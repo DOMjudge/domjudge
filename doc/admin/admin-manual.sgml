@@ -102,12 +102,14 @@ name="Installation: optional features">.
 The requirements for the deployment of DOMjudge are:
 
 <itemize>
-<item> Computers for the domserver and judgehosts must run Linux or a
-       Unix variant. This software has been developed mostly under
-       Debian GNU/Linux, and the manual adds some specific hints for
-       that, which also apply to Debian derivative distributions like Ubuntu.
-       DOMjudge has been tested a bit under other Linux
-       distributions and FreeBSD. We try to adhere to POSIX standards.
+<item> Computers for the domserver and judgehosts must run Linux (or
+       the domserver possibly a Unix variant). This software has been
+       developed mostly under Debian GNU/Linux, and the manual adds
+       some specific hints for that, which also apply to Debian
+       derivative distributions like Ubuntu. DOMjudge has also been
+       tested under RedHat-like Linux distributions. We try to adhere
+       to POSIX standards, but especially the judgehost security
+       solution is Linux-specific.
 
 <item> (Local) root access on the domserver and judgehosts for configuring sudo,
        installing some files with restricted permissions
@@ -153,22 +155,22 @@ The following software is required for running DOMjudge.
        Nginx webserver is also included, and may be used instead of
        Apache. However, this setup is less well tested and documented.
 
-<item> MySQL or MariaDB &gt;= 4.1.x database and client software
+<item> MySQL or MariaDB &gt;= 4.1.x database and client software.
 
 <item> PHP &gt;= 5.2.0 command line interface and the curl and json
        extensions.
 
-<item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash)
+<item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash).
 
 <item> A statically compiled POSIX shell, located in
-       <tt>lib/judge/sh-static</tt> (dash is included for Linux IA32)
+       <tt>lib/judge/sh-static</tt> (dash is included for Linux IA32).
 
 <item> A lot of standard (GNU) programs, a probably incomplete list:
        hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
        grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail, pgrep,
-       zip, unzip
+       zip, unzip.
 
-<item> sudo to gain root privileges
+<item> Sudo to gain root privileges.
 
 <item> A LaTeX installation to regenerate the team PDF-manual with
        site specific configuration settings included.
@@ -184,6 +186,12 @@ functionality or are generally useful.
 
 <item> An NTP daemon (for keeping the clocks between jury
        system and team workstations in sync)
+
+<item> <htmlurl name="libcgroup" url="http://libcg.sourceforge.net/">,
+       to enable support for Linux cgroup accounting and security on
+       the judgehosts. This is strongly recommended to improve Java
+       memory limit measurements. See section
+       <ref id="cgroups" name="Linux cgroups">.
 
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">
        and <htmlurl name="libJSONcpp" url="http://jsoncpp.sourceforge.net/">
@@ -1058,7 +1066,7 @@ make -C doc/judge docs
 <sect>Optional features <label id="optionalfeatures">
 <p>
 
-<sect1>Linux Control Groups (cgroups) in the judgedaemon
+<sect1>Linux Control Groups (cgroups) in the judgedaemon <label id="cgroups">
 <p>
 DOMjudge has support for using Linux Control Groups or cgroups
 for process isolation in the judgedaemon. Using cgroups gives more accurate
