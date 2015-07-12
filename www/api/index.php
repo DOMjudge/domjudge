@@ -1085,7 +1085,7 @@ function scoreboard($args)
 			                           'num_judged'  => $pdata['num_submissions'],
 			                           'num_pending' => $pdata['num_pending'],
 						   'time'        => $pdata['time'],
-						   'solved'      => isset($pdata['is_correct']));
+						   'solved'      => $pdata['is_correct']);
 		}
 		$res[] = $row;
 	}
