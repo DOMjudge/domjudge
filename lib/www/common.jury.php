@@ -227,16 +227,20 @@ function get_image_thumb_type($image)
 		error("Unsupported image type '$type' found.");
 	}
 
-	$thumbsize = dbconfig_get('thumbnail_size', 128);
+	$thumbmaxsize = dbconfig_get('thumbnail_size', 128);
+
+	$rescale = $thumbmaxsize / max($info[0],$info[1]);
+	$thumbsize = array(round($info[0]*$rescale),
+	                   round($info[1]*$rescale));
 
 	$orig = imagecreatefromstring($image);
-	$thumb = imagecreatetruecolor($thumbsize, $thumbsize);
+	$thumb = imagecreatetruecolor($thumbsize[0], $thumbsize[1]);
 	if ( $orig===FALSE || $thumb===FALSE ) {
 		error('Cannot create GD image.');
 	}
 
 	if ( !imagecopyresampled($thumb, $orig, 0, 0, 0, 0,
-	                         $thumbsize, $thumbsize, $info[0], $info[1]) ) {
+	                         $thumbsize[0], $thumbsize[1], $info[0], $info[1]) ) {
 		error('Cannot create resized thumbnail image.');
 	}
 
