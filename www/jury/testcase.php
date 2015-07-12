@@ -154,7 +154,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 			auditlog('testcase', $probid, 'updated', "$file rank $rank");
 
-			$result .= "<li>Updated $file for testcase $rank from " .
+			$result .= "<li>Updated $file for testcase $rank with file " .
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
 			    " (" . printsize($_FILES[$fileid]['size'][$rank]) . ")";
 			if ( $file=='output' &&
@@ -216,7 +216,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 		auditlog('testcase', $probid, 'added', "rank $rank");
 
-		$result .= "<li>Added new testcase $rank from " .
+		$result .= "<li>Added new testcase $rank from files " .
 			htmlspecialchars($_FILES['add_input']['name']) .
 			" (" . printsize($_FILES['add_input']['size']) . ") and " .
 			htmlspecialchars($_FILES['add_output']['name']) .
