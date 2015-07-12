@@ -154,10 +154,10 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 			auditlog('testcase', $probid, 'updated', "$file rank $rank");
 
-			$result .= "<li>Updated $inout for testcase $rank from " .
+			$result .= "<li>Updated $file for testcase $rank from " .
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
 			    " (" . printsize($_FILES[$fileid]['size'][$rank]) . ")";
-			if ( $inout=='output' &&
+			if ( $file=='output' &&
 			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('output_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: file size exceeds " .
 				    "<code>output_limit</code> of " . dbconfig_get('output_limit') .
