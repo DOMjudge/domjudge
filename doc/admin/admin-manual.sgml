@@ -325,8 +325,6 @@ what should (not) happen.
 Optionally:
 <itemize>
 <item> Install the submit client on the team workstations.
-<item> Further tighten the security of the system, e.g. by applying
-       firewall rules.
 <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
        or use the balloon web interface.
 <item> Setup the Java chroot environment on the judgehosts to use Java with chroot:<newline>
@@ -334,7 +332,9 @@ Optionally:
        <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>.
 <item> Set up cgroup support on the judgedaemons.
-
+<item> Further tighten the security of the system, e.g. by applying
+       firewall rules. This is not necessary when Linux cgroups are
+       enabled as this is set up to automatically block network traffic.
 <item> For additional features in the jury web interface, the
        following PHP extensions can be installed:
        <itemize>
@@ -507,7 +507,7 @@ to perform these steps manually. Although DOMjudge can be installed as
 root, one should <em>not</em> run DOMjudge programs and daemons under
 the root user, but under a normal user: <tt>runguard</tt> is
 specifically designed to be the only part invoked as root (through
-sudo) to make this unnecessary and running as root will give rise to
+sudo) to make this unnecessary. Also, running as root will give rise to
 problems, see <ref id="runguard-rootprivs" name="runguard: root privileges not dropped">
 in the common problems section.
 
@@ -546,7 +546,7 @@ programs. The archive must contain an executable file named
 executable to a judgehost <tt>build</tt> is executed <em>once</em> if
 present. Afterwards an executable file <tt>run</tt> must exist (it may
 have existed before), that is called to execute the compile, compare,
-or run script.
+or run script. The specific formats are detailed below.
 
 Executables may be changed via the web interface in an online editor
 or by uploading a replacement zip file. Changes apply immediately to
@@ -563,26 +563,24 @@ For more information, see for example the executables <tt>c</tt> or
 <tt>java_javac_detect</tt> in the web interface. Note that compile scripts are
 included for the most common languages already.
 
-Interpreted languages and non-statically linked binaries can in
-principle also be used, but require that all dependencies are added
-to the chroot environment.
+Interpreted languages and non-statically linked binaries (for example,
+Oracle Java) can in principle also be used, but require that all
+dependencies are added to the chroot environment.
+DOMjudge comes with helper scripts to build a chroot environment:
+run either <tt>dj_make_chroot</tt> or <tt>dj_make_ubuntu_chroot</tt>
+as root (for a Debian or Ubuntu-based chroot, respectively) and pass
+as arguments the target directory where to build the chroot
+environment and as second argument the target machine architecture.
+Start the script without arguments for usage information. See also sections
+<ref id="install_config:judgehost" name="Installation of a judgehost">
+and <ref id="problems:chroot" name="Problems: Setting up a chroot">.
 
 Interpreted languages do not generate an executable and in principle
 do not need a compilation step. However, to be able to use interpreted
-languages (also Oracle's Java), a script must be generated during the
-compilation step, which will function as the executable: the script
+languages (also Oracle's Java), during the compilation step a script
+must be generated that will function as the executable: the script
 must run the interpreter on the source. See for example <tt>pl</tt>
 and <tt>java_javac_detect</tt> in the list of executables.
-
-DOMjudge supports the use of Oracle Java within a chroot environment. For
-this, a chroot environment which includes the Java libraries must
-first be built. This can be accomplished with the included script
-<tt>dj_make_chroot</tt>: run this as root and pass as arguments
-the target directory to build the chroot environment in and as second
-argument the target machine architecture. Start the script without
-arguments for usage information. See also sections
-<ref id="install_config:judgehost" name="Installation of a judgehost">
-and <ref id="problems:chroot" name="Problems: Setting up a chroot">.
 
 <sect>Configuration of special run and compare programs
 <p>
@@ -599,60 +597,40 @@ has to create executable archives as described above.
 Then the executable must be
 selected in the <tt>special_run</tt> and/or <tt>special_compare</tt>
 fields of the problem (an empty value means that the default run and
-compare scripts should be used). One can select the default compare executable
-in the global configuration settings. When creating custom run and
-compare programs, we recommend re-using wrapper scripts that handle the
+compare scripts should be used; the defaults can be set in the global
+configuration settings). When creating custom run and compare
+programs, we recommend re-using wrapper scripts that handle the
 tedious, standard part. See the boolfind example for details.
 
 <sect1>Compare programs
 <p>
 
-Implementing a special compare program, also called a
-<em>validator</em>, can be done by writing a program that is run by
-a wrapper script like the <tt>run</tt> script in the boolfind compare script example.
+Compare scripts/programs should follow the
+<htmlurl name="Kattis/problemarchive output validator format"
+url="http://www.problemarchive.org/wiki/index.php/Output_validator">.
+DOMjudge uses the <htmlurl name="default output validator"
+url="http://www.problemarchive.org/wiki/index.php/Problem_Format#Output_Validators">
+specified there as its default, which can be found at
+<url url="https://github.com/Kattis/problemtools/blob/master/support/default_validator/">.
 
-Copy this wrapper to your new executable archive and let the jury write a
-checker program which can be called as
+Note that DOMjudge only supports a subset of the functionality
+described there. In particular, the calling syntax is
 <code>
-check_<tag> <testdata.in> <program.out> <testdata.out>
+/path/to/compare_script/run &lt;testdata.in&gt; &lt;testdata.ans&gt; &lt;feedbackdir&gt; &lt;compare_args&gt; &lt; &lt;program.out&gt;
 </code>
-This program should write some kind of difference to stdout. No
-output from the checker program results in a <em>correct</em> verdict
-and a nonzero exitcode in
-an internal (system) error. See as an example the compare script
-<tt>float</tt>, which compares floating point numbers. The name
-of the check program and any parameters can also be modified in the
-wrapper (i.e. <tt>run</tt>) script.
+where <tt>testdata.in</tt> <tt>testdata.ans</tt> are the jury
+reference input and output files, <tt>feedbackdir</tt> the directory
+containing e.g. the judging response file <tt>judgemessage.txt</tt> to
+be written to (the only other permitted files there
+are <tt>teammessage.txt score.txt judgeerror.txt diffposition.txt</tt>),
+<tt>compare_args</tt> a list of arguments that can set when
+configuring a contest problem, and <tt>program.out</tt> the team's
+output. The validator program should not make any assumptions on its
+working directory.
 
-For example, to compare output while ignoring DOS/UNIX newline differences, one
-can copy the wrapper from <tt>float</tt> and in that file set the variable
-<tt>CHECK_PROGRAM="`which diff`"</tt> and replace the line
-<code>
-"$CHECK_PROGRAM" $CHECK_OPTIONS "$TESTIN" "$PROGRAM" "$TESTOUT" > "$DIFFOUT"
-</code>
-by the lines
-<code>
-sed -i 's/\r$//' "$TESTOUT"
-sed 's/\r$//' "$PROGRAM" | $CHECK_PROGRAM -a - "$TESTOUT" > "$DIFFOUT"
-</code>
-Note that these commands will modify the local copy of the jury testdata, but
-the original output generated by the team's solution is retained, and a plain
-diff output is generated. Next, for each problem that you want to use this
-validator for, select the newly created executable in the
-<tt>special_compare</tt> field. You may also change the default compare script
-in the global configuration settings.
-
-As an alternative to this modified validator script, one can accept
-presentation errors as correct answers by adding the mapping
-<code>
-	'presentation-error' => 'correct',
-</code>
-to the <tt>results_remap</tt> configuration variable (to be found in
-the admin web interface under <em>configuration settings</em>).
-
-For more details on modifying validator scripts, see the comments at the top
-of the files <tt>testcase_run.sh</tt> and the compare wrapper (i.e.
-<tt>run</tt> in the <tt>boolfind_cmp</tt> example).
+For more details on writing and modifying a compare (or validator)
+scripts, see the <tt>boolfind_cmp</tt> example and the comments at the
+top of the file <tt>testcase_run.sh</tt>.
 
 DOMjudge supports a <tt>presentation-error</tt> result. The default
 <tt>compare</tt> program returns this result when output only differs
@@ -671,19 +649,19 @@ problem <tt>boolfind</tt> is included as an example interactive
 problem, see <tt>docs/examples/boolfind.pdf</tt> for the description.
 
 Usage is similar to compare programs: you can either create a program
-<tt>run_&lt;tag&gt;</tt> yourself, or use the provided wrapper
-script, which handles bi-directional communication between a
-jury program and the contestants' program on stdin/stdout (see the <tt>run</tt>
+<tt>run</tt> yourself, or use the provided wrapper script, which
+handles bi-directional communication between a jury program and the
+contestants' program on stdin/stdout (see the <tt>run</tt>
 file in the <tt>boolfind_run</tt> executable).
 
 For the first case, the calling syntax that the program must accept is
 equal to the calling syntax of <tt>run_wrapper</tt>, which is
 documented in that file. When using <tt>run_wrapper</tt>, you should
 copy it to <tt>run</tt> in your executable archive.
-The jury must write a program named exactly <tt>runjury_&lt;tag&gt;</tt>,
+The jury must write a program named exactly <tt>runjury</tt>,
 accepting the calling syntax
 <code>
-runjury_<tag> <testdata.in> <program.out>
+runjury <testdata.in> <program.out>
 </code>
 where the arguments are files to read input testdata from and write
 program output to, respectively. This program will communicate via
@@ -847,6 +825,11 @@ configuring the DOMjudge pages with an alias directive, or as a
 virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
 
+An Nginx webserver configuration snippet is also provided
+in <tt>etc/nginx-conf</tt>. This alternative webserver is less
+well-tested than the Apache setup, so your mileage may vary. Feedback
+is very welcome, though.
+
 The judgehosts connect to DOMjudge via the DOMjudge API so need
 to be able to access at least this part of the web interface.
 
@@ -931,7 +914,7 @@ username and password whitespace-separated on one line, for example:
 <verb>default http://example.edu/domjudge/api/  judgehosts  MzfJYWF5agSlUfmiGEy5mgkfqU</verb>
 Multiple lines may be specified to allow a judgedaemon to work for multiple
 domservers. The id is used to differentiate between multiple domservers,
-and should be unique.
+and should be unique within the <tt>restapi.secret</tt> file.
 
 Then start the judgedaemon:
 <code>bin/judgedaemon</code>
@@ -974,7 +957,7 @@ content:
 <verb>machine domserver.example.com login user0123 password Fba^2bHzz</verb>
 See the netrc(4) manual page for more details.
 You may want to distribute those <tt>.netrc</tt> files in advance
-over the team accounts. Make sure they are only readable for the
+to the team accounts. Make sure they are only readable for the
 user itself.
 
 <sect1>The submit client under Windows/Cygwin
@@ -1104,10 +1087,11 @@ unprivileged users to the system, i.e. add users
 <tt>domjudge-run-&lt;X&gt;</tt> (where <tt>X</tt> runs through
 <tt>0,1,2,3</tt>) with <tt>useradd</tt> as described in section <ref
 id="install_config:judgehost" name="installation of a judgehost">.
-Finally, start each of the judgedaemons with:
+Finally, start each of the judgedaemons with
 <code>
 $ judgedaemon -n <X>
 </code>
+to bind it to core X.
 
 <sect1>Encrypted communications (HTTPS) <label id="https">
 <p>
@@ -1136,7 +1120,8 @@ above.
 <p>
 
 We advise to install an NTP-daemon (Network Time Protocol) to make
-sure the time between domserver and team computers is in sync.
+sure the time between domserver, judgehosts, and jury and team
+computers is in sync.
 
 <sect1>Printing
 <p>
@@ -1234,13 +1219,17 @@ x|configuration    |Runtime configuration settings.@
 x|contest          |Contest definitions with start/end time.@
 x|contestproblem   |Coupling of problems to contests and data specific to it.@
 x|contestteam      |Coupling of teams to contests.@
-x|executable       |Executable compile/run/compare scripts.@
  |event            |Log of events during contests.@
+x|executable       |Executable compile/run/compare scripts.@
  |judgehost        |Computers (hostnames) that function as judgehosts.@
+x|judgehost&lowbar;restriction|Optional restriction sets on submissions taken by judgehosts.@
  |judging          |Judgings of submissions.@
  |judging&lowbar;run      |Result of one testcase within a judging.@
 x|language         |Definition of allowed submission languages.@
 x|problem          |Definition of problems (name, timelimit, etc.).@
+ |rankcache&lowbar;jury  |Cache of team ranking data for public/teams and for the jury@
+ |rankcache&lowbar;public|separately, because of possibility of score freezing.@
+ |rejudging        |Metadata for batched rejudging.@
  |role             |Possible user roles.@
  |scorecache&lowbar;jury  |Cache of the scoreboards for public/teams and for the jury@
  |scorecache&lowbar;public|separately, because of possibility of score freezing.@
@@ -1275,13 +1264,15 @@ The contests that the software will run. E.g. a test session and the
 live contest.
 
 <tt>cid</tt> is the reference ID and <tt>contestname</tt> is a
-descriptive name used in the interface.
+descriptive name used in the interface, while <tt>shortname</tt> is
+the publicly visible identifier.
 
 <tt>activatetime</tt>, <tt>starttime</tt> and <tt>endtime</tt>
 are required fields and specify when this contest is active and
 open for submissions. Optional <tt>freezetime</tt> and
-<tt>unfreezetime</tt> control scoreboard freezing. For a
-detailed treating of these, see section <ref
+<tt>unfreezetime</tt> control scoreboard freezing and
+<tt>deactivatetime</tt> when the contest is not visible anymore.
+For a detailed treating of these, see section <ref
 id="contestsetup:milestones" name="Contest milestones">.
 All contest times can be specified relative to <tt>starttime</tt>,
 except of course <tt>starttime</tt> itself. The input given in the
@@ -1290,7 +1281,9 @@ jury interface (either relative or absolute) is stored in the
 stored in the fields without the <tt>_string</tt> suffix.
 
 The <tt>public</tt> field can be used to limit which contests are
-displayed as public scoreboards.
+displayed as public scoreboards (as opposed to privately to a selected
+set of teams), while <tt>enabled</tt> can be used to (temporarily)
+disable a contest altogether.
 
 <tag>contestproblem</tag>
 This table couples problems to contests: <tt>cid</tt> and
@@ -1298,7 +1291,8 @@ This table couples problems to contests: <tt>cid</tt> and
 
 Furthermore, it stores problem data that is specific for the included
 contest: <tt>shortname</tt> is a contest-unique identifier string for
-the problem; <tt>allow_submit</tt> determines whether teams can submit
+the problem, <tt>points</tt> defaults to 1 and can be set to assign
+non-even scoring; <tt>allow_submit</tt> determines whether teams can submit
 solutions for this problem. Non-submittable problems are also not
 displayed on the scoreboard. This can be used to define spare
 problems, which can then be added to the contest quickly;
@@ -1311,11 +1305,19 @@ name="Scoreboard: colours">.
 
 <tag>contestteam</tag>
 This table couples teams to contests. Teams can only submit solutions to
-problems in contests that they are part of.
+problems in contests that are public or which they are part of.
 
 <tag>executable</tag>
 This table stores zip-bundles of executable scripts that can be used
 as compile, run, and compare scripts.
+
+<tag>judgehost&lowbar;restriction</tag>
+This table encodes restriction sets for selecting which submissions
+are sent to a judgehost. The restrictions are JSON encoded in
+the <tt>restrictions</tt> column, and can be set in the admin web
+interface to restrict on specific contests, problems, languages, and
+to never rejudge on the same judgehost. A restriction set can be
+assigned to judgehost(s) on the edit page of the judgehosts overview.
 
 <tag>language</tag>
 Programming languages in which to accept and judge submissions.
@@ -1379,9 +1381,10 @@ cross site scripting or other attacks. The file type is stored in
 <tt>problemtext_type</tt>.
 
 <tag>team</tag>
-Table of teams: <tt>login</tt> is a short name for the team
-(which is referenced to in other tables as <tt>teamid</tt>) and
-<tt>name</tt> the displayed name of the team. <tt>categoryid</tt> is
+Table of teams: <tt>teamid</tt> is (internal) ID of the team,
+while <tt>externalid</tt> can be used to store an ID for im/exporting
+to other systems.
+<tt>name</tt> the displayed name of the team, <tt>categoryid</tt> is
 the ID of the category the team is in; <tt>affilid</tt> is the
 affiliation ID of the team.
 
@@ -1396,6 +1399,10 @@ display only; <tt>comments</tt> can be filled with arbitrary useful
 information and is only visible to the jury.
 The timestamp <tt>teampage_first_visited</tt> and the <tt>hostname</tt>
 field indicate when/whether/from where a team visited its team web interface.
+
+The <tt>penalty</tt> field can be used to give this team a (positive
+or negative) number of penalty minutes to correct for exceptional
+circumstances.
 
 <tag>team_affiliation</tag>
 <tt>affilid</tt> is the reference ID and <tt>name</tt> the name of the
@@ -1429,10 +1436,14 @@ separate, invisible category.
 <tag>testcase</tag>
 The testcase table contains testdata for each problem;
 <tt>testcaseid</tt> is a unique identifier, <tt>input</tt> and
-<tt>output</tt> contain the testcase input/output and
-<tt>md5sum_input</tt>, <tt>md5sum_output</tt> their respective md5
+<tt>output</tt> contain the testcase input/output and <tt>image</tt>
+an optional graphical representation of the testcase for the jury.
+The fields <tt>md5sum_input</tt>, <tt>md5sum_output</tt>,
+and <tt>md5sum_image</tt> contain their respective md5
 hashes to check for up-to-date-ness of cached versions by the
-judgehosts. <tt>probid</tt> is the corresponding problem and
+judgehosts and <tt>image_thumb</tt> and <tt>image_type</tt> a
+thumbnail version and mimetype string for the image.
+The field <tt>probid</tt> is the corresponding problem and
 <tt>rank</tt> determines the order of the testcases for one problem.
 <tt>description</tt> is an optional description for this testcase. See
 also <ref id="contestsetup:testdata" name="providing testdata">.
@@ -1456,8 +1467,7 @@ define when the contest runs and are required fields (activatetime and
 starttime may be equal).
 
 activatetime is the moment when a contest first becomes
-visible to the public and teams (potentially replacing a previous contest
-that was displayed before). Nothing can be submitted yet and the
+visible to the public and teams . Nothing can be submitted yet and the
 problem set is not revealed. Clarifications can be viewed and sent.
 
 At starttime, the scoreboard is displayed and submissions are accepted.
@@ -1476,26 +1486,22 @@ that time. For a more elaborate description, see also section <ref
 id="scoreboard:freeze" name="Scoreboard: freezing and defrosting">.
 
 The scoreboard, results and clarifications will remain to be displayed
-to team and public after a contest, until an activatetime of a later
-contest passes.
+to team and public after a contest, until the <em>deactivatetime</em>.
 
 All events happen at the first moment of the defined time. That is:
 for a contest with starttime "12:00:00" and endtime "17:00:00", the
 first submission will be accepted at 12:00:00 and the last one at
 16:59:59.
 
-The following ordering must always hold: activatetime &lt;=
-starttime &lt; (freezetime &lt;=) endtime (&lt;= unfreezetime).
-No two contests may have overlap: there's always at most one active
-contest at any time.
-
+The following ordering must always hold: activatetime &lt;= starttime
+&lt; (freezetime &lt;=) endtime (&lt;= unfreezetime) (&lt;= deactivatime).
 
 
 <sect>User authentication
 <label id="contestsetup:authentication">
 <p>
 
-The authentication system lets domserver know which user it is dealing
+The authentication system lets the domserver know which user it is dealing
 with and which role(s) the user has. This system is modular, allowing
 flexible addition of new methods, if required. The following methods
 are available by default for authentication.
@@ -1525,8 +1531,6 @@ requirement for this method is that each team computer has a separate
 IP-address from the view of the domserver, though, so this is most
 suitable for onsite contests and might not work with online contests
 if multiple teams are located behind a router, for example.
-Furthermore, with this method the command line submitclient can be
-used next to the web interface submit.
 
 There are two possible ways of configuring team IP-addresses.
 
@@ -1577,7 +1581,7 @@ servers can be specified: they are queried in order to try to
 successfully authenticate. After successful authentication against the
 LDAP server(s), PHP sessions are used to track login into DOMjudge.
 
-<sect1>Fixed team authentication
+<sect1>Fixed authentication
 <p>
 
 This method automatically authenticates each connection to the
