@@ -632,13 +632,6 @@ For more details on writing and modifying a compare (or validator)
 scripts, see the <tt>boolfind_cmp</tt> example and the comments at the
 top of the file <tt>testcase_run.sh</tt>.
 
-DOMjudge supports a <tt>presentation-error</tt> result. The default
-<tt>compare</tt> program returns this result when output only differs
-by whitespace; this is counted as an incorrect submission. The script
-<tt>compare_wrapper</tt> does not support presentation error results
-however. By default presentation errors are remapped to wrong answer;
-this can be changed with <tt>results_remap</tt>.
-
 <sect1>Run programs
 <p>
 

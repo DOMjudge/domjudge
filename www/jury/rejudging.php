@@ -176,7 +176,7 @@ $verdicts = array('compiler-error'     => 'CTE',
                   'run-error'          => 'RTE',
                   'timelimit'          => 'TLE',
                   'wrong-answer'       => 'WA',
-                  'presentation-error' => 'PE',
+                  'presentation-error' => 'PE', /* dropped since 5.0 */
                   'no-output'          => 'NO',
                   'correct'            => 'AC');
 

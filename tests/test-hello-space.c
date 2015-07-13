@@ -1,9 +1,8 @@
 /*
- * This should give CORRECT, WRONG-ANSWER or PRESENTATION-ERROR on the
- * default problem 'hello' depending on how strict white space is
- * checked for.
+ * This should give CORRECT or WRONG-ANSWER on the default problem
+ * 'hello' depending on how strict white space is checked for.
  *
- * @EXPECTED_RESULTS@: CORRECT,WRONG-ANSWER,PRESENTATION-ERROR
+ * @EXPECTED_RESULTS@: CORRECT,WRONG-ANSWER
  */
 
 #include <stdio.h>

@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 5.0.0 - DEV
 -------------------
+ - Removed support for 'presentation-error' judgement.
 
 Version 5.0.0 Release Candidate 1 - 7 July 2015
 -----------------------------------------------
