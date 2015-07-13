@@ -1084,8 +1084,8 @@ function scoreboard($args)
 			                           'label'       => $prob2label[$probid],
 			                           'num_judged'  => $pdata['num_submissions'],
 			                           'num_pending' => $pdata['num_pending'],
-						   'time'        => $pdata['time'],
-						   'solved'      => $pdata['is_correct']);
+			                           'time'        => $pdata['time'],
+			                           'solved'      => $pdata['is_correct']);
 		}
 		$res[] = $row;
 	}
