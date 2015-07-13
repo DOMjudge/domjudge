@@ -31,6 +31,21 @@ function checkargs($args, $mandatory)
 	}
 }
 
+function safe_int($value)
+{
+	return is_null($value) ? null : (int)$value;
+}
+
+function safe_float($value)
+{
+	return is_null($value) ? null : (float)$value;
+}
+
+function safe_bool($value)
+{
+	return is_null($value) ? null : (bool)$value;
+}
+
 $api = new RestApi();
 
 /**
@@ -65,15 +80,15 @@ function contest()
 	$cid = $cids[0];
 	$cdata = $cdatas[$cid];
 	return array(
-		'id'        => $cid,
+		'id'        => safe_int($cid),
 		'shortname' => $cdata['shortname'],
 		'name'      => $cdata['name'],
-		'start'     => $cdata['starttime'],
-		'freeze'    => $cdata['freezetime'],
-		'end'       => $cdata['endtime'],
-		'length'    => $cdata['endtime'] - $cdata['starttime'],
-		'unfreeze'  => $cdata['unfreezetime'],
-		'penalty'   => 60*dbconfig_get('penalty_time', 20),
+		'start'     => safe_float($cdata['starttime']),
+		'freeze'    => safe_float($cdata['freezetime']),
+		'end'       => safe_float($cdata['endtime']),
+		'length'    => safe_float($cdata['endtime'] - $cdata['starttime']),
+		'unfreeze'  => safe_float($cdata['unfreezetime']),
+		'penalty'   => safe_int(60*dbconfig_get('penalty_time', 20)),
 		);
 }
 $doc = "Get information about the current contest: id, shortname, name, start, freeze, unfreeze, length, penalty and end. ";
@@ -96,15 +111,15 @@ function contests()
 
 	return array_map(function($cdata) {
 		return array(
-			'id' => $cdata['cid'],
+			'id'        => safe_int($cdata['cid']),
 			'shortname' => $cdata['shortname'],
-			'name' => $cdata['name'],
-			'start' => $cdata['starttime'],
-			'freeze' => $cdata['freezetime'],
-			'end' => $cdata['endtime'],
-			'length' => $cdata['endtime'] - $cdata['starttime'],
-			'unfreeze' => $cdata['unfreezetime'],
-			'penalty' => 60 * dbconfig_get('penalty_time', 20),
+			'name'      => $cdata['name'],
+			'start'     => safe_float($cdata['starttime']),
+			'freeze'    => safe_float($cdata['freezetime']),
+			'end'       => safe_float($cdata['endtime']),
+			'length'    => safe_float($cdata['endtime'] - $cdata['starttime']),
+			'unfreeze'  => safe_float($cdata['unfreezetime']),
+			'penalty'   => safe_int(60 * dbconfig_get('penalty_time', 20)),
 		);
 	}, $cdatas);
 }
@@ -119,8 +134,8 @@ function user()
 	global $userdata;
 
 	$return = array(
-		'id'       => $userdata['userid'],
-		'teamid'   => $userdata['teamid'],
+		'id'       => safe_int($userdata['userid']),
+		'teamid'   => safe_int($userdata['teamid']),
 		'email'    => $userdata['email'],
 		'ip'       => $userdata['ip_address'],
 		'lastip'   => $userdata['last_ip_address'],
@@ -142,10 +157,19 @@ function problems($args)
 
 	checkargs($args, array('cid'));
 
-	return $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
-	               FROM problem
-	               INNER JOIN contestproblem USING (probid)
-	               WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
+	$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
+	                  FROM problem
+	                  INNER JOIN contestproblem USING (probid)
+	                  WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
+	return array_map(function($pdata) {
+		return array(
+			'id'        => safe_int($pdata['id']),
+			'label'     => $pdata['label'],
+			'shortname' => $pdata['shortname'],
+			'name'      => $pdata['name'],
+			'color'     => $pdata['color'],
+		);
+	}, $pdatas);
 }
 $doc = "Get a list of problems in a contest, with for each problem: id, shortname, name and color.";
 $args = array('cid' => 'Contest ID.');
@@ -192,10 +216,10 @@ function judgings($args)
 		if ( array_key_exists('result', $args) &&
 		     $args['result'] != $data['result'] ) continue;
 
-		$res[] = array('id'         => $row['judgingid'],
-		               'submission' => $row['submitid'],
+		$res[] = array('id'         => safe_int($row['judgingid']),
+		               'submission' => safe_int($row['submitid']),
 		               'outcome'    => $data['result'],
-		               'time'       => $row['eventtime']);
+		               'time'       => safe_float($row['eventtime']));
 	}
 	return $res;
 }
@@ -351,7 +375,16 @@ function judgings_POST($args)
 	              ')', $submitid, $row['cid'], now(), $host,
 	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge);
 
-	$row['judgingid'] = $jid;
+	$row['submitid']    = safe_int($row['submitid']);
+	$row['cid']         = safe_int($row['cid']);
+	$row['teamid']      = safe_int($row['teamid']);
+	$row['probid']      = safe_int($row['probid']);
+	$row['langid']      = $row['langid'];
+	$row['rejudgingid'] = safe_int($row['rejudgingid']);
+	$row['maxruntime']  = safe_int($row['maxruntime']);
+	$row['memlimit']    = safe_int($row['memlimit']);
+	$row['outputlimit'] = safe_int($row['outputlimit']);
+	$row['judgingid']   = safe_int($jid);
 
 	return $row;
 }
@@ -613,11 +646,11 @@ function submissions($args)
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
-			'id'        => $row['submitid'],
-			'team'      => $row['teamid'],
-			'problem'   => $row['probid'],
+			'id'        => safe_int($row['submitid']),
+			'team'      => safe_int($row['teamid']),
+			'problem'   => safe_int($row['probid']),
 			'language'  => $row['langid'],
-			'time'      => $row['submittime'],
+			'time'      => safe_float($row['submittime']),
 			);
 	}
 	return $res;
@@ -673,7 +706,7 @@ function submissions_POST($args)
 
 	auditlog('submission', $sid, 'added', 'via api', null, $cid);
 
-	return $sid;
+	return safe_int($sid);
 }
 
 $args = array('code[]' => 'Array of source files to submit',
@@ -741,7 +774,15 @@ function testcases($args)
 
 	// would probably never be empty, because then endtime would also
 	// have been set. we cope with it anyway for now.
-	return is_null($testcase) ? '' : $testcase;
+	if (is_null($testcase)) {
+		return null;
+	}
+
+	$testcase['testcaseid'] = safe_int($testcase['testcaseid']);
+	$testcase['rank'] = safe_int($testcase['rank']);
+	$testcase['probid'] = safe_int($testcase['probid']);
+
+	return $testcase;
 }
 $args = array('judgingid' => 'Get the next-to-judge testcase for this judging.');
 $doc = 'Get a testcase.';
@@ -818,17 +859,21 @@ function queue($args)
 	$hasLimit = array_key_exists('limit', $args);
 	// TODO: validate limit
 
-	return $DB->q('TABLE SELECT submitid
-	               FROM submission s
-	               LEFT JOIN team t USING (teamid)
-	               LEFT JOIN problem p USING (probid)
-	               LEFT JOIN language l USING (langid)
-	               LEFT JOIN contestproblem cp USING (probid, cid)
-	               WHERE judgehost IS NULL AND s.cid IN (%Ai)
-	               AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
-	               ORDER BY judging_last_started ASC, submittime ASC, submitid ASC' .
-	              ($hasLimit ? ' LIMIT %i' : ' %_'),
-	              $cids, ($hasLimit ? $args['limit'] : -1));
+	$sdatas = $DB->q('TABLE SELECT submitid
+	                  FROM submission s
+	                  LEFT JOIN team t USING (teamid)
+	                  LEFT JOIN problem p USING (probid)
+	                  LEFT JOIN language l USING (langid)
+	                  LEFT JOIN contestproblem cp USING (probid, cid)
+	                  WHERE judgehost IS NULL AND s.cid IN (%Ai)
+	                  AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
+	                  ORDER BY judging_last_started ASC, submittime ASC, submitid ASC' .
+	                 ($hasLimit ? ' LIMIT %i' : ' %_'),
+	                 $cids, ($hasLimit ? $args['limit'] : -1));
+
+	return array_map(function($sdata) {
+		return array('submitid' => safe_int($sdata['submitid']));
+	}, $sdatas);
 }
 $args = array('limit' => 'Get only the first N queued submissions');
 $doc = 'Get a list of all queued submission ids.';
@@ -853,7 +898,15 @@ function affiliations($args)
 	$query .= ' ORDER BY name';
 
 	// Run query and return result
-	return $DB->q($query, $country);
+	$adatas = $DB->q($query, $country);
+	return array_map(function($adata) {
+		return array(
+			'affilid'   => safe_int($adata['affilid']),
+			'shortname' => $adata['shortname'],
+			'name'      => $adata['name'],
+			'country'   => $adata['country'],
+		);
+	}, $adatas);
 }
 $doc = 'Get a list of affiliations, with for each affiliation: affilid, shortname, name and country.';
 $optArgs = array('country' => 'ISO 3166-1 alpha-3 country code to search for.');
@@ -890,7 +943,19 @@ function teams($args)
 	$query .= ($args['public'] ? ' AND visible = 1' : '');
 
 	// Run query and return result
-	return $DB->q($query, $category, $affiliation, $teamid);
+	$tdatas = $DB->q($query, $category, $affiliation, $teamid);
+	return array_map(function($tdata) {
+		return array(
+			'id'          => safe_int($tdata['id']),
+			'name'        => $tdata['name'],
+			'members'     => $tdata['members'],
+			'nationality' => $tdata['nationality'],
+			'category'    => safe_int($tdata['category']),
+			'group'       => $tdata['group'],
+			'affilid'     => safe_int($tdata['affilid']),
+			'affiliation' => $tdata['affiliation'],
+		);
+	}, $tdatas);
 }
 $args = array('category' => 'ID of a single category/group to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
@@ -910,10 +975,11 @@ function categories($args)
 	             FROM team_category ' . $extra . ' ORDER BY sortorder');
 	$res = array();
 	while ( $row = $q->next() ) {
-		$res[] = array('categoryid' => $row['categoryid'],
-			'name' => $row['name'],
-			'color' => $row['color'],
-			'sortorder' => $row['sortorder']);
+		$res[] = array(
+			'categoryid' => safe_int($row['categoryid']),
+			'name'       => $row['name'],
+			'color'      => $row['color'],
+			'sortorder'  => safe_int($row['sortorder']));
 	}
 	return $res;
 }
@@ -935,8 +1001,8 @@ function languages()
 			'id'           => $row['langid'],
 			'name'         => $row['name'],
 			'extensions'   => json_decode($row['extensions']),
-			'allow_judge'  => (bool)$row['allow_judge'],
-			'time_factor'  => (float)$row['time_factor'],
+			'allow_judge'  => safe_bool($row['allow_judge']),
+			'time_factor'  => safe_float($row['time_factor']),
 			);
 	}
 	return $res;
@@ -963,7 +1029,15 @@ function clarifications($args)
 	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
 	$problem = ($byProblem ? $args['problem'] : null);
 
-	return $DB->q($query, $cids, $problem);
+	$cdatas = $DB->q($query, $cids, $problem);
+	return array_map(function($cdata) {
+		return array(
+			'clarid'     => safe_int($cdata['clarid']),
+			'submittime' => safe_float($cdata['submittime']),
+			'probid'     => safe_int($cdata['probid']),
+			'body'       => $cdata['body'],
+		);
+	}, $cdatas);
 }
 $doc = 'Get a list of all public clarifications.';
 $args = array('problem' => 'Search for clarifications about a specific problem.');
@@ -983,7 +1057,14 @@ function judgehosts($args)
 	$query .= ($byHostname ? ' WHERE hostname = %s' : '%_');
 	$hostname = ($byHostname ? $args['hostname'] : null);
 
-	return $DB->q($query, $hostname);
+	$jdatas = $DB->q($query, $hostname);
+	return array_map(function($jdata) {
+		return array(
+			'hostname' => $jdata['hostname'],
+			'active'   => safe_bool($jdata['active']),
+			'polltime' => safe_float($jdata['polltime']),
+		);
+	}, $jdatas);
 }
 $doc = 'Get a list of judgehosts.';
 $args = array('hostname' => 'Search only for judgehosts with given hostname.');
@@ -1016,7 +1097,13 @@ function judgehosts_POST($args)
 		auditlog('judging', $jud['judgingid'], 'given back', null, $args['hostname'], $jud['cid']);
 	}
 
-	return $res;
+	return array_map(function($jud) {
+		return array(
+			'judgingid' => safe_int($jud['judgingid']),
+			'submitid'  => safe_int($jud['submitid']),
+			'cid'       => safe_int($jud['cid']),
+		);
+	}, $res);
 }
 $doc = 'Add a new judgehost to the list of judgehosts. Also restarts (and returns) unfinished judgings.';
 $args = array('hostname' => 'Add this specific judgehost and activate it.');
@@ -1076,16 +1163,16 @@ function scoreboard($args)
 	$res = array();
 	foreach ( $scoreboard['scores'] as $teamid => $data ) {
 		$row = array('rank' => $data['rank'], 'team' => $teamid);
-		$row['score'] = array('num_solved' => $data['num_points'],
-		                      'total_time' => $data['total_time']);
+		$row['score'] = array('num_solved' => safe_int($data['num_points']),
+		                      'total_time' => safe_int($data['total_time']));
 		$row['problems'] = array();
 		foreach ( $scoreboard['matrix'][$teamid] as $probid => $pdata ) {
-			$row['problems'][] = array('problem'     => $probid,
+			$row['problems'][] = array('problem'     => safe_int($probid),
 			                           'label'       => $prob2label[$probid],
-			                           'num_judged'  => $pdata['num_submissions'],
-			                           'num_pending' => $pdata['num_pending'],
-			                           'time'        => $pdata['time'],
-			                           'solved'      => $pdata['is_correct']);
+			                           'num_judged'  => safe_int($pdata['num_submissions']),
+			                           'num_pending' => safe_int($pdata['num_pending']),
+			                           'time'        => safe_int($pdata['time']),
+			                           'solved'      => safe_bool($pdata['is_correct']));
 		}
 		$res[] = $row;
 	}

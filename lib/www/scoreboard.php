@@ -134,7 +134,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			// provide default scores when nothing submitted for this team,problem yet
 			if ( ! isset ( $MATRIX[$team][$prob] ) ) {
 				$MATRIX[$team][$prob] = array('num_submissions' => 0, 'num_pending' => 0,
-				                              'is_correct' => 0, 'time' => 0, 'penalty' => 0);
+				                              'is_correct' => false, 'time' => 0, 'penalty' => 0);
 			}
 			$pdata = $MATRIX[$team][$prob];
 			$psum = &$SUMMARY['problems'][$prob];
