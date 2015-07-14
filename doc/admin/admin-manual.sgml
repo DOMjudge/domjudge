@@ -1595,12 +1595,11 @@ the functions in that file to handle your specific case.
 <label id="contestsetup:testdata">
 <p>
 Testdata is used to judge the problems: when a submission run is given the
-input testdata, the resulting output is compared to the reference output data.
-If they match exactly, the problem is judged to be correct.
-For problems with a special compare script, testdata should still be
-provided in the same way, but the correctness depends on the output of the
-custom compare script. Please check the documentation in
-<tt>judge/compare_wrapper</tt> when using this feature.
+input testdata, the resulting output is compared to the reference
+output data using a <em>compare script</em>. The default compare
+script simply checks if the outputs are equal up to whitespace
+differences, but more elaborate comparisons can be done, see e.g.
+the <tt>float</tt> and <tt>boolfind_cmp</tt> scripts.
 
 The database has a separate table named testcase, which can be manipulated
 from the web interface. Under a problem, click on the testcase link. There
@@ -1632,8 +1631,12 @@ They all run as a normal user on the system. The needed root privileges
 are gained through sudo only when necessary.
 
 <itemize>
-<item> One or more judgedaemons, one on each judgehost;
-<item> Optionally the balloon notification daemon.
+<item> One or more judgedaemons: one on each judgehost (or optionally
+  multiple per host, if cgroups are enabled; then the <tt>-n X</tt>
+  option should be used to bind a judgedaemon to CPU X to prevent
+  CPU resource conflicts).
+<item> Optionally the balloon notification daemon (as an alternative
+  to the web interface).
 </itemize>
 
 <sect>Check that everything works
@@ -1808,13 +1811,13 @@ visible flag can be set to `0'.
 <sect1>Starting and ending
 <p>
 
-The displayed scoreboard will always be that of the most recently
-started contest. The scoreboard is never displayed for a contest that
-still has to start. In other words, the scores will become visible on
-the first second of a contest start time.
+A contest can be selected for viewing after its activation time, but
+the scoreboard will only become visible to public and teams once the
+contest starts. Thus no data such as problems and teams is revealed
+before then.
 
-When the contest ends, the scores will remain to be displayed, until a
-next contest starts.
+When the contest ends, the scores will remain displayed until the
+deactivation time passes.
 
 <sect1>Freezing and defrosting <label id="scoreboard:freeze">
 <p>
@@ -1850,7 +1853,8 @@ Almost every cell is clickable in the jury interface and gives
 detailed information relevant to that cell. This is (of course) not
 available in the team and public scoreboards, except that in the team
 and public interface the team name cell links to a page with some more
-information and optionally a team picture.
+information and optionally a team picture, and the problem header
+cells link to the problem text, if available.
 
 <sect1>Caching
 <p>
@@ -1895,8 +1899,8 @@ prints to a printer. When configured, start <tt>bin/balloons</tt>
 and notification will start.
 
 Notifications will stop as soon as the scoreboard is frozen.
-Enable the <tt>show_balloons_postfreeze</tt> to keep issuing balloon
-notifications after the freeze.
+Enable the <tt>show_balloons_postfreeze</tt> configuration option to
+keep issuing balloon notifications after the freeze.
 
 
 <chapt>Security <label id="security">
@@ -1927,7 +1931,7 @@ during a programming contest: you have to hack the system and make use
 of that within very limited time. And you have to not get caught and
 disqualified afterwards. Therefore passive security measures of
 warning people of the consequences and only check (or probe) things
-will probably be enough.
+might be enough.
 
 However we wanted the system to be as secure as possible within
 reason. Furthermore this software is open source, so users can try to
@@ -1990,7 +1994,11 @@ limiting all kinds of system resources (memory, processes, time,
 unprivileged user) we protect the system from programs which try to
 hack or could crash the system.  However, a chroot environment does
 not restrict network access, so there lies a possible security risk
-that has to be handled separately.
+that has to be handled separately, see further below.
+
+The optional (but strongly recommended) Linux cgroups system can be
+enabled to block network access and provide a few other extra security
+measures.
 
 <sect>File system privileges <label id="security:fileprivs">
 <p>
@@ -2009,10 +2017,10 @@ server user (commonly <tt>www-data</tt> or <tt>apache</tt>).
 The following information is for those who want to verify the setup
 or make modifications to the settings.
 
-Care should be taken with the <tt>etc</tt> dir: the
-<tt>domserver-{config,static}.php</tt> and
-<tt>dbpasswords.secret</tt> files
-should all be readable, but <tt>dbpasswords.secret</tt> should not be
+Care should be taken with the <tt>etc</tt> directory: the
+<tt>domserver-{config,static}.php</tt>, <tt>dbpasswords.secret</tt>
+and <tt>restapi.secret</tt> files should all be readable, but
+<tt>dbpasswords.secret</tt> and <tt>restapi.secret</tt> should not be
 readable by anyone else. This can be done for example by setting the
 <tt>etc</tt> directory to owner:group &lt;DOMjudge
 account&gt;:&lt;Web server group&gt; and permissions
@@ -2111,8 +2119,8 @@ described below.
        Disabling the chroot environment removes this layer of
        security against submissions that attempt to
        cheat, but it is a simple solution to getting Java to work, for
-       demo or testing purposes. No guarantees about system security
-       can be made when running a contest with chroot disabled.
+       demo or testing purposes. <bf>Note</bf>: no guarantees about system
+       security can be made when running a contest with chroot disabled!
 </enum>
 
 <sect>The Java virtual machine (jvm) and memory limits
@@ -2144,6 +2152,12 @@ the configuration variable <tt>memory limit</tt> is set larger than
 <tt>MEMRESERVED</tt>. If that does not help, you should try to increase the
 configuration variable <tt>process limit</tt> (since the JVM uses a lot of
 processes for garbage collection).
+
+Note that (especially on x86_64 machines) the jvm seems to preallocate
+huge amounts of memory, up to 2 GB! This is not actually all used, but
+the memory restriction in DOMjudge will flag it as such, unless Linux
+cgroups are enabled, then the actual memory used is measured. Thus, we
+strongly recommend using Linux cgroups when using the Oracle jvm.
 
 <sect>Java class naming
 <p>
