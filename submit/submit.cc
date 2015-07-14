@@ -319,7 +319,7 @@ void usage()
 "Submit a solution for a problem.\n"
 "\n"
 "Options (see below for more information)\n"
-"  -c  --contest=CONTESTID  submit for contest named CONTESTID.\n"
+"  -c  --contest=CONTEST    submit for contest with identifier name CONTEST.\n"
 "                               Defaults to the value of the\n"
 "                               environment variable 'SUBMITCONTEST'.\n"
 "                               Mandatory when more than one contest is active.\n"
@@ -367,8 +367,8 @@ void usage()
 "\n");
 	printf("Submit problem 'b' in Java:\n"
 	       "    %s b.java\n\n",progname);
-	printf("Submit problem 'z' in C# for contest 2:\n"
-	       "    %s --contest=2 z.cs\n\n",progname);
+	printf("Submit problem 'z' in C# for contest 'demo':\n"
+	       "    %s --contest=demo z.cs\n\n",progname);
 	printf("Submit problem 'e' in C++:\n"
 	       "    %s --problem e --language=cpp ProblemE.cc\n\n",progname);
 	printf("Submit problem 'hello' in C (options override the defaults from FILENAME):\n"
