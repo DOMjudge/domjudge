@@ -333,6 +333,7 @@ if ( isset($_GET['edited']) ) {
 		"If the contest start time was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
 		addSubmit('recalculate caches now', 'refresh')
 		) .
+		addHidden('cid', $id) .
 		addEndForm();
 
 }
