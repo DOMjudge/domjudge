@@ -689,7 +689,7 @@ function initScorefilter()
 		}
 	}
 
-	setcookie('domjudge_scorefilter', json_encode($scorefilter));
+	dj_setcookie('domjudge_scorefilter', json_encode($scorefilter));
 
 	return $scorefilter;
 }

@@ -28,7 +28,7 @@ $refresh = '15;url=submissions.php?' .
 $title = 'Submissions';
 
 // Set cookie of submission view type, expiry defaults to end of session.
-setcookie('domjudge_submissionview', $view);
+dj_setcookie('domjudge_submissionview', $view);
 
 $jury_member = $username;
 
