@@ -13,6 +13,31 @@ define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
 define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/');
 
 /**
+ * Wrapper around PHP setcookie function to automatically set some
+ * DOMjudge specific defaults and check the return value.
+ * - cookies are defined in a common path for all web interfaces
+ */
+function dj_setcookie($name, $value = null, $expire = 0,
+                      $path = null, $domain = null, $secure = false)
+{
+	if ( !isset($path) ) {
+		// KLUDGE: We want to find the DOMjudge base path, but this
+		// information is not directly available as configuration, so
+		// we extract it from the executed PHP script.
+		$path = preg_replace('/(jury|public|team)\/?$/', '',
+		                     dirname($_SERVER['PHP_SELF']));
+	}
+
+	$ret = setcookie($name, $value, $expire, $path, $domain, $secure);
+
+	if ( $ret!==true ) warning("Cookie '$name' not set properly.");
+
+	logmsg(LOG_DEBUG, "Cookie set: $name=$value, expire=$expire, path=$path");
+
+	return $ret;
+}
+
+/**
  * helperfunction to read all contents from a file.
  * If $sizelimit is true (default), then only limit this to
  * the first 50,000 bytes and attach a note saying so.
