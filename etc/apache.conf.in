@@ -55,10 +55,10 @@ Alias /domjudge @domserver_wwwdir@
 
 <Directory @domserver_wwwdir@>
 # For Apache 2.2:
-Order allow,deny
-Allow from all
-# For Apache 2.4 use the following instead:
-# Require all granted
+#Order allow,deny
+#Allow from all
+# For Apache 2.4:
+Require all granted
 
 Options FollowSymlinks
 DirectoryIndex index.php
