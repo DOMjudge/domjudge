@@ -675,12 +675,18 @@ function submissions_POST($args)
 	$contests = getCurContests(TRUE, $userdata['teamid'], false, 'shortname');
 	$contest_shortname = null;
 
-	if ( !isset($args['contest']) && count($contests) == 1 ) {
-		$contest_shortname = key($contests);
-	} elseif ( isset($args['contest']) && isset($contests[$args['contest']]) ) {
-		$contest_shortname = $args['contest'];
+	if ( isset($args['contest']) ) {
+		if ( isset($contests[$args['contest']]) ) {
+			$contest_shortname = $args['contest'];
+		} else {
+			$api->createError("Cannot find active contest '$args[contest]', or you are not part of it.");
+		}
 	} else {
-		$api->createError("Can not find that contest, or you are not part of it, or multiple active contests found");
+		if ( count($contests) == 1 ) {
+			$contest_shortname = key($contests);
+		} else {
+			$api->createError("No contest specified while multiple active contests found.");
+		}
 	}
 	$cid = $contests[$contest_shortname]['cid'];
 
