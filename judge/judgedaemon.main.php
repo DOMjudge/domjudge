@@ -104,23 +104,12 @@ function dbconfig_get_rest($name) {
 }
 
 /**
- * Decode a json encoded string and handle errors.
- */
-function dj_json_decode($str) {
-	$res = json_decode($str, TRUE);
-	if ( $res === NULL ) {
-		error("Error retrieving API data. API gave us: " . $str);
-	}
-	return $res;
-}
-
-/**
  * Encode file contents for POST-ing to REST API.
  * Returns contents of $file (optionally limited in size, see
- * getFileContents) as encoded string.
+ * dj_get_file_contents) as encoded string.
  */
 function rest_encode_file($file, $sizelimit = TRUE) {
-	return urlencode(base64_encode(getFileContents($file, $sizelimit)));
+	return urlencode(base64_encode(dj_get_file_contents($file, $sizelimit)));
 }
 
 $waittime = 5;

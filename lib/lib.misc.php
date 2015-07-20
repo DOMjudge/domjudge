@@ -12,52 +12,7 @@ define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
 /** Perl regex of allowed filenames. */
 define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/');
 
-/**
- * Wrapper around PHP setcookie function to automatically set some
- * DOMjudge specific defaults and check the return value.
- * - cookies are defined in a common path for all web interfaces
- */
-function dj_setcookie($name, $value = null, $expire = 0,
-                      $path = null, $domain = null, $secure = false, $httponly = false)
-{
-	if ( !isset($path) ) {
-		// KLUDGE: We want to find the DOMjudge base path, but this
-		// information is not directly available as configuration, so
-		// we extract it from the executed PHP script.
-		$path = preg_replace('/(jury|public|team)\/?$/', '',
-		                     dirname($_SERVER['PHP_SELF']));
-	}
-
-	$ret = setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
-
-	if ( $ret!==true ) warning("Cookie '$name' not set properly.");
-
-	logmsg(LOG_DEBUG, "Cookie set: $name=$value, expire=$expire, path=$path");
-
-	return $ret;
-}
-
-/**
- * helperfunction to read all contents from a file.
- * If $sizelimit is true (default), then only limit this to
- * the first 50,000 bytes and attach a note saying so.
- */
-function getFileContents($filename, $sizelimit = true) {
-
-	if ( ! file_exists($filename) ) {
-		return '';
-	}
-	if ( ! is_readable($filename) ) {
-		error("Could not open $filename for reading: not readable");
-	}
-
-	if ( $sizelimit && filesize($filename) > 50000 ) {
-		return file_get_contents($filename, FALSE, NULL, -1, 50000)
-			. "\n[output truncated after 50,000 B]\n";
-	}
-
-	return file_get_contents($filename);
-}
+require_once('lib.wrappers.php');
 
 /**
  * Will return all the contests that are currently active
@@ -666,7 +621,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
 		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
-		       $id, $filenames[$rank], $rank, getFileContents($files[$rank], false));
+		       $id, $filenames[$rank], $rank, dj_get_file_contents($files[$rank], false));
 	}
 
 	// Recalculate scoreboard cache for pending submissions
