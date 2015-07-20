@@ -18,7 +18,7 @@ define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/');
  * - cookies are defined in a common path for all web interfaces
  */
 function dj_setcookie($name, $value = null, $expire = 0,
-                      $path = null, $domain = null, $secure = false)
+                      $path = null, $domain = null, $secure = false, $httponly = false)
 {
 	if ( !isset($path) ) {
 		// KLUDGE: We want to find the DOMjudge base path, but this
@@ -28,7 +28,7 @@ function dj_setcookie($name, $value = null, $expire = 0,
 		                     dirname($_SERVER['PHP_SELF']));
 	}
 
-	$ret = setcookie($name, $value, $expire, $path, $domain, $secure);
+	$ret = setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
 
 	if ( $ret!==true ) warning("Cookie '$name' not set properly.");
 
