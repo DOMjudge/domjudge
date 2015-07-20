@@ -440,19 +440,7 @@ if ( isset($jid) )  {
 		}
 		echo addEndForm();
 	}
-	echo rejudgeForm('submission', $id);
-
-	echo ( $lastjud === NULL ? '' :
-	      "<span class=\"testcases_prev\">" .
-	      "<a href=\"javascript:togglelastruns();\">show/hide</a> results of previous " .
-	      "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a>" .
-	          ( empty($lastjud['verify_comment']) ? '' :
-		    "<span class=\"prevsubmit\"> (verify comment: '" . $lastjud['verify_comment'] . "')</span>"
-                  ) .
-	      "</span>" );
-
-	echo '<br/><br/>';
-
+	echo rejudgeForm('submission', $id) . '<br/><br/>';
 
 	echo 'Result: ' . printresult($jud['result'], $jud['valid']) . ( $lastjud === NULL ? '' :
 		'<span class="lastresult"> (<a href="submission.php?id=' . $lastsubmitid . '">s' . $lastsubmitid. '</a>: '
@@ -488,6 +476,16 @@ if ( isset($jid) )  {
 			echo $lasttclist;
 		}
 		echo "</table>\n";
+	}
+
+	// Show JS toggle of previous submission results.
+	if ( $lastjud!==NULL ) {
+		echo "<span class=\"testcases_prev\">" .
+		     "<a href=\"javascript:togglelastruns();\">show/hide</a> results of previous " .
+		     "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a>" .
+		     ( empty($lastjud['verify_comment']) ? '' :
+		       "<span class=\"prevsubmit\"> (verify comment: '" .
+		       $lastjud['verify_comment'] . "')</span>" ) . "</span>";
 	}
 
 	// display following data only when the judging has been completed
