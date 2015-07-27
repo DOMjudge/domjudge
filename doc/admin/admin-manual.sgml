@@ -2315,7 +2315,7 @@ to modify the DOMjudge source. If you have any questions about
 developing DOMjudge, or if you want to share your changes that
 may be useful to others, please don't hesitate to contact us
 through <htmlurl name="our development mailing list"
-url="http://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">.
+url="https://www.domjudge.org/mailman/listinfo/domjudge-devel">.
 
 
 <sect>Bootstrapping from Git repository sources
