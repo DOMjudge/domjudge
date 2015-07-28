@@ -153,7 +153,7 @@ foreach ( $json['contest']['group'] as $group ) {
 				      (name, categoryid, affilid, enabled, members, comments, externalid, room)
 				      VALUES (%s, %i, %i, %i, %s, %s, %i, %s)',
 				     $team['teamName'], $participants, $affilid, $enabled, $members,
-				     "Status: " . $team['status'], $team['reservationId'], $siteName);
+				     "Status: " . $team['status'], $team['teamId'], $siteName);
 			$username = sprintf("team%04d", $id);
 			$userid = $DB->q('RETURNID INSERT INTO user (username, name, teamid, email)
 					  VALUES (%s,%s,%i,%s)', $username, $team['teamName'], $id, $mails);
