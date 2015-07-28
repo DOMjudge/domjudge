@@ -212,7 +212,8 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid, s.origsubmit
 if ( ! $submdata ) error ("Missing submission data");
 
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, j.valid, j.starttime,
-                 j.judgehost, j.verified, j.jury_member, j.verify_comment, r.reason, r.rejudgingid,
+                 j.judgehost, j.verified, j.jury_member, j.verify_comment,
+                 r.reason, r.rejudgingid,
                  MAX(jr.runtime) AS max_runtime
                  FROM judging j
                  LEFT JOIN judging_run jr USING(judgingid)
@@ -454,7 +455,7 @@ if ( isset($jid) )  {
 	if ( $judging_ended ) {
 		echo ', finished in '.
 				printtimediff($jud['starttime'], $jud['endtime']) . ' s';
-	} elseif ( $jud['valid'] ) {
+	} elseif ( $jud['valid'] || isset($jud['rejudgingid']) ) {
 		echo ' [still judging - busy ' . printtimediff($jud['starttime']) . ']';
 	} else {
 		echo ' [aborted]';
