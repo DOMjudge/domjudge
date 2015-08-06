@@ -217,7 +217,7 @@ CREATE TABLE `judging` (
   `judgehost` varchar(50) DEFAULT NULL COMMENT 'Judgehost that performed the judging',
   `result` varchar(25) DEFAULT NULL COMMENT 'Result string as defined in config.php',
   `verified` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Result verified by jury member?',
-  `jury_member` varchar(15) DEFAULT NULL COMMENT 'Name of jury member who verified this',
+  `jury_member` varchar(25) DEFAULT NULL COMMENT 'Name of jury member who verified this',
   `verify_comment` varchar(255) DEFAULT NULL COMMENT 'Optional additional information provided by the verifier',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Old judging is marked as invalid when rejudging',
   `output_compile` longblob COMMENT 'Output of the compiling the program',
@@ -345,7 +345,7 @@ CREATE TABLE `rejudging` (
 
 CREATE TABLE `role` (
   `roleid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `role` varchar(15) NOT NULL COMMENT 'Role name',
+  `role` varchar(25) NOT NULL COMMENT 'Role name',
   `description` varchar(255) NOT NULL COMMENT 'Description for the web interface',
   PRIMARY KEY (`roleid`),
   UNIQUE KEY `role` (`role`)
