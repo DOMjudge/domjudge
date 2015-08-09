@@ -34,7 +34,7 @@ Version 5.0.0 Release Candidate 1 - 7 July 2015
    result of sample testcases is enabled (#137, thanks Ruud Koot).
  - In Haskell run script, set maximum stack size to someting small to
    prevent ghc from running out of memory (#138, thanks Ruud Koot).
- - Update ACE editor to 1.1.6, JScolor to 1.4.3.
+ - Update ACE editor to 1.1.8, JScolor to 1.4.4.
  - Improve installation on and documentation for Red Hat(like) Linux.
  - Root is not required anymore for 'make install'.
  - Raise minimum required PHP version to 5.3.3.
