@@ -113,7 +113,8 @@ to name them here too (with non-GPL licences listed where applicable):
        <url url="http://www.barelyfitz.com/projects/tabber/">.
 <item> Ace code editor by Ajax.org B.V., licenced under the BSD
        licence, see <tt>COPYING.BSD</tt>. It was downloaded from
-       <url url="https://github.com/ajaxorg/ace-builds">.
+       <url url="https://github.com/ajaxorg/ace-builds">,
+       the <tt>src-min-noconflict</tt> version.
 <item> Flot JavaScript library by IOLA and Ole Laursen, licenced
        under the MIT licence, see <tt>COPYING.MIT</tt>. It was
        downloaded from <url url="http://www.flotcharts.org/">.
@@ -123,11 +124,11 @@ to name them here too (with non-GPL licences listed where applicable):
 <item> jQuery TokenInput by James Smith, dual
        licenced under the GPL and MIT licences, see <tt>COPYING</tt>
        and <tt>COPYING.MIT</tt>. It was downloaded from
-       <url url="http://loopj.com/jquery-tokeninput/">.
+       <url url="https://github.com/loopj/jquery-tokeninput">.
 <item> The default compare script was included from the
        Kattis problemtools package, and licenced under the MIT
        licence, see <tt>COPYING.MIT</tt>. It was downloaded from
-       <url url="https://github.com/Kattis/problemtools/tree/master/default_validator">.
+       <url url="https://github.com/Kattis/problemtools/tree/master/support/default_validator">.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
        Erik van Sebille.
 <item> Several icons have been taken from the phpMyAdmin project.
