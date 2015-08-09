@@ -69,7 +69,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 11
+#serial 13
 
 AU_ALIAS([AC_PATH_GENERIC], [AX_PATH_GENERIC])
 AC_DEFUN([AX_PATH_GENERIC],[
@@ -89,7 +89,7 @@ AC_DEFUN([AX_PATH_GENERIC],[
   AC_ARG_VAR(UP[]_CFLAGS, [CFLAGS used for $1])
   AC_ARG_VAR(UP[]_LIBS,   [LIBS used for $1])
 
-  AS_IF([test x$UP[]_CFLAGS != x -o x$UP[]_LIBS != x],[
+  AS_IF([test x"$UP[]_CFLAGS" != x -o x"$UP[]_LIBS" != x],[
     dnl Don't run config script at all, use user-provided values instead.
     AC_SUBST(UP[]_CFLAGS)
     AC_SUBST(UP[]_LIBS)
@@ -110,19 +110,19 @@ AC_DEFUN([AX_PATH_GENERIC],[
     ])
 
     AC_PATH_PROGS(UP[]_CONFIG,[$6 DOWN-config],[no])
-    AS_IF([test "$UP[]_CONFIG" == "no"],[
+    AS_IF([test "$UP[]_CONFIG" = "no"],[
       :
       $5
     ],[
       dnl Get the CFLAGS from LIBRARY-config script
-      AS_IF([test x"$7" == x],[
+      AS_IF([test x"$7" = x],[
 	UP[]_CFLAGS="`$UP[]_CONFIG $DOWN[]_config_args --cflags`"
       ],[
 	UP[]_CFLAGS="`$UP[]_CONFIG $DOWN[]_config_args $7`"
       ])
 
       dnl Get the LIBS from LIBRARY-config script
-      AS_IF([test x"$8" == x],[
+      AS_IF([test x"$8" = x],[
 	UP[]_LIBS="`$UP[]_CONFIG $DOWN[]_config_args --libs`"
       ],[
 	UP[]_LIBS="`$UP[]_CONFIG $DOWN[]_config_args $8`"

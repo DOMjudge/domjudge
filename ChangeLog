@@ -5,6 +5,7 @@ Version 5.0.0 - DEV
  - Removed support for 'presentation-error' judgement.
  - Update ACE editor to version 1.2.0.
  - Update jQuery to version 2.1.4.
+ - Update autoconf M4 macros from upstream.
 
 Version 5.0.0 Release Candidate 1 - 7 July 2015
 -----------------------------------------------
