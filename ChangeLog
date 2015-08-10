@@ -3,9 +3,19 @@ DOMjudge Programming Contest Judging System
 Version 5.0.0 - DEV
 -------------------
  - Removed support for 'presentation-error' judgement.
+ - Various documentation improvements.
+ - Preserve aspect ratio when creating testcase image thumbnails.
+ - Fixed bug that REST API scoreboard "solved" was always true.
+   Thanks Shuhei Takahashi.
+ - Make REST API return properly typed values. Thanks Shuhei Takahashi.
+ - Synchronise selected contest between jury/team/public interfaces.
+ - By default only refresh caches of the selected contest.
+ - Show differences of a resubmission with the original submission.
+ - Fix length of role DB field. Thanks pinkston3 for pointing out.
  - Update ACE editor to version 1.2.0.
  - Update jQuery to version 2.1.4.
  - Update autoconf M4 macros from upstream.
+ - Miscellaneous smaller fixes.
 
 Version 5.0.0 Release Candidate 1 - 7 July 2015
 -----------------------------------------------
@@ -97,6 +107,8 @@ Version 4.0.0 Release Candidate 1 - 8 July 2014
    menu bar.
  - Overhauled layout of submission detail page.
  - Changed Java classname detection to use reflection instead of javap.
+ - Added script misc-tools/judging_statistics to extract various
+   statistics (variations in judging results and runtimes, etc.).
 
 Version 3.4.0 - (unreleased)
 ----------------------------
