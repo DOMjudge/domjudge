@@ -6,6 +6,8 @@ Version 4.0.6 - DEV
    in judgedaemon.
  - Let dj-setup-database work with an empty DB password.
  - Fix file permissions during install and running of judgedaemon.
+ - Fix a bug in displaying special run script.
+ - Redirect /api to /api/ to prevent "PATH_INFO not set" errors.
  - Made several documentation improvements.
 
 Version 4.0.5 - 23 March 2015
