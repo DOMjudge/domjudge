@@ -244,7 +244,7 @@ if ( !empty($data['problemtext_type']) ) {
 	    urlencode($data['problemtext_type']) . '.png" alt="problem text" ' .
 	    'title="view problem description" /></a> ' . "</td></tr>\n";
 }
-if ( !empty($data['special_compare']) ) {
+if ( !empty($data['special_run']) ) {
 	echo '<tr><td>Special run script:</td><td class="filename">' .
 		'<a href="executable.php?id=' . urlencode($data['special_run']) . '">' .
 		htmlspecialchars($data['special_run']) . "</a></td></tr>\n";
