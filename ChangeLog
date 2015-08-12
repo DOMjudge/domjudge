@@ -1,12 +1,13 @@
 DOMjudge Programming Contest Judging System
 
-Version 4.0.6 - DEV
--------------------
+Version 4.0.6 - 12 August 2015
+------------------------------
  - Prevent unintended collisions by using exact string comparison
    in judgedaemon.
  - Let dj-setup-database work with an empty DB password.
  - Fix file permissions during install and running of judgedaemon.
  - Fix a bug in displaying special run script.
+ - Fix the Baylor import/export to work with the current API.
  - Redirect /api to /api/ to prevent "PATH_INFO not set" errors.
  - Made several documentation improvements.
 
