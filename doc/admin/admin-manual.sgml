@@ -344,8 +344,7 @@ Optionally:
        <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>.
-<item> Set up cgroup support on the judgedaemons.
-
+<item> Set up cgroup support on the judgedaemons (strongly recommended).
 <item> For additional features in the jury web interface, the
        following PHP extensions can be installed:
        <itemize>
