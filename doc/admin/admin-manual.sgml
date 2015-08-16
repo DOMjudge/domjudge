@@ -331,7 +331,7 @@ Optionally:
        <tt>bin/dj_make_chroot &lt;chrootdir&gt; &lt;architecture&gt;</tt><newline>
        <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
        enable the <tt>chroot-startstop.sh</tt> script in <tt>etc/judgehost-config.php</tt>.
-<item> Set up cgroup support on the judgedaemons.
+<item> Set up cgroup support on the judgedaemons (strongly recommended).
 <item> Further tighten the security of the system, e.g. by applying
        firewall rules. This is not necessary when Linux cgroups are
        enabled as this is set up to automatically block network traffic.
