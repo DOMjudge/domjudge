@@ -292,9 +292,21 @@ all submissions for a given language, problem, team or judgehost; to
 do so, go to the page of the respective language, problem, team or
 judgehost, press the `Rejudge all' button and confirm.
 
+There are two different ways to run a rejudging, depending on whether
+the <tt>create rejudging</tt> button toggled:
+<enum>
+<item>Without this button toggled, an "old-style" rejudging is
+  performed where the results are directly made effective.
+<item>When toggled, a "rejudging" set is created, and all affected
+  submissions are rejudged, but the new judgings are not made
+  effective yet. Instead, the jury can inspect the results of the
+  rejudging (under the rejudging tab). Based on that the whole
+  rejudging, as a set, can be applied or cancelled, keeping the old
+  judgings as is.
+</enum>
+
 Submissions that have been marked as `CORRECT' will not be rejudged.
-Only DOMjudge admins can override this restriction for individual
-submissions.
+Only DOMjudge admins can override this restriction using a tickbox.
 
 Teams will not get explicit notifications of rejudgings, other than a
 potentially changed outcome of their submissions. It might be desirable
