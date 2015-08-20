@@ -3,7 +3,8 @@
 # Provides:          domjudge-judgehost
 # Required-Start:    $remote_fs $syslog $network
 # Required-Stop:     $remote_fs $syslog
-# Should-Stop:       $network
+# Should-Start:      $all $network apache2 nginx mysql
+# Should-Stop:       $all $network apache2 nginx mysql
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: DOMjudge Judgedaemon
@@ -86,7 +87,7 @@ case "$1" in
   reload|force-reload|restart)
 	log_begin_msg "Restarting $DESC: $NAME"
 	if start-stop-daemon --stop --quiet --retry 5 --pidfile $PIDFILE; then
-		start-stop-daemon --start --quiet --chuid $RUNAS --pidfile "$PIDFILE" --exec $DAEMON -- $OPTIONS
+		start-stop-daemon --start --quiet --chuid $RUNAS --pidfile "$PIDFILE" --exec "$DAEMON" -- $OPTIONS
 	fi
 	log_end_msg $?
 	;;
