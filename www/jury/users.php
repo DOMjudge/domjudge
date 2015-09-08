@@ -46,7 +46,7 @@ if( $users->count() == 0 ) {
 		        htmlspecialchars($row['roles'])."</a></td>".
 		    "<td>" . (isset($row['teamid']) ? $link . "t" .
 		        htmlspecialchars($row['teamid']). "</a>" : '') . "</td>";
-		echo "<td class=\"";
+		echo "<td sorttable_customkey=\"" . $status . "\" class=\"";
 		if ($status == 1) {
 			echo 'team-ok" title="logged in: ' . printtime($row['last_login']) . '"';
 		} else {
