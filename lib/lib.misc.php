@@ -632,6 +632,8 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	        VALUES(%s, %i, %i, %s, %i, %i, "problem submitted")',
 	       now(), $contest, $teamid, $langid, $probid, $id);
 
+	alert('submit', "submission $id: team $teamid, language $langid, problem $probid");
+
 	if ( is_writable( SUBMITDIR ) ) {
 		// Copy the submission to SUBMITDIR for safe-keeping
 		for($rank=0; $rank<count($files); $rank++) {

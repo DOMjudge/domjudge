@@ -430,6 +430,11 @@ function judgings_PUT($args)
 			               WHERE judgingid = %i',$judgingid);
 			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 
+			// We call alert here for the failed submission. Note that
+			// this means that these alert messages should be treated
+			// as confidential information.
+			alert('reject', "submission $row[submitid], judging $judgingid: compiler-error");
+
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
 			if ( ! dbconfig_get('verification_required', 0) ) {
@@ -532,6 +537,12 @@ function judging_runs_POST($args)
 			               LEFT JOIN submission s USING(submitid)
 			               WHERE judgingid = %i',$args['judgingid']);
 			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
+
+			// We call alert here before possible validation. Note
+			// that this means that these alert messages should be
+			// treated as confidential information.
+			alert(($result==='correct' ? 'accept' : 'reject'),
+			      "submission $row[submitid], judging $args[judgingid]: $result");
 
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
