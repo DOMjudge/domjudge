@@ -42,7 +42,7 @@ define('BALLOON_CMD', '');
 
 // Internal and output character set used, don't change.
 define('DJ_CHARACTER_SET', 'utf-8');
-define('DJ_CHARACTER_SET_MYSQL', 'utf8');
+define('DJ_CHARACTER_SET_MYSQL', 'utf8mb4');
 // MySQL connection flags.
 define('DJ_MYSQL_CONNECT_FLAGS', null);
 // To enable SSL/TLS encryption of MySQL connections, use the following.
