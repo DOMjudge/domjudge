@@ -521,7 +521,11 @@ function judging_runs_POST($args)
 			        WHERE judgingid = %i', $result, $args['judgingid']);
 		}
 
+		// Only update if the current result is different from what we
+		// had before. This should only happen when the old result was
+		// NULL.
 		if ( $before !== $result ) {
+			if ( $before!==NULL ) error('internal bug: the evaluated result changed during judging');
 
 			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
 			               FROM judging
