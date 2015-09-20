@@ -329,7 +329,8 @@ function confirmClar() {
 		if ( ! $respid ) {
 			$teams = $DB->q('KEYVALUETABLE SELECT teamid, name
 			                 FROM team
-			                 ORDER BY categoryid ASC, team.name COLLATE '. DJ_CHARACTER_SET_MYSQL . '_general_ci ASC');
+			                 ORDER BY categoryid ASC, team.name
+			                 COLLATE '. DJ_MYSQL_COLLATE . ' ASC');
 			$options += $teams;
 		} else {
 			if ( $clar['sender'] ) {
