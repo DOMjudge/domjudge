@@ -195,9 +195,9 @@ while($row = $mysqldatares->next()) {
 }
 
 result('software', 'MySQL version',
-	version_compare('4.1', $mysqldata['version'], '>=') ? 'E':'O',
+	version_compare('5.5.3', $mysqldata['version'], '>=') ? 'E':'O',
 	'Connected to MySQL server version ' . $mysqldata['version'] .
-	'. Minimum required is 4.1.');
+	'. Minimum required is 5.5.3.');
 
 result('software', 'MySQL maximum connections',
 	$mysqldata['max_connections'] < 300 ? 'W':'O',
