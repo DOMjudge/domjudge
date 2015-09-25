@@ -1,5 +1,4 @@
 <!doctype linuxdoc system [
-<!ENTITY problemformat SYSTEM "problem-format-inc.sgml">
 <!ENTITY % admin "IGNORE">
 <!ENTITY % judge "INCLUDE">
 <!ENTITY domjudgeoverview SYSTEM "../domjudge-overview-inc.sgml">
@@ -126,8 +125,10 @@ see if a submission is close to the timelimit.
 
 Problems can be imported and exported into and from DOMjudge
 using zip-files that contain the problem metadata and testdata files.
-See appendix <ref id="problem-format" name="DOMjuge problem format
-specification">. Problems can have special <em>compare</em> and
+For more information about this format please refer to the specification
+at <htmlurl name="problemformat.org"
+url="http://www.problemarchive.org/wiki/index.php/Problem_Format">.
+Problems can have special <em>compare</em> and
 <em>run</em> scripts associated to them, to deal with problem
 statements that require non-standard evaluation. For more details see
 the administrator's manual.
@@ -384,11 +385,5 @@ now' button under contests.
 There's not much more to be done after the contest has ended. The
 administrator will need to take care of backing up all system data and
 submissions, and the awards ceremony can start.
-
-
-<appendix>
-
-&problemformat;
-
 
 </report>
