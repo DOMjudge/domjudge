@@ -124,10 +124,10 @@ use the actual limit to determine the verdict, this allows judges to
 see if a submission is close to the timelimit.
 
 Problems can be imported and exported into and from DOMjudge
-using zip-files that contain the problem metadata and testdata files.
-For more information about this format please refer to the specification
-at <htmlurl name="problemformat.org"
-url="http://www.problemarchive.org/wiki/index.php/Problem_Format">.
+using zip-files that contain the problem metadata and testdata files,
+based on the <tt>problemarchive.org</tt> format.
+See appendix <ref id="problem-format" name="Problem package format
+-specification"> for details.
 Problems can have special <em>compare</em> and
 <em>run</em> scripts associated to them, to deal with problem
 statements that require non-standard evaluation. For more details see
@@ -385,5 +385,60 @@ now' button under contests.
 There's not much more to be done after the contest has ended. The
 administrator will need to take care of backing up all system data and
 submissions, and the awards ceremony can start.
+
+<appendix>
+
+<chapt>Problem package format
+<label id="problem-format"> 
+<p>
+DOMjudge supports the import and export of problems in a zip-bundle
+format.
+
+<p>
+The base of the format is Problem Format specification at
+<htmlurl name="problemformat.org"
+url="http://www.problemarchive.org/wiki/index.php/Problem_Format">.
+Please refer to that for the base specifications.
+
+On top, DOMjudge defines a few extensions:
+<itemize>
+<item><tt>domjudge-problem.ini</tt> (required): metadata file, see below.
+<item><tt>problem.{pdf,html,txt}</tt> (optional): problem statements as
+distributed to participants. The file extension determines any of three
+supported formats. If multiple files matching this pattern are
+available, any one of those will be used.
+</itemize>
+
+<p>
+The file <tt>domjudge-problem.ini</tt> contains key-value pairs, one
+pair per line, of the form <tt>key = value</tt>. The <tt>=</tt> can
+optionally be surrounded by whitespace and the value may be quoted,
+which allows it to contain newlines. The following keys are supported
+(these correspond directly to the problem settings in the jury web
+interface):
+<itemize>
+<item><tt>probid</tt> - the problem short name (e.g. "A")
+<item><tt>name</tt> - the problem displayed name
+<item><tt>allow_submit</tt> - allow submissions to this problem,
+disabling this also makes the problem invisible to teams and public
+<item><tt>allow_judge</tt> - allow judging of this problem
+<item><tt>timelimit</tt> - time limit in seconds per test case
+<item><tt>special_run</tt> - executable id of a special run script
+<item><tt>special_compare</tt> - executable id of a special compare script
+<item><tt>points</tt> - number of points for this problem (defaults to 1)
+<item><tt>color</tt> - CSS color specification for this problem
+</itemize>
+
+<p>
+The <tt>probid</tt> key is required when importing a new problem from
+the <tt>jury/problems.php</tt> overview page, while it is ignored when
+uploading into an existing problem. All other keys are optional. If
+they are present, the respective value will be overwritten; if not
+present, then the value will not be changed or a default chosen when
+creating a new problem. Test data files are added to set of test
+cases already present. Thus, one can easily add test cases to a
+configured problem by uploading a zip file that contains only
+testcase files. Any jury solutions present will be automatically
+submitted when <tt>allow_submit</tt> is <tt>1</tt>.
 
 </report>
