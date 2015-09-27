@@ -8,7 +8,6 @@ docs distdocs: judge-manual.pdf judge-manual.html
 install-docs: docs
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/judge \
 		judge-manual.pdf judge-manual*.html
-	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)
 
 judge-manual.pdf: %.pdf: %.sgml $(TOPDIR)/doc/domjudge-overview-inc.sgml \
                                 $(TOPDIR)/doc/docs_header.tex
