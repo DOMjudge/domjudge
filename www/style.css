@@ -92,13 +92,14 @@ td {
 .list .disabled a  { color: silver;   }
 .list .editdel  a  { display: inline; }
 
-.output_text {
+.output_text, .editor {
 	border-top: 1px dotted #C0C0C0;
 	border-bottom: 1px dotted #C0C0C0;
 	background-color: #FAFAFA;
 	margin: 0;
 	padding: 5px;
 	font-family: monospace;
+	white-space: pre;
 }
 
 span.differ {
