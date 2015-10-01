@@ -1,7 +1,13 @@
 DOMjudge Programming Contest Judging System
 
-Version 5.0.1 - DEV
--------------------
+Version 5.0.1 - 1 October 2015
+------------------------------
+ - Fix issue where syntax highlighting would omit empty lines at the
+   beginning of a source file (#177).
+ - Make users table also sortable by user status.
+ - Update documentation to accurately describe the problem package
+   format DOMjudge supports since 5.0.
+ - Various other documentation updates.
 
 Version 5.0.0 - 11 August 2015
 ------------------------------
