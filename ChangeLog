@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 5.0.2 - DEV
+-------------------
+
 Version 5.0.1 - 1 October 2015
 ------------------------------
  - Fix issue where syntax highlighting would omit empty lines at the
