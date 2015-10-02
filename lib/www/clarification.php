@@ -330,7 +330,7 @@ function confirmClar() {
 			$teams = $DB->q('KEYVALUETABLE SELECT teamid, name
 			                 FROM team
 			                 ORDER BY categoryid ASC, team.name
-			                 COLLATE '. DJ_MYSQL_COLLATE . ' ASC');
+			                 COLLATE '. DJ_MYSQL_COLLATION . ' ASC');
 			$options += $teams;
 		} else {
 			if ( $clar['sender'] ) {

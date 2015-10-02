@@ -19,7 +19,7 @@ $teams = $DB->q('SELECT t.*, c.name AS catname,
                  LEFT JOIN team_affiliation a USING (affilid)
                  WHERE (co.public = 1 OR ct.cid IS NOT NULL)
                  GROUP BY teamid
-                 ORDER BY c.sortorder, t.name COLLATE '. DJ_MYSQL_COLLATE);
+                 ORDER BY c.sortorder, t.name COLLATE '. DJ_MYSQL_COLLATION);
 
 if ( empty($cids) ) {
 	$nsubmits = array();
