@@ -305,7 +305,7 @@ foreach( $data as $rank => $row ) {
 				    addSelect("sample[$rank]",array("no", "yes"), $row['sample'], true) . "</td>";
 
 				// hide sample dropdown field if javascript is enabled
-				echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
+				echo "<script type=\"text/javascript\">" .
 				    "hideTcSample($rank, '". printyn($row['sample'])."');</script>";
 				echo "<td class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
 				    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"1\">" .

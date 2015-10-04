@@ -256,7 +256,7 @@ if ($submission['origsubmitid']) {
 
 if ($olddata !== NULL) {
 	$oldid = $olddata['submitid'];
-	$html .= "<h2><a name=\"diff\"></a>Diff to submission " .
+	$html .= "<h2 id=\"diff\">Diff to submission " .
 	         "<a href=\"submission.php?id=$oldid\">s$oldid</a></h2>\n";
 
 	$html .= multifilediff($sources, $oldsources, $olddata);
@@ -265,7 +265,7 @@ if ($olddata !== NULL) {
 
 if ( !empty($origsources) ) {
 	$origid = $submission['origsubmitid'];
-	$html .= "<h2><a name=\"origdiff\"></a>Diff to original submission " .
+	$html .= "<h2 id=\"origdiff\">Diff to original submission " .
 	         "<a href=\"submission.php?id=$origid\">s$origid</a></h2>\n\n";
 
 	$html .= multifilediff($sources, $origsources, $origdata);
