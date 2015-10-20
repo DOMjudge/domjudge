@@ -61,10 +61,11 @@ de web-interface:
 \begin{description}[\breaklabel\setlabelstyle{\bfseries}]
 \ifcmdsubmit{
 \item[Command-line]
-Gebruik \cmd{submit <probleem>.<extensie>}, met \cmd{<probleem>} het
+Gebruik \cmd{submit <bestandsnaam>}. Als je bestandsnaam de vorm
+\cmd{<probleem>.<extensie>} heeft, met \cmd{<probleem>} het
 label van het probleem en \cmd{<extensie>} een standaard-extensie van
-de programmeertaal. Voor de complete documentatie en alle opties, zie
-\cmd{submit --help}.
+de programmeertaal, dan worden deze automatisch gedetecteerd. Voor de
+complete documentatie en alle opties, zie \cmd{submit --help}.
 }
 \item[Web-Interface]
 Vanaf je teampagina op \url{\WEBBASEURI team} kun je een bestand
