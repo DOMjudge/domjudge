@@ -237,7 +237,7 @@ foreach ($new_verdicts as $submitid => $new_verdict) {
 	$table[$orig_verdict][$new_verdict][] = $submitid;
 }
 
-echo "<h2>Overview</h2>\n";
+echo "<h2>Overview of changes</h2>\n";
 echo '<table class="rejudgetable">' . "\n";
 echo "<tr><th title=\"old vs. new verdicts\">-\+</th>"; // first column are table headers as well
 // write table header
@@ -246,7 +246,7 @@ foreach ($verdicts as $verdict => $abbrev) {
 		// filter out unused cols
 		continue;
 	}
-	echo "<th title=\"$verdict\">$abbrev</th>\n";
+	echo "<th title=\"$verdict (new)\">$abbrev</th>\n";
 }
 echo "</tr>";
 
@@ -257,7 +257,7 @@ foreach ($table as $orig_verdict => $changed_verdicts) {
 	}
 
 	$orig_verdict_abbrev = $verdicts[$orig_verdict];
-	echo "<tr><th title=\"$orig_verdict\">$orig_verdict_abbrev</th>";
+	echo "<tr><th title=\"$orig_verdict (old)\">$orig_verdict_abbrev</th>";
 	foreach ($changed_verdicts as $new_verdict => $submitids) {
 		if ( !isset($used[$new_verdict]) ) {
 			// filter out unused cols
