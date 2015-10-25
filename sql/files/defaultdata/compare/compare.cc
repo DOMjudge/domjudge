@@ -72,7 +72,10 @@ FILE *openfeedback(const char *feedbackdir, const char *feedback, const char *wh
 	return res;
 }
 
-/* Test two numbers for equality, accounting for +/-INF, NaN and precision */
+/* Test two numbers for equality, accounting for +/-INF, NaN and
+ * precision. Float f2 is considered the reference value for relative
+ * error.
+ */
 int equal(flt f1, flt f2, flt float_abs_tol, flt float_rel_tol)
 {
 	flt absdiff, reldiff;
@@ -173,8 +176,8 @@ int main(int argc, char **argv) {
 			if (!isfloat(team.c_str(), tval)) {
 				wrong_answer("Expected float, got: %s", team.c_str());
 			}
-			if (!equal(jval, tval, float_abs_tol, float_rel_tol)) {
-				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Difference: %le\n (abs tol %le rel tol %le)", 
+			if (!equal(tval, jval, float_abs_tol, float_rel_tol)) {
+				wrong_answer("Too large difference.\n Judge: %s\n Team: %s\n Difference: %Lg\n (abs tol %Lg rel tol %Lg)",
 							 judge.c_str(), team.c_str(), fabsl(jval-tval), float_abs_tol, float_rel_tol);
 			}
 		} else if (case_sensitive) {
