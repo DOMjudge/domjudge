@@ -426,6 +426,8 @@ if ( isset($jid) )  {
 		$state = ' (INVALID)';
 	}
 
+	echo rejudgeForm('submission', $id) . "<br /><br />\n\n";
+
 	echo "<h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .  $state .
 		"</h2>\n\n&nbsp;";
 	if ( !$jud['verified'] ) {
@@ -441,7 +443,7 @@ if ( isset($jid) )  {
 		}
 		echo addEndForm();
 	}
-	echo rejudgeForm('submission', $id) . '<br/><br/>';
+	echo "<br /><br />\n\n";
 
 	echo 'Result: ' . printresult($jud['result'], $jud['valid']) . ( $lastjud === NULL ? '' :
 		'<span class="lastresult"> (<a href="submission.php?id=' . $lastsubmitid . '">s' . $lastsubmitid. '</a>: '

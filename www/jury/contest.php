@@ -413,12 +413,13 @@ echo '</td></tr>';
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
-	if ( in_array($data['cid'], $cids) ) {
-		echo "<p>". rejudgeForm('contest', $data['cid']) . "</p>\n\n";
-	}
 	echo "<p>" .
 		editLink('contest',$data['cid']) . "\n" .
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";
+
+	if ( in_array($data['cid'], $cids) ) {
+		echo rejudgeForm('contest', $data['cid']) . "<br />\n\n";
+	}
 }
 
 echo "<h3>Problems</h3>\n\n";

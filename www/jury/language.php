@@ -144,13 +144,14 @@ if ( empty($data['compile_script']) ) {
 <?php
 echo addEndForm();
 
-echo "<br />\n" . rejudgeForm('language',$data['langid']) . "\n\n";
-
 if ( IS_ADMIN ) {
 	echo "<p>" .
 		editLink('language', $data['langid']) . "\n" .
 		delLink('language','langid',$data['langid']) . "</p>\n\n";
 }
+
+echo rejudgeForm('language',$data['langid']) . "<br />\n\n";
+
 echo "<h2>Submissions in " . htmlspecialchars($data['name']) . "</h2>\n\n";
 
 $restrictions = array( 'langid' => $id );

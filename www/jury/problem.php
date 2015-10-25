@@ -256,14 +256,14 @@ if ( !empty($data['special_compare_args']) ) {
 
 echo "</table>\n" . addEndForm();
 
-echo "<br />\n" . rejudgeForm('problem', $id) . "\n\n";
-
 if ( IS_ADMIN ) {
 	echo "<p>" .
 		exportLink($id) . "\n" .
 		editLink('problem',$id) . "\n" .
 		delLink('problem','probid', $id) . "</p>\n\n";
 }
+
+echo rejudgeForm('problem', $id) . "<br />\n\n";
 
 if ( $current_cid === null) {
 	echo "<h3>Contests</h3>\n\n";
