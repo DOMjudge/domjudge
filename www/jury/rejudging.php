@@ -273,8 +273,10 @@ foreach ($table as $orig_verdict => $changed_verdicts) {
 		} else {
 			// this case is the interesting one
 			$class = "changed";
-			$link = '<a href="rejudging.php?id=' . urlencode($id) . '&old_verdict=' .
-				urlencode($orig_verdict) . '&new_verdict=' . urlencode($new_verdict) . '">';
+			$link = '<a href="rejudging.php?id=' . urlencode($id) .
+				'&amp;' . urlencode('view[4]=all') .
+				'&amp;old_verdict=' . urlencode($orig_verdict) .
+				'&amp;new_verdict=' . urlencode($new_verdict) . '">';
 		}
 		echo "<td class=\"$class\">$link$cnt" .  ( empty($link) ? '' : '</a>' ) . "</td>\n";
 	}
@@ -295,17 +297,37 @@ if ( isset($_REQUEST['new_verdict']) && $_REQUEST['new_verdict'] != 'all' ) {
 	$restrictions['result'] = $_REQUEST['new_verdict'];
 }
 
-echo addForm($pagename, 'get') . "<p>Show submissions:\n" .
+echo "<p>Show submissions:</p>\n" .
+	addForm($pagename, 'get') .
 	addHidden('id', $id);
 for($i=0; $i<count($viewtypes); ++$i) {
 	echo addSubmit($viewtypes[$i], 'view['.$i.']', null, ($view != $i));
 }
+if ( isset($_REQUEST['old_verdict']) ) {
+	echo addHidden('old_verdict', $_REQUEST['old_verdict']);
+}
+if ( isset($_REQUEST['new_verdict']) ) {
+	echo addHidden('new_verdict', $_REQUEST['new_verdict']);
+}
+echo addEndForm() . "<br />\n";
+
+echo addForm($pagename, 'get') .
+	addHidden('id', $id) .
+	addHidden("view[$view]", $viewtypes[$view]);
 $verdicts = array_keys($verdicts);
 array_unshift($verdicts, 'all');
-echo "<br/>old verdict: " . addSelect('old_verdict', $verdicts, ( isset($_REQUEST['old_verdict']) ? $_REQUEST['old_verdict'] : 'all' ));
-echo ", new verdict: " . addSelect('new_verdict', $verdicts, ( isset($_REQUEST['new_verdict']) ? $_REQUEST['new_verdict'] : 'all' ));
-echo addSubmit('filter');
-echo "</p>\n" . addEndForm();
+echo "old verdict: " .
+	addSelect('old_verdict', $verdicts,
+	          ( isset($_REQUEST['old_verdict']) ? $_REQUEST['old_verdict'] : 'all' ));
+echo ", new verdict: " .
+	addSelect('new_verdict', $verdicts,
+	          ( isset($_REQUEST['new_verdict']) ? $_REQUEST['new_verdict'] : 'all' ));
+echo addSubmit('filter') . addEndForm();
+
+echo addForm($pagename, 'get') .
+	addHidden('id', $id) .
+	addHidden("view[$view]", $viewtypes[$view]) .
+	addSubmit('clear') . addEndForm() . "<br /><br />\n";
 
 putSubmissions($cdatas, $restrictions);
 
