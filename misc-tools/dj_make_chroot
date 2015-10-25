@@ -5,7 +5,7 @@
 #
 # This script downloads and installs a Debian base system.
 # Minimum requirements: a Linux system with glibc >= 2.3, wget, ar and
-# a POSIX shell in /bin/sh. About 250 MB disk space is needed. It must
+# a POSIX shell in /bin/sh. About 335 MB disk space is needed. It must
 # be run as root and will install the debootstrap package.
 #
 # Part of the DOMjudge Programming Contest Jury System and licenced
@@ -27,7 +27,7 @@ CHROOTDIR=$1
 ARCH=$2
 
 # Debian release (codename) to bootstrap (note: overriden right below):
-RELEASE="wheezy"
+RELEASE="jessie"
 
 # If host system is Debian, use its release and architecture by default
 if [ 'Debian' = "$(lsb_release -i -s || true)" ]; then
@@ -38,7 +38,7 @@ if [ 'Debian' = "$(lsb_release -i -s || true)" ]; then
 fi
 
 # List of possible architectures to install chroot for:
-ARCHLIST="amd64,armel,armhf,i386,ia64,powerpc,s390,s390x,sparc"
+ARCHLIST="amd64,armel,armhf,arm64,i386,mips,mipsel,powerpc,ppc64el,s390x"
 
 # Packages to include during bootstrap process (comma separated):
 INCLUDEDEBS=""
@@ -52,7 +52,7 @@ INSTALLDEBS="openjdk-7-jre-headless locales"
 REMOVEDEBS=""
 
 # Which debootstrap package to install on non-Debian systems:
-DEBOOTDEB="debootstrap_1.0.48+deb7u2_all.deb"
+DEBOOTDEB="debootstrap_1.0.67_all.deb"
 
 # The Debian mirror/proxy below can be passed as environment
 # variables; if none are given the following defaults are used.
