@@ -84,9 +84,10 @@ function exportLink($probid)
  */
 function rejudgeForm($table, $id)
 {
-	$ret = addForm('rejudge.php') .
-		addHidden('table', $table) .
-		addHidden('id', $id);
+	$ret = '<div id="rejudge" class="framed">' .
+	     addForm('rejudge.php') .
+	     addHidden('table', $table) .
+	     addHidden('id', $id);
 
 	$button = 'REJUDGE this submission';
 	$question = "Rejudge submission s$id?";
@@ -124,12 +125,12 @@ function rejudgeForm($table, $id)
 
 	$ret .= '<input type="submit" value="' . htmlspecialchars($button) . '" ' .
 		($disabled ? 'disabled="disabled"' : 'onclick="return confirm(\'' .
-		htmlspecialchars($question) . '\');"') . " />\n" .
+		htmlspecialchars($question) . '\');"') . " /><br />\n" .
 		($allbutton ? addCheckBox('include_all') .
-		              '<label for="include_all">include pending/correct submissions</label>' : '' ) .
+		              '<label for="include_all">include pending/correct submissions</label><br />' : '' ) .
 		addCheckBox('full_rejudge') . '<label for="full_rejudge">create rejudging with reason: </label>' .
 		addInput('reason', '', 0, 255) .
-		addEndForm();
+		addEndForm() . '</div>';
 
 	return $ret;
 }

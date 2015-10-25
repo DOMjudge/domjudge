@@ -57,6 +57,12 @@ hr {
 }
 address { font-size: smaller; }
 
+.framed {
+	border: 1px solid silver;
+	padding: 2px;
+	display: inline-block;
+}
+
 tr.unread td {
 	font-weight: bold;
 }
