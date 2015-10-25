@@ -90,7 +90,7 @@ td {
 	padding-right: 5px;
 }
 .list .disabled a  { color: silver;   }
-.list .editdel  a  { display: inline; }
+.list .editdel  a  { display: inline; white-space: nowrap; }
 
 .output_text, .editor {
 	border-top: 1px dotted #C0C0C0;

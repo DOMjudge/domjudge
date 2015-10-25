@@ -66,7 +66,7 @@ if( $res->count() == 0 ) {
 		     '</a></td>';
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-			     editLink('judgehost_restriction', $row['restrictionid']) . " " .
+			     editLink('judgehost_restriction', $row['restrictionid']) . "&nbsp;" .
 			     delLink('judgehost_restriction', 'restrictionid', $row['restrictionid']) . "</td>";
 		}
 		echo "</tr>\n";

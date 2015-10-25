@@ -55,7 +55,7 @@ if( $users->count() == 0 ) {
 		echo ">$link" . CIRCLE_SYM . "</a></td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-			    editLink('user', $row['userid']) . " " .
+			    editLink('user', $row['userid']) . "&nbsp;" .
 			    delLink('user','userid',$row['userid']) . "</td>";
 		}
 		echo "</tr>\n";

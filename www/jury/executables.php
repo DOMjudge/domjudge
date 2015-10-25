@@ -44,7 +44,7 @@ if( $res->count() == 0 ) {
 			echo '<td title="export executable as zip-file"><a href="executable.php?fetch&amp;id=' . urlencode($row['execid']) .
 			     '"><img src="../images/b_save.png" alt="export" /></a></td>' .
 			     "<td class=\"editdel\">" .
-			     editLink('executable', $row['execid']) . " " .
+			     editLink('executable', $row['execid']) . "&nbsp;" .
 			     delLink('executable','execid',$row['execid']) . "</td>";
 		}
 		echo "</tr>\n";

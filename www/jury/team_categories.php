@@ -38,7 +38,7 @@ if( $res->count() == 0 ) {
 			'</a></td>';
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-				editLink('team_category', $row['categoryid']) . " " .
+				editLink('team_category', $row['categoryid']) . "&nbsp;" .
 				delLink('team_category', 'categoryid', $row['categoryid']) . "</td>";
 		}
 		echo "</tr>\n";

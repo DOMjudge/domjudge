@@ -102,7 +102,7 @@ if( $teams->count() == 0 ) {
 		echo "<td class=\"teamstat\" title=\"$numcor correct / $numsub submitted\">$link$numcor / $numsub</a></td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-				editLink('team', $row['teamid']) . " " .
+				editLink('team', $row['teamid']) . "&nbsp;" .
 				delLink('team','teamid',$row['teamid']) . "</td>";
 		}
 		echo "</tr>\n";

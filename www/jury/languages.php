@@ -39,7 +39,7 @@ if( $res->count() == 0 ) {
 			"</td><td>" . $link . htmlspecialchars($row['extensions']) . "</a>";
 			if ( IS_ADMIN ) {
 				echo "</td><td class=\"editdel\">" .
-					editLink('language', $row['langid']) . " " .
+					editLink('language', $row['langid']) . "&nbsp;" .
 					delLink('language','langid',$row['langid']);
 			}
 		echo "</td></tr>\n";
