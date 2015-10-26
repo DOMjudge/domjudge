@@ -10,7 +10,9 @@ SUBST_DOMSERVER = save_sources2file restore_sources2db static_scoreboard \
                   combined_scoreboard judging_statistics balloons \
                   simulate_contest create_accounts
 
-SUBST_FILES = $(SUBST_DOMSERVER) create_cgroups
+SUBST_JUDGEHOST = create_cgroups dj_make_chroot dj_make_ubuntu_chroot
+
+SUBST_FILES = $(SUBST_DOMSERVER) $(SUBST_JUDGEHOST)
 
 build: $(TARGETS) $(SUBST_FILES)
 
@@ -26,7 +28,8 @@ install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) $(SUBST_DOMSERVER)
 
 install-judgehost:
-	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) dj_make_*chroot create_cgroups
+	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) $(SUBST_JUDGEHOST) \
+		dj_make_ubuntu_java_chroot
 
 clean-l:
 	-rm -f $(TARGETS) $(OBJECTS)

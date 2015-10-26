@@ -338,6 +338,13 @@ umask(0022);
 // Warn when chroot has been disabled. This has security implications.
 if ( ! USE_CHROOT ) {
 	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
+} else {
+	if ( !is_dir(CHROOTDIR) ) {
+		logmsg(LOG_WARNING, "Pre-built chroot tree '".CHROOTDIR.
+		       "' not found: using minimal chroot.");
+	} else {
+		define('CHROOT_SCRIPT', 'chroot-startstop.sh');
+	}
 }
 if ( !defined('USE_CGROUPS') || !USE_CGROUPS ) {
 	logmsg(LOG_WARNING, "Not using cgroups. Using cgroups is highly recommended. See the manual for details.");

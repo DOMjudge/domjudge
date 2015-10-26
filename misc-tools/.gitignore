@@ -7,3 +7,5 @@
 /create_cgroups
 /create_accounts
 /judging_statistics
+/dj_make_chroot
+/dj_make_ubuntu_chroot
