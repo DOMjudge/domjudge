@@ -304,7 +304,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				error("Need 'probid' in '" . $prop_file . "' when adding a new problem.");
 			}
 			// Set sensible defaults for name and timelimit if not specified:
-			if ( !isset($ini_array_problem['name'])      ) $ini_array_problem['name'] = $ini_array_problem['probid'];
+			if ( !isset($ini_array_problem['name'])      ) $ini_array_problem['name'] = $ini_array_contest_problem['probid'];
 			if ( !isset($ini_array_problem['timelimit']) ) $ini_array_problem['timelimit'] = $def_timelimit;
 
 			// rename probid to shortname
@@ -390,7 +390,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 					echo "<p>Custom validator specified but not found.</p>\n";
 				} else {
 					// file(s) have to share common directory
-					$validator_dir = mb_substr($validator_files[0], 0, mb_strrpos($validator_files[0], "/"));
+					$validator_dir = mb_substr($validator_files[0], 0, mb_strrpos($validator_files[0], "/")) . "/";
 					$same_dir = TRUE;
 					foreach ( $validator_files as $validator_file ) {
 						if ( !starts_with($validator_file, $validator_dir) ) {
@@ -517,8 +517,9 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			// Skip testcases that already exist identically
 			$id = $DB->q('MAYBEVALUE SELECT testcaseid FROM testcase
 			              WHERE md5sum_input = %s AND md5sum_output = %s AND
-			              description = %s AND sample = %i',
-			             $md5in, $md5out, $description, $type == 'sample' ? 1 : 0);
+			              description = %s AND sample = %i AND probid = %i',
+			             $md5in, $md5out, $description,
+			             ($type == 'sample' ? 1 : 0), $probid);
 			if ( isset($id) ) {
 				echo "<li>Skipped $type testcase <tt>$datafile</tt>: already exists</li>\n";
 				continue;
