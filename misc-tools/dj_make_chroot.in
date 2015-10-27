@@ -102,7 +102,7 @@ while getopts 'a:d:' OPT ; do
 		\?) error "Could not parse options." ;;
 	esac
 done
-shift $(($OPTIND-1))
+shift $((OPTIND-1))
 
 [ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."
 [ -z "$ARCH" ]      && error "No architecture given or detected."
