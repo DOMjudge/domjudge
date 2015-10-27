@@ -224,7 +224,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 				if ( file_put_contents($execbuildpath, $buildscript) === FALSE ) {
 					error("Could not write file 'build' in $exepath");
 				}
-				chmod($execbuildpath, 0700);
+				chmod($execbuildpath, 0755);
 			}
 		} else if ( !is_executable($execbuildpath) ) {
 			error("Invalid executable, file 'build' exists but is not executable.");
