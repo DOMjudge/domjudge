@@ -14,3 +14,24 @@ SELECT '1'; -- No check available yet.
 -- full UTF-8 unicode support. This requires MySQL/MariaDB >= 5.5.3.
 -- Comment out to disable this change.
 source upgrade/convert_to_utf8mb4_5.0.sql
+
+--
+-- Create additional structures
+--
+
+-- Set allow_submit default to 1
+ALTER TABLE `contestproblem`
+  MODIFY COLUMN `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted for this problem?',
+
+--
+-- Transfer data from old to new structure
+--
+
+--
+-- Add/remove sample/initial contents
+--
+
+--
+-- Finally remove obsolete structures after moving data
+--
+
