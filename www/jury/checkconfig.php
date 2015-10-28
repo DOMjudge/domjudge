@@ -176,6 +176,22 @@ foreach($postmaxvars as $var) {
 result('software', 'PHP POST/upload filesize',
        min($sizes) < 52428800 ? 'W':'O', '', $resulttext);
 
+$timezone_php = ini_get('date.timezone');
+$timezone_sys = date_default_timezone_get();
+if ( $timezone_php===FALSE || empty($timezone_php) ) {
+	if ( empty($timezone_sys) || $timezone_sys=='UTC' ) {
+		result('software', 'PHP timezone', 'E',
+		       "date.timezone is unset in php.ini and the system default '" .
+		       $timezone_sys . "' may not be properly detected.");
+	} else {
+		result('software', 'PHP timezone', 'W',
+		       "date.timezone is unset in php.ini, PHP is " .
+		       "using the system default '$timezone_sys'.");
+	}
+} else {
+	result('software', 'PHP timezone', 'O', "date.timezone set to '$timezone'.");
+}
+
 if ( class_exists("ZipArchive") ) {
 	result('software', 'Problem up/download via zip bundles',
 	       'O', 'PHP ZipArchive class available for importing and exporting problem data.');
