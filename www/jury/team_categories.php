@@ -11,6 +11,17 @@ $title = 'Categories';
 
 require(LIBWWWDIR . '/header.php');
 
+if ( isset($_GET['edited']) ) {
+
+	echo addForm('refresh_cache.php') .
+		msgbox("Warning: Refresh scoreboard cache",
+		       "If the category sort order was changed, it may be necessary to " .
+		       "recalculate any cached scoreboards.<br /><br />" .
+		       addSubmit('recalculate caches now', 'refresh')) .
+		addHidden('cid', $id) .
+		addEndForm();
+}
+
 echo "<h1>Categories</h1>\n\n";
 
 $res = $DB->q('SELECT team_category.*, COUNT(teamid) AS numteams
