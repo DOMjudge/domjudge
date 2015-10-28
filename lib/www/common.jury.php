@@ -414,7 +414,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 							file_put_contents($newfilename, $content);
 							if ( $filebase === 'build' || $filebase === 'run' ) {
 								// mark special files as executable
-								chmod($newfilename, 0700);
+								chmod($newfilename, 0755);
 							}
 						}
 
