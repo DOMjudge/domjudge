@@ -114,7 +114,8 @@ if( $res->count() == 0 ) {
 		 "<th scope=\"col\">active</th>" .
 		 "<th class=\"sorttable_nosort\">status</th>" .
 	     "<th class=\"sorttable_nosort\">restriction</th>" .
-		 "<th class=\"sorttable_nosort\">load</th></tr>\n" .
+		 "<th class=\"sorttable_nosort\">load</th>" .
+		 "<th scope=\"col\" colspan=\"2\"></th></tr>\n" .
 		 "</thead>\n<tbody>\n";
 	while($row = $res->next()) {
 		$link = '<a href="judgehost.php?id=' . urlencode($row['hostname']) . '">';

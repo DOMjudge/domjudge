@@ -442,6 +442,7 @@ else {
 	echo "<th scope=\"col\">allow<br />judge</th>";
 	echo "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>\n";
 	echo "<th scope=\"col\">lazy eval</th>\n";
+	echo "<th scope=\"col\"></th>\n";
 	echo "</tr>\n</thead>\n<tbody>\n";
 
 	$iseven = false;

@@ -23,7 +23,7 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">sort</th>" .
 		"<th scope=\"col\">name</th><th scope=\"col\">#teams</th>" .
-		"<th scope=\"col\">visible</th></tr>\n" .
+		"<th scope=\"col\">visible</th><th scope=\"col\"></th></tr>\n" .
 		"</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
