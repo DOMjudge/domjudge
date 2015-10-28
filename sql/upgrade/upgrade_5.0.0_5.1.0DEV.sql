@@ -21,7 +21,7 @@ source upgrade/convert_to_utf8mb4_5.0.sql
 
 -- Set allow_submit default to 1
 ALTER TABLE `contestproblem`
-  MODIFY COLUMN `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted for this problem?',
+  MODIFY COLUMN `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted for this problem?';
 
 --
 -- Transfer data from old to new structure
