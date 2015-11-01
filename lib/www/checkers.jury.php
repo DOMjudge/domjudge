@@ -185,11 +185,12 @@ function check_relative_time($time, $starttime, $field)
 		$neg = ($time[0] == '-');
 		$time[0] = '0';
 		$times = explode(':', $time, 3);
-		if ( count($times) == 2 ) $times[2] = 0;
+		if ( count($times) == 2 ) $times[2] = '00';
 		if ( count($times) == 3 &&
 		     is_numeric($times[0]) &&
 		     is_numeric($times[1]) && $times[1] < 60 &&
-		     is_numeric($times[2]) && $times[2] < 60 ) {
+		     is_numeric($times[2]) && $times[2] < 60 &&
+		     preg_match('/^[0-9]{2}(\.[0-9]{1,6})?$/', $times[2])===1 ) {
 			$hours = $times[0];
 			$minutes = $times[1];
 			$seconds = $times[2];
@@ -199,12 +200,25 @@ function check_relative_time($time, $starttime, $field)
 			}
 			$ret = $starttime + $seconds;
 		} else {
-			ch_error($field . " is not correctly formatted, expecting: +/-hh:mm(:ss)");
+			ch_error($field . " is not correctly formatted, expecting: +/-hh:mm[:ss[.uuuuuu]]");
 			$ret = null;
 		}
 	} else {
-		// Time string is absolute, just convert to Unix epoch
-		$ret = strtotime($time);
+		// Time string is absolute, just convert to Unix epoch, but
+		// first detect and strip subseconds, since strtotime doesn't
+		// handle that.
+		if ( preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2} '.
+		                '[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,6})?$/', $time)!==1 ) {
+			ch_error($field . " is not correctly formatted, expecting: " .
+			         "yyyy-mm-dd hh:mm:ss[.uuuuuu]");
+			$ret = null;
+		}
+		$subsec = 0;
+		if ( preg_match('/\.[0-9]{1,6}$/', $time, $match)===1 ) {
+			$subsec = floatval('0'.$match[0]);
+			$time = explode('.', $time)[0];
+		}
+		$ret = floatval(strtotime($time)) + $subsec;
 	}
 
 	return $ret;

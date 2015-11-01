@@ -17,8 +17,8 @@ $jqtokeninput = true;
 
 require(LIBWWWDIR . '/header.php');
 
-$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d";
-$pattern_offset    = "\d?\d:\d\d";
+$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d(.\d\d?\d?\d?\d?\d?)?";
+$pattern_offset    = "\d?\d:\d\d(:\d\d(.\d\d?\d?\d?\d?\d?)?)?";
 $pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
 $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 
@@ -50,22 +50,22 @@ if ( !empty($_GET['cmd']) ):
 <tr><td><label for="data_0__name_">Contest name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__activatetime_string_">Activate time:</label></td>
-<td><?php echo addInput('data[0][activatetime_string]', (empty($row['activatetime_string'])?strftime('%Y-%m-%d %H:%M:00'):$row['activatetime_string']), 20, 19, 'required pattern="' . $pattern_dateorneg . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> -hh:mm)</td></tr>
+<td><?php echo addInput('data[0][activatetime_string]', (empty($row['activatetime_string'])?strftime('%Y-%m-%d %H:%M:00'):$row['activatetime_string']), 26, 26, 'required pattern="' . $pattern_dateorneg . '"')?> format: <kbd>yyyy-mm-dd hh:mm:ss</kbd> <i>or</i> <kbd>-hh:mm[:ss]</kbd> (also up to 6 decimals for subsecond resolution can be added everywhere)</td></tr>
 
 <tr><td><label for="data_0__starttime_string_">Start time:</label></td>
-<td><?php echo addInput('data[0][starttime_string]', @$row['starttime_string'], 20, 19, 'required pattern="' . $pattern_datetime . '"')?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+<td><?php echo addInput('data[0][starttime_string]', @$row['starttime_string'], 26, 26, 'required pattern="' . $pattern_datetime . '"')?> format: <kbd>yyyy-mm-dd hh:mm:ss</kbd></td></tr>
 
 <tr><td><label for="data_0__freezetime_string_">Scoreboard freeze time:</label></td>
-<td><?php echo addInput('data[0][freezetime_string]', @$row['freezetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][freezetime_string]', @$row['freezetime_string'], 26, 26, 'pattern="' . $pattern_dateorpos . '"')?> format: <kbd>yyyy-mm-dd hh:mm:ss</kbd> <i>or</i> <kbd>+hh:mm[:ss]</kbd></td></tr>
 
 <tr><td><label for="data_0__endtime_string_">End time:</label></td>
-<td><?php echo addInput('data[0][endtime_string]', @$row['endtime_string'], 20, 19, 'required pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][endtime_string]', @$row['endtime_string'], 26, 26, 'required pattern="' . $pattern_dateorpos . '"')?> format: <kbd>yyyy-mm-dd hh:mm:ss</kbd> <i>or</i> <kbd>+hh:mm[:ss]</kbd></td></tr>
 
 <tr><td><label for="data_0__unfreezetime_string_">Scoreboard unfreeze time:</label></td>
-<td><?php echo addInput('data[0][unfreezetime_string]', @$row['unfreezetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][unfreezetime_string]', @$row['unfreezetime_string'], 26, 26, 'pattern="' . $pattern_dateorpos . '"')?> format: <kbd>yyyy-mm-dd hh:mm:ss</kbd> <i>or</i> <kbd>+hh:mm[:ss]</kbd></td></tr>
 
 <tr><td><label for="data_0__deactivatetime_string_">Deactivate time:</label></td>
-<td><?php echo addInput('data[0][deactivatetime_string]', @$row['deactivatetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][deactivatetime_string]', @$row['deactivatetime_string'], 26, 26, 'pattern="' . $pattern_dateorpos . '"')?> format: <kbd>yyyy-mm-dd hh:mm:ss</kbd> <i>or</i> <kbd>+hh:mm[:ss]</kbd></td></tr>
 
 <tr><td>Process balloons:</td><td>
 <?php echo addRadioButton('data[0][process_balloons]', (!isset($row['process_balloons']) ||  $row['process_balloons']), 1)?> <label for="data_0__process_balloons_1">yes</label>
