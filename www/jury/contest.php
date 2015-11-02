@@ -17,8 +17,8 @@ $jqtokeninput = true;
 
 require(LIBWWWDIR . '/header.php');
 
-$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d(.\d\d?\d?\d?\d?\d?)?";
-$pattern_offset    = "\d?\d:\d\d(:\d\d(.\d\d?\d?\d?\d?\d?)?)?";
+$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d(\.\d{1,6})?";
+$pattern_offset    = "\d?\d:\d\d(:\d\d(\.\d{1,6})?)?";
 $pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
 $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 
