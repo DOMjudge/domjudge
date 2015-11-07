@@ -25,12 +25,12 @@ ALTER TABLE `contestproblem`
 
 -- Support longer contest time strings to include microseconds
 ALTER TABLE `contest`
-  MODIFY COLUMN `activatetime_string` varchar(30) NOT NULL COMMENT 'Authoritative absolute or relative string representation of activatetime',
-  MODIFY COLUMN `starttime_string` varchar(30) NOT NULL COMMENT 'Authoritative absolute (only!) string representation of starttime',
-  MODIFY COLUMN `freezetime_string` varchar(30) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of freezetime',
-  MODIFY COLUMN `endtime_string` varchar(30) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
-  MODIFY COLUMN `unfreezetime_string` varchar(30) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
-  MODIFY COLUMN `deactivatetime_string` varchar(30) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime';
+  MODIFY COLUMN `activatetime_string` varchar(64) NOT NULL COMMENT 'Authoritative absolute or relative string representation of activatetime',
+  MODIFY COLUMN `starttime_string` varchar(64) NOT NULL COMMENT 'Authoritative absolute (only!) string representation of starttime',
+  MODIFY COLUMN `freezetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of freezetime',
+  MODIFY COLUMN `endtime_string` varchar(64) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
+  MODIFY COLUMN `unfreezetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
+  MODIFY COLUMN `deactivatetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime';
 
 --
 -- Transfer data from old to new structure
