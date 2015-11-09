@@ -450,7 +450,6 @@ CREATE TABLE `team` (
   `hostname` varchar(255) DEFAULT NULL COMMENT 'Teampage first visited from this address',
   `penalty` int(4) NOT NULL DEFAULT '0' COMMENT 'Additional penalty time in minutes',
   PRIMARY KEY  (`teamid`),
-  UNIQUE KEY `name` (`name`(190)),
   UNIQUE KEY `externalid` (`externalid`(190)),
   KEY `affilid` (`affilid`),
   KEY `categoryid` (`categoryid`),

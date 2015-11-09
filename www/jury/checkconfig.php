@@ -425,6 +425,20 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 	       'O', 'Affiliation icons disabled in config.');
 }
 
+
+// check for teams with duplicate names
+$res = $DB->q('SELECT name FROM team GROUP BY name HAVING COUNT(name) >= 2;');
+
+$details = '';
+while($row = $res->next()) {
+	$teamids = $DB->q('COLUMN SELECT teamid FROM team WHERE name=%s', $row['name']);
+	$details .= "Multiple teams have the name '" . htmlspecialchars($row['name']) . "': " .
+		    implode(', ', $teamids) . "\n";
+}
+
+result('problems, languages, teams', 'Duplicate team names',
+	($details == '' ? 'O':'W'), $details);
+
 flushresults();
 
 // SUBMISSIONS, JUDINGS
