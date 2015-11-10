@@ -40,6 +40,49 @@ ALTER TABLE `team` DROP KEY `name`;
 -- Transfer data from old to new structure
 --
 
+-- Add timezones to the contest time strings. We cannot detect the
+-- real timezone intended, only the offset, so we add Etc/GMT-+X
+-- "timezones. Note that the sign is opposite to normal!
+SET @old_time_zone = @@session.time_zone;
+SET time_zone = '+00:00';
+
+UPDATE `contest`
+  SET `activatetime_string` = CONCAT(`activatetime_string`,' Etc/GMT',
+    IF(`activatetime`-UNIX_TIMESTAMP(`activatetime_string`)>=0,'+',''),
+    ROUND((`activatetime`-UNIX_TIMESTAMP(`activatetime_string`))/3600))
+  WHERE `activatetime_string` NOT LIKE '-%';
+
+UPDATE `contest`
+  SET `starttime_string` = CONCAT(`starttime_string`,' Etc/GMT',
+    IF(`starttime`-UNIX_TIMESTAMP(`starttime_string`)>=0,'+',''),
+    ROUND((`starttime`-UNIX_TIMESTAMP(`starttime_string`))/3600));
+
+UPDATE `contest`
+  SET `freezetime_string` = CONCAT(`freezetime_string`,' Etc/GMT',
+    IF(`freezetime`-UNIX_TIMESTAMP(`freezetime_string`)>=0,'+',''),
+    ROUND((`freezetime`-UNIX_TIMESTAMP(`freezetime_string`))/3600))
+  WHERE `freezetime_string` NOT LIKE '+%';
+
+UPDATE `contest`
+  SET `endtime_string` = CONCAT(`endtime_string`,' Etc/GMT',
+    IF(`endtime`-UNIX_TIMESTAMP(`endtime_string`)>=0,'+',''),
+    ROUND((`endtime`-UNIX_TIMESTAMP(`endtime_string`))/3600))
+  WHERE `endtime_string` NOT LIKE '+%';
+
+UPDATE `contest`
+  SET `unfreezetime_string` = CONCAT(`unfreezetime_string`,' Etc/GMT',
+    IF(`unfreezetime`-UNIX_TIMESTAMP(`unfreezetime_string`)>=0,'+',''),
+    ROUND((`unfreezetime`-UNIX_TIMESTAMP(`unfreezetime_string`))/3600))
+  WHERE `unfreezetime_string` NOT LIKE '+%';
+
+UPDATE `contest`
+  SET `deactivatetime_string` = CONCAT(`deactivatetime_string`,' Etc/GMT',
+    IF(`deactivatetime`-UNIX_TIMESTAMP(`deactivatetime_string`)>=0,'+',''),
+    ROUND((`deactivatetime`-UNIX_TIMESTAMP(`deactivatetime_string`))/3600))
+  WHERE `deactivatetime_string` NOT LIKE '+%';
+
+SET time_zone = @old_time_zone;
+
 --
 -- Add/remove sample/initial contents
 --
