@@ -8,7 +8,8 @@
 --
 
 -- @UPGRADE-CHECK@
-SELECT '1'; -- No check available yet.
+ALTER TABLE `team` DROP KEY `name`;
+ALTER TABLE `team` ADD UNIQUE KEY `name` (`name`(190));
 
 -- Before any upgrades, update from utf8 (3-byte character) to utf8mb4
 -- full UTF-8 unicode support. This requires MySQL/MariaDB >= 5.5.3.
@@ -31,6 +32,9 @@ ALTER TABLE `contest`
   MODIFY COLUMN `endtime_string` varchar(64) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
   MODIFY COLUMN `unfreezetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
   MODIFY COLUMN `deactivatetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime';
+
+-- Drop unique key on team name
+ALTER TABLE `team` DROP KEY `name`;
 
 --
 -- Transfer data from old to new structure
