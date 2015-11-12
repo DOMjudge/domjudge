@@ -36,6 +36,10 @@ ALTER TABLE `contest`
 -- Drop unique key on team name
 ALTER TABLE `team` DROP KEY `name`;
 
+-- Remove obsolete comment that langid is used for source filenames
+ALTER TABLE `language`
+  MODIFY COLUMN `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string)';
+
 --
 -- Transfer data from old to new structure
 --

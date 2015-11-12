@@ -264,7 +264,7 @@ CREATE TABLE `judging_run` (
 --
 
 CREATE TABLE `language` (
-  `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string), used for source file extension',
+  `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
   `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted in this language?',
