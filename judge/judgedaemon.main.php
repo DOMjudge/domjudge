@@ -49,10 +49,20 @@ function read_credentials() {
  * When $failonerror is set to false, any error will be turned into a
  * warning and null is returned.
  */
+$lastrequest = '';
 function request($url, $verb = 'GET', $data = '', $failonerror = true) {
-	global $resturl, $restuser, $restpass;
+	global $resturl, $restuser, $restpass, $lastrequest;
 
-	logmsg(LOG_DEBUG, "API request $verb $url");
+	// Don't flood the log with requests for new judgings every few seconds.
+	if ( $url==='judgings' && $verb==='POST' ) {
+		if ( $lastrequest!==$url ) {
+			logmsg(LOG_DEBUG, "API request $verb $url");
+			$lastrequest = $url;
+		}
+	} else {
+		logmsg(LOG_DEBUG, "API request $verb $url");
+		$lastrequest = $url;
+	}
 
 	$url = $resturl . "/" . $url;
 	if ( $verb == 'GET' ) {
