@@ -2141,8 +2141,9 @@ hand, the Java virtual machine is started via a compile-time generated
 script which is run as a wrapper around the program. This means that
 the memory limits imposed by DOMjudge are for the jvm and the running
 program within it. As the jvm uses approximately 300MB, this reduces
-the limit by this significant amount. See <tt>judge/compile_java_javac.sh</tt>
-for the implementation details.
+the limit by this significant amount. See the <tt>java_javac</tt> and
+<tt>java_javac_detect</tt> compile executable scripts for the
+implementation details.
 
 If you see error messages of the form
 <code>
@@ -2156,7 +2157,7 @@ Could not reserve enough space for object heap
 </code>
 Then the problem is probably that the jvm needs more memory than what is
 reserved by the Java compile script. You should try to increase the
-<tt>MEMRESERVED</tt> variable in <tt>judge/compile_java.sh</tt> and check that
+<tt>MEMRESERVED</tt> variable in the java compile executable and check that
 the configuration variable <tt>memory limit</tt> is set larger than
 <tt>MEMRESERVED</tt>. If that does not help, you should try to increase the
 configuration variable <tt>process limit</tt> (since the JVM uses a lot of
@@ -2178,26 +2179,25 @@ experience however, many teams do so. Secondly, the Java compiler
 generates a bytecode file depending on the class name. There are two
 ways to handle this.
 
-The simplest Java compile script <tt>compile_java_javac.sh</tt>
+The simplest Java compile script <tt>java_javac</tt>
 requires the main class to be named <tt>Main</tt> with method
 <code>
 public static void main(String args[])
 </code>
 
 The alternative (and default) is to use the script
-<tt>compile_java_javac_detect.sh</tt>, which automatically detects the
+<tt>java_javac_detect</tt>, which automatically detects the
 main class and even corrects the source filename when it is declared
 public.
 
-When using the GNU gcj compiler, the same holds and two similar
-scripts <tt>compile_java_gcj.sh</tt> and
-<tt>compile_java_gcj_detect.sh</tt> are available.
+When using the GNU gcj compiler, the same holds for the
+<tt>java_gcj</tt> script as for <tt>java_javac</tt>.
 
 <sect>GCJ compiler warnings
 <p>
 
-When using the GNU GCJ compiler for compiling Java sources, it can
-give a whole lot of warning messages of the form
+When using the GNU GCJ compiler script <tt>java_gcj</tt> for compiling
+Java sources, it can give a whole lot of warning messages of the form
 <verb>
 /usr/lib/gcc-lib/i386-linux/3.2.3/libgcj.a(gc_dlopen.o)(.text+0xbc):
 In function `GC_dlopen': Using 'dlopen' in statically linked
@@ -2211,10 +2211,6 @@ linked sources, but some functions can not be static, e.g. the
 ignored, because under normal programming contest conditions people
 are not allowed to use these functions anyway (and they are not
 accessible within the chroot-ed environment the program is run in).
-
-To filter these warnings, take a look at
-<tt>judge/compile_java_gcjmod.sh</tt> and replace or symlink
-<tt>judge/compile_java.sh</tt> by/to this file.
 
 <sect>Memory limit errors in the web interface<label id="problems:memory">
 <p>
