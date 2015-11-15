@@ -9,6 +9,7 @@ Version 5.0.2 - DEV
  - Fix permissions of compare build/run scripts.
  - Fix various minor HTML issues.
  - Small tweaks to team manual.
+ - Bring admin manual up to date wrt. executables in database.
 
 Version 5.0.1 - 1 October 2015
 ------------------------------
