@@ -11,6 +11,7 @@
 --
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('clar_categories', '{"general":"General issue","tech":"Technical issue"}', 'array_keyval', 'List of additional clarification categories'),
 ('script_timelimit', '30', 'int', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.'),
 ('script_memory_limit', '2097152', 'int', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.'),
 ('script_filesize_limit', '65536', 'int', 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.'),

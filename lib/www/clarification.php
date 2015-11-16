@@ -33,6 +33,20 @@ function canViewClarification($team, $clar)
 }
 
 /**
+ * Returns the list of clarification categories as a key,value array.
+ * Keys should be non-numeric to distinguish them from problem IDs.
+ */
+function getClarCategories()
+{
+	$categs = dbconfig_get('clar_categories');
+
+	$clarcategories = array();
+	foreach ( $categs as $key => $val ) $clarcategories[$key] = $val;
+
+	return $clarcategories;
+}
+
+/**
  * Output a single clarification.
  * Helperfunction for putClarification, do _not_ use directly!
  */
@@ -73,6 +87,8 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
+	$categs = getClarCategories();
+
 	echo '<tr><td>Subject:</td><td>';
 	$prefix = '';
 	if ( IS_JURY && count($cids) > 1 )
@@ -80,7 +96,13 @@ function putClar($clar)
 		$prefix = htmlspecialchars($clar['contestshortname']) . ' - ';
 	}
 	if ( is_null($clar['probid']) ) {
-		echo $prefix . "General issue";
+		if ( is_null($clar['category']) ) {
+			// FIXME: why does it make sense to keep clars for a dropped problem and relabel them to general issue?
+			echo $prefix . "General issue";
+		} else {
+			// FIXME: add check if the category still exists?
+			echo $prefix . htmlspecialchars($categs[$clar['category']]);
+		}
 	} else {
 		if ( IS_JURY ) {
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
@@ -180,6 +202,8 @@ function putClarificationList($clars, $team = NULL)
 		( IS_JURY ? "<th scope=\"col\">answered</th><th scope=\"col\">by</th>" : "") .
 	     "</tr>\n</thead>\n<tbody>\n";
 
+	$categs = getClarCategories();
+
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams
 		if ( ! IS_JURY && !canViewClarification($team, $clar) ) continue;
@@ -219,7 +243,13 @@ function putClarificationList($clars, $team = NULL)
 
 		echo '<td>' . $link;
 		if ( is_null($clar['probid']) ) {
+		if ( is_null($clar['category']) ) {
+			// FIXME: why does it make sense to keep clars for a dropped problem and relabel them to general issue?
 			echo "general";
+		} else {
+			// FIXME: add check if the category still exists?
+			echo htmlspecialchars($categs[$clar['category']]);
+		}
 		} else {
 			echo "problem ".$clar['shortname'];
 		}
@@ -348,16 +378,18 @@ function confirmClar() {
 	}
 
 	// Select box for a specific problem (only when the contest
-	// has started) or general issue.
+	// has started) or other issues.
+	$categs = getClarCategories();
+	$defclar = key($categs);
 	$options = array();
 	foreach ($cdatas as $cid => $cdata) {
-		$row = $DB->q('TUPLE SELECT CONCAT(cid, "-general") AS c
-		               FROM contest WHERE cid = %i', $cid);
-		if ( IS_JURY && count($cdatas) > 1 )
-		{
-			$options[$row['c']] = "{$cdata['shortname']} - General issue";
-		} else {
-			$options[$row['c']] = "General issue";
+
+		foreach($categs as $categid => $categname) {
+			if ( IS_JURY && count($cdatas) > 1 ) {
+				$options["$cid-$categid"] = "{$cdata['shortname']} - $categname";
+			} else {
+				$options["$cid-$categid"] = $categname;
+			}
 		}
 		if ( difftime($cdata['starttime'], now()) <= 0 ) {
 			$problem_options =
@@ -376,9 +408,14 @@ function confirmClar() {
 			$options += $problem_options;
 		}
 	}
+	if ( is_null($clar['probid']) ) {
+		$selected = $clar['category'];
+	} else {
+		$selected = $clar['probid'];
+	}
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options,
-	               ($respid ? $clar['cid'].'-'.$clar['probid'] : 'general'), true) .
+	               ($respid ? $clar['cid'].'-'.$selected : $defclar), true) .
 	     "</td></tr>\n";
 
 	?>

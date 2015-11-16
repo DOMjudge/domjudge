@@ -74,15 +74,19 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	}
 
 	list($cid, $probid) = explode('-', $_POST['problem']);
-	if ( !ctype_digit($probid) ) $probid = NULL;
+	$category = NULL;
+	if ( !ctype_digit($probid) ) {
+		$category = $probid;
+		$probid = NULL;
+	}
 
 	$newid = $DB->q('RETURNID INSERT INTO clarification
-	                 (cid, respid, submittime, recipient, probid, body,
+	                 (cid, respid, submittime, recipient, probid, category, body,
  	                  answered, jury_member)
 	                 VALUES (%i, ' .
-	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %i, ' .
+	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %s, %i, ' .
 	                (isset($jury_member) ? '%s)' : 'NULL %_)'),
-	                $cid, $respid, now(), $sendto, $probid,
+	                $cid, $respid, now(), $sendto, $probid, $category,
 	                $_POST['bodytext'], 1, $jury_member);
 	auditlog('clarification', $newid, 'added', null, null, $cid);
 
