@@ -96,9 +96,13 @@ function putClar($clar)
 		$prefix = htmlspecialchars($clar['contestshortname']) . ' - ';
 	}
 	if ( is_null($clar['probid']) ) {
-		echo $prefix . "General issue";
-	} elseif ( !ctype_digit($clar['probid']) ) {
-		echo $prefix . htmlspecialchars($categs[$clar['probid']]);
+		if ( is_null($clar['category']) ) {
+			// FIXME: why does it make sense to keep clars for a dropped problem and relabel them to general issue?
+			echo $prefix . "General issue";
+		} else {
+			// FIXME: add check if the category still exists?
+			echo $prefix . htmlspecialchars($categs[$clar['category']]);
+		}
 	} else {
 		if ( IS_JURY ) {
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
@@ -238,9 +242,14 @@ function putClarificationList($clars, $team = NULL)
 		     '<td>' . $link . $recipient . '</a></td>';
 
 		echo '<td>' . $link;
-		if ( empty($clar['probid']) ) { /* empty */ }
-		elseif ( !ctype_digit($clar['probid']) ) {
-			echo $categs[$clar['probid']];
+		if ( is_null($clar['probid']) ) {
+		if ( is_null($clar['category']) ) {
+			// FIXME: why does it make sense to keep clars for a dropped problem and relabel them to general issue?
+			echo "general";
+		} else {
+			// FIXME: add check if the category still exists?
+			echo htmlspecialchars($categs[$clar['category']]);
+		}
 		} else {
 			echo "problem ".$clar['shortname'];
 		}
@@ -413,9 +422,14 @@ function appendAnswer() {
 			$options += $problem_options;
 		}
 	}
+	if ( is_null($clar['probid']) ) {
+		$selected = $clar['category'];
+	} else {
+		$selected = $clar['probid'];
+	}
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options,
-	               ($respid ? $clar['cid'].'-'.$clar['probid'] : $defclar), true) .
+	               ($respid ? $clar['cid'].'-'.$selected : $defclar), true) .
 	     "</td></tr>\n";
 
 	?>

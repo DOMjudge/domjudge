@@ -45,6 +45,7 @@ CREATE TABLE `clarification` (
   `recipient` int(4) unsigned DEFAULT NULL COMMENT 'Team ID, null means to jury or to all',
   `jury_member` varchar(15) DEFAULT NULL COMMENT 'Name of jury member who answered this',
   `probid` int(4) unsigned DEFAULT NULL COMMENT 'Problem associated to this clarification',
+  `category` varchar(128) DEFAULT NULL COMMENT 'Category associated to this clarification; only set for non problem clars',
   `body` longtext NOT NULL COMMENT 'Clarification text',
   `answered` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
