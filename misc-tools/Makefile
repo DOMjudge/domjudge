@@ -18,7 +18,7 @@ build: $(TARGETS) $(SUBST_FILES)
 
 domserver: $(SUBST_DOMSERVER)
 
-judgehost: $(SUBST_FILES)
+judgehost: $(SUBST_JUDGEHOST)
 
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
