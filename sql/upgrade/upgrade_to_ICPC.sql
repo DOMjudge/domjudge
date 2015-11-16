@@ -20,11 +20,6 @@ ALTER TABLE contest
   ADD COLUMN `finalizecomment` text COMMENT 'Comments by the finalizer',
   ADD COLUMN `b` smallint(3) unsigned NOT NULL default '0' COMMENT 'Number of extra bronze medals';
 
--- Drop constraint before changing data
-ALTER TABLE `clarification`
-  DROP FOREIGN KEY `clarification_ibfk_3`,
-  MODIFY COLUMN `probid` varchar(128) default NULL COMMENT 'Problem or category associated to this clarification';
-
 ALTER TABLE `submission`
   ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
   ADD COLUMN `externalresult` varchar(25) default NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
@@ -47,9 +42,6 @@ CREATE TABLE `removed_interval` (
 --
 -- Add/remove sample/initial contents
 --
-
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers');
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES ('clar_categories', '{"general":"General issue","tech":"Technical issue"}', 'array_keyval', 'List of additional clarification categories');
 
 --
 -- Finally remove obsolete structures after moving data
