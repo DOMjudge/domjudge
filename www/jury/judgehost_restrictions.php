@@ -51,6 +51,7 @@ if( $res->count() == 0 ) {
 	     "<th scope=\"col\">name</th><th scope=\"col\">#contests</th>\n" .
 	     "<th scope=\"col\">#problems</th><th scope=\"col\">#languages</th>\n" .
 	     "<th scope=\"col\">#linked judgehosts</th>\n" .
+	     "<th scope=\"col\"></th>\n" .
 	     "</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
@@ -65,7 +66,7 @@ if( $res->count() == 0 ) {
 		     '</a></td>';
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-			     editLink('judgehost_restriction', $row['restrictionid']) . " " .
+			     editLink('judgehost_restriction', $row['restrictionid']) . "&nbsp;" .
 			     delLink('judgehost_restriction', 'restrictionid', $row['restrictionid']) . "</td>";
 		}
 		echo "</tr>\n";

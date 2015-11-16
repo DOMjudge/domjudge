@@ -57,7 +57,7 @@ $clarifications = $DB->q($sqlbody .
                          'AND c.sender IS NULL AND ( c.respid IS NULL OR c.recipient IS NULL )
                           ORDER BY submittime DESC, clarid DESC', $contestids);
 
-echo '<h3><a name="newrequests"></a>' .
+echo '<h3 id="newrequests">' .
 	"New Requests:</h3>\n";
 if ( $newrequests->count() == 0 ) {
 	echo "<p class=\"nodata\">No new clarification requests.</p>\n\n";
@@ -65,7 +65,7 @@ if ( $newrequests->count() == 0 ) {
 	putClarificationList($newrequests,NULL);
 }
 
-echo '<h3><a name="oldrequests"></a>' .
+echo '<h3 id="oldrequests">' .
 	"Old Requests:</h3>\n";
 if ( $oldrequests->count() == 0 ) {
 	echo "<p class=\"nodata\">No old clarification requests.</p>\n\n";
@@ -73,7 +73,7 @@ if ( $oldrequests->count() == 0 ) {
 	putClarificationList($oldrequests,NULL);
 }
 
-echo '<h3><a name="clarifications"></a>' .
+echo '<h3 id="clarifications">' .
 	"General Clarifications:</h3>\n";
 if ( $clarifications->count() == 0 ) {
 	echo "<p class=\"nodata\">No general clarifications.</p>\n\n";

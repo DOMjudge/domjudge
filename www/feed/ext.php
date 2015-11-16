@@ -129,7 +129,7 @@ XMLaddnode($info, 'penalty', dbconfig_get('penalty_time', 20));
 $started = now() - $cdata['starttime'] >= 0;
 XMLaddnode($info, 'started', $started ? 'True' : 'False');
 XMLaddnode($info, 'starttime', ($cdata['starttime']));
-XMLaddnode($info, 'title', $cdata['contestname']);
+XMLaddnode($info, 'title', $cdata['name']);
 
 // write out languages
 $id_cnt = 0;

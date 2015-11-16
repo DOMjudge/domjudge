@@ -12,27 +12,7 @@ define('IDENTIFIER_CHARS', '[a-zA-Z0-9_-]');
 /** Perl regex of allowed filenames. */
 define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/');
 
-/**
- * helperfunction to read all contents from a file.
- * If $sizelimit is true (default), then only limit this to
- * the first 50,000 bytes and attach a note saying so.
- */
-function getFileContents($filename, $sizelimit = true) {
-
-	if ( ! file_exists($filename) ) {
-		return '';
-	}
-	if ( ! is_readable($filename) ) {
-		error("Could not open $filename for reading: not readable");
-	}
-
-	if ( $sizelimit && filesize($filename) > 50000 ) {
-		return file_get_contents($filename, FALSE, NULL, -1, 50000)
-			. "\n[output truncated after 50,000 B]\n";
-	}
-
-	return file_get_contents($filename);
-}
+require_once('lib.wrappers.php');
 
 /**
  * Will return all the contests that are currently active
@@ -142,7 +122,8 @@ function problemVisible($probid)
  */
 function calcContestTime($walltime, $cid)
 {
-	global $DB, $cdatas;
+	// get contest data in case of non-public contests
+	$cdatas = getCurContests(TRUE);
 
 	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
 
@@ -659,7 +640,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
 		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
-		       $id, $filenames[$rank], $rank, getFileContents($files[$rank], false));
+		       $id, $filenames[$rank], $rank, dj_get_file_contents($files[$rank], false));
 	}
 
 	// Recalculate scoreboard cache for pending submissions
@@ -669,6 +650,8 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
 	        VALUES(%s, %i, %i, %s, %i, %i, "problem submitted")',
 	       $submittime, $contest, $teamid, $langid, $probid, $id);
+
+	alert('submit', "submission $id: team $teamid, language $langid, problem $probid");
 
 	if ( is_writable( SUBMITDIR ) ) {
 		// Copy the submission to SUBMITDIR for safe-keeping

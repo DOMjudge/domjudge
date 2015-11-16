@@ -25,7 +25,8 @@ if( $res->count() == 0 ) {
 		"<th>shortname</th>" .
 		"<th>name</th>" .
 		"<th>country</th>" .
-		"<th>#teams</th></tr>\n</thead>\n<tbody>\n";
+		"<th>#teams</th>" .
+		"<th></th></tr>\n</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
 		$countryflag = "../images/countries/" . urlencode($row['country']) . ".png";
@@ -42,7 +43,7 @@ if( $res->count() == 0 ) {
 			'</a></td>';
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-				editLink('team_affiliation', $row['affilid']) . " " .
+				editLink('team_affiliation', $row['affilid']) . "&nbsp;" .
 				delLink('team_affiliation', 'affilid', $row['affilid']) . "</td>";
 		}
 		echo "</tr>\n";

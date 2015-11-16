@@ -49,10 +49,20 @@ function read_credentials() {
  * When $failonerror is set to false, any error will be turned into a
  * warning and null is returned.
  */
+$lastrequest = '';
 function request($url, $verb = 'GET', $data = '', $failonerror = true) {
-	global $resturl, $restuser, $restpass;
+	global $resturl, $restuser, $restpass, $lastrequest;
 
-	logmsg(LOG_DEBUG, "API request $verb $url");
+	// Don't flood the log with requests for new judgings every few seconds.
+	if ( $url==='judgings' && $verb==='POST' ) {
+		if ( $lastrequest!==$url ) {
+			logmsg(LOG_DEBUG, "API request $verb $url");
+			$lastrequest = $url;
+		}
+	} else {
+		logmsg(LOG_DEBUG, "API request $verb $url");
+		$lastrequest = $url;
+	}
 
 	$url = $resturl . "/" . $url;
 	if ( $verb == 'GET' ) {
@@ -104,23 +114,12 @@ function dbconfig_get_rest($name) {
 }
 
 /**
- * Decode a json encoded string and handle errors.
- */
-function dj_json_decode($str) {
-	$res = json_decode($str, TRUE);
-	if ( $res === NULL ) {
-		error("Error retrieving API data. API gave us: " . $str);
-	}
-	return $res;
-}
-
-/**
  * Encode file contents for POST-ing to REST API.
  * Returns contents of $file (optionally limited in size, see
- * getFileContents) as encoded string.
+ * dj_get_file_contents) as encoded string.
  */
 function rest_encode_file($file, $sizelimit = TRUE) {
-	return urlencode(base64_encode(getFileContents($file, $sizelimit)));
+	return urlencode(base64_encode(dj_get_file_contents($file, $sizelimit)));
 }
 
 $waittime = 5;
@@ -235,7 +234,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 				if ( file_put_contents($execbuildpath, $buildscript) === FALSE ) {
 					error("Could not write file 'build' in $exepath");
 				}
-				chmod($execbuildpath, 0700);
+				chmod($execbuildpath, 0755);
 			}
 		} else if ( !is_executable($execbuildpath) ) {
 			error("Invalid executable, file 'build' exists but is not executable.");
@@ -342,9 +341,20 @@ initsignals();
 
 read_credentials();
 
+// Set umask to allow group,other access, as this is needed for the
+// unprivileged user.
+umask(0022);
+
 // Warn when chroot has been disabled. This has security implications.
 if ( ! USE_CHROOT ) {
 	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
+} else {
+	if ( !is_dir(CHROOTDIR) ) {
+		logmsg(LOG_WARNING, "Pre-built chroot tree '".CHROOTDIR.
+		       "' not found: using minimal chroot.");
+	} else {
+		define('CHROOT_SCRIPT', 'chroot-startstop.sh');
+	}
 }
 if ( !defined('USE_CGROUPS') || !USE_CGROUPS ) {
 	logmsg(LOG_WARNING, "Not using cgroups. Using cgroups is highly recommended. See the manual for details.");

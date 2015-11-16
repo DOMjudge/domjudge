@@ -13,7 +13,8 @@ admin-manual.pdf: %.pdf: %.sgml $(TOPDIR)/doc/domjudge-overview-inc.sgml \
                                 $(TOPDIR)/doc/docs_header.tex
 	linuxdoc -B latex -o pdf -P "`cat $(TOPDIR)/doc/docs_header.tex`" $< >/dev/null
 
-admin-manual.html: admin-manual.sgml $(TOPDIR)/doc/docs_header.html
+admin-manual.html: %.html: %.sgml  $(TOPDIR)/doc/domjudge-overview-inc.sgml \
+                                   $(TOPDIR)/doc/docs_header.html
 	linuxdoc -B html --header=$(TOPDIR)/doc/docs_header.html $< >/dev/null
 
 maintainer-clean-l:

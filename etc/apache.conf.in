@@ -54,11 +54,15 @@ Alias /domjudge @domserver_wwwdir@
 # This section applies to both options above.
 
 <Directory @domserver_wwwdir@>
+<IfModule !mod_authz_core.c>
 # For Apache 2.2:
 Order allow,deny
 Allow from all
-# For Apache 2.4 use the following instead:
-# Require all granted
+</IfModule>
+<IfModule mod_authz_core.c>
+# For Apache 2.4:
+Require all granted
+</IfModule>
 
 Options FollowSymlinks
 DirectoryIndex index.php

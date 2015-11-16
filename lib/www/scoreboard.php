@@ -134,7 +134,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			// provide default scores when nothing submitted for this team,problem yet
 			if ( ! isset ( $MATRIX[$team][$prob] ) ) {
 				$MATRIX[$team][$prob] = array('num_submissions' => 0, 'num_pending' => 0,
-				                              'is_correct' => 0, 'time' => 0, 'penalty' => 0);
+				                              'is_correct' => false, 'time' => 0, 'penalty' => 0);
 			}
 			$pdata = $MATRIX[$team][$prob];
 			$psum = &$SUMMARY['problems'][$prob];
@@ -256,8 +256,7 @@ function initSummary($probs) {
 		if ( !isset($SUMMARY['problems'][$prob]) ) {
 			$SUMMARY['problems'][$prob]['num_submissions'] = 0;
 			$SUMMARY['problems'][$prob]['num_pending'] = 0;
-			$SUMMARY['problems'][$prob]['num_points'] = 0;
-			$SUMMARY['problems'][$prob]['best_time'] = NULL;
+			$SUMMARY['problems'][$prob]['num_correct'] = 0;
 			$SUMMARY['problems'][$prob]['best_time_sort'] = array();
 		}
 	}
@@ -619,12 +618,24 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$countries = array_unique($countries);
 		sort($countries);
 
+		$filteron = array();
+		$filtertext = "";
+		foreach (array('affilid' => 'affiliation', 'country' => 'country', 'categoryid' => 'category') as $type => $text) {
+			if ( isset($filter[$type]) ) {
+				$filteron[] = $text;
+			}
+		}
+		if ( sizeof($filteron) > 0 ) {
+			$filtertext = "(filtered on " . implode(", ", $filteron) . ")";
+		}
+
 		require_once(LIBWWWDIR . '/forms.php');
 		?>
 
 <table class="scorefilter">
 <tr>
 <td><a class="collapse" href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
+<td><?= $filtertext ?></td>
 <td><div id="detailfilter">
 <?php
 
@@ -655,7 +666,7 @@ collapse("filter");
 		$lastupdate = printtime(now(),'%a %d %b %Y %T %Z');
 	}
 	echo "<p id=\"lastmod\">Last Update: $lastupdate<br />\n" .
-	     "using <a href=\"http://www.domjudge.org/\">DOMjudge</a></p>\n\n";
+	     "using <a href=\"https://www.domjudge.org/\">DOMjudge</a></p>\n\n";
 
 	return;
 }
@@ -685,7 +696,7 @@ function initScorefilter()
 		}
 	}
 
-	setcookie('domjudge_scorefilter', json_encode($scorefilter));
+	dj_setcookie('domjudge_scorefilter', json_encode($scorefilter));
 
 	return $scorefilter;
 }

@@ -19,7 +19,7 @@ $teams = $DB->q('SELECT t.*, c.name AS catname,
                  LEFT JOIN team_affiliation a USING (affilid)
                  WHERE (co.public = 1 OR ct.cid IS NOT NULL)
                  GROUP BY teamid
-                 ORDER BY c.sortorder, t.name COLLATE utf8_general_ci');
+                 ORDER BY c.sortorder, t.name COLLATE '. DJ_MYSQL_COLLATION);
 
 if ( empty($cids) ) {
 	$nsubmits = array();
@@ -102,7 +102,7 @@ if( $teams->count() == 0 ) {
 		echo "<td class=\"teamstat\" title=\"$numcor correct / $numsub submitted\">$link$numcor / $numsub</a></td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-				editLink('team', $row['teamid']) . " " .
+				editLink('team', $row['teamid']) . "&nbsp;" .
 				delLink('team','teamid',$row['teamid']) . "</td>";
 		}
 		echo "</tr>\n";

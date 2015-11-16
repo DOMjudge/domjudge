@@ -22,7 +22,7 @@ if( $res->count() == 0 ) {
 		"<tr><th scope=\"col\">ID/ext</th><th scope=\"col\">name</th>" .
 		"<th scope=\"col\">allow<br />submit</th>" .
 		"<th scope=\"col\">allow<br />judge</th><th scope=\"col\">timefactor</th>" .
-		"<th scope=\"col\">extensions</th>" .
+		"<th scope=\"col\">extensions</th><th scope=\"col\"></th>" .
 		"</tr>\n</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
@@ -39,7 +39,7 @@ if( $res->count() == 0 ) {
 			"</td><td>" . $link . htmlspecialchars($row['extensions']) . "</a>";
 			if ( IS_ADMIN ) {
 				echo "</td><td class=\"editdel\">" .
-					editLink('language', $row['langid']) . " " .
+					editLink('language', $row['langid']) . "&nbsp;" .
 					delLink('language','langid',$row['langid']);
 			}
 		echo "</td></tr>\n";

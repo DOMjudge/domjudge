@@ -364,7 +364,8 @@ function appendAnswer() {
 		if ( ! $respid ) {
 			$teams = $DB->q('KEYVALUETABLE SELECT teamid, name
 			                 FROM team
-			                 ORDER BY categoryid ASC, team.name COLLATE utf8_general_ci ASC');
+			                 ORDER BY categoryid ASC, team.name
+			                 COLLATE '. DJ_MYSQL_COLLATION . ' ASC');
 			$options += $teams;
 		} else {
 			if ( $clar['sender'] ) {

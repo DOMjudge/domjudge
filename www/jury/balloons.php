@@ -29,7 +29,7 @@ if ( isset($_COOKIE['domjudge_balloonviewall']) ) {
 // Did someone press the view button?
 if ( isset($_REQUEST['viewall']) ) $viewall = $_REQUEST['viewall'];
 
-setcookie('domjudge_balloonviewall', $viewall);
+dj_setcookie('domjudge_balloonviewall', $viewall);
 
 $refresh = '15;url=balloons.php';
 require(LIBWWWDIR . '/header.php');

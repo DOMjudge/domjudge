@@ -1,11 +1,23 @@
 #!/bin/sh
 
-# Script to setup chroot environment extras needed for Oracle Java.
+# @configure_input@
+
+# Script to setup chroot environment extras needed for non-statically
+# compiled languages, such as Java, Python and other interpreted languages.
 #
-# Configure the use of this script in 'etc/judgehost-config.php' when
-# using the chroot environment and Oracle Java compiler/interpreter and
-# adapt this script to your environment. See also bin/dj_make_chroot.sh
-# for a script to generate a minimal chroot environment with Oracle Java.
+# The basic chroot environment contains nothing but a POSIX shell.
+# This script will (bind) mount a minimal set of subdirectories from a
+# pre-built chroot tree into the actual chroot environment that is
+# created for each judging (as well as the proc FS and a few device
+# files). Afterwards it is also called to cleanup.
+#
+# You can adapt this script to your environment, e.g. if you need to make
+# more/other subdirectories available in the chroot environment.
+#
+# See also bin/dj_make*_chroot.sh for scripts to generate a minimal
+# chroot environment with Java included. Note that if you modify paths
+# in this script, then the associated sudo rules (see
+# etc/sudoers-domjudge) must also be updated.
 #
 # This script will be called from judgedaemon.main.php in the root
 # directory of the chroot environment with one parameter: either
@@ -20,7 +32,7 @@ set -e
 # Chroot subdirs needed: (optional lib64 only needed for amd64 architecture)
 SUBDIRMOUNTS="etc usr lib lib64"
 
-# Location where to bind mount from:
+# Location of the pre-built chroot tree and where to bind mount from:
 CHROOTORIGINAL="@judgehost_chrootdir@"
 
 case "$1" in

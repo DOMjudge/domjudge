@@ -84,11 +84,11 @@ if ( IS_ADMIN ) {
 		addEndForm();
 }
 
-echo rejudgeForm('judgehost', $row['hostname']);
-
 if ( IS_ADMIN ) {
 	echo "<p>" . delLink('judgehost','hostname',$row['hostname']) . "</p>\n\n";
 }
+
+echo rejudgeForm('judgehost', $row['hostname']) . "<br />\n\n";
 
 echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 

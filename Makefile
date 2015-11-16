@@ -191,6 +191,10 @@ maintainer-uninstall:
 	rm -f $(domserver_wwwdir)/jury/doc
 	rm -rf $(judgehost_bindir)
 
+clean-l:
+# Remove Coverity scan data:
+	-rm -rf cov-int domjudge-scan.t*
+
 distclean-l: clean-autoconf
 	-rm -f paths.mk
 

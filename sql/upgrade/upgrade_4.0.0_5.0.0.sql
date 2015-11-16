@@ -125,6 +125,12 @@ ALTER TABLE `rankcache_jury`
 ALTER TABLE `rankcache_public`
   CHANGE COLUMN `correct` `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points';
 
+-- Increase some varchar field lengths
+ALTER TABLE `judging`
+  MODIFY COLUMN `jury_member` varchar(25) DEFAULT NULL COMMENT 'Name of jury member who verified this';
+ALTER TABLE `role`
+  MODIFY COLUMN `role` varchar(25) NOT NULL COMMENT 'Role name';
+
 --
 -- Transfer data from old to new structure
 --
@@ -153,6 +159,9 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.');
 
 UPDATE `contest` SET `shortname` = UPPER(SUBSTR(REPLACE(`name`, ' ', ''), 1, 10)), `public` = 1;
+
+-- Fix truncated string due to too short field length:
+UPDATE `role` SET `role` = 'full_event_reader' WHERE `role` = 'full_event_read';
 
 -- Update compare scripts to support new Kattis 42/43 exitcode format:
 source mysql_db_files_defaultdata.sql

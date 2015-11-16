@@ -47,9 +47,14 @@ define('EXT_CCS_URL', 'https://ccs.example.com/submissions/');
 // Specify URL of the iCAT webinterface
 define('ICAT_URL', 'http://icat.example.com/icat/');
 
-// Internal and output character set used, don't change.
+// Internal and output character set used, don't change (unless you
+// know what you're doing).
 define('DJ_CHARACTER_SET', 'utf-8');
-define('DJ_CHARACTER_SET_MYSQL', 'utf8');
+define('DJ_CHARACTER_SET_MYSQL', 'utf8mb4');
+// MySQL default collation setting associated to character set above.
+// Note that the DB team.name field has binary collation to be able to
+// distinguish/index on team names that differ in capitalization only.
+define('DJ_MYSQL_COLLATION', 'utf8mb4_unicode_ci');
 // MySQL connection flags.
 define('DJ_MYSQL_CONNECT_FLAGS', null);
 // To enable SSL/TLS encryption of MySQL connections, use the following.

@@ -19,7 +19,7 @@ CREATE TABLE `auditlog` (
   `action` varchar(30) DEFAULT NULL COMMENT 'Description of action performed',
   `extrainfo` varchar(255) DEFAULT NULL COMMENT 'Optional additional description of the entry',
   PRIMARY KEY (`logid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Log of all actions performed';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of all actions performed';
 
 --
 -- Table structure for table `balloon`
@@ -31,7 +31,7 @@ CREATE TABLE `balloon` (
   PRIMARY KEY (`balloonid`),
   KEY `submitid` (`submitid`),
   CONSTRAINT `balloon_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Balloons to be handed out';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Balloons to be handed out';
 
 --
 -- Table structure for table `clarification`
@@ -54,8 +54,9 @@ CREATE TABLE `clarification` (
   KEY `cid` (`cid`),
   KEY `cid_2` (`cid`,`answered`,`submittime`),
   CONSTRAINT `clarification_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
-  CONSTRAINT `clarification_ibfk_2` FOREIGN KEY (`respid`) REFERENCES `clarification` (`clarid`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Clarification requests by teams and responses by the jury';
+  CONSTRAINT `clarification_ibfk_2` FOREIGN KEY (`respid`) REFERENCES `clarification` (`clarid`) ON DELETE SET NULL,
+  CONSTRAINT `clarification_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Clarification requests by teams and responses by the jury';
 
 --
 -- Table structure for table `configuration`
@@ -69,7 +70,7 @@ CREATE TABLE `configuration` (
   `description` varchar(255) DEFAULT NULL COMMENT 'Description for in the webinterface',
   PRIMARY KEY (`configid`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Global configuration variables';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Global configuration variables';
 
 --
 -- Table structure for table `contest`
@@ -85,12 +86,12 @@ CREATE TABLE `contest` (
   `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time after which no more submissions are accepted',
   `unfreezetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Unfreeze a frozen scoreboard at this time',
   `deactivatetime` decimal(32,9) UNSIGNED DEFAULT NULL COMMENT 'Time contest becomes invisible in team/public views',
-  `activatetime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of activatetime',
-  `starttime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute (only!) string representation of starttime',
-  `freezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of freezetime',
-  `endtime_string` varchar(20) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
-  `unfreezetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
-  `deactivatetime_string` varchar(20) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime',
+  `activatetime_string` varchar(64) NOT NULL COMMENT 'Authoritative absolute or relative string representation of activatetime',
+  `starttime_string` varchar(64) NOT NULL COMMENT 'Authoritative absolute (only!) string representation of starttime',
+  `freezetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of freezetime',
+  `endtime_string` varchar(64) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
+  `unfreezetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
+  `deactivatetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether this contest can be active',
   `finalizetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time when contest was finalized, null if not yet',
   `finalizecomment` text COMMENT 'Comments by the finalizer',
@@ -98,9 +99,9 @@ CREATE TABLE `contest` (
   `process_balloons` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Will balloons be processed for this contest?',
   `public` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Is this contest visible for the public and non-associated teams?',
   PRIMARY KEY (`cid`),
-  UNIQUE KEY `shortname` (`shortname`),
+  UNIQUE KEY `shortname` (`shortname`(190)),
   KEY `cid` (`cid`,`enabled`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Contests that will be run with this install';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Contests that will be run with this install';
 
 --
 -- Table structure for table `contestproblem`
@@ -111,17 +112,17 @@ CREATE TABLE `contestproblem` (
   `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest (string)',
   `points` int(4) unsigned NOT NULL DEFAULT '1' COMMENT 'Number of points earned by solving this problem',
-  `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Are submissions accepted for this problem?',
+  `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
   `color` varchar(25) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
   `lazy_eval_results` tinyint(1) unsigned DEFAULT NULL COMMENT 'Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting',
   PRIMARY KEY (`cid`,`probid`),
-  UNIQUE KEY `shortname` (`cid`,`shortname`),
+  UNIQUE KEY `shortname` (`cid`,`shortname`(190)),
   KEY `cid` (`cid`),
   KEY `probid` (`probid`),
   CONSTRAINT `contestproblem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `contestproblem_ibfk_2` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of contests and problems';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Many-to-Many mapping of contests and problems';
 
 --
 -- Table structure for table `contestteam`
@@ -135,7 +136,7 @@ CREATE TABLE `contestteam` (
   KEY `teamid` (`teamid`),
   CONSTRAINT `contestteam_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `contestteam_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of contests and teams';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Many-to-Many mapping of contests and teams';
 
 --
 -- Table structure for table `event`
@@ -167,7 +168,7 @@ CREATE TABLE `event` (
   CONSTRAINT `event_ibfk_5` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
   CONSTRAINT `event_ibfk_6` FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE,
   CONSTRAINT `event_ibfk_7` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Log of all events during a contest';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of all events during a contest';
 
 --
 -- Table structure for table `executable`
@@ -180,7 +181,7 @@ CREATE TABLE `executable` (
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of this executable',
   `type` varchar(8) NOT NULL COMMENT 'Type of executable',
   PRIMARY KEY (`execid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Compile, compare, and run script executable bundles';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Compile, compare, and run script executable bundles';
 
 --
 -- Table structure for table `judgehost`
@@ -194,7 +195,7 @@ CREATE TABLE `judgehost` (
   PRIMARY KEY  (`hostname`),
   KEY `restrictionid` (`restrictionid`),
   CONSTRAINT `restriction_ibfk_1` FOREIGN KEY (`restrictionid`) REFERENCES `judgehost_restriction` (`restrictionid`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Hostnames of the autojudgers';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Hostnames of the autojudgers';
 
 --
 -- Table structure for table `judgehost_restriction`
@@ -205,7 +206,7 @@ CREATE TABLE `judgehost_restriction` (
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `restrictions` longtext COMMENT 'JSON-encoded restrictions',
   PRIMARY KEY  (`restrictionid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Restrictions for judgehosts';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Restrictions for judgehosts';
 
 --
 -- Table structure for table `judging`
@@ -220,7 +221,7 @@ CREATE TABLE `judging` (
   `judgehost` varchar(50) DEFAULT NULL COMMENT 'Judgehost that performed the judging',
   `result` varchar(25) DEFAULT NULL COMMENT 'Result string as defined in config.php',
   `verified` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Result verified by jury member?',
-  `jury_member` varchar(15) DEFAULT NULL COMMENT 'Name of jury member who verified this',
+  `jury_member` varchar(25) DEFAULT NULL COMMENT 'Name of jury member who verified this',
   `verify_comment` varchar(255) DEFAULT NULL COMMENT 'Optional additional information provided by the verifier',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Old judging is marked as invalid when rejudging',
   `output_compile` longblob COMMENT 'Output of the compiling the program',
@@ -238,7 +239,7 @@ CREATE TABLE `judging` (
   CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL,
   CONSTRAINT `judging_ibfk_4` FOREIGN KEY (`rejudgingid`) REFERENCES `rejudging` (`rejudgingid`) ON DELETE SET NULL,
   CONSTRAINT `judging_ibfk_5` FOREIGN KEY (`prevjudgingid`) REFERENCES `judging` (`judgingid`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of judging a submission';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Result of judging a submission';
 
 --
 -- Table structure for table `judging_run`
@@ -260,14 +261,14 @@ CREATE TABLE `judging_run` (
   KEY `testcaseid_2` (`testcaseid`),
   CONSTRAINT `judging_run_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`),
   CONSTRAINT `judging_run_ibfk_2` FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Result of a testcase run within a judging';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Result of a testcase run within a judging';
 
 --
 -- Table structure for table `language`
 --
 
 CREATE TABLE `language` (
-  `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string), used for source file extension',
+  `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
   `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted in this language?',
@@ -275,7 +276,7 @@ CREATE TABLE `language` (
   `time_factor` float NOT NULL DEFAULT '1' COMMENT 'Language-specific factor multiplied by problem run times',
   `compile_script` varchar(32) DEFAULT NULL COMMENT 'Script to compile source code for this language',
   PRIMARY KEY  (`langid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Programming languages in which teams can submit solutions';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Programming languages in which teams can submit solutions';
 
 --
 -- Table structure for table `problem`
@@ -293,7 +294,7 @@ CREATE TABLE `problem` (
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
   `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
   PRIMARY KEY  (`probid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Problems the teams can submit solutions for';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Problems the teams can submit solutions for';
 
 --
 -- Table structure for table `rankcache_jury`
@@ -307,7 +308,7 @@ CREATE TABLE `rankcache_jury` (
   PRIMARY KEY  (`cid`,`teamid`),
   KEY `order` (`cid`,`points`, `totaltime`) USING BTREE,
   CONSTRAINT `rankcache_jury_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (jury version)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Rank cache (jury version)';
 
 --
 -- Table structure for table `rankcache_public`
@@ -321,7 +322,7 @@ CREATE TABLE `rankcache_public` (
   PRIMARY KEY  (`cid`,`teamid`),
   KEY `order` (`cid`,`points`,`totaltime`) USING BTREE,
   CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rank cache (public/team version)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Rank cache (public/team version)';
 
 
 --
@@ -340,7 +341,7 @@ CREATE TABLE `rejudging` (
   KEY `userid_finish` (`userid_finish`),
   CONSTRAINT `rejudging_ibfk_1` FOREIGN KEY (`userid_start`) REFERENCES `user` (`userid`) ON DELETE SET NULL,
   CONSTRAINT `rejudging_ibfk_2` FOREIGN KEY (`userid_finish`) REFERENCES `user` (`userid`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Rejudge group';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Rejudge group';
 
 --
 -- Table structure for table `removed_interval`
@@ -362,11 +363,11 @@ CREATE TABLE `removed_interval` (
 
 CREATE TABLE `role` (
   `roleid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `role` varchar(15) NOT NULL COMMENT 'Role name',
+  `role` varchar(25) NOT NULL COMMENT 'Role name',
   `description` varchar(255) NOT NULL COMMENT 'Description for the web interface',
   PRIMARY KEY (`roleid`),
   UNIQUE KEY `role` (`role`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Possible user roles';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Possible user roles';
 
 --
 -- Table structure for table `scorecache_jury`
@@ -381,7 +382,7 @@ CREATE TABLE `scorecache_jury` (
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
   `is_correct` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (jury version)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard cache (jury version)';
 
 --
 -- Table structure for table `scorecache_public`
@@ -396,7 +397,7 @@ CREATE TABLE `scorecache_public` (
   `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
   `is_correct` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission?',
   PRIMARY KEY  (`cid`,`teamid`,`probid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Scoreboard cache (public/team version)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard cache (public/team version)';
 
 --
 -- Table structure for table `submission`
@@ -432,7 +433,7 @@ CREATE TABLE `submission` (
   CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL,
   CONSTRAINT `submission_ibfk_6` FOREIGN KEY (`origsubmitid`) REFERENCES `submission` (`submitid`) ON DELETE SET NULL,
   CONSTRAINT `submission_ibfk_7` FOREIGN KEY (`rejudgingid`) REFERENCES `rejudging` (`rejudgingid`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All incoming submissions';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='All incoming submissions';
 
 --
 -- Table structure for table `submission_file`
@@ -445,11 +446,11 @@ CREATE TABLE `submission_file` (
   `filename` varchar(255) NOT NULL COMMENT 'Filename as submitted',
   `rank` int(4) unsigned NOT NULL COMMENT 'Order of the submission files, zero-indexed',
   PRIMARY KEY (`submitfileid`),
-  UNIQUE KEY `filename` (`submitid`,`filename`),
+  UNIQUE KEY `filename` (`submitid`,`filename`(190)),
   UNIQUE KEY `rank` (`submitid`,`rank`),
   KEY `submitid` (`submitid`),
   CONSTRAINT `submission_file_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Files associated to a submission';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Files associated to a submission';
 
 --
 -- Table structure for table `team`
@@ -457,8 +458,8 @@ CREATE TABLE `submission_file` (
 
 CREATE TABLE `team` (
   `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `externalid` varchar(255) DEFAULT NULL COMMENT 'Team ID in an external system',
-  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'Team name',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Team ID in an external system',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Team name',
   `categoryid` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Team category ID',
   `affilid` int(4) unsigned DEFAULT NULL COMMENT 'Team affiliation ID',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the team is visible and operational',
@@ -470,13 +471,12 @@ CREATE TABLE `team` (
   `hostname` varchar(255) DEFAULT NULL COMMENT 'Teampage first visited from this address',
   `penalty` int(4) NOT NULL DEFAULT '0' COMMENT 'Additional penalty time in minutes',
   PRIMARY KEY  (`teamid`),
-  UNIQUE KEY `name` (`name`),
-  UNIQUE KEY `externalid` (`externalid`),
+  UNIQUE KEY `externalid` (`externalid`(190)),
   KEY `affilid` (`affilid`),
   KEY `categoryid` (`categoryid`),
   CONSTRAINT `team_ibfk_1` FOREIGN KEY (`categoryid`) REFERENCES `team_category` (`categoryid`) ON DELETE CASCADE,
   CONSTRAINT `team_ibfk_2` FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='All teams participating in the contest';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='All teams participating in the contest';
 
 --
 -- Table structure for table `team_affiliation`
@@ -489,7 +489,7 @@ CREATE TABLE `team_affiliation` (
   `country` char(3) DEFAULT NULL COMMENT 'ISO 3166-1 alpha-3 country code',
   `comments` longtext COMMENT 'Comments',
   PRIMARY KEY  (`affilid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Affilitations for teams (e.g.: university, company)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Affilitations for teams (e.g.: university, company)';
 
 --
 -- Table structure for table `team_category`
@@ -503,7 +503,7 @@ CREATE TABLE `team_category` (
   `visible` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are teams in this category visible?',
   PRIMARY KEY  (`categoryid`),
   KEY `sortorder` (`sortorder`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Categories for teams (e.g.: participants, observers, ...)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Categories for teams (e.g.: participants, observers, ...)';
 
 --
 -- Table structure for table `team_unread`
@@ -516,7 +516,7 @@ CREATE TABLE `team_unread` (
   KEY `mesgid` (`mesgid`),
   CONSTRAINT `team_unread_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
   CONSTRAINT `team_unread_ibfk_2` FOREIGN KEY (`mesgid`) REFERENCES `clarification` (`clarid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='List of items a team has not viewed yet';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='List of items a team has not viewed yet';
 
 --
 -- Table structure for table `testcase`
@@ -539,7 +539,7 @@ CREATE TABLE `testcase` (
   UNIQUE KEY `rank` (`probid`,`rank`),
   KEY `probid` (`probid`),
   CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores testcases per problem';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores testcases per problem';
 
 --
 -- Table structure for table `user`
@@ -557,10 +557,10 @@ CREATE TABLE `user` (
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the user is able to log in',
   `teamid` int(4) unsigned DEFAULT NULL COMMENT 'Team associated with',
   PRIMARY KEY (`userid`),
-  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `username` (`username`(190)),
   KEY `teamid` (`teamid`),
   CONSTRAINT `user_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Users that have access to DOMjudge';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Users that have access to DOMjudge';
 
 
 --
@@ -574,7 +574,7 @@ CREATE TABLE `userrole` (
   KEY `roleid` (`roleid`),
   CONSTRAINT `userrole_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `user` (`userid`) ON DELETE CASCADE,
   CONSTRAINT `userrole_ibfk_2` FOREIGN KEY (`roleid`) REFERENCES `role` (`roleid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Many-to-Many mapping of users and roles';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Many-to-Many mapping of users and roles';
 
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 

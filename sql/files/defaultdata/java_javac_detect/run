@@ -47,7 +47,7 @@ rm -f $TMPFILE
 
 # Look for class that has the 'main' function:
 CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
-            | sed -e 's/\.class$//' -e 's/\//./g')"
+            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
 COMPILESCRIPTDIR="$(dirname "$0")"
 MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "`pwd`" $CLASSNAMES)
 EXITCODE=$?

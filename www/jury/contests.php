@@ -212,7 +212,7 @@ if( count($res) == 0 ) {
 			"c" . (int)$row['cid'] . "</a></td>\n";
 		echo "<td>" . $link . htmlspecialchars($row['shortname']) . "</a></td>\n";
 		foreach ($times as $time) {
-			echo "<td title=\"".printtime(@$row[$time. 'time'],'%Y-%m-%d %H:%M') . "\">" .
+			echo "<td title=\"".printtime(@$row[$time. 'time'],'%Y-%m-%d %H:%M:%S (%Z)') . "\">" .
 			      $link . ( isset($row[$time.'time']) ?
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
 		}
@@ -226,7 +226,7 @@ if( count($res) == 0 ) {
 
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-				editLink('contest', $row['cid']) . " " .
+				editLink('contest', $row['cid']) . "&nbsp;" .
 				delLink('contest','cid',$row['cid']) . "</td>\n";
 		}
 

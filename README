@@ -1,4 +1,4 @@
-This is the Programming Contest Jury System "DOMjudge" version 4.1.0DEV
+This is the Programming Contest Jury System "DOMjudge" version 5.1.0DEV
 
 DOMjudge is a system for running a programming contest, like the
 ACM ICPC regional and world championship programming contests.
@@ -25,7 +25,7 @@ interface of DOMjudge). A LaTeX installation including the packages
 For more information, see the administrator documentation.
 
 All documentation is also available online at the DOMjudge homepage:
-	http://www.domjudge.org/documentation
+	https://www.domjudge.org/documentation
 Please note that this documentation is from the latest stable
 release and thus might not apply to your version.
 
@@ -42,8 +42,7 @@ DOMjudge is Copyright (c) 2004 - 2015 by the DOMjudge developers and
 all respective contributors. The current DOMjudge developers are Jaap
 Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst and Tobias
 Werth; see the administrator's manual for a complete list of
-contributors. Development is hosted at Study Association
-"A-Eskwadraat", Utrecht University, The Netherlands.
+contributors.
 
 DOMjudge, including its documentation, is free software; you can
 redistribute it and/or modify it under the terms of the GNU General
@@ -76,23 +75,23 @@ Furthermore, a binary version of the dash shell (statically compiled)
 is distributed with DOMjudge. This program is copyright by various
 people under the BSD licence and a part under the GNU GPL version 2,
 see doc/dash.copyright for more details.
-Sources can be downloaded from: http://www.domjudge.org/sources/
+Sources can be downloaded from: https://www.domjudge.org/sources/
 
 
 Contact
 -------
 
 The DOMjudge homepage can be found at:
-http://www.domjudge.org/
+https://www.domjudge.org/
 
 Announcements of new releases are sent to our low volume announcements
 mailinglist. Subscription to this list is done via
-https://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce
+https://www.domjudge.org/mailman/listinfo/domjudge-announce
 
 The developers can be reached through the mailinglist
-domjudge-devel@lists.a-eskwadraat.nl. You need to be subscribed before
+domjudge-devel@domjudge.org. You need to be subscribed before
 you can post. Information, subscription and archives are available at:
-https://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel
+https://www.domjudge.org/mailman/listinfo/domjudge-devel
 
 Some developers and users of DOMjudge linger on the IRC channel
 dedicated to DOMjudge on the Freenode network:

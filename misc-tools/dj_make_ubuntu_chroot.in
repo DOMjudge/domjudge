@@ -1,6 +1,7 @@
 #!/bin/sh
+# @configure_input@
 #
-# Script to generate a minimal chroot environment with Oracle (Sun) Java
+# Script to generate a basic chroot environment with Oracle (Sun) Java
 # support to allow for Java programs to run in a chroot.
 #
 # This script downloads and installs an Ubuntu base system.
@@ -22,15 +23,14 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Read command-line parameters:
-CHROOTDIR=$1
-ARCH=$2
+# Default directory where to build the chroot tree:
+CHROOTDIR="@judgehost_chrootdir@"
 
 # Ubuntu release (codename) to bootstrap (note: overriden right below):
 RELEASE="trusty"
 
-# If host system is Debian, use its release and architecture by default
-if [ 'Debian' = "$(lsb_release -i -s || true)" ]; then
+# If host system is Ubuntu, use its release and architecture by default
+if [ 'Ubuntu' = "$(lsb_release -i -s || true)" ]; then
 	RELEASE="$(lsb_release -c -s)"
 	if [ -z "$ARCH" ]; then
 		ARCH="$(dpkg --print-architecture)"
@@ -71,16 +71,16 @@ export DEBIAN_FRONTEND=noninteractive
 
 usage()
 {
-    echo "Usage: $0 <chrootdir> [<architecture>]"
+    echo "Usage: $0 [-d <chrootdir>] [-a <architecture>]"
     echo "Creates a chroot environment with Oracle (Sun) Java support using the"
     echo "Ubuntu GNU/Linux distribution."
     echo
-    echo "This script must be run as root, <chrootdir> the non-existing target"
+    echo "This script must be run as root, <chrootdir> is the non-existing target"
     echo "location of the chroot and <architecture> one of the following:"
     echo "$ARCHLIST"
     echo
-    echo "If the host runs Ubuntu, no architecture needs to be specified and"
-    echo "the host architecture and release are used."
+    echo "If the host runs Ubuntu, the host architecture and release are used."
+    echo "The default chrootdir is '@judgehost_chrootdir@'."
 }
 
 error()
@@ -95,7 +95,17 @@ if [ "`id -u`" != 0 ]; then
     echo "Warning: you probably need to run this program as root."
 fi
 
-[ -z "$CHROOTDIR" ] && error "No installation directory given."
+# Read command-line parameters:
+while getopts 'a:d:' OPT ; do
+	case $OPT in
+		a) ARCH=$OPTARG ;;
+		d) CHROOTDIR=$OPTARG ;;
+		\?) error "Could not parse options." ;;
+	esac
+done
+shift $((OPTIND-1))
+
+[ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."
 [ -z "$ARCH" ]      && error "No architecture given or detected."
 
 if [ -e "$CHROOTDIR" ]; then

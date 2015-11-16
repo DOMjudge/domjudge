@@ -154,10 +154,10 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 			auditlog('testcase', $probid, 'updated', "$file rank $rank");
 
-			$result .= "<li>Updated $inout for testcase $rank from " .
+			$result .= "<li>Updated $file for testcase $rank with file " .
 			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
 			    " (" . printsize($_FILES[$fileid]['size'][$rank]) . ")";
-			if ( $inout=='output' &&
+			if ( $file=='output' &&
 			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('output_limit')*1024 ) {
 				$result .= ".<br /><b>Warning: file size exceeds " .
 				    "<code>output_limit</code> of " . dbconfig_get('output_limit') .
@@ -216,7 +216,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 
 		auditlog('testcase', $probid, 'added', "rank $rank");
 
-		$result .= "<li>Added new testcase $rank from " .
+		$result .= "<li>Added new testcase $rank from files " .
 			htmlspecialchars($_FILES['add_input']['name']) .
 			" (" . printsize($_FILES['add_input']['size']) . ") and " .
 			htmlspecialchars($_FILES['add_output']['name']) .
@@ -305,7 +305,7 @@ foreach( $data as $rank => $row ) {
 				    addSelect("sample[$rank]",array("no", "yes"), $row['sample'], true) . "</td>";
 
 				// hide sample dropdown field if javascript is enabled
-				echo "<script type=\"text/javascript\" language=\"JavaScript\">" .
+				echo "<script type=\"text/javascript\">" .
 				    "hideTcSample($rank, '". printyn($row['sample'])."');</script>";
 				echo "<td class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
 				    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"1\">" .

@@ -61,9 +61,13 @@ src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 <?php
 echo addHidden('cmd', $cmd) .
 	addHidden('table','team_category') .
-	addHidden('referrer', @$_GET['referrer']) .
+	addHidden('referrer', @$_GET['referrer'] .
+	          ( $cmd == 'edit' ? (strstr(@$_GET['referrer'],'?')===FALSE ?
+	                             '?edited=1' : '&edited=1') : '' )) .
 	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate' .
+	          ( isset($_GET['referrer']) ? ' formaction="' .
+	            htmlspecialchars($_GET['referrer']) . '"' : '' )) .
 	addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
@@ -73,6 +77,17 @@ endif;
 
 $data = $DB->q('TUPLE SELECT * FROM team_category WHERE categoryid = %i', $id);
 if ( !$data ) error("Missing or invalid category id");
+
+if ( isset($_GET['edited']) ) {
+
+	echo addForm('refresh_cache.php') .
+		msgbox("Warning: Refresh scoreboard cache",
+		       "If the category sort order was changed, it may be necessary to " .
+		       "recalculate any cached scoreboards.<br /><br />" .
+		       addSubmit('recalculate caches now', 'refresh')) .
+		addHidden('cid', $id) .
+		addEndForm();
+}
 
 echo "<h1>Category: " . htmlspecialchars($data['name']) . "</h1>\n\n";
 

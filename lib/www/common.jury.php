@@ -84,9 +84,10 @@ function exportLink($probid)
  */
 function rejudgeForm($table, $id)
 {
-	$ret = addForm('rejudge.php') .
-		addHidden('table', $table) .
-		addHidden('id', $id);
+	$ret = '<div id="rejudge" class="framed">' .
+	     addForm('rejudge.php') .
+	     addHidden('table', $table) .
+	     addHidden('id', $id);
 
 	$button = 'REJUDGE this submission';
 	$question = "Rejudge submission s$id?";
@@ -124,12 +125,12 @@ function rejudgeForm($table, $id)
 
 	$ret .= '<input type="submit" value="' . htmlspecialchars($button) . '" ' .
 		($disabled ? 'disabled="disabled"' : 'onclick="return confirm(\'' .
-		htmlspecialchars($question) . '\');"') . " />\n" .
+		htmlspecialchars($question) . '\');"') . " /><br />\n" .
 		($allbutton ? addCheckBox('include_all') .
-		              '<label for="include_all">include pending/correct submissions</label>' : '' ) .
+		              '<label for="include_all">include pending/correct submissions</label><br />' : '' ) .
 		addCheckBox('full_rejudge') . '<label for="full_rejudge">create rejudging with reason: </label>' .
 		addInput('reason', '', 0, 255) .
-		addEndForm();
+		addEndForm() . '</div>';
 
 	return $ret;
 }
@@ -227,16 +228,20 @@ function get_image_thumb_type($image)
 		error("Unsupported image type '$type' found.");
 	}
 
-	$thumbsize = dbconfig_get('thumbnail_size', 128);
+	$thumbmaxsize = dbconfig_get('thumbnail_size', 128);
+
+	$rescale = $thumbmaxsize / max($info[0],$info[1]);
+	$thumbsize = array(round($info[0]*$rescale),
+	                   round($info[1]*$rescale));
 
 	$orig = imagecreatefromstring($image);
-	$thumb = imagecreatetruecolor($thumbsize, $thumbsize);
+	$thumb = imagecreatetruecolor($thumbsize[0], $thumbsize[1]);
 	if ( $orig===FALSE || $thumb===FALSE ) {
 		error('Cannot create GD image.');
 	}
 
 	if ( !imagecopyresampled($thumb, $orig, 0, 0, 0, 0,
-	                         $thumbsize, $thumbsize, $info[0], $info[1]) ) {
+	                         $thumbsize[0], $thumbsize[1], $info[0], $info[1]) ) {
 		error('Cannot create resized thumbnail image.');
 	}
 
@@ -300,7 +305,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				error("Need 'probid' in '" . $prop_file . "' when adding a new problem.");
 			}
 			// Set sensible defaults for name and timelimit if not specified:
-			if ( !isset($ini_array_problem['name'])      ) $ini_array_problem['name'] = $ini_array_problem['probid'];
+			if ( !isset($ini_array_problem['name'])      ) $ini_array_problem['name'] = $ini_array_contest_problem['probid'];
 			if ( !isset($ini_array_problem['timelimit']) ) $ini_array_problem['timelimit'] = $def_timelimit;
 
 			// rename probid to shortname
@@ -386,7 +391,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 					echo "<p>Custom validator specified but not found.</p>\n";
 				} else {
 					// file(s) have to share common directory
-					$validator_dir = mb_substr($validator_files[0], 0, mb_strrpos($validator_files[0], "/"));
+					$validator_dir = mb_substr($validator_files[0], 0, mb_strrpos($validator_files[0], "/")) . "/";
 					$same_dir = TRUE;
 					foreach ( $validator_files as $validator_file ) {
 						if ( !starts_with($validator_file, $validator_dir) ) {
@@ -410,7 +415,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 							file_put_contents($newfilename, $content);
 							if ( $filebase === 'build' || $filebase === 'run' ) {
 								// mark special files as executable
-								chmod($newfilename, 0700);
+								chmod($newfilename, 0755);
 							}
 						}
 
@@ -513,8 +518,9 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			// Skip testcases that already exist identically
 			$id = $DB->q('MAYBEVALUE SELECT testcaseid FROM testcase
 			              WHERE md5sum_input = %s AND md5sum_output = %s AND
-			              description = %s AND sample = %i',
-			             $md5in, $md5out, $description, $type == 'sample' ? 1 : 0);
+			              description = %s AND sample = %i AND probid = %i',
+			             $md5in, $md5out, $description,
+			             ($type == 'sample' ? 1 : 0), $probid);
 			if ( isset($id) ) {
 				echo "<li>Skipped $type testcase <tt>$datafile</tt>: already exists</li>\n";
 				continue;

@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT([DOMjudge],
         m4_esyscmd([sed -n '1s/^.*version //p' README | tr -d '\n']),
-        [domjudge-devel@lists.A-Eskwadraat.nl])
+        [domjudge-devel@domjudge.org])
 AC_PREREQ([2.64])
 AC_CONFIG_HEADERS([etc/config.h])
 AC_CONFIG_SRCDIR([Makefile.global])

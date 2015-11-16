@@ -43,8 +43,8 @@ This is a (rough) list of the requirements for DOMjudge.
 
 <itemize>
 <item>At least one machine running Linux, with (sudo) root access
-<item>Apache web server with PHP 5.2 or newer and PHP-command line interface
-<item>MySQL or MariaDB database server version 4.1.0 or newer
+<item>Apache web server with PHP 5.3.3 or newer and PHP-command line interface
+<item>MySQL or MariaDB database server version 5.3.3 or newer
 <item>Compilers for the languages you want to support
 </itemize>
 
@@ -66,19 +66,17 @@ Rob Franken,
 Jacob Kleerekoper,
 Ruud Koot,
 Jan Kuipers,
+Richard Lobb,
 Alex Muntada,
+Dominik Paulus,
 Jeroen Schot,
 Matt Steele,
+Shuhei Takahashi,
 and Jeroen van Wolffelaar.
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
 
-Development is hosted at Study Association
-<htmlurl name="A-Eskwadraat" url="http://www.a-eskwadraat.nl/">,
-<htmlurl name="Utrecht University" url="http://www.uu.nl/">,
-The Netherlands.
-
-It is Copyright (c) 2004 - 2015 by the DOMjudge developers and its contributors.
+DOMjudge is Copyright (c) 2004 - 2015 by the DOMjudge developers and its contributors.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the <url name="GNU General Public License"
@@ -93,13 +91,13 @@ are covered by other copyrights. See the administrator's manual for details.
 <![ %admin; [
 This software is partly based on code by other people. These
 acknowledgements are made in the respective files, but we would like
-to name them here too (with non-GPL licences where applicable):
+to name them here too (with non-GPL licences listed where applicable):
 <itemize>
 <item> dash (i386) is included, statically compiled from the Debian
        dash sources (copyright by various people under the BSD licence
        and a part under the GNU GPL version 2. See <tt>COPYING.BSD</tt>
        <tt>doc/dash.copyright</tt> for more details).
-       Sources can be downloaded from: <url url="http://www.domjudge.org/sources/">.
+       Sources can be downloaded from: <url url="https://www.domjudge.org/sources/">.
 <item> basename.h is a modified version from the
        GNU libiberty library (copyright Free Software Foundation).
 <item> lib.database.php by Jeroen van Wolffelaar et al.
@@ -115,7 +113,8 @@ to name them here too (with non-GPL licences where applicable):
        <url url="http://www.barelyfitz.com/projects/tabber/">.
 <item> Ace code editor by Ajax.org B.V., licenced under the BSD
        licence, see <tt>COPYING.BSD</tt>. It was downloaded from
-       <url url="https://github.com/ajaxorg/ace-builds">.
+       <url url="https://github.com/ajaxorg/ace-builds">,
+       the <tt>src-min-noconflict</tt> version.
 <item> Flot JavaScript library by IOLA and Ole Laursen, licenced
        under the MIT licence, see <tt>COPYING.MIT</tt>. It was
        downloaded from <url url="http://www.flotcharts.org/">.
@@ -125,11 +124,11 @@ to name them here too (with non-GPL licences where applicable):
 <item> jQuery TokenInput by James Smith, dual
        licenced under the GPL and MIT licences, see <tt>COPYING</tt>
        and <tt>COPYING.MIT</tt>. It was downloaded from
-       <url url="http://loopj.com/jquery-tokeninput/">.
+       <url url="https://github.com/loopj/jquery-tokeninput">.
 <item> The default compare script was included from the
        Kattis problemtools package, and licenced under the MIT
        licence, see <tt>COPYING.MIT</tt>. It was downloaded from
-       <url url="https://github.com/Kattis/problemtools/tree/master/default_validator">.
+       <url url="https://github.com/Kattis/problemtools/tree/master/support/default_validator">.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
        Erik van Sebille.
 <item> Several icons have been taken from the phpMyAdmin project.
@@ -160,22 +159,24 @@ Erik a free beer in case might you encounter him.
 <sect>Contact
 <p>
 The DOMjudge homepage can be found at:
-<htmlurl name="http://www.domjudge.org/"
-url="http://www.domjudge.org/">
+<htmlurl name="https://www.domjudge.org/"
+url="https://www.domjudge.org/">
 
 We have a low volume <htmlurl name="mailing list for announcements"
-url="https://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-announce">
+url="https://www.domjudge.org/mailman/listinfo/domjudge-announce">
 of new releases.
 
 The authors can be reached through the development mailing list:
-<htmlurl name="domjudge-devel@lists.a-eskwadraat.nl"
-url="mailto:domjudge-devel@lists.a-eskwadraat.nl">. You need
+<htmlurl name="domjudge-devel@domjudge.org"
+url="mailto:domjudge-devel@domjudge.org">. You need
 to be subscribed before you can post. See
 <htmlurl name="the list information page"
-url="https://lists.a-eskwadraat.nl/mailman/listinfo/domjudge-devel">
+url="https://www.domjudge.org/mailman/listinfo/domjudge-devel">
 for subscription and more details.
 
 Some developers and users of DOMjudge linger on the IRC channel
 dedicated to DOMjudge on the Freenode network:
 server <tt>irc.freenode.net</tt>, channel <tt>#domjudge</tt>.
-Feel free to drop by with your questions and comments.
+Feel free to drop by with your questions and comments, but note that
+it may sometimes take a bit longer than a few minutes to get a
+response.

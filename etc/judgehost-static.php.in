@@ -16,6 +16,7 @@ define('LOGDIR',      '@judgehost_logdir@');
 define('RUNDIR',      '@judgehost_rundir@');
 define('TMPDIR',      '@judgehost_tmpdir@');
 define('JUDGEDIR',    '@judgehost_judgedir@');
+define('CHROOTDIR',   '@judgehost_chrootdir@');
 
 define('RUNUSER',     '@RUNUSER@');
 define('USE_CGROUPS', '@USE_CGROUPS@');
@@ -28,7 +29,7 @@ $EXITCODES = array (
 	103 => 'run-error',
 	104 => 'no-output',
 	105 => 'wrong-answer',
-	106 => 'presentation-error',
+//	106 => 'presentation-error', /* dropped since 5.0 */
 	107 => 'memory-limit',
 	108 => 'output-limit',
 /* Uncomment the next line(s) to accept internal errors in the judging

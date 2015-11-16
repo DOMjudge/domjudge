@@ -7,6 +7,7 @@
  */
 
 require('init.php');
+require(LIBWWWDIR . '/checkers.jury.php');
 
 $id = getRequestID();
 $title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
@@ -16,11 +17,6 @@ $jscolor=true;
 $jqtokeninput = true;
 
 require(LIBWWWDIR . '/header.php');
-
-$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d\ \d\d:\d\d:\d\d";
-$pattern_offset    = "\d?\d:\d\d";
-$pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
-$pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 
 if ( !empty($_GET['cmd']) ):
 
@@ -46,26 +42,39 @@ if ( !empty($_GET['cmd']) ):
 ?>
 
 <tr><td><label for="data_0__shortname_">Short name:</label></td>
-<td><?php echo addInput('data[0][shortname]', @$row['shortname'], 40, 10, 'required')?></td></tr>
+<td colspan="2"><?php echo addInput('data[0][shortname]', @$row['shortname'], 40, 10, 'required')?></td></tr>
 <tr><td><label for="data_0__name_">Contest name:</label></td>
-<td><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
+<td colspan="2"><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__activatetime_string_">Activate time:</label></td>
-<td><?php echo addInput('data[0][activatetime_string]', (empty($row['activatetime_string'])?strftime('%Y-%m-%d %H:%M:00'):$row['activatetime_string']), 20, 19, 'required pattern="' . $pattern_dateorneg . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> -hh:mm)</td></tr>
+<td><?php echo addInput('data[0][activatetime_string]', (empty($row['activatetime_string'])?strftime('%Y-%m-%d %H:%M:00'):$row['activatetime_string']), 30, 64, 'required pattern="' . $pattern_dateorneg . '"')?></td>
+<td rowspan="6">
+<b>Specification of contest times:</b><br />
+Each of the contest times can be specified as absolute time or relative<br />
+to the start time (except for start time itself). Use up to 6 subsecond<br />
+decimals and a timezone from the
+<a target="_blank" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">
+time zone database</a>.
+<br /><br />
+Absolute time format: <b><kbd><?php echo $human_abs_datetime ?></kbd></b>
+<a target="_blank" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">
+<img src="../images/b_help.png" class="smallpicto" alt="?"></a><br />
+Relative time format: <b><kbd><?php echo $human_rel_datetime ?></kbd></b><br />
+</td></tr>
 
 <tr><td><label for="data_0__starttime_string_">Start time:</label></td>
-<td><?php echo addInput('data[0][starttime_string]', @$row['starttime_string'], 20, 19, 'required pattern="' . $pattern_datetime . '"')?> (yyyy-mm-dd hh:mm:ss)</td></tr>
+<td><?php echo addInput('data[0][starttime_string]', @$row['starttime_string'], 30, 64, 'required pattern="' . $pattern_datetime . '"')?></td></tr>
 
 <tr><td><label for="data_0__freezetime_string_">Scoreboard freeze time:</label></td>
-<td><?php echo addInput('data[0][freezetime_string]', @$row['freezetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][freezetime_string]', @$row['freezetime_string'], 30, 64, 'pattern="' . $pattern_dateorpos . '"')?></td></tr>
 
 <tr><td><label for="data_0__endtime_string_">End time:</label></td>
-<td><?php echo addInput('data[0][endtime_string]', @$row['endtime_string'], 20, 19, 'required pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][endtime_string]', @$row['endtime_string'], 30, 64, 'required pattern="' . $pattern_dateorpos . '"')?></td></tr>
 
 <tr><td><label for="data_0__unfreezetime_string_">Scoreboard unfreeze time:</label></td>
-<td><?php echo addInput('data[0][unfreezetime_string]', @$row['unfreezetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][unfreezetime_string]', @$row['unfreezetime_string'], 30, 64, 'pattern="' . $pattern_dateorpos . '"')?></td></tr>
 
 <tr><td><label for="data_0__deactivatetime_string_">Deactivate time:</label></td>
-<td><?php echo addInput('data[0][deactivatetime_string]', @$row['deactivatetime_string'], 20, 19, 'pattern="' . $pattern_dateorpos . '"')?> (yyyy-mm-dd hh:mm:ss <i>or</i> +hh:mm)</td></tr>
+<td><?php echo addInput('data[0][deactivatetime_string]', @$row['deactivatetime_string'], 30, 64, 'pattern="' . $pattern_dateorpos . '"')?></td></tr>
 
 <tr><td>Process balloons:</td><td>
 <?php echo addRadioButton('data[0][process_balloons]', (!isset($row['process_balloons']) ||  $row['process_balloons']), 1)?> <label for="data_0__process_balloons_1">yes</label>
@@ -333,6 +342,7 @@ if ( isset($_GET['edited']) ) {
 		"If the contest start time was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
 		addSubmit('recalculate caches now', 'refresh')
 		) .
+		addHidden('cid', $id) .
 		addEndForm();
 
 }
@@ -416,12 +426,13 @@ echo '</td></tr>';
 echo "</table>\n\n";
 
 if ( IS_ADMIN ) {
-	if ( in_array($data['cid'], $cids) ) {
-		echo "<p>". rejudgeForm('contest', $data['cid']) . "</p>\n\n";
-	}
 	echo "<p>" .
 		editLink('contest',$data['cid']) . "\n" .
 		delLink('contest','cid',$data['cid']) ."</p>\n\n";
+
+	if ( in_array($data['cid'], $cids) ) {
+		echo rejudgeForm('contest', $data['cid']) . "<br />\n\n";
+	}
 }
 
 if ( !empty($data['finalizetime']) ) {
@@ -493,6 +504,7 @@ else {
 	echo "<th scope=\"col\">allow<br />judge</th>";
 	echo "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>\n";
 	echo "<th scope=\"col\">lazy eval</th>\n";
+	echo "<th scope=\"col\"></th>\n";
 	echo "</tr>\n</thead>\n<tbody>\n";
 
 	$iseven = false;

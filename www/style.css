@@ -57,6 +57,12 @@ hr {
 }
 address { font-size: smaller; }
 
+.framed {
+	border: 1px solid silver;
+	padding: 2px;
+	display: inline-block;
+}
+
 tr.unread td {
 	font-weight: bold;
 }
@@ -90,15 +96,16 @@ td {
 	padding-right: 5px;
 }
 .list .disabled a  { color: silver;   }
-.list .editdel  a  { display: inline; }
+.list .editdel  a  { display: inline; white-space: nowrap; }
 
-.output_text {
+.output_text, .editor {
 	border-top: 1px dotted #C0C0C0;
 	border-bottom: 1px dotted #C0C0C0;
 	background-color: #FAFAFA;
 	margin: 0;
 	padding: 5px;
 	font-family: monospace;
+	white-space: pre;
 }
 
 span.differ {

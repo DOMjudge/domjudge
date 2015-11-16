@@ -11,6 +11,17 @@ $title = 'Categories';
 
 require(LIBWWWDIR . '/header.php');
 
+if ( isset($_GET['edited']) ) {
+
+	echo addForm('refresh_cache.php') .
+		msgbox("Warning: Refresh scoreboard cache",
+		       "If the category sort order was changed, it may be necessary to " .
+		       "recalculate any cached scoreboards.<br /><br />" .
+		       addSubmit('recalculate caches now', 'refresh')) .
+		addHidden('cid', $id) .
+		addEndForm();
+}
+
 echo "<h1>Categories</h1>\n\n";
 
 $res = $DB->q('SELECT team_category.*, COUNT(teamid) AS numteams
@@ -23,7 +34,7 @@ if( $res->count() == 0 ) {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID</th><th scope=\"col\">sort</th>" .
 		"<th scope=\"col\">name</th><th scope=\"col\">#teams</th>" .
-		"<th scope=\"col\">visible</th></tr>\n" .
+		"<th scope=\"col\">visible</th><th scope=\"col\"></th></tr>\n" .
 		"</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
@@ -38,7 +49,7 @@ if( $res->count() == 0 ) {
 			'</a></td>';
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-				editLink('team_category', $row['categoryid']) . " " .
+				editLink('team_category', $row['categoryid']) . "&nbsp;" .
 				delLink('team_category', 'categoryid', $row['categoryid']) . "</td>";
 		}
 		echo "</tr>\n";

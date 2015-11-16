@@ -40,13 +40,13 @@ if( $users->count() == 0 ) {
 		        htmlspecialchars($row['username'])."</a></td>".
 		    "<td>" . $link .
 		        htmlspecialchars($row['name'])."</a></td>".
-		    "<td>" . $link .
-		        htmlspecialchars($row['email'])."</a></td>".
+		    "<td>" . $link . ( isset($row['email']) ?
+		        htmlspecialchars($row['email']) : '&nbsp;' ) . "</a></td>".
 		    "<td>" . $link .
 		        htmlspecialchars($row['roles'])."</a></td>".
-		    "<td>" . (isset($row['teamid']) ? $link . "t" .
-		        htmlspecialchars($row['teamid']). "</a>" : '') . "</td>";
-		echo "<td class=\"";
+		    "<td>" . $link . (isset($row['teamid']) ? "t" .
+		        htmlspecialchars($row['teamid']) : '&nbsp;') . "</a></td>";
+		echo "<td sorttable_customkey=\"" . $status . "\" class=\"";
 		if ($status == 1) {
 			echo 'team-ok" title="logged in: ' . printtime($row['last_login']) . '"';
 		} else {
@@ -55,7 +55,7 @@ if( $users->count() == 0 ) {
 		echo ">$link" . CIRCLE_SYM . "</a></td>";
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
-			    editLink('user', $row['userid']) . " " .
+			    editLink('user', $row['userid']) . "&nbsp;" .
 			    delLink('user','userid',$row['userid']) . "</td>";
 		}
 		echo "</tr>\n";

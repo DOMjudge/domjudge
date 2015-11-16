@@ -58,7 +58,11 @@ mysql()
 		[ -n "$PROMPT_PASSWD" ] && pass="-p"
 		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
 	fi
-	command mysql $user "$pass" -h "$DBHOST" --silent --skip-column-names "$@"
+	if [ -n "$pass" ]; then
+		command mysql $user "$pass" -h "$DBHOST" --silent --skip-column-names "$@"
+	else
+		command mysql $user -h "$DBHOST" --silent --skip-column-names "$@"
+	fi
 }
 
 read_dbpasswords()
@@ -119,7 +123,10 @@ create_db_users()
 {
 	local user pass
 	(
-	echo "CREATE DATABASE IF NOT EXISTS \`$DBNAME\` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
+	# The MySQL character set and collation are hardcoded here, but
+	# can be changed in the database and their configuration settings
+	# in etc/domserver-config.php updated after installation.
+	echo "CREATE DATABASE IF NOT EXISTS \`$DBNAME\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 	echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DBNAME\`.* TO '$domjudge_DBUSER'@'localhost' IDENTIFIED BY '$domjudge_PASSWD';"
 

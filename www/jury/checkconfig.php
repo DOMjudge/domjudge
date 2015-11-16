@@ -176,6 +176,22 @@ foreach($postmaxvars as $var) {
 result('software', 'PHP POST/upload filesize',
        min($sizes) < 52428800 ? 'W':'O', '', $resulttext);
 
+$timezone_php = ini_get('date.timezone');
+$timezone_sys = date_default_timezone_get();
+if ( $timezone_php===FALSE || empty($timezone_php) ) {
+	if ( empty($timezone_sys) || $timezone_sys=='UTC' ) {
+		result('software', 'PHP timezone', 'E',
+		       "date.timezone is unset in php.ini and the system default '" .
+		       $timezone_sys . "' may not be properly detected.");
+	} else {
+		result('software', 'PHP timezone', 'W',
+		       "date.timezone is unset in php.ini, PHP is " .
+		       "using the system default '$timezone_sys'.");
+	}
+} else {
+	result('software', 'PHP timezone', 'O', "date.timezone set to '$timezone'.");
+}
+
 if ( class_exists("ZipArchive") ) {
 	result('software', 'Problem up/download via zip bundles',
 	       'O', 'PHP ZipArchive class available for importing and exporting problem data.');
@@ -195,9 +211,9 @@ while($row = $mysqldatares->next()) {
 }
 
 result('software', 'MySQL version',
-	version_compare('4.1', $mysqldata['version'], '>=') ? 'E':'O',
+	version_compare('5.5.3', $mysqldata['version'], '>=') ? 'E':'O',
 	'Connected to MySQL server version ' . $mysqldata['version'] .
-	'. Minimum required is 4.1.');
+	'. Minimum required is 5.5.3.');
 
 result('software', 'MySQL maximum connections',
 	$mysqldata['max_connections'] < 300 ? 'W':'O',
@@ -408,6 +424,20 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 	result('problems, languages, teams', 'Team affiliation icons',
 	       'O', 'Affiliation icons disabled in config.');
 }
+
+
+// check for teams with duplicate names
+$res = $DB->q('SELECT name FROM team GROUP BY name HAVING COUNT(name) >= 2;');
+
+$details = '';
+while($row = $res->next()) {
+	$teamids = $DB->q('COLUMN SELECT teamid FROM team WHERE name=%s', $row['name']);
+	$details .= "Multiple teams have the name '" . htmlspecialchars($row['name']) . "': " .
+		    implode(', ', $teamids) . "\n";
+}
+
+result('problems, languages, teams', 'Duplicate team names',
+	($details == '' ? 'O':'W'), $details);
 
 flushresults();
 
