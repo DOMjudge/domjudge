@@ -161,7 +161,6 @@ function check_language($data, $keydata = null)
 		}
 	}
 	$exts = json_decode($data['extensions'], false, 2);
-	var_dump($exts);
 	if ( $exts==null || !is_array($exts) || count($exts)==0 ) {
 		ch_error("Language extension list is not a valid JSON array");
 	}
