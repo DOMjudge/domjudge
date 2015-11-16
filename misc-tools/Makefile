@@ -10,7 +10,7 @@ SUBST_DOMSERVER = save_sources2file restore_sources2db static_scoreboard \
                   combined_scoreboard judging_statistics balloons \
                   simulate_contest create_accounts
 
-SUBST_JUDGEHOST = create_cgroups dj_make_chroot dj_make_ubuntu_chroot
+SUBST_JUDGEHOST = create_cgroups dj_make_chroot
 
 SUBST_FILES = $(SUBST_DOMSERVER) $(SUBST_JUDGEHOST)
 
