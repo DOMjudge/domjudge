@@ -103,6 +103,10 @@ while getopts 'a:d:' OPT ; do
 	esac
 done
 shift $((OPTIND-1))
+if [ $# -gt 0 ]; then
+	error "Additional arguments specified."
+fi
+
 
 [ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."
 [ -z "$ARCH" ]      && error "No architecture given or detected."
