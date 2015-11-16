@@ -18,7 +18,7 @@ build: $(TARGETS) $(SUBST_FILES)
 
 domserver: $(SUBST_DOMSERVER)
 
-judgehost: create_cgroups
+judgehost: $(SUBST_FILES)
 
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
