@@ -462,8 +462,8 @@ if ( count($removals)==0 && ! IS_ADMIN ) {
 	echo "<table>\n";
 	echo "<tr><th>from</th><td></td><th>to</th><td></td><th>duration</th></tr>\n";
 	foreach ( $removals as $row ) {
-		echo "<tr><td>" . printtime($row['starttime'],'%Y-%m-%d %H:%M:%S') . "</td><td>&rarr;</td>" .
-		     "<td>" . printtime($row['endtime'],'%Y-%m-%d %H:%M:%S') . "</td><td></td><td>( " .
+		echo "<tr><td>" . $row['starttime_string'] . "</td><td>&rarr;</td>" .
+		     "<td>" . $row['endtime_string'] . "</td><td></td><td>( " .
 		     printtimediff($row['starttime'], $row['endtime']) . " )</td>" .
 		     "<td><a href=\"removed_intervals.php?cmd=delete&amp;cid=$id&amp;intervalid=" .
 		     (int)$row['intervalid'] . "\" onclick=\"return confirm('Really delete interval?');\">" .
@@ -471,13 +471,13 @@ if ( count($removals)==0 && ! IS_ADMIN ) {
 		     "</tr>\n";
 	}
 	if ( IS_ADMIN ) {
-		echo "<tr><td>" . addInput('starttime', null, 17, 50,
+		echo "<tr><td>" . addInput('starttime_string', null, 30, 64,
 		                           'required pattern="' . $pattern_datetime . '"') .
 		         "</td><td>&rarr;</td>" .
-		         "<td>" . addInput('endtime',   null, 17, 50,
+		         "<td>" . addInput('endtime_string',   null, 30, 64,
 		                           'required pattern="' . $pattern_datetime . '"') .
 		         "</td><td></td>" .
-		         "<td>" . addSubmit('Add') . "</td><td>(yyyy-mm-dd hh:mm:ss)</td></tr>\n";
+		         "<td>" . addSubmit('Add') . "</td><td>($human_abs_datetime)</td></tr>\n";
 	}
 	echo "</table>\n\n";
 	if ( IS_ADMIN ) echo addEndForm();

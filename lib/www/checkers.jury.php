@@ -195,6 +195,8 @@ $human_rel_datetime = "&pm;[HHH]H:MM[:SS[.uuuuuu]]";
 // Returns an absolute Unix Epoch timestamp from a formatted absolute
 // or relative (to $basetime timestamp, if set) time. $field is a
 // descriptive name of the current time for error messages.
+// If an array $removed_intervals is given, these are use to adjust
+// the calculated timestamps for relative times.
 function check_relative_time($time, $basetime, $field, $removed_intervals = null)
 {
 	// FIXME: need to incorporate removed intervals
@@ -274,15 +276,25 @@ function check_relative_time($time, $basetime, $field, $removed_intervals = null
 function check_removed_intervals($contest, $intervals)
 {
 	foreach ( $intervals as $data ) {
+		foreach ( array('starttime','endtime') as $f ) {
+			// The true input date/time strings are preserved in the
+			// *_string variables. These are in absolute format only.
+			$data[$f] = $data[$f.'_string'];
+			$data[$f] = check_relative_time($data[$f], $contest['starttime'],
+			                                'removed_interval '.$f, $removed_intervals);
+		}
+	}
+
+	foreach ( $intervals as $data ) {
 		if ( difftime($data['endtime'], $data['starttime']) <= 0 ) {
 			ch_error('Interval ends before (or when) it starts');
 		}
 
 		if ( difftime($data['starttime'], $contest['starttime']) < 0 ) {
-			ch_error("Interval starttime '$data[starttime]' outside of contest");
+			ch_error("Interval starttime '$data[starttime_string]' outside of contest");
 		}
 		if ( difftime($data['endtime'], $contest['endtime']) > 0 ) {
-			ch_error("Interval endtime '$data[endtime]' outside of contest");
+			ch_error("Interval endtime '$data[endtime_string]' outside of contest");
 		}
 
 		foreach( $intervals as $other ) {
@@ -310,7 +322,7 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
 	// provides as argument or from the database if available.
 	if ( !isset($removed_intervals) && isset($keydata['cid']) ) {
 		$removed_intervals = $DB->q('TABLE SELECT * FROM removed_interval
-		                             WHERE cid = %i', $keydata['cid']);
+		                             WHERE cid = %i ORDER BY starttime', $keydata['cid']);
 	}
 
 	if ( isset($data['shortname']) && ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
