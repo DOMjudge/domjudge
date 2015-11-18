@@ -261,7 +261,7 @@ $(function() {
 	</td>
 	<td>
 		<?php echo addInputField('number',"data[0][mapping][0][extra][{id}][points]",
-                                 '{points}', ' min="0" max="9999" required'); ?>
+                                 '{points}', ' style="width:10ex" min="0" max="9999" required'); ?>
 	</td>
 	<td>
 		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", true, 1); ?>
@@ -276,12 +276,12 @@ $(function() {
 		<label for='data_0__mapping__0__extra__{id}__allow_judge_0'>no</label>
 	</td>
 	<td>
-		<?php echo addInput("data[0][mapping][0][extra][{id}][color]", '{color}', 15, 25,
+		<?php echo addInput("data[0][mapping][0][extra][{id}][color]", '{color}', 10, 25,
                             'class="color {required:false,adjust:false,hash:true,caps:false}"'); ?>
 	</td>
 	<td>
 		<?php echo addInputField('number',"data[0][mapping][0][extra][{id}][lazy_eval_results]",
-                                 '{lazy_eval_results}', ' min="0" max="1"'); ?>
+                                 '{lazy_eval_results}', ' style="width:10ex" min="0" max="1"'); ?>
 	</td>
 </tr>
 </script>
@@ -297,7 +297,7 @@ $(function() {
 		<th>color
 		<a target="_blank" href="http://www.w3schools.com/cssref/css_colornames.asp">
 		<img src="../images/b_help.png" class="smallpicto" alt="?"></a></th>
-		<th>lazy evaluation</th>
+		<th>lazy eval</th>
 	</tr>
 	</thead>
 	<tbody>
