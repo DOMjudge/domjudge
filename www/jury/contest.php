@@ -46,7 +46,7 @@ if ( !empty($_GET['cmd']) ):
 <tr><td><label for="data_0__name_">Contest name:</label></td>
 <td colspan="2"><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__activatetime_string_">Activate time:</label></td>
-<td><?php echo addInput('data[0][activatetime_string]', (empty($row['activatetime_string'])?strftime('%Y-%m-%d %H:%M:00'):$row['activatetime_string']), 30, 64, 'required pattern="' . $pattern_dateorneg . '"')?></td>
+<td><?php echo addInput('data[0][activatetime_string]', (empty($row['activatetime_string'])?strftime('%Y-%m-%d %H:%M:00 ').date_default_timezone_get():$row['activatetime_string']), 30, 64, 'required pattern="' . $pattern_dateorneg . '"')?></td>
 <td rowspan="6">
 <b>Specification of contest times:</b><br />
 Each of the contest times can be specified as absolute time or relative<br />
