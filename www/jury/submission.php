@@ -38,7 +38,7 @@ function display_compile_output($output, $success) {
 
 	if ( !empty($output) ) {
 		echo '<pre class="output_text" id="detailcompile">' .
-			htmlspecialchars($output)."</pre>\n\n";
+			htmlspecialchars($output, ENT_SUBSTITUTE)."</pre>\n\n";
 	} else {
 		echo '<p class="nodata" id="detailcompile">' .
 			"There were no compiler errors or warnings.</p>\n";
@@ -645,7 +645,7 @@ togglelastruns();
 		echo "<h5>Program output</h5>\n";
 		if ( strlen(@$run['output_run']) > 0 ) {
 			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_run'])."</pre>\n\n";
+			    htmlspecialchars($run['output_run'], ENT_SUBSTITUTE)."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no program output.</p>\n";
 		}
@@ -653,7 +653,7 @@ togglelastruns();
 		echo "<h5>Program error output</h5>\n";
 		if ( strlen(@$run['output_error']) > 0 ) {
 			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_error'])."</pre>\n\n";
+			    htmlspecialchars($run['output_error'], ENT_SUBSTITUTE)."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no stderr output.</p>\n";
 		}
@@ -661,7 +661,7 @@ togglelastruns();
 		echo "<h5>Judging system output (info/debug/errors)</h5>\n";
 		if ( strlen(@$run['output_system']) > 0 ) {
 			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_system'])."</pre>\n\n";
+			    htmlspecialchars($run['output_system'], ENT_SUBSTITUTE)."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no judging system output.</p>\n";
 		}

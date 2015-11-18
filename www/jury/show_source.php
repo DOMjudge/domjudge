@@ -110,7 +110,7 @@ function presentSource ($sourcedata, $langid)
 	$langid = langidToAce($langid);
 
 	$ace = '<div class="editor" id="editor' . htmlspecialchars($sourcedata['rank']) . '">'
-		. htmlspecialchars($sourcedata['sourcecode']) . '</div>' .
+		. htmlspecialchars($sourcedata['sourcecode'], ENT_SUBSTITUTE) . '</div>' .
 		'<script src="../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>' .
 		'<script>' .
 		'var editor = ace.edit("editor' . htmlspecialchars($sourcedata['rank']) . '");' .
