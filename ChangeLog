@@ -12,6 +12,8 @@ Version 5.0.2 - DEV
  - Bring admin manual up to date wrt. executables in database.
  - [security] Disable GCC family automatic language detection to
    prevent submitting other languages or object/executable code.
+ - Fix empty source and compile/progrem/error output displayed by
+   substituting invalid characters in htmlspecialchars().
 
 Version 5.0.1 - 1 October 2015
 ------------------------------
