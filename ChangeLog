@@ -10,6 +10,8 @@ Version 5.0.2 - DEV
  - Fix various minor HTML issues.
  - Small tweaks to team manual.
  - Bring admin manual up to date wrt. executables in database.
+ - [security] Disable GCC family automatic language detection to
+   prevent submitting other languages or object/executable code.
 
 Version 5.0.1 - 1 October 2015
 ------------------------------
