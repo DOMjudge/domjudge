@@ -7,12 +7,15 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
+# -x hs:    Explicitly only allow Haskell source (no object files or
+#           other intermediate files autodetected by extension, also
+#           disables literate Haskell (.lhs) files)
 # -Wall:	Report all warnings
 # -O:		Optimize
 # -static:	Static link Haskell libraries
 # -optl-static:	Pass '-static' option to the linker
 # -optl-pthread: Pass '-pthread' option to the linker (see Debian bug #593402)
-ghc -Wall -Wwarn -O -static -optl-static -optl-pthread -DONLINE_JUDGE -DDOMJUDGE -o "$DEST" "$@"
+ghc -x hs -Wall -Wwarn -O -static -optl-static -optl-pthread -DONLINE_JUDGE -DDOMJUDGE -o "$DEST" "$@"
 exitcode=$?
 
 # clean created files:

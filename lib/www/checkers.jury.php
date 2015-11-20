@@ -192,16 +192,19 @@ $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 $human_abs_datetime = "YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone";
 $human_rel_datetime = "&pm;[HHH]H:MM[:SS[.uuuuuu]]";
 
-function check_relative_time($time, $starttime, $field, $removed_intervals = null)
+// Returns an absolute Unix Epoch timestamp from a formatted absolute
+// or relative (to $basetime timestamp, if set) time. $field is a
+// descriptive name of the current time for error messages.
+function check_relative_time($time, $basetime, $field, $removed_intervals = null)
 {
 	// FIXME: need to incorporate removed intervals
 
 	global $pattern_datetime, $pattern_offset, $human_abs_datetime, $human_rel_datetime;
 	if ( empty($time) ) return null;
 	if ($time[0] == '+' || $time[0] == '-') {
-		// First check that we're not parsing a relative start time.
-		if ( $field=='starttime' ) {
-			ch_error('starttime must be specified as absolute time');
+		// First check that this is allowed to be a relative time.
+		if ( $basetime===null ) {
+			ch_error($field . ' must be specified as absolute time');
 			return null;
 		}
 		// Time string seems relative, check correctness.
@@ -226,7 +229,7 @@ function check_relative_time($time, $starttime, $field, $removed_intervals = nul
 				$seconds *= -1;
 			}
 			// calculate the absolute time, adjusting for removed intervals
-			$abstime = $starttime + $seconds;
+			$abstime = $basetime + $seconds;
 			if ( is_array($removed_intervals) ) {
 				foreach ( $removed_intervals as $intv ) {
 					if ( difftime($intv['starttime'],$abstime)<=0 ) {
@@ -321,7 +324,9 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
 		// *_string variables, since these may be relative times
 		// that need to be kept as is.
 		$data[$f] = $data[$f.'_string'];
-		$data[$f] = check_relative_time($data[$f], $data['starttime'], $f, $removed_intervals);
+		$data[$f] = check_relative_time($data[$f],
+		                                ($f=='starttime' ? null : $data['starttime']),
+		                                $f, $removed_intervals);
 	}
 
 	// are required times specified?

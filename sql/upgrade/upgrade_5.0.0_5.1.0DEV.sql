@@ -40,6 +40,10 @@ ALTER TABLE `team` DROP KEY `name`;
 ALTER TABLE `language`
   MODIFY COLUMN `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string)';
 
+-- Add extra field for clarification category (alternative to probid)
+ALTER TABLE `clarification`
+  ADD COLUMN `category` varchar(128) DEFAULT NULL COMMENT 'Category associated to this clarification; only set for non problem clars' AFTER `probid`;
+
 --
 -- Transfer data from old to new structure
 --
@@ -90,6 +94,10 @@ SET time_zone = @old_time_zone;
 --
 -- Add/remove sample/initial contents
 --
+
+-- Add default clarification categories to configuration settings
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('clar_categories', '{"general":"General issue","tech":"Technical issue"}', 'array_keyval', 'List of additional clarification categories');
 
 --
 -- Finally remove obsolete structures after moving data

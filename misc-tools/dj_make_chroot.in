@@ -4,10 +4,10 @@
 # Script to generate a basic chroot environment with Oracle (Sun) Java
 # support to allow for Java programs to run in a chroot.
 #
-# This script downloads and installs a Debian base system.
+# This script downloads and installs a Debian or Ubuntu base system.
 # Minimum requirements: a Linux system with glibc >= 2.3, wget, ar and
-# a POSIX shell in /bin/sh. About 335 MB disk space is needed. It must
-# be run as root and will install the debootstrap package.
+# a POSIX shell in /bin/sh. About 335/610 MB disk space is needed. It
+# must be run as root and will install the debootstrap package.
 #
 # Part of the DOMjudge Programming Contest Jury System and licenced
 # under the GNU GPL. See README and COPYING for details.
@@ -26,19 +26,75 @@ trap cleanup EXIT
 # Default directory where to build the chroot tree:
 CHROOTDIR="@judgehost_chrootdir@"
 
-# Debian release (codename) to bootstrap (note: overriden right below):
+# Fallback Debian and release (codename) to bootstrap (note: overriden right below):
+DISTRO="Debian"
 RELEASE="jessie"
 
-# If host system is Debian, use its release and architecture by default
-if [ 'Debian' = "$(lsb_release -i -s || true)" ]; then
+# List of possible architectures to install chroot for:
+DEBIAN_ARCHLIST="amd64,armel,armhf,arm64,i386,mips,mipsel,powerpc,ppc64el,s390x"
+UBUNTU_ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
+
+# If host system is Debian or Ubuntu, use its release and architecture by default
+if [ "x$(lsb_release -i -s || true)" = 'xDebian' -o \
+     "x$(lsb_release -i -s || true)" = 'xUbuntu' ]; then
+	DISTRO="$(lsb_release -i -s)"
 	RELEASE="$(lsb_release -c -s)"
 	if [ -z "$ARCH" ]; then
 		ARCH="$(dpkg --print-architecture)"
 	fi
 fi
 
-# List of possible architectures to install chroot for:
-ARCHLIST="amd64,armel,armhf,arm64,i386,mips,mipsel,powerpc,ppc64el,s390x"
+usage()
+{
+    echo "Usage: $0 [-d <chrootdir>] [-D <distro>] [-a <architecture>]"
+    echo "Creates a chroot environment with Oracle (Sun) Java support using the"
+    echo "Debian or Ubuntu GNU/Linux distribution."
+    echo
+    echo "This script must be run as root, <chrootdir> is the non-existing target"
+    echo "location of the chroot, <distro> can be set to 'Debian' or 'Ubuntu' to"
+	echo "override any default, and <architecture> one of the following:"
+    echo "Debian: $DEBIAN_ARCHLIST"
+    echo "Ubuntu: $UBUNTU_ARCHLIST"
+    echo
+    echo "If the host runs Debian/Ubuntu, the host architecture and release are used."
+    echo "The default chrootdir is '@judgehost_chrootdir@'."
+}
+
+error()
+{
+    echo "Error: $*"
+    echo
+    usage
+    exit 1
+}
+
+if [ "`id -u`" != 0 ]; then
+    echo "Warning: you probably need to run this program as root."
+fi
+
+# Read command-line parameters:
+while getopts 'a:d:' OPT ; do
+	case $OPT in
+		a) ARCH=$OPTARG ;;
+		d) CHROOTDIR=$OPTARG ;;
+		D) DISTRO=$OPTARG ;;
+		\?) error "Could not parse options." ;;
+	esac
+done
+shift $((OPTIND-1))
+if [ $# -gt 0 ]; then
+	error "Additional arguments specified."
+fi
+
+if [ "$DISTRO" != 'Debian' -a "$DISTRO" != 'Ubuntu' ]; then
+	error "Invalid distribution specified, only 'Debian' and 'Ubuntu' are supported."
+fi
+
+[ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."
+[ -z "$ARCH" ]      && error "No architecture given or detected."
+
+# Various settings that can be tweaked, specific per distribution:
+if [ "$DISTRO" = 'Debian' ]; then
 
 # Packages to include during bootstrap process (comma separated):
 INCLUDEDEBS=""
@@ -60,56 +116,44 @@ DEBOOTDEB="debootstrap_1.0.67_all.deb"
 # Debian mirror. http.debian.net will pick the 'closest'.
 [ -z "$DEBMIRROR" ] && DEBMIRROR="http://http.debian.net/debian"
 
-# A local caching proxy to use for debian packages
+# A local caching proxy to use for apt-get,
 # (typically an install of aptcacher-ng), for example:
 #DEBPROXY="http://aptcacher-ng.example.com:3142/"
 [ -z "$DEBPROXY" ] && DEBPROXY=""
 
+fi
+
+if [ "$DISTRO" = 'Ubuntu' ]; then
+
+# Packages to include during bootstrap process (comma separated):
+INCLUDEDEBS="software-properties-common"
+
+# Packages to install after upgrade (space separated):
+INSTALLDEBS="openjdk-7-jre-headless locales"
+# For C# support add: mono-mcs mono-devel
+# However running mono within chroot still gives errors...
+
+# Packages to remove after upgrade (space separated):
+REMOVEDEBS=""
+
+# Which debootstrap package to install on non-Debian/Ubuntu systems:
+DEBOOTDEB="debootstrap_1.0.59_all.deb"
+
+# The Debian mirror/proxy below can be passed as environment
+# variables; if none are given the following defaults are used.
+
+# Ubuntu mirror, modify to match closest mirror
+[ -z "$DEBMIRROR" ] && DEBMIRROR="https://packages/ubuntu/"
+
+# A local caching proxy to use for apt-get,
+# (typically an install of aptcacher-ng), for example:
+#DEBPROXY="http://aptcacher-ng.example.com:3142/"
+[ -z "$DEBPROXY" ] && DEBPROXY=""
+
+fi
+
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
-
-usage()
-{
-    echo "Usage: $0 [-d <chrootdir>] [-a <architecture>]"
-    echo "Creates a chroot environment with Oracle (Sun) Java support using the"
-    echo "Debian GNU/Linux distribution."
-    echo
-    echo "This script must be run as root, <chrootdir> is the non-existing target"
-    echo "location of the chroot and <architecture> one of the following:"
-    echo "$ARCHLIST"
-    echo
-    echo "If the host runs Debian, the host architecture and release are used."
-    echo "The default chrootdir is '@judgehost_chrootdir@'."
-}
-
-error()
-{
-    echo "Error: $*"
-    echo
-    usage
-    exit 1
-}
-
-if [ "`id -u`" != 0 ]; then
-    echo "Warning: you probably need to run this program as root."
-fi
-
-# Read command-line parameters:
-while getopts 'a:d:' OPT ; do
-	case $OPT in
-		a) ARCH=$OPTARG ;;
-		d) CHROOTDIR=$OPTARG ;;
-		\?) error "Could not parse options." ;;
-	esac
-done
-shift $((OPTIND-1))
-if [ $# -gt 0 ]; then
-	error "Additional arguments specified."
-fi
-
-
-[ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."
-[ -z "$ARCH" ]      && error "No architecture given or detected."
 
 if [ -e "$CHROOTDIR" ]; then
 	printf "'$CHROOTDIR' already exists. Remove? (y/N) "
@@ -176,6 +220,7 @@ rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
 cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
 
+if [ "$DISTRO" = 'Debian' ]; then
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 # Different releases (incl. optional security repository):
 
@@ -190,6 +235,17 @@ deb http://security.debian.org	$RELEASE/updates	main
 # Unstable
 #deb $DEBMIRROR			unstable	main
 EOF
+fi
+if [ "$DISTRO" = 'Ubuntu' ]; then
+cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
+deb $DEBMIRROR $RELEASE main
+deb $DEBMIRROR $RELEASE universe
+deb $DEBMIRROR $RELEASE-updates main
+deb $DEBMIRROR $RELEASE-updates universe
+deb $DEBMIRROR $RELEASE-security main
+deb $DEBMIRROR $RELEASE-security universe
+EOF
+fi
 
 cat > "$CHROOTDIR/etc/apt/apt.conf" <<EOF
 APT::Get::Assume-Yes "true";
@@ -206,6 +262,7 @@ if [ -n "$DEBPROXY" ]; then
 fi
 
 mount -t proc proc "$CHROOTDIR/proc"
+mount -t sysfs sysfs "$CHROOTDIR/sys"
 
 # Required for some warning messages about writing to log files
 mount --bind /dev/pts "$CHROOTDIR/dev/pts"
@@ -235,6 +292,14 @@ locales	locales/locales_to_be_generated	multiselect
 locales	locales/default_environment_locale	select	None
 EOF
 
+if [ "$DISTRO" = 'Ubuntu' ]; then
+# Disable upstart init scripts(so upgrades work), we don't need to actually run
+# any services in the chroot, so this is fine.
+# Refer to: http://ubuntuforums.org/showthread.php?t=1326721
+chroot "$CHROOTDIR" /bin/sh -c "dpkg-divert --local --rename --add /sbin/initctl"
+chroot "$CHROOTDIR" /bin/sh -c "ln -s /bin/true /sbin/initctl"
+fi
+
 # Upgrade the system, and install/remove packages as desired
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
@@ -255,6 +320,7 @@ chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
 sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
 
 umount "$CHROOTDIR/dev/pts"
+umount "$CHROOTDIR/sys"
 umount "$CHROOTDIR/proc"
 
 exit 0

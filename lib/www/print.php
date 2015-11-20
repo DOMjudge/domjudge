@@ -99,12 +99,12 @@ function printtimediff($start, $end = NULL)
 	$ret = '';
 	$diff = floor($end - $start);
 
-	if ( $diff > 24*60*60 ) {
+	if ( $diff >= 24*60*60 ) {
 		$d = floor($diff/(24*60*60));
 		$ret .= $d . "d ";
 		$diff -= $d * 24*60*60;
 	}
-	if ( $diff > 60*60 ) {
+	if ( $diff >= 60*60 || isset($d) ) {
 		$h = floor($diff/(60*60));
 		$ret .= $h . ":";
 		$diff -= $h * 60*60;

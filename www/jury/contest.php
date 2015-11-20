@@ -46,7 +46,7 @@ if ( !empty($_GET['cmd']) ):
 <tr><td><label for="data_0__name_">Contest name:</label></td>
 <td colspan="2"><?php echo addInput('data[0][name]', @$row['name'], 40, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__activatetime_string_">Activate time:</label></td>
-<td><?php echo addInput('data[0][activatetime_string]', (empty($row['activatetime_string'])?strftime('%Y-%m-%d %H:%M:00'):$row['activatetime_string']), 30, 64, 'required pattern="' . $pattern_dateorneg . '"')?></td>
+<td><?php echo addInput('data[0][activatetime_string]', (empty($row['activatetime_string'])?strftime('%Y-%m-%d %H:%M:00 ').date_default_timezone_get():$row['activatetime_string']), 30, 64, 'required pattern="' . $pattern_dateorneg . '"')?></td>
 <td rowspan="6">
 <b>Specification of contest times:</b><br />
 Each of the contest times can be specified as absolute time or relative<br />
@@ -78,11 +78,11 @@ Relative time format: <b><kbd><?php echo $human_rel_datetime ?></kbd></b><br />
 
 <tr><td>Process balloons:</td><td>
 <?php echo addRadioButton('data[0][process_balloons]', (!isset($row['process_balloons']) ||  $row['process_balloons']), 1)?> <label for="data_0__process_balloons_1">yes</label>
-<?php echo addRadioButton('data[0][process_balloons]', ( isset($row['process_balloons']) && !$row['process_balloons']), 0)?> <label for="data_0__process_balloons_0">no</label></td></tr>
+<?php echo addRadioButton('data[0][process_balloons]', ( isset($row['process_balloons']) && !$row['process_balloons']), 0)?> <label for="data_0__process_balloons_0">no</label></td><td></td></tr>
 
 <tr><td>Public:</td><td>
 <?php echo addRadioButton('data[0][public]', (!isset($row['public']) ||  $row['public']), 1)?> <label for="data_0__public_1">yes</label>
-<?php echo addRadioButton('data[0][public]', ( isset($row['public']) && !$row['public']), 0)?> <label for="data_0__public_0">no</label></td></tr>
+<?php echo addRadioButton('data[0][public]', ( isset($row['public']) && !$row['public']), 0)?> <label for="data_0__public_0">no</label></td><td></td></tr>
 
 <tr id="teams" <?php if (!isset($row['public']) || $row['public']): ?>style="display: none; "<?php endif; ?>>
 	<td>Teams:</td>
@@ -107,12 +107,12 @@ Relative time format: <b><kbd><?php echo $human_rel_datetime ?></kbd></b><br />
 				});
 			});
 		</script>
-	</td>
+	</td><td></td>
 </tr>
 
 <tr><td>Enabled:</td><td>
 <?php echo addRadioButton('data[0][enabled]', (!isset($row['enabled']) ||  $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
-<?php echo addRadioButton('data[0][enabled]', ( isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td></tr>
+<?php echo addRadioButton('data[0][enabled]', ( isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td><td></td></tr>
 
 <script type="text/javascript">
 $(function() {
@@ -261,7 +261,7 @@ $(function() {
 	</td>
 	<td>
 		<?php echo addInputField('number',"data[0][mapping][0][extra][{id}][points]",
-                                 '{points}', ' min="0" max="9999" required'); ?>
+                                 '{points}', ' style="width:10ex" min="0" max="9999" required'); ?>
 	</td>
 	<td>
 		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", true, 1); ?>
@@ -276,12 +276,12 @@ $(function() {
 		<label for='data_0__mapping__0__extra__{id}__allow_judge_0'>no</label>
 	</td>
 	<td>
-		<?php echo addInput("data[0][mapping][0][extra][{id}][color]", '{color}', 15, 25,
+		<?php echo addInput("data[0][mapping][0][extra][{id}][color]", '{color}', 10, 25,
                             'class="color {required:false,adjust:false,hash:true,caps:false}"'); ?>
 	</td>
 	<td>
 		<?php echo addInputField('number',"data[0][mapping][0][extra][{id}][lazy_eval_results]",
-                                 '{lazy_eval_results}', ' min="0" max="1"'); ?>
+                                 '{lazy_eval_results}', ' style="width:10ex" min="0" max="1"'); ?>
 	</td>
 </tr>
 </script>
@@ -297,7 +297,7 @@ $(function() {
 		<th>color
 		<a target="_blank" href="http://www.w3schools.com/cssref/css_colornames.asp">
 		<img src="../images/b_help.png" class="smallpicto" alt="?"></a></th>
-		<th>lazy evaluation</th>
+		<th>lazy eval</th>
 	</tr>
 	</thead>
 	<tbody>
