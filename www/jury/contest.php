@@ -459,27 +459,34 @@ if ( count($removals)==0 && ! IS_ADMIN ) {
 		echo addForm('removed_intervals.php') .
 		    addHidden('cmd', 'add') . addHidden('cid', $id);
 	}
-	echo "<table>\n";
-	echo "<tr><th>from</th><td></td><th>to</th><td></td><th>duration</th></tr>\n";
+	echo "<table class=\"list\">\n<thead><tr>" .
+	     "<th>id</th><th>from</th><th></th><th>to</th><th>duration</th><th></th>" .
+	     "</tr></thead>\n<tbody>\n";
+	$iseven = false;
 	foreach ( $removals as $row ) {
-		echo "<tr><td>" . $row['starttime_string'] . "</td><td>&rarr;</td>" .
-		     "<td>" . $row['endtime_string'] . "</td><td></td><td>( " .
-		     printtimediff($row['starttime'], $row['endtime']) . " )</td>" .
+		echo '<tr class="' . ($iseven ? 'roweven' : 'rowodd') . '">' .
+		     "<td>" . $row['intervalid'] . "</td>" .
+		     "<td>" . $row['starttime_string'] . "</td><td>&nbsp;&rarr;&nbsp;</td>" .
+		     "<td>" . $row['endtime_string'] . "</td><td class=\"tdright\">&nbsp;" .
+		     printtimediff($row['starttime'], $row['endtime']) . "</td>" .
 		     "<td><a href=\"removed_intervals.php?cmd=delete&amp;cid=$id&amp;intervalid=" .
 		     (int)$row['intervalid'] . "\" onclick=\"return confirm('Really delete interval?');\">" .
 		     "<img src=\"../images/delete.png\" alt=\"delete\" class=\"picto\" /></a></td>" .
 		     "</tr>\n";
+		$iseven = !$iseven;
 	}
 	if ( IS_ADMIN ) {
-		echo "<tr><td>" . addInput('starttime_string', null, 30, 64,
-		                           'required pattern="' . $pattern_datetime . '"') .
-		         "</td><td>&rarr;</td>" .
-		         "<td>" . addInput('endtime_string',   null, 30, 64,
-		                           'required pattern="' . $pattern_datetime . '"') .
-		         "</td><td></td>" .
-		         "<td>" . addSubmit('Add') . "</td><td>($human_abs_datetime)</td></tr>\n";
+		echo "<tr><td>new&nbsp;</td>" .
+		     "<td>" . addInput('starttime_string', null, 30, 64,
+		                       'required pattern="' . $pattern_datetime . '"') .
+		     "</td><td>&nbsp;&rarr;&nbsp;</td>" .
+		     "<td>" . addInput('endtime_string',   null, 30, 64,
+		                       'required pattern="' . $pattern_datetime . '"') .
+		     "</td><td></td><td>" . addSubmit('Add') . "</td></tr>\n";
 	}
-	echo "</table>\n\n";
+	echo "</tbody>\n</table>\n" .
+	     "<p>Use the format <b><kbd>$human_abs_datetime</kbd></b> " .
+	     "for start/end times.</p>\n";
 	if ( IS_ADMIN ) echo addEndForm();
 }
 
