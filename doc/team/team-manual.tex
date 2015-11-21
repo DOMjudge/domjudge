@@ -45,7 +45,7 @@ and~\ref{fig:team-scoreboard} on the next page for an impression.
 
 Solutions have to read all input from `standard in' and write all
 output to `standard out' (also known as console). You will never have
-to open (other) files. See appendix~\ref{codeexamples} for some
+to open (other) files. See appendix~\ref{codeexamples} for some code
 examples.
 
 \subsection*{Submitting solutions}
@@ -56,10 +56,11 @@ the web interface:
 \begin{description}[\breaklabel\setlabelstyle{\bfseries}]
 \ifcmdsubmit{
 \item[Command-line]
-Use \cmd{submit <problem>.<extension>}, where \cmd{<problem>} is the
+Use \cmd{submit <filename>}. If your filename is of the form
+\cmd{<problem>.<extension>} where \cmd{<problem>} is the
 label of the problem and \cmd{<extension>} is a standard extension for
-your language.  For a complete reference of all options and examples,
-see \cmd{submit --help}.
+your language, then these will automatically be detected. For a
+complete reference of all options and examples, see \cmd{submit --help}.
 }
 \item[Web interface]
 From your team page, \url{\WEBBASEURI team}, click \textbf{Select file\ldots} in the
@@ -254,8 +255,8 @@ and testing on one of the jury computers.
 
 Your program will be compiled on a jury computer running Linux.
 All submitted source files will be passed to the compiler which
-generates a single program to run out of them; for languages where
-that is relevant, the first specified file will be considered the
+generates a single program to run; for languages where
+this is relevant, the first file specified will be considered the
 `main' source file.
 
 Using a different compiler or operating system than the jury should
@@ -292,7 +293,7 @@ submissions are subjected:
 \begin{description}[\setlabelphantom{number of processes}]
 \item[compile time]
 Compilation of your program may take no longer than \COMPILETIME\
-seconds. After that compilation will be aborted and the result will
+seconds. After that, compilation will be aborted and the result will
 be a compile error. In practice this should never give rise to
 problems. Should this happen to a normal program, please inform the
 jury right away.
