@@ -25,7 +25,8 @@ if( $res->count() == 0 ) {
 		"<th>shortname</th>" .
 		"<th>name</th>" .
 		"<th>country</th>" .
-		"<th>#teams</th></tr>\n</thead>\n<tbody>\n";
+		"<th>#teams</th>" .
+		"<th></th></tr>\n</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
 		$countryflag = "../images/countries/" . urlencode($row['country']) . ".png";
