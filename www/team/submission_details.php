@@ -63,7 +63,7 @@ if ( ( $show_compile == 2 ) ||
 
 	if ( strlen(@$row['output_compile']) > 0 ) {
 		echo "<pre class=\"output_text\">\n".
-			htmlspecialchars(@$row['output_compile'], ENT_SUBSTITUTE)."\n</pre>\n\n";
+			htmlspecialchars(@$row['output_compile'])."\n</pre>\n\n";
 	} else {
 		echo "<p class=\"nodata\">There were no compiler errors or warnings.</p>\n";
 	}
@@ -109,7 +109,7 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 		echo "<h5>Program output</h5>\n";
 		if ( @$run['output_run'] ) {
 			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_run'], ENT_SUBSTITUTE)."</pre>\n\n";
+			    htmlspecialchars($run['output_run'])."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no program output.</p>\n";
 		}
@@ -124,7 +124,7 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 		echo "<h5>Error output (info/debug/errors)</h5>\n";
 		if ( @$run['output_error'] ) {
 			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_error'], ENT_SUBSTITUTE)."</pre>\n\n";
+			    htmlspecialchars($run['output_error'])."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no stderr output.</p>\n";
 		}
