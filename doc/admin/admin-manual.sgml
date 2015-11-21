@@ -1303,14 +1303,9 @@ as compile, run, and compare scripts.
 <tag>language</tag>
 Programming languages in which to accept and judge submissions.
 <tt>langid</tt> is a string of maximum length 8, which references the
-language; it is used internally as extension for source files.
-This reference is also used to call the correct compile
-script (<tt>lib/judge/compile_c.sh</tt>, etc.), so when adding
-a new language, check that these match.
-Alternative extensions that should be recognized are JSON encoded in
-<tt>extensions</tt>.
-
+language.
 <tt>name</tt> is the displayed name of the language;
+<tt>extensions</tt> is a JSON encoded list of recognized filename extensions;
 <tt>allow_submit</tt> determines whether teams can submit
 using this language; <tt>allow_judge</tt> determines whether
 judgehosts will judge submissions for this problem. This can for
@@ -1319,7 +1314,8 @@ with the judging of a specific language; after resolution of the
 problem this can be set to <em>yes</em> again.
 
 <tt>time_factor</tt> is the relative factor by which the timelimit is
-multiplied for solutions in this language.
+multiplied for solutions in this language; <tt>compile_script</tt>
+refers to a compile executable script that is used for this language.
 
 <tag>problem</tag>
 This table contains the problem definitions. <tt>probid</tt> is the
