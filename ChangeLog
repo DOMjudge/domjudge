@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 4.0.7 - DEV
 -------------------
+ - [security] Disable GCC family automatic language detection to
+   prevent submitting other languages or object/executable code.
 
 Version 4.0.6 - 12 August 2015
 ------------------------------

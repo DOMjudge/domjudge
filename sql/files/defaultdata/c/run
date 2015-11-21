@@ -7,7 +7,8 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
-# -x c:     Explicitly set compile language to C (no C++ autodetect by extension)
+# -x c:     Explicitly set compile language to C (no C++ nor object files
+#           autodetected by extension)
 # -Wall:	Report all warnings
 # -O2:		Level 2 optimizations (default for speed)
 # -static:	Static link with all libraries

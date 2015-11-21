@@ -7,11 +7,13 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
+# -x f95:       Explicitly set compile language to Fortran95 (no object
+#               files or other languages autodetected by extension)
 # -Wall:        Report all warnings
 # -02:          Level 2 optimizations (default for speed)
 # -static:      Static link with all libraries
 # -cpp:         Run C preprocessor
-gfortran -static -Wall -O2 -cpp -DONLINE_JUDGE -DDOMJUDGE -o $DEST "$@"
+gfortran -x f95 -static -Wall -O2 -cpp -DONLINE_JUDGE -DDOMJUDGE -o $DEST "$@"
 exitcode=$?
 
 # clean created files:
