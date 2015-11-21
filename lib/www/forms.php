@@ -12,16 +12,16 @@
  */
 function addInputField($type, $name = null, $value = null, $attributes = '') {
     if ( $name !== null && $type != 'hidden' ) {
-		$id = ' id="' . htmlspecialchars(strtr($name,'[]','__'));
-		if ( $type == 'radio' ) $id .= htmlspecialchars($value);
+		$id = ' id="' . specialchars(strtr($name,'[]','__'));
+		if ( $type == 'radio' ) $id .= specialchars($value);
 		$id .= '"';
     } else {
         $id = '';
     }
 
 	return '<input type="'.$type.'"'.
-		($name  !== null ? ' name="'.htmlspecialchars($name).'"' : '') . $id .
-		($value !== null ? ' value="'.htmlspecialchars($value).'"' : '') .
+		($name  !== null ? ' name="'.specialchars($name).'"' : '') . $id .
+		($value !== null ? ' value="'.specialchars($value).'"' : '') .
 		' ' . $attributes . " />\n";
 }
 
@@ -101,14 +101,14 @@ function addSelect($name, $values, $default = null, $usekeys = false, $multi = f
 	$size = 5;
 	if ( is_int($multi) ) $size = $multi;
 
-	$ret = '<select name="' . htmlspecialchars($name) . '"' .
+	$ret = '<select name="' . specialchars($name) . '"' .
 		($multi ? " multiple=\"multiple\" size=\"$size\"" : '') .
-		' id="' . htmlspecialchars(strtr($name,'[]','__')) . "\">\n";
+		' id="' . specialchars(strtr($name,'[]','__')) . "\">\n";
 	foreach ($values as $k => $v) {
 		if ( ! $usekeys ) $k = $v;
-		$ret .= '<option value="' .	htmlspecialchars( $k ) . '"' .
+		$ret .= '<option value="' .	specialchars( $k ) . '"' .
 			( matchSelect($k, $default) ? ' selected="selected"' : '') . '>' .
-			htmlspecialchars($v) ."</option>\n";
+			specialchars($v) ."</option>\n";
 	}
 	$ret .= "</select>\n";
 
@@ -121,7 +121,7 @@ function addSelect($name, $values, $default = null, $usekeys = false, $multi = f
  */
 function addSubmit($value, $name = null, $onclick = null, $enable = true, $extraattrs = "") {
 	return addInputField('submit', $name, $value,
-		(empty($onclick) ? null : ' onclick="'.htmlspecialchars($onclick).'"') .
+		(empty($onclick) ? null : ' onclick="'.specialchars($onclick).'"') .
 		($enable ? '' : ' disabled="disabled"') .
 		(empty($extraattrs) ? '' : " $extraattrs"));
 }
@@ -136,10 +136,10 @@ function addReset($value) {
  * Textarea form element.
  */
 function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '') {
-	return '<textarea name="'.htmlspecialchars($name).'" '.
+	return '<textarea name="'.specialchars($name).'" '.
 		'rows="'.(int)$rows .'" cols="'.(int)$cols.'" '.
-		'id="' . htmlspecialchars(strtr($name,'[]','__')).'" ' .
-		$attr . '>'.htmlspecialchars($text) ."</textarea>\n";
+		'id="' . specialchars(strtr($name,'[]','__')).'" ' .
+		$attr . '>'.specialchars($text) ."</textarea>\n";
 }
 
 /**
@@ -153,11 +153,11 @@ function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '') {
 function addAddRowButton($templateid, $tableid, $value = 'Add row', $name = null)
 {
 	$return = addInputField('button', $name, $value, 'onclick="addRow(\'' .
-	                                htmlspecialchars($templateid) . '\', \'' .
-	                                htmlspecialchars($tableid) . '\')"');
+	                                specialchars($templateid) . '\', \'' .
+	                                specialchars($tableid) . '\')"');
 	$return .= "<script type=\"text/javascript\">
     $(function() {
-        addFirstRow('" . htmlspecialchars($templateid) . "', '" . htmlspecialchars($tableid) . "');
+        addFirstRow('" . specialchars($templateid) . "', '" . specialchars($tableid) . "');
     });
 </script>";
 	return $return;
@@ -175,7 +175,7 @@ function addForm($action, $method = 'post', $id = '', $enctype = '', $charset = 
 		$enctype = ' enctype="'.$enctype.'"';
 	}
 	if ( $charset ) {
-		$charset = ' accept-charset="'.htmlspecialchars($charset).'"';
+		$charset = ' accept-charset="'.specialchars($charset).'"';
 	}
 
 	return '<form style="display:inline;" action="'. $action .'" method="'. $method .'"'.

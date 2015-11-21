@@ -76,7 +76,7 @@ require(LIBWWWDIR . '/header.php');
 
 $edit_mode = ( isset($_GET['edit_source']) );
 
-echo '<h2>' . ( $edit_mode ? 'Edit content of e' : 'E' ) . "xecutable " .htmlspecialchars($id). "</h2>\n\n";
+echo '<h2>' . ( $edit_mode ? 'Edit content of e' : 'E' ) . "xecutable " .specialchars($id). "</h2>\n\n";
 
 if ( $edit_mode ) {
 	echo addForm($pagename, 'post', null, 'multipart/form-data');
@@ -113,7 +113,7 @@ for ($j = 0; $j < $zip->numFiles; $j++) {
 
 	$html .= '<div class="tabbertab' . ((int) @$_GET['rank'] === $j ? ' tabbertabdefault' : '') .'">' .
 		'<h2 class="filename"><a id="source' . $j . '"></a>' .
-		htmlspecialchars($filename) . "</h2>\n\n";
+		specialchars($filename) . "</h2>\n\n";
 	// FIXME: skip files based on size?
 	if ( $edit_mode ) {
 		$html .= addTextArea('texta'. $j, $content, 120, 40) . "<br/>\n";
@@ -125,7 +125,7 @@ for ($j = 0; $j < $zip->numFiles; $j++) {
 			"</a>\n\n";
 	}
 
-	$html .= '<div class="editor" id="editor' . $j . '">' . htmlspecialchars($content) . '</div>';
+	$html .= '<div class="editor" id="editor' . $j . '">' . specialchars($content) . '</div>';
 	$html .= '<script>' . "\n";
 
 	if ( $edit_mode ) {
@@ -160,7 +160,7 @@ if ( count($skippedBinary) > 0 ) {
 	echo "binary files:\n";
 	echo "<ul>";
 	foreach ($skippedBinary as $skipped) {
-		echo "<li>" . htmlspecialchars($skipped) . "</li>";
+		echo "<li>" . specialchars($skipped) . "</li>";
 	}
 	echo "</ul>";
 }

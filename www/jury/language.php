@@ -9,8 +9,8 @@
 require('init.php');
 
 $id = getRequestID(FALSE);
-$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
-                 'language' . ($id ? ' '.htmlspecialchars(@$id) : ''));
+$title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
+                 'language' . ($id ? ' '.specialchars(@$id) : ''));
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -53,7 +53,7 @@ if ( !empty($cmd) ):
 
 		echo "<tr><td>Language ID/ext:</td><td>" .
 			addHidden('keydata[0][langid]', $row['langid']) .
-			htmlspecialchars($row['langid']);
+			specialchars($row['langid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__langid_\">Language ID/ext:</label></td><td>";
 		echo addInput('data[0][langid]', null, 8, 8,  'required pattern="' . IDENTIFIER_CHARS . '+" title="alphanumerics only"');
@@ -105,7 +105,7 @@ $data = $DB->q('TUPLE SELECT * FROM language WHERE langid = %s', $id);
 
 if ( ! $data ) error("Missing or invalid language id");
 
-echo "<h1>Language ".htmlspecialchars($data['name'])."</h1>\n\n";
+echo "<h1>Language ".specialchars($data['name'])."</h1>\n\n";
 
 echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 	addHidden('id', $id) .
@@ -115,8 +115,8 @@ echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 
 ?>
 <table>
-<tr><td>ID/extension:</td><td><?php echo htmlspecialchars($data['langid'])?></td></tr>
-<tr><td>Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
+<tr><td>ID/extension:</td><td><?php echo specialchars($data['langid'])?></td></tr>
+<tr><td>Name:        </td><td><?php echo specialchars($data['name'])?></td></tr>
 <tr><td>Allow submit:</td><td><?php echo printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
@@ -127,19 +127,19 @@ echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
 		" judging for this language?')"); ?>
 </td></tr>
-<tr><td>Time factor:  </td><td><?php echo htmlspecialchars($data['time_factor'])?> x</td></tr>
+<tr><td>Time factor:  </td><td><?php echo specialchars($data['time_factor'])?> x</td></tr>
 <tr><td>Compile script:</td><td class="filename">
 <?php
 if ( empty($data['compile_script']) ) {
 	echo '<span class="nodata">none specified</span>';
 } else {
 	echo '<a href="executable.php?id=' . urlencode($data['compile_script']) . '">' .
-		htmlspecialchars($data['compile_script']) . '</a>';
+		specialchars($data['compile_script']) . '</a>';
 }
 ?>
 </td></tr>
 <tr><td>Extensions:  </td><td><?php
-echo htmlspecialchars(implode(', ',json_decode($data['extensions']))) ?></td></tr>
+echo specialchars(implode(', ',json_decode($data['extensions']))) ?></td></tr>
 </table>
 
 <?php
@@ -153,7 +153,7 @@ if ( IS_ADMIN ) {
 
 echo rejudgeForm('language',$data['langid']) . "<br />\n\n";
 
-echo "<h2>Submissions in " . htmlspecialchars($data['name']) . "</h2>\n\n";
+echo "<h2>Submissions in " . specialchars($data['name']) . "</h2>\n\n";
 
 $restrictions = array( 'langid' => $id );
 putSubmissions($cdatas, $restrictions);

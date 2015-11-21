@@ -137,7 +137,7 @@ function show_loginpage()
 		if ( empty($_SERVER['REMOTE_USER'] ) ) {
 			show_failed_login("No authentication information provided by Apache.");
 		} else {
-			show_failed_login("User '" . htmlspecialchars($_SERVER['REMOTE_USER']) . "' not authorized.");
+			show_failed_login("User '" . specialchars($_SERVER['REMOTE_USER']) . "' not authorized.");
 		}
 	case 'IPADDRESS':
 	case 'PHP_SESSIONS':
@@ -442,7 +442,7 @@ function do_logout()
 
 	require(LIBWWWDIR . '/header.php');
 	echo "<h1>Logged out</h1>\n\n<p>Successfully logged out as user '" .
-	    htmlspecialchars($username) . "'.</p>\n" .
+	    specialchars($username) . "'.</p>\n" .
 	    "<p><a href=\"../\">Click here to return to the main site.</a></p>\n\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;

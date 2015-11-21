@@ -9,8 +9,8 @@
 require('init.php');
 
 $id = getRequestID();
-$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
-                 'user' . ($id ? ' '.htmlspecialchars(@$id) : ''));
+$title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
+                 'user' . ($id ? ' '.specialchars(@$id) : ''));
 
 if ( isset($_GET['cmd'] ) ) {
     $cmd = $_GET['cmd'];
@@ -37,10 +37,10 @@ if ( !empty($cmd) ):
 
 		echo "<tr><td>User ID:</td><td>" .
 		    addHidden('keydata[0][userid]', $row['userid']) .
-		    htmlspecialchars($row['userid']) . "</td></tr>\n" .
+		    specialchars($row['userid']) . "</td></tr>\n" .
 		    "<tr><td>Username:</td><td class=\"username\">" .
 		    addHidden('keydata[0][username]', $row['username']) .
-		    htmlspecialchars($row['username']);
+		    specialchars($row['username']);
     } else {
         echo "<tr><td><label for=\"data_0__login_\">Username:</label></td><td class=\"username\">";
         echo addInput('data[0][username]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required');
@@ -120,7 +120,7 @@ if ( ! $row ) error("Missing or invalid user id");
 
 $userimage = "../images/users/" . urlencode($row['username']) . ".jpg";
 
-echo "<h1>User ".htmlspecialchars($row['name'])."</h1>\n\n";
+echo "<h1>User ".specialchars($row['name'])."</h1>\n\n";
 
 if ( $row['enabled'] != 1 ) {
     echo "<p><em>User is disabled</em></p>\n\n";
@@ -129,13 +129,13 @@ if ( $row['enabled'] != 1 ) {
 ?>
 
 <div class="col1"><table>
-<tr><td>ID:        </td><td><?php echo htmlspecialchars($row['userid']) ?></td></tr>
-<tr><td>Login:     </td><td class="teamid"><?php echo htmlspecialchars($row['username']) ?></td></tr>
-<tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name']) ?></td></tr>
+<tr><td>ID:        </td><td><?php echo specialchars($row['userid']) ?></td></tr>
+<tr><td>Login:     </td><td class="teamid"><?php echo specialchars($row['username']) ?></td></tr>
+<tr><td>Name:      </td><td><?php echo specialchars($row['name']) ?></td></tr>
 <tr><td>Email:      </td><td><?php
 if ( !empty($row['email']) ) {
 	echo "<a href=\"mailto:" . urlencode($row['email']) . "\">" .
-	     htmlspecialchars($row['email']) . "</a>";
+	     specialchars($row['email']) . "</a>";
 } else {
 	echo "-";
 }
@@ -159,7 +159,7 @@ if ( !empty($row['password']) ) {
 if ( $row['teamid'] ) {
 	echo "<td class=\"teamid\"><a href=\"team.php?id=" .
 	     urlencode($row['teamid']) . "\">" .
-	     htmlspecialchars($row['teamname'] . " (t" .$row['teamid'].")") . "</a></td>";
+	     specialchars($row['teamname'] . " (t" .$row['teamid'].")") . "</a></td>";
 } else {
 	echo "<td>-</td>";
 } ?></tr>

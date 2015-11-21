@@ -43,12 +43,12 @@ if( ! $row['valid'] ) {
 
 <table>
 <tr><td>Problem:</td>
-	<td><span class="probid"><?php echo htmlspecialchars($row['shortname']) ?></span> -
-    <?php echo htmlspecialchars($row['probname'])?></td></tr>
+	<td><span class="probid"><?php echo specialchars($row['shortname']) ?></span> -
+    <?php echo specialchars($row['probname'])?></td></tr>
 <tr><td>Submitted:</td>
 	<td><?php echo printtime($row['submittime'])?></td></tr>
 <tr><td>Language:</td>
-	<td><?php echo htmlspecialchars($row['langname'])?></td></tr>
+	<td><?php echo specialchars($row['langname'])?></td></tr>
 </table>
 
 <p>Result: <?php echo printresult($row['result'], TRUE)?></p>
@@ -63,7 +63,7 @@ if ( ( $show_compile == 2 ) ||
 
 	if ( strlen(@$row['output_compile']) > 0 ) {
 		echo "<pre class=\"output_text\">\n".
-			htmlspecialchars(@$row['output_compile'], ENT_SUBSTITUTE)."\n</pre>\n\n";
+			specialchars(@$row['output_compile'])."\n</pre>\n\n";
 	} else {
 		echo "<p class=\"nodata\">There were no compiler errors or warnings.</p>\n";
 	}
@@ -100,7 +100,7 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 		}
 		echo "<table>\n" .
 		    "<tr><td>Description:</td><td>" .
-		    htmlspecialchars($run['description']) . "</td></tr>" .
+		    specialchars($run['description']) . "</td></tr>" .
 		    "<tr><td>Runtime:</td><td>$run[runtime] sec</td></tr>" .
 		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
 		    ( $run['runresult']=='correct' ? '' : 'in' ) .
@@ -109,7 +109,7 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 		echo "<h5>Program output</h5>\n";
 		if ( @$run['output_run'] ) {
 			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_run'], ENT_SUBSTITUTE)."</pre>\n\n";
+			    specialchars($run['output_run'])."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no program output.</p>\n";
 		}
@@ -124,7 +124,7 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 		echo "<h5>Error output (info/debug/errors)</h5>\n";
 		if ( @$run['output_error'] ) {
 			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_error'], ENT_SUBSTITUTE)."</pre>\n\n";
+			    specialchars($run['output_error'])."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no stderr output.</p>\n";
 		}

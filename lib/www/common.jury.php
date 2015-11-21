@@ -14,11 +14,11 @@ require_once(LIBEXTDIR . '/spyc/spyc.php');
  */
 function addLink($table, $multi = false)
 {
-	return "<a href=\"" . htmlspecialchars($table) . ".php?cmd=add\">" .
+	return "<a href=\"" . specialchars($table) . ".php?cmd=add\">" .
 		"<img src=\"../images/add" . ($multi?"-multi":"") .
 		".png\" alt=\"add" . ($multi?" multiple":"") .
 		"\" title=\"add" .   ($multi?" multiple":"") .
-		" new " . htmlspecialchars($table) . "\" class=\"picto\" /></a>";
+		" new " . specialchars($table) . "\" class=\"picto\" /></a>";
 }
 
 /**
@@ -29,7 +29,7 @@ function addLink($table, $multi = false)
  */
 function editLink($table, $value, $multi = false)
 {
-	return "<a href=\"" . htmlspecialchars($table) . ".php?cmd=edit" .
+	return "<a href=\"" . specialchars($table) . ".php?cmd=edit" .
 		($multi ? "" : "&amp;id=" . urlencode($value) ) .
 		"&amp;referrer=" . urlencode(basename($_SERVER['SCRIPT_NAME']) .
 		(empty($_REQUEST['id']) ? '' : '?id=' . urlencode($_REQUEST['id']))) .
@@ -37,7 +37,7 @@ function editLink($table, $value, $multi = false)
 		"<img src=\"../images/edit" . ($multi?"-multi":"") .
 		".png\" alt=\"edit" . ($multi?" multiple":"") .
 		"\" title=\"edit " .   ($multi?"multiple ":"this ") .
-		htmlspecialchars($table) . "\" class=\"picto\" /></a>";
+		specialchars($table) . "\" class=\"picto\" /></a>";
 }
 
 /**
@@ -62,7 +62,7 @@ function delLinkMultiple($table, $fields, $values, $referrer = '')
 	return "<a href=\"delete.php?table=" . urlencode($table) . $arguments .
 	       "&amp;referrer=" . urlencode($referrer)
 	       ."\"><img src=\"../images/delete.png\" " .
-	       "alt=\"delete\" title=\"delete this " . htmlspecialchars($table) .
+	       "alt=\"delete\" title=\"delete this " . specialchars($table) .
 	       "\" class=\"picto\" /></a>";
 }
 
@@ -123,9 +123,9 @@ function rejudgeForm($table, $id)
 		if ( IS_ADMIN ) $allbutton = true;
 	}
 
-	$ret .= '<input type="submit" value="' . htmlspecialchars($button) . '" ' .
+	$ret .= '<input type="submit" value="' . specialchars($button) . '" ' .
 		($disabled ? 'disabled="disabled"' : 'onclick="return confirm(\'' .
-		htmlspecialchars($question) . '\');"') . " /><br />\n" .
+		specialchars($question) . '\');"') . " /><br />\n" .
 		($allbutton ? addCheckBox('include_all') .
 		              '<label for="include_all">include pending/correct submissions</label><br />' : '' ) .
 		addCheckBox('full_rejudge') . '<label for="full_rejudge">create rejudging with reason: </label>' .

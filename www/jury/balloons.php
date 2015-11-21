@@ -136,28 +136,28 @@ if ( !empty($BALLOONS) ) {
 
 		if ( count($contestids) > 1 ) {
 			// contest of this problem, only when more than one active
-			echo '<td>' . htmlspecialchars($row['shortname']) . '</td>';
+			echo '<td>' . specialchars($row['shortname']) . '</td>';
 		}
 
 		// the balloon earned
 		echo '<td class="probid">' .
 			'<div class="circle" style="background-color: ' .
-		    htmlspecialchars($probs_data[$row['probid']]['color']) .
-			';"></div> ' . htmlspecialchars($row['probshortname']) . '</td>';
+		    specialchars($probs_data[$row['probid']]['color']) .
+			';"></div> ' . specialchars($row['probshortname']) . '</td>';
 
 		// team name, location (room) and category
-		echo '<td>t' . htmlspecialchars($row['teamid']) . '</td><td>' .
-			htmlspecialchars($row['teamname']) . '</td><td>' .
-			htmlspecialchars($row['room']) . '</td><td>' .
-			htmlspecialchars($row['catname']) . '</td><td>';
+		echo '<td>t' . specialchars($row['teamid']) . '</td><td>' .
+			specialchars($row['teamname']) . '</td><td>' .
+			specialchars($row['room']) . '</td><td>' .
+			specialchars($row['catname']) . '</td><td>';
 
 		// list of balloons for this team
 		sort($TOTAL_BALLOONS[$row['teamid']]);
 		$TOTAL_BALLOONS[$row['teamid']] = array_unique($TOTAL_BALLOONS[$row['teamid']]);
 		foreach($TOTAL_BALLOONS[$row['teamid']] as $prob_solved) {
-			echo '<div title="' . htmlspecialchars($prob_solved) .
+			echo '<div title="' . specialchars($prob_solved) .
 				'" class="circle" style="background-color: ' .
-				htmlspecialchars($probs_data[$prob_solved]['color']) .
+				specialchars($probs_data[$prob_solved]['color']) .
 				';"></div> ';
 		}
 		echo '</td><td>';

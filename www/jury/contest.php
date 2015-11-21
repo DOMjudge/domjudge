@@ -10,8 +10,8 @@ require('init.php');
 require(LIBWWWDIR . '/checkers.jury.php');
 
 $id = getRequestID();
-$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
-                 'contest' . ($id ? ' c'.htmlspecialchars(@$id) : ''));
+$title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
+                 'contest' . ($id ? ' c'.specialchars(@$id) : ''));
 
 $jscolor=true;
 $jqtokeninput = true;
@@ -36,7 +36,7 @@ if ( !empty($_GET['cmd']) ):
 
 		echo "<tr><td>Contest ID:</td><td>" .
 			addHidden('keydata[0][cid]', $row['cid']) .
-			'c' . htmlspecialchars($row['cid']) .
+			'c' . specialchars($row['cid']) .
 			"</td></tr>\n";
 	}
 ?>
@@ -324,7 +324,7 @@ echo addHidden('cmd', $cmd) .
 	addHidden('table','contest') .
 	addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .
 	addSubmit('Save', null, 'clearTeamsOnPublic()') .
-	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate' . (isset($_GET['referrer']) ? ' formaction="' . htmlspecialchars($_GET['referrer']) . '"':'')) .
+	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate' . (isset($_GET['referrer']) ? ' formaction="' . specialchars($_GET['referrer']) . '"':'')) .
 	addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
@@ -350,7 +350,7 @@ if ( isset($_GET['edited']) ) {
 
 $data = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
 
-echo "<h1>Contest: ".htmlspecialchars($data['name'])."</h1>\n\n";
+echo "<h1>Contest: ".specialchars($data['name'])."</h1>\n\n";
 
 if ( in_array($data['cid'], $cids) ) {
 	echo "<p><em>This is an active contest.</em></p>\n\n";
@@ -371,28 +371,28 @@ echo "<table>\n";
 echo '<tr><td>CID:</td><td>c' .
 	(int)$data['cid'] . "</td></tr>\n";
 echo '<tr><td>Short name:</td><td>' .
-     htmlspecialchars($data['shortname']) .
+     specialchars($data['shortname']) .
      "</td></tr>\n";
 echo '<tr><td>Name:</td><td>' .
-	htmlspecialchars($data['name']) .
+	specialchars($data['name']) .
 	"</td></tr>\n";
 echo '<tr><td>Activate time:</td><td>' .
-	htmlspecialchars(@$data['activatetime_string']) .
+	specialchars(@$data['activatetime_string']) .
 	"</td></tr>\n";
 echo '<tr><td>Start time:</td><td>' .
-	htmlspecialchars($data['starttime_string']) .
+	specialchars($data['starttime_string']) .
 	"</td></tr>\n";
 echo '<tr><td>Scoreboard freeze:</td><td>' .
-	(empty($data['freezetime_string']) ? "-" : htmlspecialchars(@$data['freezetime_string'])) .
+	(empty($data['freezetime_string']) ? "-" : specialchars(@$data['freezetime_string'])) .
 	"</td></tr>\n";
 echo '<tr><td>End time:</td><td>' .
-	htmlspecialchars($data['endtime_string']) .
+	specialchars($data['endtime_string']) .
 	"</td></tr>\n";;
 echo '<tr><td>Scoreboard unfreeze:</td><td>' .
-	(empty($data['unfreezetime_string']) ? "-" : htmlspecialchars(@$data['unfreezetime_string'])) .
+	(empty($data['unfreezetime_string']) ? "-" : specialchars(@$data['unfreezetime_string'])) .
 	"</td></tr>\n";
 echo '<tr><td>Dectivate time:</td><td>' .
-     htmlspecialchars(@$data['deactivatetime_string']) .
+     specialchars(@$data['deactivatetime_string']) .
      "</td></tr>\n";
 echo '<tr><td>Process balloons:</td><td>' .
      ($data['process_balloons'] ? 'yes' : 'no') .
@@ -464,15 +464,15 @@ else {
 		     ($iseven ? 'roweven' : 'rowodd') . '">' .
 		     "<td class=\"tdright\">" . $link .
 		     "p" . (int)$row['probid'] . "</a></td>\n";
-		echo "<td>" . $link . htmlspecialchars($row['name']) . "</a></td>\n";
-		echo "<td>" . $link . htmlspecialchars($row['shortname']) . "</a></td>\n";
-		echo "<td>" . $link . htmlspecialchars($row['points']) . "</a></td>\n";
+		echo "<td>" . $link . specialchars($row['name']) . "</a></td>\n";
+		echo "<td>" . $link . specialchars($row['shortname']) . "</a></td>\n";
+		echo "<td>" . $link . specialchars($row['points']) . "</a></td>\n";
 		echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_submit']) . "</a></td>\n";
 		echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_judge']) . "</a></td>\n";
 		echo ( !empty($row['color'])
-			? '<td title="' . htmlspecialchars($row['color']) .
+			? '<td title="' . specialchars($row['color']) .
 			  '">' . $link . '<div class="circle" style="background-color: ' .
-			  htmlspecialchars($row['color']) .
+			  specialchars($row['color']) .
 			  ';"></div></a></td>'
 			: '<td>'. $link . '&nbsp;</a></td>' );
 		echo "<td>" . $link . ( isset($row['lazy_eval_results']) ?

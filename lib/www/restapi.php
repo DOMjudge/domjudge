@@ -171,7 +171,7 @@ class RestApi {
 		if ( empty($userdata) ) {
 			print "anonymous user";
 		} else {
-			print htmlspecialchars($userdata['username']) . " with roles ";
+			print specialchars($userdata['username']) . " with roles ";
 			$roles = $userdata['roles'];
 			if ( !empty($userdata['teamid']) ) $roles[] = "team(".$userdata['teamid'].")";
 			print implode(", ", $roles);

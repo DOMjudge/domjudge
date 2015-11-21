@@ -14,10 +14,12 @@ Version 5.1.0 - DEV
  - Merge Debian/Ubuntu chroot scripts and add minor fixes.
  - Drop CHROOT_SCRIPT setting, use hardcoded chroot-startstop.sh.
  - Fix float compare script output and relative checking.
- - Fix various small bugs in problem ZIP import
+ - Fix various small bugs in problem ZIP import.
  - [security] Disable GCC family automatic language detection to
    prevent submitting other languages or object/executable code.
  - Write compare script errors to logfile. (Closes #179).
+ - Substitute invalid Unicode characters instead of producing
+   blank output.
  - Various smaller fixes and improvements to the jury interface.
 
 Version 5.0.0 - 11 August 2015

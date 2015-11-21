@@ -34,7 +34,7 @@ $row = $DB->q('TUPLE SELECT judgehost.*, r.name AS restrictionname
                LEFT JOIN judgehost_restriction r USING (restrictionid)
                WHERE hostname = %s', $id);
 
-$title = 'Judgehost '.htmlspecialchars($row['hostname']);
+$title = 'Judgehost '.specialchars($row['hostname']);
 
 require(LIBWWWDIR . '/header.php');
 
@@ -50,7 +50,7 @@ echo "<h1>Judgehost ".printhost($row['hostname'])."</h1>\n\n";
 		echo '<i>None</i>';
 	} else {
 		echo '<a href="judgehost_restriction.php?id=' . urlencode($row['restrictionid']) . '">' .
-		     htmlspecialchars($row['restrictionname']) . '</a>';
+		     specialchars($row['restrictionname']) . '</a>';
 	}
 	?>
 </td></tr>

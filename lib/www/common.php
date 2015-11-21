@@ -12,7 +12,7 @@ define('CIRCLE_SYM', '&#9679;');
 function parseRunDiff($difftext){
 	$line = strtok($difftext,"\n"); //first line
 	if(sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1)
-		return htmlspecialchars($difftext);
+		return specialchars($difftext);
 	$return = $line . "\n";
 
 	// Add second line 'team ? reference'
@@ -31,20 +31,20 @@ function parseRunDiff($difftext){
 		$mid = mb_substr($diffline, $midloc-1, 3);
 		switch($mid){
 			case ' = ':
-				$formdiffline = "<span class='correct'>".htmlspecialchars($diffline)."</span>";
+				$formdiffline = "<span class='correct'>".specialchars($diffline)."</span>";
 				break;
 			case ' ! ':
-				$formdiffline = "<span class='differ'>".htmlspecialchars($diffline)."</span>";
+				$formdiffline = "<span class='differ'>".specialchars($diffline)."</span>";
 				break;
 			case ' $ ':
-				$formdiffline = "<span class='endline'>".htmlspecialchars($diffline)."</span>";
+				$formdiffline = "<span class='endline'>".specialchars($diffline)."</span>";
 				break;
 			case ' > ':
 			case ' < ':
-				$formdiffline = "<span class='extra'>".htmlspecialchars($diffline)."</span>";
+				$formdiffline = "<span class='extra'>".specialchars($diffline)."</span>";
 				break;
 			default:
-				$formdiffline = htmlspecialchars($diffline);
+				$formdiffline = specialchars($diffline);
 		}
 		$return = $return . $linenostr . " " . $formdiffline . "\n";
 		$line = strtok("\n");
@@ -221,13 +221,13 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		echo "<td><a$link>" . printtime($row['submittime']) . "</a></td>";
 		if ( IS_JURY ) {
 			echo '<td title="t' .
-				htmlspecialchars($row['teamid']) . '">' .
-				"<a$link>" . htmlspecialchars(str_cut($row['teamname'],30)) . '</a></td>';
+				specialchars($row['teamid']) . '">' .
+				"<a$link>" . specialchars(str_cut($row['teamname'],30)) . '</a></td>';
 		}
-		echo '<td class="probid" title="' . htmlspecialchars($row['probname']) . '">' .
-			"<a$link>" . htmlspecialchars($row['shortname']) . '</a></td>';
-		echo '<td class="langid" title="' . htmlspecialchars($row['langname']) . '">' .
-			"<a$link>" . htmlspecialchars($row['langid']) . '</a></td>';
+		echo '<td class="probid" title="' . specialchars($row['probname']) . '">' .
+			"<a$link>" . specialchars($row['shortname']) . '</a></td>';
+		echo '<td class="langid" title="' . specialchars($row['langname']) . '">' .
+			"<a$link>" . specialchars($row['langid']) . '</a></td>';
 		echo "<td class=\"result\"><a$link>";
 		if ( difftime($row['submittime'],$cdatas[$row['cid']]['endtime']) >= 0 ) {
 			echo printresult('too-late');
@@ -255,7 +255,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 				if ( empty($row['jury_member']) ) {
 					$jury_member = '&nbsp;';
 				} else {
-					$jury_member = htmlspecialchars($row['jury_member']);
+					$jury_member = specialchars($row['jury_member']);
 				}
 				if ( !$row['verified'] ) {
 					$vercnt++;
@@ -337,43 +337,43 @@ function putTeam($teamid) {
 	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
 	$teamimage = "../images/teams/" . urlencode($team['teamid']) . ".jpg";
 
-	echo "<h1>Team ".htmlspecialchars($team['name'])."</h1>\n\n";
+	echo "<h1>Team ".specialchars($team['name'])."</h1>\n\n";
 
 	if ( is_readable($teamimage) ) {
 		echo '<img id="teampicture" src="' . $teamimage .
 			'" alt="Picture of team ' .
-			htmlspecialchars($team['name']) . '" />';
+			specialchars($team['name']) . '" />';
 	}
 
 ?>
 
 <table>
-<tr><td>Name:    </td><td><?php echo htmlspecialchars($team['name'])?></td></tr>
-<tr><td>Category:</td><td><?php echo htmlspecialchars($team['catname'])?></td></tr>
+<tr><td>Name:    </td><td><?php echo specialchars($team['name'])?></td></tr>
+<tr><td>Category:</td><td><?php echo specialchars($team['catname'])?></td></tr>
 <?php
 
 	if ( !empty($team['members']) ) {
 		echo '<tr><td>Members:</td><td>' .
-			nl2br(htmlspecialchars($team['members'])) . "</td></tr>\n";
+			nl2br(specialchars($team['members'])) . "</td></tr>\n";
 	}
 
 	if ( !empty($team['affilid']) ) {
 		echo '<tr><td>Affiliation:</td><td>';
-		echo htmlspecialchars($team['affname']);
+		echo specialchars($team['affname']);
 		echo "</td></tr>\n";
 		if ( !empty($team['country']) ) {
 			echo '<tr><td>Country:</td><td>';
 			if ( is_readable($countryflag) ) {
 				echo '<img src="' . $countryflag . '" alt="' .
-					htmlspecialchars($team['country']) . '" /> ';
+					specialchars($team['country']) . '" /> ';
 			}
-			echo htmlspecialchars($team['country']) . "</td></tr>\n";
+			echo specialchars($team['country']) . "</td></tr>\n";
 		}
 	}
 
 	if ( !empty($team['room']) ) {
 		echo '<tr><td>Location:</td><td>' .
-			htmlspecialchars($team['room']) . "</td></tr>\n";
+			specialchars($team['room']) . "</td></tr>\n";
 	}
 
 	echo "</table>\n\n";
@@ -563,10 +563,10 @@ function putProblemTextList()
 			while($row = $res->next()) {
 				print '<li> ' .
 				      '<img src="../images/' . urlencode($row['problemtext_type']) .
-				      '.png" alt="' . htmlspecialchars($row['problemtext_type']) .
+				      '.png" alt="' . specialchars($row['problemtext_type']) .
 				      '" /> <a href="problem.php?id=' . urlencode($row['probid']) . '">' .
-				      'Problem ' . htmlspecialchars($row['shortname']) . ': ' .
-				      htmlspecialchars($row['name']) . "</a></li>\n";
+				      'Problem ' . specialchars($row['shortname']) . ': ' .
+				      specialchars($row['name']) . "</a></li>\n";
 			}
 			echo "</ul>\n";
 		}

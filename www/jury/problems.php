@@ -52,10 +52,10 @@ if( $res->count() == 0 ) {
 
 		echo "<tr class=\"" . implode(' ',$classes) .
 			"\"><td>" . $link . "p" .
-				htmlspecialchars($row['probid'])."</a>".
-			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
+				specialchars($row['probid'])."</a>".
+			"</td><td>" . $link . specialchars($row['name'])."</a>".
 			"</td><td>".
-			$link . htmlspecialchars(isset($activecontests[$row['probid']])?$activecontests[$row['probid']]:0) . "</a>" .
+			$link . specialchars(isset($activecontests[$row['probid']])?$activecontests[$row['probid']]:0) . "</a>" .
 			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
 			"</td><td>" . $link . (isset($row['memlimit']) ? (int)$row['memlimit'] : 'default') . "</a>" .
 			"</td><td>" . $link . (isset($row['outputlimit']) ? (int)$row['outputlimit'] : 'default') . "</a>" .

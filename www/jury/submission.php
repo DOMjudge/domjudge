@@ -38,7 +38,7 @@ function display_compile_output($output, $success) {
 
 	if ( !empty($output) ) {
 		echo '<pre class="output_text" id="detailcompile">' .
-			htmlspecialchars($output, ENT_SUBSTITUTE)."</pre>\n\n";
+			specialchars($output)."</pre>\n\n";
 	} else {
 		echo '<p class="nodata" id="detailcompile">' .
 			"There were no compiler errors or warnings.</p>\n";
@@ -73,7 +73,7 @@ function display_runinfo($runinfo, $is_final) {
 			$short = substr($run['runresult'], 0, 1);
 			$class = "tc_incorrect";
 		}
-		$tclist .= "<a title=\"desc: " . htmlspecialchars($run['description']) .
+		$tclist .= "<a title=\"desc: " . specialchars($run['description']) .
 			($run['runresult'] !== NULL ?  ", runtime: " . $run['runtime'] . "s, result: " . $run['runresult'] : '') .
 			"\" href=\"$link\"" .
 			($run['runresult'] == 'correct' ? ' onclick="display_correctruns(true);" ' : '') .
@@ -106,7 +106,7 @@ function compute_lcsdiff($line1, $line2) {
 	}
 
 	if ($n1 == $n2 && $n1 == $dp[$n1][$n2]) {
-		return array(false, htmlspecialchars($line1) . "\n");
+		return array(false, specialchars($line1) . "\n");
 	}
 
 	// reconstruct lcs
@@ -133,11 +133,11 @@ function compute_lcsdiff($line1, $line2) {
 	$j = 0;
 	for ($k = 0; $k < $l ; $k++) {
 		while ($i < $n1 && $tokens1[$i] != $lcs[$k]) {
-			$diff .= "<del>" . htmlspecialchars($tokens1[$i]) . "</del> ";
+			$diff .= "<del>" . specialchars($tokens1[$i]) . "</del> ";
 			$i++;
 		}
 		while ($j < $n2 && $tokens2[$j] != $lcs[$k]) {
-			$diff .= "<ins>" . htmlspecialchars($tokens2[$j]) . "</ins> ";
+			$diff .= "<ins>" . specialchars($tokens2[$j]) . "</ins> ";
 			$j++;
 		}
 		$diff .= $lcs[$k] . " ";
@@ -145,11 +145,11 @@ function compute_lcsdiff($line1, $line2) {
 		$j++;
 	}
 	while ($i < $n1 && ($k >= $l || $tokens1[$i] != $lcs[$k])) {
-		$diff .= "<del>" . htmlspecialchars($tokens1[$i]) . "</del> ";
+		$diff .= "<del>" . specialchars($tokens1[$i]) . "</del> ";
 		$i++;
 	}
 	while ($j < $n2 && ($k >= $l || $tokens2[$j] != $lcs[$k])) {
-		$diff .= "<ins>" . htmlspecialchars($tokens2[$j]) . "</ins> ";
+		$diff .= "<ins>" . specialchars($tokens2[$j]) . "</ins> ";
 		$j++;
 	}
 
@@ -265,7 +265,7 @@ require_once(LIBWWWDIR . '/header.php');
 echo "<br/><h1 style=\"display:inline;\">Submission s" . $id .
     ( isset($submdata['origsubmitid']) ?
       ' (resubmit of <a href="submission.php?id='. urlencode($submdata['origsubmitid']) .
-      '">s' . htmlspecialchars($submdata['origsubmitid']) . '</a>)' : '' ) .
+      '">s' . specialchars($submdata['origsubmitid']) . '</a>)' : '' ) .
 	( $submdata['valid'] ? '' : ' (ignored)' ) . "</h1>\n\n";
 if ( IS_ADMIN ) {
 	$val = ! $submdata['valid'];
@@ -286,19 +286,19 @@ if ( ! $submdata['valid'] ) {
 
 <p>
 <img title="team" alt="Team:" src="../images/team.png"/> <a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>&amp;cid=<?php echo urlencode($submdata['cid'])?>">
-    <?php echo htmlspecialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>&nbsp;&nbsp;
+    <?php echo specialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>&nbsp;&nbsp;
 <img title="contest" alt="Contest:" src="../images/contest.png"/> <a href="contest.php?id=<?php echo $submdata['cid']?>">
-	<span class="contestid"><?php echo htmlspecialchars($submdata['contestshortname'])?></span></a>&nbsp;&nbsp;
+	<span class="contestid"><?php echo specialchars($submdata['contestshortname'])?></span></a>&nbsp;&nbsp;
 <img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>&amp;cid=<?php echo urlencode($submdata['cid'])?>">
-	<span class="probid"><?php echo htmlspecialchars($submdata['probshortname'])?></span>:
-	<?php echo htmlspecialchars($submdata['probname'])?></a>&nbsp;&nbsp;
+	<span class="probid"><?php echo specialchars($submdata['probshortname'])?></span>:
+	<?php echo specialchars($submdata['probname'])?></a>&nbsp;&nbsp;
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
-	<?php echo htmlspecialchars($submdata['langname'])?></a>&nbsp;&nbsp;
+	<?php echo specialchars($submdata['langname'])?></a>&nbsp;&nbsp;
 <img title="submittime" alt="Submittime:" src="../images/submittime.png"/>
 	<?php echo '<span title="' . printtime($submdata['submittime'],'%Y-%m-%d %H:%M:%S (%Z)') . '">' .
 	           printtime($submdata['submittime']) . '</span>' ?>&nbsp;&nbsp;
 <img title="allowed runtime" alt="Allowed runtime:" src="../images/allowedtime.png"/>
-	<?php echo  htmlspecialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
+	<?php echo  specialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
 <img title="view source code" alt="" src="../images/code.png"/>
 <a href="show_source.php?id=<?= $id ?>" style="font-weight:bold;">view source code</a>
 </p>
@@ -330,10 +330,10 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
 			'<td>' . $link . printtime($jud['starttime']) . '</a></td>' .
-			'<td>' . $link . htmlspecialchars($jud['max_runtime']) . ' s</a></td>' .
+			'<td>' . $link . specialchars($jud['max_runtime']) . ' s</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
 			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
-			'<td>' . $link . htmlspecialchars($rinfo) . '</a></td>' .
+			'<td>' . $link . specialchars($rinfo) . '</a></td>' .
 			"</tr>\n";
 
 	}
@@ -419,9 +419,9 @@ if ( isset($jid) )  {
 		$reason = $DB->q('VALUE SELECT reason FROM rejudging WHERE rejudgingid=%i', $jud['rejudgingid']);
 		$state = ' (rejudging <a href="rejudging.php?id=' .
 			 urlencode($jud['rejudgingid']) . '">r' .
-			 htmlspecialchars($jud['rejudgingid']) .
+			 specialchars($jud['rejudgingid']) .
 			 '</a>, reason: ' .
-			 htmlspecialchars($reason) . ')';
+			 specialchars($reason) . ')';
 	} else if ( $jud['valid'] != 1 ) {
 		$state = ' (INVALID)';
 	}
@@ -434,7 +434,7 @@ if ( isset($jid) )  {
 		echo addForm($pagename . '?id=' . urlencode($id) . '&amp;jid=' . urlencode($jid));
 
 		if ( !empty($jud['jury_member']) ) {
-			echo ' (claimed by ' . htmlspecialchars($jud['jury_member']) . ') ';
+			echo ' (claimed by ' . specialchars($jud['jury_member']) . ') ';
 		}
 		if ( $jury_member == @$jud['jury_member']) {
 			echo addSubmit('unclaim', 'unclaim');
@@ -511,9 +511,9 @@ if ( isset($jid) )  {
 			echo "<p>Verified: " .
 			    "<strong>" . printyn($jud['verified']) . "</strong>";
 			if ( $jud['verified'] && ! empty($jud['jury_member']) ) {
-				echo ", by " . htmlspecialchars($jud['jury_member']);
+				echo ", by " . specialchars($jud['jury_member']);
 				if ( !empty($jud['verify_comment']) ) {
-					echo ' with comment "'.htmlspecialchars($jud['verify_comment']).'"';
+					echo ' with comment "'.specialchars($jud['verify_comment']).'"';
 				}
 			}
 
@@ -570,11 +570,11 @@ togglelastruns();
 		echo "<table>\n<tr><td>";
 		echo "<table>\n" .
 		    "<tr><td>Description:</td><td>" .
-		    htmlspecialchars($run['description']) . "</td></tr>" .
+		    specialchars($run['description']) . "</td></tr>" .
 		    "<tr><td>Download: </td><td>" .
-		    "<a href=\"testcase.php?probid=" . htmlspecialchars($submdata['probid']) .
+		    "<a href=\"testcase.php?probid=" . specialchars($submdata['probid']) .
 		    "&amp;rank=" . $run['rank'] . "&amp;fetch=input\">Input</a> / " .
-		    "<a href=\"testcase.php?probid=" . htmlspecialchars($submdata['probid']) .
+		    "<a href=\"testcase.php?probid=" . specialchars($submdata['probid']) .
 		    "&amp;rank=" . $run['rank'] . "&amp;fetch=output\">Reference Output</a> / " .
 		    "<a href=\"team_output.php?runid=" . $run['runid'] . "&amp;cid=" .
 		    $submdata['cid'] . "\">Team Output</a></td></tr>" .
@@ -645,7 +645,7 @@ togglelastruns();
 		echo "<h5>Program output</h5>\n";
 		if ( strlen(@$run['output_run']) > 0 ) {
 			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_run'], ENT_SUBSTITUTE)."</pre>\n\n";
+			    specialchars($run['output_run'])."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no program output.</p>\n";
 		}
@@ -653,7 +653,7 @@ togglelastruns();
 		echo "<h5>Program error output</h5>\n";
 		if ( strlen(@$run['output_error']) > 0 ) {
 			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_error'], ENT_SUBSTITUTE)."</pre>\n\n";
+			    specialchars($run['output_error'])."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no stderr output.</p>\n";
 		}
@@ -661,7 +661,7 @@ togglelastruns();
 		echo "<h5>Judging system output (info/debug/errors)</h5>\n";
 		if ( strlen(@$run['output_system']) > 0 ) {
 			echo "<pre class=\"output_text\">".
-			    htmlspecialchars($run['output_system'], ENT_SUBSTITUTE)."</pre>\n\n";
+			    specialchars($run['output_system'])."</pre>\n\n";
 		} else {
 			echo "<p class=\"nodata\">There was no judging system output.</p>\n";
 		}

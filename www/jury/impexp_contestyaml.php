@@ -201,7 +201,7 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Import / export configuration</h1>\n\n";
 
 if ( isset($_GET['import-ok']) ) {
-	echo msgbox("Import successful!", "The file " . htmlspecialchars(@$_GET['file']) .
+	echo msgbox("Import successful!", "The file " . specialchars(@$_GET['file']) .
 	            " is successfully imported.");
 }
 

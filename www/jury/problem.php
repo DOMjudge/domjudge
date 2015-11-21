@@ -15,9 +15,9 @@ if ( isset($_GET['cid']) && is_numeric($_GET['cid']) ) {
 	$cdata = $cdatas[$cid];
 	$current_cid = $cid;
 }
-$title = 'Problem p'.htmlspecialchars(@$id);
-$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
-                 'problem' . ($id ? ' p'.htmlspecialchars(@$id) : ''));
+$title = 'Problem p'.specialchars(@$id);
+$title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
+                 'problem' . ($id ? ' p'.specialchars(@$id) : ''));
 
 if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
@@ -53,8 +53,8 @@ if ( isset($_POST['upload']) ) {
 			                    WHERE probid = %i', $probid);
 
 			echo '<p><a href="' . $pagename.'?id='.urlencode($probid) .
-			    '">Return to problem p' . htmlspecialchars($probid) .
-			    ': ' . htmlspecialchars($probname) . ".</a></p>\n";
+			    '">Return to problem p' . specialchars($probid) .
+			    ': ' . specialchars($probname) . ".</a></p>\n";
 		}
 		echo "<p><a href=\"problems.php\">Return to problems overview.</a></p>\n";
 	} else {
@@ -85,7 +85,7 @@ if ( !empty($cmd) ):
 		               LEFT JOIN testcase USING (probid)
 		               WHERE probid = %i GROUP BY probid', $id);
 		echo addHidden('keydata[0][probid]', $row['probid']);
-		echo "p" . htmlspecialchars($row['probid']);
+		echo "p" . specialchars($row['probid']);
 		echo "</td></tr>\n";
 	}
 
@@ -204,7 +204,7 @@ if ( !isset($data['special_compare']) ) {
 	$data['special_compare'] = dbconfig_get('default_compare');
 }
 
-echo "<h1>Problem ".htmlspecialchars($data['name'])."</h1>\n\n";
+echo "<h1>Problem ".specialchars($data['name'])."</h1>\n\n";
 
 echo addForm($pagename . '?id=' . urlencode($id),
              'post', null, 'multipart/form-data') . "<p>\n" .
@@ -212,8 +212,8 @@ echo addForm($pagename . '?id=' . urlencode($id),
 	"</p>\n";
 ?>
 <table>
-<tr><td>ID:          </td><td>p<?php echo htmlspecialchars($data['probid'])?></td></tr>
-<tr><td>Name:        </td><td><?php echo htmlspecialchars($data['name'])?></td></tr>
+<tr><td>ID:          </td><td>p<?php echo specialchars($data['probid'])?></td></tr>
+<tr><td>Name:        </td><td><?php echo specialchars($data['name'])?></td></tr>
 <tr><td>Testcases:   </td><td><?php
     if ( $data['ntestcases']==0 ) {
 		echo '<em>no testcases</em>';
@@ -228,8 +228,8 @@ echo addForm($pagename . '?id=' . urlencode($id),
 <?php
 if ( !empty($data['color']) ) {
 	echo '<tr><td>Colour:</td><td><div class="circle" style="background-color: ' .
-		htmlspecialchars($data['color']) .
-		';"></div> ' . htmlspecialchars($data['color']) .
+		specialchars($data['color']) .
+		';"></div> ' . specialchars($data['color']) .
 		"</td></tr>\n";
 }
 if ( !empty($data['problemtext_type']) ) {
@@ -241,17 +241,17 @@ if ( !empty($data['problemtext_type']) ) {
 
 echo '<tr><td>Run script:</td><td class="filename">' .
 	'<a href="executable.php?id=' . urlencode($data['special_run']) . '">' .
-	htmlspecialchars($data['special_run']) . "</a>" .
+	specialchars($data['special_run']) . "</a>" .
 	(@$defaultrun ? ' (default)' : '') . "</td></tr>\n";
 
 echo '<tr><td>Compare script:</td><td class="filename">' .
 	'<a href="executable.php?id=' . urlencode($data['special_compare']) . '">' .
-	htmlspecialchars($data['special_compare']) . "</a>" .
+	specialchars($data['special_compare']) . "</a>" .
 	(@$defaultcompare ? ' (default)' : '') . "</td></tr>\n";
 
 if ( !empty($data['special_compare_args']) ) {
 	echo '<tr><td>Compare script arguments:</td><td>' .
-		htmlspecialchars($data['special_compare_args']) . "</td></tr>\n";
+		specialchars($data['special_compare_args']) . "</td></tr>\n";
 }
 
 echo "</table>\n" . addEndForm();
@@ -299,15 +299,15 @@ if ( $current_cid === null) {
 			     (!$row['enabled'] ? ' disabled' : '') . '">' .
 			     "<td class=\"tdright\">" . $link .
 			     "c" . (int)$row['cid'] . "</a></td>\n";
-			echo "<td>" . $link . htmlspecialchars($row['shortname']) . "</a></td>\n";
-			echo "<td>" . $link . htmlspecialchars($row['name']) . "</a></td>\n";
-			echo "<td>" . $link . htmlspecialchars($row['problemshortname']) . "</a></td>\n";
+			echo "<td>" . $link . specialchars($row['shortname']) . "</a></td>\n";
+			echo "<td>" . $link . specialchars($row['name']) . "</a></td>\n";
+			echo "<td>" . $link . specialchars($row['problemshortname']) . "</a></td>\n";
 			echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_submit']) . "</a></td>\n";
 			echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_judge']) . "</a></td>\n";
 			echo ( !empty($row['color'])
-				? '<td title="' . htmlspecialchars($row['color']) .
+				? '<td title="' . specialchars($row['color']) .
 				  '">' . $link . '<div class="circle" style="background-color: ' .
-				  htmlspecialchars($row['color']) .
+				  specialchars($row['color']) .
 				  ';"></div></a></td>'
 				: '<td>'. $link . '&nbsp;</a></td>' );
 
@@ -319,7 +319,7 @@ if ( $current_cid === null) {
 	}
 }
 
-echo "<h2>Submissions for " . htmlspecialchars($data['name']) . "</h2>\n\n";
+echo "<h2>Submissions for " . specialchars($data['name']) . "</h2>\n\n";
 
 $restrictions = array( 'probid' => $id );
 putSubmissions($cdatas, $restrictions);

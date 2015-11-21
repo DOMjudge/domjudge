@@ -10,7 +10,7 @@ require('init.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
 $id = getRequestID();
-$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
+$title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
 		 'judgehost restriction');
 
 require(LIBWWWDIR . '/header.php');
@@ -47,7 +47,7 @@ if ( !empty($_GET['cmd']) ) {
 
 		echo "<tr><td>ID:</td><td>" .
 		     addHidden('keydata[0][restrictionid]', $row['restrictionid']) .
-		     htmlspecialchars($row['restrictionid']) . "</td></tr>\n";
+		     specialchars($row['restrictionid']) . "</td></tr>\n";
 	}
 
 	?>
@@ -110,11 +110,11 @@ if ( !empty($_GET['cmd']) ) {
 $data = $DB->q('TUPLE SELECT * FROM judgehost_restriction WHERE restrictionid = %i', $id);
 if ( !$data ) error("Missing or invalid restriction id");
 
-echo "<h1>Restriction: " . htmlspecialchars($data['name']) . "</h1>\n\n";
+echo "<h1>Restriction: " . specialchars($data['name']) . "</h1>\n\n";
 
 echo "<table>\n";
-echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['restrictionid']) . "</td></tr>\n";
-echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
+echo '<tr><td>ID:</td><td>' . specialchars($data['restrictionid']) . "</td></tr>\n";
+echo '<tr><td>Name:</td><td>' . specialchars($data['name']) . "</td></tr>\n";
 
 $restrictions = json_decode($data['restrictions'], true);
 
@@ -144,7 +144,7 @@ if ( IS_ADMIN ) {
 	     delLink('judgehost_restriction','restrictionid',$data['restrictionid']) . "</p>\n\n";
 }
 
-echo "<h2>Judgehosts having restriction " . htmlspecialchars($data['name']) . "</h2>\n\n";
+echo "<h2>Judgehosts having restriction " . specialchars($data['name']) . "</h2>\n\n";
 
 $judgehosts = $DB->q('SELECT hostname, active FROM judgehost WHERE restrictionid = %i', $id);
 if ( $judgehosts->count() == 0 ) {
@@ -157,7 +157,7 @@ if ( $judgehosts->count() == 0 ) {
 		$link = '<a href="judgehost.php?id=' . urlencode($judgehost['hostname']) . '">';
 		echo "<tr".( $judgehost['active'] ? '': ' class="disabled"').
 		     "><td>"
-		     . $link . htmlspecialchars($judgehost['hostname']) .
+		     . $link . specialchars($judgehost['hostname']) .
 		     "</a></td><td>" .
 		     $link . printyn($judgehost['active']) .
 		     "</a></td></tr>\n";

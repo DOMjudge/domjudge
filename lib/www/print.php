@@ -54,7 +54,7 @@ function printyn ($val) {
 function printtime($datetime, $format = NULL) {
 	if ( empty($datetime) ) return '';
 	if ( is_null($format) ) $format = dbconfig_get('time_format', '%H:%M');
-	return htmlspecialchars(strftime($format,floor($datetime)));
+	return specialchars(strftime($format,floor($datetime)));
 }
 
 /**
@@ -69,7 +69,7 @@ function printhost($hostname, $full = FALSE) {
 		$hostname = array_shift($expl);
 	}
 
-	return "<span class=\"hostname\">".htmlspecialchars($hostname)."</span>";
+	return "<span class=\"hostname\">".specialchars($hostname)."</span>";
 }
 
 /**
