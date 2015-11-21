@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 5.1.0 - DEV
 -------------------
+ - Minimum PHP version is now 5.4.
  - Minimum MySQL/MariaDB version is now 5.5.3 for full UTF-8 support.
    Also introduces new DJ_MYSQL_COLLATION configuration setting.
  - Remove CHROOT_SCRIPT configuration setting: automatically run
