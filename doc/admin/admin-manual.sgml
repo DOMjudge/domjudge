@@ -812,9 +812,6 @@ installed on the domserver and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
 details.
 
-You should turn PHP's <tt>magic_quotes_*</tt> options off. We
-also recommend to turn off <tt>register_globals</tt>.
-
 To configure the web server for DOMjudge, use the Apache configuration
 snippet from <tt>etc/apache.conf</tt>. It contains examples for
 configuring the DOMjudge pages with an alias directive, or as a

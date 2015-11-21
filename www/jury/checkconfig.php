@@ -114,22 +114,6 @@ if( !function_exists('version_compare') || version_compare( '5.4',PHP_VERSION,'>
 		'See <a href="?phpinfo">phpinfo</a> for details.');
 }
 
-if ( (bool) ini_get('register_globals') &&
-     strtolower(ini_get('register_globals'))!='off' ) {
-	result('software', 'PHP register_globals', 'W',
-	       'PHP register_globals is on. This obsolete feature should be disabled');
-} else {
-	result('software', 'PHP register_globals', 'O', 'PHP register_globals off');
-}
-
-if ( function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()==1 ) {
-	result('software', 'PHP magic quotes', 'E',
-	       'PHP magic quotes enabled. This will result in overquoted ' .
-	       'entries in the database.');
-} else {
-	result('software', 'PHP magic quotes', 'O', 'PHP magic quotes disabled.');
-}
-
 if ( !function_exists('gd_info') ) {
 	result('software', 'PHP GD library', 'W',
 	       'The PHP GD library is not available. Test case images cannot be uploaded.');
