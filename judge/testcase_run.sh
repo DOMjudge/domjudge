@@ -242,8 +242,7 @@ fi
 
 logmsg $LOG_DEBUG "checking compare script exit-status: $exitcode"
 if grep '^time-result: .*timelimit' compare.meta >/dev/null 2>&1 ; then
-	echo "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:" >> feedback/judgemessage.txt
-	cat compare.tmp >> feedback/judgemessage.txt
+	logmsg $LOG_ERR "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:\n$(cat compare.tmp)"
 	cleanexit ${E_COMPARE_ERROR:-1}
 fi
 # Append output validator stdin/stderr - display extra?
@@ -252,8 +251,7 @@ if [ -s compare.tmp ]; then
 	cat compare.tmp >> feedback/judgemessage.txt
 fi
 if [ $exitcode -ne 42 ] && [ $exitcode -ne 43 ]; then
-	echo "Comparing failed with exitcode $exitcode, compare output:" >> feedback/judgemessage.txt
-	cat compare.tmp >> feedback/judgemessage.txt
+	logmsg $LOG_ERR "Comparing failed with exitcode $exitcode, compare script output:\n$(cat compare.tmp)"
 	cleanexit ${E_COMPARE_ERROR:-1}
 fi
 
