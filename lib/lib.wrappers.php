@@ -64,3 +64,20 @@ function dj_get_file_contents($filename, $sizelimit = true) {
 	return file_get_contents($filename);
 }
 
+/**
+ * Wrapper around PHP's htmlspecialchars() to set desired options globally:
+ *
+ * - ENT_QUOTES: Also convert single quotes, in case string is contained
+ *   in a single quoted context.
+ * - ENT_HTML5: Display those single quotes as the HTML5 entity &apos;.
+ * - ENT_SUBSTITUTE: Replace any invalid Unicode characters with the
+ *   Unicode replacement character.
+ *
+ * Additionally, set the character set explicitly to the DOMjudge global
+ * character set.
+ */
+function specialchars($string) {
+	return htmlspecialchars($string,
+		ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
+		DJ_CHARACTER_SET);
+}
