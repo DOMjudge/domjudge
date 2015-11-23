@@ -117,6 +117,7 @@ function presentSource ($sourcedata, $langid)
 		'editor.setOptions({ maxLines: Infinity });' .
 		'editor.setReadOnly(true);' .
 		'editor.getSession().setMode("ace/mode/' . $langid . '");' .
+        'document.getElementById("editor' . specialchars($sourcedata['rank']) . '").editor = editor;' .
 		'</script>';
 
 	return $head . $ace . '</div>';
@@ -221,7 +222,14 @@ $sources = $DB->q('TABLE SELECT *
                    FROM submission_file LEFT JOIN submission USING(submitid)
                    WHERE submitid = %i ORDER BY rank', $id);
 
-$html = '<script type="text/javascript" src="../js/tabber.js"></script>' .
+$html = '<script type="text/javascript">' .
+        // Resize ACE editor after the corresponding tab is clicked
+        'tabberOptions = { "onTabDisplay" : function(d) {' .
+        '  var ed = d.tabber.tabs[d.index].div.getElementsByClassName("ace_editor")[0];' .
+        '  if(ed && ed.editor) ed.editor.resize();' .
+        '} };' .
+        '</script>' .
+        '<script type="text/javascript" src="../js/tabber.js"></script>' .
 		'<script type="text/javascript" src="../js/ace/ace.js" charset="utf-8"></script>' .
 	'<div class="tabber">';
 foreach($sources as $sourcedata)
