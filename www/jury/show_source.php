@@ -111,7 +111,6 @@ function presentSource ($sourcedata, $langid)
 
 	$ace = '<div class="editor" id="editor' . htmlspecialchars($sourcedata['rank']) . '">'
 		. htmlspecialchars($sourcedata['sourcecode']) . '</div>' .
-		'<script src="../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>' .
 		'<script>' .
 		'var editor = ace.edit("editor' . htmlspecialchars($sourcedata['rank']) . '");' .
 		'editor.setTheme("ace/theme/eclipse");' .
@@ -223,6 +222,7 @@ $sources = $DB->q('TABLE SELECT *
                    WHERE submitid = %i ORDER BY rank', $id);
 
 $html = '<script type="text/javascript" src="../js/tabber.js"></script>' .
+		'<script type="text/javascript" src="../js/ace/ace.js" charset="utf-8"></script>' .
 	'<div class="tabber">';
 foreach($sources as $sourcedata)
 {
