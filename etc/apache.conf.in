@@ -31,6 +31,8 @@
 #<VirtualHost *:443>
 #ServerName _default_
 #DocumentRoot @domserver_wwwdir@
+#RedirectMatch ^/api$ /api/
+#Alias /api @domserver_wwwdir@/api/index.php
 #
 #SSLEngine on
 #SSLCertificateFile    /path/to/your/SSL-certificate.crt
