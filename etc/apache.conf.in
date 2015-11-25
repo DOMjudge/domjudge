@@ -78,12 +78,6 @@ RewriteRule .gitignore$ - [F]
 RewriteRule Makefile$ - [F]
 </IfModule>
 
-# Disable some evil PHP magic
-<IfModule mod_php5.c>
-php_flag magic_quotes_gpc off
-php_flag magic_quotes_runtime off
-</IfModule>
-
 </Directory>
 
 # Limit access to the jury webinterface
