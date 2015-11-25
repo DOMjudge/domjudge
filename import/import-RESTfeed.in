@@ -74,17 +74,6 @@ function request($url, $verb = 'GET', $data = '') {
 	return $response;
 }
 
-/**
- * Decode a json encoded string and handle errors.
- */
-function dj_json_decode($str) {
-	$res = json_decode($str, TRUE);
-	if ( $res === NULL ) {
-		error("Error retrieving API data. API gave us: " . $str);
-	}
-	return $res;
-}
-
 
 logmsg(LOG_NOTICE, "Forwarding-feed import started [DOMjudge/".DOMJUDGE_VERSION."]");
 
