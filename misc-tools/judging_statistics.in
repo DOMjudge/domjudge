@@ -344,7 +344,7 @@ if ( in_array('variations', $reports) ) {
 		$avgrun  = $totalrun  / $njudged;
 		// FIXME: variance over all judgings from different problems
 		// doesn't make sense.
-		$variance = $sumsquare / $njudged - $avgrun;
+		$variance = $sumsquare / $njudged - $avgrun*$avgrun;
 		printf(" %-22.22s | %9d | %12.4f | %8.3f | %12.4f \n",
 		       $judgehost, $njudged, $avgrun, sqrt($variance), $avgtime);
 	}
