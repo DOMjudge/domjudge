@@ -48,7 +48,7 @@ if ( count($clars) > 0 ) {
 if (false && count($blockers) > 0 ) {
 	echo "<p>Contest can not yet be finalized:</p>\n <ul>";
 	foreach ($blockers as $blocker) {
-		echo "  <li>" . htmlspecialchars($blocker) . "</li>\n";
+		echo "  <li>" . specialchars($blocker) . "</li>\n";
 	}
 	echo "</ul>\n\n";
 
@@ -75,7 +75,7 @@ echo "<table>\n";
 echo "<tr><td>Contest ID:</td><td>";
 echo addHidden('id', $id) . 'c' . $id . "</td></tr>\n";
 echo "<tr><td>Contest name:</td><td>";
-echo htmlspecialchars($row['contestname']) . "</td></tr>\n";
+echo specialchars($row['contestname']) . "</td></tr>\n";
 
 echo "<tr><td>Started:</td><td>";
 echo printtime($row['starttime']) .

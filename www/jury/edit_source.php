@@ -74,19 +74,19 @@ echo '<script type="text/javascript" src="../js/tabber.js"></script>' .
 foreach($sources as $sourcedata)
 {
 	echo '<div class="tabbertab' . ($_GET['rank'] === $sourcedata['rank'] ? ' tabbertabdefault' : '') .'">';
-	echo '<h2 class="filename">' . htmlspecialchars($sourcedata['filename']) . '</h2>';
+	echo '<h2 class="filename">' . specialchars($sourcedata['filename']) . '</h2>';
 	echo addTextArea('source' . $sourcedata['rank'], $sourcedata['sourcecode'], 120, 40) . "<br />\n";
-	$editor = 'editor' . htmlspecialchars($sourcedata['rank']);
+	$editor = 'editor' . specialchars($sourcedata['rank']);
 	$langid = langidToAce($submission['langid']);
 	echo '<div class="editor" id="' . $editor . '"></div>';
 	echo '<script>' .
-		'var textarea = document.getElementById("source' . htmlspecialchars($sourcedata['rank']) . '");' .
+		'var textarea = document.getElementById("source' . specialchars($sourcedata['rank']) . '");' .
 		'textarea.style.display = \'none\';' .
 		'var ' . $editor . ' = ace.edit("' . $editor . '");' .
 		$editor . '.setTheme("ace/theme/eclipse");' .
 		$editor . '.getSession().setValue(textarea.value);' .
 		$editor . '.getSession().on(\'change\', function(){' .
-			'var textarea = document.getElementById("source' . htmlspecialchars($sourcedata['rank']) . '");' .
+			'var textarea = document.getElementById("source' . specialchars($sourcedata['rank']) . '");' .
 			'textarea.value = ' . $editor . '.getSession().getValue();' .
 		'});' .
 		$editor . '.setOptions({ maxLines: Infinity });' .

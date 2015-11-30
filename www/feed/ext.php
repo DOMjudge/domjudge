@@ -40,23 +40,23 @@ $result_map = array(
 /**
  * Create node and add below $paren.
  * $value is an optional element value and $attrs an array whose
- * key,value pairs are added as node attributes. All strings are htmlspecialchars
+ * key,value pairs are added as node attributes. All strings are specialchars
  */
 function XMLaddnode($paren, $name, $value = NULL, $attrs = NULL)
 {
 	global $xmldoc;
 
 	if ( $value === NULL ) {
-		$node = $xmldoc->createElement(htmlspecialchars($name,ENT_XML1));
+		$node = $xmldoc->createElement(specialchars($name,ENT_XML1));
 	} else {
-		$node = $xmldoc->createElement(htmlspecialchars($name,ENT_XML1),
-		                               htmlspecialchars($value,ENT_XML1));
+		$node = $xmldoc->createElement(specialchars($name,ENT_XML1),
+		                               specialchars($value,ENT_XML1));
 	}
 
 	if ( count($attrs) > 0 ) {
 		foreach( $attrs as $key => $value ) {
-			$node->setAttribute(htmlspecialchars($key,ENT_XML1),
-			                    htmlspecialchars($value,ENT_XML1));
+			$node->setAttribute(specialchars($key,ENT_XML1),
+			                    specialchars($value,ENT_XML1));
 		}
 	}
 

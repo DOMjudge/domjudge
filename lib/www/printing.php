@@ -104,7 +104,7 @@ function handle_print_upload()
 
 	$ret = send_print($realfilename,$langid,$whoami,$filename);
 
-	echo "<p>" . nl2br(htmlspecialchars($ret[1])) . "</p>\n\n";
+	echo "<p>" . nl2br(specialchars($ret[1])) . "</p>\n\n";
 
 	if ( $ret[0] ) {
 		echo "<p>Print successful.</p>";

@@ -91,7 +91,7 @@ while ( $jud = $res->next() ) {
 			if ( $full_rejudge ) {
 				$DB->q('DELETE FROM rejudging WHERE rejudgingid=%i', $rejudgingid);
 			}
-			error('submission is already part of rejudging r' . htmlspecialchars($jud['rejudgingid']));
+			error('submission is already part of rejudging r' . specialchars($jud['rejudgingid']));
 		} else {
 			// silently skip that submission
 			continue;

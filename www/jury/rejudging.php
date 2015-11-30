@@ -64,7 +64,7 @@ if ( isset($_REQUEST['apply']) ) {
 
 	echo "<p>\n";
 	while ( $row = $res->next() ) {
-		echo "s" . htmlspecialchars($row['submitid']) . ", ";
+		echo "s" . specialchars($row['submitid']) . ", ";
 		$DB->q('START TRANSACTION');
 		// first invalidate old judging, maybe different from prevjudgingid!
 		$DB->q('UPDATE judging SET valid=0
@@ -131,7 +131,7 @@ echo "<tr><td>Reason:</td><td>";
 if ( empty($rejdata['reason']) ) {
 	echo '<span class="nodata">none</span>';
 } else {
-	echo htmlspecialchars($rejdata['reason']);
+	echo specialchars($rejdata['reason']);
 }
 echo "</td></tr>\n";
 foreach ( array('userid_start' => 'Issued by',
@@ -140,7 +140,7 @@ foreach ( array('userid_start' => 'Issued by',
 	if ( isset($rejdata[$user]) ) {
 		echo "<tr><td>$msg:</td><td>" .
 			'<a href="user.php?id=' . urlencode($rejdata[$user]) . '">' .
-			htmlspecialchars($userdata[$rejdata[$user]])  .
+			specialchars($userdata[$rejdata[$user]])  .
 			"</a></td></tr>\n";
 	}
 }

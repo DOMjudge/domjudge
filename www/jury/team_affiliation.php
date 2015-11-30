@@ -10,8 +10,8 @@ require('init.php');
 require(LIBWWWDIR . '/scoreboard.php');
 
 $id = getRequestID();
-$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
-                 'affiliation' . ($id ? ' '.htmlspecialchars(@$id) : ''));
+$title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
+                 'affiliation' . ($id ? ' '.specialchars(@$id) : ''));
 
 require(LIBWWWDIR . '/header.php');
 
@@ -33,7 +33,7 @@ if ( !empty($_GET['cmd']) ):
 
 		echo "<tr><td>Affiliation ID:</td><td>" .
 			addHidden('keydata[0][affilid]', $row['affilid']) .
-			htmlspecialchars($row['affilid']) . "</td></tr>\n";
+			specialchars($row['affilid']) . "</td></tr>\n";
 	}
 
 ?>
@@ -74,33 +74,33 @@ if ( ! $data ) error("Missing or invalid affiliation id");
 $affillogo = "../images/affiliations/" . urlencode($data['affilid']) . ".png";
 $countryflag = "../images/countries/" . urlencode($data['country']) . ".png";
 
-echo "<h1>Affiliation: ".htmlspecialchars($data['name'])."</h1>\n\n";
+echo "<h1>Affiliation: ".specialchars($data['name'])."</h1>\n\n";
 
 echo "<table>\n";
-echo '<tr><td>ID:</td><td>' . htmlspecialchars($data['affilid']) . "</td></tr>\n";
-echo '<tr><td>Shortname:</td><td>' . htmlspecialchars($data['shortname']) . "</td></tr>\n";
-echo '<tr><td>Name:</td><td>' . htmlspecialchars($data['name']) . "</td></tr>\n";
+echo '<tr><td>ID:</td><td>' . specialchars($data['affilid']) . "</td></tr>\n";
+echo '<tr><td>Shortname:</td><td>' . specialchars($data['shortname']) . "</td></tr>\n";
+echo '<tr><td>Name:</td><td>' . specialchars($data['name']) . "</td></tr>\n";
 
 echo '<tr><td>Logo:</td><td>';
 
 if ( is_readable($affillogo) ) {
 	echo '<img src="' . $affillogo . '" alt="' .
-		htmlspecialchars($data['shortname']) . "\" /></td></tr>\n";
+		specialchars($data['shortname']) . "\" /></td></tr>\n";
 } else {
 	echo "not available</td></tr>\n";
 }
 
-echo '<tr><td>Country:</td><td>' . htmlspecialchars($data['country']);
+echo '<tr><td>Country:</td><td>' . specialchars($data['country']);
 
 if ( is_readable($countryflag) ) {
 	echo ' <img src="' . $countryflag . '" alt="' .
-		htmlspecialchars($data['country']) . "\" />";
+		specialchars($data['country']) . "\" />";
 }
 echo "</td></tr>\n";
 
 if ( !empty($data['comments']) ) {
 	echo '<tr><td>Comments:</td><td>' .
-		nl2br(htmlspecialchars($data['comments'])) . "</td></tr>\n";
+		nl2br(specialchars($data['comments'])) . "</td></tr>\n";
 }
 
 echo "</table>\n\n";
@@ -111,7 +111,7 @@ if ( IS_ADMIN ) {
 		delLink('team_affiliation', 'affilid', $data['affilid']) . "</p>\n\n";
 }
 
-echo "<h2>Teams from " . htmlspecialchars($data['name']) . "</h2>\n\n";
+echo "<h2>Teams from " . specialchars($data['name']) . "</h2>\n\n";
 
 $listteams = array();
 $teams = $DB->q('SELECT teamid,name FROM team WHERE affilid = %s', $id);
@@ -125,8 +125,8 @@ if ( $teams->count() == 0 ) {
 		$listteams[] = $team['teamid'];
 		$link = '<a href="team.php?id=' . urlencode($team['teamid']) . '">';
 		echo "<tr><td>" .
-		$link . "t" .htmlspecialchars($team['teamid']) . "</a></td><td>" .
-		$link . htmlspecialchars($team['name']) . "</a></td></tr>\n";
+		$link . "t" .specialchars($team['teamid']) . "</a></td><td>" .
+		$link . specialchars($team['name']) . "</a></td></tr>\n";
 	}
 	echo "</tbody>\n</table>\n\n";
 

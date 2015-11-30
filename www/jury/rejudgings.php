@@ -48,9 +48,9 @@ if( $res->count() == 0 ) {
 		}
 		echo "<tr $class>" .
 			"<td>" . $link . ($row['rejudgingid']) . '</a></td>' .
-			"<td>" . $link . htmlspecialchars($row['reason']) . '</a></td>' .
-			"<td>" . $link . htmlspecialchars($row['startuser']) .  "</a></td>" .
-			"<td>" . $link . htmlspecialchars($row['finishuser']) .  "</a></td>" .
+			"<td>" . $link . specialchars($row['reason']) . '</a></td>' .
+			"<td>" . $link . specialchars($row['startuser']) .  "</a></td>" .
+			"<td>" . $link . specialchars($row['finishuser']) .  "</a></td>" .
 			"<td>" . $link . printtime($row['starttime']) .  "</a></td>" .
 			"<td>" . $link . printtime($row['endtime']) .  "</a></td>" .
 			"<td>" . $link;

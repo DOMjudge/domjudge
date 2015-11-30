@@ -70,23 +70,23 @@ if( $teams->count() == 0 ) {
 		echo "<tr class=\"category" . (int)$row['categoryid']  .
 			($row['enabled'] == 1 ? '' : ' sub_ignore') .  "\">".
 			"<td>" . $link . "t" .
-				htmlspecialchars($row['teamid'])."</a></td>".
+				specialchars($row['teamid'])."</a></td>".
 			"<td>" . $link .
-				htmlspecialchars($row['name'])."</a></td>".
+				specialchars($row['name'])."</a></td>".
 			"<td>" . $link .
-				htmlspecialchars($row['catname'])."</a></td>".
-			"<td title=\"".htmlspecialchars($row['affname'])."\">" . $link .
-				($row['affshortname'] ? htmlspecialchars($row['affshortname']) : '&nbsp;') .
+				specialchars($row['catname'])."</a></td>".
+			"<td title=\"".specialchars($row['affname'])."\">" . $link .
+				($row['affshortname'] ? specialchars($row['affshortname']) : '&nbsp;') .
 			"</a></td><td>" . $link . $row['numcontests']."</a></td><td title=\"";
 
 		if ( @$row['hostname'] ) {
-			echo htmlspecialchars($row['hostname']) . "\">" . $link .
+			echo specialchars($row['hostname']) . "\">" . $link .
 			    printhost($row['hostname']);
 		} else {
 			echo "\">" . $link . "-";
 		}
 		echo "</a></td><td>" . $link .
-			($row['room'] ? htmlspecialchars($row['room']) : '&nbsp;') . "</a></td>";
+			($row['room'] ? specialchars($row['room']) : '&nbsp;') . "</a></td>";
 		echo "<td class=\"";
 		switch ( $status ) {
 		case 0: echo 'team-nocon" title="no connections made"';

@@ -45,7 +45,7 @@ function genpw($users, $group, $format) {
 				str_replace("\t", " ", $user['username']),
 				$pass)) . "\n";
 		if ( $format == "page" ) {
-			echo htmlspecialchars($line);
+			echo specialchars($line);
 		} else {
 			echo $line;
 		}

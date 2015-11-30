@@ -95,17 +95,17 @@ foreach ( array('j.starttime'  => 'judging_start',
 	$char = strtoupper($type[0]);
 	if ( isset($opts[$char]) ) {
 		$res = parse_time_interval($opts[$char]);
-		$sql_where .= " AND $id >= %i and $id < %i";
+		$sql_where .= " AND $id >= %i and $id < %i ";
 	} else {
 		$res = array(NULL, NULL);
-		$sql_where .= ' %_ %_';
+		$sql_where .= ' %_ %_ ';
 	}
 	$restr[$type] = $res;
 }
 
 // Parse other restrictions:
 if ( isset($opts['v']) ) {
-	$sql_where .= ' AND j.valid=1 AND s.valid=1';
+	$sql_where .= ' AND j.valid=1 AND s.valid=1 ';
 }
 $restr['valid'] = isset($opts['v']);
 
@@ -127,7 +127,7 @@ $judgings = $DB->q('KEYTABLE SELECT j.judgingid AS ARRAYKEY,
                     FROM judging j
                     LEFT JOIN submission s USING (submitid)
                     LEFT JOIN judging_run r USING (judgingid)
-                    WHERE j.endtime IS NOT NULL' . $sql_where .
+                    WHERE j.endtime IS NOT NULL ' . $sql_where .
                    'GROUP BY j.judgingid ORDER BY j.judgingid ASC',
                    $restr['contest'], $restr['host'], $restr['language'],
                    $restr['problem'], $restr['submission'], $restr['team'],
@@ -344,7 +344,7 @@ if ( in_array('variations', $reports) ) {
 		$avgrun  = $totalrun  / $njudged;
 		// FIXME: variance over all judgings from different problems
 		// doesn't make sense.
-		$variance = $sumsquare / $njudged - $avgrun;
+		$variance = $sumsquare / $njudged - $avgrun*$avgrun;
 		printf(" %-22.22s | %9d | %12.4f | %8.3f | %12.4f \n",
 		       $judgehost, $njudged, $avgrun, sqrt($variance), $avgtime);
 	}

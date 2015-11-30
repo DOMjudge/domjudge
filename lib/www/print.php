@@ -71,7 +71,7 @@ function printtime($datetime, $format = NULL, $cid = NULL) {
 			return sprintf("%d:%02d", $h, $m);
 		}
 	} else {
-		return htmlspecialchars(strftime($format,floor($datetime)));
+		return specialchars(strftime($format,floor($datetime)));
 	}
 }
 
@@ -87,7 +87,7 @@ function printhost($hostname, $full = FALSE) {
 		$hostname = array_shift($expl);
 	}
 
-	return "<span class=\"hostname\">".htmlspecialchars($hostname)."</span>";
+	return "<span class=\"hostname\">".specialchars($hostname)."</span>";
 }
 
 /**

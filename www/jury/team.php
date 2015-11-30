@@ -15,8 +15,8 @@ if ( isset($_GET['cid']) && is_numeric($_GET['cid']) ) {
 	$cdata = $cdatas[$cid];
 	$current_cid = $cid;
 }
-$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
-                 'team' . ($id ? ' t'.htmlspecialchars(@$id) : ''));
+$title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
+                 'team' . ($id ? ' t'.specialchars(@$id) : ''));
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
@@ -50,7 +50,7 @@ if ( !empty($cmd) ):
 
 		echo "<tr><td>ID:</td><td>" .
 			addHidden('keydata[0][teamid]', $row['teamid']) .
-			"t" . htmlspecialchars($row['teamid']) . "</td></tr>\n";
+			"t" . specialchars($row['teamid']) . "</td></tr>\n";
 	}
 
 ?>
@@ -165,7 +165,7 @@ $affillogo   = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
 $countryflag = "../images/countries/"    . urlencode($row['country']) . ".png";
 $teamimage   = "../images/teams/"        . urlencode($row['teamid'])  . ".jpg";
 
-echo "<h1>Team ".htmlspecialchars($row['name'])."</h1>\n\n";
+echo "<h1>Team ".specialchars($row['name'])."</h1>\n\n";
 
 if ( $row['enabled'] != 1 ) {
 	echo "<p><em>Team is disabled</em></p>\n\n";
@@ -174,20 +174,20 @@ if ( $row['enabled'] != 1 ) {
 ?>
 
 <div class="col1"><table>
-<tr><td>ID:        </td><td>t<?php echo htmlspecialchars($row['teamid'])?></td></tr>
-<tr><td>Name:      </td><td><?php echo htmlspecialchars($row['name'])?></td></tr>
+<tr><td>ID:        </td><td>t<?php echo specialchars($row['teamid'])?></td></tr>
+<tr><td>Name:      </td><td><?php echo specialchars($row['name'])?></td></tr>
 <tr><td>Host:</td><td><?php echo
 	(@$row['hostname'] ? printhost($row['hostname'], TRUE):'') ?></td></tr>
 <?php if (!empty($row['penalty'])): ?>
-<tr><td>Penalty time:</td><td><?php echo htmlspecialchars($row['penalty'])?></td></tr>
+<tr><td>Penalty time:</td><td><?php echo specialchars($row['penalty'])?></td></tr>
 <?php endif; ?>
 <?php if (!empty($row['room'])): ?>
-<tr><td>Location:</td><td><?php echo htmlspecialchars($row['room'])?></td></tr>
+<tr><td>Location:</td><td><?php echo specialchars($row['room'])?></td></tr>
 <?php endif; ?>
 <tr><td>User:</td><td><?php
 if ( count($users) ) {
 	foreach($users as $user) {
-		echo "<a href=\"user.php?id=" . urlencode($user['userid']) . "\">" . htmlspecialchars($user['username']) . "</a> ";
+		echo "<a href=\"user.php?id=" . urlencode($user['userid']) . "\">" . specialchars($user['username']) . "</a> ";
 	}
 } else {
 	echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode($row['teamid']) . "\"><small>(add)</small></a>";
@@ -222,32 +222,32 @@ if ( !empty($private_contests)) {
 
 echo '<tr><td>Category:</td><td><a href="team_category.php?id=' .
 	urlencode($row['categoryid']) . '">' .
-	htmlspecialchars($row['catname']) . "</a></td></tr>\n";
+	specialchars($row['catname']) . "</a></td></tr>\n";
 
 if ( !empty($row['affilid']) ) {
 	echo '<tr><td>Affiliation:</td><td>';
 	if ( is_readable($affillogo) ) {
 		echo '<img src="' . $affillogo . '" alt="' .
-			htmlspecialchars($row['affshortname']) . '" /> ';
+			specialchars($row['affshortname']) . '" /> ';
 	}
 	echo '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">' .
-		htmlspecialchars($row['affname']) . "</a></td></tr>\n";
+		specialchars($row['affname']) . "</a></td></tr>\n";
 }
 if ( !empty($row['country']) ) {
 	echo '<tr><td>Country:</td><td>';
 	if ( is_readable($countryflag) ) {
 		echo '<img src="' . $countryflag . '" alt="' .
-			htmlspecialchars($row['country']) . '" /> ';
+			specialchars($row['country']) . '" /> ';
 	}
-	echo htmlspecialchars($row['country']) . "</td></tr>\n";
+	echo specialchars($row['country']) . "</td></tr>\n";
 }
 if ( !empty($row['members']) ) {
 	echo '<tr><td>Members:   </td><td>' .
-		nl2br(htmlspecialchars($row['members'])) . "</td></tr>\n";
+		nl2br(specialchars($row['members'])) . "</td></tr>\n";
 }
 if ( !empty($row['comments']) ) {
 	echo '<tr><td>Comments:</td><td>' .
-		nl2br(htmlspecialchars($row['comments'])) . "</td></tr>\n";
+		nl2br(specialchars($row['comments'])) . "</td></tr>\n";
 }
 echo "</table></div>\n";
 
@@ -275,7 +275,7 @@ if ( isset($key) ) {
 	case 'judgehost': $keystr = "judgehost"; break;
 	default:          error("Restriction on $key not allowed.");
 	}
-	echo ' for ' . htmlspecialchars($keystr) . ': ' . htmlspecialchars($value);
+	echo ' for ' . specialchars($keystr) . ': ' . specialchars($value);
 }
 echo "</h3>\n\n";
 

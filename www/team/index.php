@@ -5,7 +5,7 @@
  */
 
 require('init.php');
-$title = htmlspecialchars($teamdata['name']);
+$title = specialchars($teamdata['name']);
 require(LIBWWWDIR . '/header.php');
 
 // Don't use HTTP meta refresh, but javascript: otherwise we cannot
@@ -32,8 +32,8 @@ if ( $fdata['cstarted'] ) {
 	echo "function getProbDescription(probid)\n{\n";
 	echo "\tswitch(probid) {\n";
 	foreach($probdata as $probinfo) {
-		echo "\t\tcase '" . htmlspecialchars($probinfo['shortname']) .
-		    "': return '" . htmlspecialchars($probinfo['name']) . "';\n";
+		echo "\t\tcase '" . specialchars($probinfo['shortname']) .
+		    "': return '" . specialchars($probinfo['name']) . "';\n";
 	}
 	echo "\t\tdefault: return '';\n\t}\n}\n\n";
 }
@@ -112,7 +112,8 @@ $requests = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromna
                     WHERE c.cid = %i AND c.sender = %i
                     ORDER BY submittime DESC, clarid DESC', $cid, $teamid);
 
-$clarifications = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname
+$clarifications = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname,
+                          u.mesgid AS unread
                           FROM clarification c
                           LEFT JOIN problem p USING (probid)
                           LEFT JOIN contestproblem cp USING (probid, cid)

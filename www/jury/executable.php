@@ -9,8 +9,8 @@
 require('init.php');
 
 $id = getRequestID(FALSE);
-$title = ucfirst((empty($_GET['cmd']) ? '' : htmlspecialchars($_GET['cmd']) . ' ') .
-                 'executable' . ($id ? ' '.htmlspecialchars(@$id) : ''));
+$title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
+                 'executable' . ($id ? ' '.specialchars(@$id) : ''));
 
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
@@ -107,7 +107,7 @@ if ( !empty($cmd) ):
 		               FROM executable
 		               WHERE execid = %s', $id);
 		echo addHidden('keydata[0][execid]', $row['execid']);
-		echo htmlspecialchars($row['execid']);
+		echo specialchars($row['execid']);
 	} else {
 		echo "<tr><td><label for=\"data_0__execid_\">Executable ID:</label></td><td>";
 		echo addInput('data[0][execid]', null, 8, 10,
@@ -122,7 +122,7 @@ if ( !empty($cmd) ):
 <td><?php echo addInput('data[0][description]', @$row['description'], 30, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__type_">Executable type:</label></td>
 <td><?php echo addSelect('data[0][type]', $executable_types, @$row['type'], True)?></td></tr>
-<tr><td>Content:     </td><td><a href="show_executable.php?edit_source=1&amp;id=<?php echo htmlspecialchars($id)?>">edit file contents</a></td></tr>
+<tr><td>Content:     </td><td><a href="show_executable.php?edit_source=1&amp;id=<?php echo specialchars($id)?>">edit file contents</a></td></tr>
 </table>
 
 <?php
@@ -156,7 +156,7 @@ $data = $DB->q('MAYBETUPLE SELECT execid, description, md5sum, type,
 
 if ( ! $data ) error("Missing or invalid problem id");
 
-echo "<h1>Executable ".htmlspecialchars($id)."</h1>\n\n";
+echo "<h1>Executable ".specialchars($id)."</h1>\n\n";
 
 echo addForm($pagename . '?id=' . urlencode($id),
              'post', null, 'multipart/form-data') . "<p>\n" .
@@ -164,12 +164,12 @@ echo addForm($pagename . '?id=' . urlencode($id),
 	"</p>\n";
 ?>
 <table>
-<tr><td>ID:          </td><td class="execid"><?php echo htmlspecialchars($data['execid'])?></td></tr>
-<tr><td>Name:        </td><td><?php echo htmlspecialchars($data['description'])?></td></tr>
-<tr><td>md5sum:      </td><td><?php echo htmlspecialchars($data['md5sum'])?></td></tr>
-<tr><td>type:        </td><td><?php echo htmlspecialchars($data['type'])?></td></tr>
-<tr><td>size:        </td><td><?php echo htmlspecialchars($data['size'])?> Bytes</td></tr>
-<tr><td>content:     </td><td><a href="show_executable.php?id=<?php echo htmlspecialchars($id)?>">view file contents</a></td></tr>
+<tr><td>ID:          </td><td class="execid"><?php echo specialchars($data['execid'])?></td></tr>
+<tr><td>Name:        </td><td><?php echo specialchars($data['description'])?></td></tr>
+<tr><td>md5sum:      </td><td><?php echo specialchars($data['md5sum'])?></td></tr>
+<tr><td>type:        </td><td><?php echo specialchars($data['type'])?></td></tr>
+<tr><td>size:        </td><td><?php echo specialchars($data['size'])?> Bytes</td></tr>
+<tr><td>content:     </td><td><a href="show_executable.php?id=<?php echo specialchars($id)?>">view file contents</a></td></tr>
 <tr><td>used as <?=$data['type'] ?> script:</td><td>
 <?php
 if ( $data['type'] == 'compare' ) {

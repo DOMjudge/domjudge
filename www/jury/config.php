@@ -111,9 +111,9 @@ foreach ( $LIBDBCONFIG as $key => $data ) {
 	// Ignore unknown datatypes
 	if ( empty($editfield) ) continue;
 
-	echo "<tr><td>" . htmlspecialchars(ucfirst(strtr($key,'_',' '))) .
+	echo "<tr><td>" . specialchars(ucfirst(strtr($key,'_',' '))) .
 		"</td><td style=\"white-space: nowrap;\">" . $editfield .
-		"</td><td>" . htmlspecialchars($data['desc']) .
+		"</td><td>" . specialchars($data['desc']) .
 		"</td></tr>\n";
 }
 

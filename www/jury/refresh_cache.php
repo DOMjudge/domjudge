@@ -79,11 +79,11 @@ foreach ($contests as $contest) {
 // for each team, fetch the status of each problem
 	foreach ($teams as $team) {
 
-		echo "Team t" . htmlspecialchars($team['teamid']) . ":";
+		echo "Team t" . specialchars($team['teamid']) . ":";
 
 		// for each problem fetch the result
 		foreach ($probs as $pr) {
-			echo " p" . htmlspecialchars($pr['probid']);
+			echo " p" . specialchars($pr['probid']);
 			calcScoreRow($pr['cid'], $team['teamid'], $pr['probid']);
 		}
 

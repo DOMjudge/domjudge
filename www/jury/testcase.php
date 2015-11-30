@@ -20,7 +20,7 @@ if ( ! $prob ) error("Missing or invalid problem id");
 
 function filebase($probid, $rank)
 {
-	return 'p' . htmlspecialchars($probid) . '.t' . $rank . '.';
+	return 'p' . specialchars($probid) . '.t' . $rank . '.';
 }
 
 // Download testcase
@@ -112,7 +112,7 @@ if ( isset ($_GET['move']) ) {
 	return;
 }
 
-$title = 'Testcases for problem p'.htmlspecialchars(@$probid).' - '.htmlspecialchars($prob['name']);
+$title = 'Testcases for problem p'.specialchars(@$probid).' - '.specialchars($prob['name']);
 
 require(LIBWWWDIR . '/header.php');
 
@@ -155,7 +155,7 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 			auditlog('testcase', $probid, 'updated', "$file rank $rank");
 
 			$result .= "<li>Updated $file for testcase $rank with file " .
-			    htmlspecialchars($_FILES[$fileid]['name'][$rank]) .
+			    specialchars($_FILES[$fileid]['name'][$rank]) .
 			    " (" . printsize($_FILES[$fileid]['size'][$rank]) . ")";
 			if ( $file=='output' &&
 			     $_FILES[$fileid]['size'][$rank]>dbconfig_get('output_limit')*1024 ) {
@@ -217,9 +217,9 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 		auditlog('testcase', $probid, 'added', "rank $rank");
 
 		$result .= "<li>Added new testcase $rank from files " .
-			htmlspecialchars($_FILES['add_input']['name']) .
+			specialchars($_FILES['add_input']['name']) .
 			" (" . printsize($_FILES['add_input']['size']) . ") and " .
-			htmlspecialchars($_FILES['add_output']['name']) .
+			specialchars($_FILES['add_output']['name']) .
 			" (" . printsize($_FILES['add_output']['size']) . ").";
 		if ( $_FILES['add_output']['size']>dbconfig_get('output_limit')*1024 ) {
 			$result .= "<br /><b>Warning: output file size exceeds " .
@@ -258,7 +258,7 @@ if ( count($data)<(int)key($data) ) {
 }
 
 echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem p" .
-	htmlspecialchars($probid) . "</a></p>\n\n";
+	specialchars($probid) . "</a></p>\n\n";
 
 if ( IS_ADMIN ) {
 	echo addForm($pagename, 'post', null, 'multipart/form-data') .
@@ -295,7 +295,7 @@ foreach( $data as $rank => $row ) {
 		    urlencode($probid) . "&amp;rank=$rank&amp;fetch=" . $inout . "\">" .
 		    filebase($probid,$rank) . substr($inout,0,-3) . "</a></td>" .
 		    "<td class=\"size\">" . printsize($row["size_$inout"]) . "</td>" .
-		    "<td class=\"md5\">" . htmlspecialchars($row["md5sum_$inout"]) . "</td>";
+		    "<td class=\"md5\">" . specialchars($row["md5sum_$inout"]) . "</td>";
 		if ( IS_ADMIN ) {
 		    echo "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";
 		}
@@ -309,7 +309,7 @@ foreach( $data as $rank => $row ) {
 				    "hideTcSample($rank, '". printyn($row['sample'])."');</script>";
 				echo "<td class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
 				    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"1\">" .
-				    htmlspecialchars($row['description']) . "</textarea></td>" .
+				    specialchars($row['description']) . "</textarea></td>" .
 				    "<td rowspan=\"2\" class=\"editdel\">" .
 				    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]&amp;referrer=" .
 				    urlencode('testcase.php?probid='.$probid) . "\">" .
@@ -319,7 +319,7 @@ foreach( $data as $rank => $row ) {
 				echo "<td rowspan=\"2\" align=\"testsample\">" .
 					printyn($row['issample']) . "</td>";
 				echo "<td class=\"testdesc\">" .
-				    htmlspecialchars($row['description']) . "</td>";
+				    specialchars($row['description']) . "</td>";
 			}
 		} else {
 			echo '<td class="testimage filename">';

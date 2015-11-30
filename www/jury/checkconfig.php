@@ -72,12 +72,12 @@ function flushresults() {
 
 		if ( $row['section'] != $lastsection ) {
 			echo "<tr><th colspan=\"2\">" .
-			    htmlspecialchars(ucfirst($row['section'])) .
+			    specialchars(ucfirst($row['section'])) .
 			    "</th></tr>\n";
 			$lastsection = $row['section'];
 		}
 
-		echo "<tr class=\"result " . htmlspecialchars($row['result']) .
+		echo "<tr class=\"result " . specialchars($row['result']) .
 		    "\"><td class=\"resulticon\"><img src=\"../images/s_";
 		switch($row['result']) {
 		case 'O': echo "okay"; break;
@@ -87,11 +87,11 @@ function flushresults() {
 		default: error("Unknown config checker result: ".$row['result']);
 		}
 		echo ".png\" alt=\"" . $row['result'] . "\" class=\"picto\" /></td><td>" .
-		    htmlspecialchars($row['item']) ." " .
+		    specialchars($row['item']) ." " .
 		    "<a href=\"javascript:collapse($resultno)\"><img src=\"../images/b_help.png\" " .
 		    "alt=\"?\" title=\"show details\" class=\"smallpicto helpicon\" /></a>\n" .
 		    "<div class=\"details\" id=\"detail$resultno\">" .
-		    nl2br(htmlspecialchars(trim($row['details']))."\n") . $row['details_html'] .
+		    nl2br(specialchars(trim($row['details']))."\n") . $row['details_html'] .
 		    "</div></td></tr>\n";
 
 		++$resultno;
@@ -104,30 +104,14 @@ echo "<table class=\"configcheck\">\n";
 
 // SOFTWARE
 
-if( !function_exists('version_compare') || version_compare( '5.3.3',PHP_VERSION,'>=') ) {
+if( !function_exists('version_compare') || version_compare( '5.4',PHP_VERSION,'>=') ) {
 	result('software', 'PHP version', 'E',
-		'You have PHP ' . PHP_VERSION . ', but need at least 5.3.3.',
+		'You have PHP ' . PHP_VERSION . ', but need at least 5.4.0.',
 		'See <a href="?phpinfo">phpinfo</a> for details.');
 } else {
 	result('software', 'PHP version', 'O',
 		'You have PHP ' . PHP_VERSION . '.',
 		'See <a href="?phpinfo">phpinfo</a> for details.');
-}
-
-if ( (bool) ini_get('register_globals') &&
-     strtolower(ini_get('register_globals'))!='off' ) {
-	result('software', 'PHP register_globals', 'W',
-	       'PHP register_globals is on. This obsolete feature should be disabled');
-} else {
-	result('software', 'PHP register_globals', 'O', 'PHP register_globals off');
-}
-
-if ( function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()==1 ) {
-	result('software', 'PHP magic quotes', 'E',
-	       'PHP magic quotes enabled. This will result in overquoted ' .
-	       'entries in the database.');
-} else {
-	result('software', 'PHP magic quotes', 'O', 'PHP magic quotes disabled.');
 }
 
 if ( !function_exists('gd_info') ) {
@@ -432,7 +416,7 @@ $res = $DB->q('SELECT name FROM team GROUP BY name HAVING COUNT(name) >= 2;');
 $details = '';
 while($row = $res->next()) {
 	$teamids = $DB->q('COLUMN SELECT teamid FROM team WHERE name=%s', $row['name']);
-	$details .= "Multiple teams have the name '" . htmlspecialchars($row['name']) . "': " .
+	$details .= "Multiple teams have the name '" . specialchars($row['name']) . "': " .
 		    implode(', ', $teamids) . "\n";
 }
 
@@ -448,7 +432,7 @@ $submnote = NULL;
 if ( ! is_writable(SUBMITDIR) ) {
 	$submres = 'W';
 	$submnote = 'The webserver has no write access to SUBMITDIR (' .
-	            htmlspecialchars(SUBMITDIR) . '), and thus will not ' .
+	            specialchars(SUBMITDIR) . '), and thus will not ' .
 	            'be able to make backup copies of submissions.';
 }
 

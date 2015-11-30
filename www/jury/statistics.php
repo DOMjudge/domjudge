@@ -17,11 +17,11 @@ if ( !empty($_GET['probid']) ) {
 	$shortname = $DB->q('VALUE SELECT shortname FROM problem p
 	                     INNER JOIN contestproblem USING (probid)
 	                     WHERE p.probid = %i', $_GET['probid']);
-	$title .= " - Problem " . htmlspecialchars($shortname);
+	$title .= " - Problem " . specialchars($shortname);
 }
 
 require(LIBWWWDIR . '/header.php');
-echo "<h1>" . htmlspecialchars($title) . "</h1>\n\n";
+echo "<h1>" . specialchars($title) . "</h1>\n\n";
 
 $partCat = $DB->q('VALUE SELECT categoryid FROM team_category WHERE name=%s', 'Participants');
 
@@ -44,7 +44,7 @@ $problems = $DB->q('SELECT p.probid,p.name FROM problem p
 print '<p>';
 print '<a href="statistics.php">All problems</a>&nbsp;&nbsp;&nbsp;';
 while($row = $problems->next()) {
-	print '<a href="statistics.php?probid=' . urlencode($row['probid']) . '">' . htmlspecialchars($row['name']) . '</a>&nbsp;&nbsp;&nbsp;';
+	print '<a href="statistics.php?probid=' . urlencode($row['probid']) . '">' . specialchars($row['name']) . '</a>&nbsp;&nbsp;&nbsp;';
 }
 print '</p>';
 

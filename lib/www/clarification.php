@@ -56,13 +56,13 @@ function putClar($clar)
 
 	// $clar['sender'] is set to the team ID, or empty if sent by the jury.
 	if ( !empty($clar['sender']) ) {
-		$from = htmlspecialchars($clar['fromname'] . ' (t'.$clar['sender'] . ')') ;
+		$from = specialchars($clar['fromname'] . ' (t'.$clar['sender'] . ')') ;
 	} else {
 		$from = 'Jury';
-		if ( IS_JURY ) $from .= ' (' . htmlspecialchars($clar['jury_member']) . ')';
+		if ( IS_JURY ) $from .= ' (' . specialchars($clar['jury_member']) . ')';
 	}
 	if ( $clar['recipient'] && empty($clar['sender']) ) {
-		$to = htmlspecialchars($clar['toname'] . ' (t'.$clar['recipient'] . ')') ;
+		$to = specialchars($clar['toname'] . ' (t'.$clar['recipient'] . ')') ;
 	} else {
 		$to = ( $clar['sender'] ) ? 'Jury' : 'All';
 	}
@@ -93,7 +93,7 @@ function putClar($clar)
 	$prefix = '';
 	if ( IS_JURY && count($cids) > 1 )
 	{
-		$prefix = htmlspecialchars($clar['contestshortname']) . ' - ';
+		$prefix = specialchars($clar['contestshortname']) . ' - ';
 	}
 	if ( is_null($clar['probid']) ) {
 		if ( is_null($clar['category']) ) {
@@ -101,15 +101,15 @@ function putClar($clar)
 			echo $prefix . "General issue";
 		} else {
 			// FIXME: add check if the category still exists?
-			echo $prefix . htmlspecialchars($categs[$clar['category']]);
+			echo $prefix . specialchars($categs[$clar['category']]);
 		}
 	} else {
 		if ( IS_JURY ) {
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
-			     '">' . $prefix . 'Problem ' . htmlspecialchars($clar['shortname'] . ": " .
+			     '">' . $prefix . 'Problem ' . specialchars($clar['shortname'] . ": " .
 			     $clar['probname']) . '</a>';
 		} else {
-			echo 'Problem ' . htmlspecialchars($clar['shortname'] . ": " . $clar['probname']);
+			echo 'Problem ' . specialchars($clar['shortname'] . ": " . $clar['probname']);
 		}
 	}
 	echo "</td></tr>\n";
@@ -119,7 +119,7 @@ function putClar($clar)
 	echo "</td></tr>\n";
 
 	echo '<tr><td></td><td class="filename">';
-	echo '<pre class="output_text">' . htmlspecialchars(wrap_unquoted($clar['body'],80)) . "</pre>";
+	echo '<pre class="output_text">' . specialchars(wrap_unquoted($clar['body'],80)) . "</pre>";
 	echo "</td></tr>\n";
 
 	echo "</table>\n";
@@ -178,7 +178,7 @@ function summarizeClarification($body, $maxchars = 80)
 	foreach($split as $line) {
 		if ( strlen($line) > 0 && $line{0} != '>' ) $newbody .= $line . ' ';
 	}
-	return htmlspecialchars( str_cut( ( empty($newbody) ? $body : $newbody ), $maxchars) );
+	return specialchars( str_cut( ( empty($newbody) ? $body : $newbody ), $maxchars) );
 }
 
 /**
@@ -226,15 +226,23 @@ function putClarificationList($clars, $team = NULL)
 
 		echo '<td>' . $link . printtime($clar['submittime'], NULL, $clar['cid']) . '</a></td>';
 
-		if ( $clar['sender']  == NULL ) {
+		if ( $clar['sender'] == NULL ) {
 			$sender = 'Jury';
 			if ( $clar['recipient'] == NULL ) {
 				$recipient = 'All';
 			} else {
-				$recipient = htmlspecialchars($clar['toname']);
+				if ( $team != NULL && $clar['recipient'] == $team ) {
+					$recipient = 'You';
+				} else {
+					$recipient = specialchars($clar['toname']);
+				}
 			}
 		} else {
-			$sender = htmlspecialchars($clar['fromname']);
+			if ( $team != NULL && $clar['sender'] == $team ) {
+				$sender = 'You';
+			} else {
+				$sender = specialchars($clar['fromname']);
+			}
 			$recipient = 'Jury';
 		}
 
@@ -248,7 +256,7 @@ function putClarificationList($clars, $team = NULL)
 			echo "general";
 		} else {
 			// FIXME: add check if the category still exists?
-			echo htmlspecialchars($categs[$clar['category']]);
+			echo specialchars($categs[$clar['category']]);
 		}
 		} else {
 			echo "problem ".$clar['shortname'];
@@ -265,7 +273,7 @@ function putClarificationList($clars, $team = NULL)
 			if ( empty($clar['jury_member']) ) {
 				$jury_member = '&nbsp;';
 			} else {
-				$jury_member = htmlspecialchars($clar['jury_member']);
+				$jury_member = specialchars($clar['jury_member']);
 			}
 			if ( !$clar['answered'] ) {
 				if ( empty($clar['jury_member']) ) {
@@ -278,11 +286,11 @@ function putClarificationList($clars, $team = NULL)
 			echo "<td>$link $answered</a></td><td>";
 			if ( $claim && isset($clar['sender']) ) {
 				echo "<a class=\"button\" href=\"clarification.php?claim=1&amp;id=" .
-					htmlspecialchars($clar['clarid']) . "\">claim</a>";
+					specialchars($clar['clarid']) . "\">claim</a>";
 			} else {
 				if ( !$clar['answered'] && $jury_member==$username ) {
 					echo "<a class=\"button\" href=\"clarification.php?unclaim=1&amp;id=" .
-						htmlspecialchars($clar['clarid']) . "\">unclaim</a>";
+						specialchars($clar['clarid']) . "\">unclaim</a>";
 				} else {
 					echo "$link $jury_member</a>";
 				}

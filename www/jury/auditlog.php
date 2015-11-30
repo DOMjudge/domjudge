@@ -46,17 +46,17 @@ echo "<table class=\"list sortable\">\n" .
      "<th>who</th><th colspan=\"3\">what</th><th>extra info</th></tr></thead>\n<tbody>\n";
 while ( $logline = $res->next() ) {
 	echo "<tr><td>" .
-	htmlspecialchars($logline['logid']) . "</td>" .
-	"<td title=\"" . htmlspecialchars(printtime($logline['logtime'], "%Y-%m-%d %H:%M:%S (%Z)")) . "\">" .
+	specialchars($logline['logid']) . "</td>" .
+	"<td title=\"" . specialchars(printtime($logline['logtime'], "%Y-%m-%d %H:%M:%S (%Z)")) . "\">" .
 	printtime($logline['logtime']) . "</td><td>" .
 	(empty($logline['cid'])?'':'c'.$logline['cid']) . "</td><td>" .
-	htmlspecialchars($logline['user']) . "</td><td>" .
-	htmlspecialchars($logline['datatype']) . "</td><td>";
+	specialchars($logline['user']) . "</td><td>" .
+	specialchars($logline['datatype']) . "</td><td>";
 
 	// First define defaults, allow to override afterwards:
 	$link = urlencode($logline['datatype']) . '.php?id=' .
 	    urlencode($logline['dataid']);
-	$name = htmlspecialchars($logline['dataid']);
+	$name = specialchars($logline['dataid']);
 	switch ( $logline['datatype'] ) {
 	case 'balloon':
 		$link = NULL;
@@ -86,8 +86,8 @@ while ( $logline = $res->next() ) {
 	}
 
 	echo "</td><td>" .
-	htmlspecialchars($logline['action']) . "</td><td>" .
-	htmlspecialchars($logline['extrainfo']) . "</td></tr>\n";
+	specialchars($logline['action']) . "</td><td>" .
+	specialchars($logline['extrainfo']) . "</td></tr>\n";
 }
 echo "</tbody></table>\n\n";
 

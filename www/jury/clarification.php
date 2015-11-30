@@ -153,7 +153,7 @@ if ( !$req['answered'] ) {
 	if ( empty($req['jury_member']) ) {
 		echo '; ';
 	} else {
-		echo ', by ' . htmlspecialchars($req['jury_member']) . '; ' .
+		echo ', by ' . specialchars($req['jury_member']) . '; ' .
 		    addSubmit('unclaim', 'unclaim') . ' or ';
 	}
 	echo addSubmit('claim', 'claim') . '</p>' .
@@ -168,7 +168,7 @@ if ( ! empty ( $req['respid'] ) ) {
 		'">original clarification ' . $respid . '</a> by ' .
 		( $orig['sender']==NULL ? 'Jury' :
 			'<a href="team.php?id=' . urlencode($orig['sender']) . '">' .
-			htmlspecialchars($orig['name'] . " (t" . $orig['sender'] . ")") .
+			specialchars($orig['name'] . " (t" . $orig['sender'] . ")") .
 			'</a>' ) .
 		"</p>\n\n";
 

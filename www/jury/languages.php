@@ -29,15 +29,15 @@ if( $res->count() == 0 ) {
 		$link = '<a href="language.php?id=' . urlencode($row['langid']) . '">';
 		echo "<tr".
 			( $row['allow_submit'] ? '': ' class="disabled"').
-			"><td>" . $link . htmlspecialchars($row['langid'])."</a>".
-			"</td><td>" . $link . htmlspecialchars($row['name'])."</a>".
+			"><td>" . $link . specialchars($row['langid'])."</a>".
+			"</td><td>" . $link . specialchars($row['name'])."</a>".
 			"</td><td>" . $link .
 				printyn($row['allow_submit']) . "</a>" .
 			"</td><td>" . $link .
 				printyn($row['allow_judge']) . "</a>" .
-			"</td><td>" . $link . htmlspecialchars($row['time_factor']) . "</a>" .
+			"</td><td>" . $link . specialchars($row['time_factor']) . "</a>" .
 			"</td><td>" . $link .
-			htmlspecialchars(implode(', ',json_decode($row['extensions']))) . "</a>";
+			specialchars(implode(', ',json_decode($row['extensions']))) . "</a>";
 			if ( IS_ADMIN ) {
 				echo "</td><td class=\"editdel\">" .
 					editLink('language', $row['langid']) . "&nbsp;" .

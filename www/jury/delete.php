@@ -72,7 +72,7 @@ if (isset($_POST['confirm'] ) ) {
 	$DB->q("DELETE FROM $t WHERE %SS LIMIT 1", $k);
 	auditlog($t, implode(', ', $k), 'deleted');
 
-	echo "<p>" . ucfirst($t) . " <strong>" . htmlspecialchars(implode(", ", $k)) .
+	echo "<p>" . ucfirst($t) . " <strong>" . specialchars(implode(", ", $k)) .
 		"</strong> has been deleted.</p>\n\n";
 
 	if ( !empty($referrer) ) {
@@ -92,7 +92,7 @@ if (isset($_POST['confirm'] ) ) {
 	echo msgbox (
 		"Really delete?",
 		"You're about to delete $t <strong>" .
-		htmlspecialchars(join(", ", array_values($k))) . "</strong>.<br />\n" .
+		specialchars(join(", ", array_values($k))) . "</strong>.<br />\n" .
 		(count($warnings)>0 ? "<br /><strong>Warning, this will:</strong><br />" .
 		 implode('<br />', $warnings) : '' ) . "<br /><br />\n" .
 		"Are you sure?<br /><br />\n\n" .

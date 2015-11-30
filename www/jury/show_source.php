@@ -14,13 +14,13 @@ function parseSourceDiff($difftext){
 		$line = trim($line, "\r\n");
 		switch ( substr($line,0,1) ) {
 		case '-':
-			$formdiffline = "<span class='diff-del'>".htmlspecialchars($line)."</span>";
+			$formdiffline = "<span class='diff-del'>".specialchars($line)."</span>";
 			break;
 		case '+':
-			$formdiffline = "<span class='diff-add'>".htmlspecialchars($line)."</span>";
+			$formdiffline = "<span class='diff-add'>".specialchars($line)."</span>";
 			break;
 		default:
-			$formdiffline = htmlspecialchars($line);
+			$formdiffline = specialchars($line);
 		}
 		$return .= $formdiffline . "\n";
 		$line = strtok("\n");
@@ -95,9 +95,9 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid) {
 function presentSource ($sourcedata, $langid)
 {
 	$head = '<div class="tabbertab">' .
-		'<h2 class="filename"><a id="source' . htmlspecialchars($sourcedata['rank']) .
+		'<h2 class="filename"><a id="source' . specialchars($sourcedata['rank']) .
 		'"></a>' .
-		htmlspecialchars($sourcedata['filename']) . "</h2> <a " .
+		specialchars($sourcedata['filename']) . "</h2> <a " .
 		"href=\"show_source.php?id=" . urlencode($sourcedata['submitid']) .
 		"&amp;fetch=" . urlencode($sourcedata['rank']) .
 		"\"><img class=\"picto\" src=\"../images/b_save.png\" " .
@@ -109,15 +109,15 @@ function presentSource ($sourcedata, $langid)
 
 	$langid = langidToAce($langid);
 
-	$ace = '<div class="editor" id="editor' . htmlspecialchars($sourcedata['rank']) . '">'
-		. htmlspecialchars($sourcedata['sourcecode'], ENT_SUBSTITUTE) . '</div>' .
-		'<script src="../js/ace/ace.js" type="text/javascript" charset="utf-8"></script>' .
+	$ace = '<div class="editor" id="editor' . specialchars($sourcedata['rank']) . '">'
+		. specialchars($sourcedata['sourcecode']) . '</div>' .
 		'<script>' .
-		'var editor = ace.edit("editor' . htmlspecialchars($sourcedata['rank']) . '");' .
+		'var editor = ace.edit("editor' . specialchars($sourcedata['rank']) . '");' .
 		'editor.setTheme("ace/theme/eclipse");' .
 		'editor.setOptions({ maxLines: Infinity });' .
 		'editor.setReadOnly(true);' .
 		'editor.getSession().setMode("ace/mode/' . $langid . '");' .
+        'document.getElementById("editor' . specialchars($sourcedata['rank']) . '").editor = editor;' .
 		'</script>';
 
 	return $head . $ace . '</div>';
@@ -133,7 +133,7 @@ function presentDiff ($old, $new)
 
 	return '<div class="tabbertab">' .
 		'<h2 class="filename">' .
-		htmlspecialchars($old['filename']) . "</h2>\n\n" .
+		specialchars($old['filename']) . "</h2>\n\n" .
 
 		'<pre class="output_text">' . parseSourceDiff($difftext) . "</pre>\n\n" .
 		'</div>';
@@ -222,7 +222,15 @@ $sources = $DB->q('TABLE SELECT *
                    FROM submission_file LEFT JOIN submission USING(submitid)
                    WHERE submitid = %i ORDER BY rank', $id);
 
-$html = '<script type="text/javascript" src="../js/tabber.js"></script>' .
+$html = '<script type="text/javascript">' .
+        // Resize ACE editor after the corresponding tab is clicked
+        'tabberOptions = { "onTabDisplay" : function(d) {' .
+        '  var ed = d.tabber.tabs[d.index].div.getElementsByClassName("ace_editor")[0];' .
+        '  if(ed && ed.editor) ed.editor.resize();' .
+        '} };' .
+        '</script>' .
+        '<script type="text/javascript" src="../js/tabber.js"></script>' .
+		'<script type="text/javascript" src="../js/ace/ace.js" charset="utf-8"></script>' .
 	'<div class="tabber">';
 foreach($sources as $sourcedata)
 {
@@ -272,7 +280,7 @@ if ( !empty($origsources) ) {
 }
 
 echo "<h2>Source code for submission <a href=\"submission.php?id=" .
-	urlencode($id) . "\">s" .htmlspecialchars($id) . "</a>";
+	urlencode($id) . "\">s" .specialchars($id) . "</a>";
 if ( !empty($submission['origsubmitid']) ) {
 	$origid = $submission['origsubmitid'];
 	echo  " (resubmit of <a href=\"submission.php?id=" . urlencode($origid) . "\">s$origid</a>)";

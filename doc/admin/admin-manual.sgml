@@ -147,7 +147,7 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with support for PHP &gt;= 5.3.3 and the mysqli,
+<item> Apache web server with support for PHP &gt;= 5.4 and the mysqli,
        GD, curl and json extensions for PHP. PHP needs to be running as an
        Apache module (the most common configuration); a (fast)CGI setup
        is not currently supported. We also recommend the posix extension
@@ -157,7 +157,7 @@ The following software is required for running DOMjudge.
 
 <item> MySQL or MariaDB &gt;= 5.5.3 database and client software.
 
-<item> PHP &gt;= 5.3.3 command line interface and the curl and json
+<item> PHP &gt;= 5.4 command line interface and the curl and json
        extensions.
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash).
@@ -811,9 +811,6 @@ For the web interface, you need to have a web server (e.g. Apache)
 installed on the domserver and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
 details.
-
-You should turn PHP's <tt>magic_quotes_*</tt> options off. We
-also recommend to turn off <tt>register_globals</tt>.
 
 To configure the web server for DOMjudge, use the Apache configuration
 snippet from <tt>etc/apache.conf</tt>. It contains examples for

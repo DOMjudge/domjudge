@@ -2,12 +2,25 @@ DOMjudge Programming Contest Judging System
 
 Version 5.1.0 - DEV
 -------------------
+ - Minimum PHP version is now 5.4.
  - Minimum MySQL/MariaDB version is now 5.5.3 for full UTF-8 support.
    Also introduces new DJ_MYSQL_COLLATION configuration setting.
  - Remove CHROOT_SCRIPT configuration setting: automatically run
    chroot-startstop.sh if a pre-built chroot tree is found.
  - Update ACE editor to version 1.2.2, JScolor to version 1.4.5.
  - Support microsecond resolution contest times.
+ - Port XML event feed from ICPC-live branch.
+ - Port clarification categories feature from ICPC-live branch.
+ - Merge Debian/Ubuntu chroot scripts and add minor fixes.
+ - Drop CHROOT_SCRIPT setting, use hardcoded chroot-startstop.sh.
+ - Fix float compare script output and relative checking.
+ - Fix various small bugs in problem ZIP import.
+ - [security] Disable GCC family automatic language detection to
+   prevent submitting other languages or object/executable code.
+ - Write compare script errors to logfile. (Closes #179).
+ - Substitute invalid Unicode characters instead of producing
+   blank output.
+ - Various smaller fixes and improvements to the jury interface.
 
 Version 5.0.0 - 11 August 2015
 ------------------------------
