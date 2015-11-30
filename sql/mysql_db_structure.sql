@@ -357,7 +357,7 @@ CREATE TABLE `removed_interval` (
   PRIMARY KEY (`intervalid`),
   KEY `cid` (`cid`),
   CONSTRAINT `removed_interval_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Time intervals removed from the contest for scoring';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Time intervals removed from the contest for scoring';
 
 --
 -- Table structure for table `role`
