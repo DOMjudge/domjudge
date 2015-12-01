@@ -1014,7 +1014,7 @@ function cmp($a, $b) {
 	if ( $scorecmp != 0 ) return $scorecmp;
 	// else, order by teamname alphabetically
 	if ( $a['teamname'] != $b['teamname'] ) {
-		return strcasecmp($a['teamname'],$b['teamname']);
+		return strcmp($a['teamname'],$b['teamname']);
 	}
 	// undecided, should never happen in practice
 	return 0;
