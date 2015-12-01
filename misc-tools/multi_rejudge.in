@@ -58,7 +58,7 @@ $RESTRICTION = '{"contest":[],"problem":[],"language":[],"rejudge_own":"0"}';
 $restrict_id = $DB->q('MAYBEVALUE SELECT restrictionid FROM judgehost_restriction WHERE restrictions = %s', $RESTRICTION);
 
 if ( empty($restrict_id) ) {
-	$restrict_id = $DB->q('RETURNID INSERT INTO judgehost_restriction (restrictionname, restrictions) VALUES (%s, %s)', 'not self, for statistics', $RESTRICTION);
+	$restrict_id = $DB->q('RETURNID INSERT INTO judgehost_restriction (name, restrictions) VALUES (%s, %s)', 'not self, for statistics', $RESTRICTION);
 }
 
 // FIXME: save old restrictions first?
@@ -104,5 +104,7 @@ while ( TRUE ) {
 	echo "\n";
 
 }
+
+// FIXME: remove new judgehost restriction, restore old one
 
 exit;
