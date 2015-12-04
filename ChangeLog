@@ -3,7 +3,8 @@ DOMjudge Programming Contest Judging System
 Version 5.1.0 - DEV
 -------------------
  - Minimum PHP version is now 5.4.
- - Minimum MySQL/MariaDB version is now 5.5.3 for full UTF-8 support.
+ - Minimum MySQL/MariaDB version is now 5.5.3.
+ - More pervasive UTF-8 support.
    Also introduces new DJ_MYSQL_COLLATION configuration setting.
  - Remove CHROOT_SCRIPT configuration setting: automatically run
    chroot-startstop.sh if a pre-built chroot tree is found.
@@ -15,9 +16,11 @@ Version 5.1.0 - DEV
  - Drop CHROOT_SCRIPT setting, use hardcoded chroot-startstop.sh.
  - Fix float compare script output and relative checking.
  - Fix various small bugs in problem ZIP import.
+ - Fix ACE editor to resize after tab change (#145).
+ - Fix variance calculation in judging_statistics script.
  - [security] Disable GCC family automatic language detection to
    prevent submitting other languages or object/executable code.
- - Write compare script errors to logfile. (Closes #179).
+ - Write compare script errors to logfile (#179).
  - Substitute invalid Unicode characters instead of producing
    blank output.
  - Various smaller fixes and improvements to the jury interface.
