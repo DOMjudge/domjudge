@@ -6,7 +6,8 @@ Version 4.0.7 - DEV
    prevent submitting other languages or object/executable code.
  - Make users sortable by status in the jury interface.
  - Make Apache config work for version 2.2 or 2.4 automatically.
- - Fix issue with dissapearing first source code line. (Fixes #177)
+ - Fix issue with dissapearing first source code line (#177).
+ - Fix ACE editor to resize after tab change (#145).
  - Fix various minor HTML issues.
  - Small tweaks to team manual.
  - Bring admin manual up to date wrt. executables in database.
