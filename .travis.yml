@@ -1,0 +1,7 @@
+sudo: required
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y gcc g++ make zip unzip mysql-server apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php5-json bsdmainutils phpmyadmin ntp libboost-regex-dev libgmp3-dev linuxdoc-tools linuxdoc-tools-text groff texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-lang-dutch libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev autoconf automake bisonc++ make sudo debootstrap php5-cli php5-curl php5-json procps gcc g++ openjdk-7-jre-headless openjdk-7-jdk ghc fp-compiler libcgroup-dev cgroup-bin 
+script: ./travis.sh
+dist: trusty
+
