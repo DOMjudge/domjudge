@@ -7,6 +7,8 @@ Version 5.0.2 - DEV
  - Check for Ubuntu host in dj_make_ubuntu_chroot script.
  - Fix a number of bugs in problem zip import.
  - Fix permissions of compare build/run scripts.
+ - Fix ACE editor to resize after tab change (#145).
+ - Fix variance calculation in judging_statistics script.
  - Fix various minor HTML issues.
  - Small tweaks to team manual.
  - Bring admin manual up to date wrt. executables in database.
