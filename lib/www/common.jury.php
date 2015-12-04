@@ -584,15 +584,16 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				$source = $zip->getFromIndex($j);
 				$results = getExpectedResults($source);
 				if ( $results === NULL ) {
-					// annotate source code with expected result
-					$source = "// added by import: " . $matchstrings[0] . $expectedResult . "\n" . $source;
+					$results[] = $expectedResult;
 				} else if ( !in_array($expectedResult, $results) ) {
 					warning("annotated result '" . implode(', ', $results) . "' does not match directory for $filename");
 				}
 				file_put_contents($tmpfname, $source);
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
-					submit_solution($teamid, $probid, $cid, $langid,
+					$sid = submit_solution($teamid, $probid, $cid, $langid,
 							array($tmpfname), array(basename($filename)));
+					$DB->q('UPDATE submission SET expected_results=%s WHERE submitid=%i', json_encode($results), $sid);
+
 					echo "<li>Added jury solution from: <tt>$filename</tt></li>\n";
 					$njurysols++;
 				} else {

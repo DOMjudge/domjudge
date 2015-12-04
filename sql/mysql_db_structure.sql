@@ -397,6 +397,7 @@ CREATE TABLE `submission` (
   `judgehost` varchar(50) DEFAULT NULL COMMENT 'Current/last judgehost judging this submission',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'If false ignore this submission in all scoreboard calculations',
   `rejudgingid` int(4) unsigned DEFAULT NULL COMMENT 'Rejudging ID (if rejudge)',
+  `expected_results` varchar(255) DEFAULT NULL COMMENT 'JSON encoded list of expected results - used to validate jury submissions',
   PRIMARY KEY  (`submitid`),
   KEY `teamid` (`cid`,`teamid`),
   KEY `judgehost` (`cid`,`judgehost`),
