@@ -47,7 +47,7 @@ cd /${DIR}/tests
 make check test-stress
 
 # wait for and check results
-NUMSUBS=$(curl http://admin:admin@localhost/domjudge/api/submissions | python -mjson.tool | grep id | wc -l)
+NUMSUBS=$(curl http://admin:admin@localhost/domjudge/api/submissions | python -mjson.tool | grep -c id)
 export COOKIEJAR=`mktemp --tmpdir`
 export CURLOPTS="-sq -m 30 -b $COOKIEJAR"
 curl $CURLOPTS -c $COOKIEJAR -F "cmd=login" -F "login=admin" -F "passwd=admin" "http://localhost/domjudge/jury/"
