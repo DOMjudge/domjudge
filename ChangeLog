@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 5.1.0 - DEV
--------------------
+Version 5.1.0 - 7 December 2015
+-------------------------------
  - Minimum PHP version is now 5.4.
  - Minimum MySQL/MariaDB version is now 5.5.3.
  - More pervasive UTF-8 support.
