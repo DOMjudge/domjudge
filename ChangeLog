@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 4.0.7 - DEV
--------------------
+Version 4.0.7 - 7 December 2015
+-------------------------------
  - [security] Disable GCC family automatic language detection to
    prevent submitting other languages or object/executable code.
  - Make users sortable by status in the jury interface.
