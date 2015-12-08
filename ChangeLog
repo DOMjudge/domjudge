@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 5.0.3 - DEV
+-------------------
+
 Version 5.0.2 - 7 December 2015
 -------------------------------
  - Fix float comparison and output in default validator.
