@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 5.0.2 - DEV
--------------------
+Version 5.0.2 - 7 December 2015
+-------------------------------
  - Fix float comparison and output in default validator.
  - Install all scripts under misc-tools for domserver target.
  - Check for Ubuntu host in dj_make_ubuntu_chroot script.
