@@ -501,14 +501,21 @@ function putProblemText($probid)
 {
 	global $DB, $cdata;
 
-	$prob = $DB->q("MAYBETUPLE SELECT cid, shortname, problemtext, problemtext_type
-	                FROM problem INNER JOIN contestproblem USING (probid)
-	                WHERE OCTET_LENGTH(problemtext) > 0
-	                AND probid = %i AND cid = %i", $probid, $cdata['cid']);
+	if ( IS_JURY ) {
+		$prob = $DB->q("MAYBETUPLE SELECT problemtext, problemtext_type
+		                FROM problem p
+		                WHERE OCTET_LENGTH(problemtext) > 0 AND probid = %i",
+		               $probid);
+		$probname = $probid;
+	} else {
+		$prob = $DB->q("MAYBETUPLE SELECT shortname, problemtext, problemtext_type
+		                FROM problem INNER JOIN contestproblem USING (probid)
+		                WHERE OCTET_LENGTH(problemtext) > 0 and allow_submit = 1
+		                AND probid = %i AND cid = %i", $probid, $cdata['cid']);
+		$probname = $prob['shortname'];
+	}
 
-	if ( empty($prob) ||
-	     !(IS_JURY ||
-	       ($prob['cid']==$cdata['cid'] && difftime($cdata['starttime'],now())<=0)) ) {
+	if ( empty($prob) || difftime($cdata['starttime'],now())>0 ) {
 		error("Problem p$probid not found or not available");
 	}
 
@@ -526,8 +533,7 @@ function putProblemText($probid)
 		error("Problem p$probid text has unknown type");
 	}
 
-
-	$filename = "prob-$prob[shortname].$prob[problemtext_type]";
+	$filename = "prob-$probname.$prob[problemtext_type]";
 
 	header("Content-Type: $mimetype; name=\"$filename\"");
 	header("Content-Disposition: inline; filename=\"$filename\"");
