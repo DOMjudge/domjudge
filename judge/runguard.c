@@ -159,6 +159,7 @@ size_t streamsize;
 pid_t child_pid;
 
 static volatile sig_atomic_t received_SIGCHLD = 0;
+static volatile sig_atomic_t received_signal = -1;
 
 FILE *child_stdout;
 FILE *child_stderr;
@@ -327,6 +328,10 @@ void output_exit_time(int exitcode)
 
 	verbose("command exited with exitcode %d",exitcode);
 	write_meta("exitcode","%d",exitcode);
+
+	if (received_signal != -1) {
+		write_meta("signal", "%d", received_signal);
+	}
 
 	walldiff = (endtime.tv_sec  - starttime.tv_sec ) +
 	           (endtime.tv_usec - starttime.tv_usec)*1E-6;
@@ -525,7 +530,7 @@ void terminate(int sig)
 		warning("received signal %d: aborting command",sig);
 	}
 
-	write_meta("signal", "%d", sig);
+	received_signal = sig;
 
 	/* First try to kill graciously, then hard.
 	   Don't report an already exited process as error. */
