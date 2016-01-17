@@ -111,6 +111,33 @@ std::string stringtolower(std::string str)
 	return str;
 }
 
+const int nHTML_entities = 5;
+const char HTML_entities[nHTML_entities][2][8] = {
+	{"&amp;", '&'},
+	{"&quot;", '"'},
+	{"&apos;", '\''},
+	{"&lt;", '<'},
+	{"&gt;", '>'}};
+
+std::string decode_HTML_entities(std::string str)
+{
+	string res;
+	unsigned int i, j;
+
+	for(i=0; i<str.length(); i++) {
+		for(j=0; j<nHTML_entities; j++) {
+			if ( str.substr(i,strlen(HTML_entities[j][0]))==HTML_entities[j][0] ) {
+				res += HTML_entities[j][1];
+				i += strlen(HTML_entities[j][0]) - 1;
+				break;
+			}
+		}
+		if ( j>=nHTML_entities ) res += str[i];
+	}
+
+	return res;
+}
+
 int nwarnings;
 
 /* Submission information */
@@ -646,7 +673,7 @@ int websubmit()
 	curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
 	if ( http_code >= 300 ) {
 		while ( getline(curloutput,line) ) {
-			printf("%s\n", line.c_str());
+			printf("%s\n", decode_HTML_entities(line).c_str());
 		}
 		curl_formfree(post);
 		curl_easy_cleanup(handle);
