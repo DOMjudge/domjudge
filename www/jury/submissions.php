@@ -125,9 +125,17 @@ foreach ( $filters as $filter_name => $filter_data ) {
 <?php
 }
 ?>
+	<input id="submissions-filter-clear-all" type="button" value="Clear all" />
 </div>
 <script type="text/javascript">
 $(function() {
+	$('#submissions-filter-clear-all').on('click', function() {
+		$('.filter').tokenInput('clear').trigger('change');
+		setTimeout(function() {
+			$('.filter').parent().find('input').blur();
+		}, 100);
+	});
+
 	var process_submissions_filter = function () {
 		var filters = [];
 
