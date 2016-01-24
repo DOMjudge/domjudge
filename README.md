@@ -1,3 +1,6 @@
+DOMjudge [![Build Status](https://travis-ci.org/DOMjudge/domjudge.svg?branch=master)](https://travis-ci.org/DOMjudge/domjudge)
+--------
+
 This is the Programming Contest Jury System "DOMjudge" version 5.2.0DEV
 
 DOMjudge is a system for running a programming contest, like the
