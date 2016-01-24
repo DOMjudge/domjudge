@@ -1,10 +1,9 @@
 <nav><div id="menutop">
 <a href="index.php" accesskey="h">home</a>
+<a href="problems.php" accesskey="p">problems</a>
 <?php
-if ( have_problemtexts() ) {
-	echo "<a href=\"problems.php\" accesskey=\"p\">problems</a>\n";
-}
 logged_in(); // fill userdata
+
 if ( checkrole('team') ) {
 	echo "<a target=\"_top\" href=\"../team/\" accesskey=\"t\">→team</a>\n";
 }

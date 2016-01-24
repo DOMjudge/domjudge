@@ -640,21 +640,6 @@ function putProblemTextList()
 }
 
 /**
- * Returns true if at least one problem in the current contest has a
- * problem statement text and/or sample testcase in the database.
- */
-function have_problemtexts()
-{
-	global $DB, $cid;
-        return $DB->q('VALUE SELECT MAX(hastexts)+MAX(hassamples) FROM (
-	               SELECT MAX(case when problemtext_type is null then 0 else 1 end) AS hastexts, MAX(sample) AS hassamples
-	               FROM problem
-	               INNER JOIN testcase USING(probid)
-	               INNER JOIN contestproblem USING (probid)
-	               WHERE cid = %i GROUP BY probid) AS t', $cid) > 0;
-}
-
-/**
  * Maps domjudge language id to Ace language id
  */
 function langidToAce($langid) {
