@@ -342,6 +342,67 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 
 if ( !isset($jid) ) {
 	echo "<p><em>Not (re)judged yet</em></p>\n\n";
+
+	// Check if there is an active judgehost that run this submission. Otherwise, we will print some error
+	$judgehosts = $DB->q("TABLE SELECT hostname, restrictionid FROM judgehost WHERE active = 1");
+	$can_be_judged = false;
+
+	foreach ( $judgehosts as $judgehost ) {
+		if ( $judgehost['restrictionid'] === null ) {
+			$can_be_judged = true;
+			break;
+		}
+
+		// Get judgehost restrictions
+		$contests = array();
+		$problems = array();
+		$languages = array();
+		$restrictions = $DB->q('MAYBEVALUE SELECT restrictions FROM judgehost
+				INNER JOIN judgehost_restriction USING (restrictionid)
+				WHERE hostname = %s', $judgehost['hostname']);
+		if ( $restrictions ) {
+			$restrictions = json_decode($restrictions, true);
+			$contests = @$restrictions['contest'];
+			$problems = @$restrictions['problem'];
+			$languages = @$restrictions['language'];
+		}
+
+		$extra_join = '';
+		$extra_where = '';
+		if ( empty($contests) ) {
+			$extra_where .= '%_ ';
+		} else {
+			$extra_where .= 'AND s.cid IN (%Ai) ';
+		}
+
+		if ( empty($problems) ) {
+			$extra_where .= '%_ ';
+		} else {
+			$extra_join  .= 'LEFT JOIN problem p USING (probid) ';
+			$extra_where .= 'AND s.probid IN (%Ai) ';
+		}
+
+		if ( empty($languages) ) {
+			$extra_where .= '%_ ';
+		} else {
+			$extra_where .= 'AND s.langid IN (%As) ';
+		}
+
+		$submitid = $DB->q('MAYBEVALUE SELECT s.submitid
+				    FROM submission s
+				    LEFT JOIN language l USING (langid)
+				    LEFT JOIN contestproblem cp USING (probid, cid) ' .
+				   $extra_join .
+				   'WHERE s.submitid = %i AND s.judgehost IS NULL
+				    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
+				   $extra_where .
+				   'LIMIT 1',
+				   $id, $contests, $problems, $languages);
+	}
+
+	if ( !$can_be_judged ) {
+		echo "<p class=\"error\">No active judgehost can judge this submission. Edit judgehost restrictions!</p>\n\n";
+	}
 }
 
 
