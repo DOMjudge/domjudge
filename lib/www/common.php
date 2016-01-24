@@ -157,7 +157,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 
 	// print the table with the submissions.
 	// table header
-	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
+	echo "<table class=\"list sortable submissions\">\n<thead>\n<tr>" .
 
 		(IS_JURY ? "<th scope=\"col\" class=\"sorttable_numeric\">ID</th>" : '') .
 		(IS_JURY && count($cids) > 1 ? "<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" : '') .
@@ -210,7 +210,11 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		if (!IS_JURY && !$row['seen'] ) {
 			echo ' unseen';
 		}
-		echo '">';
+		echo '"';
+		echo ' data-team-id="' . $row['teamid'] . '"';
+		echo ' data-problem-id="' . $row['probid'] . '"';
+		echo ' data-language-id="' . $row['langid'] . '"';
+		echo '>';
 
 		if ( IS_JURY ) {
 			echo "<td><a$link>s$sid</a></td>";

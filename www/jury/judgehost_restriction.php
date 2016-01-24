@@ -57,28 +57,28 @@ if ( !empty($_GET['cmd']) ) {
     <td><?php echo addInput('data[0][name]', @$row['name'], 15, 255, 'required')?></td></tr>
 <?php
 
-	$types = array(
-		'contest' => array(
-			'ajax' => 'ajax_contests.php',
-			'hintText' => 'Type to search for contest ID, name, or short name',
-			'noResultsText' => 'No contests found',
-			'allData' => $contests,
-		),
-		'problem' => array(
-			'ajax' => 'ajax_problems.php',
-			'hintText' => 'Type to search for problem ID or name',
-			'noResultsText' => 'No problems found',
-			'allData' => $problems,
-		),
-		'language' => array(
-			'ajax' => 'ajax_languages.php',
-			'hintText' => 'Type to search for language ID or name',
-			'noResultsText' => 'No languages found',
-			'allData' => $languages,
-		),
-	);
-	foreach ( $types as $type => $type_settings ) {
-		?>
+$types = array(
+	'contest' => array(
+		'ajax' => 'ajax_contests.php',
+		'hintText' => 'Type to search for contest ID, name, or short name',
+		'noResultsText' => 'No contests found',
+		'allData' => $contests,
+	),
+	'problem' => array(
+		'ajax' => 'ajax_problems.php',
+		'hintText' => 'Type to search for problem ID or name',
+		'noResultsText' => 'No problems found',
+		'allData' => $problems,
+	),
+	'language' => array(
+		'ajax' => 'ajax_languages.php',
+		'hintText' => 'Type to search for language ID or name',
+		'noResultsText' => 'No languages found',
+		'allData' => $languages,
+	),
+);
+foreach ( $types as $type => $type_settings ) {
+?>
 <tr><td colspan="2">
 <h3>Restrict to any of the following <?php echo $type; ?>s (leave empty to allow all)</h3>
 </td></tr>

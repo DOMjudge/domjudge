@@ -125,6 +125,9 @@ to name them here too (with non-GPL licences listed where applicable):
        licenced under the GPL and MIT licences, see <tt>COPYING</tt>
        and <tt>COPYING.MIT</tt>. It was downloaded from
        <url url="https://github.com/loopj/jquery-tokeninput">.
+<item> JavaScript Cookie by Klaus Hartl and Fagner Brack, licenced
+       under the MIT licence, see <tt>COPYING.MIT</tt>. It was
+       downloaded from <url url="https://github.com/js-cookie/js-cookie">.
 <item> The Spyc PHP YAML parser by Chris Wanstrath and Vlad Andersen,
        licenced under the MIT licence, see <tt>COPYING.MIT</tt>. It
        was downloaded from <url url="https://github.com/mustangostang/spyc/">.

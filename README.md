@@ -67,6 +67,7 @@ Various JavaScript libraries/snippets are included under www/js/:
 - Flot: licenced under the MIT licence, see COPYING.MIT.
 - jQuery: licenced under the MIT licence, see COPYING.MIT.
 - jQuery TokenInput: dual licensed under GPL and MIT licences, see COPYING and COPYING.MIT.
+- JavaScript Cookie: licenced under the MIT licence, see COPYING.MIT.
 
 The Spyc PHP YAML parser is included, licenced under the MIT licence,
 see COPYING.MIT.
