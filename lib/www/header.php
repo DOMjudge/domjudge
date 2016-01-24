@@ -21,10 +21,6 @@ if ( ! IS_PUBLIC ) header('X-Frame-Options: DENY');
 
 $refresh_cookie = (!isset($_COOKIE["domjudge_refresh"]) || (bool)$_COOKIE["domjudge_refresh"]);
 
-if ( isset($refresh) && $refresh_cookie ) {
-	header('Refresh: ' . $refresh);
-}
-
 if(!isset($menu)) {
 	$menu = true;
 }
@@ -45,6 +41,7 @@ if ( IS_JURY ) {
 	}
 	echo "<script type=\"text/javascript\" src=\"../js/jquery.min.js\"></script>\n";
 	echo "<script type=\"text/javascript\" src=\"../js/jury.js\"></script>\n";
+	echo "<script type=\"text/javascript\" src=\"../js/js.cookie.min.js\"></script>\n";
 	if (isset($jscolor)) {
 		echo "<script type=\"text/javascript\" src=\"" .
 		"../js/jscolor.js\"></script>\n";
@@ -59,6 +56,58 @@ if ( IS_JURY ) {
 echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
 
 if ( ! empty($extrahead) ) echo $extrahead;
+?>
+<?php
+if ( isset($refresh) ) {
+?>
+<script type="text/javascript">
+var refreshHandler = null;
+var refreshEnabled = false;
+function enableRefresh() {
+	refreshHandler = setTimeout(function () {
+		window.location = '<?php echo $refresh['url']; ?>';
+	}, <?php echo $refresh['after'] * 1000; ?>);
+	refreshEnabled = true;
+	window.Cookies && Cookies.set('domjudge_refresh', 1);
+}
+
+function disableRefresh() {
+	clearTimeout(refreshHandler);
+	refreshEnabled = false;
+	window.Cookies && Cookies.set('domjudge_refresh', 0);
+}
+
+function toggleRefresh() {
+	if ( refreshEnabled ) {
+		disableRefresh();
+	} else {
+		enableRefresh();
+	}
+
+	var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';
+	$('#refresh-toggle').val(text);
+}
+
+<?php
+if ( IS_JURY ) {
+?>
+$(function () {
+	$('#refresh-toggle').on('click', function () {
+		toggleRefresh();
+	});
+});
+
+<?php
+}
+if ($refresh_cookie) {
+?>
+enableRefresh();
+<?php
+}
+?>
+</script>
+<?php
+}
 ?>
 </head>
 <?php

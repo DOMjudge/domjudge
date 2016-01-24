@@ -11,7 +11,10 @@ require('init.php');
 $id = getRequestID(FALSE);
 if ( empty($id) ) error("Missing judge hostname");
 
-$refresh = '15;url=judgehost.php?id='.urlencode($id);
+$refresh = array(
+	'after' => 15,
+	'url' => 'judgehost.php?id='.urlencode($id),
+);
 
 if ( isset($_REQUEST['cmd']) &&
 	( $_REQUEST['cmd'] == 'activate' || $_REQUEST['cmd'] == 'deactivate' ) ) {

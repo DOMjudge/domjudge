@@ -8,7 +8,10 @@
  */
 
 require('init.php');
-$refresh = '30;url=scoreboard.php';
+$refresh = array(
+	'after' => 30,
+	'url' => 'scoreboard.php',
+);
 $title = 'Scoreboard';
 $printercss = TRUE;
 

@@ -8,7 +8,10 @@
 
 require('init.php');
 $title = 'Rejudgings';
-$refresh = '15;url=rejudgings.php';
+$refresh = array(
+	'after' => 15,
+	'url' => 'rejudgings.php',
+);
 
 require(LIBWWWDIR . '/header.php');
 

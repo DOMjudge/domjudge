@@ -23,8 +23,11 @@ if ( isset($_REQUEST['view']) ) {
 }
 
 require('init.php');
-$refresh = '15;url=submissions.php?' .
-	urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]);
+$refresh = array(
+	'after' => 15,
+	'url' => 'submissions.php?' .
+		urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view])
+);
 $title = 'Submissions';
 
 // Set cookie of submission view type, expiry defaults to end of session.
@@ -105,7 +108,6 @@ foreach ( $filters as $filter_name => $filter_data ) {
 }
 ?>
 </div>
-<script type="text/javascript" src="/js/js.cookie.min.js"></script>
 <script type="text/javascript">
 $(function() {
 	var process_submissions_filter = function () {
@@ -150,7 +152,29 @@ $(function() {
 				.show();
 		}
 	};
-	$('.filter').on('change', process_submissions_filter);
+
+	var $filter = $('.filter');
+
+	$filter.on('change', process_submissions_filter);
+
+	console.log($filter.parent().find('input[type=text]'));
+
+	var refreshWasEnabled = false;
+
+	$filter.parent().find('input[type=text]').on('focus', function() {
+		refreshWasEnabled = refreshEnabled;
+		if (refreshEnabled) {
+			$('#refresh-toggle').attr('disabled', 'disabled');
+			disableRefresh();
+		}
+	});
+
+	$filter.parent().find('input[type=text]').on('blur', function() {
+		if (refreshWasEnabled && !refreshEnabled) {
+			$('#refresh-toggle').attr('disabled', null);
+			enableRefresh();
+		}
+	});
 
 	process_submissions_filter();
 });

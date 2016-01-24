@@ -31,7 +31,10 @@ if ( isset($_REQUEST['viewall']) ) $viewall = $_REQUEST['viewall'];
 
 dj_setcookie('domjudge_balloonviewall', $viewall);
 
-$refresh = '15;url=balloons.php';
+$refresh = array(
+	'after' => 15,
+	'url' => 'balloons.php',
+);
 require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Balloon Status</h1>\n\n";

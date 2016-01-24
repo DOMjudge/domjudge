@@ -20,10 +20,13 @@ if ( isset($_REQUEST['view']) ) {
 require('init.php');
 $id = getRequestID();
 
-$refresh = '15;url=rejudging.php?id=' . urlencode($id) . '&' .
-	urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]) .
-	(isset($_REQUEST['old_verdict']) ? '&old_verdict=' . urlencode($_REQUEST['old_verdict']) : '') .
-	(isset($_REQUEST['new_verdict']) ? '&new_verdict=' . urlencode($_REQUEST['new_verdict']) : '');
+$refresh = array(
+	'after' => 15,
+	'url' => 'rejudging.php?id=' . urlencode($id) . '&' .
+		urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]) .
+		(isset($_REQUEST['old_verdict']) ? '&old_verdict=' . urlencode($_REQUEST['old_verdict']) : '') .
+		(isset($_REQUEST['new_verdict']) ? '&new_verdict=' . urlencode($_REQUEST['new_verdict']) : ''),
+);
 
 $title = 'Rejudging r'.@$id;
 

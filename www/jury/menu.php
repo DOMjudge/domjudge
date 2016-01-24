@@ -56,10 +56,8 @@ $refresh_flag = !isset($_COOKIE["domjudge_refresh"]) || (bool)$_COOKIE["domjudge
 
 echo "<div id=\"toggles\">\n";
 if ( isset($refresh) ) {
-	echo addForm('toggle_refresh.php', 'get') .
-	    addHidden('enable', ($refresh_flag ? 0 : 1)) .
-	    addSubmit(($refresh_flag ? 'Dis' : 'En' ) . 'able refresh', 'toggle_refresh') .
-	    addEndForm();
+	$text = $refresh_flag ? 'Disable' : 'Enable';
+	echo '<input id="refresh-toggle" type="button" value="' . $text . ' refresh"></input>';
 }
 
 // Default hide this from view, only show when javascript and

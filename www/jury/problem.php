@@ -28,7 +28,10 @@ if ( isset($_POST['cmd']) ) {
 	if ( $current_cid !== null ) {
 		$extra = '&cid=' . urlencode($current_cid);
 	}
-	$refresh = '15;url='.$pagename.'?id='.urlencode($id).$extra;
+	$refresh = array(
+		'after' => 15,
+		'url' => $pagename.'?id='.urlencode($id).$extra.
+	);
 }
 
 // This doesn't return, call before sending headers

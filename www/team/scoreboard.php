@@ -9,7 +9,10 @@
 $pagename = basename($_SERVER['PHP_SELF']);
 
 require('init.php');
-$refresh = '30;url=scoreboard.php';
+$refresh = array(
+	'after' => 30,
+	'url' => 'scoreboard.php',
+);
 $title = 'Scoreboard';
 
 // This reads and sets a cookie, so must be called before headers are sent.

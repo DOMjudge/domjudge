@@ -25,8 +25,11 @@ if ( isset($_GET['cmd'] ) ) {
 	if ( $current_cid !== null ) {
 		$extra = '&cid=' . urlencode($current_cid);
 	}
-	$refresh = '15;url='.$pagename.'?id='.urlencode($id).$extra.
-		(isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):'');
+	$refresh = array(
+		'after' => 15,
+		'url' => $pagename.'?id='.urlencode($id).$extra.
+			(isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):''),
+	);
 }
 
 $jqtokeninput = true;
