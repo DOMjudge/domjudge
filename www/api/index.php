@@ -172,12 +172,24 @@ function problems($args)
 		$pdatas = array();
 	}
 
+	foreach ( $pdatas as $key => $pdata ) {
+		if ( !isset($pdata['color']) ) {
+			$pdatas[$key]['rgb'] = null;
+		} elseif ( preg_match('/^#[[:xdigit:]]{3,6}$/',$pdata['color']) ) {
+			$pdatas[$key]['rgb'] = $pdata['color'];
+			$pdatas[$key]['color'] = hex_to_color($pdata['color']);
+		} else {
+			$pdatas[$key]['rgb'] = color_to_hex($pdata['color']);
+		}
+	}
+
 	return array_map(function($pdata) {
 		return array(
 			'id'        => safe_int($pdata['id']),
 			'label'     => $pdata['label'],
 			'shortname' => $pdata['shortname'],
 			'name'      => $pdata['name'],
+			'rgb'       => $pdata['rgb'],
 			'color'     => $pdata['color'],
 		);
 	}, $pdatas);
