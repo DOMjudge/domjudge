@@ -6,9 +6,10 @@ lsb_release -a
 # downgrade java version outside of chroot since this didn't work
 sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle-java7-installer oracle-java8-installer
 
-# configure, make and install
+# configure, make and install (but skip documentation)
 make configure
 ./configure
+touch doc/examples/.pdf-generated
 make domserver judgehost
 sudo make install-domserver install-judgehost
 
