@@ -41,7 +41,7 @@
 <?php	} ?>
 <?php
 if ( checkrole('team') ) {
-	echo "<a target=\"_top\" href=\"../team/\" accesskey=\"t\">→team</a>\n";
+	echo "<a target=\"_top\" href=\"../team/\" accesskey=\"t\"><span class=\"octicon octicon-arrow-right\"></span> team</a>\n";
 }
 ?>
 </div>

@@ -12,7 +12,7 @@ if ( have_printing() ) {
 echo "<a target=\"_top\" href=\"scoreboard.php\" accesskey=\"b\"><span class=\"octicon octicon-list-ordered\"></span> scoreboard</a>\n";
 
 if ( checkrole('jury') || checkrole('balloon') ) {
-	echo "<a target=\"_top\" href=\"../jury/\" accesskey=\"j\"><span class=\"octicon octicon-arrow-small-right\"></span> jury</a>\n";
+	echo "<a target=\"_top\" href=\"../jury/\" accesskey=\"j\"><span class=\"octicon octicon-arrow-right\"></span> jury</a>\n";
 }
 
 echo "</div>\n\n<div id=\"menutopright\">\n";
