@@ -7,7 +7,7 @@ lsb_release -a
 sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle-java7-installer oracle-java8-installer
 
 # configure, make and install
-./bootstrap
+make configure
 ./configure
 make domserver judgehost
 sudo make install-domserver install-judgehost
