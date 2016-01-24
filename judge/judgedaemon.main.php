@@ -350,6 +350,11 @@ if ( ! USE_CHROOT ) {
 	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
 } else {
 	if ( !is_dir(CHROOTDIR) ) {
+		if ( !defined('CHROOT_SCRIPT') ) {
+			logmsg(LOG_ERR, "Pre-built chroot tree '" . CHROOTDIR .
+			       "' not found and no chroot-dir set, exiting.");
+			exit;
+		}
 		logmsg(LOG_WARNING, "Pre-built chroot tree '".CHROOTDIR.
 		       "' not found: using minimal chroot.");
 	} else {
