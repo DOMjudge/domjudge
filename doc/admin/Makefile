@@ -3,7 +3,9 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
+ifeq ($(DOC_BUILD_ENABLED),yes)
 docs distdocs: admin-manual.pdf admin-manual.html
+endif
 
 install-docs: docs
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/admin \
