@@ -273,11 +273,6 @@ On the domserver host:
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server:
        <tt>
-       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf &&
-       sudo apache2ctl graceful
-       </tt>
-       Or for Apache 2.4 and up:
-       <tt>
        sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
        sudo a2enconf domjudge &&
        sudo apache2ctl graceful
