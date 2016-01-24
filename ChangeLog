@@ -2,12 +2,12 @@ DOMjudge Programming Contest Judging System
 
 Version 5.1.1 - DEV
 -------------------
-- Fix bug in signal handler in runguard.
-- Explicitely ask for basic authentication if not authenticated
+ - Fix bug in signal handler in runguard.
+ - Explicitely ask for basic authentication if not authenticated
   in event feed.
-- Exit judgedaemon when no default chroot dir set and
-  CHROOT_SCRIPT not set
-- Fix importing example problem statements into database.
+ - Exit judgedaemon when no default chroot dir set and
+   CHROOT_SCRIPT not set
+ - Fix importing example problem statements into database.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------
