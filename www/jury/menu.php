@@ -1,43 +1,43 @@
 <nav><div id="menutop">
-<a href="index.php" accesskey="h">home</a>
+<a href="index.php" accesskey="h"><span class="octicon octicon-home"></span> home</a>
 <?php	if ( checkrole('balloon') ) { ?>
-<a href="balloons.php" accesskey="b">balloons</a>
+<a href="balloons.php" accesskey="b"><span class="octicon octicon-location"></span> balloons</a>
 <?php	} ?>
 <?php	if ( checkrole('jury') ) { ?>
-<a href="problems.php" accesskey="p">problems</a>
+<a href="problems.php" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
 <?php	} ?>
 <?php	if ( IS_ADMIN ) {
 	$ndown = count($updates['judgehosts']);
 	if ( $ndown > 0 ) { ?>
-<a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts">judgehosts (<?php echo $ndown ?> down)</a>
+<a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts (<?php echo $ndown ?> down)</a>
 <?php	} else { ?>
-<a href="judgehosts.php" accesskey="j" id="menu_judgehosts">judgehosts</a>
+<a href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts</a>
 <?php	}
 	} ?>
 <?php	if ( checkrole('jury') ) { ?>
-<a href="teams.php" accesskey="t">teams</a>
-<a href="users.php" accesskey="u">users</a>
+<a href="teams.php" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>
+<a href="users.php" accesskey="u"><span class="octicon octicon-person"></span> users</a>
 <?php
 	$nunread = count($updates['clarifications']);
 	if ( $nunread > 0 ) { ?>
-<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications (<?php echo $nunread ?> new)</a>
+<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications (<?php echo $nunread ?> new)</a>
 <?php	} else { ?>
-<a href="clarifications.php" accesskey="c" id="menu_clarifications">clarifications</a>
+<a href="clarifications.php" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications</a>
 <?php	} ?>
-<a href="submissions.php" accesskey="s">submissions</a>
+<a href="submissions.php" accesskey="s"><span class="octicon octicon-file-code"></span> submissions</a>
 <?php
 	$nrejudgings = count($updates['rejudgings']);
 	if ( $nrejudgings > 0 ) { ?>
-<a class="new" href="rejudgings.php" accesskey="r" id="menu_rejudgings">rejudgings (<?php echo $nrejudgings ?> active)</a>
+<a class="new" href="rejudgings.php" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings (<?php echo $nrejudgings ?> active)</a>
 <?php	} else { ?>
-<a href="rejudgings.php" accesskey="r" id="menu_rejudgings">rejudgings</a>
+<a href="rejudgings.php" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings</a>
 <?php	} ?>
 <?php   } /* checkrole('jury') */ ?>
 <?php	if ( have_printing() ) { ?>
-<a href="print.php" accesskey="p">print</a>
+<a href="print.php" accesskey="p"><span class="octicon octicon-file-text"></span> print</a>
 <?php	} ?>
 <?php	if ( checkrole('jury') ) { ?>
-<a href="scoreboard.php" accesskey="b">scoreboard</a>
+<a href="scoreboard.php" accesskey="b"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
 <?php	} ?>
 <?php
 if ( checkrole('team') ) {

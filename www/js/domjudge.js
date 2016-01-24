@@ -35,10 +35,10 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 					newstr = ' ('+nclars+' new)';
 					elem.className = 'new';
 				}
-				if ( elem.innerHTML != 'clarifications' + newstr ) {
-					elem.innerHTML = 'clarifications' + newstr;
+				if ( elem.innerHTML != '<span class="octicon octicon-comment-discussion"></span> clarifications' + newstr ) {
+					elem.innerHTML = '<span class="octicon octicon-comment-discussion"></span> clarifications' + newstr;
 					if(doreload_clarifications) {
-						location.reload()
+						location.reload();
 					}
 				}
 			}
@@ -51,10 +51,10 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 					newstr = ' ('+nhosts+' down)';
 					elem.className = 'new';
 				}
-				if ( elem.innerHTML != 'judgehosts' + newstr ) {
-					elem.innerHTML = 'judgehosts' + newstr;
+				if ( elem.innerHTML != '<span class="octicon octicon-law"></span> judgehosts' + newstr ) {
+					elem.innerHTML = '<span class="octicon octicon-law"></span> judgehosts' + newstr;
 					if(doreload_judgehosts) {
-						location.reload()
+						location.reload();
 					}
 				}
 			}
@@ -67,10 +67,10 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 					newstr = ' ('+nrejuds+' active)';
 					elem.className = 'new';
 				}
-				if ( elem.innerHTML != 'rejudgings' + newstr ) {
-					elem.innerHTML = 'rejudgings' + newstr;
+				if ( elem.innerHTML != '<span class="octicon octicon-sync"></span> rejudgings' + newstr ) {
+					elem.innerHTML = '<span class="octicon octicon-sync"></span> rejudgings' + newstr;
 					if(doreload_judgehosts) {
-						location.reload()
+						location.reload();
 					}
 				}
 			}
