@@ -89,7 +89,7 @@ docs-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(docs_dirs))
 
 install-docs-l:
-	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) README ChangeLog COPYING*
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) README.md ChangeLog COPYING*
 
 # As final step try set ownership and permissions of a few special
 # files/directories. Print a warning and fail gracefully if this

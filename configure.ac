@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT([DOMjudge],
-        m4_esyscmd([sed -n '1s/^.*version //p' README | tr -d '\n']),
+        m4_esyscmd([grep 'version' README.md | sed -n '1s/^.*version //p' | tr -d '\n']),
         [domjudge-devel@domjudge.org])
 AC_PREREQ([2.64])
 AC_CONFIG_HEADERS([etc/config.h])
@@ -26,7 +26,7 @@ if test "x$prefix" = xNONE; then
 fi
 
 if test -z "$PACKAGE_VERSION"; then
-	AC_MSG_ERROR([could not find version on first line of README file.])
+	AC_MSG_ERROR([could not find version on first line of README.md file.])
 fi
 AC_SUBST(DOMJUDGE_VERSION, $PACKAGE_VERSION)
 AC_DEFINE_UNQUOTED(DOMJUDGE_VERSION, "$PACKAGE_VERSION",
