@@ -34,13 +34,13 @@ if(!isset($menu)) {
 <link rel="icon" href="../images/favicon.png" type="image/png" />
 <link rel="stylesheet" href="../style.css" type="text/css" />
 <link rel="stylesheet" href="../css/octicons/octicons.css" />
+<script type="text/javascript" src="../js/jquery.min.js"></script>
 <?php
 if ( IS_JURY ) {
 	echo "<link rel=\"stylesheet\" href=\"style_jury.css\" type=\"text/css\" />\n";
 	if (isset($printercss)) {
 		echo "<link rel=\"stylesheet\" href=\"style_printer.css\" type=\"text/css\" media=\"print\" />\n";
 	}
-	echo "<script type=\"text/javascript\" src=\"../js/jquery.min.js\"></script>\n";
 	echo "<script type=\"text/javascript\" src=\"../js/jury.js\"></script>\n";
 	echo "<script type=\"text/javascript\" src=\"../js/js.cookie.min.js\"></script>\n";
 	if (isset($jscolor)) {

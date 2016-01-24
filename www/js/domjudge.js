@@ -341,12 +341,17 @@ function resetUploadForm(refreshtime, maxfiles) {
 }
 
 var doReload = true;
+var reloadLocation = null;
 
 function reloadPage()
 {
 	// interval is in seconds
 	if (doReload) {
-		location.reload();
+		if ( reloadLocation ) {
+			window.location = reloadLocation;
+		} else {
+			location.reload();
+		}
 	}
 }
 

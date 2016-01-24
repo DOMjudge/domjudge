@@ -214,6 +214,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		echo ' data-team-id="' . $row['teamid'] . '"';
 		echo ' data-problem-id="' . $row['probid'] . '"';
 		echo ' data-language-id="' . $row['langid'] . '"';
+		echo ' data-submission-id="' . $row['submitid'] . '"';
 		echo '>';
 
 		if ( IS_JURY ) {

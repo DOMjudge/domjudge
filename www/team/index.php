@@ -50,50 +50,64 @@ echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
 
 
 if ( $fdata['cstarted'] ) {
-	if ( $submitted ) {
-		echo "<p class=\"submissiondone\">submission done <a href=\"./\">x</a></p>\n\n";
-	} else {
-		$maxfiles = dbconfig_get('sourcefiles_limit',100);
+	echo <<<HTML
+<script type="text/javascript">
+$(function() {
+	var matches = location.hash.match(/submitted=(\d+)/);
+	if (matches) {
+		var \$p = \$('<p class="submissiondone" />').html('submission done <a href="#">x</a>');
+		\$('#submitlist > .teamoverview').after(\$p);
+		\$('table.submissions tr[data-submission-id=' + matches[1] + ']').addClass('highlight');
 
-		echo addForm('upload.php','post',null,'multipart/form-data', null,
-		             ' onreset="resetUploadForm('.$refreshtime .', '.$maxfiles.');"') .
-		    "<p id=\"submitform\">\n\n";
-
-		echo "<input type=\"file\" name=\"code[]\" id=\"maincode\" required";
-		if ( $maxfiles > 1 ) {
-			echo " multiple";
-		}
-		echo " />\n";
-
-
-		$probs = array();
-		foreach($probdata as $probinfo) {
-			$probs[$probinfo['probid']]=$probinfo['shortname'];
-		}
-		$probs[''] = 'problem';
-		echo addSelect('probid', $probs, '', true);
-		$langs = array();
-		foreach($langdata as $langid => $langdata) {
-			$langs[$langid] = $langdata['name'];
-		}
-		$langs[''] = 'language';
-		echo addSelect('langid', $langs, '', true);
-
-		echo addSubmit('submit', 'submit',
-			       "return checkUploadForm();");
-
-		echo addReset('cancel');
-
-		if ( $maxfiles > 1 ) {
-			echo "<br /><span id=\"auxfiles\"></span>\n" .
-			    "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
-			    "value=\"Add another file\" onclick=\"addFileUpload();\" " .
-			    "disabled=\"disabled\" />\n";
-		}
-		echo "<script type=\"text/javascript\">initFileUploads($maxfiles);</script>\n\n";
-
-		echo "</p>\n</form>\n\n";
+		\$('.submissiondone a').on('click', function() {
+			\$(this).parent().remove();
+			\$('table.submissions tr.highlight').removeClass('highlight');
+			reloadLocation = 'index.php';
+		});
 	}
+});
+</script>
+HTML;
+	$maxfiles = dbconfig_get('sourcefiles_limit',100);
+
+	echo addForm('upload.php','post',null,'multipart/form-data', null,
+		     ' onreset="resetUploadForm('.$refreshtime .', '.$maxfiles.');"') .
+	    "<p id=\"submitform\">\n\n";
+
+	echo "<input type=\"file\" name=\"code[]\" id=\"maincode\" required";
+	if ( $maxfiles > 1 ) {
+		echo " multiple";
+	}
+	echo " />\n";
+
+
+	$probs = array();
+	foreach($probdata as $probinfo) {
+		$probs[$probinfo['probid']]=$probinfo['shortname'];
+	}
+	$probs[''] = 'problem';
+	echo addSelect('probid', $probs, '', true);
+	$langs = array();
+	foreach($langdata as $langid => $langdata) {
+		$langs[$langid] = $langdata['name'];
+	}
+	$langs[''] = 'language';
+	echo addSelect('langid', $langs, '', true);
+
+	echo addSubmit('submit', 'submit',
+		       "return checkUploadForm();");
+
+	echo addReset('cancel');
+
+	if ( $maxfiles > 1 ) {
+		echo "<br /><span id=\"auxfiles\"></span>\n" .
+		    "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
+		    "value=\"Add another file\" onclick=\"addFileUpload();\" " .
+		    "disabled=\"disabled\" />\n";
+	}
+	echo "<script type=\"text/javascript\">initFileUploads($maxfiles);</script>\n\n";
+
+	echo "</p>\n</form>\n\n";
 }
 // call putSubmissions function from common.php for this team.
 $restrictions = array( 'teamid' => $teamid );
