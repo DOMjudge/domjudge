@@ -51,41 +51,59 @@ for( $i=0; $i<count($viewtypes); ++$i ) {
 }
 echo "</p>\n" . addEndForm();
 
-echo "<div class='submissions-filter'><p>Filter submissions on:</p>\n";
-
-$filters = array(
-	'problem' => array(
-		'ajax' => 'ajax_problems.php',
-		'hintText' => 'Type to search for problem ID or name',
-		'noResultsText' => 'No problems found',
-		'prePopulateQuery' => "TABLE SELECT probid AS id, CONCAT(name, ' (p', probid, ')') AS search
-		     FROM problem WHERE probid IN (%Ai)",
-	),
-	'language' => array(
-		'ajax' => 'ajax_languages.php',
-		'hintText' => 'Type to search for language ID or name',
-		'noResultsText' => 'No languages found',
-		'prePopulateQuery' => "TABLE SELECT langid AS id, name,
-		    CONCAT(name, ' (', langid, ')') AS search FROM language
-		    WHERE langid IN (%As)",
-	),
-	'team' => array(
-		'ajax' => 'ajax_teams.php',
-		'hintText' => 'Type to search for team ID or name',
-		'noResultsText' => 'No teams found',
-		'prePopulateQuery' => "TABLE SELECT teamid AS id, name,
-		 CONCAT(name, ' (t', teamid, ')') AS search FROM team
-		 WHERE teamid IN (%Ai)",
-	),
-);
 $submissions_filter = array();
 if ( isset($_COOKIE['submissions-filter']) ) {
 	$submissions_filter = json_decode($_COOKIE['submissions-filter'], true);
 }
+
+echo "<a class=\"collapse\" href=\"javascript:collapse('submissions-filter')\"><img src=\"../images/filter.png\" alt=\"filter&hellip;\" title=\"filter&hellip;\" class=\"picto\" /></a>";
+echo "<div id='detailsubmissions-filter' class='submissions-filter'>\n";
+
+if ( empty($submissions_filter) ) {
+	echo <<<HTML
+<script type="text/javascript">
+<!--
+collapse("submissions-filter");
+// -->
+</script>
+HTML;
+}
+
+$filters = array(
+	'problem' => array(
+		'ajax' => $cid ? ('ajax_problems.php?fromcontest=' . $cid) : 'ajax_problems.php',
+		'hintText' => 'Type to search for problem ID or name',
+		'noResultsText' => 'No problems found',
+		'prePopulateQuery' => $cid ?
+			("TABLE SELECT problem.probid AS id,
+			 CONCAT(problem.name, ' (', contestproblem.shortname, ' - p', problem.probid, ')') AS search
+			 FROM problem INNER JOIN contestproblem ON contestproblem.probid = problem.probid
+			 WHERE problem.probid IN (%Ai) AND contestproblem.cid = %i")
+			:
+			"TABLE SELECT probid AS id, CONCAT(name, ' (p', probid, ')') AS search
+			 FROM problem WHERE probid IN (%Ai) %_",
+	),
+	'language' => array(
+		'ajax' => 'ajax_languages.php?enabled=1',
+		'hintText' => 'Type to search for language ID or name',
+		'noResultsText' => 'No languages found',
+		'prePopulateQuery' => "TABLE SELECT langid AS id, name,
+		    CONCAT(name, ' (', langid, ')') AS search FROM language
+		    WHERE langid IN (%As) %_",
+	),
+	'team' => array(
+		'ajax' => 'ajax_teams.php?enabled=1',
+		'hintText' => 'Type to search for team ID or name',
+		'noResultsText' => 'No teams found',
+		'prePopulateQuery' => "TABLE SELECT teamid AS id, name,
+		 CONCAT(name, ' (t', teamid, ')') AS search FROM team
+		 WHERE teamid IN (%Ai) %_",
+	),
+);
 foreach ( $filters as $filter_name => $filter_data ) {
 	$prepopulate = array();
 	if ( isset($submissions_filter[$filter_name . '-id']) ) {
-		$prepopulate = $DB->q($filter_data['prePopulateQuery'], $submissions_filter[$filter_name . '-id']);
+		$prepopulate = $DB->q($filter_data['prePopulateQuery'], $submissions_filter[$filter_name . '-id'], $cid);
 	}
 ?>
 <p>
