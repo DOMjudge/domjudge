@@ -156,6 +156,7 @@ echo addHidden('cmd', $cmd) .
 
 
 if ( class_exists("ZipArchive") ) {
+	$selected_cid = ($cid === null) ? -1 : $cid;
 	$contests = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ': ' , shortname, ' - ', name) FROM contest");
 	$values = array(-1 => 'Do not add / update contest data');
 	foreach ($contests as $cid => $contest) {
@@ -165,7 +166,7 @@ if ( class_exists("ZipArchive") ) {
 	addForm($pagename, 'post', null, 'multipart/form-data') .
 	addHidden('id', @$row['probid']) .
 	'Contest: ' .
-	addSelect('contest', $values, -1, true) .
+	addSelect('contest', $values, $selected_cid, true) .
 	'<label for="problem_archive__">Upload problem archive:</label>' .
 	addFileField('problem_archive[]') .
 	addSubmit('Upload', 'upload') .
