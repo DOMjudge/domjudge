@@ -416,10 +416,14 @@ function confirmClar() {
 			$options += $problem_options;
 		}
 	}
-	if ( is_null($clar['probid']) ) {
-		$selected = $clar['category'];
+	if ( $respid ) {
+		if ( is_null($clar['probid']) ) {
+			$selected = $clar['category'];
+		} else {
+			$selected = $clar['probid'];
+		}
 	} else {
-		$selected = $clar['probid'];
+		$selected = $defclar;
 	}
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options,
