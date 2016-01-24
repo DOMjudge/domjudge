@@ -426,6 +426,11 @@ Note that <tt>fpc</tt> is not available in RedHat 7.
 <label id="install_config:installsystem">
 <p>
 
+There is a separate <em>maintainer installation</em> method meant for
+those wishing to do development on the DOMjudge source code. See
+the <ref id="appendix:developerinfo" name="appendix with developer information">
+and skip the rest of this section.
+
 The DOMjudge build/install system consists of a <tt>configure</tt>
 script and makefiles, but when installing it, some more care has to be
 taken than simply running '<tt>./configure &amp;&amp; make &amp;&amp;
@@ -436,7 +441,7 @@ system these parts are referred to as <tt>domserver, judgehost</tt>
 and additionally <tt>docs</tt> for all documentation.
 
 
-There are three different methods for installing DOMjudge:
+DOMjudge can be installed with two different directory layouts:
 <descrip>
 <tag>Single directory tree</tag>
 	With this method all DOMjudge related files and programs are
@@ -485,11 +490,6 @@ There are three different methods for installing DOMjudge:
 	to pass options <tt>--sysconfdir=/etc</tt> and
 	<tt>--localstatedir=/var</tt> to <tt>configure</tt> to disable
 	the prefix for these.
-
-<tag>Maintainer install</tag>
-	Meant for those wishing to do development on the DOMjudge
-	source code. See the <ref id="appendix:developerinfo"
-	name="appendix with developer information">.
 </descrip>
 
 After running the <tt>configure</tt> script, the system can be built
