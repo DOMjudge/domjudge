@@ -24,9 +24,9 @@ check-syntax:
 
 check: test-normal test-fltcmp test-boolfind
 
-PROBLEM=A
-test-fltcmp: PROBLEM=B
-test-boolfind: PROBLEM=C
+PROBLEM=hello
+test-fltcmp: PROBLEM=fltcmp
+test-boolfind: PROBLEM=boolfind
 
 test-normal: $(SUBMITCMD)
 	@echo "Submitting normal test sources..." ; \
