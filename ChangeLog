@@ -2,6 +2,15 @@ DOMjudge Programming Contest Judging System
 
 Version 5.2.0 - DEV
 -------------------
+ - Allow team to download testcase data marked as 'sample'.
+ - Add icons to menu bars.
+ - Allow to filter submissions on team, problem, language.
+ - Show when a problem can not be judged on any judgehost.
+ - Use current contest as default when uploading problem archive.
+ - Allow to add user during team creation in UI.
+ - Make problem texts always downloadable for jury.
+ - Decode HTML entities for proper display of error messages in
+   submit client.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------
