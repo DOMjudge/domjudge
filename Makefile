@@ -36,11 +36,16 @@ install:
 	@echo " - make install-docs"
 	@exit 1
 
-all: build docs
+all: build
 build: domserver judgehost
 
 ifeq ($(SUBMITCLIENT_ENABLED),yes)
 build: submitclient
+endif
+
+ifeq ($(DOC_BUILD_ENABLED),yes)
+all: docs
+dist: distdocs
 endif
 
 # MAIN TARGETS
@@ -50,7 +55,7 @@ submitclient:
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure distdocs
+dist: configure
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.

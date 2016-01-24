@@ -8,8 +8,7 @@ sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle
 
 # configure, make and install (but skip documentation)
 make configure
-./configure
-touch doc/examples/.pdf-generated
+./configure --disable-doc-build
 make domserver judgehost
 sudo make install-domserver install-judgehost
 

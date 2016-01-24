@@ -22,7 +22,13 @@ install-docs:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/examples boolfind.pdf boolfind.in boolfind.out
 
 $(PDF): %.pdf: %.tex %.in %.out $(TOPDIR)/doc/logos/DOMjudgelogo.pdf
+# Ugly hack to prevent running pdflatex, but do create a PDF file,
+# since this is needed for DB installation.
+ifeq ($(DOC_BUILD_ENABLED),yes)
 	pdflatex -interaction=nonstopmode $< > /dev/null
+else
+	cp $(TOPDIR)/doc/logos/DOMjudgelogo.pdf $@
+endif
 	touch .pdf-generated
 
 $(INI): %.ini:
