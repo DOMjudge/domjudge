@@ -19,10 +19,10 @@ INSERT INTO `contest` (`cid`, `name`, `shortname`, `activatetime`, `starttime`, 
 --
 
 INSERT INTO `contestproblem` (`cid`, `probid`, `shortname`, `allow_submit`, `allow_judge`, `color`) VALUES
-(1, 1, 'A', 1, 1, NULL),
-(2, 1, 'A', 1, 1, 'magenta'),
-(2, 2, 'B', 1, 1, 'yellow'),
-(2, 3, 'C', 1, 1, 'limegreen');
+(1, 1, 'hello', 1, 1, NULL),
+(2, 1, 'hello', 1, 1, 'magenta'),
+(2, 2, 'fltcmp', 1, 1, 'yellow'),
+(2, 3, 'boolfind', 1, 1, 'limegreen');
 
 --
 -- Dumping data for table `contestteam`
