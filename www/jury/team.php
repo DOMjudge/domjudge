@@ -113,12 +113,39 @@ if ( $num_contests > 0 ) {
 <tr><td>Enabled:</td>
 <td><?php echo addRadioButton('data[0][enabled]', (!isset($row['']) || $row['enabled']), 1)?> <label for="data_0__enabled_1">yes</label>
 <?php echo addRadioButton('data[0][enabled]', (isset($row['enabled']) && !$row['enabled']), 0)?> <label for="data_0__enabled_0">no</label></td></tr>
+<?php
+if ( $cmd == 'add' ) {
+?>
+<tr><td></td>
+<td><?php echo addCheckBox('data[0][adduser]', true, 1)?> <label for="data_0__adduser_">Add user for this team</label></td></tr>
+<tr id="user_extra_data"><td><label for="data_0__mapping__1__extra__username_">Username:</label></td>
+<td><?php echo addInput('data[0][mapping][1][extra][username]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required')?></td></tr>
+<script type="text/javascript">
+	$(function() {
+		var show_hide_user_extra_data = function() {
+			if ($('#data_0__adduser_:checked').val()) {
+				$('#user_extra_data').show();
+			} else {
+				$('#user_extra_data').hide();
+			}
+		};
+
+		show_hide_user_extra_data();
+
+		$('#data_0__adduser_').on('change', show_hide_user_extra_data);
+	});
+</script>
+<?php
+}
+?>
 </table>
 
 <?php
 echo addHidden('data[0][mapping][0][fk][0]', 'teamid') .
      addHidden('data[0][mapping][0][fk][1]', 'cid') .
      addHidden('data[0][mapping][0][table]', 'contestteam');
+echo addHidden('data[0][mapping][1][fk]', 'teamid') .
+     addHidden('data[0][mapping][1][table]', 'user');
 echo addHidden('cmd', $cmd) .
      addHidden('table','team') .
      addHidden('referrer', @$_GET['referrer'] . ( $cmd == 'edit'?(strstr(@$_GET['referrer'],'?') === FALSE?'?edited=1':'&edited=1'):'')) .
