@@ -30,7 +30,7 @@ if ( isset($_POST['cmd']) ) {
 	}
 	$refresh = array(
 		'after' => 15,
-		'url' => $pagename.'?id='.urlencode($id).$extra.
+		'url' => $pagename.'?id='.urlencode($id).$extra,
 	);
 }
 
