@@ -44,7 +44,7 @@ bin/judgedaemon -n 0 &
 
 # submit test programs
 cd /${DIR}/tests
-make check test-stress
+make check-syntax check test-stress
 
 # wait for and check results
 NUMSUBS=$(curl http://admin:admin@localhost/domjudge/api/submissions | python -mjson.tool | grep -c id)
