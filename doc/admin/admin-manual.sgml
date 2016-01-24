@@ -366,7 +366,7 @@ apt-get install gcc g++ make zip unzip mysql-server \
 	bsdmainutils phpmyadmin ntp \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
-	texlive-fonts-recommended texlive-lang-dutch
+	texlive-fonts-recommended texlive-lang-european
 </code>
 
 The following command can be used on RedHat Enterprise Linux, and
