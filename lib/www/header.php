@@ -64,6 +64,9 @@ if ( isset($refresh) ) {
 var refreshHandler = null;
 var refreshEnabled = false;
 function enableRefresh() {
+	if (refreshEnabled) {
+		return;
+	}
 	refreshHandler = setTimeout(function () {
 		window.location = '<?php echo $refresh['url']; ?>';
 	}, <?php echo $refresh['after'] * 1000; ?>);
@@ -72,6 +75,9 @@ function enableRefresh() {
 }
 
 function disableRefresh() {
+	if (!refreshEnabled) {
+		return;
+	}
 	clearTimeout(refreshHandler);
 	refreshEnabled = false;
 	window.Cookies && Cookies.set('domjudge_refresh', 0);
