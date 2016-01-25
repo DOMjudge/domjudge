@@ -288,7 +288,9 @@ AC_ARG_ENABLE(doc-build,AS_HELP_STRING([--enable-doc-build],
 [enable building documentation; requires a working LaTeX installation
  for 'make dist' (default: yes).]))
 
-if test "x$enable_doc_build" != "xno"; then
+if test "x$enable_doc_build" = "xno"; then
+	AC_SUBST(DOC_BUILD_ENABLED,[no])
+else
 	AC_SUBST(DOC_BUILD_ENABLED,[yes])
 fi
 

@@ -6,7 +6,7 @@ include $(TOPDIR)/Makefile.global
 MANUALSTEX=team-manual.tex $(wildcard team-manual-??.tex)
 MANUALSPDF=$(MANUALSTEX:%tex=%pdf)
 
-ifeq ($(DOC_BUILD_ENABLED),yes)
+ifneq ($(DOC_BUILD_ENABLED),no)
 docs: gentexconfig $(MANUALSPDF)
 
 # For distdocs we cannot generate gentexconfig, since paths.mk is not
