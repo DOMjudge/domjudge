@@ -1,8 +1,7 @@
 DOMjudge
-
+--------
 [![Build Status](https://travis-ci.org/DOMjudge/domjudge.svg?branch=master)](https://travis-ci.org/DOMjudge/domjudge)
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
---------
 
 This is the Programming Contest Jury System "DOMjudge" version 5.2.0DEV
 
