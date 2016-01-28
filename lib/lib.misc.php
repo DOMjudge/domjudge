@@ -260,9 +260,9 @@ function updateRankCache($cid, $team, $jury) {
 
 	// Fetch values from scoreboard cache per problem
 	$scoredata = $DB->q("SELECT submissions, is_correct, cp.points, totaltime
-			     FROM scorecache_$tblname
-			     LEFT JOIN contestproblem cp USING(probid,cid)
-			     WHERE cid = %i and teamid = %i", $cid, $team);
+	                     FROM scorecache_$tblname
+	                     LEFT JOIN contestproblem cp USING(probid,cid)
+	                     WHERE cid = %i and teamid = %i", $cid, $team);
 	$num_points = 0;
 	$total_time = $team_penalty;
 	while ( $srow = $scoredata->next() ) {
