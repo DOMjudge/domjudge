@@ -437,15 +437,6 @@ function alert($msgtype, $description = '')
 }
 
 /**
- * Compares two IP addresses for equivalence
- */
-function compareipaddr($ip1, $ip2)
-{
-	$ip1n = inet_pton($ip1); $ip2n = inet_pton($ip2);
-	return $ip1n !== FALSE && $ip1n === $ip2n;
-}
-
-/**
  * Functions to support graceful shutdown of daemons upon receiving a signal
  */
 function sig_handler($signal)
