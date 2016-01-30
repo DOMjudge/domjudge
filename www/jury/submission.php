@@ -237,13 +237,15 @@ $jury_member = $username;
 if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 
 	// Send headers before possible warning messages.
-	if ( !isset($_REQUEST['unclaim']) ) require_once(LIBWWWDIR . '/header.php');
+	require_once(LIBWWWDIR . '/header.php');
+
+	$unornot = isset($_REQUEST['unclaim']) ? 'un' : '';
 
 	if ( !isset($jid) ) {
-		warning("Cannot claim this submission: no valid judging found.");
+		warning("Cannot " . $unornot . "claim this submission: no valid judging found.");
 	} else if ( $jdata[$jid]['verified'] ) {
-		warning("Cannot claim this submission: judging already verified.");
-	} else if ( empty($jury_member) && isset($_REQUEST['claim']) ) {
+		warning("Cannot " . $unornot . "claim this submission: judging already verified.");
+	} else if ( empty($jury_member) && $unornot==='' ) {
 		warning("Cannot claim this submission: no jury member specified.");
 	} else {
 		if ( !empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) && $jury_member !== $jdata[$jid]['jury_member'] ) {
@@ -251,11 +253,11 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 			        @$jdata[$jid]['jury_member'] . " replaced.");
 		}
 		$DB->q('UPDATE judging SET jury_member = ' .
-		       (isset($_REQUEST['unclaim']) ? 'NULL %_ ' : '%s ') .
+		       ($unornot==='un' ? 'NULL %_ ' : '%s ') .
 		       'WHERE judgingid = %i', $jury_member, $jid);
-		auditlog('judging', $jid, isset($_REQUEST['unclaim']) ? 'unclaimed' : 'claimed');
+		auditlog('judging', $jid, $unornot . 'claimed');
 
-		if ( isset($_REQUEST['unclaim']) ) header('Location: submissions.php');
+		if ( $unornot==='un' ) header('Location: submissions.php');
 	}
 }
 
