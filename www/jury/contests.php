@@ -21,7 +21,7 @@ if ( isset($_POST['donow']) ) {
 	if ( !in_array($time, $times) ) error("Unknown value for timetype");
 
 	$now = floor($now);
-	$nowstring = strftime('%Y-%m-%d %H:%M:%S',$now);
+	$nowstring = strftime('%Y-%m-%d %H:%M:%S ',$now) . date_default_timezone_get();
 	auditlog('contest', $docid, $time. ' now', $nowstring);
 
 	// starttime is special because other, relative times depend on it.
