@@ -554,8 +554,10 @@ if ( isset($jid) )  {
 		       $lastjud['verify_comment'] . "')</span>" ) . "</span>";
 	}
 
-	// display following data only when the judging has been completed
-	if ( $judging_ended ) {
+	// Display following data only when the judging result is known.
+	// Note that the judging may still not be finished yet when lazy
+	// evaluation is off.
+	if ( !empty($jud['result']) ) {
 
 		// display verification data: verified, by whom, and comment.
 		// only if this is a valid judging, otherwise irrelevant
@@ -588,8 +590,8 @@ if ( isset($jid) )  {
 				echo "</p>\n";
 			}
 		}
-	} else { // judging not ended yet
-			echo "<p><b>Judging is not finished yet!</b></p>\n";
+	} else { // judging does not have a result yet
+			echo "<p><b>Judging is not ready yet!</b></p>\n";
 	}
 
 ?>
