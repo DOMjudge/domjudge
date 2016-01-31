@@ -248,9 +248,18 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 	} else if ( empty($jury_member) && $unornot==='' ) {
 		warning("Cannot claim this submission: no jury member specified.");
 	} else {
-		if ( !empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) && $jury_member !== $jdata[$jid]['jury_member'] ) {
-			warning("Submission claimed and previous owner " .
-			        @$jdata[$jid]['jury_member'] . " replaced.");
+		if ( !empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) &&
+		     $jury_member !== $jdata[$jid]['jury_member'] &&
+		     !isset($_REQUEST['forceclaim']) ) {
+
+			// Don't use warning() here since it implies that a
+			// recoverable error has occurred. Also, it generates
+			// invalid HTML (using an unclosed <b> tag) to detect such
+			// issues.
+			echo "<fieldset class=\"warning\"><legend>Warning</legend>" .
+			     "Submission has been claimed by " . @$jdata[$jid]['jury_member'] .
+			     ". Claim again on this page to force an update.</fieldset>";
+			goto claimdone;
 		}
 		$DB->q('UPDATE judging SET jury_member = ' .
 		       ($unornot==='un' ? 'NULL %_ ' : '%s ') .
@@ -265,6 +274,7 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 		exit;
 	}
 }
+claimdone:
 
 // Headers might already have been included.
 require_once(LIBWWWDIR . '/header.php');
@@ -503,6 +513,7 @@ if ( isset($jid) )  {
 
 		if ( !empty($jud['jury_member']) ) {
 			echo ' (claimed by ' . specialchars($jud['jury_member']) . ') ';
+			echo addHidden('forceclaim', '1');
 		}
 		if ( $jury_member == @$jud['jury_member']) {
 			echo addSubmit('unclaim', 'unclaim');
