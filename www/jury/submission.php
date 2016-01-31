@@ -257,7 +257,12 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 		       'WHERE judgingid = %i', $jury_member, $jid);
 		auditlog('judging', $jid, $unornot . 'claimed');
 
-		if ( $unornot==='un' ) header('Location: submissions.php');
+		if ( $unornot==='un' ) {
+			header('Location: submissions.php');
+		} else {
+			header('Location: submission.php?id=' . $id);
+		}
+		exit;
 	}
 }
 
