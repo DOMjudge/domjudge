@@ -326,7 +326,7 @@ Optionally:
        or use the balloon web interface.
 <item> On the judgehosts, create a pre-built chroot tree to support
        interpreted or byte-compiled languages such as Java:<newline>
-       <tt>bin/dj_make_chroot [optional arguments]</tt><newline>
+       <tt>sudo bin/dj_make_chroot [optional arguments]</tt><newline>
        <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
        Modifying <tt>chroot-startstop.sh</tt> is typically not
        necessary, but might be in circumstances where your
@@ -673,10 +673,12 @@ details.
 The judgehost connects to the domserver via a REST API. You need to
 create an account for the judgedaemons to use (this may be a
 shared account between all judgedaemons) with a difficult,
-random password and the 'judgehost' role. On each judgedaemon,
-create a file <tt>etc/restapi.secret</tt> containing the id, URL,
+random password and the 'judgehost' role. On each judgehost, copy from
+the domserver (or create) a file <tt>etc/restapi.secret</tt> containing the id, URL,
 username and password whitespace-separated on one line, for example:
 <verb>default http://example.edu/domjudge/api/  judgehosts  MzfJYWF5agSlUfmiGEy5mgkfqU</verb>
+Note that the password must be identical to that of
+the <tt>judgehost</tt> user in the admin web interface.
 Multiple lines may be specified to allow a judgedaemon to work for multiple
 domservers. The id is used to differentiate between multiple domservers,
 and should be unique within the <tt>restapi.secret</tt> file.
@@ -794,7 +796,7 @@ Interpreted languages and non-statically linked binaries (for example,
 Oracle Java) can in principle also be used, but require that all
 dependencies are added to the chroot environment.
 DOMjudge comes with helper scripts to build a chroot environment:
-run either <tt>dj_make_chroot</tt> or <tt>dj_make_ubuntu_chroot</tt>
+run either <tt>sudo dj_make_chroot</tt> or <tt>sudo dj_make_ubuntu_chroot</tt>
 as root (for a Debian or Ubuntu-based chroot, respectively).
 Options can be given change the target directory where to build the
 chroot environment (normally the default from configure is used) and
@@ -2392,7 +2394,9 @@ Note that these targets have to be executed <em>separately</em> and
 they replace the steps described in the section
 <ref id="install_config:installsystem" name="Installation system">;
 also no <tt>--prefix</tt> flag or other directories have to be
-specified to <tt>configure</tt>.
+specified to <tt>configure</tt>. In this case the binaries
+(e.g. <tt>judgedaemon</tt> and <tt>dj-setup-database</tt>) can be
+found in their respective source directories, not in <tt>bin</tt>.
 
 <sect>Makefile structure
 <p>
