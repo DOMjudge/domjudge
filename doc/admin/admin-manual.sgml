@@ -49,8 +49,8 @@ DOMjudge discerns the following kinds of hosts:
        done with a browser via the web interface.
 <tag>DOMjudge server</tag>
        A host that receives the submissions, runs the
-       database and serves the web pages. This host will run Apache,
-       and MySQL.
+       database and serves the web pages. This host will run the
+       Apache webserver and MySQL database.
        Also called <em>domserver</em> for brevity.
 <tag>Judgehosts</tag>
        A number of hosts, at least one, that will retrieve
@@ -273,12 +273,12 @@ On the domserver host:
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server:
        <tt>
-       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf &&
+       sudo ln -s &lt;INSTALL_PATH&gt;/domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf &&
        sudo apache2ctl graceful
        </tt>
        Or for Apache 2.4 and up:
        <tt>
-       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
+       sudo ln -s &lt;INSTALL_PATH&gt;/domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
        sudo a2enconf domjudge &&
        sudo apache2ctl graceful
        </tt>
@@ -746,8 +746,8 @@ followed by <tt>make submit.exe</tt> in the <tt>submit</tt> directory.
 Configuration of the judge system is mostly done by editing the
 configuration variables on the page <tt>Configuration settings</tt>
 available in the administrator interface, and changes take effect
-immediately. The administrator interface
-can be reached on <tt>http://yourhost/domjudge/jury/</tt> and the
+immediately. The administrator interface can be reached
+on <tt>http(s)://yourhost.example.edu/domjudge/jury/</tt> and the
 default username is <tt>admin</tt> with password <tt>admin</tt>.
 Make sure to change the default password immediately.
 
@@ -1015,8 +1015,8 @@ should end with a slash and defaults to <tt>http://example.com/domjudge/</tt>.
 The following should do it on a Debian-like system:
 <code>
 sudo apt-get install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
-cd .../docs/team
-./genteammanual [-w http://your.location.example.com/domjudge/] [targetdir]
+cd &lt;INSTALL_PATH&gt;/docs/team
+./genteammanual [-w http(s)://yourhost.example.edu/domjudge/] [targetdir]
 </code>
 
 <p>
@@ -1644,8 +1644,8 @@ If the daemons have started without any problems, you've come a long
 way! Now to check that you're ready for a contest.
 
 First, go to the jury interface:
-<tt>http://www.your-domjudge-location/jury</tt>. Look under all the
-menu items to see whether the displayed data looks sane. Use the
+<tt>http(s)://yourhost.example.edu/domjudge/jury</tt>. Look under all
+the menu items to see whether the displayed data looks sane. Use the
 config-checker under `Admin Functions' for some sanity checks on your
 configuration.
 
