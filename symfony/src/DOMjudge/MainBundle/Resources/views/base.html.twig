@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+<head>
+	<!-- DOMjudge version {{ domjudge_version }} -->
+	<meta charset="utf-8"/>
+	<title>{% if page_title is defined %} {{ page_title }}{% endif %}</title>
+	<link rel="icon" href="{{ asset('bundles/domjudgemain/images/favicon.png') }}" type="image/png" />
+	<link rel="stylesheet" href="{{ asset('bundles/domjudgemain/css/style.css') }}" type="text/css" />
+	<link rel="stylesheet" href="{{ asset('bundles/domjudgemain/css/octicons/octicons.css') }}" />
+	<script type="text/javascript" src="{{ asset('bundles/domjudgemain/js/jquery.min.js') }}"></script>
+	<script type="text/javascript" src="{{ asset('bundles/domjudgemain/js/domjudge.js') }}"></script>
+</head>
+<body>
+	{% block menu %}{% endblock %}
+	{% block body %}{% endblock %}
+</body>
+</html>

@@ -35,6 +35,8 @@ framework:
 twig:
     debug:            "%kernel.debug%"
     strict_variables: "%kernel.debug%"
+    globals:
+        domjudge_version: %domjudge_version%
 
 # Doctrine Configuration
 doctrine:

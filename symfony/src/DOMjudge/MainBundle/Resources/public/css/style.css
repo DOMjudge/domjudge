@@ -1,0 +1,506 @@
+body {
+	color: black;
+	background-color: white;
+	font-family: sans-serif;
+}
+
+img {	border: 0; }
+
+.sol {
+	font-weight: bold;
+	font-variant: small-caps;
+}
+
+.sol_correct      { color: green;  }
+.sol_incorrect    { color: red;    }
+.sol_queued       { color: gray;   }
+
+.prevsubmit       { color: #696969; }
+
+tr.sub_ignore td {
+	text-decoration: line-through;
+}
+
+tr.unseen td {
+	font-weight: bold;
+}
+
+a:link, a:visited { color: blue;   }
+a:hover           { color: purple; }
+a:active          { color: red;    }
+
+.disabled         { color: silver; }
+.disabled a       { color: gray;   }
+.disabled .circle { opacity: 0.2;  }
+.nodata           { color: gray; font-style: italic; }
+
+/* general table layout (not in scoreboard or lists) */
+table {
+	border-collapse: separate;
+	border-spacing: 2px;
+}
+
+th {
+	vertical-align: bottom;
+}
+
+caption {
+	font-weight: bold;
+	margin-bottom: 1ex;
+}
+
+hr {
+	border: 0;
+	height: 1px;
+	background-color: gray;
+	margin-top: 2em;
+}
+address { font-size: smaller; }
+
+.framed {
+	border: 1px solid silver;
+	padding: 2px;
+	display: inline-block;
+}
+
+tr.unread td {
+	font-weight: bold;
+}
+
+/* more spacing in lists of teams, submissions, etc. */
+.list {
+	border-collapse: collapse;
+	border-spacing: 0px;
+}
+.list th {
+	vertical-align: bottom;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+td {
+	vertical-align: top;
+}
+
+.list tr { border-bottom: 1px solid silver; }
+.list tr.roweven { background: #ededed; }
+.list tr:hover { background: #ffffcc; }
+.list thead tr { border-bottom-color: black; }
+.list thead tr:hover { background: white; }
+.list tfoot tr:hover { background: white; }
+.list a {
+	text-decoration: none;
+	color: black;
+	display: block;
+	padding: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+.list .disabled a  { color: silver;   }
+.list .editdel  a  { display: inline; white-space: nowrap; }
+
+.output_text, .editor {
+	border-top: 1px dotted #C0C0C0;
+	border-bottom: 1px dotted #C0C0C0;
+	background-color: #FAFAFA;
+	margin: 0;
+	padding: 5px;
+	font-family: monospace;
+	white-space: pre;
+}
+
+span.differ {
+	color: Red;
+}
+
+span.endline {
+	color: Orange;
+}
+
+span.extra {
+	color: Red;
+}
+
+.teamid { font-family: monospace; }
+.probid, .langid { font-variant: small-caps; }
+
+#menutop a {
+	font-weight: bold;
+	text-decoration: none;
+	background-color: #FFFFF0;
+	border: 1px solid black;
+	margin: 2px;
+	padding: 2px;
+	padding-left: 5px;
+	padding-right: 5px;
+	position: relative;
+	z-index: 1;
+}
+#menutop a.new {
+	color: #FF0000;
+}
+
+#menutopright {
+	position: absolute; right: 1ex; top: 1ex;
+	text-align: right;
+}
+#clock {
+/*	font-size: small; */
+	font-family: monospace;
+	border: 1px dashed #ccc;
+	padding: 4px;
+	color: gray;
+}
+#timeleft { color: #800080;}
+#toggles {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+fieldset {
+	margin: 2em;
+	padding: 1em;
+}
+
+.error {
+	color: red;
+	font-family: monospace;
+	border: 1px dotted red;
+}
+
+legend {
+	font-variant: small-caps;
+	font-weight: bold;
+	padding: .1ex .5ex;
+}
+
+.error legend {
+	font-size: x-large;
+	border-right: 1px solid gray;
+	border-bottom: 1px solid gray;
+}
+
+.center { margin: 0px auto; }
+
+.scoreboard {
+	border-collapse: collapse;
+	clear: both;
+}
+.scoreboard td {
+	font-size: small;
+	vertical-align: middle;
+	text-align: center;
+}
+.scoreboard tr {
+	border-bottom: 1px solid black; 
+	height: 42px;
+}
+.scoreboard td, .scoreboard th {
+	border-right: 1px solid silver;
+}
+.scoreboard a {
+	display: block;
+	padding: 3px;
+	text-decoration: none;
+	color: black;
+}
+
+.scoreboard .scoretn {
+	padding: 0px;
+	max-width: 15em;
+	text-align: right;
+	font-weight: bold;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.scoreboard .scoreaf { white-space: nowrap; border: 0; }
+.scoreboard .scoreaf img { vertical-align: middle; }
+.univ {
+	font-size: 80%;
+	font-weight: normal;
+	color: dimgrey;
+}
+
+.scoreheader {
+	font-variant: small-caps;
+	border-bottom: 2px solid black;
+	white-space: nowrap;
+}
+
+.problempoints {
+	font-size: smaller;
+	font-weight: normal;
+	color: #303030;
+	padding-left: 3pt;
+	padding-right: 3pt;
+}
+
+.score_correct   { background: #60e760; }
+.score_first     { background: #1daa1d !important; }
+.score_pending   { background: #6666FF; }
+.score_incorrect { background: #e87272; }
+
+.tc_box { text-align:center;font-size:85%;width:1.2em;display:inline-block;padding:2px;margin:1px;color:black;}
+.tc_correct   { background: #60e760; }
+.tc_pending   { background: #6666FF; }
+.tc_unused    { background: #BBBBBB; }
+.tc_incorrect { background: #e87272; }
+
+#scoresolv,#scoretotal { width: 2.5em; }
+.scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }
+.scorenc { font-weight: bold; }
+td.scorenc { border-color: silver; border-right: 0; }
+
+.scoreprob { width: 3.0em; vertical-align: middle; }
+.scoreaffil { text-align: center; }
+
+#scoresummary {
+	border-top: 2px solid black;
+	border-bottom: none;
+	font-variant: small-caps;
+}
+.scorethisisme .scoretn {
+	background: #ff6600;
+	font-weight: bold;
+}
+
+.scorelegend {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.scorelegend td {
+	text-align: center;
+	width: 25ex;
+}
+
+#lastmod {
+	position: absolute; right: 1ex; margin-top: 1em;
+}
+#lastmod, #lastmod a {
+	font-size: x-small;
+	color: gray;
+	text-align: right;
+}
+
+#teamscoresummary { margin-top: 2.5em; }
+
+#teampicture { position: absolute; right: 4ex; top: 7ex; }
+
+/* between different sortorder-categories, print a thick line */
+.sortorderswitch { border-top: 2px solid black; }
+
+/* between different contests, print a thin line */
+.contestswitch { border-top: 1px solid black; }
+
+.submissionsuccessful {
+	font-weight: bold;
+	background-color: #FFFFF0;
+	border: 1px solid black;
+	margin: 1em;
+	padding: 2px;
+	color: #006400;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+input,select,textarea {
+	border: solid 1px darkgray;
+	background-color: #F0F0F0;
+}
+input,select {
+	cursor: pointer;
+}
+
+h3.teamoverview {
+	border-top: solid 1px darkgray;
+	border-bottom: solid 1px darkgray;
+	background-color: #c4d8ff;
+	font-size: smaller;
+	font-weight: normal;
+	margin-top: 2ex;
+	padding-left: 1ex;
+}
+
+#submitlist,#clarlist {
+	width: 48%;
+}
+#submitlist {
+	position: absolute;
+	left: 1ex;
+}
+#clarlist {
+	position: absolute;
+	right: 1ex;
+}
+.compilation-success {
+	color: green;
+	font-style: italic;
+}
+.compilation-error {
+	color: red;
+	font-style: italic;
+}
+#submitform, .submissiondone {
+	text-align: center;
+}
+.submissiondone a {
+	color: red;
+}
+#submitlist .list, #clarlist .list {
+	width: 100%;
+}
+#submitlist .list th, #clarlist .list th {
+	text-align: left;
+}
+#submitlist td.result, #clarlist td.clartext {
+	width: 1000ex;
+}
+#submitlist tr.highlight {
+	background-color: #c4d8ff;
+	border-color: blue;
+}
+.errorfield {
+	border-color: red;
+	color: red;
+}
+.button {
+	border: solid 1px darkgray;
+	background-color: #F0F0F0;
+	font-size: 90%;
+}
+
+h2#teamwelcome {
+	padding-bottom: 0;
+	margin-bottom: 0;
+	margin-left: 3em;
+	font-weight: normal;
+}
+#teamwelcometeam {
+	font-weight: bold;
+}
+h3#contestnotstarted {
+	color: silver;
+	margin-top: .2ex;
+	margin-left: 8em;
+}
+
+span.fileinputs {
+	position: relative;
+}
+
+input#addfile {
+	margin-top: 1ex;
+}
+
+/* tabbed layout for multiple source files */
+.tabberlive .tabbertabhide {
+	display:none;
+}
+.tabber {
+}
+.tabberlive {
+	margin-top:1em;
+}
+ul.tabbernav
+{
+	margin:0;
+	padding: 3px 0;
+	border-bottom: 1px solid #778;
+	font: bold 12px Verdana, sans-serif;
+}
+
+ul.tabbernav li
+{
+	list-style: none;
+	margin: 0;
+	display: inline;
+}
+
+ul.tabbernav li a
+{
+	padding: 3px 0.5em;
+	margin-left: 3px;
+	border: 1px solid #778;
+	border-bottom: none;
+	background: #DDE;
+	text-decoration: none;
+}
+
+ul.tabbernav li a:link { color: #448; }
+ul.tabbernav li a:visited { color: #667; }
+
+ul.tabbernav li a:hover
+{
+	color: #000;
+	background: #AAE;
+	border-color: #227;
+}
+
+ul.tabbernav li.tabberactive a
+{
+	background-color: #fff;
+	border-bottom: 1px solid #fff;
+}
+
+ul.tabbernav li.tabberactive a:hover
+{
+	color: #000;
+	background: white;
+	border-bottom: 1px solid white;
+}
+.tabberlive .tabbertab {
+	padding:5px;
+	border:1px solid #aaa;
+	border-top:0;
+}
+.tabberlive .tabbertab h2 {
+	display:none;
+}
+
+.circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: solid 1px black;
+    display: inline-block;
+}
+
+.heart {
+	padding: .3em;
+	cursor: pointer;
+}
+
+table.lcsdiff {
+	border-spacing: 0;
+	border-collapse: collapse;
+}
+table.lcsdiff td.linenr {
+	background-color: darkgray;
+	text-align: right;
+	border-right: solid 1px black;
+	padding-right: 7px;
+}
+
+ins {
+	background: #dfd;
+	text-decoration: none;
+}
+del {
+	background: #fdd;
+	text-decoration: none;
+}
+
+table.rejudgetable td {
+	text-align: center;
+}
+table.rejudgetable td.changed {
+	background-color: #fdd;
+	font-weight: bold;
+}
+table.rejudgetable td.identical {
+	background-color: #dfd;
+}
+table.rejudgetable td.zero {
+	background-color: #F0F8FF;
+}
