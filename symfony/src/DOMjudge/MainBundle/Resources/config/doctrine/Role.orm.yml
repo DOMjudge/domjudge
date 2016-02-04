@@ -15,7 +15,7 @@ DOMjudge\MainBundle\Entity\Role:
             generator:
                 strategy: IDENTITY
     fields:
-        role:
+        name:
             type: string
             nullable: false
             length: 25
@@ -28,10 +28,10 @@ DOMjudge\MainBundle\Entity\Role:
             fixed: false
             comment: 'Description for the web interface'
     manyToMany:
-        userid:
+        users:
             targetEntity: User
             cascade: {  }
-            mappedBy: roleid
+            mappedBy: users
             inversedBy: null
             joinTable: null
             orderBy: null

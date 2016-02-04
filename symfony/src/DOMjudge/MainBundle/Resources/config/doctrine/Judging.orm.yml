@@ -27,18 +27,20 @@ DOMjudge\MainBundle\Entity\Judging:
             generator:
                 strategy: IDENTITY
     fields:
-        starttime:
+        startTime:
             type: decimal
             nullable: false
             precision: 32
             scale: 9
             comment: 'Time judging started'
-        endtime:
+            column: starttime
+        endTime:
             type: decimal
             nullable: true
             precision: 32
             scale: 9
             comment: 'Time judging ended, null = still busy'
+            column: endtime
         result:
             type: string
             nullable: true
@@ -82,7 +84,7 @@ DOMjudge\MainBundle\Entity\Judging:
             comment: 'Whether the team has seen this judging'
             default: '0'
     manyToOne:
-        cid:
+        contest:
             targetEntity: Contest
             cascade: {  }
             mappedBy: null
@@ -91,7 +93,7 @@ DOMjudge\MainBundle\Entity\Judging:
                 cid:
                     referencedColumnName: cid
             orphanRemoval: false
-        submitid:
+        submission:
             targetEntity: Submission
             cascade: {  }
             mappedBy: null
@@ -109,7 +111,7 @@ DOMjudge\MainBundle\Entity\Judging:
                 judgehost:
                     referencedColumnName: hostname
             orphanRemoval: false
-        rejudgingid:
+        rejudging:
             targetEntity: Rejudging
             cascade: {  }
             mappedBy: null
@@ -118,7 +120,7 @@ DOMjudge\MainBundle\Entity\Judging:
                 rejudgingid:
                     referencedColumnName: rejudgingid
             orphanRemoval: false
-        prevjudgingid:
+        previousJudging:
             targetEntity: Judging
             cascade: {  }
             mappedBy: null
@@ -127,4 +129,17 @@ DOMjudge\MainBundle\Entity\Judging:
                 prevjudgingid:
                     referencedColumnName: judgingid
             orphanRemoval: false
+    oneToMany:
+        events:
+            targetEntity: Event
+            mappedBy: judging
+            inversedBy: judging
+        nextJudgings:
+            targetEntity: judging
+            mappedBy: previousJudging
+            inversedBy: previousJudging
+        judgingRuns:
+            targetEntity: judgingRun
+            mappedBy: judging
+            inversedBy: judging
     lifecycleCallbacks: {  }

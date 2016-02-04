@@ -21,7 +21,7 @@ DOMjudge\MainBundle\Entity\Balloon:
             comment: 'Has been handed out yet?'
             default: '0'
     manyToOne:
-        submitid:
+        submission:
             targetEntity: Submission
             cascade: {  }
             mappedBy: null

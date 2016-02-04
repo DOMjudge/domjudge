@@ -22,12 +22,13 @@ DOMjudge\MainBundle\Entity\Team:
             generator:
                 strategy: IDENTITY
     fields:
-        externalid:
+        externalId:
             type: string
             nullable: true
             length: 255
             fixed: false
             comment: 'Team ID in an external system'
+            column: externalid
         name:
             type: string
             nullable: false
@@ -71,12 +72,13 @@ DOMjudge\MainBundle\Entity\Team:
             scale: 9
             comment: 'Time of first teampage view'
             column: teampage_first_visited
-        hostname:
+        hostName:
             type: string
             nullable: true
             length: 255
             fixed: false
             comment: 'Teampage first visited from this address'
+            column: hostname
         penalty:
             type: integer
             nullable: false
@@ -84,7 +86,7 @@ DOMjudge\MainBundle\Entity\Team:
             comment: 'Additional penalty time in minutes'
             default: '0'
     manyToOne:
-        categoryid:
+        category:
             targetEntity: TeamCategory
             cascade: {  }
             mappedBy: null
@@ -93,7 +95,7 @@ DOMjudge\MainBundle\Entity\Team:
                 categoryid:
                     referencedColumnName: categoryid
             orphanRemoval: false
-        affilid:
+        affiliation:
             targetEntity: TeamAffiliation
             cascade: {  }
             mappedBy: null
@@ -103,11 +105,11 @@ DOMjudge\MainBundle\Entity\Team:
                     referencedColumnName: affilid
             orphanRemoval: false
     manyToMany:
-        cid:
+        contests:
             targetEntity: Contest
             cascade: {  }
             mappedBy: null
-            inversedBy: teamid
+            inversedBy: teams
             joinTable:
                 name: contestteam
                 joinColumns:
@@ -119,11 +121,11 @@ DOMjudge\MainBundle\Entity\Team:
                         name: cid
                         referencedColumnName: cid
             orderBy: null
-        mesgid:
+        unreadClarifications:
             targetEntity: Clarification
             cascade: {  }
             mappedBy: null
-            inversedBy: teamid
+            inversedBy: unreadTeams
             joinTable:
                 name: team_unread
                 joinColumns:
@@ -135,4 +137,13 @@ DOMjudge\MainBundle\Entity\Team:
                         name: mesgid
                         referencedColumnName: clarid
             orderBy: null
+    oneToMany:
+        submissions:
+            targetEntity: Submission
+            mappedBy: team
+            inversedBy: team
+        users:
+            targetEntity: User
+            mappedBy: team
+            inversedBy: team
     lifecycleCallbacks: {  }

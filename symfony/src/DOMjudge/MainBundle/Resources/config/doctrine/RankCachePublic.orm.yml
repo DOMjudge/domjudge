@@ -1,16 +1,19 @@
-DOMjudge\MainBundle\Entity\RankcacheJury:
+DOMjudge\MainBundle\Entity\RankCachePublic:
     type: entity
-    table: rankcache_jury
+    table: rankcache_public
     indexes:
         order:
             columns:
                 - cid
                 - points
                 - totaltime
-        IDX_FCB785134B30D9C4:
-            columns:
-                - cid
     id:
+        cid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Contest ID'
+            id: true
         teamid:
             type: integer
             nullable: false
@@ -24,14 +27,16 @@ DOMjudge\MainBundle\Entity\RankcacheJury:
             unsigned: true
             comment: 'Total correctness points'
             default: '0'
-        totaltime:
+        totalTime:
             type: integer
             nullable: false
             unsigned: true
             comment: 'Total time spent'
             default: '0'
-    oneToOne:
-        cid:
+            column: totaltime
+    manyToOne:
+        # We have no reverse for this, as this does not make any sense
+        contest:
             targetEntity: Contest
             cascade: {  }
             mappedBy: null
@@ -39,5 +44,14 @@ DOMjudge\MainBundle\Entity\RankcacheJury:
             joinColumns:
                 cid:
                     referencedColumnName: cid
+            orphanRemoval: false
+        team:
+            targetEntity: Team
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                teamid:
+                    referencedColumnName: teamid
             orphanRemoval: false
     lifecycleCallbacks: {  }

@@ -1,4 +1,4 @@
-DOMjudge\MainBundle\Entity\Testcase:
+DOMjudge\MainBundle\Entity\TestCase:
     type: entity
     table: testcase
     indexes:
@@ -83,7 +83,7 @@ DOMjudge\MainBundle\Entity\Testcase:
             comment: 'Sample testcases that can be shared with teams'
             default: '0'
     manyToOne:
-        probid:
+        problem:
             targetEntity: Problem
             cascade: {  }
             mappedBy: null
@@ -92,4 +92,9 @@ DOMjudge\MainBundle\Entity\Testcase:
                 probid:
                     referencedColumnName: probid
             orphanRemoval: false
+    oneToMany:
+        judgingRuns:
+            targetEntity: judgingRun
+            mappedBy: testcase
+            inversedBy: testcase
     lifecycleCallbacks: {  }

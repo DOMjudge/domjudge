@@ -23,4 +23,9 @@ DOMjudge\MainBundle\Entity\JudgehostRestriction:
             length: null
             fixed: false
             comment: 'JSON-encoded restrictions'
+    oneToMany:
+        judgehosts:
+            targetEntity: judgehost
+            mappedBy: restriction
+            inversedBy: restriction
     lifecycleCallbacks: {  }

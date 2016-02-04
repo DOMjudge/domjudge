@@ -11,12 +11,13 @@ DOMjudge\MainBundle\Entity\TeamAffiliation:
             generator:
                 strategy: IDENTITY
     fields:
-        shortname:
+        shortName:
             type: string
             nullable: false
             length: 30
             fixed: false
             comment: 'Short descriptive name'
+            column: shortname
         name:
             type: string
             nullable: false
@@ -35,4 +36,9 @@ DOMjudge\MainBundle\Entity\TeamAffiliation:
             length: null
             fixed: false
             comment: Comments
+    oneToMany:
+        teams:
+            targetEntity: Team
+            mappedBy: affiliation
+            inversedBy: affiliation
     lifecycleCallbacks: {  }

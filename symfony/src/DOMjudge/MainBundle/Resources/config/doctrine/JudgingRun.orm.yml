@@ -23,18 +23,20 @@ DOMjudge\MainBundle\Entity\JudgingRun:
             generator:
                 strategy: IDENTITY
     fields:
-        runresult:
+        runResult:
             type: string
             nullable: true
             length: 25
             fixed: false
             comment: 'Result of this run, NULL if not finished yet'
-        runtime:
+            column: runresult
+        runTime:
             type: float
             nullable: true
             precision: 10
             scale: 0
             comment: 'Submission running time on this testcase'
+            column: runtime
         outputRun:
             type: blob
             nullable: true
@@ -64,7 +66,7 @@ DOMjudge\MainBundle\Entity\JudgingRun:
             comment: 'Judging system output'
             column: output_system
     manyToOne:
-        testcaseid:
+        testcase:
             targetEntity: Testcase
             cascade: {  }
             mappedBy: null
@@ -73,7 +75,7 @@ DOMjudge\MainBundle\Entity\JudgingRun:
                 testcaseid:
                     referencedColumnName: testcaseid
             orphanRemoval: false
-        judgingid:
+        judging:
             targetEntity: Judging
             cascade: {  }
             mappedBy: null

@@ -18,18 +18,20 @@ DOMjudge\MainBundle\Entity\Rejudging:
             generator:
                 strategy: IDENTITY
     fields:
-        starttime:
+        startTime:
             type: decimal
             nullable: false
             precision: 32
             scale: 9
             comment: 'Time rejudging started'
-        endtime:
+            column: starttime
+        endTime:
             type: decimal
             nullable: true
             precision: 32
             scale: 9
             comment: 'Time rejudging ended, null = still busy'
+            column: endtime
         reason:
             type: string
             nullable: false
@@ -42,7 +44,7 @@ DOMjudge\MainBundle\Entity\Rejudging:
             comment: 'Rejudging is marked as invalid if canceled'
             default: '1'
     manyToOne:
-        useridStart:
+        startedByUser:
             targetEntity: User
             cascade: {  }
             mappedBy: null
@@ -51,7 +53,7 @@ DOMjudge\MainBundle\Entity\Rejudging:
                 userid_start:
                     referencedColumnName: userid
             orphanRemoval: false
-        useridFinish:
+        finishedByUser:
             targetEntity: User
             cascade: {  }
             mappedBy: null
@@ -60,4 +62,13 @@ DOMjudge\MainBundle\Entity\Rejudging:
                 userid_finish:
                     referencedColumnName: userid
             orphanRemoval: false
+    oneToMany:
+        judgings:
+            targetEntity: Judging
+            mappedBy: rejudging
+            inversedBy: rejudging
+        submissions:
+            targetEntity: Submission
+            mappedBy: rejudging
+            inversedBy: rejudging
     lifecycleCallbacks: {  }

@@ -33,12 +33,13 @@ DOMjudge\MainBundle\Entity\Event:
             generator:
                 strategy: IDENTITY
     fields:
-        eventtime:
+        eventTime:
             type: decimal
             nullable: false
             precision: 32
             scale: 9
             comment: 'When the event occurred'
+            column: eventtime
         description:
             type: text
             nullable: false
@@ -46,7 +47,7 @@ DOMjudge\MainBundle\Entity\Event:
             fixed: false
             comment: 'Event description'
     manyToOne:
-        cid:
+        contest:
             targetEntity: Contest
             cascade: {  }
             mappedBy: null
@@ -55,7 +56,7 @@ DOMjudge\MainBundle\Entity\Event:
                 cid:
                     referencedColumnName: cid
             orphanRemoval: false
-        clarid:
+        clarification:
             targetEntity: Clarification
             cascade: {  }
             mappedBy: null
@@ -64,7 +65,7 @@ DOMjudge\MainBundle\Entity\Event:
                 clarid:
                     referencedColumnName: clarid
             orphanRemoval: false
-        langid:
+        language:
             targetEntity: Language
             cascade: {  }
             mappedBy: null
@@ -73,7 +74,7 @@ DOMjudge\MainBundle\Entity\Event:
                 langid:
                     referencedColumnName: langid
             orphanRemoval: false
-        probid:
+        problem:
             targetEntity: Problem
             cascade: {  }
             mappedBy: null
@@ -82,7 +83,7 @@ DOMjudge\MainBundle\Entity\Event:
                 probid:
                     referencedColumnName: probid
             orphanRemoval: false
-        submitid:
+        submission:
             targetEntity: Submission
             cascade: {  }
             mappedBy: null
@@ -91,7 +92,7 @@ DOMjudge\MainBundle\Entity\Event:
                 submitid:
                     referencedColumnName: submitid
             orphanRemoval: false
-        judgingid:
+        judging:
             targetEntity: Judging
             cascade: {  }
             mappedBy: null
@@ -100,7 +101,7 @@ DOMjudge\MainBundle\Entity\Event:
                 judgingid:
                     referencedColumnName: judgingid
             orphanRemoval: false
-        teamid:
+        team:
             targetEntity: Team
             cascade: {  }
             mappedBy: null

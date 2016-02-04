@@ -24,12 +24,13 @@ DOMjudge\MainBundle\Entity\SubmissionFile:
             generator:
                 strategy: IDENTITY
     fields:
-        sourcecode:
+        sourceCode:
             type: blob
             nullable: false
             length: null
             fixed: false
             comment: 'Full source code'
+            column: sourcecode
         filename:
             type: string
             nullable: false
@@ -42,7 +43,7 @@ DOMjudge\MainBundle\Entity\SubmissionFile:
             unsigned: true
             comment: 'Order of the submission files, zero-indexed'
     manyToOne:
-        submitid:
+        submission:
             targetEntity: Submission
             cascade: {  }
             mappedBy: null

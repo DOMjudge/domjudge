@@ -1,6 +1,10 @@
-DOMjudge\MainBundle\Entity\Auditlog:
+DOMjudge\MainBundle\Entity\AuditLog:
     type: entity
     table: auditlog
+    indexes:
+        cid:
+            columns:
+                - cid
     id:
         logid:
             type: integer
@@ -11,45 +15,54 @@ DOMjudge\MainBundle\Entity\Auditlog:
             generator:
                 strategy: IDENTITY
     fields:
-        logtime:
+        logTime:
             type: decimal
             nullable: false
             precision: 32
             scale: 9
             comment: 'Timestamp of the logentry'
-        cid:
-            type: integer
-            nullable: true
-            unsigned: true
-            comment: 'Contest ID associated to this entry'
+            column: logtime
         user:
             type: string
             nullable: true
             length: 255
             fixed: false
             comment: 'User who performed this action'
-        datatype:
+        dataType:
             type: string
             nullable: true
             length: 25
             fixed: false
             comment: 'Reference to DB table associated to this entry'
-        dataid:
+            column: datatype
+        dataId:
             type: string
             nullable: true
             length: 50
             fixed: false
             comment: 'Identifier in reference table'
+            column: dataid
         action:
             type: string
             nullable: true
             length: 30
             fixed: false
             comment: 'Description of action performed'
-        extrainfo:
+        extraInfo:
             type: string
             nullable: true
             length: 255
             fixed: false
             comment: 'Optional additional description of the entry'
+            column: extrainfo
+    manyToOne:
+        contest:
+            targetEntity: Contest
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                cid:
+                    referencedColumnName: cid
+            orphanRemoval: false
     lifecycleCallbacks: {  }

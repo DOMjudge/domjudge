@@ -51,4 +51,13 @@ DOMjudge\MainBundle\Entity\Language:
             fixed: false
             comment: 'Script to compile source code for this language'
             column: compile_script
+    oneToMany:
+        events:
+            targetEntity: Event
+            mappedBy: language
+            inversedBy: language
+        submissions:
+            targetEntity: Submission
+            mappedBy: language
+            inversedBy: language
     lifecycleCallbacks: {  }

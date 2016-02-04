@@ -1,6 +1,6 @@
-DOMjudge\MainBundle\Entity\ScorecachePublic:
+DOMjudge\MainBundle\Entity\ScoreCacheJury:
     type: entity
-    table: scorecache_public
+    table: scorecache_jury
     id:
         cid:
             type: integer
@@ -33,16 +33,45 @@ DOMjudge\MainBundle\Entity\ScorecachePublic:
             unsigned: false
             comment: 'Number of submissions pending judgement'
             default: '0'
-        totaltime:
+        totalTime:
             type: integer
             nullable: false
             unsigned: true
             comment: 'Total time spent'
             default: '0'
+            column: totaltime
         isCorrect:
             type: boolean
             nullable: false
             comment: 'Has there been a correct submission?'
             default: '0'
             column: is_correct
+    manyToOne:
+        contest:
+            targetEntity: Contest
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                cid:
+                    referencedColumnName: cid
+            orphanRemoval: false
+        team:
+            targetEntity: Team
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                teamid:
+                    referencedColumnName: teamid
+            orphanRemoval: false
+        problem:
+            targetEntity: Problem
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                probid:
+                    referencedColumnName: probid
+            orphanRemoval: false
     lifecycleCallbacks: {  }

@@ -21,14 +21,15 @@ DOMjudge\MainBundle\Entity\Judgehost:
             nullable: false
             comment: 'Should this host take on judgings?'
             default: '1'
-        polltime:
+        pollTime:
             type: decimal
             nullable: true
             precision: 32
             scale: 9
             comment: 'Time of last poll by autojudger'
+            column: polltime
     manyToOne:
-        restrictionid:
+        restriction:
             targetEntity: JudgehostRestriction
             cascade: {  }
             mappedBy: null
@@ -37,4 +38,13 @@ DOMjudge\MainBundle\Entity\Judgehost:
                 restrictionid:
                     referencedColumnName: restrictionid
             orphanRemoval: false
+    oneToMany:
+        judgings:
+            targetEntity: Judging
+            mappedBy: judgehost
+            inversedBy: judgehost
+        submissions:
+            targetEntity: Submission
+            mappedBy: judgehost
+            inversedBy: judgehost
     lifecycleCallbacks: {  }

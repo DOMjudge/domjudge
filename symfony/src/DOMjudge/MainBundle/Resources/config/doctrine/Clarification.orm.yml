@@ -26,12 +26,13 @@ DOMjudge\MainBundle\Entity\Clarification:
             generator:
                 strategy: IDENTITY
     fields:
-        submittime:
+        submitTime:
             type: decimal
             nullable: false
             precision: 32
             scale: 9
             comment: 'Time sent'
+            column: submittime
         sender:
             type: integer
             nullable: true
@@ -67,7 +68,7 @@ DOMjudge\MainBundle\Entity\Clarification:
             comment: 'Has been answered by jury?'
             default: '0'
     manyToOne:
-        cid:
+        contest:
             targetEntity: Contest
             cascade: {  }
             mappedBy: null
@@ -76,7 +77,7 @@ DOMjudge\MainBundle\Entity\Clarification:
                 cid:
                     referencedColumnName: cid
             orphanRemoval: false
-        respid:
+        inReplyTo:
             targetEntity: Clarification
             cascade: {  }
             mappedBy: null
@@ -85,7 +86,7 @@ DOMjudge\MainBundle\Entity\Clarification:
                 respid:
                     referencedColumnName: clarid
             orphanRemoval: false
-        probid:
+        problem:
             targetEntity: Problem
             cascade: {  }
             mappedBy: null
@@ -95,11 +96,20 @@ DOMjudge\MainBundle\Entity\Clarification:
                     referencedColumnName: probid
             orphanRemoval: false
     manyToMany:
-        teamid:
+        unreadTeams:
             targetEntity: Team
             cascade: {  }
-            mappedBy: mesgid
+            mappedBy: unreadClarifications
             inversedBy: null
             joinTable: null
             orderBy: null
+    oneToMany:
+        responses:
+            targetEntity: Clarification
+            mappedBy: inReplyTo
+            inversedBy: inReplyTo
+        events:
+            targetEntity: Event
+            mappedBy: clarification
+            inversedBy: clarification
     lifecycleCallbacks: {  }

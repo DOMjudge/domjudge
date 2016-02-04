@@ -17,22 +17,25 @@ DOMjudge\MainBundle\Entity\Problem:
             length: 255
             fixed: false
             comment: 'Descriptive name'
-        timelimit:
+        timeLimit:
             type: integer
             nullable: false
             unsigned: true
             comment: 'Maximum run time for this problem'
             default: '0'
-        memlimit:
+            column: timelimit
+        memLimit:
             type: integer
             nullable: true
             unsigned: true
             comment: 'Maximum memory available (in kB) for this problem'
-        outputlimit:
+            column: memlimit
+        outputLimit:
             type: integer
             nullable: true
             unsigned: true
             comment: 'Maximum output size (in kB) for this problem'
+            column: outputlimit
         specialRun:
             type: string
             nullable: true
@@ -54,13 +57,14 @@ DOMjudge\MainBundle\Entity\Problem:
             fixed: false
             comment: 'Optional arguments to special_compare script'
             column: special_compare_args
-        problemtext:
+        problemText:
             type: blob
             nullable: true
             length: null
             fixed: false
             comment: 'Problem text in HTML/PDF/ASCII'
-        problemtextType:
+            column: problemtext
+        problemTextType:
             type: string
             nullable: true
             length: 4
@@ -68,11 +72,28 @@ DOMjudge\MainBundle\Entity\Problem:
             comment: 'File type of problem text'
             column: problemtext_type
     manyToMany:
-        cid:
+        contests:
             targetEntity: Contest
             cascade: {  }
-            mappedBy: probid
+            mappedBy: problems
             inversedBy: null
             joinTable: null
             orderBy: null
+    oneToMany:
+        clarifications:
+            targetEntity: Clarification
+            mappedBy: problem
+            inversedBy: problem
+        events:
+            targetEntity: Event
+            mappedBy: problem
+            inversedBy: problem
+        submissions:
+            targetEntity: Submission
+            mappedBy: problem
+            inversedBy: problem
+        testcases:
+            targetEntity: TestCase
+            mappedBy: problem
+            inversedBy: problem
     lifecycleCallbacks: {  }

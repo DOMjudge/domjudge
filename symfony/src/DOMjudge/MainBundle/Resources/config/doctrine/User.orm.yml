@@ -70,7 +70,7 @@ DOMjudge\MainBundle\Entity\User:
             comment: 'Whether the user is able to log in'
             default: '1'
     manyToOne:
-        teamid:
+        team:
             targetEntity: Team
             cascade: {  }
             mappedBy: null
@@ -80,11 +80,12 @@ DOMjudge\MainBundle\Entity\User:
                     referencedColumnName: teamid
             orphanRemoval: false
     manyToMany:
-        roleid:
+        # Not roles because of a conflict with UserInterface
+        userRoles:
             targetEntity: Role
             cascade: {  }
             mappedBy: null
-            inversedBy: userid
+            inversedBy: users
             joinTable:
                 name: userrole
                 joinColumns:
@@ -96,4 +97,13 @@ DOMjudge\MainBundle\Entity\User:
                         name: roleid
                         referencedColumnName: roleid
             orderBy: null
+    oneToMany:
+        startedRejudgings:
+            targetEntity: Judging
+            mappedBy: startedByUser
+            inversedBy: startedByUser
+        finishedRejudgings:
+            targetEntity: Judging
+            mappedBy: finishedByUser
+            inversedBy: finishedByUser
     lifecycleCallbacks: {  }

@@ -21,11 +21,12 @@ DOMjudge\MainBundle\Entity\TeamCategory:
             length: 255
             fixed: false
             comment: 'Descriptive name'
-        sortorder:
+        sortOrder:
             type: boolean
             nullable: false
             comment: 'Where to sort this category on the scoreboard'
             default: '0'
+            column: sortorder
         color:
             type: string
             nullable: true
@@ -37,4 +38,9 @@ DOMjudge\MainBundle\Entity\TeamCategory:
             nullable: false
             comment: 'Are teams in this category visible?'
             default: '1'
+    oneToMany:
+        teams:
+            targetEntity: Team
+            mappedBy: category
+            inversedBy: category
     lifecycleCallbacks: {  }

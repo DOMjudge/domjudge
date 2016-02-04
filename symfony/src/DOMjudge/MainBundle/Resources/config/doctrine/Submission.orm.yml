@@ -41,12 +41,13 @@ DOMjudge\MainBundle\Entity\Submission:
             generator:
                 strategy: IDENTITY
     fields:
-        submittime:
+        submitTime:
             type: decimal
             nullable: false
             precision: 32
             scale: 9
             comment: 'Time submitted'
+            column: submittime
         valid:
             type: boolean
             nullable: false
@@ -60,7 +61,7 @@ DOMjudge\MainBundle\Entity\Submission:
             comment: 'JSON encoded list of expected results - used to validate jury submissions'
             column: expected_results
     manyToOne:
-        cid:
+        contest:
             targetEntity: Contest
             cascade: {  }
             mappedBy: null
@@ -69,7 +70,7 @@ DOMjudge\MainBundle\Entity\Submission:
                 cid:
                     referencedColumnName: cid
             orphanRemoval: false
-        teamid:
+        team:
             targetEntity: Team
             cascade: {  }
             mappedBy: null
@@ -78,7 +79,7 @@ DOMjudge\MainBundle\Entity\Submission:
                 teamid:
                     referencedColumnName: teamid
             orphanRemoval: false
-        probid:
+        problem:
             targetEntity: Problem
             cascade: {  }
             mappedBy: null
@@ -87,7 +88,7 @@ DOMjudge\MainBundle\Entity\Submission:
                 probid:
                     referencedColumnName: probid
             orphanRemoval: false
-        langid:
+        language:
             targetEntity: Language
             cascade: {  }
             mappedBy: null
@@ -105,7 +106,7 @@ DOMjudge\MainBundle\Entity\Submission:
                 judgehost:
                     referencedColumnName: hostname
             orphanRemoval: false
-        origsubmitid:
+        originalSubmission:
             targetEntity: Submission
             cascade: {  }
             mappedBy: null
@@ -114,7 +115,7 @@ DOMjudge\MainBundle\Entity\Submission:
                 origsubmitid:
                     referencedColumnName: submitid
             orphanRemoval: false
-        rejudgingid:
+        rejudging:
             targetEntity: Rejudging
             cascade: {  }
             mappedBy: null
@@ -123,4 +124,25 @@ DOMjudge\MainBundle\Entity\Submission:
                 rejudgingid:
                     referencedColumnName: rejudgingid
             orphanRemoval: false
+    oneToMany:
+        balloons:
+            targetEntity: Balloon
+            mappedBy: submission
+            inversedBy: submission
+        events:
+            targetEntity: Event
+            mappedBy: submission
+            inversedBy: submission
+        judgings:
+            targetEntity: Judging
+            mappedBy: submission
+            inversedBy: submission
+        followUpSubmissions:
+            targetEntity: Submission
+            mappedBy: originalSubmission
+            inversedBy: originalSubmission
+        submissionFiles:
+            targetEntity: SubmissionFile
+            mappedBy: submission
+            inversedBy: submission
     lifecycleCallbacks: {  }
