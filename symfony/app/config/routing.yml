@@ -1,3 +1,23 @@
-app:
-    resource: "@AppBundle/Controller/"
+main:
+    resource: "@DOMjudgeMainBundle/Controller/"
     type:     annotation
+
+public:
+    resource: "@DOMjudgePublicBundle/Controller/"
+    type:     annotation
+    prefix:   /public
+
+team:
+    resource: "@DOMjudgeTeamBundle/Controller/"
+    type:     annotation
+    prefix:   /team
+
+jury:
+    resource: "@DOMjudgeJuryBundle/Controller/"
+    type:     annotation
+    prefix:   /jury
+
+api:
+    resource: "@DOMjudgeApiBundle/Controller/"
+    type:     annotation
+    prefix:   /api
