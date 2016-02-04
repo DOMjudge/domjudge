@@ -116,4 +116,300 @@ class TestCase
         $this->judgingRuns = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+
+    /**
+     * Get testcaseid
+     *
+     * @return integer 
+     */
+    public function getTestcaseid()
+    {
+        return $this->testcaseid;
+    }
+
+    /**
+     * Set md5sumInput
+     *
+     * @param string $md5sumInput
+     * @return TestCase
+     */
+    public function setMd5sumInput($md5sumInput)
+    {
+        $this->md5sumInput = $md5sumInput;
+
+        return $this;
+    }
+
+    /**
+     * Get md5sumInput
+     *
+     * @return string 
+     */
+    public function getMd5sumInput()
+    {
+        return $this->md5sumInput;
+    }
+
+    /**
+     * Set md5sumOutput
+     *
+     * @param string $md5sumOutput
+     * @return TestCase
+     */
+    public function setMd5sumOutput($md5sumOutput)
+    {
+        $this->md5sumOutput = $md5sumOutput;
+
+        return $this;
+    }
+
+    /**
+     * Get md5sumOutput
+     *
+     * @return string 
+     */
+    public function getMd5sumOutput()
+    {
+        return $this->md5sumOutput;
+    }
+
+    /**
+     * Set input
+     *
+     * @param string $input
+     * @return TestCase
+     */
+    public function setInput($input)
+    {
+        $this->input = $input;
+
+        return $this;
+    }
+
+    /**
+     * Get input
+     *
+     * @return string 
+     */
+    public function getInput()
+    {
+        return $this->input;
+    }
+
+    /**
+     * Set output
+     *
+     * @param string $output
+     * @return TestCase
+     */
+    public function setOutput($output)
+    {
+        $this->output = $output;
+
+        return $this;
+    }
+
+    /**
+     * Get output
+     *
+     * @return string 
+     */
+    public function getOutput()
+    {
+        return $this->output;
+    }
+
+    /**
+     * Set rank
+     *
+     * @param integer $rank
+     * @return TestCase
+     */
+    public function setRank($rank)
+    {
+        $this->rank = $rank;
+
+        return $this;
+    }
+
+    /**
+     * Get rank
+     *
+     * @return integer 
+     */
+    public function getRank()
+    {
+        return $this->rank;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     * @return TestCase
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string 
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set image
+     *
+     * @param string $image
+     * @return TestCase
+     */
+    public function setImage($image)
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    /**
+     * Get image
+     *
+     * @return string 
+     */
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    /**
+     * Set imageThumb
+     *
+     * @param string $imageThumb
+     * @return TestCase
+     */
+    public function setImageThumb($imageThumb)
+    {
+        $this->imageThumb = $imageThumb;
+
+        return $this;
+    }
+
+    /**
+     * Get imageThumb
+     *
+     * @return string 
+     */
+    public function getImageThumb()
+    {
+        return $this->imageThumb;
+    }
+
+    /**
+     * Set imageType
+     *
+     * @param string $imageType
+     * @return TestCase
+     */
+    public function setImageType($imageType)
+    {
+        $this->imageType = $imageType;
+
+        return $this;
+    }
+
+    /**
+     * Get imageType
+     *
+     * @return string 
+     */
+    public function getImageType()
+    {
+        return $this->imageType;
+    }
+
+    /**
+     * Set sample
+     *
+     * @param boolean $sample
+     * @return TestCase
+     */
+    public function setSample($sample)
+    {
+        $this->sample = $sample;
+
+        return $this;
+    }
+
+    /**
+     * Get sample
+     *
+     * @return boolean 
+     */
+    public function getSample()
+    {
+        return $this->sample;
+    }
+
+    /**
+     * Add judgingRuns
+     *
+     * @param \DOMjudge\MainBundle\Entity\judgingRun $judgingRuns
+     * @return TestCase
+     */
+    public function addJudgingRun(\DOMjudge\MainBundle\Entity\judgingRun $judgingRuns)
+    {
+        $this->judgingRuns[] = $judgingRuns;
+
+        return $this;
+    }
+
+    /**
+     * Remove judgingRuns
+     *
+     * @param \DOMjudge\MainBundle\Entity\judgingRun $judgingRuns
+     */
+    public function removeJudgingRun(\DOMjudge\MainBundle\Entity\judgingRun $judgingRuns)
+    {
+        $this->judgingRuns->removeElement($judgingRuns);
+    }
+
+    /**
+     * Get judgingRuns
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getJudgingRuns()
+    {
+        return $this->judgingRuns;
+    }
+
+    /**
+     * Set problem
+     *
+     * @param \DOMjudge\MainBundle\Entity\Problem $problem
+     * @return TestCase
+     */
+    public function setProblem(\DOMjudge\MainBundle\Entity\Problem $problem = null)
+    {
+        $this->problem = $problem;
+
+        return $this;
+    }
+
+    /**
+     * Get problem
+     *
+     * @return \DOMjudge\MainBundle\Entity\Problem 
+     */
+    public function getProblem()
+    {
+        return $this->problem;
+    }
 }

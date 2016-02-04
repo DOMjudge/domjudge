@@ -131,4 +131,386 @@ class Problem
         $this->contests = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+
+    /**
+     * Get probid
+     *
+     * @return integer 
+     */
+    public function getProbid()
+    {
+        return $this->probid;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return Problem
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set timeLimit
+     *
+     * @param integer $timeLimit
+     * @return Problem
+     */
+    public function setTimeLimit($timeLimit)
+    {
+        $this->timeLimit = $timeLimit;
+
+        return $this;
+    }
+
+    /**
+     * Get timeLimit
+     *
+     * @return integer 
+     */
+    public function getTimeLimit()
+    {
+        return $this->timeLimit;
+    }
+
+    /**
+     * Set memLimit
+     *
+     * @param integer $memLimit
+     * @return Problem
+     */
+    public function setMemLimit($memLimit)
+    {
+        $this->memLimit = $memLimit;
+
+        return $this;
+    }
+
+    /**
+     * Get memLimit
+     *
+     * @return integer 
+     */
+    public function getMemLimit()
+    {
+        return $this->memLimit;
+    }
+
+    /**
+     * Set outputLimit
+     *
+     * @param integer $outputLimit
+     * @return Problem
+     */
+    public function setOutputLimit($outputLimit)
+    {
+        $this->outputLimit = $outputLimit;
+
+        return $this;
+    }
+
+    /**
+     * Get outputLimit
+     *
+     * @return integer 
+     */
+    public function getOutputLimit()
+    {
+        return $this->outputLimit;
+    }
+
+    /**
+     * Set specialRun
+     *
+     * @param string $specialRun
+     * @return Problem
+     */
+    public function setSpecialRun($specialRun)
+    {
+        $this->specialRun = $specialRun;
+
+        return $this;
+    }
+
+    /**
+     * Get specialRun
+     *
+     * @return string 
+     */
+    public function getSpecialRun()
+    {
+        return $this->specialRun;
+    }
+
+    /**
+     * Set specialCompare
+     *
+     * @param string $specialCompare
+     * @return Problem
+     */
+    public function setSpecialCompare($specialCompare)
+    {
+        $this->specialCompare = $specialCompare;
+
+        return $this;
+    }
+
+    /**
+     * Get specialCompare
+     *
+     * @return string 
+     */
+    public function getSpecialCompare()
+    {
+        return $this->specialCompare;
+    }
+
+    /**
+     * Set specialCompareArgs
+     *
+     * @param string $specialCompareArgs
+     * @return Problem
+     */
+    public function setSpecialCompareArgs($specialCompareArgs)
+    {
+        $this->specialCompareArgs = $specialCompareArgs;
+
+        return $this;
+    }
+
+    /**
+     * Get specialCompareArgs
+     *
+     * @return string 
+     */
+    public function getSpecialCompareArgs()
+    {
+        return $this->specialCompareArgs;
+    }
+
+    /**
+     * Set problemText
+     *
+     * @param string $problemText
+     * @return Problem
+     */
+    public function setProblemText($problemText)
+    {
+        $this->problemText = $problemText;
+
+        return $this;
+    }
+
+    /**
+     * Get problemText
+     *
+     * @return string 
+     */
+    public function getProblemText()
+    {
+        return $this->problemText;
+    }
+
+    /**
+     * Set problemTextType
+     *
+     * @param string $problemTextType
+     * @return Problem
+     */
+    public function setProblemTextType($problemTextType)
+    {
+        $this->problemTextType = $problemTextType;
+
+        return $this;
+    }
+
+    /**
+     * Get problemTextType
+     *
+     * @return string 
+     */
+    public function getProblemTextType()
+    {
+        return $this->problemTextType;
+    }
+
+    /**
+     * Add clarifications
+     *
+     * @param \DOMjudge\MainBundle\Entity\Clarification $clarifications
+     * @return Problem
+     */
+    public function addClarification(\DOMjudge\MainBundle\Entity\Clarification $clarifications)
+    {
+        $this->clarifications[] = $clarifications;
+
+        return $this;
+    }
+
+    /**
+     * Remove clarifications
+     *
+     * @param \DOMjudge\MainBundle\Entity\Clarification $clarifications
+     */
+    public function removeClarification(\DOMjudge\MainBundle\Entity\Clarification $clarifications)
+    {
+        $this->clarifications->removeElement($clarifications);
+    }
+
+    /**
+     * Get clarifications
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getClarifications()
+    {
+        return $this->clarifications;
+    }
+
+    /**
+     * Add events
+     *
+     * @param \DOMjudge\MainBundle\Entity\Event $events
+     * @return Problem
+     */
+    public function addEvent(\DOMjudge\MainBundle\Entity\Event $events)
+    {
+        $this->events[] = $events;
+
+        return $this;
+    }
+
+    /**
+     * Remove events
+     *
+     * @param \DOMjudge\MainBundle\Entity\Event $events
+     */
+    public function removeEvent(\DOMjudge\MainBundle\Entity\Event $events)
+    {
+        $this->events->removeElement($events);
+    }
+
+    /**
+     * Get events
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getEvents()
+    {
+        return $this->events;
+    }
+
+    /**
+     * Add submissions
+     *
+     * @param \DOMjudge\MainBundle\Entity\Submission $submissions
+     * @return Problem
+     */
+    public function addSubmission(\DOMjudge\MainBundle\Entity\Submission $submissions)
+    {
+        $this->submissions[] = $submissions;
+
+        return $this;
+    }
+
+    /**
+     * Remove submissions
+     *
+     * @param \DOMjudge\MainBundle\Entity\Submission $submissions
+     */
+    public function removeSubmission(\DOMjudge\MainBundle\Entity\Submission $submissions)
+    {
+        $this->submissions->removeElement($submissions);
+    }
+
+    /**
+     * Get submissions
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getSubmissions()
+    {
+        return $this->submissions;
+    }
+
+    /**
+     * Add testcases
+     *
+     * @param \DOMjudge\MainBundle\Entity\TestCase $testcases
+     * @return Problem
+     */
+    public function addTestcase(\DOMjudge\MainBundle\Entity\TestCase $testcases)
+    {
+        $this->testcases[] = $testcases;
+
+        return $this;
+    }
+
+    /**
+     * Remove testcases
+     *
+     * @param \DOMjudge\MainBundle\Entity\TestCase $testcases
+     */
+    public function removeTestcase(\DOMjudge\MainBundle\Entity\TestCase $testcases)
+    {
+        $this->testcases->removeElement($testcases);
+    }
+
+    /**
+     * Get testcases
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getTestcases()
+    {
+        return $this->testcases;
+    }
+
+    /**
+     * Add contests
+     *
+     * @param \DOMjudge\MainBundle\Entity\Contest $contests
+     * @return Problem
+     */
+    public function addContest(\DOMjudge\MainBundle\Entity\Contest $contests)
+    {
+        $this->contests[] = $contests;
+
+        return $this;
+    }
+
+    /**
+     * Remove contests
+     *
+     * @param \DOMjudge\MainBundle\Entity\Contest $contests
+     */
+    public function removeContest(\DOMjudge\MainBundle\Entity\Contest $contests)
+    {
+        $this->contests->removeElement($contests);
+    }
+
+    /**
+     * Get contests
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getContests()
+    {
+        return $this->contests;
+    }
 }

@@ -64,4 +64,139 @@ class TeamCategory
         $this->teams = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+
+    /**
+     * Get categoryid
+     *
+     * @return integer 
+     */
+    public function getCategoryid()
+    {
+        return $this->categoryid;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return TeamCategory
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set sortOrder
+     *
+     * @param boolean $sortOrder
+     * @return TeamCategory
+     */
+    public function setSortOrder($sortOrder)
+    {
+        $this->sortOrder = $sortOrder;
+
+        return $this;
+    }
+
+    /**
+     * Get sortOrder
+     *
+     * @return boolean 
+     */
+    public function getSortOrder()
+    {
+        return $this->sortOrder;
+    }
+
+    /**
+     * Set color
+     *
+     * @param string $color
+     * @return TeamCategory
+     */
+    public function setColor($color)
+    {
+        $this->color = $color;
+
+        return $this;
+    }
+
+    /**
+     * Get color
+     *
+     * @return string 
+     */
+    public function getColor()
+    {
+        return $this->color;
+    }
+
+    /**
+     * Set visible
+     *
+     * @param boolean $visible
+     * @return TeamCategory
+     */
+    public function setVisible($visible)
+    {
+        $this->visible = $visible;
+
+        return $this;
+    }
+
+    /**
+     * Get visible
+     *
+     * @return boolean 
+     */
+    public function getVisible()
+    {
+        return $this->visible;
+    }
+
+    /**
+     * Add teams
+     *
+     * @param \DOMjudge\MainBundle\Entity\Team $teams
+     * @return TeamCategory
+     */
+    public function addTeam(\DOMjudge\MainBundle\Entity\Team $teams)
+    {
+        $this->teams[] = $teams;
+
+        return $this;
+    }
+
+    /**
+     * Remove teams
+     *
+     * @param \DOMjudge\MainBundle\Entity\Team $teams
+     */
+    public function removeTeam(\DOMjudge\MainBundle\Entity\Team $teams)
+    {
+        $this->teams->removeElement($teams);
+    }
+
+    /**
+     * Get teams
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getTeams()
+    {
+        return $this->teams;
+    }
 }

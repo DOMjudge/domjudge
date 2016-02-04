@@ -50,4 +50,93 @@ class Role
         $this->users = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+
+    /**
+     * Get roleid
+     *
+     * @return integer 
+     */
+    public function getRoleid()
+    {
+        return $this->roleid;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return Role
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     * @return Role
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string 
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Add users
+     *
+     * @param \DOMjudge\MainBundle\Entity\User $users
+     * @return Role
+     */
+    public function addUser(\DOMjudge\MainBundle\Entity\User $users)
+    {
+        $this->users[] = $users;
+
+        return $this;
+    }
+
+    /**
+     * Remove users
+     *
+     * @param \DOMjudge\MainBundle\Entity\User $users
+     */
+    public function removeUser(\DOMjudge\MainBundle\Entity\User $users)
+    {
+        $this->users->removeElement($users);
+    }
+
+    /**
+     * Get users
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getUsers()
+    {
+        return $this->users;
+    }
 }

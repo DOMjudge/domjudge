@@ -86,4 +86,218 @@ class Language
         $this->submissions = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+
+    /**
+     * Get langid
+     *
+     * @return string 
+     */
+    public function getLangid()
+    {
+        return $this->langid;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return Language
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set extensions
+     *
+     * @param string $extensions
+     * @return Language
+     */
+    public function setExtensions($extensions)
+    {
+        $this->extensions = $extensions;
+
+        return $this;
+    }
+
+    /**
+     * Get extensions
+     *
+     * @return string 
+     */
+    public function getExtensions()
+    {
+        return $this->extensions;
+    }
+
+    /**
+     * Set allowSubmit
+     *
+     * @param boolean $allowSubmit
+     * @return Language
+     */
+    public function setAllowSubmit($allowSubmit)
+    {
+        $this->allowSubmit = $allowSubmit;
+
+        return $this;
+    }
+
+    /**
+     * Get allowSubmit
+     *
+     * @return boolean 
+     */
+    public function getAllowSubmit()
+    {
+        return $this->allowSubmit;
+    }
+
+    /**
+     * Set allowJudge
+     *
+     * @param boolean $allowJudge
+     * @return Language
+     */
+    public function setAllowJudge($allowJudge)
+    {
+        $this->allowJudge = $allowJudge;
+
+        return $this;
+    }
+
+    /**
+     * Get allowJudge
+     *
+     * @return boolean 
+     */
+    public function getAllowJudge()
+    {
+        return $this->allowJudge;
+    }
+
+    /**
+     * Set timeFactor
+     *
+     * @param float $timeFactor
+     * @return Language
+     */
+    public function setTimeFactor($timeFactor)
+    {
+        $this->timeFactor = $timeFactor;
+
+        return $this;
+    }
+
+    /**
+     * Get timeFactor
+     *
+     * @return float 
+     */
+    public function getTimeFactor()
+    {
+        return $this->timeFactor;
+    }
+
+    /**
+     * Set compileScript
+     *
+     * @param string $compileScript
+     * @return Language
+     */
+    public function setCompileScript($compileScript)
+    {
+        $this->compileScript = $compileScript;
+
+        return $this;
+    }
+
+    /**
+     * Get compileScript
+     *
+     * @return string 
+     */
+    public function getCompileScript()
+    {
+        return $this->compileScript;
+    }
+
+    /**
+     * Add events
+     *
+     * @param \DOMjudge\MainBundle\Entity\Event $events
+     * @return Language
+     */
+    public function addEvent(\DOMjudge\MainBundle\Entity\Event $events)
+    {
+        $this->events[] = $events;
+
+        return $this;
+    }
+
+    /**
+     * Remove events
+     *
+     * @param \DOMjudge\MainBundle\Entity\Event $events
+     */
+    public function removeEvent(\DOMjudge\MainBundle\Entity\Event $events)
+    {
+        $this->events->removeElement($events);
+    }
+
+    /**
+     * Get events
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getEvents()
+    {
+        return $this->events;
+    }
+
+    /**
+     * Add submissions
+     *
+     * @param \DOMjudge\MainBundle\Entity\Submission $submissions
+     * @return Language
+     */
+    public function addSubmission(\DOMjudge\MainBundle\Entity\Submission $submissions)
+    {
+        $this->submissions[] = $submissions;
+
+        return $this;
+    }
+
+    /**
+     * Remove submissions
+     *
+     * @param \DOMjudge\MainBundle\Entity\Submission $submissions
+     */
+    public function removeSubmission(\DOMjudge\MainBundle\Entity\Submission $submissions)
+    {
+        $this->submissions->removeElement($submissions);
+    }
+
+    /**
+     * Get submissions
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getSubmissions()
+    {
+        return $this->submissions;
+    }
 }

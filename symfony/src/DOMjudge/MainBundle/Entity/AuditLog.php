@@ -74,4 +74,175 @@ class AuditLog
     private $contest;
 
 
+
+    /**
+     * Get logid
+     *
+     * @return integer 
+     */
+    public function getLogid()
+    {
+        return $this->logid;
+    }
+
+    /**
+     * Set logTime
+     *
+     * @param string $logTime
+     * @return AuditLog
+     */
+    public function setLogTime($logTime)
+    {
+        $this->logTime = $logTime;
+
+        return $this;
+    }
+
+    /**
+     * Get logTime
+     *
+     * @return string 
+     */
+    public function getLogTime()
+    {
+        return $this->logTime;
+    }
+
+    /**
+     * Set user
+     *
+     * @param string $user
+     * @return AuditLog
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get user
+     *
+     * @return string 
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * Set dataType
+     *
+     * @param string $dataType
+     * @return AuditLog
+     */
+    public function setDataType($dataType)
+    {
+        $this->dataType = $dataType;
+
+        return $this;
+    }
+
+    /**
+     * Get dataType
+     *
+     * @return string 
+     */
+    public function getDataType()
+    {
+        return $this->dataType;
+    }
+
+    /**
+     * Set dataId
+     *
+     * @param string $dataId
+     * @return AuditLog
+     */
+    public function setDataId($dataId)
+    {
+        $this->dataId = $dataId;
+
+        return $this;
+    }
+
+    /**
+     * Get dataId
+     *
+     * @return string 
+     */
+    public function getDataId()
+    {
+        return $this->dataId;
+    }
+
+    /**
+     * Set action
+     *
+     * @param string $action
+     * @return AuditLog
+     */
+    public function setAction($action)
+    {
+        $this->action = $action;
+
+        return $this;
+    }
+
+    /**
+     * Get action
+     *
+     * @return string 
+     */
+    public function getAction()
+    {
+        return $this->action;
+    }
+
+    /**
+     * Set extraInfo
+     *
+     * @param string $extraInfo
+     * @return AuditLog
+     */
+    public function setExtraInfo($extraInfo)
+    {
+        $this->extraInfo = $extraInfo;
+
+        return $this;
+    }
+
+    /**
+     * Get extraInfo
+     *
+     * @return string 
+     */
+    public function getExtraInfo()
+    {
+        return $this->extraInfo;
+    }
+
+    /**
+     * Set contest
+     *
+     * @param \DOMjudge\MainBundle\Entity\Contest $contest
+     * @return AuditLog
+     */
+    public function setContest(\DOMjudge\MainBundle\Entity\Contest $contest = null)
+    {
+        $this->contest = $contest;
+
+        return $this;
+    }
+
+    /**
+     * Get contest
+     *
+     * @return \DOMjudge\MainBundle\Entity\Contest 
+     */
+    public function getContest()
+    {
+        return $this->contest;
+    }
 }

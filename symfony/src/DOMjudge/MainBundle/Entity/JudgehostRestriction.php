@@ -50,4 +50,93 @@ class JudgehostRestriction
         $this->judgehosts = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+
+    /**
+     * Get restrictionid
+     *
+     * @return integer 
+     */
+    public function getRestrictionid()
+    {
+        return $this->restrictionid;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return JudgehostRestriction
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set restrictions
+     *
+     * @param string $restrictions
+     * @return JudgehostRestriction
+     */
+    public function setRestrictions($restrictions)
+    {
+        $this->restrictions = $restrictions;
+
+        return $this;
+    }
+
+    /**
+     * Get restrictions
+     *
+     * @return string 
+     */
+    public function getRestrictions()
+    {
+        return $this->restrictions;
+    }
+
+    /**
+     * Add judgehosts
+     *
+     * @param \DOMjudge\MainBundle\Entity\judgehost $judgehosts
+     * @return JudgehostRestriction
+     */
+    public function addJudgehost(\DOMjudge\MainBundle\Entity\judgehost $judgehosts)
+    {
+        $this->judgehosts[] = $judgehosts;
+
+        return $this;
+    }
+
+    /**
+     * Remove judgehosts
+     *
+     * @param \DOMjudge\MainBundle\Entity\judgehost $judgehosts
+     */
+    public function removeJudgehost(\DOMjudge\MainBundle\Entity\judgehost $judgehosts)
+    {
+        $this->judgehosts->removeElement($judgehosts);
+    }
+
+    /**
+     * Get judgehosts
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getJudgehosts()
+    {
+        return $this->judgehosts;
+    }
 }

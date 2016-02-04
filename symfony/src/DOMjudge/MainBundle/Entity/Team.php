@@ -166,4 +166,422 @@ class Team
         $this->unreadClarifications = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+
+    /**
+     * Get teamid
+     *
+     * @return integer 
+     */
+    public function getTeamid()
+    {
+        return $this->teamid;
+    }
+
+    /**
+     * Set externalId
+     *
+     * @param string $externalId
+     * @return Team
+     */
+    public function setExternalId($externalId)
+    {
+        $this->externalId = $externalId;
+
+        return $this;
+    }
+
+    /**
+     * Get externalId
+     *
+     * @return string 
+     */
+    public function getExternalId()
+    {
+        return $this->externalId;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     * @return Team
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string 
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set enabled
+     *
+     * @param boolean $enabled
+     * @return Team
+     */
+    public function setEnabled($enabled)
+    {
+        $this->enabled = $enabled;
+
+        return $this;
+    }
+
+    /**
+     * Get enabled
+     *
+     * @return boolean 
+     */
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Set members
+     *
+     * @param string $members
+     * @return Team
+     */
+    public function setMembers($members)
+    {
+        $this->members = $members;
+
+        return $this;
+    }
+
+    /**
+     * Get members
+     *
+     * @return string 
+     */
+    public function getMembers()
+    {
+        return $this->members;
+    }
+
+    /**
+     * Set room
+     *
+     * @param string $room
+     * @return Team
+     */
+    public function setRoom($room)
+    {
+        $this->room = $room;
+
+        return $this;
+    }
+
+    /**
+     * Get room
+     *
+     * @return string 
+     */
+    public function getRoom()
+    {
+        return $this->room;
+    }
+
+    /**
+     * Set comments
+     *
+     * @param string $comments
+     * @return Team
+     */
+    public function setComments($comments)
+    {
+        $this->comments = $comments;
+
+        return $this;
+    }
+
+    /**
+     * Get comments
+     *
+     * @return string 
+     */
+    public function getComments()
+    {
+        return $this->comments;
+    }
+
+    /**
+     * Set judgingLastStarted
+     *
+     * @param string $judgingLastStarted
+     * @return Team
+     */
+    public function setJudgingLastStarted($judgingLastStarted)
+    {
+        $this->judgingLastStarted = $judgingLastStarted;
+
+        return $this;
+    }
+
+    /**
+     * Get judgingLastStarted
+     *
+     * @return string 
+     */
+    public function getJudgingLastStarted()
+    {
+        return $this->judgingLastStarted;
+    }
+
+    /**
+     * Set teampageFirstVisited
+     *
+     * @param string $teampageFirstVisited
+     * @return Team
+     */
+    public function setTeampageFirstVisited($teampageFirstVisited)
+    {
+        $this->teampageFirstVisited = $teampageFirstVisited;
+
+        return $this;
+    }
+
+    /**
+     * Get teampageFirstVisited
+     *
+     * @return string 
+     */
+    public function getTeampageFirstVisited()
+    {
+        return $this->teampageFirstVisited;
+    }
+
+    /**
+     * Set hostName
+     *
+     * @param string $hostName
+     * @return Team
+     */
+    public function setHostName($hostName)
+    {
+        $this->hostName = $hostName;
+
+        return $this;
+    }
+
+    /**
+     * Get hostName
+     *
+     * @return string 
+     */
+    public function getHostName()
+    {
+        return $this->hostName;
+    }
+
+    /**
+     * Set penalty
+     *
+     * @param integer $penalty
+     * @return Team
+     */
+    public function setPenalty($penalty)
+    {
+        $this->penalty = $penalty;
+
+        return $this;
+    }
+
+    /**
+     * Get penalty
+     *
+     * @return integer 
+     */
+    public function getPenalty()
+    {
+        return $this->penalty;
+    }
+
+    /**
+     * Add submissions
+     *
+     * @param \DOMjudge\MainBundle\Entity\Submission $submissions
+     * @return Team
+     */
+    public function addSubmission(\DOMjudge\MainBundle\Entity\Submission $submissions)
+    {
+        $this->submissions[] = $submissions;
+
+        return $this;
+    }
+
+    /**
+     * Remove submissions
+     *
+     * @param \DOMjudge\MainBundle\Entity\Submission $submissions
+     */
+    public function removeSubmission(\DOMjudge\MainBundle\Entity\Submission $submissions)
+    {
+        $this->submissions->removeElement($submissions);
+    }
+
+    /**
+     * Get submissions
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getSubmissions()
+    {
+        return $this->submissions;
+    }
+
+    /**
+     * Add users
+     *
+     * @param \DOMjudge\MainBundle\Entity\User $users
+     * @return Team
+     */
+    public function addUser(\DOMjudge\MainBundle\Entity\User $users)
+    {
+        $this->users[] = $users;
+
+        return $this;
+    }
+
+    /**
+     * Remove users
+     *
+     * @param \DOMjudge\MainBundle\Entity\User $users
+     */
+    public function removeUser(\DOMjudge\MainBundle\Entity\User $users)
+    {
+        $this->users->removeElement($users);
+    }
+
+    /**
+     * Get users
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getUsers()
+    {
+        return $this->users;
+    }
+
+    /**
+     * Set category
+     *
+     * @param \DOMjudge\MainBundle\Entity\TeamCategory $category
+     * @return Team
+     */
+    public function setCategory(\DOMjudge\MainBundle\Entity\TeamCategory $category = null)
+    {
+        $this->category = $category;
+
+        return $this;
+    }
+
+    /**
+     * Get category
+     *
+     * @return \DOMjudge\MainBundle\Entity\TeamCategory 
+     */
+    public function getCategory()
+    {
+        return $this->category;
+    }
+
+    /**
+     * Set affiliation
+     *
+     * @param \DOMjudge\MainBundle\Entity\TeamAffiliation $affiliation
+     * @return Team
+     */
+    public function setAffiliation(\DOMjudge\MainBundle\Entity\TeamAffiliation $affiliation = null)
+    {
+        $this->affiliation = $affiliation;
+
+        return $this;
+    }
+
+    /**
+     * Get affiliation
+     *
+     * @return \DOMjudge\MainBundle\Entity\TeamAffiliation 
+     */
+    public function getAffiliation()
+    {
+        return $this->affiliation;
+    }
+
+    /**
+     * Add contests
+     *
+     * @param \DOMjudge\MainBundle\Entity\Contest $contests
+     * @return Team
+     */
+    public function addContest(\DOMjudge\MainBundle\Entity\Contest $contests)
+    {
+        $this->contests[] = $contests;
+
+        return $this;
+    }
+
+    /**
+     * Remove contests
+     *
+     * @param \DOMjudge\MainBundle\Entity\Contest $contests
+     */
+    public function removeContest(\DOMjudge\MainBundle\Entity\Contest $contests)
+    {
+        $this->contests->removeElement($contests);
+    }
+
+    /**
+     * Get contests
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getContests()
+    {
+        return $this->contests;
+    }
+
+    /**
+     * Add unreadClarifications
+     *
+     * @param \DOMjudge\MainBundle\Entity\Clarification $unreadClarifications
+     * @return Team
+     */
+    public function addUnreadClarification(\DOMjudge\MainBundle\Entity\Clarification $unreadClarifications)
+    {
+        $this->unreadClarifications[] = $unreadClarifications;
+
+        return $this;
+    }
+
+    /**
+     * Remove unreadClarifications
+     *
+     * @param \DOMjudge\MainBundle\Entity\Clarification $unreadClarifications
+     */
+    public function removeUnreadClarification(\DOMjudge\MainBundle\Entity\Clarification $unreadClarifications)
+    {
+        $this->unreadClarifications->removeElement($unreadClarifications);
+    }
+
+    /**
+     * Get unreadClarifications
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getUnreadClarifications()
+    {
+        return $this->unreadClarifications;
+    }
 }

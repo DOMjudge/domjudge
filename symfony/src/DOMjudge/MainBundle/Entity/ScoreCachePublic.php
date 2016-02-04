@@ -98,4 +98,234 @@ class ScoreCachePublic
     private $problem;
 
 
+
+    /**
+     * Set cid
+     *
+     * @param integer $cid
+     * @return ScoreCachePublic
+     */
+    public function setCid($cid)
+    {
+        $this->cid = $cid;
+
+        return $this;
+    }
+
+    /**
+     * Get cid
+     *
+     * @return integer 
+     */
+    public function getCid()
+    {
+        return $this->cid;
+    }
+
+    /**
+     * Set teamid
+     *
+     * @param integer $teamid
+     * @return ScoreCachePublic
+     */
+    public function setTeamid($teamid)
+    {
+        $this->teamid = $teamid;
+
+        return $this;
+    }
+
+    /**
+     * Get teamid
+     *
+     * @return integer 
+     */
+    public function getTeamid()
+    {
+        return $this->teamid;
+    }
+
+    /**
+     * Set probid
+     *
+     * @param integer $probid
+     * @return ScoreCachePublic
+     */
+    public function setProbid($probid)
+    {
+        $this->probid = $probid;
+
+        return $this;
+    }
+
+    /**
+     * Get probid
+     *
+     * @return integer 
+     */
+    public function getProbid()
+    {
+        return $this->probid;
+    }
+
+    /**
+     * Set submissions
+     *
+     * @param integer $submissions
+     * @return ScoreCachePublic
+     */
+    public function setSubmissions($submissions)
+    {
+        $this->submissions = $submissions;
+
+        return $this;
+    }
+
+    /**
+     * Get submissions
+     *
+     * @return integer 
+     */
+    public function getSubmissions()
+    {
+        return $this->submissions;
+    }
+
+    /**
+     * Set pending
+     *
+     * @param integer $pending
+     * @return ScoreCachePublic
+     */
+    public function setPending($pending)
+    {
+        $this->pending = $pending;
+
+        return $this;
+    }
+
+    /**
+     * Get pending
+     *
+     * @return integer 
+     */
+    public function getPending()
+    {
+        return $this->pending;
+    }
+
+    /**
+     * Set totalTime
+     *
+     * @param integer $totalTime
+     * @return ScoreCachePublic
+     */
+    public function setTotalTime($totalTime)
+    {
+        $this->totalTime = $totalTime;
+
+        return $this;
+    }
+
+    /**
+     * Get totalTime
+     *
+     * @return integer 
+     */
+    public function getTotalTime()
+    {
+        return $this->totalTime;
+    }
+
+    /**
+     * Set isCorrect
+     *
+     * @param boolean $isCorrect
+     * @return ScoreCachePublic
+     */
+    public function setIsCorrect($isCorrect)
+    {
+        $this->isCorrect = $isCorrect;
+
+        return $this;
+    }
+
+    /**
+     * Get isCorrect
+     *
+     * @return boolean 
+     */
+    public function getIsCorrect()
+    {
+        return $this->isCorrect;
+    }
+
+    /**
+     * Set contest
+     *
+     * @param \DOMjudge\MainBundle\Entity\Contest $contest
+     * @return ScoreCachePublic
+     */
+    public function setContest(\DOMjudge\MainBundle\Entity\Contest $contest = null)
+    {
+        $this->contest = $contest;
+
+        return $this;
+    }
+
+    /**
+     * Get contest
+     *
+     * @return \DOMjudge\MainBundle\Entity\Contest 
+     */
+    public function getContest()
+    {
+        return $this->contest;
+    }
+
+    /**
+     * Set team
+     *
+     * @param \DOMjudge\MainBundle\Entity\Team $team
+     * @return ScoreCachePublic
+     */
+    public function setTeam(\DOMjudge\MainBundle\Entity\Team $team = null)
+    {
+        $this->team = $team;
+
+        return $this;
+    }
+
+    /**
+     * Get team
+     *
+     * @return \DOMjudge\MainBundle\Entity\Team 
+     */
+    public function getTeam()
+    {
+        return $this->team;
+    }
+
+    /**
+     * Set problem
+     *
+     * @param \DOMjudge\MainBundle\Entity\Problem $problem
+     * @return ScoreCachePublic
+     */
+    public function setProblem(\DOMjudge\MainBundle\Entity\Problem $problem = null)
+    {
+        $this->problem = $problem;
+
+        return $this;
+    }
+
+    /**
+     * Get problem
+     *
+     * @return \DOMjudge\MainBundle\Entity\Problem 
+     */
+    public function getProblem()
+    {
+        return $this->problem;
+    }
 }

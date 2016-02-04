@@ -39,4 +39,60 @@ class Balloon
     private $submission;
 
 
+
+    /**
+     * Get balloonid
+     *
+     * @return integer 
+     */
+    public function getBalloonid()
+    {
+        return $this->balloonid;
+    }
+
+    /**
+     * Set done
+     *
+     * @param boolean $done
+     * @return Balloon
+     */
+    public function setDone($done)
+    {
+        $this->done = $done;
+
+        return $this;
+    }
+
+    /**
+     * Get done
+     *
+     * @return boolean 
+     */
+    public function getDone()
+    {
+        return $this->done;
+    }
+
+    /**
+     * Set submission
+     *
+     * @param \DOMjudge\MainBundle\Entity\Submission $submission
+     * @return Balloon
+     */
+    public function setSubmission(\DOMjudge\MainBundle\Entity\Submission $submission = null)
+    {
+        $this->submission = $submission;
+
+        return $this;
+    }
+
+    /**
+     * Get submission
+     *
+     * @return \DOMjudge\MainBundle\Entity\Submission 
+     */
+    public function getSubmission()
+    {
+        return $this->submission;
+    }
 }
