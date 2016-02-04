@@ -94,7 +94,7 @@ class TestCase
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 *
-	 * @ORM\OneToMany(targetEntity="DOMjudge\MainBundle\Entity\judgingRun", mappedBy="testcase")
+	 * @ORM\OneToMany(targetEntity="DOMjudge\MainBundle\Entity\JudgingRun", mappedBy="testcase")
 	 */
 	private $judgingRuns;
 
@@ -358,9 +358,9 @@ class TestCase
 	}
 
 	/**
-	 * Add judgingRuns
+	 * Add JudgingRuns
 	 *
-	 * @param \DOMjudge\MainBundle\Entity\judgingRun $judgingRuns
+	 * @param \DOMjudge\MainBundle\Entity\JudgingRun $judgingRuns
 	 * @return TestCase
 	 */
 	public function addJudgingRun(\DOMjudge\MainBundle\Entity\judgingRun $judgingRuns)
@@ -371,9 +371,9 @@ class TestCase
 	}
 
 	/**
-	 * Remove judgingRuns
+	 * Remove JudgingRuns
 	 *
-	 * @param \DOMjudge\MainBundle\Entity\judgingRun $judgingRuns
+	 * @param \DOMjudge\MainBundle\Entity\JudgingRun $judgingRuns
 	 */
 	public function removeJudgingRun(\DOMjudge\MainBundle\Entity\judgingRun $judgingRuns)
 	{
@@ -381,7 +381,7 @@ class TestCase
 	}
 
 	/**
-	 * Get judgingRuns
+	 * Get JudgingRuns
 	 *
 	 * @return \Doctrine\Common\Collections\Collection
 	 */

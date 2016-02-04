@@ -24,7 +24,7 @@ class Role
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="name", type="string", length=25, nullable=false)
+	 * @ORM\Column(name="role", type="string", length=25, nullable=false)
 	 */
 	private $name;
 
@@ -38,7 +38,7 @@ class Role
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 *
-	 * @ORM\ManyToMany(targetEntity="DOMjudge\MainBundle\Entity\User", mappedBy="users")
+	 * @ORM\ManyToMany(targetEntity="DOMjudge\MainBundle\Entity\User", mappedBy="userRoles")
 	 */
 	private $users;
 

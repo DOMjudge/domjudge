@@ -90,7 +90,7 @@ class Submission
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Team
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Team")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Team", inversedBy="submissions")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
 	 * })
@@ -140,7 +140,7 @@ class Submission
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Rejudging
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Rejudging")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Rejudging", inversedBy="submissions")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid")
 	 * })

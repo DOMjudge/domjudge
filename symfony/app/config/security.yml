@@ -1,24 +1,46 @@
-# To get started with security, check out the documentation:
-# http://symfony.com/doc/current/book/security.html
 security:
+    always_authenticate_before_granting: true
 
-    # http://symfony.com/doc/current/book/security.html#where-do-users-come-from-user-providers
+    # Set up our custom md5 encoder for the password
+    encoders:
+        DOMjudge\MainBundle\Entity\User:
+            id: md5_encoder
+
+    role_hierarchy:
+        # Admin role has all other roles
+        ROLE_ADMIN: [ROLE_JURY, ROLE_TEAM, ROLE_BALLOON, ROLE_PRINT, ROLE_JUDGEHOST, ROLE_EVENT_READER, ROLE_FULL_EVENT_READER]
+
     providers:
-        in_memory:
-            memory: ~
+        dj_db_provider:
+            entity:
+                class: DOMjudgeMainBundle:User
+                property: username
 
     firewalls:
-        # disables authentication for assets and the profiler, adapt it according to your needs
         dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            pattern:  ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        main:
+        default:
             anonymous: ~
-            # activate different ways to authenticate
+            form_login:
+                login_path:                     login
+                check_path:                     login_check
+                username_parameter:             login[username]
+                password_parameter:             login[password]
+                csrf_parameter:                 login[_token]
+                csrf_token_id:                  authenticate
+                csrf_token_generator:           security.csrf.token_manager
+            provider: dj_db_provider
+            logout:
+                path: logout
+                target: /
 
-            # http_basic: ~
-            # http://symfony.com/doc/current/book/security.html#a-configuring-how-your-users-will-authenticate
-
-            # form_login: ~
-            # http://symfony.com/doc/current/cookbook/security/form_login_setup.html
+    # Set up default authentication for admin and team pages
+    access_control:
+        -
+            path: ^/jury
+            allow_if: "has_role('ROLE_JURY') or has_role('ROLE_BALLOON')"
+        -
+            path: ^/team
+            roles: ROLE_TEAM

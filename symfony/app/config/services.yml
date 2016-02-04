@@ -1,9 +1,4 @@
-# Learn more about services, parameters and containers at
-# http://symfony.com/doc/current/book/service_container.html
-parameters:
-#    parameter_name: value
-
 services:
-#    service_name:
-#        class: AppBundle\Directory\ClassName
-#        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+    # Add MD5 encoder for DOMjudge password storage
+    md5_encoder:
+        class: DOMjudge\MainBundle\Security\MD5PasswordEncoder

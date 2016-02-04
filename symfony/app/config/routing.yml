@@ -1,3 +1,6 @@
+logout:
+    path:     /logout
+
 main:
     resource: "@DOMjudgeMainBundle/Controller/"
     type:     annotation

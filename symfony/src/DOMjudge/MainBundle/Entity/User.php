@@ -3,6 +3,7 @@
 namespace DOMjudge\MainBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * User
@@ -10,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="username", columns={"username"})}, indexes={@ORM\Index(name="teamid", columns={"teamid"})})
  * @ORM\Entity
  */
-class User
+class User implements UserInterface, \Serializable
 {
 	/**
 	 * @var integer
@@ -80,21 +81,21 @@ class User
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 *
-	 * @ORM\OneToMany(targetEntity="DOMjudge\MainBundle\Entity\Judging", mappedBy="startedByUser")
+	 * @ORM\OneToMany(targetEntity="DOMjudge\MainBundle\Entity\Rejudging", mappedBy="startedByUser")
 	 */
 	private $startedRejudgings;
 
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 *
-	 * @ORM\OneToMany(targetEntity="DOMjudge\MainBundle\Entity\Judging", mappedBy="finishedByUser")
+	 * @ORM\OneToMany(targetEntity="DOMjudge\MainBundle\Entity\Rejudging", mappedBy="finishedByUser")
 	 */
 	private $finishedRejudgings;
 
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Team
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Team")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Team", inversedBy="users")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
 	 * })
@@ -441,5 +442,91 @@ class User
 	public function getUserRoles()
 	{
 		return $this->userRoles;
+	}
+
+	/**
+	 * String representation of object
+	 * @link http://php.net/manual/en/serializable.serialize.php
+	 * @return string the string representation of the object or null
+	 * @since 5.1.0
+	 */
+	public function serialize()
+	{
+		return serialize(
+			array(
+				$this->userid,
+				$this->username,
+				$this->password,
+			)
+		);
+	}
+
+	/**
+	 * Constructs the object
+	 * @link http://php.net/manual/en/serializable.unserialize.php
+	 * @param string $serialized <p>
+	 * The string representation of the object.
+	 * </p>
+	 * @return void
+	 * @since 5.1.0
+	 */
+	public function unserialize($serialized)
+	{
+		list (
+			$this->userid,
+			$this->username,
+			$this->password,
+		) = unserialize($serialized);
+	}
+
+	/**
+	 * Returns the roles granted to the user.
+	 *
+	 * <code>
+	 * public function getRoles()
+	 * {
+	 *     return array('ROLE_USER');
+	 * }
+	 * </code>
+	 *
+	 * Alternatively, the roles might be stored on a ``roles`` property,
+	 * and populated in any number of different ways when the user object
+	 * is created.
+	 *
+	 * @return \Symfony\Component\Security\Core\Role\Role[] The user roles
+	 */
+	public function getRoles()
+	{
+		/** @var Role[] $userRoles */
+		$userRoles = $this->getUserRoles();
+		$roles = array();
+		foreach ( $userRoles as $role ) {
+			$roles[] = sprintf("ROLE_%s", strtoupper($role->getName()));
+		}
+
+		return $roles;
+	}
+
+	/**
+	 * Returns the salt that was originally used to encode the password.
+	 *
+	 * This can return null if the password was not encoded using a salt.
+	 *
+	 * @return string|null The salt
+	 */
+	public function getSalt()
+	{
+		return $this->username;
+	}
+
+	/**
+	 * Removes sensitive data from the user.
+	 *
+	 * This is important if, at any given point, sensitive information like
+	 * the plain-text password is stored on this object.
+	 */
+	public function eraseCredentials()
+	{
+		// Nothing
 	}
 }

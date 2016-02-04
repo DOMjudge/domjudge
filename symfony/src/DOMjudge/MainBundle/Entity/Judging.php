@@ -101,7 +101,7 @@ class Judging
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 *
-	 * @ORM\OneToMany(targetEntity="DOMjudge\MainBundle\Entity\judgingRun", mappedBy="judging")
+	 * @ORM\OneToMany(targetEntity="DOMjudge\MainBundle\Entity\JudgingRun", mappedBy="judging")
 	 */
 	private $judgingRuns;
 
@@ -138,7 +138,7 @@ class Judging
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Rejudging
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Rejudging")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Rejudging", inversedBy="judgings")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid")
 	 * })
@@ -450,9 +450,9 @@ class Judging
 	}
 
 	/**
-	 * Add judgingRuns
+	 * Add JudgingRuns
 	 *
-	 * @param \DOMjudge\MainBundle\Entity\judgingRun $judgingRuns
+	 * @param \DOMjudge\MainBundle\Entity\JudgingRun $judgingRuns
 	 * @return Judging
 	 */
 	public function addJudgingRun(\DOMjudge\MainBundle\Entity\judgingRun $judgingRuns)
@@ -463,9 +463,9 @@ class Judging
 	}
 
 	/**
-	 * Remove judgingRuns
+	 * Remove JudgingRuns
 	 *
-	 * @param \DOMjudge\MainBundle\Entity\judgingRun $judgingRuns
+	 * @param \DOMjudge\MainBundle\Entity\JudgingRun $judgingRuns
 	 */
 	public function removeJudgingRun(\DOMjudge\MainBundle\Entity\judgingRun $judgingRuns)
 	{
@@ -473,7 +473,7 @@ class Judging
 	}
 
 	/**
-	 * Get judgingRuns
+	 * Get JudgingRuns
 	 *
 	 * @return \Doctrine\Common\Collections\Collection
 	 */

@@ -66,7 +66,7 @@ class Rejudging
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\User
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\User")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\User", inversedBy="startedRejudgings")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="userid_start", referencedColumnName="userid")
 	 * })
@@ -76,7 +76,7 @@ class Rejudging
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\User
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\User")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\User", inversedBy="finishedRejudgings")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="userid_finish", referencedColumnName="userid")
 	 * })
