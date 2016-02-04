@@ -1,0 +1,55 @@
+DOMjudge\MainBundle\Entity\Auditlog:
+    type: entity
+    table: auditlog
+    id:
+        logid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        logtime:
+            type: decimal
+            nullable: false
+            precision: 32
+            scale: 9
+            comment: 'Timestamp of the logentry'
+        cid:
+            type: integer
+            nullable: true
+            unsigned: true
+            comment: 'Contest ID associated to this entry'
+        user:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+            comment: 'User who performed this action'
+        datatype:
+            type: string
+            nullable: true
+            length: 25
+            fixed: false
+            comment: 'Reference to DB table associated to this entry'
+        dataid:
+            type: string
+            nullable: true
+            length: 50
+            fixed: false
+            comment: 'Identifier in reference table'
+        action:
+            type: string
+            nullable: true
+            length: 30
+            fixed: false
+            comment: 'Description of action performed'
+        extrainfo:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+            comment: 'Optional additional description of the entry'
+    lifecycleCallbacks: {  }

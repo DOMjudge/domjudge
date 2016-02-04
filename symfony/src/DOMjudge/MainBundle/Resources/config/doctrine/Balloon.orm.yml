@@ -1,0 +1,33 @@
+DOMjudge\MainBundle\Entity\Balloon:
+    type: entity
+    table: balloon
+    indexes:
+        submitid:
+            columns:
+                - submitid
+    id:
+        balloonid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        done:
+            type: boolean
+            nullable: false
+            comment: 'Has been handed out yet?'
+            default: '0'
+    manyToOne:
+        submitid:
+            targetEntity: Submission
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                submitid:
+                    referencedColumnName: submitid
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

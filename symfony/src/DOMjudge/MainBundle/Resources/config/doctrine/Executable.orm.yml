@@ -1,0 +1,39 @@
+DOMjudge\MainBundle\Entity\Executable:
+    type: entity
+    table: executable
+    id:
+        execid:
+            type: string
+            nullable: false
+            length: 32
+            fixed: false
+            comment: 'Unique ID (string)'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        md5sum:
+            type: string
+            nullable: true
+            length: 32
+            fixed: true
+            comment: 'Md5sum of zip file'
+        zipfile:
+            type: blob
+            nullable: true
+            length: null
+            fixed: false
+            comment: 'Zip file'
+        description:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+            comment: 'Description of this executable'
+        type:
+            type: string
+            nullable: false
+            length: 8
+            fixed: false
+            comment: 'Type of executable'
+    lifecycleCallbacks: {  }

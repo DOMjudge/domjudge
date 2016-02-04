@@ -1,0 +1,78 @@
+DOMjudge\MainBundle\Entity\Problem:
+    type: entity
+    table: problem
+    id:
+        probid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            comment: 'Descriptive name'
+        timelimit:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Maximum run time for this problem'
+            default: '0'
+        memlimit:
+            type: integer
+            nullable: true
+            unsigned: true
+            comment: 'Maximum memory available (in kB) for this problem'
+        outputlimit:
+            type: integer
+            nullable: true
+            unsigned: true
+            comment: 'Maximum output size (in kB) for this problem'
+        specialRun:
+            type: string
+            nullable: true
+            length: 32
+            fixed: false
+            comment: 'Script to run submissions for this problem'
+            column: special_run
+        specialCompare:
+            type: string
+            nullable: true
+            length: 32
+            fixed: false
+            comment: 'Script to compare problem and jury output for this problem'
+            column: special_compare
+        specialCompareArgs:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+            comment: 'Optional arguments to special_compare script'
+            column: special_compare_args
+        problemtext:
+            type: blob
+            nullable: true
+            length: null
+            fixed: false
+            comment: 'Problem text in HTML/PDF/ASCII'
+        problemtextType:
+            type: string
+            nullable: true
+            length: 4
+            fixed: false
+            comment: 'File type of problem text'
+            column: problemtext_type
+    manyToMany:
+        cid:
+            targetEntity: Contest
+            cascade: {  }
+            mappedBy: probid
+            inversedBy: null
+            joinTable: null
+            orderBy: null
+    lifecycleCallbacks: {  }

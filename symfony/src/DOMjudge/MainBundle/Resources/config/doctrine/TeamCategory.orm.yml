@@ -1,0 +1,40 @@
+DOMjudge\MainBundle\Entity\TeamCategory:
+    type: entity
+    table: team_category
+    indexes:
+        sortorder:
+            columns:
+                - sortorder
+    id:
+        categoryid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            comment: 'Descriptive name'
+        sortorder:
+            type: boolean
+            nullable: false
+            comment: 'Where to sort this category on the scoreboard'
+            default: '0'
+        color:
+            type: string
+            nullable: true
+            length: 25
+            fixed: false
+            comment: 'Background colour on the scoreboard'
+        visible:
+            type: boolean
+            nullable: false
+            comment: 'Are teams in this category visible?'
+            default: '1'
+    lifecycleCallbacks: {  }

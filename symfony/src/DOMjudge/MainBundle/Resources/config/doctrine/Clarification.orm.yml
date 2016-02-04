@@ -1,0 +1,105 @@
+DOMjudge\MainBundle\Entity\Clarification:
+    type: entity
+    table: clarification
+    indexes:
+        respid:
+            columns:
+                - respid
+        probid:
+            columns:
+                - probid
+        cid:
+            columns:
+                - cid
+        cid_2:
+            columns:
+                - cid
+                - answered
+                - submittime
+    id:
+        clarid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        submittime:
+            type: decimal
+            nullable: false
+            precision: 32
+            scale: 9
+            comment: 'Time sent'
+        sender:
+            type: integer
+            nullable: true
+            unsigned: true
+            comment: 'Team ID, null means jury'
+        recipient:
+            type: integer
+            nullable: true
+            unsigned: true
+            comment: 'Team ID, null means to jury or to all'
+        juryMember:
+            type: string
+            nullable: true
+            length: 15
+            fixed: false
+            comment: 'Name of jury member who answered this'
+            column: jury_member
+        category:
+            type: string
+            nullable: true
+            length: 128
+            fixed: false
+            comment: 'Category associated to this clarification; only set for non problem clars'
+        body:
+            type: text
+            nullable: false
+            length: null
+            fixed: false
+            comment: 'Clarification text'
+        answered:
+            type: boolean
+            nullable: false
+            comment: 'Has been answered by jury?'
+            default: '0'
+    manyToOne:
+        cid:
+            targetEntity: Contest
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                cid:
+                    referencedColumnName: cid
+            orphanRemoval: false
+        respid:
+            targetEntity: Clarification
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                respid:
+                    referencedColumnName: clarid
+            orphanRemoval: false
+        probid:
+            targetEntity: Problem
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                probid:
+                    referencedColumnName: probid
+            orphanRemoval: false
+    manyToMany:
+        teamid:
+            targetEntity: Team
+            cascade: {  }
+            mappedBy: mesgid
+            inversedBy: null
+            joinTable: null
+            orderBy: null
+    lifecycleCallbacks: {  }

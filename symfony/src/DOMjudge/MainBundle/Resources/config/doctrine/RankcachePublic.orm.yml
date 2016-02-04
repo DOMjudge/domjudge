@@ -1,0 +1,43 @@
+DOMjudge\MainBundle\Entity\RankcachePublic:
+    type: entity
+    table: rankcache_public
+    indexes:
+        order:
+            columns:
+                - cid
+                - points
+                - totaltime
+        IDX_35D92F804B30D9C4:
+            columns:
+                - cid
+    id:
+        teamid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Team ID'
+            id: true
+    fields:
+        points:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Total correctness points'
+            default: '0'
+        totaltime:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Total time spent'
+            default: '0'
+    oneToOne:
+        cid:
+            targetEntity: Contest
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                cid:
+                    referencedColumnName: cid
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

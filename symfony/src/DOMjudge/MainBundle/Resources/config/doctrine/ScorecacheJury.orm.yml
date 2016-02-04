@@ -1,0 +1,48 @@
+DOMjudge\MainBundle\Entity\ScorecacheJury:
+    type: entity
+    table: scorecache_jury
+    id:
+        cid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Contest ID'
+            id: true
+        teamid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Team ID'
+            id: true
+        probid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Problem ID'
+            id: true
+    fields:
+        submissions:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Number of submissions made'
+            default: '0'
+        pending:
+            type: integer
+            nullable: false
+            unsigned: false
+            comment: 'Number of submissions pending judgement'
+            default: '0'
+        totaltime:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Total time spent'
+            default: '0'
+        isCorrect:
+            type: boolean
+            nullable: false
+            comment: 'Has there been a correct submission?'
+            default: '0'
+            column: is_correct
+    lifecycleCallbacks: {  }

@@ -1,0 +1,153 @@
+DOMjudge\MainBundle\Entity\Contest:
+    type: entity
+    table: contest
+    indexes:
+        cid:
+            columns:
+                - cid
+                - enabled
+    uniqueConstraints:
+        shortname:
+            columns:
+                - shortname
+    id:
+        cid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            comment: 'Descriptive name'
+        shortname:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            comment: 'Short name for this contest'
+        activatetime:
+            type: decimal
+            nullable: false
+            precision: 32
+            scale: 9
+            comment: 'Time contest becomes visible in team/public views'
+        starttime:
+            type: decimal
+            nullable: false
+            precision: 32
+            scale: 9
+            comment: 'Time contest starts, submissions accepted'
+        freezetime:
+            type: decimal
+            nullable: true
+            precision: 32
+            scale: 9
+            comment: 'Time scoreboard is frozen'
+        endtime:
+            type: decimal
+            nullable: false
+            precision: 32
+            scale: 9
+            comment: 'Time after which no more submissions are accepted'
+        unfreezetime:
+            type: decimal
+            nullable: true
+            precision: 32
+            scale: 9
+            comment: 'Unfreeze a frozen scoreboard at this time'
+        deactivatetime:
+            type: decimal
+            nullable: true
+            precision: 32
+            scale: 9
+            comment: 'Time contest becomes invisible in team/public views'
+        activatetimeString:
+            type: string
+            nullable: false
+            length: 64
+            fixed: false
+            comment: 'Authoritative absolute or relative string representation of activatetime'
+            column: activatetime_string
+        starttimeString:
+            type: string
+            nullable: false
+            length: 64
+            fixed: false
+            comment: 'Authoritative absolute (only!) string representation of starttime'
+            column: starttime_string
+        freezetimeString:
+            type: string
+            nullable: true
+            length: 64
+            fixed: false
+            comment: 'Authoritative absolute or relative string representation of freezetime'
+            column: freezetime_string
+        endtimeString:
+            type: string
+            nullable: false
+            length: 64
+            fixed: false
+            comment: 'Authoritative absolute or relative string representation of endtime'
+            column: endtime_string
+        unfreezetimeString:
+            type: string
+            nullable: true
+            length: 64
+            fixed: false
+            comment: 'Authoritative absolute or relative string representation of unfreezetrime'
+            column: unfreezetime_string
+        deactivatetimeString:
+            type: string
+            nullable: true
+            length: 64
+            fixed: false
+            comment: 'Authoritative absolute or relative string representation of deactivatetime'
+            column: deactivatetime_string
+        enabled:
+            type: boolean
+            nullable: false
+            comment: 'Whether this contest can be active'
+            default: '1'
+        processBalloons:
+            type: boolean
+            nullable: true
+            comment: 'Will balloons be processed for this contest?'
+            default: '1'
+            column: process_balloons
+        public:
+            type: boolean
+            nullable: true
+            comment: 'Is this contest visible for the public and non-associated teams?'
+            default: '1'
+    manyToMany:
+        probid:
+            targetEntity: Problem
+            cascade: {  }
+            mappedBy: null
+            inversedBy: cid
+            joinTable:
+                name: contestproblem
+                joinColumns:
+                    -
+                        name: cid
+                        referencedColumnName: cid
+                inverseJoinColumns:
+                    -
+                        name: probid
+                        referencedColumnName: probid
+            orderBy: null
+        teamid:
+            targetEntity: Team
+            cascade: {  }
+            mappedBy: cid
+            inversedBy: null
+            joinTable: null
+            orderBy: null
+    lifecycleCallbacks: {  }

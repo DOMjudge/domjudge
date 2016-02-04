@@ -1,0 +1,99 @@
+DOMjudge\MainBundle\Entity\User:
+    type: entity
+    table: user
+    indexes:
+        teamid:
+            columns:
+                - teamid
+    uniqueConstraints:
+        username:
+            columns:
+                - username
+    id:
+        userid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        username:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            comment: 'User login name'
+        name:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            comment: Name
+        email:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+            comment: 'Email address'
+        lastLogin:
+            type: decimal
+            nullable: true
+            precision: 32
+            scale: 9
+            comment: 'Time of last successful login'
+            column: last_login
+        lastIpAddress:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+            comment: 'Last IP address of successful login'
+            column: last_ip_address
+        password:
+            type: string
+            nullable: true
+            length: 32
+            fixed: false
+            comment: 'Password hash'
+        ipAddress:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+            comment: 'IP Address used to autologin'
+            column: ip_address
+        enabled:
+            type: boolean
+            nullable: false
+            comment: 'Whether the user is able to log in'
+            default: '1'
+    manyToOne:
+        teamid:
+            targetEntity: Team
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                teamid:
+                    referencedColumnName: teamid
+            orphanRemoval: false
+    manyToMany:
+        roleid:
+            targetEntity: Role
+            cascade: {  }
+            mappedBy: null
+            inversedBy: userid
+            joinTable:
+                name: userrole
+                joinColumns:
+                    -
+                        name: userid
+                        referencedColumnName: userid
+                inverseJoinColumns:
+                    -
+                        name: roleid
+                        referencedColumnName: roleid
+            orderBy: null
+    lifecycleCallbacks: {  }

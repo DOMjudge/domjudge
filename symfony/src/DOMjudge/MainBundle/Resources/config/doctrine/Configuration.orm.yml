@@ -1,0 +1,42 @@
+DOMjudge\MainBundle\Entity\Configuration:
+    type: entity
+    table: configuration
+    uniqueConstraints:
+        name:
+            columns:
+                - name
+    id:
+        configid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: false
+            length: 25
+            fixed: false
+            comment: 'Name of the configuration variable'
+        value:
+            type: text
+            nullable: false
+            length: null
+            fixed: false
+            comment: 'Content of the configuration variable (JSON encoded)'
+        type:
+            type: string
+            nullable: true
+            length: 25
+            fixed: false
+            comment: 'Type of the value (metatype for use in the webinterface)'
+        description:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+            comment: 'Description for in the webinterface'
+    lifecycleCallbacks: {  }

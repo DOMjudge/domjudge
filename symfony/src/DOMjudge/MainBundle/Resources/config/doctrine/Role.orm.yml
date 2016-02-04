@@ -1,0 +1,38 @@
+DOMjudge\MainBundle\Entity\Role:
+    type: entity
+    table: role
+    uniqueConstraints:
+        role:
+            columns:
+                - role
+    id:
+        roleid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        role:
+            type: string
+            nullable: false
+            length: 25
+            fixed: false
+            comment: 'Role name'
+        description:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            comment: 'Description for the web interface'
+    manyToMany:
+        userid:
+            targetEntity: User
+            cascade: {  }
+            mappedBy: roleid
+            inversedBy: null
+            joinTable: null
+            orderBy: null
+    lifecycleCallbacks: {  }

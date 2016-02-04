@@ -1,0 +1,95 @@
+DOMjudge\MainBundle\Entity\Testcase:
+    type: entity
+    table: testcase
+    indexes:
+        probid:
+            columns:
+                - probid
+    uniqueConstraints:
+        rank:
+            columns:
+                - probid
+                - rank
+    id:
+        testcaseid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        md5sumInput:
+            type: string
+            nullable: true
+            length: 32
+            fixed: true
+            comment: 'Checksum of input data'
+            column: md5sum_input
+        md5sumOutput:
+            type: string
+            nullable: true
+            length: 32
+            fixed: true
+            comment: 'Checksum of output data'
+            column: md5sum_output
+        input:
+            type: blob
+            nullable: true
+            length: null
+            fixed: false
+            comment: 'Input data'
+        output:
+            type: blob
+            nullable: true
+            length: null
+            fixed: false
+            comment: 'Output data'
+        rank:
+            type: integer
+            nullable: false
+            unsigned: false
+            comment: 'Determines order of the testcases in judging'
+        description:
+            type: string
+            nullable: true
+            length: 255
+            fixed: false
+            comment: 'Description of this testcase'
+        image:
+            type: blob
+            nullable: true
+            length: null
+            fixed: false
+            comment: 'A graphical representation of this testcase'
+        imageThumb:
+            type: blob
+            nullable: true
+            length: null
+            fixed: false
+            comment: 'Aumatically created thumbnail of the image'
+            column: image_thumb
+        imageType:
+            type: string
+            nullable: true
+            length: 4
+            fixed: false
+            comment: 'File type of the image and thumbnail'
+            column: image_type
+        sample:
+            type: boolean
+            nullable: false
+            comment: 'Sample testcases that can be shared with teams'
+            default: '0'
+    manyToOne:
+        probid:
+            targetEntity: Problem
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                probid:
+                    referencedColumnName: probid
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

@@ -1,0 +1,26 @@
+DOMjudge\MainBundle\Entity\JudgehostRestriction:
+    type: entity
+    table: judgehost_restriction
+    id:
+        restrictionid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        name:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            comment: 'Descriptive name'
+        restrictions:
+            type: text
+            nullable: true
+            length: null
+            fixed: false
+            comment: 'JSON-encoded restrictions'
+    lifecycleCallbacks: {  }

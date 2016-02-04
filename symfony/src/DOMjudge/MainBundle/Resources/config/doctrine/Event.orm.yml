@@ -1,0 +1,112 @@
+DOMjudge\MainBundle\Entity\Event:
+    type: entity
+    table: event
+    indexes:
+        cid:
+            columns:
+                - cid
+        clarid:
+            columns:
+                - clarid
+        langid:
+            columns:
+                - langid
+        probid:
+            columns:
+                - probid
+        submitid:
+            columns:
+                - submitid
+        judgingid:
+            columns:
+                - judgingid
+        teamid:
+            columns:
+                - teamid
+    id:
+        eventid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        eventtime:
+            type: decimal
+            nullable: false
+            precision: 32
+            scale: 9
+            comment: 'When the event occurred'
+        description:
+            type: text
+            nullable: false
+            length: null
+            fixed: false
+            comment: 'Event description'
+    manyToOne:
+        cid:
+            targetEntity: Contest
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                cid:
+                    referencedColumnName: cid
+            orphanRemoval: false
+        clarid:
+            targetEntity: Clarification
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                clarid:
+                    referencedColumnName: clarid
+            orphanRemoval: false
+        langid:
+            targetEntity: Language
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                langid:
+                    referencedColumnName: langid
+            orphanRemoval: false
+        probid:
+            targetEntity: Problem
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                probid:
+                    referencedColumnName: probid
+            orphanRemoval: false
+        submitid:
+            targetEntity: Submission
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                submitid:
+                    referencedColumnName: submitid
+            orphanRemoval: false
+        judgingid:
+            targetEntity: Judging
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                judgingid:
+                    referencedColumnName: judgingid
+            orphanRemoval: false
+        teamid:
+            targetEntity: Team
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                teamid:
+                    referencedColumnName: teamid
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

@@ -1,0 +1,54 @@
+DOMjudge\MainBundle\Entity\SubmissionFile:
+    type: entity
+    table: submission_file
+    indexes:
+        submitid:
+            columns:
+                - submitid
+    uniqueConstraints:
+        rank:
+            columns:
+                - submitid
+                - rank
+        filename:
+            columns:
+                - submitid
+                - filename
+    id:
+        submitfileid:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Unique ID'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        sourcecode:
+            type: blob
+            nullable: false
+            length: null
+            fixed: false
+            comment: 'Full source code'
+        filename:
+            type: string
+            nullable: false
+            length: 255
+            fixed: false
+            comment: 'Filename as submitted'
+        rank:
+            type: integer
+            nullable: false
+            unsigned: true
+            comment: 'Order of the submission files, zero-indexed'
+    manyToOne:
+        submitid:
+            targetEntity: Submission
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                submitid:
+                    referencedColumnName: submitid
+            orphanRemoval: false
+    lifecycleCallbacks: {  }

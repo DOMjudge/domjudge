@@ -1,0 +1,40 @@
+DOMjudge\MainBundle\Entity\Judgehost:
+    type: entity
+    table: judgehost
+    indexes:
+        restrictionid:
+            columns:
+                - restrictionid
+    id:
+        hostname:
+            type: string
+            nullable: false
+            length: 50
+            fixed: false
+            comment: 'Resolvable hostname of judgehost'
+            id: true
+            generator:
+                strategy: IDENTITY
+    fields:
+        active:
+            type: boolean
+            nullable: false
+            comment: 'Should this host take on judgings?'
+            default: '1'
+        polltime:
+            type: decimal
+            nullable: true
+            precision: 32
+            scale: 9
+            comment: 'Time of last poll by autojudger'
+    manyToOne:
+        restrictionid:
+            targetEntity: JudgehostRestriction
+            cascade: {  }
+            mappedBy: null
+            inversedBy: null
+            joinColumns:
+                restrictionid:
+                    referencedColumnName: restrictionid
+            orphanRemoval: false
+    lifecycleCallbacks: {  }
