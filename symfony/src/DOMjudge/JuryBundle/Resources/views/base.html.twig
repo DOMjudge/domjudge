@@ -1,0 +1,32 @@
+{% extends '@DOMjudgeMain/base.html.twig' %}
+
+{% block menu %}
+	<nav>
+		<div id="menutop">
+			<a href="{{ path('jury_home') }}" accesskey="h"><span class="octicon octicon-home"></span> home</a>
+			{% if is_granted('ROLE_BALLOON') %}
+				<a href="#" accesskey="b"><span class="octicon octicon-location"></span> balloons</a>
+			{% endif %}
+			{% if is_granted('ROLE_BALLOON') %}
+				<a href="#" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
+			{% endif %}
+			{% if is_granted('ROLE_ADMIN') %}
+				<a href="#" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts</a>
+			{% endif %}
+			{% if is_granted('ROLE_JURY') %}
+				<a href="#" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>
+				<a href="#" accesskey="u"><span class="octicon octicon-person"></span> users</a>
+				<a href="#" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications</a>
+				<a href="#" accesskey="s"><span class="octicon octicon-file-code"></span> submissions</a>
+				<a href="#" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings</a>
+				<a href="#" accesskey="b"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
+			{% endif %}
+			{% if is_granted('ROLE_TEAM') %}
+				<a target="_top" href="{{ path('team_home') }}" accesskey="t"><span class="octicon octicon-arrow-right"></span> team</a>
+			{% endif %}
+			{% if app.user is null %}
+				<a href="{{ path('login') }}" accesskey="l"><span class="octicon octicon-sign-in"></span> login</a>
+			{% endif %}
+		</div>
+	</nav>
+{% endblock %}

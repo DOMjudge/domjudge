@@ -2,17 +2,18 @@
 
 namespace DOMjudge\TeamBundle\Controller;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends Controller
 {
 	/**
 	 * @Route("/", name="team_home")
+	 * @Template()
 	 */
 	public function homeAction()
 	{
-		return new Response("Team home");
+		return array();
 	}
 }

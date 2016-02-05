@@ -5,10 +5,14 @@
 	<div id="menutop">
 		<a href="{{ path('public_home') }}" accesskey="h"><span class="octicon octicon-home"></span> home</a>
 		<a href="#" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
+		{% if is_granted('ROLE_TEAM') %}
+			<a target="_top" href="{{ path('team_home') }}" accesskey="t"><span class="octicon octicon-arrow-right"></span> team</a>
+		{% endif %}
+		{% if is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') %}
+			<a target="_top" href="{{ path('jury_home') }}" accesskey="j"><span class="octicon octicon-arrow-right"></span> jury</a>
+		{% endif %}
 		{% if app.user is null %}
 			<a href="{{ path('login') }}" accesskey="l"><span class="octicon octicon-sign-in"></span> login</a>
-		{% else %}
-			<a href="{{ path('logout') }}" accesskey="l"><span class="octicon octicon-sign-out"></span> logout</a>
 		{% endif %}
 	</div>
 </nav>

@@ -12,6 +12,12 @@ class HomeController extends Controller
 	 */
 	public function homeAction()
 	{
-		return $this->redirectToRoute('public_home');
+		if ( $this->isGranted('ROLE_JURY') || $this->isGranted('ROLE_BALLOON') ) {
+			return $this->redirectToRoute('jury_home');
+		} elseif ( $this->isGranted('ROLE_TEAM') ) {
+			return $this->redirectToRoute('team_home');
+		} else {
+			return $this->redirectToRoute('public_home');
+		}
 	}
 }

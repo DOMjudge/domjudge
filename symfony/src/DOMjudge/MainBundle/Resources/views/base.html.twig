@@ -12,6 +12,19 @@
 </head>
 <body>
 	{% block menu %}{% endblock %}
+	{% block clock %}
+		<div id="menutopright">
+			<div id="clock">
+				<span id="timeleft">Time left goes here</span>
+				{% if app.user is not null %}
+					<div id="username">
+						logged in as {{ app.user.username }}
+						<a href="{{ path('logout') }}">x</a>
+					</div>
+				{% endif %}
+			</div>
+		</div>
+	{% endblock %}
 	{% block body %}{% endblock %}
 </body>
 </html>
