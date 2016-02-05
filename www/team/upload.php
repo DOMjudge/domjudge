@@ -20,7 +20,7 @@ if ( is_null($cid) ) {
 	exit;
 }
 $now = now();
-if ( difftime($cdata['starttime'], $now) > 0 ) {
+if ( !checkrole('jury') && difftime($cdata['starttime'], $now) > 0 ) {
 	require(LIBWWWDIR . '/header.php');
 	echo "<p class=\"nodata\">Contest has not yet started.</p>\n";
 	require(LIBWWWDIR . '/footer.php');

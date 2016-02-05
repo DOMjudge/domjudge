@@ -557,7 +557,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	if ( ! isset($contestdata) ) {
 		error("Contest c$contest not found.");
 	}
-	if( difftime($contestdata['starttime'], $now) > 0 ) {
+	if( !checkrole('jury') && difftime($contestdata['starttime'], $now) > 0 ) {
 		error("The contest is closed, no submissions accepted. [c$contest]");
 	}
 
