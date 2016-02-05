@@ -132,9 +132,9 @@ void set_fd_close_exec(int fd, int value)
 
 int main(int argc, char **argv)
 {
- 	struct sigaction sigact;
- 	sigset_t sigmask;
- 	pid_t pid;
+	struct sigaction sigact;
+	sigset_t sigmask;
+	pid_t pid;
 	int   status;
 	int   exitcode, myexitcode;
 	int   opt;

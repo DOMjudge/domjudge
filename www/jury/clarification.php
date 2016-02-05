@@ -82,7 +82,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, respid, submittime, recipient, probid, category, body,
- 	                  answered, jury_member)
+	                  answered, jury_member)
 	                 VALUES (%i, ' .
 	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %s, %i, ' .
 	                (isset($jury_member) ? '%s)' : 'NULL %_)'),

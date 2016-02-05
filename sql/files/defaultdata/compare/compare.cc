@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
 
 	judgeans_pos = stdin_pos;
 	judgeans_line = stdin_line = 1;
-   
+
 	std::string judge, team;
 	while (true) {
 		// Space!  Can't live with it, can't live without it...
@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
 		if (!(std::cin >> team)) {
 			wrong_answer("User EOF while judge had more output\n(Next judge token: %s)", judge.c_str());
 		}
-     
+
 		flt jval, tval;
 		if (use_floats && isfloat(judge.c_str(), jval)) {
 			if (!isfloat(team.c_str(), tval)) {

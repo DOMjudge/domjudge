@@ -369,8 +369,8 @@ while($row = $res->next()) {
 		}
 	}
 	if ( ! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
- 	               WHERE input IS NOT NULL AND output IS NOT NULL AND
- 	               probid = %i", $row['probid']) ) {
+	               WHERE input IS NOT NULL AND output IS NOT NULL AND
+	               probid = %i", $row['probid']) ) {
 		$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": missing in/output testcase.\n";
 	}
 

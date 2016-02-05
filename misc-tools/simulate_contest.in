@@ -318,7 +318,7 @@ while ( $cdata['cid']==$cid && difftime(now(),$cdata['endtime'])<0 ) { // bug!
 /*
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid,
- 	                           probid, submitid, description)
+	                           probid, submitid, description)
 	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
 	       $s['submittime'], $s['cid'], $s['teamid'], $s['langid'],
 	       $s['probid'], $s['sid']);

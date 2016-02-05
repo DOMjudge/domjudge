@@ -68,7 +68,7 @@ if ( !empty($cid) ) {
 	        FROM judging j
 	        LEFT JOIN submission s USING(submitid)
 	        WHERE s.teamid = %i AND j.cid = %i AND j.seen = 0
- 	        AND j.valid=1 AND s.submittime < %i' .
+	        AND j.valid=1 AND s.submittime < %i' .
 	       ( dbconfig_get('verification_required', 0) ?
 	         ' AND j.verified = 1' : ''), $teamid, $cid, $cdata['endtime']);
 }

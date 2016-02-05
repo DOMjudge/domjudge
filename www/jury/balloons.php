@@ -90,7 +90,7 @@ $res = null;
 if ( !empty($contestids) ) {
 	$res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
 	               t.teamid, t.name AS teamname, t.room, c.name AS catname,
- 	               s.cid, co.shortname
+	               s.cid, co.shortname
 	               FROM balloon b
 	               LEFT JOIN submission s USING (submitid)
 	               LEFT JOIN problem p USING (probid)
