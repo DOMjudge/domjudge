@@ -66,7 +66,7 @@ class JudgingRun
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Testcase
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Testcase")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Testcase", inversedBy="judgingRuns")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid")
 	 * })
@@ -76,7 +76,7 @@ class JudgingRun
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Judging
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Judging")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Judging", inversedBy="judgingRuns")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid")
 	 * })

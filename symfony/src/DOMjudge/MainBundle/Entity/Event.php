@@ -38,7 +38,7 @@ class Event
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Contest
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Contest")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Contest", inversedBy="events")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
 	 * })
@@ -48,7 +48,7 @@ class Event
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Clarification
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Clarification")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Clarification", inversedBy="events")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="clarid", referencedColumnName="clarid")
 	 * })
@@ -58,7 +58,7 @@ class Event
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Language
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Language")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Language", inversedBy="events")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="langid", referencedColumnName="langid")
 	 * })
@@ -68,7 +68,7 @@ class Event
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Problem
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Problem")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Problem", inversedBy="events")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="probid", referencedColumnName="probid")
 	 * })
@@ -78,7 +78,7 @@ class Event
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Submission
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Submission")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Submission", inversedBy="events")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
 	 * })
@@ -88,7 +88,7 @@ class Event
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Judging
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Judging")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Judging", inversedBy="events")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid")
 	 * })

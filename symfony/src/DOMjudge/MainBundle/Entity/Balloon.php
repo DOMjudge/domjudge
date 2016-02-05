@@ -31,7 +31,7 @@ class Balloon
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Submission
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Submission")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Submission", inversedBy="balloons")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
 	 * })

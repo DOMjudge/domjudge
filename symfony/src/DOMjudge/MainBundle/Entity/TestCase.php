@@ -101,7 +101,7 @@ class TestCase
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Problem
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Problem")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Problem", inversedBy="testcases")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="probid", referencedColumnName="probid")
 	 * })

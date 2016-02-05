@@ -108,7 +108,7 @@ class Team
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\TeamCategory
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\TeamCategory")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\TeamCategory", inversedBy="teams")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid")
 	 * })
@@ -118,7 +118,7 @@ class Team
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\TeamAffiliation
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\TeamAffiliation")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\TeamAffiliation", inversedBy="teams")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="affilid", referencedColumnName="affilid")
 	 * })

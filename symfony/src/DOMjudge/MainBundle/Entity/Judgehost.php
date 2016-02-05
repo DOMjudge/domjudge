@@ -52,7 +52,7 @@ class Judgehost
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\JudgehostRestriction
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\JudgehostRestriction")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\JudgehostRestriction", inversedBy="judgehosts")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="restrictionid", referencedColumnName="restrictionid")
 	 * })

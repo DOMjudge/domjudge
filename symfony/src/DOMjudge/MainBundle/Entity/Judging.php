@@ -108,7 +108,7 @@ class Judging
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Contest
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Contest")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Contest", inversedBy="judgings")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
 	 * })
@@ -118,7 +118,7 @@ class Judging
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Submission
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Submission")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Submission", inversedBy="judgings")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
 	 * })
@@ -128,7 +128,7 @@ class Judging
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Judgehost
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Judgehost")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Judgehost", inversedBy="judgings")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="judgehost", referencedColumnName="hostname")
 	 * })
@@ -148,7 +148,7 @@ class Judging
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Judging
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Judging")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Judging", inversedBy="nextJudgings")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="prevjudgingid", referencedColumnName="judgingid")
 	 * })

@@ -95,7 +95,7 @@ class User implements UserInterface, \Serializable
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Team
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Team", inversedBy="users")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Team", inversedBy="users", inversedBy="users")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
 	 * })

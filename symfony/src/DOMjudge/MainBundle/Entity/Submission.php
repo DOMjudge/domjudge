@@ -80,7 +80,7 @@ class Submission
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Contest
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Contest")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Contest", inversedBy="submissions")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
 	 * })
@@ -100,7 +100,7 @@ class Submission
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Problem
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Problem")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Problem", inversedBy="submissions")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="probid", referencedColumnName="probid")
 	 * })
@@ -110,7 +110,7 @@ class Submission
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Language
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Language")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Language", inversedBy="submissions")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="langid", referencedColumnName="langid")
 	 * })
@@ -120,7 +120,7 @@ class Submission
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Judgehost
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Judgehost")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Judgehost", inversedBy="submissions")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="judgehost", referencedColumnName="hostname")
 	 * })
@@ -130,7 +130,7 @@ class Submission
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Submission
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Submission")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Submission", inversedBy="followUpSubmissions")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="origsubmitid", referencedColumnName="submitid")
 	 * })

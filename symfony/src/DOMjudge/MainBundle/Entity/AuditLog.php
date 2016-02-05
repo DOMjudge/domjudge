@@ -66,7 +66,7 @@ class AuditLog
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Contest
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Contest")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Contest", inversedBy="auditlogs")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
 	 * })

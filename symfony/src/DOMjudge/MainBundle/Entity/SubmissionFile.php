@@ -45,7 +45,7 @@ class SubmissionFile
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Submission
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Submission")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Submission", inversedBy="submissionFiles")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
 	 * })

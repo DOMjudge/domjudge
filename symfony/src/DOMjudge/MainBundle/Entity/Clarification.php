@@ -87,7 +87,7 @@ class Clarification
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Contest
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Contest")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Contest", inversedBy="clarifications")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
 	 * })
@@ -97,7 +97,7 @@ class Clarification
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Clarification
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Clarification")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Clarification", inversedBy="responses")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="respid", referencedColumnName="clarid")
 	 * })
@@ -107,7 +107,7 @@ class Clarification
 	/**
 	 * @var \DOMjudge\MainBundle\Entity\Problem
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Problem")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Problem", inversedBy="clarifications")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="probid", referencedColumnName="probid")
 	 * })
