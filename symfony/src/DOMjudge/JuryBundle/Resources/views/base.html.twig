@@ -21,7 +21,7 @@
 				<a href="#" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings</a>
 				<a href="#" accesskey="b"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
 			{% endif %}
-			{% if is_granted('ROLE_TEAM') %}
+			{% if is_granted('ROLE_TEAM') and app.user.hasEnabledTeam %}
 				<a target="_top" href="{{ path('team_home') }}" accesskey="t"><span class="octicon octicon-arrow-right"></span> team</a>
 			{% endif %}
 			{% if app.user is null %}
@@ -30,3 +30,6 @@
 		</div>
 	</nav>
 {% endblock %}
+
+{% set activeContests = contests.activeContests(null, false, null, true) %}
+{% set currentContest = contests.currentContest(false, null, true) %}

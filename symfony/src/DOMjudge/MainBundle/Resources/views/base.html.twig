@@ -15,7 +15,35 @@
 	{% block clock %}
 		<div id="menutopright">
 			<div id="clock">
-				<span id="timeleft">Time left goes here</span>
+				<span id="timeleft">
+					{% if currentContest is defined %}
+						{% if currentContest.isCurrentlyRunning %}
+							time left: {{ timediff(null, currentContest.endTime) }}
+						{% elseif currentContest.isActiveButNotStarted %}
+							time to start: {{ timediff(null, currentContest.startTime) }}
+						{% endif %}
+					{% endif %}
+				</span>
+				{% if currentContest is defined %}
+					{% set activateTime = -1 %}
+					{% set startTime = -1 %}
+					{% set endTime = -1 %}
+					{% if currentContest.activateTime is not null %}{% set activateTime = currentContest.activateTime %}{% endif %}
+					{% if currentContest.startTime is not null %}{% set startTime = currentContest.startTime %}{% endif %}
+					{% if currentContest.endTime is not null %}{% set endTime = currentContest.endTime %}{% endif %}
+					<script type="text/javascript">
+						var initial = {{ date().timestamp }};
+						var activatetime = {{ activateTime }};
+						var starttime = {{ startTime }};
+						var endtime = {{ endTime }};
+						var offset = 0;
+						var date = new Date(initial*1000);
+						var timeleftelt = document.getElementById("timeleft");
+
+						setInterval(function(){updateClock();},1000);
+						updateClock();
+					</script>
+				{% endif %}
 				{% if app.user is not null %}
 					<div id="username">
 						logged in as {{ app.user.username }}

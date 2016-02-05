@@ -15,3 +15,7 @@
 		</div>
 	</nav>
 {% endblock %}
+
+{% set team = app.user.team %}
+{% set activeContests = contests.activeContests(null, false, team) %}
+{% set currentContest = contests.currentContest(false, team) %}

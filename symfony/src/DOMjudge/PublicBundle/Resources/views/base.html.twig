@@ -5,7 +5,7 @@
 	<div id="menutop">
 		<a href="{{ path('public_home') }}" accesskey="h"><span class="octicon octicon-home"></span> home</a>
 		<a href="#" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
-		{% if is_granted('ROLE_TEAM') %}
+		{% if is_granted('ROLE_TEAM') and app.user.hasEnabledTeam %}
 			<a target="_top" href="{{ path('team_home') }}" accesskey="t"><span class="octicon octicon-arrow-right"></span> team</a>
 		{% endif %}
 		{% if is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') %}
@@ -17,3 +17,6 @@
 	</div>
 </nav>
 {% endblock %}
+
+{% set activeContests = contests.activeContests(null, true) %}
+{% set currentContest = contests.currentContest(true) %}

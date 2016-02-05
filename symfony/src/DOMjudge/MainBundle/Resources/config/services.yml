@@ -1,0 +1,9 @@
+services:
+    domjudge.contest:
+        class: DOMjudge\MainBundle\Contest\ContestLoader
+        arguments: [ "@doctrine.orm.entity_manager", "@session" ]
+    domjudge.time_diff_formatter:
+        class: DOMjudge\MainBundle\Twig\TimeDiffFormatter
+        public: false
+        tags:
+            - { name: twig.extension }

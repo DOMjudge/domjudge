@@ -445,6 +445,16 @@ class User implements UserInterface, \Serializable
 	}
 
 	/**
+	 * Whether this user is part of an enabled team
+	 *
+	 * @return bool
+	 */
+	public function hasEnabledTeam()
+	{
+		return ($this->getTeam() != null && $this->getTeam()->getEnabled());
+	}
+
+	/**
 	 * String representation of object
 	 * @link http://php.net/manual/en/serializable.serialize.php
 	 * @return string the string representation of the object or null

@@ -43,4 +43,4 @@ security:
             allow_if: "has_role('ROLE_JURY') or has_role('ROLE_BALLOON')"
         -
             path: ^/team
-            roles: ROLE_TEAM
+            allow_if: "has_role('ROLE_TEAM') and user.hasEnabledTeam()"

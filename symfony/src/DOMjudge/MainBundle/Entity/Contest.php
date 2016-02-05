@@ -843,4 +843,24 @@ class Contest
 	{
 		return $this->teams;
 	}
+
+	/**
+	 * Whether this contest is currently running
+	 *
+	 * @return bool
+	 */
+	public function isCurrentlyRunning()
+	{
+		return time() >= $this->getStartTime() && time() < $this->getEndTime();
+	}
+
+	/**
+	 * Whether this contest is active but not yet started
+	 *
+	 * @return bool
+	 */
+	public function isActiveButNotStarted()
+	{
+		return time() >= $this->getActivateTime() && time() < $this->getStartTime();
+	}
 }
