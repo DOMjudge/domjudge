@@ -1,0 +1,22 @@
+{% set pageTitle = 'Submissions' %}
+
+{% extends '@DOMjudgeJury/base.html.twig' %}
+
+{% block body %}
+	<p>
+		{{ form_start(filterForm) }}
+			Show submissions:
+			{{ form_widget(filterForm.newest) }}
+			{{ form_widget(filterForm.unverified) }}
+			{{ form_widget(filterForm.unjudged) }}
+			{{ form_widget(filterForm.all) }}
+		{{ form_end(filterForm) }}
+	</p>
+	
+	{{ dump(submissions) }}
+	{{ dump(submissionCount) }}
+	{{ dump(correctSubmissionCount) }}
+	{{ dump(unverifiedSubmissionCount) }}
+	{{ dump(ignoredSubmissionCount) }}
+	{{ dump(queuedSubmissionCount) }}
+{% endblock %}

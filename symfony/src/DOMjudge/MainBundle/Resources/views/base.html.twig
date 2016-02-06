@@ -8,7 +8,7 @@
 <head>
 	<!-- DOMjudge version {{ domjudge_version }} -->
 	<meta charset="utf-8"/>
-	<title>{% if page_title is defined %} {{ page_title }}{% endif %}</title>
+	<title>{% if pageTitle is defined %} {{ pageTitle }}{% endif %}</title>
 	<link rel="icon" href="{{ asset('bundles/domjudgemain/images/favicon.png') }}" type="image/png" />
 	<link rel="stylesheet" href="{{ asset('bundles/domjudgemain/css/style.css') }}" type="text/css" />
 	<link rel="stylesheet" href="{{ asset('bundles/domjudgemain/css/octicons/octicons.css') }}" />
@@ -51,7 +51,7 @@
 						updateClock();
 					</script>
 				{% endif %}
-				{% if isJury or activeContests | length > 1 %}
+				{% if activeContests is defined and (isJury or activeContests | length > 1) %}
 					{% set selectedContestId = -1 %}
 					{% if currentContest is defined and currentContest is not null %}
 						{% set selectedContestId = currentContest.cid %}
@@ -83,6 +83,9 @@
 			</div>
 		</div>
 	{% endblock %}
+	{% if pageTitle is defined and noPageHeader is not defined %}
+		<h1>{{ pageTitle }}</h1>
+	{% endif %}
 	{% block body %}{% endblock %}
 </body>
 </html>

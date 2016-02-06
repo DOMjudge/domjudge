@@ -97,8 +97,8 @@ class ContestLoader
 	{
 		$contests = $this->getActiveContests('c.cid', $onlyPublic, $onlyOfTeam, $alsoFuture);
 
-		if ( $this->session->has('current_contest_id') ) {
-			$current_contest_id = $this->session->get('current_contest_id');
+		if ( $this->session->has('domjudge.current_contest_id') ) {
+			$current_contest_id = $this->session->get('domjudge.current_contest_id');
 			if ( isset($contests[$current_contest_id]) ) {
 				return $contests[$current_contest_id];
 			} elseif ($current_contest_id == -1) {
@@ -126,9 +126,9 @@ class ContestLoader
 	public function setCurrentContest(Contest $contest = null)
 	{
 		if ( $contest === null ) {
-			$this->session->set('current_contest_id', -1);
+			$this->session->set('domjudge.current_contest_id', -1);
 		} else {
-			$this->session->set('current_contest_id', $contest->getCid());
+			$this->session->set('domjudge.current_contest_id', $contest->getCid());
 		}
 	}
 }

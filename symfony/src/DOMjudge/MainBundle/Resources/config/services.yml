@@ -2,6 +2,9 @@ services:
     domjudge.contest:
         class: DOMjudge\MainBundle\Contest\ContestLoader
         arguments: [ "@doctrine.orm.entity_manager", "@session" ]
+    domjudge.submission:
+        class: DOMjudge\MainBundle\Submission\SubmissionLoader
+        arguments: [ "@doctrine.orm.entity_manager" ]
     domjudge.time_diff_formatter:
         class: DOMjudge\MainBundle\Twig\TimeDiffFormatter
         public: false
