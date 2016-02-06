@@ -1186,11 +1186,17 @@ $api->provideFunction('PUT', 'judgehosts', $doc, $args, $exArgs, $roles);
  */
 function scoreboard($args)
 {
-	global $DB;
+	global $DB, $api, $cdatas, $cids;
 
-	checkargs($args, array('cid'));
-
-	global $cdatas;
+	if ( isset($args['cid']) ) {
+		$cid = safe_int($args['cid']);
+	} else {
+		if ( count($cids)==1 ) {
+			$cid = reset($cids);
+		} else {
+			$api->createError("No contest ID specified but active contest is ambiguous.");
+		}
+	}
 
 	$filter = array();
 	if ( array_key_exists('category', $args) ) {
@@ -1203,10 +1209,10 @@ function scoreboard($args)
 		$filter['affilid'] = array($args['affiliation']);
 	}
 
-	$scoreboard = genScoreBoard($cdatas[$args['cid']], !$args['public'], $filter);
+	$scoreboard = genScoreBoard($cdatas[$cid], !$args['public'], $filter);
 
 	$prob2label = $DB->q('KEYVALUETABLE SELECT probid, shortname
-	                      FROM contestproblem WHERE cid = %i', $args['cid']);
+	                      FROM contestproblem WHERE cid = %i', $cid);
 
 	$res = array();
 	foreach ( $scoreboard['scores'] as $teamid => $data ) {
