@@ -153,7 +153,7 @@ $api->provideFunction('GET', 'user', $doc);
  */
 function problems($args)
 {
-	global $DB, $cdatas;
+	global $DB, $cdatas, $userdata;
 
 	checkargs($args, array('cid'));
 	$cid = safe_int($args['cid']);
