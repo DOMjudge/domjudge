@@ -101,9 +101,11 @@ class ContestLoader
 			$current_contest_id = $this->session->get('current_contest_id');
 			if ( isset($contests[$current_contest_id]) ) {
 				return $contests[$current_contest_id];
-			} else {
+			} elseif ($current_contest_id == -1) {
 				return null;
 			}
+			// Else: contest is not -1 (i.e. a contest is selected) but not found, default to first
+			// found one
 		}
 
 		if ( count($contests) >= 1 ) {
@@ -121,7 +123,7 @@ class ContestLoader
 	 * @param Contest|null $contest
 	 *   The contest to make active for the current session or null to make no contest active
 	 */
-	public function setActiveContest(Contest $contest = null)
+	public function setCurrentContest(Contest $contest = null)
 	{
 		if ( $contest === null ) {
 			$this->session->set('current_contest_id', -1);

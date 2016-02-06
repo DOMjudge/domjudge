@@ -1,3 +1,8 @@
+{# Set jury to false by default. The jury's base.html.twig overrides this #}
+{% if isJury is not defined %}
+	{% set isJury = false %}
+{% endif %}
+
 <!DOCTYPE html>
 <html lang="en" xml:lang="en">
 <head>
@@ -9,6 +14,8 @@
 	<link rel="stylesheet" href="{{ asset('bundles/domjudgemain/css/octicons/octicons.css') }}" />
 	<script type="text/javascript" src="{{ asset('bundles/domjudgemain/js/jquery.min.js') }}"></script>
 	<script type="text/javascript" src="{{ asset('bundles/domjudgemain/js/domjudge.js') }}"></script>
+	<script src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
+	<script src="{{ path('fos_js_routing_js', {'callback': 'fos.Router.setData'}) }}"></script>
 </head>
 <body>
 	{% block menu %}{% endblock %}
@@ -16,7 +23,7 @@
 		<div id="menutopright">
 			<div id="clock">
 				<span id="timeleft">
-					{% if currentContest is defined %}
+					{% if currentContest is defined and currentContest is not null %}
 						{% if currentContest.isCurrentlyRunning %}
 							time left: {{ timediff(null, currentContest.endTime) }}
 						{% elseif currentContest.isActiveButNotStarted %}
@@ -24,7 +31,7 @@
 						{% endif %}
 					{% endif %}
 				</span>
-				{% if currentContest is defined %}
+				{% if currentContest is defined and currentContest is not null %}
 					{% set activateTime = -1 %}
 					{% set startTime = -1 %}
 					{% set endTime = -1 %}
@@ -42,6 +49,29 @@
 
 						setInterval(function(){updateClock();},1000);
 						updateClock();
+					</script>
+				{% endif %}
+				{% if isJury or activeContests | length > 1 %}
+					{% set selectedContestId = -1 %}
+					{% if currentContest is defined and currentContest is not null %}
+						{% set selectedContestId = currentContest.cid %}
+					{% endif %}
+					<div id="selectcontest">
+						<select id="changecontest">
+							{% if isJury %}
+								<option {% if selectedContestId == -1 %}selected{% endif %} value="-1">- No contest</option>
+							{% endif %}
+							{% for contest in activeContests %}
+								<option {% if selectedContestId == contest.cid %}selected{% endif %} value="{{ contest.cid }}">{{ contest.shortName }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<script type="text/javascript">
+						$(function() {
+							$('#changecontest').on('change', function() {
+								window.location = Routing.generate('change_contest', { contest: $(this).val() });
+							});
+						});
 					</script>
 				{% endif %}
 				{% if app.user is not null %}
