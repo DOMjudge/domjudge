@@ -153,14 +153,24 @@ $api->provideFunction('GET', 'user', $doc);
  */
 function problems($args)
 {
-	global $DB;
+	global $DB, $cdatas;
 
 	checkargs($args, array('cid'));
+	$cid = safe_int($args['cid']);
 
-	$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
-	                  FROM problem
-	                  INNER JOIN contestproblem USING (probid)
-	                  WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
+	// Check that user has access to the problems in this contest:
+	if ( checkrole('team') ) $cdatas = getCurContests(TRUE, $userdata['teamid']);
+	if ( checkrole('jury') ||
+	     (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0) ) {
+
+		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
+		                  FROM problem
+		                  INNER JOIN contestproblem USING (probid)
+		                  WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
+	} else {
+		$pdatas = array();
+	}
+
 	return array_map(function($pdata) {
 		return array(
 			'id'        => safe_int($pdata['id']),
