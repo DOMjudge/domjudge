@@ -1,0 +1,8 @@
+{% if total > 0 %}
+<p>
+	Total correct: {{ correct }}, submitted: {{ total }}
+	{%- if unverified > 0 %}, unverified: {{ unverified }}{% endif %}
+	{%- if ignored > 0 %}, ignored: {{ ignored }}{% endif %}
+	{%- if queued > 0 %}, judgement pending: {{ queued }}{% endif %}
+</p>
+{% endif %}

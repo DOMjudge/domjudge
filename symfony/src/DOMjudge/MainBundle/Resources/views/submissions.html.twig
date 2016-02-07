@@ -1,0 +1,163 @@
+{# @var submissions \DOMjudge\MainBundle\Entity\Submission[] #}
+{# @var highlight \DOMjudge\MainBundle\Entity\Submission #}
+{# @var isJury bool #}
+{# @var showOldResult bool #}
+{# @var showContestColumn bool #}
+{# @var rejudging \DOMjudge\MainBundle\Entity\Rejudging #}
+{# @var oldJudgings \DOMjudge\MainBundle\Entity\Judging[] #}
+{% if submissions is empty %}
+	<p class="nodata">No submissions</p>
+{% else %}
+	<table class="list sortable submissions">
+		<thead>
+		<tr>
+			{% if isJury %}
+				<th scope="col" class="sorttable_numeric">ID</th>
+				{% if showContestColumn %}
+					<th scope="col" class="sorttable_numeric">contest</th>
+				{% endif %}
+			{% endif %}
+			<th scope="col">time</th>
+			{% if isJury %}
+				<th scope="col">team</th>
+			{% endif %}
+			<th scope="col">problem</th>
+			<th scope="col">language</th>
+			<th scope="col">result</th>
+			{% if isJury %}
+				<th scope="col">verified</th>
+				<th scope="col">by</th>
+				{% if showOldResult %}
+					<th scope="col">old result</th>
+				{% endif %}
+			{% endif %}
+		</tr>
+		</thead>
+		<tbody>
+		{% for submission in submissions %}
+			{% set link = null %}
+
+			{# @var judging \DOMjudge\MainBundle\Entity\Judging #}
+			{% set judging = null %}
+			{% if submission.judgings is not empty %}
+				{% set judging = submission.judgings.0 %}
+			{% endif %}
+			
+			{% if isJury %}
+				{% if rejudging is not null %}
+					{% set link = path('jury_submission_for_rejudging', {'submission': submission.submitid, 'rejudging': rejudging.rejudgingid}) %}
+				{% else %}
+					{% set link = path('jury_submission', {'submission': submission.submitid}) %}
+				{% endif %}
+			{% else %}
+				{% if submission.submitTime < submission.contest.endTime
+					and judging is not null
+					and submission.valid
+					and (not config.configurationValue("verification_required", false).value or judging.verified) %}
+					{# TODO: team submission details link #}
+				{% endif %}
+			{% endif %}
+			{% set class = cycle(['rowodd', 'roweven'], loop.index0) %}
+			{% if not submission.valid %}
+				{% set class = class ~ " sub_ignore" %}
+			{% endif %}
+			{% if highlight is not null and highlight.submitid == submission.submitid %}
+				{% set class = class ~ " highlight" %}
+			{% endif %}
+			{% if not isJury and (judging is null or not judging.seen) %}
+				{% set class = class ~ " unseen" %}
+			{% endif %}
+			<tr class="{{ class }}">
+				{% if isJury %}
+					<td><a {% if link is not null %}href="{{ link }}"{% endif %}>s{{ submission.submitid }}</a></td>
+					{% if showContestColumn %}
+						<td><a {% if link is not null %}href="{{ link }}"{% endif %}>c{{ submission.contest.cid }}</a></td>
+					{% endif %}
+				{% endif %}
+				<td><a {% if link is not null %}href="{{ link }}"{% endif %}>{{ specialChars(formatTime(submission.submitTime)) }}</a></td>
+				{% if isJury %}
+					<td title="t{{ specialChars(submission.team.teamid) }}">
+						<a {% if link is not null %}href="{{ link }}"{% endif %}>
+							{{ specialChars(submission.team.name[:30]) }}
+						</a>
+					</td>
+				{% endif %}
+				<td class="probid" title="t{{ specialChars(submission.problem.name) }}">
+					<a {% if link is not null %}href="{{ link }}"{% endif %}>
+						{{ specialChars(submission.contestProblem.shortName) }}
+					</a>
+				</td>
+				<td class="langid" title="t{{ specialChars(submission.language.name) }}">
+					<a {% if link is not null %}href="{{ link }}"{% endif %}>
+						{{ specialChars(submission.language.langid) }}
+					</a>
+				</td>
+				<td class="result">
+					<a {% if link is not null %}href="{{ link }}"{% endif %}>
+						{% if submission.submitTime >= submission.contest.endTime %}
+							{% set result = 'too-late' %}
+							{% if isJury and judging is not null %}
+								{% set result = judging.result %}
+							{% endif %}
+						{% elseif judging is null or (not isJury
+							and (judging is null
+								or (not judging.verified and config.configurationValue("verification_required", false).value))) %}
+							{% if submission.judgehost is not null or not isJury %}
+								{% set result = '' %}
+							{% else %}
+								{% set result = 'queued' %}
+							{% endif %}
+						{% else %}
+							{% set result = judging.result %}
+						{% endif %}
+						{{ formatResult(result, isJury) }}
+					</a>
+				</td>
+			{% if isJury %}
+				{% set claim = false %}
+				{% if judging is null %}
+					{% set verified = ' ' %}
+					{% set juryMember = ' ' %}
+				{% else %}
+					{% set verified = judging.verified ? 'yes' : 'no' %}
+					{% if judging.juryMember is not empty %}
+						{% set juryMember = specialChars(judging.juryMember) %}
+					{% else %}
+						{% set juryMember = ' ' %}
+					{% endif %}
+					{% if not judging.verified %}
+						{% if judging.juryMember is empty %}
+							{% set claim = true %}
+						{% else %}
+							{% set verified = 'claimed' %}
+						{% endif %}
+					{% endif %}
+				{% endif %}
+
+				<td><a {% if link is not null %}href="{{ link }}"{% endif %}>{{ verified }}</a></td>
+				<td>
+					{% if claim %}
+						<a class="button" href="{{ link }}&claim">claim</a>
+					{% elseif not judging.verified and judging.juryMember == app.user.username %}
+						<a class="button" href="{{ link }}&unclaim">unclaim</a>
+					{% else %}
+						<a href="{{ link }}">{{ judging.juryMember }}</a>
+					{% endif %}
+				</td>
+				{% if showOldResult %}
+					{% set oldResult = '' %}
+					{% if oldJudgings[submission.submitid] is defined %}
+						{% set oldResult = oldJudgings[submission.submitid].result %}
+					{% endif %}
+					<td>
+						<a href="{{ path('jury_submission', {'submission': submission.submitid}) }}">
+							{{ formatResult(oldResult) }}
+						</a>
+					</td>
+				{% endif %}
+			{% endif %}
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+{% endif %}

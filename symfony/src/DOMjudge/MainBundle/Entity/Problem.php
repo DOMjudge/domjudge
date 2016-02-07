@@ -115,9 +115,9 @@ class Problem
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 *
-	 * @ORM\ManyToMany(targetEntity="DOMjudge\MainBundle\Entity\Contest", mappedBy="problems")
+	 * @ORM\OneToMany(targetEntity="DOMjudge\MainBundle\Entity\ContestProblem", mappedBy="problem")
 	 */
-	private $contests;
+	private $contestProblems;
 
 	/**
 	 * Constructor
@@ -128,7 +128,7 @@ class Problem
 		$this->events = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->submissions = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->testcases = new \Doctrine\Common\Collections\ArrayCollection();
-		$this->contests = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->contestProblems = new \Doctrine\Common\Collections\ArrayCollection();
 	}
 
 
@@ -481,36 +481,36 @@ class Problem
 		return $this->testcases;
 	}
 
-	/**
-	 * Add contests
-	 *
-	 * @param \DOMjudge\MainBundle\Entity\Contest $contests
-	 * @return Problem
-	 */
-	public function addContest(\DOMjudge\MainBundle\Entity\Contest $contests)
-	{
-		$this->contests[] = $contests;
+    /**
+     * Add contestProblems
+     *
+     * @param \DOMjudge\MainBundle\Entity\ContestProblem $contestProblems
+     * @return Problem
+     */
+    public function addContestProblem(\DOMjudge\MainBundle\Entity\ContestProblem $contestProblems)
+    {
+        $this->contestProblems[] = $contestProblems;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Remove contests
-	 *
-	 * @param \DOMjudge\MainBundle\Entity\Contest $contests
-	 */
-	public function removeContest(\DOMjudge\MainBundle\Entity\Contest $contests)
-	{
-		$this->contests->removeElement($contests);
-	}
+    /**
+     * Remove contestProblems
+     *
+     * @param \DOMjudge\MainBundle\Entity\ContestProblem $contestProblems
+     */
+    public function removeContestProblem(\DOMjudge\MainBundle\Entity\ContestProblem $contestProblems)
+    {
+        $this->contestProblems->removeElement($contestProblems);
+    }
 
-	/**
-	 * Get contests
-	 *
-	 * @return \Doctrine\Common\Collections\Collection
-	 */
-	public function getContests()
-	{
-		return $this->contests;
-	}
+    /**
+     * Get contestProblems
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getContestProblems()
+    {
+        return $this->contestProblems;
+    }
 }

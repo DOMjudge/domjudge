@@ -2,13 +2,35 @@
 
 namespace DOMjudge\MainBundle\Twig;
 
-class TimeDiffFormatter extends \Twig_Extension
+use DOMjudge\MainBundle\Config\DatabaseConfig;
+
+class TimeFormatter extends \Twig_Extension
 {
+	/**
+	 * @var DatabaseConfig
+	 */
+	private $databaseConfig;
+
+	public function __construct(DatabaseConfig $databaseConfig)
+	{
+		$this->databaseConfig = $databaseConfig;
+	}
+
 	public function getFunctions()
 	{
 		return array(
-			new \Twig_SimpleFunction('timediff', array($this, 'timeDiffFormatter')),
+			new \Twig_SimpleFunction('formatTime', array($this, 'timeFormatter')),
+			new \Twig_SimpleFunction('formatTimeDiff', array($this, 'timeDiffFormatter')),
 		);
+	}
+	
+	public function timeFormatter($time, $format = null)
+	{
+		if ( empty($time) ) return '';
+		if ( is_null($format) ) {
+			$format = $this->databaseConfig->getConfigurationValue('time_format', '%H:%M')->getValue();
+		}
+		return strftime($format, floor($time));
 	}
 
 	public function timeDiffFormatter($start = null, $end = NULL)

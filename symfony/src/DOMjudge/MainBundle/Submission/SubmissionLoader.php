@@ -4,6 +4,7 @@ namespace DOMjudge\MainBundle\Submission;
 
 use Doctrine\ORM\EntityManager;
 use DOMjudge\MainBundle\Entity\Contest;
+use DOMjudge\MainBundle\Entity\Judging;
 use DOMjudge\MainBundle\Entity\Submission;
 use Doctrine\ORM\Query\Expr;
 
@@ -21,7 +22,7 @@ class SubmissionLoader
 
 	/**
 	 * Get all submissions for a given set of restrictions
-	 * 
+	 *
 	 * @param Contest[] $contests
 	 *   Get all submissions for the given contests
 	 * @param array $restrictions
@@ -43,24 +44,70 @@ class SubmissionLoader
 	public function getSubmissions($contests, $restrictions = array(), $limit = null)
 	{
 		$qb = $this->getSubmissionsBaseBuilder($contests, $restrictions);
-		
+
+		$qb->select('s, partial j.{judgingid,result,verified,juryMember}, p, cp, l');
+
 		if ( $limit !== null ) {
 			$qb->setMaxResults($limit);
 		}
-		
+
 		$query = $qb->getQuery();
 
 		return $query->getResult();
 	}
-	
+
+	/**
+	 * Get the old judgings for a set of submissions.
+	 *
+	 * @param Submission[] $submissions
+	 *   The submissions to get the old judgings for
+	 *
+	 * @return Judging[]
+	 *   The old judgings for the passed submissions. Indexed on submission ID
+	 */
+	public function getOldJudgings($submissions)
+	{
+		$qb = $this->entityManager->createQueryBuilder();
+
+		$judgings = array();
+		foreach ( $submissions as $submission ) {
+			foreach ( $submission->getJudgings() as $judging ) {
+				$judgings[] = $judging->getJudgingid();
+			}
+		}
+
+		$qb
+			->select('j, j')
+			->from('DOMjudgeMainBundle:Judging', 'j')
+			->innerJoin('j.submission', 's')
+			->leftJoin('DOMjudgeMainBundle:Judging', 'jnew', Expr\Join::WITH,
+			           'jnew.previousJudging IS NULL AND s = j.submission AND j.valid = 1 OR jnew.previousJudging = j.judgingid')
+			->where('s.submitid IN (:submissions)')
+			->andWhere('jnew.judgingid IN (:judgings)')
+			->setParameter('submissions', $submissions)
+			->setParameter('judgings', $judgings);
+
+		$query = $qb->getQuery();
+
+		/** @var Judging[] $judgings */
+		$judgings = $query->getResult();
+
+		$result = array();
+		foreach ( $judgings as $judging ) {
+			$result[$judging->getSubmission()->getSubmitid()] = $judging;
+		}
+
+		return $result;
+	}
+
 	public function getSubmissionCount($contests, $restrictions = array())
 	{
 		$qb = $this->getSubmissionsBaseBuilder($contests, $restrictions);
-		
+
 		$qb->select('COUNT(s)');
-		
+
 		$query = $qb->getQuery();
-		
+
 		return (int)$query->getSingleScalarResult();
 	}
 
@@ -119,7 +166,7 @@ class SubmissionLoader
 
 	/**
 	 * Get the base submission query builder for the given restrictions
-	 * 
+	 *
 	 * @param Contest[] $contests
 	 *   Get all submissions for the given contests
 	 * @param array $restrictions
@@ -136,7 +183,8 @@ class SubmissionLoader
 	 * @return \Doctrine\ORM\QueryBuilder
 	 *   A query builder to use as a basis for other functions in this service
 	 */
-	private function getSubmissionsBaseBuilder($contests, $restrictions = array()) {
+	private function getSubmissionsBaseBuilder($contests, $restrictions = array())
+	{
 		if ( isset($restrictions['rejudgingdiff']) && !isset($restrictions['rejudging']) ) {
 			throw new \InvalidArgumentException("Rejudgingdiff set but no rejudging given");
 		}
@@ -146,12 +194,11 @@ class SubmissionLoader
 
 		$qb = $this->entityManager->createQueryBuilder();
 		$qb
-			->select('s')
 			->from('DOMjudgeMainBundle:Submission', 's')
-			->leftJoin('s.team', 't')
-			->leftJoin('s.problem', 'p')
-			->leftJoin('p.contests', 'c')
-			->leftJoin('s.language', 'l')
+			->innerJoin('s.team', 't')
+			->innerJoin('s.problem', 'p')
+			->innerJoin('p.contestProblems', 'cp', Expr\Join::WITH, 'cp.contest = s.contest')
+			->innerJoin('s.language', 'l')
 			->where('s.contest IN (:contests)')
 			->setParameter('contests', $contests);
 
@@ -163,8 +210,8 @@ class SubmissionLoader
 				->leftJoin('DOMjudgeMainBundle:Judging', 'jold', Expr\Join::WITH,
 				           'j.previousJudging IS NULL AND s = jold.submission AND jold.valid = 1 OR j.previousJudging = jold.judgingid')
 				->andWhere($qb->expr()->orX(
-					$qb->expr()->eq('s.rejudging', $restrictions['rejudging']),
-					$qb->expr()->eq('j.rejudging', $restrictions['rejudging'])
+					$qb->expr()->eq('s.rejudging', ':rejudging'),
+					$qb->expr()->eq('j.rejudging', ':rejudging')
 				))
 				->setParameter('rejudging', $restrictions['rejudging']);
 		} else {
@@ -261,7 +308,7 @@ class SubmissionLoader
 				->andWhere('j.result = :result')
 				->setParameter('result', $restrictions['result']);
 		}
-		
+
 		return $qb;
 	}
 }

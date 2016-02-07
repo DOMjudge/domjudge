@@ -25,9 +25,9 @@
 				<span id="timeleft">
 					{% if currentContest is defined and currentContest is not null %}
 						{% if currentContest.isCurrentlyRunning %}
-							time left: {{ timediff(null, currentContest.endTime) }}
+							time left: {{ formatTimeDiff(null, currentContest.endTime) }}
 						{% elseif currentContest.isActiveButNotStarted %}
-							time to start: {{ timediff(null, currentContest.startTime) }}
+							time to start: {{ formatTimeDiff(null, currentContest.startTime) }}
 						{% endif %}
 					{% endif %}
 				</span>

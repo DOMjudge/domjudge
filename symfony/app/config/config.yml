@@ -38,6 +38,7 @@ twig:
     strict_variables: "%kernel.debug%"
     globals:
         domjudge_version: %domjudge_version%
+        config: "@domjudge.config"
         contests: "@domjudge.contest"
 
 # Doctrine Configuration

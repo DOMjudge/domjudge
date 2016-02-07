@@ -1,4 +1,7 @@
 services:
+    domjudge.config:
+        class: DOMjudge\MainBundle\Config\DatabaseConfig
+        arguments: [ "@doctrine.orm.entity_manager" ]
     domjudge.contest:
         class: DOMjudge\MainBundle\Contest\ContestLoader
         arguments: [ "@doctrine.orm.entity_manager", "@session" ]
@@ -6,7 +9,23 @@ services:
         class: DOMjudge\MainBundle\Submission\SubmissionLoader
         arguments: [ "@doctrine.orm.entity_manager" ]
     domjudge.time_diff_formatter:
-        class: DOMjudge\MainBundle\Twig\TimeDiffFormatter
+        class: DOMjudge\MainBundle\Twig\TimeFormatter
+        arguments: [ "@domjudge.config" ]
+        public: false
+        tags:
+            - { name: twig.extension }
+    domjudge.special_chars:
+        class: DOMjudge\MainBundle\Twig\SpecialChars
+        public: false
+        tags:
+            - { name: twig.extension }
+    domjudge.format_result:
+        class: DOMjudge\MainBundle\Twig\ResultFormatter
+        public: false
+        tags:
+            - { name: twig.extension }
+    domjudge.submissions_displayer:
+        class: DOMjudge\MainBundle\Twig\SubmissionsDisplayer
         public: false
         tags:
             - { name: twig.extension }

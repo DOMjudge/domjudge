@@ -2,13 +2,14 @@
 
 namespace DOMjudge\MainBundle\Entity;
 
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Submission
  *
  * @ORM\Table(name="submission", indexes={@ORM\Index(name="teamid", columns={"cid", "teamid"}), @ORM\Index(name="judgehost", columns={"cid", "judgehost"}), @ORM\Index(name="teamid_2", columns={"teamid"}), @ORM\Index(name="probid", columns={"probid"}), @ORM\Index(name="langid", columns={"langid"}), @ORM\Index(name="judgehost_2", columns={"judgehost"}), @ORM\Index(name="origsubmitid", columns={"origsubmitid"}), @ORM\Index(name="rejudgingid", columns={"rejudgingid"}), @ORM\Index(name="IDX_DB055AF34B30D9C4", columns={"cid"})})
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="SubmissionRepository")
  */
 class Submission
 {
@@ -563,5 +564,21 @@ class Submission
 	public function getRejudging()
 	{
 		return $this->rejudging;
+	}
+
+	/**
+	 * Return the contest problem for this submission
+	 * @return ContestProblem
+	 * @throws \Exception
+	 */
+	public function getContestProblem()
+	{
+		/** @var ContestProblem[] $contest_problems */
+		$contest_problems = $this->getProblem()->getContestProblems();
+		if (empty($contest_problems) ||
+			$contest_problems[0]->getContest()->getCid() !== $this->getContest()->getCid() ) {
+			throw new \Exception("Contest problems not loaded or mismatch in contest information");
+		}
+		return $contest_problems[0];
 	}
 }

@@ -13,10 +13,6 @@
 		{{ form_end(filterForm) }}
 	</p>
 	
-	{{ dump(submissions) }}
-	{{ dump(submissionCount) }}
-	{{ dump(correctSubmissionCount) }}
-	{{ dump(unverifiedSubmissionCount) }}
-	{{ dump(ignoredSubmissionCount) }}
-	{{ dump(queuedSubmissionCount) }}
+	{{ submissions(submissions, true, null, showContestColumn) }}
+	{{ submission_counts(total, correct, unverified, ignored, queued) }}
 {% endblock %}

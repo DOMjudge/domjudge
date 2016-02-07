@@ -178,17 +178,9 @@ class Contest
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
 	 *
-	 * @ORM\ManyToMany(targetEntity="DOMjudge\MainBundle\Entity\Problem", inversedBy="contests")
-	 * @ORM\JoinTable(name="contestproblem",
-	 *   joinColumns={
-	 *     @ORM\JoinColumn(name="cid", referencedColumnName="cid")
-	 *   },
-	 *   inverseJoinColumns={
-	 *     @ORM\JoinColumn(name="probid", referencedColumnName="probid")
-	 *   }
-	 * )
+	 * @ORM\OneToMany(targetEntity="DOMjudge\MainBundle\Entity\ContestProblem", mappedBy="contest")
 	 */
-	private $problems;
+	private $contestProblems;
 
 	/**
 	 * @var \Doctrine\Common\Collections\Collection
@@ -207,7 +199,7 @@ class Contest
 		$this->events = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->judgings = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->submissions = new \Doctrine\Common\Collections\ArrayCollection();
-		$this->problems = new \Doctrine\Common\Collections\ArrayCollection();
+		$this->contestProblems = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->teams = new \Doctrine\Common\Collections\ArrayCollection();
 	}
 
@@ -779,39 +771,6 @@ class Contest
 	}
 
 	/**
-	 * Add problems
-	 *
-	 * @param \DOMjudge\MainBundle\Entity\Problem $problems
-	 * @return Contest
-	 */
-	public function addProblem(\DOMjudge\MainBundle\Entity\Problem $problems)
-	{
-		$this->problems[] = $problems;
-
-		return $this;
-	}
-
-	/**
-	 * Remove problems
-	 *
-	 * @param \DOMjudge\MainBundle\Entity\Problem $problems
-	 */
-	public function removeProblem(\DOMjudge\MainBundle\Entity\Problem $problems)
-	{
-		$this->problems->removeElement($problems);
-	}
-
-	/**
-	 * Get problems
-	 *
-	 * @return \Doctrine\Common\Collections\Collection
-	 */
-	public function getProblems()
-	{
-		return $this->problems;
-	}
-
-	/**
 	 * Add teams
 	 *
 	 * @param \DOMjudge\MainBundle\Entity\Team $teams
@@ -863,4 +822,37 @@ class Contest
 	{
 		return time() >= $this->getActivateTime() && time() < $this->getStartTime();
 	}
+
+    /**
+     * Add contestProblems
+     *
+     * @param \DOMjudge\MainBundle\Entity\ContestProblem $contestProblems
+     * @return Contest
+     */
+    public function addContestProblem(\DOMjudge\MainBundle\Entity\ContestProblem $contestProblems)
+    {
+        $this->contestProblems[] = $contestProblems;
+
+        return $this;
+    }
+
+    /**
+     * Remove contestProblems
+     *
+     * @param \DOMjudge\MainBundle\Entity\ContestProblem $contestProblems
+     */
+    public function removeContestProblem(\DOMjudge\MainBundle\Entity\ContestProblem $contestProblems)
+    {
+        $this->contestProblems->removeElement($contestProblems);
+    }
+
+    /**
+     * Get contestProblems
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getContestProblems()
+    {
+        return $this->contestProblems;
+    }
 }
