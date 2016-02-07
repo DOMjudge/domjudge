@@ -36,7 +36,6 @@ class SecurityController extends Controller {
 			if ( $error instanceof BadCredentialsException ) {
 				$error = new FormError('Bad credentials');
 			} else {
-				dump($error);
 				$error = new FormError(
 					$this->get('translator')->trans($error->getMessageKey(),
 					                                $error->getMessageData()));

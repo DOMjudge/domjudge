@@ -304,12 +304,19 @@ td.scorenc { border-color: silver; border-right: 0; }
 	padding-right: 5px;
 }
 
-input,select,textarea {
+input,select,textarea,button {
 	border: solid 1px darkgray;
 	background-color: #F0F0F0;
 }
-input,select {
+input,select,button {
 	cursor: pointer;
+}
+
+ul.form-error {
+	list-style: none;
+	padding-left: 0;
+	color: red;
+	border: 1px dotted red;
 }
 
 h3.teamoverview {

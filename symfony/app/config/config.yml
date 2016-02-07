@@ -36,6 +36,8 @@ framework:
 twig:
     debug:            "%kernel.debug%"
     strict_variables: "%kernel.debug%"
+    form_themes:
+        - "@DOMjudgeMain/form_layout.html.twig"
     globals:
         domjudge_version: %domjudge_version%
         config: "@domjudge.config"

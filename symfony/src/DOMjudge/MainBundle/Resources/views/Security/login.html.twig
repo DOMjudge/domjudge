@@ -6,10 +6,6 @@
 	<p>
 		Please supply your credentials below, or contact a staff member for assistance.
 	</p>
-	{{ form_start(form) }}
-	{{ form_errors(form, { 'global_errors': true }) }}
-	{{ form_row(form.username) }}
-	{{ form_row(form.password) }}
-	{{ form_widget(form.login) }}
-	{{ form_end(form) }}
+	{{ form(form) }}
+	
 {% endblock %}
