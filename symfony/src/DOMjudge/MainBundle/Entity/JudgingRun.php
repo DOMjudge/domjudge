@@ -64,9 +64,9 @@ class JudgingRun
 	private $outputSystem;
 
 	/**
-	 * @var \DOMjudge\MainBundle\Entity\Testcase
+	 * @var \DOMjudge\MainBundle\Entity\TestCase
 	 *
-	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\Testcase", inversedBy="judgingRuns")
+	 * @ORM\ManyToOne(targetEntity="DOMjudge\MainBundle\Entity\TestCase", inversedBy="judgingRuns")
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid")
 	 * })
@@ -236,10 +236,10 @@ class JudgingRun
 	/**
 	 * Set testcase
 	 *
-	 * @param \DOMjudge\MainBundle\Entity\Testcase $testcase
+	 * @param \DOMjudge\MainBundle\Entity\TestCase $testcase
 	 * @return JudgingRun
 	 */
-	public function setTestcase(\DOMjudge\MainBundle\Entity\Testcase $testcase = null)
+	public function setTestcase(\DOMjudge\MainBundle\Entity\TestCase $testcase = null)
 	{
 		$this->testcase = $testcase;
 
@@ -249,7 +249,7 @@ class JudgingRun
 	/**
 	 * Get testcase
 	 *
-	 * @return \DOMjudge\MainBundle\Entity\Testcase
+	 * @return \DOMjudge\MainBundle\Entity\TestCase
 	 */
 	public function getTestcase()
 	{
