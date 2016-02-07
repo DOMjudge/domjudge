@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use DOMjudge\MainBundle\Entity\Contest;
 use DOMjudge\MainBundle\Entity\Judging;
 use DOMjudge\MainBundle\Entity\Submission;
+use DOMjudge\MainBundle\Entity\Rejudging;
 use Doctrine\ORM\Query\Expr;
 
 class SubmissionLoader
@@ -57,37 +58,40 @@ class SubmissionLoader
 	}
 
 	/**
-	 * Get the old judgings for a set of submissions.
+	 * Get the old judgings for a rejudging and an optional set of submissions.
 	 *
-	 * @param Submission[] $submissions
-	 *   The submissions to get the old judgings for
+	 * @param Rejudging $rejudging
+	 *   The rejudging to get the old results for
+	 * @param Submission[]|null $submissions
+	 *   The submissions to get the old judgings for or null to get all old results for the given
+	 *   rejudging
 	 *
 	 * @return Judging[]
 	 *   The old judgings for the passed submissions. Indexed on submission ID
 	 */
-	public function getOldJudgings($submissions)
+	public function getOldJudgings(Rejudging $rejudging, $submissions = null)
 	{
-		$qb = $this->entityManager->createQueryBuilder();
-
-		$judgings = array();
-		foreach ( $submissions as $submission ) {
-			foreach ( $submission->getJudgings() as $judging ) {
-				$judgings[] = $judging->getJudgingid();
-			}
+		$q = "
+			SELECT jold
+			FROM DOMjudgeMainBundle:Submission s
+			LEFT JOIN DOMjudgeMainBundle:Judging j
+				WITH j.rejudging = :rejudging
+			LEFT JOIN DOMjudgeMainBundle:Judging jold
+				WITH j.previousJudging IS NULL
+					AND s = jold.submission
+					AND jold.valid = 1
+					OR j.previousJudging = jold.judgingid
+		WHERE (s.rejudging = :rejudging OR j.rejudging = :rejudging)";
+		if ( $submissions !== null ) {
+			$q .= " AND s.submitid IN (:submissions)";
 		}
+		$query = $this->entityManager->createQuery($q);
 
-		$qb
-			->select('j, j')
-			->from('DOMjudgeMainBundle:Judging', 'j')
-			->innerJoin('j.submission', 's')
-			->leftJoin('DOMjudgeMainBundle:Judging', 'jnew', Expr\Join::WITH,
-			           'jnew.previousJudging IS NULL AND s = j.submission AND j.valid = 1 OR jnew.previousJudging = j.judgingid')
-			->where('s.submitid IN (:submissions)')
-			->andWhere('jnew.judgingid IN (:judgings)')
-			->setParameter('submissions', $submissions)
-			->setParameter('judgings', $judgings);
+		$query->setParameter('rejudging', $rejudging);
 
-		$query = $qb->getQuery();
+		if ( $submissions !== null ) {
+			$query->setParameter('submissions', $submissions);
+		}
 
 		/** @var Judging[] $judgings */
 		$judgings = $query->getResult();

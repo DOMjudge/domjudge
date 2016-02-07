@@ -138,10 +138,10 @@
 				<td>
 					{% if claim %}
 						<a class="button" href="{{ link }}&claim">claim</a>
-					{% elseif not judging.verified and judging.juryMember == app.user.username %}
+					{% elseif judging is not null and not judging.verified and judging.juryMember == app.user.username %}
 						<a class="button" href="{{ link }}&unclaim">unclaim</a>
 					{% else %}
-						<a href="{{ link }}">{{ judging.juryMember }}</a>
+						<a href="{{ link }}">{% if judging is not null %}{{ judging.juryMember }}{% endif %}</a>
 					{% endif %}
 				</td>
 				{% if showOldResult %}
