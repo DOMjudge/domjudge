@@ -16,15 +16,21 @@ class TimeFormatter extends \Twig_Extension
 		$this->databaseConfig = $databaseConfig;
 	}
 
-	public function getFunctions()
+	public function getFilters()
 	{
 		return array(
-			new \Twig_SimpleFunction('formatTime', array($this, 'timeFormatter')),
-			new \Twig_SimpleFunction('formatTimeDiff', array($this, 'timeDiffFormatter')),
+			new \Twig_SimpleFilter('formatTime', array($this, 'formatTime')),
 		);
 	}
 	
-	public function timeFormatter($time, $format = null)
+	public function getFunctions()
+	{
+		return array(
+			new \Twig_SimpleFunction('formatTimeDiff', array($this, 'formatTimeDiff')),
+		);
+	}
+	
+	public function formatTime($time, $format = null)
 	{
 		if ( empty($time) ) return '';
 		if ( is_null($format) ) {
@@ -33,7 +39,7 @@ class TimeFormatter extends \Twig_Extension
 		return strftime($format, floor($time));
 	}
 
-	public function timeDiffFormatter($start = null, $end = NULL)
+	public function formatTimeDiff($start = null, $end = NULL)
 	{
 		if ( is_null($start) ) $start = microtime(TRUE);
 		if ( is_null($end) ) $end = microtime(TRUE);

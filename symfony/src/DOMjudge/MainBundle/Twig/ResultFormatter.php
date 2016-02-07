@@ -4,10 +4,10 @@ namespace DOMjudge\MainBundle\Twig;
 
 class ResultFormatter extends \Twig_Extension
 {
-	public function getFunctions()
+	public function getFilters()
 	{
 		return array(
-			new \Twig_SimpleFunction('formatResult', array($this, 'formatResult'), array(
+			new \Twig_SimpleFilter('formatResult', array($this, 'formatResult'), array(
 				'is_safe' => array('html'),
 				'needs_environment' => true,
 			)),

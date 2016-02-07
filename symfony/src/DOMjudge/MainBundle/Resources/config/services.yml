@@ -14,11 +14,6 @@ services:
         public: false
         tags:
             - { name: twig.extension }
-    domjudge.special_chars:
-        class: DOMjudge\MainBundle\Twig\SpecialChars
-        public: false
-        tags:
-            - { name: twig.extension }
     domjudge.format_result:
         class: DOMjudge\MainBundle\Twig\ResultFormatter
         public: false
@@ -26,6 +21,12 @@ services:
             - { name: twig.extension }
     domjudge.submissions_displayer:
         class: DOMjudge\MainBundle\Twig\SubmissionsDisplayer
+        public: false
+        tags:
+            - { name: twig.extension }
+
+    domjudge.hostname:
+        class: DOMjudge\MainBundle\Twig\HostFormatter
         public: false
         tags:
             - { name: twig.extension }

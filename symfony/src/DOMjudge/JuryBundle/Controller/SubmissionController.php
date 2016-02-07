@@ -2,10 +2,14 @@
 
 namespace DOMjudge\JuryBundle\Controller;
 
-use DOMjudge\JuryBundle\Resources\Type\SubmissionsFilterType;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\Expr;
+use DOMjudge\JuryBundle\Form\Type\IgnoreSubmissionType;
+use DOMjudge\JuryBundle\Form\Type\SubmissionsFilterType;
+use DOMjudge\MainBundle\Entity\Judging;
 use DOMjudge\MainBundle\Entity\Rejudging;
 use DOMjudge\MainBundle\Entity\Submission;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use DOMjudge\MainBundle\Entity\TestCase;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -74,11 +78,21 @@ class SubmissionController extends Controller
 	}
 
 	/**
-	 * @Route("/submission/{submission}", name="jury_submission")
-	 * @ParamConverter("submission", class="DOMjudgeMainBundle:Submission")
+	 * @Route("/submission/{submissionId}", name="jury_submission")
+	 * @Template()
 	 */
-	public function viewAction(Request $request, Submission $submission)
+	public function viewAction(Request $request, $submissionId)
 	{
+		// TODO: claiming code
+		
+		$em = $this->getDoctrine()->getManager();
+
+		if ( $request->query->has('judging') ) {
+			$judgingId = $request->query->get('judging');
+		} else {
+			$judgingId = null;
+		}
+
 		if ( $request->query->has('rejudging') ) {
 			$rejudging = $this->getDoctrine()->getRepository('DOMjudgeMainBundle:Rejudging')->find($request->query->get('rejudging'));
 			if ( $rejudging === null ) {
@@ -87,8 +101,219 @@ class SubmissionController extends Controller
 		} else {
 			$rejudging = null;
 		}
+
+		if ( $judgingId !== null && $rejudging !== null ) {
+			throw new \InvalidArgumentException("You cannot specify judging and rejudging at the same time.");
+		}
+
+		if ( $judgingId === null && $rejudging !== null ) {
+			// Try to select judging from rejudging
+			$query = $this->get('doctrine.orm.entity_manager')->createQueryBuilder()
+				->select('partial j.{judgingid}')
+				->from('DOMjudgeMainBundle:Judging', 'j')
+				->where('j.submission = :submission')
+				->andWhere('j.rejudging = :rejudging')
+				->setParameter('submission', $submissionId)
+				->setParameter('rejudging', $rejudging)
+				->getQuery();
+
+			$judgingId = $query->getOneOrNullResult(Query::HYDRATE_SINGLE_SCALAR);
+		}
+
+		// Load the submission
+		$query = $this->get('doctrine.orm.entity_manager')->createQueryBuilder()
+			->select('s, t, p, l, c, cp')
+			->from('DOMjudgeMainBundle:Submission', 's')
+			->leftJoin('s.team', 't')
+			->leftJoin('s.problem', 'p')
+			->leftJoin('s.language', 'l')
+			->leftJoin('s.contest', 'c')
+			->leftJoin('p.contestProblems', 'cp', Expr\Join::WITH, 'cp.contest = c')
+			->where('s.submitid = :submission')
+			->setParameter('submission', $submissionId)
+			->getQuery();
+
+		/** @var Submission $submission */
+		$submission = $query->getOneOrNullResult();
+
+		if ( $submission === null ) {
+			throw new NotFoundHttpException(sprintf("Submission s%d not found", $submissionId));
+		}
+
+		$ignoreForm = null;
+		$ignoreFormView = null;
+
+		if ( $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') ) {
+			$ignoreForm = $this->createForm(IgnoreSubmissionType::class,
+			                                array(
+				                                'submission' => $submission->getSubmitid(),
+				                                'ignore' => $submission->getValid(),
+			                                ), array(
+				                                'ignore' => $submission->getValid(),
+			                                )
+			);
+
+			$ignoreForm->handleRequest($request);
+
+			// If form was submitted, process ignore status
+			if ( $ignoreForm->isSubmitted() && $ignoreForm->isValid() ) {
+				$ignore = $ignoreForm['ignore']->getData();
+				$submission->setValid(!$ignore);
+				$em->flush();
+
+				// Rebuild the form to have it have the new values
+				$ignoreForm = $this->createForm(IgnoreSubmissionType::class,
+				                                array(
+					                                'submission' => $submission->getSubmitid(),
+					                                'ignore' => $submission->getValid(),
+				                                ), array(
+					                                'ignore' => $submission->getValid(),
+				                                )
+				);
+			}
+
+			$ignoreFormView = $ignoreForm->createView();
+		}
+
+		// Now load the judgings for this submission
+		$query = $this->get('doctrine.orm.entity_manager')->createQueryBuilder()
+			->select('partial j.{judgingid,result,valid,startTime,endTime,judgehost,verified,juryMember,verifyComment}, MAX(jr.runTime) AS maxRunTime, partial r.{reason,rejudgingid}')
+			->from('DOMjudgeMainBundle:Judging', 'j')
+			->leftJoin('j.judgingRuns', 'jr')
+			->leftJoin('j.rejudging', 'r')
+			->where('j.contest = :contest')
+			->andWhere('j.submission = :submission')
+			->groupBy('j.judgingid')
+			->orderBy('j.startTime', 'ASC')
+			->addOrderBy('j.judgingid', 'ASC')
+			->setParameter('contest', $submission->getContest())
+			->setParameter('submission', $submission)
+			->getQuery();
+
+		// Because of the MAX(), this will be an array where each element is an array with two keys:
+		// * 0: the Judging object
+		// * maxRunTime: the result from the MAX()
+		$judgings = $query->getResult();
+
+		// If there is no judging selected through the request, we select the
+		// valid one.
+		if ( $judgingId === null ) {
+			/** @var Judging[] $judging */
+			foreach ( $judgings as $judging ) {
+				if ( $judging[0]->getValid() ) {
+					$judgingId = $judging[0]->getJudgingid();
+					break;
+				}
+			}
+		}
+
+		// And load the judging
+		if ( $judgingId === null ) {
+			$currentJudging = null;
+		} else {
+			$query = $this->get('doctrine.orm.entity_manager')->createQueryBuilder()
+				->select('partial j.{judgingid,result,valid,startTime,endTime,judgehost,verified,juryMember,verifyComment}')
+				->from('DOMjudgeMainBundle:Judging', 'j')
+				->where('j.judgingid = :judging')
+				->andWhere('j.submission = :submission')
+				->setParameter('judging', $judgingId)
+				->setParameter('submission', $submission)
+				->getQuery();
+
+			/** @var Judging $currentJudging */
+			$currentJudging = $query->getOneOrNullResult();
+
+			if ( $currentJudging === null ) {
+				throw new NotFoundHttpException(sprintf("Judging j%d not found for submission s%d", $judgingId, $submission->getSubmitid()));
+			}
+		}
 		
-		dump($submission);
-		dump($rejudging);
+		if ($currentJudging !== null) {
+			$query = $this->get('doctrine.orm.entity_manager')->createQueryBuilder()
+				->select('partial r.{runid,judging,testcase,runResult,runTime}, partial t.{testcaseid,rank,description,imageType,imageThumb}')
+				->addSelect('SUBSTRING(r.outputRun, 1, 50001) AS outputRun')
+				->addSelect('SUBSTRING(r.outputDiff, 1, 50001) AS outputDiff')
+				->addSelect('SUBSTRING(r.outputError, 1, 50001) AS outputError')
+				->addSelect('SUBSTRING(r.outputSystem, 1, 50001) AS outputSystem')
+				->addSelect('SUBSTRING(t.output, 1, 50001) AS outputReference')
+				->from('DOMjudgeMainBundle:TestCase', 't')
+				->leftJoin('t.judgingRuns', 'r', Expr\Join::WITH, 'r.judging = :judging')
+				->where('t.problem = :problem')
+				->orderBy('t.rank')
+				->setParameter('judging', $currentJudging)
+				->setParameter('problem', $submission->getProblem())
+				->getQuery();
+			
+			/** @var TestCase[] $runs */
+			$runs = $query->getResult();
+			
+			$lastSubmission = $submission->getOriginalSubmission();
+			
+			if ($lastSubmission === null) {
+				$query = $this->get('doctrine.orm.default_entity_manager')->createQueryBuilder()
+					->select('s')
+					->from('DOMjudgeMainBundle:Submission', 's')
+					->where('s.team = :team')
+					->andWhere('s.problem = :problem')
+					->andWhere('s.submitTime < :submittime')
+					->orderBy('s.submitTime', 'DESC')
+					->setMaxResults(1)
+					->setParameter('team', $submission->getTeam())
+					->setParameter('problem', $submission->getProblem())
+					->setParameter('submittime', $submission->getSubmitTime())
+					->getQuery();
+				
+				$lastSubmission = $query->getOneOrNullResult();
+			}
+		} else {
+			$runs = null;
+			$lastSubmission = null;
+		}
+		
+		if ($lastSubmission !== null) {
+			$query = $this->get('doctrine.orm.default_entity_manager')->createQueryBuilder()
+				->select('partial j.{judgingid,result,verifyComment,endTime}')
+				->from('DOMjudgeMainBundle:Judging', 'j')
+				->where('j.submission = :submission')
+				->andWhere('j.valid = 1')
+				->orderBy('j.judgingid', 'DESC')
+				->setMaxResults(1)
+				->setParameter('submission', $lastSubmission)
+				->getQuery();
+			
+			/** @var Judging $lastJudging */
+			$lastJudging = $query->getOneOrNullResult();
+		} else {
+			$lastJudging = null;
+		}
+		
+		if ($lastJudging !== null) {
+			$query = $this->get('doctrine.orm.default_entity_manager')->createQueryBuilder()
+				->select('partial t.{testcaseid,rank,description}')
+				->addSelect('partial r.{runid,runTime,runResult}')
+				->from('DOMjudgeMainBundle:TestCase', 't')
+				->leftJoin('t.judgingRuns', 'r', Expr\Join::WITH, 'r.judging = :judging')
+				->where('t.problem = :problem')
+				->orderBy('t.rank')
+				->setParameter('judging', $lastJudging)
+				->setParameter('problem', $submission->getProblem())
+				->getQuery();
+
+			/** @var TestCase $lastRuns */
+			$lastRuns = $query->getResult();
+		} else {
+			$lastRuns = null;
+		}
+
+		return array(
+			'submission' => $submission,
+			'judgings' => $judgings,
+			'currentJudging' => $currentJudging,
+			'runs' => $runs,
+			'lastSubmission' => $lastSubmission,
+			'lastJudging' => $lastJudging,
+			'lastRuns' => $lastRuns,
+			'ignoreForm' => $ignoreFormView,
+		);
 	}
 }

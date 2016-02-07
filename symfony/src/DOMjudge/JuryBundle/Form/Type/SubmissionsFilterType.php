@@ -1,6 +1,6 @@
 <?php
 
-namespace DOMjudge\JuryBundle\Resources\Type;
+namespace DOMjudge\JuryBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;

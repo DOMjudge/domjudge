@@ -1,0 +1,160 @@
+{% set pageTitle = 'Submission s' ~ submission.submitid %}
+{% set noPageHeader = true %}
+
+{% extends '@DOMjudgeJury/base.html.twig' %}
+
+{% block body %}
+	{% if submission.originalSubmission is not null %}
+		{% set link = path('jury_submission', {'submissionId': submission.originalSubmission.submitid}) %}
+		{% set extra = ' (resubmit of <a href="' ~ link ~ '">s' ~ submission.originalSubmission.submitid ~ '</a>)' | raw %}
+		{% set pageHeader = pageTitle ~ extra | raw %}
+	{% else %}
+		{% set pageHeader = pageTitle %}
+	{% endif %}
+	{% if not submission.valid %}
+		{% set pageHeader = pageHeader ~ ' (ignored)' %}
+	{% endif %}
+	<br/>
+	<h1 style="display: inline;">{{ pageHeader | raw }}</h1>
+	{% if is_granted('ROLE_ADMIN') %}
+		&nbsp;
+		{% if submission.valid %}
+			{% set ignore = 'ignore' %}
+		{% else %}
+			{% set ignore = 'unignore' %}
+		{% endif %}
+		{% set confirmText = 'Really ' ~ ignore ~ ' submission s' ~ submission.submitid ~ '?' %}
+		{{ form_start(ignoreForm, {'attr': {
+			'style': 'display: inline;',
+			'onclick': 'return confirm("' ~ confirmText ~ '");'
+		}}) }}
+		{{ form_widget(ignoreForm.submit) }}
+		{{ form_end(ignoreForm) }}
+	{% endif %}
+	
+	{% if not submission.valid %}
+		<p>This submission is not used during scoreboard calculations.</p>
+	{% endif %}
+	
+	{# Condensed submission info on a single line with icons #}
+	<p>
+		<img title="team" alt="Team:" src="{{ asset('bundles/domjudgemain/images/team.png') }}"/>
+		<a href="#">{{ submission.team.name ~ ' (t' ~ submission.team.teamid ~ ')' }}</a>
+		&nbsp;&nbsp;
+		<img title="contest" alt="Contest:" src="{{ asset('bundles/domjudgemain/images/contest.png') }}"/>
+		<a href="#">
+			<span class="contestid">{{ submission.contest.shortName }}</span>
+		</a>
+		&nbsp;&nbsp;
+		<img title="problem" alt="Problem:" src="{{ asset('bundles/domjudgemain/images/problem.png') }}"/>
+		<a href="#">
+			<span class="probid">{{ submission.contestProblem.shortName }}</span>:
+			{{ submission.problem.name }}
+		</a>
+		&nbsp;&nbsp;
+		<img title="language" alt="Language:" src="{{ asset('bundles/domjudgemain/images/lang.png') }}"/>
+		<a href="#">
+			{{ submission.language.name }}
+		</a>
+		&nbsp;&nbsp;
+		<img title="submittime" alt="Submittime:" src="{{ asset('bundles/domjudgemain/images/submittime.png') }}"/>
+		<span title="{{ submission.submitTime | formatTime('%Y-%m-%d %H:%M:%S (%Z)') }}">
+			{{ submission.submitTime | formatTime }}
+		</span>
+		&nbsp;&nbsp;
+		<img title="allowed runtime" alt="Allowed runtime:" src="{{ asset('bundles/domjudgemain/images/allowedtime.png') }}"/>
+		{{ (submission.language.timeFactor * submission.problem.timeLimit) | round(0, 'ceil') }}s
+		&nbsp;&nbsp;
+		<img title="view source code" alt="" src="{{ asset('bundles/domjudgemain/images/code.png') }}"/>
+		<a href="#" style="font-weight:bold;">view source code</a>
+	</p>
+	
+	{% if judgings | length > 1 or (judgings is not empty and currentJudging is null) %}
+		<table class="list">
+			<caption>Judgings</caption>
+			<thead>
+			<tr>
+				<td></td>
+				<th scope="col">ID</th>
+				<th scope="col">start</th>
+				<th scope="col">max runtime</th>
+				<th scope="col">judgehost</th>
+				<th scope="col">result</th>
+				<th scope="col">rejudging</th>
+			</tr>
+			</thead>
+			<tbody>
+			{% for judgingData in judgings %}
+				{% set maxRunTime = judgingData.maxRunTime %}
+				{# @var judging \DOMjudge\MainBundle\Entity\Judging #}
+				{% set judging = judgingData.0 %}
+				<tr {% if not judging.valid %}class="disabled"{% endif %}>
+					{% set link = path('jury_submission', {'submissionId': submission.submitid, 'judging': judging.judgingid}) %}
+					<td>
+						<a href="{{ link }}">
+							{% if judging.judgingid == currentJudging.judgingid %}&rarr;{% endif %}
+							&nbsp;
+						</a>
+					</td>
+					<td><a href="{{ link }}">j{{ judging.judgingid }}</a></td>
+					<td><a href="{{ link }}">{{ judging.startTime | formatTime }}</a></td>
+					<td><a href="{{ link }}">{{ maxRunTime }} s</a></td>
+					<td><a href="{{ link }}">{{ judging.judgehost.hostname }}</a></td>
+					<td><a href="{{ link }}">{{ judging.result | formatResult(true, judging.valid) }}</a></td>
+					<td>
+						<a href="{{ link }}">
+							{% if judging.rejudging is not null %}
+								r{{ judging.rejudging.rejudgingid }} ({{ judging.rejudging.reason }})
+							{% endif %}
+						</a>
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	{% endif %}
+	
+	{% if currentJudging is null %}
+		<p><em>Not (re)judged yet</em></p>
+		
+		{# TODO: restriction checking. Idea: modify Entity/Judgehost to have a function 'canJudgeSubmission' #}
+	{% else %}
+		{# TODO: rejudge form #}
+		<br/>
+		<h2 style="display: inline;">
+			Judging j{{ currentJudging.judgingid }}
+			{% if currentJudging.rejudging is not null %}
+				(rejudging <a href="#">r{{ currentJudging.rejudging.rejudgingid }}</a>, reason: {{ currentJudging.rejudging.reason }})
+			{% elseif not currentJudging.valid %}
+				(INVALID)
+			{% endif %}
+		</h2>
+		&nbsp;
+		{# TODO: add verify / claim form #}
+		<br /><br />
+		Result: {{ currentJudging.result | formatResult(true, currentJudging.valid) }}
+		{%- if lastJudging is not null -%}
+			<span class="lastresult"> (<a href="{{ path('jury_submission', {'submissionId': lastSubmission.submitid}) }}">s{{ lastSubmission.submitid }}</a>: {{ lastJudging.result }})</span>,
+		{%- else -%}
+			,
+		{%- endif %}
+		Judgehost: <a href="#">{{ currentJudging.judgehost.hostname | formatHost }}</a>
+		
+		{# Time (start, end, used) #}
+		<span class="judgetime">
+			Judging started: {{ currentJudging.startTime | formatTime('%H:%M:%S') }}
+			{%- if currentJudging.endTime is not empty -%}
+				, finished in {{ formatTimeDiff(currentJudging.startTime, currentJudging.endTime) }} s
+			{%- elseif currentJudging.valid or currentJudging.rejudging is not null -%}
+				&nbsp;[still judging - busy {{ formatTimeDiff(currentJudging.startTime) }}]
+			{%- else -%}
+				&nbsp;[aborted]
+			{%- endif -%}
+		</span>
+
+		<script type="text/javascript">
+			togglelastruns();
+		</script>
+	{% endif %}
+{% endblock %}
+

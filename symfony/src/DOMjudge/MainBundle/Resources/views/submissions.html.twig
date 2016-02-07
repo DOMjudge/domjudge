@@ -22,7 +22,7 @@
 				<th scope="col">team</th>
 			{% endif %}
 			<th scope="col">problem</th>
-			<th scope="col">language</th>
+			<th scope="col">lang</th>
 			<th scope="col">result</th>
 			{% if isJury %}
 				<th scope="col">verified</th>
@@ -45,9 +45,9 @@
 			
 			{% if isJury %}
 				{% if rejudging is not null %}
-					{% set link = path('jury_submission', {'submission': submission.submitid, 'rejudging': rejudging.rejudgingid}) %}
+					{% set link = path('jury_submission', {'submissionId': submission.submitid, 'rejudging': rejudging.rejudgingid}) %}
 				{% else %}
-					{% set link = path('jury_submission', {'submission': submission.submitid}) %}
+					{% set link = path('jury_submission', {'submissionId': submission.submitid}) %}
 				{% endif %}
 			{% else %}
 				{% if submission.submitTime < submission.contest.endTime
@@ -74,22 +74,22 @@
 						<td><a {% if link is not null %}href="{{ link }}"{% endif %}>c{{ submission.contest.cid }}</a></td>
 					{% endif %}
 				{% endif %}
-				<td><a {% if link is not null %}href="{{ link }}"{% endif %}>{{ specialChars(formatTime(submission.submitTime)) }}</a></td>
+				<td><a {% if link is not null %}href="{{ link }}"{% endif %}>{{ submission.submitTime | formatTime) }}</a></td>
 				{% if isJury %}
-					<td title="t{{ specialChars(submission.team.teamid) }}">
+					<td title="t{{ submission.team.teamid }}">
 						<a {% if link is not null %}href="{{ link }}"{% endif %}>
-							{{ specialChars(submission.team.name[:30]) }}
+							{{ submission.team.name[:30] }}
 						</a>
 					</td>
 				{% endif %}
-				<td class="probid" title="t{{ specialChars(submission.problem.name) }}">
+				<td class="probid" title="t{{ submission.problem.name }}">
 					<a {% if link is not null %}href="{{ link }}"{% endif %}>
-						{{ specialChars(submission.contestProblem.shortName) }}
+						{{ submission.contestProblem.shortName }}
 					</a>
 				</td>
-				<td class="langid" title="t{{ specialChars(submission.language.name) }}">
+				<td class="langid" title="t{{ submission.language.name }}">
 					<a {% if link is not null %}href="{{ link }}"{% endif %}>
-						{{ specialChars(submission.language.langid) }}
+						{{ submission.language.langid }}
 					</a>
 				</td>
 				<td class="result">
@@ -110,7 +110,7 @@
 						{% else %}
 							{% set result = judging.result %}
 						{% endif %}
-						{{ formatResult(result, isJury) }}
+						{{ result | formatResult(isJury) }}
 					</a>
 				</td>
 			{% if isJury %}
@@ -121,7 +121,7 @@
 				{% else %}
 					{% set verified = judging.verified ? 'yes' : 'no' %}
 					{% if judging.juryMember is not empty %}
-						{% set juryMember = specialChars(judging.juryMember) %}
+						{% set juryMember = judging.juryMember %}
 					{% else %}
 						{% set juryMember = ' ' %}
 					{% endif %}
@@ -150,8 +150,8 @@
 						{% set oldResult = oldJudgings[submission.submitid].result %}
 					{% endif %}
 					<td>
-						<a href="{{ path('jury_submission', {'submission': submission.submitid}) }}">
-							{{ formatResult(oldResult) }}
+						<a href="{{ path('jury_submission', {'submissionId': submission.submitid}) }}">
+							{{ oldResult | formatResult }}
 						</a>
 					</td>
 				{% endif %}

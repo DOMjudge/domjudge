@@ -8,10 +8,11 @@
 <head>
 	<!-- DOMjudge version {{ domjudge_version }} -->
 	<meta charset="utf-8"/>
-	<title>{% if pageTitle is defined %} {{ pageTitle }}{% endif %}</title>
+	<title>{% if pageTitle is defined %} {{ pageTitle | raw }}{% endif %}</title>
 	<link rel="icon" href="{{ asset('bundles/domjudgemain/images/favicon.png') }}" type="image/png" />
 	<link rel="stylesheet" href="{{ asset('bundles/domjudgemain/css/style.css') }}" type="text/css" />
 	<link rel="stylesheet" href="{{ asset('bundles/domjudgemain/css/octicons/octicons.css') }}" />
+	{% block stylesheets %}{% endblock %}
 	<script type="text/javascript" src="{{ asset('bundles/domjudgemain/js/jquery.min.js') }}"></script>
 	<script type="text/javascript" src="{{ asset('bundles/domjudgemain/js/domjudge.js') }}"></script>
 	<script src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>

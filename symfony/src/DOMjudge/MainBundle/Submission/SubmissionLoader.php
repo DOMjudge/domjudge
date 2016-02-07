@@ -46,7 +46,10 @@ class SubmissionLoader
 	{
 		$qb = $this->getSubmissionsBaseBuilder($contests, $restrictions);
 
-		$qb->select('s, partial j.{judgingid,result,verified,juryMember}, p, cp, l');
+		$qb
+			->select('s, partial j.{judgingid,result,verified,juryMember}, p, cp, l')
+			->orderBy('s.submitTime', 'DESC')
+			->addOrderBy('s.submitid', 'DESC');
 
 		if ( $limit !== null ) {
 			$qb->setMaxResults($limit);
