@@ -9,6 +9,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class SubmissionController extends Controller
@@ -76,18 +77,17 @@ class SubmissionController extends Controller
 	 * @Route("/submission/{submission}", name="jury_submission")
 	 * @ParamConverter("submission", class="DOMjudgeMainBundle:Submission")
 	 */
-	public function viewAction(Submission $submission)
+	public function viewAction(Request $request, Submission $submission)
 	{
-		dump($submission);
-	}
-
-	/**
-	 * @Route("/submission/{submission}/rejudging/{rejudging}", name="jury_submission_for_rejudging")
-	 * @ParamConverter("submission", class="DOMjudgeMainBundle:Submission")
-	 * @ParamConverter("rejudging", class="DOMjudgeMainBundle:Rejudging")
-	 */
-	public function viewWithRejudgingAction(Submission $submission, Rejudging $rejudging)
-	{
+		if ( $request->query->has('rejudging') ) {
+			$rejudging = $this->getDoctrine()->getRepository('DOMjudgeMainBundle:Rejudging')->find($request->query->get('rejudging'));
+			if ( $rejudging === null ) {
+				throw new NotFoundHttpException('DOMjudgeMainBundle:Rejudging object not found.');
+			}
+		} else {
+			$rejudging = null;
+		}
+		
 		dump($submission);
 		dump($rejudging);
 	}

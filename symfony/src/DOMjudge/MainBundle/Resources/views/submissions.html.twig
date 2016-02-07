@@ -45,7 +45,7 @@
 			
 			{% if isJury %}
 				{% if rejudging is not null %}
-					{% set link = path('jury_submission_for_rejudging', {'submission': submission.submitid, 'rejudging': rejudging.rejudgingid}) %}
+					{% set link = path('jury_submission', {'submission': submission.submitid, 'rejudging': rejudging.rejudgingid}) %}
 				{% else %}
 					{% set link = path('jury_submission', {'submission': submission.submitid}) %}
 				{% endif %}

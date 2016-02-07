@@ -2,14 +2,13 @@
 
 namespace DOMjudge\MainBundle\Entity;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Submission
  *
  * @ORM\Table(name="submission", indexes={@ORM\Index(name="teamid", columns={"cid", "teamid"}), @ORM\Index(name="judgehost", columns={"cid", "judgehost"}), @ORM\Index(name="teamid_2", columns={"teamid"}), @ORM\Index(name="probid", columns={"probid"}), @ORM\Index(name="langid", columns={"langid"}), @ORM\Index(name="judgehost_2", columns={"judgehost"}), @ORM\Index(name="origsubmitid", columns={"origsubmitid"}), @ORM\Index(name="rejudgingid", columns={"rejudgingid"}), @ORM\Index(name="IDX_DB055AF34B30D9C4", columns={"cid"})})
- * @ORM\Entity(repositoryClass="SubmissionRepository")
+ * @ORM\Entity
  */
 class Submission
 {
