@@ -99,7 +99,7 @@
 					<td><a href="{{ link }}">j{{ judging.judgingid }}</a></td>
 					<td><a href="{{ link }}">{{ judging.startTime | formatTime }}</a></td>
 					<td><a href="{{ link }}">{{ maxRunTime }} s</a></td>
-					<td><a href="{{ link }}">{{ judging.judgehost.hostname }}</a></td>
+					<td><a href="{{ link }}">{% if judging.judgehost is not null %}{{ judging.judgehost.hostname | formatHost }}{% endif %}</span></a></td>
 					<td><a href="{{ link }}">{{ judging.result | formatResult(true, judging.valid) }}</a></td>
 					<td>
 						<a href="{{ link }}">
@@ -138,7 +138,7 @@
 		{%- else -%}
 			,
 		{%- endif %}
-		Judgehost: <a href="#">{{ currentJudging.judgehost.hostname | formatHost }}</a>
+		Judgehost: <a href="#">{% if currentJudging.judgehost is not null %}{{ currentJudging.judgehost.hostname | formatHost }}{% endif %}</a>
 		
 		{# Time (start, end, used) #}
 		<span class="judgetime">
