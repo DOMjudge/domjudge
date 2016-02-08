@@ -571,6 +571,19 @@ select-queries to one or more replicated slave servers, while updates
 will still be done to the master. This is not supported out of the box,
 and will require making changes to the DOMjudge source.
 
+<sect1>Storage of submissions
+<label id="install_config:storage_submissions">
+<p>
+The database is the authoritative version for submission source files;
+file system storage is available as an easy way to access the source
+files and as backup, but only when the web server has write
+permissions to <tt>&lt;domjudge_submitdir&gt;</tt>. File system
+storage is ignored if these permissions are not set. The programs
+<tt>bin/save_sources2file</tt> and <tt>bin/restore_sources2db</tt> are
+available to store and recover the submission table in the database
+to/from these files.
+
+
 <sect>Web server configuration
 <p>
 
@@ -694,6 +707,17 @@ before starting the judgedaemon.
 
 <sect>Building and installing the submit client<label id="install_config:submitclient">
 <p>
+
+DOMjudge supports two submission methods: via the command
+line <tt>submit</tt> program and via the web interface. From
+experience, both methods have users that prefer the one above the
+other.
+
+The command line submit client sends submissions using the API
+interface internally. This requires the libcURL and libjsonCPP library
+development files at compile time. The submit client can be statically
+linked using the <tt>--enable-static-linking</tt> configure option to
+avoid a runtime dependency.
 
 The submit client can be built with <tt>make submitclient</tt>. There
 is no make target to install the submit client, as its location will
@@ -923,26 +947,6 @@ be made. These are sometimes needed in non-standard environments.
        modified to suit your local environment. See comments in that
        file for more information.
 </itemize>
-
-<sect>Submission methods <label id="install_config:submissionmethods">
-<p>
-
-DOMjudge supports two submission methods: via the command line submit
-program and via the web interface. From experience, both methods have
-users that prefer the one above the other.
-
-The command line submit client sends submissions using the API
-interface internally. This requires the libcURL
-and libjsonCPP library development files at compile time (the submit
-client is statically linked to avoid a runtime dependency).
-
-The database is the authoritative version for submission source files;
-file system storage is available as an easy way to access the source
-files and as backup, but only when the web server has write
-permissions on <tt>&lt;domjudge_submitdir&gt;</tt>. File system
-storage is ignored if these permissions are not set. The program
-<tt>bin/restore_sources2db</tt> is available to recover the submission
-table in the database from these files.
 
 <sect>Logging &amp; debugging
 <p>
@@ -2030,7 +2034,7 @@ web server group access to the configuration and password files.
 If you want the web server to also store incoming submission sources on
 the file system (next to the database), then <tt>&lt;domserver_submitdir&gt;</tt> must be
 writable for the web server, see also <ref
-id="install_config:submissionmethods" name="submission methods">.
+id="install_config:storage_submissions" name="storage of submissions">.
 
 You should take care not to serve any files over the web that
 are not under the DOMjudge 'www/' directory, because they might
