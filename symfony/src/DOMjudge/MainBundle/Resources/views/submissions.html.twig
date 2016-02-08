@@ -82,12 +82,12 @@
 						</a>
 					</td>
 				{% endif %}
-				<td class="probid" title="t{{ submission.problem.name }}">
+				<td class="probid" title="{{ submission.problem.name }}">
 					<a {% if link is not null %}href="{{ link }}"{% endif %}>
 						{{ submission.problem.contestProblems.0.shortName }}
 					</a>
 				</td>
-				<td class="langid" title="t{{ submission.language.name }}">
+				<td class="langid" title="{{ submission.language.name }}">
 					<a {% if link is not null %}href="{{ link }}"{% endif %}>
 						{{ submission.language.langid }}
 					</a>

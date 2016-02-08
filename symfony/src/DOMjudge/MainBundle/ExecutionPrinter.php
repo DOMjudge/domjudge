@@ -19,6 +19,6 @@ class ExecutionPrinter
 	public function getTotalTime() {
 		$now = microtime(true);
 		$taken = $now - $this->kernel->getStartTime();
-		return sprintf('Execution took: %d ms', round($taken * 1000));
+		return sprintf('<p>Execution took: %d ms</p>', round($taken * 1000));
 	}
 }

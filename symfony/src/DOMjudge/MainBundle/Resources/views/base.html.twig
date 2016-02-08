@@ -90,7 +90,7 @@
 	{% block body %}{% endblock %}
 
 	{% if show_total_time %}
-		{{ execution_printer.totalTime }}
+		{{ execution_printer.totalTime | raw }}
 	{% endif %}
 </body>
 </html>
