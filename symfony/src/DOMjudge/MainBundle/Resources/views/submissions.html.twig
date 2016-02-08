@@ -42,7 +42,7 @@
 			{% if submission.judgings is not empty %}
 				{% set judging = submission.judgings.0 %}
 			{% endif %}
-			
+
 			{% if isJury %}
 				{% if rejudging is not null %}
 					{% set link = path('jury_submission', {'submissionId': submission.submitid, 'rejudging': rejudging.rejudgingid}) %}
@@ -74,7 +74,7 @@
 						<td><a {% if link is not null %}href="{{ link }}"{% endif %}>c{{ submission.contest.cid }}</a></td>
 					{% endif %}
 				{% endif %}
-				<td><a {% if link is not null %}href="{{ link }}"{% endif %}>{{ submission.submitTime | formatTime) }}</a></td>
+				<td><a {% if link is not null %}href="{{ link }}"{% endif %}>{{ submission.submitTime | formatTime }}</a></td>
 				{% if isJury %}
 					<td title="t{{ submission.team.teamid }}">
 						<a {% if link is not null %}href="{{ link }}"{% endif %}>
