@@ -30,3 +30,7 @@ services:
         public: false
         tags:
             - { name: twig.extension }
+            
+    domjudge.execution_printer:
+        class: DOMjudge\MainBundle\ExecutionPrinter
+        arguments: ["@kernel"]

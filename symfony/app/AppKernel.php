@@ -38,4 +38,17 @@ class AppKernel extends Kernel
 		$loader->load($this->getRootDir() . '/config/config_' . $this->getEnvironment() .
 		              '.yml');
 	}
+
+	public function __construct($environment, $debug)
+	{
+		parent::__construct($environment, $debug);
+		if ( $this->startTime === null ) {
+			$this->startTime = microtime(true);
+		}
+	}
+
+	public function getStartTime()
+	{
+		return $this->startTime;
+	}
 }

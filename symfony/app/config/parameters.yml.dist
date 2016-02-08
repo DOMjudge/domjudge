@@ -19,3 +19,5 @@ parameters:
     secret:            ThisTokenIsNotSoSecretChangeIt
     
     domjudge_version:  5.2.0DEV
+    
+    show_total_time:   false

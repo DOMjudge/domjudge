@@ -42,6 +42,8 @@ twig:
         domjudge_version: %domjudge_version%
         config: "@domjudge.config"
         contests: "@domjudge.contest"
+        show_total_time: %show_total_time%
+        execution_printer: "@domjudge.execution_printer"
 
 # Doctrine Configuration
 doctrine:

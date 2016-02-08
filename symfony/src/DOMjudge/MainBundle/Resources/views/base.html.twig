@@ -88,5 +88,9 @@
 		<h1>{{ pageTitle }}</h1>
 	{% endif %}
 	{% block body %}{% endblock %}
+
+	{% if show_total_time %}
+		{{ execution_printer.totalTime }}
+	{% endif %}
 </body>
 </html>
