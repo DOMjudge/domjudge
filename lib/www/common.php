@@ -198,9 +198,9 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 			( $iseven ? 'roweven': 'rowodd' );
 		$iseven = !$iseven;
 
-		if ( $row['valid'] ) {
-			$subcnt++;
-		} else {
+		$subcnt++;
+
+		if ( !$row['valid'] ) {
 			$igncnt++;
 			echo ' sub_ignore';
 		}
