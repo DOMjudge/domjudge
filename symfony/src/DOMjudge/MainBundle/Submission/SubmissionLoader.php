@@ -3,6 +3,7 @@
 namespace DOMjudge\MainBundle\Submission;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Query;
 use DOMjudge\MainBundle\Entity\Contest;
 use DOMjudge\MainBundle\Entity\Judging;
 use DOMjudge\MainBundle\Entity\Submission;
@@ -47,7 +48,13 @@ class SubmissionLoader
 		$qb = $this->getSubmissionsBaseBuilder($contests, $restrictions);
 
 		$qb
-			->select('s, partial j.{judgingid,result,verified,juryMember}, p, cp, l, t')
+			->select('partial s.{submitid,submitTime,valid}')
+			->addSelect('partial c.{cid,endTime}')
+			->addSelect('partial j.{judgingid,result,verified,juryMember}')
+			->addSelect('partial p.{probid,name}')
+			->addSelect('partial cp.{cid,probid,contest,problem,shortName}')
+			->addSelect('partial l.{langid,name}')
+			->addSelect('partial t.{teamid,name}')
 			->orderBy('s.submitTime', 'DESC')
 			->addOrderBy('s.submitid', 'DESC');
 
@@ -57,7 +64,7 @@ class SubmissionLoader
 
 		$query = $qb->getQuery();
 
-		return $query->getResult();
+		return $query->getResult(Query::HYDRATE_ARRAY);
 	}
 
 	/**
@@ -202,6 +209,7 @@ class SubmissionLoader
 		$qb = $this->entityManager->createQueryBuilder();
 		$qb
 			->from('DOMjudgeMainBundle:Submission', 's')
+			->innerJoin('s.contest', 'c')
 			->innerJoin('s.team', 't')
 			->innerJoin('s.problem', 'p')
 			->innerJoin('p.contestProblems', 'cp', Expr\Join::WITH, 'cp.contest = s.contest')

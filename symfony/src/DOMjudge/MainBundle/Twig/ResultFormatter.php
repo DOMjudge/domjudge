@@ -9,12 +9,11 @@ class ResultFormatter extends \Twig_Extension
 		return array(
 			new \Twig_SimpleFilter('formatResult', array($this, 'formatResult'), array(
 				'is_safe' => array('html'),
-				'needs_environment' => true,
 			)),
 		);
 	}
 
-	public function formatResult(\Twig_Environment $twig, $result, $isJury = false, $valid = true)
+	public function formatResult($result, $isJury = false, $valid = true)
 	{
 		$classes = array('sol');
 
@@ -43,10 +42,8 @@ class ResultFormatter extends \Twig_Extension
 			}
 		}
 		
-		return $twig->render('@DOMjudgeMain/result.html.twig', array(
-			'class' => implode(' ', $classes),
-			'result' => $result,
-		));
+		$class = implode(' ', $classes);
+		return sprintf('<span class="%s">%s</span>', $class, $result);
 	}
 
 	public function getName()

@@ -84,7 +84,7 @@
 				{% endif %}
 				<td class="probid" title="t{{ submission.problem.name }}">
 					<a {% if link is not null %}href="{{ link }}"{% endif %}>
-						{{ submission.contestProblem.shortName }}
+						{{ submission.problem.contestProblems.0.shortName }}
 					</a>
 				</td>
 				<td class="langid" title="t{{ submission.language.name }}">
