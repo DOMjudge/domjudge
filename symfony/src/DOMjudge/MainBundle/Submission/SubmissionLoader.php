@@ -47,7 +47,7 @@ class SubmissionLoader
 		$qb = $this->getSubmissionsBaseBuilder($contests, $restrictions);
 
 		$qb
-			->select('s, partial j.{judgingid,result,verified,juryMember}, p, cp, l')
+			->select('s, partial j.{judgingid,result,verified,juryMember}, p, cp, l, t')
 			->orderBy('s.submitTime', 'DESC')
 			->addOrderBy('s.submitid', 'DESC');
 
