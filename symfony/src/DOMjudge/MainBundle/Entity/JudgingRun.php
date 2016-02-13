@@ -22,6 +22,13 @@ class JudgingRun
 	private $runid;
 
 	/**
+	 * @var int
+	 *
+	 * @ORM\Column(name="testcaseid", type="integer", nullable=true)
+	 */
+	private $testcaseid;
+
+	/**
 	 * @var string
 	 *
 	 * @ORM\Column(name="runresult", type="string", length=25, nullable=true)
@@ -93,6 +100,16 @@ class JudgingRun
 	public function getRunid()
 	{
 		return $this->runid;
+	}
+
+	/**
+	 * Get testcaseid
+	 *
+	 * @return integer
+	 */
+	public function getTestcaseid()
+	{
+		return $this->testcaseid;
 	}
 
 	/**

@@ -7,6 +7,7 @@ use Doctrine\ORM\Query\Expr;
 use DOMjudge\JuryBundle\Form\Type\IgnoreSubmissionType;
 use DOMjudge\JuryBundle\Form\Type\SubmissionsFilterType;
 use DOMjudge\MainBundle\Entity\Judging;
+use DOMjudge\MainBundle\Entity\JudgingRun;
 use DOMjudge\MainBundle\Entity\Rejudging;
 use DOMjudge\MainBundle\Entity\Submission;
 use DOMjudge\MainBundle\Entity\TestCase;
@@ -84,7 +85,7 @@ class SubmissionController extends Controller
 	public function viewAction(Request $request, $submissionId)
 	{
 		// TODO: claiming code
-		
+
 		$em = $this->getDoctrine()->getManager();
 
 		if ( $request->query->has('judging') ) {
@@ -177,7 +178,7 @@ class SubmissionController extends Controller
 
 		// Now load the judgings for this submission
 		$query = $this->get('doctrine.orm.entity_manager')->createQueryBuilder()
-			->select('partial j.{judgingid,result,valid,startTime,endTime,judgehost,verified,juryMember,verifyComment}, MAX(jr.runTime) AS maxRunTime, partial r.{reason,rejudgingid}')
+			->select('partial j.{judgingid,result,valid,startTime,endTime,judgehost,verified,juryMember,verifyComment,outputCompile}, MAX(jr.runTime) AS maxRunTime, partial r.{reason,rejudgingid}')
 			->from('DOMjudgeMainBundle:Judging', 'j')
 			->leftJoin('j.judgingRuns', 'jr')
 			->leftJoin('j.rejudging', 'r')
@@ -212,7 +213,7 @@ class SubmissionController extends Controller
 			$currentJudging = null;
 		} else {
 			$query = $this->get('doctrine.orm.entity_manager')->createQueryBuilder()
-				->select('partial j.{judgingid,result,valid,startTime,endTime,judgehost,verified,juryMember,verifyComment}')
+				->select('partial j.{judgingid,result,valid,startTime,endTime,judgehost,verified,juryMember,verifyComment,outputCompile}')
 				->from('DOMjudgeMainBundle:Judging', 'j')
 				->where('j.judgingid = :judging')
 				->andWhere('j.submission = :submission')
@@ -224,32 +225,41 @@ class SubmissionController extends Controller
 			$currentJudging = $query->getOneOrNullResult();
 
 			if ( $currentJudging === null ) {
-				throw new NotFoundHttpException(sprintf("Judging j%d not found for submission s%d", $judgingId, $submission->getSubmitid()));
+				throw new NotFoundHttpException(sprintf("Judging j%d not found for submission s%d",
+				                                        $judgingId, $submission->getSubmitid()));
 			}
 		}
-		
-		if ($currentJudging !== null) {
+
+		if ( $currentJudging !== null ) {
 			$query = $this->get('doctrine.orm.entity_manager')->createQueryBuilder()
-				->select('partial r.{runid,judging,testcase,runResult,runTime}, partial t.{testcaseid,rank,description,imageType,imageThumb}')
+				->select('partial t.{testcaseid,rank,description,imageType,imageThumb}')
+				->addSelect('SUBSTRING(t.output, 1, 50001) AS outputReference')
+				->from('DOMjudgeMainBundle:TestCase', 't')
+				->where('t.problem = :problem')
+				->orderBy('t.rank')
+				->setParameter('problem', $submission->getProblem())
+				->getQuery();
+
+			/** @var array $testCases */
+			$testCases = $query->getResult();
+
+			$query = $this->get('doctrine.orm.entity_manager')->createQueryBuilder()
+				->select('partial r.{runid,judging,testcaseid,testcase,runResult,runTime}')
 				->addSelect('SUBSTRING(r.outputRun, 1, 50001) AS outputRun')
 				->addSelect('SUBSTRING(r.outputDiff, 1, 50001) AS outputDiff')
 				->addSelect('SUBSTRING(r.outputError, 1, 50001) AS outputError')
 				->addSelect('SUBSTRING(r.outputSystem, 1, 50001) AS outputSystem')
-				->addSelect('SUBSTRING(t.output, 1, 50001) AS outputReference')
-				->from('DOMjudgeMainBundle:TestCase', 't')
-				->leftJoin('t.judgingRuns', 'r', Expr\Join::WITH, 'r.judging = :judging')
-				->where('t.problem = :problem')
-				->orderBy('t.rank')
+				->from('DOMjudgeMainBundle:JudgingRun', 'r', 'r.testcaseid')
+				->where('r.judging = :judging')
 				->setParameter('judging', $currentJudging)
-				->setParameter('problem', $submission->getProblem())
 				->getQuery();
-			
-			/** @var TestCase[] $runs */
+
+			/** @var array $runs */
 			$runs = $query->getResult();
-			
+
 			$lastSubmission = $submission->getOriginalSubmission();
-			
-			if ($lastSubmission === null) {
+
+			if ( $lastSubmission === null ) {
 				$query = $this->get('doctrine.orm.default_entity_manager')->createQueryBuilder()
 					->select('s')
 					->from('DOMjudgeMainBundle:Submission', 's')
@@ -262,57 +272,80 @@ class SubmissionController extends Controller
 					->setParameter('problem', $submission->getProblem())
 					->setParameter('submittime', $submission->getSubmitTime())
 					->getQuery();
-				
+
 				$lastSubmission = $query->getOneOrNullResult();
 			}
 		} else {
+			$testCases = null;
 			$runs = null;
 			$lastSubmission = null;
 		}
-		
-		if ($lastSubmission !== null) {
+
+		if ( $lastSubmission !== null ) {
 			$query = $this->get('doctrine.orm.default_entity_manager')->createQueryBuilder()
 				->select('partial j.{judgingid,result,verifyComment,endTime}')
+				->addSelect('partial r.{rejudgingid,valid}')
 				->from('DOMjudgeMainBundle:Judging', 'j')
+				->leftJoin('j.rejudging', 'r')
 				->where('j.submission = :submission')
 				->andWhere('j.valid = 1')
 				->orderBy('j.judgingid', 'DESC')
 				->setMaxResults(1)
 				->setParameter('submission', $lastSubmission)
 				->getQuery();
-			
+
 			/** @var Judging $lastJudging */
 			$lastJudging = $query->getOneOrNullResult();
 		} else {
 			$lastJudging = null;
 		}
-		
-		if ($lastJudging !== null) {
+
+		if ( $lastJudging !== null ) {
 			$query = $this->get('doctrine.orm.default_entity_manager')->createQueryBuilder()
-				->select('partial t.{testcaseid,rank,description}')
-				->addSelect('partial r.{runid,runTime,runResult}')
-				->from('DOMjudgeMainBundle:TestCase', 't')
-				->leftJoin('t.judgingRuns', 'r', Expr\Join::WITH, 'r.judging = :judging')
-				->where('t.problem = :problem')
-				->orderBy('t.rank')
+				->select('partial r.{runid,runTime,runResult}')
+				->from('DOMjudgeMainBundle:JudgingRun', 'r', 'r.testcaseid')
+				->where('r.judging = :judging')
 				->setParameter('judging', $lastJudging)
-				->setParameter('problem', $submission->getProblem())
 				->getQuery();
 
-			/** @var TestCase $lastRuns */
+			/** @var JudgingRun[] $lastRuns */
 			$lastRuns = $query->getResult();
+
+			$sumLastRunTime = 0;
+			$maxLastRunTime = 0;
+
+			foreach ( $lastRuns as $judgingRun ) {
+				$sumLastRunTime += $judgingRun->getRunTime();
+				$maxLastRunTime = max($maxLastRunTime, $judgingRun->getRunTime());
+			}
 		} else {
 			$lastRuns = null;
+			$sumLastRunTime = 0;
+			$maxLastRunTime = 0;
+		}
+
+		$sumRunTime = 0;
+		$maxRunTime = 0;
+		foreach ( $runs as $run ) {
+			/** @var JudgingRun $judgingRun */
+			$judgingRun = $run[0];
+			$sumRunTime += $judgingRun->getRunTime();
+			$maxRunTime = max($maxRunTime, $judgingRun->getRunTime());
 		}
 
 		return array(
 			'submission' => $submission,
 			'judgings' => $judgings,
 			'currentJudging' => $currentJudging,
+			'testCases' => $testCases,
 			'runs' => $runs,
+			'sumRunTime' => $sumRunTime,
+			'maxRunTime' => $maxRunTime,
 			'lastSubmission' => $lastSubmission,
 			'lastJudging' => $lastJudging,
 			'lastRuns' => $lastRuns,
+			'sumLastRunTime' => $sumLastRunTime,
+			'maxLastRunTime' => $maxLastRunTime,
 			'ignoreForm' => $ignoreFormView,
 		);
 	}

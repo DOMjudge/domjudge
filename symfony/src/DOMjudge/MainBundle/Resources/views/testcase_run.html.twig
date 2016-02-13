@@ -1,0 +1,9 @@
+{# @var testCase \DOMjudge\MainBundle\Entity\TestCase #}
+{# @var judgingRun \DOMjudge\MainBundle\Entity\JudgingRun #}
+{% set title = 'desc: ' ~ testCase.description %}
+{% if judgingRun is not null and judgingRun.runResult is not null %}
+	{% set title = title ~ (', runtime: %ss, result: %s' | format(judgingRun.runTime, judgingRun.runResult)) %}
+{% endif %}
+<a title="{{ title }}" href="#run-{{ testCase.rank }}" {% if judgingRun is not null and judgingRun.runResult == 'correct' %}onclick="display_correctruns(true);"{% endif %}>
+	<span class="{{ class }} tc_box">{{ short }}</span>
+</a>

@@ -1,0 +1,6 @@
+services:
+    domjudge.run_output_formatter:
+        class: DOMjudge\JuryBundle\Twig\RunOutputFormatter
+        public: false
+        tags:
+            - { name: twig.extension }

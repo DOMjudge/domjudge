@@ -361,6 +361,30 @@ class Judging
 	}
 
 	/**
+	 * Get outputCompile
+	 *
+	 * @return string
+	 */
+	public function getOutputCompileString()
+	{
+		if ( is_resource($this->outputCompile) ) {
+			$this->outputCompile = stream_get_contents($this->outputCompile);
+		}
+
+		return $this->getOutputCompile();
+	}
+
+	/**
+	 * Get outputCompile number of lines
+	 *
+	 * @return int
+	 */
+	public function getOutputCompileLines()
+	{
+		return mb_substr_count($this->getOutputCompileString(), "\n");
+	}
+
+	/**
 	 * Set seen
 	 *
 	 * @param boolean $seen

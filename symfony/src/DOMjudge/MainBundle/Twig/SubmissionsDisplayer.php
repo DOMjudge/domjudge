@@ -3,8 +3,10 @@
 namespace DOMjudge\MainBundle\Twig;
 
 use DOMjudge\MainBundle\Entity\Judging;
+use DOMjudge\MainBundle\Entity\JudgingRun;
 use DOMjudge\MainBundle\Entity\Rejudging;
 use DOMjudge\MainBundle\Entity\Submission;
+use DOMjudge\MainBundle\Entity\TestCase;
 
 class SubmissionsDisplayer extends \Twig_Extension
 {
@@ -16,6 +18,10 @@ class SubmissionsDisplayer extends \Twig_Extension
 				'needs_environment' => true,
 			)),
 			new \Twig_SimpleFunction('submissions', array($this, 'submissions'), array(
+				'is_safe' => array('html'),
+				'needs_environment' => true,
+			)),
+			new \Twig_SimpleFunction('testcaseRun', array($this, 'testcaseRun'), array(
 				'is_safe' => array('html'),
 				'needs_environment' => true,
 			)),
@@ -87,6 +93,46 @@ class SubmissionsDisplayer extends \Twig_Extension
 			'unverified' => $unverified,
 			'ignored' => $ignored,
 			'queued' => $queued,
+		));
+	}
+
+	/**
+	 * Display a testcase result
+	 * 
+	 * @param \Twig_Environment $twig
+	 *   The Twig environment to use
+	 * @param TestCase $testCase
+	 *   The testcase to use
+	 * @param JudgingRun|null $judgingRun
+	 *   The judging run to use
+	 * @param bool $final
+	 *   Whether the judging is final
+	 * @return string
+	 *   The rendered testcase
+	 */
+	public function testcaseRun(\Twig_Environment $twig, TestCase $testCase, JudgingRun $judgingRun = null, $final)
+	{
+		$class = ( $final ? "tc_unused" : "tc_pending" );
+		$short = "?";
+		if ($judgingRun !== null) {
+			switch ( $judgingRun->getRunResult() ) {
+				case 'correct':
+					$class = "tc_correct";
+					$short = "✓";
+					break;
+				case NULL:
+					break;
+				default:
+					$short = substr($judgingRun->getRunResult(), 0, 1);
+					$class = "tc_incorrect";
+			}
+		}
+		
+		return $twig->render('@DOMjudgeMain/testcase_run.html.twig', array(
+			'testCase' => $testCase,
+			'judgingRun' => $judgingRun,
+			'class' => $class,
+			'short' => $short,
 		));
 	}
 

@@ -151,10 +151,255 @@
 				&nbsp;[aborted]
 			{%- endif -%}
 		</span>
+		
+		{% if currentJudging.result != 'compiler-error' %}
+			, max/sum runtime: {{ '%.2f/%.2fs' | format(maxRunTime, sumRunTime) }}
+			
+			{% if lastRuns is not null -%}
+				<span class="lastruntime">
+					(<a href="{{ path('jury_submission', {'submissionId': lastSubmission.submitid}) }}">s{{ lastSubmission.submitid }}</a>:
+					{{ '%.2f/%.2fs' | format(maxLastRunTime, sumLastRunTime) }})
+				</span>
+			{%- endif %}
+			
+			<table>
+				<tr>
+					<td>testcase runs:</td>
+					<td>
+						{% spaceless %}
+						{% for testCaseData in testCases %}
+							{# @var testCase \DOMjudge\MainBundle\Entity\TestCase #}
+							{% set testCase = testCaseData.0 %}
+							{% set judgingRun = null %}
+							{% if runs[testCase.testcaseid] is defined %}
+								{% set judgingRun = runs[testCase.testcaseid].0 %}
+							{% endif %}
+							{{ testcaseRun(testCase, judgingRun, currentJudging.endTime is not empty) }}
+						{% endfor %}
+						{% endspaceless %}
+					</td>
+				</tr>
+				{% if lastRuns is not null %}
+					<tr class="lasttcruns">
+						<td>
+							<a href="{{ path('jury_submission', {'submissionId': lastSubmission.submitid}) }}">s{{ lastSubmission.submitid }}</a> runs:
+						</td>
+						<td>
+							{% spaceless %}
+								{% for testCaseData in testCases %}
+									{# @var testCase \DOMjudge\MainBundle\Entity\TestCase #}
+									{% set testCase = testCaseData.0 %}
+									{% set judgingRun = null %}
+									{% if lastRuns[testCase.testcaseid] is defined %}
+										{% set judgingRun = lastRuns[testCase.testcaseid] %}
+									{% endif %}
+									{{ testcaseRun(testCase, judgingRun, lastJudging.endTime is not empty) }}
+								{% endfor %}
+							{% endspaceless %}
+						</td>
+					</tr>
+				{% endif %}
+			</table>
+		{% endif %}
+		
+		{# Show JS toggle of previous submission results. #}
+		{% if lastJudging is not null %}
+			<span class="testcases_prev">
+				<a href="javascript:togglelastruns();">show/hide</a>
+				results of previous
+				<a href="{{ path('jury_submission', {'submissionId': lastSubmission.submitid}) }}">submission s{{ lastSubmission.submitid }}</a>
+				{% if lastJudging.verifyComment is not empty %}
+					<span class="prevsubmit"> (verify comment: {{ lastJudging.verifyComment }})</span>
+				{% endif %}
+			</span>
+		{% endif %}
+		
+		{#
+		Display following data only when the judging result is known.
+		Note that the judging may still not be finished yet when lazy
+		evaluation is off
+		#}
+		{% if currentJudging.result is not empty %}
+			{# display verification data: verified, by whom, and comment. #}
+			{# only if this is a valid judging, otherwise irrelevant #}
+			{% if currentJudging.valid or (currentJudging.rejudging is not null and currentJudging.rejudging.valid) %}
+				{# TODO verification data and form #}
+			{% endif %}
+		{% else %}
+			<p><b>Judging is not ready yet!</b></p>
+		{% endif %}
 
 		<script type="text/javascript">
 			togglelastruns();
 		</script>
+		
+		{# Display compilation output #}
+		{% set compileColor = '#6666FF' %}
+		{% set compileMessage = 'not finished yet' %}
+		{% if currentJudging.outputCompile is not null %}
+			{% if currentJudging.result != "compiler-error" %}
+				{% set compileColor = '#1daa1d' %}
+				{% set compileMessage = 'successful' %}
+				{% if currentJudging.outputCompileString is not empty %}
+					{% set compileMessage = compileMessage ~ ' (with ' ~ currentJudging.outputCompileLines ~ ' line(s) of output)' %}
+				{% endif %}
+			{% else %}
+				{% set compileColor = 'red' %}
+				{% set compileMessage = 'unsuccessful' %}
+			{% endif %}
+		{% endif %}
+		
+		<h3 id="compile">
+			{% if currentJudging.outputCompileString is not empty %}
+				<a class="collapse" href="javascript:collapse('compile')">
+			{% endif %}
+					Compilation <span style="color: {{ compileColor }};">{{ compileMessage }}</span>
+			{% if currentJudging.outputCompileString is not empty %}
+				</a>
+			{% endif %}
+		</h3>
+		
+		{% if currentJudging.outputCompileString is not empty %}
+			<pre class="output_text" id="detailcompile">{{ currentJudging.outputCompileString }}</pre>
+		{% else %}
+			<p class="nodata" id="detailcompile">There were no compiler errors or warnings.</p>
+		{% endif %}
+		
+		{# Collapse compile output when compiled succesfully #}
+		<script type="text/javascript">
+			collapse('compile');
+		</script>
+		
+		{# If compilation is not finished yet or failed, there's no more info to show, so stop here #}
+		{% if currentJudging.outputCompileString is null or currentJudging.result == 'compiler-error' %}
+			{# stop #}
+		{% else %}
+			{% for testCaseData in testCases %}
+				{# @var testCase \DOMjudge\MainBundle\Entity\TestCase #}
+				{% set testCase = testCaseData.0 %}
+				{# @var judgingRun \DOMjudge\MainBundle\Entity\JudgingRun #}
+				{% set judgingRun = null %}
+				{% if runs[testCase.testcaseid] is defined %}
+					{% set judgingRun = runs[testCase.testcaseid].0 %}
+				{% endif %}
+
+				{% if judgingRun is not null and judgingRun.runResult == 'correct' %}
+					<div class="run_correct">
+				{% endif %}
+
+				<h4 id="run-{{ testCase.rank }}">Run {{ testCase.rank }}</h4>
+
+				{% if judgingRun is null or judgingRun.runResult is null %}
+					<p class="nodata">
+						{% if currentJudging.result is null %}
+							Run not started/finished yet.
+						{% else %}
+							Run not used for final result.
+						{% endif %}
+					</p>
+				{% else %}
+					{% set judgingData = runs[testCase.testcaseid] %}
+					
+					{% set timelimitStr = '' %}
+					{% if judgingRun.runResult == 'timelimit' %}
+						{% if judgingData.outputSystem matches '/timelimit exceeded.*hard (wall|cpu) time/' %}
+							{% set timelimitStr = '<b>(terminated)</b>' %}
+						{% else %}
+							{% set timelimitStr = '<b>(finished late)</b>' %}
+						{% endif %}
+					{% endif %}
+					
+					<table>
+						<tr>
+							<td>
+								
+								<table>
+									<tr>
+										<td>Description:</td>
+										<td>{{ testCase.description }}</td>
+									</tr>
+									<tr>
+										<td>Download:</td>
+										<td>
+											<a href="#">Input</a>
+											/
+											<a href="#">Reference Output</a>
+											/
+											<a href="#">Team Output</a>
+										</td>
+									</tr>
+									<tr>
+										<td>Runtime:</td>
+										<td>
+											{{ judgingRun.runTime }} sec {{ timelimitStr | raw }}
+										</td>
+									</tr>
+									<tr>
+										<td>Result:</td>
+										<td>
+											<span class="sol sol_{% if judgingRun.runResult != 'correct' %}in{% endif %}correct">
+												{{ judgingRun.runResult }}
+											</span>
+										</td>
+									</tr>
+								</table>
+								
+							</td>
+							<td>
+								{# TODO: testcase image display #}
+							</td>
+						</tr>
+					</table>
+					
+					<h5>Diff output</h5>
+					
+					{% if judgingData.outputDiff | length > 0 %}
+						<pre class="output_text">{{ parseRunDiff(truncateCheck(judgingData.outputDiff)) }}</pre>
+					{% else %}
+						<p class="nodata">There was no diff output.</p>
+					{% endif %}
+					
+					{% if judgingRun.runResult != 'correct' %}
+						{{ formatRunOutputText(judgingData.outputRun, testCaseData.outputReference) }}
+					{% endif %}
+
+					<h5>Program output</h5>
+					{% if judgingData.outputRun is not empty %}
+						<pre class="output_text">{{ truncateCheck(judgingData.outputRun) }}</pre>
+					{% else %}
+						<p class="nodata">There was no program output.</p>
+					{% endif %}
+
+					<h5>Program error output</h5>
+					{% if judgingData.outputError is not empty %}
+						<pre class="output_text">{{ truncateCheck(judgingData.outputError) }}</pre>
+					{% else %}
+						<p class="nodata">There was no program stderr output.</p>
+					{% endif %}
+
+					<h5>Judging system output (info/debug/errors)</h5>
+					{% if judgingData.outputSystem is not empty %}
+						<pre class="output_text">{{ truncateCheck(judgingData.outputSystem) }}</pre>
+					{% else %}
+						<p class="nodata">There was no judging system output.</p>
+					{% endif %}
+				{% endif %}
+
+				{% if judgingRun is not null and judgingRun.runResult == 'correct' %}
+					</div>
+				{% endif %}
+			{% endfor %}
+
+			<script type="text/javascript">
+				function display_correctruns(show) {
+					var elements = document.getElementsByClassName('run_correct');
+					for (i = 0; i < elements.length; i++) {
+						elements[i].style.display = show ? 'block' : 'none';
+					}
+				}
+				display_correctruns(false);
+			</script>
+		{% endif %}
 	{% endif %}
 {% endblock %}
 
