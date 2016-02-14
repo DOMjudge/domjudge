@@ -1,0 +1,96 @@
+{% set pageTitle = 'Teams' %}
+
+{% extends '@DOMjudgeJury/base.html.twig' %}
+
+{% block body %}
+	{% if teams is empty %}
+	<p class="nodata">No teams defined</p>
+{% else %}
+	<table class="list sortable">
+		<thead>
+		<tr>
+			<th class="sorttable_numeric" scope="col">ID</th>
+			<th scope="col">teamname</th>
+			<th scope="col">category</th>
+			<th scope="col">affiliation</th>
+			<th scope="col" class="sorttable_numeric"># contests</th>
+			<th scope="col">host</th>
+			<th scope="col">room</th>
+			<th class="sorttable_nosort"></th>
+			<th class="thleft" scope="col">status</th>
+			<th></th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for teamData in teams %}
+			{# @var team \DOMjudge\MainBundle\Entity\Team #}
+			{% set team = teamData.0 %}
+			<tr class="category{{ team.category.categoryid }} {% if not team.enabled %}sub_ignore{% endif %}">
+				<td><a href="{{ path('jury_team_view', {'team': team.teamid}) }}">t{{ team.teamid }}</a></td>
+				<td><a href="{{ path('jury_team_view', {'team': team.teamid}) }}">{{ team.name }}</a></td>
+				<td><a href="{{ path('jury_team_view', {'team': team.teamid}) }}">{{ team.category.name }}</a></td>
+				{% if team.affiliation is null %}
+				<td><a href="{{ path('jury_team_view', {'team': team.teamid}) }}"></a></td>
+				{% else %}
+				<td title="{{ team.affiliation.name }}"><a href="{{ path('jury_team_view', {'team': team.teamid}) }}">{{ team.affiliation.shortName }}</a></td>
+				{% endif %}
+				<td><a href="{{ path('jury_team_view', {'team': team.teamid}) }}">{{ teamData.numContests }}</a></td>
+				<td title="{{ team.hostName }}">
+					<a href="{{ path('jury_team_view', {'team': team.teamid}) }}">
+						{% if team.hostName is not empty %}
+							{{ team.hostName | formatHost }}
+						{% else %}
+							-
+						{% endif %}
+					</a>
+				</td>
+				<td><a href="{{ path('jury_team_view', {'team': team.teamid}) }}">{{ team.room }}</a></td>
+				{% set statusClass = 'team-nocon' %}
+				{% set statusTitle = 'no connections made' %}
+				{% set numSubmit = 0 %}
+				{% set numCorrect = 0 %}
+				{% if team.teampageFirstVisited %}
+					{% set statusClass = 'team-nonosubcon' %}
+					{% set statusTitle = 'teampage viewed, no submissions' %}
+				{% endif %}
+				{% if teamData.numSubmit is defined and teamData.numSubmit > 0 %}
+					{% set statusClass = 'team-nocor' %}
+					{% set statusTitle = 'submitted, none correct' %}
+					{% set numSubmit = teamData.numSubmit %}
+				{% endif %}
+				{% if teamData.numCorrect is defined and teamData.numCorrect > 0 %}
+					{% set statusClass = 'team-ok' %}
+					{% set statusTitle = 'correct submission(s)' %}
+					{% set numCorrect = teamData.numCorrect %}
+				{% endif %}
+				<td class="{{ statusClass }}" title="{{ statusTitle }}">
+					<a href="{{ path('jury_team_view', {'team': team.teamid}) }}">&#9679;</a>
+				</td>
+				<td class="teamstat" title="{{ numCorrect }} correct / {{ numSubmit }} submitted">
+					<a href="{{ path('jury_team_view', {'team': team.teamid}) }}">
+						{{ numCorrect }} / {{ numSubmit }}
+					</a>
+				</td>
+				{% if is_granted('ROLE_ADMIN') %}
+					<td class="editdel">
+						<a href="{{ path('jury_team_edit', {'team': team.teamid}) }}">
+							<img src="{{ asset('bundles/domjudgemain/images/edit.png') }}" alt="edit this team" class="picto" />
+						</a>
+						<a href="{{ path('jury_team_delete', {'team': team.teamid}) }}">
+							<img src="{{ asset('bundles/domjudgemain/images/delete.png') }}" alt="delete this team" class="picto" />
+						</a>
+					</td>
+				{% endif %}
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+	{% if is_granted('ROLE_ADMIN') %}
+		<p>
+			<a href="{{ path('jury_team_create') }}">
+				<img src="{{ asset('bundles/domjudgemain/images/add.png') }}" alt="add new team" class="picto" />
+			</a>
+		</p>
+	{% endif %}
+{% endif %}
+{% endblock %}

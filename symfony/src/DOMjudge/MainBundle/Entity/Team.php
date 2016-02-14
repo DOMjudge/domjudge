@@ -3,6 +3,7 @@
 namespace DOMjudge\MainBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Team
@@ -32,6 +33,7 @@ class Team
 	 * @var string
 	 *
 	 * @ORM\Column(name="name", type="string", length=255, nullable=false)
+	 * @Assert\NotBlank(message="Team name is required")
 	 */
 	private $name;
 
@@ -112,6 +114,8 @@ class Team
 	 * @ORM\JoinColumns({
 	 *   @ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid")
 	 * })
+	 *
+	 * @Assert\NotBlank()
 	 */
 	private $category;
 
@@ -160,6 +164,8 @@ class Team
 	 */
 	public function __construct()
 	{
+		$this->penalty = 0;
+		$this->enabled = true;
 		$this->submissions = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->users = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->contests = new \Doctrine\Common\Collections\ArrayCollection();

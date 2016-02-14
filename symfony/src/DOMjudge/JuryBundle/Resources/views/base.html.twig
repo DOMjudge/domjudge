@@ -18,7 +18,7 @@
 				<a href="#" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts</a>
 			{% endif %}
 			{% if is_granted('ROLE_JURY') %}
-				<a href="#" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>
+				<a href="{{ path('jury_team_list') }}" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>
 				<a href="#" accesskey="u"><span class="octicon octicon-person"></span> users</a>
 				<a href="#" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications</a>
 				<a href="{{ path('jury_submissions') }}" accesskey="s"><span class="octicon octicon-file-code"></span> submissions</a>

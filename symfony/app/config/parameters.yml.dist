@@ -21,3 +21,5 @@ parameters:
     domjudge_version:  5.2.0DEV
     
     show_total_time:   false
+
+    mysql_collation: utf8mb4_unicode_ci

@@ -1,0 +1,12 @@
+{% set pageTitle = 'Delete team t' ~ team.teamid %}
+
+{% extends '@DOMjudgeJury/base.html.twig' %}
+
+{% block body %}
+	<p>
+		Are you sure you want to delete team t{{ team.teamid }} ({{ team.name }})?
+		{{ form_start(form) }}
+		{{ form_end(form) }}
+	</p>
+{% endblock %}
+
