@@ -11,6 +11,7 @@ Version 5.2.0 - DEV
  - Make problem texts always downloadable for jury.
  - Decode HTML entities for proper display of error messages in
    submit client.
+ - The event feed and REST API now comply with ICPC WF 2016 specs.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------

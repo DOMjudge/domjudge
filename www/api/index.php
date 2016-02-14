@@ -185,12 +185,12 @@ function problems($args)
 
 	return array_map(function($pdata) {
 		return array(
-			'id'        => safe_int($pdata['id']),
-			'label'     => $pdata['label'],
-			'shortname' => $pdata['shortname'],
-			'name'      => $pdata['name'],
-			'rgb'       => $pdata['rgb'],
-			'color'     => $pdata['color'],
+			'id'         => safe_int($pdata['id']),
+			'label'      => $pdata['label'],
+			'short_name' => $pdata['shortname'],
+			'name'       => $pdata['name'],
+			'rgb'        => $pdata['rgb'],
+			'color'      => $pdata['color'],
 		);
 	}, $pdatas);
 }
