@@ -1,6 +1,6 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT([DOMjudge],
-        m4_esyscmd([sed -n '1s/^.*version //p' README | tr -d '\n']),
+        m4_esyscmd([grep 'version' README.md | sed -n '1s/^.*version //p' | tr -d '\n']),
         [domjudge-devel@domjudge.org])
 AC_PREREQ([2.64])
 AC_CONFIG_HEADERS([etc/config.h])
@@ -26,7 +26,7 @@ if test "x$prefix" = xNONE; then
 fi
 
 if test -z "$PACKAGE_VERSION"; then
-	AC_MSG_ERROR([could not find version on first line of README file.])
+	AC_MSG_ERROR([could not find version on first line of README.md file.])
 fi
 AC_SUBST(DOMJUDGE_VERSION, $PACKAGE_VERSION)
 AC_DEFINE_UNQUOTED(DOMJUDGE_VERSION, "$PACKAGE_VERSION",
@@ -282,6 +282,18 @@ if test "x$enable_static_linking" = "xyes"; then
 	AC_SUBST(STATIC_LINK_END,  [-Wl,-Bdynamic])
 fi
 
+# Check option to build documentation. This option is provided to
+# allow disabling it when a LaTeX installation is not present.
+AC_ARG_ENABLE(doc-build,AS_HELP_STRING([--enable-doc-build],
+[enable building documentation; requires a working LaTeX installation
+ for 'make dist' (default: yes).]))
+
+if test "x$enable_doc_build" = "xno"; then
+	AC_SUBST(DOC_BUILD_ENABLED,[no])
+else
+	AC_SUBST(DOC_BUILD_ENABLED,[yes])
+fi
+
 # See 'man feature_test_macros' under Linux:
 # Expose POSIX.1-2001 base specification and SUSv2 features.
 # We try to conform to POSIX, so ideally we shouldn't need to include
@@ -337,7 +349,12 @@ else
    echo " * submitclient........: disabled"
 fi
 echo ""
-echo " * documentation.......: $domjudge_docdir"
+echo -n " * documentation.......: $domjudge_docdir"
+if test "x$DOC_BUILD_ENABLED" != xyes ; then
+   echo " (disabled)"
+else
+   echo ""
+fi
 echo ""
 echo " * domserver...........: $domserver_root"
 echo "    - bin..............: $domserver_bindir"

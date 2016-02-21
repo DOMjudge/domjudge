@@ -84,6 +84,7 @@ if( $res->count() == 0 ) {
 if ( IS_ADMIN ) {
 	echo "<p>" . addLink('problem') . "</p>\n\n";
 	if ( class_exists("ZipArchive") ) {
+		$selected_cid = ($cid === null) ? -1 : $cid;
 		$contests = $DB->q("KEYVALUETABLE SELECT cid,
 		                    CONCAT('c', cid, ': ', shortname, ' - ', name) FROM contest");
 		$values = array(-1 => 'Do not link to a contest');
@@ -92,7 +93,7 @@ if ( IS_ADMIN ) {
 		}
 		echo "\n" . addForm('problem.php', 'post', null, 'multipart/form-data') .
 		     'Contest: ' .
-		     addSelect('contest', $values, -1, true) .
+		     addSelect('contest', $values, $selected_cid, true) .
 		     'Problem archive(s): ' .
 		     addFileField('problem_archive[]', null, ' required multiple accept="application/zip"') .
 		     addSubmit('Upload', 'upload') .

@@ -10,7 +10,10 @@ require('init.php');
 $title = 'Judgehosts';
 
 if ( !isset($_REQUEST['cmd']) ) {
-	$refresh = '15;url=judgehosts.php';
+	$refresh = array(
+		'after' => 15,
+		'url' => 'judgehosts.php',
+	);
 }
 
 require(LIBWWWDIR . '/header.php');

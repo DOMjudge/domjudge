@@ -350,6 +350,11 @@ if ( ! USE_CHROOT ) {
 	logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
 } else {
 	if ( !is_dir(CHROOTDIR) ) {
+		if ( !defined('CHROOT_SCRIPT') ) {
+			logmsg(LOG_ERR, "Pre-built chroot tree '" . CHROOTDIR .
+			       "' not found and no chroot-dir set, exiting.");
+			exit;
+		}
 		logmsg(LOG_WARNING, "Pre-built chroot tree '".CHROOTDIR.
 		       "' not found: using minimal chroot.");
 	} else {
@@ -543,6 +548,9 @@ function judge($row)
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
 
+	// Query timelimit overshoot here once for all testcases
+	$overshoot = dbconfig_get_rest('timelimit_overshoot');
+
 	$totalcases = 0;
 	while ( TRUE ) {
 		// get the next testcase
@@ -602,8 +610,7 @@ function judge($row)
 
 		// do the actual test-run
 		$hardtimelimit = $row['maxruntime'] +
-		                 overshoot_time($row['maxruntime'],
-		                                dbconfig_get_rest('timelimit_overshoot'));
+		                 overshoot_time($row['maxruntime'],$overshoot);
 
 		$compare_runpath = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
 		$run_runpath = fetch_executable($workdirpath, $row['run'], $row['run_md5sum']);

@@ -69,18 +69,10 @@ function flushresults($header, $results, $collapse = FALSE)
 
 while( !empty($cids) && $row = $res->next() ) {
 	$sid = $row['submitid'];
-
-	// Try to find the verification match string in one of the source
-	// files. The first match is used.
-	$files = $DB->q("KEYVALUETABLE SELECT rank, sourcecode
-	                 FROM submission_file WHERE submitid = %i", $sid);
-
-	$results = NULL;
-	foreach ( $files as $rank => $source ) {
-		if ( ($results = getExpectedResults($source)) !== NULL ) break;
-	}
+	$results = $row['expected_results'];
 
 	if ( $results !== NULL && $row['verified']==0 ) {
+		$results = json_decode($results);
 		$nchecked++;
 
 		$result = mb_strtoupper($row['result']);
@@ -115,7 +107,7 @@ while( !empty($cids) && $row = $res->next() ) {
 		$nunchecked++;
 
 		if ( $results===NULL ) {
-			$nomatch[] = "string '<code>@EXPECTED_RESULTS@:</code>' not found in " .
+			$nomatch[] = "expected results unknown in " .
 				"<a href=\"submission.php?id=" . $sid .
 				"\">s$sid</a>, leaving submission unchecked";
 		} else {

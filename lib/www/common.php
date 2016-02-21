@@ -161,7 +161,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 
 	// print the table with the submissions.
 	// table header
-	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
+	echo "<table class=\"list sortable submissions\">\n<thead>\n<tr>" .
 
 		(IS_JURY ? "<th scope=\"col\" class=\"sorttable_numeric\">ID</th>" : '') .
 		(IS_JURY && count($cids) > 1 ? "<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" : '') .
@@ -203,9 +203,9 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 			( $iseven ? 'roweven': 'rowodd' );
 		$iseven = !$iseven;
 
-		if ( $row['valid'] ) {
-			$subcnt++;
-		} else {
+		$subcnt++;
+
+		if ( !$row['valid'] ) {
 			$igncnt++;
 			echo ' sub_ignore';
 		}
@@ -215,7 +215,12 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 		if (!IS_JURY && !$row['seen'] ) {
 			echo ' unseen';
 		}
-		echo '">';
+		echo '"';
+		echo ' data-team-id="' . $row['teamid'] . '"';
+		echo ' data-problem-id="' . $row['probid'] . '"';
+		echo ' data-language-id="' . $row['langid'] . '"';
+		echo ' data-submission-id="' . $row['submitid'] . '"';
+		echo '>';
 
 		if ( IS_JURY ) {
 			echo "<td><a$link>s$sid</a></td>";
@@ -545,14 +550,21 @@ function putProblemText($probid)
 {
 	global $DB, $cdata;
 
-	$prob = $DB->q("MAYBETUPLE SELECT cid, shortname, problemtext, problemtext_type
-	                FROM problem INNER JOIN contestproblem USING (probid)
-	                WHERE OCTET_LENGTH(problemtext) > 0
-	                AND probid = %i AND cid = %i", $probid, $cdata['cid']);
+	if ( IS_JURY ) {
+		$prob = $DB->q("MAYBETUPLE SELECT problemtext, problemtext_type
+		                FROM problem p
+		                WHERE OCTET_LENGTH(problemtext) > 0 AND probid = %i",
+		               $probid);
+		$probname = $probid;
+	} else {
+		$prob = $DB->q("MAYBETUPLE SELECT shortname, problemtext, problemtext_type
+		                FROM problem INNER JOIN contestproblem USING (probid)
+		                WHERE OCTET_LENGTH(problemtext) > 0 and allow_submit = 1
+		                AND probid = %i AND cid = %i", $probid, $cdata['cid']);
+		$probname = $prob['shortname'];
+	}
 
-	if ( empty($prob) ||
-	     !(IS_JURY ||
-	       ($prob['cid']==$cdata['cid'] && difftime($cdata['starttime'],now())<=0)) ) {
+	if ( empty($prob) || difftime($cdata['starttime'],now())>0 ) {
 		error("Problem p$probid not found or not available");
 	}
 
@@ -570,8 +582,7 @@ function putProblemText($probid)
 		error("Problem p$probid text has unknown type");
 	}
 
-
-	$filename = "prob-$prob[shortname].$prob[problemtext_type]";
+	$filename = "prob-$probname.$prob[problemtext_type]";
 
 	header("Content-Type: $mimetype; name=\"$filename\"");
 	header("Content-Disposition: inline; filename=\"$filename\"");
@@ -583,51 +594,98 @@ function putProblemText($probid)
 }
 
 /**
- * Outputs bulleted list of problem statements for this contest
+ * Outputs a specific sample testcase for a problem.
+ * A testcase is sample if it is marked as such. It's then available from
+ * the team interface for download.
+ *
+ * $seq is the number of the testcase when selecting only the testcases
+ * marked sample for the given problem, ordered by testcaseid. This is
+ * done as to not leak the total number of testcases to teams.
+ *
+ * $type is "in" or "out".
+ */
+function putSampleTestcase($probid, $seq, $type)
+{
+	global $DB, $cdata;
+
+	$sample = $DB->q('MAYBETUPLE SELECT shortname, ' . $type . 'put AS content
+	                  FROM problem INNER JOIN testcase USING (probid)
+	                  INNER JOIN contestproblem USING (probid)
+	                  WHERE probid = %i AND cid = %i AND allow_submit = 1
+	                  AND sample = 1 ORDER BY testcaseid ASC LIMIT %i,1',
+	                  $probid, $cdata['cid'], $seq-1);
+
+	if ( empty($sample) || difftime($cdata['starttime'],now())>0 ) {
+		error("Problem p$probid not found or not available");
+	}
+	$probname = $sample['shortname'];
+
+	$filename = "sample-$probname.$seq.$type";
+
+	header("Content-Type: text/plain; name=\"$filename\"");
+	header("Content-Disposition: attachment; filename=\"$filename\"");
+	header("Content-Length: " . strlen($sample['content']));
+
+	echo $sample['content'];
+
+	exit(0);
+}
+
+
+/**
+ * Outputs bulleted list of problem names for this contest,
+ * with links to problem statement text and/or sample testcase(s)
+ * when available.
  */
 function putProblemTextList()
 {
 	global $cid, $cdata, $DB;
 	$fdata = calcFreezeData($cdata);
 
-	if ( ! have_problemtexts() ) {
-		echo "<p class=\"nodata\">No problem texts available for this contest.</p>\n\n";
-	} elseif ( !$fdata['cstarted'] ) {
+	if ( !$fdata['cstarted'] ) {
 		echo "<p class=\"nodata\">Problem texts will appear here at contest start.</p>\n\n";
 	} else {
 
 		// otherwise, display list
-		$res = $DB->q('SELECT probid,shortname,name,color,problemtext_type
-		               FROM problem INNER JOIN contestproblem USING (probid)
-		               WHERE cid = %i AND allow_submit = 1 AND
-		               problemtext_type IS NOT NULL ORDER BY shortname', $cid);
+		$res = $DB->q('SELECT probid,shortname,name,color,problemtext_type,MAX(sample) AS numsamples
+		               FROM problem
+		               INNER JOIN testcase USING(probid)
+		               INNER JOIN contestproblem USING (probid)
+		               WHERE cid = %i AND allow_submit = 1
+		               GROUP BY probid ORDER BY shortname', $cid);
 
 		if ( $res->count() > 0 ) {
 			echo "<ul>\n";
 			while($row = $res->next()) {
-				print '<li> ' .
-				      '<img src="../images/' . urlencode($row['problemtext_type']) .
-				      '.png" alt="' . specialchars($row['problemtext_type']) .
-				      '" /> <a href="problem.php?id=' . urlencode($row['probid']) . '">' .
-				      'Problem ' . specialchars($row['shortname']) . ': ' .
-				      specialchars($row['name']) . "</a></li>\n";
+				print '<li><strong> Problem ' . specialchars($row['shortname']) . ': ' .
+				      specialchars($row['name']) . "</strong><br />\n";
+				if ( isset($row['problemtext_type']) ) {
+				print '<img src="../images/' . urlencode($row['problemtext_type']) .
+					      '.png" alt="' . specialchars($row['problemtext_type']) .
+					      '" /> <a href="problem.php?id=' . urlencode($row['probid']) . '">' .
+					      'problem statement</a><br />';
+				}
+				$i = 1;
+				if ( !empty($row['numsamples']) ) {
+					$samples = $DB->q('COLUMN SELECT testcaseid FROM testcase
+					                   WHERE probid = %i AND sample = 1 ORDER BY testcaseid ASC', $row['probid']);
+					foreach($samples as $id) {
+						print '<img src="../images/b_save.png" alt="download" /> ';
+						print '<a href="problem.php?id=' . urlencode($row['probid']) .
+						      '&amp;testcase=' . urlencode($i) . '&amp;type=in">sample input</a> | ';
+						print '<a href="problem.php?id=' . urlencode($row['probid']) .
+						      '&amp;testcase=' . urlencode($i) . '&amp;type=out">sample output</a>';
+						print "<br />";
+						++$i;
+					}
+				}
+				print "<br /></li>\n";
 			}
 			echo "</ul>\n";
+		} else {
+			echo "<p class=\"nodata\">No problem texts available for this contest.</p>\n\n";
 		}
 	}
-}
-
-/**
- * Returns true if at least one problem in the current contest has a
- * problem statement text in the database.
- */
-function have_problemtexts()
-{
-	global $DB, $cid;
-	return $DB->q('VALUE SELECT COUNT(*) FROM problem
-	               INNER JOIN contestproblem USING (probid)
-	               WHERE problemtext_type IS NOT NULL
-	               AND cid = %i', $cid) > 0;
 }
 
 /**

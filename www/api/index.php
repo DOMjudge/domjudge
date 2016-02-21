@@ -7,6 +7,7 @@
  */
 
 require('init.php');
+require_once(LIBWWWDIR . '/common.jury.php');
 
 
 
@@ -153,21 +154,43 @@ $api->provideFunction('GET', 'user', $doc);
  */
 function problems($args)
 {
-	global $DB;
+	global $DB, $cdatas, $userdata;
 
 	checkargs($args, array('cid'));
+	$cid = safe_int($args['cid']);
 
-	$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
-	                  FROM problem
-	                  INNER JOIN contestproblem USING (probid)
-	                  WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $args['cid']);
+	// Check that user has access to the problems in this contest:
+	if ( checkrole('team') ) $cdatas = getCurContests(TRUE, $userdata['teamid']);
+	if ( checkrole('jury') ||
+	     (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0) ) {
+
+		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
+		                  FROM problem
+		                  INNER JOIN contestproblem USING (probid)
+		                  WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
+	} else {
+		$pdatas = array();
+	}
+
+	foreach ( $pdatas as $key => $pdata ) {
+		if ( !isset($pdata['color']) ) {
+			$pdatas[$key]['rgb'] = null;
+		} elseif ( preg_match('/^#[[:xdigit:]]{3,6}$/',$pdata['color']) ) {
+			$pdatas[$key]['rgb'] = $pdata['color'];
+			$pdatas[$key]['color'] = hex_to_color($pdata['color']);
+		} else {
+			$pdatas[$key]['rgb'] = color_to_hex($pdata['color']);
+		}
+	}
+
 	return array_map(function($pdata) {
 		return array(
-			'id'        => safe_int($pdata['id']),
-			'label'     => $pdata['label'],
-			'shortname' => $pdata['shortname'],
-			'name'      => $pdata['name'],
-			'color'     => $pdata['color'],
+			'id'         => safe_int($pdata['id']),
+			'label'      => $pdata['label'],
+			'short_name' => $pdata['shortname'],
+			'name'       => $pdata['name'],
+			'rgb'        => $pdata['rgb'],
+			'color'      => $pdata['color'],
 		);
 	}, $pdatas);
 }
@@ -724,6 +747,10 @@ function submissions_POST($args)
 	}
 
 	$sid = submit_solution($userdata['teamid'], $probid, $cid, $args['langid'], $FILEPATHS, $FILENAMES);
+	if ( checkrole('jury') ) {
+		$results = getExpectedResults(file_get_contents($FILEPATHS[0]));
+		$DB->q('UPDATE submission SET expected_results=%s WHERE submitid=%i', json_encode($results), $sid);
+	}
 
 	auditlog('submission', $sid, 'added', 'via api', null, $cid);
 
@@ -1159,11 +1186,17 @@ $api->provideFunction('PUT', 'judgehosts', $doc, $args, $exArgs, $roles);
  */
 function scoreboard($args)
 {
-	global $DB;
+	global $DB, $api, $cdatas, $cids;
 
-	checkargs($args, array('cid'));
-
-	global $cdatas;
+	if ( isset($args['cid']) ) {
+		$cid = safe_int($args['cid']);
+	} else {
+		if ( count($cids)==1 ) {
+			$cid = reset($cids);
+		} else {
+			$api->createError("No contest ID specified but active contest is ambiguous.");
+		}
+	}
 
 	$filter = array();
 	if ( array_key_exists('category', $args) ) {
@@ -1176,10 +1209,10 @@ function scoreboard($args)
 		$filter['affilid'] = array($args['affiliation']);
 	}
 
-	$scoreboard = genScoreBoard($cdatas[$args['cid']], !$args['public'], $filter);
+	$scoreboard = genScoreBoard($cdatas[$cid], !$args['public'], $filter);
 
 	$prob2label = $DB->q('KEYVALUETABLE SELECT probid, shortname
-	                      FROM contestproblem WHERE cid = %i', $args['cid']);
+	                      FROM contestproblem WHERE cid = %i', $cid);
 
 	$res = array();
 	foreach ( $scoreboard['scores'] as $teamid => $data ) {

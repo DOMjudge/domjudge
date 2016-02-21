@@ -18,6 +18,50 @@ function ch_error($string)
 	$CHECKER_ERRORS[] = $string;
 }
 
+function check_mapping_team($data, $mapping_data, $keydata = null)
+{
+	// Only when user information is providede (i.e. on add)
+	if ( isset($mapping_data[1]) ) {
+		if ( $data['adduser'] === '1' ) {
+			$id = $mapping_data[1]['extra']['username'];
+			if ( ! preg_match ( ID_REGEX, $id ) ) {
+				ch_error("Username may only contain characters " . IDENTIFIER_CHARS . ".");
+			}
+
+			// Set user fullname to team name
+			$mapping_data[1]['extra']['name'] = $data['name'];
+		} else {
+			// Remove user information when not adding a user
+			unset($mapping_data[1]);
+		}
+	}
+
+	return $mapping_data;
+}
+
+function check_team($data, $keydata = null)
+{
+	// Unset adduser checkbox as it is only a helper checkbox
+	if ( isset($data['adduser']) ) {
+		unset($data['adduser']);
+	}
+
+	return $data;
+}
+
+function post_team($prikey, $cmd)
+{
+	if ( $cmd == 'add' ) {
+		global $DB;
+		// Add team user-role to user for this team
+		$DB->q("INSERT INTO userrole (userid, roleid)
+		        SELECT userid, roleid FROM user
+		        LEFT JOIN team USING (teamid)
+		        LEFT JOIN role ON role.role = 'team'
+		        WHERE teamid = %i", $prikey['teamid']);
+	}
+}
+
 function check_user($data, $keydata = null)
 {
 	global $DB;

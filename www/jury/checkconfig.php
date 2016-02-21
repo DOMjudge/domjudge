@@ -306,6 +306,59 @@ $res = $DB->q('SELECT probid, cid, shortname, timelimit, special_compare, specia
                FROM problem INNER JOIN contestproblem USING (probid)
                ORDER BY probid');
 
+
+
+// Select all active judgehosts including restrictions, so we can check all problems
+$judgehosts = $DB->q("TABLE SELECT hostname, restrictionid FROM judgehost WHERE active = 1");
+$judgehost_without_restrictions = false;
+foreach ($judgehosts as &$judgehost) {
+	if ( $judgehost['restrictionid'] === null ) {
+		$judgehost_without_restrictions = true;
+		break;
+	}
+
+	$judgehost['no_restriction'] = false;
+
+	// Get judgehost restrictions
+	$judgehost['contests'] = array();
+	$judgehost['problems'] = array();
+	$judgehost['languages'] = array();
+	$restrictions = $DB->q('MAYBEVALUE SELECT restrictions FROM judgehost
+				INNER JOIN judgehost_restriction USING (restrictionid)
+				WHERE hostname = %s', $judgehost['hostname']);
+	if ( $restrictions ) {
+		$restrictions = json_decode($restrictions, true);
+		$judgehost['contests'] = @$restrictions['contest'];
+		$judgehost['problems'] = @$restrictions['problem'];
+		$judgehost['languages'] = @$restrictions['language'];
+	}
+
+	$extra_where = '';
+	if ( empty($judgehost['contests']) ) {
+		$extra_where .= '%_ ';
+	} else {
+		$extra_where .= 'AND cp.cid IN (%Ai) ';
+	}
+
+	if ( empty($judgehost['problems']) ) {
+		$extra_where .= '%_ ';
+	} else {
+		$extra_where .= 'AND cp.probid IN (%Ai) ';
+	}
+
+	if ( empty($judgehost['languages']) ) {
+		$extra_where .= '%_ ';
+	} else {
+		$extra_where .= 'AND l.langid IN (%As) ';
+	}
+
+	$judgehost['extra_where'] = $extra_where;
+
+	unset($judgehost);
+}
+
+$languages = $DB->q("KEYVALUETABLE SELECT langid, name FROM language WHERE allow_submit = 1 AND allow_judge = 1");
+
 $details = '';
 while($row = $res->next()) {
 	$CHECKER_ERRORS = array();
@@ -316,9 +369,33 @@ while($row = $res->next()) {
 		}
 	}
 	if ( ! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
- 	               WHERE input IS NOT NULL AND output IS NOT NULL AND
- 	               probid = %i", $row['probid']) ) {
+	               WHERE input IS NOT NULL AND output IS NOT NULL AND
+	               probid = %i", $row['probid']) ) {
 		$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": missing in/output testcase.\n";
+	}
+
+	// Check for each language if there it can be checked by a judgehost
+	foreach ($languages as $langid => $langname) {
+		$language_ok = $judgehost_without_restrictions;
+		if ( !$judgehost_without_restrictions ) {
+			// No judgehosts without restrictions, check them
+			foreach ($judgehosts as $judgehost) {
+				$found = $DB->q("MAYBEVALUE SELECT cp.probid
+						 FROM contestproblem cp, language l
+						 WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s" .
+						$judgehost['extra_where'],
+						$row['probid'], $row['cid'], $langid, $judgehost['contests'],
+						$judgehost['problems'], $judgehost['languages']);
+				if ( $found ) {
+					$language_ok = true;
+					break;
+				}
+			}
+		}
+
+		if (!$language_ok) {
+			$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": no judgehost can judge for language " . $langname . ".\n";
+		}
 	}
 }
 foreach(array('input','output') as $inout) {

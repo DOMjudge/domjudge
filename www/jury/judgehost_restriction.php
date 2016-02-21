@@ -13,18 +13,20 @@ $id = getRequestID();
 $title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
 		 'judgehost restriction');
 
-require(LIBWWWDIR . '/header.php');
+$jqtokeninput = true;
 
 // Get these lists here, as they are needed both on the edit and view pages.
-$contests  = $DB->q("KEYVALUETABLE SELECT cid, CONCAT('c', cid, ' - ', shortname)
+$contests  = $DB->q("KEYVALUETABLE SELECT cid, CONCAT(name, ' (', shortname, ' - c', cid, ')')
                      FROM contest ORDER BY cid");
-$problems  = $DB->q("KEYVALUETABLE SELECT probid, CONCAT('p', probid, ' - ', name)
+$problems  = $DB->q("KEYVALUETABLE SELECT probid, CONCAT(name, ' (p', probid, ')')
                      FROM problem ORDER BY probid");
-$languages = $DB->q("KEYVALUETABLE SELECT langid, CONCAT(langid, ' - ', name)
+$languages = $DB->q("KEYVALUETABLE SELECT langid, CONCAT(name, ' (', langid, ')')
                      FROM language ORDER BY langid");
 $lists = array('contest' => $contests,
                'problem' => $problems,
                'language' => $languages);
+
+require(LIBWWWDIR . '/header.php');
 
 if ( !empty($_GET['cmd']) ) {
 
@@ -55,33 +57,56 @@ if ( !empty($_GET['cmd']) ) {
     <td><?php echo addInput('data[0][name]', @$row['name'], 15, 255, 'required')?></td></tr>
 <?php
 
-	foreach ( array('contest','problem','language') as $type ) {
-		?>
+$types = array(
+	'contest' => array(
+		'ajax' => 'ajax_contests.php',
+		'hintText' => 'Type to search for contest ID, name, or short name',
+		'noResultsText' => 'No contests found',
+		'allData' => $contests,
+	),
+	'problem' => array(
+		'ajax' => 'ajax_problems.php',
+		'hintText' => 'Type to search for problem ID or name',
+		'noResultsText' => 'No problems found',
+		'allData' => $problems,
+	),
+	'language' => array(
+		'ajax' => 'ajax_languages.php',
+		'hintText' => 'Type to search for language ID or name',
+		'noResultsText' => 'No languages found',
+		'allData' => $languages,
+	),
+);
+foreach ( $types as $type => $type_settings ) {
+?>
 <tr><td colspan="2">
 <h3>Restrict to any of the following <?php echo $type; ?>s (leave empty to allow all)</h3>
 </td></tr>
 <?php
-		if ( isset($row) && isset($row['restrictions'][$type]) ) {
-			$start = count($row['restrictions'][$type]);
-
-			foreach ( $row['restrictions'][$type] as $j => $restriction ) {
-				echo '<tr><td></td><td>' .
-				     addSelect("data[0][restrictions][$type][${j}]",
-				               array(null => "-- Remove restriction") + $lists[$type],
-				               $restriction, true) .
-				     "</td></tr>\n";
-			}
-		} else {
-			$start = 0;
-		}
-
-		for ($j = $start, $i = 0; $i < 10; $i++, $j = $i + $start) {
-			echo '<tr><td></td><td>' .
-			     addSelect("data[0][restrictions][$type][${j}]",
-			               array(null => "-- Do not restrict") + $lists[$type],
-				           null, true) .
-			     "</td></tr>\n";
-		}
+$prepopulate = array();
+if ( is_array($row['restrictions'][$type]) ) {
+	foreach ( $row['restrictions'][$type] as $id ) {
+		$prepopulate[] = array(
+			'id' => $id,
+			'search' => $type_settings['allData'][$id],
+		);
+	}
+}
+?>
+<tr><td></td><td><?php echo addInput("data[0][restrictions][$type]", '', 50); ?></td></tr>
+<script type="text/javascript">
+	$(function() {
+		$('#data_0__restrictions__<?php echo $type; ?>_').tokenInput('<?php echo $type_settings['ajax']; ?>', {
+			propertyToSearch: 'search',
+			hintText: '<?php echo $type_settings['hintText']; ?>',
+			noResultsText: '<?php echo $type_settings['noResultsText']; ?>',
+			preventDuplicates: true,
+			excludeCurrent: true,
+			prePopulate: <?php echo json_encode($prepopulate); ?>
+		});
+	});
+</script>
+<?php
 	}
 
 	$rejudge_own = !isset($row['restrictions']['rejudge_own']) ||

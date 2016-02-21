@@ -137,6 +137,7 @@ foreach ($contests as $contest) {
 
 $time_end = microtime(TRUE);
 
-echo "<p>Scoreboard cache refresh completed in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
+echo "<p>Scoreboard cache refresh completed in " .
+     sprintf('%.2lf',$time_end - $time_start) . " seconds.</p>\n\n";
 
 require(LIBWWWDIR . '/footer.php');

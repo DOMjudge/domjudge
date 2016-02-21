@@ -389,7 +389,7 @@ submissions, and the awards ceremony can start.
 <appendix>
 
 <chapt>Problem package format
-<label id="problem-format"> 
+<label id="problem-format">
 <p>
 DOMjudge supports the import and export of problems in a zip-bundle
 format.

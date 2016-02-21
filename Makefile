@@ -36,11 +36,16 @@ install:
 	@echo " - make install-docs"
 	@exit 1
 
-all: build docs
+all: build
 build: domserver judgehost
 
 ifeq ($(SUBMITCLIENT_ENABLED),yes)
 build: submitclient
+endif
+
+ifneq ($(DOC_BUILD_ENABLED),no)
+all: docs
+dist: distdocs
 endif
 
 # MAIN TARGETS
@@ -50,7 +55,7 @@ submitclient:
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure distdocs
+dist: configure
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
@@ -89,7 +94,7 @@ docs-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(docs_dirs))
 
 install-docs-l:
-	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) README ChangeLog COPYING*
+	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir) README.md ChangeLog COPYING*
 
 # As final step try set ownership and permissions of a few special
 # files/directories. Print a warning and fail gracefully if this

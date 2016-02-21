@@ -416,6 +416,7 @@ CREATE TABLE `submission` (
   `judgehost` varchar(50) DEFAULT NULL COMMENT 'Current/last judgehost judging this submission',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'If false ignore this submission in all scoreboard calculations',
   `rejudgingid` int(4) unsigned DEFAULT NULL COMMENT 'Rejudging ID (if rejudge)',
+  `expected_results` varchar(255) DEFAULT NULL COMMENT 'JSON encoded list of expected results - used to validate jury submissions',
   `externalid` int(4) unsigned DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
   `externalresult` varchar(25) DEFAULT NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
   PRIMARY KEY  (`submitid`),

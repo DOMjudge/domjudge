@@ -67,6 +67,20 @@ if ( ! isset($_POST['cancel']) ) {
 			unset($itemdata['mapping']);
 		}
 
+		// First allow to check mappings
+		$fn = "check_mapping_$t";
+		if ( function_exists($fn) ) {
+			$CHECKER_ERRORS = array();
+			$mappingdata = $fn($itemdata, $mappingdata, $keydata[$i]);
+			if ( count($CHECKER_ERRORS) ) {
+				error("Errors while processing $t " .
+				      @implode(', ', @$keydata[$i]) . ":\n" .
+				      implode(";\n", $CHECKER_ERRORS));
+			}
+
+		}
+
+		// Then check normal data
 		$fn = "check_$t";
 		if ( function_exists($fn) ) {
 			$CHECKER_ERRORS = array();
@@ -78,6 +92,7 @@ if ( ! isset($_POST['cancel']) ) {
 			}
 
 		}
+
 		check_sane_keys($itemdata);
 
 		$newid = null;
@@ -106,31 +121,63 @@ if ( ! isset($_POST['cancel']) ) {
 			auditlog($t, implode(', ', $prikey), 'updated');
 		}
 
-		// special case for many-to-many mappings
+		// special case for many-to-one and many-to-many mappings
 		if ( $mappingdata != null ) {
 			foreach ( $mappingdata as $mapping ) {
-				// If the items is not an array, it is set by tokenizer and it should be split on ,
-				if ( !is_array($mapping['items']) ) {
-					$mapping['items'] = explode(',', $mapping['items']);
-				}
+				if (count($mapping['fk']) == 2) {
+					// Many-to-many
 
-				$junctiontable = $mapping['table'];
-				$fk = $mapping['fk'];
-
-				// Make sure this is a valid mapping
-				check_manymany_mapping($junctiontable, $fk);
-
-				// Remove all old mappings
-				$DB->q('DELETE FROM %l WHERE %S', $junctiontable, $prikey);
-				foreach ( $mapping['items'] as $key => $mapdest ) {
-					// Skip empty rows
-					if ( empty($mapdest) ) {
-						continue;
+					// If the items is not an array, it is set by tokenizer and it should be split on ,
+					if ( !is_array($mapping['items']) ) {
+						$mapping['items'] = explode(',', $mapping['items']);
 					}
-					$columns = array($fk[0], $fk[1]);
-					$values = array($prikey[$fk[0]], $mapdest);
-					if ( isset($mapping['extra'][$key]) ) {
-						foreach ( $mapping['extra'][$key] as $column => $value ) {
+
+					$junctiontable = $mapping['table'];
+					$fk = $mapping['fk'];
+
+					// Make sure this is a valid mapping
+					check_manymany_mapping($junctiontable, $fk);
+
+					// Remove all old mappings
+					$DB->q('DELETE FROM %l WHERE %S', $junctiontable, $prikey);
+					foreach ( $mapping['items'] as $key => $mapdest ) {
+						// Skip empty rows
+						if ( empty($mapdest) ) {
+							continue;
+						}
+						$columns = array($fk[0], $fk[1]);
+						$values = array($prikey[$fk[0]], $mapdest);
+						if ( isset($mapping['extra'][$key]) ) {
+							foreach ( $mapping['extra'][$key] as $column => $value ) {
+								$columns[] = $column;
+								// set empty string to null
+								$values[] = ($value === "" ? null : $value);
+							}
+						}
+
+						$query = "INSERT INTO %l (";
+						$query .= implode(',', array_fill(0, count($columns), '%l'));
+						$query .= ') VALUES (';
+						$query .= implode(',', array_fill(0, count($values), '%s'));
+						$query .= ')';
+						$arguments = array($query, $junctiontable);
+						$arguments = array_merge($arguments, $columns);
+						$arguments = array_merge($arguments, $values);
+						$ret = call_user_func_array(array($DB, 'q'), $arguments);
+					}
+				} else {
+					// Many-to-one
+
+					$targettable = $mapping['table'];
+					$fk = $mapping['fk'];
+
+					// Make sure this is a valid mapping
+					check_manyone_mapping($targettable, $fk);
+
+					$columns = array($fk);
+					$values = array($prikey[$fk]);
+					if ( isset($mapping['extra']) ) {
+						foreach ( $mapping['extra'] as $column => $value ) {
 							$columns[] = $column;
 							// set empty string to null
 							$values[] = ($value === "" ? null : $value);
@@ -142,12 +189,25 @@ if ( ! isset($_POST['cancel']) ) {
 					$query .= ') VALUES (';
 					$query .= implode(',', array_fill(0, count($values), '%s'));
 					$query .= ')';
-					$arguments = array($query, $junctiontable);
+					$arguments = array($query, $targettable);
 					$arguments = array_merge($arguments, $columns);
 					$arguments = array_merge($arguments, $values);
 					$ret = call_user_func_array(array($DB, 'q'), $arguments);
 				}
 			}
+		}
+
+		// Allow post-edit functioms
+		$fn = "post_$t";
+		if ( function_exists($fn) ) {
+			$CHECKER_ERRORS = array();
+			$fn($prikey, $cmd);
+			if ( count($CHECKER_ERRORS) ) {
+				error("Errors while post-processing $t " .
+				      @implode(', ', @$keydata[$i]) . ":\n" .
+				      implode(";\n", $CHECKER_ERRORS));
+			}
+
 		}
 	}
 	// If the form contained uploadable files, process these now.
@@ -202,5 +262,16 @@ function check_manymany_mapping($table, $keys) {
 		if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $key ) ) {
 			error ("Invalid characters in field name \"$key\".");
 		}
+	}
+}
+
+// Verify a many-to-one mapping is valid
+function check_manyone_mapping($table, $key) {
+	if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $table ) ) {
+		error ("Invalid characters in table name \"$table\".");
+	}
+
+	if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $key ) ) {
+		error ("Invalid characters in field name \"$key\".");
 	}
 }

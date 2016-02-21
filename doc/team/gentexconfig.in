@@ -26,7 +26,7 @@ if ( is_readable($config) ) {
 } else {
 	@include('../../etc/domserver-config.php');
 	@include('../../etc/judgehost-config.php');
-	define('DOMJUDGE_VERSION', `sed -n '1s/.*version //p' ../../README | tr -d '\n'`);
+	define('DOMJUDGE_VERSION', `sed -n '1s/.*version //p' ../../README.md | tr -d '\n'`);
 }
 
 // FIXME: we need to read some of these variables from the MySQL DB.

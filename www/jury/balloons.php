@@ -31,7 +31,10 @@ if ( isset($_REQUEST['viewall']) ) $viewall = $_REQUEST['viewall'];
 
 dj_setcookie('domjudge_balloonviewall', $viewall);
 
-$refresh = '15;url=balloons.php';
+$refresh = array(
+	'after' => 15,
+	'url' => 'balloons.php',
+);
 require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Balloon Status</h1>\n\n";
@@ -87,7 +90,7 @@ $res = null;
 if ( !empty($contestids) ) {
 	$res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
 	               t.teamid, t.name AS teamname, t.room, c.name AS catname,
- 	               s.cid, co.shortname
+	               s.cid, co.shortname
 	               FROM balloon b
 	               LEFT JOIN submission s USING (submitid)
 	               LEFT JOIN problem p USING (probid)

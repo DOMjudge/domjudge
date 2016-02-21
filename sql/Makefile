@@ -47,8 +47,8 @@ $(ZIPSQL): $(ZIPFILES)
 
 # Extract DOMjudge version from README here as a hack, because the
 # system isn't configured yet.
-$(CONFSTUB): %: %.in $(TOPDIR)/README
-	VERSION=`sed -n '1s/^.*version //p' $(TOPDIR)/README | tr -d '\n'` ; \
+$(CONFSTUB): %: %.in $(TOPDIR)/README.md
+	VERSION=`sed -n '1s/^.*version //p' $(TOPDIR)/README.md | tr -d '\n'` ; \
 	sed "s/@VERSION@/$$VERSION/" $< > $@
 
 dj-setup-database: %: %.in $(TOPDIR)/paths.mk

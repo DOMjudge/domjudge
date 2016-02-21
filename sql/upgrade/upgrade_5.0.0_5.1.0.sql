@@ -44,6 +44,10 @@ ALTER TABLE `language`
 ALTER TABLE `clarification`
   ADD COLUMN `category` varchar(128) DEFAULT NULL COMMENT 'Category associated to this clarification; only set for non problem clars' AFTER `probid`;
 
+-- Add field in submissions table to store expected results
+ALTER TABLE `submission`
+  ADD COLUMN `expected_results` varchar(255) DEFAULT NULL COMMENT 'JSON encoded list of expected results - used to validate jury submissions' AFTER `rejudgingid`;
+
 --
 -- Transfer data from old to new structure
 --

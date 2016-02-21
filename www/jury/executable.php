@@ -15,7 +15,10 @@ $title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
 if ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
 } else {
-	$refresh = '15;url='.$pagename.'?id='.urlencode($id);
+	$refresh = array(
+		'after' => 15,
+		'url' => $pagename.'?id='.urlencode($id),
+	);
 }
 
 if ( isset($_GET['fetch']) ) {

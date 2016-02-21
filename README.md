@@ -1,4 +1,9 @@
-This is the Programming Contest Jury System "DOMjudge" version 5.1.0DEV
+DOMjudge
+--------
+[![Build Status](https://travis-ci.org/DOMjudge/domjudge.svg?branch=master)](https://travis-ci.org/DOMjudge/domjudge)
+[![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
+
+This is the Programming Contest Jury System "DOMjudge" version 5.2.0DEV
 
 DOMjudge is a system for running a programming contest, like the
 ACM ICPC regional and world championship programming contests.
@@ -38,7 +43,7 @@ by running 'make dist', see the online documentation, section
 Copyright & Licencing
 ---------------------
 
-DOMjudge is Copyright (c) 2004 - 2015 by the DOMjudge developers and
+DOMjudge is Copyright (c) 2004 - 2016 by the DOMjudge developers and
 all respective contributors. The current DOMjudge developers are Jaap
 Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst and Tobias
 Werth; see the administrator's manual for a complete list of
@@ -64,9 +69,14 @@ Various JavaScript libraries/snippets are included under www/js/:
 - Flot: licenced under the MIT licence, see COPYING.MIT.
 - jQuery: licenced under the MIT licence, see COPYING.MIT.
 - jQuery TokenInput: dual licensed under GPL and MIT licences, see COPYING and COPYING.MIT.
+- JavaScript Cookie: licenced under the MIT licence, see COPYING.MIT.
 
 The Spyc PHP YAML parser is included, licenced under the MIT licence,
 see COPYING.MIT.
+
+GitHub Octicons are copyright 2012-2016 Github.
+Font License: SIL OFL 1.1 (http://scripts.sil.org/OFL)
+Code License: the MIT licence, see COPYING.MIT.
 
 The default validator from the Kattis problemtools package is
 included, licenced under the MIT licence, see COPYING.MIT.

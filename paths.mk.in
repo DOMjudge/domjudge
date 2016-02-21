@@ -41,6 +41,9 @@ INSTALL = @INSTALL@
 # Build submit client?
 SUBMITCLIENT_ENABLED = @SUBMITCLIENT_ENABLED@
 
+# Build documentation?
+DOC_BUILD_ENABLED = @DOC_BUILD_ENABLED@
+
 # Use Linux cgroups?
 USE_CGROUPS = @USE_CGROUPS@
 

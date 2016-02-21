@@ -126,5 +126,20 @@ a.collapse { color: black; text-decoration: none; } */
 .tdright { text-align: right; }
 .teamstat { text-align: right; }
 
+div.submissions-filter > p {
+	position: relative;
+}
+
+div.submissions-filter > p > span {
+	position: absolute;
+	top: 3px;
+}
+
+div.submissions-filter ul.token-input-list {
+	display: inline-block;
+	position: relative;
+	left: 100px;
+}
+
 .tc_box_small { text-align:center;font-size:65%;width:1.0em;display:inline-block;padding:1px;margin:1px;color:black; }
 .tc_list_small { max-width:500px; }

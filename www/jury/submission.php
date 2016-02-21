@@ -250,27 +250,44 @@ $jury_member = $username;
 if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 
 	// Send headers before possible warning messages.
-	if ( !isset($_REQUEST['unclaim']) ) require_once(LIBWWWDIR . '/header.php');
+	require_once(LIBWWWDIR . '/header.php');
+
+	$unornot = isset($_REQUEST['unclaim']) ? 'un' : '';
 
 	if ( !isset($jid) ) {
-		warning("Cannot claim this submission: no valid judging found.");
+		warning("Cannot " . $unornot . "claim this submission: no valid judging found.");
 	} else if ( $jdata[$jid]['verified'] ) {
-		warning("Cannot claim this submission: judging already verified.");
-	} else if ( empty($jury_member) && isset($_REQUEST['claim']) ) {
+		warning("Cannot " . $unornot . "claim this submission: judging already verified.");
+	} else if ( empty($jury_member) && $unornot==='' ) {
 		warning("Cannot claim this submission: no jury member specified.");
 	} else {
-		if ( !empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) && $jury_member !== $jdata[$jid]['jury_member'] ) {
-			warning("Submission claimed and previous owner " .
-			        @$jdata[$jid]['jury_member'] . " replaced.");
+		if ( !empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) &&
+		     $jury_member !== $jdata[$jid]['jury_member'] &&
+		     !isset($_REQUEST['forceclaim']) ) {
+
+			// Don't use warning() here since it implies that a
+			// recoverable error has occurred. Also, it generates
+			// invalid HTML (using an unclosed <b> tag) to detect such
+			// issues.
+			echo "<fieldset class=\"warning\"><legend>Warning</legend>" .
+			     "Submission has been claimed by " . @$jdata[$jid]['jury_member'] .
+			     ". Claim again on this page to force an update.</fieldset>";
+			goto claimdone;
 		}
 		$DB->q('UPDATE judging SET jury_member = ' .
-		       (isset($_REQUEST['unclaim']) ? 'NULL %_ ' : '%s ') .
+		       ($unornot==='un' ? 'NULL %_ ' : '%s ') .
 		       'WHERE judgingid = %i', $jury_member, $jid);
-		auditlog('judging', $jid, isset($_REQUEST['unclaim']) ? 'unclaimed' : 'claimed');
+		auditlog('judging', $jid, $unornot . 'claimed');
 
-		if ( isset($_REQUEST['unclaim']) ) header('Location: submissions.php');
+		if ( $unornot==='un' ) {
+			header('Location: submissions.php');
+		} else {
+			header('Location: submission.php?id=' . $id);
+		}
+		exit;
 	}
 }
+claimdone:
 
 // Headers might already have been included.
 require_once(LIBWWWDIR . '/header.php');
@@ -361,6 +378,67 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 
 if ( !isset($jid) ) {
 	echo "<p><em>Not (re)judged yet</em></p>\n\n";
+
+	// Check if there is an active judgehost that run this submission. Otherwise, we will print some error
+	$judgehosts = $DB->q("TABLE SELECT hostname, restrictionid FROM judgehost WHERE active = 1");
+	$can_be_judged = false;
+
+	foreach ( $judgehosts as $judgehost ) {
+		if ( $judgehost['restrictionid'] === null ) {
+			$can_be_judged = true;
+			break;
+		}
+
+		// Get judgehost restrictions
+		$contests = array();
+		$problems = array();
+		$languages = array();
+		$restrictions = $DB->q('MAYBEVALUE SELECT restrictions FROM judgehost
+				INNER JOIN judgehost_restriction USING (restrictionid)
+				WHERE hostname = %s', $judgehost['hostname']);
+		if ( $restrictions ) {
+			$restrictions = json_decode($restrictions, true);
+			$contests = @$restrictions['contest'];
+			$problems = @$restrictions['problem'];
+			$languages = @$restrictions['language'];
+		}
+
+		$extra_join = '';
+		$extra_where = '';
+		if ( empty($contests) ) {
+			$extra_where .= '%_ ';
+		} else {
+			$extra_where .= 'AND s.cid IN (%Ai) ';
+		}
+
+		if ( empty($problems) ) {
+			$extra_where .= '%_ ';
+		} else {
+			$extra_join  .= 'LEFT JOIN problem p USING (probid) ';
+			$extra_where .= 'AND s.probid IN (%Ai) ';
+		}
+
+		if ( empty($languages) ) {
+			$extra_where .= '%_ ';
+		} else {
+			$extra_where .= 'AND s.langid IN (%As) ';
+		}
+
+		$submitid = $DB->q('MAYBEVALUE SELECT s.submitid
+				    FROM submission s
+				    LEFT JOIN language l USING (langid)
+				    LEFT JOIN contestproblem cp USING (probid, cid) ' .
+				   $extra_join .
+				   'WHERE s.submitid = %i AND s.judgehost IS NULL
+				    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
+				   $extra_where .
+				   'LIMIT 1',
+				   $id, $contests, $problems, $languages);
+	}
+
+	if ( !$can_be_judged ) {
+		echo "<p class=\"error\">No active judgehost can judge this submission. Edit judgehost restrictions!</p>\n\n";
+	}
 }
 
 
@@ -454,6 +532,7 @@ if ( isset($jid) )  {
 
 		if ( !empty($jud['jury_member']) ) {
 			echo ' (claimed by ' . specialchars($jud['jury_member']) . ') ';
+			echo addHidden('forceclaim', '1');
 		}
 		if ( $jury_member == @$jud['jury_member']) {
 			echo addSubmit('unclaim', 'unclaim');
@@ -510,8 +589,10 @@ if ( isset($jid) )  {
 		       $lastjud['verify_comment'] . "')</span>" ) . "</span>";
 	}
 
-	// display following data only when the judging has been completed
-	if ( $judging_ended ) {
+	// Display following data only when the judging result is known.
+	// Note that the judging may still not be finished yet when lazy
+	// evaluation is off.
+	if ( !empty($jud['result']) ) {
 
 		// display verification data: verified, by whom, and comment.
 		// only if this is a valid judging, otherwise irrelevant
@@ -566,8 +647,8 @@ if ( isset($jid) )  {
 					. ' by DOMjudge.');
 			}
 		}
-	} else { // judging not ended yet
-			echo "<p><b>Judging is not finished yet!</b></p>\n";
+	} else { // judging does not have a result yet
+			echo "<p><b>Judging is not ready yet!</b></p>\n";
 	}
 
 ?>

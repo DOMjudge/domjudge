@@ -79,8 +79,16 @@ function XMLgetnode($path, $paren = NULL)
 	return $nodelist->item(0);
 }
 
+/**
+ * Formats a floating point timestamp by truncating it to milliseconds.
+ */
+function formattime($time)
+{
+	return floor(1000*$time)/1000;
+}
+
 // Get problems, languages, affiliations, categories and events
-$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color
+$probs = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, color, shortname
                  FROM problem INNER JOIN contestproblem USING(probid)
                  WHERE cid = %i AND allow_submit = 1 ORDER BY shortname', $cid);
 
@@ -128,8 +136,9 @@ XMLaddnode($info, 'scoreboard-freeze-length', $freezelengthString);
 XMLaddnode($info, 'penalty', dbconfig_get('penalty_time', 20));
 $started = now() - $cdata['starttime'] >= 0;
 XMLaddnode($info, 'started', $started ? 'True' : 'False');
-XMLaddnode($info, 'starttime', ($cdata['starttime']));
+XMLaddnode($info, 'starttime', formattime($cdata['starttime']));
 XMLaddnode($info, 'title', $cdata['name']);
+XMLaddnode($info, 'short-title', $cdata['shortname']);
 
 // write out languages
 $id_cnt = 0;
@@ -163,7 +172,13 @@ foreach( $probs as $prob => $data ) {
 	$prob_to_id[$prob] = $id_cnt;
 	$node = XMLaddnode($root, 'problem');
 	XMLaddnode($node, 'id', $id_cnt);
+	XMLaddnode($node, 'label', $data['shortname']);
 	XMLaddnode($node, 'name', $data['name']);
+	if ( preg_match('/^#[0-9A-Fa-f]{3,6}$/', $data['color']) ) {
+		XMLaddnode($node, 'rgb', substr($data['color'],1));
+	} else {
+		XMLaddnode($node, 'color', $data['color']);
+	}
 }
 
 // write out teams
@@ -175,7 +190,7 @@ foreach( $teams as $team => $data ) {
 	$node = XMLaddnode($root, 'team');
 	XMLaddnode($node, 'id', $id_cnt);
 	XMLaddnode($node, 'name', $data['name']);
-        if ( isset($data['externalid']) ) {
+	if ( isset($data['externalid']) ) {
 		XMLaddnode($node, 'external-id', $data['externalid']);
 	}
 	if ( isset($data['affilid']) ) {
@@ -191,8 +206,8 @@ while ( $row = $clars->next() ) {
 	XMLaddnode($node, 'id', $row['clarid']);
 	XMLaddnode($node, 'team', $team_to_id[$row['sender']]);
 	XMLaddnode($node, 'problem', $row['probid']); // FIXME: probid is shortname?
-	XMLaddnode($node, 'time', calcContestTime($row['submittime'],$cid));
-	XMLaddnode($node, 'timestamp', $row['submittime']);
+	XMLaddnode($node, 'time', formattime(calcContestTime($row['submittime'],$cid)));
+	XMLaddnode($node, 'timestamp', formattime($row['submittime']));
 	XMLaddnode($node, 'question', $row['question']);
 	if ( isset($row['answer']) ) {
 		XMLaddnode($node, 'answer', $row['answer']);
@@ -226,8 +241,8 @@ while ( $row = $events->next() ) {
 	XMLaddnode($run, 'id', $row['submitid']);
 	XMLaddnode($run, 'problem', $prob_to_id[$data['probid']]);
 	XMLaddnode($run, 'team', $team_to_id[$data['teamid']]);
-	XMLaddnode($run, 'timestamp', ($row['eventtime']));
-	XMLaddnode($run, 'time', calcContestTime($data['submittime'],$cid));
+	XMLaddnode($run, 'timestamp', formattime($row['eventtime']));
+	XMLaddnode($run, 'time', formattime(calcContestTime($data['submittime'],$cid)));
 	XMLaddnode($run, 'language', $data['langname']);
 
 	if ($row['description'] == 'problem submitted') {
@@ -261,8 +276,8 @@ while ( $row = $events->next() ) {
 			XMLaddnode($testcase, 'n', $ntestcases);
 			XMLaddnode($testcase, 'run-id', $row['submitid']);
 			XMLaddnode($testcase, 'solved', ($jrun['runresult']=='correct' ? 'True' : 'False'));
-			XMLaddnode($testcase, 'time', $jrun['runtime']);
-			XMLaddnode($testcase, 'timestamp', $timestamp);
+			XMLaddnode($testcase, 'time', formattime($jrun['runtime']));
+			XMLaddnode($testcase, 'timestamp', formattime($timestamp));
 			$timestamp += (float)$jrun['runtime'];
 		}
 

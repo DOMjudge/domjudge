@@ -18,11 +18,15 @@ require_once(LIBWWWDIR . '/auth.php');
 
 setup_database_connection();
 
-if ( ! logged_in() &&
-     isset($_SERVER['PHP_AUTH_USER']) &&
-     isset($_SERVER['PHP_AUTH_PW']) ) {
-	do_login_native($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
-	$userdata['roles'] = get_user_roles($userdata['userid']);
+if ( ! logged_in() ) {
+	if ( isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW']) ) {
+		do_login_native($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
+		$userdata['roles'] = get_user_roles($userdata['userid']);
+	} else {
+		header('WWW-Authenticate: Basic realm="DOMjudge event feed"');
+		header('HTTP/1.0 401 Unauthorized');
+		exit;
+	}
 }
 
 if ( !checkrole('full_event_reader') ) {

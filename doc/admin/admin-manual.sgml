@@ -49,8 +49,8 @@ DOMjudge discerns the following kinds of hosts:
        done with a browser via the web interface.
 <tag>DOMjudge server</tag>
        A host that receives the submissions, runs the
-       database and serves the web pages. This host will run Apache,
-       and MySQL.
+       database and serves the web pages. This host will run the
+       Apache webserver and MySQL database.
        Also called <em>domserver</em> for brevity.
 <tag>Judgehosts</tag>
        A number of hosts, at least one, that will retrieve
@@ -273,12 +273,7 @@ On the domserver host:
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server:
        <tt>
-       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf.d/domjudge.conf &&
-       sudo apache2ctl graceful
-       </tt>
-       Or for Apache 2.4 and up:
-       <tt>
-       sudo ln -s .../domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
+       sudo ln -s &lt;INSTALL_PATH&gt;/domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
        sudo a2enconf domjudge &&
        sudo apache2ctl graceful
        </tt>
@@ -326,7 +321,7 @@ Optionally:
        or use the balloon web interface.
 <item> On the judgehosts, create a pre-built chroot tree to support
        interpreted or byte-compiled languages such as Java:<newline>
-       <tt>bin/dj_make_chroot [optional arguments]</tt><newline>
+       <tt>sudo bin/dj_make_chroot [optional arguments]</tt><newline>
        <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
        Modifying <tt>chroot-startstop.sh</tt> is typically not
        necessary, but might be in circumstances where your
@@ -366,7 +361,7 @@ apt-get install gcc g++ make zip unzip mysql-server \
 	bsdmainutils phpmyadmin ntp \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
-	texlive-fonts-recommended texlive-lang-dutch
+	texlive-fonts-recommended texlive-lang-european
 </code>
 
 The following command can be used on RedHat Enterprise Linux, and
@@ -428,6 +423,11 @@ Note that <tt>fpc</tt> is not available in RedHat 7.
 <label id="install_config:installsystem">
 <p>
 
+There is a separate <em>maintainer installation</em> method meant for
+those wishing to do development on the DOMjudge source code. See
+the <ref id="appendix:developerinfo" name="appendix with developer information">
+and skip the rest of this section.
+
 The DOMjudge build/install system consists of a <tt>configure</tt>
 script and makefiles, but when installing it, some more care has to be
 taken than simply running '<tt>./configure &amp;&amp; make &amp;&amp;
@@ -438,7 +438,7 @@ system these parts are referred to as <tt>domserver, judgehost</tt>
 and additionally <tt>docs</tt> for all documentation.
 
 
-There are three different methods for installing DOMjudge:
+DOMjudge can be installed with two different directory layouts:
 <descrip>
 <tag>Single directory tree</tag>
 	With this method all DOMjudge related files and programs are
@@ -487,11 +487,6 @@ There are three different methods for installing DOMjudge:
 	to pass options <tt>--sysconfdir=/etc</tt> and
 	<tt>--localstatedir=/var</tt> to <tt>configure</tt> to disable
 	the prefix for these.
-
-<tag>Maintainer install</tag>
-	Meant for those wishing to do development on the DOMjudge
-	source code. See the <ref id="appendix:developerinfo"
-	name="appendix with developer information">.
 </descrip>
 
 After running the <tt>configure</tt> script, the system can be built
@@ -516,13 +511,264 @@ in the common problems section.
 For a list of basic make targets, run <tt>make</tt> in the source root
 directory without arguments.
 
+<sect>Database installation
+<p>
+
+DOMjudge uses a MySQL or MariaDB database server for information storage.
+Where this document talks about MySQL, it can be understood to also apply
+to MariaDB.
+
+The database structure and privileges are included in MySQL
+dump files in the sql subdirectory. The default database name is
+<tt>domjudge</tt>. This can be changed manually in the
+<tt>etc/dbpasswords.secret</tt> file: the database name as specified
+in this file will be used when installing.
+
+Installation of the database is done with <tt>bin/dj-setup-database</tt>.
+For this, you need an installed and configured MySQL server and
+administrator access to it. Run
+<code>
+dj-setup-database genpass
+dj-setup-database [-u <admin_user>] [-p <password>|-r] install
+</code>
+This first creates the DOMjudge database credentials file
+<tt>etc/dbpasswords.secret</tt> (optionally change the random
+generated password, although it is not needed for normal operation).
+Then it creates the database and user and inserts some
+default/example data into the domjudge database. The option
+<tt>-r</tt> will prompt for a password for mysql; when no user is
+specified, the mysql client will try to read
+credentials from <tt>$HOME/.my.cnf</tt> as usual. The command
+<tt>uninstall</tt> can be passed to <tt>dj-setup-database</tt> to
+remove the DOMjudge database and users; <em>this deletes all data!</em>
+
+The domjudge database contains a number of tables, some of which need
+to be manually filled with data before the contest can be run. See the
+<ref id="contestsetup:database" name="database section of Contest
+setup"> for details.
+
+<sect1>Setting up replication or backups
+<p>
+The MySQL server is the central place of information storage for
+DOMjudge. Think well about what to do if the MySQL
+host fails or loses your data.
+
+A very robust solution is to set up a replicating MySQL server on
+another host. This will be a hot copy of all data up to the second,
+and can take over immediately in the event of failure. The MySQL manual
+has more information about setting this up.
+
+Alternatively, you can make regular backups of your data to another host,
+for example with <tt>mysqldump</tt>, or use a RAID based system.
+
+Replication can also be used to improve performance, by directing all
+select-queries to one or more replicated slave servers, while updates
+will still be done to the master. This is not supported out of the box,
+and will require making changes to the DOMjudge source.
+
+<sect1>Storage of submissions
+<label id="install_config:storage_submissions">
+<p>
+The database is the authoritative version for submission source files;
+file system storage is available as an easy way to access the source
+files and as backup, but only when the web server has write
+permissions to <tt>&lt;domjudge_submitdir&gt;</tt>. File system
+storage is ignored if these permissions are not set. The programs
+<tt>bin/save_sources2file</tt> and <tt>bin/restore_sources2db</tt> are
+available to store and recover the submission table in the database
+to/from these files.
+
+
+<sect>Web server configuration
+<p>
+
+For the web interface, you need to have a web server (e.g. Apache)
+installed on the domserver and made sure that PHP correctly works
+with it. Refer to the documentation of your web server and PHP for
+details.
+
+To configure the web server for DOMjudge, use the Apache configuration
+snippet from <tt>etc/apache.conf</tt>. It contains examples for
+configuring the DOMjudge pages with an alias directive, or as a
+virtualhost, optionally with SSL; it also contains PHP and security
+settings. Reload the web server for changes to take effect.
+
+An Nginx webserver configuration snippet is also provided
+in <tt>etc/nginx-conf</tt>. This alternative webserver is less
+well-tested than the Apache setup, so your mileage may vary. Feedback
+is very welcome, though.
+
+The judgehosts connect to DOMjudge via the DOMjudge API so need
+to be able to access at least this part of the web interface.
+
+<sect>Fine tuning server settings
+<p>
+For Apache, there are countless documents on how to maximise performance.
+Of particular importance is to ensure that the <tt>MaxClients</tt> setting
+is high enough to receive the number of parallel requests you expect, but
+not higher than your amount of RAM allows.
+
+<p>
+As for PHP, the use of an opcode cache like the Alternative PHP Cache
+(Debian package: <tt>php-apc</tt>) is beneficial for performance. For
+uploading large testcases, see the
+<ref id="problems:memory" name="section about memory limits">.
+
+<p>
+It may be desirable or even necessary to fine tune some MySQL default settings:
+
+<itemize>
+<item><tt>max_connections</tt>: The default 100 is too low, because of the
+connection caching by Apache threads. 1000 is more appropriate.
+<item><tt>max_allowed_packet</tt>: The default of 16MB might be too
+low when using large testcases. This should be changed both in the
+MySQL server and client configuration and be set to about twice the
+maximum testcase size.
+<item>Root password: MySQL does not have a password for the root user
+by default. It's very desirable to set one.
+<item>When maximising performance is required, you can
+consider to use the <em>Memory</em> table storage engine
+for the scorecache_public and scorecache_jury tables. They will be
+lost in case of a full crash, but can be recalculated from the jury
+interface.
+</itemize>
+
+<sect>Installation of a judgehost<label id="install_config:judgehost">
+<p>
+
+A few extra steps might need to be taken to completely install and
+configure a judgehost.
+
+For running solution programs under a non-privileged user, a user has
+to be added to the system(s) that act as judgehost. This user does not
+need a home-directory or password, so the following command would
+suffice to add a user `domjudge-run' with minimal privileges.
+
+<!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
+On RedHat:
+<verb>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</verb>
+On Debian:
+<verb>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</verb>
+
+For other systems check the specifics of your useradd command.
+This user must also be configured as the user under which programs run
+via <tt>configure --enable-runuser=USER</tt>; the default is
+<tt>domjudge-run</tt>.
+
+<tt>Runguard</tt> needs to be able to become root for certain operations
+like changing to the runuser and performing a chroot. Also, the default
+<tt>chroot-startstop.sh</tt> script uses sudo to gain privileges for
+certain operations. There's a pregenerated <tt>/etc/sudoers.d/</tt> snippet
+in <tt>etc/sudoers-domjudge</tt> that contains all required rules. You can
+put the lines in the snippet at the end of  <tt>/etc/sudoers</tt>, or, for
+modern sudo versions, place the file in <tt>/etc/sudoers.d/</tt>. If you
+change the user you run the judgedaemon as, or the installation paths, be
+sure to update the sudoers rules accordingly.
+
+When the chroot setting is enabled (default), a static POSIX shell has
+to be available for copying it to the chroot environment. For Linux
+i386, a static Dash shell is included, which works out of the box,
+also for the Linux Intel/AMD 64 architecture. For
+other architectures or operating systems, a shell has to be added
+manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
+file. If you want to support languages that cannot be compiled to
+statically linked binaries, e.g. byte-compiled languages such as Java,
+or interpreted languages such as Python, then a complete chroot
+environment must be built and configured. See the appendix on
+<ref id="problems:chroot" name="setting up a chroot"> for more
+details.
+
+The judgehost connects to the domserver via a REST API. You need to
+create an account for the judgedaemons to use (this may be a
+shared account between all judgedaemons) with a difficult,
+random password and the 'judgehost' role. On each judgehost, copy from
+the domserver (or create) a file <tt>etc/restapi.secret</tt> containing the id, URL,
+username and password whitespace-separated on one line, for example:
+<verb>default http://example.edu/domjudge/api/  judgehosts  MzfJYWF5agSlUfmiGEy5mgkfqU</verb>
+Note that the password must be identical to that of
+the <tt>judgehost</tt> user in the admin web interface.
+Multiple lines may be specified to allow a judgedaemon to work for multiple
+domservers. The id is used to differentiate between multiple domservers,
+and should be unique within the <tt>restapi.secret</tt> file.
+
+Then start the judgedaemon:
+<code>bin/judgedaemon</code>
+
+Upon its first connection to the domserver API the judgehost will be
+auto-registered and will be by default enabled. If you wish to
+add a new judgehost but have it initially disabled, you can add it
+manually through the DOMjudge web interface and set it to disabled
+before starting the judgedaemon.
+
+<sect>Building and installing the submit client<label id="install_config:submitclient">
+<p>
+
+DOMjudge supports two submission methods: via the command
+line <tt>submit</tt> program and via the web interface. From
+experience, both methods have users that prefer the one above the
+other.
+
+The command line submit client sends submissions using the API
+interface internally. This requires the libcURL and libjsonCPP library
+development files at compile time. The submit client can be statically
+linked using the <tt>--enable-static-linking</tt> configure option to
+avoid a runtime dependency.
+
+The submit client can be built with <tt>make submitclient</tt>. There
+is no make target to install the submit client, as its location will
+very much depend on the environment. You might e.g. want to copy it to
+all team computers or make it available on a network filesystem. Note
+that if the team computers run a different (version of the) operating
+system than the jury systems, then you need to build the submit
+client for that OS.
+
+The submit client needs to know the URL of the domserver. This
+can be passed as a command line option or environment variable. The
+latter option makes for easier usage. A sample script
+<tt>submit_wrapper.sh</tt> is included, which sets this variable.
+See that script for more details on how to set this up.
+
+The submit client authenticates to the DOMjudge API via either the
+configured authentication scheme, or can use the DOMjudge internal
+username and password combination for a given user account regardless
+of authentication scheme. For example, when the IPADDRESS scheme is
+used, no additional configuration is required because submissions
+will come from the correct IP address of the team. When another
+scheme is used, it may be necessary to place username and password
+combinations in the team's account so the submit client can use
+those. In this case these are always the DOMjudge internal
+password, so not e.g. LDAP passwords when using that scheme. The
+credentials are placed in the file <tt>~/.netrc</tt>, with example
+content:
+<verb>machine domserver.example.com login user0123 password Fba^2bHzz</verb>
+See the netrc(4) manual page for more details.
+You may want to distribute those <tt>.netrc</tt> files in advance
+to the team accounts. Make sure they are only readable for the
+user itself.
+
+<sect1>The submit client under Windows/Cygwin
+<p>
+
+<em>Note: this feature is not well supported anymore; we
+recommend using the web interface for submitting in Windows.</em>
+
+<p>
+The submit client can also be built under Windows when the Cygwin
+environment is installed. First install <url name="Cygwin"
+url="https://cygwin.com/install.html">, and include GCC, curl-devel
+and maybe some more packages.
+When Cygwin is correctly installed with all necessary development
+tools, the submit binary can be created by running <tt>configure</tt>
+followed by <tt>make submit.exe</tt> in the <tt>submit</tt> directory.
+
+
 <sect>Configuration
 <p>
 Configuration of the judge system is mostly done by editing the
 configuration variables on the page <tt>Configuration settings</tt>
 available in the administrator interface, and changes take effect
-immediately. The administrator interface
-can be reached on <tt>http://yourhost/domjudge/jury/</tt> and the
+immediately. The administrator interface can be reached
+on <tt>http(s)://yourhost.example.edu/domjudge/jury/</tt> and the
 default username is <tt>admin</tt> with password <tt>admin</tt>.
 Make sure to change the default password immediately.
 
@@ -569,7 +815,7 @@ Interpreted languages and non-statically linked binaries (for example,
 Oracle Java) can in principle also be used, but require that all
 dependencies are added to the chroot environment.
 DOMjudge comes with helper scripts to build a chroot environment:
-run either <tt>dj_make_chroot</tt> or <tt>dj_make_ubuntu_chroot</tt>
+run either <tt>sudo dj_make_chroot</tt> or <tt>sudo dj_make_ubuntu_chroot</tt>
 as root (for a Debian or Ubuntu-based chroot, respectively).
 Options can be given change the target directory where to build the
 chroot environment (normally the default from configure is used) and
@@ -697,135 +943,6 @@ be made. These are sometimes needed in non-standard environments.
        file for more information.
 </itemize>
 
-<sect>Submission methods <label id="install_config:submissionmethods">
-<p>
-
-DOMjudge supports two submission methods: via the command line submit
-program and via the web interface. From experience, both methods have
-users that prefer the one above the other.
-
-The command line submit client sends submissions using the API
-interface internally. This requires the libcURL
-and libjsonCPP library development files at compile time (the submit
-client is statically linked to avoid a runtime dependency).
-
-The database is the authoritative version for submission source files;
-file system storage is available as an easy way to access the source
-files and as backup, but only when the web server has write
-permissions on <tt>&lt;domjudge_submitdir&gt;</tt>. File system
-storage is ignored if these permissions are not set. The program
-<tt>bin/restore_sources2db</tt> is available to recover the submission
-table in the database from these files.
-
-<sect>Database installation
-<p>
-
-DOMjudge uses a MySQL or MariaDB database server for information storage.
-Where this document talks about MySQL, it can be understood to also apply
-to MariaDB.
-
-The database structure and privileges are included in MySQL
-dump files in the sql subdirectory. The default database name is
-<tt>domjudge</tt>. This can be changed manually in the
-<tt>etc/dbpasswords.secret</tt> file: the database name as specified
-in this file will be used when installing.
-
-Installation of the database is done with <tt>bin/dj-setup-database</tt>.
-For this, you need an installed and configured MySQL server and
-administrator access to it. Run
-<code>
-dj-setup-database genpass
-dj-setup-database [-u <admin_user>] [-p <password>|-r] install
-</code>
-This first creates the DOMjudge database credentials file
-<tt>etc/dbpasswords.secret</tt> (optionally change the random
-generated password, although it is not needed for normal operation).
-Then it creates the database and user and inserts some
-default/example data into the domjudge database. The option
-<tt>-r</tt> will prompt for a password for mysql; when no user is
-specified, the mysql client will try to read
-credentials from <tt>$HOME/.my.cnf</tt> as usual. The command
-<tt>uninstall</tt> can be passed to <tt>dj-setup-database</tt> to
-remove the DOMjudge database and users; <em>this deletes all data!</em>
-
-The domjudge database contains a number of tables, some of which need
-to be manually filled with data before the contest can be run. See the
-<ref id="contestsetup:database" name="database section of Contest
-setup"> for details.
-
-<sect1>Fine tuning settings
-<p>
-For Apache, there are countless documents on how to maximise performance.
-Of particular importance is to ensure that the <tt>MaxClients</tt> setting
-is high enough to receive the number of parallel requests you expect, but
-not higher than your amount of RAM allows.
-
-<p>
-As for PHP, the use of an opcode cache like the Alternative PHP Cache
-(Debian package: <tt>php-apc</tt>) is beneficial for performance. For
-uploading large testcases, see the
-<ref id="problems:memory" name="section about memory limits">.
-
-<p>
-It may be desirable or even necessary to fine tune some MySQL default settings:
-
-<itemize>
-<item><tt>max_connections</tt>: The default 100 is too low, because of the
-connection caching by Apache threads. 1000 is more appropriate.
-<item><tt>max_allowed_packet</tt>: The default of 16MB might be too
-low when using large testcases. This should be changed both in the
-MySQL server and client configuration and be set to about twice the
-maximum testcase size.
-<item>Root password: MySQL does not have a password for the root user
-by default. It's very desirable to set one.
-<item>When maximising performance is required, you can
-consider to use the <em>Memory</em> table storage engine
-for the scorecache_public and scorecache_jury tables. They will be
-lost in case of a full crash, but can be recalculated from the jury
-interface.
-</itemize>
-
-<sect1>Setting up replication or backups
-<p>
-The MySQL server is the central place of information storage for
-DOMjudge. Think well about what to do if the MySQL
-host fails or loses your data.
-
-A very robust solution is to set up a replicating MySQL server on
-another host. This will be a hot copy of all data up to the second,
-and can take over immediately in the event of failure. The MySQL manual
-has more information about setting this up.
-
-Alternatively, you can make regular backups of your data to another host,
-for example with <tt>mysqldump</tt>, or use a RAID based system.
-
-Replication can also be used to improve performance, by directing all
-select-queries to one or more replicated slave servers, while updates
-will still be done to the master. This is not supported out of the box,
-and will require making changes to the DOMjudge source.
-
-<sect>Web server configuration
-<p>
-
-For the web interface, you need to have a web server (e.g. Apache)
-installed on the domserver and made sure that PHP correctly works
-with it. Refer to the documentation of your web server and PHP for
-details.
-
-To configure the web server for DOMjudge, use the Apache configuration
-snippet from <tt>etc/apache.conf</tt>. It contains examples for
-configuring the DOMjudge pages with an alias directive, or as a
-virtualhost, optionally with SSL; it also contains PHP and security
-settings. Reload the web server for changes to take effect.
-
-An Nginx webserver configuration snippet is also provided
-in <tt>etc/nginx-conf</tt>. This alternative webserver is less
-well-tested than the Apache setup, so your mileage may vary. Feedback
-is very welcome, though.
-
-The judgehosts connect to DOMjudge via the DOMjudge API so need
-to be able to access at least this part of the web interface.
-
 <sect>Logging &amp; debugging
 <p>
 
@@ -853,121 +970,6 @@ Extra debugging information can be obtained by setting the config
 option <tt>DEBUG</tt> to a bitwise-or of the available
 <tt>DEBUG_*</tt> flags in <tt>etc/common-config.php</tt>, to e.g.
 generate extra SQL query and timing information in the web interface.
-
-<sect>Installation of a judgehost<label id="install_config:judgehost">
-<p>
-
-A few extra steps might need to be taken to completely install and
-configure a judgehost.
-
-For running solution programs under a non-privileged user, a user has
-to be added to the system(s) that act as judgehost. This user does not
-need a home-directory or password, so the following command would
-suffice to add a user `domjudge-run' with minimal privileges.
-
-<!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
-On RedHat:
-<verb>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</verb>
-On Debian:
-<verb>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</verb>
-
-For other systems check the specifics of your useradd command.
-This user must also be configured as the user under which programs run
-via <tt>configure --enable-runuser=USER</tt>; the default is
-<tt>domjudge-run</tt>.
-
-<tt>Runguard</tt> needs to be able to become root for certain operations
-like changing to the runuser and performing a chroot. Also, the default
-<tt>chroot-startstop.sh</tt> script uses sudo to gain privileges for
-certain operations. There's a pregenerated <tt>/etc/sudoers.d/</tt> snippet
-in <tt>etc/sudoers-domjudge</tt> that contains all required rules. You can
-put the lines in the snippet at the end of  <tt>/etc/sudoers</tt>, or, for
-modern sudo versions, place the file in <tt>/etc/sudoers.d/</tt>. If you
-change the user you run the judgedaemon as, or the installation paths, be
-sure to update the sudoers rules accordingly.
-
-When the chroot setting is enabled (default), a static POSIX shell has
-to be available for copying it to the chroot environment. For Linux
-i386, a static Dash shell is included, which works out of the box,
-also for the Linux Intel/AMD 64 architecture. For
-other architectures or operating systems, a shell has to be added
-manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
-file. If you want to support languages that cannot be compiled to
-statically linked binaries, e.g. byte-compiled languages such as Java,
-or interpreted languages such as Python, then a complete chroot
-environment must be built and configured. See the appendix on
-<ref id="problems:chroot" name="setting up a chroot"> for more
-details.
-
-The judgehost connects to the domserver via a REST API. You need to
-create an account for the judgedaemons to use (this may be a
-shared account between all judgedaemons) with a difficult,
-random password and the 'judgehost' role. On each judgedaemon,
-create a file <tt>etc/restapi.secret</tt> containing the id, URL,
-username and password whitespace-separated on one line, for example:
-<verb>default http://example.edu/domjudge/api/  judgehosts  MzfJYWF5agSlUfmiGEy5mgkfqU</verb>
-Multiple lines may be specified to allow a judgedaemon to work for multiple
-domservers. The id is used to differentiate between multiple domservers,
-and should be unique within the <tt>restapi.secret</tt> file.
-
-Then start the judgedaemon:
-<code>bin/judgedaemon</code>
-
-Upon its first connection to the domserver API the judgehost will be
-auto-registered and will be by default enabled. If you wish to
-add a new judgehost but have it initially disabled, you can add it
-manually through the DOMjudge web interface and set it to disabled
-before starting the judgedaemon.
-
-<sect>Building and installing the submit client<label id="install_config:submitclient">
-<p>
-
-The submit client can be built with <tt>make submitclient</tt>. There
-is no make target to install the submit client, as its location will
-very much depend on the environment. You might e.g. want to copy it to
-all team computers or make it available on a network filesystem. Note
-that if the team computers run a different (version of the) operating
-system than the jury systems, then you need to build the submit
-client for that OS.
-
-The submit client needs to know the URL of the domserver. This
-can be passed as a command line option or environment variable. The
-latter option makes for easier usage. A sample script
-<tt>submit_wrapper.sh</tt> is included, which sets this variable.
-See that script for more details on how to set this up.
-
-The submit client authenticates to the DOMjudge API via either the
-configured authentication scheme, or can use the DOMjudge internal
-username and password combination for a given user account regardless
-of authentication scheme. For example, when the IPADDRESS scheme is
-used, no additional configuration is required because submissions
-will come from the correct IP address of the team. When another
-scheme is used, it may be necessary to place username and password
-combinations in the team's account so the submit client can use
-those. In this case these are always the DOMjudge internal
-password, so not e.g. LDAP passwords when using that scheme. The
-credentials are placed in the file <tt>~/.netrc</tt>, with example
-content:
-<verb>machine domserver.example.com login user0123 password Fba^2bHzz</verb>
-See the netrc(4) manual page for more details.
-You may want to distribute those <tt>.netrc</tt> files in advance
-to the team accounts. Make sure they are only readable for the
-user itself.
-
-<sect1>The submit client under Windows/Cygwin
-<p>
-
-<em>Note: this feature is not well supported anymore; we
-recommend using the web interface for submitting in Windows.</em>
-
-<p>
-The submit client can also be built under Windows when the Cygwin
-environment is installed. First install <url name="Cygwin"
-url="https://cygwin.com/install.html">, and include GCC, curl-devel
-and maybe some more packages.
-When Cygwin is correctly installed with all necessary development
-tools, the submit binary can be created by running <tt>configure</tt>
-followed by <tt>make submit.exe</tt> in the <tt>submit</tt> directory.
 
 <sect>(Re)generating documentation and the team manual
 <p>
@@ -1014,8 +1016,8 @@ should end with a slash and defaults to <tt>http://example.com/domjudge/</tt>.
 The following should do it on a Debian-like system:
 <code>
 sudo apt-get install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
-cd .../docs/team
-./genteammanual [-w http://your.location.example.com/domjudge/] [targetdir]
+cd &lt;INSTALL_PATH&gt;/docs/team
+./genteammanual [-w http(s)://yourhost.example.edu/domjudge/] [targetdir]
 </code>
 
 <p>
@@ -1643,8 +1645,8 @@ If the daemons have started without any problems, you've come a long
 way! Now to check that you're ready for a contest.
 
 First, go to the jury interface:
-<tt>http://www.your-domjudge-location/jury</tt>. Look under all the
-menu items to see whether the displayed data looks sane. Use the
+<tt>http(s)://yourhost.example.edu/domjudge/jury</tt>. Look under all
+the menu items to see whether the displayed data looks sane. Use the
 config-checker under `Admin Functions' for some sanity checks on your
 configuration.
 
@@ -2027,7 +2029,7 @@ web server group access to the configuration and password files.
 If you want the web server to also store incoming submission sources on
 the file system (next to the database), then <tt>&lt;domserver_submitdir&gt;</tt> must be
 writable for the web server, see also <ref
-id="install_config:submissionmethods" name="submission methods">.
+id="install_config:storage_submissions" name="storage of submissions">.
 
 You should take care not to serve any files over the web that
 are not under the DOMjudge 'www/' directory, because they might
@@ -2391,7 +2393,9 @@ Note that these targets have to be executed <em>separately</em> and
 they replace the steps described in the section
 <ref id="install_config:installsystem" name="Installation system">;
 also no <tt>--prefix</tt> flag or other directories have to be
-specified to <tt>configure</tt>.
+specified to <tt>configure</tt>. In this case the binaries
+(e.g. <tt>judgedaemon</tt> and <tt>dj-setup-database</tt>) can be
+found in their respective source directories, not in <tt>bin</tt>.
 
 <sect>Makefile structure
 <p>
