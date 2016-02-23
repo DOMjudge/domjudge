@@ -21,7 +21,7 @@ SELECT '1'; -- No check possible yet.
 -- First assign a newly created judgehost to all judgings to guarantee
 -- that we can add a constraint later.
 REPLACE INTO `judgehost` (`hostname`, `active`) VALUES ('host-created-by-SQL-upgrade', '0');
-UPDATE `judgings` SET `judgehost` = 'host-created-by-SQL-upgrade' WHERE `judgehost` IS NULL;
+UPDATE `judging` SET `judgehost` = 'host-created-by-SQL-upgrade' WHERE `judgehost` IS NULL;
 
 --
 -- Add/remove sample/initial contents
