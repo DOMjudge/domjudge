@@ -12,8 +12,9 @@ Version 5.2.0 - DEV
  - Decode HTML entities for proper display of error messages in
    submit client.
  - The event feed and REST API now comply with ICPC WF 2016 specs.
- - Disallow deleting a judgehost, since the dangling reference from
-   the judging table makes submissions being rejudged again.
+ - Disallow deleting a judgehost that has performed judgings,
+   since the dangling reference from the judging table makes
+   submissions being rejudged again.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------
