@@ -218,7 +218,7 @@ CREATE TABLE `judging` (
   `submitid` int(4) unsigned NOT NULL COMMENT 'Submission ID being judged',
   `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time judging started',
   `endtime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time judging ended, null = still busy',
-  `judgehost` varchar(50) DEFAULT NULL COMMENT 'Judgehost that performed the judging',
+  `judgehost` varchar(50) NOT NULL COMMENT 'Judgehost that performed the judging',
   `result` varchar(25) DEFAULT NULL COMMENT 'Result string as defined in config.php',
   `verified` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Result verified by jury member?',
   `jury_member` varchar(25) DEFAULT NULL COMMENT 'Name of jury member who verified this',
@@ -236,7 +236,7 @@ CREATE TABLE `judging` (
   KEY `prevjudgingid` (`prevjudgingid`),
   CONSTRAINT `judging_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `judging_ibfk_2` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
-  CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL,
+  CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`),
   CONSTRAINT `judging_ibfk_4` FOREIGN KEY (`rejudgingid`) REFERENCES `rejudging` (`rejudgingid`) ON DELETE SET NULL,
   CONSTRAINT `judging_ibfk_5` FOREIGN KEY (`prevjudgingid`) REFERENCES `judging` (`judgingid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Result of judging a submission';
@@ -297,33 +297,20 @@ CREATE TABLE `problem` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Problems the teams can submit solutions for';
 
 --
--- Table structure for table `rankcache_jury`
+-- Table structure for table `rankcache`
 --
 
-CREATE TABLE `rankcache_jury` (
+CREATE TABLE `rankcache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
-  `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points',
-  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
-  PRIMARY KEY  (`cid`,`teamid`),
-  KEY `order` (`cid`,`points`, `totaltime`) USING BTREE,
-  CONSTRAINT `rankcache_jury_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Rank cache (jury version)';
-
---
--- Table structure for table `rankcache_public`
---
-
-CREATE TABLE `rankcache_public` (
-  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
-  `points` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points',
-  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
-  PRIMARY KEY  (`cid`,`teamid`),
-  KEY `order` (`cid`,`points`,`totaltime`) USING BTREE,
-  CONSTRAINT `rankcache_public_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Rank cache (public/team version)';
-
+  `points_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points (restricted audience)',
+  `totaltime_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent (restricted audience)',
+  `points_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points (public)',
+  `totaltime_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent (public)',
+  PRIMARY KEY (`cid`,`teamid`),
+  KEY `order_restricted` (`cid`,`points_restricted`,`totaltime_restricted`) USING BTREE,
+  KEY `order_public` (`cid`,`points_public`,`totaltime_public`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard rank cache';
 
 --
 -- Table structure for table `rejudging`
@@ -372,34 +359,23 @@ CREATE TABLE `role` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Possible user roles';
 
 --
--- Table structure for table `scorecache_jury`
+-- Table structure for table `scorecache`
 --
 
-CREATE TABLE `scorecache_jury` (
+CREATE TABLE `scorecache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
   `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
-  `submissions` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made',
-  `pending` int(4) NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement',
-  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
-  `is_correct` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission?',
-  PRIMARY KEY  (`cid`,`teamid`,`probid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard cache (jury version)';
-
---
--- Table structure for table `scorecache_public`
---
-
-CREATE TABLE `scorecache_public` (
-  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
-  `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
-  `submissions` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made',
-  `pending` int(4) NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement',
-  `totaltime` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent',
-  `is_correct` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission?',
-  PRIMARY KEY  (`cid`,`teamid`,`probid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard cache (public/team version)';
+  `submissions_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made (restricted audiences)',
+  `pending_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement (restricted audience)',
+  `totaltime_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent (restricted audience)',
+  `is_correct_restricted` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission? (restricted audience)',
+  `submissions_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made (public)',
+  `pending_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement (public)',
+  `totaltime_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent (public)',
+  `is_correct_public` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission? (public)',
+  PRIMARY KEY (`cid`,`teamid`,`probid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard cache';
 
 --
 -- Table structure for table `submission`

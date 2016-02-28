@@ -12,6 +12,12 @@ Version 5.2.0 - DEV
  - Decode HTML entities for proper display of error messages in
    submit client.
  - The event feed and REST API now comply with ICPC WF 2016 specs.
+ - Disallow deleting a judgehost that has performed judgings,
+   since the dangling reference from the judging table makes
+   submissions being rejudged again.
+ - Performance: merge jury and public versions of cache database
+   tables into single tables. Please refresh scoreboard cache after
+   upgrade.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------
@@ -22,7 +28,7 @@ Version 5.1.0 - 7 December 2015
  - Remove CHROOT_SCRIPT configuration setting: automatically run
    chroot-startstop.sh if a pre-built chroot tree is found.
  - Update ACE editor to version 1.2.2, JScolor to version 1.4.5.
- - Support microsecond resolution contest times.
+ - Support microsecond resolution contest times and timezones.
  - Port XML event feed from ICPC-live branch.
  - Port clarification categories feature from ICPC-live branch.
  - Merge Debian/Ubuntu chroot scripts and add minor fixes.
