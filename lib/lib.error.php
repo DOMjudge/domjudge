@@ -58,7 +58,7 @@ function logmsg($msglevel, $string) {
 	if ( $msglevel <= $verbose  ) {
 		// if this is the webinterface, print it to stdout, else to stderr
 		if ( IS_WEB ) {
-			$msg = specialchars($string);
+			$msg = htmlspecialchars($string);
 			// if this is the API, do not add HTML formatting and send HTTP status code
 			if ( defined('DOMJUDGE_API_VERSION') ) {
 				if ( $msglevel == LOG_ERR && ! headers_sent() ) {
