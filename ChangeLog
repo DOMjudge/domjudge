@@ -4,6 +4,8 @@ Version 5.0.3 - DEV
 -------------------
  - Fix bug in signal handler in runguard.
  - Fix importing example problem statements into database.
+ - Restrict API access to problems depending on role (#200).
+ - Allow verifying a judging once result is known (#196).
 
 Version 5.0.2 - 7 December 2015
 -------------------------------
