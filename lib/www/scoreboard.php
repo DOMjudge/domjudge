@@ -64,7 +64,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	$SUMMARY = initSummary($probs);
 	$SCORES = initScores($teams);
 
-	// scorecache_jury is always up to date, scorecache_public might be frozen.
+	// The scorecache for the jury is always up to date, for public might be frozen.
 	if ( $jury || $showfinal ) {
 		$variant = 'restricted';
 	} else {
