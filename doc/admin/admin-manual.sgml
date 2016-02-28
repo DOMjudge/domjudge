@@ -364,6 +364,8 @@ apt-get install gcc g++ make zip unzip mysql-server \
 	texlive-fonts-recommended texlive-lang-european
 </code>
 
+For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
+
 The following command can be used on RedHat Enterprise Linux, and
 related distributions like CentOS and Fedora.
 <code>
