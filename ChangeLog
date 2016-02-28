@@ -15,6 +15,9 @@ Version 5.2.0 - DEV
  - Disallow deleting a judgehost that has performed judgings,
    since the dangling reference from the judging table makes
    submissions being rejudged again.
+ - Performance: merge jury and public versions of cache database
+   tables into single tables. Please refresh scoreboard cache after
+   upgrade.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------

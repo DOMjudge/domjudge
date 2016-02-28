@@ -205,27 +205,22 @@ function calcScoreRow($cid, $team, $prob) {
 	}
 
 	// insert or update the values in the public/team scores table
-	$DB->q('REPLACE INTO scorecache_public
-	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
-	        VALUES (%i,%i,%i,%i,%i,%i,%i)',
-	       $cid, $team, $prob, $submitted_p, $pending_p, $time_p, $correct_p);
-
-	// insert or update the values in the jury scores table
-	$DB->q('REPLACE INTO scorecache_jury
-	        (cid, teamid, probid, submissions, pending, totaltime, is_correct)
-	        VALUES (%i,%i,%i,%i,%i,%i,%i)',
-	       $cid, $team, $prob, $submitted_j, $pending_j, $time_j, $correct_j);
+	$DB->q('REPLACE INTO scorecache
+	        (cid, teamid, probid,
+	         submissions_restricted, pending_restricted, totaltime_restricted, is_correct_restricted,
+	         submissions_public, pending_public, totaltime_public, is_correct_public)
+	        VALUES (%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i)',
+	       $cid, $team, $prob,
+	       $submitted_j, $pending_j, $time_j, $correct_j,
+	       $submitted_p, $pending_p, $time_p, $correct_p);
 
 	if ( $DB->q("VALUE SELECT RELEASE_LOCK('$lockstr')") != 1 ) {
 		error("calcScoreRow failed to release lock '$lockstr'");
 	}
 
 	// If we found a new correct result, update the rank cache too
-	if ( $correct_j > 0 ) {
-		updateRankCache($cid, $team, true);
-	}
-	if ( $correct_p > 0 ) {
-		updateRankCache($cid, $team, false);
+	if ( $correct_j > 0 || $correct_p > 0 ) {
+		updateRankCache($cid, $team);
 	}
 
 	return;
@@ -235,51 +230,53 @@ function calcScoreRow($cid, $team, $prob) {
  * Update tables used for efficiently computing team ranks
  *
  * Given a contestid and teamid (re)calculate the time
- * and solved problems for a team. Third parameter indicates
- * if the cache for jury or public should be updated.
+ * and solved problems for a team.
  *
  * Due to current transactions usage, this function MUST NOT contain
  * any START TRANSACTION or COMMIT statements.
  */
-function updateRankCache($cid, $team, $jury) {
+function updateRankCache($cid, $team) {
 	global $DB;
 
-	logmsg(LOG_DEBUG, "updateRankCache '$cid' '$team' '$jury'");
+	logmsg(LOG_DEBUG, "updateRankCache '$cid' '$team'");
 
 	$team_penalty = $DB->q("VALUE SELECT penalty FROM team WHERE teamid = %i", $team);
 
-	// Find table name
-	$tblname = $jury ? 'jury' : 'public';
-
 	// First acquire an advisory lock to prevent other calls to
 	// calcScoreRow() from interfering with our update.
-	$lockstr = "domjudge.$cid.$team.$tblname";
+	$lockstr = "domjudge.$cid.$team";
 	if ( $DB->q("VALUE SELECT GET_LOCK('$lockstr',3)") != 1 ) {
 		error("updateRankCache failed to obtain lock '$lockstr'");
 	}
 
 	// Fetch values from scoreboard cache per problem
-	$scoredata = $DB->q("SELECT submissions, is_correct, cp.points, totaltime
-	                     FROM scorecache_$tblname
+	$scoredata = $DB->q("SELECT *, cp.points
+	                     FROM scorecache
 	                     LEFT JOIN contestproblem cp USING(probid,cid)
 	                     WHERE cid = %i and teamid = %i", $cid, $team);
-	$num_points = 0;
-	$total_time = $team_penalty;
+
+	$num_points = array('public' => 0, 'restricted' => 0);
+	$total_time = array('public' => $team_penalty, 'restricted' => $team_penalty);
 	while ( $srow = $scoredata->next() ) {
 		// Only count solved problems
-		if ( $srow['is_correct'] ) {
-			$penalty = calcPenaltyTime( $srow['is_correct'],
-			                            $srow['submissions'] );
-			$num_points += $srow['points'];
-			$total_time += $srow['totaltime'] + $penalty;
+		foreach (array('public', 'restricted') as $variant) {
+			if ( $srow['is_correct_'.$variant] ) {
+				$penalty = calcPenaltyTime( $srow['is_correct_'.$variant],
+							    $srow['submissions_'.$variant] );
+				$num_points[$variant] += $srow['points'];
+				$total_time[$variant] += $srow['totaltime_'.$variant] + $penalty;
+			}
 		}
 	}
 
 	// Update the rank cache table
-	$DB->q("REPLACE INTO rankcache_$tblname
-	        (cid, teamid, points, totaltime)
-	        VALUES (%i,%i,%i,%i)",
-	       $cid, $team, $num_points, $total_time);
+	$DB->q("REPLACE INTO rankcache (cid, teamid,
+	        points_restricted, totaltime_restricted,
+	        points_public, totaltime_public)
+	        VALUES (%i,%i,%i,%i,%i,%i)",
+	       $cid, $team,
+	       $num_points['restricted'], $total_time['restricted'],
+	       $num_points['public'], $total_time['public']);
 
 	// Release the lock
 	if ( $DB->q("VALUE SELECT RELEASE_LOCK('$lockstr')") != 1 ) {

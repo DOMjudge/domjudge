@@ -16,9 +16,9 @@ require_once(LIBDIR . '/lib.misc.php');
 
 /**
  * Generate scoreboard data based on the cached data in table
- * 'scorecache_{public,jury}'. If the function is called while
- * $jury set to true, the scoreboard will always be
- * current, regardless of the freezetime setting in the contesttable.
+ * 'scorecache'. If the function is called while $jury set to true,
+ * the scoreboard will always be current, regardless of the freezetime
+ * setting in the contest table.
  *
  * The $filter argument may contain subarrays 'affilid', 'country',
  * 'categoryid' of values to filter on these.
@@ -66,13 +66,19 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
 	// scorecache_jury is always up to date, scorecache_public might be frozen.
 	if ( $jury || $showfinal ) {
-		$cachetable = 'scorecache_jury';
+		$variant = 'restricted';
 	} else {
-		$cachetable = 'scorecache_public';
+		$variant = 'public';
 	}
 
 	// Get all stuff from the cached table from this contest
-	$query = "SELECT points, $cachetable.* FROM $cachetable JOIN contestproblem USING(probid,cid) WHERE cid = %i";
+	$query = "SELECT points,
+	          teamid, probid,
+	          submissions_$variant AS submissions,
+	          pending_$variant AS pending,
+	          totaltime_$variant AS totaltime,
+	          is_correct_$variant AS is_correct
+	          FROM scorecache JOIN contestproblem USING(probid,cid) WHERE cid = %i";
 	$scoredata = $DB->q($query, $cid);
 
 	// loop all info the scoreboard cache and put it in our own datastructure
@@ -265,7 +271,7 @@ function initSummary($probs) {
 
 /**
  * Output the general scoreboard based on the cached data in table
- * 'scorecache_{team,jury}'. $myteamid can be passed to highlight a
+ * 'scorecache'. $myteamid can be passed to highlight a
  * specific row.
  * If this function is called while IS_JURY is defined, the scoreboard
  * will always be current, regardless of the freezetime setting in the
@@ -767,8 +773,9 @@ function putTeamRow($cdata, $teamids) {
 
 		// Calculate rank, num points and total time from rank cache
 		foreach ($teams as $teamid => $team ) {
-			$totals = $DB->q("MAYBETUPLE SELECT points, totaltime
-			                  FROM rankcache_jury
+			$totals = $DB->q("MAYBETUPLE SELECT points_restricted AS points,
+			                  totaltime_restricted AS totaltime
+			                  FROM rankcache
 			                  WHERE cid = %i
 			                  AND teamid = %i", $cid, $teamid);
 			if ( $totals != null ) {
@@ -780,7 +787,10 @@ function putTeamRow($cdata, $teamids) {
 
 		// Get values for this team about problems from scoreboard cache
 		$MATRIX = array();
-		$scoredata = $DB->q("SELECT * FROM scorecache_jury WHERE cid = %i AND teamid = %i", $cid,
+		$scoredata = $DB->q("SELECT cid, teamid, probid, submissions_restricted AS submissions,
+		                     pending_restricted AS pending, totaltime_restricted AS totaltime,
+		                     is_correct_restricted AS is_correct
+		                     FROM scorecache WHERE cid = %i AND teamid = %i", $cid,
 		                    current($teamids));
 
 		// loop all info the scoreboard cache and put it in our own datastructure
@@ -853,7 +863,7 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 	$cid = $cdata['cid'];
 
 	// Use jury scoreboard when jury or final scoreboard should be displayed
-	$tblname = $jury || $fdata['showfinal'] ? 'jury' : 'public';
+	$variant = $jury || $fdata['showfinal'] ? 'restricted' : 'public';
 
 	$points    = (isset($teamtotals['points'])    ? $teamtotals['points']    : 0);
 	$totaltime = (isset($teamtotals['totaltime']) ? $teamtotals['totaltime'] : 0);
@@ -865,11 +875,12 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 
 	// Number of teams that definitely ranked higher
 	$better = $DB->q("VALUE SELECT COUNT(team.teamid)
-	                  FROM rankcache_$tblname AS rc
+	                  FROM rankcache AS rc
 	                  LEFT JOIN team USING (teamid)
 	                  LEFT JOIN team_category USING (categoryid)
 	                  WHERE cid = %i AND sortorder = %i AND enabled = 1
-	                  AND (points > %i OR (points = %i AND totaltime < %i))",
+	                  AND (points_$variant > %i OR
+	                  (points_$variant = %i AND totaltime_$variant < %i))",
 	                 $cid, $sortorder, $points, $points, $totaltime);
 	$rank = $better + 1;
 
@@ -877,11 +888,11 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 	// solved at least one problem, so this list should usually be short
 	if ( $points > 0 ) {
 		$tied = $DB->q("COLUMN SELECT team.teamid
-		                FROM rankcache_$tblname AS rc
+		                FROM rankcache AS rc
 		                LEFT JOIN team USING (teamid)
 		                LEFT JOIN team_category USING (categoryid)
 		                WHERE cid = %i AND sortorder = %i AND enabled = 1
-		                AND points = %i AND totaltime = %i",
+		                AND points_$variant = %i AND totaltime_$variant = %i",
 		               $cid, $sortorder, $points, $totaltime);
 
 		// All teams that are tied for this position, in most cases this will
@@ -895,11 +906,11 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 			}
 
 			// Get submission times for each of the teams
-			$scoredata = $DB->q("SELECT teamid, totaltime
-			                     FROM scorecache_$tblname AS sc
+			$scoredata = $DB->q("SELECT teamid, totaltime_$variant AS totaltime
+			                     FROM scorecache AS sc
 			                     LEFT JOIN problem p USING (probid)
 			                     LEFT JOIN contestproblem cp USING (probid, cid)
-			                     WHERE sc.cid = %i AND is_correct = 1
+			                     WHERE sc.cid = %i AND is_correct_$variant = 1
 			                     AND allow_submit = 1 AND teamid IN (%Ai)",
 			                    $cid, $tied);
 			while ( $srow = $scoredata->next() ) {
