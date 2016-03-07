@@ -119,7 +119,7 @@ class RestApi {
 			}
 			if  ( ! $hasrole ) {
 				$this->createError("Permission denied " .
-				                   "' for function '" . $name . "'.", FORBIDDEN);
+				                   " for function '" . $name . "'.", FORBIDDEN);
 			}
 		}
 
