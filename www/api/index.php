@@ -36,9 +36,17 @@ function safe_int($value)
 	return is_null($value) ? null : (int)$value;
 }
 
-function safe_float($value)
+function safe_float($value, $decimals = null)
 {
-	return is_null($value) ? null : (float)$value;
+	if ( is_null($value) ) return null;
+	if ( is_null($decimals) ) return (float)$value;
+
+	// Truncate the string version to a specified number of decimals,
+	// since PHP floats seem not very reliable in not giving e.g.
+	// 1.9999 instead of 2.0.
+	$decpos = strpos((string)$value, '.');
+	if ( $decpos===FALSE ) return (float)$value;
+	return (float)substr((string)$value, 0, $decpos+$decimals+1);
 }
 
 function safe_bool($value)
@@ -83,11 +91,11 @@ function contest()
 		'id'        => safe_int($cid),
 		'shortname' => $cdata['shortname'],
 		'name'      => $cdata['name'],
-		'start'     => safe_float($cdata['starttime']),
-		'freeze'    => safe_float($cdata['freezetime']),
-		'end'       => safe_float($cdata['endtime']),
-		'length'    => safe_float($cdata['endtime'] - $cdata['starttime']),
-		'unfreeze'  => safe_float($cdata['unfreezetime']),
+		'start'     => safe_float($cdata['starttime'],3),
+		'freeze'    => safe_float($cdata['freezetime'],3),
+		'end'       => safe_float($cdata['endtime'],3),
+		'length'    => safe_float($cdata['endtime'] - $cdata['starttime'],3),
+		'unfreeze'  => safe_float($cdata['unfreezetime'],3),
 		'penalty'   => safe_int(60*dbconfig_get('penalty_time', 20)),
 		);
 }
@@ -114,11 +122,11 @@ function contests()
 			'id'        => safe_int($cdata['cid']),
 			'shortname' => $cdata['shortname'],
 			'name'      => $cdata['name'],
-			'start'     => safe_float($cdata['starttime']),
-			'freeze'    => safe_float($cdata['freezetime']),
-			'end'       => safe_float($cdata['endtime']),
-			'length'    => safe_float($cdata['endtime'] - $cdata['starttime']),
-			'unfreeze'  => safe_float($cdata['unfreezetime']),
+			'start'     => safe_float($cdata['starttime'],3),
+			'freeze'    => safe_float($cdata['freezetime'],3),
+			'end'       => safe_float($cdata['endtime'],3),
+			'length'    => safe_float($cdata['endtime'] - $cdata['starttime'],3),
+			'unfreeze'  => safe_float($cdata['unfreezetime'],3),
 			'penalty'   => safe_int(60 * dbconfig_get('penalty_time', 20)),
 		);
 	}, $cdatas);
@@ -229,7 +237,7 @@ function judgings($args)
 		$res[] = array('id'         => safe_int($row['judgingid']),
 		               'submission' => safe_int($row['submitid']),
 		               'outcome'    => $data['result'],
-		               'time'       => safe_float($row['eventtime']));
+		               'time'       => safe_float($row['eventtime'],3));
 	}
 	return $res;
 }
@@ -660,7 +668,7 @@ function submissions($args)
 			'team'      => safe_int($row['teamid']),
 			'problem'   => safe_int($row['probid']),
 			'language'  => $row['langid'],
-			'time'      => safe_float($row['submittime']),
+			'time'      => safe_float($row['submittime'],3),
 			);
 	}
 	return $res;
@@ -1049,7 +1057,7 @@ function clarifications($args)
 	return array_map(function($cdata) {
 		return array(
 			'clarid'     => safe_int($cdata['clarid']),
-			'submittime' => safe_float($cdata['submittime']),
+			'submittime' => safe_float($cdata['submittime'],3),
 			'probid'     => safe_int($cdata['probid']),
 			'body'       => $cdata['body'],
 		);
@@ -1078,7 +1086,7 @@ function judgehosts($args)
 		return array(
 			'hostname' => $jdata['hostname'],
 			'active'   => safe_bool($jdata['active']),
-			'polltime' => safe_float($jdata['polltime']),
+			'polltime' => safe_float($jdata['polltime'],3),
 		);
 	}, $jdatas);
 }
