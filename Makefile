@@ -155,7 +155,7 @@ paths.mk:
 MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -D_FORTIFY_SOURCE=2 \
               -fPIE -Wformat -Wformat-security -ansi -pedantic
 MAINT_LDFLAGS=-fPIE -pie -Wl,-z,relro -Wl,-z,now
-maintainer-conf: dist
+maintainer-conf: configure
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
