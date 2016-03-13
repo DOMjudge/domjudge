@@ -161,7 +161,8 @@ eval $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
 cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
-cp -a /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
+cp /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || true
+cp /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
 
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 deb $DEBMIRROR $RELEASE main
