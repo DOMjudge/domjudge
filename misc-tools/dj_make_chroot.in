@@ -240,12 +240,12 @@ EOF
 fi
 if [ "$DISTRO" = 'Ubuntu' ]; then
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
-deb $DEBMIRROR $RELEASE main
-deb $DEBMIRROR $RELEASE universe
-deb $DEBMIRROR $RELEASE-updates main
-deb $DEBMIRROR $RELEASE-updates universe
-deb $DEBMIRROR $RELEASE-security main
-deb $DEBMIRROR $RELEASE-security universe
+deb $DEBMIRROR $RELEASE           main restricted universe multiverse
+deb $DEBMIRROR $RELEASE-security  main restricted universe multiverse
+deb $DEBMIRROR $RELEASE-updates   main restricted universe multiverse
+deb $DEBMIRROR $RELEASE-backports main restricted universe multiverse
+deb https://packages/apt trusty main
+deb https://packages/ppa trusty main
 EOF
 fi
 
