@@ -129,7 +129,7 @@ if [ "$DISTRO" = 'Ubuntu' ]; then
 INCLUDEDEBS="software-properties-common"
 
 # Packages to install after upgrade (space separated):
-INSTALLDEBS="openjdk-7-jre-headless locales"
+INSTALLDEBS="openjdk-8-jre-headless locales"
 # For C# support add: mono-mcs mono-devel
 # However running mono within chroot still gives errors...
 
