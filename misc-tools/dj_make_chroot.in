@@ -252,6 +252,7 @@ fi
 cat > "$CHROOTDIR/etc/apt/apt.conf" <<EOF
 APT::Get::Assume-Yes "true";
 APT::Get::Force-Yes "false";
+APT::Get::AllowUnauthenticated "true";
 APT::Get::Purge "true";
 APT::Install-Recommends "false";
 Acquire::Retries "3";
