@@ -57,7 +57,7 @@ if ( isset($_POST['import']) ) {
 		// First try new key then fallback to old 'scoreboard-freeze':
 		if ( ! empty($contest_yaml_data['scoreboard-freeze-length']) ) {
 			$contest['freezetime_string'] =
-			    '+' . $contest_yaml_data['scoreboard-freeze-length'],0,-3);
+			    '+' . $contest_yaml_data['scoreboard-freeze-length'];
 		}
 		else if ( ! empty($contest_yaml_data['scoreboard-freeze']) ) {
 			$contest['freezetime_string'] =
