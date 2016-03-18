@@ -131,6 +131,8 @@ if ( isset($cdata['freezetime']) ) {
 	$freezelength = 0;
 }
 $freezelengthString = sprintf('%02d:%02d:%02d', $freezelength/(60*60), ($freezelength/60) % 60, $freezelength % 60);
+
+XMLaddnode($info, 'contest-id', $cdata['externalid']);
 XMLaddnode($info, 'length', $lengthString);
 XMLaddnode($info, 'scoreboard-freeze-length', $freezelengthString);
 XMLaddnode($info, 'penalty', dbconfig_get('penalty_time', 20));

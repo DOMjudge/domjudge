@@ -12,6 +12,13 @@ SELECT '1'; -- No check possible yet.
 
 --
 -- Create additional structures
+--
+
+ALTER TABLE `contest`
+  ADD COLUMN `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Contest ID in an external system' AFTER `cid`,
+  ADD UNIQUE KEY `externalid` (`externalid`(190));
+
+-- Merge {rank,score}cache_{public,jury} tables into one.
 CREATE TABLE `rankcache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
@@ -23,7 +30,7 @@ CREATE TABLE `rankcache` (
   KEY `order_restricted` (`cid`,`points_restricted`,`totaltime_restricted`) USING BTREE,
   KEY `order_public` (`cid`,`points_public`,`totaltime_public`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard rank cache';
---
+
 CREATE TABLE `scorecache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',

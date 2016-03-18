@@ -78,6 +78,7 @@ CREATE TABLE `configuration` (
 
 CREATE TABLE `contest` (
   `cid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Contest ID in an external system',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `shortname` varchar(255) NOT NULL COMMENT 'Short name for this contest',
   `activatetime` decimal(32,9) unsigned NOT NULL COMMENT 'Time contest becomes visible in team/public views',
@@ -99,6 +100,7 @@ CREATE TABLE `contest` (
   `process_balloons` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Will balloons be processed for this contest?',
   `public` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Is this contest visible for the public and non-associated teams?',
   PRIMARY KEY (`cid`),
+  UNIQUE KEY `externalid` (`externalid`(190)),
   UNIQUE KEY `shortname` (`shortname`(190)),
   KEY `cid` (`cid`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Contests that will be run with this install';

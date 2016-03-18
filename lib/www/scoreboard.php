@@ -193,8 +193,8 @@ function getTeams($filter, $jury, $cdata) {
 	global $DB;
 
 	return $DB->q('KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, team.externalid,
-	               team.name, team.categoryid, team.affilid, sortorder,
-	               country, color, penalty, team_affiliation.name AS affilname
+	               team.name, team.categoryid, team.affilid, penalty, sortorder,
+	               country, color, team_affiliation.name AS affilname
 	               FROM team
 	               INNER JOIN contest ON (contest.cid = %i)
 	               LEFT JOIN contestteam ct USING (teamid, cid)

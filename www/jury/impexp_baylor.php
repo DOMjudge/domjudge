@@ -128,9 +128,9 @@ foreach ( $json['contest']['group'] as $group ) {
 				   WHERE name=%s', $team['institutionName']);
 		if ( empty($affilid) ) {
 			$affilid = $DB->q('RETURNID INSERT INTO team_affiliation
-					   (name, shortname, country) VALUES (%s, %s, %s)',
-					  $team['institutionName'],
-					  $team['institutionShortName'], $team['country']);
+			                   (name, shortname, country) VALUES (%s, %s, %s)',
+			                  $team['institutionName'],
+			                  $team['institutionShortName'], $team['country']);
 			$new_affils[] = $team['institutionName'];
 		}
 
@@ -147,28 +147,29 @@ foreach ( $json['contest']['group'] as $group ) {
 
 		// Note: teams are not deleted but disabled depending on their status
 		$id = $DB->q('MAYBEVALUE SELECT teamid FROM team
-			      WHERE externalid=%i', $team['teamId']);
+		              WHERE externalid=%i', $team['teamId']);
 		$enabled = $team['status'] === 'ACCEPTED';
 		if ( empty($id) ) {
 			$id = $DB->q('RETURNID INSERT INTO team
-				      (name, categoryid, affilid, enabled, members, comments, externalid, room)
-				      VALUES (%s, %i, %i, %i, %s, %s, %i, %s)',
-				     $team['teamName'], $participants, $affilid, $enabled, $members,
-				     "Status: " . $team['status'], $team['teamId'], $siteName);
+			              (name, categoryid, affilid, enabled, members, comments, externalid, room)
+			              VALUES (%s, %i, %i, %i, %s, %s, %i, %s)',
+			             $team['teamName'], $participants, $affilid, $enabled, $members,
+			             "Status: " . $team['status'], $team['teamId'], $siteName);
 			$username = sprintf("team%04d", $id);
 			$userid = $DB->q('RETURNID INSERT INTO user (username, name, teamid, email)
-					  VALUES (%s,%s,%i,%s)', $username, $team['teamName'], $id, $mails);
+			                  VALUES (%s,%s,%i,%s)',
+			                 $username, $team['teamName'], $id, $mails);
 			$DB->q('INSERT INTO userrole (userid, roleid) VALUES (%i,%i)', $userid, $teamrole);
 			$new_teams[] = $team['teamName'];
 		} else {
 			$username = sprintf("team%04d", $id);
 			$cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i,
-				       affilid=%i, enabled=%i, members=%s, comments=%s, room=%s
-				       WHERE teamid=%i',
-				      $team['teamName'], $participants, $affilid, $enabled,
-				      $members, "Status: " . $team['status'], $siteName, $id);
+			               affilid=%i, enabled=%i, members=%s, comments=%s, room=%s
+			               WHERE teamid=%i',
+			              $team['teamName'], $participants, $affilid, $enabled,
+			              $members, "Status: " . $team['status'], $siteName, $id);
 			$cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s, email=%s
-					WHERE username=%s', $team['teamName'], $mails, $username);
+			                WHERE username=%s', $team['teamName'], $mails, $username);
 			if ( $cnt > 0 ) {
 				$updated_teams[] = $team['teamName'];
 			}
