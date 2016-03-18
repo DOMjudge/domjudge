@@ -10,6 +10,21 @@ require('init.php');
 
 requireAdmin();
 
+// Calculate the difference between two HH:MM:SS strings and output
+// again in that format. Assumes that $time1 >= $time2.
+function timestring_diff($time1, $time2)
+{
+	sscanf($time1, '%2d:%2d:%2d', $h1, $m1, $s1);
+	sscanf($time2, '%2d:%2d:%2d', $h2, $m2, $s2);
+
+	$s = 3600 * ($h1 - $h2) + 60 * ($m1 - $m2) + ($s1 - $s2);
+
+	$h = floor($s/(60*60)); $s -= $h * 60*60;
+	$m = floor($s/60);      $s -= $m * 60;
+
+	return sprintf('%02d:%02d:%02d', $h, $m, $s);
+}
+
 if ( isset($_POST['import']) ) {
 
 	if ( isset($_FILES) && isset($_FILES['import_config']) &&
@@ -35,17 +50,22 @@ if ( isset($_POST['import']) ) {
 		$contest['shortname'] = preg_replace($invalid_regex, '_',
 		                                     $contest_yaml_data['short-name']);
 		$contest['starttime_string'] =
-		    strftime('%Y-%m-%d %H:%M:%S', strtotime($contest_yaml_data['start-time']));
+			date_format('Y-m-d H-i-s e',
+		                date_create_from_format('c', $contest_yaml_data['start-time']));
 		$contest['activatetime_string'] = '-1:00';
-		// chop off final ":00" because our contests do not support
-		// that precision in relative notation
-		$contest['endtime_string'] = '+' . substr($contest_yaml_data['duration'],0,-3);
+		$contest['endtime_string'] = '+' . $contest_yaml_data['duration'];
+		// First try new key then fallback to old 'scoreboard-freeze':
+		if ( ! empty($contest_yaml_data['scoreboard-freeze-length']) ) {
+			$contest['freezetime_string'] =
+			    '+' . $contest_yaml_data['scoreboard-freeze-length'],0,-3);
+		}
+		else if ( ! empty($contest_yaml_data['scoreboard-freeze']) ) {
+			$contest['freezetime_string'] =
+				'+' . timestring_diff($contest_yaml_data['duration'],
+			                          $contest_yaml_data['scoreboard-freeze']);
+		}
 		// unfreezetime is not supported by the current standard
 		$contest['unfreezetime_string'] = null;
-		if ( ! empty($contest_yaml_data['scoreboard-freeze']) ) {
-			$contest['freezetime_string'] =
-			    '+' . substr($contest_yaml_data['scoreboard-freeze'],0,-3);
-		}
 		$contest['enabled'] = 1;
 
 		$contest = check_contest($contest);
