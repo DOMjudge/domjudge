@@ -192,7 +192,7 @@ function getProblems($cdata) {
 function getTeams($filter, $jury, $cdata) {
 	global $DB;
 
-	return $DB->q('KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, externalid,
+	return $DB->q('KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, team.externalid,
 	               team.name, team.categoryid, team.affilid, penalty, sortorder,
 	               country, color, team_affiliation.name AS affilname
 	               FROM team
