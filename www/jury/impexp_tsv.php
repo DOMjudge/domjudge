@@ -41,8 +41,10 @@ function tsv_import($fmt)
 	$version = rtrim(array_shift($content));
 	// Two variants are in use: one where the first token is a static string
 	// "File_Version" and the second where it's the type, e.g. "groups".
-	if ( !preg_match("/^(File_Version|$fmt)\t1$/", $version) ) {
-		error ("Unknown format or version: $version");
+	$versionmatch = '1';
+	if ( $fmt == 'teams' ) $versionmatch = '[12]';
+	if ( !preg_match("/^(File_Version|$fmt)\t$versionmatch$/i", $version) ) {
+		error ("Unknown format or version: $version != $versionmatch");
 	}
 
 	// select each format and call appropriate functions.
