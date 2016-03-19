@@ -73,7 +73,7 @@ if [ "`id -u`" != 0 ]; then
 fi
 
 # Read command-line parameters:
-while getopts 'a:d:' OPT ; do
+while getopts 'a:d:D:' OPT ; do
 	case $OPT in
 		a) ARCH=$OPTARG ;;
 		d) CHROOTDIR=$OPTARG ;;
