@@ -264,9 +264,14 @@ while ( TRUE ) {
 			     $res['probid']!=remap('problem', val($run,'problem')) ||
 			     $res['langid']!=remap('language',val($run,'language')) ||
 			     (abs((float)$res['submittime']-(float)val($run,'timestamp'))>0.1 &&
-			      val($run, 'status')!=='done') ) {
+			      strcasecmp(val($run, 'judged'),'true')!=0) ) {
 				error("External submission '".val($run,'id')."' already exists as s".
-				      $res['submitid']." with non-matching data.");
+				      $res['submitid']." with non-matching data: " .
+				      $res['teamid']." ?= ".remap('team',    val($run,'team'))    .", ".
+				      $res['probid']." ?= ".remap('problem', val($run,'problem')) .", ".
+				      $res['langid']." ?= ".remap('language',val($run,'language')).
+				      (strcasecmp(val($run, 'judged'),'true')==0 ? '' : ', submittime diff = '.
+				       abs((float)$res['submittime']-(float)val($run,'timestamp')) ." sec"));
 			}
 			if ( val($run, 'judged') !== 'True' ) {
 				logmsg(LOG_DEBUG,"Skipping re-import of submission '".
