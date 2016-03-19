@@ -91,7 +91,11 @@ if ( isset($_POST['import']) ) {
 			$LIBDBCONFIG['penalty_time']['value'] = (int)$contest_yaml_data['penaltytime'];
 		}
 
-		$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
+		if ( isset($contest_yaml_data['default-clars']) ) {
+			$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
+		} else {
+			$LIBDBCONFIG['clar_answers']['value'] = array();
+		}
 		$categories = array();
 		foreach ( $contest_yaml_data['clar-categories'] as $category ) {
 			$cat_key = substr(str_replace(array(' ', ',', '.'), '-',
