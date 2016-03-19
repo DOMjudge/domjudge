@@ -49,9 +49,12 @@ if ( isset($_POST['import']) ) {
 		$contest['name'] = $contest_yaml_data['name'];
 		$contest['shortname'] = preg_replace($invalid_regex, '_',
 		                                     $contest_yaml_data['short-name']);
-		$contest['starttime_string'] =
-			date_format('Y-m-d H-i-s e',
-		                date_create_from_format('c', $contest_yaml_data['start-time']));
+
+		$starttime = date_create_from_format(DateTime::ISO8601,
+		                                     $contest_yaml_data['start-time']);
+		$starttime->setTimezone(new DateTimeZone(date_default_timezone_get()));
+
+		$contest['starttime_string'] = date_format($starttime, 'Y-m-d H:i:s e');
 		$contest['activatetime_string'] = '-1:00';
 		$contest['endtime_string'] = '+' . $contest_yaml_data['duration'];
 		// First try new key then fallback to old 'scoreboard-freeze':
