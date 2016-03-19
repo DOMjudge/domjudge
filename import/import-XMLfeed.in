@@ -205,6 +205,10 @@ foreach ( $languages as $lang ) {
 	if ( empty($id) ) {
 		error("Language ID '".val($lang,'id')."' from external CCS not available locally.");
 	}
+
+	// The language name, not ID, is in the XML 'run' element, so add
+	// a mapping from the name also to our ID.
+	$config['remapping']['language'][val($lang,'name')] = $id;
 }
 
 $teams = $xpath->query('/contest/team');
