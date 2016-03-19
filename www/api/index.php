@@ -1191,12 +1191,14 @@ function scoreboard($args)
 		                      'total_time' => safe_int($data['total_time']));
 		$row['problems'] = array();
 		foreach ( $scoreboard['matrix'][$teamid] as $probid => $pdata ) {
-			$row['problems'][] = array('problem'     => safe_int($probid),
-			                           'label'       => $prob2label[$probid],
-			                           'num_judged'  => safe_int($pdata['num_submissions']),
-			                           'num_pending' => safe_int($pdata['num_pending']),
-			                           'time'        => safe_int($pdata['time']),
-			                           'solved'      => safe_bool($pdata['is_correct']));
+			$prob = array('label'       => $prob2label[$probid],
+			              'num_judged'  => safe_int($pdata['num_submissions']),
+			              'num_pending' => safe_int($pdata['num_pending']),
+			              'solved'      => safe_bool($pdata['is_correct']));
+
+			if ( $prob['solved'] ) $prob['time'] = safe_int($pdata['time']);
+
+			$row['problems'][] = $prob;
 		}
 		$res[] = $row;
 	}
