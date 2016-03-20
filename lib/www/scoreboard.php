@@ -991,7 +991,7 @@ function tiebreaker($a, $b) {
 	$btimes = $b['solve_times'];
 	rsort($atimes);
 	rsort($btimes);
-        if ( isset($atimes[0]) ) {
+	if ( isset($atimes[0]) ) {
 		if ( $atimes[0] != $btimes[0] ) return $atimes[0] < $btimes[0] ? -1 : 1;
 	}
 	return 0;
