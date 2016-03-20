@@ -197,7 +197,7 @@ while ( TRUE ) {
 
 		foreach ( $res as $f ) {
 			$filenames[] = $f['filename'];
-			if ( !($tmpfname = tempnam(TMPDIR,"import_feed")) ) {
+			if ( !($tmpfname = tempnam(TMPDIR,"import_RESTfeed")) ) {
 				error("Could not create temporary file.");
 			}
 			file_put_contents($tmpfname, base64_decode($f['content']));
