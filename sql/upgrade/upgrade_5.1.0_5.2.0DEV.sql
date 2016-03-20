@@ -8,7 +8,8 @@
 --
 
 -- @UPGRADE-CHECK@
-SELECT '1'; -- No check possible yet.
+ALTER TABLE `contest` ADD  COLUMN `externalid` varchar(255);
+ALTER TABLE `contest` DROP COLUMN `externalid`;
 
 --
 -- Create additional structures

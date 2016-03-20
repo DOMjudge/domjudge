@@ -991,16 +991,15 @@ function cmpscore($a, $b) {
 /**
  * Tie-breaker comparison function, called from the 'cmpscore' function
  * above. Scores two arrays, $a and $b, based on the following criterion:
- * - fastest submission time for latest correct problem, when times
- *   are equal, compare one-to-latest, etc...
+ * - fastest submission time for latest correct problem
  */
 function tiebreaker($a, $b) {
 	$atimes = $a['solve_times'];
 	$btimes = $b['solve_times'];
 	rsort($atimes);
 	rsort($btimes);
-	for($i = 0; $i < count($atimes); $i++) {
-		if ( $atimes[$i] != $btimes[$i] ) return $atimes[$i] < $btimes[$i] ? -1 : 1;
+        if ( isset($atimes[0]) ) {
+		if ( $atimes[0] != $btimes[0] ) return $atimes[0] < $btimes[0] ? -1 : 1;
 	}
 	return 0;
 }

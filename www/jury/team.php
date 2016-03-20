@@ -128,8 +128,10 @@ if ( $cmd == 'add' ) {
 		var show_hide_user_extra_data = function() {
 			if ($('#data_0__adduser_:checked').val()) {
 				$('#user_extra_data').show();
+				$('#data_0__mapping__1__extra__username_').prop("required", true);
 			} else {
 				$('#user_extra_data').hide();
+				$('#data_0__mapping__1__extra__username_').prop("required", false);
 			}
 		};
 
