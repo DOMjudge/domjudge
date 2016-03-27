@@ -117,7 +117,7 @@ function presentSource ($sourcedata, $langid)
 		'editor.setOptions({ maxLines: Infinity });' .
 		'editor.setReadOnly(true);' .
 		'editor.getSession().setMode("ace/mode/' . $langid . '");' .
-        'document.getElementById("editor' . specialchars($sourcedata['rank']) . '").editor = editor;' .
+        'document.getElementById("editor' . htmlspecialchars($sourcedata['rank']) . '").editor = editor;' .
 		'</script>';
 
 	return $head . $ace . '</div>';
