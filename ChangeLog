@@ -6,6 +6,11 @@ Version 5.0.3 - DEV
  - Fix importing example problem statements into database.
  - Restrict API access to problems depending on role (#200).
  - Allow verifying a judging once result is known (#196).
+ - Corrections to REST API to conform to spec: truncate timestamps,
+   drop problem ID from scoreboard, only output time for scoreboard
+   when problem is solved.
+ - Fix import functions to accept most up to date ICPC files.
+ - Also copy local SSL certificates into chroot in dj_make_chroot.
 
 Version 5.0.2 - 7 December 2015
 -------------------------------
