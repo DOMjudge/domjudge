@@ -13,6 +13,12 @@ Version 5.1.1 - DEV
  - Allow verifying a judging once result is known (#196).
  - Fix error messages being obscured by the specialchars()
    function not being defined yet.
+ - Corrections to REST API to conform to spec: truncate timestamps,
+   drop problem ID from scoreboard, only output time for scoreboard
+   when problem is solved.
+ - Fix import functions to accept most up to date ICPC files.
+ - Fix -D (distribution) option to dj_make_chroot and also copy
+   local SSL certificates into chroot.
  - Administrator manual improvements.
 
 Version 5.1.0 - 7 December 2015
