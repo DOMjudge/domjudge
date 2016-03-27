@@ -11,6 +11,7 @@ Version 5.0.3 - DEV
    when problem is solved.
  - Fix import functions to accept most up to date ICPC files.
  - Also copy local SSL certificates into chroot in dj_make_chroot.
+ - Fix use of nonexistant specialchars() in show_source.
 
 Version 5.0.2 - 7 December 2015
 -------------------------------
