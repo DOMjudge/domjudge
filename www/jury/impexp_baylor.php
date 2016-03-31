@@ -76,10 +76,12 @@ if ( isset($_REQUEST['upload']) ) {
 			$totals['points'] = $totals['totaltime'] = 0;
 		}
 		$rank = calcTeamRank($cdata, $row['teamid'], $totals, TRUE);
-		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(totaltime_restricted) FROM scorecache
+		$lastProblem = $DB->q('MAYBEVALUE SELECT MAX(solvetime_restricted) FROM scorecache
 		                       WHERE teamid=%i AND cid=%i', $row['teamid'], $cid);
 		if ( $lastProblem === NULL ) {
 			$lastProblem = 0;
+		} else {
+			$lastProblem = scoretime($lastProblem);
 		}
 		$data .= '<Standing LastProblemTime="' . $lastProblem . '" ProblemsSolved="' .  $totals['points'] . '" Rank="' . $rank .
 			'" TeamID="' . $row['externalid'] . '" TotalTime="' .

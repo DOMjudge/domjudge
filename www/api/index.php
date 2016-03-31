@@ -1237,7 +1237,13 @@ function scoreboard($args)
 			              'num_pending' => safe_int($pdata['num_pending']),
 			              'solved'      => safe_bool($pdata['is_correct']));
 
-			if ( $prob['solved'] ) $prob['time'] = safe_int($pdata['time']);
+			if ( $prob['solved'] ) {
+				$prob['time'] = scoretime($pdata['time']);
+				$first = first_solved($pdata['time'],
+				                      $scoreboard['summary']['problems'][$probid]
+				                      ['best_time_sort'][$data['sortorder']]);
+				$prob['first_to_solve'] = safe_bool($first);
+			}
 
 			$row['problems'][] = $prob;
 		}

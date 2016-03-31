@@ -266,9 +266,10 @@ function tsv_scoreboard_get()
 		$maxtime = -1;
 		$drow = array();
 		foreach($sb['matrix'][$teamid] as $prob) {
+			$time = scoretime($prob['time']);
 			$drow[] = $prob['num_submissions'];
-			$drow[] = $prob['is_correct'] ? $prob['time'] : -1;
-			$maxtime = max($maxtime, $prob['time']);
+			$drow[] = $prob['is_correct'] ? $time : -1;
+			$maxtime = max($maxtime, $time);
 		}
 		$data[] = array_merge (
 			array($sb['teams'][$teamid]['affilname'], @$sb['teams'][$teamid]['externalid'],
@@ -334,7 +335,7 @@ function tsv_results_get()
 	foreach ($sb['scores'] as $teamid => $srow) {
 		$maxtime = -1;
 		foreach($sb['matrix'][$teamid] as $prob) {
-			$maxtime = max($maxtime, $prob['time']);
+			$maxtime = max($maxtime, scoretime($prob['time']));
 		}
 
 		$rank = $srow['rank'];
