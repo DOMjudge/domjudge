@@ -38,11 +38,11 @@ CREATE TABLE `scorecache` (
   `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `submissions_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made (restricted audiences)',
   `pending_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement (restricted audience)',
-  `solvetime_restricted`  decimal(32,9) unsigned NOT NULL DEFAULT '0' COMMENT 'Seconds into contest when problem solved (restricted audience)',
+  `solvetime_restricted`  decimal(32,9) unsigned NOT NULL DEFAULT '0.000000000' COMMENT 'Seconds into contest when problem solved (restricted audience)',
   `is_correct_restricted` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission? (restricted audience)',
   `submissions_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made (public)',
   `pending_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement (public)',
-  `solvetime_public` decimal(32,9) unsigned NOT NULL DEFAULT '0' COMMENT 'Seconds into contest when problem solved (public)',
+  `solvetime_public` decimal(32,9) unsigned NOT NULL DEFAULT '0.000000000' COMMENT 'Seconds into contest when problem solved (public)',
   `is_correct_public` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission? (public)',
   PRIMARY KEY (`cid`,`teamid`,`probid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard cache';
