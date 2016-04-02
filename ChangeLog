@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 5.1.2 - DEV
+-------------------
+
 Version 5.1.1 - 2 April 2016
 ----------------------------
  - Fix bug in signal handler in runguard.
