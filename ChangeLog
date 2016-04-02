@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 5.0.3 - DEV
--------------------
+Version 5.0.3 - 2 April 2016
+----------------------------
  - Fix bug in signal handler in runguard.
  - Fix importing example problem statements into database.
  - Restrict API access to problems depending on role (#200).
