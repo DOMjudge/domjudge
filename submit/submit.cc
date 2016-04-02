@@ -303,6 +303,9 @@ int main(int argc, char **argv)
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( baseurl.empty()  ) usage2(0,"no url specified");
 
+	/* Make sure that baseurl terminates with a '/' for later concatenation. */
+	if ( baseurl.back()!='/' ) baseurl += '/';
+
 	logmsg(LOG_DEBUG,"contest is `%s'",contest.c_str());
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
