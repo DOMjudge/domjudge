@@ -353,11 +353,13 @@ function check_contest($data, $keydata = null)
 		if ( difftime($data['unfreezetime'], $data['endtime']) < 0 ) {
 			ch_error('Unfreezetime must be larger than endtime.');
 		}
-		if ( difftime($data['deactivatetime'], $data['unfreezetime']) < 0 ) {
+		if ( !empty($data['deactivatetime']) &&
+		     difftime($data['deactivatetime'], $data['unfreezetime']) < 0 ) {
 			ch_error('Deactivatetime must be larger than unfreezetime.');
 		}
 	} else {
-		if ( !empty($data['deactivatetime']) && difftime($data['deactivatetime'], $data['endtime']) < 0 ) {
+		if ( !empty($data['deactivatetime']) &&
+		     difftime($data['deactivatetime'], $data['endtime']) < 0 ) {
 			ch_error('Deactivatetime must be larger than endtime.');
 		}
 	}
