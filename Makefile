@@ -189,6 +189,7 @@ maintainer-install: dist build domserver-create-dirs judgehost-create-dirs
 # Make tmpdir, submitdir writable for webserver, because
 # judgehost-create-dirs sets wrong permissions:
 	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
+	@echo "Make sure that etc/dbpasswords.secret is readable by the webserver!"
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:
