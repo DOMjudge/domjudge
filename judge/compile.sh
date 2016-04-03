@@ -129,6 +129,10 @@ $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -m $SCRIPTMEMLIMIT 
 	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
+# Make sure that all files are owned by the current user, so that we
+# can delete the judging output tree without root access.
+$GAINROOT chown -R `id -un` "$WORKDIR/compile"
+
 cd "$WORKDIR"
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
