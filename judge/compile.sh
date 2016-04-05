@@ -131,7 +131,7 @@ $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -m $SCRIPTMEMLIMIT 
 
 # Make sure that all files are owned by the current user, so that we
 # can delete the judging output tree without root access.
-$GAINROOT chown -R `id -un` "$WORKDIR/compile"
+$GAINROOT chown -R "`id -un`" "$WORKDIR/compile"
 
 cd "$WORKDIR"
 
