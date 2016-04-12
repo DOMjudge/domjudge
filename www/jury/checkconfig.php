@@ -417,7 +417,7 @@ while($r = $oversize->next()) {
 $has_errors = $details != '';
 $probs = $DB->q("TABLE SELECT probid, cid FROM contestproblem WHERE color IS NULL");
 foreach($probs as $probdata) {
-       $details .= 'p'.$probdata['probid'] . " in contest c" . $probdata['cid'] . ": has no color\n";
+       $details .= 'p'.$probdata['probid'] . " in contest c" . $probdata['cid'] . ": has no colour\n";
 }
 
 result('problems, languages, teams', 'Problems integrity',

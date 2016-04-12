@@ -202,7 +202,7 @@ function problems($args)
 		);
 	}, $pdatas);
 }
-$doc = "Get a list of problems in a contest, with for each problem: id, shortname, name and color.";
+$doc = "Get a list of problems in a contest, with for each problem: id, shortname, name and colour.";
 $args = array('cid' => 'Contest ID.');
 $exArgs = array(array('cid' => 2));
 $api->provideFunction('GET', 'problems', $doc, $args, $exArgs);
