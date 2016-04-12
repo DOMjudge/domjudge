@@ -1679,33 +1679,16 @@ the practice session of a contest.
 Before running a real contest, you and/or the jury will want to test
 the jury's reference solutions on the system.
 
-There is no special feature for testing their solutions under
-DOMjudge. The simplest approach is to submit these solutions as a
-special team. This method requires a few steps and some carefulness to
-prevent a possible information leak of the problemset. It is assumed
-that you have completely configured the system and contest and that
-all testdata is provided. To submit the jury solutions the following
-steps have to be taken:
-<itemize>
-<item> change the contest time to make the contest currently active;
-<item> setup a special team at a local computer;
-<item> submit the jury solutions as that team;
-<item> check that all solutions are judged as expected in the jury
-       interface;
-<item> revert the contest to the original times.
-</itemize>
-Note that while the contest time is changed to the current time,
-anyone might be able to access the public or team web interface:
-there's not too much there, but on the scoreboard the number of
-problems and their titles can be read. To prevent this information
-leak, one could disconnect the DOMjudge server, judgehosts and the
-computer used for submitting from the rest of the network.
-
-Furthermore, you should make sure that the team you submit the
-solutions as, is in a category which is set to invisible, so that it
-doesn't show up on the public and team scoreboard. The sample team
-"DOMjudge" could be used, as it is in the "Organisation" category,
-which is not visible by default.
+The simplest way to do this is to include the jury solutions in a
+problem zip file and upload this. You can also upload a zip file
+containing just solutions to an existing problem. Note that the zip
+archive has to adhere to the <htmlurl name="Kattis problem package format"
+url="http://www.problemarchive.org/wiki/index.php/Problem_Format">.
+For this to work, the jury/admin who uploads the problem has to have
+an associated team to which the solutions will be assigned. The
+solutions will automatically be judged if the contest is active (but
+it need not have started yet). You can verify whether the submissions
+gave the expected answer from the link on the jury/admin index page.
 
 
 <chapt>Team Workstations<label id="teamworkstations">
