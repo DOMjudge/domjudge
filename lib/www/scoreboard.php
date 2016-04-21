@@ -76,7 +76,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	          teamid, probid,
 	          submissions_$variant AS submissions,
 	          pending_$variant AS pending,
-	          totaltime_$variant AS totaltime,
+	          solvetime_$variant AS solvetime,
 	          is_correct_$variant AS is_correct
 	          FROM scorecache JOIN contestproblem USING(probid,cid) WHERE cid = %i";
 	$scoredata = $DB->q($query, $cid);
@@ -95,14 +95,14 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 			'is_correct'      => (bool) $srow['is_correct'],
 			'num_submissions' => $srow['submissions'],
 			'num_pending'     => $srow['pending'],
-			'time'            => $srow['totaltime'],
+			'time'            => $srow['solvetime'],
 			'penalty'         => $penalty );
 
 		// calculate totals for this team
 		if ( $srow['is_correct'] ) {
 			$SCORES[$srow['teamid']]['num_points'] += $srow['points'];
-			$SCORES[$srow['teamid']]['solve_times'][] = $srow['totaltime'];
-			$SCORES[$srow['teamid']]['total_time'] += $srow['totaltime'] + $penalty;
+			$SCORES[$srow['teamid']]['solve_times'][] = $srow['solvetime'];
+			$SCORES[$srow['teamid']]['total_time'] += scoretime($srow['solvetime']) + $penalty;
 		}
 	}
 
@@ -432,12 +432,10 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			echo '<td class=';
 			// CSS class for correct/incorrect/neutral results
 			if( $matrix[$team][$prob]['is_correct'] ) {
-				// The best times for each problem may not have been
-				// calculated (if called from putTeamRow()), so we
-				// have to suppress an undefined index here.
 				echo '"score_correct' .
-					( @$summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]
-				      ===$matrix[$team][$prob]['time'] ? ' score_first' : '') . '"';
+					( first_solved($matrix[$team][$prob]['time'],
+					               @$summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]) ?
+				      ' score_first' : '') . '"';
 			} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
 				echo '"score_pending"';
 			} elseif ( $matrix[$team][$prob]['num_submissions'] > 0 ) {
@@ -453,7 +451,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			}
 			// if correct, print time scored
 			if( $matrix[$team][$prob]['is_correct'] ) {
-				$str .= '/' . $matrix[$team][$prob]['time'];
+				$str .= '/' . scoretime($matrix[$team][$prob]['time']);
 			}
 			echo '>' . jurylink('team.php?id=' . urlencode($team) .
 								'&amp;restrict=probid:' . urlencode($prob),
@@ -787,7 +785,7 @@ function putTeamRow($cdata, $teamids) {
 			                  AND teamid = %i", $cid, $teamid);
 			if ( $totals != null ) {
 				$SCORES[$teamid]['num_points'] = $totals['points'];
-				$SCORES[$teamid]['total_time']  = $totals['totaltime'];
+				$SCORES[$teamid]['total_time'] = $totals['totaltime'];
 			}
 			if ($displayrank) $SCORES[$teamid]['rank'] = calcTeamRank($cdata, $teamid, $totals, true);
 		}
@@ -795,7 +793,7 @@ function putTeamRow($cdata, $teamids) {
 		// Get values for this team about problems from scoreboard cache
 		$MATRIX = array();
 		$scoredata = $DB->q("SELECT cid, teamid, probid, submissions_restricted AS submissions,
-		                     pending_restricted AS pending, totaltime_restricted AS totaltime,
+		                     pending_restricted AS pending, solvetime_restricted AS solvetime,
 		                     is_correct_restricted AS is_correct
 		                     FROM scorecache WHERE cid = %i AND teamid = %i", $cid,
 		                    current($teamids));
@@ -813,7 +811,7 @@ function putTeamRow($cdata, $teamids) {
 				'is_correct'      => (bool) $srow['is_correct'],
 				'num_submissions' => $srow['submissions'],
 				'num_pending'     => $srow['pending'],
-				'time'            => $srow['totaltime'],
+				'time'            => $srow['solvetime'],
 				'penalty'         => $penalty );
 		}
 
@@ -913,7 +911,7 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 			}
 
 			// Get submission times for each of the teams
-			$scoredata = $DB->q("SELECT teamid, totaltime_$variant AS totaltime
+			$scoredata = $DB->q("SELECT teamid, solvetime_$variant AS solvetime
 			                     FROM scorecache AS sc
 			                     LEFT JOIN problem p USING (probid)
 			                     LEFT JOIN contestproblem cp USING (probid, cid)
@@ -921,7 +919,7 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 			                     AND allow_submit = 1 AND teamid IN (%Ai)",
 			                    $cid, $tied);
 			while ( $srow = $scoredata->next() ) {
-				$teamdata[$srow['teamid']]['solve_times'][] = $srow['totaltime'];
+				$teamdata[$srow['teamid']]['solve_times'][] = $srow['solvetime'];
 			}
 
 			// Now check for each team if it is ranked higher than $teamid
@@ -998,7 +996,7 @@ function tiebreaker($a, $b) {
 	$btimes = $b['solve_times'];
 	rsort($atimes);
 	rsort($btimes);
-        if ( isset($atimes[0]) ) {
+	if ( isset($atimes[0]) ) {
 		if ( $atimes[0] != $btimes[0] ) return $atimes[0] < $btimes[0] ? -1 : 1;
 	}
 	return 0;

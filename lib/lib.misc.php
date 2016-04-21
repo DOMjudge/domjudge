@@ -183,8 +183,8 @@ function calcScoreRow($cid, $team, $prob) {
 	// for each submission
 	while( $row = $result->next() ) {
 
-		// Contest submit time in minutes for scoring.
-		$submittime = (int)floor(calcContestTime($row['submittime'],$cid) / 60);
+		// Contest submit time
+		$submittime = calcContestTime($row['submittime'],$cid);
 
 		// Check if this submission has a publicly visible judging result:
 		if ( (dbconfig_get('verification_required', 0) && ! $row['verified']) ||
@@ -222,8 +222,8 @@ function calcScoreRow($cid, $team, $prob) {
 	// insert or update the values in the public/team scores table
 	$DB->q('REPLACE INTO scorecache
 	        (cid, teamid, probid,
-	         submissions_restricted, pending_restricted, totaltime_restricted, is_correct_restricted,
-	         submissions_public, pending_public, totaltime_public, is_correct_public)
+	         submissions_restricted, pending_restricted, solvetime_restricted, is_correct_restricted,
+	         submissions_public, pending_public, solvetime_public, is_correct_public)
 	        VALUES (%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i)',
 	       $cid, $team, $prob,
 	       $submitted_j, $pending_j, $time_j, $correct_j,
@@ -279,7 +279,7 @@ function updateRankCache($cid, $team) {
 				$penalty = calcPenaltyTime( $srow['is_correct_'.$variant],
 							    $srow['submissions_'.$variant] );
 				$num_points[$variant] += $srow['points'];
-				$total_time[$variant] += $srow['totaltime_'.$variant] + $penalty;
+				$total_time[$variant] += scoretime($srow['solvetime_'.$variant]) + $penalty;
 			}
 		}
 	}
@@ -299,6 +299,27 @@ function updateRankCache($cid, $team) {
 	}
 }
 
+
+/**
+ * Time as used on the scoreboard (i.e. truncated minutes).
+ */
+function scoretime($time)
+{
+	return (int)floor($time / 60);
+}
+
+/**
+ * Checks whether the team was the first to solve this problem by
+ * comparing times. Note that times are floats so a simple equality
+ * test is unreliable. Also, $probtime may be NULL when called through
+ * putTeamRow(), in which case we simply return FALSE.
+ */
+function first_solved($teamtime, $probtime)
+{
+	if ( !isset($probtime) ) return false;
+	$eps = 0.0000001;
+	return $teamtime-$eps <= $probtime;
+}
 
 /**
  * Calculate the penalty time.

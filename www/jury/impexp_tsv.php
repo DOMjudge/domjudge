@@ -248,15 +248,16 @@ function tsv_teams_get()
 function tsv_scoreboard_get()
 {
 	// we'll here assume that the requested file will be of the current contest,
-	// as all our scoreboard interfaces do
-	// 1 	Institution name 	University of Virginia 	string
-	// 2	External ID 	24314 	integer
-	// 3 	Position in contest 	1 	integer
-	// 4 	Number of problems the team has solved 	4 	integer
-	// 5 	Total Time 	534 	integer
-	// 6 	Time of the last accepted submission 	233 	integer   -1 if none
-	// 6 + 2i - 1 	Number of submissions for problem i 	2 	integer
-	// 6 + 2i 	Time when problem i was solved 	233 	integer   -1 if not
+	// as all our scoreboard interfaces do. Row format explanation:
+	// Row	Description	Example content	Type
+	// 1	Institution name	University of Virginia	string
+	// 2	External ID	24314	integer
+	// 3	Position in contest	1	integer
+	// 4	Number of problems the team has solved	4	integer
+	// 5	Total Time	534	integer
+	// 6	Time of the last accepted submission	233	integer   -1 if none
+	// 6+2i-1	Number of submissions for problem i	2	integer
+	// 6+2i	Time when problem i was solved	233	integer   -1 if not solved
 	global $cdata;
 	$sb = genScoreBoard($cdata, true);
 
@@ -265,9 +266,10 @@ function tsv_scoreboard_get()
 		$maxtime = -1;
 		$drow = array();
 		foreach($sb['matrix'][$teamid] as $prob) {
+			$time = scoretime($prob['time']);
 			$drow[] = $prob['num_submissions'];
-			$drow[] = $prob['is_correct'] ? $prob['time'] : -1;
-			$maxtime = max($maxtime, $prob['time']);
+			$drow[] = $prob['is_correct'] ? $time : -1;
+			$maxtime = max($maxtime, $time);
 		}
 		$data[] = array_merge (
 			array($sb['teams'][$teamid]['affilname'], @$sb['teams'][$teamid]['externalid'],
@@ -334,7 +336,7 @@ function tsv_results_get()
 	foreach ($sb['scores'] as $teamid => $srow) {
 		$maxtime = -1;
 		foreach($sb['matrix'][$teamid] as $prob) {
-			$maxtime = max($maxtime, $prob['time']);
+			$maxtime = max($maxtime, scoretime($prob['time']));
 		}
 
 		$rank = $srow['rank'];

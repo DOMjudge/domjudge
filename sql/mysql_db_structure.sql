@@ -306,9 +306,9 @@ CREATE TABLE `rankcache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
   `points_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points (restricted audience)',
-  `totaltime_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent (restricted audience)',
+  `totaltime_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total penalty time in minutes (restricted audience)',
   `points_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total correctness points (public)',
-  `totaltime_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent (public)',
+  `totaltime_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total penalty time in minutes (public)',
   PRIMARY KEY (`cid`,`teamid`),
   KEY `order_restricted` (`cid`,`points_restricted`,`totaltime_restricted`) USING BTREE,
   KEY `order_public` (`cid`,`points_public`,`totaltime_public`) USING BTREE
@@ -370,11 +370,11 @@ CREATE TABLE `scorecache` (
   `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `submissions_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made (restricted audiences)',
   `pending_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement (restricted audience)',
-  `totaltime_restricted` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent (restricted audience)',
+  `solvetime_restricted`  decimal(32,9) unsigned NOT NULL DEFAULT '0.000000000' COMMENT 'Seconds into contest when problem solved (restricted audience)',
   `is_correct_restricted` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission? (restricted audience)',
   `submissions_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions made (public)',
   `pending_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement (public)',
-  `totaltime_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Total time spent (public)',
+  `solvetime_public` decimal(32,9) unsigned NOT NULL DEFAULT '0.000000000' COMMENT 'Seconds into contest when problem solved (public)',
   `is_correct_public` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission? (public)',
   PRIMARY KEY (`cid`,`teamid`,`probid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard cache';
