@@ -90,8 +90,8 @@ if ( isset($_POST['import']) ) {
 		dbconfig_init();
 
 		// TODO: event-feed-port
-		if (isset($contest_yaml_data)) {
-			$LIBDBCONFIG['penalty_time']['value'] = (int)$contest_yaml_data['penaltytime'];
+		if ( isset($contest_yaml_data['penalty-time']) ) {
+			$LIBDBCONFIG['penalty_time']['value'] = (int)$contest_yaml_data['penalty-time'];
 		}
 
 		if ( isset($contest_yaml_data['default-clars']) ) {
