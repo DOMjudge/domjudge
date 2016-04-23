@@ -323,7 +323,7 @@ real user ID.\n");
 void output_exit_time(int exitcode)
 {
 	double walldiff, cpudiff, userdiff, sysdiff;
-	int timelimit_reached;
+	int timelimit_reached = 0;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
 	verbose("command exited with exitcode %d",exitcode);

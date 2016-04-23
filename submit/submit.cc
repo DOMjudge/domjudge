@@ -113,11 +113,11 @@ std::string stringtolower(std::string str)
 
 const int nHTML_entities = 5;
 const char HTML_entities[nHTML_entities][2][8] = {
-	{"&amp;", '&'},
-	{"&quot;", '"'},
-	{"&apos;", '\''},
-	{"&lt;", '<'},
-	{"&gt;", '>'}};
+	{"&amp;", "&"},
+	{"&quot;", "\""},
+	{"&apos;", "'"},
+	{"&lt;", "<"},
+	{"&gt;", ">"}};
 
 std::string decode_HTML_entities(std::string str)
 {
