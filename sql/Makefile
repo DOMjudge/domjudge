@@ -10,7 +10,7 @@ CONFSTUB=files/config.h
 
 domserver: dj-setup-database
 
-build-scripts:
+build-scripts: $(CONFSTUB)
 	@for d in $(EXECDIRS) ; do \
 		[ -x $$d/build ] && ( cd $$d && ./build ) ; \
 	done
