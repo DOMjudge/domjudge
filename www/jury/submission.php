@@ -276,6 +276,14 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 }
 claimdone:
 
+if ( !isset($jid) ) {
+	# automatically refresh while we wait for judging data
+	$refresh = array(
+		'after' => 15,
+		'url' => 'submission.php?id=' . urlencode($id)
+	);
+}
+
 // Headers might already have been included.
 require_once(LIBWWWDIR . '/header.php');
 
