@@ -426,7 +426,23 @@ if ( !isset($jid) ) {
 	}
 
 	if ( !$can_be_judged ) {
-		echo "<p class=\"error\">No active judgehost can judge this submission. Edit judgehost restrictions!</p>\n\n";
+		error("No active judgehost can judge this submission. Edit judgehost restrictions!");
+	}
+
+	$lang_allowed = $DB->q('VALUE SELECT allow_judge
+				FROM language
+				LEFT JOIN submission USING (langid)
+				WHERE submitid = %i', $id);
+	if ( $lang_allowed == 0 ) {
+		error("Submission language is currently not allowed to be judged!");
+	}
+
+	$prob_allowed = $DB->q('VALUE SELECT allow_judge
+				FROM contestproblem
+				LEFT JOIN submission USING (probid)
+				WHERE submitid = %i', $id);
+	if ( $prob_allowed == 0 ) {
+		error("Problem is currently not allowed to be judged!");
 	}
 }
 
