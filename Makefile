@@ -166,7 +166,7 @@ maintainer-conf: configure
 	            --with-judgehost_rundir=$(CURDIR)/output/run \
 	            --with-domserver_tmpdir=$(CURDIR)/output/tmp \
 	            --with-judgehost_tmpdir=$(CURDIR)/output/tmp \
-	            --with-judgehost_judgedir=$(CURDIR)/output/judging \
+	            --with-judgehost_judgedir=$(CURDIR)/output/judgings \
 	            --with-domserver_submitdir=$(CURDIR)/output/submissions \
 	            CFLAGS='$(MAINT_CXFLAGS)' \
 	            CXXFLAGS='$(MAINT_CXFLAGS)' \
