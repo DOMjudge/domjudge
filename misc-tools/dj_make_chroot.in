@@ -97,7 +97,7 @@ fi
 if [ "$DISTRO" = 'Debian' ]; then
 
 # Packages to include during bootstrap process (comma separated):
-INCLUDEDEBS=""
+INCLUDEDEBS="ca-certificates"
 
 # Packages to install after upgrade (space separated):
 INSTALLDEBS="openjdk-7-jre-headless locales"
