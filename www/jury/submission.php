@@ -444,195 +444,197 @@ if ( !isset($jid) ) {
 	if ( $prob_allowed == 0 ) {
 		error("Problem is currently not allowed to be judged!");
 	}
+
+	// nothing more to display
+	require(LIBWWWDIR . '/footer.php');
+	exit;
 }
 
 
 // Display the details of the selected judging
 
-if ( isset($jid) )  {
+$jud = $DB->q('TUPLE SELECT j.*, r.valid AS rvalid
+	       FROM judging j
+	       LEFT JOIN rejudging r USING (rejudgingid)
+	       WHERE judgingid = %i', $jid);
 
-	$jud = $DB->q('TUPLE SELECT j.*, r.valid AS rvalid
-	               FROM judging j
-	               LEFT JOIN rejudging r USING (rejudgingid)
-	               WHERE judgingid = %i', $jid);
+// sanity check
+if ($jud['submitid'] != $id) error(
+	sprintf("judingid j%d belongs to submitid s%d, not s%d",
+		$jid, $jud['submitid'], $id));
 
-	// sanity check
-	if ($jud['submitid'] != $id) error(
-		sprintf("judingid j%d belongs to submitid s%d, not s%d",
-			$jid, $jud['submitid'], $id));
+// Display testcase runs
+$runs = $DB->q('TABLE SELECT r.runid, r.judgingid,
+		r.testcaseid, r.runresult, r.runtime, ' .
+		truncate_SQL_field('r.output_run')    . ' AS output_run, ' .
+		truncate_SQL_field('r.output_diff')   . ' AS output_diff, ' .
+		truncate_SQL_field('r.output_error')  . ' AS output_error, ' .
+		truncate_SQL_field('r.output_system') . ' AS output_system, ' .
+		truncate_SQL_field('t.output')        . ' AS output_reference,
+		t.rank, t.description, t.image_type, t.image_thumb
+		FROM testcase t
+		LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+					     r.judgingid = %i )
+		WHERE t.probid = %s ORDER BY rank',
+	       $jid, $submdata['probid']);
 
-	// Display testcase runs
-	$runs = $DB->q('TABLE SELECT r.runid, r.judgingid,
-	                r.testcaseid, r.runresult, r.runtime, ' .
-	                truncate_SQL_field('r.output_run')    . ' AS output_run, ' .
-	                truncate_SQL_field('r.output_diff')   . ' AS output_diff, ' .
-	                truncate_SQL_field('r.output_error')  . ' AS output_error, ' .
-	                truncate_SQL_field('r.output_system') . ' AS output_system, ' .
-	                truncate_SQL_field('t.output')        . ' AS output_reference,
-	                t.rank, t.description, t.image_type, t.image_thumb
-	                FROM testcase t
-	                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
-	                                             r.judgingid = %i )
-	                WHERE t.probid = %s ORDER BY rank',
-	               $jid, $submdata['probid']);
+// Use original submission as previous, or try to find a previous
+// submission/judging of the same team/problem.
+if ( isset($submdata['origsubmitid']) ) {
+	$lastsubmitid = $submdata['origsubmitid'];
+} else {
+	$lastsubmitid = $DB->q('MAYBEVALUE SELECT submitid
+				FROM submission
+				WHERE teamid = %i AND probid = %i AND submittime < %s
+				ORDER BY submittime DESC LIMIT 1',
+			       $submdata['teamid'],$submdata['probid'],
+			       $submdata['submittime']);
+}
 
-	// Use original submission as previous, or try to find a previous
-	// submission/judging of the same team/problem.
-	if ( isset($submdata['origsubmitid']) ) {
-		$lastsubmitid = $submdata['origsubmitid'];
-	} else {
-		$lastsubmitid = $DB->q('MAYBEVALUE SELECT submitid
-		                        FROM submission
-		                        WHERE teamid = %i AND probid = %i AND submittime < %s
-		                        ORDER BY submittime DESC LIMIT 1',
-		                       $submdata['teamid'],$submdata['probid'],
-		                       $submdata['submittime']);
-	}
-
-	$lastjud = NULL;
-	if ( $lastsubmitid !== NULL ) {
-		$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result, verify_comment, endtime
-		                   FROM judging
-		                   WHERE submitid = %s AND valid = 1
-		                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
-		if ( $lastjud !== NULL ) {
-			$lastruns = $DB->q('TABLE SELECT r.runtime, r.runresult, rank, description
-			                    FROM testcase t
-			                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
-			                                                 r.judgingid = %i )
-			                    WHERE t.probid = %s ORDER BY rank',
-			                   $lastjud['judgingid'], $submdata['probid']);
-		}
-	}
-
-	$judging_ended = !empty($jud['endtime']);
-	list($tclist, $sum_runtime, $max_runtime) = display_runinfo($runs, $judging_ended);
-	$tclist = "<tr><td>testcase runs:</td><td>" . $tclist . "</td></tr>\n";
-
+$lastjud = NULL;
+if ( $lastsubmitid !== NULL ) {
+	$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result, verify_comment, endtime
+			   FROM judging
+			   WHERE submitid = %s AND valid = 1
+			   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
 	if ( $lastjud !== NULL ) {
-		$lastjudging_ended = !empty($lastjud['endtime']);
-		list($lasttclist, $sum_lastruntime, $max_lastruntime) = display_runinfo($lastruns, $lastjudging_ended);
-		$lasttclist = "<tr class=\"lasttcruns\"><td><a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a> runs:</td><td>" .
-				$lasttclist . "</td></tr>\n";
+		$lastruns = $DB->q('TABLE SELECT r.runtime, r.runresult, rank, description
+				    FROM testcase t
+				    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+								 r.judgingid = %i )
+				    WHERE t.probid = %s ORDER BY rank',
+				   $lastjud['judgingid'], $submdata['probid']);
 	}
+}
 
-	$state = '';
-	if ( isset($jud['rejudgingid']) ) {
-		$reason = $DB->q('VALUE SELECT reason FROM rejudging WHERE rejudgingid=%i', $jud['rejudgingid']);
-		$state = ' (rejudging <a href="rejudging.php?id=' .
-			 urlencode($jud['rejudgingid']) . '">r' .
-			 specialchars($jud['rejudgingid']) .
-			 '</a>, reason: ' .
-			 specialchars($reason) . ')';
-	} else if ( $jud['valid'] != 1 ) {
-		$state = ' (INVALID)';
+$judging_ended = !empty($jud['endtime']);
+list($tclist, $sum_runtime, $max_runtime) = display_runinfo($runs, $judging_ended);
+$tclist = "<tr><td>testcase runs:</td><td>" . $tclist . "</td></tr>\n";
+
+if ( $lastjud !== NULL ) {
+	$lastjudging_ended = !empty($lastjud['endtime']);
+	list($lasttclist, $sum_lastruntime, $max_lastruntime) = display_runinfo($lastruns, $lastjudging_ended);
+	$lasttclist = "<tr class=\"lasttcruns\"><td><a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a> runs:</td><td>" .
+			$lasttclist . "</td></tr>\n";
+}
+
+$state = '';
+if ( isset($jud['rejudgingid']) ) {
+	$reason = $DB->q('VALUE SELECT reason FROM rejudging WHERE rejudgingid=%i', $jud['rejudgingid']);
+	$state = ' (rejudging <a href="rejudging.php?id=' .
+		 urlencode($jud['rejudgingid']) . '">r' .
+		 specialchars($jud['rejudgingid']) .
+		 '</a>, reason: ' .
+		 specialchars($reason) . ')';
+} else if ( $jud['valid'] != 1 ) {
+	$state = ' (INVALID)';
+}
+
+echo rejudgeForm('submission', $id) . "<br /><br />\n\n";
+
+echo "<h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .  $state .
+	"</h2>\n\n&nbsp;";
+if ( !$jud['verified'] ) {
+	echo addForm($pagename . '?id=' . urlencode($id) . '&amp;jid=' . urlencode($jid));
+
+	if ( !empty($jud['jury_member']) ) {
+		echo ' (claimed by ' . specialchars($jud['jury_member']) . ') ';
+		echo addHidden('forceclaim', '1');
 	}
-
-	echo rejudgeForm('submission', $id) . "<br /><br />\n\n";
-
-	echo "<h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .  $state .
-		"</h2>\n\n&nbsp;";
-	if ( !$jud['verified'] ) {
-		echo addForm($pagename . '?id=' . urlencode($id) . '&amp;jid=' . urlencode($jid));
-
-		if ( !empty($jud['jury_member']) ) {
-			echo ' (claimed by ' . specialchars($jud['jury_member']) . ') ';
-			echo addHidden('forceclaim', '1');
-		}
-		if ( $jury_member == @$jud['jury_member']) {
-			echo addSubmit('unclaim', 'unclaim');
-		} else {
-			echo addSubmit('claim', 'claim');
-		}
-		echo addEndForm();
-	}
-	echo "<br /><br />\n\n";
-
-	echo 'Result: ' . printresult($jud['result'], $jud['valid']) . ( $lastjud === NULL ? '' :
-		'<span class="lastresult"> (<a href="submission.php?id=' . $lastsubmitid . '">s' . $lastsubmitid. '</a>: '
-		. @$lastjud['result'] . ')</span>' ) . ', ' .
-		'Judgehost: <a href="judgehost.php?id=' . urlencode($jud['judgehost']) . '">' .
-		printhost($jud['judgehost']) . '</a>, ';
-
-	// Time (start, end, used)
-	echo "<span class=\"judgetime\">Judging started: " . printtime($jud['starttime'],'%H:%M:%S');
-
-	if ( $judging_ended ) {
-		echo ', finished in '.
-				printtimediff($jud['starttime'], $jud['endtime']) . ' s';
-	} elseif ( $jud['valid'] || isset($jud['rejudgingid']) ) {
-		echo ' [still judging - busy ' . printtimediff($jud['starttime']) . ']';
+	if ( $jury_member == @$jud['jury_member']) {
+		echo addSubmit('unclaim', 'unclaim');
 	} else {
-		echo ' [aborted]';
+		echo addSubmit('claim', 'claim');
+	}
+	echo addEndForm();
+}
+echo "<br /><br />\n\n";
+
+echo 'Result: ' . printresult($jud['result'], $jud['valid']) . ( $lastjud === NULL ? '' :
+	'<span class="lastresult"> (<a href="submission.php?id=' . $lastsubmitid . '">s' . $lastsubmitid. '</a>: '
+	. @$lastjud['result'] . ')</span>' ) . ', ' .
+	'Judgehost: <a href="judgehost.php?id=' . urlencode($jud['judgehost']) . '">' .
+	printhost($jud['judgehost']) . '</a>, ';
+
+// Time (start, end, used)
+echo "<span class=\"judgetime\">Judging started: " . printtime($jud['starttime'],'%H:%M:%S');
+
+if ( $judging_ended ) {
+	echo ', finished in '.
+			printtimediff($jud['starttime'], $jud['endtime']) . ' s';
+} elseif ( $jud['valid'] || isset($jud['rejudgingid']) ) {
+	echo ' [still judging - busy ' . printtimediff($jud['starttime']) . ']';
+} else {
+	echo ' [aborted]';
+}
+
+
+echo "</span>\n";
+
+if ( @$jud['result']!=='compiler-error' ) {
+	echo ", max/sum runtime: " . sprintf('%.2f/%.2fs',$max_runtime,$sum_runtime);
+	if ( isset($max_lastruntime) ) {
+		echo " <span class=\"lastruntime\">(<a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a>: "
+			. sprintf('%.2f/%.2fs',$max_lastruntime,$sum_lastruntime) .
+			")</span>";
 	}
 
+	echo "<table>\n$tclist";
+	if ( $lastjud !== NULL ) {
+		echo $lasttclist;
+	}
+	echo "</table>\n";
+}
 
-	echo "</span>\n";
+// Show JS toggle of previous submission results.
+if ( $lastjud!==NULL ) {
+	echo "<span class=\"testcases_prev\">" .
+	     "<a href=\"javascript:togglelastruns();\">show/hide</a> results of previous " .
+	     "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a>" .
+	     ( empty($lastjud['verify_comment']) ? '' :
+	       "<span class=\"prevsubmit\"> (verify comment: '" .
+	       $lastjud['verify_comment'] . "')</span>" ) . "</span>";
+}
 
-	if ( @$jud['result']!=='compiler-error' ) {
-		echo ", max/sum runtime: " . sprintf('%.2f/%.2fs',$max_runtime,$sum_runtime);
-		if ( isset($max_lastruntime) ) {
-			echo " <span class=\"lastruntime\">(<a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a>: "
-				. sprintf('%.2f/%.2fs',$max_lastruntime,$sum_lastruntime) .
-				")</span>";
+// Display following data only when the judging result is known.
+// Note that the judging may still not be finished yet when lazy
+// evaluation is off.
+if ( !empty($jud['result']) ) {
+
+	// display verification data: verified, by whom, and comment.
+	// only if this is a valid judging, otherwise irrelevant
+	if ( $jud['valid'] || (isset($jud['rejudgingid']) && $jud['rvalid'])) {
+		$verification_required = dbconfig_get('verification_required', 0);
+		if ( ! ($verification_required && $jud['verified']) ) {
+
+			$val = ! $jud['verified'];
+
+			echo addForm('verify.php') .
+			    addHidden('id',  $jud['judgingid']) .
+			    addHidden('val', $val) .
+			    addHidden('redirect', @$_SERVER['HTTP_REFERER']);
 		}
 
-		echo "<table>\n$tclist";
-		if ( $lastjud !== NULL ) {
-			echo $lasttclist;
-		}
-		echo "</table>\n";
-	}
-
-	// Show JS toggle of previous submission results.
-	if ( $lastjud!==NULL ) {
-		echo "<span class=\"testcases_prev\">" .
-		     "<a href=\"javascript:togglelastruns();\">show/hide</a> results of previous " .
-		     "<a href=\"submission.php?id=$lastsubmitid\">submission s$lastsubmitid</a>" .
-		     ( empty($lastjud['verify_comment']) ? '' :
-		       "<span class=\"prevsubmit\"> (verify comment: '" .
-		       $lastjud['verify_comment'] . "')</span>" ) . "</span>";
-	}
-
-	// Display following data only when the judging result is known.
-	// Note that the judging may still not be finished yet when lazy
-	// evaluation is off.
-	if ( !empty($jud['result']) ) {
-
-		// display verification data: verified, by whom, and comment.
-		// only if this is a valid judging, otherwise irrelevant
-		if ( $jud['valid'] || (isset($jud['rejudgingid']) && $jud['rvalid'])) {
-			$verification_required = dbconfig_get('verification_required', 0);
-			if ( ! ($verification_required && $jud['verified']) ) {
-
-				$val = ! $jud['verified'];
-
-				echo addForm('verify.php') .
-				    addHidden('id',  $jud['judgingid']) .
-				    addHidden('val', $val) .
-				    addHidden('redirect', @$_SERVER['HTTP_REFERER']);
-			}
-
-			echo "<p>Verified: " .
-			    "<strong>" . printyn($jud['verified']) . "</strong>";
-			if ( $jud['verified'] && ! empty($jud['jury_member']) ) {
-				echo ", by " . specialchars($jud['jury_member']);
-				if ( !empty($jud['verify_comment']) ) {
-					echo ' with comment "'.specialchars($jud['verify_comment']).'"';
-				}
-			}
-
-			if ( ! ($verification_required && $jud['verified']) ) {
-				echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
-				if ( $val ) echo ' with comment ' . addInput('comment', '', 25);
-				echo "</p>" . addEndForm();
-			} else {
-				echo "</p>\n";
+		echo "<p>Verified: " .
+		    "<strong>" . printyn($jud['verified']) . "</strong>";
+		if ( $jud['verified'] && ! empty($jud['jury_member']) ) {
+			echo ", by " . specialchars($jud['jury_member']);
+			if ( !empty($jud['verify_comment']) ) {
+				echo ' with comment "'.specialchars($jud['verify_comment']).'"';
 			}
 		}
-	} else { // judging does not have a result yet
-			echo "<p><b>Judging is not ready yet!</b></p>\n";
+
+		if ( ! ($verification_required && $jud['verified']) ) {
+			echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
+			if ( $val ) echo ' with comment ' . addInput('comment', '', 25);
+			echo "</p>" . addEndForm();
+		} else {
+			echo "</p>\n";
+		}
 	}
+} else { // judging does not have a result yet
+		echo "<p><b>Judging is not ready yet!</b></p>\n";
+}
 
 ?>
 <script type="text/javascript">
@@ -642,154 +644,151 @@ togglelastruns();
 </script>
 <?php
 
-	display_compile_output(@$jud['output_compile'], @$jud['result']!=='compiler-error');
+display_compile_output(@$jud['output_compile'], @$jud['result']!=='compiler-error');
 
-	// If compilation is not finished yet or failed, there's no more info to show, so stop here
-	if ( @$jud['output_compile'] === NULL || @$jud['result']=='compiler-error' ) {
-		require(LIBWWWDIR . '/footer.php');
-		exit(0);
+// If compilation is not finished yet or failed, there's no more info to show, so stop here
+if ( @$jud['output_compile'] === NULL || @$jud['result']=='compiler-error' ) {
+	require(LIBWWWDIR . '/footer.php');
+	exit(0);
+}
+
+foreach ( $runs as $run ) {
+
+	if ( $run['runresult'] == 'correct' ) {
+		echo "<div class=\"run_correct\">";
+	}
+	echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
+
+	if ( $run['runresult']===NULL ) {
+		echo "<p class=\"nodata\">" .
+			( $jud['result'] === NULL ? 'Run not started/finished yet.' : 'Run not used for final result.' ) .
+			"</p>\n";
+		continue;
 	}
 
-	foreach ( $runs as $run ) {
-
-		if ( $run['runresult'] == 'correct' ) {
-			echo "<div class=\"run_correct\">";
-		}
-		echo "<h4 id=\"run-$run[rank]\">Run $run[rank]</h4>\n\n";
-
-		if ( $run['runresult']===NULL ) {
-			echo "<p class=\"nodata\">" .
-				( $jud['result'] === NULL ? 'Run not started/finished yet.' : 'Run not used for final result.' ) .
-				"</p>\n";
-			continue;
-		}
-
-		$timelimit_str = '';
-		if ( $run['runresult']=='timelimit' ) {
-			if ( preg_match('/timelimit exceeded.*hard (wall|cpu) time/',$run['output_system']) ) {
-				$timelimit_str = '<b>(terminated)</b>';
-			} else {
-				$timelimit_str = '<b>(finished late)</b>';
-			}
-		}
-		echo "<table>\n<tr><td>";
-		echo "<table>\n" .
-		    "<tr><td>Description:</td><td>" .
-		    specialchars($run['description']) . "</td></tr>" .
-		    "<tr><td>Download: </td><td>" .
-		    "<a href=\"testcase.php?probid=" . specialchars($submdata['probid']) .
-		    "&amp;rank=" . $run['rank'] . "&amp;fetch=input\">Input</a> / " .
-		    "<a href=\"testcase.php?probid=" . specialchars($submdata['probid']) .
-		    "&amp;rank=" . $run['rank'] . "&amp;fetch=output\">Reference Output</a> / " .
-		    "<a href=\"team_output.php?runid=" . $run['runid'] . "&amp;cid=" .
-		    $submdata['cid'] . "\">Team Output</a></td></tr>" .
-		    "<tr><td>Runtime:</td><td>$run[runtime] sec $timelimit_str</td></tr>" .
-		    "<tr><td>Result: </td><td><span class=\"sol sol_" .
-		    ( $run['runresult']=='correct' ? '' : 'in' ) .
-		    "correct\">$run[runresult]</span></td></tr>" .
-		    "</table>\n\n";
-		echo "</td><td>";
-		if ( isset($run['image_thumb']) ) {
-			$imgurl = "./testcase.php?probid=" .  urlencode($submdata['probid']) .
-			    "&amp;rank=" . $run['rank'] . "&amp;fetch=image";
-			echo "<a href=\"$imgurl\">";
-			echo '<img src="data:image/' . $run['image_type'] . ';base64,' .
-			    base64_encode($run['image_thumb']) . '"/>';
-			echo "</a>";
-		}
-		echo "</td></tr></table>\n\n";
-
-		echo "<h5>Diff output</h5>\n";
-		if ( strlen(@$run['output_diff']) > 0 ) {
-			echo "<pre class=\"output_text\">";
-			echo parseRunDiff($run['output_diff']);
-			echo "</pre>\n\n";
+	$timelimit_str = '';
+	if ( $run['runresult']=='timelimit' ) {
+		if ( preg_match('/timelimit exceeded.*hard (wall|cpu) time/',$run['output_system']) ) {
+			$timelimit_str = '<b>(terminated)</b>';
 		} else {
-			echo "<p class=\"nodata\">There was no diff output.</p>\n";
-		}
-
-		if ( $run['runresult'] !== 'correct' ) {
-			echo "<pre class=\"output_text\">";
-			// TODO: can be improved using diffposition.txt
-			// FIXME: only show when diffposition.txt is set?
-			// FIXME: cut off after XXX lines
-			$lines_team = preg_split('/\n/', trim($run['output_run']));
-			$lines_ref  = preg_split('/\n/', trim($run['output_reference']));
-
-			$diffs = array();
-			$firstErr = sizeof($lines_team) + 1;
-			$lastErr  = -1;
-			for ($i = 0; $i < min(sizeof($lines_team), sizeof($lines_ref)); $i++) {
-				$lcs = compute_lcsdiff($lines_team[$i], $lines_ref[$i]);
-				if ( $lcs[0] === TRUE ) {
-					$firstErr = min($firstErr, $i);
-					$lastErr  = max($lastErr, $i);
-				}
-				$diffs[] = $lcs[1];
-			}
-			$contextLines = 5;
-			$firstErr -= $contextLines;
-			$lastErr  += $contextLines;
-			$firstErr = max(0, $firstErr);
-			$lastErr  = min(sizeof($diffs)-1, $lastErr);
-			echo "<table class=\"lcsdiff\">\n";
-			if ($firstErr > 0) {
-				echo "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
-			}
-			for ($i = $firstErr; $i <= $lastErr; $i++) {
-				echo "<tr><td class=\"linenr\">" . ($i + 1) . "</td><td>" . $diffs[$i] . "</td></tr>";
-			}
-			if ($lastErr < sizeof($diffs) - 1) {
-				echo "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
-			}
-			echo "</table>";
-
-			echo "</pre>\n\n";
-		}
-
-		echo "<h5>Program output</h5>\n";
-		if ( strlen(@$run['output_run']) > 0 ) {
-			echo "<pre class=\"output_text\">".
-			    specialchars($run['output_run'])."</pre>\n\n";
-		} else {
-			echo "<p class=\"nodata\">There was no program output.</p>\n";
-		}
-
-		echo "<h5>Program error output</h5>\n";
-		if ( strlen(@$run['output_error']) > 0 ) {
-			echo "<pre class=\"output_text\">".
-			    specialchars($run['output_error'])."</pre>\n\n";
-		} else {
-			echo "<p class=\"nodata\">There was no stderr output.</p>\n";
-		}
-
-		echo "<h5>Judging system output (info/debug/errors)</h5>\n";
-		if ( strlen(@$run['output_system']) > 0 ) {
-			echo "<pre class=\"output_text\">".
-			    specialchars($run['output_system'])."</pre>\n\n";
-		} else {
-			echo "<p class=\"nodata\">There was no judging system output.</p>\n";
-		}
-
-		if ( $run['runresult'] == 'correct' ) {
-			echo "</div>";
+			$timelimit_str = '<b>(finished late)</b>';
 		}
 	}
+	echo "<table>\n<tr><td>";
+	echo "<table>\n" .
+	    "<tr><td>Description:</td><td>" .
+	    specialchars($run['description']) . "</td></tr>" .
+	    "<tr><td>Download: </td><td>" .
+	    "<a href=\"testcase.php?probid=" . specialchars($submdata['probid']) .
+	    "&amp;rank=" . $run['rank'] . "&amp;fetch=input\">Input</a> / " .
+	    "<a href=\"testcase.php?probid=" . specialchars($submdata['probid']) .
+	    "&amp;rank=" . $run['rank'] . "&amp;fetch=output\">Reference Output</a> / " .
+	    "<a href=\"team_output.php?runid=" . $run['runid'] . "&amp;cid=" .
+	    $submdata['cid'] . "\">Team Output</a></td></tr>" .
+	    "<tr><td>Runtime:</td><td>$run[runtime] sec $timelimit_str</td></tr>" .
+	    "<tr><td>Result: </td><td><span class=\"sol sol_" .
+	    ( $run['runresult']=='correct' ? '' : 'in' ) .
+	    "correct\">$run[runresult]</span></td></tr>" .
+	    "</table>\n\n";
+	echo "</td><td>";
+	if ( isset($run['image_thumb']) ) {
+		$imgurl = "./testcase.php?probid=" .  urlencode($submdata['probid']) .
+		    "&amp;rank=" . $run['rank'] . "&amp;fetch=image";
+		echo "<a href=\"$imgurl\">";
+		echo '<img src="data:image/' . $run['image_type'] . ';base64,' .
+		    base64_encode($run['image_thumb']) . '"/>';
+		echo "</a>";
+	}
+	echo "</td></tr></table>\n\n";
+
+	echo "<h5>Diff output</h5>\n";
+	if ( strlen(@$run['output_diff']) > 0 ) {
+		echo "<pre class=\"output_text\">";
+		echo parseRunDiff($run['output_diff']);
+		echo "</pre>\n\n";
+	} else {
+		echo "<p class=\"nodata\">There was no diff output.</p>\n";
+	}
+
+	if ( $run['runresult'] !== 'correct' ) {
+		echo "<pre class=\"output_text\">";
+		// TODO: can be improved using diffposition.txt
+		// FIXME: only show when diffposition.txt is set?
+		// FIXME: cut off after XXX lines
+		$lines_team = preg_split('/\n/', trim($run['output_run']));
+		$lines_ref  = preg_split('/\n/', trim($run['output_reference']));
+
+		$diffs = array();
+		$firstErr = sizeof($lines_team) + 1;
+		$lastErr  = -1;
+		for ($i = 0; $i < min(sizeof($lines_team), sizeof($lines_ref)); $i++) {
+			$lcs = compute_lcsdiff($lines_team[$i], $lines_ref[$i]);
+			if ( $lcs[0] === TRUE ) {
+				$firstErr = min($firstErr, $i);
+				$lastErr  = max($lastErr, $i);
+			}
+			$diffs[] = $lcs[1];
+		}
+		$contextLines = 5;
+		$firstErr -= $contextLines;
+		$lastErr  += $contextLines;
+		$firstErr = max(0, $firstErr);
+		$lastErr  = min(sizeof($diffs)-1, $lastErr);
+		echo "<table class=\"lcsdiff\">\n";
+		if ($firstErr > 0) {
+			echo "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
+		}
+		for ($i = $firstErr; $i <= $lastErr; $i++) {
+			echo "<tr><td class=\"linenr\">" . ($i + 1) . "</td><td>" . $diffs[$i] . "</td></tr>";
+		}
+		if ($lastErr < sizeof($diffs) - 1) {
+			echo "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
+		}
+		echo "</table>";
+
+		echo "</pre>\n\n";
+	}
+
+	echo "<h5>Program output</h5>\n";
+	if ( strlen(@$run['output_run']) > 0 ) {
+		echo "<pre class=\"output_text\">".
+		    specialchars($run['output_run'])."</pre>\n\n";
+	} else {
+		echo "<p class=\"nodata\">There was no program output.</p>\n";
+	}
+
+	echo "<h5>Program error output</h5>\n";
+	if ( strlen(@$run['output_error']) > 0 ) {
+		echo "<pre class=\"output_text\">".
+		    specialchars($run['output_error'])."</pre>\n\n";
+	} else {
+		echo "<p class=\"nodata\">There was no stderr output.</p>\n";
+	}
+
+	echo "<h5>Judging system output (info/debug/errors)</h5>\n";
+	if ( strlen(@$run['output_system']) > 0 ) {
+		echo "<pre class=\"output_text\">".
+		    specialchars($run['output_system'])."</pre>\n\n";
+	} else {
+		echo "<p class=\"nodata\">There was no judging system output.</p>\n";
+	}
+
+	if ( $run['runresult'] == 'correct' ) {
+		echo "</div>";
+	}
+}
 
 ?>
-	<script type="text/javascript">
-		function display_correctruns(show) {
-			elements = document.getElementsByClassName('run_correct');
-			for (i = 0; i < elements.length; i++) {
-				elements[i].style.display = show ? 'block' : 'none';
-			}
+<script type="text/javascript">
+	function display_correctruns(show) {
+		elements = document.getElementsByClassName('run_correct');
+		for (i = 0; i < elements.length; i++) {
+			elements[i].style.display = show ? 'block' : 'none';
 		}
-		display_correctruns(false);
-	</script>
+	}
+	display_correctruns(false);
+</script>
 <?php
-
-
-}
 
 // We're done!
 
