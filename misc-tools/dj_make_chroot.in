@@ -316,7 +316,7 @@ chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
 	/usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
 	/usr/bin/gpasswd /usr/bin/passwd /usr/lib/pt_chown \
-	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd"
+	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd" || true
 
 # Disable root account
 sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
