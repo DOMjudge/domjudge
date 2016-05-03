@@ -277,7 +277,7 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 claimdone:
 
 if ( !isset($jid) ) {
-	# automatically refresh while we wait for judging data
+	// Automatically refresh page while we wait for judging data.
 	$refresh = array(
 		'after' => 15,
 		'url' => 'submission.php?id=' . urlencode($id)
@@ -368,8 +368,10 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 if ( !isset($jid) ) {
 	echo "<p><em>Not (re)judged yet</em></p>\n\n";
 
-	// Check if there is an active judgehost that run this submission. Otherwise, we will print some error
-	$judgehosts = $DB->q("TABLE SELECT hostname, restrictionid FROM judgehost WHERE active = 1");
+	// Check if there is an active judgehost that can judge this
+	// submission. Otherwise, generate an error.
+	$judgehosts = $DB->q("TABLE SELECT hostname, restrictionid
+	                      FROM judgehost WHERE active = 1");
 	$can_be_judged = false;
 
 	foreach ( $judgehosts as $judgehost ) {
@@ -383,8 +385,8 @@ if ( !isset($jid) ) {
 		$problems = array();
 		$languages = array();
 		$restrictions = $DB->q('MAYBEVALUE SELECT restrictions FROM judgehost
-				INNER JOIN judgehost_restriction USING (restrictionid)
-				WHERE hostname = %s', $judgehost['hostname']);
+		                        INNER JOIN judgehost_restriction USING (restrictionid)
+		                        WHERE hostname = %s', $judgehost['hostname']);
 		if ( $restrictions ) {
 			$restrictions = json_decode($restrictions, true);
 			$contests = @$restrictions['contest'];
@@ -414,15 +416,14 @@ if ( !isset($jid) ) {
 		}
 
 		$submitid = $DB->q('MAYBEVALUE SELECT s.submitid
-				    FROM submission s
-				    LEFT JOIN language l USING (langid)
-				    LEFT JOIN contestproblem cp USING (probid, cid) ' .
-				   $extra_join .
-				   'WHERE s.submitid = %i AND s.judgehost IS NULL
-				    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
-				   $extra_where .
-				   'LIMIT 1',
-				   $id, $contests, $problems, $languages);
+		                    FROM submission s
+		                    LEFT JOIN language l USING (langid)
+		                    LEFT JOIN contestproblem cp USING (probid, cid) ' .
+		                   $extra_join .
+		                   'WHERE s.submitid = %i AND s.judgehost IS NULL
+		                    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
+		                   $extra_where . 'LIMIT 1',
+		                   $id, $contests, $problems, $languages);
 	}
 
 	if ( !$can_be_judged ) {
@@ -430,17 +431,17 @@ if ( !isset($jid) ) {
 	}
 
 	$lang_allowed = $DB->q('VALUE SELECT allow_judge
-				FROM language
-				LEFT JOIN submission USING (langid)
-				WHERE submitid = %i', $id);
+	                        FROM language
+	                        LEFT JOIN submission USING (langid)
+	                        WHERE submitid = %i', $id);
 	if ( $lang_allowed == 0 ) {
 		error("Submission language is currently not allowed to be judged!");
 	}
 
 	$prob_allowed = $DB->q('VALUE SELECT allow_judge
-				FROM contestproblem
-				LEFT JOIN submission USING (probid)
-				WHERE submitid = %i', $id);
+	                        FROM contestproblem
+	                        LEFT JOIN submission USING (probid)
+	                        WHERE submitid = %i', $id);
 	if ( $prob_allowed == 0 ) {
 		error("Problem is currently not allowed to be judged!");
 	}

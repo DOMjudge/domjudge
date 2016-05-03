@@ -308,7 +308,8 @@ $res = $DB->q('SELECT probid, cid, shortname, timelimit, special_compare, specia
 
 
 
-// Select all active judgehosts including restrictions, so we can check all problems
+// Select all active judgehosts including restrictions, so we can
+// check for all problem,language pairs whether they are judgeable.
 $judgehosts = $DB->q("TABLE SELECT hostname, restrictionid FROM judgehost WHERE active = 1");
 $judgehost_without_restrictions = false;
 foreach ($judgehosts as &$judgehost) {
@@ -324,8 +325,8 @@ foreach ($judgehosts as &$judgehost) {
 	$judgehost['problems'] = array();
 	$judgehost['languages'] = array();
 	$restrictions = $DB->q('MAYBEVALUE SELECT restrictions FROM judgehost
-				INNER JOIN judgehost_restriction USING (restrictionid)
-				WHERE hostname = %s', $judgehost['hostname']);
+	                        INNER JOIN judgehost_restriction USING (restrictionid)
+	                        WHERE hostname = %s', $judgehost['hostname']);
 	if ( $restrictions ) {
 		$restrictions = json_decode($restrictions, true);
 		$judgehost['contests'] = @$restrictions['contest'];
@@ -357,7 +358,8 @@ foreach ($judgehosts as &$judgehost) {
 	unset($judgehost);
 }
 
-$languages = $DB->q("KEYVALUETABLE SELECT langid, name FROM language WHERE allow_submit = 1 AND allow_judge = 1");
+$languages = $DB->q("KEYVALUETABLE SELECT langid, name FROM language
+                     WHERE allow_submit = 1 AND allow_judge = 1");
 
 $details = '';
 while($row = $res->next()) {
@@ -374,7 +376,7 @@ while($row = $res->next()) {
 		$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": missing in/output testcase.\n";
 	}
 
-	// Check for each language if there it can be checked by a judgehost
+	// Check for each problem,language pair if this can be judged by a judgehost.
 	foreach ($languages as $langid => $langname) {
 		$language_ok = $judgehost_without_restrictions;
 		if ( !$judgehost_without_restrictions ) {
