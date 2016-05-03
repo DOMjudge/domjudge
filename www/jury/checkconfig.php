@@ -318,8 +318,6 @@ foreach ($judgehosts as &$judgehost) {
 		break;
 	}
 
-	$judgehost['no_restriction'] = false;
-
 	// Get judgehost restrictions
 	$judgehost['contests'] = array();
 	$judgehost['problems'] = array();
@@ -379,20 +377,15 @@ while($row = $res->next()) {
 	// Check for each problem,language pair if this can be judged by a judgehost.
 	foreach ($languages as $langid => $langname) {
 		$language_ok = $judgehost_without_restrictions;
-		if ( !$judgehost_without_restrictions ) {
-			// No judgehosts without restrictions, check them
-			foreach ($judgehosts as $judgehost) {
-				$found = $DB->q("MAYBEVALUE SELECT cp.probid
-						 FROM contestproblem cp, language l
-						 WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s" .
-						$judgehost['extra_where'],
-						$row['probid'], $row['cid'], $langid, $judgehost['contests'],
-						$judgehost['problems'], $judgehost['languages']);
-				if ( $found ) {
-					$language_ok = true;
-					break;
-				}
-			}
+		foreach ($judgehosts as $judgehost) {
+			if ( $language_ok ) break;
+			$found = $DB->q("MAYBEVALUE SELECT cp.probid
+			                 FROM contestproblem cp, language l
+			                 WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s" .
+			                $judgehost['extra_where'],
+			                $row['probid'], $row['cid'], $langid, $judgehost['contests'],
+			                $judgehost['problems'], $judgehost['languages']);
+			if ( $found ) $language_ok = true;
 		}
 
 		if (!$language_ok) {
