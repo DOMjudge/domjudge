@@ -66,6 +66,11 @@ AC_ARG_WITH([domjudge-user], [AS_HELP_STRING([--with-domjudge-user=USER],
 [User that owns password files (default: current user).])], [], [])
 
 if test "x$with_domjudge_user" = x; then
+	# Check and warn if running as root (without explicitly setting it):
+	if test "x$USER" = xroot; then
+		AC_MSG_ERROR([installing/running as root is STRONGLY DISCOURAGED, use --with-domjudge-user=root to override.])
+	fi
+
 	AC_SUBST(DOMJUDGE_USER,$USER)
 	AC_MSG_RESULT([$DOMJUDGE_USER (default: current user)])
 else
