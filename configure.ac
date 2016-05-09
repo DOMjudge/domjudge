@@ -118,30 +118,7 @@ else
 fi
 
 # Check for using Linux cgroups for memory control
-AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]))
-
-if test "x$LIBCGROUP" != x; then
-	use_cgroups=yes
-else
-	use_cgroups=no
-fi
-AC_ARG_ENABLE(cgroups,AS_HELP_STRING([--enable-cgroups],
-[Use Linux cgroups for memory control (default: if supported).
- This requires Linux kernel >= 3.2.0 and libcgroup.]), [], [])
-
-if test "x$enable_cgroups" = xno; then
-	use_cgroups=no
-elif test "x$enable_cgroups" != x; then
-	use_cgroups=yes
-fi
-
-# Finally define an export variable that can be substituted into
-# etc/runguard-config.h.in:
-if test "x$use_cgroups" = xyes; then
-	AC_SUBST(USE_CGROUPS,1)
-else
-	AC_SUBST(USE_CGROUPS,0)
-fi
+AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]), AC_MSG_ERROR([Linux cgroup library not found.]))
 
 # }}}
 
@@ -345,8 +322,6 @@ echo ""
 echo " * default user........: $DOMJUDGE_USER"
 echo " * runguard user.......: $RUNUSER"
 echo " * webserver group.....: $WEBSERVER_GROUP"
-echo ""
-echo " * use Linux cgroups...: $use_cgroups"
 echo ""
 if test "x$SUBMITCLIENT_ENABLED" = xyes ; then
    echo " * submitclient........: enabled, cURL version: $curl_version"

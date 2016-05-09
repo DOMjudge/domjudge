@@ -44,9 +44,6 @@ SUBMITCLIENT_ENABLED = @SUBMITCLIENT_ENABLED@
 # Build documentation?
 DOC_BUILD_ENABLED = @DOC_BUILD_ENABLED@
 
-# Use Linux cgroups?
-USE_CGROUPS = @USE_CGROUPS@
-
 # libcgroup
 LIBCGROUP = @LIBCGROUP@
 
@@ -170,6 +167,5 @@ define substconfigvars
 	-e 's,@BEEP[@],@BEEP@,g' \
 	-e 's,@RUNUSER[@],@RUNUSER@,g' \
 	-e 's,@SUBMITCLIENT_ENABLED[@],@SUBMITCLIENT_ENABLED@,g' \
-	-e 's,@USE_CGROUPS[@],@USE_CGROUPS@,g' \
 	> $@
 endef

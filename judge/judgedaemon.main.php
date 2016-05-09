@@ -273,10 +273,6 @@ if ( isset($options['h']) ) usage();
 
 $myhost = trim(`hostname | cut -d . -f 1`);
 if ( isset($options['daemonid']) ) {
-	if ( !defined('USE_CGROUPS') || !USE_CGROUPS ) {
-		echo "Option `-n' is only supported when compiled with cgroup support.\n";
-		exit(1);
-	}
 	if ( preg_match('/^\d+$/', $options['daemonid'] ) ) {
 		$myhost = $myhost . "-" . $options['daemonid'];
 	} else {
@@ -361,10 +357,6 @@ if ( ! USE_CHROOT ) {
 		define('CHROOT_SCRIPT', 'chroot-startstop.sh');
 	}
 }
-if ( !defined('USE_CGROUPS') || !USE_CGROUPS ) {
-	logmsg(LOG_WARNING, "Not using cgroups. Using cgroups is highly recommended. See the manual for details.");
-}
-
 
 
 // Perform setup work for each endpoint we are communicating with

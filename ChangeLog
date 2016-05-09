@@ -18,6 +18,8 @@ Version 5.2.0 - DEV
  - Performance: merge jury and public versions of cache database
    tables into single tables. Please refresh scoreboard cache after
    upgrade.
+ - Make Linux cgroups a requirement: running Java without it has
+   become too painful with memory overheads, also when compiling.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------

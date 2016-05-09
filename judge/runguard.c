@@ -34,10 +34,8 @@
 
 /* For chroot(), which is not POSIX. */
 #define _DEFAULT_SOURCE
-/* For unshare(), only used when cgroups are enabled */
-#if ( USE_CGROUPS == 1 )
+/* For unshare() used by cgroups. */
 #define _GNU_SOURCE
-#endif
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -61,14 +59,10 @@
 #include <time.h>
 #include <math.h>
 #include <limits.h>
-#if ( USE_CGROUPS == 1 )
 #include <inttypes.h>
 #include <libcgroup.h>
 #include <sched.h>
 #include <sys/sysinfo.h>
-#else
-#undef USE_CGROUPS
-#endif
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
@@ -117,7 +111,6 @@ char  *stderrfilename;
 char  *metafilename;
 FILE  *metafile;
 
-#ifdef USE_CGROUPS
 char  *cgroupname;
 const char *cpuset;
 
@@ -125,7 +118,6 @@ const char *cpuset;
 #define OOM_PATH_NEW "/proc/self/oom_score_adj"
 #define OOM_PATH_OLD "/proc/self/oom_adj"
 #define OOM_RESET_VALUE 0
-#endif
 
 int runuid;
 int rungid;
@@ -147,11 +139,7 @@ int show_version;
 
 double walltime[2], cputime[2]; /* in seconds, soft and hard limits */
 int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
-#ifdef USE_CGROUPS
 int64_t memsize;
-#else
-rlim_t memsize;
-#endif
 rlim_t filesize;
 rlim_t nproc;
 size_t streamsize;
@@ -379,7 +367,6 @@ void output_exit_time(int exitcode)
 	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
 }
 
-#ifdef USE_CGROUPS
 void output_cgroup_stats()
 {
 	int ret;
@@ -504,7 +491,6 @@ void cgroup_delete()
 	}
 	cgroup_free(&cg);
 }
-#endif // USE_CGROUPS
 
 void terminate(int sig)
 {
@@ -666,20 +652,10 @@ void setrestrictions()
 		setlim(CPU);
 	}
 
-	/* Memory limits may be handled by cgroups now */
-#ifndef USE_CGROUPS
-	if ( memsize!=RLIM_INFINITY ) {
-		verbose("setting memory limits to %d bytes",(int)memsize);
-		lim.rlim_cur = lim.rlim_max = memsize;
-		setlim(AS);
-		setlim(DATA);
-	}
-#else
-	/* Memory limits should be unlimited when using cgroups */
+	/* Memory limits should be unlimited, since we use cgroups. */
 	lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
 	setlim(AS);
 	setlim(DATA);
-#endif
 
 	/* Always set the stack size to be unlimited. */
 	lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
@@ -705,10 +681,8 @@ void setrestrictions()
 		if ( setrlimit(RLIMIT_CORE,&lim)!=0 ) error(errno,"disabling core dumps");
 	}
 
-#ifdef USE_CGROUPS
 	/* Put the child process in the cgroup */
 	cgroup_attach();
-#endif
 
 	/* Run the command in a separate process group so that the command
 	   and all its children can be killed off with one signal. */
@@ -773,11 +747,9 @@ int main(int argc, char **argv)
 	fd_set readfds;
 	pid_t pid;
 	int   i, r, nfds;
-#ifdef USE_CGROUPS
 	int   ret;
 	FILE *fp;
 	char *oom_path;
-#endif
 	int   status;
 	int   exitcode;
 	char *valid_users;
@@ -854,11 +826,7 @@ int main(int argc, char **argv)
 			nproc = (rlim_t) read_optarg_int("process limit",1,LONG_MAX);
 			break;
 		case 'P': /* cpuset option */
-			#ifdef USE_CGROUPS
 				cpuset = optarg;
-			#else
-				error(0,"option `-P' is only supported when compiled with cgroup support.");
-			#endif
 			break;
 		case 'c': /* no-core option */
 			no_coredump = 1;
@@ -946,7 +914,6 @@ int main(int argc, char **argv)
 		error(errno,"installing signal handler");
 	}
 
-#ifdef USE_CGROUPS
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
 		int ret = strtol(cpuset, &ptr, 10);
 		/* check if input is only a single integer */
@@ -994,7 +961,6 @@ int main(int argc, char **argv)
 		}
 		if ( fclose(fp)!=0 ) error(errno,"closing file `%s'",oom_path);
 	}
-#endif
 
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
@@ -1174,11 +1140,9 @@ int main(int argc, char **argv)
 			exitcode = WEXITSTATUS(status);
 		}
 
-#ifdef USE_CGROUPS
 		output_cgroup_stats();
 		cgroup_kill();
 		cgroup_delete();
-#endif
 
 		/* Drop root before writing to output file(s). */
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");

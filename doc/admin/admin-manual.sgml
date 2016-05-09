@@ -165,6 +165,11 @@ The following software is required for running DOMjudge.
 <item> A statically compiled POSIX shell, located in
        <tt>lib/judge/sh-static</tt> (dash is included for Linux IA32).
 
+<item> <htmlurl name="libcgroup" url="http://libcg.sourceforge.net/">,
+       to enable support for Linux cgroup accounting and security on
+       the judgehosts. See section <ref id="install_config:judgehost"
+       name="installation of a judgehost ">.
+
 <item> A lot of standard (GNU) programs, a probably incomplete list:
        hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
        grep, diff, wc, mkdir, mkfifo, mount, sleep, head, tail, pgrep,
@@ -186,12 +191,6 @@ functionality or are generally useful.
 
 <item> An NTP daemon (for keeping the clocks between jury
        system and team workstations in sync)
-
-<item> <htmlurl name="libcgroup" url="http://libcg.sourceforge.net/">,
-       to enable support for Linux cgroup accounting and security on
-       the judgehosts. This is strongly recommended to improve Java
-       memory limit measurements. See section
-       <ref id="cgroups" name="Linux cgroups">.
 
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">
        and <htmlurl name="libJSONcpp" url="http://jsoncpp.sourceforge.net/">
@@ -293,6 +292,9 @@ On the judgehosts:
        (check specific options of useradd, since these vary per system)
 <item> Add to <tt>/etc/sudoers.d/</tt> or append to <tt>/etc/sudoers</tt> the
        sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
+<item> Set up cgroup support: enable kernel parameters in
+       <tt>/etc/default/grub</tt> and reboot, then use
+       <tt>misc/create_cgroups</tt> to create cgroups for DOMjudge.
 <item> Put the right credentials in the file <tt>etc/restapi.secret</tt>
        on all judgehosts (copied from the domserver).
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
@@ -328,10 +330,6 @@ Optionally:
        interpreters are not installed under <tt>/usr</tt> or require
        files from other locations. See also the appendix
        on <ref id="problems:chroot" name="setting up a chroot">.
-<item> Set up cgroup support on the judgedaemons (strongly recommended).
-<item> Further tighten the security of the system, e.g. by applying
-       firewall rules. This is not necessary when Linux cgroups are
-       enabled as this is set up to automatically block network traffic.
 <item> For additional features in the jury web interface, the
        following PHP extensions can be installed:
        <itemize>
@@ -406,14 +404,16 @@ and Pascal; change the list as appropriate.
 
 For Debian:
 <code>
-apt-get install make sudo debootstrap php5-cli php5-curl php5-json procps \
-	gcc g++ gcj-jre-headless gcj-jdk openjdk-7-jre-headless openjdk-7-jdk \
-	ghc fp-compiler
+apt-get install make sudo debootstrap libcgroup-devel \
+	php5-cli php5-curl php5-json procps \
+	gcc g++ gcj-jre-headless gcj-jdk openjdk-7-jre-headless \
+	openjdk-7-jdk ghc fp-compiler
 </code>
 
 For RedHat:
 <code>
-yum install make sudo php-cli php-mbstring php-process procps-ng \
+yum install make sudo libcgroup-devel \
+	php-cli php-mbstring php-process procps-ng \
 	gcc gcc-c++ glibc-static libstdc++-static \
 	java-1.7.0-openjdk-headless java-1.7.0-openjdk-devel \
 	ghc-compiler fpc
@@ -679,6 +679,32 @@ or interpreted languages such as Python, then a complete chroot
 environment must be built and configured. See the appendix on
 <ref id="problems:chroot" name="setting up a chroot"> for more
 details.
+
+<p>
+DOMjudge uses Linux Control Groups or cgroups for process isolation in
+the judgedaemon. Linux cgroups give more accurate measurement of
+actually allocated memory than traditional resource limits (which is
+helpful with interpreters like Java that reserve but not actually use
+lots of memory). Also, cgroups are used to restrict network access so
+no separate measures are necessary, and they allow running multiple
+judgedaemons on a multi-core machine by using CPU binding.
+
+<p>
+The judgedaemon needs to run a recent Linux kernel (at least 3.2.0). The
+following steps configure cgroups on Debian wheezy. Instructions for other
+distributions may be different (send us your feedback!).
+Edit grub config to add cgroup memory and swap accounting to the boot
+options. Edit <tt>/etc/default/grub</tt> and change the default
+commandline to
+<verb>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</verb>
+Then run <tt>update-grub</tt> and reboot.
+
+You have now configured the system to use cgroups, but you need to create
+the actual cgroups that DOMjudge will use. For that, you can use the
+script under <tt>misc-tools/create_cgroups</tt>. Edit the script to
+match your situation first.
+This script needs to be re-run after each boot (e.g., add it to
+the judgedaemon init script).
 
 The judgehost connects to the domserver via a REST API. You need to
 create an account for the judgedaemons to use (this may be a
@@ -1041,42 +1067,10 @@ make -C doc/judge docs
 <sect>Optional features <label id="optionalfeatures">
 <p>
 
-<sect1>Linux Control Groups (cgroups) in the judgedaemon <label id="cgroups">
-<p>
-DOMjudge has support for using Linux Control Groups or cgroups
-for process isolation in the judgedaemon. Using cgroups gives more accurate
-measurement of actually allocated memory, which is helpful with interpreters
-like Java that reserve but not actually use lots of memory. Also, the feature
-will restrict network access so no separate measures are necessary, and allows
-to run multiple judgedaemons on a multi-core machine.
-
-<p>
-The judgedaemon needs to run a recent Linux kernel (at least 3.2.0). The
-following steps configure cgroups on Debian wheezy. Instructions for other
-distributions may be different (send us your feedback!).
-
-<p>
-<itemize>
-<item> Install the necessary packages:
-<tt># apt-get install libcgroup-dev</tt>
-(or <tt># yum install libcgroup-devel</tt> on RedHat)
-<item> Edit grub config to add memory cgroup and swap accounting to the boot options. Edit <tt>/etc/default/grub</tt> and change the default commandline to <tt>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</tt>.
-Then run <tt>update-grub</tt> and reboot.
-<item> Compile DOMjudge with cgroup support. Re-run <tt>./configure</tt> and look for cgroup in the output. Then rebuild the runguard with <tt>make build</tt>.
-</itemize>
-
-You have now configured the system to use cgroups, but you need to create
-the actual cgroups that DOMjudge will use. For that, you can use the
-script under <tt>misc-tools/create_cgroups</tt>. Edit the script to
-match your situation first.
-This script needs to be re-run after each boot (e.g., add it to
-the judgedaemon init script).
-
 <sect1>Multiple judgedaemons per machine
 <p>
-With cgroup support set up, as per the section above, you can run multiple
-judgedaemons on one multi-cpu or multi-core machine, dedicating one cpu core
-to each judgedaemon.
+You can run multiple judgedaemons on one multi-cpu or multi-core
+machine, dedicating one cpu core to each judgedaemon.
 
 To that end, set the <tt>cpuset.cpus</tt> variable in
 <tt>etc/cgroup-domjudge.conf</tt> snippet correctly, e.g. to use all
@@ -1631,9 +1625,8 @@ are gained through sudo only when necessary.
 
 <itemize>
 <item> One or more judgedaemons: one on each judgehost (or optionally
-  multiple per host, if cgroups are enabled; then the <tt>-n X</tt>
-  option should be used to bind a judgedaemon to CPU X to prevent
-  CPU resource conflicts).
+  multiple per host; then the <tt>-n X</tt> option should be used to
+  bind a judgedaemon to CPU X to prevent CPU resource conflicts).
 <item> Optionally the balloon notification daemon (as an alternative
   to the web interface).
 </itemize>
@@ -1970,17 +1963,12 @@ calls (which can be obscured and are different per language).
 
 Therefore we decided to tackle this issue by running these programs in
 a environment as restrictive as possible. This is done by setting up a
-minimal chroot environment. For this, root privileges on the judgehosts
-and statically compiled programs are needed. By also
-limiting all kinds of system resources (memory, processes, time,
-unprivileged user) we protect the system from programs which try to
-hack or could crash the system.  However, a chroot environment does
-not restrict network access, so there lies a possible security risk
-that has to be handled separately, see further below.
-
-The optional (but strongly recommended) Linux cgroups system can be
-enabled to block network access and provide a few other extra security
-measures.
+minimal chroot environment with Linux cgroup process control. For
+this, root privileges on the judgehosts and statically compiled
+programs are needed. By also limiting all kinds of system resources
+(memory, processes, time, unprivileged user and network access) we
+protect the system from programs which try to hack or could crash the
+system.
 
 <sect>File system privileges <label id="security:fileprivs">
 <p>
@@ -2032,20 +2020,8 @@ might be: monitor traffic, modify firewall rules on team computers or
 (what we implemented with great satisfaction) put all team computers
 behind a firewalling router.
 
-Solutions are run within a restricted (chroot) environment on the
-judgehosts. This however does not restrict network access, so a
-team could try to send in a solution that tries to send input testdata
-back to them, access the internet, etc... A solution to this problem
-is to disallow all network traffic for the test user on the judgehosts.
-On Linux, this can be accomplished by modifying the
-iptables, adding a rule like:
-
-<verb>
-iptables -I OUTPUT -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
-</verb>
-
-Note that when using cgroups, network access <em>is</em> restricted by
-default and the above is not necessary.
+Solutions are run within a restricted (chroot/cgroup) environment on
+the judgehosts which restricts outgoing network access.
 
 <appendix>
 
