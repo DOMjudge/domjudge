@@ -45,6 +45,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/resource.h>
+#include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -54,6 +55,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <fnmatch.h>
+#include <regex.h>
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
@@ -120,6 +123,7 @@ const char *cpuset;
 #define OOM_RESET_VALUE 0
 
 int runuid;
+char *runuser;
 int rungid;
 int use_root;
 int use_walltime;
@@ -754,6 +758,7 @@ int main(int argc, char **argv)
 	int   exitcode;
 	char *valid_users;
 	char *ptr;
+	regex_t userregex;
 	int   opt;
 	double tmpd;
 	size_t data_passed[3];
@@ -784,8 +789,18 @@ int main(int argc, char **argv)
 			break;
 		case 'u': /* user option: uid or string */
 			use_user = 1;
+			runuser = NULL;
 			runuid = strtol(optarg,&ptr,10);
-			if ( errno || *ptr!='\0' ) runuid = userid(optarg);
+			if ( errno || *ptr!='\0' ) {
+				runuid = userid(optarg);
+				runuser = strdup(optarg);
+				if ( regcomp(&userregex,"^[A-Za-z][A-Za-z0-9\\._-]*$", REG_NOSUB)!=0 ) {
+					error(0,"could not create username regex");
+				}
+				if ( regexec(&userregex, runuser, 0, NULL, 0)!=0 ) {
+					error(0,"username `%s' does not match POSIX pattern", runuser);
+				}
+			}
 			if ( runuid<0 ) error(0,"invalid username or ID specified: `%s'",optarg);
 			break;
 		case 'g': /* group option: gid or string */
@@ -881,12 +896,21 @@ int main(int argc, char **argv)
 		error(errno,"cannot open `%s'",metafilename);
 	}
 
-	/* Check that new uid is in list of valid uid's.
-	   This must be done before chroot for /etc/passwd lookup. */
+	/* Check that new uid is in list of valid uid's. When the new user
+	   was given as a username string, then '*' matches an arbitrary
+	   length string of valid POSIX username characters [A-Za-z0-9._-].
+	   This check must be done before chroot for /etc/passwd lookup. */
 	if ( use_user ) {
 		valid_users = strdup(VALID_USERS);
 		for(ptr=strtok(valid_users,","); ptr!=NULL; ptr=strtok(NULL,",")) {
 			if ( runuid==userid(ptr) ) break;
+			if ( runuser!=NULL ) {
+				ret = fnmatch(ptr,runuser,0);
+				if ( ret==0 ) break;
+				if ( ret!=FNM_NOMATCH ) {
+					error(0,"could not match username `%s' against `%s'",runuser,ptr);
+				}
+			}
 		}
 		if ( ptr==NULL || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
 	}
