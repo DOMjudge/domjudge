@@ -216,7 +216,7 @@ if( count($res) == 0 ) {
 			      $link . ( isset($row[$time.'time']) ?
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
 		}
-		echo "<td>" . $link . $numintvs[$row['cid']] . "</a></td>\n";
+		echo "<td>" . $link . (isset($numintvs[$row['cid']])?$numintvs[$row['cid']]:0) . "</a></td>\n";
 		echo "<td>" . $link . ($row['process_balloons'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . ($row['public'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . ($row['public'] ? '<em>all</em>' : $row['numteams']) . "</a></td>\n";
