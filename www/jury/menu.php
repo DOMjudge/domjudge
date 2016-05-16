@@ -13,6 +13,10 @@
 <?php	} else { ?>
 <a href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts</a>
 <?php	}
+	$nerr = count($updates['internal_error']);
+	if ( $nerr > 0 ) { ?>
+<a class="new" href="internal_errors.php" accesskey="e" id="menu_internal_error"><span class="octicon octicon-zap"></span> internal error (<?php echo $nerr ?> new)</a>
+<?php	}
 	} ?>
 <?php	if ( checkrole('jury') ) { ?>
 <a href="teams.php" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>

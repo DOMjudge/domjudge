@@ -614,3 +614,18 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 
 	return $probid;
 }
+
+// dis- or re-enable what caused an internal error
+function set_internal_error($disabled, $cid, $value) {
+	global $DB;
+	switch ($disabled['kind']) {
+		case 'problem':
+			$DB->q('RETURNAFFECTED UPDATE contestproblem
+				SET allow_judge=%i
+				WHERE cid=%i AND probid=%i',
+				$value, $cid, $disabled['probid']);
+			break;
+		default:
+			$api->createError("unknown internal error kind '" . $disabled['kind'] . "'");
+	}
+}

@@ -55,6 +55,15 @@ function safe_bool($value)
 	return is_null($value) ? null : (bool)$value;
 }
 
+function give_back_judging($judgingid, $submitid) {
+	global $DB;
+
+	$DB->q('UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i',
+	       $judgingid);
+	$DB->q('UPDATE submission SET judgehost = NULL
+		WHERE submitid = %i', $submitid);
+}
+
 $api = new RestApi();
 
 /**
@@ -324,6 +333,7 @@ function judgings_POST($args)
 	} else {
 		$extra_join  .= '%_ ';
 	}
+
 
 	// Prioritize teams according to last judging time
 	$submitid = $DB->q('MAYBEVALUE SELECT s.submitid
@@ -1146,10 +1156,7 @@ function judgehosts_POST($args)
 	          AND (j.valid = 1 OR r.valid = 1)';
 	$res = $DB->q($query, $args['hostname']);
 	foreach ( $res as $jud ) {
-		$DB->q('UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i',
-		       $jud['judgingid']);
-		$DB->q('UPDATE submission SET judgehost = NULL
-		        WHERE submitid = %i', $jud['submitid']);
+		give_back_judging($jud['judgingid'], $jud['submitid']);
 		auditlog('judging', $jud['judgingid'], 'given back', null, $args['hostname'], $jud['cid']);
 	}
 
@@ -1260,6 +1267,41 @@ $args = array('cid' => 'ID of the contest to get the scoreboard for.',
 $exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'),
                 array('cid' => 2, 'country' => 'NLD'));
 $api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs, null, true);
+
+/**
+ * Internal error reporting (back from judgehost)
+ */
+function internal_error_POST($args)
+{
+	global $DB;
+
+	checkargs($args, array('description', 'judgehostlog', 'disabled'));
+
+	global $cdatas, $api;
+
+	// FIXME: rather group together duplicate internal errors than to
+	// create new ones over and over
+	$errorid = $DB->q('RETURNID INSERT INTO internal_error
+		(judgingid, cid, description, judgehostlog, time, disabled) VALUES
+		(%i, %i, %s, %s, %i, %s)',
+		$args['judgingid'], $args['cid'], $args['description'], $args['judgehostlog'], now(), $args['disabled']);
+
+	$disabled = dj_json_decode($args['disabled']);
+	// disable what needs to be disabled
+	set_internal_error($disabled, $args['cid'], 0);
+	$submitid = $DB->q('VALUE SELECT submitid FROM judging WHERE judgingid = %i', $args['judgingid']);
+	give_back_judging($args['judgingid'], $submitid);
+
+	return $errorid;
+}
+$doc = 'Report an internal error from the judgedaemon.';
+$args = array('judgingid' => 'ID of the corresponding judging (if exists).',
+	      'cid' => 'Contest ID.',
+              'description' => 'short description',
+              'judgehostlog' => 'last N lines of judgehost log',
+              'disabled' => 'reason (JSON encoded)');
+$exArgs = array();
+$api->provideFunction('POST', 'internal_error', $doc, $args, $exArgs, null, true);
 
 // Now provide the api, which will handle the request
 $api->provideApi();

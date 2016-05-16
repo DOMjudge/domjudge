@@ -547,6 +547,22 @@ function judge($row)
 	while ( TRUE ) {
 		// get the next testcase
 		$testcase = request('testcases', 'GET', 'judgingid=' . urlencode($row['judgingid']));
+		if ( json_decode($testcase) === NULL ) {
+			$disabled = json_encode(array(
+				'kind' => 'problem',
+				'probid' => $row['probid']));
+			ob_start();
+			passthru('tail -20 ' . escapeshellarg(LOGFILE));
+			$judgehostlog = trim(ob_get_clean());
+			$error_id = request('internal_error', 'POST',
+				'judgingid=' . urlencode($row['judgingid']) .
+				'&cid=' . urlencode($row['cid']) .
+				'&description=' . urlencode("no test cases found") .
+				'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
+				'&disabled=' . urlencode($disabled));
+			logmsg(LOG_WARNING, "No testcases found for p$row[probid] => internal error " . $error_id);
+			break;
+		}
 		$tc = dj_json_decode($testcase);
 
 		// empty means: no more testcases for this judging.

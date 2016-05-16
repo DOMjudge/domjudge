@@ -86,4 +86,8 @@ $updates = array(
 	$DB->q('TABLE SELECT rejudgingid
 	        FROM rejudging
 	        WHERE endtime IS NULL'),
+	'internal_error' =>
+	$DB->q('TABLE SELECT errorid
+	        FROM internal_error
+	        WHERE status=%s', 'open'),
 );
