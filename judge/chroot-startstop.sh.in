@@ -14,7 +14,7 @@
 # You can adapt this script to your environment, e.g. if you need to make
 # more/other subdirectories available in the chroot environment.
 #
-# See also bin/dj_make*_chroot.sh for scripts to generate a minimal
+# See also bin/dj_make_chroot.sh for a script to generate a minimal
 # chroot environment with Java included. Note that if you modify paths
 # in this script, then the associated sudo rules (see
 # etc/sudoers-domjudge) must also be updated.
