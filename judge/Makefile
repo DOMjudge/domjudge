@@ -11,7 +11,6 @@ judgehost: $(TARGETS) $(SUBST_FILES)
 
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
-	chmod a+x $@
 
 runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
 
