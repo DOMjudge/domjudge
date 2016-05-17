@@ -183,9 +183,13 @@ maintainer-install: dist build domserver-create-dirs judgehost-create-dirs
 	ln -sf $(CURDIR)/judge  $(judgehost_libjudgedir)
 	ln -sf $(CURDIR)/submit $(domserver_libsubmitdir)
 	ln -sfn $(CURDIR)/doc $(domserver_wwwdir)/jury/doc
-	$(MKDIR_P) $(judgehost_bindir)
+# Add symlinks to binaries:
+	$(MKDIR_P) $(judgehost_bindir) $(domserver_bindir)
+	ln -sf $(CURDIR)/judge/judgedaemon $(judgehost_bindir)
 	ln -sf $(CURDIR)/judge/runguard $(judgehost_bindir)
 	ln -sf $(CURDIR)/judge/runpipe  $(judgehost_bindir)
+	ln -sf $(CURDIR)/sql/dj-setup-database $(domserver_bindir)
+	$(MAKE) -C misc-tools maintainer-install
 # Make tmpdir, submitdir writable for webserver, because
 # judgehost-create-dirs sets wrong permissions:
 	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
