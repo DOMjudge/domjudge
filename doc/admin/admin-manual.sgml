@@ -1071,10 +1071,7 @@ make -C doc/judge docs
 You can run multiple judgedaemons on one multi-cpu or multi-core
 machine, dedicating one cpu core to each judgedaemon.
 
-To that end, set the <tt>cpuset.cpus</tt> variable in
-<tt>etc/cgroup-domjudge.conf</tt> snippet correctly, e.g. to use all
-cores on a quad-core machine set it to <tt>0-3</tt>, and add extra
-unprivileged users to the system, i.e. add users
+To that end, add extra unprivileged users to the system, i.e. add users
 <tt>domjudge-run-&lt;X&gt;</tt> (where <tt>X</tt> runs through
 <tt>0,1,2,3</tt>) with <tt>useradd</tt> as described in section <ref
 id="install_config:judgehost" name="installation of a judgehost">.
