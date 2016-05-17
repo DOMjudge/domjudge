@@ -173,7 +173,7 @@ if ( $timezone_php===FALSE || empty($timezone_php) ) {
 		       "using the system default '$timezone_sys'.");
 	}
 } else {
-	result('software', 'PHP timezone', 'O', "date.timezone set to '$timezone'.");
+	result('software', 'PHP timezone', 'O', "date.timezone set to '$timezone_php'.");
 }
 
 if ( class_exists("ZipArchive") ) {
