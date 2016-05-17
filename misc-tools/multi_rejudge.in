@@ -23,7 +23,7 @@ require(LIBDIR . '/init.php');
 
 function usage()
 {
-	echo "Usage: " . SCRIPT_ID . " FIXME";
+	echo "Usage: " . SCRIPT_ID . " -C <cid>";
 	exit;
 }
 
@@ -69,9 +69,9 @@ $DB->q('UPDATE judgehost SET restrictionid = %i', $restrict_id);
 while ( TRUE ) {
 	while ( TRUE ) {
 		$jud_cnt = $DB->q('VALUE SELECT COUNT(*) FROM judging WHERE cid=%i AND result IS NULL AND valid=1', $cid);
-		$sub_cnt = $DB->q('VALUE SELECT COUNT(*) FROM submission WHERE cid=%i AND judgehost IS NULL', $cid);
+		$sub_cnt = $DB->q('VALUE SELECT COUNT(*) FROM submission WHERE cid=%i AND judgehost IS NULL AND valid=1', $cid);
 		$cnt = $jud_cnt + $sub_cnt;
-		if ( $cnt == 0) {
+		if ( $cnt == 0 ) {
 			break;
 		}
 		echo "$cnt more judging(s) to go in this round\n";
