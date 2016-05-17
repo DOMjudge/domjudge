@@ -139,6 +139,12 @@ function usage()
 	exit;
 }
 
+function read_judgehostlog($n = 20) {
+	ob_start();
+	passthru("tail -$n " . escapeshellarg(LOGFILE));
+	return trim(ob_get_clean());
+}
+
 // fetches new executable from database if necessary
 // runs build to compile executable
 // returns absolute path to run script
@@ -574,9 +580,7 @@ function judge($row)
 			$disabled = json_encode(array(
 				'kind' => 'problem',
 				'probid' => $row['probid']));
-			ob_start();
-			passthru('tail -20 ' . escapeshellarg(LOGFILE));
-			$judgehostlog = trim(ob_get_clean());
+			$judgehostlog = read_judgehostlog();
 			$error_id = request('internal_error', 'POST',
 				'judgingid=' . urlencode($row['judgingid']) .
 				'&cid=' . urlencode($row['cid']) .
