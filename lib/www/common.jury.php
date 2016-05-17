@@ -617,7 +617,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 
 // dis- or re-enable what caused an internal error
 function set_internal_error($disabled, $cid, $value) {
-	global $DB;
+	global $DB, $api;
 	switch ($disabled['kind']) {
 		case 'problem':
 			$DB->q('RETURNAFFECTED UPDATE contestproblem
