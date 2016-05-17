@@ -197,6 +197,7 @@ CREATE TABLE `internal_error` (
   `status` ENUM('open', 'resolved', 'ignored')  NOT NULL DEFAULT 'open' COMMENT 'Status of internal error',
   PRIMARY KEY (`errorid`),
   KEY `judgingid` (`judgingid`),
+  KEY `cid` (`cid`),
   CONSTRAINT `internal_error_ibfk_1` FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE SET NULL,
   CONSTRAINT `internal_error_ibfk_2` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of judgehost internal errors';
