@@ -13,7 +13,6 @@ domserver: $(SUBST_FILES)
 
 $(SUBST_FILES): %: %.in ../paths.mk
 	$(substconfigvars)
-	chmod a+x $@
 
 install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libsubmitdir) \

@@ -22,7 +22,6 @@ judgehost: $(SUBST_JUDGEHOST)
 
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
-	chmod a+x $@
 
 install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) $(SUBST_DOMSERVER)

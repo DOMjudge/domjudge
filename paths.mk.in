@@ -172,4 +172,5 @@ define substconfigvars
 	-e 's,@SUBMITCLIENT_ENABLED[@],@SUBMITCLIENT_ENABLED@,g' \
 	-e 's,@USE_CGROUPS[@],@USE_CGROUPS@,g' \
 	> $@
+@chmod --reference=$< $@
 endef

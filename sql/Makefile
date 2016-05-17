@@ -53,7 +53,6 @@ $(CONFSTUB): %: %.in $(TOPDIR)/README.md
 
 dj-setup-database: %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
-	chmod a+x $@
 
 install-domserver: $(ZIPSQL)
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) dj-setup-database

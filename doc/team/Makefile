@@ -23,7 +23,6 @@ install-docs:
 
 gentexconfig: gentexconfig.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
-	chmod a+x $@
 
 # 'genteammanual' (re-)generates all versions even if only one is not uptodate.
 $(MANUALSPDF): %pdf: %tex team-manual-preamble.tex $(TOPDIR)/etc/domserver-config.php
