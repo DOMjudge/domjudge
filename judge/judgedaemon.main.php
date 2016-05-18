@@ -692,6 +692,9 @@ function judge($row)
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
 
+	// Evict all contents of the workdir from the kernel fs cache
+	system(LIBJUDGEDIR . "/evict $workdir");
+
 	// Sanity check: need to have had at least one testcase
 	if ( $totalcases == 0 ) {
 		logmsg(LOG_WARNING, "No testcases judged for s$row[submitid]/j$row[judgingid]!");

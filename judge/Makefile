@@ -3,7 +3,7 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-TARGETS = runguard runpipe
+TARGETS = runguard runpipe evict
 
 SUBST_FILES = judgedaemon chroot-startstop.sh
 
@@ -17,6 +17,9 @@ runguard: LDFLAGS := $(filter-out -pie,$(LDFLAGS))
 runguard: -lm $(LIBCGROUP)
 runguard: CFLAGS += -std=c99
 runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h
+
+evict: evict.c $(LIBHEADERS) $(LIBSOURCES)
+	$(CC) $(CFLAGS) -o $@ $< $(LIBSOURCES)
 
 # FIXME: compile with diet libc to produce a static binary which is
 # not 0.6 MB (!) in size?
