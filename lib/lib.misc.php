@@ -459,14 +459,15 @@ function alert($msgtype, $description = '')
  */
 function sig_handler($signal)
 {
-	global $exitsignalled;
+	global $exitsignalled, $gracefulexitsignalled;
 
 	logmsg(LOG_DEBUG, "Signal $signal received");
 
 	switch ( $signal ) {
-	case SIGTERM:
 	case SIGHUP:
-	case SIGINT:
+		$gracefulexitsignalled = TRUE;
+	case SIGINT:   # Ctrl+C
+	case SIGTERM:
 		$exitsignalled = TRUE;
 	}
 }

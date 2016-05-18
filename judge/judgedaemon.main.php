@@ -445,12 +445,18 @@ while ( TRUE ) {
 
 	judge($row);
 
+    // Check if we were interrupted while judging, if so, exit(to avoid sleeping)
+    if ($exitsignalled) {
+        logmsg(LOG_NOTICE, "Received signal, exiting.");
+		exit;
+    }
+
 	// restart the judging loop
 }
 
 function judge($row)
 {
-	global $EXITCODES, $myhost, $options, $workdirpath;
+	global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $globalexitsignalled;
 
 	// Set configuration variables for called programs
 	putenv('USE_CHROOT='        . (USE_CHROOT ? '1' : ''));
@@ -545,6 +551,23 @@ function judge($row)
 
 	$totalcases = 0;
 	while ( TRUE ) {
+		// Check whether we have received an exit signal(but not a graceful exit signal)
+		if ( function_exists('pcntl_signal_dispatch') ) pcntl_signal_dispatch();
+		if ( $exitsignalled && !$gracefulexitsignalled) {
+			logmsg(LOG_NOTICE, "Received HARD exit signal, aborting current judging.");
+
+			// Make sure the domserver knows that we didn't finish this judging
+			$unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
+			$unfinished = dj_json_decode($unfinished);
+			foreach ( $unfinished as $jud ) {
+				logmsg(LOG_WARNING, "Aborted judging j" . $jud['judgingid'] .
+					   " due to signal");
+			}
+
+			// Break, not exit so we cleanup nicely
+			break;
+		}
+
 		// get the next testcase
 		$testcase = request('testcases', 'GET', 'judgingid=' . urlencode($row['judgingid']));
 		if ( json_decode($testcase) === NULL ) {
