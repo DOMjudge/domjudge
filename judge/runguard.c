@@ -761,8 +761,10 @@ int main(int argc, char **argv)
 	regex_t userregex;
 	int   opt;
 	double tmpd;
+	size_t data_read[3];
 	size_t data_passed[3];
 	ssize_t nread, nwritten;
+	char str[256];
 
 	struct itimerval itimer;
 	struct sigaction sigact;
@@ -1032,7 +1034,7 @@ int main(int argc, char **argv)
 		/* Redirect child stdout/stderr to file */
 		for(i=1; i<=2; i++) {
 			child_redirfd[i] = i; /* Default: no redirects */
-			data_passed[i] = 0; /* Reset data counters */
+			data_read[i] = data_passed[i] = 0; /* Reset data counters */
 		}
 		if ( redir_stdout ) {
 			child_redirfd[STDOUT_FILENO] = creat(stdoutfilename, S_IRUSR | S_IWUSR);
@@ -1123,6 +1125,7 @@ int main(int argc, char **argv)
 						child_pipefd[i][PIPE_OUT] = -1;
 						continue;
 					}
+					data_read[i] += nread;
 					if ( limit_streamsize && data_passed[i]+nread>=streamsize ) {
 						if ( data_passed[i]<streamsize ) {
 							verbose("child fd %d limit reached",i);
@@ -1172,6 +1175,24 @@ int main(int argc, char **argv)
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
 
 		output_exit_time(exitcode);
+
+		/* Check if the output stream was truncated. */
+		if ( limit_streamsize ) {
+			str[0] = 0;
+			ptr = str;
+			if ( data_passed[1]<data_read[1] ) {
+				ptr = stpcpy(ptr,"stdout");
+			}
+			if ( data_passed[2]<data_read[2] ) {
+				if ( ptr!=str ) ptr = stpcpy(ptr,",");
+				ptr = stpcpy(ptr,"stderr");
+			}
+			write_meta("output-truncated","%s",str);
+		}
+
+		write_meta("stdin-bytes", "%zu",data_read[0]);
+		write_meta("stdout-bytes","%zu",data_read[1]);
+		write_meta("stderr-bytes","%zu",data_read[2]);
 
 		if ( outputmeta && fclose(metafile)!=0 ) {
 			error(errno,"closing file `%s'",metafilename);

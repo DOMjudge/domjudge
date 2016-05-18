@@ -20,6 +20,7 @@ Version 5.2.0 - DEV
    upgrade.
  - Make Linux cgroups a requirement: running Java without it has
    become too painful with memory overheads, also when compiling.
+ - Add 'output-limit' verdict.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------
