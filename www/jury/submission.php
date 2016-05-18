@@ -439,9 +439,9 @@ if ( !isset($jid) ) {
 	}
 
 	$prob_allowed = $DB->q('VALUE SELECT allow_judge
-	                        FROM contestproblem
+	                        FROM contestproblem cp
 	                        LEFT JOIN submission USING (probid)
-	                        WHERE submitid = %i', $id);
+	                        WHERE submitid = %i AND cp.cid = %i', $id, $cid);
 	if ( $prob_allowed == 0 ) {
 		error("Problem is currently not allowed to be judged!");
 	}
