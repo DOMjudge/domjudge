@@ -456,7 +456,7 @@ while ( TRUE ) {
 
 function judge($row)
 {
-	global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $globalexitsignalled;
+	global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled;
 
 	// Set configuration variables for called programs
 	putenv('USE_CHROOT='        . (USE_CHROOT ? '1' : ''));
