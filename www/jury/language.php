@@ -73,7 +73,7 @@ if ( !empty($cmd) ):
 <?php echo addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
 
 <tr><td><label for="data_0__time_factor_">Time factor:</label></td>
-<td><?php echo addInputField('number', 'data[0][time_factor]', @$row['time_factor'], ' min="0" step="any"')?> x</td></tr>
+<td><?php echo addInputField('number', 'data[0][time_factor]', (isset($row['time_factor'])?$row['time_factor']:1), ' min="1" step="any" required')?> &times;</td></tr>
 <tr><td><label for="data_0__compile_script_">Compile script:</label></td>
 <td>
 <?php
@@ -85,7 +85,7 @@ echo addSelect('data[0][compile_script]', $execmap, @$row['compile_script'], Tru
 ?>
 </td></tr>
 <tr><td><label for="data_0__extensions_">Extensions:</label></td>
-<td><?php echo addInput('data[0][extensions]', @$row['extensions'], 20, 255, 'required')?> (as JSON encoded array)</td></tr>
+<td><?php echo addInput('data[0][extensions]', @$row['extensions'], 20, 255, 'required')?> (as JSON encoded array, for example <tt>["cpp","cc","c++"]</tt>)</td></tr>
 </table>
 
 <?php
@@ -127,7 +127,7 @@ echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 		"return confirm('" . ($data['allow_judge'] ? 'Disallow' : 'Allow') .
 		" judging for this language?')"); ?>
 </td></tr>
-<tr><td>Time factor:  </td><td><?php echo specialchars($data['time_factor'])?> x</td></tr>
+<tr><td>Time factor:  </td><td><?php echo specialchars($data['time_factor'])?> &times;</td></tr>
 <tr><td>Compile script:</td><td class="filename">
 <?php
 if ( empty($data['compile_script']) ) {
