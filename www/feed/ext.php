@@ -65,12 +65,25 @@ function XMLgetnode($path, $paren = NULL)
 	return $nodelist->item(0);
 }
 
+function safe_float($value, $decimals = null)
+{
+	if ( is_null($value) ) return null;
+	if ( is_null($decimals) ) return (float)$value;
+
+	// Truncate the string version to a specified number of decimals,
+	// since PHP floats seem not very reliable in not giving e.g.
+	// 1.9999 instead of 2.0.
+	$decpos = strpos((string)$value, '.');
+	if ( $decpos===FALSE ) return (float)$value;
+	return (float)substr((string)$value, 0, $decpos+$decimals+1);
+}
+
 /**
  * Formats a floating point timestamp by truncating it to milliseconds.
  */
 function formattime($time)
 {
-	return floor(1000*$time)/1000;
+	return safe_float($time, 8);
 }
 
 // Get problems, languages, affiliations, categories and events
