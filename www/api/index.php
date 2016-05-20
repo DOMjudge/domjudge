@@ -1298,9 +1298,8 @@ function internal_error_POST($args)
 	// note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors
 	$errorid = $DB->q('MAYBEVALUE SELECT errorid FROM internal_error
 			   WHERE description=%s AND disabled=%s AND status=%s' .
-			   ( isset($args['judgingid']) ? ' AND judgingid=%i' : '%_' ) .
 			   ( isset($args['cid']) ? ' AND cid=%i' : '%_' ),
-			   $args['description'], $args['disabled'], 'open', $args['judgingid'], $args['cid']);
+			   $args['description'], $args['disabled'], 'open', $args['cid']);
 
 	if ( isset($errorid) ) {
 		// FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog
