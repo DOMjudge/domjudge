@@ -80,6 +80,14 @@ switch ($kind) {
 		$name = $DB->q('VALUE SELECT name FROM problem WHERE probid=%i', $probid);
 		echo "<a href=\"problem.php?id=" . urlencode($probid) . "\">" . specialchars($shortname . " - " . $name) . "</a>";
 		break;
+	case 'judgehost':
+		$judgehost = $disabled['judgehost'];
+		echo "<a href=\"judgehost.php?id=" . urlencode($judgehost) . "\">" . specialchars($judgehost) . "</a>";
+		break;
+	case 'language':
+		$langid = $disabled['langid'];
+		echo "<a href=\"language.php?id=" . urlencode($langid) . "\">" . specialchars($langid) . "</a>";
+		break;
 	default:
 		// FIXME
 

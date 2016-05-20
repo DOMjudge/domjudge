@@ -631,6 +631,12 @@ function set_internal_error($disabled, $cid, $value) {
 				WHERE hostname=%s',
 				$value, $disabled['hostname']);
 			break;
+		case 'language':
+			$DB->q('RETURNAFFECTED UPDATE language
+				SET allow_judge=%i
+				WHERE langid=%s',
+				$value, $disabled['langid']);
+			break;
 		default:
 			$api->createError("unknown internal error kind '" . $disabled['kind'] . "'");
 	}

@@ -546,7 +546,21 @@ function judge($row)
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
 		alert('error');
-		error("Unknown exitcode from compile.sh for s$row[submitid]: $retval");
+		logmsg(LOG_ERR, "Unknown exitcode from compile.sh for s$row[submitid]: $retval");
+		$disabled = json_encode(array(
+			'kind' => 'language',
+			'langid' => $row['langid']));
+		$judgehostlog = read_judgehostlog();
+		$description = "compile script '" . $row['compile_script'] . "' returned exit code " . $retval;
+		$error_id = request('internal_error', 'POST',
+			'judgingid=' . urlencode($row['judgingid']) .
+			'&cid=' . urlencode($row['cid']) .
+			'&description=' . urlencode($description) .
+			'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
+			'&disabled=' . urlencode($disabled));
+		// revoke readablity for domjudge-run user to this workdir
+		chmod($workdir, 0700);
+		return;
 	}
 	$compile_success =  ($EXITCODES[$retval]!='compiler-error');
 
