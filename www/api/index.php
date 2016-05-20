@@ -1300,7 +1300,7 @@ function internal_error_POST($args)
 	$disabled = dj_json_decode($args['disabled']);
 	// disable what needs to be disabled
 	set_internal_error($disabled, $args['cid'], 0);
-	if ( $disabled['kind'] == 'problem' ) {
+	if ( in_array($disabled['kind'], array('problem', 'language')) ) {
 		// give back judging if we have to
 		$submitid = $DB->q('VALUE SELECT submitid FROM judging WHERE judgingid = %i', $args['judgingid']);
 		give_back_judging($args['judgingid'], $submitid);
