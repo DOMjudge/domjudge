@@ -17,7 +17,10 @@ require(ETCDIR . '/domserver-config.php');
 define('SCRIPT_ID', 'import-RESTfeed');
 define('LOGFILE', LOGDIR.'/import.log');
 
+define('IS_JURY', TRUE);
+
 require(LIBDIR . '/init.php');
+require_once(LIBWWWDIR . '/auth.php');
 
 require_once(LIBEXTDIR . '/spyc/spyc.php');
 
