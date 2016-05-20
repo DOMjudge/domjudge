@@ -402,15 +402,11 @@ while ( TRUE ) {
 
 	// Check for available disk space
 	$free_space = disk_free_space(JUDGEDIR);
-	$total_space = disk_total_space(JUDGEDIR);
-	$free_perc = (100.*$free_space) / $total_space;
-
-	$allowed_free_perc = dbconfig_get_rest('diskspace_error_perc');
-	$allowed_free_abs  = dbconfig_get_rest('diskspace_error_abs'); // in kB
-	if ( $free_perc <  $allowed_free_perc || $free_space < 1024*$allowed_free_abs ) {
-		$free_perc = sprintf("%01.2f%%", $free_perc);
+	$allowed_free_space  = dbconfig_get_rest('diskspace_error_space'); // in kB
+	if ( $free_space < 1024*$allowed_free_space ) {
 		$free_abs = sprintf("%01.2fGB", $free_space / (1024*1024*1024));
-		logmsg(LOG_ERR, "Low on disk space: $free_perc available, i.e. $free_abs");
+		logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
+				"change 'diskspace_error_space' value in config before resolving this error.");
 
 		$disabled = json_encode(array(
 			'kind' => 'judgehost',
