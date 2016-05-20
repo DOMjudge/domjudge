@@ -1279,8 +1279,18 @@ function internal_error_POST($args)
 
 	global $cdatas, $api;
 
-	// FIXME: rather group together duplicate internal errors than to
-	// create new ones over and over
+	// group together duplicate internal errors
+	$errorid = $DB->q('MAYBEVALUE SELECT errorid FROM internal_error
+			   WHERE description=%s AND disabled=%s AND status=%s' .
+			   ( isset($args['judgingid']) ? ' AND judgingid=%i' : '%_' ) .
+			   ( isset($args['cid']) ? ' AND cid=%i' : '%_' ),
+			   $args['description'], $args['disabled'], 'open', $args['judgingid'], $args['cid']);
+
+	if ( isset($errorid) ) {
+		// FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog
+		return $errorid;
+	}
+
 	$errorid = $DB->q('RETURNID INSERT INTO internal_error
 		(judgingid, cid, description, judgehostlog, time, disabled) VALUES
 		(%i, %i, %s, %s, %i, %s)',
