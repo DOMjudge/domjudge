@@ -85,7 +85,7 @@ echo addSelect('data[0][compile_script]', $execmap, @$row['compile_script'], Tru
 ?>
 </td></tr>
 <tr><td><label for="data_0__extensions_">Extensions:</label></td>
-<td><?php echo addInput('data[0][extensions]', @$row['extensions'], 20, 255, 'required')?> (as JSON encoded array, for example <tt>["cpp","cc","c++"]</tt>)</td></tr>
+<td><?php echo addInput('data[0][extensions]', @$row['extensions'], 20, 255, 'required')?> (as JSON encoded array, for example <kbd>["cpp","cc","c++"]</kbd>)</td></tr>
 </table>
 
 <?php
