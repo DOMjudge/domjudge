@@ -623,6 +623,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	logmsg (LOG_INFO, "input verified");
 
 	// Insert submission into the database
+	$DB->q('START TRANSACTION');
 	$id = $DB->q('RETURNID INSERT INTO submission
 	              (cid, teamid, probid, langid, submittime, origsubmitid)
 	              VALUES (%i, %i, %i, %s, %s, %i)',
@@ -633,6 +634,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
 		       $id, $filenames[$rank], $rank, dj_get_file_contents($files[$rank], false));
 	}
+	$DB->q('COMMIT');
 
 	// Recalculate scoreboard cache for pending submissions
 	calcScoreRow($contest, $teamid, $probid);
