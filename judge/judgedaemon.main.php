@@ -479,6 +479,19 @@ while ( TRUE ) {
 	// restart the judging loop
 }
 
+function disable_language($langid, $description, $judgingid, $cid) {
+	$disabled = json_encode(array(
+		'kind' => 'language',
+		'langid' => $langid));
+	$judgehostlog = read_judgehostlog();
+	$error_id = request('internal_error', 'POST',
+		'judgingid=' . urlencode($judgingid) .
+		'&cid=' . urlencode($cid) .
+		'&description=' . urlencode($description) .
+		'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
+		'&disabled=' . urlencode($disabled));
+}
+
 function judge($row)
 {
 	global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled;
@@ -547,17 +560,8 @@ function judge($row)
 	if( ! isset($EXITCODES[$retval]) ) {
 		alert('error');
 		logmsg(LOG_ERR, "Unknown exitcode from compile.sh for s$row[submitid]: $retval");
-		$disabled = json_encode(array(
-			'kind' => 'language',
-			'langid' => $row['langid']));
-		$judgehostlog = read_judgehostlog();
 		$description = "compile script '" . $row['compile_script'] . "' returned exit code " . $retval;
-		$error_id = request('internal_error', 'POST',
-			'judgingid=' . urlencode($row['judgingid']) .
-			'&cid=' . urlencode($row['cid']) .
-			'&description=' . urlencode($description) .
-			'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
-			'&disabled=' . urlencode($disabled));
+		disable_language($row['langid'], $description, $row['judgingid'], $row['cid']);
 		// revoke readablity for domjudge-run user to this workdir
 		chmod($workdir, 0700);
 		return;
