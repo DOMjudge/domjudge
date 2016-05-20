@@ -400,6 +400,29 @@ $endpointIDs = array_keys($endpoints);
 $currentEndpoint = 0;
 while ( TRUE ) {
 
+	// Check for available disk space
+	$free_space = disk_free_space(JUDGEDIR);
+	$total_space = disk_total_space(JUDGEDIR);
+	$free_perc = (100.*$free_space) / $total_space;
+
+	$allowed_free_perc = dbconfig_get_rest('diskspace_error_perc');
+	$allowed_free_abs  = dbconfig_get_rest('diskspace_error_abs'); // in kB
+	if ( $free_perc <  $allowed_free_perc || $free_space < 1024*$allowed_free_abs ) {
+		$free_perc = sprintf("%01.2f%%", $free_perc);
+		$free_abs = sprintf("%01.2fGB", $free_space / (1024*1024*1024));
+		logmsg(LOG_ERR, "Low on disk space: $free_perc available, i.e. $free_abs");
+
+		$disabled = json_encode(array(
+			'kind' => 'judgehost',
+			'hostname' => $myhost));
+		$judgehostlog = read_judgehostlog();
+		$error_id = request('internal_error', 'POST',
+			'description=' . urlencode("low on disk space on $myhost") .
+			'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
+			'&disabled=' . urlencode($disabled));
+		logmsg(LOG_ERR, "=> internal error " . $error_id);
+	}
+
 	// If all endpoints are waiting, sleep for a bit
 	$dosleep = TRUE;
 	foreach ($endpoints as $id=>$endpoint) {
@@ -451,11 +474,11 @@ while ( TRUE ) {
 
 	judge($row);
 
-    // Check if we were interrupted while judging, if so, exit(to avoid sleeping)
-    if ($exitsignalled) {
-        logmsg(LOG_NOTICE, "Received signal, exiting.");
+	// Check if we were interrupted while judging, if so, exit(to avoid sleeping)
+	if ($exitsignalled) {
+		logmsg(LOG_NOTICE, "Received signal, exiting.");
 		exit;
-    }
+	}
 
 	// restart the judging loop
 }
@@ -587,7 +610,7 @@ function judge($row)
 				'&description=' . urlencode("no test cases found") .
 				'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
 				'&disabled=' . urlencode($disabled));
-			logmsg(LOG_WARNING, "No testcases found for p$row[probid] => internal error " . $error_id);
+			logmsg(LOG_ERR, "No testcases found for p$row[probid] => internal error " . $error_id);
 			break;
 		}
 		$tc = dj_json_decode($testcase);

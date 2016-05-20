@@ -78,6 +78,9 @@ UPDATE `judging` SET `judgehost` = 'host-created-by-SQL-upgrade' WHERE `judgehos
 --
 -- Add/remove sample/initial contents
 --
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('diskspace_error_perc', '5', 'int', 'Minimum percentage of free disk space on judgehosts.'),
+('diskspace_error_abs', '1048576', 'int', 'Minimum absolute free disk space (in kB) on judgehosts.');
 
 --
 -- Finally remove obsolete structures after moving data

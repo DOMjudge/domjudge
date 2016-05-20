@@ -625,6 +625,12 @@ function set_internal_error($disabled, $cid, $value) {
 				WHERE cid=%i AND probid=%i',
 				$value, $cid, $disabled['probid']);
 			break;
+		case 'judgehost':
+			$DB->q('RETURNAFFECTED UPDATE judgehost
+				SET active=%i
+				WHERE hostname=%s',
+				$value, $disabled['hostname']);
+			break;
 		default:
 			$api->createError("unknown internal error kind '" . $disabled['kind'] . "'");
 	}
