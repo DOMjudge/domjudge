@@ -62,14 +62,19 @@ if ( empty($restrict_id) ) {
 }
 
 // FIXME: save old restrictions first?
+// note that this may be tricky since you would have to combine the old
+// restrictions with the new one
 // restrict judgehost not to judge same submission again
 $DB->q('UPDATE judgehost SET restrictionid = %i', $restrict_id);
 
-
 while ( TRUE ) {
 	while ( TRUE ) {
-		$jud_cnt = $DB->q('VALUE SELECT COUNT(*) FROM judging WHERE cid=%i AND result IS NULL AND valid=1', $cid);
-		$sub_cnt = $DB->q('VALUE SELECT COUNT(*) FROM submission WHERE cid=%i AND judgehost IS NULL AND valid=1', $cid);
+		$jud_cnt = $DB->q('VALUE SELECT COUNT(*)
+				   FROM judging
+				   WHERE cid=%i AND result IS NULL AND valid=1', $cid);
+		$sub_cnt = $DB->q('VALUE SELECT COUNT(*)
+				   FROM submission
+				   WHERE cid=%i AND judgehost IS NULL AND valid=1', $cid);
 		$cnt = $jud_cnt + $sub_cnt;
 		if ( $cnt == 0 ) {
 			break;
@@ -78,7 +83,12 @@ while ( TRUE ) {
 		sleep(10);
 	}
 
-	$min_numjudgings = $DB->q('MAYBEVALUE SELECT COUNT(*) AS numj FROM judging WHERE cid=%i GROUP BY submitid ORDER BY numj LIMIT 1', $cid);
+	$min_numjudgings = $DB->q('MAYBEVALUE SELECT COUNT(*) AS numj
+				   FROM judging j
+				   LEFT JOIN submission s USING(submitid)
+				   WHERE s.cid=%i AND s.valid=1
+				   GROUP BY submitid
+				   ORDER BY numj LIMIT 1', $cid);
 	if ( !empty($min_numjudgings) && $min_numjudgings == $numact_jh ) {
 		// we are done
 		break;
@@ -86,11 +96,17 @@ while ( TRUE ) {
 
 	echo "\n" . ($numact_jh - $min_numjudgings) . " more round(s) to go\n";
 
-	$rows = $DB->q('SELECT submitid,COUNT(*) AS cnt FROM judging WHERE cid=%i GROUP BY submitid', $cid);
+	$rows = $DB->q('SELECT submitid,COUNT(*) AS cnt
+			FROM judging
+			WHERE cid=%i
+			GROUP BY submitid', $cid);
 	while ( $row = $rows->next() ) {
 		if ( $row['cnt'] >= $numact_jh ) {
-			// assume it's done by now, FIXME: might be slightly incorrect
-			break;
+			// assume it's done by now
+			// note that this might be slightly incorrect since a
+			// submission may have been judged multiple times
+			// before running this script on the same judgehost
+			continue;
 		}
 
 		$sid = $row['submitid'];
@@ -105,6 +121,8 @@ while ( TRUE ) {
 
 }
 
-// FIXME: remove new judgehost restriction, restore old one
+// remove new judgehost restriction
+// FIXME: restore old one
+$DB->q('UPDATE judgehost SET restrictionid = NULL');
 
 exit;
