@@ -186,7 +186,7 @@ function check_judgehost($data, $keydata = null)
 
 function check_language($data, $keydata = null)
 {
-	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 1 ) {
+	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] <= 0 ) {
 		ch_error("Timelimit is not a valid positive factor");
 	}
 	$id = (isset($data['langid']) ? $data['langid'] : $keydata['langid']);

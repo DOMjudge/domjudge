@@ -73,7 +73,7 @@ if ( !empty($cmd) ):
 <?php echo addRadioButton('data[0][allow_judge]', (isset($row['allow_judge']) && !$row['allow_judge']), 0)?> <label for="data_0__allow_judge_0">no</label></td></tr>
 
 <tr><td><label for="data_0__time_factor_">Time factor:</label></td>
-<td><?php echo addInputField('number', 'data[0][time_factor]', (isset($row['time_factor'])?$row['time_factor']:1), ' min="1" step="any" required')?> &times;</td></tr>
+<td><?php echo addInputField('number', 'data[0][time_factor]', (isset($row['time_factor'])?$row['time_factor']:1), ' min="0" step="any" required')?> &times;</td></tr>
 <tr><td><label for="data_0__compile_script_">Compile script:</label></td>
 <td>
 <?php
