@@ -101,7 +101,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 		// calculate totals for this team
 		if ( $srow['is_correct'] ) {
 			$SCORES[$srow['teamid']]['num_points'] += $srow['points'];
-			$SCORES[$srow['teamid']]['solve_times'][] = $srow['solvetime'];
+			$SCORES[$srow['teamid']]['solve_times'][] = scoretime($srow['solvetime']);
 			$SCORES[$srow['teamid']]['total_time'] += scoretime($srow['solvetime']) + $penalty;
 		}
 	}
@@ -912,7 +912,7 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 			                     AND allow_submit = 1 AND teamid IN (%Ai)",
 			                    $cid, $tied);
 			while ( $srow = $scoredata->next() ) {
-				$teamdata[$srow['teamid']]['solve_times'][] = $srow['solvetime'];
+				$teamdata[$srow['teamid']]['solve_times'][] = scoretime($srow['solvetime']);
 			}
 
 			// Now check for each team if it is ranked higher than $teamid
