@@ -57,14 +57,14 @@ echo "<tr><td>Time:</td><td>"
 	. printtime($edata['time'])
 	. "</td></tr>\n";
 if ( isset($edata['judgingid']) ) {
-	echo "<tr><td>Related Judging:</td><td>j"
-		. "<a href=\"submission.php?jid=" . urlencode($edata['judgingid']) . "\">"
+	echo "<tr><td>Related Judging:</td><td>"
+		. "<a href=\"submission.php?jid=" . urlencode($edata['judgingid']) . "\">j"
 		. specialchars($edata['judgingid']) . "</a>"
 		. "</td></tr>\n";
 }
 if ( isset($edata['cid']) ) {
-	echo "<tr><td>Related Contest:</td><td>j"
-		. "<a href=\"contest.php?id=" . urlencode($edata['cid']) . "\">"
+	echo "<tr><td>Related Contest:</td><td>"
+		. "<a href=\"contest.php?id=" . urlencode($edata['cid']) . "\">c"
 		. specialchars($edata['cid']) . "</a>"
 		. "</td></tr>\n";
 }
