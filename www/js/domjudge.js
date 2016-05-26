@@ -1,5 +1,6 @@
 function XMLHttpHandle()
 {
+	'use strict';
 	var ajaxRequest;
 	try {
 		ajaxRequest = new XMLHttpRequest();
@@ -15,7 +16,8 @@ function XMLHttpHandle()
 
 function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejudgings)
 {
-	var handle = XMLHttpHandle();
+	'use strict';
+	var handle = new XMLHttpHandle();
 	if (!handle) {
 		return;
 	}
@@ -26,8 +28,11 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 			var nhosts  = resp.judgehosts.length;
 			var nrejuds = resp.rejudgings.length;
 
-			var elem = document.getElementById('menu_clarifications');
-			var newstr = '';
+			var elem;
+			var newstr;
+
+			elem = document.getElementById('menu_clarifications');
+			newstr = '';
 			if ( elem!==null ) {
 				if ( nclars == 0 ) {
 					elem.className = null;
@@ -42,8 +47,8 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 					}
 				}
 			}
-			var elem = document.getElementById('menu_judgehosts');
-			var newstr = '';
+			elem = document.getElementById('menu_judgehosts');
+			newstr = '';
 			if ( elem!==null ) {
 				if ( nhosts == 0 ) {
 					elem.className = null;
@@ -58,8 +63,8 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 					}
 				}
 			}
-			var elem = document.getElementById('menu_rejudgings');
-			var newstr = '';
+			elem = document.getElementById('menu_rejudgings');
+			newstr = '';
 			if ( elem!==null ) {
 				if ( nrejuds == 0 ) {
 					elem.className = null;
@@ -75,13 +80,13 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 				}
 			}
 
-			for(i=0; i<nclars; i++) {
+			for(var i=0; i<nclars; i++) {
 				sendNotification('New clarification.',
 				                 {'tag': 'clar_'+resp.clarifications[i].clarid,
 				                  'link': 'clarification.php?id='+resp.clarifications[i].clarid,
 				                  'body': resp.clarifications[i].body });
 			}
-			for(i=0; i<nhosts; i++) {
+			for(var i=0; i<nhosts; i++) {
 				sendNotification('Judgehost down.',
 				                 {'tag': 'host_'+resp.judgehosts[i].hostname+'@'+
 				                  Math.floor(resp.judgehosts[i].polltime)});
@@ -97,6 +102,7 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 // Returns whether setting it was successful.
 function toggleNotifications(enable)
 {
+	'use strict';
 	if ( enable ) {
 		if ( !('Notification' in window) ) {
 			alert('Your browser does not support desktop notifications.');
@@ -112,7 +118,7 @@ function toggleNotifications(enable)
 		if ( Notification.permission=='denied' ) {
 			alert('Browser denied permission to send desktop notifications.\n' +
 			      'Re-enable notification permission in the browser and retry.');
-		} else
+		} else {
 			if ( Notification.permission!=='granted' ) {
 				Notification.requestPermission(function (permission) {
 					// Safari and Chrome don't support the static 'permission'
@@ -130,6 +136,7 @@ function toggleNotifications(enable)
 					}
 				});
 			}
+		}
 
 		return (Notification.permission==='granted');
 	} else {
@@ -152,6 +159,7 @@ function toggleNotifications(enable)
 // client has already received to display each notification only once.
 function sendNotification(title, options)
 {
+	'use strict';
 	if ( getCookie('domjudge_notify')!=1 ) return;
 
 //	if ( typeof options.tag === 'undefined' ) options.tag = null;
@@ -197,6 +205,7 @@ function sendNotification(title, options)
 // make corresponding testcase description editable
 function editTcDesc(descid)
 {
+	'use strict';
 	var node = document.getElementById('tcdesc_' + descid);
 	node.parentNode.setAttribute('onclick', '');
 	node.parentNode.removeChild(node.nextSibling);
@@ -207,6 +216,7 @@ function editTcDesc(descid)
 // hides edit field if javascript is enabled
 function hideTcDescEdit(descid)
 {
+	'use strict';
 	var node = document.getElementById('tcdesc_' + descid);
 	node.style.display = 'none';
 	node.setAttribute('name', 'invalid');
@@ -219,6 +229,7 @@ function hideTcDescEdit(descid)
 // make corresponding testcase sample dropdown editable
 function editTcSample(tcid)
 {
+	'use strict';
 	var node = document.getElementById('sample_' + tcid + '_');
 	node.parentNode.setAttribute('onclick', '');
 	var remove = node.nextSibling;
@@ -232,6 +243,7 @@ function editTcSample(tcid)
 // hides sample dropdown field if javascript is enabled
 function hideTcSample(tcid, str)
 {
+	'use strict';
 	var node = document.getElementById('sample_' + tcid + '_');
 	node.style.display = 'none';
 	node.setAttribute('name', 'invalid');
@@ -244,6 +256,7 @@ function hideTcSample(tcid, str)
 // Autodetection of problem, language in websubmit
 function detectProblemLanguage(filename)
 {
+	'use strict';
 	var addfile = document.getElementById("addfile");
 	if ( addfile ) addfile.disabled = false;
 
@@ -280,6 +293,7 @@ function detectProblemLanguage(filename)
 
 function checkUploadForm()
 {
+	'use strict';
 	var langelt = document.getElementById("langid");
 	var language = langelt.options[langelt.selectedIndex].value;
 	var languagetxt = langelt.options[langelt.selectedIndex].text;
@@ -331,7 +345,9 @@ function checkUploadForm()
 
 }
 
-function resetUploadForm(refreshtime, maxfiles) {
+function resetUploadForm(refreshtime, maxfiles)
+{
+	'use strict';
 	var addfile = document.getElementById("addfile");
 	var auxfiles = document.getElementById("auxfiles");
 	addfile.disabled = true;
@@ -345,6 +361,7 @@ var reloadLocation = null;
 
 function reloadPage()
 {
+	'use strict';
 	// interval is in seconds
 	if (doReload) {
 		if ( reloadLocation ) {
@@ -361,7 +378,9 @@ function initReload(refreshtime)
 	setTimeout('reloadPage()', refreshtime * 1000);
 }
 
-function initFileUploads(maxfiles) {
+function initFileUploads(maxfiles)
+{
+	'use strict';
 	var fileelt = document.getElementById("maincode");
 
 	if ( maxfiles > 1 ) {
@@ -379,7 +398,9 @@ function initFileUploads(maxfiles) {
 	}
 }
 
-function collapse(x){
+function collapse(x)
+{
+	'use strict';
 	var oTemp=document.getElementById("detail"+x);
 	if (oTemp.style.display=="none") {
 		oTemp.style.display="block";
@@ -388,7 +409,9 @@ function collapse(x){
 	}
 }
 
-function addFileUpload() {
+function addFileUpload()
+{
+	'use strict';
 	var input = document.createElement('input');
 	input.type = 'file';
 	input.name = 'code[]';
@@ -398,11 +421,13 @@ function addFileUpload() {
 	document.getElementById('auxfiles').appendChild( br );
 }
 
-function togglelastruns() {
+function togglelastruns()
+{
+	'use strict';
 	var names = {'lastruntime':0, 'lastresult':1, 'lasttcruns':2};
 	for (var name in names) {
-		cells = document.getElementsByClassName(name);
-		for (i = 0; i < cells.length; i++) {
+		var cells = document.getElementsByClassName(name);
+		for (var i = 0; i < cells.length; i++) {
 			style = 'inline';
 			if (name == 'lasttcruns') {
 				style = 'table-row';
@@ -414,7 +439,8 @@ function togglelastruns() {
 
 function updateClock()
 {
-	curtime = initial+offset;
+	'use strict';
+	var curtime = initial+offset;
 	date.setTime(curtime*1000);
 
 	var fmt = "";
@@ -431,16 +457,16 @@ function updateClock()
 
 	if ( left ) {
 		if ( left > 24*60*60 ) {
-			d = Math.floor(left/(24*60*60));
+			var d = Math.floor(left/(24*60*60));
 			fmt += d + "d ";
 			left -= d * 24*60*60;
 		}
 		if ( left > 60*60 ) {
-			h = Math.floor(left/(60*60));
+			var h = Math.floor(left/(60*60));
 			fmt += h + ":";
 			left -= h * 60*60;
 		}
-		m = Math.floor(left/60);
+		var m = Math.floor(left/60);
 		if ( m < 10 ) { fmt += "0"; }
 		fmt += m + ":";
 		left -= m * 60;
@@ -452,13 +478,17 @@ function updateClock()
 	offset++;
 }
 
-function setCookie(name, value) {
+function setCookie(name, value)
+{
+	'use strict';
 	var expire = new Date();
 	expire.setDate(expire.getDate() + 3); // three days valid
 	document.cookie = name + "=" + escape(value) + "; expires=" + expire.toUTCString();
 }
 
-function getCookie(name) {
+function getCookie(name)
+{
+	'use strict';
 	var cookies = document.cookie.split(";");
 	for (var i = 0; i < cookies.length; i++) {
 		var idx = cookies[i].indexOf("=");
@@ -472,7 +502,9 @@ function getCookie(name) {
 	return "";
 }
 
-function getSelectedTeams() {
+function getSelectedTeams()
+{
+	'use strict';
 	var cookieVal = getCookie("domjudge_teamselection");
 	if (cookieVal == null || cookieVal == "") {
 		return new Array();
@@ -480,7 +512,9 @@ function getSelectedTeams() {
 	return JSON.parse(cookieVal);
 }
 
-function getScoreboard() {
+function getScoreboard()
+{
+	'use strict';
 	var scoreboard = document.getElementsByClassName("scoreboard");
 	if (scoreboard == null || scoreboard[0] == null) {
 		return null;
@@ -488,7 +522,9 @@ function getScoreboard() {
 	return scoreboard[0].rows;
 }
 
-function getRank(row) {
+function getRank(row)
+{
+	'use strict';
 	return row.getElementsByTagName("td")[0];
 }
 
@@ -496,13 +532,17 @@ function getHeartCol(row) {
 	return row.getElementsByTagName("td")[1];
 }
 
-function getTeamname(row) {
+function getTeamname(row)
+{
+	'use strict';
 	var res = row.getAttribute("id");
 	if ( res == null ) return res;
 	return res.replace(/^team:/, '');
 }
 
-function toggle(id, show) {
+function toggle(id, show)
+{
+	'use strict';
 	var scoreboard = getScoreboard();
 
 	var favTeams = getSelectedTeams();
@@ -540,13 +580,17 @@ function toggle(id, show) {
 	window.location.reload();
 }
 
-function addHeart(rank, row, id, isFav) {
+function addHeart(rank, row, id, isFav)
+{
+	'use strict';
 	var heartCol = getHeartCol(row);
 	var color = isFav ? "red" : "gray";
 	return heartCol.innerHTML + "<span class=\"heart\" style=\"color:" + color + ";\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\">&#9829;</span>";
 }
 
-function initFavouriteTeams() {
+function initFavouriteTeams()
+{
+	'use strict';
 	var scoreboard = getScoreboard();
 	if (scoreboard == null) {
 		return;
