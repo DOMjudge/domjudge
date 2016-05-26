@@ -217,7 +217,7 @@ if( count($res) == 0 ) {
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 				editLink('contest', $row['cid']) . "&nbsp;" .
-				delLink('contest','cid',$row['cid']) . "</td>\n";
+				delLink('contest','cid',$row['cid'],$row['name']) . "</td>\n";
 		}
 
 		echo "</tr>\n";

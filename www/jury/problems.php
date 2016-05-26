@@ -74,7 +74,7 @@ if( $res->count() == 0 ) {
 			     exportLink($row['probid']) . '</td>' .
 			     "<td class=\"editdel\">" .
 			     editLink('problem', $row['probid']) . "&nbsp;" .
-			     delLink('problem','probid',$row['probid']) . "</td>";
+			     delLink('problem','probid',$row['probid'],$row['name']) . "</td>";
 		}
 		echo "</tr>\n";
 	}

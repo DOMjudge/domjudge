@@ -43,25 +43,27 @@ function editLink($table, $value, $multi = false)
 /**
  * Return a link to delete a specific data element from a given table.
  * Takes the table, the key field to match on and the value.
+ * Optionally specify an extra description of the item to be deleted.
  */
-function delLink($table, $field, $value)
+function delLink($table, $field, $value, $desc = NULL)
 {
-	return delLinkMultiple($table, array($field), array($value));
+	return delLinkMultiple($table, array($field), array($value), '', $desc);
 }
 
 /**
  * Return a link to delete a specific data element from a given table.
  * Takes the table, the key fields to match on and the values.
  */
-function delLinkMultiple($table, $fields, $values, $referrer = '')
+function delLinkMultiple($table, $fields, $values, $referrer = '', $desc = NULL)
 {
 	$arguments = '';
 	foreach ($fields as $i => $field) {
 		$arguments .= '&amp;' . $field . '=' . urlencode($values[$i]);
 	}
 	return "<a href=\"delete.php?table=" . urlencode($table) . $arguments .
-	       "&amp;referrer=" . urlencode($referrer)
-	       ."\"><img src=\"../images/delete.png\" " .
+	       "&amp;referrer=" . urlencode($referrer) .
+	       ( isset($desc) ? "&amp;desc=".urlencode($desc)  : '' ) .
+	       "\"><img src=\"../images/delete.png\" " .
 	       "alt=\"delete\" title=\"delete this " . specialchars($table) .
 	       "\" class=\"picto\" /></a>";
 }

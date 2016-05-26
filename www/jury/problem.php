@@ -264,7 +264,7 @@ if ( IS_ADMIN ) {
 	echo "<p>" .
 		exportLink($id) . "\n" .
 		editLink('problem',$id) . "\n" .
-		delLink('problem','probid', $id) . "</p>\n\n";
+		delLink('problem','probid', $id, $data['name']) . "</p>\n\n";
 }
 
 echo rejudgeForm('problem', $id) . "<br />\n\n";

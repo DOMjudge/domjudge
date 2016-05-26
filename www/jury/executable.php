@@ -223,7 +223,7 @@ if ( IS_ADMIN ) {
 		'"><img src="../images/b_save.png" ' .
 		' title="export executable as zip-file" alt="export" /></a>' .
 		editLink('executable',$id) . "\n" .
-		delLink('executable','execid', $id) . "</p>\n\n";
+		delLink('executable','execid', $id, $data['description']) . "</p>\n\n";
 }
 
 require(LIBWWWDIR . '/footer.php');
