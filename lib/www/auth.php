@@ -10,7 +10,9 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$ip = $_SERVER['REMOTE_ADDR'];
+// In ICPC-live branch the IP need not be set when included from
+// import-{REST,XML}feed scripts, so suppress empty value.
+$ip = @$_SERVER['REMOTE_ADDR'];
 
 $teamid = NULL;
 $username = NULL;
