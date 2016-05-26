@@ -17,6 +17,9 @@ require(ETCDIR . '/domserver-config.php');
 define('SCRIPT_ID', 'import-RESTfeed');
 define('LOGFILE', LOGDIR.'/import.log');
 
+// We define IS_JURY and include lib/www/auth.php to make
+// checkrole('jury') return true in submit_solution() in
+// lib/lib.misc.php.
 define('IS_JURY', TRUE);
 
 require(LIBDIR . '/init.php');
