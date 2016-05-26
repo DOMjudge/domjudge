@@ -18,7 +18,7 @@ if ( isset($_GET['edited']) ) {
 		       "If the category sort order was changed, it may be necessary to " .
 		       "recalculate any cached scoreboards.<br /><br />" .
 		       addSubmit('recalculate caches now', 'refresh')) .
-		addHidden('cid', $id) .
+		addHidden('cid', $cid) .
 		addEndForm();
 }
 
