@@ -1212,8 +1212,6 @@ function scoreboard($args)
 	$filter = array();
 	if ( array_key_exists('category', $args) ) {
 		$filter['categoryid'] = array($args['category']);
-	} else { // XXX: hack for now to only show visible teams for easier comparison
-		$filter['categoryid'] = $DB->q('COLUMN SELECT categoryid FROM team_category WHERE visible=1');
 	}
 	if ( array_key_exists('country', $args) ) {
 		$filter['country'] = array($args['country']);
