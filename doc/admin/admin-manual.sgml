@@ -266,7 +266,7 @@ DOMjudge:
 </itemize>
 On the domserver host:
 <itemize>
-<item> Install the MySQL database using e.g. <tt>bin/dj-setup-database -u root -r
+<item> Install the MySQL database using e.g. <tt>bin/dj_setup_database -u root -r
        install</tt> on the domserver host.
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server:<newline>
@@ -525,12 +525,12 @@ dump files in the sql subdirectory. The default database name is
 <tt>etc/dbpasswords.secret</tt> file: the database name as specified
 in this file will be used when installing.
 
-Installation of the database is done with <tt>bin/dj-setup-database</tt>.
+Installation of the database is done with <tt>bin/dj_setup_database</tt>.
 For this, you need an installed and configured MySQL server and
 administrator access to it. Run
 <code>
-dj-setup-database genpass
-dj-setup-database [-u <admin_user>] [-p <password>|-r] install
+dj_setup_database genpass
+dj_setup_database [-u <admin_user>] [-p <password>|-r] install
 </code>
 This first creates the DOMjudge database credentials file
 <tt>etc/dbpasswords.secret</tt> (optionally change the random
@@ -540,7 +540,7 @@ default/example data into the domjudge database. The option
 <tt>-r</tt> will prompt for a password for mysql; when no user is
 specified, the mysql client will try to read
 credentials from <tt>$HOME/.my.cnf</tt> as usual. The command
-<tt>uninstall</tt> can be passed to <tt>dj-setup-database</tt> to
+<tt>uninstall</tt> can be passed to <tt>dj_setup_database</tt> to
 remove the DOMjudge database and users; <em>this deletes all data!</em>
 
 The domjudge database contains a number of tables, some of which need
@@ -1164,7 +1164,7 @@ consecutive DOMjudge versions. At the beginning of each script, a check
 is performed which will let MySQL bail out with an error if it should
 not be applied anymore. Note that the scripts must be applied in order
 (sorted by release). These scripts can be applied by running
-<tt>dj-setup-database upgrade</tt>.
+<tt>dj_setup_database upgrade</tt>.
 
 
 <chapt>Setting up a contest <label id="contestsetup">
@@ -2349,7 +2349,7 @@ they replace the steps described in the section
 <ref id="install_config:installsystem" name="Installation system">;
 also no <tt>--prefix</tt> flag or other directories have to be
 specified to <tt>configure</tt>. In this case the binaries
-(e.g. <tt>judgedaemon</tt> and <tt>dj-setup-database</tt>) can be
+(e.g. <tt>judgedaemon</tt> and <tt>dj_setup_database</tt>) can be
 found in their respective source directories, not in <tt>bin</tt>.
 
 <sect>Makefile structure

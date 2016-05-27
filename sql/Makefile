@@ -8,7 +8,7 @@ ZIPFILES=$(EXECDIRS:=.zip)
 ZIPSQL=mysql_db_files_defaultdata.sql mysql_db_files_examples.sql
 CONFSTUB=files/config.h
 
-domserver: dj-setup-database
+domserver: dj_setup_database
 
 build-scripts: $(CONFSTUB)
 	@for d in $(EXECDIRS) ; do \
@@ -51,11 +51,11 @@ $(CONFSTUB): %: %.in $(TOPDIR)/README.md
 	VERSION=`sed -n '1s/^.*version //p' $(TOPDIR)/README.md | tr -d '\n'` ; \
 	sed "s/@VERSION@/$$VERSION/" $< > $@
 
-dj-setup-database: %: %.in $(TOPDIR)/paths.mk
+dj_setup_database: %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
 install-domserver: $(ZIPSQL)
-	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) dj-setup-database
+	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) dj_setup_database
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir) \
 		mysql_db_structure.sql mysql_db_defaultdata.sql mysql_db_examples.sql \
 		$(ZIPSQL)
@@ -74,7 +74,7 @@ dist-l: $(CONFSTUB)
 	$(MAKE) $(ZIPSQL)
 
 distclean-l:
-	-rm -f dj-setup-database
+	-rm -f dj_setup_database
 
 maintainer-clean-l:
 	-rm -f $(ZIPSQL) $(ZIPFILES) $(CONFSTUB)

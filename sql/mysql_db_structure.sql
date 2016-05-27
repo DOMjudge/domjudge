@@ -1,7 +1,7 @@
 -- These are the database tables needed for DOMjudge.
 --
 -- You can pipe this file into the 'mysql' command to create the
--- database tables, but preferably use 'dj-setup-database'. Database
+-- database tables, but preferably use 'dj_setup_database'. Database
 -- should be set externally (e.g. to 'domjudge').
 
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;

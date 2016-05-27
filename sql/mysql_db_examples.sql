@@ -1,7 +1,7 @@
 -- This provides a sample contest setup for the DOMjudge database.
 --
 -- You can pipe this file into the 'mysql' command to insert this
--- data, but preferably use 'dj-setup-database'. Database should be set
+-- data, but preferably use 'dj_setup_database'. Database should be set
 -- externally (e.g. to 'domjudge').
 
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
