@@ -2350,7 +2350,8 @@ they replace the steps described in the section
 also no <tt>--prefix</tt> flag or other directories have to be
 specified to <tt>configure</tt>. In this case the binaries
 (e.g. <tt>judgedaemon</tt> and <tt>dj_setup_database</tt>) can be
-found in their respective source directories, not in <tt>bin</tt>.
+found in their respective source directories, and are also symlinked
+in <tt>bin</tt>.
 
 <sect>Makefile structure
 <p>
