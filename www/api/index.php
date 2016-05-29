@@ -1157,6 +1157,9 @@ $exArgs = array();
 $roles = array('judgehost');
 $api->provideFunction('PUT', 'judgehosts', $doc, $args, $exArgs, $roles);
 
+// Helper function used below:
+function cmp_prob_label($a, $b) { return $a['label'] > $b['label']; }
+
 /**
  * Scoreboard
  */
@@ -1200,6 +1203,7 @@ function scoreboard($args)
 
 			$row['problems'][] = $prob;
 		}
+		usort($row['problems'], 'cmp_prob_label');
 		$res[] = $row;
 	}
 	return $res;
