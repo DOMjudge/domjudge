@@ -98,7 +98,7 @@ class RestApi {
 			$arguments['__primary_key'] = $primary_key;
 		} else if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
 			$postmax = phpini_to_bytes(trim(ini_get('post_max_size')));
-			if ( $postmax != -1 && $postmax < $_SERVER['CONTENT_LENGTH'] ) {
+			if ( $postmax > 0 && $postmax < $_SERVER['CONTENT_LENGTH'] ) {
 				$this->createError("Size of post data too large (" . $_SERVER['CONTENT_LENGTH']
 						. "), increase post_max_size (" . $postmax . ") in your PHP config.");
 			}
