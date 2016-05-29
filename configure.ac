@@ -132,7 +132,7 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_wwwdir,      $datadir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_sqldir,      $datadir/${PACKAGE_TARNAME}/sql)
 	AC_SUBST(domserver_libdir,      $libdir/${PACKAGE_TARNAME})
-	AC_SUBST(domserver_libextdir,   $libdir/${PACKAGE_TARNAME}/ext)
+	AC_SUBST(domserver_libvendordir,$libdir/${PACKAGE_TARNAME}/vendor)
 	AC_SUBST(domserver_libwwwdir,   $libdir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_libsubmitdir,$libdir/${PACKAGE_TARNAME}/submit)
 	AC_SUBST(domserver_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
@@ -144,7 +144,7 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(judgehost_bindir,      $bindir)
 	AC_SUBST(judgehost_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_libdir,      $libdir/${PACKAGE_TARNAME})
-	AC_SUBST(judgehost_libextdir,   $libdir/${PACKAGE_TARNAME}/ext)
+	AC_SUBST(judgehost_libvendordir,$libdir/${PACKAGE_TARNAME}/vendor)
 	AC_SUBST(judgehost_libjudgedir, $libdir/${PACKAGE_TARNAME}/judge)
 	AC_SUBST(judgehost_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_rundir,      $localstatedir/run/${PACKAGE_TARNAME})
@@ -179,7 +179,7 @@ AX_PATH(domserver_etcdir,       [$domserver_root/etc])
 AX_PATH(domserver_wwwdir,       [$domserver_root/www])
 AX_PATH(domserver_sqldir,       [$domserver_root/sql])
 AX_PATH(domserver_libdir,       [$domserver_root/lib])
-AX_PATH(domserver_libextdir,    [$domserver_root/lib/ext])
+AX_PATH(domserver_libvendordir, [$domserver_root/lib/vendor])
 AX_PATH(domserver_libwwwdir,    [$domserver_root/lib/www])
 AX_PATH(domserver_libsubmitdir, [$domserver_root/lib/submit])
 AX_PATH(domserver_logdir,       [$domserver_root/log])
@@ -190,7 +190,7 @@ AX_WITH_COMMENT(6,[     ])
 AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
 AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
 AX_PATH(judgehost_libdir,       [$judgehost_root/lib])
-AX_PATH(judgehost_libextdir,    [$judgehost_root/lib/ext])
+AX_PATH(judgehost_libvendordir, [$judgehost_root/lib/vendor])
 AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
 AX_PATH(judgehost_logdir,       [$judgehost_root/log])
 AX_PATH(judgehost_rundir,       [$judgehost_root/run])
@@ -340,7 +340,7 @@ echo " * domserver...........: $domserver_root"
 echo "    - bin..............: $domserver_bindir"
 echo "    - etc..............: $domserver_etcdir"
 echo "    - lib..............: $domserver_libdir"
-echo "    - libext...........: $domserver_libextdir"
+echo "    - libvendor........: $domserver_libvendordir"
 echo "    - libwww...........: $domserver_libwwwdir"
 echo "    - libsubmit........: $domserver_libsubmitdir"
 echo "    - log..............: $domserver_logdir"
@@ -354,7 +354,7 @@ echo " * judgehost...........: $judgehost_root"
 echo "    - bin..............: $judgehost_bindir"
 echo "    - etc..............: $judgehost_etcdir"
 echo "    - lib..............: $judgehost_libdir"
-echo "    - libext...........: $judgehost_libextdir"
+echo "    - libvendor........: $judgehost_libvendordir"
 echo "    - libjudge.........: $judgehost_libjudgedir"
 echo "    - log..............: $judgehost_logdir"
 echo "    - run..............: $judgehost_rundir"

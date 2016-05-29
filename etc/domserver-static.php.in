@@ -11,7 +11,7 @@ define('BINDIR',      '@domserver_bindir@');
 define('ETCDIR',      '@domserver_etcdir@');
 define('WWWDIR',      '@domserver_wwwdir@');
 define('LIBDIR',      '@domserver_libdir@');
-define('LIBEXTDIR',   '@domserver_libextdir@');
+define('LIBVENDORDIR','@domserver_libvendordir@');
 define('LIBWWWDIR',   '@domserver_libwwwdir@');
 define('LIBSUBMITDIR','@domserver_libsubmitdir@');
 define('LOGDIR',      '@domserver_logdir@');
@@ -20,5 +20,3 @@ define('TMPDIR',      '@domserver_tmpdir@');
 define('SUBMITDIR',   '@domserver_submitdir@');
 
 define('SUBMITCLIENT_ENABLED', '@SUBMITCLIENT_ENABLED@');
-
-set_include_path(get_include_path() . PATH_SEPARATOR . LIBEXTDIR);

@@ -9,6 +9,7 @@
 		"ext-mysqli": "*",
 		"ext-json": "*",
 		"ext-curl": "*",
+		"mustangostang/spyc": "0.5.*",
 		"jumbojett/openid-connect-php": "0.1.*",
 		"ext-mcrypt": "*",
 		"ext-gmp": "*"

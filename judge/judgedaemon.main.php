@@ -8,7 +8,7 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
-require(LIBEXTDIR . '/spyc/spyc.php');
+require(LIBVENDORDIR . '/autoload.php');
 
 require(ETCDIR . '/judgehost-config.php');
 
