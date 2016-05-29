@@ -388,7 +388,7 @@ function putTeam($teamid) {
  * Output clock
  */
 function putClock() {
-	global $cdata, $username;
+	global $cdata, $username, $userdata;
 
 	echo '<div id="clock">';
 	// timediff to end of contest
@@ -430,7 +430,12 @@ function putClock() {
 	}
 
 	if ( logged_in() ) {
-		echo "<div id=\"username\">logged in as " . $username
+		// Show pretty name if possible
+		$displayname = $username;
+		if ($userdata['name']) {
+			$displayname = "<abbr title=\"$username\">" . $userdata['name'] . "</abbr>";
+		}
+		echo "<div id=\"username\">logged in as " . $displayname
 			. ( have_logout() ? " <a href=\"../auth/logout.php\">×</a>" : "" )
 			. "</div>";
 	}
