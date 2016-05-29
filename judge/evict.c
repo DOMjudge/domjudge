@@ -1,17 +1,13 @@
 #include "config.h"
 
-#include <stdio.h>
-#include <stdarg.h>
 #include <dirent.h>
-#include <sys/stat.h>
-#include <string.h>
 #include <fcntl.h>
 #include <getopt.h>
-#include <unistd.h>
 #include <malloc.h>
 #include <stdlib.h>
-
-
+#include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include "lib.error.h"
 #include "lib.misc.h"
 
@@ -19,7 +15,6 @@
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
 extern int errno;
-
 const char *progname;
 
 int be_verbose;
@@ -53,10 +48,9 @@ void evict_directory(char *dirname) {
 	char *entry_path;
 	struct stat s;
 
-
 	dir = opendir(dirname);
 	if (dir != NULL) {
-		if (be_verbose) warning(0, "Evicting all files in directory: %s", dirname);
+		if (be_verbose) logmsg(LOG_INFO, "Evicting all files in directory: %s", dirname);
 
 		/* Read everything in the directory */
 		while ( (entry = readdir(dir)) != NULL ) {
@@ -83,10 +77,11 @@ void evict_directory(char *dirname) {
 					warning(errno, "Unable to open file: %s", entry_path);
 				} else {
 					if (posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED)) {
-						warning(0, "Unable to evict file: %s\n", entry_path);
+						warning(errno, "Unable to evict file: %s\n", entry_path);
 					}
+					if (be_verbose) logmsg(LOG_DEBUG, "Evicted file: %s", entry_path);
+					close(fd);
 				}
-				close(fd);
 			}
 			free(entry_path);
 		}
@@ -106,26 +101,30 @@ int main(int argc, char *argv[])
 	/* Parse command-line options */
 	be_verbose = show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+v",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
 		case 'v': /* verbose option */
 			be_verbose = 1;
+			verbose = LOG_DEBUG;
 			break;
 		case ':': /* getopt error */
 		case '?':
-			error(0,"unknown option or missing argument `%c'",optopt);
+			logmsg(LOG_ERR, "unknown option or missing argument `%c'", optopt);
 			break;
 		default:
-			error(0,"getopt returned character code `%c' ??",(char)opt);
+			logmsg(LOG_ERR, "getopt returned character code `%c' ??", (char)opt);
 		}
 	}
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
 
-	if ( argc<=optind ) error(0,"no directory specified");
+	if ( argc<=optind ) {
+		logmsg(LOG_ERR, "no directory specified");
+		return 0;
+	}
 
 	/* directory to evict */
 	dirname = argv[optind];
