@@ -274,9 +274,10 @@ clicked to inspect the source code. If the team has submitted code
 in the same language for this problem before, a diff output between
 the current and previous submission is also available there.
 
-It's possible to edit the source code and resubmit it as the special
-`domjudge' user. This does not have any effect for the teams, but
-allows a judge to perform a `what if this was changed'-analysis.
+It is possible to edit the source code and resubmit it if you have a
+team associated to your user. This does not have any effect for the
+teams, but allows a judge to perform a `what if this was
+changed'-analysis.
 
 A submission can have multiple judgings, but only one valid judging at
 any time. Multiple judgings occur when rejudging, see <ref
@@ -284,7 +285,7 @@ id="rejudging" name="Rejudging">.
 
 <sect1>Rejudging <label id="rejudging">
 <p>
-In some situations it is necessary to rejudge a submission. This means
+In some situations it is necessary to rejudge one or more submissions. This means
 that the submission will re-enter the flow as if it had not been
 judged before. The submittime will be the original time, but the
 program will be compiled, run and tested again.
