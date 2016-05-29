@@ -60,12 +60,12 @@ if ( isset($_POST['import']) ) {
 		// First try new key then fallback to old 'scoreboard-freeze':
 		if ( ! empty($contest_yaml_data['scoreboard-freeze-length']) ) {
 			$contest['freezetime_string'] =
-			    '+' . $contest_yaml_data['scoreboard-freeze-length'],0,-3);
+			    '+' . timestring_diff($contest_yaml_data['duration'],
+			                          $contest_yaml_data['scoreboard-freeze-length']);
 		}
 		else if ( ! empty($contest_yaml_data['scoreboard-freeze']) ) {
 			$contest['freezetime_string'] =
-				'+' . timestring_diff($contest_yaml_data['duration'],
-			                          $contest_yaml_data['scoreboard-freeze']);
+			    '+' . $contest_yaml_data['scoreboard-freeze'];
 		}
 		// unfreezetime is not supported by the current standard
 		$contest['unfreezetime_string'] = null;
