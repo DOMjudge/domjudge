@@ -156,8 +156,11 @@ The following software is required for running DOMjudge.
 
 <item> MySQL or MariaDB &gt;= 5.5.3 database and client software.
 
-<item> PHP &gt;= 5.4 command line interface and the curl and json
+<item> PHP &gt;= 5.4 command line interface and the curl, json, mcrypt, and gmp
        extensions.
+
+<item> <htmlurl name="composer" url="https://getcomposer.org"> for managing
+       PHP dependencies
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash).
 
@@ -355,11 +358,15 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 apt-get install gcc g++ make zip unzip mysql-server \
 	apache2 php5 php5-cli libapache2-mod-php5 \
 	php5-gd php5-curl php5-mysql php5-json \
+	php5-mcrypt php5-gmp \
 	bsdmainutils phpmyadmin ntp \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
 </code>
+Note that php modules may need to be enabled depending on your distribution.
+E.g. on ubuntu run <code>php5enmod mcrypt</code> to enable mcrypt.
+
 
 For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
 
@@ -810,6 +817,37 @@ these are directly picked up by the webinterfaces.
 Besides these settings, there are a few other places where changes can
 be made to the system, see <ref id="install_config:configurablescripts"
 name="other configurable scripts">.
+
+<sect>OpenID Connect
+<p>
+
+DOMjudge supports allowing users to log in using your favorite OpenID Connect
+provider, such as google (or ICPC accounts in the future). Some things need
+to be configured on the <tt>Configuration Settings</tt> page for this to work
+properly.
+
+
+<sect1>Google
+<p>
+To use Google as an OpenID Provider, you need to obtain a clientID and
+clientSecret. You can get these values from
+<htmlurl name="Google Developer Console" url="https://console.developers.google.com/">.
+
+Navigate to <tt>Credentials</tt> under the <tt>API Manager</tt> heading. Then
+<tt>Create Credentials</tt> for  <tt>OAuth Client ID</tt>. This will give you
+the client ID and secret you need. For the openid provider set the URL to
+<tt>https://accounts.google.com</tt>. You also need to set the
+<tt>Authorized redirect URIs</tt> to the full url to
+<tt>/domjudge/auth/oid_cb.php</tt>.
+E.g. <tt>http(s)://yourhost.example.edu/domjudge/auth/oid_cb.php</tt>
+
+
+You also need to set the <tt>Base URL</tt> setting to the full URL to your
+DOMjudge installation. Omit the trailing slash. For example this will probably
+be something like this:
+<tt>http(s)://yourhost.example.edu/domjudge</tt>
+
+Finally, enable the setting <tt>Allow openid auth</tt>.
 
 <sect>Executables
 <p>
