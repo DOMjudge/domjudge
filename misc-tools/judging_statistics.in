@@ -312,8 +312,9 @@ if ( in_array('variations', $reports) ) {
 		echo "\n";
 	}
 
+	$tmp = reset($runtime_spread);
 	printf("Largest spread in testcase runtimes: %.3f sec, top %d:\n",
-	       reset($runtime_spread)[0], min(MAX_LIST_LEN,count($runtime_spread)));
+	       $tmp[0], min(MAX_LIST_LEN,count($runtime_spread)));
 
 	for ($i=0; $i<MAX_LIST_LEN; $i++) {
 		if ( !(list($key, $val) = each($runtime_spread)) ) break;
