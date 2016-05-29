@@ -800,6 +800,10 @@ function submission_files($args)
 	$sources = $DB->q('SELECT filename, sourcecode FROM submission_file
 	                   WHERE submitid = %i ORDER BY rank', $args['id']);
 
+	if ( $sources->count()==0 ) {
+		$api->createError("Cannot find source files for submission '$args[id]'.");
+	}
+
 	$ret = array();
 	while($src = $sources->next()) {
 		$ret[] = array(
@@ -873,8 +877,12 @@ function testcase_files($args)
 		$inout = 'input';
 	}
 
-	$content = $DB->q("VALUE SELECT SQL_NO_CACHE $inout FROM testcase
+	$content = $DB->q("MAYBEVALUE SELECT SQL_NO_CACHE $inout FROM testcase
 	                   WHERE testcaseid = %i", $args['testcaseid']);
+
+	if ( is_null($content) ) {
+		$api->createError("Cannot find testcase '$args[testcaseid]'.");
+	}
 
 	return base64_encode($content);
 }
@@ -893,8 +901,12 @@ function executable($args)
 
 	checkargs($args, array('execid'));
 
-	$content = $DB->q("VALUE SELECT SQL_NO_CACHE zipfile FROM executable
+	$content = $DB->q("MAYBEVALUE SELECT SQL_NO_CACHE zipfile FROM executable
 	                   WHERE execid = %s", $args['execid']);
+
+	if ( is_null($content) ) {
+		$api->createError("Cannot find executable '$args[execid]'.");
+	}
 
 	return base64_encode($content);
 }
