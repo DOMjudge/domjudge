@@ -99,10 +99,12 @@ echo "<h3>Judgings by " . printhost($row['hostname']) . "</h3>\n\n";
 // select only specific fields to avoid retrieving large blobs
 $cids = getCurContests(FALSE);
 if ( !empty($cids) ) {
-	$res = $DB->q('SELECT judgingid, submitid, starttime, endtime, judgehost,
-	               result, verified, valid FROM judging
+	$res = $DB->q('SELECT judgingid, submitid, j.starttime, j.endtime, judgehost,
+	               result, verified, j.valid, j.rejudgingid, r.valid AS rejudgevalid
+	               FROM judging j
+	               LEFT JOIN rejudging r USING(rejudgingid)
 	               WHERE cid IN (%Ai) AND judgehost = %s
-	               ORDER BY starttime DESC, judgingid DESC',
+	               ORDER BY j.starttime DESC, judgingid DESC',
 	              $cids, $row['hostname']);
 }
 
@@ -117,7 +119,7 @@ if( empty($cids) || $res->count() == 0 ) {
 
 	while( $jud = $res->next() ) {
 		if ( empty($jud['endtime']) ) {
-			if ( $jud['valid'] ) {
+			if ( $jud['valid'] || $jud['rejudgevalid'] ) {
 				$runtime = printtimediff($jud['starttime'], NULL);
 			} else {
 				$runtime = '[aborted]';
