@@ -734,7 +734,8 @@ function judge($row)
 	}
 
 	// Evict all contents of the workdir from the kernel fs cache
-	system(LIBJUDGEDIR . "/evict $workdir");
+	system(LIBJUDGEDIR . "/evict $workdir", $retval);
+	if ( $retval!=0 ) warning("evict script exited with exitcode $retval");
 
 	// Sanity check: need to have had at least one testcase
 	if ( $totalcases == 0 ) {
