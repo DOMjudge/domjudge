@@ -53,6 +53,8 @@ if ( isset($_POST['storeid']) ) {
 
 	$DB->q('UPDATE executable SET zipfile = %s, md5sum = %s WHERE execid = %s', $content, md5($content), $id);
 
+	auditlog('executable', $id, 'updated');
+
 	unlink($tmpfname);
 	unlink($tmpfname . ".zip");
 	system("rm -rf '$tmpexecdir'");
