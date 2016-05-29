@@ -280,8 +280,12 @@ class db
 			global $DEBUG_NUM_QUERIES;
 			$DEBUG_NUM_QUERIES++;
 			if ( isset($_SERVER['REMOTE_ADDR']) ) {
-				printf("<p>SQL: $this->database: <kbd>%s</kbd> ({$elapsed_ms}ms)</p>\n",
-				       specialchars($query));
+				if ( defined('DOMJUDGE_API_VERSION') ) {
+					logmsg(LOG_DEBUG,"SQL: $this->database: $query ({$elapsed_ms}ms)\n");
+				} else {
+					printf("<p>SQL: $this->database: <kbd>%s</kbd> ({$elapsed_ms}ms)</p>\n",
+					       specialchars($query));
+				}
 			} else {
 				printf("SQL: $this->database: %s ({$elapsed_ms}ms)\n",$query);
 			}
