@@ -10,6 +10,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+require_once(LIBDIR . '/vendor/autoload.php');
+
 // In ICPC-live branch the IP need not be set when included from
 // import-{REST,XML}feed scripts, so suppress empty value.
 $ip = @$_SERVER['REMOTE_ADDR'];
@@ -165,6 +167,16 @@ Please supply your credentials below, or contact a staff member for assistance.
 </form>
 
 <?php
+if (dbconfig_get('allow_openid_auth', false)) { ?>
+<p>You can also log in using OpenID </p>
+<form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
+	<input type="hidden" name="cmd" value="login" />
+	<input type="hidden" name="oidc" value="true" />
+	<input type="submit" value="Log in with OpenID"></input>
+</form>
+<?php } // endif allow_openid_auth ?>
+
+<?php
 if (dbconfig_get('allow_registration', false)) { ?>
 <p>If you do not have an account, you can register for one below: </p>
 <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post">
@@ -245,6 +257,11 @@ function do_login()
 	// some specializations are handled by if-statements.
 	case 'IPADDRESS':
 	case 'PHP_SESSIONS':
+		if ($_POST['oidc'] == 'true') {
+			do_login_oidc();
+			break;
+		}
+
 		$user = trim($_POST['login']);
 		$pass = trim($_POST['passwd']);
 
@@ -340,6 +357,97 @@ function do_login_native($user, $pass)
 	}
 
 	$username = $userdata['username'];
+}
+
+function do_login_oidc() {
+	global $DB, $userdata, $username, $ip;
+	if ( AUTH_METHOD != "PHP_SESSIONS") {
+		error("You can only use OpenID Connect if the site is using PHP Sessions for authentication.");
+	}
+	if (dbconfig_get('allow_openid_auth', false) == false) {
+		error("OpenID authentication disabled by administrator.");
+	}
+	if (empty(dbconfig_get('base_url', ''))) {
+		error("OpenID authentication requires that 'Base url' be defined in the config settings.");
+	}
+
+	$provider = dbconfig_get('openid_provider', '');
+	$clientID = dbconfig_get('openid_clientid', '');
+	$clientSecret = dbconfig_get('openid_clientsecret', '');
+	if (empty($provider) || empty($clientID) || empty($clientSecret)) {
+		error("OpenID details are not configured.");
+	}
+
+	$oidc = new OpenIDConnectClient($provider, $clientID, $clientSecret);
+	$oidc->addScope(array("openid", "email"));
+
+	// TODO: how to dynamically figure this out properly on all/most servers
+	$oidc->setRedirectURL(dbconfig_get("base_url", "") . "/auth/oid_cb.php");
+
+	// For google, forces asking the user what account they want to use every time.
+	$oidc->addAuthParam(array("prompt"=>"select_account"));
+
+	if (isset($_REQUEST["code"])) {
+		// authenticate the code we've received
+		$oidc->authenticate();
+	} else {
+		// save destination url in session so we can redirect after log in
+		$_SESSION['redirect_after_login'] = $_SERVER['PHP_SELF'];
+
+		// Launch the OpenID Connect process
+		$oidc->authenticate();
+	}
+
+	// we are logged in now, get a bunch of user information from the OID Provider
+	$username = "oidc-" . $oidc->requestUserInfo("sub");
+	$email = $oidc->requestUserInfo("email");
+
+
+	// Create the user if they don't exist
+	$user = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
+	if (!$user) {
+		$u = array();
+
+		// Create a team for the user as well
+		if (dbconfig_get("openid_autocreate_team", true)) {
+			$i = array();
+			$i['name'] = $email;
+			$i['categoryid'] = 2; // Self-registered category id
+			$i['enabled'] = 1;
+			$i['comments'] = "Registered via OIDC by $ip on " . date('r');
+
+			$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $i);
+			auditlog('team', $teamid, 'registered via OIDC by ' . $ip);
+
+			$u['teamid'] = $teamid;
+		}
+
+		$u['username'] = $username;
+		$u['email'] = $email;
+		$u['name'] = $email;
+		$u['password'] = NULL;
+		$newid = $DB->q("RETURNID INSERT INTO user SET %S", $u);
+		auditlog('user', $newid, 'registered via OIDC', $ip);
+
+		// Assign the team role if we created a team for them
+		if (isset($u['teamid'])) {
+			$DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
+		}
+	}
+
+	// Load the information about the user
+	$userdata = $DB->q('MAYBETUPLE SELECT * FROM user WHERE
+						username = %s AND enabled = 1', $username);
+
+	// Save the username in the session so they are logged in
+	session_start();
+	$_SESSION['username'] = $username;
+	auditlog('user', $userdata['userid'], 'logged in', $ip);
+
+
+	// Update the user's last login time
+	$DB->q('UPDATE user SET last_login = %s, last_ip_address = %s
+	        WHERE username = %s', now(), $ip, $username);
 }
 
 function do_register() {

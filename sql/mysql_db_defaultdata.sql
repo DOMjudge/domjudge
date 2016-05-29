@@ -11,6 +11,8 @@
 --
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('base_url', '""', 'string', 'Base URL for your DOMjudge installation(e.g. http://domjudge.org/domjudge)'),
+
 ('clar_categories', '{"general":"General issue","tech":"Technical issue"}', 'array_keyval', 'List of additional clarification categories'),
 ('script_timelimit', '30', 'int', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.'),
 ('script_memory_limit', '2097152', 'int', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.'),
@@ -37,6 +39,11 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.'),
 ('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.'),
 ('allow_registration', '0', 'bool', 'Allow users to register themselves with the system?'),
+('allow_openid_auth', '0', 'bool', 'Allow users to log in using OpenID'),
+('openid_autocreate_team', '1', 'bool', 'Create a team for each user that logs in with OpenID'),
+('openid_provider', '"https://accounts.google.com"', 'string', 'OpenID Provider URL'),
+('openid_clientid', '""', 'string', 'OpenID Connect client id'),
+('openid_clientsecret', '""', 'string', 'OpenID Connect client secret'),
 ('judgehost_warning', '30', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "warning".'),
 ('judgehost_critical', '120', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "critical".'),
 ('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.'),

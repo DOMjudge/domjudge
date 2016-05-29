@@ -8,6 +8,12 @@
 		"ext-mbstring": "*",
 		"ext-mysqli": "*",
 		"ext-json": "*",
-		"ext-curl": "*"
+		"ext-curl": "*",
+		"jumbojett/openid-connect-php": "0.1.*",
+		"ext-mcrypt": "*",
+		"ext-gmp": "*"
+	},
+	"config": {
+		"vendor-dir": "lib/vendor"
 	}
 }
