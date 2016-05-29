@@ -295,7 +295,7 @@ $(function() {
 	        <th>points</th>
 		<th>allow submit</th>
 		<th>allow judge</th>
-		<th>color
+		<th>colour
 		<a target="_blank" href="http://www.w3schools.com/cssref/css_colornames.asp">
 		<img src="../images/b_help.png" class="smallpicto" alt="?"></a></th>
 		<th>lazy eval</th>
