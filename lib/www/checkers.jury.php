@@ -166,6 +166,8 @@ function check_language($data, $keydata = null)
 
 function check_executable($data, $keydata = null)
 {
+	global $executable_types;
+
 	$id = (isset($data['execid']) ? $data['execid'] : $keydata['execid']);
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Executable ID may only contain characters " . IDENTIFIER_CHARS . ".");
