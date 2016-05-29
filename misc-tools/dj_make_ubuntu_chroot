@@ -247,4 +247,5 @@ umount "$CHROOTDIR/dev/pts"
 umount "$CHROOTDIR/sys"
 umount "$CHROOTDIR/proc"
 
+echo "Done building chroot in $CHROOTDIR"
 exit 0
