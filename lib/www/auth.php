@@ -10,7 +10,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-require_once(LIBDIR . '/vendor/autoload.php');
+require_once(LIBVENDORDIR . '/autoload.php');
 
 // In ICPC-live branch the IP need not be set when included from
 // import-{REST,XML}feed scripts, so suppress empty value.
