@@ -45,6 +45,8 @@ install-domserver: relations.php
 # KLUDGE: how to install a tree of files with correct permissions?
 	cp -R           -t $(DESTDIR)$(domserver_libextdir) ext/*
 	chmod -R a+rX      $(DESTDIR)$(domserver_libextdir)
+	cp -R           -t $(DESTDIR)$(domserver_libdir) vendor/
+	chmod -R a+rX      $(DESTDIR)$(domserver_libdir)/vendor
 
 install-judgehost: relations.php
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libdir)    *.php *.sh
