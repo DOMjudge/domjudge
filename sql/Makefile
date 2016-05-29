@@ -61,7 +61,7 @@ install-domserver: $(ZIPSQL)
 		mysql_db_structure.sql mysql_db_defaultdata.sql mysql_db_examples.sql \
 		$(ZIPSQL)
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/upgrade \
-	 	upgrade/upgrade_*.sql upgrade/README
+	 	upgrade/*.sql upgrade/README
 
 	$(INSTALL_DIR) $(addprefix $(DESTDIR)$(domserver_sqldir)/files/,defaultdata examples)
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/files/defaultdata \
