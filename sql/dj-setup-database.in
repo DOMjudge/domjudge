@@ -113,7 +113,7 @@ status()
 
 	printf "Searching for data in database: "
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD \
-		mysql -e "USE \`$DBNAME\`; SELECT name FROM team WHERE login = 'domjudge';" || return 1
+		mysql -e "USE \`$DBNAME\`; SELECT name FROM team WHERE name = 'DOMjudge';" || return 1
 
 	printf "MySQL server version: "
 	mysql -e 'SELECT version();'
