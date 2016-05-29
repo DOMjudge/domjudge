@@ -3,6 +3,15 @@
 DIR=$(pwd)
 lsb_release -a
 
+# install composer(per the composer docs)
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php -r "if (hash_file('SHA384', 'composer-setup.php') === '070854512ef404f16bac87071a6db9fd9721da1684cd4589b1196c3faf71b9a2682e2311b36a5079825e155ac7ce150d') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php composer-setup.php --filename=composer
+php -r "unlink('composer-setup.php');"
+
+# install all php dependencies
+./composer install --no-dev
+
 # downgrade java version outside of chroot since this didn't work
 sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle-java7-installer oracle-java8-installer
 
