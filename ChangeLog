@@ -2,6 +2,23 @@ DOMjudge Programming Contest Judging System
 
 Version 5.1.2 - DEV
 -------------------
+ - Don't compare unfreeze- and deactivatetime when latter is unset.
+ - Print problems sorted by label as required by JSON scoreboard spec.
+ - Fix importing penalty-time and freezetime from contest.yaml.
+ - Add auditlog entry when an executable script is edited.
+ - Fix appearance of "null" problem colour, and use British spelling of
+   "colour" in web interface.
+ - Fix dj_make_chroot failing on chmod of non-existent file.
+ - Fix variable name to properly display PHP configured timezone.
+ - Fix dj-setup-database status command.
+ - Add transaction around submission upload to prevent race condition
+   between a submission present, but not yet the source files.
+ - Don't raise error when post_max_size=0, since that means unlimited.
+ - Fix editing of executable metadata. Thanks Josse van Dobben de Bruyn.
+ - In the REST API write SQL debug info to logfile to not break the API.
+ - Fix variable name typo in www/jury/team_affiliations.php.
+ - Fix installing all SQL upgrade scripts.
+ - Various small updates to the admin and jury manuals.
 
 Version 5.1.1 - 2 April 2016
 ----------------------------
