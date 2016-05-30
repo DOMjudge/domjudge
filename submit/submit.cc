@@ -90,7 +90,10 @@ int  file_istext(char *filename);
 #endif
 
 int  websubmit();
+
+Json::Value doAPIrequest(const char *, int);
 int  getlangexts();
+int  getcontests();
 
 /* Helper function for using libcurl in websubmit() and getlangexts() */
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
@@ -147,6 +150,9 @@ char *submitdir;
 
 /* Language extensions */
 vector<vector<string> > languages;
+
+/* Active contests: shortname,name */
+vector<vector<string> > contests;
 
 int main(int argc, char **argv)
 {
@@ -231,6 +237,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( getlangexts()!=0 ) warning(0,"could not obtain language extensions");
+	if ( getcontests()!=0 ) warning(0,"could not obtain active contests");
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
@@ -299,6 +306,19 @@ int main(int argc, char **argv)
 		language = extension;
 	}
 
+	if ( contest.empty() ) {
+		if ( contests.size()==0 ) {
+			warnuser("no active contests found (and no contest specified)");
+		}
+		if ( contests.size()==1 ) {
+			contest = contests[0][0];
+		}
+		if ( contests.size()>1 ) {
+			warnuser("multiple active contests found, please specify one");
+		}
+	}
+
+	if ( contest.empty()  ) usage2(0,"no contest specified");
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( baseurl.empty()  ) usage2(0,"no url specified");
@@ -323,9 +343,7 @@ int main(int argc, char **argv)
 			}
 			printf("\n");
 		}
-		if ( !contest.empty() ) {
-			printf("  contest:     %s\n",contest.c_str());
-		}
+		printf("  contest:     %s\n",contest.c_str());
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
 		printf("  url:         %s\n",baseurl.c_str());
@@ -367,7 +385,26 @@ void usage()
 "  -u, --url=URL            submit to webserver with base address URL\n"
 "\n"
 "Explanation of submission options:\n"
-"\n"
+"\n");
+	if ( contests.size()<=1 ) {
+		printf(
+"For CONTEST use the short name as shown in the top-right contest selection box\n"
+"in the webinterface.");
+		if ( contests.size()==1 ) {
+			printf(" Currently this defaults to the only active contest \"%s\".",
+			       contests[0][0].c_str());
+		}
+		printf("\n\n");
+	}
+	if ( contests.size()>=2 ) {
+		printf(
+"For CONTEST use one of the following in lower- or uppercase:\n");
+		for(i=0; i<contests.size(); i++) {
+			printf("   %-15s  %s\n",contests[i][0].c_str(),contests[i][1].c_str());
+		}
+		printf("\n");
+	}
+	printf(
 "For PROBLEM use the ID of the problem (letter, number or short name)\n"
 "in lower- or uppercase. When not specified, PROBLEM defaults to the\n"
 "first FILENAME excluding the extension. For example, 'B.java' will\n"
@@ -502,7 +539,11 @@ magicerror:
 
 #endif /* HAVE_MAGIC_H */
 
-int getlangexts()
+/*
+ * Make an API call 'funcname'. If failonerror is false, then a NULL
+ * value is returned when the call fails; if true, then error() is called.
+ */
+Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 {
 	CURL *handle;
 	CURLcode res;
@@ -510,37 +551,45 @@ int getlangexts()
 	char *url;
 	stringstream curloutput;
 	Json::Reader reader;
-	Json::Value root, exts;
+	Json::Value result;
 
-	url = strdup((baseurl+"api/languages").c_str());
+	url = strdup((baseurl+"api/"+string(funcname)).c_str());
 
 	curlerrormsg[0] = 0;
 
 	handle = curl_easy_init();
 	if ( handle == NULL ) {
-		warning(0,"curl_easy_init() error");
 		free(url);
-		return 1;
+		if ( failonerror ) {
+			error(0,"curl_easy_init() error");
+		} else {
+			warning(0,"curl_easy_init() error");
+		}
+		return result;
 	}
 
 /* helper macros to easily set curl options */
 #define curlsetopt(opt,val) \
 	if ( curl_easy_setopt(handle, CURLOPT_ ## opt, val)!=CURLE_OK ) { \
-		warning(0,"setting curl option '" #opt "': %s, aborting",curlerrormsg); \
 		curl_easy_cleanup(handle); \
 		free(url); \
-		return 1; }
+		if ( failonerror ) { \
+			error(0,"setting curl option '" #opt "': %s, aborting",curlerrormsg); \
+		} else { \
+			warning(0,"setting curl option '" #opt "': %s, aborting",curlerrormsg); \
+		} \
+		return result; }
 
 	/* Set options for post */
 	curlsetopt(ERRORBUFFER,   curlerrormsg);
-	curlsetopt(FAILONERROR,   1);
+	curlsetopt(FAILONERROR,   failonerror);
 	curlsetopt(FOLLOWLOCATION,1);
 	curlsetopt(MAXREDIRS,     10);
 	curlsetopt(TIMEOUT,       timeout_secs);
 	curlsetopt(URL,           url);
 	curlsetopt(WRITEFUNCTION, writesstream);
 	curlsetopt(WRITEDATA,     (void *)&curloutput);
-	curlsetopt(USERAGENT     ,DOMJUDGE_PROGRAM " (" PROGRAM " using cURL)");
+	curlsetopt(USERAGENT,     DOMJUDGE_PROGRAM " (" PROGRAM " using cURL)");
 
 	if ( verbose >= LOG_DEBUG ) {
 		curlsetopt(VERBOSE,   1);
@@ -551,10 +600,14 @@ int getlangexts()
 	logmsg(LOG_INFO,"connecting to %s",url);
 
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
-		warning(0,"downloading '%s': %s",url,curlerrormsg);
 		curl_easy_cleanup(handle);
 		free(url);
-		return 1;
+		if ( failonerror ) {
+			error(0,"downloading '%s': %s",url,curlerrormsg);
+		} else {
+			warning(0,"downloading '%s': %s",url,curlerrormsg);
+		}
+		return result;
 	}
 
 #undef curlsetopt
@@ -563,21 +616,39 @@ int getlangexts()
 
 	free(url);
 
-	if ( !reader.parse(curloutput, root) ) {
-		warning(0,"parsing REST API output: %s",
-		        reader.getFormattedErrorMessages().c_str());
-		return 1;
+	logmsg(LOG_DEBUG,"API call '%s' returned:\n%s\n",funcname,curloutput.str().c_str());
+
+	if ( !reader.parse(curloutput, result) ) {
+		if ( failonerror ) {
+			error(0,"parsing REST API output: %s",
+			      reader.getFormattedErrorMessages().c_str());
+		} else {
+			warning(0,"parsing REST API output: %s",
+			        reader.getFormattedErrorMessages().c_str());
+		}
 	}
 
-	if ( !root.isArray() || root.size()==0 ) goto invalid_json;
+	return result;
+}
 
-	for(Json::ArrayIndex i=0; i<root.size(); i++) {
+int getlangexts()
+{
+	Json::Value langs, exts;
+
+	langs = doAPIrequest("languages", 0);
+
+	if ( langs.isNull() ) return 1;
+
+	for(Json::ArrayIndex i=0; i<langs.size(); i++) {
 		vector<string> lang;
 
-		lang.push_back(root[i].get("name","").asString());
+		lang.push_back(langs[i]["name"].asString());
 		if ( lang[0]=="" ||
-		     !(exts = root[i]["extensions"]) ||
-		     !exts.isArray() || exts.size()==0 ) goto invalid_json;
+		     !(exts = langs[i]["extensions"]) ||
+		     !exts.isArray() || exts.size()==0 ) {
+			warning(0,"REST API returned unexpected JSON data for languages");
+			return 1;
+		}
 
 		for(Json::ArrayIndex j=0; j<exts.size(); j++) lang.push_back(exts[j].asString());
 
@@ -585,10 +656,30 @@ int getlangexts()
 	}
 
 	return 0;
+}
 
-  invalid_json:
-	warning(0,"REST API returned unexpected JSON data");
-	return 1;
+int getcontests()
+{
+	Json::Value res;
+
+	res = doAPIrequest("contests", 0);
+
+	if ( res.isNull() || !res.isObject() ) return 1;
+
+	for(Json::Value::iterator it=res.begin(); it!=res.end(); ++it) {
+		vector<string> contest;
+
+		contest.push_back((*it)["shortname"].asString());
+		contest.push_back((*it)["name"].asString());
+		if ( contest[0]=="" || contest[1]=="" ) {
+			warning(0,"REST API returned unexpected JSON data for contests");
+			return 1;
+		}
+
+		contests.push_back(contest);
+	}
+
+	return 0;
 }
 
 int websubmit()
