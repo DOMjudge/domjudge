@@ -155,8 +155,6 @@ rlim_t memsize;
 rlim_t filesize;
 rlim_t nproc;
 size_t streamsize;
-size_t data_passed[3];
-size_t data_read[3];
 
 pid_t child_pid;
 
@@ -379,9 +377,6 @@ void output_exit_time(int exitcode)
 	}
 
 	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
-
-	write_meta("stdout-size","%zu",data_read[1]);
-	write_meta("stderr-size","%zu",data_read[2]);
 }
 
 #ifdef USE_CGROUPS
@@ -789,6 +784,7 @@ int main(int argc, char **argv)
 	char *ptr;
 	int   opt;
 	double tmpd;
+	size_t data_passed[3];
 	ssize_t nread, nwritten;
 
 	struct itimerval itimer;
@@ -1046,7 +1042,7 @@ int main(int argc, char **argv)
 		/* Redirect child stdout/stderr to file */
 		for(i=1; i<=2; i++) {
 			child_redirfd[i] = i; /* Default: no redirects */
-			data_read[i] = data_passed[i] = 0; /* Reset data counters */
+			data_passed[i] = 0; /* Reset data counters */
 		}
 		if ( redir_stdout ) {
 			child_redirfd[STDOUT_FILENO] = creat(stdoutfilename, S_IRUSR | S_IWUSR);
@@ -1137,7 +1133,6 @@ int main(int argc, char **argv)
 						child_pipefd[i][PIPE_OUT] = -1;
 						continue;
 					}
-					data_read[i] += nread;
 					if ( limit_streamsize && data_passed[i]+nread>=streamsize ) {
 						if ( data_passed[i]<streamsize ) {
 							verbose("child fd %d limit reached",i);
