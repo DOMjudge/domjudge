@@ -601,12 +601,12 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
 		curl_easy_cleanup(handle);
-		free(url);
 		if ( failonerror ) {
 			error(0,"downloading '%s': %s",url,curlerrormsg);
 		} else {
 			warning(0,"downloading '%s': %s",url,curlerrormsg);
 		}
+		free(url);
 		return result;
 	}
 
