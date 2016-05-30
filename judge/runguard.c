@@ -763,7 +763,7 @@ int main(int argc, char **argv)
 	double tmpd;
 	size_t data_read[3];
 	size_t data_passed[3];
-	ssize_t nread, nwritten;
+	ssize_t nread;
 	char str[256];
 
 	struct itimerval itimer;
@@ -1115,8 +1115,22 @@ int main(int argc, char **argv)
 			for(i=1; i<=2; i++) {
 				if ( child_pipefd[i][PIPE_OUT] != -1 &&
 				     FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
-					nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
-					if ( nread==-1 ) error(errno,"reading child fd %d",i);
+
+					if (data_passed[i] == streamsize) {
+						/* Throw away data if we're at the output limit, but
+						   still count how much data we consumed  */
+						nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
+					} else {
+						/* Otherwise copy the output to a file */
+						nread = splice(child_pipefd[i][PIPE_OUT], NULL,
+									   child_redirfd[i], NULL,
+									   BUF_SIZE, SPLICE_F_MOVE);
+						data_passed[i] += nread;
+					}
+					if ( nread==-1 ) {
+						if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) continue;
+						error(errno,"copying data fd %d",i);
+					}
 					if ( nread==0 ) {
 						/* EOF detected: close fd and indicate this with -1 */
 						if ( close(child_pipefd[i][PIPE_OUT])!=0 ) {
@@ -1126,17 +1140,23 @@ int main(int argc, char **argv)
 						continue;
 					}
 					data_read[i] += nread;
-					if ( limit_streamsize && data_passed[i]+nread>=streamsize ) {
-						if ( data_passed[i]<streamsize ) {
-							verbose("child fd %d limit reached",i);
-						}
-						nread = streamsize - data_passed[i];
+
+					/* Truncate to the output limit */
+					if (limit_streamsize && data_passed[i] > streamsize) {
+						verbose("child fd %i limit reached",i);
+						data_passed[i] = streamsize;
+
+						ret = ftruncate(child_redirfd[i], streamsize);
+						if( ret!=0 ) error(errno,"truncating output fd %d", i);
 					}
-					nwritten = write(child_redirfd[i], buf, nread);
-					if ( nwritten==-1 ) error(errno,"writing child fd %d",i);
-					data_passed[i] += nwritten;
 				}
 			}
+		}
+
+		/* Close the output files */
+		for(i=1; i<=2; i++) {
+			ret = close(child_redirfd[i]);
+			if( ret!=0 ) error(errno,"closing output fd %d", i);
 		}
 
 		if ( times(&endticks)==(clock_t) -1 ) {
