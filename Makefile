@@ -57,6 +57,14 @@ install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
 dist: configure
 
+# Install PHP dependencies
+dist: composer-dependencies
+composer-dependencies:
+ifeq (, $(shell which composer))
+	$(error "'composer' command not found in $(PATH), install it https://getcomposer.org/download/")
+endif
+	composer install --no-dev
+
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
 distdocs:

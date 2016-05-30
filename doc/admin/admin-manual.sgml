@@ -2350,6 +2350,9 @@ additional software to be installed:
 <itemize>
 <item> The GNU autoconf/automake toolset
 
+<item> <htmlurl name="composer" url="https://getcomposer.org">
+       - PHP Package Manager
+
 <item> Linuxdoc and groff to build the admin and judge
        documentation from SGML sources and a LaTeX installation to
        generate the PDF admin, judge and default team manual.
@@ -2361,6 +2364,9 @@ install the additionally required packages (next to the
 <code>
 apt-get install autoconf automake git
 </code>
+
+Composer can be installed by following the documentation located
+<htmlurl name="here" url="https://getcomposer.org/download">.
 
 When this software is present, bootstrapping can be done by running
 <tt>make dist</tt>, which creates the <tt>configure</tt> script and
