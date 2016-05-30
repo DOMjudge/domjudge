@@ -71,6 +71,7 @@
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
 #define max(x,y) ((x) > (y) ? (x) : (y))
+#define min(x,y) ((x) < (y) ? (x) : (y))
 
 /* Array indices for input/output file descriptors as used by pipe() */
 #define PIPE_IN  1
@@ -764,6 +765,7 @@ int main(int argc, char **argv)
 	size_t data_read[3];
 	size_t data_passed[3];
 	ssize_t nread;
+	size_t to_read;
 	char str[256];
 
 	struct itimerval itimer;
@@ -1116,16 +1118,25 @@ int main(int argc, char **argv)
 				if ( child_pipefd[i][PIPE_OUT] != -1 &&
 				     FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
 
-					if (data_passed[i] == streamsize) {
+					if (limit_streamsize && data_passed[i] == streamsize) {
 						/* Throw away data if we're at the output limit, but
 						   still count how much data we consumed  */
 						nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
 					} else {
 						/* Otherwise copy the output to a file */
+						to_read = BUF_SIZE;
+						if (limit_streamsize) {
+							to_read = min(BUF_SIZE, streamsize-data_passed[i]);
+						}
 						nread = splice(child_pipefd[i][PIPE_OUT], NULL,
 									   child_redirfd[i], NULL,
-									   BUF_SIZE, SPLICE_F_MOVE);
+									   to_read, SPLICE_F_MOVE);
 						data_passed[i] += nread;
+
+						/* print message if we're at the streamsize limit */
+						if (limit_streamsize && data_passed[i] == streamsize) {
+							verbose("child fd %i limit reached",i);
+						}
 					}
 					if ( nread==-1 ) {
 						if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) continue;
@@ -1140,15 +1151,6 @@ int main(int argc, char **argv)
 						continue;
 					}
 					data_read[i] += nread;
-
-					/* Truncate to the output limit */
-					if (limit_streamsize && data_passed[i] > streamsize) {
-						verbose("child fd %i limit reached",i);
-						data_passed[i] = streamsize;
-
-						ret = ftruncate(child_redirfd[i], streamsize);
-						if( ret!=0 ) error(errno,"truncating output fd %d", i);
-					}
 				}
 			}
 		}
