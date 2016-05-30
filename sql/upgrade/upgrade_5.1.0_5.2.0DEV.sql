@@ -79,7 +79,13 @@ UPDATE `judging` SET `judgehost` = 'host-created-by-SQL-upgrade' WHERE `judgehos
 -- Add/remove sample/initial contents
 --
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
-('diskspace_error', '1048576', 'int', 'Minimum free disk space (in kB) on judgehosts.');
+('diskspace_error', '1048576', 'int', 'Minimum free disk space (in kB) on judgehosts.'),
+('base_url', '""', 'string', 'Base URL for your DOMjudge installation(e.g. http://domjudge.org/domjudge)'),
+('allow_openid_auth', '0', 'bool', 'Allow users to log in using OpenID'),
+('openid_autocreate_team', '1', 'bool', 'Create a team for each user that logs in with OpenID'),
+('openid_provider', '"https://accounts.google.com"', 'string', 'OpenID Provider URL'),
+('openid_clientid', '""', 'string', 'OpenID Connect client id'),
+('openid_clientsecret', '""', 'string', 'OpenID Connect client secret');
 
 --
 -- Finally remove obsolete structures after moving data
