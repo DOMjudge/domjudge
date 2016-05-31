@@ -63,7 +63,7 @@ composer-dependencies:
 ifeq (, $(shell which composer))
 	$(error "'composer' command not found in $(PATH), install it https://getcomposer.org/download/")
 endif
-	composer install --no-dev
+	composer $(subst 1,-q,$(QUIET)) install --no-dev
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
@@ -224,4 +224,4 @@ clean-autoconf:
 
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
         clean-autoconf $(addprefix maintainer-,conf install uninstall) \
-        config submitclient distdocs
+        config submitclient distdocs composer-dependencies
