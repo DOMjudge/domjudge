@@ -62,6 +62,9 @@ CURL_STATIC = @CURL_STATIC@
 DOMJUDGE_USER   = @DOMJUDGE_USER@
 WEBSERVER_GROUP = @WEBSERVER_GROUP@
 
+# Base URL of the DOMjudge web interfaces
+BASEURL         = @BASEURL@
+
 # Autoconf prefixes and paths
 FHS_ENABLED    = @FHS_ENABLED@
 
@@ -166,6 +169,7 @@ define substconfigvars
 	-e 's,@WEBSERVER_GROUP[@],@WEBSERVER_GROUP@,g' \
 	-e 's,@BEEP[@],@BEEP@,g' \
 	-e 's,@RUNUSER[@],@RUNUSER@,g' \
+	-e 's,@BASEURL[@],@BASEURL@,g' \
 	-e 's,@SUBMITCLIENT_ENABLED[@],@SUBMITCLIENT_ENABLED@,g' \
 	> $@
 @chmod --reference=$< $@

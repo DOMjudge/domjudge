@@ -367,8 +367,8 @@ function do_login_oidc() {
 	if (dbconfig_get('allow_openid_auth', false) == false) {
 		error("OpenID authentication disabled by administrator.");
 	}
-	if (empty(dbconfig_get('base_url', ''))) {
-		error("OpenID authentication requires that 'Base url' be defined in the config settings.");
+	if (empty(BASEURL)) {
+		error("OpenID authentication requires that 'BASEURL' be configured.");
 	}
 
 	$provider = dbconfig_get('openid_provider', '');
@@ -382,7 +382,7 @@ function do_login_oidc() {
 	$oidc->addScope(array("openid", "email"));
 
 	// TODO: how to dynamically figure this out properly on all/most servers
-	$oidc->setRedirectURL(dbconfig_get("base_url", "") . "/auth/oid_cb.php");
+	$oidc->setRedirectURL(BASEURL . "/auth/oid_cb.php");
 
 	// For google, forces asking the user what account they want to use every time.
 	$oidc->addAuthParam(array("prompt"=>"select_account"));

@@ -1075,14 +1075,12 @@ When the <tt>docs</tt> part of DOMjudge is installed and site-specific
 configuration set, the team manual can be generated with the command
 <tt>genteammanual</tt> found under <tt>docs/team</tt>. The PDF
 document will be placed in the current
-directory or a directory given as argument. The option <tt>-w WEBBASEURI</tt>
-can be passed to set the base URI of the DOMjudge webinterface; it
-should end with a slash and defaults to <tt>http://example.com/domjudge/</tt>.
+directory or a directory given as argument.
 The following should do it on a Debian-like system:
 <code>
 sudo apt-get install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
 cd &lt;INSTALL_PATH&gt;/docs/team
-./genteammanual [-w http(s)://yourhost.example.edu/domjudge/] [targetdir]
+./genteammanual [targetdir]
 </code>
 
 <p>

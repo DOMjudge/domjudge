@@ -195,8 +195,8 @@ int main(int argc, char **argv)
 
 	logmsg(LOG_INFO,"started");
 
-	/* Read default for baseurl from environment */
-	baseurl = string("http://localhost/domjudge/");
+	/* Read default for baseurl and contest from environment */
+	baseurl = string(BASEURL);
 	contest = "";
 	if ( getenv("SUBMITBASEURL")!=NULL ) baseurl = string(getenv("SUBMITBASEURL"));
 	if ( getenv("SUBMITCONTEST")!=NULL ) contest = string(getenv("SUBMITCONTEST"));
@@ -427,8 +427,11 @@ void usage()
 "The default for LANGUAGE is the extension of FILENAME. For example,\n"
 "'B.java' will indicate a Java solution.\n"
 "\n"
-"Set URL to the base address of the webinterface without the\n"
-"'api/' suffix.\n"
+"Set URL to the base address of the webinterface without the 'api/' suffix.\n");
+	if ( !baseurl.empty() ) {
+		printf("The pre-configured URL is '%s'.\n",baseurl.c_str());
+    }
+	printf(
 "\n"
 "Examples:\n"
 "\n");

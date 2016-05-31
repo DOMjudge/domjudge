@@ -202,6 +202,18 @@ AX_WITH_COMMENT(7,[      ])
 
 # }}}
 
+AC_ARG_WITH([baseurl], [AS_HELP_STRING([--with-baseurl=URL],
+[Base URL of the DOMjudge web interfaces. Example default:
+ "https://example.com/domjudge/".])], [], [])
+AX_WITH_COMMENT(8,[       ])
+
+if test "x$with_baseurl" != x; then
+	AC_SUBST(BASEURL,$with_baseurl)
+	AC_MSG_RESULT($BASEURL)
+else
+	AC_SUBST(BASEURL,'https://example.com/domjudge/')
+fi
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC

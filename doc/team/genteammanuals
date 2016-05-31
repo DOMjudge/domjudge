@@ -1,8 +1,7 @@
 #!/bin/sh
 #
 # Script to generate team manual including actual configuration
-# settings. Also allows one to pass a WEBBASEURI setting with the
-# option '-w'.
+# settings.
 #
 # Part of the DOMjudge Programming Contest Jury System and licenced
 # under the GNU GPL. See README and COPYING for details.
@@ -13,13 +12,6 @@ SOURCES="team-manual.tex team-manual-??.tex"
 PREAMBLE=team-manual-preamble.tex
 
 NRUNS=3
-
-# Default value for base URL of the DOMjudge webinterface:
-WEBBASEURI='http://example.com/domjudge/'
-if [ "x$1" = 'x-w' ]; then
-	WEBBASEURI=$2
-	shift 2
-fi
 
 OUTPUTDIR=.
 [ -n "$1" ] && OUTPUTDIR="$1"
@@ -42,9 +34,9 @@ fi
 TEXCONFIG=`mktemp --tmpdir domjudge-texconfig.XXXXXX`
 
 if [ -x "gentexconfig" ]; then
-	./gentexconfig    "$WEBBASEURI" > "$TEXCONFIG"
+	./gentexconfig    > "$TEXCONFIG"
 else
-	./gentexconfig.in "$WEBBASEURI" > "$TEXCONFIG"
+	./gentexconfig.in > "$TEXCONFIG"
 fi
 
 # Run LaTeX:

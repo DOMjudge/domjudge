@@ -11,7 +11,6 @@
 --
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
-('base_url', '""', 'string', 'Base URL for your DOMjudge installation(e.g. http://domjudge.org/domjudge)'),
 ('clar_categories', '{"general":"General issue","tech":"Technical issue"}', 'array_keyval', 'List of additional clarification categories'),
 ('script_timelimit', '30', 'int', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.'),
 ('script_memory_limit', '2097152', 'int', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.'),

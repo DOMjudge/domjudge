@@ -176,6 +176,7 @@ maintainer-conf: configure
 	            --with-judgehost_tmpdir=$(CURDIR)/output/tmp \
 	            --with-judgehost_judgedir=$(CURDIR)/output/judgings \
 	            --with-domserver_submitdir=$(CURDIR)/output/submissions \
+	            --with-baseurl='http://localhost/domjudge/' \
 	            CFLAGS='$(MAINT_CXFLAGS)' \
 	            CXXFLAGS='$(MAINT_CXFLAGS)' \
 	            LDFLAGS='$(MAINT_LDFLAGS)' \

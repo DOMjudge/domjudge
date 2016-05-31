@@ -13,4 +13,7 @@
    an old file. */
 #define WARN_MTIME   5
 
+/* Base URL of the DOMjudge web interfaces, used to access the REST API. */
+#define BASEURL      "@BASEURL@"
+
 #endif /* _SUBMIT_CONFIG_ */
