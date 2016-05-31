@@ -17,7 +17,7 @@ else
 fi
 
 if [ -x /usr/bin/checkbashisms ]; then
-	grep -rsl "^#\!.*/bin/sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run))' | \
+	grep -rsl "^#\!.*/bin/sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/))' | \
 	while read i ; do
 		checkbashisms "$i"
 	done
@@ -26,7 +26,7 @@ else
 fi
 
 if [ -x /usr/bin/shellcheck ]; then
-	grep -rslE "^#\!.*/bin/(ba)?sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run))' | \
+	grep -rslE "^#\!.*/bin/(ba)?sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/))' | \
 	while read i ; do
 		shellcheck -e 1072,2006,2034,2059,2086 "$i"
 	done
