@@ -24,9 +24,11 @@ if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
 fi
 
 # Check syntax:
-sh $RUNOPTIONS -n "$MAINSOURCE"
-EXITCODE=$?
-[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+for i in "$@" ; do
+	sh $RUNOPTIONS -n "$i"
+	EXITCODE=$?
+	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+done
 
 # Write executing script:
 cat > "$DEST" <<EOF
