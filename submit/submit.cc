@@ -391,7 +391,7 @@ void usage()
 "For CONTEST use the short name as shown in the top-right contest selection box\n"
 "in the webinterface.");
 		if ( contests.size()==1 ) {
-			printf(" Currently this defaults to the only active contest \"%s\".",
+			printf(" Currently this defaults to the only active contest '%s'.",
 			       contests[0][0].c_str());
 		}
 		printf("\n\n");
