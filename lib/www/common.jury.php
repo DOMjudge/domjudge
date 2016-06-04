@@ -72,9 +72,9 @@ function delLinkMultiple($table, $fields, $values, $referrer = '', $desc = NULL)
  * Returns a link to export a problem as zip-file.
  *
  */
-function exportLink($probid)
+function exportProblemLink($probid)
 {
-	return '<a href="export.php?id=' . urlencode($probid) .
+	return '<a href="export_problem.php?id=' . urlencode($probid) .
 		'"><img src="../images/b_save.png" ' .
 		' title="export problem as zip-file" alt="export" /></a>';
 }

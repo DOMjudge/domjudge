@@ -262,7 +262,7 @@ echo "</table>\n" . addEndForm();
 
 if ( IS_ADMIN ) {
 	echo "<p>" .
-		exportLink($id) . "\n" .
+		exportProblemLink($id) . "\n" .
 		editLink('problem',$id) . "\n" .
 		delLink('problem','probid', $id, $data['name']) . "</p>\n\n";
 }
