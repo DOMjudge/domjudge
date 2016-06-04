@@ -23,6 +23,7 @@ Version 5.2.0 - DEV
  - Add 'output-limit' verdict.
  - Renamed dj-setup-database to dj_setup_database for consistency
    with other script names.
+ - Update ACE editor to version 1.2.3, jQuery to version 2.2.4.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------
