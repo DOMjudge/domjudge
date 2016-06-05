@@ -209,9 +209,23 @@ maintainer-uninstall:
 	rm -f $(domserver_wwwdir)/jury/doc
 	rm -rf $(judgehost_bindir)
 
+# Rules to configure and build for a Coverity scan.
+coverity-conf:
+	$(MAKE) maintainer-conf
+
+coverity-build: paths.mk
+	$(MAKE) build build-scripts
+	@VERSION=` grep '^VERSION ='   paths.mk | sed 's/^VERSION = *//'` ; \
+	PUBLISHED=`grep '^PUBLISHED =' paths.mk | sed 's/^PUBLISHED = *//'` ; \
+	if [ "$$PUBLISHED" = release ]; then DESC="release" ; \
+	elif [ -n "$$PUBLISHED" ];      then DESC="snapshot $$PUBLISHED" ; \
+	elif [ ! -d .git ];             then DESC="unknown source on `date`" ; fi ; \
+	echo "VERSION=$$VERSION" > cov-submit-data-version.sh ; \
+	if [ -n "$$DESC" ]; then echo "DESC=$$DESC" >> cov-submit-data-version.sh ; fi
+
 clean-l:
 # Remove Coverity scan data:
-	-rm -rf cov-int domjudge-scan.t*
+	-rm -rf cov-int domjudge-scan.t* coverity-scan.tar.xz cov-submit-data-version.sh
 
 distclean-l: clean-autoconf
 	-rm -f paths.mk
@@ -224,4 +238,5 @@ clean-autoconf:
 
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
         clean-autoconf $(addprefix maintainer-,conf install uninstall) \
-        config submitclient distdocs composer-dependencies
+        config submitclient distdocs composer-dependencies \
+        coverity-conf coverity-build
