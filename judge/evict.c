@@ -80,14 +80,18 @@ void evict_directory(char *dirname) {
 						warning(errno, "Unable to evict file: %s\n", entry_path);
 					}
 					if (be_verbose) logmsg(LOG_DEBUG, "Evicted file: %s", entry_path);
-					close(fd);
+					if ( close(fd)!=0 ) {
+						warning(errno, "Unable to close file: %s", entry_path);
+					}
 				}
 			}
 			free(entry_path);
 		}
-		closedir(dir);
+		if ( closedir(dir)!=0 ) {
+			warning(errno, "Unable to close directory: %s", dirname);
+		}
 	} else {
-		warning(0, "Unable to open directory: %s", dirname);
+		warning(errno, "Unable to open directory: %s", dirname);
 	}
 }
 
