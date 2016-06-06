@@ -766,6 +766,8 @@ int websubmit()
 
 	free(url);
 
+	logmsg(LOG_DEBUG,"API call 'submissions' returned:\n%s\n",curloutput.str().c_str());
+
 	// The connection worked, but we may have received an HTTP error
 	curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
 	if ( http_code >= 300 ) {
