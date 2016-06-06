@@ -168,21 +168,24 @@ function openZipFile($filename) {
 	return $zip;
 }
 
-$matchstrings = array('@EXPECTED_RESULTS@: ',
-		      '@EXPECTED_SCORE@: ');
+// From http://www.problemarchive.org/wiki/index.php/Problem_Format
 
+// Expected result tag in (jury) submissions:
+$problem_result_matchstrings = array('@EXPECTED_RESULTS@: ',
+                                     '@EXPECTED_SCORE@: ');
+
+// Remap from Kattis problem package format to DOMjudge internal strings:
+$problem_result_remap = array('ACCEPTED' => 'CORRECT',
+                              'WRONG_ANSWER' => 'WRONG-ANSWER',
+                              'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
+                              'RUN_TIME_ERROR' => 'RUN-ERROR');
 
 function normalizeExpectedResult($result) {
-	// Remap results as specified by the Kattis problem package format,
-	// see: http://www.problemarchive.org/wiki/index.php/Problem_Format
-	$resultremap = array('ACCEPTED' => 'CORRECT',
-			     'WRONG_ANSWER' => 'WRONG-ANSWER',
-			     'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
-			     'RUN_TIME_ERROR' => 'RUN-ERROR');
+	global $problem_result_remap;
 
 	$result = trim(mb_strtoupper($result));
-	if ( in_array($result,array_keys($resultremap)) ) {
-		return $resultremap[$result];
+	if ( in_array($result,array_keys($problem_result_remap)) ) {
+		return $problem_result_remap[$result];
 	}
 	return $result;
 }
@@ -193,9 +196,9 @@ function normalizeExpectedResult($result) {
  * returns array of expected results otherwise
  */
 function getExpectedResults($source) {
-	global $matchstrings;
+	global $problem_result_matchstrings;
 	$pos = FALSE;
-	foreach ( $matchstrings as $matchstring ) {
+	foreach ( $problem_result_matchstrings as $matchstring ) {
 		if ( ($pos = mb_stripos($source,$matchstring)) !== FALSE ) break;
 	}
 
@@ -278,7 +281,7 @@ function get_image_thumb_type($image)
  */
 function importZippedProblem($zip, $probid = NULL, $cid = -1)
 {
-	global $DB, $teamid, $cdatas, $matchstrings;
+	global $DB, $teamid, $cdatas;
 	$prop_file = 'domjudge-problem.ini';
 	$yaml_file = 'problem.yaml';
 
@@ -566,6 +569,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			$extension = end($filename_parts);
 			if ( !starts_with($filename, 'submissions/') || ends_with($filename, '/') ) {
 				// skipping non-submission files and directories silently
+				// FIXME: (multi-file) submissions can also sit in a subdirectory.
 				continue;
 			}
 			unset($langid);
