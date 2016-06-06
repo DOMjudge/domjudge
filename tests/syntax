@@ -26,9 +26,11 @@ else
 fi
 
 if [ -x /usr/bin/shellcheck ]; then
-	grep -rslE "^#\!.*/bin/(ba)?sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/))' | \
+	grep -rslE "^#\!.*/bin/(ba)?sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
 	while read i ; do
-		shellcheck -e 1072,2006,2034,2059,2086 "$i"
+		if [ "${i##*.}" != "zip" ]; then
+			shellcheck -e 1072,2006,2034,2059,2086 "$i"
+		fi
 	done
 else
 	echo "shellcheck not found in /usr/bin/shellcheck"
