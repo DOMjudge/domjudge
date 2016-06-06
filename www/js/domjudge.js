@@ -270,7 +270,7 @@ function detectProblemLanguage(filename)
 	// the "autodetect" option has empty value
 	if ( elt.value != '' ) return;
 
-	for (i=0;i<elt.length;i++) {
+	for (var i=0;i<elt.length;i++) {
 		if ( elt.options[i].text.toLowerCase() == parts[1] ) {
 			elt.selectedIndex = i;
 		}
@@ -283,7 +283,7 @@ function detectProblemLanguage(filename)
 	if ( elt.value != '' ) return;
 
 	var langid = getMainExtension(parts[0]);
-	for (i=0;i<elt.length;i++) {
+	for (var i=0;i<elt.length;i++) {
 		if ( elt.options[i].value == langid ) {
 			elt.selectedIndex = i;
 		}
