@@ -260,8 +260,8 @@ External software:
 
 DOMjudge:
 <itemize>
-<item> Extract the source tarball and run <tt>./configure
-       [--enable-fhs|--prefix=&lt;basepath&gt;]</tt>.
+<item> Extract the source tarball and run
+       <tt>./configure [--enable-fhs|--prefix=&lt;basepath&gt;] --with-baseurl=&lt;url&gt;</tt>.
 <item> Run <tt>make domserver judgehost docs</tt> or just those
        targets you want installed on the current host.
 <item> Run <tt>make install-{domserver,judgehost,docs}</tt>
@@ -453,7 +453,7 @@ DOMjudge can be installed with two different directory layouts:
 	installed in a single directory tree which is specified by the
 	prefix option of configure, like
 <code>
-./configure --prefix=$HOME/domjudge
+./configure --prefix=$HOME/domjudge --with-baseurl=https://domjudge.example.com/
 </code>
 	This will install each of the <tt>domserver, judgehost,
 	docs</tt> parts in a subdirectory
@@ -496,6 +496,14 @@ DOMjudge can be installed with two different directory layouts:
 	<tt>--localstatedir=/var</tt> to <tt>configure</tt> to disable
 	the prefix for these.
 </descrip>
+
+Note that the <tt>--with-baseurl</tt> configure option is not required
+but highly recommended, as it allows building the submit client and
+team documentation with the correct URL preset. The option is required
+when using <ref id="install_config:openid" name="OpenID">. If needed,
+the setting can later be updated in <tt>etc/domserver-static.php</tt>
+on the domserver, and in <tt>etc/submit-config.h</tt> in the source
+tree for rebuilding the submit client.
 
 After running the <tt>configure</tt> script, the system can be built
 and installed. Each of the <tt>domserver, judgehost, docs</tt> parts
@@ -818,7 +826,7 @@ Besides these settings, there are a few other places where changes can
 be made to the system, see <ref id="install_config:configurablescripts"
 name="other configurable scripts">.
 
-<sect>OpenID Connect
+<sect>OpenID Connect<label id="install_config:openid">
 <p>
 
 DOMjudge supports allowing users to log in using your favorite OpenID Connect
@@ -841,10 +849,11 @@ the client ID and secret you need. For the openid provider set the URL to
 <tt>/domjudge/auth/oid_cb.php</tt>.
 E.g. <tt>http(s)://yourhost.example.edu/domjudge/auth/oid_cb.php</tt>
 
-
-You also need to set the <tt>Base URL</tt> setting to the full URL to your
-DOMjudge installation. Omit the trailing slash. For example this will probably
-be something like this:
+You also need to set the authentication scheme to <tt>PHP_SESSIONS</tt>
+in <tt>etc/domserver-config.php</tt> (the default) and make sure that
+the DOMjudge webserver base URL was set correctly with
+<tt>configure --with-baseurl=&lt;URL&gt;</tt>. For example, this will
+probably be something like this:
 <tt>http(s)://yourhost.example.edu/domjudge</tt>
 
 Finally, enable the setting <tt>Allow openid auth</tt>.

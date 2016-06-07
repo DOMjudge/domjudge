@@ -212,6 +212,7 @@ if test "x$with_baseurl" != x; then
 	AC_MSG_RESULT($BASEURL)
 else
 	AC_SUBST(BASEURL,'https://example.com/domjudge/')
+	AC_SUBST(BASEURL_UNCONFIGURED,1)
 fi
 
 # Checks for programs.
@@ -335,6 +336,8 @@ echo " * default user........: $DOMJUDGE_USER"
 echo " * runguard user.......: $RUNUSER"
 echo " * webserver group.....: $WEBSERVER_GROUP"
 echo ""
+echo " * website base URL....: $BASEURL"
+echo ""
 if test "x$SUBMITCLIENT_ENABLED" = xyes ; then
    echo " * submitclient........: enabled, cURL version: $curl_version"
 else
@@ -377,6 +380,12 @@ echo "    - cgroup...........: $judgehost_cgroupdir"
 echo ""
 echo "Run 'make' without arguments to get a list of (build) targets."
 echo ""
+if test "x$BASEURL_UNCONFIGURED" = x1 ; then
+   echo "Warning: base URL is unconfigured; the submit client, generating team"
+   echo "documentation and OpenID support will not work out of the box!"
+   echo "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
+   echo ""
+fi
 fi # !QUIET
 # }}}
 
