@@ -1254,6 +1254,7 @@ x|contestproblem   |Coupling of problems to contests and data specific to it.@
 x|contestteam      |Coupling of teams to contests.@
  |event            |Log of events during contests.@
 x|executable       |Executable compile/run/compare scripts.@
+ |internal&lowbar;error|Stores errors that occurred on judgehosts including logs.@
  |judgehost        |Computers (hostnames) that function as judgehosts.@
 x|judgehost&lowbar;restriction|Optional restriction sets on submissions taken by judgehosts.@
  |judging          |Judgings of submissions.@
