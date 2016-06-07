@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+# @configure_input@
+#
 # Script for automatic submission of solution source code or
 # sending clarification requests as a team.
 #
@@ -18,7 +20,7 @@
 
 # Defaults:
 PROBID='general'
-BASEURL='http://localhost/domjudge/'
+BASEURL='@BASEURL@'
 
 # cURL cookie-jar file to store PHP session data.
 COOKIEJAR=$(mktemp --tmpdir)
