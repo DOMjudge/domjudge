@@ -25,11 +25,18 @@ else
 	echo "checkbashisms not found in /usr/bin/checkbashisms"
 fi
 
+# We ignore the following shellcheck warnings, for more details see:
+# https://github.com/koalaman/shellcheck/wiki/<code>
+#
+# SC1072: buggy on empty compile scripts, see https://github.com/koalaman/shellcheck/issues/384
+# SC2034: many "unused variables" are actually used, or in compile scripts declared on purpose
+# SC2086: there are too many cases where quoting is not necessary and tedious
+
 if [ -x /usr/bin/shellcheck ]; then
 	grep -rslE "^#\!.*/bin/(ba)?sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
 	while read i ; do
 		if [ "${i##*.}" != "zip" ]; then
-			shellcheck -e 1072,2006,2034,2059,2086 "$i"
+			shellcheck -f gcc -e 1072,2034,2086 "$i"
 		fi
 	done
 else

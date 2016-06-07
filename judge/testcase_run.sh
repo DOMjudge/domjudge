@@ -92,9 +92,9 @@ shift $((OPTIND-1))
 
 if [ -n "$CPUSET" ]; then
 	CPUSET_OPT="-P $CPUSET"
-	LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`-$CPUSET.log"
+	LOGFILE="$DJ_LOGDIR/judge.$(hostname | cut -d . -f 1)-$CPUSET.log"
 else
-	LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`.log"
+	LOGFILE="$DJ_LOGDIR/judge.$(hostname | cut -d . -f 1).log"
 fi
 
 # Logging:
@@ -204,7 +204,7 @@ runcheck ./run testdata.in program.out \
 	"$PREFIX/$PROGRAM" 2>runguard.err
 
 # Check for still running processes:
-output=`ps -u "$RUNUSER" -o pid= -o comm= || true`
+output=$(ps -u "$RUNUSER" -o pid= -o comm= || true)
 if [ -n "$output" ] ; then
 	error "found processes still running as '$RUNUSER', check manually:\n$output"
 fi
@@ -262,13 +262,13 @@ fi
 logmsg $LOG_DEBUG "checking program run exit-status"
 # There's no bash YAML parser, and the format is rigid enough that we
 # can parse it with grep here.
-timeused=`        grep '^time-used: '    program.meta | sed 's/time-used: //'`
-program_cputime=` grep '^cpu-time: '     program.meta | sed 's/cpu-time: //'`
-program_walltime=`grep '^wall-time: '    program.meta | sed 's/wall-time: //'`
-program_exit=`    grep '^exitcode: '     program.meta | sed 's/exitcode: //'`
-program_stdout=`  grep '^stdout-bytes: ' program.meta | sed 's/stdout-bytes: //'`
-program_stderr=`  grep '^stderr-bytes: ' program.meta | sed 's/stderr-bytes: //'`
-memory_bytes=`    grep '^memory-bytes: ' program.meta | sed 's/memory-bytes: //'`
+timeused=$(        grep '^time-used: '    program.meta | sed 's/time-used: //')
+program_cputime=$( grep '^cpu-time: '     program.meta | sed 's/cpu-time: //')
+program_walltime=$(grep '^wall-time: '    program.meta | sed 's/wall-time: //')
+program_exit=$(    grep '^exitcode: '     program.meta | sed 's/exitcode: //')
+program_stdout=$(  grep '^stdout-bytes: ' program.meta | sed 's/stdout-bytes: //')
+program_stderr=$(  grep '^stderr-bytes: ' program.meta | sed 's/stderr-bytes: //')
+memory_bytes=$(    grep '^memory-bytes: ' program.meta | sed 's/memory-bytes: //')
 resourceinfo="\
 runtime: ${program_cputime}s cpu, ${program_walltime}s wall
 memory used: ${memory_bytes} bytes"

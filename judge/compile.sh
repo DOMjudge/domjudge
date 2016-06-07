@@ -66,9 +66,9 @@ shift $((OPTIND-1))
 
 if [ -n "$CPUSET" ]; then
 	CPUSET_OPT="-P $CPUSET"
-	LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`-$CPUSET.log"
+	LOGFILE="$DJ_LOGDIR/judge.$(hostname | cut -d . -f 1)-$CPUSET.log"
 else
-	LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`.log"
+	LOGFILE="$DJ_LOGDIR/judge.$(hostname | cut -d . -f 1).log"
 fi
 
 # Logging:
@@ -131,7 +131,7 @@ $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -m $SCRIPTMEMLIMIT 
 
 # Make sure that all files are owned by the current user, so that we
 # can delete the judging output tree without root access.
-$GAINROOT chown -R "`id -un`" "$WORKDIR/compile"
+$GAINROOT chown -R "$(id -un)" "$WORKDIR/compile"
 
 cd "$WORKDIR"
 

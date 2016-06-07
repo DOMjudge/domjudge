@@ -68,7 +68,7 @@ error()
     exit 1
 }
 
-if [ "`id -u`" != 0 ]; then
+if [ "$(id -u)" != 0 ]; then
     echo "Warning: you probably need to run this program as root."
 fi
 
@@ -156,7 +156,7 @@ fi
 export DEBIAN_FRONTEND=noninteractive
 
 if [ -e "$CHROOTDIR" ]; then
-	printf "'$CHROOTDIR' already exists. Remove? (y/N) "
+	printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
 	read yn
 	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
 		error "Chrootdir already exists, exiting."
@@ -213,6 +213,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 
+# shellcheck disable=SC2086
 eval $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 

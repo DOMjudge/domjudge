@@ -31,7 +31,7 @@ fi
 [ -z "$LATEX" ] && LATEX=pdflatex
 [ -z "$LATEXFLAGS" ] && LATEXFLAGS='--interaction=errorstopmode'
 
-TEXCONFIG=`mktemp --tmpdir domjudge-texconfig.XXXXXX`
+TEXCONFIG=$(mktemp --tmpdir domjudge-texconfig.XXXXXX)
 
 if [ -x "gentexconfig" ]; then
 	./gentexconfig    > "$TEXCONFIG"
@@ -40,13 +40,17 @@ else
 fi
 
 # Run LaTeX:
+# shellcheck disable=SC2059
+{
 for f in $SOURCES ; do
-	[ "$QUIET" ] || printf "Running $NRUNS passes of '$LATEX $LATEXFLAGS $f'..."
+	[ "$QUIET" ] || printf "Running $NRUNS passes of '%s'..." "$LATEX $LATEXFLAGS $f"
 	run=1
-	while [ $run -le $NRUNS ]; do
+	while [ "$run" -le "$NRUNS" ]; do
+		# shellcheck disable=SC2086
 		if ! ( cat "$TEXCONFIG" ; echo \\"input{$f}" ) | \
-			$LATEX $LATEXFLAGS -jobname ${f%.tex} -output-directory "$OUTPUTDIR" >/dev/null ; then
-			printf "\nTeX-ing failed in run $run, see '${f%tex}log' for details.\n"
+			$LATEX $LATEXFLAGS -jobname "${f%.tex}" -output-directory "$OUTPUTDIR" >/dev/null ; then
+			printf
+			"\nTeX-ing failed in run $run, see '%s' for details.\n" "${f%tex}log$"
 			exit 1
 		else
 			[ "$QUIET" ] || printf " $run"
@@ -55,5 +59,6 @@ for f in $SOURCES ; do
 	done
 	[ "$QUIET" ] || printf "\n" ;
 done
+} # end shellcheck disable
 
 rm -f "$TEXCONFIG"
