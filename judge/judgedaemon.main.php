@@ -147,7 +147,7 @@ function read_judgehostlog($n = 20) {
 
 // fetches new executable from database if necessary
 // runs build to compile executable
-// returns absolute path to run script
+// returns array with absolute path to run script and possibly error message
 function fetch_executable($workdirpath, $execid, $md5sum)
 {
 	$execpath = "$workdirpath/executable/" . $execid;
@@ -157,7 +157,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 	$execrunpath = $execpath . "/run";
 	$execzippath = $execpath . "/executable.zip";
 	if ( empty($md5sum) ) {
-		error("unknown executable '" . $execid . "' specified");
+		return array(NULL, "unknown executable '" . $execid . "' specified");
 	}
 	if ( !file_exists($execpath) || !file_exists($execmd5path) ||
 	     !file_exists($execdeploypath)
@@ -169,14 +169,14 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 		$content = request('executable', 'GET', 'execid=' . urlencode($execid));
 		$content = base64_decode(dj_json_decode($content));
 		if ( file_put_contents($execzippath, $content) === FALSE ) {
-			error("Could not create executable zip file in $execpath");
+			return error("Could not create executable zip file in $execpath");
 		}
 		unset($content);
 		if ( md5_file($execzippath) !== $md5sum ) {
-			error("Zip file corrupted during download.");
+			return error("Zip file corrupted during download.");
 		}
 		if ( file_put_contents($execmd5path, $md5sum) === FALSE ) {
-			error("Could not write md5sum to file.");
+			return error("Could not write md5sum to file.");
 		}
 
 		logmsg(LOG_DEBUG, "Unzipping");
@@ -202,7 +202,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 				$source = "";
 				foreach ($langexts as $lang => $langext) {
 					if ( ($handle = opendir($execpath)) === FALSE ) {
-						error("Could not open $execpath");
+						return error("Could not open $execpath");
 					}
 					while ( ($file = readdir($handle)) !== FALSE ) {
 						$ext = pathinfo($file, PATHINFO_EXTENSION);
@@ -216,7 +216,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 					if ( $execlang !== FALSE ) break;
 				}
 				if ( $execlang === FALSE ) {
-					error("executable must either provide an executable file named 'build' or a C/C++/Java or Python file.");
+					return array(NULL, "executable must either provide an executable file named 'build' or a C/C++/Java or Python file.");
 				}
 				switch ( $execlang ) {
 				case 'c':
@@ -238,12 +238,12 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 					break;
 				}
 				if ( file_put_contents($execbuildpath, $buildscript) === FALSE ) {
-					error("Could not write file 'build' in $exepath");
+					return error("Could not write file 'build' in $exepath");
 				}
 				chmod($execbuildpath, 0755);
 			}
 		} else if ( !is_executable($execbuildpath) ) {
-			error("Invalid executable, file 'build' exists but is not executable.");
+			return array(NULL, "Invalid executable, file 'build' exists but is not executable.");
 		}
 
 		if ( $do_compile ) {
@@ -251,17 +251,17 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 			$olddir = getcwd();
 			chdir($execpath);
 			system("./build", $retval);
-			if ( $retval!=0 ) error("Could not run ./build in $execpath");
+			if ( $retval!=0 ) return array(NULL, "Could not run ./build in $execpath");
 			chdir($olddir);
 		}
 		if ( !file_exists($execrunpath) || !is_executable($execrunpath) ) {
-			error("Invalid build file, must produce an executable file 'run'.");
+			return array(NULL, "Invalid build file, must produce an executable file 'run'.");
 		}
 	}
 	// Create file to mark executable successfully deployed.
 	touch($execdeploypath);
 
-	return $execrunpath;
+	return array($execrunpath, NULL);
 }
 
 $options = getopt("dv:n:hV");
@@ -479,10 +479,10 @@ while ( TRUE ) {
 	// restart the judging loop
 }
 
-function disable_language($langid, $description, $judgingid, $cid) {
+function disable($kind, $idcolumn, $id, $description, $judgingid, $cid) {
 	$disabled = json_encode(array(
-		'kind' => 'language',
-		'langid' => $langid));
+		'kind' => $kind,
+		$idcolumn => $id));
 	$judgehostlog = read_judgehostlog();
 	$error_id = request('internal_error', 'POST',
 		'judgingid=' . urlencode($judgingid) .
@@ -549,8 +549,13 @@ function judge($row)
 		error("No compile script specified for language " . $row['langid'] . ".");
 	}
 
-	$execrunpath = fetch_executable($workdirpath, $row['compile_script'],
-	                                $row['compile_script_md5sum']);
+	list($execrunpath, $error) = fetch_executable($workdirpath, $row['compile_script'],
+						      $row['compile_script_md5sum']);
+	if ( isset($error) ) {
+		logmsg(LOG_ERR, "fetching executable failed for compile script '" . $row['compile_script'] . "':" . $error);
+		disable('language', 'langid', $row['langid'], $error, $row['judgingid'], $row['cid']);
+		return;
+	}
 
 	// Compile the program.
 	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
@@ -561,7 +566,7 @@ function judge($row)
 		alert('error');
 		logmsg(LOG_ERR, "Unknown exitcode from compile.sh for s$row[submitid]: $retval");
 		$description = "compile script '" . $row['compile_script'] . "' returned exit code " . $retval;
-		disable_language($row['langid'], $description, $row['judgingid'], $row['cid']);
+		disable('language', 'langid', $row['langid'], $description, $row['judgingid'], $row['cid']);
 		// revoke readablity for domjudge-run user to this workdir
 		chmod($workdir, 0700);
 		return;
@@ -684,8 +689,19 @@ function judge($row)
 		$hardtimelimit = $row['maxruntime'] +
 		                 overshoot_time($row['maxruntime'],$overshoot);
 
-		$compare_runpath = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
-		$run_runpath = fetch_executable($workdirpath, $row['run'], $row['run_md5sum']);
+		list($compare_runpath, $error) = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
+		if ( isset($error) ) {
+			logmsg(LOG_ERR, "fetching executable failed for compare script '" . $row['compare'] . "':" . $error);
+			disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
+			return;
+		}
+
+		list($run_runpath, $error) = fetch_executable($workdirpath, $row['run'], $row['run_md5sum']);
+		if ( isset($error) ) {
+			logmsg(LOG_ERR, "fetching executable failed for run script '" . $row['run'] . "':" . $error);
+			disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
+			return;
+		}
 
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
