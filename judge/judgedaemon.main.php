@@ -400,25 +400,6 @@ $endpointIDs = array_keys($endpoints);
 $currentEndpoint = 0;
 while ( TRUE ) {
 
-	// Check for available disk space
-	$free_space = disk_free_space(JUDGEDIR);
-	$allowed_free_space  = dbconfig_get_rest('diskspace_error'); // in kB
-	if ( $free_space < 1024*$allowed_free_space ) {
-		$free_abs = sprintf("%01.2fGB", $free_space / (1024*1024*1024));
-		logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
-				"change 'diskspace error' value in config before resolving this error.");
-
-		$disabled = json_encode(array(
-			'kind' => 'judgehost',
-			'hostname' => $myhost));
-		$judgehostlog = read_judgehostlog();
-		$error_id = request('internal_error', 'POST',
-			'description=' . urlencode("low on disk space on $myhost") .
-			'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
-			'&disabled=' . urlencode($disabled));
-		logmsg(LOG_ERR, "=> internal error " . $error_id);
-	}
-
 	// If all endpoints are waiting, sleep for a bit
 	$dosleep = TRUE;
 	foreach ($endpoints as $id=>$endpoint) {
@@ -445,6 +426,27 @@ while ( TRUE ) {
 	if ( $exitsignalled ) {
 		logmsg(LOG_NOTICE, "Received signal, exiting.");
 		exit;
+	}
+
+	if ( $endpoints[$endpointID]["waiting"] === FALSE ) {
+		// Check for available disk space
+		$free_space = disk_free_space(JUDGEDIR);
+		$allowed_free_space  = dbconfig_get_rest('diskspace_error'); // in kB
+		if ( $free_space < 1024*$allowed_free_space ) {
+			$free_abs = sprintf("%01.2fGB", $free_space / (1024*1024*1024));
+			logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
+					"change 'diskspace error' value in config before resolving this error.");
+
+			$disabled = json_encode(array(
+				'kind' => 'judgehost',
+				'hostname' => $myhost));
+			$judgehostlog = read_judgehostlog();
+			$error_id = request('internal_error', 'POST',
+				'description=' . urlencode("low on disk space on $myhost") .
+				'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
+				'&disabled=' . urlencode($disabled));
+			logmsg(LOG_ERR, "=> internal error " . $error_id);
+		}
 	}
 
 	// Request open submissions to judge. Any errors will be treated as
