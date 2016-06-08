@@ -317,7 +317,7 @@ foreach( $data as $rank => $row ) {
 				    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
 			} else {
 				echo "<td rowspan=\"2\" align=\"testsample\">" .
-					printyn($row['issample']) . "</td>";
+					printyn($row['sample']) . "</td>";
 				echo "<td class=\"testdesc\">" .
 				    specialchars($row['description']) . "</td>";
 			}
