@@ -81,7 +81,7 @@ switch ($kind) {
 		echo "<a href=\"problem.php?id=" . urlencode($probid) . "\">" . specialchars($shortname . " - " . $name) . "</a>";
 		break;
 	case 'judgehost':
-		$judgehost = $disabled['judgehost'];
+		$judgehost = $disabled['hostname'];
 		echo "<a href=\"judgehost.php?id=" . urlencode($judgehost) . "\">" . specialchars($judgehost) . "</a>";
 		break;
 	case 'language':
