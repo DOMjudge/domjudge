@@ -169,14 +169,14 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 		$content = request('executable', 'GET', 'execid=' . urlencode($execid));
 		$content = base64_decode(dj_json_decode($content));
 		if ( file_put_contents($execzippath, $content) === FALSE ) {
-			return error("Could not create executable zip file in $execpath");
+			error("Could not create executable zip file in $execpath");
 		}
 		unset($content);
 		if ( md5_file($execzippath) !== $md5sum ) {
-			return error("Zip file corrupted during download.");
+			error("Zip file corrupted during download.");
 		}
 		if ( file_put_contents($execmd5path, $md5sum) === FALSE ) {
-			return error("Could not write md5sum to file.");
+			error("Could not write md5sum to file.");
 		}
 
 		logmsg(LOG_DEBUG, "Unzipping");
@@ -202,7 +202,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 				$source = "";
 				foreach ($langexts as $lang => $langext) {
 					if ( ($handle = opendir($execpath)) === FALSE ) {
-						return error("Could not open $execpath");
+						error("Could not open $execpath");
 					}
 					while ( ($file = readdir($handle)) !== FALSE ) {
 						$ext = pathinfo($file, PATHINFO_EXTENSION);
@@ -238,7 +238,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 					break;
 				}
 				if ( file_put_contents($execbuildpath, $buildscript) === FALSE ) {
-					return error("Could not write file 'build' in $exepath");
+					error("Could not write file 'build' in $exepath");
 				}
 				chmod($execbuildpath, 0755);
 			}
