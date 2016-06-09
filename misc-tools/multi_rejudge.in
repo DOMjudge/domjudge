@@ -100,7 +100,7 @@ while ( TRUE ) {
 
 	$rows = $DB->q('SELECT submitid,COUNT(*) AS cnt
 	                FROM judging
-	                WHERE cid=%i
+	                WHERE cid=%i AND valid=1
 	                GROUP BY submitid', $cid);
 	while ( $row = $rows->next() ) {
 		if ( $row['cnt'] >= $numact_jh ) {

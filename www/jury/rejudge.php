@@ -53,20 +53,18 @@ if ( IS_ADMIN && ($table == 'submission') ) $include_all = true;
 $res = null;
 $cids = getCurContests(FALSE);
 if ( !empty($cids) ) {
-	$restrictions = 'result != \'correct\' AND result IS NOT NULL AND ';
+	// Do not include pending/queued or ignored submissions in rejudge.
+	$restrictions = 'result IS NOT NULL AND s.valid=1 AND ';
 	if ( $include_all ) {
-		if ( $full_rejudge ) {
-			// do not include pending/queued submissions in rejudge
-			$restrictions = 'result IS NOT NULL AND ';
-		} else {
-			$restrictions = '';
-		}
+		if ( !$full_rejudge ) $restrictions = '';
+	} else {
+		$restrictions .= 'result != \'correct\' AND '
 	}
 	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid, s.rejudgingid
 	               FROM judging j
 	               LEFT JOIN submission s USING (submitid)
 	               WHERE j.cid IN (%Ai) AND j.valid = 1 AND ' .
-		      $restrictions .
+	              $restrictions .
 	              $tablemap[$table] . ' = %s', $cids, $id);
 }
 
