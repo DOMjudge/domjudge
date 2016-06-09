@@ -275,6 +275,9 @@ AC_ARG_ENABLE(static-linking,AS_HELP_STRING([--enable-static-linking],
 if test "x$enable_static_linking" = "xyes"; then
 	AC_SUBST(STATIC_LINK_START,[-Wl,-Bstatic])
 	AC_SUBST(STATIC_LINK_END,  [-Wl,-Bdynamic])
+else
+	AC_SUBST(STATIC_LINK_START,[''])
+	AC_SUBST(STATIC_LINK_END,  [''])
 fi
 
 # Check option to build documentation. This option is provided to
