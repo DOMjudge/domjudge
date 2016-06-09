@@ -602,36 +602,35 @@ if ( $lastjud!==NULL ) {
 // evaluation is off.
 if ( !empty($jud['result']) ) {
 
-	// display verification data: verified, by whom, and comment.
-	// only if this is a valid judging, otherwise irrelevant
-	if ( $jud['valid'] || (isset($jud['rejudgingid']) && $jud['rvalid'])) {
-		$verification_required = dbconfig_get('verification_required', 0);
-		if ( ! ($verification_required && $jud['verified']) ) {
+	// We cannot revert a verification of a valid judging when
+	// verification_required is set.
+	$verification_required = dbconfig_get('verification_required', 0);
+	$verify_change_allowed = !($verification_required && $jud['verified'] && $jud['valid']);
+	if ( $verify_change_allowed ) {
 
-			$val = ! $jud['verified'];
+		$val = ! $jud['verified'];
 
-			echo addForm('verify.php') .
-			    addHidden('id',  $jud['judgingid']) .
-			    addHidden('val', $val) .
-			    addHidden('redirect', @$_SERVER['HTTP_REFERER']);
+		echo addForm('verify.php') .
+		   addHidden('id',  $jud['judgingid']) .
+		    addHidden('val', $val) .
+		    addHidden('redirect', @$_SERVER['HTTP_REFERER']);
+	}
+
+	// Display verification data: verified, by whom, and comment.
+	echo "<p>Verified: <strong>" . printyn($jud['verified']) . "</strong>";
+	if ( $jud['verified'] && ! empty($jud['jury_member']) ) {
+		echo ", by " . specialchars($jud['jury_member']);
+		if ( !empty($jud['verify_comment']) ) {
+			echo ' with comment "'.specialchars($jud['verify_comment']).'"';
 		}
+	}
 
-		echo "<p>Verified: " .
-		    "<strong>" . printyn($jud['verified']) . "</strong>";
-		if ( $jud['verified'] && ! empty($jud['jury_member']) ) {
-			echo ", by " . specialchars($jud['jury_member']);
-			if ( !empty($jud['verify_comment']) ) {
-				echo ' with comment "'.specialchars($jud['verify_comment']).'"';
-			}
-		}
-
-		if ( ! ($verification_required && $jud['verified']) ) {
-			echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
-			if ( $val ) echo ' with comment ' . addInput('comment', '', 25);
-			echo "</p>" . addEndForm();
-		} else {
-			echo "</p>\n";
-		}
+	if ( $verify_change_allowed ) {
+		echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
+		if ( $val ) echo ' with comment ' . addInput('comment', '', 25);
+		echo "</p>" . addEndForm();
+	} else {
+		echo "</p>\n";
 	}
 } else { // judging does not have a result yet
 		echo "<p><b>Judging is not ready yet!</b></p>\n";
