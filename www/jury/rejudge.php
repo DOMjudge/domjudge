@@ -58,7 +58,7 @@ if ( !empty($cids) ) {
 	if ( $include_all ) {
 		if ( !$full_rejudge ) $restrictions = '';
 	} else {
-		$restrictions .= 'result != \'correct\' AND '
+		$restrictions .= 'result != \'correct\' AND ';
 	}
 	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid, s.rejudgingid
 	               FROM judging j
