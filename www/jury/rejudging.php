@@ -222,7 +222,7 @@ function addVerdict($unknownVerdict, &$verdicts, &$table) {
 foreach ($new_verdicts as $submitid => $new_verdict) {
 	$orig_verdict = $orig_verdicts[$submitid];
 
-	// add verdicts to data structures if they are unkown up to now
+	// add verdicts to data structures if they are unknown up to now
 	foreach (array($new_verdict, $orig_verdict) as $verdict) {
 		if ( !array_key_exists($verdict, $verdicts) ) {
 			addVerdict($verdict, $verdicts, $table);
