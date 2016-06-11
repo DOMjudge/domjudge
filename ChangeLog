@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 5.1.2 - DEV
--------------------
+Version 5.1.2 - 11 June 2016
+----------------------------
  - Don't compare unfreeze- and deactivatetime when latter is unset.
  - Print problems sorted by label as required by JSON scoreboard spec.
  - Fix importing penalty-time and freezetime from contest.yaml.
