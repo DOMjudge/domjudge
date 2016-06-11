@@ -7,6 +7,10 @@
  */
 
 require('init.php');
+require_once(LIBVENDORDIR . '/autoload.php');
+Twig_Autoloader::register();
+$loader = new Twig_Loader_Filesystem('.');
+$twig = new Twig_Environment($loader);
 
 $INOROUT = array('input','output');
 $FILES   = array('input','output','image');
@@ -59,18 +63,17 @@ if ( isset($_GET['fetch']) && in_array($_GET['fetch'], $FILES) ) {
 }
 
 // We may need to re-update the testcase data, so make it a function.
-function get_testcase_data()
+function read_testdata($probid)
 {
-	global $DB, $data, $probid;
-
-	$data = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
-	                description, sample, image_type,
-	                OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-	                OCTET_LENGTH(output) AS size_output, md5sum_output,
-	                OCTET_LENGTH(image)  AS size_image
-	                FROM testcase WHERE probid = %i ORDER BY rank', $probid);
+	global $DB;
+	return $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
+	               description, sample, image_type,
+	               OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+	               OCTET_LENGTH(output) AS size_output, md5sum_output,
+	               OCTET_LENGTH(image)  AS size_image
+	               FROM testcase WHERE probid = %i ORDER BY rank', $probid);
 }
-get_testcase_data();
+$data = read_testdata($probid);
 
 // Reorder testcases
 if ( isset ($_GET['move']) ) {
@@ -115,8 +118,6 @@ if ( isset ($_GET['move']) ) {
 $title = 'Testcases for problem p'.specialchars(@$probid).' - '.specialchars($prob['name']);
 
 require(LIBWWWDIR . '/header.php');
-
-echo "<h1>" . $title ."</h1>\n\n";
 
 $result = '';
 if ( isset($_POST['probid']) && IS_ADMIN ) {
@@ -167,12 +168,12 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 		}
 	}
 
-	if ( isset($_POST['sample'][$rank]) ) {
-		$DB->q('UPDATE testcase SET sample = %i WHERE probid = %i
-		        AND rank = %i', $_POST['sample'][$rank], $probid, $rank);
+	$affected = $DB->q('RETURNAFFECTED UPDATE testcase SET sample = %i WHERE probid = %i
+		AND rank = %i', isset($_POST['sample'][$rank]), $probid, $rank);
+	if ( $affected ) {
 		$result .= "<li>Set testcase $rank to be " .
-		           ($_POST['sample'][$rank] ? "" : "not ") .
-		           "a sample testcase</li>\n";
+			   (isset($_POST['sample'][$rank]) ? "" : "not ") .
+			   "a sample testcase</li>\n";
 	}
 
 	if ( isset($_POST['description'][$rank]) ) {
@@ -233,10 +234,8 @@ if ( isset($_POST['probid']) && IS_ADMIN ) {
 	}
 }
 if ( !empty($result) ) {
-	echo "<ul>\n$result</ul>\n\n";
-
 	// Reload testcase data after updates
-	get_testcase_data();
+	$data = read_testdata($probid);
 }
 
 // Check if ranks must be renumbered (if test cases have been deleted).
@@ -254,113 +253,23 @@ if ( count($data)<(int)key($data) ) {
 	echo "<p>Test case rankings reordered.</p>\n\n";
 
 	// Reload testcase data after updates
-	get_testcase_data();
+	$data = read_testdata($probid);
 }
 
 echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem p" .
 	specialchars($probid) . "</a></p>\n\n";
 
+echo $twig->loadTemplate('testcase.phtml')->render(array(
+	'title' => $title,
+	'testdata' => $data,
+	'probid' => $probid,
+	'is_admin' => IS_ADMIN,
+	'result' => $result
+));
+
 if ( IS_ADMIN ) {
 	echo addForm($pagename, 'post', null, 'multipart/form-data') .
 	    addHidden('probid', $probid);
-}
-
-if ( count($data)==0 ) {
-	echo "<p class=\"nodata\">No testcase(s) yet.</p>\n";
-} else {
-	?>
-<table class="list testcases">
-<thead><tr>
-<th scope="col">#</th><th scope="col">download</th>
-<th scope="col">size</th><th scope="col">md5</th>
-<?php
-	if ( IS_ADMIN ) echo '<th scope="col">upload new</th>';
-?><th scope="col">sample</th><th scope="col">description / image</th><th></th>
-</tr></thead>
-<tbody>
-<?php
-}
-
-foreach( $data as $rank => $row ) {
-	foreach($INOROUT as $inout) {
-		echo '<tr' . ( $inout=='output' ? ' class="testcase-middle"' : '' ) . '>';
-		if ( $inout=='input' ) {
-			echo "<td rowspan=\"2\" class=\"testrank\">" .
-			    "<a href=\"./testcase.php?probid=" . urlencode($probid) .
-			    "&amp;rank=$rank&amp;move=up\">&uarr;</a>$rank" .
-			    "<a href=\"./testcase.php?probid=" . urlencode($probid) .
-			    "&amp;rank=$rank&amp;move=down\">&darr;</a></td>";
-		}
-		echo "<td class=\"filename\"><a href=\"./testcase.php?probid=" .
-		    urlencode($probid) . "&amp;rank=$rank&amp;fetch=" . $inout . "\">" .
-		    filebase($probid,$rank) . substr($inout,0,-3) . "</a></td>" .
-		    "<td class=\"size\">" . printsize($row["size_$inout"]) . "</td>" .
-		    "<td class=\"md5\">" . specialchars($row["md5sum_$inout"]) . "</td>";
-		if ( IS_ADMIN ) {
-		    echo "<td>" . addFileField("update_".$inout."[$rank]") . "</td>";
-		}
-		if ( $inout=='input' ) {
-			if ( IS_ADMIN ) {
-				echo "<td rowspan=\"2\"	class=\"testsample\" onclick=\"editTcSample($rank)\">" .
-				    addSelect("sample[$rank]",array("no", "yes"), $row['sample'], true) . "</td>";
-
-				// hide sample dropdown field if javascript is enabled
-				echo "<script type=\"text/javascript\">" .
-				    "hideTcSample($rank, '". printyn($row['sample'])."');</script>";
-				echo "<td class=\"testdesc\" onclick=\"editTcDesc($rank)\">" .
-				    "<textarea id=\"tcdesc_$rank\" name=\"description[$rank]\" cols=\"50\" rows=\"1\">" .
-				    specialchars($row['description']) . "</textarea></td>" .
-				    "<td rowspan=\"2\" class=\"editdel\">" .
-				    "<a href=\"delete.php?table=testcase&amp;testcaseid=$row[testcaseid]&amp;referrer=" .
-				    urlencode('testcase.php?probid='.$probid) . "\">" .
-				    "<img src=\"../images/delete.png\" alt=\"delete\"" .
-				    " title=\"delete this testcase\" class=\"picto\" /></a></td>";
-			} else {
-				echo "<td rowspan=\"2\" align=\"testsample\">" .
-					printyn($row['sample']) . "</td>";
-				echo "<td class=\"testdesc\">" .
-				    specialchars($row['description']) . "</td>";
-			}
-		} else {
-			echo '<td class="testimage filename">';
-			if ( $row['size_image'] ) {
-				echo "<a href=\"./testcase.php?probid=" . urlencode($probid) .
-				    "&amp;rank=$rank&amp;fetch=image\">" .
-				    filebase($probid,$rank). $row['image_type'] . "</a>";
-			} else {
-				echo '<span class="nodata">No image.</span>';
-			}
-			if ( IS_ADMIN ) {
-				echo '&nbsp;' . addFileField("update_image[$rank]");
-			}
-			echo "</td>";
-		}
-		echo "</tr>\n";
-	}
-}
-
-if ( count($data)!=0 ) echo "</tbody>\n</table>\n";
-
-if ( IS_ADMIN ) {
-	echo "<script type=\"text/javascript\">\n";
-	foreach ( $data as $rank => $row ) {
-		echo "hideTcDescEdit($rank);\n";
-	}
-	echo "</script>\n\n";
-
-?>
-<h3>Create new testcase</h3>
-
-<table>
-<tr><td>Input testdata: </td><td><?php echo addFileField('add_input')  ?></td></tr>
-<tr><td>Output testdata:</td><td><?php echo addFileField('add_output') ?></td></tr>
-<tr><td>Sample testcase:</td><td><?php echo addSelect('add_sample', array("no","yes"), 0, true);?></td></tr>
-<tr><td>Description:    </td><td><?php echo addInput('add_desc','',30); ?></td></tr>
-<tr><td>Image:          </td><td><?php echo addFileField('add_image') ?></td></tr>
-</table>
-<?php
-
-	echo "<br />" . addSubmit('Submit all changes') . addEndForm();
 }
 
 require(LIBWWWDIR . '/footer.php');
