@@ -4,15 +4,16 @@
 	"homepage": "https://www.domjudge.org",
 	"license": "GPL-2.0+",
 	"require": {
-		"php": ">= 5.4",
-		"ext-mbstring": "*",
-		"ext-mysqli": "*",
-		"ext-json": "*",
 		"ext-curl": "*",
-		"mustangostang/spyc": "0.5.*",
-		"jumbojett/openid-connect-php": "0.1.*",
+		"ext-gmp": "*",
+		"ext-json": "*",
+		"ext-mbstring": "*",
 		"ext-mcrypt": "*",
-		"ext-gmp": "*"
+		"ext-mysqli": "*",
+		"jumbojett/openid-connect-php": "0.1.*",
+		"mustangostang/spyc": "0.5.*",
+		"php": ">= 5.4",
+		"twig/twig": "~1.0"
 	},
 	"config": {
 		"vendor-dir": "lib/vendor"
