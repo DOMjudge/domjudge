@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 5.0.4 - DEV
--------------------
+Version 5.0.4 - 11 June 2016
+----------------------------
  - Add workaround for direct array indexing of function results not
    being supported in PHP < 5.4 yet.
  - Don't compare unfreeze- and deactivatetime when latter is unset.
