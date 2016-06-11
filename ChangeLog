@@ -17,6 +17,7 @@ Version 5.0.4 - DEV
  - Don't raise error when post_max_size=0, since that means unlimited.
  - Fix editing of executable metadata. Thanks Josse van Dobben de Bruyn.
  - In the REST API write SQL debug info to logfile to not break the API.
+ - Fix variable name typo in www/jury/testcase.php.
  - Fix installing all SQL upgrade scripts.
  - Various small updates to the admin and jury manuals.
 
