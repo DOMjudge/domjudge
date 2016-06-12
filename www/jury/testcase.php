@@ -9,7 +9,7 @@
 require('init.php');
 require_once(LIBVENDORDIR . '/autoload.php');
 Twig_Autoloader::register();
-$loader = new Twig_Loader_Filesystem('.');
+$loader = new Twig_Loader_Filesystem(array('.', LIBWWWDIR));
 $twig = new Twig_Environment($loader);
 
 $twig->addFilter(new Twig_SimpleFilter('humansize', 'printsize'));

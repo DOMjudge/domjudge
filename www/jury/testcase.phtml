@@ -1,15 +1,13 @@
 {% import _self as this %}
+{% import 'forms.phtml' as forms %}
 
 {% macro filename(probid, rank, suffix) %}
 	p{{ probid }}.t{{ rank }}.{{ suffix }}
 {% endmacro %}
 
 {% macro update_fileform(rank, type) %}
-	<input type="file" name="update_{{ type }}[{{ rank }}]" id="update_{{ type }}_{{ rank }}_" />
-{% endmacro %}
-
-{% macro fileform(name) %}
-	<input type="file" name="{{ name  }}" id="{{ name }}" />
+	{% import 'forms.phtml' as forms %}
+	{{ forms.fileField('update_' ~ type ~ '[' ~ rank ~ ']') }}
 {% endmacro %}
 
 {% macro testfile(probid, rank, type, suffix, size, md5, is_admin) %}
@@ -41,7 +39,7 @@
 {% endif %}
 
 {% if is_admin %}
-<form action="testcase.php" method="post" enctype="multipart/form-data">
+	{{ forms.form('testcase.php', 'post', 'multipart/form-data') }}
 {% endif %}
 
 {% if not testdata %}
@@ -101,17 +99,17 @@
 	<h3>Create new testcase</h3>
 
 	<table>
-	<tr><td>Input testdata: </td><td>{{ this.fileform("add_input") }}</td></tr>
-	<tr><td>Output testdata:</td><td>{{ this.fileform("add_output") }}</td></tr>
+	<tr><td>Input testdata: </td><td>{{ forms.fileField("add_input") }}</td></tr>
+	<tr><td>Output testdata:</td><td>{{ forms.fileField("add_output") }}</td></tr>
 	<tr><td>Sample testcase:</td><td><input type="checkbox" name="add_sample" value="add_sample" /></td></tr>
 	<tr><td>Description:    </td><td><input type="text" name="add_desc" id="add_desc" value=""  size="30" /></td></tr>
-	<tr><td>Image:          </td><td>{{ this.fileform("add_image") }}</td></tr>
+	<tr><td>Image:          </td><td>{{ forms.fileField("add_image") }}</td></tr>
 	</table>
 
-	<input type="submit" name="submit" value="Submit all changes" />
-	<input type="hidden" name="probid" value="{{ probid }}" />
+	{{ forms.submit('Submit all changes') }}
+	{{ forms.hidden('probid', probid) }}
 	{% endif %}
 
 {% if is_admin %}
-</form>
+	{{ forms.endForm() }}
 {% endif %}
