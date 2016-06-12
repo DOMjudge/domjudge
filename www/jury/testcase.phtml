@@ -32,6 +32,8 @@
 
 <h1>{{title}}</h1>
 
+<p><a href="problem.php?id={{ probid | url_encode }}">Back to problem p{{ probid }}</a></p>
+
 {% if result is not empty %}
 <ul>
     {{ result | raw }}

@@ -113,8 +113,6 @@ if ( isset ($_GET['move']) ) {
 
 $title = 'Testcases for problem p'.specialchars(@$probid).' - '.specialchars($prob['name']);
 
-require(LIBWWWDIR . '/header.php');
-
 $result = '';
 if ( isset($_POST['probid']) && IS_ADMIN ) {
 
@@ -246,14 +244,13 @@ if ( count($data)<(int)key($data) ) {
 		        WHERE probid = %i AND rank = %i', $newrank++, $probid, $rank);
 	}
 
-	echo "<p>Test case rankings reordered.</p>\n\n";
+	$result .= "<li>Test case rankings reordered.</li>\n";
 
 	// Reload testcase data after updates
 	$data = read_testdata($probid);
 }
 
-echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem p" .
-	specialchars($probid) . "</a></p>\n\n";
+require(LIBWWWDIR . '/header.php');
 
 renderPage(array(
 	'title' => $title,
