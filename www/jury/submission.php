@@ -577,7 +577,7 @@ if ( @$jud['result']!=='compiler-error' ) {
 	if ( isset($max_lastruntime) ) {
 		echo " <span class=\"lastruntime\">(<a href=\"submission.php?id=$lastsubmitid\">s$lastsubmitid</a>: "
 			. sprintf('%.2f/%.2fs',$max_lastruntime,$sum_lastruntime) .
-			")</span>";
+			")</span>\n";
 	}
 
 	echo "<table>\n$tclist";
@@ -711,7 +711,6 @@ foreach ( $runs as $run ) {
 	}
 
 	if ( $run['runresult'] !== 'correct' ) {
-		echo "<pre class=\"output_text\">";
 		// TODO: can be improved using diffposition.txt
 		// FIXME: only show when diffposition.txt is set?
 		// FIXME: cut off after XXX lines
@@ -734,7 +733,7 @@ foreach ( $runs as $run ) {
 		$lastErr  += $contextLines;
 		$firstErr = max(0, $firstErr);
 		$lastErr  = min(sizeof($diffs)-1, $lastErr);
-		echo "<table class=\"lcsdiff\">\n";
+		echo "<br/>\n<table class=\"lcsdiff output_text\">\n";
 		if ($firstErr > 0) {
 			echo "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
 		}
@@ -744,9 +743,7 @@ foreach ( $runs as $run ) {
 		if ($lastErr < sizeof($diffs) - 1) {
 			echo "<tr><td class=\"linenr\">[...]</td><td/></tr>\n";
 		}
-		echo "</table>";
-
-		echo "</pre>\n\n";
+		echo "</table>\n";
 	}
 
 	echo "<h5>Program output</h5>\n";
