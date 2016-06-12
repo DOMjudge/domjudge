@@ -94,14 +94,9 @@ switch ($kind) {
 }
 
 echo "<tr><td>Judgehost log snippet:</td><td>";
-echo "<pre class=\"output_text\">";
+echo "<pre class=\"output_text\">\n";
 echo specialchars(base64_decode($edata['judgehostlog']));
-echo "</pre>";
-echo "</td></tr>\n";
-
-echo "</td></tr>\n";
-
-echo "</table>\n\n";
+echo "</pre></td></tr>\n</table>\n\n";
 
 
 if ( $edata['status'] == 'open' ) {
