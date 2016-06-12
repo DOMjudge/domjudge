@@ -107,10 +107,8 @@ INSTALLDEBS="default-jre-headless locales"
 # Packages to remove after upgrade (space separated):
 REMOVEDEBS=""
 
-# Which debootstrap package to install on non-Ubuntu systems:
-# This is only used when the default distro changed from Debian to
-# Ubuntu. The version below corresponds to Ubuntu 16.04 Xenial.
-DEBOOTDEB="debootstrap_1.0.78+nmu1ubuntu1.1_all.deb"
+# Which debootstrap package to install on non-Debian systems:
+DEBOOTDEB="debootstrap_1.0.67_all.deb"
 
 # The Debian mirror/proxy below can be passed as environment
 # variables; if none are given the following defaults are used.
@@ -138,8 +136,10 @@ INSTALLDEBS="default-jre-headless locales"
 # Packages to remove after upgrade (space separated):
 REMOVEDEBS=""
 
-# Which debootstrap package to install on non-Debian/Ubuntu systems:
-DEBOOTDEB="debootstrap_1.0.59_all.deb"
+# Which debootstrap package to install on non-Ubuntu systems:
+# This is only used when the default distro changed from Debian to
+# Ubuntu. The version below corresponds to Ubuntu 16.04 Xenial.
+DEBOOTDEB="debootstrap_1.0.78+nmu1ubuntu1.1_all.deb"
 
 # The Debian mirror/proxy below can be passed as environment
 # variables; if none are given the following defaults are used.
