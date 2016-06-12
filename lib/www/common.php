@@ -701,12 +701,16 @@ function putgetMainExtension($langdata) {
  * Render page with help of twig.
  * Assumes rendering template in file with same base name and suffix .phtml
  */
-function renderPage($data, $templateFile = null) {
+function renderPage($data, $header = true, $footer = true, $templateFile = null) {
 	if ( empty($templateFile) ) {
 		$templateFile = $_SERVER['PHP_SELF'];
 	}
 	$templateFile = basename($templateFile, '.php') . '.phtml';
 
+	if ( $header ) require(LIBWWWDIR . '/header.php');
+
 	global $twig;
 	echo $twig->loadTemplate($templateFile)->render($data);
+
+	if ( $footer ) require(LIBWWWDIR . '/footer.php');
 }

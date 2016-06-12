@@ -250,8 +250,6 @@ if ( count($data)<(int)key($data) ) {
 	$data = read_testdata($probid);
 }
 
-require(LIBWWWDIR . '/header.php');
-
 renderPage(array(
 	'title' => $title,
 	'testdata' => $data,
@@ -259,5 +257,3 @@ renderPage(array(
 	'is_admin' => IS_ADMIN,
 	'result' => $result
 ));
-
-require(LIBWWWDIR . '/footer.php');
