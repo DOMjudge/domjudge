@@ -111,7 +111,7 @@
 	{% if extraattrs is not null %}
 		{% set attr = attr ~ ' ' ~ extraattrs %}
 	{% endif %}
-	{{ this.inputField('text', name, value, attr) }}
+	{{ this.inputField('submit', name, value, attr) }}
 {% endmacro %}
 
 {# form reset button, value = caption #}
