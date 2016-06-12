@@ -1,3 +1,6 @@
+<?php
+global $updates;
+?>
 <nav><div id="menutop">
 <a href="index.php" accesskey="h"><span class="octicon octicon-home"></span> home</a>
 <?php	if ( checkrole('balloon') ) { ?>
