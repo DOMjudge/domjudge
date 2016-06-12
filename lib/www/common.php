@@ -696,3 +696,17 @@ function putgetMainExtension($langdata) {
 	}
 	echo "\t\tdefault: return '';\n\t}\n}\n\n";
 }
+
+/**
+ * Render page with help of twig.
+ * Assumes rendering template in file with same base name and suffix .phtml
+ */
+function renderPage($data, $templateFile = null) {
+	if ( empty($templateFile) ) {
+		$templateFile = $_SERVER['PHP_SELF'];
+	}
+	$templateFile = basename($templateFile, '.php') . '.phtml';
+
+	global $twig;
+	echo $twig->loadTemplate($templateFile)->render($data);
+}

@@ -255,7 +255,7 @@ if ( count($data)<(int)key($data) ) {
 echo "<p><a href=\"problem.php?id=" . urlencode($probid) . "\">back to problem p" .
 	specialchars($probid) . "</a></p>\n\n";
 
-echo $twig->loadTemplate('testcase.phtml')->render(array(
+renderPage(array(
 	'title' => $title,
 	'testdata' => $data,
 	'probid' => $probid,
