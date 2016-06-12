@@ -27,11 +27,7 @@ require_once(LIBWWWDIR . '/auth.php');
 if ( @$_POST['cmd']=='login' ) do_login();
 if ( !logged_in() ) show_loginpage();
 
-if ( checkrole('admin') ) {
-	define('IS_ADMIN', true);
-} else {
-	define('IS_ADMIN', false);
-}
+define('IS_ADMIN', checkrole('admin'));
 
 if ( !isset($REQUIRED_ROLES) ) $REQUIRED_ROLES = array('jury');
 $allowed = false;
