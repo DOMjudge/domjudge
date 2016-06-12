@@ -154,7 +154,7 @@ $data = $DB->q('MAYBETUPLE SELECT execid, description, md5sum, type,
                                   OCTET_LENGTH(zipfile) AS size
                 FROM executable WHERE execid = %s', $id);
 
-if ( ! $data ) error("Missing or invalid problem id");
+if ( ! $data ) error("Missing or invalid executable id");
 
 echo "<h1>Executable ".specialchars($id)."</h1>\n\n";
 
