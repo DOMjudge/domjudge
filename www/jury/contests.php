@@ -17,7 +17,8 @@ if ( isset($_POST['donow']) ) {
 
 	$docid = $_POST['cid'];
 
-	$time = key($_POST['donow']);
+	// The first array encodes the contest ID, second level the time.
+	$time = key(reset($_POST['donow']));
 	if ( !in_array($time, $times) ) error("Unknown value for timetype");
 
 	$now = floor($now);
@@ -83,7 +84,7 @@ if ( empty($curcids) )  {
 		     ' (' . specialchars($row['shortname']) . ')' .
 		     "</em>; active from " . printtime($row['activatetime'], '%a %d %b %Y %T %Z') .
 		     "<br /><br />\n";
-		if ( IS_ADMIN ) echo addSubmit("activate now", "donow[activate]");
+		if ( IS_ADMIN ) echo addSubmit("activate now", "donow[$row[cid]][activate]");
 		echo "</form>\n\n";
 	} else {
 		echo "<p class=\"nodata\">No upcoming contest</p>\n";
@@ -150,7 +151,7 @@ if ( empty($curcids) )  {
 					($time == 'unfreeze' && $hasfrozen && !$hasunfrozen &&
 					 $hasended))
 			) {
-				echo addSubmit("$time now", "donow[$time]");
+				echo addSubmit("$time now", "donow[$row[cid]][$time]");
 			}
 
 			echo "</td></tr>";
