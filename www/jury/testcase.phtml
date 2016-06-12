@@ -84,7 +84,6 @@
 					{% if testcase.size_image > 0 %}
 						<a href="testcase.php?probid={{ probid | url_encode }}&rank={{ testcase.rank | url_encode }}&fetch=image">
 							{{ this.filename(probid, testcase.rank, testcase.image_type) }}
-							
 						</a>
 					{% else %}
 						<span class="nodata">No image.</span>
@@ -116,4 +115,3 @@
 {% if is_admin %}
 </form>
 {% endif %}
-
