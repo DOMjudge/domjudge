@@ -20,8 +20,7 @@
 		</a>
 	</td>
 	<td class="size">
-		<!-- FIXME: print sizes human readable -->
-		{{ size }}B
+		{{ size|humansize|raw }}
 	</td>
 	<td class="md5">
 		{{ md5 }}

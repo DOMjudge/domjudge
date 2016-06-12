@@ -12,6 +12,8 @@ Twig_Autoloader::register();
 $loader = new Twig_Loader_Filesystem('.');
 $twig = new Twig_Environment($loader);
 
+$twig->addFilter(new Twig_SimpleFilter('humansize', 'printsize'));
+
 $INOROUT = array('input','output');
 $FILES   = array('input','output','image');
 
