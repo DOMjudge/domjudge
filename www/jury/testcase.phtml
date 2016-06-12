@@ -41,7 +41,7 @@
 {% endif %}
 
 {% if is_admin %}
-	{{ forms.form('testcase.php', 'post', 'multipart/form-data') }}
+	{{ forms.form('testcase.php', 'post', 'null', 'multipart/form-data') }}
 {% endif %}
 
 {% if not testdata %}
@@ -89,7 +89,7 @@
 						<span class="nodata">No image.</span>
 					{% endif %}
 					{% if is_admin %}
-					&nbsp;{{ this.update_fileform(probid, "image") }}
+					&nbsp;{{ this.update_fileform(testcase.rank, "image") }}
 					{% endif %}
 				</td>
 			</tr>
