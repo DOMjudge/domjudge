@@ -263,9 +263,4 @@ renderPage(array(
 	'result' => $result
 ));
 
-if ( IS_ADMIN ) {
-	echo addForm($pagename, 'post', null, 'multipart/form-data') .
-	    addHidden('probid', $probid);
-}
-
 require(LIBWWWDIR . '/footer.php');
