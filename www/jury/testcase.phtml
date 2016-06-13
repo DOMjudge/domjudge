@@ -13,7 +13,7 @@
 {% macro testfile(probid, rank, type, suffix, size, md5, is_admin) %}
 	{% import _self as this %}
 	<td class="filename">
-		<a href="testcase.php?probid={{ probid | url_encode }}&rank={{ rank | url_encode }}&fetch={{ type | url_encode }}">
+		<a href="testcase.php?probid={{ probid | url_encode }}&amp;rank={{ rank | url_encode }}&amp;fetch={{ type | url_encode }}">
 			{{ this.filename(probid, rank, suffix) }}
 		</a>
 	</td>
@@ -64,9 +64,9 @@
 		{% for testcase in testdata %}
 			<tr>
 				<td rowspan="2" class="testrank">
-					<a href="testcase.php?probid={{ probid | url_encode }}&rank={{ testcase.rank | url_encode }}&move=up">&uarr;</a>
+					<a href="testcase.php?probid={{ probid | url_encode }}&amp;rank={{ testcase.rank | url_encode }}&amp;move=up">&uarr;</a>
 					{{ testcase.rank }}
-					<a href="testcase.php?probid={{ probid | url_encode }}&rank={{ testcase.rank | url_encode }}&move=down">&darr;</a>
+					<a href="testcase.php?probid={{ probid | url_encode }}&amp;rank={{ testcase.rank | url_encode }}&amp;move=down">&darr;</a>
 				</td>
 				<td rowspan="2" class="testsample">
 					<input type="checkbox" name="sample[{{ testcase.rank }}]" value="sample"
@@ -82,7 +82,7 @@
 				{{ this.testfile(probid, testcase.rank, "output", "out", testcase.size_output, testcase.md5sum_output, is_admin) }}
 				<td class="testimage filename">
 					{% if testcase.size_image > 0 %}
-						<a href="testcase.php?probid={{ probid | url_encode }}&rank={{ testcase.rank | url_encode }}&fetch=image">
+						<a href="testcase.php?probid={{ probid | url_encode }}&amp;rank={{ testcase.rank | url_encode }}&amp;fetch=image">
 							{{ this.filename(probid, testcase.rank, testcase.image_type) }}
 						</a>
 					{% else %}
