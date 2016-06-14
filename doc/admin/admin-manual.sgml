@@ -405,14 +405,14 @@ on the team workstations where <tt>submit</tt> is installed.
 
 
 On a judgehost, the following should be sufficient. The last two lines show some
-example compilers to install for C, C++, Java (GNU), Java (OpenJDK), Haskell
-and Pascal; change the list as appropriate.
+example compilers to install for C, C++, Java (OpenJDK), Haskell and Pascal;
+change the list as appropriate.
 
 For Debian:
 <code>
 apt-get install make sudo debootstrap libcgroup-dev \
 	php5-cli php5-curl php5-json procps \
-	gcc g++ gcj-jre-headless gcj-jdk openjdk-7-jre-headless \
+	gcc g++ openjdk-7-jre-headless \
 	openjdk-7-jdk ghc fp-compiler
 </code>
 
