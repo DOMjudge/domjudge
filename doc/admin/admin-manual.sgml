@@ -406,7 +406,7 @@ on the team workstations where <tt>submit</tt> is installed.
 
 
 On a judgehost, the following should be sufficient. The last two lines show some
-example compilers to install for C, C++, Java (GNU), Java (Oracle), Haskell
+example compilers to install for C, C++, Java (GNU), Java (OpenJDK), Haskell
 and Pascal; change the list as appropriate.
 
 For Debian:
@@ -2093,7 +2093,7 @@ rules and the <tt>CHROOTORIGINAL</tt> variable in <tt>chroot-startstop.sh</tt>.
 <sect>Java compilers
 <p>
 Java is difficult to deal with in an automatic way. It is probably
-most preferable to use Oracle (previously Sun) Java, because that's the
+most preferable to use OpenJDK or Oracle Java, because that's the
 version contestants will be used to. The GNU Compiler for Java (GCJ) is
 easier to deal with but may lack some features.
 
