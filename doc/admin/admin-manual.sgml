@@ -159,9 +159,6 @@ The following software is required for running DOMjudge.
 <item> PHP &gt;= 5.4 command line interface and the curl, json, mcrypt, and gmp
        extensions.
 
-<item> <htmlurl name="composer" url="https://getcomposer.org"> for managing
-       PHP dependencies
-
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash).
 
 <item> A statically compiled POSIX shell, located in
@@ -2355,8 +2352,8 @@ additional software to be installed:
 <itemize>
 <item> The GNU autoconf/automake toolset
 
-<item> <htmlurl name="composer" url="https://getcomposer.org">
-       - PHP Package Manager
+<item> <htmlurl name="Composer" url="https://getcomposer.org">
+       - PHP Package Manager.
 
 <item> Linuxdoc and groff to build the admin and judge
        documentation from SGML sources and a LaTeX installation to
@@ -2371,7 +2368,8 @@ apt-get install autoconf automake git
 </code>
 
 Composer can be installed by following the documentation located
-<htmlurl name="here" url="https://getcomposer.org/download">.
+<htmlurl name="here" url="https://getcomposer.org/download">, or since
+Debian Stretch by installing the package <tt>composer</tt>.
 
 When this software is present, bootstrapping can be done by running
 <tt>make dist</tt>, which creates the <tt>configure</tt> script and
