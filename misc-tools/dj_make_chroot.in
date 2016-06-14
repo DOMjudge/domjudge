@@ -113,8 +113,8 @@ DEBOOTDEB="debootstrap_1.0.67_all.deb"
 # The Debian mirror/proxy below can be passed as environment
 # variables; if none are given the following defaults are used.
 
-# Debian mirror. http.debian.net will pick the 'closest'.
-[ -z "$DEBMIRROR" ] && DEBMIRROR="http://http.debian.net/debian"
+# Debian mirror. httpredir.debian.org will pick the 'closest'.
+[ -z "$DEBMIRROR" ] && DEBMIRROR="http://httpredir.debian.org/debian"
 
 # A local caching proxy to use for apt-get,
 # (typically an install of aptcacher-ng), for example:
