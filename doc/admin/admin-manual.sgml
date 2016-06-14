@@ -822,8 +822,7 @@ Interpreted languages and non-statically linked binaries (for example,
 Oracle Java) can in principle also be used, but require that all
 dependencies are added to the chroot environment.
 DOMjudge comes with helper scripts to build a chroot environment:
-run either <tt>sudo dj_make_chroot</tt> or <tt>sudo dj_make_ubuntu_chroot</tt>
-as root (for a Debian or Ubuntu-based chroot, respectively).
+run <tt>sudo bin/dj_make_chroot</tt>.
 Options can be given change the target directory where to build the
 chroot environment (normally the default from configure is used) and
 to select the target machine architecture.
@@ -2074,10 +2073,8 @@ environment which contains all necessary ingredients to let the
 submissions run. DOMjudge supports this with some manual setup.
 
 First of all, a chroot tree with those interpreters or runtimes needs to
-be created. The script <tt>bin/dj_make_chroot</tt> creates one from
-Debian GNU/Linux sources. Alternatively, the script
-<tt>bin/dj_make_ubuntu_chroot</tt> creates one based on Ubuntu.
-Add the required packages for the needed
+be created. The script <tt>bin/dj_make_chroot</tt> can create one from
+Debian or Ubuntu GNU/Linux sources. Add the required packages for the needed
 languages to the <tt>INSTALLDEBS</tt> variable in the script; run the
 script without arguments for basic usage information.
 
