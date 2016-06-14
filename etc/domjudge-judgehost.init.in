@@ -56,7 +56,7 @@ fi
 
 # Check that the chroot is created/set up properly
 if [ ! -d $CHROOTDIR ]; then
-	echo "Warning: chroot $CHROOTDIR not created. Run dj_make_chroot or dj_make_ubuntu_chroot to create it."
+	echo "Warning: chroot $CHROOTDIR not created. Run dj_make_chroot to create it."
 fi
 
 
