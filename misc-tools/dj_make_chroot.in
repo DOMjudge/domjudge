@@ -1,8 +1,8 @@
 #!/bin/sh
 # @configure_input@
 #
-# Script to generate a basic chroot environment with Oracle (Sun) Java
-# support to allow for Java programs to run in a chroot.
+# Script to generate a basic chroot environment with a Java JRE
+# to allow for Java programs to run in a chroot.
 #
 # This script downloads and installs a Debian or Ubuntu base system.
 # Minimum requirements: a Linux system with glibc >= 2.3, wget, ar and
@@ -47,7 +47,7 @@ fi
 usage()
 {
     echo "Usage: $0 [-d <chrootdir>] [-D <distro>] [-a <architecture>]"
-    echo "Creates a chroot environment with Oracle (Sun) Java support using the"
+    echo "Creates a chroot environment with Java JRE support using the"
     echo "Debian or Ubuntu GNU/Linux distribution."
     echo
     echo "This script must be run as root, <chrootdir> is the non-existing target"
