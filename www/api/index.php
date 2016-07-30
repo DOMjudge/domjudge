@@ -221,9 +221,19 @@ $api->provideFunction('GET', 'problems', $doc, $args, $exArgs);
  */
 function judgings($args)
 {
-	global $DB;
+	global $DB, $userdata;
 
 	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE description = "problem judged"';
+
+	// Note that we rely on the events table not listing judgings of
+	// submissions that were received too late.
+	if ( ! checkrole('jury') ) { // This implies we must be a team
+		$query .= ' AND teamid = %i';
+		$teamid = $userdata['teamid'];
+	} else {
+		$query .= ' %_';
+		$teamid = 0;
+	}
 
 	$hasCid = array_key_exists('cid', $args);
 	$query .= ($hasCid ? ' AND cid = %i' : ' %_');
@@ -237,6 +247,10 @@ function judgings($args)
 	$query .= ($hasJudgingid ? ' AND judgingid = %i' : ' %_');
 	$judgingid = ($hasJudgingid ? $args['judgingid'] : 0);
 
+	$hasSubmitid = array_key_exists('submitid', $args);
+	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' %_');
+	$submitid = ($hasSubmitid ? $args['submitid'] : 0);
+
 	$query .= ' ORDER BY eventid';
 
 	$hasLimit = array_key_exists('limit', $args);
@@ -244,7 +258,7 @@ function judgings($args)
 	$limit = ($hasLimit ? $args['limit'] : -1);
 	// TODO: validate limit
 
-	$q = $DB->q($query, $cid, $fromId, $judgingid, $limit);
+	$q = $DB->q($query, $teamid, $cid, $fromId, $judgingid, $submitid, $limit);
 	$res = array();
 	while ( $row = $q->next() ) {
 		$data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result FROM judging j
@@ -263,14 +277,15 @@ function judgings($args)
 	}
 	return $res;
 }
-$doc = 'Get all judgings (including those post-freeze, so currently limited to jury).';
+$doc = 'Get all or selected judgings. This includes those post-freeze, so currently limited to jury, or as a team but then restricted your own submissions.';
 $args = array('cid' => 'Contest ID. If not provided, get judgings of all active contests',
               'result' => 'Search only for judgings with a certain result.',
               'fromid' => 'Search from a certain ID',
               'judgingid' => 'Search only for a certain ID',
+              'submitid' => 'Search only for judgings associated to this submission ID',
               'limit' => 'Get only the first N judgings');
 $exArgs = array(array('cid' => 2), array('result' => 'correct'), array('fromid' => 800, 'limit' => 10));
-$roles = array('jury');
+$roles = array('jury','team');
 $api->provideFunction('GET', 'judgings', $doc, $args, $exArgs, $roles);
 
 function judgings_POST($args)
