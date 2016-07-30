@@ -226,15 +226,15 @@ function judgings($args)
 	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE description = "problem judged"';
 
 	$hasCid = array_key_exists('cid', $args);
-	$query .= ($hasCid ? ' AND cid = %i' : ' AND TRUE %_');
+	$query .= ($hasCid ? ' AND cid = %i' : ' %_');
 	$cid = ($hasCid ? $args['cid'] : 0);
 
 	$hasFromid = array_key_exists('fromid', $args);
-	$query .= ($hasFromid ? ' AND judgingid >= %i' : ' AND TRUE %_');
+	$query .= ($hasFromid ? ' AND judgingid >= %i' : ' %_');
 	$fromId = ($hasFromid ? $args['fromid'] : 0);
 
 	$hasJudgingid = array_key_exists('judgingid', $args);
-	$query .= ($hasJudgingid ? ' AND judgingid = %i' : ' AND TRUE %_');
+	$query .= ($hasJudgingid ? ' AND judgingid = %i' : ' %_');
 	$judgingid = ($hasJudgingid ? $args['judgingid'] : 0);
 
 	$query .= ' ORDER BY eventid';
