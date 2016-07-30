@@ -262,10 +262,15 @@ if test "x$enable_submitclient" != "xno"; then
 
 	# Check for JSONcpp library to decode language/extensions list from
 	# REST API (this also requires libcURL below).
+
+	# Note that under Debian the header files are installed under
+	# PREFIX/jsoncpp/json/json.h and not PREFIX/json/json.h since that
+	# conflicts with the libjson C library, so we check that first.
 	AC_LANG_PUSH([C++])
-	AC_CHECK_HEADERS([jsoncpp/json/json.h],AC_SUBST(LIBJSONCPP,[-ljsoncpp]),[
-		AC_MSG_ERROR([JSONcpp headers not found (required for submit client)])
-	])
+	AC_CHECK_HEADERS([jsoncpp/json/json.h json/json.h],[found_jsoncpp_headers=yes; break;],[])
+	AS_IF([test "x$found_jsoncpp_headers" != "xyes"],
+		AC_MSG_ERROR([JSONcpp headers not found (required for submit client)]),
+		AC_SUBST(LIBJSONCPP,[-ljsoncpp]))
 	AC_LANG_POP([C++])
 
 fi

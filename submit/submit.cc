@@ -11,7 +11,7 @@
 #include "submit-config.h"
 
 /* Check whether submit dependencies are available */
-#if ( ! ( HAVE_CURL_CURL_H && HAVE_JSONCPP_JSON_JSON_H ) )
+#if ( ! ( HAVE_CURL_CURL_H && ( HAVE_JSONCPP_JSON_JSON_H || HAVE_JSON_JSON_H ) ) )
 #error "libcURL or libJSONcpp not available."
 #endif
 
@@ -27,7 +27,12 @@
 #include <termios.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#ifdef HAVE_JSONCPP_JSON_JSON_H
 #include <jsoncpp/json/json.h>
+#endif
+#ifdef HAVE_JSON_JSON_H
+#include <json/json.h>
+#endif
 #ifdef HAVE_MAGIC_H
 #include <magic.h>
 #endif
