@@ -3,11 +3,22 @@
 DIR=$(pwd)
 lsb_release -a
 
-# install composer(per the composer docs)
+# install composer per the composer docs, see:
+# https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
+EXPECTED_SIGNATURE=$(wget https://composer.github.io/installer.sig -O - -q)
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-php -r "if (hash_file('SHA384', 'composer-setup.php') === '070854512ef404f16bac87071a6db9fd9721da1684cd4589b1196c3faf71b9a2682e2311b36a5079825e155ac7ce150d') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-php composer-setup.php --filename=composer
-php -r "unlink('composer-setup.php');"
+ACTUAL_SIGNATURE=$(php -r "echo hash_file('SHA384', 'composer-setup.php');")
+
+if [ "$EXPECTED_SIGNATURE" = "$ACTUAL_SIGNATURE" ]; then
+    php composer-setup.php --quiet
+    RESULT=$?
+    rm composer-setup.php
+    exit $RESULT
+else
+    >&2 echo 'ERROR: Invalid installer signature'
+    rm composer-setup.php
+    exit 1
+fi
 
 # install all php dependencies
 ./composer install --no-dev
