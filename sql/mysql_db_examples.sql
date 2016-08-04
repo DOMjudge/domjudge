@@ -10,9 +10,15 @@
 -- Dumping data for table `contest`
 --
 
+-- Temporarily use UTC as timezone, since UNIX_TIMESTAMP() uses the system timezone.
+SET @old_time_zone = @@session.time_zone;
+SET time_zone = '+00:00';
+
 INSERT INTO `contest` (`cid`, `name`, `shortname`, `activatetime`, `starttime`, `freezetime`, `endtime`, `unfreezetime`, `deactivatetime`, `activatetime_string`, `starttime_string`, `freezetime_string`, `endtime_string`, `unfreezetime_string`, `deactivatetime_string`, `enabled`, `process_balloons`, `public`) VALUES
-(1, 'Demo practice session', 'demoprac', UNIX_TIMESTAMP(CONCAT(YEAR(NOW()), '-01-01 08:00:00 UTC')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW()),'-01-01 09:00:00 UTC')), NULL, UNIX_TIMESTAMP(CONCAT(YEAR(NOW()),'-01-01 11:00:00 UTC')), NULL, UNIX_TIMESTAMP(CONCAT(YEAR(NOW()),'-01-01 15:00:00 UTC')), '-1:00', CONCAT(YEAR(NOW()),'-01-01 09:00:00 UTC'), NULL, '+2:00', NULL, '+6:00', 1, 1, 0),
-(2, 'Demo contest', 'demo', UNIX_TIMESTAMP(CONCAT(YEAR(NOW()),'-01-01 11:29:59.877 Europe/Amsterdam')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW()),'-01-01 12:00:00 Europe/Amsterdam')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW())+2,' 16:00:00 Europe/Amsterdam')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW())+2,'-01-01 17:00:00 Europe/Amsterdam')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW())+2,'-01-01 17:30:00 Europe/Amsterdam')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW())+2,'-01-01 18:30:00 Europe/Amsterdam')), '-00:30:00.123', CONCAT(YEAR(NOW()),'-01-01 12:00:00 Europe/Amsterdam'), CONCAT(YEAR(NOW())+2,'-01-01 16:00:00 Europe/Amsterdam'), CONCAT(YEAR(NOW())+2,'-01-01 17:00:00 Europe/Amsterdam'), CONCAT(YEAR(NOW())+2,'-01-01 17:30:00 Europe/Amsterdam'), CONCAT(YEAR(NOW())+2,'-01-01 18:30:00 Europe/Amsterdam'), 1, 1, 1);
+(1, 'Demo practice session', 'demoprac', UNIX_TIMESTAMP(CONCAT(YEAR(NOW()), '-01-01 08:00:00')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW()),'-01-01 09:00:00')), NULL, UNIX_TIMESTAMP(CONCAT(YEAR(NOW()),'-01-01 11:00:00')), NULL, UNIX_TIMESTAMP(CONCAT(YEAR(NOW()),'-01-01 15:00:00')), '-1:00', CONCAT(YEAR(NOW()),'-01-01 09:00:00'), NULL, '+2:00', NULL, '+6:00', 1, 1, 0),
+(2, 'Demo contest', 'demo', UNIX_TIMESTAMP(CONCAT(YEAR(NOW()),'-01-01 10:29:59.877')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW()),'-01-01 11:00:00')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW())+2,'-01-01 15:00:00')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW())+2,'-01-01 16:00:00')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW())+2,'-01-01 16:30:00')), UNIX_TIMESTAMP(CONCAT(YEAR(NOW())+2,'-01-01 17:30:00')), '-00:30:00.123', CONCAT(YEAR(NOW()),'-01-01 12:00:00 Europe/Amsterdam'), CONCAT(YEAR(NOW())+2,'-01-01 16:00:00 Europe/Amsterdam'), CONCAT(YEAR(NOW())+2,'-01-01 17:00:00 Europe/Amsterdam'), CONCAT(YEAR(NOW())+2,'-01-01 17:30:00 Europe/Amsterdam'), CONCAT(YEAR(NOW())+2,'-01-01 18:30:00 Europe/Amsterdam'), 1, 1, 1);
+
+SET time_zone = @old_time_zone;
 
 --
 -- Dumping data for table `contestproblem`
