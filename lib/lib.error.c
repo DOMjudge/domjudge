@@ -22,6 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
 
 /* Define va_copy macro if not available (ANSI C99 only).
  * memcpy() is fallback suggested by the autoconf manual, but doesn't
@@ -54,7 +55,7 @@ int  syslog_open  = 0;
 /* Main function that contains logging code */
 void vlogmsg(int msglevel, const char *mesg, va_list ap)
 {
-    time_t currtime;
+    struct timeval currtime;
     char timestring[128];
 	char *buffer;
 	int bufferlen;
@@ -79,8 +80,9 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 		}
 	}
 
-	currtime = time(NULL);
-	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", localtime(&currtime));
+	gettimeofday(&currtime,NULL);
+	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", localtime(&currtime.tv_sec));
+	sprintf(timestring+strlen(timestring), ".%03d", (int)(currtime.tv_usec/1000));
 
 	bufferlen = strlen(timestring)+strlen(progname)+strlen(mesg)+20;
 	buffer = (char *)malloc(bufferlen);
