@@ -3,5 +3,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install -y gcc g++ make zip unzip mysql-server apache2 php5 php5-cli libapache2-mod-php5 php5-mysql php5-json php5-gmp php5-mcrypt php5-curl bsdmainutils libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev autoconf automake sudo debootstrap procps gcc g++ openjdk-7-jre-headless openjdk-7-jdk ghc fp-compiler libcgroup-dev devscripts
   - sudo php5enmod mcrypt
+jdk:
+  - oraclejdk7
 script: ./travis.sh
 dist: trusty
