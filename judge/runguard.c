@@ -1038,6 +1038,7 @@ int main(int argc, char **argv)
 			child_redirfd[i] = i; /* Default: no redirects */
 			data_read[i] = data_passed[i] = 0; /* Reset data counters */
 		}
+		data_read[0] = 0;
 		if ( redir_stdout ) {
 			child_redirfd[STDOUT_FILENO] = creat(stdoutfilename, S_IRUSR | S_IWUSR);
 			if ( child_redirfd[STDOUT_FILENO]<0 ) {
