@@ -546,6 +546,7 @@ function judge($row)
 			error("Could not create $srcfile");
 		}
 	}
+	if ( count($files)==0 ) error("No submission files could be downloaded.");
 
 	if ( empty($row['compile_script']) ) {
 		error("No compile script specified for language " . $row['langid'] . ".");
