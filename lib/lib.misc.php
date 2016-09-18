@@ -580,7 +580,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	}
 	if ( !is_array($filenames) || count($filenames)!=count($files) ) {
 		error("Nonmatching (number of) filenames specified: " .
-		      count($filenames) . " vs. " count($files));
+		      count($filenames) . " vs. " . count($files));
 	}
 
 	if ( count($filenames)!=count(array_unique($filenames)) ) {
