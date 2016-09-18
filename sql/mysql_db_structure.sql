@@ -1,7 +1,7 @@
 -- These are the database tables needed for DOMjudge.
 --
 -- You can pipe this file into the 'mysql' command to create the
--- database tables, but preferably use 'dj-setup-database'. Database
+-- database tables, but preferably use 'dj_setup_database'. Database
 -- should be set externally (e.g. to 'domjudge').
 
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
@@ -184,6 +184,26 @@ CREATE TABLE `executable` (
   `type` varchar(8) NOT NULL COMMENT 'Type of executable',
   PRIMARY KEY (`execid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Compile, compare, and run script executable bundles';
+
+--
+-- Table structure for table `internal_error`
+--
+
+CREATE TABLE `internal_error` (
+  `errorid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `judgingid` int(4) unsigned DEFAULT NULL COMMENT 'Judging ID',
+  `cid` int(4) unsigned DEFAULT NULL COMMENT 'Contest ID',
+  `description` varchar(255) NOT NULL COMMENT 'Description of the error',
+  `judgehostlog` text NOT NULL COMMENT 'Last N lines of the judgehost log',
+  `time` decimal(32,9) unsigned NOT NULL COMMENT 'Timestamp of the internal error',
+  `disabled` text NOT NULL COMMENT 'Disabled stuff, JSON-encoded',
+  `status` ENUM('open', 'resolved', 'ignored')  NOT NULL DEFAULT 'open' COMMENT 'Status of internal error',
+  PRIMARY KEY (`errorid`),
+  KEY `judgingid` (`judgingid`),
+  KEY `cid` (`cid`),
+  CONSTRAINT `internal_error_ibfk_1` FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE SET NULL,
+  CONSTRAINT `internal_error_ibfk_2` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of judgehost internal errors';
 
 --
 -- Table structure for table `judgehost`

@@ -1,8 +1,8 @@
 #!/bin/sh
 # @configure_input@
 #
-# Script to generate a basic chroot environment with Oracle (Sun) Java
-# support to allow for Java programs to run in a chroot.
+# Script to generate a basic chroot environment with a Java JRE
+# to allow for Java programs to run in a chroot.
 #
 # This script downloads and installs a Debian or Ubuntu base system.
 # Minimum requirements: a Linux system with glibc >= 2.3, wget, ar and
@@ -47,7 +47,7 @@ fi
 usage()
 {
     echo "Usage: $0 [-d <chrootdir>] [-D <distro>] [-a <architecture>]"
-    echo "Creates a chroot environment with Oracle (Sun) Java support using the"
+    echo "Creates a chroot environment with Java JRE support using the"
     echo "Debian or Ubuntu GNU/Linux distribution."
     echo
     echo "This script must be run as root, <chrootdir> is the non-existing target"
@@ -68,7 +68,7 @@ error()
     exit 1
 }
 
-if [ "`id -u`" != 0 ]; then
+if [ "$(id -u)" != 0 ]; then
     echo "Warning: you probably need to run this program as root."
 fi
 
@@ -97,10 +97,10 @@ fi
 if [ "$DISTRO" = 'Debian' ]; then
 
 # Packages to include during bootstrap process (comma separated):
-INCLUDEDEBS=""
+INCLUDEDEBS="ca-certificates"
 
 # Packages to install after upgrade (space separated):
-INSTALLDEBS="openjdk-7-jre-headless locales"
+INSTALLDEBS="default-jre-headless locales"
 # For C# support add: mono-runtime libmono-system2.0-cil
 # However running mono within chroot still gives errors...
 
@@ -113,8 +113,8 @@ DEBOOTDEB="debootstrap_1.0.67_all.deb"
 # The Debian mirror/proxy below can be passed as environment
 # variables; if none are given the following defaults are used.
 
-# Debian mirror. http.debian.net will pick the 'closest'.
-[ -z "$DEBMIRROR" ] && DEBMIRROR="http://http.debian.net/debian"
+# Debian mirror. httpredir.debian.org will pick the 'closest'.
+[ -z "$DEBMIRROR" ] && DEBMIRROR="http://httpredir.debian.org/debian"
 
 # A local caching proxy to use for apt-get,
 # (typically an install of aptcacher-ng), for example:
@@ -136,8 +136,10 @@ INSTALLDEBS="openjdk-8-jre-headless locales"
 # Packages to remove after upgrade (space separated):
 REMOVEDEBS=""
 
-# Which debootstrap package to install on non-Debian/Ubuntu systems:
-DEBOOTDEB="debootstrap_1.0.59_all.deb"
+# Which debootstrap package to install on non-Ubuntu systems:
+# This is only used when the default distro changed from Debian to
+# Ubuntu. The version below corresponds to Ubuntu 16.04 Xenial.
+DEBOOTDEB="debootstrap_1.0.78+nmu1ubuntu1.1_all.deb"
 
 # The Debian mirror/proxy below can be passed as environment
 # variables; if none are given the following defaults are used.
@@ -156,7 +158,7 @@ fi
 export DEBIAN_FRONTEND=noninteractive
 
 if [ -e "$CHROOTDIR" ]; then
-	printf "'$CHROOTDIR' already exists. Remove? (y/N) "
+	printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
 	read yn
 	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
 		error "Chrootdir already exists, exiting."
@@ -213,6 +215,7 @@ fi
 
 echo "Running debootstrap to install base system, this may take a while..."
 
+# shellcheck disable=SC2086
 eval $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
@@ -317,7 +320,7 @@ chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
 	/usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
 	/usr/bin/gpasswd /usr/bin/passwd /usr/lib/pt_chown \
-	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd"
+	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd" || true
 
 # Disable root account
 sed -i "s/^root::/root:*:/" "$CHROOTDIR/etc/shadow"
@@ -326,4 +329,5 @@ umount "$CHROOTDIR/dev/pts"
 umount "$CHROOTDIR/sys"
 umount "$CHROOTDIR/proc"
 
+echo "Done building chroot in $CHROOTDIR"
 exit 0

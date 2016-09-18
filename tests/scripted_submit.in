@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+# @configure_input@
+#
 # Script for automatic submission of solution source code or
 # sending clarification requests as a team.
 #
@@ -18,10 +20,10 @@
 
 # Defaults:
 PROBID='general'
-BASEURL='http://localhost/domjudge/'
+BASEURL='@BASEURL@'
 
 # cURL cookie-jar file to store PHP session data.
-COOKIEJAR=`mktemp --tmpdir`
+COOKIEJAR=$(mktemp --tmpdir)
 
 CURLOPTS="-sq -m 30 -b $COOKIEJAR"
 
@@ -69,7 +71,7 @@ URL="$BASEURL/team/"
 # See if we are logged in already, and try to use credentials otherwise:
 if curl $CURLOPTS "$URL" | grep '<h1>Not Authenticated</h1>' &>/dev/null ; then
 	[ -n "$LOGIN" ] || error "credentials required for login."
-	curl $CURLOPTS -c $COOKIEJAR -F "cmd=login" -F "login=$LOGIN" \
+	curl $CURLOPTS -c "$COOKIEJAR" -F "cmd=login" -F "login=$LOGIN" \
 		-F "passwd=$PASS" "$URL" &>/dev/null
 fi
 
@@ -79,7 +81,7 @@ fi
 
 case "$CMD" in
 	clar*)
-		curl $CURLOPTS -F "problem=general" -F "bodytext=`cat $FILE`" \
+		curl $CURLOPTS -F "problem=general" -F "bodytext=$(cat "$FILE")" \
 		    -F "submit=Send" "${URL}clarification.php"
 		;;
 

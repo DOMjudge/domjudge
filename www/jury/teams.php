@@ -103,7 +103,7 @@ if( $teams->count() == 0 ) {
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 				editLink('team', $row['teamid']) . "&nbsp;" .
-				delLink('team','teamid',$row['teamid']) . "</td>";
+				delLink('team','teamid',$row['teamid'],$row['name']) . "</td>";
 		}
 		echo "</tr>\n";
 	}

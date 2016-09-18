@@ -2,7 +2,7 @@
 -- correct functioning.
 --
 -- You can pipe this file into the 'mysql' command to insert this
--- data, but preferably use 'dj-setup-database'. Database should be set
+-- data, but preferably use 'dj_setup_database'. Database should be set
 -- externally (e.g. to 'domjudge').
 
 
@@ -38,9 +38,15 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.'),
 ('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.'),
 ('allow_registration', '0', 'bool', 'Allow users to register themselves with the system?'),
+('allow_openid_auth', '0', 'bool', 'Allow users to log in using OpenID'),
+('openid_autocreate_team', '1', 'bool', 'Create a team for each user that logs in with OpenID'),
+('openid_provider', '"https://accounts.google.com"', 'string', 'OpenID Provider URL'),
+('openid_clientid', '""', 'string', 'OpenID Connect client id'),
+('openid_clientsecret', '""', 'string', 'OpenID Connect client secret'),
 ('judgehost_warning', '30', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "warning".'),
 ('judgehost_critical', '120', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "critical".'),
-('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.');
+('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.'),
+('diskspace_error', '1048576', 'int', 'Minimum free disk space (in kB) on judgehosts.');
 
 --
 -- Dumping data for table `executable`

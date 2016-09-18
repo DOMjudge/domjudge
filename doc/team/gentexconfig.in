@@ -31,7 +31,7 @@ if ( is_readable($config) ) {
 
 // FIXME: we need to read some of these variables from the MySQL DB.
 $configvars = array(
-	'WEBBASEURI'                => $_SERVER['argv'][1],
+	'BASEURL'                   => 'https://example.com/domjudge/',
 	'DOMJUDGE_VERSION'          => 'unknown',
 	'SOURCESIZE'                => 256,
 	'COMPILETIME'               => 30,

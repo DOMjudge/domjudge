@@ -1,0 +1,117 @@
+{% import _self as this %}
+{% import 'forms.phtml' as forms %}
+
+{% macro filename(probid, rank, suffix) %}
+	p{{ probid }}.t{{ rank }}.{{ suffix }}
+{% endmacro %}
+
+{% macro update_fileform(rank, type) %}
+	{% import 'forms.phtml' as forms %}
+	{{ forms.fileField('update_' ~ type ~ '[' ~ rank ~ ']') }}
+{% endmacro %}
+
+{% macro testfile(probid, rank, type, suffix, size, md5, is_admin) %}
+	{% import _self as this %}
+	<td class="filename">
+		<a href="testcase.php?probid={{ probid | url_encode }}&amp;rank={{ rank | url_encode }}&amp;fetch={{ type | url_encode }}">
+			{{ this.filename(probid, rank, suffix) }}
+		</a>
+	</td>
+	<td class="size">
+		{{ size|humansize|raw }}
+	</td>
+	<td class="md5">
+		{{ md5 }}
+	</td>
+	{% if is_admin %}
+	<td>
+		{{ this.update_fileform(rank, type) }}
+	</td>
+	{% endif %}
+{% endmacro %}
+
+<h1>{{title}}</h1>
+
+<p><a href="problem.php?id={{ probid | url_encode }}">Back to problem p{{ probid }}</a></p>
+
+{% if result is not empty %}
+<ul>
+    {{ result | raw }}
+</ul>
+{% endif %}
+
+{% if is_admin %}
+	{{ forms.form('testcase.php', 'post', 'null', 'multipart/form-data') }}
+{% endif %}
+
+{% if not testdata %}
+<p class="nodata">No testcase(s) yet.</p>
+{% else %}
+	<table class="list testcases" id="testcaseTable">
+		<thead>
+		<tr>
+			<th scope="col">#</th>
+			<th scope="col">sample</th>
+			<th scope="col">download</th>
+			<th scope="col">size</th>
+			<th scope="col">md5</th>
+{% if is_admin %}
+			<th scope="col">upload new</th>
+{% endif %}
+			<th scope="col">description / image</th>
+		</tr>
+		</thead>
+		{% for testcase in testdata %}
+			<tr>
+				<td rowspan="2" class="testrank">
+					<a href="testcase.php?probid={{ probid | url_encode }}&amp;rank={{ testcase.rank | url_encode }}&amp;move=up">&uarr;</a>
+					{{ testcase.rank }}
+					<a href="testcase.php?probid={{ probid | url_encode }}&amp;rank={{ testcase.rank | url_encode }}&amp;move=down">&darr;</a>
+				</td>
+				<td rowspan="2" class="testsample">
+					<input type="checkbox" name="sample[{{ testcase.rank }}]" value="sample"
+						{% if testcase.sample %}
+							checked
+						{% endif %}
+					/>
+				</td>
+				{{ this.testfile(probid, testcase.rank, "input", "in", testcase.size_input, testcase.md5sum_input, is_admin) }}
+				<td class="testdesc">{{ testcase.description }}</td>
+			</tr>
+			<tr>
+				{{ this.testfile(probid, testcase.rank, "output", "out", testcase.size_output, testcase.md5sum_output, is_admin) }}
+				<td class="testimage filename">
+					{% if testcase.size_image > 0 %}
+						<a href="testcase.php?probid={{ probid | url_encode }}&amp;rank={{ testcase.rank | url_encode }}&amp;fetch=image">
+							{{ this.filename(probid, testcase.rank, testcase.image_type) }}
+						</a>
+					{% else %}
+						<span class="nodata">No image.</span>
+					{% endif %}
+					{% if is_admin %}
+					&nbsp;{{ this.update_fileform(testcase.rank, "image") }}
+					{% endif %}
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endif %}
+
+	{% if is_admin %}
+	<h3>Create new testcase</h3>
+
+	<table>
+	<tr><td>Input testdata: </td><td>{{ forms.fileField("add_input") }}</td></tr>
+	<tr><td>Output testdata:</td><td>{{ forms.fileField("add_output") }}</td></tr>
+	<tr><td>Sample testcase:</td><td><input type="checkbox" name="add_sample" value="add_sample" /></td></tr>
+	<tr><td>Description:    </td><td><input type="text" name="add_desc" id="add_desc" value=""  size="30" /></td></tr>
+	<tr><td>Image:          </td><td>{{ forms.fileField("add_image") }}</td></tr>
+	</table>
+
+	{{ forms.submit('Submit all changes') }}
+	{{ forms.hidden('probid', probid) }}
+	{% endif %}
+
+{% if is_admin %}
+	{{ forms.endForm() }}
+{% endif %}

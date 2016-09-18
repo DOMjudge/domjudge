@@ -10,7 +10,7 @@ define('DOMJUDGE_VERSION', '@DOMJUDGE_VERSION@');
 define('BINDIR',      '@judgehost_bindir@');
 define('ETCDIR',      '@judgehost_etcdir@');
 define('LIBDIR',      '@judgehost_libdir@');
-define('LIBEXTDIR',   '@judgehost_libextdir@');
+define('LIBVENDORDIR','@judgehost_libvendordir@');
 define('LIBJUDGEDIR', '@judgehost_libjudgedir@');
 define('LOGDIR',      '@judgehost_logdir@');
 define('RUNDIR',      '@judgehost_rundir@');
@@ -19,7 +19,6 @@ define('JUDGEDIR',    '@judgehost_judgedir@');
 define('CHROOTDIR',   '@judgehost_chrootdir@');
 
 define('RUNUSER',     '@RUNUSER@');
-define('USE_CGROUPS', '@USE_CGROUPS@');
 
 // Possible exitcodes from testcase_run.sh and their meaning.
 $EXITCODES = array (

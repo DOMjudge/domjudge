@@ -55,10 +55,12 @@ $numact_jh = $DB->q('VALUE SELECT COUNT(*) FROM judgehost WHERE active=1');
 
 $RESTRICTION = '{"contest":[],"problem":[],"language":[],"rejudge_own":"0"}';
 
-$restrict_id = $DB->q('MAYBEVALUE SELECT restrictionid FROM judgehost_restriction WHERE restrictions = %s', $RESTRICTION);
+$restrict_id = $DB->q('MAYBEVALUE SELECT restrictionid FROM judgehost_restriction
+                       WHERE restrictions = %s', $RESTRICTION);
 
 if ( empty($restrict_id) ) {
-	$restrict_id = $DB->q('RETURNID INSERT INTO judgehost_restriction (name, restrictions) VALUES (%s, %s)', 'not self, for statistics', $RESTRICTION);
+	$restrict_id = $DB->q('RETURNID INSERT INTO judgehost_restriction (name, restrictions)
+	                       VALUES (%s, %s)', 'not self, for statistics', $RESTRICTION);
 }
 
 // FIXME: save old restrictions first?
@@ -70,11 +72,11 @@ $DB->q('UPDATE judgehost SET restrictionid = %i', $restrict_id);
 while ( TRUE ) {
 	while ( TRUE ) {
 		$jud_cnt = $DB->q('VALUE SELECT COUNT(*)
-				   FROM judging
-				   WHERE cid=%i AND result IS NULL AND valid=1', $cid);
+		                   FROM judging
+		                   WHERE cid=%i AND result IS NULL AND valid=1', $cid);
 		$sub_cnt = $DB->q('VALUE SELECT COUNT(*)
-				   FROM submission
-				   WHERE cid=%i AND judgehost IS NULL AND valid=1', $cid);
+		                   FROM submission
+		                   WHERE cid=%i AND judgehost IS NULL AND valid=1', $cid);
 		$cnt = $jud_cnt + $sub_cnt;
 		if ( $cnt == 0 ) {
 			break;
@@ -84,11 +86,11 @@ while ( TRUE ) {
 	}
 
 	$min_numjudgings = $DB->q('MAYBEVALUE SELECT COUNT(*) AS numj
-				   FROM judging j
-				   LEFT JOIN submission s USING(submitid)
-				   WHERE s.cid=%i AND s.valid=1
-				   GROUP BY submitid
-				   ORDER BY numj LIMIT 1', $cid);
+	                           FROM judging j
+	                           LEFT JOIN submission s USING(submitid)
+	                           WHERE s.cid=%i AND s.valid=1
+	                           GROUP BY submitid
+	                           ORDER BY numj LIMIT 1', $cid);
 	if ( !empty($min_numjudgings) && $min_numjudgings == $numact_jh ) {
 		// we are done
 		break;
@@ -97,9 +99,9 @@ while ( TRUE ) {
 	echo "\n" . ($numact_jh - $min_numjudgings) . " more round(s) to go\n";
 
 	$rows = $DB->q('SELECT submitid,COUNT(*) AS cnt
-			FROM judging
-			WHERE cid=%i
-			GROUP BY submitid', $cid);
+	                FROM judging
+	                WHERE cid=%i AND valid=1
+	                GROUP BY submitid', $cid);
 	while ( $row = $rows->next() ) {
 		if ( $row['cnt'] >= $numact_jh ) {
 			// assume it's done by now

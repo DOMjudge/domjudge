@@ -1,3 +1,6 @@
+<?php
+global $updates;
+?>
 <nav><div id="menutop">
 <a href="index.php" accesskey="h"><span class="octicon octicon-home"></span> home</a>
 <?php	if ( checkrole('balloon') ) { ?>
@@ -12,6 +15,10 @@
 <a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts (<?php echo $ndown ?> down)</a>
 <?php	} else { ?>
 <a href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts</a>
+<?php	}
+	$nerr = count($updates['internal_error']);
+	if ( $nerr > 0 ) { ?>
+<a class="new" href="internal_errors.php" accesskey="e" id="menu_internal_error"><span class="octicon octicon-zap"></span> internal error (<?php echo $nerr ?> new)</a>
 <?php	}
 	} ?>
 <?php	if ( checkrole('jury') ) { ?>

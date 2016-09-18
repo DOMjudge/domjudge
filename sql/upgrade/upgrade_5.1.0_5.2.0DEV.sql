@@ -47,6 +47,22 @@ CREATE TABLE `scorecache` (
   PRIMARY KEY (`cid`,`teamid`,`probid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard cache';
 
+CREATE TABLE `internal_error` (
+  `errorid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `judgingid` int(4) unsigned DEFAULT NULL COMMENT 'Judging ID',
+  `cid` int(4) unsigned DEFAULT NULL COMMENT 'Contest ID',
+  `description` varchar(255) NOT NULL COMMENT 'Description of the error',
+  `judgehostlog` text NOT NULL COMMENT 'Last N lines of the judgehost log',
+  `time` decimal(32,9) unsigned NOT NULL COMMENT 'Timestamp of the internal error',
+  `disabled` text NOT NULL COMMENT 'Disabled stuff, JSON-encoded',
+  `status` ENUM('open', 'resolved', 'ignored')  NOT NULL DEFAULT 'open' COMMENT 'Status of internal error',
+  PRIMARY KEY (`errorid`),
+  KEY `judgingid` (`judgingid`),
+  KEY `cid` (`cid`),
+  CONSTRAINT `internal_error_ibfk_1` FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE SET NULL,
+  CONSTRAINT `internal_error_ibfk_2` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of judgehost internal errors';
+
 
 --
 -- Transfer data from old to new structure
@@ -62,6 +78,13 @@ UPDATE `judging` SET `judgehost` = 'host-created-by-SQL-upgrade' WHERE `judgehos
 --
 -- Add/remove sample/initial contents
 --
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('diskspace_error', '1048576', 'int', 'Minimum free disk space (in kB) on judgehosts.'),
+('allow_openid_auth', '0', 'bool', 'Allow users to log in using OpenID'),
+('openid_autocreate_team', '1', 'bool', 'Create a team for each user that logs in with OpenID'),
+('openid_provider', '"https://accounts.google.com"', 'string', 'OpenID Provider URL'),
+('openid_clientid', '""', 'string', 'OpenID Connect client id'),
+('openid_clientsecret', '""', 'string', 'OpenID Connect client secret');
 
 --
 -- Finally remove obsolete structures after moving data

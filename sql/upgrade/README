@@ -11,7 +11,7 @@ Each script contains a check that verifies if it should be applied and
 which fails if the upgrade was applied already. The scripts should be
 applied in order; this can be done manually - be sure to run them from
 sql/ as the current working directory (not sql/upgrades/) - but it is
-probably easier to use the command 'dj-setup-database upgrade'.
+probably easier to use the command 'dj_setup_database upgrade'.
 
 Upgrading to a new minor/major version is supported, but only to the
 latest bugfix release in that series. For example, there is only one

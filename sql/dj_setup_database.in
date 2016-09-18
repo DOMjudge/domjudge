@@ -105,15 +105,15 @@ status()
 	printf "Trying to connect to the server as DB admin: "
 	mysql -e 'SELECT "success.";' || return 1
 
-	printf "Trying to connect to the server with user '$domjudge_DBUSER': "
+	printf "Trying to connect to the server with user '%s': " "$domjudge_DBUSER"
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD mysql -e 'SELECT "success.";' || return 1
 
-	printf "Searching for database \`$DBNAME\`: "
+	printf "Searching for database '%s': " "$DBNAME"
 	mysql -e "USE \`$DBNAME\`; SELECT 'found.';" || return 1
 
 	printf "Searching for data in database: "
 	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD \
-		mysql -e "USE \`$DBNAME\`; SELECT name FROM team WHERE login = 'domjudge';" || return 1
+		mysql -e "USE \`$DBNAME\`; SELECT name FROM team WHERE name = 'DOMjudge';" || return 1
 
 	printf "MySQL server version: "
 	mysql -e 'SELECT version();'
@@ -230,7 +230,7 @@ bare-install|install)
 			$SQLDIR/mysql_db_examples.sql \
 			$SQLDIR/mysql_db_files_examples.sql"
 	fi
-	RESTPW=`grep -v ^# $RESTPWFILE | cut -f4`
+	RESTPW=$(grep -v ^# $RESTPWFILE | cut -f4)
 	(
 		cat $FILES
 		echo "UPDATE user SET password = MD5('judgehost#$RESTPW') WHERE username='judgehost';"
@@ -250,7 +250,7 @@ upgrade)
 		echo "Warning: please remove all non-jury users from $PASSWDFILE"
 		echo "You may also remove those users from MySQL."
 	fi
-	TMPOUT=`mktemp --tmpdir domjudge-sql.XXXXXX`
+	TMPOUT=$(mktemp --tmpdir domjudge-sql.XXXXXX)
 	read_dbpasswords
 	# Make sure we're in the SQL directory, for relative path 'source'
 	# statements to work.
@@ -262,7 +262,7 @@ upgrade)
 		fi
 		# First find the line where the upgrade check is performed to
 		# filter possible error messages later.
-		UPGRADELINE=`grep -n '@UPGRADE-CHECK@' "$i" | cut -d : -f 1`
+		UPGRADELINE=$(grep -n '@UPGRADE-CHECK@' "$i" | cut -d : -f 1)
 		UPGRADELINE=$((UPGRADELINE+1))
 		if mysql -D "$DBNAME" < "$i" >$TMPOUT 2>&1 ; then
 			echo "Upgraded script '$i'."

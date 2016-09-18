@@ -118,6 +118,7 @@ closedir($dh);
 foreach ( $submissions as $s ) {
 
 	// Insert submissions into the database
+	$DB->q('START TRANSACTION');
 	$DB->q('INSERT INTO submission
 	        (submitid,cid,teamid,probid,langid,submittime)
 	        VALUES (%i, %i, %s, %s, %s, %s)', $s['sid'], $s['cid'],
@@ -130,6 +131,7 @@ foreach ( $submissions as $s ) {
 		       dj_get_file_contents($file['source'], false));
 		if ( empty($mainfile) ) $mainfile = $file['name'];
 	}
+	$DB->q('COMMIT');
 
 	// Log to event table
 	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid,

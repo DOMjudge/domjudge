@@ -71,10 +71,10 @@ if( $res->count() == 0 ) {
 		}
 		if ( IS_ADMIN ) {
 			echo '<td title="export problem as zip-file">' .
-			     exportLink($row['probid']) . '</td>' .
+			     exportProblemLink($row['probid']) . '</td>' .
 			     "<td class=\"editdel\">" .
 			     editLink('problem', $row['probid']) . "&nbsp;" .
-			     delLink('problem','probid',$row['probid']) . "</td>";
+			     delLink('problem','probid',$row['probid'],$row['name']) . "</td>";
 		}
 		echo "</tr>\n";
 	}

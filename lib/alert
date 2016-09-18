@@ -16,11 +16,11 @@ fi
 shift
 DESCRIPTION="$*"
 
-BEEPCMD=`which beep`
+BEEPCMD=$(which beep)
 
 beep()
 {
-	[ -x "$BEEPCMD" ] && $BEEPCMD "$@"
+	[ -x "$BEEPCMD" ] && "$BEEPCMD" "$@"
 }
 
 case "$MSGTYPE" in

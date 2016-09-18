@@ -27,11 +27,7 @@ require_once(LIBWWWDIR . '/auth.php');
 if ( @$_POST['cmd']=='login' ) do_login();
 if ( !logged_in() ) show_loginpage();
 
-if ( checkrole('admin') ) {
-	define('IS_ADMIN', true);
-} else {
-	define('IS_ADMIN', false);
-}
+define('IS_ADMIN', checkrole('admin'));
 
 if ( !isset($REQUIRED_ROLES) ) $REQUIRED_ROLES = array('jury');
 $allowed = false;
@@ -86,4 +82,16 @@ $updates = array(
 	$DB->q('TABLE SELECT rejudgingid
 	        FROM rejudging
 	        WHERE endtime IS NULL'),
+	'internal_error' =>
+	$DB->q('TABLE SELECT errorid
+	        FROM internal_error
+	        WHERE status=%s', 'open'),
 );
+
+// set up twig
+require_once(LIBVENDORDIR . '/autoload.php');
+Twig_Autoloader::register();
+$loader = new Twig_Loader_Filesystem(array('.', LIBWWWDIR));
+$twig = new Twig_Environment($loader);
+
+$twig->addFilter(new Twig_SimpleFilter('humansize', 'printsize'));

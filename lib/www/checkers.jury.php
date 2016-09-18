@@ -186,7 +186,7 @@ function check_judgehost($data, $keydata = null)
 
 function check_language($data, $keydata = null)
 {
-	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
+	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] <= 0 ) {
 		ch_error("Timelimit is not a valid positive factor");
 	}
 	$id = (isset($data['langid']) ? $data['langid'] : $keydata['langid']);
@@ -206,7 +206,7 @@ function check_language($data, $keydata = null)
 	}
 	$exts = json_decode($data['extensions'], false, 2);
 	if ( $exts==null || !is_array($exts) || count($exts)==0 ) {
-		ch_error("Language extension list is not a valid JSON array");
+		ch_error("Language extension list is not a valid non-empty JSON array");
 	}
 
 	return $data;
@@ -214,6 +214,8 @@ function check_language($data, $keydata = null)
 
 function check_executable($data, $keydata = null)
 {
+	global $executable_types;
+
 	$id = (isset($data['execid']) ? $data['execid'] : $keydata['execid']);
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Executable ID may only contain characters " . IDENTIFIER_CHARS . ".");

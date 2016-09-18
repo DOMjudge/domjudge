@@ -45,7 +45,7 @@ if( $res->count() == 0 ) {
 			     '"><img src="../images/b_save.png" alt="export" /></a></td>' .
 			     "<td class=\"editdel\">" .
 			     editLink('executable', $row['execid']) . "&nbsp;" .
-			     delLink('executable','execid',$row['execid']) . "</td>";
+			     delLink('executable','execid',$row['execid'],$row['description']) . "</td>";
 		}
 		echo "</tr>\n";
 	}

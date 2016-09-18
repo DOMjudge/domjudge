@@ -18,7 +18,7 @@ if ( isset($_GET['edited']) ) {
 		       "If the category sort order was changed, it may be necessary to " .
 		       "recalculate any cached scoreboards.<br /><br />" .
 		       addSubmit('recalculate caches now', 'refresh')) .
-		addHidden('cid', $id) .
+		addHidden('cid', $cid) .
 		addEndForm();
 }
 
@@ -50,7 +50,7 @@ if( $res->count() == 0 ) {
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 				editLink('team_category', $row['categoryid']) . "&nbsp;" .
-				delLink('team_category', 'categoryid', $row['categoryid']) . "</td>";
+				delLink('team_category', 'categoryid', $row['categoryid'], $row['name']) . "</td>";
 		}
 		echo "</tr>\n";
 	}

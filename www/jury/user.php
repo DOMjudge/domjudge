@@ -175,7 +175,7 @@ if ( $row['teamid'] ) {
 if ( IS_ADMIN ) {
     echo "<p class=\"nomorecol\">" .
         editLink('user', $id). "\n" .
-        delLink('user','userid',$id) .
+        delLink('user','userid',$id,$row['name']) .
         "</p>\n\n";
 }
 

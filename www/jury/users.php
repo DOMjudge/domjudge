@@ -56,7 +56,7 @@ if( $users->count() == 0 ) {
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 			    editLink('user', $row['userid']) . "&nbsp;" .
-			    delLink('user','userid',$row['userid']) . "</td>";
+			    delLink('user','userid',$row['userid'],$row['name']) . "</td>";
 		}
 		echo "</tr>\n";
 	}

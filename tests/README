@@ -19,7 +19,7 @@ running. The default contest 'Demo contest', problems 'Hello',
 other files 'test-*' should fail for different reasons, which is
 described in these files respectively. The files 'fltcmp-test-*' are
 for problem 'Fltcmp' and files 'boolfind-test-*' for problem
-'Boolfind' respectively.
+'Boolfind' respectively. Zip files contain multifile submissions.
 
 'make test-stress' will submit the stress tests, which may break the
 system and require manual repair: be careful!

@@ -162,10 +162,17 @@ the task of semantic validation to another program.
 Before a contest, you will want to have tested your reference
 solutions on the system to see whether those are judged as expected
 and maybe use their runtimes to set timelimits for the problems.
-There is no special method to test such solutions; the easiest way is
-to submit these as a special team before the contest. This requires
-some special care and coordination with the contest administrator. See
-the administrator's manual for more details.
+
+The simplest way to do this is to include the jury solutions in a
+problem zip file and upload this. You can also upload a zip file
+containing just solutions to an existing problem. Note that the zip
+archive has to adhere to the <htmlurl name="Kattis problem package format"
+url="http://www.problemarchive.org/wiki/index.php/Problem_Format">.
+For this to work, the jury/admin who uploads the problem has to have
+an associated team to which the solutions will be assigned. The
+solutions will automatically be judged if the contest is active (but
+it need not have started yet). You can verify whether the submissions
+gave the expected answer from the link on the jury/admin index page.
 
 <sect>Practice Session
 <p>
@@ -267,9 +274,10 @@ clicked to inspect the source code. If the team has submitted code
 in the same language for this problem before, a diff output between
 the current and previous submission is also available there.
 
-It's possible to edit the source code and resubmit it as the special
-`domjudge' user. This does not have any effect for the teams, but
-allows a judge to perform a `what if this was changed'-analysis.
+It is possible to edit the source code and resubmit it if you have a
+team associated to your user. This does not have any effect for the
+teams, but allows a judge to perform a `what if this was
+changed'-analysis.
 
 A submission can have multiple judgings, but only one valid judging at
 any time. Multiple judgings occur when rejudging, see <ref
@@ -277,7 +285,7 @@ id="rejudging" name="Rejudging">.
 
 <sect1>Rejudging <label id="rejudging">
 <p>
-In some situations it is necessary to rejudge a submission. This means
+In some situations it is necessary to rejudge one or more submissions. This means
 that the submission will re-enter the flow as if it had not been
 judged before. The submittime will be the original time, but the
 program will be compiled, run and tested again.

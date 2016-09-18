@@ -3,11 +3,13 @@
 #ifndef _RUNGUARD_CONFIG_
 #define _RUNGUARD_CONFIG_
 
-/* Lots of suffixed names because we want to support multiple judgedaemons per host.  This allows 8 of them.*/
-#define VALID_USERS "@RUNUSER@,@RUNUSER@-0,@RUNUSER@-1,@RUNUSER@-2,@RUNUSER@-3,@RUNUSER@-4,@RUNUSER@-5,@RUNUSER@-6,@RUNUSER@-7"
+/* Valid users to allow as unprivileged user that runguard drops to.
+   The '*' globbing characters matches an arbitrary length string
+   since we want to have a user for each judgedaemon when supporting
+   multiple judgedaemons per host. Matching is only performed when the
+   user is specified as a name, not UID, to runguard. */
+#define VALID_USERS "@RUNUSER@,@RUNUSER@-*"
 
 #define CHROOT_PREFIX "@judgehost_judgedir@"
-
-#define USE_CGROUPS @USE_CGROUPS@
 
 #endif /* _RUNGUARD_CONFIG_ */

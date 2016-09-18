@@ -144,14 +144,21 @@ endswitch;
 echo addForm($pagename);
 ?>
 <p>Generate a random password for:<br/>
-<input type="checkbox" name="group[]" value="team">all teams<br />
-<input type="checkbox" name="group[]" value="teamwithoutpw">teams without password<br />
-<input type="checkbox" name="group[]" value="judge">jury members<br />
-<input type="checkbox" name="group[]" value="admin">admins<br />
+<input type="checkbox" name="group[]" value="team" id="group_team" />
+<label for="group_team">all teams</label><br />
+<input type="checkbox" name="group[]" value="teamwithoutpw" id="group_teamwithoutpw" />
+<label for="group_teamwithoutpw">teams without password</label><br />
+<input type="checkbox" name="group[]" value="judge" id="group_judge" />
+<label for="group_judge">jury members</label><br />
+<input type="checkbox" name="group[]" value="admin" id="group_admin" />
+<label for="group_admin">admins</label><br />
 </p>
 <p>Output format:<br/>
-<input type="radio" name="format" value="page" checked>on web page<br/>
-<input type="radio" name="format" value="tsv">as userdata.tsv download<br/>
+<input type="radio" name="format" value="page" checked id="format_page" />
+<label for="format_page">on web page</label><br/>
+<input type="radio" name="format" value="tsv" id="format_tsv" />
+<label for="format_tsv">as userdata.tsv download</label><br/>
+</p>
 <?php
 echo addSubmit('generate') . addEndForm();
 

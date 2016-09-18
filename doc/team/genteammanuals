@@ -1,8 +1,7 @@
 #!/bin/sh
 #
 # Script to generate team manual including actual configuration
-# settings. Also allows one to pass a WEBBASEURI setting with the
-# option '-w'.
+# settings.
 #
 # Part of the DOMjudge Programming Contest Jury System and licenced
 # under the GNU GPL. See README and COPYING for details.
@@ -13,13 +12,6 @@ SOURCES="team-manual.tex team-manual-??.tex"
 PREAMBLE=team-manual-preamble.tex
 
 NRUNS=3
-
-# Default value for base URL of the DOMjudge webinterface:
-WEBBASEURI='http://example.com/domjudge/'
-if [ "x$1" = 'x-w' ]; then
-	WEBBASEURI=$2
-	shift 2
-fi
 
 OUTPUTDIR=.
 [ -n "$1" ] && OUTPUTDIR="$1"
@@ -39,22 +31,25 @@ fi
 [ -z "$LATEX" ] && LATEX=pdflatex
 [ -z "$LATEXFLAGS" ] && LATEXFLAGS='--interaction=errorstopmode'
 
-TEXCONFIG=`mktemp --tmpdir domjudge-texconfig.XXXXXX`
+TEXCONFIG=$(mktemp --tmpdir domjudge-texconfig.XXXXXX)
 
 if [ -x "gentexconfig" ]; then
-	./gentexconfig    "$WEBBASEURI" > "$TEXCONFIG"
+	./gentexconfig    > "$TEXCONFIG"
 else
-	./gentexconfig.in "$WEBBASEURI" > "$TEXCONFIG"
+	./gentexconfig.in > "$TEXCONFIG"
 fi
 
 # Run LaTeX:
+# shellcheck disable=SC2059
+{
 for f in $SOURCES ; do
-	[ "$QUIET" ] || printf "Running $NRUNS passes of '$LATEX $LATEXFLAGS $f'..."
+	[ "$QUIET" ] || printf "Running $NRUNS passes of '%s'..." "$LATEX $LATEXFLAGS $f"
 	run=1
-	while [ $run -le $NRUNS ]; do
+	while [ "$run" -le "$NRUNS" ]; do
+		# shellcheck disable=SC2086
 		if ! ( cat "$TEXCONFIG" ; echo \\"input{$f}" ) | \
-			$LATEX $LATEXFLAGS -jobname ${f%.tex} -output-directory "$OUTPUTDIR" >/dev/null ; then
-			printf "\nTeX-ing failed in run $run, see '${f%tex}log' for details.\n"
+			$LATEX $LATEXFLAGS -jobname "${f%.tex}" -output-directory "$OUTPUTDIR" >/dev/null ; then
+			printf "\nTeX-ing failed in run $run, see '%s' for details.\n" "${f%tex}log$"
 			exit 1
 		else
 			[ "$QUIET" ] || printf " $run"
@@ -63,5 +58,6 @@ for f in $SOURCES ; do
 	done
 	[ "$QUIET" ] || printf "\n" ;
 done
+} # end shellcheck disable
 
 rm -f "$TEXCONFIG"

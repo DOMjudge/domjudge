@@ -474,14 +474,15 @@ function alert($msgtype, $description = '')
  */
 function sig_handler($signal)
 {
-	global $exitsignalled;
+	global $exitsignalled, $gracefulexitsignalled;
 
 	logmsg(LOG_DEBUG, "Signal $signal received");
 
 	switch ( $signal ) {
-	case SIGTERM:
 	case SIGHUP:
-	case SIGINT:
+		$gracefulexitsignalled = TRUE;
+	case SIGINT:   # Ctrl+C
+	case SIGTERM:
 		$exitsignalled = TRUE;
 	}
 }
@@ -644,6 +645,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	logmsg (LOG_INFO, "input verified");
 
 	// Insert submission into the database
+	$DB->q('START TRANSACTION');
 	$id = $DB->q('RETURNID INSERT INTO submission
 	              (cid, teamid, probid, langid, submittime, origsubmitid,
 	               externalid, externalresult)
@@ -656,6 +658,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
 		       $id, $filenames[$rank], $rank, dj_get_file_contents($files[$rank], false));
 	}
+	$DB->q('COMMIT');
 
 	// Recalculate scoreboard cache for pending submissions
 	calcScoreRow($contest, $teamid, $probid);

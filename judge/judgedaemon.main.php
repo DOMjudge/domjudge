@@ -8,7 +8,7 @@
  */
 if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
 
-require(LIBEXTDIR . '/spyc/spyc.php');
+require(LIBVENDORDIR . '/autoload.php');
 
 require(ETCDIR . '/judgehost-config.php');
 
@@ -139,9 +139,15 @@ function usage()
 	exit;
 }
 
+function read_judgehostlog($n = 20) {
+	ob_start();
+	passthru("tail -$n " . escapeshellarg(LOGFILE));
+	return trim(ob_get_clean());
+}
+
 // fetches new executable from database if necessary
 // runs build to compile executable
-// returns absolute path to run script
+// returns array with absolute path to run script and possibly error message
 function fetch_executable($workdirpath, $execid, $md5sum)
 {
 	$execpath = "$workdirpath/executable/" . $execid;
@@ -151,7 +157,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 	$execrunpath = $execpath . "/run";
 	$execzippath = $execpath . "/executable.zip";
 	if ( empty($md5sum) ) {
-		error("unknown executable '" . $execid . "' specified");
+		return array(NULL, "unknown executable '" . $execid . "' specified");
 	}
 	if ( !file_exists($execpath) || !file_exists($execmd5path) ||
 	     !file_exists($execdeploypath)
@@ -210,7 +216,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 					if ( $execlang !== FALSE ) break;
 				}
 				if ( $execlang === FALSE ) {
-					error("executable must either provide an executable file named 'build' or a C/C++/Java or Python file.");
+					return array(NULL, "executable must either provide an executable file named 'build' or a C/C++/Java or Python file.");
 				}
 				switch ( $execlang ) {
 				case 'c':
@@ -237,7 +243,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 				chmod($execbuildpath, 0755);
 			}
 		} else if ( !is_executable($execbuildpath) ) {
-			error("Invalid executable, file 'build' exists but is not executable.");
+			return array(NULL, "Invalid executable, file 'build' exists but is not executable.");
 		}
 
 		if ( $do_compile ) {
@@ -245,17 +251,17 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 			$olddir = getcwd();
 			chdir($execpath);
 			system("./build", $retval);
-			if ( $retval!=0 ) error("Could not run ./build in $execpath");
+			if ( $retval!=0 ) return array(NULL, "Could not run ./build in $execpath");
 			chdir($olddir);
 		}
 		if ( !file_exists($execrunpath) || !is_executable($execrunpath) ) {
-			error("Invalid build file, must produce an executable file 'run'.");
+			return array(NULL, "Invalid build file, must produce an executable file 'run'.");
 		}
 	}
 	// Create file to mark executable successfully deployed.
 	touch($execdeploypath);
 
-	return $execrunpath;
+	return array($execrunpath, NULL);
 }
 
 $options = getopt("dv:n:hV");
@@ -273,10 +279,6 @@ if ( isset($options['h']) ) usage();
 
 $myhost = trim(`hostname | cut -d . -f 1`);
 if ( isset($options['daemonid']) ) {
-	if ( !defined('USE_CGROUPS') || !USE_CGROUPS ) {
-		echo "Option `-n' is only supported when compiled with cgroup support.\n";
-		exit(1);
-	}
 	if ( preg_match('/^\d+$/', $options['daemonid'] ) ) {
 		$myhost = $myhost . "-" . $options['daemonid'];
 	} else {
@@ -361,10 +363,6 @@ if ( ! USE_CHROOT ) {
 		define('CHROOT_SCRIPT', 'chroot-startstop.sh');
 	}
 }
-if ( !defined('USE_CGROUPS') || !USE_CGROUPS ) {
-	logmsg(LOG_WARNING, "Not using cgroups. Using cgroups is highly recommended. See the manual for details.");
-}
-
 
 
 // Perform setup work for each endpoint we are communicating with
@@ -430,6 +428,27 @@ while ( TRUE ) {
 		exit;
 	}
 
+	if ( $endpoints[$endpointID]["waiting"] === FALSE ) {
+		// Check for available disk space
+		$free_space = disk_free_space(JUDGEDIR);
+		$allowed_free_space  = dbconfig_get_rest('diskspace_error'); // in kB
+		if ( $free_space < 1024*$allowed_free_space ) {
+			$free_abs = sprintf("%01.2fGB", $free_space / (1024*1024*1024));
+			logmsg(LOG_ERR, "Low on disk space: $free_abs free, clean up or " .
+					"change 'diskspace error' value in config before resolving this error.");
+
+			$disabled = json_encode(array(
+				'kind' => 'judgehost',
+				'hostname' => $myhost));
+			$judgehostlog = read_judgehostlog();
+			$error_id = request('internal_error', 'POST',
+				'description=' . urlencode("low on disk space on $myhost") .
+				'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
+				'&disabled=' . urlencode($disabled));
+			logmsg(LOG_ERR, "=> internal error " . $error_id);
+		}
+	}
+
 	// Request open submissions to judge. Any errors will be treated as
 	// non-fatal: we will just keep on retrying in this loop.
 	$judging = request('judgings', 'POST', 'judgehost=' . urlencode($myhost), false);
@@ -453,12 +472,31 @@ while ( TRUE ) {
 
 	judge($row);
 
+	// Check if we were interrupted while judging, if so, exit(to avoid sleeping)
+	if ($exitsignalled) {
+		logmsg(LOG_NOTICE, "Received signal, exiting.");
+		exit;
+	}
+
 	// restart the judging loop
+}
+
+function disable($kind, $idcolumn, $id, $description, $judgingid, $cid) {
+	$disabled = json_encode(array(
+		'kind' => $kind,
+		$idcolumn => $id));
+	$judgehostlog = read_judgehostlog();
+	$error_id = request('internal_error', 'POST',
+		'judgingid=' . urlencode($judgingid) .
+		'&cid=' . urlencode($cid) .
+		'&description=' . urlencode($description) .
+		'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
+		'&disabled=' . urlencode($disabled));
 }
 
 function judge($row)
 {
-	global $EXITCODES, $myhost, $options, $workdirpath;
+	global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled;
 
 	// Set configuration variables for called programs
 	putenv('USE_CHROOT='        . (USE_CHROOT ? '1' : ''));
@@ -508,13 +546,19 @@ function judge($row)
 			error("Could not create $srcfile");
 		}
 	}
+	if ( count($files)==0 ) error("No submission files could be downloaded.");
 
 	if ( empty($row['compile_script']) ) {
 		error("No compile script specified for language " . $row['langid'] . ".");
 	}
 
-	$execrunpath = fetch_executable($workdirpath, $row['compile_script'],
-	                                $row['compile_script_md5sum']);
+	list($execrunpath, $error) = fetch_executable($workdirpath, $row['compile_script'],
+						      $row['compile_script_md5sum']);
+	if ( isset($error) ) {
+		logmsg(LOG_ERR, "fetching executable failed for compile script '" . $row['compile_script'] . "':" . $error);
+		disable('language', 'langid', $row['langid'], $error, $row['judgingid'], $row['cid']);
+		return;
+	}
 
 	// Compile the program.
 	system(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
@@ -523,7 +567,12 @@ function judge($row)
 	// what does the exitcode mean?
 	if( ! isset($EXITCODES[$retval]) ) {
 		alert('error');
-		error("Unknown exitcode from compile.sh for s$row[submitid]: $retval");
+		logmsg(LOG_ERR, "Unknown exitcode from compile.sh for s$row[submitid]: $retval");
+		$description = "compile script '" . $row['compile_script'] . "' returned exit code " . $retval;
+		disable('language', 'langid', $row['langid'], $description, $row['judgingid'], $row['cid']);
+		// revoke readablity for domjudge-run user to this workdir
+		chmod($workdir, 0700);
+		return;
 	}
 	$compile_success =  ($EXITCODES[$retval]!='compiler-error');
 
@@ -553,8 +602,39 @@ function judge($row)
 
 	$totalcases = 0;
 	while ( TRUE ) {
+		// Check whether we have received an exit signal(but not a graceful exit signal)
+		if ( function_exists('pcntl_signal_dispatch') ) pcntl_signal_dispatch();
+		if ( $exitsignalled && !$gracefulexitsignalled) {
+			logmsg(LOG_NOTICE, "Received HARD exit signal, aborting current judging.");
+
+			// Make sure the domserver knows that we didn't finish this judging
+			$unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
+			$unfinished = dj_json_decode($unfinished);
+			foreach ( $unfinished as $jud ) {
+				logmsg(LOG_WARNING, "Aborted judging j" . $jud['judgingid'] .
+					   " due to signal");
+			}
+
+			// Break, not exit so we cleanup nicely
+			break;
+		}
+
 		// get the next testcase
 		$testcase = request('testcases', 'GET', 'judgingid=' . urlencode($row['judgingid']));
+		if ( json_decode($testcase) === NULL ) {
+			$disabled = json_encode(array(
+				'kind' => 'problem',
+				'probid' => $row['probid']));
+			$judgehostlog = read_judgehostlog();
+			$error_id = request('internal_error', 'POST',
+				'judgingid=' . urlencode($row['judgingid']) .
+				'&cid=' . urlencode($row['cid']) .
+				'&description=' . urlencode("no test cases found") .
+				'&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
+				'&disabled=' . urlencode($disabled));
+			logmsg(LOG_ERR, "No testcases found for p$row[probid] => internal error " . $error_id);
+			break;
+		}
 		$tc = dj_json_decode($testcase);
 
 		// empty means: no more testcases for this judging.
@@ -605,15 +685,26 @@ function judge($row)
 		system("mkdir -p '$programdir'", $retval);
 		if ( $retval!=0 ) error("Could not create directory '$programdir'");
 
-		system("cp -PR '$workdir'/compile/* '$programdir'", $retval);
+		system("cp -PRl '$workdir'/compile/* '$programdir'", $retval);
 		if ( $retval!=0 ) error("Could not copy program to '$programdir'");
 
 		// do the actual test-run
 		$hardtimelimit = $row['maxruntime'] +
 		                 overshoot_time($row['maxruntime'],$overshoot);
 
-		$compare_runpath = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
-		$run_runpath = fetch_executable($workdirpath, $row['run'], $row['run_md5sum']);
+		list($compare_runpath, $error) = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
+		if ( isset($error) ) {
+			logmsg(LOG_ERR, "fetching executable failed for compare script '" . $row['compare'] . "':" . $error);
+			disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
+			return;
+		}
+
+		list($run_runpath, $error) = fetch_executable($workdirpath, $row['run'], $row['run_md5sum']);
+		if ( isset($error) ) {
+			logmsg(LOG_ERR, "fetching executable failed for run script '" . $row['run'] . "':" . $error);
+			disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
+			return;
+		}
 
 		system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
 		       "$row[maxruntime]:$hardtimelimit '$testcasedir' " .
@@ -660,6 +751,10 @@ function judge($row)
 		system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
 		if ( $retval!=0 ) error("chroot script exited with exitcode $retval");
 	}
+
+	// Evict all contents of the workdir from the kernel fs cache
+	system(LIBJUDGEDIR . "/evict $workdir", $retval);
+	if ( $retval!=0 ) warning("evict script exited with exitcode $retval");
 
 	// Sanity check: need to have had at least one testcase
 	if ( $totalcases == 0 ) {

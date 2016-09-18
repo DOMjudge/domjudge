@@ -15,10 +15,11 @@ require(LIBDIR . '/relations.php');
 
 $t = @$_REQUEST['table'];
 $referrer = @$_REQUEST['referrer'];
+$desc = @$_REQUEST['desc'];
 if ( ! preg_match('/^[._a-zA-Z0-9?&=-]*$/', $referrer ) ) error ("Invalid characters in referrer.");
 
-if(!$t)	error ("No table selected.");
-if(!in_array($t, array_keys($KEYS))) error ("Unknown table.");
+if ( !$t ) error("No table selected.");
+if ( !in_array($t, array_keys($KEYS)) ) error("Unknown table.");
 
 $k = array();
 foreach($KEYS[$t] as $key) {
@@ -92,7 +93,8 @@ if (isset($_POST['confirm'] ) ) {
 	echo msgbox (
 		"Really delete?",
 		"You're about to delete $t <strong>" .
-		specialchars(join(", ", array_values($k))) . "</strong>.<br />\n" .
+		specialchars(join(", ", array_values($k))) .
+		( empty($desc) ? '' : ' "' . specialchars($desc) . '"' ) . "</strong>.<br />\n" .
 		(count($warnings)>0 ? "<br /><strong>Warning, this will:</strong><br />" .
 		 implode('<br />', $warnings) : '' ) . "<br /><br />\n" .
 		"Are you sure?<br /><br />\n\n" .
