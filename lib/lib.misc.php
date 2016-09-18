@@ -561,7 +561,8 @@ function daemonize($pidfile = NULL)
  * moves it to a backup storage.
  */
 function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
-                         $origsubmitid = NULL, $extid = NULL, $submittime = NULL)
+                         $origsubmitid = NULL, $extid = NULL, $submittime = NULL,
+                         $extresult = NULL)
 {
 	global $DB;
 
@@ -577,7 +578,8 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 		error("Tried to submit more than the allowed number of source files.");
 	}
 	if ( !is_array($filenames) || count($filenames)!=count($files) ) {
-		error("Nonmatching (number of) filenames specified.");
+		error("Nonmatching (number of) filenames specified: " .
+		      count($filenames) . " vs. " count($files));
 	}
 
 	if ( count($filenames)!=count(array_unique($filenames)) ) {
@@ -604,7 +606,8 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 		error("Language '$lang' not found in database or not submittable.");
 	}
 	if( ! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team
-	                        WHERE teamid = %i AND enabled = 1',$team) ) {
+	                        WHERE teamid = %i' .
+	                       (checkrole('jury') ? '' : ' AND enabled = 1'),$team) ) {
 		error("Team '$team' not found in database or not enabled.");
 	}
 	$probdata = $DB->q('MAYBETUPLE SELECT probid, points FROM problem
@@ -642,9 +645,11 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 
 	// Insert submission into the database
 	$id = $DB->q('RETURNID INSERT INTO submission
-	              (cid, teamid, probid, langid, submittime, origsubmitid, externalid)
-	              VALUES (%i, %i, %i, %s, %s, %i, %i)',
-	             $contest, $teamid, $probid, $langid, $submittime, $origsubmitid, $extid);
+	              (cid, teamid, probid, langid, submittime, origsubmitid,
+	               externalid, externalresult)
+	              VALUES (%i, %i, %i, %s, %s, %i, %i, %s)',
+	             $contest, $teamid, $probid, $langid, $submittime, $origsubmitid,
+	             $extid, $extresult);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
