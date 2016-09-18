@@ -709,7 +709,8 @@ function daemonize($pidfile = NULL)
  * moves it to a backup storage.
  */
 function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
-                         $origsubmitid = NULL, $entry_point = NULL, $extid = NULL, $submittime = NULL)
+                         $origsubmitid = NULL, $entry_point = NULL, $extid = NULL, $submittime = NULL,
+                         $extresult = NULL)
 {
 	global $DB;
 
@@ -753,7 +754,8 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 		error("Language '$lang' not found in database or not submittable.");
 	}
 	if( ! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team
-	                        WHERE teamid = %i AND enabled = 1',$team) ) {
+	                        WHERE teamid = %i' .
+	                       (checkrole('jury') ? '' : ' AND enabled = 1'),$team) ) {
 		error("Team '$team' not found in database or not enabled.");
 	}
 	$probdata = $DB->q('MAYBETUPLE SELECT probid, points FROM problem
@@ -799,10 +801,10 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	$DB->q('START TRANSACTION');
 	$id = $DB->q('RETURNID INSERT INTO submission
 		      (cid, teamid, probid, langid, submittime, origsubmitid, entry_point,
-		       externalid)
-	              VALUES (%i, %i, %i, %s, %s, %i, %s, %s)',
-		     $contest, $teamid, $probid, $langid, $submittime, $origsubmitid, $entry_point,
-		     $extid);
+	               externalid, externalresult)
+	              VALUES (%i, %i, %i, %s, %s, %i, %s, %s, %s)',
+	             $contest, $teamid, $probid, $langid, $submittime, $origsubmitid, $entry_point,
+	             $extid, $extresult);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
