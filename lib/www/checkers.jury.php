@@ -186,13 +186,13 @@ function check_executable($data, $keydata = null)
 // Regex patterns for absolute/relative contest time formats. These
 // are also used in www/jury/contest.php.
 $pattern_timezone  = "[A-Za-z][A-Za-z0-9_\/+-]{1,35}";
-$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? $pattern_timezone";
+$pattern_datetime  = "\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? $pattern_timezone";
 $pattern_offset    = "\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?";
-$pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
+$pattern_dateorneg = "($pattern_datetime|-$pattern_offset)";
 $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 // Human readable versions of the patterns:
 $human_abs_datetime = "YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone";
-$human_rel_datetime = "&pm;[HHH]H:MM[:SS[.uuuuuu]]";
+$human_rel_datetime = "±[HHH]H:MM[:SS[.uuuuuu]]";
 
 // Returns an absolute Unix Epoch timestamp from a formatted absolute
 // or relative (to $basetime timestamp, if set) time. $field is a
