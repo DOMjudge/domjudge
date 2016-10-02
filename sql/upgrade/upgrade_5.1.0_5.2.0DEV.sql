@@ -22,6 +22,9 @@ ALTER TABLE `contest`
 ALTER TABLE `user`
   MODIFY COLUMN `password` varchar(255) DEFAULT NULL COMMENT 'Password hash';
 
+ALTER TABLE `problem`
+  MODIFY COLUMN `timelimit` float unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time (in seconds) for this problem';
+
 -- Merge {rank,score}cache_{public,jury} tables into one.
 CREATE TABLE `rankcache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
