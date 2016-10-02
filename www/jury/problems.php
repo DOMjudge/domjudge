@@ -56,7 +56,7 @@ if( $res->count() == 0 ) {
 			"</td><td>" . $link . specialchars($row['name'])."</a>".
 			"</td><td>".
 			$link . specialchars(isset($activecontests[$row['probid']])?$activecontests[$row['probid']]:0) . "</a>" .
-			"</td><td>" . $link . (int)$row['timelimit'] . "</a>" .
+			"</td><td>" . $link . (float)$row['timelimit'] . "</a>" .
 			"</td><td>" . $link . (isset($row['memlimit']) ? (int)$row['memlimit'] : 'default') . "</a>" .
 			"</td><td>" . $link . (isset($row['outputlimit']) ? (int)$row['outputlimit'] : 'default') . "</a>" .
 			"</td><td><a href=\"testcase.php?probid=" . $row['probid'] .

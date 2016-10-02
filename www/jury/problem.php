@@ -105,7 +105,7 @@ if ( !empty($cmd) ):
 ?>
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
 <td><?php echo addInputField('number','data[0][timelimit]', @$row['timelimit'],
-	' min="1" max="10000" required')?> sec</td></tr>
+	' min="0" max="10000" step="any" required')?> sec</td></tr>
 
 <tr><td><label for="data_0__memlimit_">Memory limit:</label></td>
 <td><?php echo addInputField('number','data[0][memlimit]', @$row['memlimit']);
@@ -226,7 +226,7 @@ echo addForm($pagename . '?id=' . urlencode($id),
 	}
 	echo ' <a href="testcase.php?probid='.urlencode($data['probid']).'">details/edit</a>';
 ?></td></tr>
-<tr><td>Timelimit:   </td><td><?php echo (int)$data['timelimit']?> sec</td></tr>
+<tr><td>Timelimit:   </td><td><?php echo (float)$data['timelimit']?> sec</td></tr>
 <tr><td>Memory limit:</td><td><?php	echo (int)$data['memlimit'].' kB'.(@$defaultmemlimit ? ' (default)' : '')?></td></tr>
 <tr><td>Output limit:</td><td><?php echo (int)$data['outputlimit'].' kB'.(@$defaultoutputlimit ? ' (default)' : '')?></td></tr>
 <?php

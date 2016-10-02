@@ -104,9 +104,8 @@ function check_problem($data, $keydata = null)
 {
 	global $DB;
 
-	if ( ! is_numeric($data['timelimit']) || $data['timelimit'] < 0 ||
-			(int)$data['timelimit'] != $data['timelimit'] ) {
-		ch_error("Timelimit is not a valid positive integer");
+	if ( ! is_numeric($data['timelimit']) || $data['timelimit'] <= 0 ) {
+		ch_error("Timelimit is not a valid positive number");
 	}
 	if ( isset($data['shortname']) && ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
 		ch_error("Problem shortname may only contain characters " . IDENTIFIER_CHARS . ".");
