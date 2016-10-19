@@ -40,7 +40,7 @@ maintainer-clean-l:
 
 install-domserver: relations.php
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libdir)    *.php
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libwwwdir) www/*.php
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libwwwdir) www/*.php www/*.phtml
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libdir)    alert
 # KLUDGE: how to install a tree of files with correct permissions?
 	cp -R           -t $(DESTDIR)$(domserver_libvendordir) vendor/*
