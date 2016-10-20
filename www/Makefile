@@ -22,6 +22,11 @@ install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/js           js/*.js js/*.gif js/*.png
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/js/flot      js/flot/*.js
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/js/ace       js/ace/*.js
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/css/octicons css/octicons/octicons.css
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/css/octicons css/octicons/octicons.eot
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/css/octicons css/octicons/octicons.woff
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/css/octicons css/octicons/octicons.ttf
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/css/octicons css/octicons/octicons.svg
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)              *.php *.css
 	rm -f $(DESTDIR)$(domserver_wwwdir)/jury/doc
 	$(LN_S) $(domjudge_docdir) $(DESTDIR)$(domserver_wwwdir)/jury/doc
