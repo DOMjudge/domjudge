@@ -73,7 +73,7 @@ function check_user($data, $keydata = null)
 		ch_error("Email not valid.");
 	}
 	if ( !empty($data['password']) ) {
-		$data['password'] = md5("$id#".$data['password']);
+		$data['password'] = generate_password_hash($data['password']);
 	} else {
 		unset($data['password']);
 	}

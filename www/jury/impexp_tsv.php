@@ -198,7 +198,7 @@ function tsv_accounts_prepare($content)
 			'user' => array (
 				'name' => $line[1],
 				'username' => $line[2],
-				'password' => md5($line[2].'#'.$line[3]),
+				'password' => generate_password_hash($line[3]),
 				'teamid' => $teamid
 				),
 			'userrole' => array (
