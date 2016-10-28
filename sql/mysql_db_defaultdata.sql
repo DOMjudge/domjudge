@@ -137,7 +137,7 @@ INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room
 --
 
 INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES
-(1, 'admin', 'Administrator', MD5('admin#admin')),
+(1, 'admin', 'Administrator', '$2y$10$WkXRuj/UgoMGF80BaqhOJ.b1HW8KcGrUcWV3uAvGrQlp6Ia8w/dgO'), -- Is a hash for 'admin'
 (2, 'judgehost', 'User for judgedaemons', NULL);
 
 --
