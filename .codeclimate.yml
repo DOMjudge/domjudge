@@ -1,14 +1,26 @@
 engines:
+  csslint:
+    enabled: true
+  duplication:
+    enabled: true
+    config:
+      languages:
+        php:
+          mass_threshold: 60
+  eslint:
+    enabled: true
+  fixme:
+    enabled: true
+  phpcodesniffer:
+    enabled: true
+    config:
+      ignore_warnings: true
   phpmd:
     enabled: true
     config:
-## Don't use the 'controversial' ruleset:
-      rulesets: "cleancode,codesize,design,naming,unusedcode"
-    checks:
-      Controversial/CamelCaseClassName:
-        enabled: false
-      Controversial/CamelCaseParameterName:
-        enabled: false
+      rulesets: ".phpmd-ruleset.xml"
+  shellcheck:
+    enabled: true
 
 ## Simply include all files for GPA ratings:
 ratings:
