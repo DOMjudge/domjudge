@@ -9,6 +9,9 @@ engines:
           mass_threshold: 60
   eslint:
     enabled: true
+    checks:
+      no-alert:
+        enabled: false
   fixme:
     enabled: true
   phpmd:

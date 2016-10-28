@@ -6,7 +6,6 @@
 	<description>Custom PHPMD rules for DOMjudge</description>
 
 	<!-- Include these rulesets unchanged: -->
-	<rule ref="rulesets/cleancode.xml" />
 	<rule ref="rulesets/codesize.xml" />
 	<rule ref="rulesets/design.xml" />
 	<rule ref="rulesets/unusedcode.xml" />
