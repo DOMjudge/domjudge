@@ -231,9 +231,12 @@ bare-install|install)
 			$SQLDIR/mysql_db_files_examples.sql"
 	fi
 	RESTPW=$(grep -v ^# $RESTPWFILE | cut -f4)
+	# NOTE: the hash function and cost below have to be kept
+	# synchronised with those used in the code!
+	PWHASH=$(htpasswd -nbB -C 10 foouser "$RESTPW" | sed 's/^foouser://')
 	(
 		cat $FILES
-		echo "UPDATE user SET password = MD5('judgehost#$RESTPW') WHERE username='judgehost';"
+		echo "UPDATE user SET password = '$PWHASH' WHERE username='judgehost';"
 	) | mysql -D "$DBNAME"
 	if [ "$1" = "install" ]; then
 		verbose "SQL structure and default/example data installed."
