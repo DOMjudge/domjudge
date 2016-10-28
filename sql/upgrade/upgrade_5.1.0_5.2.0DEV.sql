@@ -19,6 +19,9 @@ ALTER TABLE `contest`
   ADD COLUMN `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Contest ID in an external system' AFTER `cid`,
   ADD UNIQUE KEY `externalid` (`externalid`(190));
 
+ALTER TABLE `user`
+  MODIFY COLUMN `password` varchar(255) DEFAULT NULL COMMENT 'Password hash';
+
 -- Merge {rank,score}cache_{public,jury} tables into one.
 CREATE TABLE `rankcache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
