@@ -1,6 +1,9 @@
 ## Exclude external libraries:
 exclude_paths:
+- "config.guess"
+- "config.sub"
 - "lib/vendor/"
+- "www/js/ace/"
 - "www/js/flot/"
 - "www/js/jquery*.js"
 - "www/js/jscolor.js"
