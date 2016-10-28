@@ -1,4 +1,21 @@
-## Exclude external libraries:
+engines:
+  phpmd:
+    enabled: true
+    config:
+## Don't use the 'controversial' ruleset:
+      rulesets: "cleancode,codesize,design,naming,unusedcode"
+    checks:
+      Controversial/CamelCaseClassName:
+        enabled: false
+      Controversial/CamelCaseParameterName:
+        enabled: false
+
+## Simply include all files for GPA ratings:
+ratings:
+  paths:
+  - "**"
+
+## Excluded files, e.g. external libraries:
 exclude_paths:
 - "config.guess"
 - "config.sub"
