@@ -1182,6 +1182,15 @@ memory addressing bugs give more reproducible results:
 <code>
 echo 0 &gt; /proc/sys/kernel/randomize_va_space
 </code>
+or
+<code>
+sysctl -w kernel.randomize_va_space=0
+</code>
+And remember that, this value will be reset if your server is rebooted.
+You can edit <tt>/etc/sysctl.conf</tt> to permanent settings:
+<code>
+kernel.randomize_va_space=0
+</code>
 </itemize>
 
 
