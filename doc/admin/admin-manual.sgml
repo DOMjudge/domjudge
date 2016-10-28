@@ -1151,10 +1151,16 @@ judging.
 <item> Disable CPU frequency scaling and Intel "Turbo Boost" to
 prevent fluctuations in CPU power.
 <item> Disable address-space randomization to make programs with
-memory addressing bugs give more reproducible results:
+memory addressing bugs give more reproducible results. To do that,
+you can add the following line to <tt>/etc/sysctl.conf</tt>:
 <code>
-echo 0 &gt; /proc/sys/kernel/randomize_va_space
+kernel.randomize_va_space=0
 </code>
+Then run the following command:
+<code>
+sysctl -p
+</code>
+So that the setings will be kept if your server is rebooted.
 </itemize>
 
 
