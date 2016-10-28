@@ -353,7 +353,7 @@ function resetUploadForm(refreshtime, maxfiles)
 	addfile.disabled = true;
 	auxfiles.innerHTML = "";
 	doReload = true;
-	setTimeout('reloadPage()', refreshtime * 1000);
+	setTimeout(function() { reloadPage(); }, refreshtime * 1000);
 }
 
 var doReload = true;
@@ -375,7 +375,7 @@ function reloadPage()
 function initReload(refreshtime)
 {
 	// interval is in seconds
-	setTimeout('reloadPage()', refreshtime * 1000);
+	setTimeout(function() { reloadPage(); }, refreshtime * 1000);
 }
 
 function initFileUploads(maxfiles)

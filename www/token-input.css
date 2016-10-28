@@ -27,6 +27,7 @@ ul.token-input-list li input {
     padding: 3px 8px;
     background-color: #F0F0F0;
     margin: 2px 0;
+    -moz-appearance: caret;
     -webkit-appearance: caret;
 }
 
