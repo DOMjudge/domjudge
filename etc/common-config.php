@@ -18,6 +18,8 @@ define('DEBUG_JUDGE',      8); // Display judging scripts debug info
 
 define('DEBUG', 1);
 
+define('PASSWORD_HASH_COST', 10); // Cost for hashing function. Increase for more secure hashes and decrease for speed.
+
 // By default report all PHP errors, except notices.
 error_reporting(E_ALL & ~E_NOTICE);
 

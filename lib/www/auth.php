@@ -347,10 +347,11 @@ function do_login_native($user, $pass)
 	global $DB, $userdata, $username;
 
 	$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
-	                    WHERE username = %s AND password = %s AND enabled = 1',
-	                   $user, md5($user."#".$pass));
+	                    WHERE username = %s AND enabled = 1',
+	                   $user);
 
-	if ( !$userdata ) {
+	if ( !$userdata || !password_verify($userdata['password'])) {
+		$userdata = false;
 		sleep(1);
 		show_failed_login("Invalid username or password supplied. " .
 		                  "Please try again or contact a staff member.");
@@ -496,7 +497,7 @@ function do_register() {
 		// Associate a user with the team we just made
         $i = array();
         $i['username'] = $login;
-        $i['password'] = md5($login."#".$pass);
+        $i['password'] = generate_password_hash($pass);
         $i['name'] = $login;
         $i['teamid'] = $teamid;
         $newid = $DB->q("RETURNID INSERT INTO user SET %S", $i);
@@ -564,4 +565,9 @@ function get_user_roles($userid)
 	return $DB->q('COLUMN SELECT role.role FROM userrole
 	               LEFT JOIN role USING (roleid)
 	               WHERE userrole.userid = %s', $userid);
+}
+
+function generate_password_hash($password)
+{
+	return password_hash($password, PASSWORD_DEFAULT, ['cost' => PASSWORD_HASH_COST]);
 }
