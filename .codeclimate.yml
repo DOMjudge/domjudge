@@ -11,16 +11,14 @@ engines:
     enabled: true
   fixme:
     enabled: true
-  phpcodesniffer:
-    enabled: true
-    config:
-      ignore_warnings: true
   phpmd:
     enabled: true
     config:
       rulesets: ".phpmd-ruleset.xml"
   shellcheck:
-    enabled: true
+## Disable since we already check it ourselves, and the tests are not
+## configurable on Code Climate.
+    enabled: false
 
 ## Simply include all files for GPA ratings:
 ratings:
@@ -31,6 +29,7 @@ ratings:
 exclude_paths:
 - "config.guess"
 - "config.sub"
+- "install.sh"
 - "lib/vendor/"
 - "www/js/ace/"
 - "www/js/flot/"
