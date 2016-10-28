@@ -1,0 +1,9 @@
+## Exclude external libraries:
+exclude_paths:
+- "lib/vendor/"
+- "www/js/flot/"
+- "www/js/jquery*.js"
+- "www/js/jscolor.js"
+- "www/js/js.cookie*.js"
+- "www/js/sorttable.js"
+- "www/js/tabber.js"
