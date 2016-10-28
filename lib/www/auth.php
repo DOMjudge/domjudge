@@ -350,7 +350,7 @@ function do_login_native($user, $pass)
 	                    WHERE username = %s AND enabled = 1',
 	                   $user);
 
-	if ( !$userdata || !password_verify($userdata['password'])) {
+	if ( !$userdata || !password_verify($pass, $userdata['password'])) {
 		$userdata = false;
 		sleep(1);
 		show_failed_login("Invalid username or password supplied. " .
