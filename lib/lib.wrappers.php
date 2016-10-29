@@ -81,3 +81,31 @@ function specialchars($string) {
 		ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
 		DJ_CHARACTER_SET);
 }
+
+/**
+ * Wrappers around the PHP password hashing functions. These check if
+ * it is still an old hash of the form md5($user.'#'.$password), and
+ * hash using our default settings. Note that dj_password_verify() has
+ * an extra parameter $user relative to the PHP native function.
+ */
+function dj_password_verify($password, $hash, $user = null)
+{
+	// First check for old-style MD5 hashes:
+	if ( !empty($user) && strlen($hash)>0 && $hash[0]!=='$' ) {
+		return md5($user."#".$password)===$hash;
+	}
+	return password_verify($password, $hash);
+}
+
+function dj_password_needs_rehash($hash)
+{
+	if ( strlen($hash)>0 && $hash[0]!=='$' ) return true;
+	return password_needs_rehash($hash, PASSWORD_DEFAULT,
+	                             array('cost' => PASSWORD_HASH_COST));
+}
+
+function dj_password_hash($password)
+{
+	return password_hash($password, PASSWORD_DEFAULT,
+	                     array('cost' => PASSWORD_HASH_COST));
+}

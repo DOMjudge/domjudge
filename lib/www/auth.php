@@ -350,11 +350,17 @@ function do_login_native($user, $pass)
 	                    WHERE username = %s AND enabled = 1',
 	                   $user);
 
-	if ( !$userdata || !password_verify($pass, $userdata['password'])) {
+	if ( !$userdata || !dj_password_verify($pass, $userdata['password'], $user) ) {
 		$userdata = false;
 		sleep(1);
 		show_failed_login("Invalid username or password supplied. " .
 		                  "Please try again or contact a staff member.");
+	}
+
+	// Update the password hash if necessary:
+	if ( dj_password_needs_rehash($userdata['password']) ) {
+		$newhash = dj_password_hash($pass);
+		$DB->q('UPDATE user SET password = %s WHERE username = %s', $newhash, $user);
 	}
 
 	$username = $userdata['username'];
@@ -497,7 +503,7 @@ function do_register() {
 		// Associate a user with the team we just made
         $i = array();
         $i['username'] = $login;
-        $i['password'] = generate_password_hash($pass);
+        $i['password'] = dj_password_hash($pass);
         $i['name'] = $login;
         $i['teamid'] = $teamid;
         $newid = $DB->q("RETURNID INSERT INTO user SET %S", $i);
@@ -565,9 +571,4 @@ function get_user_roles($userid)
 	return $DB->q('COLUMN SELECT role.role FROM userrole
 	               LEFT JOIN role USING (roleid)
 	               WHERE userrole.userid = %s', $userid);
-}
-
-function generate_password_hash($password)
-{
-	return password_hash($password, PASSWORD_DEFAULT, ['cost' => PASSWORD_HASH_COST]);
 }
