@@ -6,9 +6,18 @@
 	<description>Custom PHPMD rules for DOMjudge</description>
 
 	<!-- Include these rulesets unchanged: -->
-	<rule ref="rulesets/codesize.xml" />
 	<rule ref="rulesets/design.xml" />
 	<rule ref="rulesets/unusedcode.xml" />
+
+	<rule ref="rulesets/codesize.xml">
+		<exclude name="CyclomaticComplexity"/>
+	</rule>
+
+	<rule ref="rulesets/codesize.xml/CyclomaticComplexity">
+		<properties>
+			<property name="reportLevel" value="20" />
+		</properties>
+	</rule>
 
 	<rule ref="rulesets/naming.xml">
 		<exclude name="ShortVariable"/>
