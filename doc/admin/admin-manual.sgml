@@ -1147,11 +1147,12 @@ you can add the following line to <tt>/etc/sysctl.conf</tt>:
 <code>
 kernel.randomize_va_space=0
 </code>
+This will restore these settings permanently across reboots.
 Then run the following command:
 <code>
-sysctl -p
+sudo sysctl -p
 </code>
-So that the setings will be kept if your server is rebooted.
+to directly activate these settings.
 </itemize>
 
 
