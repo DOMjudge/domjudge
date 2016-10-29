@@ -491,22 +491,22 @@ function do_register() {
 	}
 
 	// Create the team object
-	$i = array();
-	$i['name'] = $login;
-	$i['categoryid'] = 2; // Self-registered category id
-	$i['enabled'] = 1;
-	$i['comments'] = "Registered by $ip on " . date('r');
+	$team = array();
+	$team['name'] = $login;
+	$team['categoryid'] = 2; // Self-registered category id
+	$team['enabled'] = 1;
+	$team['comments'] = "Registered by $teamp on " . date('r');
 
-	$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $i);
+	$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $team);
 	auditlog('team', $teamid, 'registered by ' . $ip);
 
 	// Associate a user with the team we just made
-	$i = array();
-	$i['username'] = $login;
-	$i['password'] = dj_password_hash($pass);
-	$i['name'] = $login;
-	$i['teamid'] = $teamid;
-	$newid = $DB->q("RETURNID INSERT INTO user SET %S", $i);
+	$user = array();
+	$user['username'] = $login;
+	$user['password'] = dj_password_hash($pass);
+	$user['name'] = $login;
+	$user['teamid'] = $teamid;
+	$newid = $DB->q("RETURNID INSERT INTO user SET %S", $user);
 	auditlog('user', $newid, 'registered by ' . $ip);
 
 	$DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
