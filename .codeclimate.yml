@@ -15,6 +15,8 @@ engines:
     exclude_fingerprints:
 ## Ignore 'exit(1)' in test-hello.js:
     - 868673da0d2ee8f1ff139f0a004b166f
+## Ignore IE <= 8 overwrite of catch variable 'e':
+    - 2bae39c1743204c63f6ba7028b612199
   fixme:
     enabled: true
   phpmd:
