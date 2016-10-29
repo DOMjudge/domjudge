@@ -458,66 +458,66 @@ function do_login_oidc() {
 }
 
 function do_register() {
-        global $DB, $ip;
-        if ( !dbconfig_get('allow_registration', false) ) {
-            error("Self-Registration is disabled.");
-        }
-        if ( AUTH_METHOD != "PHP_SESSIONS" ) {
-            error("You can only register if the site is using PHP Sessions for authentication.");
-        }
+	global $DB, $ip;
+	if ( !dbconfig_get('allow_registration', false) ) {
+		error("Self-Registration is disabled.");
+	}
+	if ( AUTH_METHOD != "PHP_SESSIONS" ) {
+		error("You can only register if the site is using PHP Sessions for authentication.");
+	}
 
-        $login = trim($_POST['login']);
-        $pass = trim($_POST['passwd']);
-        $pass2 = trim($_POST['passwd2']);
+	$login = trim($_POST['login']);
+	$pass = trim($_POST['passwd']);
+	$pass2 = trim($_POST['passwd2']);
 
-        if ( $login == '' || $pass == '') {
-            error("You must enter all fields");
-        }
+	if ( $login == '' || $pass == '') {
+		error("You must enter all fields");
+	}
 
-        if ( !ctype_alnum($login) ) {
-            error("Username must consist of only alphanumeric characters.");
-        }
+	if ( !ctype_alnum($login) ) {
+		error("Username must consist of only alphanumeric characters.");
+	}
 
-        if ( $pass != $pass2 ) {
-            error("Your passwords do not match. Please go back and try registering again.");
-        }
-        $user = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $login);
-        if ( $user ) {
-            error("That login is already taken.");
-        }
-        $team = $DB->q('MAYBETUPLE SELECT * FROM team WHERE name = %s', $login);
-        if ( $team ) {
-            error("That login is already taken.");
-        }
+	if ( $pass != $pass2 ) {
+		error("Your passwords do not match. Please go back and try registering again.");
+	}
+	$user = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $login);
+	if ( $user ) {
+		error("That login is already taken.");
+	}
+	$team = $DB->q('MAYBETUPLE SELECT * FROM team WHERE name = %s', $login);
+	if ( $team ) {
+		error("That login is already taken.");
+	}
 
-		// Create the team object
-        $i = array();
-        $i['name'] = $login;
-        $i['categoryid'] = 2; // Self-registered category id
-        $i['enabled'] = 1;
-        $i['comments'] = "Registered by $ip on " . date('r');
+	// Create the team object
+	$i = array();
+	$i['name'] = $login;
+	$i['categoryid'] = 2; // Self-registered category id
+	$i['enabled'] = 1;
+	$i['comments'] = "Registered by $ip on " . date('r');
 
-        $teamid = $DB->q("RETURNID INSERT INTO team SET %S", $i);
-        auditlog('team', $teamid, 'registered by ' . $ip);
+	$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $i);
+	auditlog('team', $teamid, 'registered by ' . $ip);
 
-		// Associate a user with the team we just made
-        $i = array();
-        $i['username'] = $login;
-        $i['password'] = dj_password_hash($pass);
-        $i['name'] = $login;
-        $i['teamid'] = $teamid;
-        $newid = $DB->q("RETURNID INSERT INTO user SET %S", $i);
-        auditlog('user', $newid, 'registered by ' . $ip);
+	// Associate a user with the team we just made
+	$i = array();
+	$i['username'] = $login;
+	$i['password'] = dj_password_hash($pass);
+	$i['name'] = $login;
+	$i['teamid'] = $teamid;
+	$newid = $DB->q("RETURNID INSERT INTO user SET %S", $i);
+	auditlog('user', $newid, 'registered by ' . $ip);
 
-        $DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
+	$DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
 
-        $title = 'Account Registered';
-        $menu = false;
+	$title = 'Account Registered';
+	$menu = false;
 
-        require(LIBWWWDIR . '/header.php');
-        echo "<h1>Account registered</h1>\n\n<p><a href=\"./\">Click here to login.</a></p>\n\n";
-        require(LIBWWWDIR . '/footer.php');
-		exit;
+	require(LIBWWWDIR . '/header.php');
+	echo "<h1>Account registered</h1>\n\n<p><a href=\"./\">Click here to login.</a></p>\n\n";
+	require(LIBWWWDIR . '/footer.php');
+	exit;
 }
 
 // Logout a team. Function does not return and should generate a page
