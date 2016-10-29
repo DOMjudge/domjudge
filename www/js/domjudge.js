@@ -317,32 +317,28 @@ function checkUploadForm()
 		error = true;
 	}
 	if ( filename == "" ) {
-		return false;
+		error = true;
 	}
+	if ( error ) return false;
 
-	if ( error ) {
-		return false;
-	} else {
-		var auxfileno = 0;
-		// start at one; skip maincode file field
-		for (var i = 1; i < auxfiles.length; i++) {
-			if (auxfiles[i].value != "" ) {
-				auxfileno++;
-			}
+	var auxfileno = 0;
+	// start at one; skip maincode file field
+	for (var i = 1; i < auxfiles.length; i++) {
+		if ( auxfiles[i].value != "" ) {
+			auxfileno++;
 		}
-		var extrafiles = '';
-		if ( auxfileno > 0 ) {
-			extrafiles = "Additional source files: " + auxfileno + '\n';
-		}
-		var question =
-			'Main source file: ' + filename + '\n' +
-			extrafiles + '\n' +
-			'Problem: ' + problemtxt + '\n'+
-			'Language: ' + languagetxt + '\n' +
-			'\nMake submission?';
-		return confirm (question);
 	}
-
+	var extrafiles = '';
+	if ( auxfileno > 0 ) {
+		extrafiles = "Additional source files: " + auxfileno + '\n';
+	}
+	var question =
+		'Main source file: ' + filename + '\n' +
+		extrafiles + '\n' +
+		'Problem: ' + problemtxt + '\n'+
+		'Language: ' + languagetxt + '\n' +
+		'\nMake submission?';
+	return confirm (question);
 }
 
 function resetUploadForm(refreshtime, maxfiles)
