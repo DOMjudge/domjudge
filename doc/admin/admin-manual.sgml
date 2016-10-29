@@ -1091,7 +1091,7 @@ unprivileged users to the system, i.e. add users
 id="install_config:judgehost" name="installation of a judgehost">.
 Finally, start each of the judgedaemons with
 <code>
-$ judgedaemon -n <X>
+judgedaemon -n <X>
 </code>
 to bind it to core X.
 
@@ -1110,7 +1110,7 @@ refuse to connect over HTTPS. If your judgedaemon gives an error message
 about an untrusted certificate, put your domserver's certificate in
 <tt>/etc/ssl/certs/yourname.crt</tt> of each judgehost (and on the team
 machines when using the commandline submit client) and run:
-<code># c_rehash</code>
+<code>sudo c_rehash</code>
 
 <p>
 When loading teams from the ICPC registration system through the import
