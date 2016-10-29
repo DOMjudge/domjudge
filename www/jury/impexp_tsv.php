@@ -55,20 +55,20 @@ function tsv_import($fmt)
 	switch ($fmt) {
 		case 'groups':
 			$data = tsv_groups_prepare($content);
-			$c = tsv_groups_set($data);
+			$cnt = tsv_groups_set($data);
 			break;
 		case 'teams':
 			$data = tsv_teams_prepare($content);
-			$c = tsv_teams_set($data);
+			$cnt = tsv_teams_set($data);
 			break;
 		case 'accounts':
 			$data = tsv_accounts_prepare($content);
-			$c = tsv_accounts_set($data);
+			$cnt = tsv_accounts_set($data);
 			break;
 		default: error("Unknown format");
 	}
 
-	echo "<p>$c items imported</p>";
+	echo "<p>$cnt items imported</p>";
 
 }
 
@@ -93,13 +93,13 @@ function tsv_groups_prepare($content)
 function tsv_groups_set($data)
 {
 	global $DB;
-	$c = 0;
+	$cnt = 0;
 	foreach ($data as $row) {
 		$DB->q("REPLACE INTO team_category SET %S", $row);
 		auditlog('team_category', $row['categoryid'], 'replaced', 'imported from tsv');
-		$c++;
+		$cnt++;
 	}
-	return $c;
+	return $cnt;
 }
 
 function tsv_teams_prepare($content)
@@ -133,7 +133,7 @@ function tsv_teams_prepare($content)
 function tsv_teams_set($data)
 {
 	global $DB;
-	$c = 0;
+	$cnt = 0;
 	foreach ($data as $row) {
 		// it is legitimate that a team has no affiliation. Do not add it then.
 		if ( !empty($row['team_affiliation']['shortname']) ) {
@@ -144,9 +144,9 @@ function tsv_teams_set($data)
 		}
 		$DB->q("REPLACE INTO team SET %S", $row['team']);
 		auditlog('team', $row['team']['teamid'], 'replaced', 'imported from tsv');
-		$c++;
+		$cnt++;
 	}
-	return $c;
+	return $cnt;
 }
 
 
@@ -187,7 +187,7 @@ function tsv_accounts_prepare($content)
 				// Ignore type analyst for now. We don't have a useful mapping yet.
 				continue 2;
 			default:
-				error('unknown role id in line ' . $l . ': ' . $line[0]);
+				error('unknown role id on line ' . $l . ': ' . $line[0]);
 		}
 
 		// accounts.tsv contains data pertaining both to users and userroles.
@@ -216,7 +216,7 @@ function tsv_accounts_prepare($content)
 function tsv_accounts_set($data)
 {
 	global $DB;
-	$c = 0;
+	$cnt = 0;
 	foreach ($data as $row) {
 		if ( ! empty($row['team']) ) {
 			$teamid = $DB->q("MAYBEVALUE SELECT teamid FROM team WHERE name = %s AND categoryid = %i",
@@ -233,9 +233,9 @@ function tsv_accounts_set($data)
 		$row['userrole']['userid'] = $userid;
 		$DB->q("REPLACE INTO userrole SET %S", $row['userrole']);
 		auditlog('userrole', $userid, 'replaced', 'imported from tsv');
-		$c++;
+		$cnt++;
 	}
-	return $c;
+	return $cnt;
 }
 
 

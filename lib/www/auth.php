@@ -406,31 +406,31 @@ function do_login_oidc() {
 	// Create the user if they don't exist
 	$user = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
 	if (!$user) {
-		$u = array();
+		$user = array();
 
 		// Create a team for the user as well
 		if (dbconfig_get("openid_autocreate_team", true)) {
-			$i = array();
-			$i['name'] = $email;
-			$i['categoryid'] = 2; // Self-registered category id
-			$i['enabled'] = 1;
-			$i['comments'] = "Registered via OIDC by $ip on " . date('r');
+			$team = array();
+			$team['name'] = $email;
+			$team['categoryid'] = 2; // Self-registered category id
+			$team['enabled'] = 1;
+			$team['comments'] = "Registered via OIDC by $ip on " . date('r');
 
-			$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $i);
+			$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $team);
 			auditlog('team', $teamid, 'registered via OIDC by ' . $ip);
 
-			$u['teamid'] = $teamid;
+			$user['teamid'] = $teamid;
 		}
 
-		$u['username'] = $username;
-		$u['email'] = $email;
-		$u['name'] = $email;
-		$u['password'] = NULL;
-		$newid = $DB->q("RETURNID INSERT INTO user SET %S", $u);
+		$user['username'] = $username;
+		$user['email'] = $email;
+		$user['name'] = $email;
+		$user['password'] = NULL;
+		$newid = $DB->q("RETURNID INSERT INTO user SET %S", $user);
 		auditlog('user', $newid, 'registered via OIDC', $ip);
 
 		// Assign the team role if we created a team for them
-		if (isset($u['teamid'])) {
+		if (isset($user['teamid'])) {
 			$DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
 		}
 	}
