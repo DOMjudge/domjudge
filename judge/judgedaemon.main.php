@@ -238,7 +238,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 					break;
 				}
 				if ( file_put_contents($execbuildpath, $buildscript) === FALSE ) {
-					error("Could not write file 'build' in $exepath");
+					error("Could not write file 'build' in $execpath");
 				}
 				chmod($execbuildpath, 0755);
 			}
