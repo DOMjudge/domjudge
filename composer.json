@@ -13,6 +13,7 @@
 		"jumbojett/openid-connect-php": "0.1.*",
 		"mustangostang/spyc": "0.5.*",
 		"php": ">= 5.4",
+		"ircmaxell/password-compat": "*",
 		"twig/twig": "~1.0"
 	},
 	"config": {
