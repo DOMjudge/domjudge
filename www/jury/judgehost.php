@@ -39,7 +39,8 @@ if ( !empty($cids) ) {
 	$jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, judgingid, submitid,
 	                 j.starttime, j.endtime, judgehost, result, verified,
 	                 j.valid, j.rejudgingid, r.valid AS rejudgevalid,
-	                 (j.endtime IS NULL AND j.valid=0 AND (r.valid IS NULL OR r.valid)) AS aborted
+	                 (j.endtime IS NULL AND j.valid=0 AND
+	                  (r.valid IS NULL OR r.valid=0)) AS aborted
 	                 FROM judging j
 	                 LEFT JOIN rejudging r USING(rejudgingid)
 	                 WHERE cid IN (%Ai) AND judgehost = %s
