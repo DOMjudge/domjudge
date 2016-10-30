@@ -1312,9 +1312,9 @@ function internal_error_POST($args)
 	// group together duplicate internal errors
 	// note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors
 	$errorid = $DB->q('MAYBEVALUE SELECT errorid FROM internal_error
-			   WHERE description=%s AND disabled=%s AND status=%s' .
-			   ( isset($args['cid']) ? ' AND cid=%i' : '%_' ),
-			   $args['description'], $args['disabled'], 'open', $args['cid']);
+	                   WHERE description=%s AND disabled=%s AND status=%s' .
+	                  ( isset($args['cid']) ? ' AND cid=%i' : '%_' ),
+	                  $args['description'], $args['disabled'], 'open', $args['cid']);
 
 	if ( isset($errorid) ) {
 		// FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog
@@ -1322,9 +1322,10 @@ function internal_error_POST($args)
 	}
 
 	$errorid = $DB->q('RETURNID INSERT INTO internal_error
-		(judgingid, cid, description, judgehostlog, time, disabled) VALUES
-		(%i, %i, %s, %s, %i, %s)',
-		$args['judgingid'], $args['cid'], $args['description'], $args['judgehostlog'], now(), $args['disabled']);
+	                   (judgingid, cid, description, judgehostlog, time, disabled)
+	                   VALUES (%i, %i, %s, %s, %i, %s)',
+	                  $args['judgingid'], $args['cid'], $args['description'],
+	                  $args['judgehostlog'], now(), $args['disabled']);
 
 	$disabled = dj_json_decode($args['disabled']);
 	// disable what needs to be disabled

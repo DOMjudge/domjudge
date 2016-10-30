@@ -102,8 +102,8 @@ function check_updated_file($probid, $rank, $fileid, $file)
 
 		$content = file_get_contents($_FILES[$fileid]['tmp_name'][$rank]);
 		if ( $DB->q("VALUE SELECT count(testcaseid)
-			     FROM testcase WHERE probid = %i AND rank = %i",
-			    $probid, $rank)==0 ) {
+		             FROM testcase WHERE probid = %i AND rank = %i",
+		            $probid, $rank)==0 ) {
 			error("cannot find testcase $rank for probid = $probid");
 		}
 
@@ -111,11 +111,11 @@ function check_updated_file($probid, $rank, $fileid, $file)
 			list($thumb, $type) = get_image_thumb_type($content);
 
 			$DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
-				WHERE probid = %i AND rank = %i',
+			        WHERE probid = %i AND rank = %i',
 			       $content, $thumb, $type, $probid, $rank);
 		} else {
 			$DB->q("UPDATE testcase SET md5sum_$file = %s, $file = %s
-				WHERE probid = %i AND rank = %i",
+			        WHERE probid = %i AND rank = %i",
 			       md5($content), $content, $probid, $rank);
 		}
 

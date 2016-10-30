@@ -220,7 +220,7 @@ function tsv_accounts_set($data)
 	foreach ($data as $row) {
 		if ( ! empty($row['team']) ) {
 			$teamid = $DB->q("MAYBEVALUE SELECT teamid FROM team WHERE name = %s AND categoryid = %i",
-		               $row['team']['name'], $row['team']['categoryid']);
+			                 $row['team']['name'], $row['team']['categoryid']);
 			if ( is_null($teamid) ) {
 				$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $row['team']);
 			}
