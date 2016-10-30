@@ -355,7 +355,8 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
 			'<td>' . $link . printtime($jud['starttime']) . '</a></td>' .
-			'<td>' . $link . specialchars($jud['max_runtime']) . ' s</a></td>' .
+			'<td>' . $link . specialchars($jud['max_runtime']) .
+			                 (isset($jud['max_runtime']) ? ' s' : '') . '</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
 			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
 			'<td>' . $link . specialchars($rinfo) . '</a></td>' .
