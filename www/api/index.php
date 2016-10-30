@@ -380,7 +380,7 @@ function judgings_POST($args)
 	if ( empty($submitid) || $numupd == 0 ) return '';
 
 	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid, s.rejudgingid,
-	               CEILING(time_factor*timelimit) AS maxruntime,
+	               time_factor*timelimit AS maxruntime,
 	               p.memlimit, p.outputlimit,
 	               special_run AS run, special_compare AS compare,
 	               special_compare_args AS compare_args, compile_script
@@ -437,7 +437,7 @@ function judgings_POST($args)
 	$row['probid']      = safe_int($row['probid']);
 	$row['langid']      = $row['langid'];
 	$row['rejudgingid'] = safe_int($row['rejudgingid']);
-	$row['maxruntime']  = safe_int($row['maxruntime']);
+	$row['maxruntime']  = safe_float($row['maxruntime'],6);
 	$row['memlimit']    = safe_int($row['memlimit']);
 	$row['outputlimit'] = safe_int($row['outputlimit']);
 	$row['judgingid']   = safe_int($jid);

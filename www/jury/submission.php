@@ -200,7 +200,7 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid, s.origsubmit
                     s.submittime, s.valid, c.cid, c.shortname AS contestshortname,
                     c.name AS contestname, t.name AS teamname, l.name AS langname,
                     cp.shortname AS probshortname, p.name AS probname,
-                    CEILING(time_factor*timelimit) AS maxruntime
+                    time_factor*timelimit AS maxruntime
                     FROM submission s
                     LEFT JOIN team     t ON (t.teamid = s.teamid)
                     LEFT JOIN problem  p ON (p.probid = s.probid)
