@@ -99,7 +99,24 @@ function dj_password_verify($password, $hash, $user = null)
 
 function dj_password_needs_rehash($hash)
 {
-	if ( strlen($hash)>0 && $hash[0]!=='$' ) return true;
+	// First check for an old-style MD5 hash:
+	if ( strlen($hash)>0 && $hash[0]!=='$' ) {
+		// Check that the SQL structure has been upgraded so that the
+		// new, longer hashes actually fit.
+		global $DB;
+		$res = $DB->q('MAYBETUPLE SHOW COLUMNS FROM user WHERE Field = %s', 'password');
+		$matches = array();
+		if ( !isset($res['Type']) ||
+		     !preg_match('/^varchar\(([0-9]+)\)$/i',$res['Type'],$matches) ) {
+			error("Could not parse DB table 'user' information");
+		}
+		$len = (int)$matches[1];
+		if ( $len<255 ) {
+			error("DB column 'user.password' has length $len; " .
+			      "upgrade your DB structure to support storing new, longer hashes");
+		}
+		return true;
+	}
 	return password_needs_rehash($hash, PASSWORD_DEFAULT,
 	                             array('cost' => PASSWORD_HASH_COST));
 }
