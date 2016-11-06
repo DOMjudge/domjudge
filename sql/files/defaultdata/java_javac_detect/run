@@ -71,7 +71,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec java -XX:+UseSerialGC -Xss64m -Xms${MEMLIMITJAVA}k -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS'
+exec java -XX:+UseSerialGC -Xss64m -Xms${MEMLIMITJAVA}k -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"

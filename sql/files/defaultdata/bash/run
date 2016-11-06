@@ -50,7 +50,7 @@ fi
 
 export ONLINE_JUDGE=1 DOMJUDGE=1
 
-exec bash $RUNOPTIONS "$MAINSOURCE"
+exec bash $RUNOPTIONS "$MAINSOURCE" "\$@"
 EOF
 
 chmod a+x "$DEST"

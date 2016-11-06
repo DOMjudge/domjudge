@@ -37,7 +37,7 @@ fi
 
 export ONLINE_JUDGE=1 DOMJUDGE=1
 
-exec nodejs "$MAINSOURCE"
+exec nodejs "$MAINSOURCE" "\$@"
 EOF
 
 chmod a+x "$DEST"

@@ -43,7 +43,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec awk -v ONLINE_JUDGE=1 -v DOMJUDGE=1 $FILEARGS
+exec awk -v ONLINE_JUDGE=1 -v DOMJUDGE=1 $FILEARGS "\$@"
 EOF
 
 chmod a+x "$DEST"

@@ -44,7 +44,7 @@ fi
 
 export ONLINE_JUDGE=1 DOMJUDGE=1
 
-exec ruby "$MAINSOURCE"
+exec ruby "$MAINSOURCE" "\$@"
 EOF
 
 chmod a+x "$DEST"
