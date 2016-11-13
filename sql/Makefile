@@ -60,13 +60,13 @@ install-domserver: $(ZIPSQL)
 		mysql_db_structure.sql mysql_db_defaultdata.sql mysql_db_examples.sql \
 		$(ZIPSQL)
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/upgrade \
-	 	upgrade/*.sql upgrade/README
+		upgrade/*.sql upgrade/README
 
 	$(INSTALL_DIR) $(addprefix $(DESTDIR)$(domserver_sqldir)/files/,defaultdata examples)
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/files/defaultdata \
-	 	files/defaultdata/*.zip
+		files/defaultdata/*.zip
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/files/examples \
-	 	files/examples/*.zip
+		files/examples/*.zip
 
 # Make $(CONFSTUB) a dependency, and the other stuff sub-rules to make
 # sure that config.h already exists when creating the zipfiles.
