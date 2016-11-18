@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 5.2.0 - DEV
 -------------------
+ - [security] bind PHP session cookie to specific web URI to prevent
+   sharing sessions between different websites on the same host.
  - Allow team to download testcase data marked as 'sample'.
  - Add icons to menu bars.
  - Allow to filter submissions on team, problem, language.
