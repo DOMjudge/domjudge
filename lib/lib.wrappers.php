@@ -18,7 +18,7 @@ function dj_setcookie($name, $value = null, $expire = 0,
 		// KLUDGE: We want to find the DOMjudge base path, but this
 		// information is not directly available as configuration, so
 		// we extract it from the executed PHP script.
-		$path = preg_replace('/(jury|public|team)\/?$/', '',
+		$path = preg_replace('/\/(api|jury|public|team)\/?$/', '/',
 		                     dirname($_SERVER['PHP_SELF']));
 	}
 
