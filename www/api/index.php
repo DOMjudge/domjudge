@@ -675,8 +675,8 @@ function submissions($args)
 {
 	global $DB, $cdatas, $api;
 
-	$query = 'SELECT submitid, teamid, probid, langid, submittime, valid
-	          FROM submission WHERE TRUE';
+	$query = 'SELECT submitid, teamid, probid, langid, submittime
+	          FROM submission WHERE valid=1';
 
 	$hasCid = array_key_exists('cid', $args);
 	$query .= ($hasCid ? ' AND cid = %i' : ' AND TRUE %_');
