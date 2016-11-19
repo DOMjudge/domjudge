@@ -52,7 +52,12 @@ foreach($k as $key => $val) {
 			case 'RESTRICT':
 				error("$t.$key \"$val\" is still referenced in $table, cannot delete.");
 			case 'CASCADE':
-				$warnings[] = "cascade to $table";
+				$deps = fk_dependent_tables($table);
+				$warn = "cascade to $table";
+				if ( count($deps)>0 ) {
+					$warn .= ", and possibly to dependent tables " . implode(", ",$deps);
+				}
+				$warnings[] = $warn;
 				break;
 			case 'SETNULL':
 				$warnings[] = "create dangling references in $table";

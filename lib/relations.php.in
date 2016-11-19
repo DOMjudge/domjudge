@@ -54,3 +54,37 @@ function fk_check($keyfield, $value) {
 	if ( count($ret) ) return $ret;
 	return null;
 }
+
+/**
+ * Find all dependent tables that a delete could cascade into.
+ *
+ * Returns an array of table names.
+ */
+function fk_dependent_tables($table)
+{
+	global $RELATIONS;
+
+	$ret = array();
+	// We do a BFS through the list of tables.
+	$queue = array($table);
+	while ( count($queue)>0 ) {
+		$curr_table = reset($queue);
+		unset($queue[array_search($curr_table,$queue)]);
+
+		if ( in_array($curr_table,$ret) ) continue;
+		if ( $curr_table!=$table ) $ret[] = $curr_table;
+
+		foreach ( $RELATIONS as $next_table => $data ) {
+			foreach ( $data as $val ) {
+				@list( $foreign, $action ) = explode('&', $val);
+				@list( $foreign_table, $foreign_key ) = explode('.', $foreign);
+				if ( empty($action) ) $action = 'CASCADE';
+				if ( $foreign_table==$curr_table && $action=='CASCADE' ) {
+					$queue[] = $next_table;
+				}
+			}
+		}
+	}
+
+	return $ret;
+}
