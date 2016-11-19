@@ -3,7 +3,7 @@
  * @configure_input@
  *
  * Document relations between DOMjudge tables for various use.
- * The data is extracted fromt the SQL DB structure file.
+ * The data is extracted from the SQL DB structure file.
  */
 
 /** For each table specify the set of attributes that together
@@ -36,7 +36,7 @@ $RELATIONS['clarification']['recipient'] = 'team.teamid&NOCONSTRAINT';
  *
  * Returns null or an array "table name => action" where matches are found.
  */
-function fk_check ($keyfield, $value) {
+function fk_check($keyfield, $value) {
 	global $RELATIONS, $DB;
 
 	$ret = array();
