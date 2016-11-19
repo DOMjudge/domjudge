@@ -704,7 +704,7 @@ function renderPage($data, $header = true, $footer = true, $templateFile = null)
 	$templateFile = basename($templateFile, '.php') . '.phtml';
 
 	$title = $data['title'];
-	$refresh = $data['refresh'];
+	$refresh = @$data['refresh'];
 	if ( $header ) require(LIBWWWDIR . '/header.php');
 
 	global $twig;

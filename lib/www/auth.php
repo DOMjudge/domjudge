@@ -257,7 +257,7 @@ function do_login()
 	// some specializations are handled by if-statements.
 	case 'IPADDRESS':
 	case 'PHP_SESSIONS':
-		if ($_POST['oidc'] == 'true') {
+		if (@$_POST['oidc'] == 'true') {
 			do_login_oidc();
 			break;
 		}
