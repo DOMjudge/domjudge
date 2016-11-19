@@ -13,15 +13,27 @@ $extrahead .= '<script language="javascript" type="text/javascript" src="../js/f
 $bar_size = 10;
 
 $title = "Statistics";
-if ( !empty($_GET['probid']) ) {
+
+if ( !empty($_GET['probid']) && is_numeric($_GET['probid']) ) {
+	$probid = (int)$_GET['probid'];
+}
+
+if ( !empty($cid) && isset($probid) ) {
 	$shortname = $DB->q('VALUE SELECT shortname FROM problem p
-	                     INNER JOIN contestproblem USING (probid)
-	                     WHERE p.probid = %i', $_GET['probid']);
+	                     INNER JOIN contestproblem cp USING (probid)
+	                     WHERE cp.cid = %i AND p.probid = %i', $cid, $probid);
 	$title .= " - Problem " . specialchars($shortname);
 }
 
 require(LIBWWWDIR . '/header.php');
 echo "<h1>" . specialchars($title) . "</h1>\n\n";
+
+if ( empty($cid) ) {
+	echo "<p class=\"nodata\">No active contest available</p>\n\n";
+
+	require(LIBWWWDIR . '/footer.php');
+	exit;
+}
 
 $partCat = $DB->q('VALUE SELECT categoryid FROM team_category WHERE name=%s', 'Participants');
 
@@ -33,9 +45,9 @@ $res = $DB->q('SELECT result, COUNT(result) as count,
                LEFT OUTER JOIN contest c ON(c.cid=j.cid)
                LEFT OUTER JOIN team t USING(teamid)
                WHERE s.cid = %i AND s.valid = 1 AND t.categoryid = %i ' .
-              ( empty($_GET['probid']) ? '%_' : 'AND s.probid = %i ' ) .
+              ( isset($probid) ? 'AND s.probid = %i ' : '%_' ) .
               'AND submittime < c.endtime AND submittime >= c.starttime
-               GROUP BY minute, result', $bar_size * 60, $bar_size, $cid, $partCat, @$_GET['probid']);
+               GROUP BY minute, result', $bar_size * 60, $bar_size, $cid, $partCat, $probid);
 
 // All problems
 $problems = $DB->q('SELECT p.probid,p.name FROM problem p
