@@ -652,21 +652,20 @@ interface.
 A few extra steps might need to be taken to completely install and
 configure a judgehost.
 
-For running solution programs under a non-privileged user, a user has
+For running solution programs under a non-privileged user, a user and group have
 to be added to the system(s) that act as judgehost. This user does not
 need a home-directory or password, so the following command would
-suffice to add a user `domjudge-run' with minimal privileges.
+suffice to add a user and group `domjudge-run' with minimal privileges.
 
 <!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
-On RedHat:
-<verb>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</verb>
-On Debian:
-<verb>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</verb>
+On Debian and Redhat based Linux distributions use:
+<verb>useradd -d /nonexistent -U -M -s /bin/false domjudge-run</verb>
 
 For other systems check the specifics of your useradd command.
 This user must also be configured as the user under which programs run
 via <tt>configure --enable-runuser=USER</tt>; the default is
-<tt>domjudge-run</tt>.
+<tt>domjudge-run</tt>. By default the group is set to the same, this
+can be modified with the option <tt>--enable-rungroup=GROUP</tt>
 
 <tt>Runguard</tt> needs to be able to become root for certain operations
 like changing to the runuser and performing a chroot. Also, the default

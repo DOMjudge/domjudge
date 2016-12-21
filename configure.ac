@@ -117,6 +117,18 @@ else
 	AC_MSG_RESULT($RUNUSER)
 fi
 
+AC_MSG_CHECKING([rungroup])
+AC_ARG_WITH([rungroup], [AS_HELP_STRING([--with-rungroup=GROUP],
+[Unprivileged group under which to run submissions (default: same as runuser).])], [], [])
+
+if test "x$with_rungroup" = x; then
+	AC_SUBST(RUNGROUP,"$RUNUSER")
+	AC_MSG_RESULT($RUNGROUP (default))
+else
+	AC_SUBST(RUNGROUP,$with_rungroup)
+	AC_MSG_RESULT($RUNGROUP)
+fi
+
 # Check for using Linux cgroups for memory control
 AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]), AC_MSG_ERROR([Linux cgroup library not found.]))
 
@@ -342,6 +354,7 @@ echo " * LDFLAGS.............: $LDFLAGS"
 echo ""
 echo " * default user........: $DOMJUDGE_USER"
 echo " * runguard user.......: $RUNUSER"
+echo " * runguard group......: $RUNGROUP"
 echo " * webserver group.....: $WEBSERVER_GROUP"
 echo ""
 echo " * website base URL....: $BASEURL"

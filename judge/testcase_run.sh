@@ -197,7 +197,7 @@ runcheck ./run testdata.in program.out \
 	${USE_CHROOT:+-r "$PWD/.."} \
 	--nproc=$PROCLIMIT \
 	--no-core --streamsize=$FILELIMIT \
-	--user="$RUNUSER" \
+	--user="$RUNUSER" --group="$RUNGROUP" \
 	--walltime=$TIMELIMIT --cputime=$TIMELIMIT \
 	--memsize=$MEMLIMIT --filesize=$FILELIMIT \
 	--stderr=program.err --outmeta=program.meta -- \
@@ -227,7 +227,7 @@ for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.
 	chmod a+w feedback/$i
 done
 
-runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
+runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
 	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
 	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \

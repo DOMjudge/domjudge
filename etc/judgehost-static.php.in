@@ -19,6 +19,7 @@ define('JUDGEDIR',    '@judgehost_judgedir@');
 define('CHROOTDIR',   '@judgehost_chrootdir@');
 
 define('RUNUSER',     '@RUNUSER@');
+define('RUNGROUP',    '@RUNGROUP@');
 
 // Possible exitcodes from testcase_run.sh and their meaning.
 $EXITCODES = array (

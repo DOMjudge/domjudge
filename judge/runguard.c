@@ -123,8 +123,9 @@ const char *cpuset;
 #define OOM_PATH_OLD "/proc/self/oom_adj"
 #define OOM_RESET_VALUE 0
 
-int runuid;
 char *runuser;
+char *rungroup;
+int runuid;
 int rungid;
 int use_root;
 int use_walltime;
@@ -304,6 +305,8 @@ Run COMMAND with restrictions.\n\
       --version          output version information and exit\n");
 	printf("\n\
 Note that root privileges are needed for the `root' and `user' options.\n\
+If `user' is set, then `group' defaults to the same to prevent security\n\
+issues, since otherwise the process would retain group root permissions.\n\
 The COMMAND path is relative to the changed ROOT directory if specified.\n\
 TIME may be specified as a float; two floats separated by `:' are treated\n\
 as soft and hard limits. The runtime written to file is that of the last\n\
@@ -620,6 +623,7 @@ void setrestrictions()
 {
 	char *path;
 	char  cwd[PATH_MAX+1];
+	gid_t aux_groups[10];
 
 	struct rlimit lim;
 
@@ -726,6 +730,9 @@ void setrestrictions()
 	/* Set group-id (must be root for this, so before setting user). */
 	if ( use_group ) {
 		if ( setgid(rungid) ) error(errno,"cannot set group ID to `%d'",rungid);
+		aux_groups[0] = rungid;
+		if ( setgroups(1, aux_groups) ) error(errno,"cannot clear auxiliary groups");
+
 		verbose("using group ID `%d'",rungid);
 	}
 	/* Set user-id (must be root for this). */
@@ -810,6 +817,7 @@ int main(int argc, char **argv)
 		case 'g': /* group option: gid or string */
 			use_group = 1;
 			rungid = strtol(optarg,&ptr,10);
+			rungroup = strdup(optarg);
 			if ( errno || *ptr!='\0' ) rungid = groupid(optarg);
 			if ( rungid<0 ) error(0,"invalid groupname or ID specified: `%s'",optarg);
 			break;
@@ -885,6 +893,16 @@ int main(int argc, char **argv)
 		default:
 			error(0,"getopt returned character code `%c' ??",(char)opt);
 		}
+	}
+
+	/* Make sure that we change from group root if we change to an
+	   unprivileged user to prevent unintended permissions. */
+	if ( use_user && !use_group ) {
+		verbose("using unprivileged user `%s' also as group",runuser);
+		use_group = 1;
+		rungroup = strdup(runuser);
+		rungid = groupid(rungroup);
+		if ( rungid<0 ) error(0,"invalid groupname or ID specified: `%s'",rungroup);
 	}
 
 	if ( show_help ) usage();

@@ -308,6 +308,7 @@ if ( DEBUG & DEBUG_JUDGE ) {
 
 $runuser = RUNUSER;
 if ( isset($options['daemonid']) ) $runuser .= '-' . $options['daemonid'];
+// TODO: also suffix daemonid to rungroup?
 
 // Set static environment variables for passing path configuration
 // to called programs:
@@ -318,6 +319,7 @@ putenv('DJ_LIBDIR='      . LIBDIR);
 putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
 putenv('DJ_LOGDIR='      . LOGDIR);
 putenv('RUNUSER='        . $runuser);
+putenv('RUNGROUP='       . RUNGROUP);
 
 foreach ( $EXITCODES as $code => $name ) {
 	$var = 'E_' . strtoupper(str_replace('-','_',$name));
