@@ -12,14 +12,24 @@
 #include <error.h>
 #include <errno.h>
 
+#define MAX_GROUPS 32
 #define ROOTFILE "/etc/root-permission-test.txt"
 
 int main(int argc, char **argv)
 {
 	FILE *f;
 	char line[256];
+	gid_t list[MAX_GROUPS];
+	int i, n;
 
-	printf("My effective/real group IDs are: %d/%d\n", getgid(), getegid());
+	n = getgroups(MAX_GROUPS, list);
+	if ( n==-1 ) {
+		error(1, errno, "error calling getgroups");
+	}
+
+	printf("My effective/real/auxiliary group IDs are: %d/%d/", getgid(), getegid());
+	for(i=0; i<n; i++) printf("%d ",list[i]);
+	printf("\n");
 
 	f = fopen(ROOTFILE,"r");
 
