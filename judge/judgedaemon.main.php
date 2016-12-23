@@ -308,7 +308,6 @@ if ( DEBUG & DEBUG_JUDGE ) {
 
 $runuser = RUNUSER;
 if ( isset($options['daemonid']) ) $runuser .= '-' . $options['daemonid'];
-// TODO: also suffix daemonid to rungroup?
 
 // Set static environment variables for passing path configuration
 // to called programs:
