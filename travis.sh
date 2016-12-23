@@ -42,9 +42,10 @@ echo "machine localhost login dummy password dummy" > ~/.netrc
 sudo cp /opt/domjudge/domserver/etc/apache.conf /etc/apache2/sites-enabled/
 sudo service apache2 restart
 
-# add users judgedaemons (FIXME: make them configurable)
+# add users/group for judgedaemons (FIXME: make them configurable)
 sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-0
 sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-1
+sudo groupadd domjudge-run
 
 # configure judgehost
 cd /opt/domjudge/judgehost/
