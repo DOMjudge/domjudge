@@ -800,11 +800,10 @@ int main(int argc, char **argv)
 			break;
 		case 'u': /* user option: uid or string */
 			use_user = 1;
-			runuser = NULL;
 			runuid = strtol(optarg,&ptr,10);
+			runuser = strdup(optarg);
 			if ( errno || *ptr!='\0' ) {
 				runuid = userid(optarg);
-				runuser = strdup(optarg);
 				if ( regcomp(&userregex,"^[A-Za-z][A-Za-z0-9\\._-]*$", REG_NOSUB)!=0 ) {
 					error(0,"could not create username regex");
 				}
@@ -930,7 +929,7 @@ int main(int argc, char **argv)
 				ret = fnmatch(ptr,runuser,0);
 				if ( ret==0 ) break;
 				if ( ret!=FNM_NOMATCH ) {
-					error(0,"could not match username `%s' against `%s'",runuser,ptr);
+					error(0,"matching username `%s' against `%s'",runuser,ptr);
 				}
 			}
 		}
