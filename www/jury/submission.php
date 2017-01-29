@@ -10,8 +10,8 @@
 // character length, and with a message if truncation happened.
 function truncate_SQL_field($field)
 {
-	$size = 50000;
-	$msg = "\n[output truncated after 50,000 B]\n";
+	$size = 2000;
+	$msg = "\n[output truncated after 2,000 B]\n";
 	return "IF( CHAR_LENGTH($field)>$size , CONCAT(LEFT($field,$size),'$msg') , $field)";
 }
 
