@@ -59,7 +59,7 @@ function dj_get_file_contents($filename, $maxsize = -1) {
 
 	if ( $maxsize >= 0 && filesize($filename) > $maxsize ) {
 		return file_get_contents($filename, FALSE, NULL, -1, $maxsize)
-			. "\n[output truncated after $maxsize B]\n";
+			. "\n[output storage truncated after $maxsize B]\n";
 	}
 
 	return file_get_contents($filename);

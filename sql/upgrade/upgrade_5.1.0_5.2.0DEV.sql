@@ -85,6 +85,8 @@ UPDATE `judging` SET `judgehost` = 'host-created-by-SQL-upgrade' WHERE `judgehos
 -- Add/remove sample/initial contents
 --
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('output_storage_limit', '50000', 'int', 'Maximum size of error/system output stored in the database (in bytes); use "-1" to disable any limits.'),
+('output_display_limit', '2000', 'int', 'Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use "-1" to disable any limits.'),
 ('diskspace_error', '1048576', 'int', 'Minimum free disk space (in kB) on judgehosts.'),
 ('allow_openid_auth', '0', 'bool', 'Allow users to log in using OpenID'),
 ('openid_autocreate_team', '1', 'bool', 'Create a team for each user that logs in with OpenID'),

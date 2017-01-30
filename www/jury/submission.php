@@ -6,12 +6,15 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-// Returns a piece of SQL code to return a field, truncated to a fixed
-// character length, and with a message if truncation happened.
+// Returns a piece of SQL code to return a field, truncated to a
+// configured character length, with a message if truncation happened.
 function truncate_SQL_field($field)
 {
-	$size = 2000;
-	$msg = "\n[output truncated after 2,000 B]\n";
+	$size = (int) dbconfig_get('output_display_limit', 2000);
+	// $size == -1 means never perform truncation:
+	if ( $size < 0 ) return $field;
+
+	$msg = "\n[output display truncated after $size B]\n";
 	return "IF( CHAR_LENGTH($field)>$size , CONCAT(LEFT($field,$size),'$msg') , $field)";
 }
 

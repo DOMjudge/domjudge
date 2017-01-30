@@ -21,6 +21,8 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('sourcesize_limit', '256', 'int', 'Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".'),
 ('sourcefiles_limit', '100', 'int', 'Maximum number of source files in one submission. Set to one to disable multiple file submissions.'),
 ('timelimit_overshoot', '"1s|10%"', 'string', 'Time that submissions are kept running beyond timelimt before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.'),
+('output_storage_limit', '50000', 'int', 'Maximum size of error/system output stored in the database (in bytes); use "-1" to disable any limits.'),
+('output_display_limit', '2000', 'int', 'Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use "-1" to disable any limits.'),
 ('verification_required', '0', 'bool', 'Is verification of judgings by jury required before publication?'),
 ('show_affiliations', '1', 'bool', 'Show country flags and affiliations names on the scoreboard?'),
 ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?'),
