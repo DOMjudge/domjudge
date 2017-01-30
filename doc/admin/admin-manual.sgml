@@ -361,8 +361,8 @@ apt-get install gcc g++ make zip unzip mysql-server \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
 </code>
-Note that php modules may need to be enabled depending on your distribution.
-E.g. on ubuntu run <code>php5enmod mcrypt</code> to enable mcrypt.
+Note that PHP modules may need to be enabled depending on your distribution.
+E.g. on Ubuntu run <code>php5enmod mcrypt</code> to enable mcrypt.
 
 
 For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
