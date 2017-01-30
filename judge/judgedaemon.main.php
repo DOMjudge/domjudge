@@ -119,7 +119,8 @@ function dbconfig_get_rest($name) {
  * dj_get_file_contents) as encoded string.
  */
 function rest_encode_file($file, $sizelimit = TRUE) {
-	return urlencode(base64_encode(dj_get_file_contents($file, $sizelimit)));
+	$maxsize = $sizelimit ? 50000 : -1;
+	return urlencode(base64_encode(dj_get_file_contents($file, $maxsize)));
 }
 
 $waittime = 5;

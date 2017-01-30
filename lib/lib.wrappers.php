@@ -43,11 +43,12 @@ function dj_json_decode($str) {
 }
 
 /**
- * helperfunction to read all contents from a file.
- * If $sizelimit is true (default), then only limit this to
- * the first 50,000 bytes and attach a note saying so.
+ * Helperfunction to read all contents from a file.
+ * If $maxsize is set to a nonnegative integer, then limit data read
+ * to this many bytes, and when the truncating the file, attach a note
+ * saying so.
  */
-function dj_get_file_contents($filename, $sizelimit = true) {
+function dj_get_file_contents($filename, $maxsize = -1) {
 
 	if ( ! file_exists($filename) ) {
 		return '';
@@ -56,9 +57,9 @@ function dj_get_file_contents($filename, $sizelimit = true) {
 		error("Could not open $filename for reading: not readable");
 	}
 
-	if ( $sizelimit && filesize($filename) > 50000 ) {
-		return file_get_contents($filename, FALSE, NULL, -1, 50000)
-			. "\n[output truncated after 50,000 B]\n";
+	if ( $maxsize >= 0 && filesize($filename) > $maxsize ) {
+		return file_get_contents($filename, FALSE, NULL, -1, $maxsize)
+			. "\n[output truncated after $maxsize B]\n";
 	}
 
 	return file_get_contents($filename);

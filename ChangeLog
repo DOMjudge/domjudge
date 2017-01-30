@@ -30,6 +30,7 @@ Version 5.2.0 - DEV
  - Update ACE editor to version 1.2.3, jQuery to version 2.2.4.
  - Implement better password hashing (#237 thanks Bert Peters).
  - Allow float timelimits (#235).
+ - Changed semantics of dj_file_contents_get() optional size argument.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------
