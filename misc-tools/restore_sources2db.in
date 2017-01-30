@@ -128,7 +128,7 @@ foreach ( $submissions as $s ) {
 	foreach ( $s['files'] as $rank => $file ) {
 		$DB->q('INSERT INTO submission_file (submitid, filename, rank, sourcecode)
 		        VALUES (%i, %s, %i, %s)', $s['sid'], $file['name'], $rank,
-		       dj_get_file_contents($file['source']);
+		       dj_get_file_contents($file['source']));
 		if ( empty($mainfile) ) $mainfile = $file['name'];
 	}
 	$DB->q('COMMIT');
