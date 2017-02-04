@@ -7,9 +7,42 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+/**
+ * Reads balloon filter settings from a cookie and explicit POST of
+ * filter settings. Also sets the cookie, so must be called before
+ * headers are sent. Returns the balloon filter settings array.
+ */
+function initBalloonfilter()
+{
+	$balloonfilter = array();
+
+	// Read balloon filter options from cookie and explicit POST
+	if ( isset($_COOKIE['domjudge_balloonfilter']) ) {
+		$balloonfilter = json_decode($_COOKIE['domjudge_balloonfilter'], TRUE);
+	}
+
+	if ( isset($_REQUEST['clear']) ) $balloonfilter = array();
+
+	if ( isset($_REQUEST['filter']) ) {
+		$balloonfilter = array();
+		foreach( array('affilid', 'room') as $type ) {
+			if ( !empty($_REQUEST[$type]) ) {
+				$balloonfilter[$type] = $_REQUEST[$type];
+			}
+		}
+	}
+
+	dj_setcookie('domjudge_balloonfilter', json_encode($balloonfilter));
+
+	return $balloonfilter;
+}
+
 $REQUIRED_ROLES = array('jury','balloon');
 require('init.php');
 $title = 'Balloon Status';
+
+// This reads and sets a cookie, so must be called before headers are sent.
+$filter = initBalloonfilter();
 
 if ( isset($_POST['done']) ) {
 	foreach($_POST['done'] as $done => $dummy) {
@@ -51,6 +84,62 @@ echo addForm($pagename, 'get') . "<p>\n" .
     addHidden('viewall', ($viewall ? 0 : 1)) .
     addSubmit($viewall ? 'view unsent only' : 'view all') . "</p>\n" .
     addEndForm();
+
+
+// Filtering by affiliation or room
+$affils = $DB->q('TABLE SELECT affilid,
+				  team_affiliation.name, room
+				  FROM team_affiliation
+				  LEFT JOIN team t USING (affilid)
+				  INNER JOIN contest c ON (c.cid = %i)
+				  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
+				  WHERE c.cid = %i AND
+				  (c.public = 1 OR ct.teamid IS NOT NULL)
+				  GROUP BY affilid, room',
+				 $cdata['cid'], $cdata['cid']);
+
+// all possible filter values for the select field
+$affilids  = array();
+$rooms = array();
+foreach( $affils as $affil ) {
+	$affilids[$affil['affilid']] = $affil['name'];
+	if ( isset($affil['room']) ) $rooms[$affil['room']] = $affil['room'];
+}
+
+// the 'filtered on' text
+$filteron = array();
+$filtertext = "";
+foreach (array('affilid' => 'affiliation', 'room' => 'room') as $type => $text) {
+	if ( isset($filter[$type]) ) {
+		$filteron[] = $text;
+	}
+}
+if ( sizeof($filteron) > 0 ) {
+	$filtertext = "(filtered on " . implode(", ", $filteron) . ")";
+}
+?>
+
+<table class="balloonfilter">
+<tr>
+<td><a class="collapse" href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
+<td><?= $filtertext ?></td>
+<td><div id="detailfilter">
+<?php
+
+		echo addForm($pagename, 'get') .
+			( count($affilids) > 1 ? addSelect('affilid[]',    $affilids,  @$filter['affilid'],    TRUE,  8) : "" ) .
+			( count($rooms) > 1 ? addSelect('room[]',    $rooms,  @$filter['room'],    TRUE,  8) : "" ) .
+			addSubmit('filter', 'filter') . addSubmit('clear', 'clear') .
+			addEndForm();
+		?>
+</div></td></tr>
+</table>
+<script type="text/javascript">
+<!--
+collapse("filter");
+// -->
+</script>
+		<?php
 
 $contestids = $cids;
 if ( $cid !== null ) {
@@ -98,9 +187,11 @@ if ( !empty($contestids) ) {
 	               LEFT JOIN team t USING(teamid)
 	               LEFT JOIN team_category c USING(categoryid)
 	               LEFT JOIN contest co USING (cid)
-	               WHERE s.cid IN (%Ai) $freezecond
-	               ORDER BY done ASC, balloonid DESC",
-	              $contestids);
+	               WHERE s.cid IN (%Ai) $freezecond" .
+	               (isset($filter['affilid']) ? ' AND t.affilid IN (%As) ' : ' %_') .
+	               (isset($filter['room']) ? ' AND t.room IN (%As) ' : ' %_') .
+	               "ORDER BY done ASC, balloonid DESC",
+	              $contestids, @$filter['affilid'], @$filter['room']);
 }
 
 /* Loop over the result, store the total of balloons for a team
