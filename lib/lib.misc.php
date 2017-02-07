@@ -978,15 +978,18 @@ $HTML_colors = array(
 
 /**
  * Convert a HTML extended color name to 6-digit hex RGB value.
- * Returns black if $color is not valid.
+ * If $color is already in hex RGB format, it is returned unchanged.
+ * Returns NULL if $color is not valid.
  */
 function color_to_hex($color)
 {
 	global $HTML_colors;
 
+	if ( preg_match('/^#([[:xdigit:]]{3}){1,2}$/', $color) ) return $color;
+
 	$color = strtolower(preg_replace('/[[:space:]]/','',$color));
 	if ( isset($HTML_colors[$color]) ) return strtoupper($HTML_colors[$color]);
-	return '#000000';
+	return null;
 }
 
 /**

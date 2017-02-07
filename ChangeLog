@@ -34,6 +34,7 @@ Version 5.2.0 - DEV
  - Add filtering to balloons page (#251 thanks Michael Baer).
  - Changed semantics of dj_file_contents_get() optional size argument.
  - Make storage and display limits for output/error files configurable.
+ - Changed special case handling of color name/hex conversion functions.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------
