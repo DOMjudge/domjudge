@@ -191,10 +191,11 @@ if ( isset($_POST['import']) ) {
 
 	}
 	$contest_data['problems'] = array();
-	$contests = getCurContests(FALSE);
-	if ( !empty($contests) ) {
-		$q = $DB->q("SELECT * FROM problem INNER JOIN contestproblem USING (probid) WHERE cid IN (%Ai)",
-		            $contests);
+	if ( !empty($cid) ) {
+		$q = $DB->q("SELECT * FROM problem
+		             INNER JOIN contestproblem USING (probid)
+		             WHERE cid = %i",
+		            $cid);
 		while ( $prob = $q->next() ) {
 
 			$problem = array();
