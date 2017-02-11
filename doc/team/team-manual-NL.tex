@@ -41,7 +41,7 @@ doorneemt, omdat daarin specifieke details van het jurysysteem staan
 die ook van belang kunnen zijn op het moment dat niet alles perfect
 gaat. \textbf{WEES GEWAARSCHUWD!}
 
-DOMjudge werkt via een web-interface die je kunt vinden op \\
+DOMjudge werkt via een web-interface die je kunt vinden op
 \url{\BASEURL team}. De figuren~\ref{fig:team-overview}
 en~\ref{fig:team-scoreboard} op de volgende pagina geven een impressie
 hiervan.
@@ -68,32 +68,31 @@ de programmeertaal, dan worden deze automatisch gedetecteerd. Voor de
 complete documentatie en alle opties, zie \cmd{submit --help}.
 }
 \item[Web-Interface]
-Vanaf je teampagina op \url{\BASEURL team} kun je een bestand
-selecteren met de \textbf{Select file\ldots}-knop in de linker kolom en deze met
+Vanaf je teampagina op \url{\BASEURL team} kun je bestand(en)
+selecteren met de \textbf{browse} knop in de linker kolom en deze met
 de \textbf{submit} knop insturen.
-Standaard wordt het probleem uit het deel van de bestandsnaam v\'o\'or de
-punt gehaald en de programmeertaal uit de extensie. Je kunt meer
-bestanden toevoegen met de knop \textbf{Add another file}.
+Standaard wordt het probleem uit het deel van de bestandsnaam v\'o\'or
+de punt gehaald en de programmeertaal uit de extensie.
 
 \end{description}
 
 \subsection*{Bekijken van scores, inzendingen, e.d.}
 
 Het bekijken van inzendingen, scores en sturen en lezen van
-``clarification requests'' gaat via de web-interface in de rechter kolom.
+``clarification requests \& replies'' gaat via de web-interface in de rechter kolom.
 
 \emph{Einde samenvatting.}
 
 \begin{figure}[p]
   \centering
-  \fbox{\includegraphics[width=15cm]{team-overview}}
+  \fbox{\includegraphics[width=\textwidth]{team-overview}}
   \caption{de team web-interface overzichtspagina.}
   \label{fig:team-overview}
 \end{figure}
 
 \begin{figure}[p]
   \centering
-  \fbox{\includegraphics[width=15cm]{team-scoreboard}}
+  \fbox{\includegraphics[width=\textwidth]{team-scoreboard}}
   \caption{de scorebord pagina.}
   \label{fig:team-scoreboard}
 \end{figure}
@@ -148,18 +147,13 @@ submitprogramma niet meer correct functioneert.
 \subsection{Web-interface}
 
 Vanaf je teampagina \url{\BASEURL team} kun je oplossingen insturen
-door het bestand te selecteren met de \textbf{Select file\ldots}-knop in de
+door een of meer bestanden te selecteren met de \textbf{browse} knop in de
 linker kolom. \DOMjudge probeert het probleem te detecteren uit de
-basis van de bestandsnaam (v\'o\'or de punt) en de programmeertaal uit
+basis van de eerste bestandsnaam (v\'o\'or de punt) en de programmeertaal uit
 de extensie. Als dat niet lukt, kun je deze handmatig selecteren.
 Bestandsnamen moeten beginnen met een alfanumeriek teken en
 mogen daarna slechts bestaan uit alfanumerieke tekens en
 \cmd{+.\_-}.
-
-Nadat je de eerste bestandsnaam geselecteerd hebt, kun je extra bestanden
-opgeven die deel uit moeten maken van deze oplossing door de knop \textbf{Add
-more files} te gebruiken (zie sectie~\ref{howjudged} `Hoe worden opgaven
-beoordeeld?').
 
 Nadat je op de submitknop geklikt hebt en dit bevestigd hebt, word je
 teruggestuurd naar de overzichtspagina. Daarop staat een
@@ -188,11 +182,14 @@ straftijd voor alle voorgaande incorrect inzendingen.
 Het scorebord kan mogelijk `bevroren' worden als het einde van de
 wedstrijd nadert. Het scorebord wordt dan niet meer aangepast, maar de
 rij op de overzichtspagina nog wel. Je positie wordt daar dan met een
-`?' weergegeven.
+`?' weergegeven. Tenslotte kun je via het menu ook de lijst van
+problemen bekijken en de tekst en voorbeeld in/uitvoer bekijken en
+downloaden, als deze beschikbaar zijn gemaakt door de jury.
 
 \subsection{Mogelijke uitslagen}
 
-Voor een ingestuurde oplossing zijn de volgende uitslagen mogelijk.
+Voor een ingestuurde oplossing zijn de volgende uitslagen mogelijk
+(sommige kunnen door de jury uitgeschakeld zijn).
 
 \begin{description}[\setleftmargin{4.5cm}]
 \item[CORRECT]
@@ -239,9 +236,10 @@ staan. Boven aan de pagina de gegeven clarifications, daar onder je
 
 Je kan vragen aan de jury stellen door middel van het doen van een
 ``Clarification Request''; de knop hiervoor bevindt zich bovenaan de
-clarifications kolom.  Je vraag zal alleen bij de jury aankomen; zij
-zullen deze zo snel mogelijk en adequaat beantwoorden. Antwoorden die
-voor iedereen relevant kunnen zijn zullen naar iedereen gestuurd worden.
+clarifications kolom. Hier kun je opgeven bij welk specifiek probleem
+of algemene categorie dit request hoort. Je vraag zal alleen bij de
+jury aankomen. De jury kan dan een antwoord sturen naar jouw team of
+naar alle teams als de vraag relevant is voor iedereen.
 
 \section{Hoe worden opgaven beoordeeld?}\label{howjudged}
 
@@ -258,7 +256,7 @@ een opgave insturen, zodat hij ge\"upload wordt naar de jury. Let op
 dat je de source-code van je programma moet insturen (en dus niet een
 gecompileerd programma of de uitvoer van je programma)
 
-Dan komt je programma in de wachtrij te staan, om gecompileerd,
+Op het jury-systeem komt je programma in de wachtrij te staan, om gecompileerd,
 uitgevoerd en getest te worden op \'e\'en van de jury-computers.
 
 \subsection{Compileren}
@@ -289,7 +287,8 @@ opgelegd worden. Als je programma die overschrijdt, wordt het ook
 afgebroken met een fout, zie sectie~\ref{runlimits}.
 
 Verder moet de uitvoer van jouw programma exact overeenkomen met de
-uitvoer van de jury. Let dus goed op, dat je de uitvoerspecificatie
+uitvoer van de jury, behalve dat enige extra ``whitespace'' over het
+hoofd gezien wordt. Let dus goed op, dat je de uitvoerspecificatie
 volgt. In gevallen waarin er niet \'e\'en unieke uitvoer is (zoals bij
 floating point-antwoorden) kan de jury een aangepaste beoordeling
 hiervoor maken.
@@ -324,7 +323,7 @@ probeert te gebruiken, zal het afgebroken worden, zodat dit een
 \item[aantal processen]
 Het is niet de bedoeling dat je programma meerdere processen (threads)
 start. Dit heeft ook geen zin, want je programma heeft precies \'e\'en
-processor volledig tot zijn beschikking. Om de stabiliteit van het
+processorkern volledig tot zijn beschikking. Om de stabiliteit van het
 jurysysteem te bevorderen, kun je maximaal \PROCLIMIT\ processen
 tegelijk draaien (inclusief de processen waardoor je programma
 gestart is).
@@ -341,7 +340,8 @@ Het compileren van Java broncode wordt gecompliceerd door de
 klassenaamgeving van Java: er is geen vast startpunt van de code;
 iedere klasse kan een methode \texttt{main} bevatten. Een klasse die
 \texttt{public} gedeclareerd is, moet verder in een bestand met
-dezelfde naam staan.
+dezelfde naam staan. Verder moet je in je code ook geen ``packages''
+declareren.
 
 In de standaard configuratie detecteert DOMjudge automatisch de
 hoofdklasse. Anders moet de hoofdklasse ``\verb!Main!'' heten en een
