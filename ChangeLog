@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 5.0.5 - DEV
--------------------
+Version 5.0.5 - 12 February 2017
+--------------------------------
  - [security] bind PHP session cookie to specific web URI to prevent
    sharing sessions between different websites on the same host.
  - Use 'officialised' http redir mirror in dj_make_chroot script.
