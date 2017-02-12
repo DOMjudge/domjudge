@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 5.1.3 - DEV
 -------------------
+ - [security] bind PHP session cookie to specific web URI to prevent
+   sharing sessions between different websites on the same host.
  - Use 'officialised' http redir mirror in dj_make_chroot script.
  - Properly detect libJSONcpp headers on Debian and Redhat-like systems.
  - Fix HTML regex pattern to work in Chrome browser.
