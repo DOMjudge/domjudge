@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 5.0.5 - DEV
 -------------------
+ - [security] bind PHP session cookie to specific web URI to prevent
+   sharing sessions between different websites on the same host.
 
 Version 5.0.4 - 11 June 2016
 ----------------------------

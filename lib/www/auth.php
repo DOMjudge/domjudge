@@ -12,6 +12,12 @@
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
+session_name('domjudge_session');
+
+session_set_cookie_params(0, preg_replace('/\/(api|jury|public|team)\/?$/', '/',
+                                          dirname($_SERVER['PHP_SELF'])),
+                          null, false, true);
+
 $teamid = NULL;
 $username = NULL;
 $teamdata = NULL;
