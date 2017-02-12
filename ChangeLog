@@ -4,6 +4,14 @@ Version 5.0.5 - DEV
 -------------------
  - [security] bind PHP session cookie to specific web URI to prevent
    sharing sessions between different websites on the same host.
+ - Use 'officialised' http redir mirror in dj_make_chroot script.
+ - Properly detect libJSONcpp headers on Debian and Redhat-like systems.
+ - Fix variable name typo in error message.
+ - Fix single problem statistics page.
+ - Only highlight new clarifications for the active/selected contest.
+ - Allow balloon users to change the selected contest too.
+ - Add 'output-limit' verdict to the team manual.
+ - Various small documentation improvements.
 
 Version 5.0.4 - 11 June 2016
 ----------------------------
