@@ -1,5 +1,5 @@
 # ===========================================================================
-#        http://www.gnu.org/software/autoconf-archive/ax_lib_curl.html
+#       https://www.gnu.org/software/autoconf-archive/ax_lib_curl.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -30,7 +30,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 8
+#serial 9
 
 AU_ALIAS([AC_CHECK_CURL], [AX_LIB_CURL])
 AC_DEFUN([AX_LIB_CURL], [
