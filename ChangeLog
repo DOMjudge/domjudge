@@ -8,6 +8,10 @@ Version 5.1.3 - DEV
  - Properly detect libJSONcpp headers on Debian and Redhat-like systems.
  - Fix HTML regex pattern to work in Chrome browser.
  - Fix variable name typo in error message.
+ - Fix single problem statistics page.
+ - Only highlight new clarifications for the active/selected contest.
+ - Allow balloon users to change the selected contest too.
+ - Update team manual with new figures, 'output-limit' and other details.
  - Various small documentation improvements.
 
 Version 5.1.2 - 11 June 2016
