@@ -164,6 +164,12 @@ foreach ( $VERDICTS as $long_verdict => $acronym ) {
 	$node = XMLaddnode($root, 'judgement');
 	XMLaddnode($node, 'acronym', $acronym);
 	XMLaddnode($node, 'name', $long_verdict);
+	XMLaddnode($node, 'solved', $long_verdict==='correct' ? 'True' : 'False');
+	$penalty = true;
+	if ( $long_verdict==='correct' ||
+	     ($long_verdict==='compiler-error' &&
+	      $compile_penalty==0) ) $penalty = false;
+	XMLaddnode($node, 'penalty', $penalty ? 'True' : 'False');
 }
 
 
@@ -293,6 +299,8 @@ while ( $row = $events->next() ) {
 
 		XMLaddnode($run, 'judged', 'True');
 		XMLaddnode($run, 'status', 'done');
+		XMLaddnode($run, 'judging-time', formattime(calcContestTime($jdata['starttime'],$cid)));
+		XMLaddnode($run, 'judging-timestamp', formattime($jdata['starttime']));
 		XMLaddnode($run, 'result', $VERDICTS[$jdata['result']]);
 		if ( $jdata['result'] == 'correct' ) {
 			XMLaddnode($run, 'solved', 'True');
