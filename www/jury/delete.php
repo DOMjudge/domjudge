@@ -52,7 +52,12 @@ foreach($k as $key => $val) {
 			case 'RESTRICT':
 				error("$t.$key \"$val\" is still referenced in $table, cannot delete.");
 			case 'CASCADE':
-				$warnings[] = "cascade to $table";
+				$deps = fk_dependent_tables($table);
+				$warn = "cascade to $table";
+				if ( count($deps)>0 ) {
+					$warn .= ", and possibly to dependent tables " . implode(", ",$deps);
+				}
+				$warnings[] = $warn;
 				break;
 			case 'SETNULL':
 				$warnings[] = "create dangling references in $table";
@@ -68,9 +73,20 @@ foreach($k as $key => $val) {
 
 if (isset($_POST['confirm'] ) ) {
 
+	// Deleting problem is a special case: its dependent tables do not
+	// form a tree, and a delete to judging_run can only cascade from
+	// judging, not from testcase. Since MySQL does not define the
+	// order of cascading deletes, we need to manually first cascade
+	// via submission -> judging -> judging_run.
+	if ( $t=='problem' ) {
+		$DB->q('START TRANSACTION');
+		$DB->q('DELETE FROM submission WHERE %SS',$k);
+	}
+
 	// LIMIT 1 is a security measure to prevent our bugs from
 	// wiping a table by accident.
 	$DB->q("DELETE FROM $t WHERE %SS LIMIT 1", $k);
+	if ( $t=='problem' ) $DB->q('COMMIT');
 	auditlog($t, implode(', ', $k), 'deleted');
 
 	echo "<p>" . ucfirst($t) . " <strong>" . specialchars(implode(", ", $k)) .

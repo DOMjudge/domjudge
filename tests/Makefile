@@ -27,7 +27,10 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
 check-syntax:
-	./syntax
+	@output=`./syntax` ; \
+	if [ -n "$$output" ]; then \
+		echo "$$output" ; exit 1 ; \
+	fi
 
 check: test-normal test-fltcmp test-boolfind
 

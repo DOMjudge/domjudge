@@ -173,15 +173,7 @@ if ( !isset($rejdata['endtime']) ) {
 	}
 }
 
-$verdicts = array('compiler-error'     => 'CTE',
-                  'memory-limit'       => 'MLE',
-                  'output-limit'       => 'OLE',
-                  'run-error'          => 'RTE',
-                  'timelimit'          => 'TLE',
-                  'wrong-answer'       => 'WA',
-                  'presentation-error' => 'PE', /* dropped since 5.0 */
-                  'no-output'          => 'NO',
-                  'correct'            => 'AC');
+$verdicts = $VERDICTS;
 
 $orig_verdicts = $DB->q('KEYVALUETABLE SELECT submitid, result
                          FROM judging

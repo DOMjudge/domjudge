@@ -656,7 +656,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
 		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
-		       $id, $filenames[$rank], $rank, dj_get_file_contents($files[$rank], false));
+		       $id, $filenames[$rank], $rank, dj_get_file_contents($files[$rank]));
 	}
 	$DB->q('COMMIT');
 

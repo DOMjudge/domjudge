@@ -40,7 +40,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec mono "$DESTCLI"
+exec mono "$DESTCLI" "\$@"
 EOF
 
 chmod a+x "$DEST"

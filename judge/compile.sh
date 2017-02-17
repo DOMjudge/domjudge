@@ -124,14 +124,18 @@ logmsg $LOG_INFO "starting compile"
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
-$GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -m $SCRIPTMEMLIMIT \
-	-t $SCRIPTTIMELIMIT -c -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M "$WORKDIR/compile.meta" -- \
+$GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
+	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
+	-M "$WORKDIR/compile.meta" -- \
 	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 
-# Make sure that all files are owned by the current user, so that we
-# can delete the judging output tree without root access.
-$GAINROOT chown -R "$(id -un)" "$WORKDIR/compile"
+# Make sure that all files are owned by the current user/group, so
+# that we can delete the judging output tree without root access.
+# We also remove group RUNGROUP so that this can safely be shared
+# across multiple judgedaemons, and remove write permissions.
+$GAINROOT chown -R "$(id -un):" "$WORKDIR/compile"
+chmod -R go-w "$WORKDIR/compile"
 
 cd "$WORKDIR"
 

@@ -380,7 +380,7 @@ function judgings_POST($args)
 	if ( empty($submitid) || $numupd == 0 ) return '';
 
 	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid, s.rejudgingid,
-	               CEILING(time_factor*timelimit) AS maxruntime,
+	               time_factor*timelimit AS maxruntime,
 	               p.memlimit, p.outputlimit,
 	               special_run AS run, special_compare AS compare,
 	               special_compare_args AS compare_args, compile_script
@@ -437,7 +437,7 @@ function judgings_POST($args)
 	$row['probid']      = safe_int($row['probid']);
 	$row['langid']      = $row['langid'];
 	$row['rejudgingid'] = safe_int($row['rejudgingid']);
-	$row['maxruntime']  = safe_int($row['maxruntime']);
+	$row['maxruntime']  = safe_float($row['maxruntime'],6);
 	$row['memlimit']    = safe_int($row['memlimit']);
 	$row['outputlimit'] = safe_int($row['outputlimit']);
 	$row['judgingid']   = safe_int($jid);
@@ -675,8 +675,8 @@ function submissions($args)
 {
 	global $DB, $cdatas, $api;
 
-	$query = 'SELECT submitid, teamid, probid, langid, submittime, valid
-	          FROM submission WHERE TRUE';
+	$query = 'SELECT submitid, teamid, probid, langid, submittime
+	          FROM submission WHERE valid=1';
 
 	$hasCid = array_key_exists('cid', $args);
 	$query .= ($hasCid ? ' AND cid = %i' : ' AND TRUE %_');
@@ -1312,9 +1312,9 @@ function internal_error_POST($args)
 	// group together duplicate internal errors
 	// note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors
 	$errorid = $DB->q('MAYBEVALUE SELECT errorid FROM internal_error
-			   WHERE description=%s AND disabled=%s AND status=%s' .
-			   ( isset($args['cid']) ? ' AND cid=%i' : '%_' ),
-			   $args['description'], $args['disabled'], 'open', $args['cid']);
+	                   WHERE description=%s AND disabled=%s AND status=%s' .
+	                  ( isset($args['cid']) ? ' AND cid=%i' : '%_' ),
+	                  $args['description'], $args['disabled'], 'open', $args['cid']);
 
 	if ( isset($errorid) ) {
 		// FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog
@@ -1322,9 +1322,10 @@ function internal_error_POST($args)
 	}
 
 	$errorid = $DB->q('RETURNID INSERT INTO internal_error
-		(judgingid, cid, description, judgehostlog, time, disabled) VALUES
-		(%i, %i, %s, %s, %i, %s)',
-		$args['judgingid'], $args['cid'], $args['description'], $args['judgehostlog'], now(), $args['disabled']);
+	                   (judgingid, cid, description, judgehostlog, time, disabled)
+	                   VALUES (%i, %i, %s, %s, %i, %s)',
+	                  $args['judgingid'], $args['cid'], $args['description'],
+	                  $args['judgehostlog'], now(), $args['disabled']);
 
 	$disabled = dj_json_decode($args['disabled']);
 	// disable what needs to be disabled

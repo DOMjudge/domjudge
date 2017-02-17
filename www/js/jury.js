@@ -24,7 +24,7 @@ function addFirstRow(templateid, tableid) {
     var $table = $('#' + tableid);
     var maxId = $table.data('max-id');
 
-    if ( maxId === undefined || maxId == 0 ) {
+    if ( maxId === undefined || maxId === 0 ) {
         addRow(templateid, tableid);
     }
 }

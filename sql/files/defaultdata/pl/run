@@ -17,14 +17,6 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
-# Check for '#!' interpreter line: don't allow it to prevent teams
-# from passing options to the interpreter.
-if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
-	echo "Error: interpreter statement(s) found:"
-	grep -n '^#!' "$MAINSOURCE"
-	exit 1
-fi
-
 # Check perl syntax:
 for i in "$@" ; do
 	perl -c -W "$i"
@@ -47,6 +39,6 @@ export ONLINE_JUDGE=1 DOMJUDGE=1
 exec perl "$MAINSOURCE"
 EOF
 
-chmod a+x "$DEST"
+chmod a+x "$DEST" "\$@"
 
 exit 0

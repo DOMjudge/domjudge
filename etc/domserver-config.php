@@ -34,6 +34,10 @@ define('AUTH_METHOD', 'PHP_SESSIONS');
 define('LDAP_SERVERS', 'ldaps://ldap1.example.com/ ldaps://ldap2.example.com/');
 define('LDAP_DNQUERY', 'CN=&,OU=users,DC=example,DC=com');
 
+// Cost for the password hashing function. Increase for more secure
+// hashes and decrease for speed.
+define('PASSWORD_HASH_COST', 10);
+
 // Set this to a notification command, which receives the notification
 // text on stdin. Examples below for notification by mail or prints.
 //define('BALLOON_CMD', 'mail -s Balloon_notification domjudge@localhost');

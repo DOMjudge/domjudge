@@ -16,14 +16,6 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
-# Check for '#!' interpreter line: don't allow it to prevent teams
-# from passing options to the interpreter.
-if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
-	echo "Error: interpreter statement(s) found:"
-	grep -n '^#!' "$MAINSOURCE"
-	exit 1
-fi
-
 # Check syntax
 python -m py_compile "$@"
 EXITCODE=$?
@@ -43,7 +35,7 @@ fi
 # set non-existing HOME variable to make python happy
 export ONLINE_JUDGE=1 DOMJUDGE=1 HOME=/does/not/exist
 
-exec python "$MAINSOURCE"
+exec python "$MAINSOURCE" "\$@"
 EOF
 
 chmod a+x "$DEST"

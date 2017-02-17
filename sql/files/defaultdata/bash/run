@@ -23,14 +23,6 @@ MAINSOURCE="$1"
 
 RUNOPTIONS=""
 
-# Check for '#!' interpreter line: don't allow it to prevent teams
-# from passing options to the interpreter.
-if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
-	echo "Error: interpreter statement(s) found:"
-	grep -n '^#!' "$MAINSOURCE"
-	exit 1
-fi
-
 # Check syntax:
 for i in "$@" ; do
 	bash $RUNOPTIONS -n "$i"
@@ -50,7 +42,7 @@ fi
 
 export ONLINE_JUDGE=1 DOMJUDGE=1
 
-exec bash $RUNOPTIONS "$MAINSOURCE"
+exec bash $RUNOPTIONS "$MAINSOURCE" "\$@"
 EOF
 
 chmod a+x "$DEST"

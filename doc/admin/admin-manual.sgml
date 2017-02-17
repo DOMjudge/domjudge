@@ -361,8 +361,8 @@ apt-get install gcc g++ make zip unzip mysql-server \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
 </code>
-Note that php modules may need to be enabled depending on your distribution.
-E.g. on ubuntu run <code>php5enmod mcrypt</code> to enable mcrypt.
+Note that PHP modules may need to be enabled depending on your distribution.
+E.g. on Ubuntu run <code>php5enmod mcrypt</code> to enable mcrypt.
 
 
 For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
@@ -652,21 +652,20 @@ interface.
 A few extra steps might need to be taken to completely install and
 configure a judgehost.
 
-For running solution programs under a non-privileged user, a user has
+For running solution programs under a non-privileged user, a user and group have
 to be added to the system(s) that act as judgehost. This user does not
 need a home-directory or password, so the following command would
-suffice to add a user `domjudge-run' with minimal privileges.
+suffice to add a user and group `domjudge-run' with minimal privileges.
 
 <!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
-On RedHat:
-<verb>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</verb>
-On Debian:
-<verb>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</verb>
+On Debian and Redhat based Linux distributions use:
+<verb>useradd -d /nonexistent -U -M -s /bin/false domjudge-run</verb>
 
 For other systems check the specifics of your useradd command.
 This user must also be configured as the user under which programs run
 via <tt>configure --enable-runuser=USER</tt>; the default is
-<tt>domjudge-run</tt>.
+<tt>domjudge-run</tt>. By default the group is set to the same, this
+can be modified with the option <tt>--enable-rungroup=GROUP</tt>
 
 <tt>Runguard</tt> needs to be able to become root for certain operations
 like changing to the runuser and performing a chroot. Also, the default
@@ -1118,7 +1117,7 @@ To that end, add extra unprivileged users to the system, i.e. add users
 id="install_config:judgehost" name="installation of a judgehost">.
 Finally, start each of the judgedaemons with
 <code>
-$ judgedaemon -n <X>
+judgedaemon -n <X>
 </code>
 to bind it to core X.
 
@@ -1137,7 +1136,7 @@ refuse to connect over HTTPS. If your judgedaemon gives an error message
 about an untrusted certificate, put your domserver's certificate in
 <tt>/etc/ssl/certs/yourname.crt</tt> of each judgehost (and on the team
 machines when using the commandline submit client) and run:
-<code># c_rehash</code>
+<code>sudo c_rehash</code>
 
 <p>
 When loading teams from the ICPC registration system through the import
@@ -1178,10 +1177,17 @@ judging.
 <item> Disable CPU frequency scaling and Intel "Turbo Boost" to
 prevent fluctuations in CPU power.
 <item> Disable address-space randomization to make programs with
-memory addressing bugs give more reproducible results:
+memory addressing bugs give more reproducible results. To do that,
+you can add the following line to <tt>/etc/sysctl.conf</tt>:
 <code>
-echo 0 &gt; /proc/sys/kernel/randomize_va_space
+kernel.randomize_va_space=0
 </code>
+This will restore these settings permanently across reboots.
+Then run the following command:
+<code>
+sudo sysctl -p
+</code>
+to directly activate these settings.
 </itemize>
 
 

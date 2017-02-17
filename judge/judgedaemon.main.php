@@ -119,7 +119,8 @@ function dbconfig_get_rest($name) {
  * dj_get_file_contents) as encoded string.
  */
 function rest_encode_file($file, $sizelimit = TRUE) {
-	return urlencode(base64_encode(dj_get_file_contents($file, $sizelimit)));
+	$maxsize = $sizelimit ? (int) dbconfig_get_rest('output_storage_limit', 50000) : -1;
+	return urlencode(base64_encode(dj_get_file_contents($file, $maxsize)));
 }
 
 $waittime = 5;
@@ -238,7 +239,7 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 					break;
 				}
 				if ( file_put_contents($execbuildpath, $buildscript) === FALSE ) {
-					error("Could not write file 'build' in $exepath");
+					error("Could not write file 'build' in $execpath");
 				}
 				chmod($execbuildpath, 0755);
 			}
@@ -318,6 +319,7 @@ putenv('DJ_LIBDIR='      . LIBDIR);
 putenv('DJ_LIBJUDGEDIR=' . LIBJUDGEDIR);
 putenv('DJ_LOGDIR='      . LOGDIR);
 putenv('RUNUSER='        . $runuser);
+putenv('RUNGROUP='       . RUNGROUP);
 
 foreach ( $EXITCODES as $code => $name ) {
 	$var = 'E_' . strtoupper(str_replace('-','_',$name));

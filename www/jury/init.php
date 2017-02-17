@@ -69,10 +69,10 @@ if ( isset($_COOKIE['domjudge_cid']) )  {
 // Data to be sent as AJAX updates:
 $updates = array(
 	'clarifications' =>
-	( empty($cids) ? array() :
+	( empty($cid) ? array() :
 	  $DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
 	          FROM clarification
-	          WHERE sender IS NOT NULL AND cid IN (%Ai) AND answered = 0', $cids) ),
+	          WHERE sender IS NOT NULL AND cid = %i AND answered = 0', $cid) ),
 	'judgehosts' =>
 	$DB->q('TABLE SELECT hostname, polltime
 	        FROM judgehost
@@ -94,4 +94,11 @@ Twig_Autoloader::register();
 $loader = new Twig_Loader_Filesystem(array('.', LIBWWWDIR));
 $twig = new Twig_Environment($loader);
 
-$twig->addFilter(new Twig_SimpleFilter('humansize', 'printsize'));
+$twig_safe = array('is_safe' => array('html'));
+$twig->addFilter(new Twig_SimpleFilter('host',      'printhost', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('humansize', 'printsize', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('time',      'printtime', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('timediff',  'printtimediff', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('result',    'printresult', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('yesno',     'printyn', $twig_safe));
+unset($twig_safe);

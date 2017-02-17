@@ -1,5 +1,5 @@
 # ===========================================================================
-#       http://www.gnu.org/software/autoconf-archive/ax_with_prog.html
+#       https://www.gnu.org/software/autoconf-archive/ax_with_prog.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -32,7 +32,7 @@
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 16
+#serial 17
 
 AC_DEFUN([AX_WITH_PROG],[
     AC_PREREQ([2.61])

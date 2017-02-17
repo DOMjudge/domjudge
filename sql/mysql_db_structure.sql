@@ -307,7 +307,7 @@ CREATE TABLE `language` (
 CREATE TABLE `problem` (
   `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
-  `timelimit` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time for this problem',
+  `timelimit` float unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time (in seconds) for this problem',
   `memlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum memory available (in kB) for this problem',
   `outputlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum output size (in kB) for this problem',
   `special_run` varchar(32) DEFAULT NULL COMMENT 'Script to run submissions for this problem',
@@ -553,7 +553,7 @@ CREATE TABLE `user` (
   `email` varchar(255) DEFAULT NULL COMMENT 'Email address',
   `last_login` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of last successful login',
   `last_ip_address` varchar(255) DEFAULT NULL COMMENT 'Last IP address of successful login',
-  `password` varchar(32) DEFAULT NULL COMMENT 'Password hash',
+  `password` varchar(255) DEFAULT NULL COMMENT 'Password hash',
   `ip_address` varchar(255) DEFAULT NULL COMMENT 'IP Address used to autologin',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the user is able to log in',
   `teamid` int(4) unsigned DEFAULT NULL COMMENT 'Team associated with',

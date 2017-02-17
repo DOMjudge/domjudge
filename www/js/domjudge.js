@@ -22,7 +22,7 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 		return;
 	}
 	handle.onreadystatechange = function() {
-		if (handle.readyState == 4) {
+		if ( handle.readyState === 4 ) {
 			var resp = JSON.parse(handle.responseText);
 			var nclars  = resp.clarifications.length;
 			var nhosts  = resp.judgehosts.length;
@@ -34,13 +34,13 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 			elem = document.getElementById('menu_clarifications');
 			newstr = '';
 			if ( elem!==null ) {
-				if ( nclars == 0 ) {
+				if ( nclars === 0 ) {
 					elem.className = null;
 				} else {
 					newstr = ' ('+nclars+' new)';
 					elem.className = 'new';
 				}
-				if ( elem.innerHTML != '<span class="octicon octicon-comment-discussion"></span> clarifications' + newstr ) {
+				if ( elem.innerHTML !== '<span class="octicon octicon-comment-discussion"></span> clarifications' + newstr ) {
 					elem.innerHTML = '<span class="octicon octicon-comment-discussion"></span> clarifications' + newstr;
 					if(doreload_clarifications) {
 						location.reload();
@@ -50,13 +50,13 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 			elem = document.getElementById('menu_judgehosts');
 			newstr = '';
 			if ( elem!==null ) {
-				if ( nhosts == 0 ) {
+				if ( nhosts === 0 ) {
 					elem.className = null;
 				} else {
 					newstr = ' ('+nhosts+' down)';
 					elem.className = 'new';
 				}
-				if ( elem.innerHTML != '<span class="octicon octicon-law"></span> judgehosts' + newstr ) {
+				if ( elem.innerHTML !== '<span class="octicon octicon-law"></span> judgehosts' + newstr ) {
 					elem.innerHTML = '<span class="octicon octicon-law"></span> judgehosts' + newstr;
 					if(doreload_judgehosts) {
 						location.reload();
@@ -66,13 +66,13 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 			elem = document.getElementById('menu_rejudgings');
 			newstr = '';
 			if ( elem!==null ) {
-				if ( nrejuds == 0 ) {
+				if ( nrejuds === 0 ) {
 					elem.className = null;
 				} else {
 					newstr = ' ('+nrejuds+' active)';
 					elem.className = 'new';
 				}
-				if ( elem.innerHTML != '<span class="octicon octicon-sync"></span> rejudgings' + newstr ) {
+				if ( elem.innerHTML !== '<span class="octicon octicon-sync"></span> rejudgings' + newstr ) {
 					elem.innerHTML = '<span class="octicon octicon-sync"></span> rejudgings' + newstr;
 					if(doreload_judgehosts) {
 						location.reload();
@@ -115,7 +115,7 @@ function toggleNotifications(enable)
 		}
 
 		// Ask user (via browser) for permission if not already granted.
-		if ( Notification.permission=='denied' ) {
+		if ( Notification.permission==='denied' ) {
 			alert('Browser denied permission to send desktop notifications.\n' +
 			      'Re-enable notification permission in the browser and retry.');
 		} else {
@@ -160,13 +160,13 @@ function toggleNotifications(enable)
 function sendNotification(title, options)
 {
 	'use strict';
-	if ( getCookie('domjudge_notify')!=1 ) return;
+	if ( getCookie('domjudge_notify')!==1 ) return;
 
 //	if ( typeof options.tag === 'undefined' ) options.tag = null;
 
 	// Check if we already sent this notification:
 	var senttags = localStorage.getItem('notifications_sent');
-	if ( senttags===null || senttags=='' ) {
+	if ( senttags===null || senttags==='' ) {
 		senttags = [];
 	} else {
 		senttags = senttags.split(',');
@@ -233,7 +233,7 @@ function editTcSample(tcid)
 	var node = document.getElementById('sample_' + tcid + '_');
 	node.parentNode.setAttribute('onclick', '');
 	var remove = node.nextSibling;
-	while (remove.nodeName == '#text')
+	while (remove.nodeName === '#text')
 		remove = remove.nextSibling;
 	node.parentNode.removeChild(remove);
 	node.style.display = 'block';
@@ -268,10 +268,10 @@ function detectProblemLanguage(filename)
 
 	var elt=document.getElementById('probid');
 	// the "autodetect" option has empty value
-	if ( elt.value != '' ) return;
+	if ( elt.value !== '' ) return;
 
 	for (var i=0;i<elt.length;i++) {
-		if ( elt.options[i].text.toLowerCase() == parts[1] ) {
+		if ( elt.options[i].text.toLowerCase() === parts[1] ) {
 			elt.selectedIndex = i;
 		}
 	}
@@ -280,11 +280,11 @@ function detectProblemLanguage(filename)
 
 	var elt=document.getElementById('langid');
 	// the "autodetect" option has empty value
-	if ( elt.value != '' ) return;
+	if ( elt.value !== '' ) return;
 
 	var langid = getMainExtension(parts[0]);
 	for (var i=0;i<elt.length;i++) {
-		if ( elt.options[i].value == langid ) {
+		if ( elt.options[i].value === langid ) {
 			elt.selectedIndex = i;
 		}
 	}
@@ -306,43 +306,39 @@ function checkUploadForm()
 
 	var error = false;
 	langelt.className = probelt.className = "";
-	if ( language == "" ) {
+	if ( language === "" ) {
 		langelt.focus();
 		langelt.className = "errorfield";
 		error = true;
 	}
-	if ( problem == "" ) {
+	if ( problem === "" ) {
 		probelt.focus();
 		probelt.className = "errorfield";
 		error = true;
 	}
-	if ( filename == "" ) {
-		return false;
+	if ( filename === "" ) {
+		error = true;
 	}
+	if ( error ) return false;
 
-	if ( error ) {
-		return false;
-	} else {
-		var auxfileno = 0;
-		// start at one; skip maincode file field
-		for (var i = 1; i < auxfiles.length; i++) {
-			if (auxfiles[i].value != "" ) {
-				auxfileno++;
-			}
+	var auxfileno = 0;
+	// start at one; skip maincode file field
+	for (var i = 1; i < auxfiles.length; i++) {
+		if ( auxfiles[i].value !== "" ) {
+			auxfileno++;
 		}
-		var extrafiles = '';
-		if ( auxfileno > 0 ) {
-			extrafiles = "Additional source files: " + auxfileno + '\n';
-		}
-		var question =
-			'Main source file: ' + filename + '\n' +
-			extrafiles + '\n' +
-			'Problem: ' + problemtxt + '\n'+
-			'Language: ' + languagetxt + '\n' +
-			'\nMake submission?';
-		return confirm (question);
 	}
-
+	var extrafiles = '';
+	if ( auxfileno > 0 ) {
+		extrafiles = "Additional source files: " + auxfileno + '\n';
+	}
+	var question =
+		'Main source file: ' + filename + '\n' +
+		extrafiles + '\n' +
+		'Problem: ' + problemtxt + '\n'+
+		'Language: ' + languagetxt + '\n' +
+		'\nMake submission?';
+	return confirm (question);
 }
 
 function resetUploadForm(refreshtime, maxfiles)
@@ -353,7 +349,7 @@ function resetUploadForm(refreshtime, maxfiles)
 	addfile.disabled = true;
 	auxfiles.innerHTML = "";
 	doReload = true;
-	setTimeout('reloadPage()', refreshtime * 1000);
+	setTimeout(function() { reloadPage(); }, refreshtime * 1000);
 }
 
 var doReload = true;
@@ -375,7 +371,7 @@ function reloadPage()
 function initReload(refreshtime)
 {
 	// interval is in seconds
-	setTimeout('reloadPage()', refreshtime * 1000);
+	setTimeout(function() { reloadPage(); }, refreshtime * 1000);
 }
 
 function initFileUploads(maxfiles)
@@ -392,7 +388,7 @@ function initFileUploads(maxfiles)
 	}
 	fileelt.onclick = function() { doReload = false; };
 	fileelt.onchange = fileelt.onmouseout = function () {
-		if ( this.value != "" ) {
+		if ( this.value !== "" ) {
 			detectProblemLanguage(this.value);
 		}
 	}
@@ -402,7 +398,7 @@ function collapse(x)
 {
 	'use strict';
 	var oTemp=document.getElementById("detail"+x);
-	if (oTemp.style.display=="none") {
+	if (oTemp.style.display==="none") {
 		oTemp.style.display="block";
 	} else {
 		oTemp.style.display="none";
@@ -429,10 +425,10 @@ function togglelastruns()
 		var cells = document.getElementsByClassName(name);
 		for (var i = 0; i < cells.length; i++) {
 			style = 'inline';
-			if (name == 'lasttcruns') {
+			if (name === 'lasttcruns') {
 				style = 'table-row';
 			}
-			cells[i].style.display = (cells[i].style.display == 'none') ? style : 'none';
+			cells[i].style.display = (cells[i].style.display === 'none') ? style : 'none';
 		}
 	}
 }
@@ -495,7 +491,7 @@ function getCookie(name)
 		var key = cookies[i].substr(0, idx);
 		var value = cookies[i].substr(idx+1);
 		key = key.replace(/^\s+|\s+$/g,""); // trim
-		if (key == name) {
+		if (key === name) {
 			return unescape(value);
 		}
 	}
@@ -506,7 +502,7 @@ function getSelectedTeams()
 {
 	'use strict';
 	var cookieVal = getCookie("domjudge_teamselection");
-	if (cookieVal == null || cookieVal == "") {
+	if (cookieVal === null || cookieVal === "") {
 		return new Array();
 	}
 	return JSON.parse(cookieVal);
@@ -516,7 +512,7 @@ function getScoreboard()
 {
 	'use strict';
 	var scoreboard = document.getElementsByClassName("scoreboard");
-	if (scoreboard == null || scoreboard[0] == null) {
+	if (scoreboard === null || scoreboard[0] === null) {
 		return null;
 	}
 	return scoreboard[0].rows;
@@ -536,7 +532,7 @@ function getTeamname(row)
 {
 	'use strict';
 	var res = row.getAttribute("id");
-	if ( res == null ) return res;
+	if ( res === null ) return res;
 	return res.replace(/^team:/, '');
 }
 
@@ -551,10 +547,10 @@ function toggle(id, show)
 	for (var i = 0; i < favTeams.length; i++) {
 		for (var j = 0; j < scoreboard.length; j++) {
 			var scoreTeamname = getTeamname(scoreboard[j]);
-			if (scoreTeamname == null) {
+			if (scoreTeamname === null) {
 				continue;
 			}
-			if (scoreTeamname == favTeams[i]) {
+			if (scoreTeamname === favTeams[i]) {
 				visCnt++;
 				break;
 			}
@@ -567,7 +563,7 @@ function toggle(id, show)
 		// copy all other teams
 		var newFavTeams = new Array();
 		for (var i = 0; i < favTeams.length; i++) {
-			if (favTeams[i] != teamname) {
+			if (favTeams[i] !== teamname) {
 				newFavTeams[newFavTeams.length] = favTeams[i];
 			}
 		}
@@ -592,7 +588,7 @@ function initFavouriteTeams()
 {
 	'use strict';
 	var scoreboard = getScoreboard();
-	if (scoreboard == null) {
+	if (scoreboard === null) {
 		return;
 	}
 
@@ -603,18 +599,18 @@ function initFavouriteTeams()
 	for (var j = 0; j < scoreboard.length - 1; j++) {
 		var found = false;
 		var teamname = getTeamname(scoreboard[j]);
-		if (teamname == null) {
+		if (teamname === null) {
 			continue;
 		}
 		var firstCol = getRank(scoreboard[j]);
 		var heartCol = getHeartCol(scoreboard[j]);
 		var rank = firstCol.innerHTML;
 		for (var i = 0; i < favTeams.length; i++) {
-			if (teamname == favTeams[i]) {
+			if (teamname === favTeams[i]) {
 				found = true;
 				heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
 				toAdd[cntFound] = scoreboard[j].cloneNode(true);
-				if (rank == "") {
+				if (rank === "") {
 					// make rank explicit in case of tie
 					getRank(toAdd[cntFound]).innerHTML += lastRank;
 				}
@@ -626,7 +622,7 @@ function initFavouriteTeams()
 		if (!found) {
 			heartCol.innerHTML = addHeart(rank, scoreboard[j], j, found);
 		}
-		if (rank != "") {
+		if (rank !== "") {
 			lastRank = rank;
 		}
 	}
@@ -637,10 +633,10 @@ function initFavouriteTeams()
 		var firstCol = getRank(copy);
 		var color = "red";
 		var style = "";
-		if (i == 0) {
+		if (i === 0) {
 			style += "border-top: 2px solid black;";
 		}
-		if (i == cntFound - 1) {
+		if (i === cntFound - 1) {
 			style += "border-bottom: thick solid black;";
 		}
 		copy.setAttribute("style", style);

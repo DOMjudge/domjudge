@@ -6,12 +6,15 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-// Returns a piece of SQL code to return a field, truncated to a fixed
-// character length, and with a message if truncation happened.
+// Returns a piece of SQL code to return a field, truncated to a
+// configured character length, with a message if truncation happened.
 function truncate_SQL_field($field)
 {
-	$size = 50000;
-	$msg = "\n[output truncated after 50,000 B]\n";
+	$size = (int) dbconfig_get('output_display_limit', 2000);
+	// $size == -1 means never perform truncation:
+	if ( $size < 0 ) return $field;
+
+	$msg = "\n[output display truncated after $size B]\n";
 	return "IF( CHAR_LENGTH($field)>$size , CONCAT(LEFT($field,$size),'$msg') , $field)";
 }
 
@@ -213,7 +216,7 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid, s.origsubmit
                     s.externalid, s.externalresult, t.externalid AS team_externalid,
                     c.name AS contestname, t.name AS teamname, l.name AS langname,
                     cp.shortname AS probshortname, p.name AS probname,
-                    CEILING(time_factor*timelimit) AS maxruntime
+                    time_factor*timelimit AS maxruntime
                     FROM submission s
                     LEFT JOIN team     t ON (t.teamid = s.teamid)
                     LEFT JOIN problem  p ON (p.probid = s.probid)
@@ -374,7 +377,8 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
 			'<td>' . $link . printtime($jud['starttime'], NULL, $jud['cid']) . '</a></td>' .
-			'<td>' . $link . specialchars($jud['max_runtime']) . ' s</a></td>' .
+			'<td>' . $link . specialchars($jud['max_runtime']) .
+			                 (isset($jud['max_runtime']) ? ' s' : '') . '</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
 			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
 			'<td>' . $link . specialchars($rinfo) . '</a></td>' .
@@ -474,29 +478,30 @@ if ( !isset($jid) ) {
 // Display the details of the selected judging
 
 $jud = $DB->q('TUPLE SELECT j.*, r.valid AS rvalid
-	       FROM judging j
-	       LEFT JOIN rejudging r USING (rejudgingid)
-	       WHERE judgingid = %i', $jid);
+               FROM judging j
+               LEFT JOIN rejudging r USING (rejudgingid)
+               WHERE judgingid = %i', $jid);
 
 // sanity check
-if ($jud['submitid'] != $id) error(
-	sprintf("judingid j%d belongs to submitid s%d, not s%d",
-		$jid, $jud['submitid'], $id));
+if ($jud['submitid'] != $id) {
+	error(sprintf("judingid j%d belongs to submitid s%d, not s%d",
+	              $jid, $jud['submitid'], $id));
+}
 
 // Display testcase runs
 $runs = $DB->q('TABLE SELECT r.runid, r.judgingid,
-		r.testcaseid, r.runresult, r.runtime, ' .
-		truncate_SQL_field('r.output_run')    . ' AS output_run, ' .
-		truncate_SQL_field('r.output_diff')   . ' AS output_diff, ' .
-		truncate_SQL_field('r.output_error')  . ' AS output_error, ' .
-		truncate_SQL_field('r.output_system') . ' AS output_system, ' .
-		truncate_SQL_field('t.output')        . ' AS output_reference,
-		t.rank, t.description, t.image_type, t.image_thumb
-		FROM testcase t
-		LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
-					     r.judgingid = %i )
-		WHERE t.probid = %s ORDER BY rank',
-	       $jid, $submdata['probid']);
+                r.testcaseid, r.runresult, r.runtime, ' .
+                truncate_SQL_field('r.output_run')    . ' AS output_run, ' .
+                truncate_SQL_field('r.output_diff')   . ' AS output_diff, ' .
+                truncate_SQL_field('r.output_error')  . ' AS output_error, ' .
+                truncate_SQL_field('r.output_system') . ' AS output_system, ' .
+                truncate_SQL_field('t.output')        . ' AS output_reference,
+                t.rank, t.description, t.image_type, t.image_thumb
+                FROM testcase t
+                LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+                                             r.judgingid = %i )
+                WHERE t.probid = %s ORDER BY rank',
+               $jid, $submdata['probid']);
 
 // Use original submission as previous, or try to find a previous
 // submission/judging of the same team/problem.
@@ -504,26 +509,26 @@ if ( isset($submdata['origsubmitid']) ) {
 	$lastsubmitid = $submdata['origsubmitid'];
 } else {
 	$lastsubmitid = $DB->q('MAYBEVALUE SELECT submitid
-				FROM submission
-				WHERE teamid = %i AND probid = %i AND submittime < %s
-				ORDER BY submittime DESC LIMIT 1',
-			       $submdata['teamid'],$submdata['probid'],
-			       $submdata['submittime']);
+	                        FROM submission
+	                        WHERE teamid = %i AND probid = %i AND submittime < %s
+	                        ORDER BY submittime DESC LIMIT 1',
+	                       $submdata['teamid'],$submdata['probid'],
+	                       $submdata['submittime']);
 }
 
 $lastjud = NULL;
 if ( $lastsubmitid !== NULL ) {
 	$lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result, verify_comment, endtime
-			   FROM judging
-			   WHERE submitid = %s AND valid = 1
-			   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
+	                   FROM judging
+	                   WHERE submitid = %s AND valid = 1
+	                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
 	if ( $lastjud !== NULL ) {
 		$lastruns = $DB->q('TABLE SELECT r.runtime, r.runresult, rank, description
-				    FROM testcase t
-				    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
-								 r.judgingid = %i )
-				    WHERE t.probid = %s ORDER BY rank',
-				   $lastjud['judgingid'], $submdata['probid']);
+		                    FROM testcase t
+		                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+		                    r.judgingid = %i )
+		                    WHERE t.probid = %s ORDER BY rank',
+		                   $lastjud['judgingid'], $submdata['probid']);
 	}
 }
 

@@ -235,6 +235,10 @@ foreach (array('compare', 'run') as $type) {
 	}
 }
 
+result('configuration', 'Compile file size vs. memory limit',
+       (dbconfig_get('script_filesize_limit')<dbconfig_get('memory_limit') ? 'W' : 'O'),
+       'If the script filesize limit is lower than the memory limit, then ' .
+       'compilation of sources that statically allocate memory may fail.');
 
 if ( DEBUG == 0 ) {
 	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
@@ -413,6 +417,17 @@ $has_errors = $details != '';
 $probs = $DB->q("TABLE SELECT probid, cid FROM contestproblem WHERE color IS NULL");
 foreach($probs as $probdata) {
        $details .= 'p'.$probdata['probid'] . " in contest c" . $probdata['cid'] . ": has no colour\n";
+}
+$probs = $DB->q('TABLE SELECT probid, cid, memlimit
+                 FROM problem INNER JOIN contestproblem USING (probid)
+                 WHERE memlimit IS NOT NULL
+                 ORDER BY probid');
+foreach($probs as $probdata) {
+	if ( $probdata['memlimit']>dbconfig_get('script_filesize_limit') ) {
+		$details .= 'p'.$probdata['probid']." in contest c" . $probdata['cid'] .
+		         ': memory limit ' . $probdata['memlimit'] .
+		         " is larger than script filesize limit.\n";
+	}
 }
 
 result('problems, languages, teams', 'Problems integrity',

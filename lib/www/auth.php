@@ -16,6 +16,12 @@ require_once(LIBVENDORDIR . '/autoload.php');
 // import-{REST,XML}feed scripts, so suppress empty value.
 $ip = @$_SERVER['REMOTE_ADDR'];
 
+session_name('domjudge_session');
+
+session_set_cookie_params(0, preg_replace('/\/(api|jury|public|team)\/?$/', '/',
+                                          dirname($_SERVER['PHP_SELF'])),
+                          null, false, true);
+
 $teamid = NULL;
 $username = NULL;
 $teamdata = NULL;
@@ -257,7 +263,7 @@ function do_login()
 	// some specializations are handled by if-statements.
 	case 'IPADDRESS':
 	case 'PHP_SESSIONS':
-		if ($_POST['oidc'] == 'true') {
+		if (@$_POST['oidc'] == 'true') {
 			do_login_oidc();
 			break;
 		}
@@ -347,13 +353,20 @@ function do_login_native($user, $pass)
 	global $DB, $userdata, $username;
 
 	$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
-	                    WHERE username = %s AND password = %s AND enabled = 1',
-	                   $user, md5($user."#".$pass));
+	                    WHERE username = %s AND enabled = 1',
+	                   $user);
 
-	if ( !$userdata ) {
+	if ( !$userdata || !dj_password_verify($pass, $userdata['password'], $user) ) {
+		$userdata = false;
 		sleep(1);
 		show_failed_login("Invalid username or password supplied. " .
 		                  "Please try again or contact a staff member.");
+	}
+
+	// Update the password hash if necessary:
+	if ( dj_password_needs_rehash($userdata['password']) ) {
+		$newhash = dj_password_hash($pass);
+		$DB->q('UPDATE user SET password = %s WHERE username = %s', $newhash, $user);
 	}
 
 	$username = $userdata['username'];
@@ -406,31 +419,31 @@ function do_login_oidc() {
 	// Create the user if they don't exist
 	$user = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $username);
 	if (!$user) {
-		$u = array();
+		$user = array();
 
 		// Create a team for the user as well
 		if (dbconfig_get("openid_autocreate_team", true)) {
-			$i = array();
-			$i['name'] = $email;
-			$i['categoryid'] = 2; // Self-registered category id
-			$i['enabled'] = 1;
-			$i['comments'] = "Registered via OIDC by $ip on " . date('r');
+			$team = array();
+			$team['name'] = $email;
+			$team['categoryid'] = 2; // Self-registered category id
+			$team['enabled'] = 1;
+			$team['comments'] = "Registered via OIDC by $ip on " . date('r');
 
-			$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $i);
+			$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $team);
 			auditlog('team', $teamid, 'registered via OIDC by ' . $ip);
 
-			$u['teamid'] = $teamid;
+			$user['teamid'] = $teamid;
 		}
 
-		$u['username'] = $username;
-		$u['email'] = $email;
-		$u['name'] = $email;
-		$u['password'] = NULL;
-		$newid = $DB->q("RETURNID INSERT INTO user SET %S", $u);
+		$user['username'] = $username;
+		$user['email'] = $email;
+		$user['name'] = $email;
+		$user['password'] = NULL;
+		$newid = $DB->q("RETURNID INSERT INTO user SET %S", $user);
 		auditlog('user', $newid, 'registered via OIDC', $ip);
 
 		// Assign the team role if we created a team for them
-		if (isset($u['teamid'])) {
+		if (isset($user['teamid'])) {
 			$DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
 		}
 	}
@@ -451,66 +464,66 @@ function do_login_oidc() {
 }
 
 function do_register() {
-        global $DB, $ip;
-        if ( !dbconfig_get('allow_registration', false) ) {
-            error("Self-Registration is disabled.");
-        }
-        if ( AUTH_METHOD != "PHP_SESSIONS" ) {
-            error("You can only register if the site is using PHP Sessions for authentication.");
-        }
+	global $DB, $ip;
+	if ( !dbconfig_get('allow_registration', false) ) {
+		error("Self-Registration is disabled.");
+	}
+	if ( AUTH_METHOD != "PHP_SESSIONS" ) {
+		error("You can only register if the site is using PHP Sessions for authentication.");
+	}
 
-        $login = trim($_POST['login']);
-        $pass = trim($_POST['passwd']);
-        $pass2 = trim($_POST['passwd2']);
+	$login = trim($_POST['login']);
+	$pass = trim($_POST['passwd']);
+	$pass2 = trim($_POST['passwd2']);
 
-        if ( $login == '' || $pass == '') {
-            error("You must enter all fields");
-        }
+	if ( $login == '' || $pass == '') {
+		error("You must enter all fields");
+	}
 
-        if ( !ctype_alnum($login) ) {
-            error("Username must consist of only alphanumeric characters.");
-        }
+	if ( !ctype_alnum($login) ) {
+		error("Username must consist of only alphanumeric characters.");
+	}
 
-        if ( $pass != $pass2 ) {
-            error("Your passwords do not match. Please go back and try registering again.");
-        }
-        $user = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $login);
-        if ( $user ) {
-            error("That login is already taken.");
-        }
-        $team = $DB->q('MAYBETUPLE SELECT * FROM team WHERE name = %s', $login);
-        if ( $team ) {
-            error("That login is already taken.");
-        }
+	if ( $pass != $pass2 ) {
+		error("Your passwords do not match. Please go back and try registering again.");
+	}
+	$user = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $login);
+	if ( $user ) {
+		error("That login is already taken.");
+	}
+	$team = $DB->q('MAYBETUPLE SELECT * FROM team WHERE name = %s', $login);
+	if ( $team ) {
+		error("That login is already taken.");
+	}
 
-		// Create the team object
-        $i = array();
-        $i['name'] = $login;
-        $i['categoryid'] = 2; // Self-registered category id
-        $i['enabled'] = 1;
-        $i['comments'] = "Registered by $ip on " . date('r');
+	// Create the team object
+	$team = array();
+	$team['name'] = $login;
+	$team['categoryid'] = 2; // Self-registered category id
+	$team['enabled'] = 1;
+	$team['comments'] = "Registered by $teamp on " . date('r');
 
-        $teamid = $DB->q("RETURNID INSERT INTO team SET %S", $i);
-        auditlog('team', $teamid, 'registered by ' . $ip);
+	$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $team);
+	auditlog('team', $teamid, 'registered by ' . $ip);
 
-		// Associate a user with the team we just made
-        $i = array();
-        $i['username'] = $login;
-        $i['password'] = md5($login."#".$pass);
-        $i['name'] = $login;
-        $i['teamid'] = $teamid;
-        $newid = $DB->q("RETURNID INSERT INTO user SET %S", $i);
-        auditlog('user', $newid, 'registered by ' . $ip);
+	// Associate a user with the team we just made
+	$user = array();
+	$user['username'] = $login;
+	$user['password'] = dj_password_hash($pass);
+	$user['name'] = $login;
+	$user['teamid'] = $teamid;
+	$newid = $DB->q("RETURNID INSERT INTO user SET %S", $user);
+	auditlog('user', $newid, 'registered by ' . $ip);
 
-        $DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
+	$DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
 
-        $title = 'Account Registered';
-        $menu = false;
+	$title = 'Account Registered';
+	$menu = false;
 
-        require(LIBWWWDIR . '/header.php');
-        echo "<h1>Account registered</h1>\n\n<p><a href=\"./\">Click here to login.</a></p>\n\n";
-        require(LIBWWWDIR . '/footer.php');
-		exit;
+	require(LIBWWWDIR . '/header.php');
+	echo "<h1>Account registered</h1>\n\n<p><a href=\"./\">Click here to login.</a></p>\n\n";
+	require(LIBWWWDIR . '/footer.php');
+	exit;
 }
 
 // Logout a team. Function does not return and should generate a page

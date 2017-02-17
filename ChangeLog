@@ -2,6 +2,10 @@ DOMjudge Programming Contest Judging System
 
 Version 5.2.0 - DEV
 -------------------
+ - [security] bind PHP session cookie to specific web URI to prevent
+   sharing sessions between different websites on the same host.
+ - [security] Add RUNGROUP configure setting to make sure that submissions
+   do not have access to group root files. (#250 thanks Richard Lobb)
  - Allow team to download testcase data marked as 'sample'.
  - Add icons to menu bars.
  - Allow to filter submissions on team, problem, language.
@@ -23,7 +27,12 @@ Version 5.2.0 - DEV
  - Add 'output-limit' verdict.
  - Renamed dj-setup-database to dj_setup_database for consistency
    with other script names.
- - Update ACE editor to version 1.2.3, jQuery to version 2.2.4.
+ - Update ACE editor to version 1.2.6, jQuery to version 2.2.4,
+   and JavaScript Cookie to version 2.1.3.
+ - Implement better password hashing (#237 thanks Bert Peters).
+ - Allow float timelimits (#235).
+ - Changed semantics of dj_file_contents_get() optional size argument.
+ - Make storage and display limits for output/error files configurable.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------

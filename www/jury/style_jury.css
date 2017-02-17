@@ -83,7 +83,7 @@ img.picto { width: 16px; height: 16px; }
 img.smallpicto { width: 11px; height: 11px; }
 img.helpicon { cursor: help; }
 
-a.collapse { color: black; text-decoration: none; } */
+a.collapse { color: black; text-decoration: none; }
 
 .sortable th { cursor: s-resize; }
 .sortable th.sorttable_sorted { cursor: n-resize; }

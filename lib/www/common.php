@@ -652,7 +652,7 @@ function putProblemTextList()
 	} else {
 
 		// otherwise, display list
-		$res = $DB->q('SELECT probid,shortname,name,color,problemtext_type,MAX(sample) AS numsamples
+		$res = $DB->q('SELECT probid,shortname,name,color,problemtext_type,SUM(sample) AS numsamples
 		               FROM problem
 		               INNER JOIN testcase USING(probid)
 		               INNER JOIN contestproblem USING (probid)
@@ -670,18 +670,14 @@ function putProblemTextList()
 					      '" /> <a href="problem.php?id=' . urlencode($row['probid']) . '">' .
 					      'problem statement</a><br />';
 				}
-				$i = 1;
 				if ( !empty($row['numsamples']) ) {
-					$samples = $DB->q('COLUMN SELECT testcaseid FROM testcase
-					                   WHERE probid = %i AND sample = 1 ORDER BY testcaseid ASC', $row['probid']);
-					foreach($samples as $id) {
+					for($i=1; $i<=$row['numsamples']; ++$i) {
 						print '<img src="../images/b_save.png" alt="download" /> ';
 						print '<a href="problem.php?id=' . urlencode($row['probid']) .
 						      '&amp;testcase=' . urlencode($i) . '&amp;type=in">sample input</a> | ';
 						print '<a href="problem.php?id=' . urlencode($row['probid']) .
 						      '&amp;testcase=' . urlencode($i) . '&amp;type=out">sample output</a>';
 						print "<br />";
-						++$i;
 					}
 				}
 				print "<br /></li>\n";
@@ -752,6 +748,7 @@ function renderPage($data, $header = true, $footer = true, $templateFile = null)
 	$templateFile = basename($templateFile, '.php') . '.phtml';
 
 	$title = $data['title'];
+	$refresh = @$data['refresh'];
 	if ( $header ) require(LIBWWWDIR . '/header.php');
 
 	global $twig;

@@ -56,11 +56,11 @@ if ( IS_ADMIN ) {
 	echo "<p>" . addLink('executable') . "</p>\n\n";
 	if ( class_exists("ZipArchive") ) {
 		echo "\n" . addForm('executable.php', 'post', null, 'multipart/form-data') .
-	 		'Executable archive(s): ' .
+			'Executable archive(s): ' .
 			addSelect('type', $executable_types) .
-	 		addFileField('executable_archive[]', null, ' required multiple accept="application/zip"') .
-	 		addSubmit('Upload', 'upload') .
-	 		addEndForm() . "\n";
+			addFileField('executable_archive[]', null, ' required multiple accept="application/zip"') .
+			addSubmit('Upload', 'upload') .
+			addEndForm() . "\n";
 	}
 }
 

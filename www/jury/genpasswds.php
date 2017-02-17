@@ -37,7 +37,8 @@ function genpw($users, $group, $format) {
 		}
 		$pass = genrandpasswd();
 		// update the user table with a password
-		$DB->q('UPDATE user SET password = %s WHERE username = %s', md5($user['username'].'#'.$pass), $user['username']);
+		$DB->q('UPDATE user SET password = %s WHERE username = %s',
+		       dj_password_hash($pass), $user['username']);
 		auditlog('user', $user['username'], 'set password');
 		$line = implode("\t",
 			array($group, $group == 'team' ? $user['teamid'] : '',

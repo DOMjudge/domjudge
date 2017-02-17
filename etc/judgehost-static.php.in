@@ -19,6 +19,7 @@ define('JUDGEDIR',    '@judgehost_judgedir@');
 define('CHROOTDIR',   '@judgehost_chrootdir@');
 
 define('RUNUSER',     '@RUNUSER@');
+define('RUNGROUP',    '@RUNGROUP@');
 
 // Possible exitcodes from testcase_run.sh and their meaning.
 $EXITCODES = array (
@@ -29,7 +30,7 @@ $EXITCODES = array (
 	104 => 'no-output',
 	105 => 'wrong-answer',
 //	106 => 'presentation-error', /* dropped since 5.0 */
-	107 => 'memory-limit',
+	107 => 'memory-limit', /* not in use internally */
 	108 => 'output-limit',
 /* Uncomment the next line(s) to accept internal errors in the judging
  * backend as outcome. WARNING: it is highly discouraged to enable

@@ -19,6 +19,12 @@ ALTER TABLE `contest`
   ADD COLUMN `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Contest ID in an external system' AFTER `cid`,
   ADD UNIQUE KEY `externalid` (`externalid`(190));
 
+ALTER TABLE `user`
+  MODIFY COLUMN `password` varchar(255) DEFAULT NULL COMMENT 'Password hash';
+
+ALTER TABLE `problem`
+  MODIFY COLUMN `timelimit` float unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time (in seconds) for this problem';
+
 -- Merge {rank,score}cache_{public,jury} tables into one.
 CREATE TABLE `rankcache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
@@ -79,6 +85,8 @@ UPDATE `judging` SET `judgehost` = 'host-created-by-SQL-upgrade' WHERE `judgehos
 -- Add/remove sample/initial contents
 --
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('output_storage_limit', '50000', 'int', 'Maximum size of error/system output stored in the database (in bytes); use "-1" to disable any limits.'),
+('output_display_limit', '2000', 'int', 'Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use "-1" to disable any limits.'),
 ('diskspace_error', '1048576', 'int', 'Minimum free disk space (in kB) on judgehosts.'),
 ('allow_openid_auth', '0', 'bool', 'Allow users to log in using OpenID'),
 ('openid_autocreate_team', '1', 'bool', 'Create a team for each user that logs in with OpenID'),
