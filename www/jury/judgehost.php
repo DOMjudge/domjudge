@@ -36,7 +36,7 @@ $data = $DB->q('TUPLE SELECT judgehost.*, r.name AS restrictionname
 // select only specific fields to avoid retrieving large blobs
 $cids = getCurContests(FALSE);
 if ( !empty($cids) ) {
-	$jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, judgingid, submitid, cid,q
+	$jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, judgingid, submitid, cid,
 	                 j.starttime, j.endtime, judgehost, result, verified,
 	                 j.valid, j.rejudgingid, r.valid AS rejudgevalid,
 	                 (j.endtime IS NULL AND j.valid=0 AND
