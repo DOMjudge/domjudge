@@ -220,12 +220,9 @@ cp "$TESTOUT" "$WORKDIR/testdata.out"
 logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
 
 exitcode=0
-# Make files writable for $RUNUSER
-mkdir feedback                   # Create dir for feedback files
-for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.txt; do
-	touch feedback/$i        # Create possible feedback files
-	chmod a+w feedback/$i
-done
+# Create dir for feedback files and make it writable for $RUNUSER
+mkdir feedback
+chmod a+w feedback
 
 runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
