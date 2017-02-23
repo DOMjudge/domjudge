@@ -12,6 +12,10 @@ using namespace std;
 int main()
 {
 	string hello("Hello world!");
+#ifdef DOMJUDGE
 	cout << hello << endl;
+#else
+	printf("DOMJUDGE not defined\n");
+#endif
 	return 0;
 }
