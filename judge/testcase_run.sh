@@ -283,7 +283,7 @@ if [ "$program_exit" != "0" ]; then
 	cleanexit ${E_RUN_ERROR:-1}
 fi
 
-if grep '^output-truncated: ([a-z]+,)*stdout(,[a-z]+)*' program.meta >/dev/null 2>&1 ; then
+if grep -E '^output-truncated: ([a-z]+,)*stdout(,[a-z]+)*' program.meta >/dev/null 2>&1 ; then
 	echo "Output limit exceeded: $program_stdout > $((FILELIMIT*1024))" >>system.out
 	echo "$resourceinfo" >>system.out
 	cleanexit ${E_OUTPUT_LIMIT:-1}
