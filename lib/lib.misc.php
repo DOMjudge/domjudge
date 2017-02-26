@@ -623,7 +623,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	logmsg (LOG_INFO, "input verified");
 
 	// First look up any expected results in file, so as to minimize
-	// the SQ: transaction time below.
+	// the SQL transaction time below.
 	if ( checkrole('jury') ) {
 		$results = getExpectedResults(dj_file_get_contents($files[0]));
 	}
@@ -646,7 +646,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	// submissions.
 	if ( checkrole('jury') && !empty($results) ) {
 		$DB->q('UPDATE submission SET expected_results=%s
-		        WHERE submitid=%i', json_encode($results), $sid);
+		        WHERE submitid=%i', json_encode($results), $id);
 	}
 	$DB->q('COMMIT');
 
