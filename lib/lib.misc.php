@@ -622,6 +622,12 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 
 	logmsg (LOG_INFO, "input verified");
 
+	// First look up any expected results in file, so as to minimize
+	// the SQ: transaction time below.
+	if ( checkrole('jury') ) {
+		$results = getExpectedResults(dj_file_get_contents($files[0]));
+	}
+
 	// Insert submission into the database
 	$DB->q('START TRANSACTION');
 	$id = $DB->q('RETURNID INSERT INTO submission
@@ -633,6 +639,14 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 		$DB->q('INSERT INTO submission_file
 		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
 		       $id, $filenames[$rank], $rank, dj_file_get_contents($files[$rank]));
+	}
+
+	// Add expected results from source. We only do this for jury
+	// submissions to prevent accidental auto-verification of team
+	// submissions.
+	if ( checkrole('jury') && !empty($results) ) {
+		$DB->q('UPDATE submission SET expected_results=%s
+		        WHERE submitid=%i', json_encode($results), $sid);
 	}
 	$DB->q('COMMIT');
 
