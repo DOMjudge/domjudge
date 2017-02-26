@@ -116,11 +116,11 @@ function dbconfig_get_rest($name) {
 /**
  * Encode file contents for POST-ing to REST API.
  * Returns contents of $file (optionally limited in size, see
- * dj_get_file_contents) as encoded string.
+ * dj_file_get_contents) as encoded string.
  */
 function rest_encode_file($file, $sizelimit = TRUE) {
 	$maxsize = $sizelimit ? (int) dbconfig_get_rest('output_storage_limit', 50000) : -1;
-	return urlencode(base64_encode(dj_get_file_contents($file, $maxsize)));
+	return urlencode(base64_encode(dj_file_get_contents($file, $maxsize)));
 }
 
 $waittime = 5;
@@ -161,8 +161,8 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 		return array(NULL, "unknown executable '" . $execid . "' specified");
 	}
 	if ( !file_exists($execpath) || !file_exists($execmd5path) ||
-	     !file_exists($execdeploypath)
-		|| file_get_contents($execmd5path) !== $md5sum ) {
+	     !file_exists($execdeploypath) ||
+	     dj_file_get_contents($execmd5path) !== $md5sum ) {
 		logmsg(LOG_INFO, "Fetching new executable '" . $execid . "'");
 		system("rm -rf $execpath");
 		system("mkdir -p '$execpath'", $retval);

@@ -781,7 +781,7 @@ function submissions_POST($args)
 
 	$sid = submit_solution($userdata['teamid'], $probid, $cid, $args['langid'], $FILEPATHS, $FILENAMES);
 	if ( checkrole('jury') ) {
-		$results = getExpectedResults(file_get_contents($FILEPATHS[0]));
+		$results = getExpectedResults(dj_file_get_contents($FILEPATHS[0]));
 		if ( !empty($results) ) {
 			$DB->q('UPDATE submission SET expected_results=%s
 			        WHERE submitid=%i', json_encode($results), $sid);
