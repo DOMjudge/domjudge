@@ -71,7 +71,8 @@
 		<td><a{{ link }}>j{{ judging.judgingid }}</a></td>
 		<td><a{{ link }}>{{ judging.starttime|time }}</a></td>
 		<td><a{{ link }}>{{ this.runtime(judging) }}</a></td>
-		<td><a{{ link }}>{{ judging.result|result(judging.valid) }}</a></td>
+		<td><a{{ link }}>{{ judging.result|result(judging.valid) }}
+		                 {{ judging|jud_busy }}</a></td>
 		<td class="tdcenter"><a{{ link }}>{{ judging.valid|yesno }}</a></td>
 		<td class="tdcenter"><a{{ link }}>{{ judging.verified|yesno }}</a></td>
 		</tr>

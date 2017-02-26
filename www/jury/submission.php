@@ -215,9 +215,11 @@ $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid, s.origsubmit
 if ( ! $submdata ) error ("Missing submission data");
 
 $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, j.valid, j.starttime,
-                 j.judgehost, j.verified, j.jury_member, j.verify_comment,
+                 j.endtime, j.judgehost, j.verified, j.jury_member, j.verify_comment,
                  r.reason, r.rejudgingid,
-                 MAX(jr.runtime) AS max_runtime
+                 MAX(jr.runtime) AS max_runtime,
+                 (j.endtime IS NULL AND j.valid=0 AND
+                  (r.valid IS NULL OR r.valid=0)) AS aborted
                  FROM judging j
                  LEFT JOIN judging_run jr USING(judgingid)
                  LEFT JOIN rejudging r USING (rejudgingid)
@@ -361,7 +363,8 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 			'<td>' . $link . specialchars($jud['max_runtime']) .
 			                 (isset($jud['max_runtime']) ? ' s' : '') . '</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
-			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) . '</a></td>' .
+			'<td>' . $link . printresult(@$jud['result'], $jud['valid']) .
+			                 printjudgingbusy($jud) . '</a></td>' .
 			'<td>' . $link . specialchars($rinfo) . '</a></td>' .
 			"</tr>\n";
 
