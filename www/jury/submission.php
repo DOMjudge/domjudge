@@ -728,7 +728,8 @@ foreach ( $runs as $run ) {
 		$diffs = array();
 		$firstErr = sizeof($lines_team) + 1;
 		$lastErr  = -1;
-		for ($i = 0; $i < min(sizeof($lines_team), sizeof($lines_ref)); $i++) {
+		$n = min(sizeof($lines_team), sizeof($lines_ref));
+		for ($i = 0; $i < $n; $i++) {
 			$lcs = compute_lcsdiff($lines_team[$i], $lines_ref[$i]);
 			if ( $lcs[0] === TRUE ) {
 				$firstErr = min($firstErr, $i);
