@@ -95,7 +95,7 @@ if ( $cid !== null ) {
 $affils = $DB->q('TABLE SELECT affilid,
                   team_affiliation.name, room
                   FROM team t
-                  INNER JOIN team_affiliation USING (affilid)
+                  LEFT JOIN team_affiliation USING (affilid)
                   INNER JOIN contest c ON (c.cid IN (%Ai))
                   LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
                   WHERE c.public = 1 OR ct.teamid IS NOT NULL
@@ -106,9 +106,12 @@ $affils = $DB->q('TABLE SELECT affilid,
 $affilids  = array();
 $rooms = array();
 foreach( $affils as $affil ) {
-	$affilids[$affil['affilid']] = $affil['name'];
-	if ( isset($affil['room']) ) $rooms[$affil['room']] = $affil['room'];
+	if ( isset($affil['affilid']) ) $affilids[$affil['affilid']] = $affil['name'];
+	if ( isset($affil['room']) ) $rooms[] = $affil['room'];
 }
+$rooms = array_unique($rooms);
+natcasesort($rooms);
+natcasesort($affilids);
 
 // the 'filtered on' text
 $filteron = array();
@@ -131,8 +134,8 @@ if ( sizeof($filteron) > 0 ) {
 <?php
 
 		echo addForm($pagename, 'get') .
-			( count($affilids) > 1 ? addSelect('affilid[]',    $affilids,  @$filter['affilid'],    TRUE,  8) : "" ) .
-			( count($rooms) > 1 ? addSelect('room[]',    $rooms,  @$filter['room'],    TRUE,  8) : "" ) .
+			( count($affilids) > 1 ? addSelect('affilid[]', $affilids, @$filter['affilid'], TRUE,   8) : "" ) .
+			( count($rooms)    > 1 ? addSelect('room[]',    $rooms,    @$filter['room'],    FALSE,  8) : "" ) .
 			addSubmit('filter', 'filter') . addSubmit('clear', 'clear') .
 			addEndForm();
 		?>
