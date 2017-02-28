@@ -86,17 +86,21 @@ echo addForm($pagename, 'get') . "<p>\n" .
     addEndForm();
 
 
+$contestids = $cids;
+if ( $cid !== null ) {
+	$contestids = array($cid);
+}
+
 // Filtering by affiliation or room
 $affils = $DB->q('TABLE SELECT affilid,
-				  team_affiliation.name, room
-				  FROM team_affiliation
-				  LEFT JOIN team t USING (affilid)
-				  INNER JOIN contest c ON (c.cid = %i)
-				  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
-				  WHERE c.cid = %i AND
-				  (c.public = 1 OR ct.teamid IS NOT NULL)
-				  GROUP BY affilid, room',
-				 $cdata['cid'], $cdata['cid']);
+                  team_affiliation.name, room
+                  FROM team t
+                  INNER JOIN team_affiliation USING (affilid)
+                  INNER JOIN contest c ON (c.cid IN (%Ai))
+                  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
+                  WHERE c.public = 1 OR ct.teamid IS NOT NULL
+                  GROUP BY affilid, room',
+                 $contestids);
 
 // all possible filter values for the select field
 $affilids  = array();
@@ -140,11 +144,6 @@ collapse("filter");
 // -->
 </script>
 		<?php
-
-$contestids = $cids;
-if ( $cid !== null ) {
-	$contestids = array($cid);
-}
 
 // Problem metadata: colours and names.
 if ( empty($cids) ) {
@@ -190,7 +189,7 @@ if ( !empty($contestids) ) {
 	               WHERE s.cid IN (%Ai) $freezecond" .
 	               (isset($filter['affilid']) ? ' AND t.affilid IN (%As) ' : ' %_') .
 	               (isset($filter['room']) ? ' AND t.room IN (%As) ' : ' %_') .
-	               "ORDER BY done ASC, balloonid DESC",
+	               " ORDER BY done ASC, balloonid DESC",
 	              $contestids, @$filter['affilid'], @$filter['room']);
 }
 
