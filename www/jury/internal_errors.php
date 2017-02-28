@@ -41,7 +41,7 @@ if( $res->count() == 0 ) {
 		}
 		echo "<tr $class>" .
 			"<td>" . $link . ($row['errorid']) . '</a></td>' .
-			"<td>" . $link . "j" . ($row['judgingid']) . '</a></td>' .
+			"<td>" . $link . (empty($row['judgingid']) ? '' : 'j' . $row['judgingid']) . '</a></td>' .
 			"<td>" . $link . specialchars($row['description']) .  "</a></td>" .
 			"<td>" . $link . printtime($row['time']) .  "</a></td>" .
 			"<td>" . $link . ($row['status']) . '</a></td>' .
