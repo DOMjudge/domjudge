@@ -614,6 +614,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 
 		$countries = array_unique($countries);
 		sort($countries);
+		asort($affilids, SORT_FLAG_CASE);
 
 		$filteron = array();
 		$filtertext = "";

@@ -111,7 +111,7 @@ foreach( $affils as $affil ) {
 }
 $rooms = array_unique($rooms);
 natcasesort($rooms);
-natcasesort($affilids);
+asort($affilids, SORT_FLAG_CASE);
 
 // the 'filtered on' text
 $filteron = array();
