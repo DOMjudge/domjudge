@@ -118,7 +118,8 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.rejudgingid = %i)
 	     LEFT JOIN judging        jold ON (j.prevjudgingid IS NULL AND s.submitid = jold.submitid AND jold.valid = 1 OR j.prevjudgingid = jold.judgingid) ' :
 	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.valid = 1) %_ ') .
-	    'WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $rejudgingclause . $externalclause .
+	    'LEFT JOIN rejudging      r    ON (j.rejudgingid = r.rejudgingid)
+	     WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $rejudgingclause . $externalclause .
 	    (isset($restrictions['teamid'])      ? 'AND s.teamid = %i '      : '%_ ') .
 	    (isset($restrictions['categoryid'])  ? 'AND t.categoryid = %i '  : '%_ ') .
 	    (isset($restrictions['probid'])      ? 'AND s.probid = %i '      : '%_ ') .
@@ -137,7 +138,9 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.externalresult, s.cid,
 	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               cp.shortname, p.name AS probname, l.name AS langname,
-	               j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.judgingid ' .
+	               j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.endtime, j.judgingid,
+	               (j.endtime IS NULL AND j.valid=0 AND
+	                (r.valid IS NULL OR r.valid=0)) AS aborted ' .
 	              (isset($restrictions['rejudgingid']) ? ', jold.result AS oldresult ' : '') .
 	              $sqlbody .
 	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
@@ -255,7 +258,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 				echo " (&#x26a1;" . printresult($row['externalresult']) . ")";
 			}
 		}
-		echo "</a></td>";
+		echo printjudgingbusy($row) . "</a></td>";
 
 		if ( IS_JURY ) {
 			// only display verification if we're done with judging

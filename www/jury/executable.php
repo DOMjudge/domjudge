@@ -66,7 +66,7 @@ if ( isset($_POST['upload']) ) {
 				$desc = $ini_array['description'];
 				$type = $ini_array['type'];
 			}
-			$content = file_get_contents($_FILES['executable_archive']['tmp_name'][$fileid]);
+			$content = dj_file_get_contents($_FILES['executable_archive']['tmp_name'][$fileid]);
 			if ( !empty($id) ) {
 				$DB->q('UPDATE executable SET description=%s, md5sum=%s, zipfile=%s, type=%s
 				        WHERE execid=%s',

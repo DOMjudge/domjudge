@@ -429,7 +429,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 							error("failed to create zip file for output validator.");
 						}
 
-						$ovzip = file_get_contents("$tmpzipfiledir/outputvalidator.zip");
+						$ovzip = dj_file_get_contents("$tmpzipfiledir/outputvalidator.zip");
 						$probname = $DB->q("VALUE SELECT name FROM problem
 						                    WHERE probid=%i", $probid);
 						$ovname = preg_replace('/[^a-zA-Z0-9]/', '_', $probname) . "_cmp";

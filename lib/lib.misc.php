@@ -115,6 +115,41 @@ function problemVisible($probid)
 }
 
 /**
+ * Given an array of contest data, calculates whether the contest
+ * has already started ('cstarted'), and if scoreboard is currently
+ * frozen ('showfrozen') or final ('showfinal').
+ */
+function calcFreezeData($cdata)
+{
+	$fdata = array();
+
+	if ( $cdata == null ) {
+		return array(
+			'showfinal' => false,
+			'showfrozen' => false,
+			'cstarted' => false
+		);
+	}
+
+	// Show final scores if contest is over and unfreezetime has been
+	// reached, or if contest is over and no freezetime had been set.
+	// We can compare $now and the dbfields stringwise.
+	$now = now();
+	$fdata['showfinal']  = ( !isset($cdata['freezetime']) &&
+	                difftime($cdata['endtime'],$now) <= 0 ) ||
+	              ( isset($cdata['unfreezetime']) &&
+	                difftime($cdata['unfreezetime'], $now) <= 0 );
+	// freeze scoreboard if freeze time has been reached and
+	// we're not showing the final score yet
+	$fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
+	              difftime($cdata['freezetime'],$now) <= 0;
+	// contest is active but has not yet started
+	$fdata['cstarted'] = difftime($cdata['starttime'],$now) <= 0;
+
+	return $fdata;
+}
+
+/**
  * Calculate contest time from wall-clock time and removed intervals.
  * Returns time since contest start in seconds.
  * NOTE: It is assumed that removed intervals do not overlap and that
@@ -644,6 +679,12 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 
 	logmsg (LOG_INFO, "input verified");
 
+	// First look up any expected results in file, so as to minimize
+	// the SQL transaction time below.
+	if ( checkrole('jury') ) {
+		$results = getExpectedResults(dj_file_get_contents($files[0]));
+	}
+
 	// Insert submission into the database
 	$DB->q('START TRANSACTION');
 	$id = $DB->q('RETURNID INSERT INTO submission
@@ -656,7 +697,15 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
 		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
-		       $id, $filenames[$rank], $rank, dj_get_file_contents($files[$rank]));
+		       $id, $filenames[$rank], $rank, dj_file_get_contents($files[$rank]));
+	}
+
+	// Add expected results from source. We only do this for jury
+	// submissions to prevent accidental auto-verification of team
+	// submissions.
+	if ( checkrole('jury') && !empty($results) ) {
+		$DB->q('UPDATE submission SET expected_results=%s
+		        WHERE submitid=%i', json_encode($results), $id);
 	}
 	$DB->q('COMMIT');
 

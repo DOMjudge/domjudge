@@ -100,5 +100,6 @@ $twig->addFilter(new Twig_SimpleFilter('humansize', 'printsize', $twig_safe));
 $twig->addFilter(new Twig_SimpleFilter('time',      'printtime', $twig_safe));
 $twig->addFilter(new Twig_SimpleFilter('timediff',  'printtimediff', $twig_safe));
 $twig->addFilter(new Twig_SimpleFilter('result',    'printresult', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('jud_busy',  'printjudgingbusy', $twig_safe));
 $twig->addFilter(new Twig_SimpleFilter('yesno',     'printyn', $twig_safe));
 unset($twig_safe);

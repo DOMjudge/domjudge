@@ -277,7 +277,8 @@ $res = $DB->q('SELECT * FROM contest ORDER BY cid');
 $detail = '';
 $has_errors = FALSE;
 while($cdata = $res->next()) {
-	$cp = $DB->q('SELECT * FROM contestproblem WHERE cid = %i', $cdata['cid']);
+	$cp = $DB->q('SELECT * FROM contestproblem
+	              WHERE cid = %i ORDER BY shortname', $cdata['cid']);
 
 	$detail .=  "c".(int)$cdata['cid'].": ";
 
@@ -314,7 +315,8 @@ $res = $DB->q('SELECT probid, cid, shortname, timelimit, special_compare, specia
 
 // Select all active judgehosts including restrictions, so we can
 // check for all problem,language pairs whether they are judgeable.
-$judgehosts = $DB->q("TABLE SELECT hostname, restrictionid FROM judgehost WHERE active = 1");
+$judgehosts = $DB->q('TABLE SELECT hostname, restrictionid FROM judgehost
+                      WHERE active = 1 ORDER BY hostname');
 $judgehost_without_restrictions = false;
 foreach ($judgehosts as &$judgehost) {
 	if ( $judgehost['restrictionid'] === null ) {
@@ -328,7 +330,8 @@ foreach ($judgehosts as &$judgehost) {
 	$judgehost['languages'] = array();
 	$restrictions = $DB->q('MAYBEVALUE SELECT restrictions FROM judgehost
 	                        INNER JOIN judgehost_restriction USING (restrictionid)
-	                        WHERE hostname = %s', $judgehost['hostname']);
+	                        WHERE hostname = %s ORDER BY restrictionid',
+	                       $judgehost['hostname']);
 	if ( $restrictions ) {
 		$restrictions = json_decode($restrictions, true);
 		$judgehost['contests'] = @$restrictions['contest'];
@@ -361,7 +364,8 @@ foreach ($judgehosts as &$judgehost) {
 }
 
 $languages = $DB->q("KEYVALUETABLE SELECT langid, name FROM language
-                     WHERE allow_submit = 1 AND allow_judge = 1");
+                     WHERE allow_submit = 1 AND allow_judge = 1
+                     ORDER BY langid");
 
 $details = '';
 while($row = $res->next()) {
@@ -399,14 +403,16 @@ while($row = $res->next()) {
 }
 foreach(array('input','output') as $inout) {
 	$mismatch = $DB->q("SELECT probid, rank FROM testcase
-	                    WHERE md5($inout) != md5sum_$inout");
+	                    WHERE md5($inout) != md5sum_$inout
+	                    ORDER BY probid, rank");
 	while($r = $mismatch->next()) {
 		$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
 		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
 	}
 }
 $oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
-                    FROM testcase WHERE OCTET_LENGTH(output) > %i",
+                    FROM testcase WHERE OCTET_LENGTH(output) > %i
+                    ORDER BY probid, rank",
                    dbconfig_get('output_limit')*1024);
 while($r = $oversize->next()) {
 	$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
@@ -414,7 +420,8 @@ while($r = $oversize->next()) {
 }
 
 $has_errors = $details != '';
-$probs = $DB->q("TABLE SELECT probid, cid FROM contestproblem WHERE color IS NULL");
+$probs = $DB->q("TABLE SELECT probid, cid FROM contestproblem
+                 WHERE color IS NULL ORDER BY probid");
 foreach($probs as $probdata) {
        $details .= 'p'.$probdata['probid'] . " in contest c" . $probdata['cid'] . ": has no colour\n";
 }
@@ -528,7 +535,7 @@ result('submissions and judgings', 'Submissions', $submres, $submnote);
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
                LEFT JOIN contestproblem p USING (cid,probid)
-               WHERE p.shortname IS NULL');
+               WHERE p.shortname IS NULL ORDER BY submitid');
 
 $details = '';
 while($row = $res->next()) {
@@ -552,7 +559,8 @@ while($row = $res->next()) {
 // check for submissions that have no associated source file(s)
 $res = $DB->q('SELECT s.submitid FROM submission s
                LEFT OUTER JOIN submission_file f USING (submitid)
-               WHERE f.submitid IS NULL');
+               WHERE f.submitid IS NULL
+               ORDER BY submitid');
 
 while($row = $res->next()) {
 	$details .= 'Submission s' . $row['submitid'] .
@@ -563,7 +571,8 @@ while($row = $res->next()) {
 // have no judging-row
 $res = $DB->q('SELECT s.submitid FROM submission s
                LEFT OUTER JOIN judging j USING (submitid)
-               WHERE j.submitid IS NULL AND s.judgehost IS NOT NULL');
+               WHERE j.submitid IS NULL AND s.judgehost IS NOT NULL
+               ORDER BY submitid');
 
 while($row = $res->next()) {
 	$details .= 'Submission s' . $row['submitid'] .
@@ -577,7 +586,8 @@ result('submissions and judgings', 'Submission integrity',
 $details = '';
 // check for more than one valid judging for a submission
 $res = $DB->q('SELECT submitid, SUM(valid) as numvalid
-	FROM judging GROUP BY submitid HAVING numvalid > 1');
+               FROM judging GROUP BY submitid HAVING numvalid > 1
+               ORDER BY submitid');
 while($row = $res->next()) {
 	$details .= 'Submission s' . $row['submitid'] .
 	            ' has more than one valid judging (' . $row['numvalid'] . ")\n";
@@ -586,7 +596,8 @@ while($row = $res->next()) {
 // check for valid judgings that are already running too long
 $res = $DB->q('SELECT judgingid, submitid, starttime
                FROM judging WHERE valid = 1 AND endtime IS NULL AND
-               (UNIX_TIMESTAMP()-starttime) > 300');
+               (UNIX_TIMESTAMP()-starttime) > 300
+               ORDER BY submitid, judgingid');
 while($row = $res->next()) {
 	$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
 	            " is running for longer than 5 minutes, probably the judgedaemon crashed\n";
@@ -598,7 +609,8 @@ $res = $DB->q('SELECT s.submitid AS s_submitid, j.submitid AS j_submitid,
                FROM judging j LEFT OUTER JOIN submission s USING (submitid)
                WHERE (j.cid != s.cid) OR (s.submitid IS NULL) OR
                (j.endtime IS NOT NULL AND j.endtime < j.starttime) OR
-               (j.starttime < s.submittime)');
+               (j.starttime < s.submittime)
+               ORDER BY j_submitid');
 
 while($row = $res->next()) {
 	$err = 'Judging j' . $row['judgingid'] . '/s' . $row['j_submitid'] . '';

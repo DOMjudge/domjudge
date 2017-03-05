@@ -220,12 +220,9 @@ cp "$TESTOUT" "$WORKDIR/testdata.out"
 logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
 
 exitcode=0
-# Make files writable for $RUNUSER
-mkdir feedback                   # Create dir for feedback files
-for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.txt; do
-	touch feedback/$i        # Create possible feedback files
-	chmod a+w feedback/$i
-done
+# Create dir for feedback files and make it writable for $RUNUSER
+mkdir feedback
+chmod a+w feedback
 
 runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
@@ -283,7 +280,7 @@ if [ "$program_exit" != "0" ]; then
 	cleanexit ${E_RUN_ERROR:-1}
 fi
 
-if grep '^output-truncated: ([a-z]+,)*stdout(,[a-z]+)*' program.meta >/dev/null 2>&1 ; then
+if grep -E '^output-truncated: ([a-z]+,)*stdout(,[a-z]+)*' program.meta >/dev/null 2>&1 ; then
 	echo "Output limit exceeded: $program_stdout > $((FILELIMIT*1024))" >>system.out
 	echo "$resourceinfo" >>system.out
 	cleanexit ${E_OUTPUT_LIMIT:-1}

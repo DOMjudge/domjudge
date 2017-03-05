@@ -48,21 +48,25 @@ function dj_json_decode($str) {
  * to this many bytes, and when the truncating the file, attach a note
  * saying so.
  */
-function dj_get_file_contents($filename, $maxsize = -1) {
+function dj_file_get_contents($filename, $maxsize = -1) {
 
 	if ( ! file_exists($filename) ) {
-		return '';
+		error("File does not exist: $filename");
 	}
 	if ( ! is_readable($filename) ) {
-		error("Could not open $filename for reading: not readable");
+		error("File is not readable: $filename");
 	}
 
 	if ( $maxsize >= 0 && filesize($filename) > $maxsize ) {
-		return file_get_contents($filename, FALSE, NULL, -1, $maxsize)
-			. "\n[output storage truncated after $maxsize B]\n";
+		$res = file_get_contents($filename, FALSE, NULL, -1, $maxsize);
+		if ( $res===FALSE ) error("Error reading from file: $filename");
+		$res .= "\n[output storage truncated after $maxsize B]\n";
+	} else {
+		$res = file_get_contents($filename);
+		if ( $res===FALSE ) error("Error reading from file: $filename");
 	}
 
-	return file_get_contents($filename);
+	return $res;
 }
 
 /**

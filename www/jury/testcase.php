@@ -100,7 +100,7 @@ function check_updated_file($probid, $rank, $fileid, $file)
 		// Check for upload errors:
 		checkFileUpload ( $_FILES[$fileid]['error'][$rank] );
 
-		$content = file_get_contents($_FILES[$fileid]['tmp_name'][$rank]);
+		$content = dj_file_get_contents($_FILES[$fileid]['tmp_name'][$rank]);
 		if ( $DB->q("VALUE SELECT count(testcaseid)
 		             FROM testcase WHERE probid = %i AND rank = %i",
 		            $probid, $rank)==0 ) {
@@ -180,7 +180,7 @@ function check_add($probid, $rank, $FILES)
 				warning("No $file file specified for new testcase, ignoring.");
 			} else {
 				checkFileUpload ( $_FILES['add_'.$file]['error'] );
-				$content[$file] = file_get_contents($_FILES['add_'.$file]['tmp_name']);
+				$content[$file] = dj_file_get_contents($_FILES['add_'.$file]['tmp_name']);
 			}
 		}
 
