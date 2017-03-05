@@ -572,7 +572,7 @@ function putProblemText($probid)
 		$probname = $prob['shortname'];
 	}
 
-	if ( empty($prob) || difftime($cdata['starttime'],now())>0 ) {
+	if ( empty($prob) || !problemVisible($probid) ) {
 		error("Problem p$probid not found or not available");
 	}
 
@@ -623,7 +623,7 @@ function putSampleTestcase($probid, $seq, $type)
 	                  AND sample = 1 ORDER BY testcaseid ASC LIMIT %i,1',
 	                  $probid, $cdata['cid'], $seq-1);
 
-	if ( empty($sample) || difftime($cdata['starttime'],now())>0 ) {
+	if ( empty($sample) || !problemVisible($probid) ) {
 		error("Problem p$probid not found or not available");
 	}
 	$probname = $sample['shortname'];
