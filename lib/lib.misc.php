@@ -90,15 +90,17 @@ function getRequestID($numeric = TRUE)
 
 /**
  * Returns whether the problem with probid is visible to teams and the
- * public. That is, it is in the active contest, which has started and
- * it is submittable.
+ * public. That is, it is in the selected (active) contest, which has
+ * started and it is submittable.
  */
 function problemVisible($probid)
 {
 	global $DB, $cdata;
 
 	if ( empty($probid) ) return FALSE;
-	if ( !$cdata || difftime(now(),$cdata['starttime']) < 0 ) return FALSE;
+
+	$fdata = calcFreezeData($cdata);
+	if ( !$fdata['cstarted'] ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
 	               INNER JOIN contestproblem USING (probid)
@@ -607,11 +609,12 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	// If no contest has started yet, refuse submissions.
 	$now = now();
 
-	$contestdata = $DB->q('MAYBETUPLE SELECT starttime,endtime FROM contest WHERE cid = %i', $contest);
+	$contestdata = $DB->q('MAYBETUPLE SELECT * FROM contest WHERE cid = %i', $contest);
 	if ( ! isset($contestdata) ) {
 		error("Contest c$contest not found.");
 	}
-	if( !checkrole('jury') && difftime($contestdata['starttime'], $now) > 0 ) {
+	$fdata = calcFreezeData($contestdata);
+	if( !checkrole('jury') && !$fdata['cstarted'] ) {
 		error("The contest is closed, no submissions accepted. [c$contest]");
 	}
 

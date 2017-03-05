@@ -399,7 +399,8 @@ function confirmClar() {
 				$options["$cid-$categid"] = $categname;
 			}
 		}
-		if ( difftime($cdata['starttime'], now()) <= 0 ) {
+		$fdata = calcFreezeData($cdata);
+		if ( $fdata['cstarted'] ) {
 			$problem_options =
 				$DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
 				                             CONCAT(shortname, ": ", name) as name
