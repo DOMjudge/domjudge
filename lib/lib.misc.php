@@ -107,6 +107,41 @@ function problemVisible($probid)
 }
 
 /**
+ * Given an array of contest data, calculates whether the contest
+ * has already started ('cstarted'), and if scoreboard is currently
+ * frozen ('showfrozen') or final ('showfinal').
+ */
+function calcFreezeData($cdata)
+{
+	$fdata = array();
+
+	if ( $cdata == null ) {
+		return array(
+			'showfinal' => false,
+			'showfrozen' => false,
+			'cstarted' => false
+		);
+	}
+
+	// Show final scores if contest is over and unfreezetime has been
+	// reached, or if contest is over and no freezetime had been set.
+	// We can compare $now and the dbfields stringwise.
+	$now = now();
+	$fdata['showfinal']  = ( !isset($cdata['freezetime']) &&
+	                difftime($cdata['endtime'],$now) <= 0 ) ||
+	              ( isset($cdata['unfreezetime']) &&
+	                difftime($cdata['unfreezetime'], $now) <= 0 );
+	// freeze scoreboard if freeze time has been reached and
+	// we're not showing the final score yet
+	$fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
+	              difftime($cdata['freezetime'],$now) <= 0;
+	// contest is active but has not yet started
+	$fdata['cstarted'] = difftime($cdata['starttime'],$now) <= 0;
+
+	return $fdata;
+}
+
+/**
  * Calculate contest time from wall-clock time.
  * Returns time since contest start in seconds.
  * This function is currently a stub around timediff, but introduced
