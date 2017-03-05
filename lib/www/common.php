@@ -439,12 +439,15 @@ function putClock() {
 
 	echo '<div id="clock">';
 	// timediff to end of contest
-	if ( difftime(now(), $cdata['starttime']) >= 0 &&
-	     difftime(now(), $cdata['endtime'])   <  0 ) {
+	$fdata = calcFreezeData($cdata);
+	if ( $fdata['cstarted'] && difftime(now(), $cdata['endtime']) < 0 ) {
 		$left = "time left: " . printtimediff(now(),$cdata['endtime']);
-	} else if ( difftime(now(), $cdata['activatetime']) >= 0 &&
-	            difftime(now(), $cdata['starttime'])    <  0 ) {
-		$left = "time to start: " . printtimediff(now(),$cdata['starttime']);
+	} else if ( !$fdata['cstarted'] && difftime(now(), $cdata['activatetime']) >= 0 ) {
+		if ( $cdata['starttime_enabled'] ) {
+			$left = "time to start: " . printtimediff(now(),$cdata['starttime']);
+		} else {
+			$left = "start delayed";
+		}
 	} else {
 		$left = "";
 	}

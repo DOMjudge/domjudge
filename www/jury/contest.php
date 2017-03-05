@@ -64,6 +64,10 @@ Relative time format: <b><kbd><?php echo $human_rel_datetime ?></kbd></b><br />
 <tr><td><label for="data_0__starttime_string_">Start time:</label></td>
 <td><?php echo addInput('data[0][starttime_string]', @$row['starttime_string'], 30, 64, 'required pattern="' . $pattern_datetime . '"')?></td></tr>
 
+<tr><td>Start time enabled:</td><td>
+<?php echo addRadioButton('data[0][starttime_enabled]', (!isset($row['starttime_enabled']) ||  $row['starttime_enabled']), 1)?> <label for="data_0__starttime_enabled_1">yes</label>
+<?php echo addRadioButton('data[0][starttime_enabled]', ( isset($row['starttime_enabled']) && !$row['starttime_enabled']), 0)?> <label for="data_0__starttime_undefined_0">no</label></td><td></td></tr>
+
 <tr><td><label for="data_0__freezetime_string_">Scoreboard freeze time:</label></td>
 <td><?php echo addInput('data[0][freezetime_string]', @$row['freezetime_string'], 30, 64, 'pattern="' . $pattern_dateorpos . '"')?></td></tr>
 
@@ -385,7 +389,9 @@ echo '<tr><td>Activate time:</td><td>' .
 	specialchars(@$data['activatetime_string']) .
 	"</td></tr>\n";
 echo '<tr><td>Start time:</td><td>' .
+	( $data['starttime_enabled'] ? '' : '<span class="ignore">' ) .
 	specialchars($data['starttime_string']) .
+	( $data['starttime_enabled'] ? '' : '</span> <em>delayed</em>' ) .
 	"</td></tr>\n";
 echo '<tr><td>Scoreboard freeze:</td><td>' .
 	(empty($data['freezetime_string']) ? "-" : specialchars(@$data['freezetime_string'])) .

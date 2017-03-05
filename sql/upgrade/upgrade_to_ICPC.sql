@@ -16,6 +16,7 @@ ALTER TABLE `contest` DROP COLUMN `finalizetime`;
 --
 
 ALTER TABLE contest
+  ADD COLUMN `starttime_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'If disabled, starttime is not used, e.g. to delay contest start',
   ADD COLUMN `finalizetime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time when contest was finalized, null if not yet',
   ADD COLUMN `finalizecomment` text COMMENT 'Comments by the finalizer',
   ADD COLUMN `b` smallint(3) unsigned NOT NULL default '0' COMMENT 'Number of extra bronze medals';

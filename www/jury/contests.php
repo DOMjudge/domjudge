@@ -19,7 +19,7 @@ if ( isset($_POST['donow']) ) {
 
 	// The first array encodes the contest ID, second level the time.
 	$time = key(reset($_POST['donow']));
-	if ( !in_array($time, $times) ) error("Unknown value for timetype");
+	if ( !in_array($time, $times) && $time!='delay_start' ) error("Unknown value for timetype");
 
 	if ( $time == 'finalize' ) {
 		header('Location: finalize.php?id=' . (int)$cid);
@@ -30,6 +30,14 @@ if ( isset($_POST['donow']) ) {
 	$nowstring = strftime('%Y-%m-%d %H:%M:%S ',$now) . date_default_timezone_get();
 	auditlog('contest', $docid, $time. ' now', $nowstring);
 
+	// Special case delay start (only sets starttime_undefined).
+	if ( $time=='delay_start' ) {
+		$DB->q('UPDATE contest SET starttime_enabled = 0
+		        WHERE cid = %i', $docid);
+		header ("Location: ./contests.php?edited=1");
+		exit;
+	}
+
 	// starttime is special because other, relative times depend on it.
 	if ( $time == 'start' ) {
 		$docdata = $cdatas[$docid];
@@ -38,7 +46,7 @@ if ( isset($_POST['donow']) ) {
 		foreach(array('endtime','freezetime','unfreezetime','activatetime','deactivatetime') as $f) {
 			$docdata[$f] = check_relative_time($docdata[$f.'_string'], $docdata['starttime'], $f);
 		}
-		$DB->q('UPDATE contest SET starttime = %s, starttime_string = %s,
+		$DB->q('UPDATE contest SET starttime = %s, starttime_string = %s, starttime_enabled = 1,
 		        endtime = %s, freezetime = %s, unfreezetime = %s,
 		        activatetime = %s, deactivatetime = %s
 		        WHERE cid = %i', $docdata['starttime'], $docdata['starttime_string'],
@@ -122,6 +130,13 @@ if ( empty($curcids) )  {
 		echo addHidden('cid', $row['cid']);
 		echo "<fieldset><legend>${contestname}</legend>\n";
 
+		if ( ! $row['starttime_enabled'] ) {
+			$hasstarted = $hasended = $hasfrozen = $hasunfrozen = false;
+			if ( $isfinal ) {
+				warning("start time is undefined, but contest is finalized!");
+			}
+		}
+
 		echo "<table>\n";
 		foreach ($times as $time) {
 			$haspassed = difftime($row[$time . 'time'], $now) <= 0;
@@ -139,7 +154,8 @@ if ( empty($curcids) )  {
 			}
 
 			echo "</td><td>" .
-			     ucfirst($time) . " time:</td><td>" .
+			     ucfirst($time) . " time:</td><td" .
+			     ( $time=='start' && !$row['starttime_enabled'] ? ' class="ignore"' : '' ) . ">" .
 			     printtime($row[$time . 'time'], '%Y-%m-%d %H:%M (%Z)') .
 			     "</td><td>";
 
@@ -159,6 +175,10 @@ if ( empty($curcids) )  {
 					 $hasended))
 			) {
 				echo addSubmit("$time now", "donow[$row[cid]][$time]");
+			}
+
+			if ( $time=='start' && !$hasstarted && $row['starttime_enabled'] ) {
+				echo addSubmit('delay start', "donow[$row[cid]][delay_start]");
 			}
 
 			echo "</td></tr>";
@@ -213,9 +233,11 @@ if( count($res) == 0 ) {
 			"c" . (int)$row['cid'] . "</a></td>\n";
 		echo "<td>" . $link . specialchars($row['shortname']) . "</a></td>\n";
 		foreach ($times as $time) {
-			echo "<td title=\"".printtime(@$row[$time. 'time'],'%Y-%m-%d %H:%M:%S (%Z)') . "\">" .
-			      $link . ( isset($row[$time.'time']) ?
-			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
+			$timeval = @$row[$time.'time'];
+			if ( ! $row['starttime_enabled'] && $time!='activate' ) $timeval = null;
+			echo "<td title=\"".printtime($timeval,'%Y-%m-%d %H:%M:%S (%Z)') . "\">" .
+			      $link . ( isset($timeval) ?
+			      printtime($timeval) : '-' ) . "</a></td>\n";
 		}
 		echo "<td>" . $link . (isset($numintvs[$row['cid']])?$numintvs[$row['cid']]:0) . "</a></td>\n";
 		echo "<td>" . $link . ($row['process_balloons'] ? 'yes' : 'no') . "</a></td>\n";
