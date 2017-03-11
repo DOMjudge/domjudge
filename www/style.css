@@ -17,7 +17,7 @@ img {	border: 0; }
 
 .prevsubmit       { color: #696969; }
 
-tr.sub_ignore td {
+tr.ignore td {
 	text-decoration: line-through;
 }
 

@@ -716,7 +716,7 @@ function putTeamRow($cdata, $teamids) {
 			global $teamdata;
 			echo "<h2 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
 				specialchars($teamdata['name']) . "</span>!</h2>\n\n";
-			echo "<h3 id=\"contestnotstarted\">contest is " .
+			echo "<h3 id=\"contestnotstarted\">contest " .
 				printContestStart($cdata) . "</h3>\n\n";
 		}
 

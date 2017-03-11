@@ -2378,7 +2378,8 @@ Composer can be installed by following the documentation located
 Debian Stretch by installing the package <tt>composer</tt>.
 
 When this software is present, bootstrapping can be done by running
-<tt>make dist</tt>, which creates the <tt>configure</tt> script and
+<tt>make dist</tt>, which creates the <tt>configure</tt> script,
+downloads and installs the PHP dependencies via composer and
 generates documentation from SGML/LaTeX sources.
 
 <sect>Maintainer mode installation

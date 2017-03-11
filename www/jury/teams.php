@@ -71,7 +71,7 @@ if( $teams->count() == 0 ) {
 		}
 		$link = '<a href="team.php?id='.urlencode($row['teamid']) . '">';
 		echo "<tr class=\"category" . (int)$row['categoryid']  .
-			($row['enabled'] == 1 ? '' : ' sub_ignore') .  "\">".
+			($row['enabled'] == 1 ? '' : ' ignore') .  "\">".
 			"<td>" . $link . "t" .
 				specialchars($row['teamid'])."</a></td>".
 			"<td>" . $link .
