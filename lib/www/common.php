@@ -205,7 +205,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 
 		if ( !$row['valid'] ) {
 			$igncnt++;
-			echo ' sub_ignore';
+			echo ' ignore';
 		}
 		if ( $sid == $highlight ) {
 			echo ' highlight';
