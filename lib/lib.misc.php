@@ -117,7 +117,7 @@ function calcFreezeData($cdata)
 {
 	$fdata = array();
 
-	if ( $cdata == null ) {
+	if ( empty($cdata) ) {
 		return array(
 			'showfinal' => false,
 			'showfrozen' => false,
