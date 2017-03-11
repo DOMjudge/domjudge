@@ -433,6 +433,8 @@ function togglelastruns()
 	}
 }
 
+// TODO: We should probably reload the page if the clock hits contest
+// start (and end?).
 function updateClock()
 {
 	'use strict';
