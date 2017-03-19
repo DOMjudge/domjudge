@@ -4,12 +4,12 @@
 
 if [ -x /usr/bin/php ]; then
 	find .. -name '*.php' | \
-	while read i ; do
+	while read -r i ; do
 		php -l "$i" | grep -v "^No syntax errors detected in "
 	done
 
 	grep -rsl "^#\!.*php" ..|egrep -v '/\.(svn|git)/'|grep -v '\.php' | \
-	while read i ; do
+	while read -r i ; do
 		php -l "$i" | grep -v "^No syntax errors detected in "
 	done
 else
@@ -18,7 +18,7 @@ fi
 
 if [ -x /usr/bin/checkbashisms ]; then
 	grep -rsl "^#\!.*/bin/sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
-	while read i ; do
+	while read -r i ; do
 		if [ "${i##*.}" != "zip" ]; then
 			checkbashisms "$i"
 		fi
@@ -36,7 +36,7 @@ fi
 
 if [ -x /usr/bin/shellcheck ]; then
 	grep -rslE "^#\!.*/bin/(ba)?sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
-	while read i ; do
+	while read -r i ; do
 		if [ "${i##*.}" != "zip" ]; then
 			shellcheck -f gcc -e 1072,2034,2086 "$i"
 		fi

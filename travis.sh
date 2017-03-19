@@ -86,7 +86,7 @@ done
 NUMNOMAGIC=$(curl $CURLOPTS "http://localhost/domjudge/jury/check_judgings.php" | grep "not checked" | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
 
 # include debug output here
-if [ $NUMNOTVERIFIED -ne 1 -o $NUMNOMAGIC -ne 0 ]; then
+if [ $NUMNOTVERIFIED -ne 1 ] || [ $NUMNOMAGIC -ne 0 ]; then
 	echo "Exactly 1 submission is expected to be unverified, but $NUMNOTVERIFIED are."
 	echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 0)."
 	curl $CURLOPTS "http://localhost/domjudge/jury/check_judgings.php?verify_multiple=1"

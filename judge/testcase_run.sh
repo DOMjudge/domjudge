@@ -69,6 +69,7 @@ runcheck ()
 }
 
 # Error and logging functions
+# shellcheck source=../lib/lib.error.sh disable=SC1091
 . "$DJ_LIBDIR/lib.error.sh"
 
 
@@ -136,8 +137,9 @@ logmsg $LOG_DEBUG "run_juryprog: '$RUN_JURYPROG'"
 
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
 [ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
-[ -d "$WORKDIR" -a -w "$WORKDIR" -a -x "$WORKDIR" ] || \
+if [ ! -d "$WORKDIR" ] || [ ! -w "$WORKDIR" ] || [ ! -x "$WORKDIR" ]; then
 	error "Workdir not found or not writable: $WORKDIR"
+fi
 [ -x "$WORKDIR/$PROGRAM" ] || error "submission program not found or not executable"
 [ -x "$COMPARE_SCRIPT" ] || error "compare script not found or not executable: $COMPARE_SCRIPT"
 [ -x "$RUN_SCRIPT" ] || error "run script not found or not executable: $RUN_SCRIPT"
@@ -168,7 +170,7 @@ logmsg $LOG_INFO "setting up testing (chroot) environment"
 # Copy the testdata input
 cp "$TESTIN" "$WORKDIR/testdata.in"
 
-mkdir -p -m 0711 ../bin ../dev
+mkdir -m 0711 ../bin ../dev
 # Copy the run-script and a statically compiled shell:
 cp -p  "$RUN_SCRIPT"  ./run
 cp -pL "$STATICSHELL" ../bin/sh
