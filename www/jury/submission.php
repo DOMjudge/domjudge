@@ -396,8 +396,10 @@ if ( !isset($jid) ) {
 
 	// Check if there is an active judgehost that can judge this
 	// submission. Otherwise, generate an error.
-	$judgehosts = $DB->q("TABLE SELECT hostname, restrictionid
-	                      FROM judgehost WHERE active = 1");
+	$judgehosts = $DB->q('TABLE SELECT hostname, restrictionid, restrictions
+	                      FROM judgehost
+	                      LEFT JOIN judgehost_restriction USING (restrictionid)
+	                      WHERE active = 1');
 	$can_be_judged = false;
 
 	foreach ( $judgehosts as $judgehost ) {
@@ -410,11 +412,8 @@ if ( !isset($jid) ) {
 		$contests = array();
 		$problems = array();
 		$languages = array();
-		$restrictions = $DB->q('MAYBEVALUE SELECT restrictions FROM judgehost
-		                        INNER JOIN judgehost_restriction USING (restrictionid)
-		                        WHERE hostname = %s', $judgehost['hostname']);
-		if ( $restrictions ) {
-			$restrictions = json_decode($restrictions, true);
+		if ( isset($judgehost['restrictions']) ) {
+			$restrictions = json_decode($judgehost['restrictions'], true);
 			$contests = @$restrictions['contest'];
 			$problems = @$restrictions['problem'];
 			$languages = @$restrictions['language'];
@@ -450,6 +449,8 @@ if ( !isset($jid) ) {
 		                    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
 		                   $extra_where . 'LIMIT 1',
 		                   $id, $contests, $problems, $languages);
+
+		if ( isset($submitid) ) $can_be_judged = true;
 	}
 
 	if ( !$can_be_judged ) {
