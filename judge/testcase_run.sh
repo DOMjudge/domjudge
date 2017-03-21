@@ -169,7 +169,8 @@ logmsg $LOG_INFO "setting up testing (chroot) environment"
 # Copy the testdata input
 cp "$TESTIN" "$WORKDIR/testdata.in"
 
-mkdir -m 0711 ../bin ../dev
+# shellcheck disable=SC2174
+mkdir -p -m 0711 ../bin ../dev
 # Copy the run-script and a statically compiled shell:
 cp -p  "$RUN_SCRIPT"  ./run
 cp -pL "$STATICSHELL" ../bin/sh
