@@ -370,6 +370,56 @@ function calcPenaltyTime($solved, $num_submissions)
 	return ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
 }
 
+// From http://www.problemarchive.org/wiki/index.php/Problem_Format
+
+// Expected result tag in (jury) submissions:
+$problem_result_matchstrings = array('@EXPECTED_RESULTS@: ',
+                                     '@EXPECTED_SCORE@: ');
+
+// Remap from Kattis problem package format to DOMjudge internal strings:
+$problem_result_remap = array('ACCEPTED' => 'CORRECT',
+                              'WRONG_ANSWER' => 'WRONG-ANSWER',
+                              'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
+                              'RUN_TIME_ERROR' => 'RUN-ERROR');
+
+function normalizeExpectedResult($result) {
+	global $problem_result_remap;
+
+	$result = trim(mb_strtoupper($result));
+	if ( in_array($result,array_keys($problem_result_remap)) ) {
+		return $problem_result_remap[$result];
+	}
+	return $result;
+}
+
+/**
+ * checks given source file for expected results string
+ * returns NULL if no such string exists
+ * returns array of expected results otherwise
+ */
+function getExpectedResults($source) {
+	global $problem_result_matchstrings;
+	$pos = FALSE;
+	foreach ( $problem_result_matchstrings as $matchstring ) {
+		if ( ($pos = mb_stripos($source,$matchstring)) !== FALSE ) break;
+	}
+
+	if ( $pos === FALSE) {
+		return NULL;
+	}
+
+	$beginpos = $pos + mb_strlen($matchstring);
+	$endpos = mb_strpos($source,"\n",$beginpos);
+	$str = mb_substr($source,$beginpos,$endpos-$beginpos);
+	$results = explode(',',trim(mb_strtoupper($str)));
+
+	foreach ( $results as $key => $val ) {
+		$results[$key] = normalizeExpectedResult($val);
+	}
+
+	return $results;
+}
+
 /**
  * Determines final result for a judging given an ordered array of
  * testcase results. Testcase results can have value NULL if not run
