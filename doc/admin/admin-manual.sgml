@@ -288,7 +288,8 @@ On the judgehosts:
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
 <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
        Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
-       (check specific options of useradd, since these vary per system)
+       (check specific options of useradd, since these vary per system)<newline>
+       and also execute: <tt>groupadd domjudge-run</tt>
 <item> Add to <tt>/etc/sudoers.d/</tt> or append to <tt>/etc/sudoers</tt> the
        sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
 <item> Set up cgroup support: enable kernel parameters in
@@ -659,7 +660,10 @@ suffice to add a user and group `domjudge-run' with minimal privileges.
 
 <!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
 On Debian and Redhat based Linux distributions use:
-<verb>useradd -d /nonexistent -U -M -s /bin/false domjudge-run</verb>
+<verb>
+useradd -d /nonexistent -U -M -s /bin/false domjudge-run
+groupadd domjudge-run
+</verb>
 
 For other systems check the specifics of your useradd command.
 This user must also be configured as the user under which programs run
