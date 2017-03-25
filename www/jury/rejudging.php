@@ -106,19 +106,37 @@ if ( isset($_REQUEST['apply']) ) {
 	$res = $DB->q('SELECT submitid, cid, teamid, probid
 	               FROM submission
 	               WHERE rejudgingid=%i', $id);
+	$time_start = microtime(TRUE);
+
+	// no output buffering... we want to see what's going on real-time
+	echo "<br/><p>Canceling rejudge may take some time, please be patient:</p>\n";
+	ob_implicit_flush(true);
+	ob_end_flush();
+
+	echo "<p>\n";
 	while ( $row = $res->next() ) {
+		echo "s" . specialchars($row['submitid']) . ", ";
 		// restore old judgehost association
 		$valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging
 		                           WHERE submitid=%i AND valid=1', $row['submitid']);
 		$DB->q('UPDATE submission SET rejudgingid = NULL, judgehost=%s
 		        WHERE rejudgingid = %i', $valid_judgehost, $id);
 	}
+	echo "\n</p>\n";
+
 	$DB->q('UPDATE rejudging
 	        SET endtime=%s, userid_finish=%i, valid=0
 	        WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
 
 	auditlog('rejudging', $id, 'canceled rejudge', '(end)');
-	header('Location: rejudging.php?id='.urlencode($id));
+
+	$time_end = microtime(TRUE);
+
+	echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) .
+		"\">r$id</a> canceled in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
+
+	require(LIBWWWDIR . '/footer.php');
+	return;
 }
 
 
