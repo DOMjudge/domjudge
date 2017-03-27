@@ -25,6 +25,10 @@ ALTER TABLE `user`
 ALTER TABLE `problem`
   MODIFY COLUMN `timelimit` float unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time (in seconds) for this problem';
 
+ALTER TABLE `judgehost`
+  DROP FOREIGN KEY `restriction_ibfk_1`,
+  ADD CONSTRAINT `judgehost_ibfk_1` FOREIGN KEY (`restrictionid`) REFERENCES `judgehost_restriction` (`restrictionid`) ON DELETE SET NULL;
+
 -- Merge {rank,score}cache_{public,jury} tables into one.
 CREATE TABLE `rankcache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
