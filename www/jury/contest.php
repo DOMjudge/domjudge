@@ -200,7 +200,8 @@ $(function() {
 			allow_submit: true,
 			allow_judge: true,
 			color: '',
-			lazy_eval_results: ''
+			lazy_eval_results: '',
+			previd: ''
 		};
 
 		for ( var i = 0; i < current_problems.length; i++ ) {
@@ -217,7 +218,8 @@ $(function() {
 			.replace(/\{shortname\}/g, contest_problem_data.shortname)
 			.replace(/\{points\}/g, contest_problem_data.points)
 			.replace(/\{color\}/g, contest_problem_data.color)
-			.replace(/\{lazy_eval_results\}/g, contest_problem_data.lazy_eval_results);
+			.replace(/\{lazy_eval_results\}/g, contest_problem_data.lazy_eval_results)
+			.replace(/\{previd\}/g, contest_problem_data.previd == null ? '' : contest_problem_data.previd);
 
 		$('tbody', $table).append(templateContents);
 
@@ -284,6 +286,9 @@ $(function() {
 		<?php echo addInputField('number',"data[0][mapping][0][extra][{id}][lazy_eval_results]",
                                  '{lazy_eval_results}', ' style="width:10ex" min="0" max="1"'); ?>
 	</td>
+	<td>
+		<?php echo addInput("data[0][mapping][0][extra][{id}][previd]", '{previd}'); ?>
+	</td>
 </tr>
 </script>
 <table id="problems_table">
@@ -299,6 +304,7 @@ $(function() {
 		<a target="_blank" href="http://www.w3schools.com/cssref/css_colornames.asp">
 		<img src="../images/b_help.png" class="smallpicto" alt="?"></a></th>
 		<th>lazy eval</th>
+		<th>depends on</th>
 	</tr>
 	</thead>
 	<tbody>
@@ -453,6 +459,7 @@ else {
 	echo "<th scope=\"col\">allow<br />judge</th>";
 	echo "<th class=\"sorttable_nosort\" scope=\"col\">colour</th>\n";
 	echo "<th scope=\"col\">lazy eval</th>\n";
+	echo "<th scope=\"col\">depends on</th>\n";
 	echo "<th scope=\"col\"></th>\n";
 	echo "</tr>\n</thead>\n<tbody>\n";
 
@@ -478,6 +485,8 @@ else {
 			: '<td>'. $link . '&nbsp;</a></td>' );
 		echo "<td>" . $link . ( isset($row['lazy_eval_results']) ?
 		                        printyn($row['lazy_eval_results']) : '-' ) . "</a></td>\n";
+		echo "<td>" . ( isset($row['previd']) ? $row['previd'] : '-' ) . "</td>\n";
+
 		if ( IS_ADMIN ) {
 			echo "<td>" .
 			     delLinkMultiple('contestproblem',array('cid','probid'),

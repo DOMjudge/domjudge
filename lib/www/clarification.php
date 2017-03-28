@@ -25,7 +25,7 @@ function setClarificationViewed($clar, $team)
  */
 function canViewClarification($team, $clar)
 {
-	return (
+	return problemVisible($clar['probid']) && (
 		   $clar['sender'] == $team
 		|| $clar['recipient'] == $team
 		|| ($clar['sender'] == NULL && $clar['recipient'] == NULL)

@@ -529,7 +529,7 @@ function putProblemText($probid)
 	}
 
 	if ( empty($prob) || !problemVisible($probid) ) {
-		error("Problem p$probid not found or not available");
+		error("Problem p$probid not found or not available; you may need to solve another problem first");
 	}
 
 	switch ( $prob['problemtext_type'] ) {

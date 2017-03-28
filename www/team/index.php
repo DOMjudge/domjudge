@@ -83,7 +83,9 @@ HTML;
 
 	$probs = array();
 	foreach($probdata as $probinfo) {
-		$probs[$probinfo['probid']]=$probinfo['shortname'];
+		if(problemVisible($probinfo['probid'])) {
+			$probs[$probinfo['probid']]=$probinfo['shortname'];
+		}
 	}
 	$probs[''] = 'problem';
 	echo addSelect('probid', $probs, '', true);

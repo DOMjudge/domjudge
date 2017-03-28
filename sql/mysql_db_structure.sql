@@ -111,6 +111,7 @@ CREATE TABLE `contestproblem` (
   `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
   `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest (string)',
   `points` int(4) unsigned NOT NULL DEFAULT '1' COMMENT 'Number of points earned by solving this problem',
+  `previd` int(4) unsigned DEFAULT NULL COMMENT 'ID of problem that must be solved before unlocking this problem',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
   `color` varchar(25) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
@@ -120,7 +121,8 @@ CREATE TABLE `contestproblem` (
   KEY `cid` (`cid`),
   KEY `probid` (`probid`),
   CONSTRAINT `contestproblem_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
-  CONSTRAINT `contestproblem_ibfk_2` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
+  CONSTRAINT `contestproblem_ibfk_2` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
+  CONSTRAINT `contestproblem_ibfk_3` FOREIGN KEY (`previd`) REFERENCES `problem` (`probid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Many-to-Many mapping of contests and problems';
 
 --

@@ -91,20 +91,31 @@ function getRequestID($numeric = TRUE)
 /**
  * Returns whether the problem with probid is visible to teams and the
  * public. That is, it is in the selected (active) contest, which has
- * started and it is submittable.
+ * started and it is submittable; if it depends on another problem,
+ * it should be visible only to teams who have solved that problem
+ * until the contest has ended.
  */
 function problemVisible($probid)
 {
-	global $DB, $cdata;
+	global $DB, $cdata, $userdata;
 
 	if ( empty($probid) ) return FALSE;
 
 	$fdata = calcFreezeData($cdata);
 	if ( !$fdata['cstarted'] ) return FALSE;
 
+	$eqteamid = is_null($userdata['teamid']) ? "IS NULL" : ("= " . strval($userdata['teamid']));
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
 	               INNER JOIN contestproblem USING (probid)
-	               WHERE cid = %i AND allow_submit = 1 AND probid = %i',
+	               WHERE cid = %i AND allow_submit = 1 AND probid = %i
+	                 AND (previd is NULL
+	                      OR ' . ((IS_JURY || $fdata['showfinal']) ? 'TRUE' : 'FALSE') . '
+	                      OR EXISTS(SELECT * FROM submission JOIN judging USING (submitid)
+	                                WHERE submission.cid = contestproblem.cid
+	                                   AND submission.teamid ' . $eqteamid . '
+	                                   AND submission.probid = contestproblem.previd
+	                                   AND judging.result = \'correct\'
+	                                   AND judging.valid = 1))',
 	              $cdata['cid'], $probid) !== NULL;
 }
 
