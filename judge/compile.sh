@@ -96,8 +96,9 @@ WORKDIR="$1"; shift
 logmsg $LOG_DEBUG "arguments: '$COMPILE_SCRIPT' '$WORKDIR'"
 logmsg $LOG_DEBUG "source file(s): $*"
 
-[ -d "$WORKDIR" -a -w "$WORKDIR" -a -x "$WORKDIR" ] || \
+if [ ! -d "$WORKDIR" ] || [ ! -w "$WORKDIR" ] || [ ! -x "$WORKDIR" ]; then
 	error "Workdir not found or not writable: $WORKDIR"
+fi
 [ -x "$COMPILE_SCRIPT" ] || error "compile script not found or not executable: $COMPILE_SCRIPT"
 [ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
 
@@ -150,7 +151,7 @@ if [ $exitcode -ne 0 ]; then
 	cat compile.tmp >>compile.out
 	cleanexit ${E_COMPILER_ERROR:--1}
 fi
-if [ ! -f compile/program -o ! -x compile/program ]; then
+if [ ! -f compile/program ] || [ ! -x compile/program ]; then
 	echo "Compiling failed: no executable was created; compiler output:" >compile.out
 	cat compile.tmp >>compile.out
 	cleanexit ${E_COMPILER_ERROR:--1}

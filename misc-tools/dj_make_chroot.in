@@ -35,8 +35,8 @@ DEBIAN_ARCHLIST="amd64,armel,armhf,arm64,i386,mips,mipsel,powerpc,ppc64el,s390x"
 UBUNTU_ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
 
 # If host system is Debian or Ubuntu, use its release and architecture by default
-if [ "x$(lsb_release -i -s || true)" = 'xDebian' -o \
-     "x$(lsb_release -i -s || true)" = 'xUbuntu' ]; then
+if [ "x$(lsb_release -i -s || true)" = 'xDebian' ] || \
+   [ "x$(lsb_release -i -s || true)" = 'xUbuntu' ]; then
 	DISTRO="$(lsb_release -i -s)"
 	RELEASE="$(lsb_release -c -s)"
 	if [ -z "$ARCH" ]; then
@@ -86,7 +86,7 @@ if [ $# -gt 0 ]; then
 	error "Additional arguments specified."
 fi
 
-if [ "$DISTRO" != 'Debian' -a "$DISTRO" != 'Ubuntu' ]; then
+if [ "$DISTRO" != 'Debian' ] && [ "$DISTRO" != 'Ubuntu' ]; then
 	error "Invalid distribution specified, only 'Debian' and 'Ubuntu' are supported."
 fi
 
@@ -159,8 +159,8 @@ export DEBIAN_FRONTEND=noninteractive
 
 if [ -e "$CHROOTDIR" ]; then
 	printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
-	read yn
-	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
+	read -r yn
+	if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
 		error "Chrootdir already exists, exiting."
 	fi
 	rm -rf "$CHROOTDIR"
@@ -174,8 +174,8 @@ if [ ! -x /usr/sbin/debootstrap ]; then
 
 	echo "This script will install debootstrap on your system."
 	printf "Continue? (y/N) "
-	read yn
-	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
+	read -r yn
+	if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
 		exit 1;
 	fi
 

@@ -17,7 +17,7 @@ MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
 # Check syntax
-pypy -m py_compile "$@"
+python2 -m py_compile "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 rm -f -- *.pyc

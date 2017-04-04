@@ -31,6 +31,7 @@ RUNAS=@DOMJUDGE_USER@
 
 test -x $DAEMON || exit 0
 
+# shellcheck disable=SC1091
 . /lib/lsb/init-functions
 
 if [ ! -d $RUNDIR ]; then
@@ -92,12 +93,13 @@ case "$1" in
 	log_end_msg $?
 	;;
   status)
-	echo -n "Status of $DESC: "
+	# shellcheck disable=SC2059
+	printf "Status of $DESC: "
 	if [ ! -r "$PIDFILE" ]; then
 		echo "$NAME is not running."
 		exit 3
 	fi
-	if read pid < "$PIDFILE" && ps -p "$pid" > /dev/null 2>&1; then
+	if read -r pid < "$PIDFILE" && ps -p "$pid" > /dev/null 2>&1; then
 		echo "$NAME is running."
 		exit 0
 	else

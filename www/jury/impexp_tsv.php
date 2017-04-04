@@ -137,9 +137,17 @@ function tsv_teams_set($data)
 	foreach ($data as $row) {
 		// it is legitimate that a team has no affiliation. Do not add it then.
 		if ( !empty($row['team_affiliation']['shortname']) ) {
-			$DB->q("REPLACE INTO team_affiliation SET %S", $row['team_affiliation']);
-			$affilid = $DB->q("VALUE SELECT affilid FROM team_affiliation WHERE shortname = %s LIMIT 1", $row['team_affiliation']['shortname']);
-			auditlog('team_affiliation', $affilid, 'replaced', 'imported from tsv');
+			// First look up if the affiliation already exists.
+			$affilid = $DB->q("MAYBEVALUE SELECT affilid FROM team_affiliation
+			                   WHERE shortname = %s AND name = %s AND country = %s LIMIT 1",
+			                  $row['team_affiliation']['shortname'],
+			                  $row['team_affiliation']['name'],
+			                  $row['team_affiliation']['country']);
+			if ( empty($affilid) ) {
+				$affilid = $DB->q("RETURNID INSERT INTO team_affiliation SET %S",
+				                  $row['team_affiliation']);
+				auditlog('team_affiliation', $affilid, 'added', 'imported from tsv');
+			}
 			$row['team']['affilid'] = $affilid;
 		}
 		$DB->q("REPLACE INTO team SET %S", $row['team']);

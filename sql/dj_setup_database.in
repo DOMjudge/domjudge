@@ -43,7 +43,6 @@ EOF
 # Wrapper around mysql command to allow setting options, user, etc.
 mysql()
 {
-	local user pass
 	# shellcheck disable=SC2153
 	if [ -n "$DBUSER" ]; then
 		user="-u $DBUSER"
@@ -72,11 +71,11 @@ read_dbpasswords()
 		echo "You may want to run: $0 genpass"
 		return 1
 	fi
-	local OLDIFS="$IFS"
+	OLDIFS="$IFS"
 	IFS=":"
 	# Don't pipe $PASSWDFILE into this while loop as that spawns a
 	# subshell and then variables are not retained in the original shell.
-	while read role host db user passwd; do
+	while read -r role host db user passwd; do
 		# Skip lines beginning with a '#'
 		[ "x$role" != "x${role###}" ] && continue
 		domjudge_DBHOST=$host
@@ -121,7 +120,6 @@ status()
 
 create_db_users()
 {
-	local user pass
 	(
 	# The MySQL character set and collation are hardcoded here, but
 	# can be changed in the database and their configuration settings
@@ -137,7 +135,6 @@ create_db_users()
 
 remove_db_users()
 {
-	local user pass
 	(
 	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
 # Also drop "@%" users, since those may have been created by pre-4.0 versions

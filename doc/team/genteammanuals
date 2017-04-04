@@ -22,7 +22,7 @@ if [ ! -f "$PREAMBLE" ]; then
 	exit 1
 fi
 
-if [ ! -d "$OUTPUTDIR" -o ! -w "$OUTPUTDIR" ]; then
+if [ ! -d "$OUTPUTDIR" ] || [ ! -w "$OUTPUTDIR" ]; then
 	echo "Output directory '$OUTPUTDIR' not found or not writable."
 	exit 1
 fi

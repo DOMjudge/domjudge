@@ -1,0 +1,95 @@
+#!/bin/bash
+
+# Script to determine the memory footprint of the JVM.
+# Run the script with root permissions in the same chroot environment where the
+# team submissions are judged.
+#
+# Configure SANDBOX_MEM to the "memory limit" for the submissions (in MB).
+# Set JVM_STACK to the stack size (-Xss) you want to allow for java submissions (in MB).
+#
+# Part of the DOMjudge Programming Contest Jury System and licenced
+# under the GNU GPL. See README and COPYING for details.
+
+cd "$(mktemp -d)" || exit -1
+
+GROUPNAME=jvmtest
+SUBGROUP=foo
+JAVA_CLASS="Test"
+SANDBOX_MEM=2048
+JVM_STACK=64
+JVM_HEAP=$((SANDBOX_MEM-JVM_STACK))
+USED_HEAP=$((SANDBOX_MEM-JVM_STACK))
+STEP=5
+
+function write_and_compile_java() {
+  FIRST_BLOCK=$((80*USED_HEAP/100))
+  cat > "$JAVA_CLASS".java <<EOF
+import java.util.*;
+class Dummy {
+  int value;
+  Dummy next;
+  Dummy(int value) {
+    this.value = value;
+    if (value % 2 == 0) {
+      next = new Dummy(value - 1);
+    }
+  }
+}
+public class $JAVA_CLASS {
+  public static final int USED_HEAP = $USED_HEAP;
+  public static final int FIRST_BLOCK = $FIRST_BLOCK;
+  public static int[][][] mem = new int[256][1024][FIRST_BLOCK];
+  public static int[][][] mem2;
+  public static void main(String[] args) throws Exception {
+    try {
+      ArrayList<Dummy> list = new ArrayList<>();
+      for (int i = 0; i < 1000; i++) {
+        int[][][] foo = new int[256][1024][5];
+	for (int j = 0; j < 100; j++) {
+	  list.add(new Dummy(i));
+	  list.add(new Dummy(j));
+	}
+	foo[1][2][3] = list.get(42 + i).value;
+      }
+      list = null;
+      mem2 = new int[256][1024][USED_HEAP - FIRST_BLOCK];
+      stack();
+    } catch (StackOverflowError soe) {
+      System.err.println("\\\\o/");
+    }
+  }
+
+  public static void stack() {
+    stack();
+  }
+}
+EOF
+  javac "$JAVA_CLASS".java
+}
+
+function exec_java() {
+  echo "- trying with: sandbox: ${SANDBOX_MEM}MB, stack: ${JVM_STACK}MB, heap: ${JVM_HEAP}MB, out of which ${USED_HEAP}MB will be used."
+  cgcreate -g memory,cpu:"$GROUPNAME"
+  cgcreate -g memory,cpu:"$GROUPNAME"/"$SUBGROUP"
+  SANDBOX_BYTE=$((SANDBOX_MEM*1024*1024))
+  echo "$SANDBOX_BYTE" > /sys/fs/cgroup/memory/"$GROUPNAME"/"$SUBGROUP"/memory.limit_in_bytes
+  echo "$SANDBOX_BYTE" > /sys/fs/cgroup/memory/"$GROUPNAME"/"$SUBGROUP"/memory.memsw.limit_in_bytes
+  cgexec -g memory,cpu:"$GROUPNAME"/"$SUBGROUP" java -XX:+UseSerialGC -Xmx"$JVM_HEAP"m -Xms"$JVM_HEAP"m -Xss"$JVM_STACK"m "$JAVA_CLASS" &> log
+}
+
+while true; do
+	write_and_compile_java
+	if exec_java; then
+	  break;
+	fi
+	if grep OutOfMemoryError log; then
+	  USED_HEAP=$((USED_HEAP-STEP))
+	else
+	  JVM_HEAP=$((JVM_HEAP-STEP))
+	fi
+	cgdelete -g memory,cpu:"$GROUPNAME" -r
+done
+MAX=$(cat /sys/fs/cgroup/memory/"$GROUPNAME"/"$SUBGROUP"/memory.memsw.max_usage_in_bytes)
+echo "Memory usage in sandbox:" $((MAX/1024/1024)) "MB (should be close to ${SANDBOX_MEM}MB)"
+echo "MEMRESERVED in java compile script should be at least" $((SANDBOX_MEM-JVM_HEAP)) "MB"
+cgdelete -g memory,cpu:"$GROUPNAME" -r
