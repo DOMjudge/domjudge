@@ -246,9 +246,7 @@ cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 deb $DEBMIRROR $RELEASE           main restricted universe multiverse
 deb $DEBMIRROR $RELEASE-security  main restricted universe multiverse
 deb $DEBMIRROR $RELEASE-updates   main restricted universe multiverse
-deb $DEBMIRROR $RELEASE-backports main restricted universe multiverse
-deb https://packages/apt trusty main
-deb https://packages/ppa trusty main
+#deb $DEBMIRROR $RELEASE-backports main restricted universe multiverse
 EOF
 fi
 
