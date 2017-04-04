@@ -232,6 +232,11 @@ runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGR
 	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
 	                  >compare.tmp 2>&1
 
+# Make sure that feedback file exists, since we assume this later.
+if [ ! -f feedback/judgemessage.txt ]; then
+	touch feedback/judgemessage.txt
+fi
+
 # Append output validator error messages
 # TODO: display extra
 if [ -s feedback/judgeerror.txt ]; then
