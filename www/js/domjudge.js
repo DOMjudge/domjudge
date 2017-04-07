@@ -424,7 +424,7 @@ function togglelastruns()
 	for (var name in names) {
 		var cells = document.getElementsByClassName(name);
 		for (var i = 0; i < cells.length; i++) {
-			style = 'inline';
+			var style = 'inline';
 			if (name === 'lasttcruns') {
 				style = 'table-row';
 			}
