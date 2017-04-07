@@ -189,7 +189,7 @@ function tsv_accounts_prepare($content)
 			case 'team':
 				$line[0] = $teamroleid;
 				// For now we assume we can find the teamid by parsing the username
-				$teamid = preg_replace('#^team0*#', '', $line[2]);
+				$teamid = preg_replace('#^team-0*#', '', $line[2]);
 				break;
 			case 'analyst':
 				// Ignore type analyst for now. We don't have a useful mapping yet.
