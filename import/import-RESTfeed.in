@@ -219,6 +219,12 @@ while ( TRUE ) {
 			      $subm['team']."' and external ID '".remap('team',$subm['team'])."'");
 		}
 
+		if ( $subm['time'] < $cdata['starttime'] || $subm['time'] < $contest['start'] ) {
+			logmsg(LOG_DEBUG, "Skipping import of submission '".
+			       $subm['id']."' which was submitted too early");
+			continue;
+		}
+
 		$id = submit_solution($teamid,
 		                      remap('problem',$subm['problem']),
 		                      $cid,
