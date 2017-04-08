@@ -119,7 +119,7 @@ function dbconfig_get_rest($name) {
  * dj_file_get_contents) as encoded string.
  */
 function rest_encode_file($file, $sizelimit = TRUE) {
-	$maxsize = $sizelimit ? (int) dbconfig_get_rest('output_storage_limit', 50000) : -1;
+	$maxsize = $sizelimit !== FALSE ? $sizelimit : -1;
 	return urlencode(base64_encode(dj_file_get_contents($file, $maxsize)));
 }
 
@@ -601,6 +601,7 @@ function judge($row)
 
 	// Query timelimit overshoot here once for all testcases
 	$overshoot = dbconfig_get_rest('timelimit_overshoot');
+	$output_storage_limit = (int) dbconfig_get_rest('output_storage_limit', 50000);
 
 	$totalcases = 0;
 	while ( TRUE ) {
@@ -736,9 +737,9 @@ function judge($row)
 			. '&runtime=' . urlencode($runtime)
 			. '&judgehost=' . urlencode($myhost)
 			. '&output_run='   . rest_encode_file($testcasedir . '/program.out', FALSE)
-			. '&output_error=' . rest_encode_file($testcasedir . '/program.err')
-			. '&output_system=' . rest_encode_file($testcasedir . '/system.out')
-			. '&output_diff='  . rest_encode_file($testcasedir . '/feedback/judgemessage.txt')
+			. '&output_error=' . rest_encode_file($testcasedir . '/program.err', $output_storage_limit)
+			. '&output_system=' . rest_encode_file($testcasedir . '/system.out', $output_storage_limit)
+			. '&output_diff='  . rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit)
 		);
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
 
