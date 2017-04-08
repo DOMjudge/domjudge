@@ -25,7 +25,7 @@ define('IS_JURY', TRUE);
 require(LIBDIR . '/init.php');
 require_once(LIBWWWDIR . '/auth.php');
 
-require_once(LIBEXTDIR . '/spyc/spyc.php');
+require_once(LIBVENDORDIR . '/autoload.php');
 
 setup_database_connection();
 
