@@ -283,10 +283,7 @@ while ( TRUE ) {
 						$id."' (s".$res['submitid'].")");
 				continue;
 			}
-		}
-
-
-		if ( val($run, 'judged')!=='True' ) {
+		} else {
 			// We're inserting a new submission
 			$res = dj_json_decode(request('submissionFiles/'.val($run,'id'),'GET'));
 
@@ -313,8 +310,9 @@ while ( TRUE ) {
 			logmsg(LOG_INFO,"Imported submission '".val($run,'id')."' as s$id");
 
 			foreach ( $files as $file ) unlink($file);
+		}
 
-		} else {
+		if ( val($run, 'judged')==='True' ) {
 			// We're inserting a new judging
 
 			$DB->q('UPDATE submission SET externalresult = %s
