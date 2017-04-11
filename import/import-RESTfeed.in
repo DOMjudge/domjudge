@@ -30,6 +30,7 @@ require_once(LIBVENDORDIR . '/autoload.php');
 setup_database_connection();
 
 $verbose = LOG_NOTICE;
+$loglevel = LOG_INFO;
 $waittime = 5;
 
 $cdatas = getCurContests(TRUE);
