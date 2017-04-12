@@ -7,6 +7,10 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
+# Set non-existing HOME variable to make GHC program happy, see:
+# https://ghc.haskell.org/trac/ghc/ticket/11678
+export HOME=/does/not/exist
+
 # -x hs:    Explicitly only allow Haskell source (no object files or
 #           other intermediate files autodetected by extension, also
 #           disables literate Haskell (.lhs) files)
