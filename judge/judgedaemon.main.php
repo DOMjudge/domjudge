@@ -117,9 +117,21 @@ function dbconfig_get_rest($name) {
  * Encode file contents for POST-ing to REST API.
  * Returns contents of $file (optionally limited in size, see
  * dj_file_get_contents) as encoded string.
+ * $sizelimit can be set to the following values:
+ * - TRUE: use the 'output_storage_limit' configuration setting
+ * - positive integer: limit to this many bytes
+ * - FALSE or -1: no size limit imposed
  */
 function rest_encode_file($file, $sizelimit = TRUE) {
-	$maxsize = $sizelimit !== FALSE ? $sizelimit : -1;
+	if ( $sizelimit===TRUE ) {
+		$maxsize = (int) dbconfig_get_rest('output_storage_limit', 50000);
+	} elseif ( $sizelimit===FALSE || $sizelimit==-1 ) {
+		$maxsize = -1;
+	} elseif ( is_int($sizelimit) && $sizelimit>0 ) {
+		$maxsize = $sizelimit;
+	} else {
+		error("Invalid argument sizelimit = '$sizelimit' specified.");
+	}
 	return urlencode(base64_encode(dj_file_get_contents($file, $maxsize)));
 }
 
@@ -509,6 +521,9 @@ function judge($row)
 	putenv('FILELIMIT='         . $row['outputlimit']);
 	putenv('PROCLIMIT='         . dbconfig_get_rest('process_limit'));
 
+	// Query output storage limit (in database once for this judging.
+	$output_storage_limit = (int) dbconfig_get_rest('output_storage_limit', 50000);
+
 	$cpuset_opt = "";
 	if ( isset($options['daemonid']) ) $cpuset_opt = "-n ${options['daemonid']}";
 
@@ -580,9 +595,10 @@ function judge($row)
 
 	// pop the compilation result back into the judging table
 	request('judgings/' . urlencode($row['judgingid']), 'PUT',
-		'judgehost=' . urlencode($myhost)
-		. '&compile_success=' . $compile_success
-		. '&output_compile=' . rest_encode_file($workdir . '/compile.out'));
+	        'judgehost=' . urlencode($myhost)
+	        . '&compile_success=' . $compile_success
+	        . '&output_compile=' . rest_encode_file($workdir . '/compile.out',
+	                                                $output_storage_limit));
 
 	// compile error: our job here is done
 	if ( ! $compile_success ) {
@@ -601,7 +617,6 @@ function judge($row)
 
 	// Query timelimit overshoot here once for all testcases
 	$overshoot = dbconfig_get_rest('timelimit_overshoot');
-	$output_storage_limit = (int) dbconfig_get_rest('output_storage_limit', 50000);
 
 	$totalcases = 0;
 	while ( TRUE ) {
