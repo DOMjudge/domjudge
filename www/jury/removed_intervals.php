@@ -84,4 +84,4 @@ default:
 	error("Unknown cmd.");
 }
 
-header('Location: contest.php?id=' . $mycid);
+header('Location: contest.php?id=' . $mycid . '&edited=1');
