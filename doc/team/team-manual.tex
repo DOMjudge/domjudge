@@ -174,17 +174,19 @@ provided by the jury.
 
 \subsection{Possible results}
 
-A submission can have the following results (not all of these may be
-available depending on configuration of the system):
+A submission can have the following results:
 
 \begin{description}[\setleftmargin{4.5cm}]
 \item[CORRECT]
 The submission passed all tests: you solved this problem!
+\textit{Correct submissions do not incur penalty time.}
 
 \item[COMPILER-ERROR]
 There was an error when compiling your program. On the submission
-details page you can inspect the exact error (this option might be
-disabled).
+details page you can inspect the exact error. Note that when
+compilation takes more than \COMPILETIME\ seconds, it is aborted and
+this counts as a compilation error.
+\textit{Compilation errors do not incur penalty time.}
 
 \item[TIMELIMIT]
 Your program took longer than the maximum allowed time for this
@@ -198,14 +200,6 @@ a lot of different causes like division by zero, incorrectly
 addressing memory (e.g. by indexing arrays out of bounds), trying to
 use more memory than the limit, etc.
 Also check that your program exits with exit code 0!
-
-\item[NO-OUTPUT]
-Your program did not generate any output. Check that you write to
-standard out.
-
-\item[OUTPUT-LIMIT]
-Your program generated more output than the allowed limit. The output
-was truncated and considered incorrect.
 
 \item[WRONG-ANSWER]
 The output of your program was incorrect. This can happen simply
@@ -255,14 +249,8 @@ generates a single program to run; for languages where
 this is relevant, the first file specified will be considered the
 `main' source file.
 
-Using a different compiler or operating system than the jury should
-not be a problem. Be careful however, not to use any special compiler
-and/or system specific things (you may be able to check compiler errors
-on the team page).
-
-The jury system defines \cmd{ONLINE\_JUDGE} and \cmd{DOMJUDGE}.
-These are defined as preprocessor symbols in compiled languages and
-as (environment) variables in scripted languages.
+Use the provided scripts to compile and run your program locally with
+the same options as on the jury system.
 
 \subsection{Testing}
 
@@ -275,9 +263,8 @@ execution. If your program violates these it will also be aborted
 with a \textsc{run-error}, see section~\ref{runlimits}.
 
 When comparing program output, it has to exactly match to output of
-the jury, except that some extra whitespace may be ignored (this
-depends on the jury's configuration of the problems). So take care
-that you follow the output specifications. In case of problem
+the jury, except that some extra whitespace may be ignored. So take
+care that you follow the output specifications. In case of problem
 statements which do not have unique output (e.g. with floating point
 answers), the jury may use a modified comparison function.
 
@@ -304,7 +291,7 @@ During execution of your program, there are \MEMLIMIT\ kilobytes of
 memory available. This is the total amount of memory (including
 program code, statically and dynamically defined variables, stack,
 Java VM, \dots)! If your program tries to use more memory, it will
-abort, resulting in a run error.
+most likely abort, resulting in a run error.
 
 \item[number of processes]
 You are not supposed to create multiple processes (threads). This is
@@ -326,11 +313,10 @@ naming conventions used: there is no fixed entry point; any class can
 contain a method \texttt{main}. Furthermore, a class declared
 \texttt{public} must be located in an indentically named file.
 
-In the default configuration of DOMjudge this is worked around by
-autodetecting the main class. When this feature is not used, then
-the main class should be ``\verb!Main!'', with method
-``\verb!public static void main(String args[])!'', see also the Java
-code example in appendix~\ref{codeexamples}.
+DOMjudge works around this is by autodetecting the main class: the
+first class with a method
+``\verb!public static void main(String args[])!'' is used, see also
+the Java code example in appendix~\ref{codeexamples}.
 
 \newpage
 \appendix
@@ -375,13 +361,7 @@ A solution in Java:
 
 \newpage
 
-A solution in C\#:
-\listinginput{1}{../examples/example.cs}
-
-A solution in Pascal:
-\listinginput{1}{../examples/example.pas}
-
-And finally a solution in Haskell:
-\listinginput{1}{../examples/example.hs}
+And finally a solution in Python:
+\listinginput{1}{../examples/example.py}
 
 \end{document}
