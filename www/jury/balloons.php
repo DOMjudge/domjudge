@@ -192,7 +192,7 @@ if ( !empty($contestids) ) {
 	               WHERE s.cid IN (%Ai) $freezecond" .
 	               (isset($filter['affilid']) ? ' AND t.affilid IN (%As) ' : ' %_') .
 	               (isset($filter['room']) ? ' AND t.room IN (%As) ' : ' %_') .
-	               " ORDER BY done ASC, balloonid DESC",
+	               " ORDER BY done ASC, (1-2*CAST(done AS SIGNED))*CAST(balloonid AS SIGNED) ASC",
 	              $contestids, @$filter['affilid'], @$filter['room']);
 }
 
