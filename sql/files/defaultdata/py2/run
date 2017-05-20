@@ -27,6 +27,10 @@ while [ $# -gt 0 ]; do
 	fi
 	shift
 done
+if [ -z "$SOURCES" ]; then
+	echo "No source files found with '.py' extension."
+	exit 1
+fi
 
 # Check syntax
 python2 -m py_compile $SOURCES
