@@ -74,7 +74,7 @@ CREATE TABLE `internal_error` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of judgehost internal errors';
 
 ALTER TABLE `testcase`
-  MODIFY COLUMN `description` longblob DEFAULT NULL COMMENT 'Description of this testcase',
+  MODIFY COLUMN `description` longblob DEFAULT NULL COMMENT 'Description of this testcase';
 
 --
 -- Transfer data from old to new structure
