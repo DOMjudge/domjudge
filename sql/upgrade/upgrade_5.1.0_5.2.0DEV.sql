@@ -73,6 +73,8 @@ CREATE TABLE `internal_error` (
   CONSTRAINT `internal_error_ibfk_2` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of judgehost internal errors';
 
+ALTER TABLE `testcase`
+  MODIFY COLUMN `description` longblob DEFAULT NULL COMMENT 'Description of this testcase',
 
 --
 -- Transfer data from old to new structure
