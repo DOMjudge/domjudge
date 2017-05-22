@@ -12,9 +12,11 @@ install-domserver:
 	for d in . countries ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/$$d images/$$d/*.png ; \
 	done
-	for d in public team jury api auth ; do \
+	for d in public team jury auth ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/$$d $$d/*.php ; \
 	done
+	$(INSTALL_DATA) -d $(DESTDIR)$(domserver_wwwdir)/api/v3
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/api/v3 api/v3/*.php
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/teams images/teams/*.jpg
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/jury         jury/*.css
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/jury         jury/*.phtml
