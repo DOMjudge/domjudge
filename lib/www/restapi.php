@@ -7,8 +7,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-define('DOMJUDGE_API_VERSION', 3);
-
 define('BAD_REQUEST', '400 Bad Request');
 define('FORBIDDEN', '403 Forbidden');
 define('METHOD_NOT_ALLOWED', '405 Method Not Allowed');

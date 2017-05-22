@@ -6,9 +6,10 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+define('DOMJUDGE_API_VERSION', 3);
+
 require('init.php');
 require_once(LIBWWWDIR . '/common.jury.php');
-
 
 
 function infreeze($cdata, $time)

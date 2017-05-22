@@ -15,8 +15,10 @@
 #<VirtualHost *>
 #ServerName _default_
 #DocumentRoot @domserver_wwwdir@
-#RedirectMatch ^/api$ /api/
-#Alias /api @domserver_wwwdir@/api/index.php
+#RedirectMatch ^/domjudge/api$ /api/v3/
+#RedirectMatch ^/domjudge/api/v3$ /api/v3/
+#Alias /api/v3 @domserver_wwwdir@/api/v3/index.php
+#Alias /api @domserver_wwwdir@/api/v3/index.php
 #</VirtualHost>
 
 # Alternatively, use HTTPS and redirect HTTP to HTTPS:
@@ -31,8 +33,11 @@
 #<VirtualHost *:443>
 #ServerName _default_
 #DocumentRoot @domserver_wwwdir@
-#RedirectMatch ^/api$ /api/
-#Alias /api @domserver_wwwdir@/api/index.php
+#RedirectMatch ^/domjudge/api$ /api/v3/
+#RedirectMatch ^/domjudge/api/$ /api/v3/
+#RedirectMatch ^/domjudge/api/v3$ /api/v3/
+#Alias /api/v3 @domserver_wwwdir@/api/v3/index.php
+#Alias /api @domserver_wwwdir@/api/v3/index.php
 #
 #SSLEngine on
 #SSLCertificateFile    /path/to/your/SSL-certificate.crt
@@ -47,8 +52,11 @@
 # want DOMjudge in the root, but only occupy a subdir, like this:
 # www.example.com/domjudge
 
-RedirectMatch ^/domjudge/api$ /domjudge/api/
-Alias /domjudge/api @domserver_wwwdir@/api/index.php
+RedirectMatch ^/domjudge/api$ /domjudge/api/v3/
+RedirectMatch ^/domjudge/api/$ /domjudge/api/v3/
+RedirectMatch ^/domjudge/api/v3$ /domjudge/api/v3/
+Alias /domjudge/api/v3 @domserver_wwwdir@/api/v3/index.php
+Alias /domjudge/api @domserver_wwwdir@/api/v3/index.php
 Alias /domjudge @domserver_wwwdir@
 
 ### General options ###
