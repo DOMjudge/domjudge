@@ -189,6 +189,7 @@ AX_WITH_COMMENT(5,[More fine tuning of all installation (sub)directories:])
 AX_PATH(domserver_bindir,       [$domserver_root/bin])
 AX_PATH(domserver_etcdir,       [$domserver_root/etc])
 AX_PATH(domserver_wwwdir,       [$domserver_root/www])
+AX_PATH(domserver_webappdir,    [$domserver_root/webapp])
 AX_PATH(domserver_sqldir,       [$domserver_root/sql])
 AX_PATH(domserver_libdir,       [$domserver_root/lib])
 AX_PATH(domserver_libvendordir, [$domserver_root/lib/vendor])
@@ -385,6 +386,7 @@ echo "    - sql..............: $domserver_sqldir"
 echo "    - submit...........: $domserver_submitdir"
 echo "    - tmp..............: $domserver_tmpdir"
 echo "    - www..............: $domserver_wwwdir"
+echo "    - webapp...........: $domserver_webappdir"
 echo ""
 echo " * judgehost...........: $judgehost_root"
 echo "    - bin..............: $judgehost_bindir"

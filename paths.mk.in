@@ -95,6 +95,7 @@ psdir          = @psdir@
 domserver_bindir       = @domserver_bindir@
 domserver_etcdir       = @domserver_etcdir@
 domserver_wwwdir       = @domserver_wwwdir@
+domserver_webappdir    = @domserver_webappdir@
 domserver_sqldir       = @domserver_sqldir@
 domserver_libdir       = @domserver_libdir@
 domserver_libvendordir = @domserver_libvendordir@

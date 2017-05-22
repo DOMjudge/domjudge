@@ -82,15 +82,15 @@ build-scripts:
 # List of SUBDIRS for recursive targets:
 build:             SUBDIRS=        lib                      tests misc-tools
 domserver:         SUBDIRS=etc         sql www                    misc-tools
-install-domserver: SUBDIRS=etc     lib sql www                    misc-tools
+install-domserver: SUBDIRS=etc     lib sql www                    misc-tools webapp
 judgehost:         SUBDIRS=etc                 judge              misc-tools
 install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
 docs:              SUBDIRS=    doc
-install-docs:      SUBDIRS=    doc         www
+install-docs:      SUBDIRS=    doc                                           webapp
 dist:              SUBDIRS=        lib sql                        misc-tools
-clean:             SUBDIRS=etc doc lib sql www judge submit tests misc-tools
-distclean:         SUBDIRS=etc doc lib sql www judge submit tests misc-tools
-maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit tests misc-tools
+clean:             SUBDIRS=etc doc lib sql www judge submit tests misc-tools webapp
+distclean:         SUBDIRS=etc doc lib sql www judge submit tests misc-tools webapp
+maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit tests misc-tools webapp
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
