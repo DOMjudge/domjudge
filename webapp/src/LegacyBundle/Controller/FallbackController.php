@@ -29,6 +29,7 @@ class FallbackController extends Controller
           $_SERVER['PATH_INFO'] = substr($path,3);
       } else {
         $_SERVER['PHP_SELF'] = basename($path);
+        $_SERVER['SCRIPT_NAME'] = basename($path);// This is used in a few scripts to set refererrer
         if (is_dir($thefile)) {
           $thefile = realpath($thefile . "/index.php");
           $_SERVER['PHP_SELF'] = "index.php";
@@ -49,8 +50,6 @@ class FallbackController extends Controller
       require($thefile);
       $headers = headers_list();
       header_remove();
-
-      // dump($_POST);
 
       $response = Response::create(ob_get_clean(), http_response_code());
       foreach ($headers as $header) {
