@@ -22,11 +22,15 @@ class FallbackController extends Controller
     public function fallback(Request $request, $path)
     {
       $thefile = realpath($this->webDir . $request->getPathInfo());
-      // API is handled separately(always by api/index.php)
+      // API is handled separately(always by api/v3/index.php)
       if (substr($path, 0, 7 ) == "api/v3/") {
           $_SERVER['PHP_SELF'] = 'index.php';
           $thefile = realpath($this->webDir . "/api/v3/index.php");
           $_SERVER['PATH_INFO'] = substr($path,7);
+      } elseif (substr($path, 0, 4 ) == "api/") {
+          $_SERVER['PHP_SELF'] = 'index.php';
+          $thefile = realpath($this->webDir . "/api/v3/index.php");
+          $_SERVER['PATH_INFO'] = substr($path,4);
       } else {
         $_SERVER['PHP_SELF'] = basename($path);
         $_SERVER['SCRIPT_NAME'] = basename($path);// This is used in a few scripts to set refererrer
