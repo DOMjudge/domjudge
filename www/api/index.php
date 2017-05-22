@@ -1340,5 +1340,71 @@ $args = array('judgingid' => 'ID of the corresponding judging (if exists).',
 $exArgs = array();
 $api->provideFunction('POST', 'internal_error', $doc, $args, $exArgs, null, true);
 
+function judgement_types($args)
+{
+	return array(
+		array(
+			'id' => '1',
+			'label' => 'AC',
+			'name' => 'correct',
+			'penalty' => FALSE,
+			'solved' => TRUE,
+		),
+		array(
+			'id' => '2',
+			'label' => 'CE',
+			'name' => 'compile error',
+			'penalty' => dbconfig_get('compile_penalty', FALSE),
+			'solved' => FALSE,
+		),
+		array(
+			'id' => '3',
+			'label' => 'WA',
+			'name' => 'wrong answer',
+			'penalty' => TRUE,
+			'solved' => FALSE,
+		),
+		array(
+			'id' => '4',
+			'label' => 'NO',
+			'name' => 'no output',
+			'penalty' => TRUE,
+			'solved' => FALSE,
+		),
+		array(
+			'id' => '5',
+			'label' => 'TLE',
+			'name' => 'time limit exceeded',
+			'penalty' => TRUE,
+			'solved' => FALSE,
+		),
+		array(
+			'id' => '6',
+			'label' => 'RTE',
+			'name' => 'run time error',
+			'penalty' => TRUE,
+			'solved' => FALSE,
+		),
+		array(
+			'id' => '7',
+			'label' => 'OLE',
+			'name' => 'output limit exceeded',
+			'penalty' => TRUE,
+			'solved' => FALSE,
+		),
+		array(
+			'id' => '8',
+			'label' => 'MLE',
+			'name' => 'memory limit exceeded',
+			'penalty' => TRUE,
+			'solved' => FALSE,
+		),
+	);
+}
+$doc = 'Lists all available judgement types.';
+$args = array();
+$exArgs = array();
+$api->provideFunction('GET', 'judgement_types', $doc, $args, $exArgs, null, true);
+
 // Now provide the api, which will handle the request
 $api->provideApi();
