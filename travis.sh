@@ -18,7 +18,25 @@ else
     exit 1
 fi
 
+# Generate a parameters yml file for symfony
+cat > webapp/app/config/parameters.yml <<EOF
+parameters:
+    database_host: 127.0.0.1
+    database_port: ~
+    database_name: domjudge
+    database_user: domjudge
+    database_password: domjudge
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: ~
+    mailer_password: ~
+
+    # A secret key that's used to generate certain security-related tokens
+    secret: ThisTokenIsNotSoSecretChangeIt
+EOF
+
 # install all php dependencies
+export SYMFONY_ENV="prod"
 ./composer install --no-dev
 
 # downgrade java version outside of chroot since this didn't work
@@ -32,6 +50,11 @@ make configure
 ./configure --disable-doc-build --with-baseurl='http://localhost/domjudge/'
 make domserver judgehost
 sudo make install-domserver install-judgehost
+
+cat > /opt/domjudge/domserver/etc/dbpasswords.secret <<EOF
+# Format: 'dummy:<db_host>:<db_name>:<user>:<password>'
+dummy:localhost:domjudge:domjudge:domjudge
+EOF
 
 # setup database and add special user
 cd /opt/domjudge/domserver
