@@ -89,8 +89,8 @@ $updates = array(
 );
 
 // set up twig
-require_once(LIBVENDORDIR . '/autoload.php');
-Twig_Autoloader::register();
+// require_once(LIBVENDORDIR . '/autoload.php');
+// Twig_Autoloader::register();
 $loader = new Twig_Loader_Filesystem(array('.', LIBWWWDIR));
 $twig = new Twig_Environment($loader);
 

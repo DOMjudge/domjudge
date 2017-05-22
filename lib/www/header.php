@@ -37,9 +37,9 @@ if(!isset($menu)) {
 <script type="text/javascript" src="../js/jquery.min.js"></script>
 <?php
 if ( IS_JURY ) {
-	echo "<link rel=\"stylesheet\" href=\"style_jury.css\" type=\"text/css\" />\n";
+	echo "<link rel=\"stylesheet\" href=\"../style_jury.css\" type=\"text/css\" />\n";
 	if (isset($printercss)) {
-		echo "<link rel=\"stylesheet\" href=\"style_printer.css\" type=\"text/css\" media=\"print\" />\n";
+		echo "<link rel=\"stylesheet\" href=\"../style_printer.css\" type=\"text/css\" media=\"print\" />\n";
 	}
 	echo "<script type=\"text/javascript\" src=\"../js/jury.js\"></script>\n";
 	echo "<script type=\"text/javascript\" src=\"../js/js.cookie.min.js\"></script>\n";

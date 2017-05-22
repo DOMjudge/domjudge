@@ -23,7 +23,7 @@ class FallbackController extends Controller
     {
       $thefile = realpath($this->webDir . $request->getPathInfo());
       $_SERVER['PHP_SELF'] = basename($path);
-      $_SERVER['REMOTE_ADDR'] = '0.0.0.0';
+      // $_SERVER['REMOTE_ADDR'] = '0.0.0.0';
       if (is_dir($thefile)) {
         $thefile = realpath($thefile . "/index.php");
         $_SERVER['PHP_SELF'] = "index.php";

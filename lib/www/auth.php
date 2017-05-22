@@ -48,7 +48,6 @@ function checkrole($rolename, $check_superset = TRUE) {
 function logged_in()
 {
 	global $DB, $ip, $username, $teamid, $teamdata, $userdata;
-
 	if ( !empty($username) && !empty($userdata) && !empty($teamdata) ) return TRUE;
 
 	// Retrieve userdata for given AUTH_METHOD, assume not logged in
@@ -95,7 +94,6 @@ function logged_in()
 		// Pull the list of roles that a user has
 		$userdata['roles'] = get_user_roles($userdata['userid']);
 	}
-
 	if ( !empty($teamdata) ) {
 		$teamid = $teamdata['teamid'];
 		// Is this the first visit? Record that in the team table.
@@ -285,7 +283,7 @@ function do_login()
 			if ( $cnt != 1 ) error("cannot set IP for '$username'");
 		}
 		if ( AUTH_METHOD=='PHP_SESSIONS' ) {
-			session_start();
+      if (session_id() == "") session_start();
 			$_SESSION['username'] = $username;
 			auditlog('user', $userdata['userid'], 'logged in', $ip);
 		}
@@ -314,7 +312,7 @@ function do_login()
 
 		$username = $userdata['username'];
 
-		session_start();
+    if (session_id() == "") session_start();
 		$_SESSION['username'] = $username;
 		auditlog('user', $userdata['userid'], 'logged in', $ip);
 		break;
@@ -453,7 +451,7 @@ function do_login_oidc() {
 						username = %s AND enabled = 1', $username);
 
 	// Save the username in the session so they are logged in
-	session_start();
+  if (session_id() == "") session_start();
 	$_SESSION['username'] = $username;
 	auditlog('user', $userdata['userid'], 'logged in', $ip);
 

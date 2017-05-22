@@ -8,7 +8,7 @@ require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/auth.php');
 
 // Where the user was trying to go, we'll redirect them back
-session_start();
+if (session_id() == "") session_start();
 $next = $_SESSION['redirect_after_login'];
 
 
