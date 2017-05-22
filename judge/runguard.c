@@ -316,9 +316,9 @@ real user ID.\n");
 	exit(0);
 }
 
-void output_exit_time(int exitcode)
+void output_exit_time(int exitcode, double cpudiff)
 {
-	double walldiff, cpudiff, userdiff, sysdiff;
+	double walldiff, userdiff, sysdiff;
 	int timelimit_reached = 0;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
@@ -334,7 +334,6 @@ void output_exit_time(int exitcode)
 
 	userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
 	sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
-	cpudiff = userdiff + sysdiff;
 
 	write_meta("wall-time","%.3f", walldiff);
 	write_meta("user-time","%.3f", userdiff);
@@ -375,10 +374,10 @@ void output_exit_time(int exitcode)
 	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
 }
 
-void output_cgroup_stats()
+void output_cgroup_stats(double *cputime)
 {
 	int ret;
-	int64_t max_usage;
+	int64_t max_usage, cpu_time_int;
 	struct cgroup *cg;
 	struct cgroup_controller *cg_controller;
 
@@ -397,6 +396,13 @@ void output_cgroup_stats()
 
 	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
 	write_meta("memory-bytes","%" PRId64, max_usage);
+
+	cg_controller = cgroup_get_controller(cg, "cpuacct");
+	ret = cgroup_get_value_int64(cg_controller, "cpuacct.usage", &cpu_time_int);
+	if ( ret!=0 ) {
+		error(0,"get cgroup value: %s(%d)", cgroup_strerror(ret), ret);
+	}
+	*cputime = (double) cpu_time_int / 1.e9;
 
 	cgroup_free(&cg);
 }
@@ -431,6 +437,9 @@ void cgroup_create()
 	} else {
 		verbose("cpuset undefined");
 	}
+
+	cg_controller = cgroup_add_controller(cg, "cpu");
+	cg_controller = cgroup_add_controller(cg, "cpuacct");
 
 	/* Perform the actual creation of the cgroup */
 	ret = cgroup_create_cgroup(cg, 1);
@@ -488,12 +497,13 @@ void cgroup_delete()
 	if (!cg) {
 		error(0,"cgroup_new_cgroup");
 	}
-	ret = cgroup_get_cgroup(cg);
-	if ( ret!=0 ) {
-		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
+	cgroup_add_controller(cg, "cpu");
+	cgroup_add_controller(cg, "memory");
+	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+		cgroup_add_controller(cg, "cpuset");
 	}
 	/* Clean up our cgroup */
-	ret = cgroup_delete_cgroup(cg, 1);
+	ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
 	if ( ret!=0 ) {
 		error(0,"deleting cgroup: %s(%d)", cgroup_strerror(ret), ret);
 	}
@@ -852,7 +862,7 @@ int main(int argc, char **argv)
 			nproc = (rlim_t) read_optarg_int("process limit",1,LONG_MAX);
 			break;
 		case 'P': /* cpuset option */
-				cpuset = optarg;
+			cpuset = optarg;
 			break;
 		case 'c': /* no-core option */
 			no_coredump = 1;
@@ -1207,14 +1217,15 @@ int main(int argc, char **argv)
 			exitcode = WEXITSTATUS(status);
 		}
 
-		output_cgroup_stats();
+		double cputime;
+		output_cgroup_stats(&cputime);
 		cgroup_kill();
 		cgroup_delete();
 
 		/* Drop root before writing to output file(s). */
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
 
-		output_exit_time(exitcode);
+		output_exit_time(exitcode, cputime);
 
 		/* Check if the output stream was truncated. */
 		if ( limit_streamsize ) {
