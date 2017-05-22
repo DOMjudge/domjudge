@@ -22,19 +22,24 @@ class FallbackController extends Controller
     public function fallback(Request $request, $path)
     {
       $thefile = realpath($this->webDir . $request->getPathInfo());
-      $_SERVER['PHP_SELF'] = basename($path);
-      // $_SERVER['REMOTE_ADDR'] = '0.0.0.0';
-      if (is_dir($thefile)) {
-        $thefile = realpath($thefile . "/index.php");
-        $_SERVER['PHP_SELF'] = "index.php";
+      // API is handled separately(always by api/index.php)
+      if (substr($path, 0, 3 ) == "api") {
+          $_SERVER['PHP_SELF'] = 'index.php';
+          $thefile = realpath($this->webDir . "/api/index.php");
+          $_SERVER['PATH_INFO'] = substr($path,3);
+      } else {
+        $_SERVER['PHP_SELF'] = basename($path);
+        if (is_dir($thefile)) {
+          $thefile = realpath($thefile . "/index.php");
+          $_SERVER['PHP_SELF'] = "index.php";
 
-
-        // Make sure it ends with a trailing slash, otherwise redirect
-        $pathInfo = $request->getPathInfo();
-        $requestUri = $request->getRequestUri();
-        if (rtrim($pathInfo, ' /') == $pathInfo ) {
-          $url = str_replace($pathInfo, $pathInfo . '/', $requestUri);
-          return $this->redirect($url, 301);
+          // Make sure it ends with a trailing slash, otherwise redirect
+          $pathInfo = $request->getPathInfo();
+          $requestUri = $request->getRequestUri();
+          if (rtrim($pathInfo, ' /') == $pathInfo ) {
+            $url = str_replace($pathInfo, $pathInfo . '/', $requestUri);
+            return $this->redirect($url, 301);
+          }
         }
       }
       if (file_exists($thefile)) {
