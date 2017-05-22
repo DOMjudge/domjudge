@@ -509,7 +509,7 @@ CREATE TABLE `testcase` (
   `output` longblob COMMENT 'Output data',
   `probid` int(4) unsigned NOT NULL COMMENT 'Corresponding problem ID',
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
-  `description` longblob DEFAULT NULL COMMENT 'Description of this testcase',
+  `description` longblob COMMENT 'Description of this testcase',
   `image` longblob COMMENT 'A graphical representation of this testcase',
   `image_thumb` longblob COMMENT 'Aumatically created thumbnail of the image',
   `image_type` varchar(4) DEFAULT NULL COMMENT 'File type of the image and thumbnail',
