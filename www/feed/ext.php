@@ -138,7 +138,7 @@ XMLaddnode($info, 'length', $lengthString);
 XMLaddnode($info, 'scoreboard-freeze-length', $freezelengthString);
 XMLaddnode($info, 'penalty', dbconfig_get('penalty_time', 20));
 XMLaddnode($info, 'started', $fdata['cstarted'] ? 'True' : 'False');
-XMLaddnode($info, 'starttime', formattime($cdata['starttime']));
+XMLaddnode($info, 'starttime', $cdata['starttime_enabled'] ? formattime($cdata['starttime']) : 'undefined');
 XMLaddnode($info, 'title', $cdata['name']);
 XMLaddnode($info, 'short-title', $cdata['shortname']);
 
