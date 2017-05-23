@@ -1,19 +1,20 @@
 #!/bin/sh
 
 # Run some Syntax checking tests on PHP and Shell scripts
+PHP=$(which php)
 
-if [ -x /usr/bin/php ]; then
-	find .. -name '*.php' | \
+if [ -x $PHP ]; then
+	find .. -path ../lib/vendor -prune -o -path ../webapp/var -prune -o -name '*.php' | \
 	while read -r i ; do
-		php -l "$i" | grep -v "^No syntax errors detected in "
+		$PHP -l "$i" | grep -v "^No syntax errors detected in "
 	done
 
 	grep -rsl "^#\!.*php" ..|egrep -v '/\.(svn|git)/'|grep -v '\.php' | \
 	while read -r i ; do
-		php -l "$i" | grep -v "^No syntax errors detected in "
+		$PHP -l "$i" | grep -v "^No syntax errors detected in "
 	done
 else
-	echo "PHP not found in /usr/bin/php"
+	echo "PHP not found"
 fi
 
 if [ -x /usr/bin/checkbashisms ]; then
