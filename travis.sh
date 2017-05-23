@@ -22,7 +22,10 @@ fi
 ./composer install --no-dev
 
 # downgrade java version outside of chroot since this didn't work
-sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle-java7-installer oracle-java8-installer
+sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle-java7-installer oracle-java8-installer oracle-java9-installer
+
+# delete apport if exists
+sudo apt-get remove -y apport
 
 # configure, make and install (but skip documentation)
 make configure
