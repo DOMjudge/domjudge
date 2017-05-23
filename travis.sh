@@ -40,7 +40,8 @@ export SYMFONY_ENV="prod"
 ./composer install --no-dev
 
 # downgrade java version outside of chroot since this didn't work
-sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle-java7-installer oracle-java8-installer
+sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle-java7-installer oracle-java8-installer oracle-java9-installer
+
 
 # delete apport if exists
 sudo apt-get remove -y apport
@@ -64,9 +65,14 @@ echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | sudo mysql domjudg
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 3);" | sudo mysql domjudge
 echo "machine localhost login dummy password dummy" > ~/.netrc
 
-# configure and restart apache
-sudo cp /opt/domjudge/domserver/etc/apache.conf /etc/apache2/sites-enabled/
-sudo service apache2 restart
+# configure and restart nginx
+sudo rm -f /etc/nginx/sites-enabled/*
+sudo cp /opt/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
+sudo service nginx restart
+
+# configure and restart php-fpm
+sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "$HOME/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/"
+sudo "$HOME/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm"
 
 # add users/group for judgedaemons (FIXME: make them configurable)
 sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-0
