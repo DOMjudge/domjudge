@@ -38,7 +38,7 @@ restapi.secret:
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
-		apache.conf nginx-conf domserver-static.php
+		apache.conf nginx-conf domserver-static.php domjudge-fpm.conf
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_etcdir) \
 		gendbpasswords genrestapicredentials
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
