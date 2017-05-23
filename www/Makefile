@@ -15,7 +15,7 @@ install-domserver:
 	for d in public team jury auth ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/$$d $$d/*.php ; \
 	done
-	$(INSTALL_DATA) -d $(DESTDIR)$(domserver_wwwdir)/api/v3
+	$(INSTALL_DATA) -d $(DESTDIR)$(domserver_wwwdir)/api/v3 -m 0755
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/api/v3 api/v3/*.php
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/teams images/teams/*.jpg
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/jury         jury/*.css
