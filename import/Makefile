@@ -3,7 +3,7 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-SUBST_FILES = import.php import-RESTfeed import-XMLfeed
+SUBST_FILES = import.php import-RESTfeed import-XMLfeed run-import-XMLfeed.sh
 
 config: $(SUBST_FILES)
 
@@ -17,7 +17,7 @@ $(SUBST_FILES): %: %.in ../paths.mk
 
 install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libsubmitdir) \
-		$(SUBST_FILES)
+		$(SUBST_FILES) getFeed.pl
 
 distclean-l:
 	-rm -f $(SUBST_FILES)

@@ -1,3 +1,4 @@
 /import.php
 /import-RESTfeed
 /import-XMLfeed
+/run-import-XMLfeed.sh
