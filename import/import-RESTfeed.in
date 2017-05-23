@@ -38,9 +38,9 @@ $cids = array_keys($cdatas);
 
 $config = spyc_load_file(ETCDIR . '/import-forwardfeed.yaml');
 
-$resturl = $config['restapi']['url'];
-$restuser = @$config['restapi']['user'];
-$restpass = @$config['restapi']['pass'];
+$resturl = $config['url'];
+$restuser = @$config['user'];
+$restpass = @$config['pass'];
 
 function request($url, $verb = 'GET', $data = '') {
 	global $resturl, $restuser, $restpass;
