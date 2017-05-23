@@ -22,10 +22,11 @@ class FallbackController extends Controller
     public function fallback(Request $request, $path)
     {
       $thefile = realpath($this->webDir . $request->getPathInfo());
-      // API is handled separately (currently always by api/v3/index.php).
+      // API is handled separately, current default is v4.
       $apiPaths = array(
 	      'api/v3/' => '/api/v3/index.php',
-	      'api/' => '/api/v3/index.php',
+	      'api/v4/' => '/api/v4/index.php',
+	      'api/' => '/api/v4/index.php',
       );
       $apiMatch = FALSE;
       foreach ( $apiPaths as $apiPath => $apiRedirect ) {
