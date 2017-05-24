@@ -1343,64 +1343,31 @@ $api->provideFunction('POST', 'internal_error', $doc, $args, $exArgs, null, true
 
 function judgement_types($args)
 {
-	return array(
-		array(
-			'id' => '1',
-			'label' => 'AC',
-			'name' => 'correct',
-			'penalty' => FALSE,
-			'solved' => TRUE,
-		),
-		array(
-			'id' => '2',
-			'label' => 'CE',
-			'name' => 'compile error',
-			'penalty' => dbconfig_get('compile_penalty', FALSE),
-			'solved' => FALSE,
-		),
-		array(
-			'id' => '3',
-			'label' => 'WA',
-			'name' => 'wrong answer',
-			'penalty' => TRUE,
-			'solved' => FALSE,
-		),
-		array(
-			'id' => '4',
-			'label' => 'NO',
-			'name' => 'no output',
-			'penalty' => TRUE,
-			'solved' => FALSE,
-		),
-		array(
-			'id' => '5',
-			'label' => 'TLE',
-			'name' => 'time limit exceeded',
-			'penalty' => TRUE,
-			'solved' => FALSE,
-		),
-		array(
-			'id' => '6',
-			'label' => 'RTE',
-			'name' => 'run time error',
-			'penalty' => TRUE,
-			'solved' => FALSE,
-		),
-		array(
-			'id' => '7',
-			'label' => 'OLE',
-			'name' => 'output limit exceeded',
-			'penalty' => TRUE,
-			'solved' => FALSE,
-		),
-		array(
-			'id' => '8',
-			'label' => 'MLE',
-			'name' => 'memory limit exceeded',
-			'penalty' => TRUE,
-			'solved' => FALSE,
-		),
-	);
+	global $VERDICTS;
+
+	$res = array();
+	$i = 0;
+	foreach ( $VERDICTS as $name => $label ) {
+		$i++;
+		$penalty = TRUE;
+		$solved = FALSE;
+		if ( $name == 'correct' ) {
+			$penalty = FALSE;
+			$solved = TRUE;
+		}
+		if ( $name == 'compiler-error' ) {
+			$penalty = dbconfig_get('compile_penalty', FALSE);
+		}
+		$res[] = array(
+			'id' => (string)$i,
+			'label' => $label,
+			'name' => str_replace('-',' ',$name),
+			'penalty' => $penalty,
+			'solved' => $solved,
+		);
+	}
+
+	return $res;
 }
 $doc = 'Lists all available judgement types.';
 $args = array();
