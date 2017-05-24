@@ -10,6 +10,8 @@
 
 require_once('@domserver_etcdir@/domserver-static.php');
 
+global $VERDICTS;
+
 require_once(ETCDIR . '/domserver-config.php');
 
 // Things that we use as globals
