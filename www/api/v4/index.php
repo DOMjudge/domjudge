@@ -11,6 +11,29 @@ define('DOMJUDGE_API_VERSION', 3);
 require('init.php');
 require_once(LIBWWWDIR . '/common.jury.php');
 
+// prints the absolute time as yyyy-mm-ddThh:mm:ss(.uuu)?[+-]zz(:mm)?
+// (with millis if $floored is false)
+function absTime($seconds, $floored = FALSE)
+{
+	$millis = sprintf(".%03d", 1000*($seconds - floor($seconds)));
+	return date("Y-m-d\TH:i:s", $seconds)
+		. ( $floored ? '' : $millis )
+		. date("P", $seconds);
+}
+
+// prints a time diff as relative time as (-)?(h)*h:mm:ss(.uuu)?
+// (with millis if $floored is false)
+function relTime($seconds, $floored = FALSE)
+{
+	$res = ( $seconds < 0 ) ? '-' : '';
+	$seconds = abs($seconds);
+	$hours = (int)($seconds / 3600);
+	$minutes = (int)(($seconds - $hours*3600)/60);
+	$millis = sprintf(".%03d", 1000*($seconds - floor($seconds)));
+	$seconds = $seconds - $hours*3600 - $minutes*60;
+	return sprintf("%d:%02d:%02d", $hours, $minutes, $seconds)
+		. ( $floored ? '' : $millis );
+}
 
 function infreeze($cdata, $time)
 {
