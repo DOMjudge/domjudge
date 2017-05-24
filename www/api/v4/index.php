@@ -101,6 +101,23 @@ function info()
 $doc = "Get general API information.";
 $api->provideFunction('GET', 'info', $doc);
 
+// helper function to convert the data in the cdata object to the specified values
+function cdataHelper($cdata)
+{
+	// TODO: clarify formal_name, its use and origin
+	return array(
+		'id'                         => safe_int($cdata['cid']),
+		'shortname'                  => $cdata['shortname'],
+		'name'                       => $cdata['name'],
+		'formal_name'                => $cdata['name'],
+		'start_time'                 => absTime($cdata['starttime']),
+		'end_time'                   => absTime($cdata['endtime']),
+		'duration'                   => relTime($cdata['endtime'] - $cdata['starttime']),
+		'scoreboard_freeze_duration' => relTime($cdata['endtime'] - $cdata['freezetime']),
+		'unfreeze'                   => absTime($cdata['unfreezetime']),
+		'penalty'                    => safe_int(dbconfig_get('penalty_time', 20)),
+	);
+}
 
 /**
  * Contest information
@@ -121,19 +138,7 @@ function contest()
 
 	$cid = $cids[0];
 	$cdata = $cdatas[$cid];
-	// TODO: clarify formal_name, its use and origin
-	return array(
-		'id'                         => safe_int($cid),
-		'shortname'                  => $cdata['shortname'],
-		'name'                       => $cdata['name'],
-		'formal_name'                => $cdata['name'],
-		'start_time'                 => absTime($cdata['starttime']),
-		'end_time'                   => absTime($cdata['endtime']),
-		'duration'                   => relTime($cdata['endtime'] - $cdata['starttime']),
-		'scoreboard_freeze_duration' => relTime($cdata['endtime'] - $cdata['freezetime']),
-		'unfreeze'                   => absTime($cdata['unfreezetime']),
-		'penalty'                    => safe_int(dbconfig_get('penalty_time', 20)),
-		);
+	return cdataHelper($cdata);
 }
 $doc = "Get information about the current contest: id, shortname, name, start_time, end_time, duration, scoreboard_freeze_duration, unfreeze, and penalty. ";
 $doc .= "If more than one contest is active, return information about the first one.";
@@ -153,21 +158,9 @@ function contests()
 		$cdatas = getCurContests(TRUE, $userdata['teamid']);
 	}
 
-	return array_map(function($cdata) {
-		return array(
-			'id'        => safe_int($cdata['cid']),
-			'shortname' => $cdata['shortname'],
-			'name'      => $cdata['name'],
-			'start'     => safe_float($cdata['starttime'],3),
-			'freeze'    => safe_float($cdata['freezetime'],3),
-			'end'       => safe_float($cdata['endtime'],3),
-			'length'    => safe_float($cdata['endtime'] - $cdata['starttime'],3),
-			'unfreeze'  => safe_float($cdata['unfreezetime'],3),
-			'penalty'   => safe_int(60 * dbconfig_get('penalty_time', 20)),
-		);
-	}, $cdatas);
+	return array_map("cdataHelper", $cdatas);
 }
-$doc = "Get information about all the current contests: id, shortname, name, start, freeze, unfreeze, length, penalty and end.";
+$doc = "Get information about all current contests: id, shortname, name, start_time, end_time, duration, scoreboard_freeze_duration, unfreeze, and penalty. ";
 $api->provideFunction('GET', 'contests', $doc);
 
 /**
