@@ -252,8 +252,9 @@ $api->provideFunction('GET', 'problems', $doc, $args, $exArgs);
  */
 function judgings($args)
 {
-	global $DB, $userdata;
+	global $DB, $userdata, $cdatas;
 
+	// FIXME: why do we use the event table for this?
 	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE description = "problem judged"';
 
 	// Note that we rely on the events table not listing judgings of
@@ -292,7 +293,7 @@ function judgings($args)
 	$q = $DB->q($query, $teamid, $cid, $fromId, $judgingid, $submitid, $limit);
 	$res = array();
 	while ( $row = $q->next() ) {
-		$data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result FROM judging j
+		$data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result, j.cid FROM judging j
 		                LEFT JOIN submission s USING (submitid)
 		                WHERE j.judgingid = %i', $row['judgingid']);
 		if ($data == NULL) continue;
@@ -301,10 +302,14 @@ function judgings($args)
 		if ( array_key_exists('result', $args) &&
 		     $args['result'] != $data['result'] ) continue;
 
-		$res[] = array('id'         => safe_int($row['judgingid']),
-		               'submission' => safe_int($row['submitid']),
-		               'outcome'    => $data['result'],
-		               'time'       => safe_float($row['eventtime'],3));
+		$res[] = array('id'                => safe_int($row['judgingid']),
+		               'submission_id'     => safe_int($row['submitid']),
+			       // FIXME:
+			       // what do we want to see here, the id, the label or a human readable description?
+		               'judgement_type'    => $data['result'],
+			       'time'              => absTime($row['eventtime']),
+			       'contest_time'      => relTime($row['eventtime'] - $cdatas[$data['cid']]['starttime']),
+		       );
 	}
 	return $res;
 }
@@ -318,6 +323,13 @@ $args = array('cid' => 'Contest ID. If not provided, get judgings of all active 
 $exArgs = array(array('cid' => 2), array('result' => 'correct'), array('fromid' => 800, 'limit' => 10));
 $roles = array('jury','team');
 $api->provideFunction('GET', 'judgings', $doc, $args, $exArgs, $roles);
+
+// FIXME: rename above function (and underlying sql table?)?
+function submission_judgements($args)
+{
+	return judgings($args);
+}
+$api->provideFunction('GET', 'submission_judgements', $doc, $args, $exArgs, $roles);
 
 function judgings_POST($args)
 {
