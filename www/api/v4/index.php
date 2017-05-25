@@ -706,7 +706,7 @@ function submissions($args)
 {
 	global $DB, $cdatas, $api;
 
-	$query = 'SELECT submitid, teamid, probid, langid, submittime
+	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid
 	          FROM submission WHERE valid=1';
 
 	$hasCid = array_key_exists('cid', $args);
@@ -748,11 +748,14 @@ function submissions($args)
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
-			'id'        => safe_int($row['submitid']),
-			'team'      => safe_int($row['teamid']),
-			'problem'   => safe_int($row['probid']),
-			'language'  => $row['langid'],
-			'time'      => safe_float($row['submittime'],3),
+			'id'           => safe_int($row['submitid']),
+			'label'        => safe_int($row['submitid']),
+			'team_id'      => safe_int($row['teamid']),
+			'problem_id'   => safe_int($row['probid']),
+			'language_id'  => $row['langid'],
+			'time'         => absTime($row['submittime']),
+			'contest_time' => relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
+			'contest_id'   => safe_int($row['cid']),
 			);
 	}
 	return $res;
