@@ -713,13 +713,17 @@ function submissions($args)
 	$query .= ($hasCid ? ' AND cid = %i' : ' AND TRUE %_');
 	$cid = ($hasCid ? $args['cid'] : 0);
 
-	$hasLanguage = array_key_exists('language', $args);
+	$hasLanguage = array_key_exists('language_id', $args);
 	$query .= ($hasLanguage ? ' AND langid = %s' : ' AND TRUE %_');
-	$language = ($hasLanguage ? $args['language'] : 0);
+	$languageId = ($hasLanguage ? $args['language_id'] : 0);
 
-	$hasFromid = array_key_exists('fromid', $args);
-	$query .= ($hasFromid ? ' AND submitid >= %i' : ' AND TRUE %_');
-	$fromId = ($hasFromid ? $args['fromid'] : 0);
+	$hasFirstId = array_key_exists('firstid', $args);
+	$query .= ($hasFirstId ? ' AND submitid >= %i' : ' AND TRUE %_');
+	$firstId = ($hasFirstId ? $args['firstid'] : 0);
+
+	$hasLastId = array_key_exists('lastid', $args);
+	$query .= ($hasLastId ? ' AND submitid <= %i' : ' AND TRUE %_');
+	$lastId = ($hasLastId ? $args['lastid'] : 0);
 
 	$hasSubmitid = array_key_exists('id', $args);
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' AND TRUE %_');
@@ -744,7 +748,7 @@ function submissions($args)
 	$limit = ($hasLimit ? $args['limit'] : -1);
 	// TODO: validate limit
 
-	$q = $DB->q($query, $cid, $language, $fromId, $submitid, $freezetime, $limit);
+	$q = $DB->q($query, $cid, $languageId, $firstId, $lastId, $submitid, $freezetime, $limit);
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
@@ -761,12 +765,13 @@ function submissions($args)
 	return $res;
 }
 $args = array('cid' => 'Contest ID. If not provided, get submissions of all active contests',
-              'language' => 'Search only for submissions in a certain language.',
+              'language_id' => 'Search only for submissions in a certain language.',
               'id' => 'Search only a certain ID',
-              'fromid' => 'Search from a certain ID',
+              'firstid' => 'Search from a certain ID',
+              'lastid' => 'Search up to a certain ID',
               'limit' => 'Get only the first N submissions');
 $doc = 'Get a list of all valid submissions.';
-$exArgs = array(array('fromid' => 100, 'limit' => 10), array('language' => 'cpp'));
+$exArgs = array(array('firstId' => 100, 'limit' => 10), array('language_id' => 'cpp'));
 $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
 
 /**
