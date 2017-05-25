@@ -1041,7 +1041,7 @@ function teams($args)
 	global $DB;
 
 	// Construct query
-	$query = 'TABLE SELECT teamid AS id, t.name, t.members, a.country AS nationality,
+	$query = 'TABLE SELECT teamid AS id, t.name, t.members, t.externalid, a.country AS nationality,
 	          t.categoryid AS category, c.name AS `group`, a.affilid, a.name AS affiliation
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
@@ -1070,10 +1070,11 @@ function teams($args)
 			'name'        => $tdata['name'],
 			'members'     => $tdata['members'],
 			'nationality' => $tdata['nationality'],
-			'category'    => safe_int($tdata['category']),
+			'group_id'    => safe_int($tdata['category']),
 			'group'       => $tdata['group'],
 			'affilid'     => safe_int($tdata['affilid']),
 			'affiliation' => $tdata['affiliation'],
+			'externalid'  => $tdata['externalid'],
 		);
 	}, $tdatas);
 }
