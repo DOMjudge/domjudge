@@ -271,17 +271,22 @@ function judgings($args)
 	$query .= ($hasCid ? ' AND cid = %i' : ' %_');
 	$cid = ($hasCid ? $args['cid'] : 0);
 
-	$hasFromid = array_key_exists('fromid', $args);
-	$query .= ($hasFromid ? ' AND judgingid >= %i' : ' %_');
-	$fromId = ($hasFromid ? $args['fromid'] : 0);
+	$hasFirstId = array_key_exists('first_id', $args);
+	$query .= ($hasFirstId ? ' AND judgingid >= %i' : ' AND TRUE %_');
+	$firstId = ($hasFirstId ? $args['first_id'] : 0);
 
-	$hasJudgingid = array_key_exists('judgingid', $args);
+	$hasLastId = array_key_exists('last_id', $args);
+	$query .= ($hasLastId ? ' AND judgingid <= %i' : ' AND TRUE %_');
+	$lastId = ($hasLastId ? $args['last_id'] : 0);
+
+
+	$hasJudgingid = array_key_exists('judging_id', $args);
 	$query .= ($hasJudgingid ? ' AND judgingid = %i' : ' %_');
-	$judgingid = ($hasJudgingid ? $args['judgingid'] : 0);
+	$judgingid = ($hasJudgingid ? $args['judging_id'] : 0);
 
-	$hasSubmitid = array_key_exists('submitid', $args);
+	$hasSubmitid = array_key_exists('submission_id', $args);
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' %_');
-	$submitid = ($hasSubmitid ? $args['submitid'] : 0);
+	$submitid = ($hasSubmitid ? $args['submission_id'] : 0);
 
 	$query .= ' ORDER BY eventid';
 
@@ -290,7 +295,7 @@ function judgings($args)
 	$limit = ($hasLimit ? $args['limit'] : -1);
 	// TODO: validate limit
 
-	$q = $DB->q($query, $teamid, $cid, $fromId, $judgingid, $submitid, $limit);
+	$q = $DB->q($query, $teamid, $cid, $firstId, $lastId, $judgingid, $submitid, $limit);
 	$res = array();
 	while ( $row = $q->next() ) {
 		$data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result, j.cid FROM judging j
@@ -316,11 +321,12 @@ function judgings($args)
 $doc = 'Get all or selected judgings. This includes those post-freeze, so currently limited to jury, or as a team but then restricted your own submissions.';
 $args = array('cid' => 'Contest ID. If not provided, get judgings of all active contests',
               'result' => 'Search only for judgings with a certain result.',
-              'fromid' => 'Search from a certain ID',
-              'judgingid' => 'Search only for a certain ID',
-              'submitid' => 'Search only for judgings associated to this submission ID',
+              'first_id' => 'Search from a certain ID',
+              'last_id' => 'Search up to a certain ID',
+              'judging_id' => 'Search only for a certain ID',
+              'submiission_id' => 'Search only for judgings associated to this submission ID',
               'limit' => 'Get only the first N judgings');
-$exArgs = array(array('cid' => 2), array('result' => 'correct'), array('fromid' => 800, 'limit' => 10));
+$exArgs = array(array('cid' => 2), array('result' => 'correct'), array('first_id' => 800, 'limit' => 10));
 $roles = array('jury','team');
 $api->provideFunction('GET', 'judgings', $doc, $args, $exArgs, $roles);
 
@@ -729,13 +735,13 @@ function submissions($args)
 	$query .= ($hasLanguage ? ' AND langid = %s' : ' AND TRUE %_');
 	$languageId = ($hasLanguage ? $args['language_id'] : 0);
 
-	$hasFirstId = array_key_exists('firstid', $args);
+	$hasFirstId = array_key_exists('first_id', $args);
 	$query .= ($hasFirstId ? ' AND submitid >= %i' : ' AND TRUE %_');
-	$firstId = ($hasFirstId ? $args['firstid'] : 0);
+	$firstId = ($hasFirstId ? $args['first_id'] : 0);
 
-	$hasLastId = array_key_exists('lastid', $args);
+	$hasLastId = array_key_exists('last_id', $args);
 	$query .= ($hasLastId ? ' AND submitid <= %i' : ' AND TRUE %_');
-	$lastId = ($hasLastId ? $args['lastid'] : 0);
+	$lastId = ($hasLastId ? $args['last_id'] : 0);
 
 	$hasSubmitid = array_key_exists('id', $args);
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' AND TRUE %_');
@@ -779,8 +785,8 @@ function submissions($args)
 $args = array('cid' => 'Contest ID. If not provided, get submissions of all active contests',
               'language_id' => 'Search only for submissions in a certain language.',
               'id' => 'Search only a certain ID',
-              'firstid' => 'Search from a certain ID',
-              'lastid' => 'Search up to a certain ID',
+              'first_id' => 'Search from a certain ID',
+              'last_id' => 'Search up to a certain ID',
               'limit' => 'Get only the first N submissions');
 $doc = 'Get a list of all valid submissions.';
 $exArgs = array(array('firstId' => 100, 'limit' => 10), array('language_id' => 'cpp'));
