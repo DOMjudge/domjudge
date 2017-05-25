@@ -210,11 +210,12 @@ function problems($args)
 		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
 		                  FROM problem
 		                  INNER JOIN contestproblem USING (probid)
-		                  WHERE cid = %i AND allow_submit = 1 ORDER BY probid', $cid);
+		                  WHERE cid = %i AND allow_submit = 1 ORDER BY shortname', $cid);
 	} else {
 		$pdatas = array();
 	}
 
+	$ordinal = 0;
 	foreach ( $pdatas as $key => $pdata ) {
 		if ( !isset($pdata['color']) ) {
 			$pdatas[$key]['rgb'] = null;
@@ -224,6 +225,9 @@ function problems($args)
 		} else {
 			$pdatas[$key]['rgb'] = color_to_hex($pdata['color']);
 		}
+		// We sort above table by shortname, i.e in the same way we
+		// sort the problems in the scoreboard.
+		$pdatas[$key]['ordinal'] = $ordinal++;
 	}
 
 	return array_map(function($pdata) {
@@ -234,6 +238,7 @@ function problems($args)
 			'name'       => $pdata['name'],
 			'rgb'        => $pdata['rgb'],
 			'color'      => $pdata['color'],
+			'ordinal'    => safe_int($pdata['ordinal']),
 		);
 	}, $pdatas);
 }
