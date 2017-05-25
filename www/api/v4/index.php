@@ -1108,6 +1108,16 @@ $doc = 'Get a list of all categories/groups.';
 $api->provideFunction('GET', 'categories', $doc, array(), array(), null, true);
 
 /**
+ * Groups information, this is currently only calling categories.
+ */
+function groups($args)
+{
+	return categories($args);
+}
+$doc = 'Get a list of all groups.';
+$api->provideFunction('GET', 'groups', $doc, array(), array(), null, true);
+
+/**
  * Language information
  */
 function languages()
