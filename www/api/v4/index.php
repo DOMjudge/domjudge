@@ -845,10 +845,10 @@ function submission_files($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('id'));
+	checkargs($args, array('submission_id'));
 
-	$sources = $DB->q('SELECT filename, sourcecode FROM submission_file
-	                   WHERE submitid = %i ORDER BY rank', $args['id']);
+	$sources = $DB->q('SELECT submitfileid, submitid, filename, sourcecode FROM submission_file
+	                   WHERE submitid = %i ORDER BY rank', $args['submission_id']);
 
 	if ( $sources->count()==0 ) {
 		$api->createError("Cannot find source files for submission '$args[id]'.");
@@ -857,16 +857,18 @@ function submission_files($args)
 	$ret = array();
 	while($src = $sources->next()) {
 		$ret[] = array(
-		         'filename' => $src['filename'],
-		         'content'  => base64_encode($src['sourcecode']),
-		         );
+			'id'            => $src['submitfileid'],
+			'submission_id' => $src['submitid'],
+			'filename'      => $src['filename'],
+			'source'        => base64_encode($src['sourcecode']),
+		);
 	}
 
 	return $ret;
 }
-$args = array('id' => 'Get only the corresponding submission files.');
+$args = array('submission_id' => 'Get only the corresponding submission files.');
 $doc = 'Get a list of all submission files. The file contents will be base64 encoded.';
-$exArgs = array(array('id' => 3));
+$exArgs = array(array('submission_id' => 3));
 $roles = array('jury','judgehost');
 $api->provideFunction('GET', 'submission_files', $doc, $args, $exArgs, $roles);
 
