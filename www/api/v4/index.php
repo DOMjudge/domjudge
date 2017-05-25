@@ -190,10 +190,17 @@ $api->provideFunction('GET', 'user', $doc);
  */
 function problems($args)
 {
-	global $DB, $cdatas, $userdata;
+	global $DB, $cdatas, $userdata, $cids;
 
-	checkargs($args, array('cid'));
-	$cid = safe_int($args['cid']);
+	if ( isset($args['cid']) ) {
+		$cid = safe_int($args['cid']);
+	} else {
+		if ( count($cids)==1 ) {
+			$cid = reset($cids);
+		} else {
+			$api->createError("No contest ID specified but active contest is ambiguous.");
+		}
+	}
 
 	// Check that user has access to the problems in this contest:
 	if ( checkrole('team') ) $cdatas = getCurContests(TRUE, $userdata['teamid']);
