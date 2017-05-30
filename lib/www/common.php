@@ -312,24 +312,30 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 						$judgingid, $probid);
 
 				$testcase_results = "";
+				$testcase_sort = "";
 				$is_final = !empty($row['result']);
 				foreach ( $runinfo as $key => $run ) {
 					$class = ( $is_final ? "tc_unused" : "tc_pending" );
 					$text = "?";
+					$sortkey = "_";
 					switch ( $run['runresult'] ) {
 						case 'correct':
 							$class = "tc_correct";
 							$text = "✓";
+							$sortkey = 'C';
 							break;
 						case NULL:
 							break;
 						default:
-							$text = substr($run['runresult'], 0, 1);
 							$class = "tc_incorrect";
+							$text = substr($run['runresult'], 0, 1);
+							$sortkey = $text;
 					}
 					$testcase_results .= "<span class=\"$class tc_box_small\">" . $text . "</span>";
+					$testcase_sort .= $sortkey;
 				}
-				echo "<td class=\"tc_list_small\">" . $testcase_results . "</td>";
+				echo "<td class=\"tc_list_small\" sorttable_customkey=\"" .
+					$testcase_sort . "\">" . $testcase_results . "</td>";
 			}
 		}
 		echo "</tr>\n";
