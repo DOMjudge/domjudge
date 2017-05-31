@@ -213,7 +213,7 @@ while ( $row = $clars->next() ) {
 	$node = XMLaddnode($root, 'clar');
 	XMLaddnode($node, 'id', $row['clarid']);
 	XMLaddnode($node, 'team', $team_to_id[$row['sender']]);
-	XMLaddnode($node, 'problem', $row['probid']); // FIXME: probid is shortname?
+	XMLaddnode($node, 'problem', $prob_to_id[$row['probid']]);
 	XMLaddnode($node, 'time', formattime(calcContestTime($row['submittime'],$cid)));
 	XMLaddnode($node, 'timestamp', formattime($row['submittime']));
 	XMLaddnode($node, 'question', $row['question']);
