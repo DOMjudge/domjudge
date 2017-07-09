@@ -16,7 +16,7 @@ set -e
 
 error()
 {
-	echo "Error: $@" >&2
+	echo "Error: $*" >&2
 	exit 1
 }
 
@@ -25,14 +25,14 @@ if [ $# -ne 2 ]; then
 fi
 
 PARAMS=$1
-DBPASSWDS=$2
+DBPASSWORDS=$2
 
 if [ ! -r "$PARAMS" ]; then
 	error "parameters.yml template file '$PARAMS' not readable."
 fi
 
-if [ ! -r "$DBPASSWDS" ]; then
-	echo "Warning: database passwords file '$DBPASSWDS' not readable;" >&2
+if [ ! -r "$DBPASSWORDS" ]; then
+	echo "Warning: database passwords file '$DBPASSWORDS' not readable;" >&2
 	echo "         generating a stub parameters.yml file..." >&2
 
 	cat <<EOF
@@ -59,11 +59,12 @@ while read -r role host db user passwd; do
 	DBNAME=$db
 	DBUSER=$user
 	PASSWD=$passwd
-done < "$DBPASSWDS"
+done < "$DBPASSWORDS"
 IFS="$OLDIFS"
 
 if [ -z "$PASSWD" ]; then
-	error "no credentials found in '$DBPASSWORDS'."
+	error "no credentials found in '$DBPASSWORDS
+'."
 fi
 
 SECRET=$(head -c20 /dev/urandom | base64 | head -c20 | tr '/+' 'Aa')
@@ -71,9 +72,8 @@ SECRET=$(head -c20 /dev/urandom | base64 | head -c20 | tr '/+' 'Aa')
 echo "# Generated from '$PARAMS' on $(hostname), $(date)."
 echo
 
-cat "$PARAMS" | \
-	sed -e "s/\(database_host:\) .*\$/\1 $DBHOST/" \
-	    -e "s/\(database_name:\) .*\$/\1 $DBNAME/" \
-	    -e "s/\(database_user:\) .*\$/\1 $DBUSER/" \
-	    -e "s/\(database_password:\) .*\$/\1 $PASSWD/" \
-	    -e "s/\(secret:\) .*\$/\1 $SECRET/"
+sed -e "s/\(database_host:\) .*\$/\1 $DBHOST/" \
+    -e "s/\(database_name:\) .*\$/\1 $DBNAME/" \
+    -e "s/\(database_user:\) .*\$/\1 $DBUSER/" \
+    -e "s/\(database_password:\) .*\$/\1 $PASSWD/" \
+    -e "s/\(secret:\) .*\$/\1 $SECRET/"  "$PARAMS"
