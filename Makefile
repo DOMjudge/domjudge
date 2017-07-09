@@ -63,7 +63,7 @@ composer-dependencies:
 ifeq (, $(shell which composer))
 	$(error "'composer' command not found in $(PATH), install it https://getcomposer.org/download/")
 endif
-	composer $(subst 1,-q,$(QUIET)) install --no-dev
+	composer $(subst 1,-q,$(QUIET)) install
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
