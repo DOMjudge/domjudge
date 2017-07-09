@@ -17,10 +17,10 @@ install-domserver: app/config/parameters.yml
 		cp -R           -t $(DESTDIR)$(domserver_webappdir) $$d ; \
 		chmod -R a+rX      $(DESTDIR)$(domserver_webappdir)/$$d ; \
 	done
-	for d in cache logs sessions ; do \
+	-for d in cache logs sessions ; do \
 		$(INSTALL_WEBSITE) -m 0775 -d $(DESTDIR)$(domserver_webappdir)/var/$$d ; \
 	done
-	$(INSTALL_WEBSITE) -t $(DESTDIR)$(domserver_webappdir)/var var/*.php var/*.cache
+	-$(INSTALL_WEBSITE) -t $(DESTDIR)$(domserver_webappdir)/var var/*.php var/*.cache
 
 install-docs:
 	$(INSTALL_DATA) -T web/images/countries/README    $(DESTDIR)$(domjudge_docdir)/README.country_flags
