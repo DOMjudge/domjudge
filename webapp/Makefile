@@ -3,7 +3,14 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-install-domserver:
+app/config/parameters.yml: %: %.dist $(TOPDIR)/etc/dbpasswords.secret
+	@[ -n "$(QUIET)" ] || echo "Generating '$@'..."
+	$(TOPDIR)/etc/gensymfonyparams $^ > $@
+
+# Don't try to create dbpasswords.secret here if it doesn't exist:
+$(TOPDIR)/etc/dbpasswords.secret:
+
+install-domserver: app/config/parameters.yml
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
 # KLUDGE: how to install a tree of files with correct permissions?
 	for d in app bin src web ; do \

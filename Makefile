@@ -63,6 +63,7 @@ composer-dependencies:
 ifeq (, $(shell which composer))
 	$(error "'composer' command not found in $(PATH), install it https://getcomposer.org/download/")
 endif
+	$(MAKE) -C webapp app/config/parameters.yml
 	composer $(subst 1,-q,$(QUIET)) install
 
 # Generate documentation for distribution. Remove this dependency from
