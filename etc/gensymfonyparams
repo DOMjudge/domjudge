@@ -32,8 +32,10 @@ if [ ! -r "$PARAMS" ]; then
 fi
 
 if [ ! -r "$DBPASSWORDS" ]; then
-	echo "Warning: database passwords file '$DBPASSWORDS' not readable;" >&2
-	echo "         generating a stub parameters.yml file..." >&2
+	if [ -n "$QUIET" ]; then
+		echo "Warning: database passwords file '$DBPASSWORDS' not readable;" >&2
+		echo "         generating a stub parameters.yml file..." >&2
+	fi
 
 	cat <<EOF
 ##### THIS FILE WILL BE OVERWRITTEN AUTOMATICALLY, DON'T EDIT. #####
