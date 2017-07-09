@@ -69,6 +69,7 @@ runcheck ()
 }
 
 # Error and logging functions
+# shellcheck disable=SC1091
 . "$DJ_LIBDIR/lib.error.sh"
 
 
