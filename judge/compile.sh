@@ -44,7 +44,7 @@ cleanexit ()
 }
 
 # Error and logging functions
-# shellcheck disable=SC1091
+# shellcheck disable=SC1090
 . "$DJ_LIBDIR/lib.error.sh"
 
 CPUSET=""
