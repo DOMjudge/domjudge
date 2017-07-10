@@ -17,7 +17,7 @@ function XMLHttpHandle()
 function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejudgings)
 {
 	'use strict';
-	var handle = new XMLHttpHandle();
+	var handle = XMLHttpHandle();
 	if (!handle) {
 		return;
 	}
@@ -542,6 +542,7 @@ function toggle(id, show)
 {
 	'use strict';
 	var scoreboard = getScoreboard();
+	if (scoreboard === null) return;
 
 	var favTeams = getSelectedTeams();
 	// count visible favourite teams (if filtered)

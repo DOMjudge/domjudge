@@ -324,7 +324,7 @@ $args = array('cid' => 'Contest ID. If not provided, get judgings of all active 
               'first_id' => 'Search from a certain ID',
               'last_id' => 'Search up to a certain ID',
               'judging_id' => 'Search only for a certain ID',
-              'submiission_id' => 'Search only for judgings associated to this submission ID',
+              'submission_id' => 'Search only for judgings associated to this submission ID',
               'limit' => 'Get only the first N judgings');
 $exArgs = array(array('cid' => 2), array('result' => 'correct'), array('first_id' => 800, 'limit' => 10));
 $roles = array('jury','team');
