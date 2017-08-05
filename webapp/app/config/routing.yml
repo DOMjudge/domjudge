@@ -4,3 +4,7 @@ fallback:
     defaults: { _controller: "legacy.controller.fallback:fallback" }
     requirements:
         path: .*
+
+
+legacy_routes:
+    resource: "@LegacyBundle/Resources/config/routing.yml"
