@@ -398,4 +398,3 @@ function check_judging($data, $keydata = null)
 
 	return $data;
 }
-
