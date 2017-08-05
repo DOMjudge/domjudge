@@ -26,7 +26,7 @@ server {
 	#location / {
 	#	root @domserver_webappdir@/web;
 	#	try_files $uri /app.php$is_args$args;
-	#	
+	#
 	#	location ~ ^/app\.php(/|$) {
 	#		fastcgi_split_path_info ^(.+\.php)(/.*)$;
 	#		fastcgi_pass domjudge;
@@ -41,7 +41,7 @@ server {
 
 	# Or you can install it with a prefix
 	location ~ /domjudge(.*) {
-		root /home/ubuntu/domjudge/webapp/web;
+		root @domserver_webappdir@/web;
 		# try to serve file directly, fallback to app.php
 		try_files $1 /domjudge/app.php$is_args$args;
 
@@ -105,7 +105,7 @@ server {
 
 #	# Or you can install it with a prefix
 #	location ~ /domjudge(.*) {
-#		root /home/ubuntu/domjudge/webapp/web;
+#		root @domserver_webappdir@/web;
 #		# try to serve file directly, fallback to app.php
 #		try_files $1 /domjudge/app.php$is_args$args;
 #		location ~ ^/domjudge/app\.php(/|$) {
