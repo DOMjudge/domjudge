@@ -109,6 +109,7 @@ global $keydata;		// www/jury/edit.php
 global $KEYS;		// lib/relations.php
 global $kind;		// www/jury/internal_error.php
 global $k;		// www/jury/delete.php
+global $LIBDBCONFIG;    // www/jury/config.php
 global $langdata;		// www/team/index.php
 global $langid;		// www/team/upload.php
 global $langs;		// www/feed/ext.php, www/jury/edit_source.php
