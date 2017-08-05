@@ -38,7 +38,8 @@ framework:
 twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
-
+    globals:
+      DOMJUDGE_VERSION: 1.2.3
 # Doctrine Configuration
 doctrine:
     dbal:
