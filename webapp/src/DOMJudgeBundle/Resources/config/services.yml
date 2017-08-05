@@ -1,0 +1,11 @@
+services:
+  domjudge.domjudge:
+    class: DOMJudgeBundle\Service\DOMJudgeService
+    arguments: [ "@doctrine.orm.entity_manager", '@request_stack' ]
+
+  domjudge.twigextension:
+    class: DOMJudgeBundle\Twig\TwigExtension
+    public: false
+    arguments: ['@domjudge.domjudge']
+    tags:
+        - { name: twig.extension }
