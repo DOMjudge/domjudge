@@ -21,11 +21,26 @@ use DOMJudgeBundle\Entity\Contest;
  */
 class APIController extends FOSRestController {
 
+	public $apiVersion = 4;
+	// FIXME: get DOMjudge version from central location
+	public $domjudgeVersion = "5.2.0DEV";
+
   /**
    * @Get("/version")
    */
   public function getVersionAction() {
-	$data = ['api_version' => '2'];
+	$data = ['api_version' => $this->apiVersion];
+	return $data;
+  }
+
+  /**
+   * @Get("/info")
+   */
+  public function getInfoAction() {
+	  $data = [
+		'api_version' => $this->apiVersion,
+		'domjudge_version' => $this->domjudgeVersion,
+	];
 	return $data;
   }
 
