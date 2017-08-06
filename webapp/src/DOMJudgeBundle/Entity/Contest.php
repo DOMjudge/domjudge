@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
+use DOMJudgeBundle\Utils\Utils;
 
 /**
  * Contests that will be run with this install
@@ -940,5 +941,26 @@ class Contest
     public function getRankcache()
     {
         return $this->rankcache;
+    }
+
+    /**
+     * Helper function to serialize this for the REST API
+     *
+     * @return array
+     */
+    public function serializeForAPI() {
+	    return [
+		    'id'                         => $this->getCid(),
+		    'external_id'                => $this->getExternalId(),
+		    'shortname'                  => $this->getShortname(),
+		    'name'                       => $this->getName(),
+		    'formal_name'                => $this->getName(),
+		    'start_time'                 => Utils::absTime($this->getStarttime()),
+		    'end_time'                   => Utils::absTime($this->getEndtime()),
+		    'duration'                   => Utils::relTime($this->getEndtime() - $this->getStarttime()),
+		    'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
+		    'unfreeze'                   => Utils::absTime($this->getUnfreezetime()),
+		    'penalty'                    => 20, // FIXME
+	    ];
     }
 }
