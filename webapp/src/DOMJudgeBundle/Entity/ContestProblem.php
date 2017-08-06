@@ -1,6 +1,7 @@
 <?php
 namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 /**
  * Many-to-Many mapping of contests and problems
  * @ORM\Entity()
@@ -64,6 +65,7 @@ class ContestProblem
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
+     * @Groups({"problems"})
      */
     private $problem;
 

@@ -1,6 +1,8 @@
 <?php
 namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
+
 /**
  * Contests that will be run with this install
  * @ORM\Entity()
@@ -14,6 +16,7 @@ class Contest
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="SEQUENCE")
      * @ORM\Column(type="integer", name="cid", options={"comment"="Unique ID"}, nullable=false)
+     * @Groups({"details", "public"})
      */
     private $cid;
 
@@ -27,48 +30,56 @@ class Contest
     /**
      * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
+     * @Groups({"details", "public"})
      */
     private $name;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Short name for this contest"}, nullable=false)
+     * @Groups({"details", "public"})
      */
     private $shortname;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="activatetime", options={"comment"="Time contest becomes visible in team/public views", "unsigned"=true}, nullable=false)
+     * @Groups({"details", "public"})
      */
     private $activatetime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time contest starts, submissions accepted", "unsigned"=true}, nullable=false)
+     * @Groups({"details", "public"})
      */
     private $starttime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="freezetime", options={"comment"="Time scoreboard is frozen", "unsigned"=true}, nullable=true)
+     * @Groups({"details", "public"})
      */
     private $freezetime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time after which no more submissions are accepted", "unsigned"=true}, nullable=false)
+     * @Groups({"details", "public"})
      */
     private $endtime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="unfreezetime", options={"comment"="Unfreeze a frozen scoreboard at this time", "unsigned"=true}, nullable=true)
+     * @Groups({"details", "public"})
      */
     private $unfreezetime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime", options={"comment"="Time contest becomes invisible in team/public views", "unsigned"=true}, nullable=true)
+     * @Groups({"details", "public"})
      */
     private $deactivatetime;
 
@@ -111,6 +122,7 @@ class Contest
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="enabled", options={"comment"="Whether this contest can be active"}, nullable=false)
+     * @Groups({"details"})
      */
     private $enabled = true;
 
@@ -123,6 +135,7 @@ class Contest
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="public", options={"comment"="Is this contest visible for the public and non-associated teams?"}, nullable=false)
+     * @Groups({"details"})
      */
     private $public = true;
 
@@ -132,6 +145,7 @@ class Contest
      *      joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid")}
      *      )
+     * @Groups({"teams"})
      */
     private $teams;
 
@@ -147,6 +161,7 @@ class Contest
 
     /**
      * @ORM\OneToMany(targetEntity="ContestProblem", mappedBy="contest")
+     * @Groups({"problems"})
      */
     private $problems;
 

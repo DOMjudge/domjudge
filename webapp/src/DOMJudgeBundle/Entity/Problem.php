@@ -1,6 +1,7 @@
 <?php
 namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation\Groups;
 /**
  * Stores testcases per problem
  * @ORM\Entity()
@@ -15,30 +16,35 @@ class Problem
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="SEQUENCE")
      * @ORM\Column(type="integer", name="probid", options={"comment"="Unique ID"}, nullable=false)
+     * @Groups({"details"})
      */
     private $probid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
+     * @Groups({"details"})
      */
     private $name;
 
     /**
      * @var double
      * @ORM\Column(type="float", name="timelimit", options={"comment"="Maximum run time (in seconds) for this problem"}, nullable=false)
+     * @Groups({"details"})
      */
     private $timelimit = 0;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="memlimit", options={"comment"="Maximum memory available (in kB) for this problem", "unsigned"=true}, nullable=true)
+     * @Groups({"details"})
      */
     private $memlimit;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="outputlimit", options={"comment"="Maximum output size (in kB) for this problem", "unsigned"=true}, nullable=true)
+     * @Groups({"details"})
      */
     private $outputlimit;
 
@@ -46,12 +52,14 @@ class Problem
     /**
      * @var string
      * @ORM\Column(type="string", name="special_run", length=32, options={"comment"="Script to run submissions for this problem"}, nullable=true)
+     * @Groups({"details"})
      */
     private $special_run;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="special_compare", length=32, options={"comment"="Script to compare problem and jury output for this problem"}, nullable=true)
+     * @Groups({"details"})
      */
     private $special_compare;
 
