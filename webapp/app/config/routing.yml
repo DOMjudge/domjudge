@@ -1,14 +1,13 @@
-jury:
+domjudge:
     resource: '@DOMJudgeBundle/Controller/'
     type: annotation
-    prefix: /jury
+    prefix: /
 
 fallback:
     path: /{path}
     defaults: { _controller: "legacy.controller.fallback:fallback" }
     requirements:
         path: .*
-
 
 legacy_routes:
     resource: "@LegacyBundle/Resources/config/routing.yml"
