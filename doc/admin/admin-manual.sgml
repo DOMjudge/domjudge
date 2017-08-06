@@ -146,7 +146,7 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with support for PHP &gt;= 5.4 and the mysqli,
+<item> Apache web server with support for PHP &gt;= 7.0 and the mysqli,
        GD, curl and json extensions for PHP. PHP needs to be running as an
        Apache module (the most common configuration); a (fast)CGI setup
        is not currently supported. We also recommend the posix extension
@@ -156,7 +156,7 @@ The following software is required for running DOMjudge.
 
 <item> MySQL or MariaDB &gt;= 5.5.3 database and client software.
 
-<item> PHP &gt;= 5.4 command line interface and the curl, json, mcrypt, and gmp
+<item> PHP &gt;= 7.0 command line interface and the curl, json, mcrypt, and gmp
        extensions.
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash).
@@ -410,8 +410,8 @@ For Debian:
 <code>
 apt-get install make sudo debootstrap libcgroup-dev \
 	php-cli php-curl php-json procps \
-	gcc g++ openjdk-7-jre-headless \
-	openjdk-7-jdk ghc fp-compiler
+	gcc g++ openjdk-8-jre-headless \
+	openjdk-8-jdk ghc fp-compiler
 </code>
 
 For RedHat:
@@ -606,6 +606,11 @@ snippet from <tt>etc/apache.conf</tt>. It contains examples for
 configuring the DOMjudge pages with an alias directive, or as a
 virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
+<verb>
+ln -s etc/apache.conf /etc/apache2/conf-available/domjudge.conf
+a2enconf domjudge
+service apache2 reload
+</verb>
 
 An Nginx webserver configuration snippet is also provided
 in <tt>etc/nginx-conf</tt>. This alternative webserver is less
@@ -617,7 +622,7 @@ to be able to access at least this part of the web interface.
 
 <sect>Fine tuning server settings
 <p>
-For Apache, there are countless documents on how to maximise performance.
+For Apache, there are countless documents on how to maximize performance.
 Of particular importance is to ensure that the <tt>MaxClients</tt> setting
 is high enough to receive the number of parallel requests you expect, but
 not higher than your amount of RAM allows.
