@@ -222,11 +222,13 @@ uninstall)
 
 install-defaults)
 	read_dbpasswords
+	# shellcheck disable=SC2002
 	cat $DEFAULTDATA_FILES | mysql -D "$DBNAME"
 	;;
 
 install-examples)
 	read_dbpasswords
+	# shellcheck disable=SC2002
 	cat $EXAMPLES_FILES | mysql -D "$DBNAME"
 	;;
 
