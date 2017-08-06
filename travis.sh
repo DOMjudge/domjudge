@@ -59,16 +59,9 @@ make configure
 make domserver judgehost
 sudo make install-domserver install-judgehost
 
-cat > /opt/domjudge/domserver/etc/dbpasswords.secret <<EOF
-# Format: 'dummy:<db_host>:<db_name>:<user>:<password>'
-dummy:localhost:domjudge:domjudge:domjudge
-EOF
-
 # setup database and add special user
 cd /opt/domjudge/domserver
-# note that database has already been created by symfony at this point
-sudo bin/dj_setup_database install-defaults
-sudo bin/dj_setup_database install-examples
+sudo bin/dj_setup_database install
 echo "INSERT INTO user (userid, username, name, password, teamid) VALUES (3, 'dummy', 'dummy user for example team', '\$2y\$10\$0d0sPmeAYTJ/Ya7rvA.kk.zvHu758ScyuHAjps0A6n9nm3eFmxW2K', 2)" | sudo mysql domjudge
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | sudo mysql domjudge
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 3);" | sudo mysql domjudge
@@ -104,6 +97,7 @@ bin/judgedaemon -n 0 &
 
 # write out current log to learn why it might be broken
 sleep 5s && cat /var/log/nginx/domjudge.log
+
 
 # submit test programs
 cd /${DIR}/tests
