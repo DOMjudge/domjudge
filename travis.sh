@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
+
 DIR=$(pwd)
 lsb_release -a
 
