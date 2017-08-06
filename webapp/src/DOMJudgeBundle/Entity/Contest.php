@@ -963,4 +963,32 @@ class Contest
 		    'penalty'                    => 20, // FIXME
 	    ];
     }
+
+    /**
+     * Returns true iff the contest is already and still active, and not disabled.
+     */
+    public function isActive() {
+	    return $this->getEnabled() &&
+		    $this->getPublic() &&
+		    ($this->deactivatetime == NULL || $this->deactivatetime > time());
+    }
+
+    /**
+     * Helper function to filter active contests.
+     */
+    public function filterActiveContests($data) {
+	    $filtered_data = [];
+	    foreach ($data as $contest) {
+		    if ($contest->isActive()) {
+			    $filtered_data[] = $contest;
+		    }
+	    }
+
+	    return array_map(
+		    function(Contest $contest) {
+			    return $contest->serializeForAPI();
+		    },
+		    $filtered_data
+	    );
+    }
 }

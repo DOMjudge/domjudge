@@ -25,6 +25,17 @@ class APIController extends FOSRestController {
 	// FIXME: get DOMjudge version from central location
 	public $domjudgeVersion = "5.2.0DEV";
 
+	/**
+	 * @Get("/")
+	 */
+	public function getCurrentActiveContest() {
+		$contests = $this->getContestsAction();
+		if (count($contests) == 0) {
+			return null;
+		} else {
+			return $contests[0];
+		}
+	}
 
 	/**
 	 * @Get("/version")
@@ -50,20 +61,24 @@ class APIController extends FOSRestController {
 	 */
 	public function getContestsAction() {
 		$em = $this->getDoctrine()->getManager();
-		$data = $em->getRepository(Contest::class)->findAll();
-
-		return array_map(
-			function(Contest $contest) {
-				return $contest->serializeForAPI();
-			},
-			$data
+		$data = $em->getRepository(Contest::class)->findBy(
+			array(
+				'enabled' => TRUE,
+				'public' => TRUE,
+			)
 		);
+
+		return Contest::filterActiveContests($data);
 	}
 
 	/**
 	 * @Get("/contests/{cid}")
 	 */
 	public function getSingleContestAction(Contest $cid) {
-		return $cid->serializeForAPI();
+		if ($cid->isActive()) {
+			return $cid->serializeForAPI();
+		} else {
+			return NULL;
+		}
 	}
 }
