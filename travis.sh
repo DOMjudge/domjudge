@@ -20,6 +20,11 @@ else
     exit 1
 fi
 
+# FIXME: This chicken-egg problem is annoying but let us bootstrap for now.
+echo "CREATE DATABASE IF NOT EXISTS \`domjudge\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" | mysql
+echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`domjudge\`.* TO 'domjudge'@'localhost' IDENTIFIED BY 'domjudge';" | mysql
+
+
 # Generate a parameters yml file for symfony
 cat > webapp/app/config/parameters.yml <<EOF
 parameters:
@@ -61,6 +66,8 @@ EOF
 
 # setup database and add special user
 cd /opt/domjudge/domserver
+# see chicken-egg comment above
+sudo bin/dj_setup_database uninstall
 sudo bin/dj_setup_database install
 echo "INSERT INTO user (userid, username, name, password, teamid) VALUES (3, 'dummy', 'dummy user for example team', '\$2y\$10\$0d0sPmeAYTJ/Ya7rvA.kk.zvHu758ScyuHAjps0A6n9nm3eFmxW2K', 2)" | sudo mysql domjudge
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | sudo mysql domjudge
