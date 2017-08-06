@@ -98,12 +98,9 @@ bin/judgedaemon -n 0 &
 # write out current log to learn why it might be broken
 sleep 5s && cat /var/log/nginx/domjudge.log
 
-# run unit tests
-cd ${DIR}/webapp
-phpunit .
 
 # submit test programs
-cd ${DIR}/tests
+cd /${DIR}/tests
 make check-syntax check test-stress
 
 # wait for and check results
