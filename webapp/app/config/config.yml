@@ -64,6 +64,19 @@ doctrine:
         mappings:
             DOMJudgeBundle: ~
 
+# We need this to make our @View annotations work for FOSRest
+sensio_framework_extra:
+    view: { annotations: true }
+
+# Pretty print json please!
+jms_serializer:
+    visitors:
+        json:
+            options: JSON_PRETTY_PRINT
+fos_rest:
+    view:
+        # Lets us return data directly, instead of wrapping in a view
+        view_response_listener: force
 # Swiftmailer Configuration
 swiftmailer:
     transport: '%mailer_transport%'
