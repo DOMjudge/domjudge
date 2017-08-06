@@ -103,6 +103,10 @@ sleep 5s && cat /var/log/nginx/domjudge.log
 cd /${DIR}/tests
 make check-syntax check test-stress
 
+# run unit tests
+cd ${DIR}/webapp
+phpunit .
+
 # wait for and check results
 NUMSUBS=$(curl http://admin:admin@localhost/domjudge/api/submissions | python -mjson.tool | grep -c '"id":')
 export COOKIEJAR
