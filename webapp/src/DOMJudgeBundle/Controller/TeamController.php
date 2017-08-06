@@ -10,7 +10,7 @@ use DOMJudgeBundle\Entity\Team;
 class TeamController extends Controller
 {
     /**
-     *@Route("/teams", name="teams_index")
+     *@Route("/teams/", name="teams_index")
      */
     public function indexAction(Request $request)
     {
