@@ -67,9 +67,9 @@ class Event
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="body", options={"comment"="Event Description"}, nullable=false)
+     * @ORM\Column(type="text", length=4294967295, name="description", options={"comment"="Event Description"}, nullable=false)
      */
-    private $body;
+    private $description;
 
   /**
    * @ORM\ManyToOne(targetEntity="Contest", inversedBy="events")
@@ -103,7 +103,7 @@ class Event
 
   /**
    * @ORM\ManyToOne(targetEntity="Judging", inversedBy="events")
-   * @ORM\JoinColumn(name="prevjudgingid", referencedColumnName="judgingid")
+   * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid")
    */
   private $judging;
 
@@ -331,27 +331,27 @@ class Event
     }
 
     /**
-     * Set body
+     * Set description
      *
-     * @param string $body
+     * @param string $description
      *
      * @return Event
      */
-    public function setBody($body)
+    public function setDescription($description)
     {
-        $this->body = $body;
+        $this->description = $description;
 
         return $this;
     }
 
     /**
-     * Get body
+     * Get description
      *
      * @return string
      */
-    public function getBody()
+    public function getDescription()
     {
-        return $this->body;
+        return $this->description;
     }
 
     /**

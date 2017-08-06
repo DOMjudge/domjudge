@@ -24,9 +24,9 @@ class Language
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="etensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
+     * @ORM\Column(type="text", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
      */
-    private $etensions;
+    private $extensions;
 
     /**
      * @var boolean
@@ -118,27 +118,27 @@ class Language
     }
 
     /**
-     * Set etensions
+     * Set extensions
      *
-     * @param string $etensions
+     * @param string $extensions
      *
      * @return Language
      */
-    public function setEtensions($etensions)
+    public function setExtensions($extensions)
     {
-        $this->etensions = $etensions;
+        $this->extensions = $extensions;
 
         return $this;
     }
 
     /**
-     * Get etensions
+     * Get extensions
      *
      * @return string
      */
-    public function getEtensions()
+    public function getExtensions()
     {
-        return $this->etensions;
+        return $this->extensions;
     }
 
     /**
