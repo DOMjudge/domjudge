@@ -26,6 +26,7 @@ global $BALLOONS;		// www/jury/balloons.php
 global $bar_size;		// www/jury/statistics.php
 global $body;		// lib/www/clarification.php
 global $categs;		// www/feed/ext.php
+global $cdata;		// www/team/init.php, www/jury/init.php, www/public/init.php
 global $cdatas;		// www/feed/init.php, www/jury/init.php, www/public/init.php, www/team/init.php
 global $cids;		// www/feed/init.php, www/jury/init.php, www/jury/judgehost.php,  www/jury/rejudge.php, www/public/init.php, www/team/init.php
 global $cid;		// www/jury/team_output.php
