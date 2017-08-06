@@ -25,8 +25,8 @@ class APIController extends FOSRestController {
    * @Get("/version")
    */
   public function getVersionAction() {
-    $data = ['version'=>'2.0'];
-    return $data;
+	$data = ['api_version' => '2'];
+	return $data;
   }
 
   /**
@@ -34,9 +34,9 @@ class APIController extends FOSRestController {
    * @View(serializerGroups={"details","problems"})
    */
   public function getContestsAction() {
-    $em = $this->getDoctrine()->getManager();
-    $data = $em->getRepository(Contest::class)->findAll();
+	$em = $this->getDoctrine()->getManager();
+	$data = $em->getRepository(Contest::class)->findAll();
 
-    return $data;
+	return $data;
   }
 }
