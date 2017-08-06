@@ -23,7 +23,9 @@
 		"symfony/monolog-bundle": "^3.0.2",
 		"symfony/swiftmailer-bundle": "^2.3.10",
 		"symfony/symfony": "3.2.*",
-		"twig/twig": "^1.0||^2.0"
+		"twig/twig": "^1.0||^2.0",
+		"friendsofsymfony/rest-bundle": "^2.2",
+		"jms/serializer-bundle": "^2.0"
 	},
 	"require-dev": {
 			"sensio/generator-bundle": "^3.0"
