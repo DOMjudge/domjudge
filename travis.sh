@@ -102,6 +102,9 @@ sudo ./dj_make_chroot -a amd64
 cd /opt/domjudge/judgehost/
 bin/judgedaemon -n 0 &
 
+# write out current log to learn why it might be broken
+sleep 5s && cat /var/log/nginx/domjudge.log
+
 # submit test programs
 cd /${DIR}/tests
 make check-syntax check test-stress
