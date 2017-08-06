@@ -3,6 +3,12 @@ domjudge:
     type: annotation
     prefix: /
 
+logout:
+    path: /logout
+
+overriden_routes:
+    resource: "@DOMJudgeBundle/Resources/config/routing.yml"
+
 fallback:
     path: /{path}
     defaults: { _controller: "legacy.controller.fallback:fallback" }

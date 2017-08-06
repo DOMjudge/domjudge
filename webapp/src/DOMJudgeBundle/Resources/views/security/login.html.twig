@@ -1,0 +1,43 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Login{% endblock %}
+
+{% block body %}
+<h1>Not Authenticated</h1>
+
+<p>
+Please supply your credentials below, or contact a staff member for assistance.
+</p>
+
+  {% if error %}
+      <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+  {% endif %}
+
+  <form action="{{ path('login') }}" method="post">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+    <table>
+      <tr>
+        <td><label for="username">Username:</label></td>
+        <td><input type="text" id="username" name="_username" value="{{ last_username }}" /></td>
+      </tr>
+
+      <tr>
+        <td><label for="password">Password:</label></td>
+        <td><input type="password" id="password" name="_password" /></td>
+      </tr>
+
+      {#
+          If you want to control the URL the user
+          is redirected to on success (more details below)
+          <input type="hidden" name="_target_path" value="/account" />
+      #}
+
+      <tr>
+        <td></td>
+        <td><button type="submit">login</button></td>
+      </tr>
+    </table>
+  </form>
+
+  {% include '::footer.html.twig' %}
+{% endblock %}

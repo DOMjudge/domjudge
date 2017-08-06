@@ -1,12 +1,13 @@
 <?php
 namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * Users that have access to DOMjudge
  * @ORM\Entity()
  * @ORM\Table(name="user", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class User
+class User implements UserInterface, \Serializable
 {
     /**
      * @var int
@@ -77,6 +78,30 @@ class User
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
      */
    private $team;
+
+
+   public function getRoles() {
+     return ['ROLE_USER'];
+   }
+   public function getSalt() {
+     return null;
+   }
+   public function eraseCredentials() {
+   }
+   public function serialize() {
+     return serialize(array(
+       $this->userid,
+       $this->username,
+       $this->password,
+     ));
+   }
+   public function unserialize($serialized) {
+     list(
+       $this->userid,
+       $this->username,
+       $this->password
+     ) = unserialize($serialized);
+   }
 
     /**
      * Get userid

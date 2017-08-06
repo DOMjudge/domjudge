@@ -6,6 +6,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 
 /**
  * @Route(service="legacy.controller.fallback")
@@ -14,13 +15,19 @@ class FallbackController extends Controller
 {
     private $webDir;
 
-    public function __construct($webDir)
+    public function __construct($webDir, Container $container)
     {
         $this->webDir = $webDir;
+        $this->setContainer($container);
     }
 
     public function fallback(Request $request, $path)
     {
+      if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+        $_SESSION['username'] = $this->get('security.token_storage')->getToken()->getUser()->getUsername();
+      }
+
+
       $thefile = realpath($this->webDir . $request->getPathInfo());
       // API is handled separately, current default is v4.
       $apiPaths = array(

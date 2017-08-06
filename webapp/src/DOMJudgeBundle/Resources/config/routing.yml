@@ -1,0 +1,16 @@
+# These are overriden routes(things we've implemented in the new api and don't want to give to legacybundle)
+legacy.login:
+    path: /auth/login.php
+    defaults:
+      _controller: FrameworkBundle:Redirect:redirect
+      route: login
+legacy.public_login:
+    path: /public/login.php
+    defaults:
+      _controller: FrameworkBundle:Redirect:redirect
+      route: login
+legacy.logout:
+    path: /auth/logout.php
+    defaults:
+      _controller: FrameworkBundle:Redirect:redirect
+      route: logout

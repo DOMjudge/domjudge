@@ -5,9 +5,10 @@ parameters:
 
 services:
     #service_name:
-    #    class: AppBundle\Directory\ClassName
+    #    class: DOMJudgeBundle\Directory\ClassName
     #    arguments: ['@another_service_name', 'plain_value', '%parameter_name%']
     legacy.controller.fallback:
         class: LegacyBundle\Controller\FallbackController
         arguments:
             - "%kernel.root_dir%/../../www"
+            - '@service_container'
