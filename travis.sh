@@ -66,9 +66,9 @@ EOF
 
 # setup database and add special user
 cd /opt/domjudge/domserver
-# see chicken-egg comment above
-sudo bin/dj_setup_database uninstall
-sudo bin/dj_setup_database install
+# note that database has already been created by symfony at this point
+sudo bin/dj_setup_database install-defaults
+sudo bin/dj_setup_database install-examples
 echo "INSERT INTO user (userid, username, name, password, teamid) VALUES (3, 'dummy', 'dummy user for example team', '\$2y\$10\$0d0sPmeAYTJ/Ya7rvA.kk.zvHu758ScyuHAjps0A6n9nm3eFmxW2K', 2)" | sudo mysql domjudge
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | sudo mysql domjudge
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 3);" | sudo mysql domjudge
