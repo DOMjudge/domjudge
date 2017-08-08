@@ -35,7 +35,7 @@ if( $users->count() == 0 ) {
 		if ( isset($row['last_login']) ) $status = 1;
 
 		$link = '<a href="user.php?id='.urlencode($row['userid']) . '">';
-		echo "<tr class=\"" . ($row['enabled'] == 1 ? '' : 'sub_ignore') .  "\">".
+		echo "<tr class=\"" . ($row['enabled'] == 1 ? '' : 'ignore') .  "\">".
 		    "<td class=\"username\">" . $link .
 		        specialchars($row['username'])."</a></td>".
 		    "<td>" . $link .
@@ -56,7 +56,7 @@ if( $users->count() == 0 ) {
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 			    editLink('user', $row['userid']) . "&nbsp;" .
-			    delLink('user','userid',$row['userid']) . "</td>";
+			    delLink('user','userid',$row['userid'],$row['name']) . "</td>";
 		}
 		echo "</tr>\n";
 	}

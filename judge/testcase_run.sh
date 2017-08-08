@@ -69,6 +69,7 @@ runcheck ()
 }
 
 # Error and logging functions
+# shellcheck disable=SC1090
 . "$DJ_LIBDIR/lib.error.sh"
 
 
@@ -92,9 +93,9 @@ shift $((OPTIND-1))
 
 if [ -n "$CPUSET" ]; then
 	CPUSET_OPT="-P $CPUSET"
-	LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`-$CPUSET.log"
+	LOGFILE="$DJ_LOGDIR/judge.$(hostname | cut -d . -f 1)-$CPUSET.log"
 else
-	LOGFILE="$DJ_LOGDIR/judge.`hostname | cut -d . -f 1`.log"
+	LOGFILE="$DJ_LOGDIR/judge.$(hostname | cut -d . -f 1).log"
 fi
 
 # Logging:
@@ -136,8 +137,9 @@ logmsg $LOG_DEBUG "run_juryprog: '$RUN_JURYPROG'"
 
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
 [ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
-[ -d "$WORKDIR" -a -w "$WORKDIR" -a -x "$WORKDIR" ] || \
+if [ ! -d "$WORKDIR" ] || [ ! -w "$WORKDIR" ] || [ ! -x "$WORKDIR" ]; then
 	error "Workdir not found or not writable: $WORKDIR"
+fi
 [ -x "$WORKDIR/$PROGRAM" ] || error "submission program not found or not executable"
 [ -x "$COMPARE_SCRIPT" ] || error "compare script not found or not executable: $COMPARE_SCRIPT"
 [ -x "$RUN_SCRIPT" ] || error "run script not found or not executable: $RUN_SCRIPT"
@@ -168,6 +170,7 @@ logmsg $LOG_INFO "setting up testing (chroot) environment"
 # Copy the testdata input
 cp "$TESTIN" "$WORKDIR/testdata.in"
 
+# shellcheck disable=SC2174
 mkdir -p -m 0711 ../bin ../dev
 # Copy the run-script and a statically compiled shell:
 cp -p  "$RUN_SCRIPT"  ./run
@@ -197,14 +200,14 @@ runcheck ./run testdata.in program.out \
 	${USE_CHROOT:+-r "$PWD/.."} \
 	--nproc=$PROCLIMIT \
 	--no-core --streamsize=$FILELIMIT \
-	--user="$RUNUSER" \
+	--user="$RUNUSER" --group="$RUNGROUP" \
 	--walltime=$TIMELIMIT --cputime=$TIMELIMIT \
 	--memsize=$MEMLIMIT --filesize=$FILELIMIT \
 	--stderr=program.err --outmeta=program.meta -- \
 	"$PREFIX/$PROGRAM" 2>runguard.err
 
 # Check for still running processes:
-output=`ps -u "$RUNUSER" -o pid= -o comm= || true`
+output=$(ps -u "$RUNUSER" -o pid= -o comm= || true)
 if [ -n "$output" ] ; then
 	error "found processes still running as '$RUNUSER', check manually:\n$output"
 fi
@@ -220,18 +223,20 @@ cp "$TESTOUT" "$WORKDIR/testdata.out"
 logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
 
 exitcode=0
-# Make files writable for $RUNUSER
-mkdir feedback                   # Create dir for feedback files
-for i in judgemessage.txt teammessage.txt score.txt judgeerror.txt diffposition.txt; do
-	touch feedback/$i        # Create possible feedback files
-	chmod a+w feedback/$i
-done
+# Create dir for feedback files and make it writable for $RUNUSER
+mkdir feedback
+chmod a+w feedback
 
-runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" \
+runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
 	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
 	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
 	                  >compare.tmp 2>&1
+
+# Make sure that feedback file exists, since we assume this later.
+if [ ! -f feedback/judgemessage.txt ]; then
+	touch feedback/judgemessage.txt
+fi
 
 # Append output validator error messages
 # TODO: display extra
@@ -262,11 +267,13 @@ fi
 logmsg $LOG_DEBUG "checking program run exit-status"
 # There's no bash YAML parser, and the format is rigid enough that we
 # can parse it with grep here.
-timeused=`        grep '^time-used: '    program.meta | sed 's/time-used: //'`
-program_cputime=` grep '^cpu-time: '     program.meta | sed 's/cpu-time: //'`
-program_walltime=`grep '^wall-time: '    program.meta | sed 's/wall-time: //'`
-program_exit=`    grep '^exitcode: '     program.meta | sed 's/exitcode: //'`
-memory_bytes=`    grep '^memory-bytes: ' program.meta | sed 's/memory-bytes: //'`
+timeused=$(        grep '^time-used: '    program.meta | sed 's/time-used: //')
+program_cputime=$( grep '^cpu-time: '     program.meta | sed 's/cpu-time: //')
+program_walltime=$(grep '^wall-time: '    program.meta | sed 's/wall-time: //')
+program_exit=$(    grep '^exitcode: '     program.meta | sed 's/exitcode: //')
+program_stdout=$(  grep '^stdout-bytes: ' program.meta | sed 's/stdout-bytes: //')
+program_stderr=$(  grep '^stderr-bytes: ' program.meta | sed 's/stderr-bytes: //')
+memory_bytes=$(    grep '^memory-bytes: ' program.meta | sed 's/memory-bytes: //')
 resourceinfo="\
 runtime: ${program_cputime}s cpu, ${program_walltime}s wall
 memory used: ${memory_bytes} bytes"
@@ -279,6 +286,12 @@ if [ "$program_exit" != "0" ]; then
 	echo "Non-zero exitcode $program_exit" >>system.out
 	echo "$resourceinfo" >>system.out
 	cleanexit ${E_RUN_ERROR:-1}
+fi
+
+if grep -E '^output-truncated: ([a-z]+,)*stdout(,[a-z]+)*' program.meta >/dev/null 2>&1 ; then
+	echo "Output limit exceeded: $program_stdout > $((FILELIMIT*1024))" >>system.out
+	echo "$resourceinfo" >>system.out
+	cleanexit ${E_OUTPUT_LIMIT:-1}
 fi
 
 if [ $exitcode -eq 42 ]; then

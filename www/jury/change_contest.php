@@ -6,6 +6,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+$REQUIRED_ROLES = array('jury','balloon');
 require('init.php');
 
 if ( empty($_SERVER['HTTP_REFERER']) ) die("Missing referrer header.");

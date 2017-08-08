@@ -9,24 +9,17 @@ configure.php: configure.php.in $(TOPDIR)/paths.mk
 domserver: configure.php
 
 install-domserver:
-	for d in . countries ; do \
-		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/$$d images/$$d/*.png ; \
-	done
-	for d in public team jury api auth ; do \
+	for d in public team jury auth ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/$$d $$d/*.php ; \
 	done
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/images/teams images/teams/*.jpg
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/jury         jury/*.css
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/js           js/*.js js/*.gif js/*.png
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/js/flot      js/flot/*.js
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/js/ace       js/ace/*.js
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)              *.php *.css
+	for version in v3 v4; do \
+		$(INSTALL_DATA) -m 0755 -d $(DESTDIR)$(domserver_wwwdir)/api/$$version ; \
+		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/api/$$version api/$$version/*.php ; \
+	done
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/jury         jury/*.phtml
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)              *.php
 	rm -f $(DESTDIR)$(domserver_wwwdir)/jury/doc
 	$(LN_S) $(domjudge_docdir) $(DESTDIR)$(domserver_wwwdir)/jury/doc
-
-install-docs:
-	$(INSTALL_DATA) -T images/countries/README    $(DESTDIR)$(domjudge_docdir)/README.country_flags
-	$(INSTALL_DATA) -T images/countries/codes.txt $(DESTDIR)$(domjudge_docdir)/country_codes.txt
 
 distclean-l:
 	-rm -f configure.php

@@ -34,10 +34,8 @@
 
 /* For chroot(), which is not POSIX. */
 #define _DEFAULT_SOURCE
-/* For unshare(), only used when cgroups are enabled */
-#if ( USE_CGROUPS == 1 )
+/* For unshare() used by cgroups. */
 #define _GNU_SOURCE
-#endif
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -47,6 +45,7 @@
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/resource.h>
+#include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -56,24 +55,23 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <fnmatch.h>
+#include <regex.h>
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
 #include <math.h>
 #include <limits.h>
-#if ( USE_CGROUPS == 1 )
 #include <inttypes.h>
 #include <libcgroup.h>
 #include <sched.h>
 #include <sys/sysinfo.h>
-#else
-#undef USE_CGROUPS
-#endif
 
 #define PROGRAM "runguard"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
 #define max(x,y) ((x) > (y) ? (x) : (y))
+#define min(x,y) ((x) < (y) ? (x) : (y))
 
 /* Array indices for input/output file descriptors as used by pipe() */
 #define PIPE_IN  1
@@ -117,7 +115,6 @@ char  *stderrfilename;
 char  *metafilename;
 FILE  *metafile;
 
-#ifdef USE_CGROUPS
 char  *cgroupname;
 const char *cpuset;
 
@@ -125,8 +122,9 @@ const char *cpuset;
 #define OOM_PATH_NEW "/proc/self/oom_score_adj"
 #define OOM_PATH_OLD "/proc/self/oom_adj"
 #define OOM_RESET_VALUE 0
-#endif
 
+char *runuser;
+char *rungroup;
 int runuid;
 int rungid;
 int use_root;
@@ -147,11 +145,7 @@ int show_version;
 
 double walltime[2], cputime[2]; /* in seconds, soft and hard limits */
 int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
-#ifdef USE_CGROUPS
 int64_t memsize;
-#else
-rlim_t memsize;
-#endif
 rlim_t filesize;
 rlim_t nproc;
 size_t streamsize;
@@ -311,6 +305,8 @@ Run COMMAND with restrictions.\n\
       --version          output version information and exit\n");
 	printf("\n\
 Note that root privileges are needed for the `root' and `user' options.\n\
+If `user' is set, then `group' defaults to the same to prevent security\n\
+issues, since otherwise the process would retain group root permissions.\n\
 The COMMAND path is relative to the changed ROOT directory if specified.\n\
 TIME may be specified as a float; two floats separated by `:' are treated\n\
 as soft and hard limits. The runtime written to file is that of the last\n\
@@ -320,10 +316,10 @@ real user ID.\n");
 	exit(0);
 }
 
-void output_exit_time(int exitcode)
+void output_exit_time(int exitcode, double cpudiff)
 {
-	double walldiff, cpudiff, userdiff, sysdiff;
-	int timelimit_reached;
+	double walldiff, userdiff, sysdiff;
+	int timelimit_reached = 0;
 	unsigned long ticks_per_second = sysconf(_SC_CLK_TCK);
 
 	verbose("command exited with exitcode %d",exitcode);
@@ -338,7 +334,6 @@ void output_exit_time(int exitcode)
 
 	userdiff = (double)(endticks.tms_cutime - startticks.tms_cutime) / ticks_per_second;
 	sysdiff  = (double)(endticks.tms_cstime - startticks.tms_cstime) / ticks_per_second;
-	cpudiff = userdiff + sysdiff;
 
 	write_meta("wall-time","%.3f", walldiff);
 	write_meta("user-time","%.3f", userdiff);
@@ -379,11 +374,10 @@ void output_exit_time(int exitcode)
 	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
 }
 
-#ifdef USE_CGROUPS
-void output_cgroup_stats()
+void output_cgroup_stats(double *cputime)
 {
 	int ret;
-	int64_t max_usage;
+	int64_t max_usage, cpu_time_int;
 	struct cgroup *cg;
 	struct cgroup_controller *cg_controller;
 
@@ -402,6 +396,13 @@ void output_cgroup_stats()
 
 	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
 	write_meta("memory-bytes","%" PRId64, max_usage);
+
+	cg_controller = cgroup_get_controller(cg, "cpuacct");
+	ret = cgroup_get_value_int64(cg_controller, "cpuacct.usage", &cpu_time_int);
+	if ( ret!=0 ) {
+		error(0,"get cgroup value: %s(%d)", cgroup_strerror(ret), ret);
+	}
+	*cputime = (double) cpu_time_int / 1.e9;
 
 	cgroup_free(&cg);
 }
@@ -436,6 +437,9 @@ void cgroup_create()
 	} else {
 		verbose("cpuset undefined");
 	}
+
+	cg_controller = cgroup_add_controller(cg, "cpu");
+	cg_controller = cgroup_add_controller(cg, "cpuacct");
 
 	/* Perform the actual creation of the cgroup */
 	ret = cgroup_create_cgroup(cg, 1);
@@ -493,18 +497,18 @@ void cgroup_delete()
 	if (!cg) {
 		error(0,"cgroup_new_cgroup");
 	}
-	ret = cgroup_get_cgroup(cg);
-	if ( ret!=0 ) {
-		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
+	cgroup_add_controller(cg, "cpu");
+	cgroup_add_controller(cg, "memory");
+	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
+		cgroup_add_controller(cg, "cpuset");
 	}
 	/* Clean up our cgroup */
-	ret = cgroup_delete_cgroup(cg, 1);
+	ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
 	if ( ret!=0 ) {
 		error(0,"deleting cgroup: %s(%d)", cgroup_strerror(ret), ret);
 	}
 	cgroup_free(&cg);
 }
-#endif // USE_CGROUPS
 
 void terminate(int sig)
 {
@@ -629,6 +633,7 @@ void setrestrictions()
 {
 	char *path;
 	char  cwd[PATH_MAX+1];
+	gid_t aux_groups[10];
 
 	struct rlimit lim;
 
@@ -666,20 +671,10 @@ void setrestrictions()
 		setlim(CPU);
 	}
 
-	/* Memory limits may be handled by cgroups now */
-#ifndef USE_CGROUPS
-	if ( memsize!=RLIM_INFINITY ) {
-		verbose("setting memory limits to %d bytes",(int)memsize);
-		lim.rlim_cur = lim.rlim_max = memsize;
-		setlim(AS);
-		setlim(DATA);
-	}
-#else
-	/* Memory limits should be unlimited when using cgroups */
+	/* Memory limits should be unlimited, since we use cgroups. */
 	lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
 	setlim(AS);
 	setlim(DATA);
-#endif
 
 	/* Always set the stack size to be unlimited. */
 	lim.rlim_cur = lim.rlim_max = RLIM_INFINITY;
@@ -705,10 +700,8 @@ void setrestrictions()
 		if ( setrlimit(RLIMIT_CORE,&lim)!=0 ) error(errno,"disabling core dumps");
 	}
 
-#ifdef USE_CGROUPS
 	/* Put the child process in the cgroup */
 	cgroup_attach();
-#endif
 
 	/* Run the command in a separate process group so that the command
 	   and all its children can be killed off with one signal. */
@@ -747,6 +740,9 @@ void setrestrictions()
 	/* Set group-id (must be root for this, so before setting user). */
 	if ( use_group ) {
 		if ( setgid(rungid) ) error(errno,"cannot set group ID to `%d'",rungid);
+		aux_groups[0] = rungid;
+		if ( setgroups(1, aux_groups) ) error(errno,"cannot clear auxiliary groups");
+
 		verbose("using group ID `%d'",rungid);
 	}
 	/* Set user-id (must be root for this). */
@@ -773,19 +769,21 @@ int main(int argc, char **argv)
 	fd_set readfds;
 	pid_t pid;
 	int   i, r, nfds;
-#ifdef USE_CGROUPS
 	int   ret;
 	FILE *fp;
 	char *oom_path;
-#endif
 	int   status;
 	int   exitcode;
 	char *valid_users;
 	char *ptr;
+	regex_t userregex;
 	int   opt;
 	double tmpd;
+	size_t data_read[3];
 	size_t data_passed[3];
-	ssize_t nread, nwritten;
+	ssize_t nread;
+	size_t to_read;
+	char str[256];
 
 	struct itimerval itimer;
 	struct sigaction sigact;
@@ -813,12 +811,22 @@ int main(int argc, char **argv)
 		case 'u': /* user option: uid or string */
 			use_user = 1;
 			runuid = strtol(optarg,&ptr,10);
-			if ( errno || *ptr!='\0' ) runuid = userid(optarg);
+			runuser = strdup(optarg);
+			if ( errno || *ptr!='\0' ) {
+				runuid = userid(optarg);
+				if ( regcomp(&userregex,"^[A-Za-z][A-Za-z0-9\\._-]*$", REG_NOSUB)!=0 ) {
+					error(0,"could not create username regex");
+				}
+				if ( regexec(&userregex, runuser, 0, NULL, 0)!=0 ) {
+					error(0,"username `%s' does not match POSIX pattern", runuser);
+				}
+			}
 			if ( runuid<0 ) error(0,"invalid username or ID specified: `%s'",optarg);
 			break;
 		case 'g': /* group option: gid or string */
 			use_group = 1;
 			rungid = strtol(optarg,&ptr,10);
+			rungroup = strdup(optarg);
 			if ( errno || *ptr!='\0' ) rungid = groupid(optarg);
 			if ( rungid<0 ) error(0,"invalid groupname or ID specified: `%s'",optarg);
 			break;
@@ -854,11 +862,7 @@ int main(int argc, char **argv)
 			nproc = (rlim_t) read_optarg_int("process limit",1,LONG_MAX);
 			break;
 		case 'P': /* cpuset option */
-			#ifdef USE_CGROUPS
-				cpuset = optarg;
-			#else
-				error(0,"option `-P' is only supported when compiled with cgroup support.");
-			#endif
+			cpuset = optarg;
 			break;
 		case 'c': /* no-core option */
 			no_coredump = 1;
@@ -900,6 +904,16 @@ int main(int argc, char **argv)
 		}
 	}
 
+	/* Make sure that we change from group root if we change to an
+	   unprivileged user to prevent unintended permissions. */
+	if ( use_user && !use_group ) {
+		verbose("using unprivileged user `%s' also as group",runuser);
+		use_group = 1;
+		rungroup = strdup(runuser);
+		rungid = groupid(rungroup);
+		if ( rungid<0 ) error(0,"invalid groupname or ID specified: `%s'",rungroup);
+	}
+
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
 
@@ -913,12 +927,21 @@ int main(int argc, char **argv)
 		error(errno,"cannot open `%s'",metafilename);
 	}
 
-	/* Check that new uid is in list of valid uid's.
-	   This must be done before chroot for /etc/passwd lookup. */
+	/* Check that new uid is in list of valid uid's. When the new user
+	   was given as a username string, then '*' matches an arbitrary
+	   length string of valid POSIX username characters [A-Za-z0-9._-].
+	   This check must be done before chroot for /etc/passwd lookup. */
 	if ( use_user ) {
 		valid_users = strdup(VALID_USERS);
 		for(ptr=strtok(valid_users,","); ptr!=NULL; ptr=strtok(NULL,",")) {
 			if ( runuid==userid(ptr) ) break;
+			if ( runuser!=NULL ) {
+				ret = fnmatch(ptr,runuser,0);
+				if ( ret==0 ) break;
+				if ( ret!=FNM_NOMATCH ) {
+					error(0,"matching username `%s' against `%s'",runuser,ptr);
+				}
+			}
 		}
 		if ( ptr==NULL || runuid<=0 ) error(0,"illegal user specified: %d",runuid);
 	}
@@ -946,7 +969,6 @@ int main(int argc, char **argv)
 		error(errno,"installing signal handler");
 	}
 
-#ifdef USE_CGROUPS
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
 		int ret = strtol(cpuset, &ptr, 10);
 		/* check if input is only a single integer */
@@ -994,7 +1016,6 @@ int main(int argc, char **argv)
 		}
 		if ( fclose(fp)!=0 ) error(errno,"closing file `%s'",oom_path);
 	}
-#endif
 
 	switch ( child_pid = fork() ) {
 	case -1: /* error */
@@ -1042,8 +1063,9 @@ int main(int argc, char **argv)
 		/* Redirect child stdout/stderr to file */
 		for(i=1; i<=2; i++) {
 			child_redirfd[i] = i; /* Default: no redirects */
-			data_passed[i] = 0; /* Reset data counters */
+			data_read[i] = data_passed[i] = 0; /* Reset data counters */
 		}
+		data_read[0] = 0;
 		if ( redir_stdout ) {
 			child_redirfd[STDOUT_FILENO] = creat(stdoutfilename, S_IRUSR | S_IWUSR);
 			if ( child_redirfd[STDOUT_FILENO]<0 ) {
@@ -1123,8 +1145,31 @@ int main(int argc, char **argv)
 			for(i=1; i<=2; i++) {
 				if ( child_pipefd[i][PIPE_OUT] != -1 &&
 				     FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
-					nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
-					if ( nread==-1 ) error(errno,"reading child fd %d",i);
+
+					if (limit_streamsize && data_passed[i] == streamsize) {
+						/* Throw away data if we're at the output limit, but
+						   still count how much data we consumed  */
+						nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
+					} else {
+						/* Otherwise copy the output to a file */
+						to_read = BUF_SIZE;
+						if (limit_streamsize) {
+							to_read = min(BUF_SIZE, streamsize-data_passed[i]);
+						}
+						nread = splice(child_pipefd[i][PIPE_OUT], NULL,
+									   child_redirfd[i], NULL,
+									   to_read, SPLICE_F_MOVE);
+						data_passed[i] += nread;
+
+						/* print message if we're at the streamsize limit */
+						if (limit_streamsize && data_passed[i] == streamsize) {
+							verbose("child fd %i limit reached",i);
+						}
+					}
+					if ( nread==-1 ) {
+						if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) continue;
+						error(errno,"copying data fd %d",i);
+					}
 					if ( nread==0 ) {
 						/* EOF detected: close fd and indicate this with -1 */
 						if ( close(child_pipefd[i][PIPE_OUT])!=0 ) {
@@ -1133,17 +1178,15 @@ int main(int argc, char **argv)
 						child_pipefd[i][PIPE_OUT] = -1;
 						continue;
 					}
-					if ( limit_streamsize && data_passed[i]+nread>=streamsize ) {
-						if ( data_passed[i]<streamsize ) {
-							verbose("child fd %d limit reached",i);
-						}
-						nread = streamsize - data_passed[i];
-					}
-					nwritten = write(child_redirfd[i], buf, nread);
-					if ( nwritten==-1 ) error(errno,"writing child fd %d",i);
-					data_passed[i] += nwritten;
+					data_read[i] += nread;
 				}
 			}
+		}
+
+		/* Close the output files */
+		for(i=1; i<=2; i++) {
+			ret = close(child_redirfd[i]);
+			if( ret!=0 ) error(errno,"closing output fd %d", i);
 		}
 
 		if ( times(&endticks)==(clock_t) -1 ) {
@@ -1174,16 +1217,33 @@ int main(int argc, char **argv)
 			exitcode = WEXITSTATUS(status);
 		}
 
-#ifdef USE_CGROUPS
-		output_cgroup_stats();
+		double cputime;
+		output_cgroup_stats(&cputime);
 		cgroup_kill();
 		cgroup_delete();
-#endif
 
 		/* Drop root before writing to output file(s). */
 		if ( setuid(getuid())!=0 ) error(errno,"dropping root privileges");
 
-		output_exit_time(exitcode);
+		output_exit_time(exitcode, cputime);
+
+		/* Check if the output stream was truncated. */
+		if ( limit_streamsize ) {
+			str[0] = 0;
+			ptr = str;
+			if ( data_passed[1]<data_read[1] ) {
+				ptr = stpcpy(ptr,"stdout");
+			}
+			if ( data_passed[2]<data_read[2] ) {
+				if ( ptr!=str ) ptr = stpcpy(ptr,",");
+				ptr = stpcpy(ptr,"stderr");
+			}
+			write_meta("output-truncated","%s",str);
+		}
+
+		write_meta("stdin-bytes", "%zu",data_read[0]);
+		write_meta("stdout-bytes","%zu",data_read[1]);
+		write_meta("stderr-bytes","%zu",data_read[2]);
 
 		if ( outputmeta && fclose(metafile)!=0 ) {
 			error(errno,"closing file `%s'",metafilename);

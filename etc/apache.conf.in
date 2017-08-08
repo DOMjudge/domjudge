@@ -14,9 +14,7 @@
 #NameVirtualHost *
 #<VirtualHost *>
 #ServerName _default_
-#DocumentRoot @domserver_wwwdir@
-#RedirectMatch ^/api$ /api/
-#Alias /api @domserver_wwwdir@/api/index.php
+#DocumentRoot @domserver_webappdir@/web
 #</VirtualHost>
 
 # Alternatively, use HTTPS and redirect HTTP to HTTPS:
@@ -30,9 +28,7 @@
 #
 #<VirtualHost *:443>
 #ServerName _default_
-#DocumentRoot @domserver_wwwdir@
-#RedirectMatch ^/api$ /api/
-#Alias /api @domserver_wwwdir@/api/index.php
+#DocumentRoot @domserver_webappdir@/web
 #
 #SSLEngine on
 #SSLCertificateFile    /path/to/your/SSL-certificate.crt
@@ -46,16 +42,13 @@
 # Alternatively, use this instead of the VirtualHost above when you don't
 # want DOMjudge in the root, but only occupy a subdir, like this:
 # www.example.com/domjudge
-
-RedirectMatch ^/domjudge/api$ /domjudge/api/
-Alias /domjudge/api @domserver_wwwdir@/api/index.php
-Alias /domjudge @domserver_wwwdir@
+Alias /domjudge @domserver_webappdir@/web
 
 ### General options ###
 #
 # This section applies to both options above.
 
-<Directory @domserver_wwwdir@>
+<Directory @domserver_webappdir@/web>
 <IfModule !mod_authz_core.c>
 # For Apache 2.2:
 Order allow,deny
@@ -66,8 +59,14 @@ Allow from all
 Require all granted
 </IfModule>
 
-Options FollowSymlinks
-DirectoryIndex index.php
+<IfModule mod_rewrite.c>
+    Options -MultiViews
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ app.php [QSA,L]
+    # Uncomment to run symfony in debug mode
+    #RewriteRule ^(.*)$ app_dev.php [QSA,L]
+</IfModule>
 
 # Disable VCS metadata access, if present
 <IfModule mod_rewrite.c>
@@ -78,18 +77,6 @@ RewriteRule .gitignore$ - [F]
 RewriteRule Makefile$ - [F]
 </IfModule>
 
-</Directory>
-
-# Limit access to the jury webinterface
-<Directory @domserver_wwwdir@/jury>
-
-# Optionally restrict access to just the jury computers:
-#  # Apache 2.2:
-#  Deny from all
-#  Allow from 192.168.1.0/24
-#  # Apache 2.4:
-#  Require ip 192.168.1.0/24
-
 # If you want to allow large file uploads for testcases, you must
 # ensure that the following PHP settings are all set to high enough
 # values. The following example will allow to upload testcases of
@@ -97,7 +84,9 @@ RewriteRule Makefile$ - [F]
 # Note that additionally, you may want to increase max_file_uploads
 # in your php.ini file to allow for more testcases per problem and
 # multiple file submissions.
-#<IfModule mod_php5.c>
+
+#<IfModule mod_php7.c>
+#php_value max_file_uploads    100
 #php_value upload_max_filesize 64M
 #php_value post_max_size       64M
 #php_value memory_limit        128M
@@ -105,25 +94,11 @@ RewriteRule Makefile$ - [F]
 
 </Directory>
 
-# Increase post limits for REST API
-<Directory @domserver_wwwdir@/api>
-
-<IfModule mod_php5.c>
-php_value upload_max_filesize 64M
-php_value post_max_size       64M
-</IfModule>
-
+<Directory @domserver_webappdir@/web/bundles>
+    <IfModule mod_rewrite.c>
+        RewriteEngine Off
+    </IfModule>
 </Directory>
-
-# Optionally enable IP-restrictions for teams, recommended if you know the
-# IP range the teams will be on.
-#<Directory @domserver_wwwdir@/team>
-#  # Apache 2.2:
-#  Deny from all
-#  Allow from 10.20.30.0/24
-#  # Apache 2.4:
-#  Require ip 10.20.30.0/24
-#</Directory>
 
 # vim: syntax=apachestyle
 # Local Variables:

@@ -1,0 +1,61 @@
+#!/usr/bin/env swipl
+
+:- use_module(library(qsave)).
+:- dynamic(loading/1).
+:- asserta(loading(0)).
+
+% The first hook is for detectin
+% loading state
+
+user:message_hook(Term, _, _) :-
+    (   Term = load_file(start(Level, _))
+    ->  asserta(loading(Level))
+    ;   (   Term = load_file(done(Level, _, _, _, _, _))
+        ->  retractall(loading(Level))
+        ;   true)),
+    false.
+
+% The second hook shuts down SWI when
+% an error occurs during loading.
+
+user:message_hook(Term, error, _):-
+    loading(_),
+    message_to_string(Term, String),
+    write(user_error, String), nl(user_error),
+    halt(2).
+
+% Main compilation function, this loads the file,
+% checks that 'main' exists, and saves it as a
+% standalone executable.
+
+domjudge_compile([Source,Dest]) :-
+    % Load the user source
+    consult(Source),
+
+    % Check that main exists
+    (
+        current_predicate(main/0)
+     ;  write(user_error, 'main/0 not found'),
+        nl(user_error),
+        halt(3)
+    ),
+
+    % Create the executable
+    qsave_program(Dest, [ goal((main,halt)), % We should execute main and then exit succesfully
+                          toplevel(halt(1)), % If not, we shoult exit with exit code 1
+                          stand_alone(true) ]),
+
+    % Exit succesfully
+    halt.
+
+% If previous case is not matched we apparently got a different number of arguments.
+domjudge_compile(_) :-
+    write(user_error, 'Usage ./compile.plg <source file> <dest>'),
+    nl(user_error),
+    halt(1).
+
+% Executed on start, calls the compilation
+% function with the commandline arguments.
+:- current_prolog_flag(argv, Arguments),
+   domjudge_compile(Arguments).
+

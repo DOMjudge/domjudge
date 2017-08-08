@@ -55,20 +55,20 @@ function tsv_import($fmt)
 	switch ($fmt) {
 		case 'groups':
 			$data = tsv_groups_prepare($content);
-			$c = tsv_groups_set($data);
+			$cnt = tsv_groups_set($data);
 			break;
 		case 'teams':
 			$data = tsv_teams_prepare($content);
-			$c = tsv_teams_set($data);
+			$cnt = tsv_teams_set($data);
 			break;
 		case 'accounts':
 			$data = tsv_accounts_prepare($content);
-			$c = tsv_accounts_set($data);
+			$cnt = tsv_accounts_set($data);
 			break;
 		default: error("Unknown format");
 	}
 
-	echo "<p>$c rows imported</p>";
+	echo "<p>$cnt items imported</p>";
 
 }
 
@@ -93,13 +93,13 @@ function tsv_groups_prepare($content)
 function tsv_groups_set($data)
 {
 	global $DB;
-	$c = 0;
+	$cnt = 0;
 	foreach ($data as $row) {
 		$DB->q("REPLACE INTO team_category SET %S", $row);
 		auditlog('team_category', $row['categoryid'], 'replaced', 'imported from tsv');
-		$c++;
+		$cnt++;
 	}
-	return $c;
+	return $cnt;
 }
 
 function tsv_teams_prepare($content)
@@ -133,20 +133,28 @@ function tsv_teams_prepare($content)
 function tsv_teams_set($data)
 {
 	global $DB;
-	$c = 0;
+	$cnt = 0;
 	foreach ($data as $row) {
 		// it is legitimate that a team has no affiliation. Do not add it then.
 		if ( !empty($row['team_affiliation']['shortname']) ) {
-			$DB->q("REPLACE INTO team_affiliation SET %S", $row['team_affiliation']);
-			$affilid = $DB->q("VALUE SELECT affilid FROM team_affiliation WHERE shortname = %s LIMIT 1", $row['team_affiliation']['shortname']);
-			auditlog('team_affiliation', $affilid, 'replaced', 'imported from tsv');
+			// First look up if the affiliation already exists.
+			$affilid = $DB->q("MAYBEVALUE SELECT affilid FROM team_affiliation
+			                   WHERE shortname = %s AND name = %s AND country = %s LIMIT 1",
+			                  $row['team_affiliation']['shortname'],
+			                  $row['team_affiliation']['name'],
+			                  $row['team_affiliation']['country']);
+			if ( empty($affilid) ) {
+				$affilid = $DB->q("RETURNID INSERT INTO team_affiliation SET %S",
+				                  $row['team_affiliation']);
+				auditlog('team_affiliation', $affilid, 'added', 'imported from tsv');
+			}
 			$row['team']['affilid'] = $affilid;
 		}
 		$DB->q("REPLACE INTO team SET %S", $row['team']);
 		auditlog('team', $row['team']['teamid'], 'replaced', 'imported from tsv');
-		$c++;
+		$cnt++;
 	}
-	return $c;
+	return $cnt;
 }
 
 
@@ -155,16 +163,40 @@ function tsv_accounts_prepare($content)
 	global $DB;
 	$data = array();
 	$l = 1;
+	$teamroleid = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'team');
 	$juryroleid = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'jury');
 	$adminroleid = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'admin');
+
+	$jurycatid = $DB->q('MAYBEVALUE SELECT categoryid FROM team_category WHERE name = "Jury"');
+	if ( !$jurycatid ) {
+		$jurycatid = $DB->q('RETURNID INSERT INTO team_category (name,sortorder,visible)
+		                     VALUES ("Jury", 100, 0)');
+	}
+
 	foreach($content as $line) {
 		$l++;
 		$line = explode("\t", trim($line));
 
-		if ($line[0] != 'admin' && $line[0] != 'judge') {
-			error('unknown role id in line ' . $l . ': ' . $line[0]);
+		$teamid = $juryteam = null;
+		switch($line[0]) {
+			case 'admin':
+				$line[0] = $adminroleid;
+				break;
+			case 'judge':
+				$line[0] = $juryroleid;
+				$juryteam = array('name' => $line[1], 'categoryid' => $jurycatid, 'members' => $line[1]);
+				break;
+			case 'team':
+				$line[0] = $teamroleid;
+				// For now we assume we can find the teamid by parsing the username
+				$teamid = preg_replace('#^team0*#', '', $line[2]);
+				break;
+			case 'analyst':
+				// Ignore type analyst for now. We don't have a useful mapping yet.
+				continue 2;
+			default:
+				error('unknown role id on line ' . $l . ': ' . $line[0]);
 		}
-		$line[0] = ($line == 'admin' ? $adminroleid : $juryroleid);
 
 		// accounts.tsv contains data pertaining both to users and userroles.
 		// hence return data for both tables.
@@ -172,12 +204,16 @@ function tsv_accounts_prepare($content)
 		// we may do more integrity/format checking of the data here.
 		$data[] = array (
 			'user' => array (
-				'name' => $line[2],
-				'username' => $line[3],
-				'password' => md5($line[3].'#'.$line[4])),
+				'name' => $line[1],
+				'username' => $line[2],
+				'password' => dj_password_hash($line[3]),
+				'teamid' => $teamid
+				),
 			'userrole' => array (
 				'userid' => -1, // need to get appropriate userid later
-				'roleid' => $line[0])
+				'roleid' => $line[0]
+				),
+			'team' => $juryteam,
 			);
 	}
 
@@ -188,17 +224,26 @@ function tsv_accounts_prepare($content)
 function tsv_accounts_set($data)
 {
 	global $DB;
-	$c = 0;
+	$cnt = 0;
 	foreach ($data as $row) {
+		if ( ! empty($row['team']) ) {
+			$teamid = $DB->q("MAYBEVALUE SELECT teamid FROM team WHERE name = %s AND categoryid = %i",
+			                 $row['team']['name'], $row['team']['categoryid']);
+			if ( is_null($teamid) ) {
+				$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $row['team']);
+			}
+			auditlog('team', $teamid, 'added', 'imported from tsv, autocreated for judge');
+			$row['user']['teamid'] = $teamid;
+		}
 		$DB->q("REPLACE INTO user SET %S", $row['user']);
 		$userid = $DB->q("VALUE SELECT userid FROM user WHERE username = %s", $row['user']['username']);
 		auditlog('user', $userid, 'replaced', 'imported from tsv');
 		$row['userrole']['userid'] = $userid;
 		$DB->q("REPLACE INTO userrole SET %S", $row['userrole']);
 		auditlog('userrole', $userid, 'replaced', 'imported from tsv');
-		$c++;
+		$cnt++;
 	}
-	return $c;
+	return $cnt;
 }
 
 
@@ -212,7 +257,6 @@ function tsv_export($fmt)
 		case 'teams':      $data = tsv_teams_get();      $version = 1; break;
 		case 'scoreboard': $data = tsv_scoreboard_get(); $version = 1; break;
 		case 'results':    $data = tsv_results_get();    $version = 1; break;
-	//	case 'userdata':   $data = tsv_userdata_get();   $version = 1; break;
 	//	case 'accounts':   $data = tsv_accounts_get();   $version = 1; break;
 		default: error('Specified format not (yet) supported.');
 	}

@@ -19,8 +19,18 @@ SUBMIT = \
 	fi ; \
 	echo
 
+SUBST_FILES = scripted_submit
+
+build: $(SUBST_FILES)
+
+$(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
+	$(substconfigvars)
+
 check-syntax:
-	./syntax
+	@output=`./syntax` ; \
+	if [ -n "$$output" ]; then \
+		echo "$$output" ; exit 1 ; \
+	fi
 
 check: test-normal test-fltcmp test-boolfind
 
@@ -51,4 +61,4 @@ $(SUBMITCMD):
 clean-l:
 	rm -f test-file\ name*
 
-.PHONY: test-normal test-fltcmp test-stress
+.PHONY: check check-syntax test-normal test-fltcmp test-stress

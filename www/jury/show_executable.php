@@ -49,7 +49,7 @@ if ( isset($_POST['storeid']) ) {
 	if ( $retval!=0 ) {
 		error("failed to zip executable files.");
 	}
-	$content = file_get_contents($tmpfname . ".zip");
+	$content = dj_file_get_contents($tmpfname . ".zip");
 
 	$DB->q('UPDATE executable SET zipfile = %s, md5sum = %s WHERE execid = %s', $content, md5($content), $id);
 

@@ -90,20 +90,57 @@ function getRequestID($numeric = TRUE)
 
 /**
  * Returns whether the problem with probid is visible to teams and the
- * public. That is, it is in the active contest, which has started and
- * it is submittable.
+ * public. That is, it is in the selected (active) contest, which has
+ * started and it is submittable.
  */
 function problemVisible($probid)
 {
 	global $DB, $cdata;
 
 	if ( empty($probid) ) return FALSE;
-	if ( !$cdata || difftime(now(),$cdata['starttime']) < 0 ) return FALSE;
+
+	$fdata = calcFreezeData($cdata);
+	if ( !$fdata['cstarted'] ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
 	               INNER JOIN contestproblem USING (probid)
 	               WHERE cid = %i AND allow_submit = 1 AND probid = %i',
 	              $cdata['cid'], $probid) !== NULL;
+}
+
+/**
+ * Given an array of contest data, calculates whether the contest
+ * has already started ('cstarted'), and if scoreboard is currently
+ * frozen ('showfrozen') or final ('showfinal').
+ */
+function calcFreezeData($cdata)
+{
+	$fdata = array();
+
+	if ( empty($cdata) ) {
+		return array(
+			'showfinal' => false,
+			'showfrozen' => false,
+			'cstarted' => false
+		);
+	}
+
+	// Show final scores if contest is over and unfreezetime has been
+	// reached, or if contest is over and no freezetime had been set.
+	// We can compare $now and the dbfields stringwise.
+	$now = now();
+	$fdata['showfinal']  = ( !isset($cdata['freezetime']) &&
+	                difftime($cdata['endtime'],$now) <= 0 ) ||
+	              ( isset($cdata['unfreezetime']) &&
+	                difftime($cdata['unfreezetime'], $now) <= 0 );
+	// freeze scoreboard if freeze time has been reached and
+	// we're not showing the final score yet
+	$fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
+	              difftime($cdata['freezetime'],$now) <= 0;
+	// contest is active but has not yet started
+	$fdata['cstarted'] = difftime($cdata['starttime'],$now) <= 0;
+
+	return $fdata;
 }
 
 /**
@@ -333,6 +370,56 @@ function calcPenaltyTime($solved, $num_submissions)
 	return ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
 }
 
+// From http://www.problemarchive.org/wiki/index.php/Problem_Format
+
+// Expected result tag in (jury) submissions:
+$problem_result_matchstrings = array('@EXPECTED_RESULTS@: ',
+                                     '@EXPECTED_SCORE@: ');
+
+// Remap from Kattis problem package format to DOMjudge internal strings:
+$problem_result_remap = array('ACCEPTED' => 'CORRECT',
+                              'WRONG_ANSWER' => 'WRONG-ANSWER',
+                              'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
+                              'RUN_TIME_ERROR' => 'RUN-ERROR');
+
+function normalizeExpectedResult($result) {
+	global $problem_result_remap;
+
+	$result = trim(mb_strtoupper($result));
+	if ( in_array($result,array_keys($problem_result_remap)) ) {
+		return $problem_result_remap[$result];
+	}
+	return $result;
+}
+
+/**
+ * checks given source file for expected results string
+ * returns NULL if no such string exists
+ * returns array of expected results otherwise
+ */
+function getExpectedResults($source) {
+	global $problem_result_matchstrings;
+	$pos = FALSE;
+	foreach ( $problem_result_matchstrings as $matchstring ) {
+		if ( ($pos = mb_stripos($source,$matchstring)) !== FALSE ) break;
+	}
+
+	if ( $pos === FALSE) {
+		return NULL;
+	}
+
+	$beginpos = $pos + mb_strlen($matchstring);
+	$endpos = mb_strpos($source,"\n",$beginpos);
+	$str = mb_substr($source,$beginpos,$endpos-$beginpos);
+	$results = explode(',',trim(mb_strtoupper($str)));
+
+	foreach ( $results as $key => $val ) {
+		$results[$key] = normalizeExpectedResult($val);
+	}
+
+	return $results;
+}
+
 /**
  * Determines final result for a judging given an ordered array of
  * testcase results. Testcase results can have value NULL if not run
@@ -459,14 +546,15 @@ function alert($msgtype, $description = '')
  */
 function sig_handler($signal)
 {
-	global $exitsignalled;
+	global $exitsignalled, $gracefulexitsignalled;
 
 	logmsg(LOG_DEBUG, "Signal $signal received");
 
 	switch ( $signal ) {
-	case SIGTERM:
 	case SIGHUP:
-	case SIGINT:
+		$gracefulexitsignalled = TRUE;
+	case SIGINT:   # Ctrl+C
+	case SIGTERM:
 		$exitsignalled = TRUE;
 	}
 }
@@ -571,11 +659,12 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	// If no contest has started yet, refuse submissions.
 	$now = now();
 
-	$contestdata = $DB->q('MAYBETUPLE SELECT starttime,endtime FROM contest WHERE cid = %i', $contest);
+	$contestdata = $DB->q('MAYBETUPLE SELECT * FROM contest WHERE cid = %i', $contest);
 	if ( ! isset($contestdata) ) {
 		error("Contest c$contest not found.");
 	}
-	if( !checkrole('jury') && difftime($contestdata['starttime'], $now) > 0 ) {
+	$fdata = calcFreezeData($contestdata);
+	if( !checkrole('jury') && !$fdata['cstarted'] ) {
 		error("The contest is closed, no submissions accepted. [c$contest]");
 	}
 
@@ -621,7 +710,14 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 
 	logmsg (LOG_INFO, "input verified");
 
+	// First look up any expected results in file, so as to minimize
+	// the SQL transaction time below.
+	if ( checkrole('jury') ) {
+		$results = getExpectedResults(dj_file_get_contents($files[0]));
+	}
+
 	// Insert submission into the database
+	$DB->q('START TRANSACTION');
 	$id = $DB->q('RETURNID INSERT INTO submission
 	              (cid, teamid, probid, langid, submittime, origsubmitid)
 	              VALUES (%i, %i, %i, %s, %s, %i)',
@@ -630,8 +726,17 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
 		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
-		       $id, $filenames[$rank], $rank, dj_get_file_contents($files[$rank], false));
+		       $id, $filenames[$rank], $rank, dj_file_get_contents($files[$rank]));
 	}
+
+	// Add expected results from source. We only do this for jury
+	// submissions to prevent accidental auto-verification of team
+	// submissions.
+	if ( checkrole('jury') && !empty($results) ) {
+		$DB->q('UPDATE submission SET expected_results=%s
+		        WHERE submitid=%i', json_encode($results), $id);
+	}
+	$DB->q('COMMIT');
 
 	// Recalculate scoreboard cache for pending submissions
 	calcScoreRow($contest, $teamid, $probid);
@@ -923,15 +1028,18 @@ $HTML_colors = array(
 
 /**
  * Convert a HTML extended color name to 6-digit hex RGB value.
- * Returns black if $color is not valid.
+ * If $color is already in hex RGB format, it is returned unchanged.
+ * Returns NULL if $color is not valid.
  */
 function color_to_hex($color)
 {
 	global $HTML_colors;
 
+	if ( preg_match('/^#([[:xdigit:]]{3}){1,2}$/', $color) ) return $color;
+
 	$color = strtolower(preg_replace('/[[:space:]]/','',$color));
 	if ( isset($HTML_colors[$color]) ) return strtoupper($HTML_colors[$color]);
-	return '#000000';
+	return null;
 }
 
 /**

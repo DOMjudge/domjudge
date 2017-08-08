@@ -7,7 +7,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-require_once(LIBEXTDIR . '/spyc/spyc.php');
+require_once(LIBVENDORDIR . '/autoload.php');
 
 /**
  * Return a link to add a new row to a specific table.
@@ -43,25 +43,27 @@ function editLink($table, $value, $multi = false)
 /**
  * Return a link to delete a specific data element from a given table.
  * Takes the table, the key field to match on and the value.
+ * Optionally specify an extra description of the item to be deleted.
  */
-function delLink($table, $field, $value)
+function delLink($table, $field, $value, $desc = NULL)
 {
-	return delLinkMultiple($table, array($field), array($value));
+	return delLinkMultiple($table, array($field), array($value), '', $desc);
 }
 
 /**
  * Return a link to delete a specific data element from a given table.
  * Takes the table, the key fields to match on and the values.
  */
-function delLinkMultiple($table, $fields, $values, $referrer = '')
+function delLinkMultiple($table, $fields, $values, $referrer = '', $desc = NULL)
 {
 	$arguments = '';
 	foreach ($fields as $i => $field) {
 		$arguments .= '&amp;' . $field . '=' . urlencode($values[$i]);
 	}
 	return "<a href=\"delete.php?table=" . urlencode($table) . $arguments .
-	       "&amp;referrer=" . urlencode($referrer)
-	       ."\"><img src=\"../images/delete.png\" " .
+	       "&amp;referrer=" . urlencode($referrer) .
+	       ( isset($desc) ? "&amp;desc=".urlencode($desc)  : '' ) .
+	       "\"><img src=\"../images/delete.png\" " .
 	       "alt=\"delete\" title=\"delete this " . specialchars($table) .
 	       "\" class=\"picto\" /></a>";
 }
@@ -70,9 +72,9 @@ function delLinkMultiple($table, $fields, $values, $referrer = '')
  * Returns a link to export a problem as zip-file.
  *
  */
-function exportLink($probid)
+function exportProblemLink($probid)
 {
-	return '<a href="export.php?id=' . urlencode($probid) .
+	return '<a href="export_problem.php?id=' . urlencode($probid) .
 		'"><img src="../images/b_save.png" ' .
 		' title="export problem as zip-file" alt="export" /></a>';
 }
@@ -166,53 +168,6 @@ function openZipFile($filename) {
 	return $zip;
 }
 
-$matchstrings = array('@EXPECTED_RESULTS@: ',
-		      '@EXPECTED_SCORE@: ');
-
-
-function normalizeExpectedResult($result) {
-	// Remap results as specified by the Kattis problem package format,
-	// see: http://www.problemarchive.org/wiki/index.php/Problem_Format
-	$resultremap = array('ACCEPTED' => 'CORRECT',
-			     'WRONG_ANSWER' => 'WRONG-ANSWER',
-			     'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
-			     'RUN_TIME_ERROR' => 'RUN-ERROR');
-
-	$result = trim(mb_strtoupper($result));
-	if ( in_array($result,array_keys($resultremap)) ) {
-		return $resultremap[$result];
-	}
-	return $result;
-}
-
-/**
- * checks given source file for expected results string
- * returns NULL if no such string exists
- * returns array of expected results otherwise
- */
-function getExpectedResults($source) {
-	global $matchstrings;
-	$pos = FALSE;
-	foreach ( $matchstrings as $matchstring ) {
-		if ( ($pos = mb_stripos($source,$matchstring)) !== FALSE ) break;
-	}
-
-	if ( $pos === FALSE) {
-		return NULL;
-	}
-
-	$beginpos = $pos + mb_strlen($matchstring);
-	$endpos = mb_strpos($source,"\n",$beginpos);
-	$str = mb_substr($source,$beginpos,$endpos-$beginpos);
-	$results = explode(',',trim(mb_strtoupper($str)));
-
-	foreach ( $results as $key => $val ) {
-		$results[$key] = normalizeExpectedResult($val);
-	}
-
-	return $results;
-}
-
 // Return resized thumbnail and mime-type (the part after 'image/')
 // from image contents.
 function get_image_thumb_type($image)
@@ -276,7 +231,7 @@ function get_image_thumb_type($image)
  */
 function importZippedProblem($zip, $probid = NULL, $cid = -1)
 {
-	global $DB, $teamid, $cdatas, $matchstrings;
+	global $DB, $teamid, $cdatas;
 	$prop_file = 'domjudge-problem.ini';
 	$yaml_file = 'problem.yaml';
 
@@ -424,7 +379,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 							error("failed to create zip file for output validator.");
 						}
 
-						$ovzip = file_get_contents("$tmpzipfiledir/outputvalidator.zip");
+						$ovzip = dj_file_get_contents("$tmpzipfiledir/outputvalidator.zip");
 						$probname = $DB->q("VALUE SELECT name FROM problem
 						                    WHERE probid=%i", $probid);
 						$ovname = preg_replace('/[^a-zA-Z0-9]/', '_', $probname) . "_cmp";
@@ -564,6 +519,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			$extension = end($filename_parts);
 			if ( !starts_with($filename, 'submissions/') || ends_with($filename, '/') ) {
 				// skipping non-submission files and directories silently
+				// FIXME: (multi-file) submissions can also sit in a subdirectory.
 				continue;
 			}
 			unset($langid);
@@ -613,4 +569,31 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 	}
 
 	return $probid;
+}
+
+// dis- or re-enable what caused an internal error
+function set_internal_error($disabled, $cid, $value) {
+	global $DB, $api;
+	switch ($disabled['kind']) {
+		case 'problem':
+			$DB->q('RETURNAFFECTED UPDATE contestproblem
+				SET allow_judge=%i
+				WHERE cid=%i AND probid=%i',
+				$value, $cid, $disabled['probid']);
+			break;
+		case 'judgehost':
+			$DB->q('RETURNAFFECTED UPDATE judgehost
+				SET active=%i
+				WHERE hostname=%s',
+				$value, $disabled['hostname']);
+			break;
+		case 'language':
+			$DB->q('RETURNAFFECTED UPDATE language
+				SET allow_judge=%i
+				WHERE langid=%s',
+				$value, $disabled['langid']);
+			break;
+		default:
+			$api->createError("unknown internal error kind '" . $disabled['kind'] . "'");
+	}
 }

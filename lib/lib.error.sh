@@ -19,7 +19,8 @@ logmsg ()
 	local msglevel stamp msg
 
 	msglevel="$1"; shift
-	stamp="[`date '+%b %d %T'`] $PROGNAME[$$]:"
+	msec=`date '+%N'`
+	stamp="[`date '+%b %d %T'`.`printf "%.3s" $msec`] $PROGNAME[$$]:"
 # Expand backslash escape sequences using printf, since support for
 # echo with(out) option -e is unreliable. First use echo to put spaces
 # between arguments.

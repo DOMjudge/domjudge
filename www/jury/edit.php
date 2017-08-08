@@ -216,7 +216,7 @@ if ( ! isset($_POST['cancel']) ) {
 			foreach($tmpnames as $field => $tmpname) {
 				if ( !empty ($tmpname) ) {
 					checkFileUpload($_FILES['data']['error'][$id][$field]);
-					$itemdata = array($field => file_get_contents($tmpname));
+					$itemdata = array($field => dj_file_get_contents($tmpname));
 					$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
 				}
 			}

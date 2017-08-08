@@ -66,7 +66,7 @@ if ( isset($_POST['upload']) ) {
 				$desc = $ini_array['description'];
 				$type = $ini_array['type'];
 			}
-			$content = file_get_contents($_FILES['executable_archive']['tmp_name'][$fileid]);
+			$content = dj_file_get_contents($_FILES['executable_archive']['tmp_name'][$fileid]);
 			if ( !empty($id) ) {
 				$DB->q('UPDATE executable SET description=%s, md5sum=%s, zipfile=%s, type=%s
 				        WHERE execid=%s',
@@ -157,7 +157,7 @@ $data = $DB->q('MAYBETUPLE SELECT execid, description, md5sum, type,
                                   OCTET_LENGTH(zipfile) AS size
                 FROM executable WHERE execid = %s', $id);
 
-if ( ! $data ) error("Missing or invalid problem id");
+if ( ! $data ) error("Missing or invalid executable id");
 
 echo "<h1>Executable ".specialchars($id)."</h1>\n\n";
 
@@ -223,7 +223,7 @@ if ( IS_ADMIN ) {
 		'"><img src="../images/b_save.png" ' .
 		' title="export executable as zip-file" alt="export" /></a>' .
 		editLink('executable',$id) . "\n" .
-		delLink('executable','execid', $id) . "</p>\n\n";
+		delLink('executable','execid', $id, $data['description']) . "</p>\n\n";
 }
 
 require(LIBWWWDIR . '/footer.php');

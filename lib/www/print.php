@@ -39,6 +39,19 @@ function printresult($result, $valid = TRUE) {
 }
 
 /**
+ * Print a small indicator when this judging is still being judged
+ * even though the result is known, e.g. with non-lazy evaluation.
+ * $judging should be an array containing (at least) the keys 'result'
+ * and 'endtime' and optionally 'aborted'.
+ */
+function printjudgingbusy($judging)
+{
+	return ( IS_JURY && !empty($judging['result']) &&
+	         empty($judging['endtime']) && !@$judging['aborted'] ) ?
+	       '&nbsp;(&hellip;)' : '';
+}
+
+/**
  * print a yes/no field, input: something that evaluates to a boolean
  */
 function printyn ($val) {

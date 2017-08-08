@@ -114,7 +114,8 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.rejudgingid = %i)
 	     LEFT JOIN judging        jold ON (j.prevjudgingid IS NULL AND s.submitid = jold.submitid AND jold.valid = 1 OR j.prevjudgingid = jold.judgingid) ' :
 	    'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.valid = 1) %_ ') .
-	    'WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $rejudgingclause .
+	    'LEFT JOIN rejudging      r    ON (j.rejudgingid = r.rejudgingid)
+	     WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $rejudgingclause .
 	    (isset($restrictions['teamid'])      ? 'AND s.teamid = %i '      : '%_ ') .
 	    (isset($restrictions['categoryid'])  ? 'AND t.categoryid = %i '  : '%_ ') .
 	    (isset($restrictions['probid'])      ? 'AND s.probid = %i '      : '%_ ') .
@@ -133,7 +134,9 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
 	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
 	               cp.shortname, p.name AS probname, l.name AS langname,
-	               j.result, j.judgehost, j.verified, j.jury_member, j.seen ' .
+	               j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.endtime,
+	               (j.endtime IS NULL AND j.valid=0 AND
+	                (r.valid IS NULL OR r.valid=0)) AS aborted ' .
 	              (isset($restrictions['rejudgingid']) ? ', jold.result AS oldresult ' : '') .
 	              $sqlbody .
 	              'ORDER BY s.submittime DESC, s.submitid DESC ' .
@@ -202,7 +205,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 
 		if ( !$row['valid'] ) {
 			$igncnt++;
-			echo ' sub_ignore';
+			echo ' ignore';
 		}
 		if ( $sid == $highlight ) {
 			echo ' highlight';
@@ -246,7 +249,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 		} else {
 			echo printresult($row['result']);
 		}
-		echo "</a></td>";
+		echo printjudgingbusy($row) . "</a></td>";
 
 		if ( IS_JURY ) {
 			// only display verification if we're done with judging
@@ -388,7 +391,7 @@ function putTeam($teamid) {
  * Output clock
  */
 function putClock() {
-	global $cdata, $username;
+	global $cdata, $username, $userdata;
 
 	echo '<div id="clock">';
 	// timediff to end of contest
@@ -430,7 +433,12 @@ function putClock() {
 	}
 
 	if ( logged_in() ) {
-		echo "<div id=\"username\">logged in as " . $username
+		// Show pretty name if possible
+		$displayname = $username;
+		if ($userdata['name']) {
+			$displayname = "<abbr title=\"$username\">" . $userdata['name'] . "</abbr>";
+		}
+		echo "<div id=\"username\">logged in as " . $displayname
 			. ( have_logout() ? " <a href=\"../auth/logout.php\">×</a>" : "" )
 			. "</div>";
 	}
@@ -520,7 +528,7 @@ function putProblemText($probid)
 		$probname = $prob['shortname'];
 	}
 
-	if ( empty($prob) || difftime($cdata['starttime'],now())>0 ) {
+	if ( empty($prob) || !problemVisible($probid) ) {
 		error("Problem p$probid not found or not available");
 	}
 
@@ -571,7 +579,7 @@ function putSampleTestcase($probid, $seq, $type)
 	                  AND sample = 1 ORDER BY testcaseid ASC LIMIT %i,1',
 	                  $probid, $cdata['cid'], $seq-1);
 
-	if ( empty($sample) || difftime($cdata['starttime'],now())>0 ) {
+	if ( empty($sample) || !problemVisible($probid) ) {
 		error("Problem p$probid not found or not available");
 	}
 	$probname = $sample['shortname'];
@@ -603,7 +611,7 @@ function putProblemTextList()
 	} else {
 
 		// otherwise, display list
-		$res = $DB->q('SELECT probid,shortname,name,color,problemtext_type,MAX(sample) AS numsamples
+		$res = $DB->q('SELECT probid,shortname,name,color,problemtext_type,SUM(sample) AS numsamples
 		               FROM problem
 		               INNER JOIN testcase USING(probid)
 		               INNER JOIN contestproblem USING (probid)
@@ -621,18 +629,14 @@ function putProblemTextList()
 					      '" /> <a href="problem.php?id=' . urlencode($row['probid']) . '">' .
 					      'problem statement</a><br />';
 				}
-				$i = 1;
 				if ( !empty($row['numsamples']) ) {
-					$samples = $DB->q('COLUMN SELECT testcaseid FROM testcase
-					                   WHERE probid = %i AND sample = 1 ORDER BY testcaseid ASC', $row['probid']);
-					foreach($samples as $id) {
+					for($i=1; $i<=$row['numsamples']; ++$i) {
 						print '<img src="../images/b_save.png" alt="download" /> ';
 						print '<a href="problem.php?id=' . urlencode($row['probid']) .
 						      '&amp;testcase=' . urlencode($i) . '&amp;type=in">sample input</a> | ';
 						print '<a href="problem.php?id=' . urlencode($row['probid']) .
 						      '&amp;testcase=' . urlencode($i) . '&amp;type=out">sample output</a>';
 						print "<br />";
-						++$i;
 					}
 				}
 				print "<br /></li>\n";
@@ -690,4 +694,24 @@ function putgetMainExtension($langdata) {
 		}
 	}
 	echo "\t\tdefault: return '';\n\t}\n}\n\n";
+}
+
+/**
+ * Render page with help of twig.
+ * Assumes rendering template in file with same base name and suffix .phtml
+ */
+function renderPage($data, $header = true, $footer = true, $templateFile = null) {
+	if ( empty($templateFile) ) {
+		$templateFile = $_SERVER['PHP_SELF'];
+	}
+	$templateFile = basename($templateFile, '.php') . '.phtml';
+
+	$title = $data['title'];
+	$refresh = @$data['refresh'];
+	if ( $header ) require(LIBWWWDIR . '/header.php');
+
+	global $twig;
+	echo $twig->loadTemplate($templateFile)->render($data);
+
+	if ( $footer ) require(LIBWWWDIR . '/footer.php');
 }

@@ -2,6 +2,7 @@ DOMjudge
 --------
 [![Build Status](https://travis-ci.org/DOMjudge/domjudge.svg?branch=master)](https://travis-ci.org/DOMjudge/domjudge)
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
+[![Code Climate](https://codeclimate.com/github/DOMjudge/domjudge/badges/gpa.svg)](https://codeclimate.com/github/DOMjudge/domjudge)
 
 This is the Programming Contest Jury System "DOMjudge" version 5.2.0DEV
 
@@ -43,7 +44,7 @@ by running 'make dist', see the online documentation, section
 Copyright & Licencing
 ---------------------
 
-DOMjudge is Copyright (c) 2004 - 2016 by the DOMjudge developers and
+DOMjudge is Copyright (c) 2004 - 2017 by the DOMjudge developers and
 all respective contributors. The current DOMjudge developers are Jaap
 Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst and Tobias
 Werth; see the administrator's manual for a complete list of

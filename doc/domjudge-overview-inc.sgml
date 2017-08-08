@@ -31,9 +31,11 @@ A global overview of the features that DOMjudge provides:
 <item>Detailed jury information (submissions, judgings, diffs) and
       options (rejudge, clarifications, resubmit)
 <item>Designed with security in mind
-<item>Has been used in many live contests
-<item>Open Source, Free Software
 </itemize>
+
+DOMjudge has been used in many live contests
+(see <url url="https://www.domjudge.org/intro"> for an overview) and
+is Open Source, Free Software.
 
 <![ %admin; [
 <sect>Requirements
@@ -60,6 +62,7 @@ DOMjudge is developed by Jaap Eldering, Nicky Gerritsen, Keith
 Johnson, Thijs Kinkhorst and Tobias Werth; Peter van de Werken has
 retired as developer. Many other people have contributed (apologies
 for any oversights):
+Michael Baer,
 Jeroen Bransen,
 Stijn van Drongelen,
 Rob Franken,
@@ -69,14 +72,16 @@ Jan Kuipers,
 Richard Lobb,
 Alex Muntada,
 Dominik Paulus,
+Bert Peters,
 Jeroen Schot,
 Matt Steele,
 Shuhei Takahashi,
+Hoai-Thu Vuong,
 and Jeroen van Wolffelaar.
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
 
-DOMjudge is Copyright (c) 2004 - 2016 by the DOMjudge developers and its contributors.
+DOMjudge is Copyright (c) 2004 - 2017 by the DOMjudge developers and its contributors.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the <url name="GNU General Public License"

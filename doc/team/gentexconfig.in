@@ -26,12 +26,13 @@ if ( is_readable($config) ) {
 } else {
 	@include('../../etc/domserver-config.php');
 	@include('../../etc/judgehost-config.php');
-	define('DOMJUDGE_VERSION', `sed -n '1s/.*version //p' ../../README.md | tr -d '\n'`);
+	define('DOMJUDGE_VERSION',
+	       `grep -E 'DOMjudge.* version' ../../README.md | sed -n '1s/.*version //p' | tr -d '\n'`);
 }
 
 // FIXME: we need to read some of these variables from the MySQL DB.
 $configvars = array(
-	'WEBBASEURI'                => $_SERVER['argv'][1],
+	'BASEURL'                   => 'https://example.com/domjudge/',
 	'DOMJUDGE_VERSION'          => 'unknown',
 	'SOURCESIZE'                => 256,
 	'COMPILETIME'               => 30,

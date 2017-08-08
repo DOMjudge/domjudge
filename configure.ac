@@ -66,6 +66,11 @@ AC_ARG_WITH([domjudge-user], [AS_HELP_STRING([--with-domjudge-user=USER],
 [User that owns password files (default: current user).])], [], [])
 
 if test "x$with_domjudge_user" = x; then
+	# Check and warn if running as root (without explicitly setting it):
+	if test "x$USER" = xroot; then
+		AC_MSG_ERROR([installing/running as root is STRONGLY DISCOURAGED, use --with-domjudge-user=root to override.])
+	fi
+
 	AC_SUBST(DOMJUDGE_USER,$USER)
 	AC_MSG_RESULT([$DOMJUDGE_USER (default: current user)])
 else
@@ -112,31 +117,20 @@ else
 	AC_MSG_RESULT($RUNUSER)
 fi
 
+AC_MSG_CHECKING([rungroup])
+AC_ARG_WITH([rungroup], [AS_HELP_STRING([--with-rungroup=GROUP],
+[Unprivileged group under which to run submissions (default: same as runuser).])], [], [])
+
+if test "x$with_rungroup" = x; then
+	AC_SUBST(RUNGROUP,"$RUNUSER")
+	AC_MSG_RESULT($RUNGROUP (default))
+else
+	AC_SUBST(RUNGROUP,$with_rungroup)
+	AC_MSG_RESULT($RUNGROUP)
+fi
+
 # Check for using Linux cgroups for memory control
-AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]))
-
-if test "x$LIBCGROUP" != x; then
-	use_cgroups=yes
-else
-	use_cgroups=no
-fi
-AC_ARG_ENABLE(cgroups,AS_HELP_STRING([--enable-cgroups],
-[Use Linux cgroups for memory control (default: if supported).
- This requires Linux kernel >= 3.2.0 and libcgroup.]), [], [])
-
-if test "x$enable_cgroups" = xno; then
-	use_cgroups=no
-elif test "x$enable_cgroups" != x; then
-	use_cgroups=yes
-fi
-
-# Finally define an export variable that can be substituted into
-# etc/runguard-config.h.in:
-if test "x$use_cgroups" = xyes; then
-	AC_SUBST(USE_CGROUPS,1)
-else
-	AC_SUBST(USE_CGROUPS,0)
-fi
+AC_CHECK_LIB(cgroup, cgroup_init, AC_SUBST(LIBCGROUP,[-lcgroup]), AC_MSG_ERROR([Linux cgroup library not found.]))
 
 # }}}
 
@@ -150,7 +144,7 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_wwwdir,      $datadir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_sqldir,      $datadir/${PACKAGE_TARNAME}/sql)
 	AC_SUBST(domserver_libdir,      $libdir/${PACKAGE_TARNAME})
-	AC_SUBST(domserver_libextdir,   $libdir/${PACKAGE_TARNAME}/ext)
+	AC_SUBST(domserver_libvendordir,$libdir/${PACKAGE_TARNAME}/vendor)
 	AC_SUBST(domserver_libwwwdir,   $libdir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_libsubmitdir,$libdir/${PACKAGE_TARNAME}/submit)
 	AC_SUBST(domserver_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
@@ -162,7 +156,7 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(judgehost_bindir,      $bindir)
 	AC_SUBST(judgehost_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_libdir,      $libdir/${PACKAGE_TARNAME})
-	AC_SUBST(judgehost_libextdir,   $libdir/${PACKAGE_TARNAME}/ext)
+	AC_SUBST(judgehost_libvendordir,$libdir/${PACKAGE_TARNAME}/vendor)
 	AC_SUBST(judgehost_libjudgedir, $libdir/${PACKAGE_TARNAME}/judge)
 	AC_SUBST(judgehost_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_rundir,      $localstatedir/run/${PACKAGE_TARNAME})
@@ -195,9 +189,10 @@ AX_WITH_COMMENT(5,[More fine tuning of all installation (sub)directories:])
 AX_PATH(domserver_bindir,       [$domserver_root/bin])
 AX_PATH(domserver_etcdir,       [$domserver_root/etc])
 AX_PATH(domserver_wwwdir,       [$domserver_root/www])
+AX_PATH(domserver_webappdir,    [$domserver_root/webapp])
 AX_PATH(domserver_sqldir,       [$domserver_root/sql])
 AX_PATH(domserver_libdir,       [$domserver_root/lib])
-AX_PATH(domserver_libextdir,    [$domserver_root/lib/ext])
+AX_PATH(domserver_libvendordir, [$domserver_root/lib/vendor])
 AX_PATH(domserver_libwwwdir,    [$domserver_root/lib/www])
 AX_PATH(domserver_libsubmitdir, [$domserver_root/lib/submit])
 AX_PATH(domserver_logdir,       [$domserver_root/log])
@@ -208,7 +203,7 @@ AX_WITH_COMMENT(6,[     ])
 AX_PATH(judgehost_bindir,       [$judgehost_root/bin])
 AX_PATH(judgehost_etcdir,       [$judgehost_root/etc])
 AX_PATH(judgehost_libdir,       [$judgehost_root/lib])
-AX_PATH(judgehost_libextdir,    [$judgehost_root/lib/ext])
+AX_PATH(judgehost_libvendordir, [$judgehost_root/lib/vendor])
 AX_PATH(judgehost_libjudgedir,  [$judgehost_root/lib/judge])
 AX_PATH(judgehost_logdir,       [$judgehost_root/log])
 AX_PATH(judgehost_rundir,       [$judgehost_root/run])
@@ -219,6 +214,19 @@ AX_PATH(judgehost_cgroupdir,    [/cgroup])
 AX_WITH_COMMENT(7,[      ])
 
 # }}}
+
+AC_ARG_WITH([baseurl], [AS_HELP_STRING([--with-baseurl=URL],
+[Base URL of the DOMjudge web interfaces. Example default:
+ "https://example.com/domjudge/".])], [], [])
+AX_WITH_COMMENT(8,[       ])
+
+if test "x$with_baseurl" != x; then
+	AC_SUBST(BASEURL,$with_baseurl)
+	AC_MSG_RESULT($BASEURL)
+else
+	AC_SUBST(BASEURL,'https://example.com/domjudge/')
+	AC_SUBST(BASEURL_UNCONFIGURED,1)
+fi
 
 # Checks for programs.
 AC_PROG_CXX
@@ -262,10 +270,15 @@ if test "x$enable_submitclient" != "xno"; then
 
 	# Check for JSONcpp library to decode language/extensions list from
 	# REST API (this also requires libcURL below).
+
+	# Note that under Debian the header files are installed under
+	# PREFIX/jsoncpp/json/json.h and not PREFIX/json/json.h since that
+	# conflicts with the libjson C library, so we check that first.
 	AC_LANG_PUSH([C++])
-	AC_CHECK_HEADERS([jsoncpp/json/json.h],AC_SUBST(LIBJSONCPP,[-ljsoncpp]),[
-		AC_MSG_ERROR([JSONcpp headers not found (required for submit client)])
-	])
+	AC_CHECK_HEADERS([jsoncpp/json/json.h json/json.h],[found_jsoncpp_headers=yes; break;],[])
+	AS_IF([test "x$found_jsoncpp_headers" != "xyes"],
+		AC_MSG_ERROR([JSONcpp headers not found (required for submit client)]),
+		AC_SUBST(LIBJSONCPP,[-ljsoncpp]))
 	AC_LANG_POP([C++])
 
 fi
@@ -280,6 +293,9 @@ AC_ARG_ENABLE(static-linking,AS_HELP_STRING([--enable-static-linking],
 if test "x$enable_static_linking" = "xyes"; then
 	AC_SUBST(STATIC_LINK_START,[-Wl,-Bstatic])
 	AC_SUBST(STATIC_LINK_END,  [-Wl,-Bdynamic])
+else
+	AC_SUBST(STATIC_LINK_START,[''])
+	AC_SUBST(STATIC_LINK_END,  [''])
 fi
 
 # Check option to build documentation. This option is provided to
@@ -339,9 +355,10 @@ echo " * LDFLAGS.............: $LDFLAGS"
 echo ""
 echo " * default user........: $DOMJUDGE_USER"
 echo " * runguard user.......: $RUNUSER"
+echo " * runguard group......: $RUNGROUP"
 echo " * webserver group.....: $WEBSERVER_GROUP"
 echo ""
-echo " * use Linux cgroups...: $use_cgroups"
+echo " * website base URL....: $BASEURL"
 echo ""
 if test "x$SUBMITCLIENT_ENABLED" = xyes ; then
    echo " * submitclient........: enabled, cURL version: $curl_version"
@@ -360,7 +377,7 @@ echo " * domserver...........: $domserver_root"
 echo "    - bin..............: $domserver_bindir"
 echo "    - etc..............: $domserver_etcdir"
 echo "    - lib..............: $domserver_libdir"
-echo "    - libext...........: $domserver_libextdir"
+echo "    - libvendor........: $domserver_libvendordir"
 echo "    - libwww...........: $domserver_libwwwdir"
 echo "    - libsubmit........: $domserver_libsubmitdir"
 echo "    - log..............: $domserver_logdir"
@@ -369,12 +386,13 @@ echo "    - sql..............: $domserver_sqldir"
 echo "    - submit...........: $domserver_submitdir"
 echo "    - tmp..............: $domserver_tmpdir"
 echo "    - www..............: $domserver_wwwdir"
+echo "    - webapp...........: $domserver_webappdir"
 echo ""
 echo " * judgehost...........: $judgehost_root"
 echo "    - bin..............: $judgehost_bindir"
 echo "    - etc..............: $judgehost_etcdir"
 echo "    - lib..............: $judgehost_libdir"
-echo "    - libext...........: $judgehost_libextdir"
+echo "    - libvendor........: $judgehost_libvendordir"
 echo "    - libjudge.........: $judgehost_libjudgedir"
 echo "    - log..............: $judgehost_logdir"
 echo "    - run..............: $judgehost_rundir"
@@ -385,6 +403,12 @@ echo "    - cgroup...........: $judgehost_cgroupdir"
 echo ""
 echo "Run 'make' without arguments to get a list of (build) targets."
 echo ""
+if test "x$BASEURL_UNCONFIGURED" = x1 ; then
+   echo "Warning: base URL is unconfigured; the submit client, generating team"
+   echo "documentation and OpenID support will not work out of the box!"
+   echo "Rerun configure with option '--with-baseurl=BASEURL' to correct this."
+   echo ""
+fi
 fi # !QUIET
 # }}}
 

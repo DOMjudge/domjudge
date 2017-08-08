@@ -264,7 +264,7 @@ if ( in_array('variations', $reports) ) {
 		}
 
 		// Check for variations in runtimes across judgings:
-		$rows = $DB->q('SELECT r.testcaseid,
+		$rows = $DB->q('SELECT r.testcaseid, t.rank,
 		                MIN(r.runtime) AS runtime_min,
 		                MAX(r.runtime) AS runtime_max,
 		                AVG(r.runtime) AS runtime_avg,
@@ -272,14 +272,16 @@ if ( in_array('variations', $reports) ) {
 		                COUNT(j.judgingid) AS njudgings
 		                FROM judging_run r
 		                LEFT JOIN judging j USING (judgingid)
+		                LEFT JOIN testcase t USING (testcaseid)
 		                WHERE j.submitid = %i GROUP BY r.testcaseid',
 		               $submitid);
 
-		$runtime_spread[$submitid] = array(-1.0, $submitid);
+		$runtime_spread[$submitid] = array(-1.0, $submitid, -1.0);
 		while ( $row = $rows->next() ) {
 			$spread = (float)$row['runtime_max'] - (float)$row['runtime_min'];
 			if ( $spread > $runtime_spread[$submitid][0] ) {
 				$runtime_spread[$submitid][0] = $spread;
+				$runtime_spread[$submitid][2] = $row['rank'];
 			}
 		}
 
@@ -317,9 +319,9 @@ if ( in_array('variations', $reports) ) {
 
 	for ($i=0; $i<MAX_LIST_LEN; $i++) {
 		if ( !(list($key, $val) = each($runtime_spread)) ) break;
-		list($spread, $submitid) = $val;
-		printf(" %5s: %.3fs over %d judgings with result: %s\n",
-		       "s$submitid", $spread, count($submissions[$submitid]),
+		list($spread, $submitid, $tcid) = $val;
+		printf(" %5s/%s: %.3fs over %d judgings with result: %s\n",
+		       "s$submitid", "tc$tcid", $spread, count($submissions[$submitid]),
 		       (in_array($submitid,$results_differ) ? '*multiple*' :
 		        $judgings[$submissions[$submitid][0]]['result']));
 	}

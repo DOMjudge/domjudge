@@ -173,7 +173,7 @@ if ( $timezone_php===FALSE || empty($timezone_php) ) {
 		       "using the system default '$timezone_sys'.");
 	}
 } else {
-	result('software', 'PHP timezone', 'O', "date.timezone set to '$timezone'.");
+	result('software', 'PHP timezone', 'O', "date.timezone set to '$timezone_php'.");
 }
 
 if ( class_exists("ZipArchive") ) {
@@ -235,6 +235,10 @@ foreach (array('compare', 'run') as $type) {
 	}
 }
 
+result('configuration', 'Compile file size vs. memory limit',
+       (dbconfig_get('script_filesize_limit')<dbconfig_get('memory_limit') ? 'W' : 'O'),
+       'If the script filesize limit is lower than the memory limit, then ' .
+       'compilation of sources that statically allocate memory may fail.');
 
 if ( DEBUG == 0 ) {
 	result('configuration', 'Debugging', 'O', 'Debugging disabled.');
@@ -273,7 +277,8 @@ $res = $DB->q('SELECT * FROM contest ORDER BY cid');
 $detail = '';
 $has_errors = FALSE;
 while($cdata = $res->next()) {
-	$cp = $DB->q('SELECT * FROM contestproblem WHERE cid = %i', $cdata['cid']);
+	$cp = $DB->q('SELECT * FROM contestproblem
+	              WHERE cid = %i ORDER BY shortname', $cdata['cid']);
 
 	$detail .=  "c".(int)$cdata['cid'].": ";
 
@@ -308,8 +313,10 @@ $res = $DB->q('SELECT probid, cid, shortname, timelimit, special_compare, specia
 
 
 
-// Select all active judgehosts including restrictions, so we can check all problems
-$judgehosts = $DB->q("TABLE SELECT hostname, restrictionid FROM judgehost WHERE active = 1");
+// Select all active judgehosts including restrictions, so we can
+// check for all problem,language pairs whether they are judgeable.
+$judgehosts = $DB->q('TABLE SELECT hostname, restrictionid FROM judgehost
+                      WHERE active = 1 ORDER BY hostname');
 $judgehost_without_restrictions = false;
 foreach ($judgehosts as &$judgehost) {
 	if ( $judgehost['restrictionid'] === null ) {
@@ -317,15 +324,14 @@ foreach ($judgehosts as &$judgehost) {
 		break;
 	}
 
-	$judgehost['no_restriction'] = false;
-
 	// Get judgehost restrictions
 	$judgehost['contests'] = array();
 	$judgehost['problems'] = array();
 	$judgehost['languages'] = array();
 	$restrictions = $DB->q('MAYBEVALUE SELECT restrictions FROM judgehost
-				INNER JOIN judgehost_restriction USING (restrictionid)
-				WHERE hostname = %s', $judgehost['hostname']);
+	                        INNER JOIN judgehost_restriction USING (restrictionid)
+	                        WHERE hostname = %s ORDER BY restrictionid',
+	                       $judgehost['hostname']);
 	if ( $restrictions ) {
 		$restrictions = json_decode($restrictions, true);
 		$judgehost['contests'] = @$restrictions['contest'];
@@ -357,7 +363,9 @@ foreach ($judgehosts as &$judgehost) {
 	unset($judgehost);
 }
 
-$languages = $DB->q("KEYVALUETABLE SELECT langid, name FROM language WHERE allow_submit = 1 AND allow_judge = 1");
+$languages = $DB->q("KEYVALUETABLE SELECT langid, name FROM language
+                     WHERE allow_submit = 1 AND allow_judge = 1
+                     ORDER BY langid");
 
 $details = '';
 while($row = $res->next()) {
@@ -374,23 +382,18 @@ while($row = $res->next()) {
 		$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": missing in/output testcase.\n";
 	}
 
-	// Check for each language if there it can be checked by a judgehost
+	// Check for each problem,language pair if this can be judged by a judgehost.
 	foreach ($languages as $langid => $langname) {
 		$language_ok = $judgehost_without_restrictions;
-		if ( !$judgehost_without_restrictions ) {
-			// No judgehosts without restrictions, check them
-			foreach ($judgehosts as $judgehost) {
-				$found = $DB->q("MAYBEVALUE SELECT cp.probid
-						 FROM contestproblem cp, language l
-						 WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s" .
-						$judgehost['extra_where'],
-						$row['probid'], $row['cid'], $langid, $judgehost['contests'],
-						$judgehost['problems'], $judgehost['languages']);
-				if ( $found ) {
-					$language_ok = true;
-					break;
-				}
-			}
+		foreach ($judgehosts as $judgehost) {
+			if ( $language_ok ) break;
+			$found = $DB->q("MAYBEVALUE SELECT cp.probid
+			                 FROM contestproblem cp, language l
+			                 WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s" .
+			                $judgehost['extra_where'],
+			                $row['probid'], $row['cid'], $langid, $judgehost['contests'],
+			                $judgehost['problems'], $judgehost['languages']);
+			if ( $found ) $language_ok = true;
 		}
 
 		if (!$language_ok) {
@@ -400,14 +403,16 @@ while($row = $res->next()) {
 }
 foreach(array('input','output') as $inout) {
 	$mismatch = $DB->q("SELECT probid, rank FROM testcase
-	                    WHERE md5($inout) != md5sum_$inout");
+	                    WHERE md5($inout) != md5sum_$inout
+	                    ORDER BY probid, rank");
 	while($r = $mismatch->next()) {
 		$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
 		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
 	}
 }
 $oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
-                    FROM testcase WHERE OCTET_LENGTH(output) > %i",
+                    FROM testcase WHERE OCTET_LENGTH(output) > %i
+                    ORDER BY probid, rank",
                    dbconfig_get('output_limit')*1024);
 while($r = $oversize->next()) {
 	$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
@@ -415,9 +420,21 @@ while($r = $oversize->next()) {
 }
 
 $has_errors = $details != '';
-$probs = $DB->q("TABLE SELECT probid, cid FROM contestproblem WHERE color IS NULL");
+$probs = $DB->q("TABLE SELECT probid, cid FROM contestproblem
+                 WHERE color IS NULL ORDER BY probid");
 foreach($probs as $probdata) {
        $details .= 'p'.$probdata['probid'] . " in contest c" . $probdata['cid'] . ": has no colour\n";
+}
+$probs = $DB->q('TABLE SELECT probid, cid, memlimit
+                 FROM problem INNER JOIN contestproblem USING (probid)
+                 WHERE memlimit IS NOT NULL
+                 ORDER BY probid');
+foreach($probs as $probdata) {
+	if ( $probdata['memlimit']>dbconfig_get('script_filesize_limit') ) {
+		$details .= 'p'.$probdata['probid']." in contest c" . $probdata['cid'] .
+		         ': memory limit ' . $probdata['memlimit'] .
+		         " is larger than script filesize limit.\n";
+	}
 }
 
 result('problems, languages, teams', 'Problems integrity',
@@ -518,7 +535,7 @@ result('submissions and judgings', 'Submissions', $submres, $submnote);
 // check for non-existent problem references
 $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
                LEFT JOIN contestproblem p USING (cid,probid)
-               WHERE p.shortname IS NULL');
+               WHERE p.shortname IS NULL ORDER BY submitid');
 
 $details = '';
 while($row = $res->next()) {
@@ -542,7 +559,8 @@ while($row = $res->next()) {
 // check for submissions that have no associated source file(s)
 $res = $DB->q('SELECT s.submitid FROM submission s
                LEFT OUTER JOIN submission_file f USING (submitid)
-               WHERE f.submitid IS NULL');
+               WHERE f.submitid IS NULL
+               ORDER BY submitid');
 
 while($row = $res->next()) {
 	$details .= 'Submission s' . $row['submitid'] .
@@ -553,7 +571,8 @@ while($row = $res->next()) {
 // have no judging-row
 $res = $DB->q('SELECT s.submitid FROM submission s
                LEFT OUTER JOIN judging j USING (submitid)
-               WHERE j.submitid IS NULL AND s.judgehost IS NOT NULL');
+               WHERE j.submitid IS NULL AND s.judgehost IS NOT NULL
+               ORDER BY submitid');
 
 while($row = $res->next()) {
 	$details .= 'Submission s' . $row['submitid'] .
@@ -567,7 +586,8 @@ result('submissions and judgings', 'Submission integrity',
 $details = '';
 // check for more than one valid judging for a submission
 $res = $DB->q('SELECT submitid, SUM(valid) as numvalid
-	FROM judging GROUP BY submitid HAVING numvalid > 1');
+               FROM judging GROUP BY submitid HAVING numvalid > 1
+               ORDER BY submitid');
 while($row = $res->next()) {
 	$details .= 'Submission s' . $row['submitid'] .
 	            ' has more than one valid judging (' . $row['numvalid'] . ")\n";
@@ -576,7 +596,8 @@ while($row = $res->next()) {
 // check for valid judgings that are already running too long
 $res = $DB->q('SELECT judgingid, submitid, starttime
                FROM judging WHERE valid = 1 AND endtime IS NULL AND
-               (UNIX_TIMESTAMP()-starttime) > 300');
+               (UNIX_TIMESTAMP()-starttime) > 300
+               ORDER BY submitid, judgingid');
 while($row = $res->next()) {
 	$details .= 'Judging s' . (int)$row['submitid'] . '/j' . (int)$row['judgingid'] .
 	            " is running for longer than 5 minutes, probably the judgedaemon crashed\n";
@@ -588,7 +609,8 @@ $res = $DB->q('SELECT s.submitid AS s_submitid, j.submitid AS j_submitid,
                FROM judging j LEFT OUTER JOIN submission s USING (submitid)
                WHERE (j.cid != s.cid) OR (s.submitid IS NULL) OR
                (j.endtime IS NOT NULL AND j.endtime < j.starttime) OR
-               (j.starttime < s.submittime)');
+               (j.starttime < s.submittime)
+               ORDER BY j_submitid');
 
 while($row = $res->next()) {
 	$err = 'Judging j' . $row['judgingid'] . '/s' . $row['j_submitid'] . '';
@@ -597,7 +619,7 @@ while($row = $res->next()) {
 		$CHECKER_ERRORS[] = 'has no corresponding submitid (in c'.$row['j_cid'] .')';
 	}
 	if($row['s_cid'] != NULL && $row['s_cid'] != $row['j_cid']) {
-		$CHEKCER_ERRORS[] = 'Judging j' .$row['judgingid'] .
+		$CHECKER_ERRORS[] = 'Judging j' .$row['judgingid'] .
 		                    ' is from a different contest (c' . $row['j_cid'] .
 		                    ') than its submission s' . $row['j_submitid'] .
 		                    ' (c' . $row['s_cid'] . ')';

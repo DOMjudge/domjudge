@@ -1,0 +1,78 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Team {{team.name}}{% endblock %}
+
+{% block body %}
+{% include 'header.html.twig' %}
+<h1>Team {{team.name}}</h1>
+
+<div class="col1">
+  <table>
+    <tbody>
+      <tr>
+        <td>ID:        </td>
+        <td>t{{team.teamid}}</td>
+      </tr>
+      <tr>
+        <td>Name:      </td>
+        <td>{{team.name}}</td>
+      </tr>
+      <tr>
+        <td>Host:</td><td><span class="hostname">{{team.hostname}}</span></td>
+      </tr>
+      <tr>
+        <td>User:</td><td>
+          {% for user in team.users %}
+          <a href="{{ path('legacy.jury_user', {id: user.userid}) }}">{{user.name}}</a>
+          {% else %}
+          None
+          {% endfor %}
+        </td>
+      </tr>
+      <tr>
+        <td>Private contests:</td>
+        <td>
+          {% for contest in team.contests %}
+          <a href="{{path('legacy.jury_contest', {id: contest.cid})}}">c{{contest.cid}} - {{contest.shortname}}</a>
+          {% else %}
+          None
+          {% endfor %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="col2">
+  <table>
+    <tbody>
+      <tr>
+        <td>Category:</td>
+        <td><a href="{{path('legacy.jury_team_category', {id: team.category.categoryid})}}">{{team.category.name}}</a></td>
+      </tr>
+      {% if team.affiliation %}
+      <tr>
+        <td>Affiliation:</td><td><a href="{{path('legacy.jury_team_affiliation', {id: team.affiliation.affilid})}}">{{team.affiliation.name}}</a></td>
+      </tr>
+      <tr>
+        <td>Country:</td><td>{{team.affiliation.country}}</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+{% set thispage = path('team_show', {teamid: team.teamid}) %}
+<p class="nomorecol"><a href="{{path('legacy.jury_team', {cmd: 'edit', id: team.teamid, referrer: thispage})}}"><img src="{{asset('images/edit.png')}}" alt="edit" title="edit this team" class="picto"></a>
+<a href="{{path('legacy.jury_delete', {table: 'team',teamid: team.teamid, desc:team.name})}}"><img src="{{asset('images/delete.png')}}" alt="delete" title="delete this team" class="picto"></a></p>
+
+{#
+{{dump(team.submissions.toArray())}}
+{{dump(team.submissions[0].files.toArray())}}
+
+{% for j in team.submissions[0].judgings if j.rejudging and j.rejudging.valid==1 %}
+{{dump(j.rejudging)}}
+{% endfor %}
+#}
+
+{% endblock %}

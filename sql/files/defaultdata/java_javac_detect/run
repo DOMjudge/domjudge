@@ -3,7 +3,7 @@
 # Java compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 #
-# This script byte-compiles with the Oracle (Sun) javac compiler and
+# This script byte-compiles with the javac compiler and
 # generates a shell script to run it with the java interpreter later.
 # It autodetects the main class name and optionally renames the source
 # file if the class is public.
@@ -22,7 +22,7 @@ MAINCLASS=""
 # versions of the jvm, but might need increasing in some cases.
 MEMRESERVED=350000
 
-TMPFILE=`mktemp --tmpdir domjudge_javac_output.XXXXXX` || exit 1
+TMPFILE=$(mktemp --tmpdir domjudge_javac_output.XXXXXX) || exit 1
 
 # Byte-compile:
 javac -encoding UTF-8 -d . "$@" 2> "$TMPFILE"
@@ -49,7 +49,7 @@ rm -f $TMPFILE
 CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
             | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
 COMPILESCRIPTDIR="$(dirname "$0")"
-MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "`pwd`" $CLASSNAMES)
+MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
@@ -59,6 +59,9 @@ MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 # Write executing script:
 # Executes java byte-code interpreter with following options
 # -Xmx: maximum size of memory allocation pool
+# -Xms: initial size of memory, improves runtime stability
+# -XX:+UseSerialGC: Serialized garbage collector improves runtime stability
+# -Xss64m: 64MB stack size
 cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute java interpreter on source.
@@ -68,7 +71,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec java -client -Xss8m -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS'
+exec java -XX:+UseSerialGC -Xss64m -Xms${MEMLIMITJAVA}k -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"

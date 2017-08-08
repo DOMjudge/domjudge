@@ -17,18 +17,16 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
-# Check for '#!' interpreter line: don't allow it to prevent teams
-# from passing options to the interpreter.
-if grep '^#!' "$MAINSOURCE" >/dev/null 2>&1 ; then
-    echo "Error: interpreter statement(s) found:"
-    grep -n '^#!' "$MAINSOURCE"
-    exit 1
-fi
-
 # Check lua syntax:
-luac -p "$MAINSOURCE"
-EXITCODE=$?
-[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+for i in "$@" ; do
+	luac -p "$i"
+	EXITCODE=$?
+	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+done
+
+# Pre-compile to byte-code for faster loading and forcing that all
+# files compile together:
+luac -o luac.out "$@"
 
 # Write executing script:
 cat > "$DEST" <<EOF
@@ -40,7 +38,7 @@ if [ "\${0%/*}" != "\$0" ]; then
     cd "\${0%/*}"
 fi
 
-exec lua "$MAINSOURCE"
+exec lua luac.out
 EOF
 
 chmod a+x "$DEST"

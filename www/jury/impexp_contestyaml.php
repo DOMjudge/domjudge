@@ -25,6 +25,16 @@ function timestring_diff($time1, $time2)
 	return sprintf('%02d:%02d:%02d', $h, $m, $s);
 }
 
+// Return the first non-null argument, else null.
+function first_defined($arg1, $arg2 = null, $arg3 = null, $arg4 = null)
+{
+	if ( !empty($arg1) ) return $arg1;
+	if ( !empty($arg2) ) return $arg2;
+	if ( !empty($arg3) ) return $arg3;
+	if ( !empty($arg4) ) return $arg4;
+	return null;
+}
+
 if ( isset($_POST['import']) ) {
 
 	if ( isset($_FILES) && isset($_FILES['import_config']) &&
@@ -58,14 +68,16 @@ if ( isset($_POST['import']) ) {
 		$contest['activatetime_string'] = '-1:00';
 		$contest['endtime_string'] = '+' . $contest_yaml_data['duration'];
 		// First try new key then fallback to old 'scoreboard-freeze':
-		if ( ! empty($contest_yaml_data['scoreboard-freeze-length']) ) {
+		$freeze_duration = first_defined($contest_yaml_data['scoreboard-freeze-duration'],
+		                                 $contest_yaml_data['scoreboard-freeze-length']);
+		$freeze_start    = first_defined($contest_yaml_data['scoreboard-freeze'],
+		                                 $contest_yaml_data['freeze']);
+		if ( isset($freeze_duration) ) {
 			$contest['freezetime_string'] =
-			    '+' . $contest_yaml_data['scoreboard-freeze-length'];
+				'+' . timestring_diff($contest_yaml_data['duration'],$freeze_duration);
 		}
-		else if ( ! empty($contest_yaml_data['scoreboard-freeze']) ) {
-			$contest['freezetime_string'] =
-				'+' . timestring_diff($contest_yaml_data['duration'],
-			                          $contest_yaml_data['scoreboard-freeze']);
+		else if ( isset($freeze_start) ) {
+			$contest['freezetime_string'] = '+' . $freeze_start;
 		}
 		// unfreezetime is not supported by the current standard
 		$contest['unfreezetime_string'] = null;
@@ -90,8 +102,10 @@ if ( isset($_POST['import']) ) {
 		dbconfig_init();
 
 		// TODO: event-feed-port
-		if ( isset($contest_yaml_data['penalty-time']) ) {
-			$LIBDBCONFIG['penalty_time']['value'] = (int)$contest_yaml_data['penalty-time'];
+		$penalty = first_defined($contest_yaml_data['penalty-time'],
+		                         $contest_yaml_data['penalty']);
+		if ( isset($penalty) ) {
+			$LIBDBCONFIG['penalty_time']['value'] = (int)$penalty;
 		}
 
 	/* clarification answers/categories currently not supported; ignore them.
@@ -125,14 +139,18 @@ if ( isset($_POST['import']) ) {
 		foreach ($contest_yaml_data['problems'] as $problem) {
 			// TODO better lang-id?
 
+			// Deal with obsolete attribute names:
+			$probname  = first_defined($problem['name'], $problem['short-name']);
+			$problabel = first_defined($problem['label'], $problem['letter']);
+
 			$probid = $DB->q('RETURNID INSERT INTO problem
 			                  SET name = %s, timelimit = %i',
-			                 $problem['short-name'], 10);
+			                 $probname, 10);
 			// TODO: ask Fredrik about configuration of timelimit
 
 			$DB->q('INSERT INTO contestproblem (cid, probid, shortname, color)
 			        VALUES (%i, %i, %s, %s)',
-			       $cid, $probid, $problem['letter'], $problem['rgb']);
+			       $cid, $probid, $problabel, $problem['rgb']);
 		}
 
 		dbconfig_store();
@@ -170,12 +188,13 @@ if ( isset($_POST['import']) ) {
 		printtimerel(calcContestTime($contest_row['endtime'], $contest_row['cid']));
 
 	if ( ! is_null($contest_row['freezetime']) ) {
-		$contest_data['scoreboard-freeze'] =
-			printtimerel(calcContestTime($contest_row['freezetime'], $contest_row['cid']));
+		$contest_data['scoreboard-freeze-duration'] = printtimerel(
+			calcContestTime($contest_row['endtime'],    $contest_row['cid']) -
+			calcContestTime($contest_row['freezetime'], $contest_row['cid']));
 	}
 
 	// TODO: event-feed-port
-	$contest_data['penaltytime'] = dbconfig_get('penalty_time');
+	$contest_data['penalty-time'] = dbconfig_get('penalty_time');
 	/*
 	$contest_data['default-clars'] = dbconfig_get('clar_answers');
 	$contest_data['clar-categories'] = array_values(dbconfig_get('clar_categories'));
@@ -191,19 +210,21 @@ if ( isset($_POST['import']) ) {
 
 	}
 	$contest_data['problems'] = array();
-	$contests = getCurContests(FALSE);
-	if ( !empty($contests) ) {
-		$q = $DB->q("SELECT * FROM problem INNER JOIN contestproblem USING (probid) WHERE cid IN (%Ai)",
-		            $contests);
+	if ( !empty($cid) ) {
+		$q = $DB->q("SELECT * FROM problem
+		             INNER JOIN contestproblem USING (probid)
+		             WHERE cid = %i",
+		            $cid);
 		while ( $prob = $q->next() ) {
 
 			$problem = array();
-			$problem['letter'] = $prob['probid'];
-			$problem['short-name'] = $prob['name'];
-			// Our color field can be both a HTML color name and an RGB value,
-			// so we output it only in the human-readable field "color" and
-			// leave the field "rgb" unset.
-			$problem['color'] = $prob['color'];
+			$problem['label'] = $prob['shortname'];
+			$problem['name'] = $prob['name'];
+			// Our color field can be both a HTML color name and an RGB value.
+			// If it is in RGB, we try to find the closest HTML color name.
+			$color = hex_to_color($prob['color']);
+			$problem['color'] = is_null($color) ? $prob['color'] : $color;
+			$problem['rgb'] = color_to_hex($prob['color']);
 			$contest_data['problems'][] = $problem;
 		}
 	}

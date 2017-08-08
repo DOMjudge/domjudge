@@ -44,7 +44,8 @@ if( $res->count() == 0 ) {
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 				editLink('team_affiliation', $row['affilid']) . "&nbsp;" .
-				delLink('team_affiliation', 'affilid', $row['affilid']) . "</td>";
+				delLink('team_affiliation', 'affilid',
+				        $row['affilid'], $row['name']) . "</td>";
 		}
 		echo "</tr>\n";
 	}

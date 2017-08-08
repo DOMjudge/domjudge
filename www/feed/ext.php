@@ -17,20 +17,6 @@ if (count($cdatas) != 1 ) {
 	$cid   = reset($cids);
 }
 
-// needed for short verdicts
-$result_map = array(
-	'correct' => 'AC',
-	'compiler-error' => 'CTE',
-	'timelimit' => 'TLE',
-	'run-error' => 'RTE',
-	'no-output' => 'NO',
-	'wrong-answer' => 'WA',
-	'presentation-error' => 'PE',
-	'memory-limit' => 'MLE',
-	'output-limit' => 'OLE'
-);
-
-
 
 /**
  * DOM XML tree helper functions (PHP 5).
@@ -160,7 +146,7 @@ foreach( $categs as $region => $data ) {
 }
 
 // write out possible verdicts
-foreach ( $result_map as $long_verdict => $acronym ) {
+foreach ( $VERDICTS as $long_verdict => $acronym ) {
 	$node = XMLaddnode($root, 'judgement');
 	XMLaddnode($node, 'acronym', $acronym);
 	XMLaddnode($node, 'name', $long_verdict);
@@ -274,7 +260,7 @@ while ( $row = $events->next() ) {
 			$testcase = XMLaddnode($root, 'testcase');
 			XMLaddnode($testcase, 'i', $jrun['rank']);
 			XMLaddnode($testcase, 'judged', 'True');
-			XMLaddnode($testcase, 'judgement', $result_map[$jrun['runresult']]);
+			XMLaddnode($testcase, 'judgement', $VERDICTS[$jrun['runresult']]);
 			XMLaddnode($testcase, 'n', $ntestcases);
 			XMLaddnode($testcase, 'run-id', $row['submitid']);
 			XMLaddnode($testcase, 'solved', ($jrun['runresult']=='correct' ? 'True' : 'False'));
@@ -285,7 +271,7 @@ while ( $row = $events->next() ) {
 
 		XMLaddnode($run, 'judged', 'True');
 		XMLaddnode($run, 'status', 'done');
-		XMLaddnode($run, 'result', $result_map[$jdata['result']]);
+		XMLaddnode($run, 'result', $VERDICTS[$jdata['result']]);
 		if ( $jdata['result'] == 'correct' ) {
 			XMLaddnode($run, 'solved', 'True');
 			XMLaddnode($run, 'penalty', 'False');

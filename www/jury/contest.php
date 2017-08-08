@@ -425,7 +425,7 @@ echo "</table>\n\n";
 if ( IS_ADMIN ) {
 	echo "<p>" .
 		editLink('contest',$data['cid']) . "\n" .
-		delLink('contest','cid',$data['cid']) ."</p>\n\n";
+		delLink('contest','cid',$data['cid'],$data['name']) ."</p>\n\n";
 
 	if ( in_array($data['cid'], $cids) ) {
 		echo rejudgeForm('contest', $data['cid']) . "<br />\n\n";
@@ -478,7 +478,12 @@ else {
 			: '<td>'. $link . '&nbsp;</a></td>' );
 		echo "<td>" . $link . ( isset($row['lazy_eval_results']) ?
 		                        printyn($row['lazy_eval_results']) : '-' ) . "</a></td>\n";
-		if ( IS_ADMIN ) echo "<td>" . delLinkMultiple('contestproblem',array('cid','probid'),array($id, $row['probid']), 'contest.php?id='.$id) ."</td>";
+		if ( IS_ADMIN ) {
+			echo "<td>" .
+			     delLinkMultiple('contestproblem',array('cid','probid'),
+			                     array($id, $row['probid']),
+			                     'contest.php?id='.$id,$row['shortname']) ."</td>";
+		}
 
 		$iseven = !$iseven;
 

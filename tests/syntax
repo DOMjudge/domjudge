@@ -1,34 +1,46 @@
 #!/bin/sh
 
 # Run some Syntax checking tests on PHP and Shell scripts
+PHP=$(which php)
 
-if [ -x /usr/bin/php ]; then
-	find .. -name '*.php' | \
-	while read i ; do
-		php -l "$i" | grep -v "^No syntax errors detected in "
+if [ -x $PHP ]; then
+	find .. -path ../lib/vendor -prune -o -path ../webapp/var -prune -o -name '*.php' | \
+	while read -r i ; do
+		$PHP -l "$i" | grep -v "^No syntax errors detected in "
 	done
 
 	grep -rsl "^#\!.*php" ..|egrep -v '/\.(svn|git)/'|grep -v '\.php' | \
-	while read i ; do
-		php -l "$i" | grep -v "^No syntax errors detected in "
+	while read -r i ; do
+		$PHP -l "$i" | grep -v "^No syntax errors detected in "
 	done
 else
-	echo "PHP not found in /usr/bin/php"
+	echo "PHP not found"
 fi
 
 if [ -x /usr/bin/checkbashisms ]; then
-	grep -rsl "^#\!.*/bin/sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run))' | \
-	while read i ; do
-		checkbashisms "$i"
+	grep -rsl "^#\!.*/bin/sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
+	while read -r i ; do
+		if [ "${i##*.}" != "zip" ]; then
+			checkbashisms "$i"
+		fi
 	done
 else
 	echo "checkbashisms not found in /usr/bin/checkbashisms"
 fi
 
+# We ignore the following shellcheck warnings, for more details see:
+# https://github.com/koalaman/shellcheck/wiki/<code>
+#
+# SC1072: buggy on empty compile scripts, see https://github.com/koalaman/shellcheck/issues/384
+# SC2034: many "unused variables" are actually used, or in compile scripts declared on purpose
+# SC2086: there are too many cases where quoting is not necessary and tedious
+
 if [ -x /usr/bin/shellcheck ]; then
-	grep -rslE "^#\!.*/bin/(ba)?sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run))' | \
-	while read i ; do
-		shellcheck -e 1072,2006,2034,2059,2086 "$i"
+	grep -rslE "^#\!.*/bin/(ba)?sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
+	while read -r i ; do
+		if [ "${i##*.}" != "zip" ]; then
+			shellcheck -f gcc -e 1072,2034,2086 "$i"
+		fi
 	done
 else
 	echo "shellcheck not found in /usr/bin/shellcheck"

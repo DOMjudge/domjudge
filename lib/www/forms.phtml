@@ -1,0 +1,154 @@
+{#
+  Simple functions to start a form, add a field to a form, end a form.
+ 
+  Part of the DOMjudge Programming Contest Jury System and licenced
+  under the GNU GPL. See README and COPYING for details.
+#}
+
+{#
+  Helper function to create form fields, not to be called directly,
+  only by other functions below.
+#}
+{% macro inputField(type, name = null, value = null, attributes = '') %}
+	{% if name is not null and type != 'hidden' %}
+		{% set id = ( name | replace({'[': '_', ']': '_'}) ) %}
+		{% if type == 'radio' %}
+			{% set id = id ~ value %}
+		{% endif %}
+	{% endif %}
+	<input type="{{ type }}"
+	{% if name is not null %}
+		name="{{ name }}"
+	{% endif %}
+	{% if id is not null %}
+		id="{{ id }}"
+	{% endif %}
+	{% if value is not null %}
+		value="{{ value }}"
+	{% endif %}
+	{{ attributes | raw }} />
+{% endmacro %}
+
+{# form checkbox #}
+{% macro checkbox(name, checked = false, value = null) %}
+	{% import _self as this %}
+	{{ this.inputField('checkbox', name, value, checked ? ' checked="checked"' : '') }}
+{% endmacro %}
+
+{# form radio button #}
+{% macro radioButton(name, checked = false, value = null) %}
+	{% import _self as this %}
+	{{ this.inputField('radio', name, value, checked ? ' checked="checked"' : '') }}
+{% endmacro %}
+
+{# hidden form field #}
+{% macro hidden(name, value) %}
+	{% import _self as this %}
+	{{ this.inputField('hidden', name, value) }}
+{% endmacro %}
+
+{# input textbox #}
+{% macro input(name, value = '', size = 0, maxlength = 0, extraattr = null) %}
+	{% import _self as this %}
+	{% set attr = '' %}
+	{% if size %}
+		{% set attr = attr ~ ' size="' ~ size ~ '"' %}
+	{% endif %}
+	{% if maxlength %}
+		{% set attr = attr ~ ' maxlength="' ~ maxlength ~ '"' %}
+	{% endif %}
+	{% if extraattr is not null %}
+		{% set attr = attr ~ ' ' ~ extraattr %}
+	{% endif %}
+	{{ this.inputField('text', name, value, attr) }}
+{% endmacro %}
+
+{# 
+  Create a selectlist from an array.
+  Usage:
+  name: html name attribute
+  values: array ( key => value )  ->  <option value="key">value</option>
+  default: the key that will be selected
+  usekeys: use the keys of the array as option value or not
+  multi: multiple values are selectable, set to integer to set vertical size
+
+  FIXME: does not work for default arrays yet
+#}
+{% macro select(name, values, default = null, usekeys = false, multi = false, size = 5) %}
+	{% import _self as this %}
+	{% set id = ( name | replace({'[': '_', ']': '_'}) ) %}
+	<select name="{{ name }}" size="{{ size }}" 
+		{% if id is not null %}
+			id="{{ id }}"
+		{% endif %}
+		{% if multi %}
+			multiple="multiple"
+		{% endif %}
+	>
+	{% for key, val in values %}
+		{% if not usekeys %}
+			{% set key=val %}
+		{% endif %}
+		<option value="{{ key }}"
+			{% if key == default %}
+				selected="selected"
+			{% endif %}
+		>{{ val }}</option>
+	{% endfor %}
+	</select>
+{% endmacro %}
+
+{# form submission button - not the switched value/name parameters! #}
+{% macro submit(value, name = null, onclick = null, enable = true, extraattrs = '') %}
+	{% import _self as this %}
+	{% set attr = '' %}
+	{% if onclick is not null %}
+		{% set attr = attr ~ ' onclick="' ~ ( onclick | e ) ~ '"' %}
+	{% endif %}
+	{% if not enable %}
+		{% set attr = attr ~ ' disabled="disabled"' %}
+	{% endif %}
+	{% if extraattrs is not null %}
+		{% set attr = attr ~ ' ' ~ extraattrs %}
+	{% endif %}
+	{{ this.inputField('submit', name, value, attr) }}
+{% endmacro %}
+
+{# form reset button, value = caption #}
+{% macro reset(value) %}
+	{% import _self as this %}
+	{{ this.inputField('reset', null, value) }}
+{% endmacro %}
+
+{# textarea form element #}
+{% macro textArea(name, text = '', cols = 40, rows = 10, attr = '') %}
+	{% set id = ( name | replace({'[': '_', ']': '_'}) ) %}
+	<textarea name="{{ name }}" rows="{{ rows }}", cols="{{ cols }}" id="{{ id }}" {{ attr | raw }}>{{ text }}</textarea>
+{% endmacro %}
+
+{# form start tag #}
+{% macro form(action, method = 'post', id = null, enctype = null, charset = null, extra = '') %}
+	<form style="display:inline;" action="{{ action }}" method="{{ method }}"
+	{% if id is not null %}
+		id="{{ id }}"
+	{% endif %}
+	{% if enctype is not null %}
+		enctype="{{ enctype }}"
+	{% endif %}
+	{% if charset is not null %}
+		accept-charset="{{ charset }}"
+	{% endif %}
+	{{ extra | raw }} >
+{% endmacro %}
+
+{# form end tag #}
+{% macro endForm() %}
+	</form>
+
+{% endmacro %}
+
+{# file upload field #}
+{% macro fileField(name, dummy = null, extraattr = '') %}
+	{% import _self as this %}
+	{{ this.inputField('file', name, null, extraattr) }}
+{% endmacro %}

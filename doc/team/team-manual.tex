@@ -36,8 +36,8 @@ reads all of this manual. There are specific details of this
 jury system that might become of importance when you run into
 problems. \textbf{BE WARNED!}
 
-DOMjudge works through a web interface that can be found at\\
-\url{\WEBBASEURI team}. See figures~\ref{fig:team-overview}
+DOMjudge works through a web interface that can be found at
+\url{\BASEURL team}. See figures~\ref{fig:team-overview}
 and~\ref{fig:team-scoreboard} on the next page for an impression.
 
 \subsection*{Reading and writing}
@@ -49,9 +49,9 @@ examples.
 
 \subsection*{Submitting solutions}
 
-You can submit solutions with%
-\ifcmdsubmit{ the command-line program \cmd{submit} or by}
-the web interface:
+You can submit solutions%
+\ifcmdsubmit{ with the command-line program \cmd{submit} or }
+from the web interface:
 \begin{description}[\breaklabel\setlabelstyle{\bfseries}]
 \ifcmdsubmit{
 \item[Command-line]
@@ -62,31 +62,30 @@ your language, then these will automatically be detected. For a
 complete reference of all options and examples, see \cmd{submit --help}.
 }
 \item[Web interface]
-From your team page, \url{\WEBBASEURI team}, click \textbf{Select file\ldots} in the
-left column and select the file you want to submit. By default,
-the problem is selected from the base of the filename and the language
-from the extension. Click \textbf{Add another file} to add more files to the
-submission.
+From your team page, \url{\BASEURL team}, click the file selection
+button in the left column and select the file(s) you want to submit.
+By default, the problem is selected from the base of the (first)
+filename and the language from the extension.
 \end{description}
 
 \subsection*{Viewing scores, submissions, etc.}
 
 Viewing scores, submissions and sending and reading clarification
-requests is done through the web interface at
-\url{\WEBBASEURI team}.
+requests and replies is done through the web interface at
+\url{\BASEURL team}.
 
 \emph{End of summary}
 
 \begin{figure}[p]
   \centering
-  \fbox{\includegraphics[width=15cm]{team-overview}}
+  \fbox{\includegraphics[width=\textwidth]{team-overview}}
   \caption{the team web interface overview page.}
   \label{fig:team-overview}
 \end{figure}
 
 \begin{figure}[p]
   \centering
-  \fbox{\includegraphics[width=15cm]{team-scoreboard}}
+  \fbox{\includegraphics[width=\textwidth]{team-scoreboard}}
   \caption{the scoreboard webpage.}
   \label{fig:team-scoreboard}
 \end{figure}
@@ -136,17 +135,13 @@ function correctly.
 
 \subsection{Web interface}
 
-Solutions can be submitted from the web interface at \url{\WEBBASEURI team}.
-In the left column click \textbf{Select file\ldots} to select the file for submission.
-\DOMjudge will try to determine the problem and
-language from the base and extension of the filename respectively.
+Solutions can be submitted from the web interface at \url{\BASEURL team}.
+In the left column click the file selection button and select one or
+multiple files for submission. \DOMjudge will try to determine the
+problem and language from the base and extension of the (first) filename.
 Otherwise, select the appropriate values.
 Filenames must start with an alphanumerical character and may contain only
 alphanumerical characters and \cmd{+.\_-}.
-
-When you've selected the first source file, you may use the \textbf{Add more
-files} button to specify additional files to be part of this submission (see
-section~\ref{howjudged} `How are submissions being judged?').
 
 After you hit the submit button and confirm the submission, you will
 be redirected back to your submission list page. On this page, a message
@@ -159,7 +154,7 @@ displayed if something went wrong.
 The left column of your team web page shows an overview of your submissions.
 It contains all relevant information: submission time, programming
 language, problem and status. The address of your team page is
-\url{\WEBBASEURI team}.
+\url{\BASEURL team}.
 
 The top of the page shows your team's row in the scoreboard: your position and
 which problems you attempted and solved. Via the menu you can view the public
@@ -173,11 +168,14 @@ total time together with any penalty time incurred for previous
 incorrect submissions. Optionally the scoreboard can
 be `frozen' some time before the end of the contest. The full scoreboard view
 will not be updated anymore, but your team row will. Your team's rank will
-be displayed as `?'.
+be displayed as `?'. Finally, via the top menu you can also view the
+list of problems and view/download problem texts and sample data, if
+provided by the jury.
 
 \subsection{Possible results}
 
-A submission can have the following results:
+A submission can have the following results (not all of these may be
+available depending on configuration of the system):
 
 \begin{description}[\setleftmargin{4.5cm}]
 \item[CORRECT]
@@ -205,6 +203,10 @@ Also check that your program exits with exit code 0!
 Your program did not generate any output. Check that you write to
 standard out.
 
+\item[OUTPUT-LIMIT]
+Your program generated more output than the allowed limit. The output
+was truncated and considered incorrect.
+
 \item[WRONG-ANSWER]
 The output of your program was incorrect. This can happen simply
 because your solution is not correct, but remember that your output
@@ -217,15 +219,16 @@ stored but will not be processed anymore.
 
 \section{Clarifications}
 
-All communication with the jury is to be done with clarifications.
+All communication with the jury is to be done through clarifications.
 These can be found in the right column on your team page. Both
 clarification replies from the jury and requests sent by you
 are displayed there.
 
 There is also a button to submit a new clarification request to the
-jury. This request is only readable for the jury and they will respond
-as soon as possible. Answers that are relevant for everyone will be
-sent to everyone.
+jury; you can associate a specific problem or one of the general
+categories to a request. This clarification request is only readable
+for the jury. The jury can answer specifically to your team or send a
+reply to everyone if it is relevant for all.
 
 \section{How are submissions being judged?}\label{howjudged}
 
@@ -241,8 +244,8 @@ to a problem to the jury. Note that you have to submit the source code
 of your program (and not a compiled program or the output of your
 program).
 
-There your program enters a queue, awaiting compilation, execution
-and testing on one of the jury computers.
+On the jury system your program enters a queue, awaiting compilation,
+execution and testing on one of the jury computers.
 
 \subsection{Compilation}
 
@@ -272,10 +275,11 @@ execution. If your program violates these it will also be aborted
 with a \textsc{run-error}, see section~\ref{runlimits}.
 
 When comparing program output, it has to exactly match to output of
-the jury. So take care that you follow the output specifications. In
-case of problem statements which do not have unique output (e.g. with
-floating point answers), the jury may use a modified comparison
-function.
+the jury, except that some extra whitespace may be ignored (this
+depends on the jury's configuration of the problems). So take care
+that you follow the output specifications. In case of problem
+statements which do not have unique output (e.g. with floating point
+answers), the jury may use a modified comparison function.
 
 \subsection{Restrictions}\label{runlimits}
 
@@ -304,7 +308,7 @@ abort, resulting in a run error.
 
 \item[number of processes]
 You are not supposed to create multiple processes (threads). This is
-to no avail anyway, because your program has exactly 1 processor fully
+to no avail anyway, because your program has exactly 1 processor core fully
 at its disposal. To increase stability of the jury system, there is a
 maximum of \PROCLIMIT\ processes that can be run simultaneously
 (including processes that started your program).

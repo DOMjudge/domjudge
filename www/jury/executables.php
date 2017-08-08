@@ -45,7 +45,7 @@ if( $res->count() == 0 ) {
 			     '"><img src="../images/b_save.png" alt="export" /></a></td>' .
 			     "<td class=\"editdel\">" .
 			     editLink('executable', $row['execid']) . "&nbsp;" .
-			     delLink('executable','execid',$row['execid']) . "</td>";
+			     delLink('executable','execid',$row['execid'],$row['description']) . "</td>";
 		}
 		echo "</tr>\n";
 	}
@@ -56,11 +56,11 @@ if ( IS_ADMIN ) {
 	echo "<p>" . addLink('executable') . "</p>\n\n";
 	if ( class_exists("ZipArchive") ) {
 		echo "\n" . addForm('executable.php', 'post', null, 'multipart/form-data') .
-	 		'Executable archive(s): ' .
+			'Executable archive(s): ' .
 			addSelect('type', $executable_types) .
-	 		addFileField('executable_archive[]', null, ' required multiple accept="application/zip"') .
-	 		addSubmit('Upload', 'upload') .
-	 		addEndForm() . "\n";
+			addFileField('executable_archive[]', null, ' required multiple accept="application/zip"') .
+			addSubmit('Upload', 'upload') .
+			addEndForm() . "\n";
 	}
 }
 

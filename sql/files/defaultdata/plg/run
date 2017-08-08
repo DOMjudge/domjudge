@@ -6,7 +6,8 @@
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
+COMPILESCRIPTDIR="$(dirname "$0")"
 
-exec swipl --goal=main,halt --stand_alone=true -o "$DEST" -c "$MAINSOURCE"
+exec swipl $COMPILESCRIPTDIR/compile.plg $MAINSOURCE $DEST
 
 exit 0

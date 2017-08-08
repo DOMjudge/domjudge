@@ -286,7 +286,7 @@ echo "</table></div>\n";
 if ( IS_ADMIN ) {
 	echo "<p class=\"nomorecol\">" .
 		editLink('team', $id). "\n" .
-		delLink('team','teamid',$id) .
+		delLink('team','teamid',$id,$row['name']) .
 		"</p>\n\n";
 }
 

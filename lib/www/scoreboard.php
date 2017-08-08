@@ -40,19 +40,10 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 
 	$cid = $cdata['cid'];
 
-	// Show final scores if contest is over and unfreezetime has been
-	// reached, or if contest is over and no freezetime had been set.
-	// We can compare $now and the dbfields stringwise.
-	$now = now();
-	$showfinal  = ( !isset($cdata['freezetime']) &&
-	                difftime($cdata['endtime'],$now) <= 0 ) ||
-	              ( isset($cdata['unfreezetime']) &&
-	                difftime($cdata['unfreezetime'], $now) <= 0 );
-	// contest is active but has not yet started
-	$cstarted = difftime($cdata['starttime'],$now) <= 0;
+	$fdata = calcFreezeData($cdata);
 
 	// Don't leak information before start of contest
-	if ( ! $cstarted && ! $jury ) return;
+	if ( ! $fdata['cstarted'] && ! $jury ) return;
 
 	// get the teams, problems and categories
 	$teams = getTeams($filter, $jury, $cdata);
@@ -65,7 +56,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	$SCORES = initScores($teams);
 
 	// The scorecache for the jury is always up to date, for public might be frozen.
-	if ( $jury || $showfinal ) {
+	if ( $jury || $fdata['showfinal'] ) {
 		$variant = 'restricted';
 	} else {
 		$variant = 'public';
@@ -101,7 +92,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 		// calculate totals for this team
 		if ( $srow['is_correct'] ) {
 			$SCORES[$srow['teamid']]['num_points'] += $srow['points'];
-			$SCORES[$srow['teamid']]['solve_times'][] = $srow['solvetime'];
+			$SCORES[$srow['teamid']]['solve_times'][] = scoretime($srow['solvetime']);
 			$SCORES[$srow['teamid']]['total_time'] += scoretime($srow['solvetime']) + $penalty;
 		}
 	}
@@ -614,6 +605,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 
 		$countries = array_unique($countries);
 		sort($countries);
+		asort($affilids, SORT_FLAG_CASE);
 
 		$filteron = array();
 		$filtertext = "";
@@ -699,41 +691,6 @@ function initScorefilter()
 }
 
 /**
- * Given an array of contest data, calculates whether the contest
- * has already started ('cstarted'), and if scoreboard is currently
- * frozen ('showfrozen') or final ('showfinal').
- */
-function calcFreezeData($cdata)
-{
-	$fdata = array();
-
-	if ( $cdata == null ) {
-		return array(
-			'showfinal' => false,
-			'showfrozen' => false,
-			'cstarted' => false
-		);
-	}
-
-	// Show final scores if contest is over and unfreezetime has been
-	// reached, or if contest is over and no freezetime had been set.
-	// We can compare $now and the dbfields stringwise.
-	$now = now();
-	$fdata['showfinal']  = ( !isset($cdata['freezetime']) &&
-	                difftime($cdata['endtime'],$now) <= 0 ) ||
-	              ( isset($cdata['unfreezetime']) &&
-	                difftime($cdata['unfreezetime'], $now) <= 0 );
-	// freeze scoreboard if freeze time has been reached and
-	// we're not showing the final score yet
-	$fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
-	              difftime($cdata['freezetime'],$now) <= 0;
-	// contest is active but has not yet started
-	$fdata['cstarted'] = difftime($cdata['starttime'],$now) <= 0;
-
-	return $fdata;
-}
-
-/**
  * Output a team row from the scoreboard based on the cached data in
  * table 'scoreboard'.
  */
@@ -752,7 +709,7 @@ function putTeamRow($cdata, $teamids) {
 			global $teamdata;
 			echo "<h2 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
 				specialchars($teamdata['name']) . "</span>!</h2>\n\n";
-			echo "<h3 id=\"contestnotstarted\">contest is " .
+			echo "<h3 id=\"contestnotstarted\">contest " .
 				printContestStart($cdata) . "</h3>\n\n";
 		}
 
@@ -912,7 +869,7 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = FALSE) {
 			                     AND allow_submit = 1 AND teamid IN (%Ai)",
 			                    $cid, $tied);
 			while ( $srow = $scoredata->next() ) {
-				$teamdata[$srow['teamid']]['solve_times'][] = $srow['solvetime'];
+				$teamdata[$srow['teamid']]['solve_times'][] = scoretime($srow['solvetime']);
 			}
 
 			// Now check for each team if it is ranked higher than $teamid

@@ -51,7 +51,8 @@ function logmsg($msglevel, $string) {
 	// Trim $string to reasonable length to prevent server/browser crashes:
 	$string = substr($string, 0, 10000);
 
-	$stamp = "[" . strftime("%b %d %H:%M:%S") . "] " . SCRIPT_ID .
+	$msec = sprintf("%03d", (int)(explode(' ',microtime())[0]*1000));
+	$stamp = "[" . strftime("%b %d %H:%M:%S") . ".$msec] " . SCRIPT_ID .
 		(function_exists('posix_getpid') ? "[" . posix_getpid() . "]" : "") .
 		": ";
 

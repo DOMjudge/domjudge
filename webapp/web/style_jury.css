@@ -1,0 +1,142 @@
+.balloons td {
+	padding-right: 2ex;
+	padding-bottom: 2ex;
+	border-bottom: solid 1px silver;
+	vertical-align: middle;
+}
+.frozen { font-style: italic; }
+
+.teamstatus { text-align: center; }
+.teamstatus img { vertical-align: middle; }
+
+.filename, .hostname { font-family: monospace; }
+
+.highlight { background-color: yellow !important; }
+
+.highlight.roweven { background-color: yellow !important; }
+.highlight.rowodd { background-color: #ffffaa !important; }
+
+.msgbox {
+	background-color: #fffff0;
+	border: 1px solid #f2e93a;
+}
+
+.msgbox legend {
+	background-color: #fffff0;
+	border-right: 2px solid #f2e93a;
+	border-bottom: 2px solid #f2e93a;
+}
+
+.size {
+	text-align: right;
+	font-family: monospace;
+}
+
+.md5 { font-family: monospace; }
+
+.testcases tr:hover { background: #ffffff; }
+.testcases a { color: blue; }
+.testcases td {
+	vertical-align: middle;
+	padding: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+.testcases_prev { font-size: xx-small; }
+tr.summary td { border-top: 1px solid black; }
+
+.testrank {
+	line-height: 0.9;
+	border-right: 1px solid silver;
+}
+
+.testsample {
+	text-align: center;
+	border-left: 1px solid silver;
+	max-width: 200px;
+}
+
+.testdesc {
+	border-left: 1px solid silver;
+	max-width: 400px;
+}
+
+.testimage {
+	border-left: 1px solid silver;
+}
+.testimage a {
+	display: inline;
+}
+
+/* set cell padding to 0 and <a> tag to 3 to make all of cell
+   clickable in the jury scoreboard and for all team cells */
+.scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
+
+#submission_layout { width: 100%; }
+
+#djlogo {
+	position: absolute; right: 1ex;
+	width: 93px; height: 196px;
+}
+
+img.picto { width: 16px; height: 16px; }
+img.smallpicto { width: 11px; height: 11px; }
+img.helpicon { cursor: help; }
+
+a.collapse { color: black; text-decoration: none; }
+
+.sortable th { cursor: s-resize; }
+.sortable th.sorttable_sorted { cursor: n-resize; }
+.sortable th.sorttable_nosort { cursor: auto; }
+
+.judgetime { font-size: smaller; font-style: italic; }
+
+.config_input { width: 9em; }
+
+/* configchecker */
+.details {
+	margin-left: 2em; padding-left: 1ex;
+	border-left: dotted 1px gray;
+	margin-top: 1ex; margin-bottom: 1ex;}
+.O { background-color: #ccfbcc; }
+.W { background-color: #f0e68c; }
+.E { background-color: #fa9972; }
+.resulticon { text-align: center; vertical-align: top; width: 48px; }
+.configcheck { width: 95%; }
+.configcheck th { text-align: left; padding-top: 1ex; }
+
+/* team connect status/judgehost poll status */
+.team-nocon a, .judgehost-nocon a { color: #AAA; }
+.team-nosub a, .judgehost-crit  a { color: red; }
+.team-nocor a, .judgehost-warn  a { color: yellow; }
+.team-ok a,    .judgehost-ok    a { color: green; }
+
+/* diff colors for source contents and filenames */
+.diff-add     { color: green; }
+.diff-del     { color: red; }
+.diff-changed { color: darkorange; }
+
+.col1 { float: left;  width: 30%; }
+.col2 { float: right; width: 70%; }
+.nomorecol { clear: left; }
+
+.thleft { text-align: left; }
+.tdcenter { text-align: center; }
+.tdcenter img {  vertical-align: text-top; }
+.tdright { text-align: right; }
+.teamstat { text-align: right; }
+
+div.submissions-filter > p {
+	position: relative;
+}
+
+div.submissions-filter > p > span {
+	position: absolute;
+	top: 3px;
+}
+
+div.submissions-filter ul.token-input-list {
+	display: inline-block;
+	position: relative;
+	left: 100px;
+}

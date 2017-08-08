@@ -44,9 +44,6 @@ SUBMITCLIENT_ENABLED = @SUBMITCLIENT_ENABLED@
 # Build documentation?
 DOC_BUILD_ENABLED = @DOC_BUILD_ENABLED@
 
-# Use Linux cgroups?
-USE_CGROUPS = @USE_CGROUPS@
-
 # libcgroup
 LIBCGROUP = @LIBCGROUP@
 
@@ -64,6 +61,9 @@ CURL_STATIC = @CURL_STATIC@
 # User:group file ownership of password files
 DOMJUDGE_USER   = @DOMJUDGE_USER@
 WEBSERVER_GROUP = @WEBSERVER_GROUP@
+
+# Base URL of the DOMjudge web interfaces
+BASEURL         = @BASEURL@
 
 # Autoconf prefixes and paths
 FHS_ENABLED    = @FHS_ENABLED@
@@ -95,9 +95,10 @@ psdir          = @psdir@
 domserver_bindir       = @domserver_bindir@
 domserver_etcdir       = @domserver_etcdir@
 domserver_wwwdir       = @domserver_wwwdir@
+domserver_webappdir    = @domserver_webappdir@
 domserver_sqldir       = @domserver_sqldir@
 domserver_libdir       = @domserver_libdir@
-domserver_libextdir    = @domserver_libextdir@
+domserver_libvendordir = @domserver_libvendordir@
 domserver_libwwwdir    = @domserver_libwwwdir@
 domserver_libsubmitdir = @domserver_libsubmitdir@
 domserver_logdir       = @domserver_logdir@
@@ -108,7 +109,7 @@ domserver_submitdir    = @domserver_submitdir@
 judgehost_bindir       = @judgehost_bindir@
 judgehost_etcdir       = @judgehost_etcdir@
 judgehost_libdir       = @judgehost_libdir@
-judgehost_libextdir    = @judgehost_libextdir@
+judgehost_libvendordir = @judgehost_libvendordir@
 judgehost_libjudgedir  = @judgehost_libjudgedir@
 judgehost_logdir       = @judgehost_logdir@
 judgehost_rundir       = @judgehost_rundir@
@@ -120,14 +121,14 @@ judgehost_cgroupdir    = @judgehost_cgroupdir@
 domjudge_docdir        = @domjudge_docdir@
 
 domserver_dirs = $(domserver_bindir) $(domserver_etcdir) $(domserver_wwwdir) \
-                 $(domserver_libdir) $(domserver_libsubmitdir) $(domserver_libextdir) \
+                 $(domserver_libdir) $(domserver_libsubmitdir) $(domserver_libvendordir) \
                  $(domserver_libwwwdir) $(domserver_logdir) $(domserver_rundir) \
                  $(domserver_tmpdir) $(domserver_submitdir) $(domserver_sqldir)/upgrade \
-                 $(addprefix $(domserver_wwwdir)/images/,affiliations countries teams) \
-                 $(addprefix $(domserver_wwwdir)/,public team jury api auth js js/flot js/ace)
+                 $(addprefix $(domserver_webappdir)/web/images/,affiliations countries teams) \
+                 $(addprefix $(domserver_wwwdir)/,public team jury api auth)
 
 judgehost_dirs = $(judgehost_bindir) $(judgehost_etcdir) $(judgehost_libdir) \
-                 $(judgehost_libextdir) $(judgehost_libjudgedir) $(judgehost_logdir) \
+                 $(judgehost_libvendordir) $(judgehost_libjudgedir) $(judgehost_logdir) \
                  $(judgehost_rundir) $(judgehost_tmpdir) $(judgehost_judgedir)
 
 docs_dirs      = $(addprefix $(domjudge_docdir)/,admin judge team examples logos)
@@ -144,9 +145,10 @@ define substconfigvars
 	-e 's,@domserver_bindir[@],@domserver_bindir@,g' \
 	-e 's,@domserver_etcdir[@],@domserver_etcdir@,g' \
 	-e 's,@domserver_wwwdir[@],@domserver_wwwdir@,g' \
+	-e 's,@domserver_webappdir[@],@domserver_webappdir@,g' \
 	-e 's,@domserver_sqldir[@],@domserver_sqldir@,g' \
 	-e 's,@domserver_libdir[@],@domserver_libdir@,g' \
-	-e 's,@domserver_libextdir[@],@domserver_libextdir@,g' \
+	-e 's,@domserver_libvendordir[@],@domserver_libvendordir@,g' \
 	-e 's,@domserver_libwwwdir[@],@domserver_libwwwdir@,g' \
 	-e 's,@domserver_libsubmitdir[@],@domserver_libsubmitdir@,g' \
 	-e 's,@domserver_logdir[@],@domserver_logdir@,g' \
@@ -156,7 +158,7 @@ define substconfigvars
 	-e 's,@judgehost_bindir[@],@judgehost_bindir@,g' \
 	-e 's,@judgehost_etcdir[@],@judgehost_etcdir@,g' \
 	-e 's,@judgehost_libdir[@],@judgehost_libdir@,g' \
-	-e 's,@judgehost_libextdir[@],@judgehost_libextdir@,g' \
+	-e 's,@judgehost_libvendordir[@],@judgehost_libvendordir@,g' \
 	-e 's,@judgehost_libjudgedir[@],@judgehost_libjudgedir@,g' \
 	-e 's,@judgehost_logdir[@],@judgehost_logdir@,g' \
 	-e 's,@judgehost_rundir[@],@judgehost_rundir@,g' \
@@ -169,7 +171,9 @@ define substconfigvars
 	-e 's,@WEBSERVER_GROUP[@],@WEBSERVER_GROUP@,g' \
 	-e 's,@BEEP[@],@BEEP@,g' \
 	-e 's,@RUNUSER[@],@RUNUSER@,g' \
+	-e 's,@RUNGROUP[@],@RUNGROUP@,g' \
+	-e 's,@BASEURL[@],@BASEURL@,g' \
 	-e 's,@SUBMITCLIENT_ENABLED[@],@SUBMITCLIENT_ENABLED@,g' \
-	-e 's,@USE_CGROUPS[@],@USE_CGROUPS@,g' \
 	> $@
+@chmod --reference=$< $@
 endef

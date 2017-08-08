@@ -9,4 +9,6 @@
 /output
 /cov-int
 /domjudge-scan.tar.xz
+/coverity-scan.tar.xz
+/cov-submit-data*.sh
 *.o

@@ -6,7 +6,7 @@ CHROOTDIR=$1
 ARCH=$2
 
 if [ ! -d "$CHROOTDIR" ]; then
-    dj_make_ubuntu_chroot -d "$CHROOTDIR" -a "$ARCH"
+    dj_make_chroot -d "$CHROOTDIR" -D Ubuntu -a "$ARCH"
 fi
 
 function cleanup {

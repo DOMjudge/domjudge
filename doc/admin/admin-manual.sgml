@@ -113,8 +113,7 @@ The requirements for the deployment of DOMjudge are:
 
 <item> (Local) root access on the domserver and judgehosts for configuring sudo,
        installing some files with restricted permissions
-       and for (un)mounting the proc file system when using Java (or other
-       interpreted languages).
+       and for (un)mounting the proc file system.
        See <ref id="security:rootprivs" name="Security: root privileges">
        for more details.
 
@@ -127,9 +126,9 @@ The requirements for the deployment of DOMjudge are:
        or HTTPS (tcp port 80 or 443):
   <itemize>
   <item> HTTP traffic from teams, the public and jury to the web server.
-  <item> The judgehosts connect to the DOMjudge API over HTTP.
-  <item> The `submit' command line client connects to the web server also
-         via HTTP.
+  <item> The judgehosts connect to the DOMjudge API on the webserver over HTTP(S).
+  <item> The `submit' command line client connects to API on the web server also
+         via HTTP(S).
   </itemize>
        When using the <tt>IP_ADDRESS</tt> authentication scheme, then each team
        computer needs to have a unique IP address from the view of the
@@ -147,7 +146,7 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with support for PHP &gt;= 5.4 and the mysqli,
+<item> Apache web server with support for PHP &gt;= 7.0 and the mysqli,
        GD, curl and json extensions for PHP. PHP needs to be running as an
        Apache module (the most common configuration); a (fast)CGI setup
        is not currently supported. We also recommend the posix extension
@@ -157,13 +156,18 @@ The following software is required for running DOMjudge.
 
 <item> MySQL or MariaDB &gt;= 5.5.3 database and client software.
 
-<item> PHP &gt;= 5.4 command line interface and the curl and json
+<item> PHP &gt;= 7.0 command line interface and the curl, json, mcrypt, and gmp
        extensions.
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash).
 
 <item> A statically compiled POSIX shell, located in
-       <tt>lib/judge/sh-static</tt> (dash is included for Linux IA32).
+       <tt>lib/judge/sh-static</tt> (dash is included for Linux i386/amd64).
+
+<item> <htmlurl name="libcgroup" url="http://libcg.sourceforge.net/">,
+       to enable support for Linux cgroup accounting and security on
+       the judgehosts. See section <ref id="install_config:judgehost"
+       name="installation of a judgehost ">.
 
 <item> A lot of standard (GNU) programs, a probably incomplete list:
        hostname, date, dirname, basename, touch, chmod, cp, mv, cat,
@@ -186,12 +190,6 @@ functionality or are generally useful.
 
 <item> An NTP daemon (for keeping the clocks between jury
        system and team workstations in sync)
-
-<item> <htmlurl name="libcgroup" url="http://libcg.sourceforge.net/">,
-       to enable support for Linux cgroup accounting and security on
-       the judgehosts. This is strongly recommended to improve Java
-       memory limit measurements. See section
-       <ref id="cgroups" name="Linux cgroups">.
 
 <item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">
        and <htmlurl name="libJSONcpp" url="http://jsoncpp.sourceforge.net/">
@@ -259,8 +257,8 @@ External software:
 
 DOMjudge:
 <itemize>
-<item> Extract the source tarball and run <tt>./configure
-       [--enable-fhs|--prefix=&lt;basepath&gt;]</tt>.
+<item> Extract the source tarball and run
+       <tt>./configure [--enable-fhs|--prefix=&lt;basepath&gt;] --with-baseurl=&lt;url&gt;</tt>.
 <item> Run <tt>make domserver judgehost docs</tt> or just those
        targets you want installed on the current host.
 <item> Run <tt>make install-{domserver,judgehost,docs}</tt>
@@ -268,10 +266,10 @@ DOMjudge:
 </itemize>
 On the domserver host:
 <itemize>
-<item> Install the MySQL database using e.g. <tt>bin/dj-setup-database -u root -r
+<item> Install the MySQL database using e.g. <tt>bin/dj_setup_database -u root -r
        install</tt> on the domserver host.
 <item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
-       it to your needs, reload web server:
+       it to your needs, reload web server:<newline>
        <tt>
        sudo ln -s &lt;INSTALL_PATH&gt;/domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
        sudo a2enconf domjudge &&
@@ -290,9 +288,13 @@ On the judgehosts:
 <!-- NOTE: update this, then also update the copy of this under chapter 2.14 -->
 <item> RedHat: <tt>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</tt><newline>
        Debian: <tt>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</tt><newline>
-       (check specific options of useradd, since these vary per system)
+       (check specific options of useradd, since these vary per system)<newline>
+       and also execute: <tt>groupadd domjudge-run</tt>
 <item> Add to <tt>/etc/sudoers.d/</tt> or append to <tt>/etc/sudoers</tt> the
        sudoers configuration as in <tt>etc/sudoers-domjudge</tt>.
+<item> Set up cgroup support: enable kernel parameters in
+       <tt>/etc/default/grub</tt> and reboot, then use
+       <tt>misc/create_cgroups</tt> to create cgroups for DOMjudge.
 <item> Put the right credentials in the file <tt>etc/restapi.secret</tt>
        on all judgehosts (copied from the domserver).
 <item> Start the judge daemon: <tt>bin/judgedaemon</tt>
@@ -328,10 +330,6 @@ Optionally:
        interpreters are not installed under <tt>/usr</tt> or require
        files from other locations. See also the appendix
        on <ref id="problems:chroot" name="setting up a chroot">.
-<item> Set up cgroup support on the judgedaemons (strongly recommended).
-<item> Further tighten the security of the system, e.g. by applying
-       firewall rules. This is not necessary when Linux cgroups are
-       enabled as this is set up to automatically block network traffic.
 <item> For additional features in the jury web interface, the
        following PHP extensions can be installed:
        <itemize>
@@ -356,13 +354,17 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
 apt-get install gcc g++ make zip unzip mysql-server \
-	apache2 php5 php5-cli libapache2-mod-php5 \
-	php5-gd php5-curl php5-mysql php5-json \
-	bsdmainutils phpmyadmin ntp \
+	apache2 php php-cli libapache2-mod-php \
+	php-gd php-curl php-mysql php-json \
+	php-mcrypt php-gmp php-xml php-mbstring \
+	bsdmainutils ntp phpmyadmin \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
 </code>
+Note that PHP modules may need to be enabled depending on your distribution.
+E.g. on Ubuntu run <code>phpenmod mcrypt</code> to enable mcrypt.
+
 
 For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
 
@@ -401,19 +403,21 @@ on the team workstations where <tt>submit</tt> is installed.
 
 
 On a judgehost, the following should be sufficient. The last two lines show some
-example compilers to install for C, C++, Java (GNU), Java (Oracle), Haskell
-and Pascal; change the list as appropriate.
+example compilers to install for C, C++, Java (OpenJDK), Haskell and Pascal;
+change the list as appropriate.
 
 For Debian:
 <code>
-apt-get install make sudo debootstrap php5-cli php5-curl php5-json procps \
-	gcc g++ gcj-jre-headless gcj-jdk openjdk-7-jre-headless openjdk-7-jdk \
-	ghc fp-compiler
+apt-get install make sudo debootstrap libcgroup-dev \
+	php-cli php-curl php-json procps \
+	gcc g++ openjdk-8-jre-headless \
+	openjdk-8-jdk ghc fp-compiler
 </code>
 
 For RedHat:
 <code>
-yum install make sudo php-cli php-mbstring php-process procps-ng \
+yum install make sudo libcgroup-devel \
+	php-cli php-mbstring php-process procps-ng \
 	gcc gcc-c++ glibc-static libstdc++-static \
 	java-1.7.0-openjdk-headless java-1.7.0-openjdk-devel \
 	ghc-compiler fpc
@@ -447,7 +451,7 @@ DOMjudge can be installed with two different directory layouts:
 	installed in a single directory tree which is specified by the
 	prefix option of configure, like
 <code>
-./configure --prefix=$HOME/domjudge
+./configure --prefix=$HOME/domjudge --with-baseurl=https://domjudge.example.com/
 </code>
 	This will install each of the <tt>domserver, judgehost,
 	docs</tt> parts in a subdirectory
@@ -491,6 +495,14 @@ DOMjudge can be installed with two different directory layouts:
 	the prefix for these.
 </descrip>
 
+Note that the <tt>--with-baseurl</tt> configure option is not required
+but highly recommended, as it allows building the submit client and
+team documentation with the correct URL preset. The option is required
+when using <ref id="install_config:openid" name="OpenID">. If needed,
+the setting can later be updated in <tt>etc/domserver-static.php</tt>
+on the domserver, and in <tt>etc/submit-config.h</tt> in the source
+tree for rebuilding the submit client.
+
 After running the <tt>configure</tt> script, the system can be built
 and installed. Each of the <tt>domserver, judgehost, docs</tt> parts
 can be built and installed separately, respectively by:
@@ -526,12 +538,12 @@ dump files in the sql subdirectory. The default database name is
 <tt>etc/dbpasswords.secret</tt> file: the database name as specified
 in this file will be used when installing.
 
-Installation of the database is done with <tt>bin/dj-setup-database</tt>.
+Installation of the database is done with <tt>bin/dj_setup_database</tt>.
 For this, you need an installed and configured MySQL server and
 administrator access to it. Run
 <code>
-dj-setup-database genpass
-dj-setup-database [-u <admin_user>] [-p <password>|-r] install
+dj_setup_database genpass
+dj_setup_database [-u <admin_user>] [-p <password>|-r] install
 </code>
 This first creates the DOMjudge database credentials file
 <tt>etc/dbpasswords.secret</tt> (optionally change the random
@@ -541,7 +553,7 @@ default/example data into the domjudge database. The option
 <tt>-r</tt> will prompt for a password for mysql; when no user is
 specified, the mysql client will try to read
 credentials from <tt>$HOME/.my.cnf</tt> as usual. The command
-<tt>uninstall</tt> can be passed to <tt>dj-setup-database</tt> to
+<tt>uninstall</tt> can be passed to <tt>dj_setup_database</tt> to
 remove the DOMjudge database and users; <em>this deletes all data!</em>
 
 The domjudge database contains a number of tables, some of which need
@@ -561,7 +573,7 @@ and can take over immediately in the event of failure. The MySQL manual
 has more information about setting this up.
 
 Alternatively, you can make regular backups of your data to another host,
-for example with <tt>mysqldump</tt>, or use a RAID based system.
+for example with <tt>mysqldump</tt>, or using a RAID based system.
 
 Replication can also be used to improve performance, by directing all
 select-queries to one or more replicated slave servers, while updates
@@ -594,6 +606,11 @@ snippet from <tt>etc/apache.conf</tt>. It contains examples for
 configuring the DOMjudge pages with an alias directive, or as a
 virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
+<verb>
+ln -s etc/apache.conf /etc/apache2/conf-available/domjudge.conf
+a2enconf domjudge
+service apache2 reload
+</verb>
 
 An Nginx webserver configuration snippet is also provided
 in <tt>etc/nginx-conf</tt>. This alternative webserver is less
@@ -605,7 +622,7 @@ to be able to access at least this part of the web interface.
 
 <sect>Fine tuning server settings
 <p>
-For Apache, there are countless documents on how to maximise performance.
+For Apache, there are countless documents on how to maximize performance.
 Of particular importance is to ensure that the <tt>MaxClients</tt> setting
 is high enough to receive the number of parallel requests you expect, but
 not higher than your amount of RAM allows.
@@ -641,21 +658,23 @@ interface.
 A few extra steps might need to be taken to completely install and
 configure a judgehost.
 
-For running solution programs under a non-privileged user, a user has
+For running solution programs under a non-privileged user, a user and group have
 to be added to the system(s) that act as judgehost. This user does not
 need a home-directory or password, so the following command would
-suffice to add a user `domjudge-run' with minimal privileges.
+suffice to add a user and group `domjudge-run' with minimal privileges.
 
 <!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
-On RedHat:
-<verb>useradd -d /nonexistent -g nobody -M -n -s /bin/false domjudge-run</verb>
-On Debian:
-<verb>useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run</verb>
+On Debian and Redhat based Linux distributions use:
+<verb>
+useradd -d /nonexistent -U -M -s /bin/false domjudge-run
+groupadd domjudge-run
+</verb>
 
 For other systems check the specifics of your useradd command.
 This user must also be configured as the user under which programs run
 via <tt>configure --enable-runuser=USER</tt>; the default is
-<tt>domjudge-run</tt>.
+<tt>domjudge-run</tt>. By default the group is set to the same, this
+can be modified with the option <tt>--enable-rungroup=GROUP</tt>
 
 <tt>Runguard</tt> needs to be able to become root for certain operations
 like changing to the runuser and performing a chroot. Also, the default
@@ -679,6 +698,32 @@ or interpreted languages such as Python, then a complete chroot
 environment must be built and configured. See the appendix on
 <ref id="problems:chroot" name="setting up a chroot"> for more
 details.
+
+<p>
+DOMjudge uses Linux Control Groups or cgroups for process isolation in
+the judgedaemon. Linux cgroups give more accurate measurement of
+actually allocated memory than traditional resource limits (which is
+helpful with interpreters like Java that reserve but not actually use
+lots of memory). Also, cgroups are used to restrict network access so
+no separate measures are necessary, and they allow running multiple
+judgedaemons on a multi-core machine by using CPU binding.
+
+<p>
+The judgedaemon needs to run a recent Linux kernel (at least 3.2.0). The
+following steps configure cgroups on Debian wheezy. Instructions for other
+distributions may be different (send us your feedback!).
+Edit grub config to add cgroup memory and swap accounting to the boot
+options. Edit <tt>/etc/default/grub</tt> and change the default
+commandline to
+<verb>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</verb>
+Then run <tt>update-grub</tt> and reboot.
+
+You have now configured the system to use cgroups, but you need to create
+the actual cgroups that DOMjudge will use. For that, you can use the
+script under <tt>misc-tools/create_cgroups</tt>. Edit the script to
+match your situation first.
+This script needs to be re-run after each boot (e.g., add it to
+the judgedaemon init script).
 
 The judgehost connects to the domserver via a REST API. You need to
 create an account for the judgedaemons to use (this may be a
@@ -786,6 +831,38 @@ Besides these settings, there are a few other places where changes can
 be made to the system, see <ref id="install_config:configurablescripts"
 name="other configurable scripts">.
 
+<sect>OpenID Connect<label id="install_config:openid">
+<p>
+
+DOMjudge supports allowing users to log in using your favorite OpenID Connect
+provider, such as google (or ICPC accounts in the future). Some things need
+to be configured on the <tt>Configuration Settings</tt> page for this to work
+properly.
+
+
+<sect1>Google
+<p>
+To use Google as an OpenID Provider, you need to obtain a clientID and
+clientSecret. You can get these values from
+<htmlurl name="Google Developer Console" url="https://console.developers.google.com/">.
+
+Navigate to <tt>Credentials</tt> under the <tt>API Manager</tt> heading. Then
+<tt>Create Credentials</tt> for  <tt>OAuth Client ID</tt>. This will give you
+the client ID and secret you need. For the openid provider set the URL to
+<tt>https://accounts.google.com</tt>. You also need to set the
+<tt>Authorized redirect URIs</tt> to the full url to
+<tt>/domjudge/auth/oid_cb.php</tt>.
+E.g. <tt>http(s)://yourhost.example.edu/domjudge/auth/oid_cb.php</tt>
+
+You also need to set the authentication scheme to <tt>PHP_SESSIONS</tt>
+in <tt>etc/domserver-config.php</tt> (the default) and make sure that
+the DOMjudge webserver base URL was set correctly with
+<tt>configure --with-baseurl=&lt;URL&gt;</tt>. For example, this will
+probably be something like this:
+<tt>http(s)://yourhost.example.edu/domjudge</tt>
+
+Finally, enable the setting <tt>Allow openid auth</tt>.
+
 <sect>Executables
 <p>
 
@@ -817,8 +894,7 @@ Interpreted languages and non-statically linked binaries (for example,
 Oracle Java) can in principle also be used, but require that all
 dependencies are added to the chroot environment.
 DOMjudge comes with helper scripts to build a chroot environment:
-run either <tt>sudo dj_make_chroot</tt> or <tt>sudo dj_make_ubuntu_chroot</tt>
-as root (for a Debian or Ubuntu-based chroot, respectively).
+run <tt>sudo bin/dj_make_chroot</tt>.
 Options can be given change the target directory where to build the
 chroot environment (normally the default from configure is used) and
 to select the target machine architecture.
@@ -1012,14 +1088,12 @@ When the <tt>docs</tt> part of DOMjudge is installed and site-specific
 configuration set, the team manual can be generated with the command
 <tt>genteammanual</tt> found under <tt>docs/team</tt>. The PDF
 document will be placed in the current
-directory or a directory given as argument. The option <tt>-w WEBBASEURI</tt>
-can be passed to set the base URI of the DOMjudge webinterface; it
-should end with a slash and defaults to <tt>http://example.com/domjudge/</tt>.
+directory or a directory given as argument.
 The following should do it on a Debian-like system:
 <code>
 sudo apt-get install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
 cd &lt;INSTALL_PATH&gt;/docs/team
-./genteammanual [-w http(s)://yourhost.example.edu/domjudge/] [targetdir]
+./genteammanual [targetdir]
 </code>
 
 <p>
@@ -1041,53 +1115,18 @@ make -C doc/judge docs
 <sect>Optional features <label id="optionalfeatures">
 <p>
 
-<sect1>Linux Control Groups (cgroups) in the judgedaemon <label id="cgroups">
-<p>
-DOMjudge has support for using Linux Control Groups or cgroups
-for process isolation in the judgedaemon. Using cgroups gives more accurate
-measurement of actually allocated memory, which is helpful with interpreters
-like Java that reserve but not actually use lots of memory. Also, the feature
-will restrict network access so no separate measures are necessary, and allows
-to run multiple judgedaemons on a multi-core machine.
-
-<p>
-The judgedaemon needs to run a recent Linux kernel (at least 3.2.0). The
-following steps configure cgroups on Debian wheezy. Instructions for other
-distributions may be different (send us your feedback!).
-
-<p>
-<itemize>
-<item> Install the necessary packages:
-<tt># apt-get install libcgroup-dev</tt>
-(or <tt># yum install libcgroup-devel</tt> on RedHat)
-<item> Edit grub config to add memory cgroup and swap accounting to the boot options. Edit <tt>/etc/default/grub</tt> and change the default commandline to <tt>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</tt>.
-Then run <tt>update-grub</tt> and reboot.
-<item> Compile DOMjudge with cgroup support. Re-run <tt>./configure</tt> and look for cgroup in the output. Then rebuild the runguard with <tt>make build</tt>.
-</itemize>
-
-You have now configured the system to use cgroups, but you need to create
-the actual cgroups that DOMjudge will use. For that, you can use the
-script under <tt>misc-tools/create_cgroups</tt>. Edit the script to
-match your situation first.
-This script needs to be re-run after each boot (e.g., add it to
-the judgedaemon init script).
-
 <sect1>Multiple judgedaemons per machine
 <p>
-With cgroup support set up, as per the section above, you can run multiple
-judgedaemons on one multi-cpu or multi-core machine, dedicating one cpu core
-to each judgedaemon.
+You can run multiple judgedaemons on one multi-cpu or multi-core
+machine, dedicating one cpu core to each judgedaemon.
 
-To that end, set the <tt>cpuset.cpus</tt> variable in
-<tt>etc/cgroup-domjudge.conf</tt> snippet correctly, e.g. to use all
-cores on a quad-core machine set it to <tt>0-3</tt>, and add extra
-unprivileged users to the system, i.e. add users
+To that end, add extra unprivileged users to the system, i.e. add users
 <tt>domjudge-run-&lt;X&gt;</tt> (where <tt>X</tt> runs through
 <tt>0,1,2,3</tt>) with <tt>useradd</tt> as described in section <ref
 id="install_config:judgehost" name="installation of a judgehost">.
 Finally, start each of the judgedaemons with
 <code>
-$ judgedaemon -n <X>
+judgedaemon -n <X>
 </code>
 to bind it to core X.
 
@@ -1106,7 +1145,7 @@ refuse to connect over HTTPS. If your judgedaemon gives an error message
 about an untrusted certificate, put your domserver's certificate in
 <tt>/etc/ssl/certs/yourname.crt</tt> of each judgehost (and on the team
 machines when using the commandline submit client) and run:
-<code># c_rehash</code>
+<code>sudo c_rehash</code>
 
 <p>
 When loading teams from the ICPC registration system through the import
@@ -1147,10 +1186,17 @@ judging.
 <item> Disable CPU frequency scaling and Intel "Turbo Boost" to
 prevent fluctuations in CPU power.
 <item> Disable address-space randomization to make programs with
-memory addressing bugs give more reproducible results:
+memory addressing bugs give more reproducible results. To do that,
+you can add the following line to <tt>/etc/sysctl.conf</tt>:
 <code>
-echo 0 &gt; /proc/sys/kernel/randomize_va_space
+kernel.randomize_va_space=0
 </code>
+This will restore these settings permanently across reboots.
+Then run the following command:
+<code>
+sudo sysctl -p
+</code>
+to directly activate these settings.
 </itemize>
 
 
@@ -1174,7 +1220,7 @@ consecutive DOMjudge versions. At the beginning of each script, a check
 is performed which will let MySQL bail out with an error if it should
 not be applied anymore. Note that the scripts must be applied in order
 (sorted by release). These scripts can be applied by running
-<tt>dj-setup-database upgrade</tt>.
+<tt>dj_setup_database upgrade</tt>.
 
 
 <chapt>Setting up a contest <label id="contestsetup">
@@ -1219,6 +1265,7 @@ x|contestproblem   |Coupling of problems to contests and data specific to it.@
 x|contestteam      |Coupling of teams to contests.@
  |event            |Log of events during contests.@
 x|executable       |Executable compile/run/compare scripts.@
+ |internal&lowbar;error|Stores errors that occurred on judgehosts including logs.@
  |judgehost        |Computers (hostnames) that function as judgehosts.@
 x|judgehost&lowbar;restriction|Optional restriction sets on submissions taken by judgehosts.@
  |judging          |Judgings of submissions.@
@@ -1631,9 +1678,8 @@ are gained through sudo only when necessary.
 
 <itemize>
 <item> One or more judgedaemons: one on each judgehost (or optionally
-  multiple per host, if cgroups are enabled; then the <tt>-n X</tt>
-  option should be used to bind a judgedaemon to CPU X to prevent
-  CPU resource conflicts).
+  multiple per host; then the <tt>-n X</tt> option should be used to
+  bind a judgedaemon to CPU X to prevent CPU resource conflicts).
 <item> Optionally the balloon notification daemon (as an alternative
   to the web interface).
 </itemize>
@@ -1970,17 +2016,12 @@ calls (which can be obscured and are different per language).
 
 Therefore we decided to tackle this issue by running these programs in
 a environment as restrictive as possible. This is done by setting up a
-minimal chroot environment. For this, root privileges on the judgehosts
-and statically compiled programs are needed. By also
-limiting all kinds of system resources (memory, processes, time,
-unprivileged user) we protect the system from programs which try to
-hack or could crash the system.  However, a chroot environment does
-not restrict network access, so there lies a possible security risk
-that has to be handled separately, see further below.
-
-The optional (but strongly recommended) Linux cgroups system can be
-enabled to block network access and provide a few other extra security
-measures.
+minimal chroot environment with Linux cgroup process control. For
+this, root privileges on the judgehosts and statically compiled
+programs are needed. By also limiting all kinds of system resources
+(memory, processes, time, unprivileged user and network access) we
+protect the system from programs which try to hack or could crash the
+system.
 
 <sect>File system privileges <label id="security:fileprivs">
 <p>
@@ -2032,20 +2073,8 @@ might be: monitor traffic, modify firewall rules on team computers or
 (what we implemented with great satisfaction) put all team computers
 behind a firewalling router.
 
-Solutions are run within a restricted (chroot) environment on the
-judgehosts. This however does not restrict network access, so a
-team could try to send in a solution that tries to send input testdata
-back to them, access the internet, etc... A solution to this problem
-is to disallow all network traffic for the test user on the judgehosts.
-On Linux, this can be accomplished by modifying the
-iptables, adding a rule like:
-
-<verb>
-iptables -I OUTPUT -m owner --uid-owner &lt;testuser_uid&gt; -j REJECT
-</verb>
-
-Note that when using cgroups, network access <em>is</em> restricted by
-default and the above is not necessary.
+Solutions are run within a restricted (chroot/cgroup) environment on
+the judgehosts which restricts outgoing network access.
 
 <appendix>
 
@@ -2067,10 +2096,8 @@ environment which contains all necessary ingredients to let the
 submissions run. DOMjudge supports this with some manual setup.
 
 First of all, a chroot tree with those interpreters or runtimes needs to
-be created. The script <tt>bin/dj_make_chroot</tt> creates one from
-Debian GNU/Linux sources. Alternatively, the script
-<tt>bin/dj_make_ubuntu_chroot</tt> creates one based on Ubuntu.
-Add the required packages for the needed
+be created. The script <tt>bin/dj_make_chroot</tt> can create one from
+Debian or Ubuntu GNU/Linux sources. Add the required packages for the needed
 languages to the <tt>INSTALLDEBS</tt> variable in the script; run the
 script without arguments for basic usage information.
 
@@ -2089,7 +2116,7 @@ rules and the <tt>CHROOTORIGINAL</tt> variable in <tt>chroot-startstop.sh</tt>.
 <sect>Java compilers
 <p>
 Java is difficult to deal with in an automatic way. It is probably
-most preferable to use Oracle (previously Sun) Java, because that's the
+most preferable to use OpenJDK or Oracle Java, because that's the
 version contestants will be used to. The GNU Compiler for Java (GCJ) is
 easier to deal with but may lack some features.
 
@@ -2340,6 +2367,9 @@ additional software to be installed:
 <itemize>
 <item> The GNU autoconf/automake toolset
 
+<item> <htmlurl name="Composer" url="https://getcomposer.org">
+       - PHP Package Manager.
+
 <item> Linuxdoc and groff to build the admin and judge
        documentation from SGML sources and a LaTeX installation to
        generate the PDF admin, judge and default team manual.
@@ -2352,8 +2382,13 @@ install the additionally required packages (next to the
 apt-get install autoconf automake git
 </code>
 
+Composer can be installed by following the documentation located
+<htmlurl name="here" url="https://getcomposer.org/download">, or since
+Debian Stretch by installing the package <tt>composer</tt>.
+
 When this software is present, bootstrapping can be done by running
-<tt>make dist</tt>, which creates the <tt>configure</tt> script and
+<tt>make dist</tt>, which creates the <tt>configure</tt> script,
+downloads and installs the PHP dependencies via composer and
 generates documentation from SGML/LaTeX sources.
 
 <sect>Maintainer mode installation
@@ -2377,8 +2412,9 @@ they replace the steps described in the section
 <ref id="install_config:installsystem" name="Installation system">;
 also no <tt>--prefix</tt> flag or other directories have to be
 specified to <tt>configure</tt>. In this case the binaries
-(e.g. <tt>judgedaemon</tt> and <tt>dj-setup-database</tt>) can be
-found in their respective source directories, not in <tt>bin</tt>.
+(e.g. <tt>judgedaemon</tt> and <tt>dj_setup_database</tt>) can be
+found in their respective source directories, and are also symlinked
+in <tt>bin</tt>.
 
 <sect>Makefile structure
 <p>

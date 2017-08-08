@@ -2,7 +2,7 @@
 -- correct functioning.
 --
 -- You can pipe this file into the 'mysql' command to insert this
--- data, but preferably use 'dj-setup-database'. Database should be set
+-- data, but preferably use 'dj_setup_database'. Database should be set
 -- externally (e.g. to 'domjudge').
 
 
@@ -14,13 +14,15 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('clar_categories', '{"general":"General issue","tech":"Technical issue"}', 'array_keyval', 'List of additional clarification categories'),
 ('script_timelimit', '30', 'int', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.'),
 ('script_memory_limit', '2097152', 'int', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.'),
-('script_filesize_limit', '65536', 'int', 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate* result written by compilers.'),
+('script_filesize_limit', '540672', 'int', 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate or final* result written by compilers.'),
 ('memory_limit', '524288', 'int', 'Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB! Can be overridden per problem.'),
 ('output_limit', '4096', 'int', 'Maximum output (in kB) submissions may generate. Any excessive output is truncated, so this should be greater than the maximum testdata output.'),
 ('process_limit', '64', 'int', 'Maximum number of processes that the submission is allowed to start (including shell and possibly interpreters).'),
 ('sourcesize_limit', '256', 'int', 'Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".'),
 ('sourcefiles_limit', '100', 'int', 'Maximum number of source files in one submission. Set to one to disable multiple file submissions.'),
 ('timelimit_overshoot', '"1s|10%"', 'string', 'Time that submissions are kept running beyond timelimt before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.'),
+('output_storage_limit', '50000', 'int', 'Maximum size of error/system output stored in the database (in bytes); use "-1" to disable any limits.'),
+('output_display_limit', '2000', 'int', 'Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use "-1" to disable any limits.'),
 ('verification_required', '0', 'bool', 'Is verification of judgings by jury required before publication?'),
 ('show_affiliations', '1', 'bool', 'Show country flags and affiliations names on the scoreboard?'),
 ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?'),
@@ -37,9 +39,15 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('default_compare', '"compare"', 'string', 'The script used to compare outputs if no special compare script specified.'),
 ('default_run', '"run"', 'string', 'The script used to run submissions if no special run script specified.'),
 ('allow_registration', '0', 'bool', 'Allow users to register themselves with the system?'),
+('allow_openid_auth', '0', 'bool', 'Allow users to log in using OpenID'),
+('openid_autocreate_team', '1', 'bool', 'Create a team for each user that logs in with OpenID'),
+('openid_provider', '"https://accounts.google.com"', 'string', 'OpenID Provider URL'),
+('openid_clientid', '""', 'string', 'OpenID Connect client id'),
+('openid_clientsecret', '""', 'string', 'OpenID Connect client secret'),
 ('judgehost_warning', '30', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "warning".'),
 ('judgehost_critical', '120', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "critical".'),
-('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.');
+('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.'),
+('diskspace_error', '1048576', 'int', 'Minimum free disk space (in kB) on judgehosts.');
 
 --
 -- Dumping data for table `executable`
@@ -131,7 +139,7 @@ INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room
 --
 
 INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES
-(1, 'admin', 'Administrator', MD5('admin#admin')),
+(1, 'admin', 'Administrator', '$2y$10$WkXRuj/UgoMGF80BaqhOJ.b1HW8KcGrUcWV3uAvGrQlp6Ia8w/dgO'), -- Is a hash for 'admin'
 (2, 'judgehost', 'User for judgedaemons', NULL);
 
 --

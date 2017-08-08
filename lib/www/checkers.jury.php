@@ -73,7 +73,7 @@ function check_user($data, $keydata = null)
 		ch_error("Email not valid.");
 	}
 	if ( !empty($data['password']) ) {
-		$data['password'] = md5("$id#".$data['password']);
+		$data['password'] = dj_password_hash($data['password']);
 	} else {
 		unset($data['password']);
 	}
@@ -104,9 +104,8 @@ function check_problem($data, $keydata = null)
 {
 	global $DB;
 
-	if ( ! is_numeric($data['timelimit']) || $data['timelimit'] < 0 ||
-			(int)$data['timelimit'] != $data['timelimit'] ) {
-		ch_error("Timelimit is not a valid positive integer");
+	if ( ! is_numeric($data['timelimit']) || $data['timelimit'] <= 0 ) {
+		ch_error("Timelimit is not a valid positive number");
 	}
 	if ( isset($data['shortname']) && ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
 		ch_error("Problem shortname may only contain characters " . IDENTIFIER_CHARS . ".");
@@ -186,7 +185,7 @@ function check_judgehost($data, $keydata = null)
 
 function check_language($data, $keydata = null)
 {
-	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] < 0 ) {
+	if ( ! is_numeric($data['time_factor']) || $data['time_factor'] <= 0 ) {
 		ch_error("Timelimit is not a valid positive factor");
 	}
 	$id = (isset($data['langid']) ? $data['langid'] : $keydata['langid']);
@@ -206,7 +205,7 @@ function check_language($data, $keydata = null)
 	}
 	$exts = json_decode($data['extensions'], false, 2);
 	if ( $exts==null || !is_array($exts) || count($exts)==0 ) {
-		ch_error("Language extension list is not a valid JSON array");
+		ch_error("Language extension list is not a valid non-empty JSON array");
 	}
 
 	return $data;
@@ -214,6 +213,8 @@ function check_language($data, $keydata = null)
 
 function check_executable($data, $keydata = null)
 {
+	global $executable_types;
+
 	$id = (isset($data['execid']) ? $data['execid'] : $keydata['execid']);
 	if ( ! preg_match ( ID_REGEX, $id ) ) {
 		ch_error("Executable ID may only contain characters " . IDENTIFIER_CHARS . ".");
@@ -228,13 +229,13 @@ function check_executable($data, $keydata = null)
 // Regex patterns for absolute/relative contest time formats. These
 // are also used in www/jury/contest.php.
 $pattern_timezone  = "[A-Za-z][A-Za-z0-9_\/+-]{1,35}";
-$pattern_datetime  = "\d\d\d\d\-\d\d\-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? $pattern_timezone";
+$pattern_datetime  = "\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? $pattern_timezone";
 $pattern_offset    = "\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?";
-$pattern_dateorneg = "($pattern_datetime|\-$pattern_offset)";
+$pattern_dateorneg = "($pattern_datetime|-$pattern_offset)";
 $pattern_dateorpos = "($pattern_datetime|\+$pattern_offset)";
 // Human readable versions of the patterns:
 $human_abs_datetime = "YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone";
-$human_rel_datetime = "&pm;[HHH]H:MM[:SS[.uuuuuu]]";
+$human_rel_datetime = "±[HHH]H:MM[:SS[.uuuuuu]]";
 
 // Returns an absolute Unix Epoch timestamp from a formatted absolute
 // or relative (to $basetime timestamp, if set) time. $field is a
@@ -397,4 +398,3 @@ function check_judging($data, $keydata = null)
 
 	return $data;
 }
-

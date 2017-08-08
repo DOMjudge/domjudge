@@ -106,19 +106,37 @@ if ( isset($_REQUEST['apply']) ) {
 	$res = $DB->q('SELECT submitid, cid, teamid, probid
 	               FROM submission
 	               WHERE rejudgingid=%i', $id);
+	$time_start = microtime(TRUE);
+
+	// no output buffering... we want to see what's going on real-time
+	echo "<br/><p>Canceling rejudge may take some time, please be patient:</p>\n";
+	ob_implicit_flush(true);
+	ob_end_flush();
+
+	echo "<p>\n";
 	while ( $row = $res->next() ) {
+		echo "s" . specialchars($row['submitid']) . ", ";
 		// restore old judgehost association
 		$valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging
 		                           WHERE submitid=%i AND valid=1', $row['submitid']);
 		$DB->q('UPDATE submission SET rejudgingid = NULL, judgehost=%s
 		        WHERE rejudgingid = %i', $valid_judgehost, $id);
 	}
+	echo "\n</p>\n";
+
 	$DB->q('UPDATE rejudging
 	        SET endtime=%s, userid_finish=%i, valid=0
 	        WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
 
 	auditlog('rejudging', $id, 'canceled rejudge', '(end)');
-	header('Location: rejudging.php?id='.urlencode($id));
+
+	$time_end = microtime(TRUE);
+
+	echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) .
+		"\">r$id</a> canceled in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
+
+	require(LIBWWWDIR . '/footer.php');
+	return;
 }
 
 
@@ -173,15 +191,7 @@ if ( !isset($rejdata['endtime']) ) {
 	}
 }
 
-$verdicts = array('compiler-error'     => 'CTE',
-                  'memory-limit'       => 'MLE',
-                  'output-limit'       => 'OLE',
-                  'run-error'          => 'RTE',
-                  'timelimit'          => 'TLE',
-                  'wrong-answer'       => 'WA',
-                  'presentation-error' => 'PE', /* dropped since 5.0 */
-                  'no-output'          => 'NO',
-                  'correct'            => 'AC');
+$verdicts = $VERDICTS;
 
 $orig_verdicts = $DB->q('KEYVALUETABLE SELECT submitid, result
                          FROM judging
@@ -225,7 +235,7 @@ function addVerdict($unknownVerdict, &$verdicts, &$table) {
 foreach ($new_verdicts as $submitid => $new_verdict) {
 	$orig_verdict = $orig_verdicts[$submitid];
 
-	// add verdicts to data structures if they are unkown up to now
+	// add verdicts to data structures if they are unknown up to now
 	foreach (array($new_verdict, $orig_verdict) as $verdict) {
 		if ( !array_key_exists($verdict, $verdicts) ) {
 			addVerdict($verdict, $verdicts, $table);

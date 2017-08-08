@@ -8,9 +8,9 @@ ZIPFILES=$(EXECDIRS:=.zip)
 ZIPSQL=mysql_db_files_defaultdata.sql mysql_db_files_examples.sql
 CONFSTUB=files/config.h
 
-domserver: dj-setup-database
+domserver: dj_setup_database
 
-build-scripts:
+build-scripts: $(CONFSTUB)
 	@for d in $(EXECDIRS) ; do \
 		[ -x $$d/build ] && ( cd $$d && ./build ) ; \
 	done
@@ -51,23 +51,22 @@ $(CONFSTUB): %: %.in $(TOPDIR)/README.md
 	VERSION=`sed -n '1s/^.*version //p' $(TOPDIR)/README.md | tr -d '\n'` ; \
 	sed "s/@VERSION@/$$VERSION/" $< > $@
 
-dj-setup-database: %: %.in $(TOPDIR)/paths.mk
+dj_setup_database: %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
-	chmod a+x $@
 
 install-domserver: $(ZIPSQL)
-	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) dj-setup-database
+	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) dj_setup_database
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir) \
 		mysql_db_structure.sql mysql_db_defaultdata.sql mysql_db_examples.sql \
 		$(ZIPSQL)
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/upgrade \
-	 	upgrade/upgrade_*.sql upgrade/README
+		upgrade/*.sql upgrade/README
 
 	$(INSTALL_DIR) $(addprefix $(DESTDIR)$(domserver_sqldir)/files/,defaultdata examples)
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/files/defaultdata \
-	 	files/defaultdata/*.zip
+		files/defaultdata/*.zip
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_sqldir)/files/examples \
-	 	files/examples/*.zip
+		files/examples/*.zip
 
 # Make $(CONFSTUB) a dependency, and the other stuff sub-rules to make
 # sure that config.h already exists when creating the zipfiles.
@@ -75,7 +74,11 @@ dist-l: $(CONFSTUB)
 	$(MAKE) $(ZIPSQL)
 
 distclean-l:
-	-rm -f dj-setup-database
+	-rm -f dj_setup_database
+	-rm -f files/defaultdata/compare/run files/defaultdata/float/check_float \
+	       files/defaultdata/java_javac_detect/DetectMain.class \
+	       files/examples/boolfind_cmp/check_boolfind \
+	       files/examples/boolfind_run/runjury
 
 maintainer-clean-l:
 	-rm -f $(ZIPSQL) $(ZIPFILES) $(CONFSTUB)

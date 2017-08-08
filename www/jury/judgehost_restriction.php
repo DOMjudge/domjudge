@@ -166,7 +166,8 @@ echo "</table>\n\n";
 if ( IS_ADMIN ) {
 	echo "<p>" .
 	     editLink('judgehost_restriction', $data['restrictionid']) . "\n" .
-	     delLink('judgehost_restriction','restrictionid',$data['restrictionid']) . "</p>\n\n";
+	     delLink('judgehost_restriction','restrictionid',
+	             $data['restrictionid'],$data['name']) . "</p>\n\n";
 }
 
 echo "<h2>Judgehosts having restriction " . specialchars($data['name']) . "</h2>\n\n";

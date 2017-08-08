@@ -7,8 +7,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-define('DOMJUDGE_API_VERSION', 3);
-
 define('BAD_REQUEST', '400 Bad Request');
 define('FORBIDDEN', '403 Forbidden');
 define('METHOD_NOT_ALLOWED', '405 Method Not Allowed');
@@ -98,7 +96,7 @@ class RestApi {
 			$arguments['__primary_key'] = $primary_key;
 		} else if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
 			$postmax = phpini_to_bytes(trim(ini_get('post_max_size')));
-			if ( $postmax != -1 && $postmax < $_SERVER['CONTENT_LENGTH'] ) {
+			if ( $postmax > 0 && $postmax < $_SERVER['CONTENT_LENGTH'] ) {
 				$this->createError("Size of post data too large (" . $_SERVER['CONTENT_LENGTH']
 						. "), increase post_max_size (" . $postmax . ") in your PHP config.");
 			}

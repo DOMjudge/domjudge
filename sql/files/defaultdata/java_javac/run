@@ -3,7 +3,7 @@
 # Java compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 #
-# This script byte-compiles with the Oracle (Sun) javac compiler and generates
+# This script byte-compiles with the javac compiler and generates
 # a shell script to run it with the java interpreter later.
 #
 # NOTICE: this compiler script cannot be used with the USE_CHROOT
@@ -19,7 +19,7 @@ MAINSOURCE="$1"
 # versions of the jvm, but might need increasing in some cases.
 MEMRESERVED=300000
 
-# Oracle java needs filename to match main class:
+# Java needs filename to match main class:
 MAINCLASS=Main
 
 SOURCEDIR="${MAINSOURCE%/*}"
@@ -45,6 +45,9 @@ MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 # Write executing script:
 # Executes java byte-code interpreter with following options
 # -Xmx: maximum size of memory allocation pool
+# -Xms: initial size of memory, improves runtime stability
+# -XX:+UseSerialGC: Serialized garbage collector improves runtime stability
+# -Xss64m: 64MB stack size
 cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute java interpreter on source.
@@ -54,7 +57,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec java -Xss8m -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS'
+exec java -XX:+UseSerialGC -Xss64m -Xms${MEMLIMITJAVA}k -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"

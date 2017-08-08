@@ -1,0 +1,82 @@
+{% import _self as this %}
+{% import 'forms.phtml' as forms %}
+
+{% macro runtime(judging) %}
+	{% if judging.aborted %}
+		[aborted]
+	{% else %}
+		{{ judging.starttime|timediff(judging.endtime) }}
+	{% endif %}
+{% endmacro %}
+
+<h1>Judgehost {{ judgehost.hostname|host }}</h1>
+
+<table>
+<tr><td>Name:  </td><td>{{ judgehost.hostname|host }}</td></tr>
+<tr><td>Active:</td><td>{{ judgehost.active|yesno }}</td></tr>
+<tr><td>Restriction:</td><td>
+	{% if not judgehost.restrictionname %}
+		<i>None</i>
+	{% else %}
+		<a href="judgehost_restriction.php?id={{ judgehost.restrictionid|url_encode }}">
+			{{ judgehost.restrictionname }}</a>
+	{% endif %}
+</td></tr>
+<tr><td>Status:</td><td>
+	{% if not judgehost.polltime %}
+		Judgehost never checked in.
+	{% else %}
+		{{ status }}, last checked in {{ judgehost.polltime|timediff }}s ago.
+	{% endif %}
+</td></tr>
+</table>
+
+{% if is_admin %}
+	{% set cmd = judgehost.active ? 'deactivate' : 'activate' %}
+	{{ forms.form('judgehost.php', 'post', 'null', 'multipart/form-data') }}
+<p>
+	{{ forms.hidden('id', judgehost.hostname) }}
+	{{ forms.hidden('cmd', cmd) }}
+	{{ forms.submit(cmd) }}
+</p>
+	{{ forms.endForm() }}
+
+<p>
+	{{ delLink('judgehost','hostname',judgehost.hostname) }}
+</p>
+{% endif %}
+
+{{ rejudgeForm('judgehost', judgehost.hostname) }} <br />
+
+<h3>Judgings by {{ judgehost.hostname|host }}</h3>
+
+{% if not judgingdata %}
+<p class="nodata">No judgings.</p>
+{% else %}
+<table class="list sortable">
+	<thead>
+		<tr>
+			<th scope="col" class="sorttable_numeric">ID</th>
+			<th scope="col">started</th>
+			<th scope="col">runtime</th>
+			<th scope="col">result</th>
+			<th scope="col">valid</th>
+			<th scope="col">verified</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for judging in judgingdata %}
+		{% set link	%} href="submission.php?id={{ judging.submitid }}&amp;jid={{ judging.judgingid }}"{% endset %}
+		<tr{% if not judging.valid %} class="disabled"{% endif %}>
+		<td><a{{ link }}>j{{ judging.judgingid }}</a></td>
+		<td><a{{ link }}>{{ judging.starttime|time }}</a></td>
+		<td><a{{ link }}>{{ this.runtime(judging) }}</a></td>
+		<td><a{{ link }}>{{ judging.result|result(judging.valid) }}
+		                 {{ judging|jud_busy }}</a></td>
+		<td class="tdcenter"><a{{ link }}>{{ judging.valid|yesno }}</a></td>
+		<td class="tdcenter"><a{{ link }}>{{ judging.verified|yesno }}</a></td>
+		</tr>
+	{% endfor %}
+	</tbody>
+</table>
+{% endif %}

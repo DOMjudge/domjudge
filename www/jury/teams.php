@@ -13,11 +13,14 @@ $teams = $DB->q('SELECT t.*, c.name AS catname,
                  a.shortname AS affshortname, a.name AS affname,
                  COUNT(co.cid) AS numcontests
                  FROM team t
-                 INNER JOIN contest co
-                 LEFT JOIN contestteam ct USING (teamid, cid)
+                 LEFT JOIN (
+                   SELECT teamid,cid FROM contest
+                   CROSS JOIN team WHERE contest.public=1
+                   UNION ALL
+                   SELECT teamid,cid FROM contestteam
+                 ) AS co USING (teamid)
                  LEFT JOIN team_category c USING (categoryid)
                  LEFT JOIN team_affiliation a USING (affilid)
-                 WHERE (co.public = 1 OR ct.cid IS NOT NULL)
                  GROUP BY teamid
                  ORDER BY c.sortorder, t.name COLLATE '. DJ_MYSQL_COLLATION);
 
@@ -68,7 +71,7 @@ if( $teams->count() == 0 ) {
 		}
 		$link = '<a href="team.php?id='.urlencode($row['teamid']) . '">';
 		echo "<tr class=\"category" . (int)$row['categoryid']  .
-			($row['enabled'] == 1 ? '' : ' sub_ignore') .  "\">".
+			($row['enabled'] == 1 ? '' : ' ignore') .  "\">".
 			"<td>" . $link . "t" .
 				specialchars($row['teamid'])."</a></td>".
 			"<td>" . $link .
@@ -103,7 +106,7 @@ if( $teams->count() == 0 ) {
 		if ( IS_ADMIN ) {
 			echo "<td class=\"editdel\">" .
 				editLink('team', $row['teamid']) . "&nbsp;" .
-				delLink('team','teamid',$row['teamid']) . "</td>";
+				delLink('team','teamid',$row['teamid'],$row['name']) . "</td>";
 		}
 		echo "</tr>\n";
 	}
