@@ -60,10 +60,10 @@ make domserver judgehost
 sudo make install-domserver install-judgehost
 
 # run phpunit tests
+cd /opt/domjudge/domserver
 lib/vendor/bin/phpunit webapp
 
 # setup database and add special user
-cd /opt/domjudge/domserver
 sudo bin/dj_setup_database install
 echo "INSERT INTO user (userid, username, name, password, teamid) VALUES (3, 'dummy', 'dummy user for example team', '\$2y\$10\$0d0sPmeAYTJ/Ya7rvA.kk.zvHu758ScyuHAjps0A6n9nm3eFmxW2K', 2)" | sudo mysql domjudge
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | sudo mysql domjudge
