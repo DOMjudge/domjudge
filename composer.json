@@ -28,7 +28,8 @@
 		"jms/serializer-bundle": "^2.0"
 	},
 	"require-dev": {
-			"sensio/generator-bundle": "^3.0"
+			"sensio/generator-bundle": "^3.0",
+		"phpunit/phpunit": "^6.3"
 	},
 	"autoload": {
 			"psr-4": { "": "webapp/src/" },

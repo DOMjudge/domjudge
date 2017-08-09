@@ -59,6 +59,9 @@ make configure
 make domserver judgehost
 sudo make install-domserver install-judgehost
 
+# run phpunit tests
+lib/vendor/bin/phpunit webapp
+
 # setup database and add special user
 cd /opt/domjudge/domserver
 sudo bin/dj_setup_database install

@@ -1,6 +1,5 @@
 <?php
 namespace Tests\DOMJudgeBundle\Utils;
-require_once('../lib/vendor/autoload.php');
 
 use DOMJudgeBundle\Utils\Utils;
 use PHPUnit\Framework\TestCase;
