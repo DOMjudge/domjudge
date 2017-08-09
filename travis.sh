@@ -44,7 +44,7 @@ EOF
 
 # install all php dependencies
 export SYMFONY_ENV="prod"
-./composer install --no-dev
+./composer install
 
 # downgrade java version outside of chroot since this didn't work
 sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle-java7-installer oracle-java8-installer oracle-java9-installer
@@ -61,7 +61,6 @@ sudo make install-domserver install-judgehost
 
 # run phpunit tests
 cd /opt/domjudge/domserver
-find .
 lib/vendor/bin/phpunit webapp
 
 # setup database and add special user
