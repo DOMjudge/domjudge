@@ -61,6 +61,7 @@ sudo make install-domserver install-judgehost
 
 # run phpunit tests
 cd /opt/domjudge/domserver
+find .
 lib/vendor/bin/phpunit webapp
 
 # setup database and add special user
