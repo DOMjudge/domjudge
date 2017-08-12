@@ -108,7 +108,16 @@ function check_updated_file($probid, $rank, $fileid, $file)
 		}
 
 		if ( $file=='image' ) {
-			list($thumb, $type) = get_image_thumb_type($content);
+			$type = get_image_type($content,$errormsg);
+			debug($type,$_FILES[$fileid]);
+			if ( $type===FALSE ) {
+				error("image: " . $errormsg);
+			}
+			$thumb = get_image_thumb($content,$errormsg);
+			if ( $thumb===FALSE ) {
+				$thumb = NULL;
+				warning("image: ".$errormsg);
+			}
 
 			$DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
 			        WHERE probid = %i AND rank = %i',
@@ -192,7 +201,7 @@ function check_add($probid, $rank, $FILES)
 		       isset($_POST['add_sample']));
 
 		if ( !empty($content['image']) ) {
-			list($thumb, $type) = get_image_thumb_type($content['image']);
+			list($thumb, $type) = get_image_thumb_and_type($content['image']);
 
 			$DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
 			        WHERE probid = %i AND rank = %i',
