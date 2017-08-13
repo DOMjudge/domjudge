@@ -31,7 +31,7 @@ require_once(LIBVENDORDIR . '/autoload.php');
 
 setup_database_connection();
 
-$verbose = LOG_NOTICE;
+$verbose = LOG_INFO;
 $waittime = 5;
 
 $cdatas = getCurContests(TRUE);
@@ -45,9 +45,9 @@ $cid = reset($cids);
 
 $config = spyc_load_file(ETCDIR . '/import-forwardfeed.yaml');
 
-$resturl = $config['restapi']['url'];
-$restuser = @$config['restapi']['user'];
-$restpass = @$config['restapi']['pass'];
+$resturl = $config['url'];
+$restuser = @$config['user'];
+$restpass = @$config['pass'];
 
 $feedurl = $config['feedurl'];
 
@@ -322,6 +322,8 @@ while ( TRUE ) {
 			logmsg(LOG_INFO, "Updated external result for s".$id.
 			       " to '".remap('result',val($run,'result'))."'");
 		}
+
+		logmsg(LOG_DEBUG, "Submission handled.");
 	}
 
 	sleep($waittime);
