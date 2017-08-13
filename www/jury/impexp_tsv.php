@@ -367,7 +367,7 @@ function tsv_results_get()
 	$cnt = 0;
 	foreach ($sb['scores'] as $teamid => $srow) {
 		$cnt++;
-		$median = $srow['num_correct'];
+		$median = $srow['num_points'];
 		if ($cnt > $numteams/2) { // XXX: lower or upper median?
 			break;
 		}
@@ -383,7 +383,7 @@ function tsv_results_get()
 		}
 
 		$rank = $srow['rank'];
-		$num_correct = $srow['num_correct'];
+		$num_correct = $srow['num_points'];
 		if ( $rank <= 4 ) {
 			$awardstring = "Gold Medal";
 		} else if ( $rank <= 8 ) {
@@ -409,7 +409,7 @@ function tsv_results_get()
 		}
 
 		$data[] = array(@$sb['teams'][$teamid]['externalid'],
-				$rank, $awardstring, $srow['num_correct'],
+				$rank, $awardstring, $srow['num_points'],
 				$srow['total_time'], $maxtime, $groupwinner);
 	}
 
