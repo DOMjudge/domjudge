@@ -1,8 +1,12 @@
+# @configure_input@
+
 # This file is a "template" of what your parameters.yml file should look like.
 
-# Note that during DOMjudge installation parameters.yml will be regenerated from
-# parameters.yml.dist with the correct database credentials and a
-# random secret token inserted.
+# Note that during DOMjudge installation parameters.yml will be
+# regenerated from parameters.yml.dist with the correct database
+# credentials and a random secret token inserted. In turn
+# parameters.yml.dist is generated from parameters.yml.dist.in at
+# configure time to add e.g. the DOMjudge version.
 
 # Set parameters here that may be different on each deployment target of the
 # app, e.g. development, staging, production.
@@ -23,3 +27,6 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt
+
+    # The parameters below are inserted at configure time.
+    domjudge.version: @DOMJUDGE_VERSION@

@@ -82,7 +82,7 @@ build-scripts:
 
 # List of SUBDIRS for recursive targets:
 build:             SUBDIRS=        lib                      tests misc-tools
-domserver:         SUBDIRS=etc         sql www                    misc-tools
+domserver:         SUBDIRS=etc         sql www                    misc-tools webapp
 install-domserver: SUBDIRS=etc     lib sql www                    misc-tools webapp
 judgehost:         SUBDIRS=etc                 judge              misc-tools
 install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
