@@ -46,7 +46,7 @@ fi
 
 usage()
 {
-    echo "Usage: $0 [-d <chrootdir>] [-D <distro>] [-a <architecture>]"
+    echo "Usage: $0 [-y] [-d <chrootdir>] [-D <distro>] [-a <architecture>]"
     echo "Creates a chroot environment with Java JRE support using the"
     echo "Debian or Ubuntu GNU/Linux distribution."
     echo
@@ -73,11 +73,12 @@ if [ "`id -u`" != 0 ]; then
 fi
 
 # Read command-line parameters:
-while getopts 'a:d:D:' OPT ; do
+while getopts 'a:d:D:y' OPT ; do
 	case $OPT in
 		a) ARCH=$OPTARG ;;
 		d) CHROOTDIR=$OPTARG ;;
 		D) DISTRO=$OPTARG ;;
+		y) FORCEYES=1 ;;
 		\?) error "Could not parse options." ;;
 	esac
 done
@@ -156,10 +157,12 @@ fi
 export DEBIAN_FRONTEND=noninteractive
 
 if [ -e "$CHROOTDIR" ]; then
-	printf "'$CHROOTDIR' already exists. Remove? (y/N) "
-	read yn
-	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
-		error "Chrootdir already exists, exiting."
+	if [ ! "$FORCEYES" ]; then
+		printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
+		read -r yn
+		if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
+			error "Chrootdir already exists, exiting."
+		fi
 	fi
 	rm -rf "$CHROOTDIR"
 fi
@@ -171,10 +174,12 @@ CHROOTDIR="$PWD"
 if [ ! -x /usr/sbin/debootstrap ]; then
 
 	echo "This script will install debootstrap on your system."
-	printf "Continue? (y/N) "
-	read yn
-	if [ "$yn" != "y" -a "$yn" != "Y" ]; then
-		exit 1;
+	if [ ! "$FORCEYES" ]; then
+		printf "Continue? (y/N) "
+		read -r yn
+		if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
+			exit 1;
+		fi
 	fi
 
 	if [ -f /etc/debian_version ]; then
