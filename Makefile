@@ -58,7 +58,7 @@ install-docs: docs-create-dirs
 dist: configure
 
 # Install PHP dependencies
-dist: composer-dependencies
+build: composer-dependencies
 composer-dependencies:
 ifeq (, $(shell which composer))
 	$(error "'composer' command not found in $(PATH), install it https://getcomposer.org/download/")
@@ -203,7 +203,60 @@ maintainer-install: dist build domserver-create-dirs judgehost-create-dirs
 # Make tmpdir, submitdir writable for webserver, because
 # judgehost-create-dirs sets wrong permissions:
 	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
-	@echo "Make sure that etc/dbpasswords.secret is readable by the webserver!"
+	@echo ""
+	@echo "========== Maintainer Install Completed =========="
+	@echo ""
+	@echo "Next:"
+	@echo "    - Set up database"
+	@echo "        ./sql/dj_setup_database -u root -p root install"
+	@echo "    - Configure apache2"
+	@echo "        make maintainer-postinstall-apache"
+	@echo "    - Configure nginx"
+	@echo "        make maintainer-postinstall-nginx"
+	@echo ""
+	@echo "Or you can run these commands manually"
+	@echo "    - Give the webserver access to things it needs"
+	@echo "        setfacl    -m   u:www-data:r    $(CURDIR)/etc/dbpasswords.secret"
+	@echo "        setfacl -R -m d:u:www-data:rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   u:www-data:rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m d:m::rwx          $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   m::rwx          $(CURDIR)/webapp/var"
+	@echo "        # Also make sure you keep access"
+	@echo "        setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
+	@echo "    - Configure webserver"
+	@echo "        Apache 2:"
+	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-enabled/domjudge.conf"
+	@echo "           a2enmod rewrite"
+	@echo "           systemctl restart apache2"
+	@echo "        Nginx + PHP-FPM:"
+	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/"
+	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm /etc/php/7.0/fpm/pool.d/domjudge.conf"
+	@echo "           systemctl restart nginx"
+	@echo "           systemctl restart php-fpm"
+
+maintainer-postinstall-permissions:
+	setfacl    -m   u:www-data:r            $(CURDIR)/etc/dbpasswords.secret
+	setfacl -R -m d:u:www-data:rwx          $(CURDIR)/webapp/var
+	setfacl -R -m   u:www-data:rwx          $(CURDIR)/webapp/var
+	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var
+	setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var
+	setfacl -R -m d:m::rwx                  $(CURDIR)/webapp/var
+	setfacl -R -m   m::rwx                  $(CURDIR)/webapp/var
+
+maintainer-postinstall-apache: maintainer-postinstall-permissions
+	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
+	ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-enabled/domjudge.conf
+	a2enmod rewrite
+	systemctl restart apache2
+
+maintainer-postinstall-nginx: maintainer-postinstall-permissions
+	@if [ ! -d "/etc/nginx/sites-enabled/" ]; then echo "Couldn't find directory /etc/nginx/sites-enabled/. Is nginx installed?"; false; fi
+	@if [ ! -d "/etc/php/7.0/fpm/pool.d/" ]; then echo "Couldn't find directory /etc/php/7.0/fpm/pool.d/. Is php-fpm installed?"; false; fi
+	ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf
+	ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/7.0/fpm/pool.d/domjudge-fpm.conf
+	systemctl restart nginx
+	systemctl restart php7.0-fpm
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:
