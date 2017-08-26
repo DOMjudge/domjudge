@@ -548,7 +548,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 		echo "<p>No jury solutions added: problem is not linked to a contest (yet).</p>\n";
 	} else if ( empty($teamid) ) {
 		echo "<p>No jury solutions added: must associate team with your user first.</p>\n";
-	} else if ( $DB->q('VALUE SELECT allow_submit FROM problem
+	} else if ( $DB->q('MAYBEVALUE SELECT allow_submit FROM problem
 	                    INNER JOIN contestproblem using (probid)
 	                    WHERE probid = %i AND cid = %i', $probid, $cid) ) {
 		// First find all submittable languages:
