@@ -208,7 +208,7 @@ maintainer-install: dist build domserver-create-dirs judgehost-create-dirs
 	@echo ""
 	@echo "Next:"
 	@echo "    - Set up database"
-	@echo "        ./sql/dj_setup_database -u root -p root install"
+	@echo "        ./sql/dj_setup_database -u root [-r|-p ROOT_PASS] install"
 	@echo "    - Configure apache2"
 	@echo "        make maintainer-postinstall-apache"
 	@echo "    - Configure nginx"
@@ -216,9 +216,9 @@ maintainer-install: dist build domserver-create-dirs judgehost-create-dirs
 	@echo ""
 	@echo "Or you can run these commands manually"
 	@echo "    - Give the webserver access to things it needs"
-	@echo "        setfacl    -m   u:www-data:r    $(CURDIR)/etc/dbpasswords.secret"
-	@echo "        setfacl -R -m d:u:www-data:rwx  $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m   u:www-data:rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m d:m::rwx          $(CURDIR)/webapp/var"
 	@echo "        setfacl -R -m   m::rwx          $(CURDIR)/webapp/var"
 	@echo "        # Also make sure you keep access"
@@ -236,13 +236,13 @@ maintainer-install: dist build domserver-create-dirs judgehost-create-dirs
 	@echo "           systemctl restart php-fpm"
 
 maintainer-postinstall-permissions:
-	setfacl    -m   u:www-data:r            $(CURDIR)/etc/dbpasswords.secret
-	setfacl -R -m d:u:www-data:rwx          $(CURDIR)/webapp/var
-	setfacl -R -m   u:www-data:rwx          $(CURDIR)/webapp/var
-	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var
-	setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var
-	setfacl -R -m d:m::rwx                  $(CURDIR)/webapp/var
-	setfacl -R -m   m::rwx                  $(CURDIR)/webapp/var
+	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
+	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
+	setfacl -R -m   u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
+	setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var
+	setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var
 
 maintainer-postinstall-apache: maintainer-postinstall-permissions
 	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
