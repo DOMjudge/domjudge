@@ -520,7 +520,7 @@ while($row = $res->next()) {
 		$CHECKER_ERRORS[] = 'has no corresponding submitid (in c'.$row['j_cid'] .')';
 	}
 	if($row['s_cid'] != NULL && $row['s_cid'] != $row['j_cid']) {
-		$CHEKCER_ERRORS[] = 'Judging j' .$row['judgingid'] .
+		$CHECKER_ERRORS[] = 'Judging j' .$row['judgingid'] .
 		                    ' is from a different contest (c' . $row['j_cid'] .
 		                    ') than its submission s' . $row['j_submitid'] .
 		                    ' (c' . $row['s_cid'] . ')';
