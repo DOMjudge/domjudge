@@ -2,6 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 5.0.6 - DEV
 -------------------
+ - Fix variable names in two places.
+ - Fix an SQL query to allow returning NULL.
 
 Version 5.0.5 - 12 February 2017
 --------------------------------
