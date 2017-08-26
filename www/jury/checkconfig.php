@@ -484,7 +484,7 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 	$res = $DB->q('SELECT DISTINCT country FROM team_affiliation
 	               WHERE country IS NOT NULL ORDER BY country');
 	while ( $row = $res->next() ) {
-		$cflag = '../images/countries/' .
+		$cflag = WEBAPPDIR . '/web/images/countries/' .
 			urlencode($row['country']) . '.png';
 		if ( ! file_exists ( $cflag ) ) {
 			$details .= "Country " . $row['country'] .

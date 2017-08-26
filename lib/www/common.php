@@ -342,13 +342,13 @@ function putTeam($teamid) {
 
 	if ( empty($team) ) error ("No team found by this id.");
 
-	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
-	$teamimage = "../images/teams/" . urlencode($team['teamid']) . ".jpg";
+	$countryflag = "images/countries/" . urlencode($team['country']) . ".png";
+	$teamimage = "images/teams/" . urlencode($team['teamid']) . ".jpg";
 
 	echo "<h1>Team ".specialchars($team['name'])."</h1>\n\n";
 
-	if ( is_readable($teamimage) ) {
-		echo '<img id="teampicture" src="' . $teamimage .
+	if ( is_readable(WEBAPPDIR.'/web/'.$teamimage) ) {
+		echo '<img id="teampicture" src="../' . $teamimage .
 			'" alt="Picture of team ' .
 			specialchars($team['name']) . '" />';
 	}
@@ -371,8 +371,8 @@ function putTeam($teamid) {
 		echo "</td></tr>\n";
 		if ( !empty($team['country']) ) {
 			echo '<tr><td>Country:</td><td>';
-			if ( is_readable($countryflag) ) {
-				echo '<img src="' . $countryflag . '" alt="' .
+			if ( is_readable(WEBAPPDIR.'/web/'.$countryflag) ) {
+				echo '<img src="../' . $countryflag . '" alt="' .
 					specialchars($team['country']) . '" /> ';
 			}
 			echo specialchars($team['country']) . "</td></tr>\n";

@@ -29,14 +29,14 @@ if( $res->count() == 0 ) {
 		"<th></th></tr>\n</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
-		$countryflag = "../images/countries/" . urlencode($row['country']) . ".png";
+		$countryflag = "images/countries/" . urlencode($row['country']) . ".png";
 		$link = '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">';
 		echo '<tr><td>' . $link . specialchars($row['affilid']) .
 			'</a></td><td>' . $link . specialchars($row['shortname']) .
 			'</a></td><td>' . $link . specialchars($row['name']) .
 			'</a></td><td class="tdcenter">' . $link .
 			specialchars($row['country']) .
-			( is_readable($countryflag) ? ' <img src="' . $countryflag .
+			( is_readable(WEBAPPDIR.'/web/'.$countryflag) ? ' <img src="../' . $countryflag .
 			  '" alt="' . specialchars($row['country']) . '" />' : '&nbsp;' ) .
 			'</a></td><td class="tdright">' . $link .
 			(int)$row['cnt'] .

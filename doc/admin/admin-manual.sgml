@@ -1453,9 +1453,9 @@ that is displayed in the jury interface.
 
 A country flag can be displayed on the scoreboard. For this to work,
 the <tt>country</tt> field must match a (flag) picture in
-<tt>www/images/countries/&lt;country&gt;.png</tt>. All
+<tt>webapp/web/images/countries/&lt;country&gt;.png</tt>. All
 country flags are present there, named with their 3-character ISO
-codes. See also <tt>www/images/countries/README</tt>.
+codes. See also <tt>webapp/web/images/countries/README</tt>.
 
 <tag>team_category</tag>
 <tt>categoryid</tt> is the reference ID and <tt>name</tt> is a string:

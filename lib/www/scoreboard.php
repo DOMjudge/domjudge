@@ -384,11 +384,11 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 						urlencode($teams[$team]['affilid']) . '">';
 				}
 				if ( isset($teams[$team]['country']) ) {
-					$countryflag = '../images/countries/' .
+					$countryflag = 'images/countries/' .
 						urlencode($teams[$team]['country']) . '.png';
 					echo ' ';
-					if ( is_readable($countryflag) ) {
-						echo '<img src="' . $countryflag . '"' .
+					if ( is_readable(WEBAPPDIR.'/web/'.$countryflag) ) {
+						echo '<img src="../' . $countryflag . '"' .
 							' alt="'   . specialchars($teams[$team]['country']) . '"' .
 							' title="' . specialchars($teams[$team]['country']) . '" />';
 					} else {
