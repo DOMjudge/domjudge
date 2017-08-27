@@ -1260,34 +1260,39 @@ $api->provideFunction('GET', 'languages', $doc);
  */
 function clarifications($args)
 {
-	global $cids, $DB;
+	global $cids, $cdatas, $DB;
 
 	if ( empty($cids) ) {
 		return array();
 	}
 
-	// Find public clarifications, maybe later also provide more info for jury
-	$query = 'TABLE SELECT clarid, submittime, probid, body FROM clarification
-	          WHERE cid IN (%Ai) AND sender IS NULL AND recipient IS NULL';
+	// Find clarifications, maybe later also provide more info for jury
+	$query = 'TABLE SELECT clarid, submittime, probid, body, cid, sender, recipient
+		  FROM clarification
+	          WHERE cid IN (%Ai)';
 
 	$byProblem = array_key_exists('problem', $args);
 	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
 	$problem = ($byProblem ? $args['problem'] : null);
 
-	$cdatas = $DB->q($query, $cids, $problem);
-	return array_map(function($cdata) {
+	$clar_datas = $DB->q($query, $cids, $problem);
+	return array_map(function($clar_data) use ($cdatas) {
 		return array(
-			'clarid'     => safe_int($cdata['clarid']),
-			'submittime' => safe_float($cdata['submittime'],3),
-			'probid'     => safe_int($cdata['probid']),
-			'body'       => $cdata['body'],
+			'id'           => safe_int($clar_data['clarid']),
+			'time'         => Utils::absTime($clar_data['submittime']),
+			'contest_time' => Utils::relTime($clar_data['submittime'] - $cdatas[$clar_data['cid']]['starttime']),
+			'problem_id'   => safe_int($clar_data['probid']),
+			'from_team_id' => safe_int($clar_data['sender']),
+			'to_team_id'   => safe_int($clar_data['recipient']),
+			'text'         => $clar_data['body'],
 		);
-	}, $cdatas);
+	}, $clar_datas);
 }
-$doc = 'Get a list of all public clarifications.';
+$doc = 'Get a list of clarifications.';
 $args = array('problem' => 'Search for clarifications about a specific problem.');
 $exArgs = array(array('problem' => 'H'));
-$api->provideFunction('GET', 'clarifications', $doc, $args, $exArgs);
+$roles = array('jury');
+$api->provideFunction('GET', 'clarifications', $doc, $args, $exArgs, $roles);
 
 /**
  * Judgehosts
