@@ -1014,6 +1014,56 @@ $roles = array('jury','judgehost');
 $api->provideFunction('GET', 'queue', $doc, $args, $exArgs, $roles);
 
 /**
+ * Judging runs information
+ */
+function runs($args)
+{
+	global $DB, $VERDICTS;
+
+	$query = 'TABLE SELECT runid, judgingid, runresult, rank
+		  FROM judging_run
+		  LEFT JOIN testcase USING (testcaseid)
+		  WHERE TRUE';
+
+	$hasFirstId = array_key_exists('first_id', $args);
+	$query .= ($hasFirstId ? ' AND runid >= %i' : ' AND TRUE %_');
+	$firstId = ($hasFirstId ? $args['first_id'] : 0);
+
+	$hasLastId = array_key_exists('last_id', $args);
+	$query .= ($hasLastId ? ' AND runid <= %i' : ' AND TRUE %_');
+	$lastId = ($hasLastId ? $args['last_id'] : 0);
+
+	$hasJudgingid = array_key_exists('judging_id', $args);
+	$query .= ($hasJudgingid ? ' AND judgingid = %i' : ' %_');
+	$judgingid = ($hasJudgingid ? $args['judging_id'] : 0);
+
+	$hasLimit = array_key_exists('limit', $args);
+	$query .= ($hasLimit ? ' LIMIT %i' : ' %_');
+	$limit = ($hasLimit ? $args['limit'] : -1);
+	// TODO: validate limit
+
+	$runs = $DB->q($query, $firstId, $lastId, $judgingid, $limit);
+	return array_map(function($run) use ($VERDICTS) {
+		return array(
+			'id'                => safe_int($run['runid']),
+			'judgement_id'      => safe_int($run['judgingid']),
+			'ordinal'           => safe_int($run['rank']),
+			'judgement_type_id' => $VERDICTS[$run['runresult']],
+		);
+	}, $runs);
+}
+$doc = 'Get all or selected runs.';
+$args = array('first_id' => 'Search from a certain ID',
+              'last_id' => 'Search up to a certain ID',
+              'run_id' => 'Search only for a certain ID',
+              'judging_id' => 'Search only for runs associated to this judging ID',
+              'limit' => 'Get only the first N runs');
+$exArgs = array(array('first_id' => 800, 'limit' => 10));
+$roles = array('jury');
+$api->provideFunction('GET', 'runs', $doc, $args, $exArgs, $roles);
+
+
+/**
  * Affiliation information
  */
 function affiliations($args)
