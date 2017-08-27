@@ -36,85 +36,85 @@ class Balloon
  private $submission;
 
 
-    /**
-     * Get balloonid
-     *
-     * @return integer
-     */
-    public function getBalloonid()
-    {
-        return $this->balloonid;
-    }
+	/**
+	 * Get balloonid
+	 *
+	 * @return integer
+	 */
+	public function getBalloonid()
+	{
+		return $this->balloonid;
+	}
 
-    /**
-     * Set submitid
-     *
-     * @param integer $submitid
-     *
-     * @return Balloon
-     */
-    public function setSubmitid($submitid)
-    {
-        $this->submitid = $submitid;
+	/**
+	 * Set submitid
+	 *
+	 * @param integer $submitid
+	 *
+	 * @return Balloon
+	 */
+	public function setSubmitid($submitid)
+	{
+		$this->submitid = $submitid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get submitid
-     *
-     * @return integer
-     */
-    public function getSubmitid()
-    {
-        return $this->submitid;
-    }
+	/**
+	 * Get submitid
+	 *
+	 * @return integer
+	 */
+	public function getSubmitid()
+	{
+		return $this->submitid;
+	}
 
-    /**
-     * Set done
-     *
-     * @param boolean $done
-     *
-     * @return Balloon
-     */
-    public function setDone($done)
-    {
-        $this->done = $done;
+	/**
+	 * Set done
+	 *
+	 * @param boolean $done
+	 *
+	 * @return Balloon
+	 */
+	public function setDone($done)
+	{
+		$this->done = $done;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get done
-     *
-     * @return boolean
-     */
-    public function getDone()
-    {
-        return $this->done;
-    }
+	/**
+	 * Get done
+	 *
+	 * @return boolean
+	 */
+	public function getDone()
+	{
+		return $this->done;
+	}
 
-    /**
-     * Set submission
-     *
-     * @param \DOMJudgeBundle\Entity\Submission $submission
-     *
-     * @return Balloon
-     */
-    public function setSubmission(\DOMJudgeBundle\Entity\Submission $submission = null)
-    {
-        $this->submission = $submission;
+	/**
+	 * Set submission
+	 *
+	 * @param \DOMJudgeBundle\Entity\Submission $submission
+	 *
+	 * @return Balloon
+	 */
+	public function setSubmission(\DOMJudgeBundle\Entity\Submission $submission = null)
+	{
+		$this->submission = $submission;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get submission
-     *
-     * @return \DOMJudgeBundle\Entity\Submission
-     */
-    public function getSubmission()
-    {
-        return $this->submission;
-    }
+	/**
+	 * Get submission
+	 *
+	 * @return \DOMJudgeBundle\Entity\Submission
+	 */
+	public function getSubmission()
+	{
+		return $this->submission;
+	}
 }

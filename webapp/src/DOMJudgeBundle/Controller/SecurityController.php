@@ -8,25 +8,25 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 
 class SecurityController extends Controller {
-  /**
-   * @Route("/login", name="login")
-   */
-  public function loginAction(Request $request) {
-    if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-      return $this->redirect($this->generateUrl('legacy.index'));
-    }
+	/**
+	 * @Route("/login", name="login")
+	 */
+	public function loginAction(Request $request) {
+		if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+			return $this->redirect($this->generateUrl('legacy.index'));
+		}
 
-    $authUtils = $this->get('security.authentication_utils');
+		$authUtils = $this->get('security.authentication_utils');
 
-    // get the login error if there is one
-    $error = $authUtils->getLastAuthenticationError();
+		// get the login error if there is one
+		$error = $authUtils->getLastAuthenticationError();
 
-    // last username entered by the user
-    $lastUsername = $authUtils->getLastUsername();
+		// last username entered by the user
+		$lastUsername = $authUtils->getLastUsername();
 
-    return $this->render('DOMJudgeBundle:security:login.html.twig', array(
-        'last_username' => $lastUsername,
-        'error'         => $error,
-    ));
-  }
+		return $this->render('DOMJudgeBundle:security:login.html.twig', array(
+		    'last_username' => $lastUsername,
+		    'error'         => $error,
+		));
+	}
 }

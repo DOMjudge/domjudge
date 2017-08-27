@@ -8,81 +8,81 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Role
 {
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="SEQUENCE")
-     * @ORM\Column(type="integer", name="roleid", options={"comment"="Unique ID"}, nullable=false)
-     */
-    private $roleid;
+	/**
+	 * @var int
+	 * @ORM\Id
+	 * @ORM\GeneratedValue(strategy="SEQUENCE")
+	 * @ORM\Column(type="integer", name="roleid", options={"comment"="Unique ID"}, nullable=false)
+	 */
+	private $roleid;
 
-    /**
-     * @var string
-     * @ORM\Column(type="string", name="role", length=25, options={"comment"="Role name"}, nullable=false)
-     */
-    private $role;
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="role", length=25, options={"comment"="Role name"}, nullable=false)
+	 */
+	private $role;
 
-    /**
-     * @var string
-     * @ORM\Column(type="string", name="description", length=255, options={"comment"="Role name"}, nullable=false)
-     */
-    private $description;
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="description", length=255, options={"comment"="Role name"}, nullable=false)
+	 */
+	private $description;
 
-    /**
-     * Get roleid
-     *
-     * @return integer
-     */
-    public function getRoleid()
-    {
-        return $this->roleid;
-    }
+	/**
+	 * Get roleid
+	 *
+	 * @return integer
+	 */
+	public function getRoleid()
+	{
+		return $this->roleid;
+	}
 
-    /**
-     * Set role
-     *
-     * @param string $role
-     *
-     * @return Role
-     */
-    public function setRole($role)
-    {
-        $this->role = $role;
+	/**
+	 * Set role
+	 *
+	 * @param string $role
+	 *
+	 * @return Role
+	 */
+	public function setRole($role)
+	{
+		$this->role = $role;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get role
-     *
-     * @return string
-     */
-    public function getRole()
-    {
-        return $this->role;
-    }
+	/**
+	 * Get role
+	 *
+	 * @return string
+	 */
+	public function getRole()
+	{
+		return $this->role;
+	}
 
-    /**
-     * Set description
-     *
-     * @param string $description
-     *
-     * @return Role
-     */
-    public function setDescription($description)
-    {
-        $this->description = $description;
+	/**
+	 * Set description
+	 *
+	 * @param string $description
+	 *
+	 * @return Role
+	 */
+	public function setDescription($description)
+	{
+		$this->description = $description;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get description
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return $this->description;
-    }
+	/**
+	 * Get description
+	 *
+	 * @return string
+	 */
+	public function getDescription()
+	{
+		return $this->description;
+	}
 }

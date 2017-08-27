@@ -8,68 +8,68 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Event
 {
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="eventid", options={"comment"="Unique ID"}, nullable=false)
-     */
-    private $eventid;
+	/**
+	 * @var int
+	 * @ORM\Id
+	 * @ORM\Column(type="integer", name="eventid", options={"comment"="Unique ID"}, nullable=false)
+	 */
+	private $eventid;
 
-    /**
-     * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="eventtime", options={"comment"="When the event occurred", "unsigned"=true}, nullable=false)
-     */
-    private $eventtime;
+	/**
+	 * @var double
+	 * @ORM\Column(type="decimal", precision=32, scale=9, name="eventtime", options={"comment"="When the event occurred", "unsigned"=true}, nullable=false)
+	 */
+	private $eventtime;
 
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
-     */
-    private $cid;
+	/**
+	 * @var int
+	 * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
+	 */
+	private $cid;
 
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="clarid", options={"comment"="In reply to clarification ID"}, nullable=true)
-     */
-    private $clarid;
+	/**
+	 * @var int
+	 * @ORM\Column(type="integer", name="clarid", options={"comment"="In reply to clarification ID"}, nullable=true)
+	 */
+	private $clarid;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="langid", options={"comment"="Language ID"}, nullable=true)
-     */
-    private $langid;
+	/**
+	 * @var int
+	 *
+	 * @ORM\Column(type="integer", name="langid", options={"comment"="Language ID"}, nullable=true)
+	 */
+	private $langid;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID"}, nullable=true)
-     */
-    private $probid;
+	/**
+	 * @var int
+	 *
+	 * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID"}, nullable=true)
+	 */
+	private $probid;
 
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="submitid", options={"comment"="Submission ID"}, nullable=true)
-     */
-    private $submitid;
+	/**
+	 * @var int
+	 * @ORM\Column(type="integer", name="submitid", options={"comment"="Submission ID"}, nullable=true)
+	 */
+	private $submitid;
 
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="judgingid", options={"comment"="Judging ID"}, nullable=true)
-     */
-    private $judgingid;
+	/**
+	 * @var int
+	 * @ORM\Column(type="integer", name="judgingid", options={"comment"="Judging ID"}, nullable=true)
+	 */
+	private $judgingid;
 
-    /**
-     * @var int
-     * @ORM\Column(type="integer", name="teamid", options={"comment"="Team ID"}, nullable=true)
-     */
-    private $teamid;
+	/**
+	 * @var int
+	 * @ORM\Column(type="integer", name="teamid", options={"comment"="Team ID"}, nullable=true)
+	 */
+	private $teamid;
 
-    /**
-     * @var string
-     * @ORM\Column(type="text", length=4294967295, name="description", options={"comment"="Event Description"}, nullable=false)
-     */
-    private $description;
+	/**
+	 * @var string
+	 * @ORM\Column(type="text", length=4294967295, name="description", options={"comment"="Event Description"}, nullable=false)
+	 */
+	private $description;
 
   /**
    * @ORM\ManyToOne(targetEntity="Contest", inversedBy="events")
@@ -114,411 +114,411 @@ class Event
   private $team;
 
 
-    /**
-     * Set eventid
-     *
-     * @param integer $eventid
-     *
-     * @return Event
-     */
-    public function setEventid($eventid)
-    {
-        $this->eventid = $eventid;
+	/**
+	 * Set eventid
+	 *
+	 * @param integer $eventid
+	 *
+	 * @return Event
+	 */
+	public function setEventid($eventid)
+	{
+		$this->eventid = $eventid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get eventid
-     *
-     * @return integer
-     */
-    public function getEventid()
-    {
-        return $this->eventid;
-    }
+	/**
+	 * Get eventid
+	 *
+	 * @return integer
+	 */
+	public function getEventid()
+	{
+		return $this->eventid;
+	}
 
-    /**
-     * Set eventtime
-     *
-     * @param string $eventtime
-     *
-     * @return Event
-     */
-    public function setEventtime($eventtime)
-    {
-        $this->eventtime = $eventtime;
+	/**
+	 * Set eventtime
+	 *
+	 * @param string $eventtime
+	 *
+	 * @return Event
+	 */
+	public function setEventtime($eventtime)
+	{
+		$this->eventtime = $eventtime;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get eventtime
-     *
-     * @return string
-     */
-    public function getEventtime()
-    {
-        return $this->eventtime;
-    }
+	/**
+	 * Get eventtime
+	 *
+	 * @return string
+	 */
+	public function getEventtime()
+	{
+		return $this->eventtime;
+	}
 
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return Event
-     */
-    public function setCid($cid)
-    {
-        $this->cid = $cid;
+	/**
+	 * Set cid
+	 *
+	 * @param integer $cid
+	 *
+	 * @return Event
+	 */
+	public function setCid($cid)
+	{
+		$this->cid = $cid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
-    {
-        return $this->cid;
-    }
+	/**
+	 * Get cid
+	 *
+	 * @return integer
+	 */
+	public function getCid()
+	{
+		return $this->cid;
+	}
 
-    /**
-     * Set clarid
-     *
-     * @param integer $clarid
-     *
-     * @return Event
-     */
-    public function setClarid($clarid)
-    {
-        $this->clarid = $clarid;
+	/**
+	 * Set clarid
+	 *
+	 * @param integer $clarid
+	 *
+	 * @return Event
+	 */
+	public function setClarid($clarid)
+	{
+		$this->clarid = $clarid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get clarid
-     *
-     * @return integer
-     */
-    public function getClarid()
-    {
-        return $this->clarid;
-    }
+	/**
+	 * Get clarid
+	 *
+	 * @return integer
+	 */
+	public function getClarid()
+	{
+		return $this->clarid;
+	}
 
-    /**
-     * Set langid
-     *
-     * @param integer $langid
-     *
-     * @return Event
-     */
-    public function setLangid($langid)
-    {
-        $this->langid = $langid;
+	/**
+	 * Set langid
+	 *
+	 * @param integer $langid
+	 *
+	 * @return Event
+	 */
+	public function setLangid($langid)
+	{
+		$this->langid = $langid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get langid
-     *
-     * @return integer
-     */
-    public function getLangid()
-    {
-        return $this->langid;
-    }
+	/**
+	 * Get langid
+	 *
+	 * @return integer
+	 */
+	public function getLangid()
+	{
+		return $this->langid;
+	}
 
-    /**
-     * Set probid
-     *
-     * @param integer $probid
-     *
-     * @return Event
-     */
-    public function setProbid($probid)
-    {
-        $this->probid = $probid;
+	/**
+	 * Set probid
+	 *
+	 * @param integer $probid
+	 *
+	 * @return Event
+	 */
+	public function setProbid($probid)
+	{
+		$this->probid = $probid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get probid
-     *
-     * @return integer
-     */
-    public function getProbid()
-    {
-        return $this->probid;
-    }
+	/**
+	 * Get probid
+	 *
+	 * @return integer
+	 */
+	public function getProbid()
+	{
+		return $this->probid;
+	}
 
-    /**
-     * Set submitid
-     *
-     * @param integer $submitid
-     *
-     * @return Event
-     */
-    public function setSubmitid($submitid)
-    {
-        $this->submitid = $submitid;
+	/**
+	 * Set submitid
+	 *
+	 * @param integer $submitid
+	 *
+	 * @return Event
+	 */
+	public function setSubmitid($submitid)
+	{
+		$this->submitid = $submitid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get submitid
-     *
-     * @return integer
-     */
-    public function getSubmitid()
-    {
-        return $this->submitid;
-    }
+	/**
+	 * Get submitid
+	 *
+	 * @return integer
+	 */
+	public function getSubmitid()
+	{
+		return $this->submitid;
+	}
 
-    /**
-     * Set judgingid
-     *
-     * @param integer $judgingid
-     *
-     * @return Event
-     */
-    public function setJudgingid($judgingid)
-    {
-        $this->judgingid = $judgingid;
+	/**
+	 * Set judgingid
+	 *
+	 * @param integer $judgingid
+	 *
+	 * @return Event
+	 */
+	public function setJudgingid($judgingid)
+	{
+		$this->judgingid = $judgingid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get judgingid
-     *
-     * @return integer
-     */
-    public function getJudgingid()
-    {
-        return $this->judgingid;
-    }
+	/**
+	 * Get judgingid
+	 *
+	 * @return integer
+	 */
+	public function getJudgingid()
+	{
+		return $this->judgingid;
+	}
 
-    /**
-     * Set teamid
-     *
-     * @param integer $teamid
-     *
-     * @return Event
-     */
-    public function setTeamid($teamid)
-    {
-        $this->teamid = $teamid;
+	/**
+	 * Set teamid
+	 *
+	 * @param integer $teamid
+	 *
+	 * @return Event
+	 */
+	public function setTeamid($teamid)
+	{
+		$this->teamid = $teamid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get teamid
-     *
-     * @return integer
-     */
-    public function getTeamid()
-    {
-        return $this->teamid;
-    }
+	/**
+	 * Get teamid
+	 *
+	 * @return integer
+	 */
+	public function getTeamid()
+	{
+		return $this->teamid;
+	}
 
-    /**
-     * Set description
-     *
-     * @param string $description
-     *
-     * @return Event
-     */
-    public function setDescription($description)
-    {
-        $this->description = $description;
+	/**
+	 * Set description
+	 *
+	 * @param string $description
+	 *
+	 * @return Event
+	 */
+	public function setDescription($description)
+	{
+		$this->description = $description;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get description
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return $this->description;
-    }
+	/**
+	 * Get description
+	 *
+	 * @return string
+	 */
+	public function getDescription()
+	{
+		return $this->description;
+	}
 
-    /**
-     * Set clarification
-     *
-     * @param \DOMJudgeBundle\Entity\Clarification $clarification
-     *
-     * @return Event
-     */
-    public function setClarification(\DOMJudgeBundle\Entity\Clarification $clarification = null)
-    {
-        $this->clarification = $clarification;
+	/**
+	 * Set clarification
+	 *
+	 * @param \DOMJudgeBundle\Entity\Clarification $clarification
+	 *
+	 * @return Event
+	 */
+	public function setClarification(\DOMJudgeBundle\Entity\Clarification $clarification = null)
+	{
+		$this->clarification = $clarification;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get clarification
-     *
-     * @return \DOMJudgeBundle\Entity\Clarification
-     */
-    public function getClarification()
-    {
-        return $this->clarification;
-    }
+	/**
+	 * Get clarification
+	 *
+	 * @return \DOMJudgeBundle\Entity\Clarification
+	 */
+	public function getClarification()
+	{
+		return $this->clarification;
+	}
 
-    /**
-     * Set language
-     *
-     * @param \DOMJudgeBundle\Entity\Language $language
-     *
-     * @return Event
-     */
-    public function setLanguage(\DOMJudgeBundle\Entity\Language $language = null)
-    {
-        $this->language = $language;
+	/**
+	 * Set language
+	 *
+	 * @param \DOMJudgeBundle\Entity\Language $language
+	 *
+	 * @return Event
+	 */
+	public function setLanguage(\DOMJudgeBundle\Entity\Language $language = null)
+	{
+		$this->language = $language;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get language
-     *
-     * @return \DOMJudgeBundle\Entity\Language
-     */
-    public function getLanguage()
-    {
-        return $this->language;
-    }
+	/**
+	 * Get language
+	 *
+	 * @return \DOMJudgeBundle\Entity\Language
+	 */
+	public function getLanguage()
+	{
+		return $this->language;
+	}
 
-    /**
-     * Set problem
-     *
-     * @param \DOMJudgeBundle\Entity\Problem $problem
-     *
-     * @return Event
-     */
-    public function setProblem(\DOMJudgeBundle\Entity\Problem $problem = null)
-    {
-        $this->problem = $problem;
+	/**
+	 * Set problem
+	 *
+	 * @param \DOMJudgeBundle\Entity\Problem $problem
+	 *
+	 * @return Event
+	 */
+	public function setProblem(\DOMJudgeBundle\Entity\Problem $problem = null)
+	{
+		$this->problem = $problem;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get problem
-     *
-     * @return \DOMJudgeBundle\Entity\Problem
-     */
-    public function getProblem()
-    {
-        return $this->problem;
-    }
+	/**
+	 * Get problem
+	 *
+	 * @return \DOMJudgeBundle\Entity\Problem
+	 */
+	public function getProblem()
+	{
+		return $this->problem;
+	}
 
-    /**
-     * Set submission
-     *
-     * @param \DOMJudgeBundle\Entity\Submission $submission
-     *
-     * @return Event
-     */
-    public function setSubmission(\DOMJudgeBundle\Entity\Submission $submission = null)
-    {
-        $this->submission = $submission;
+	/**
+	 * Set submission
+	 *
+	 * @param \DOMJudgeBundle\Entity\Submission $submission
+	 *
+	 * @return Event
+	 */
+	public function setSubmission(\DOMJudgeBundle\Entity\Submission $submission = null)
+	{
+		$this->submission = $submission;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get submission
-     *
-     * @return \DOMJudgeBundle\Entity\Submission
-     */
-    public function getSubmission()
-    {
-        return $this->submission;
-    }
+	/**
+	 * Get submission
+	 *
+	 * @return \DOMJudgeBundle\Entity\Submission
+	 */
+	public function getSubmission()
+	{
+		return $this->submission;
+	}
 
-    /**
-     * Set judging
-     *
-     * @param \DOMJudgeBundle\Entity\Judging $judging
-     *
-     * @return Event
-     */
-    public function setJudging(\DOMJudgeBundle\Entity\Judging $judging = null)
-    {
-        $this->judging = $judging;
+	/**
+	 * Set judging
+	 *
+	 * @param \DOMJudgeBundle\Entity\Judging $judging
+	 *
+	 * @return Event
+	 */
+	public function setJudging(\DOMJudgeBundle\Entity\Judging $judging = null)
+	{
+		$this->judging = $judging;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get judging
-     *
-     * @return \DOMJudgeBundle\Entity\Judging
-     */
-    public function getJudging()
-    {
-        return $this->judging;
-    }
+	/**
+	 * Get judging
+	 *
+	 * @return \DOMJudgeBundle\Entity\Judging
+	 */
+	public function getJudging()
+	{
+		return $this->judging;
+	}
 
-    /**
-     * Set team
-     *
-     * @param \DOMJudgeBundle\Entity\Team $team
-     *
-     * @return Event
-     */
-    public function setTeam(\DOMJudgeBundle\Entity\Team $team = null)
-    {
-        $this->team = $team;
+	/**
+	 * Set team
+	 *
+	 * @param \DOMJudgeBundle\Entity\Team $team
+	 *
+	 * @return Event
+	 */
+	public function setTeam(\DOMJudgeBundle\Entity\Team $team = null)
+	{
+		$this->team = $team;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get team
-     *
-     * @return \DOMJudgeBundle\Entity\Team
-     */
-    public function getTeam()
-    {
-        return $this->team;
-    }
+	/**
+	 * Get team
+	 *
+	 * @return \DOMJudgeBundle\Entity\Team
+	 */
+	public function getTeam()
+	{
+		return $this->team;
+	}
 
-    /**
-     * Set contest
-     *
-     * @param \DOMJudgeBundle\Entity\Contest $contest
-     *
-     * @return Event
-     */
-    public function setContest(\DOMJudgeBundle\Entity\Contest $contest = null)
-    {
-        $this->contest = $contest;
+	/**
+	 * Set contest
+	 *
+	 * @param \DOMJudgeBundle\Entity\Contest $contest
+	 *
+	 * @return Event
+	 */
+	public function setContest(\DOMJudgeBundle\Entity\Contest $contest = null)
+	{
+		$this->contest = $contest;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get contest
-     *
-     * @return \DOMJudgeBundle\Entity\Contest
-     */
-    public function getContest()
-    {
-        return $this->contest;
-    }
+	/**
+	 * Get contest
+	 *
+	 * @return \DOMJudgeBundle\Entity\Contest
+	 */
+	public function getContest()
+	{
+		return $this->contest;
+	}
 }
