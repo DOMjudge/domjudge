@@ -22,6 +22,7 @@ global $affils;		// www/feed/ext.php, www/jury/balloons.php
 global $allowed;		// www/jury/init.php
 global $amap;		// www/jury/team.php
 global $api;		// www/api/v?/index.php
+global $API_endpoints;		// lib/lib.misc.php
 global $BALLOONS;		// www/jury/balloons.php
 global $bar_size;		// www/jury/statistics.php
 global $body;		// lib/www/clarification.php

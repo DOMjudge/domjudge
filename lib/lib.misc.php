@@ -845,6 +845,145 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null,
 	       now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
 }
 
+/* Mapping from REST API endpoints to relevant information:
+ * - url: REST API URL of endpoint relative to baseurl, defaults to '/<endpoint>'
+ * - type: one of 'configuration', 'live', 'aggregate'
+ * - table: database table associated to data, defaults to <endpoint> without 's'
+ *
+ */
+$API_endpoints = array(
+	'contests' => array(
+		'url'  => '/',
+		'type' => 'configuration',
+	),
+	'clarifications' => array(
+		'type' => 'live',
+	),
+	'languages' => array(
+		'type' => 'configuration',
+	),
+	'problems' => array(
+		'type' => 'configuration',
+	),
+	'teams' => array(
+		'type' => 'configuration',
+	),
+	'organizations' => array(
+		'table' => 'team_affiliation',
+		'type'  => 'configuration',
+	),
+	'groups' => array(
+		'table' => 'team_category',
+		'type'  => 'configuration',
+	),
+	'submissions' => array(
+		'type' => 'live',
+	),
+	'judgement-types' => array(
+		'table' => NULL,
+		'type' => 'configuration',
+	),
+	'judgements' => array(
+		'table' => 'judging',
+		'type' => 'live',
+	),
+	'runs' => array(
+		'table' => 'judging_run',
+		'type' => 'live',
+	),
+	'awards' => array(
+		'table' => NULL,
+		'type' => 'aggregate',
+	),
+	'scoreboard' => array(
+		'table' => NULL,
+		'type' => 'aggregate',
+	),
+	'event-feed' => array(
+		'table' => 'event',
+		'type' => 'aggregate',
+	),
+);
+// Add defaults to mapping:
+foreach ( $API_endpoints as $endpoint => $data ) {
+	if ( !array_key_exists('url', $data) ) {
+		$API_endpoints[$endpoint]['url'] = '/'.$endpoint;
+	}
+	if ( !array_key_exists('table', $data) ) {
+		$API_endpoints[$endpoint]['table'] = preg_replace('/s$/', '', $endpoint);
+	}
+}
+
+/**
+ * Log an event.
+ *
+ * Arguments:
+ * $datatype    One of the table names from $datatypes below.
+ * $dataid      Identifier of the element in the table $datatype.
+ * $action      One of: create, update, delete.
+ * $cid         Contest ID to log this event for. If null, log it for
+ *              all currently active contests.
+ */
+// TODO: we should probably integrate this function with auditlog().
+function eventlog($datatype, $dataid, $action, $cid = null, $json = null)
+{
+	global $DB, $API_endpoints;
+
+	$actions = array('create', 'update', 'delete');
+
+	// Gracefully fail since we may call this from the generic
+	// jury/edit.php page where we don't know which table gets updated.
+	if ( !in_array($datatype,array_column($API_endpoints,'table')) ) {
+		logmsg(LOG_WARNING, "eventlog: invalid datatype '$datatype' specified");
+		return;
+	}
+	if ( !in_array($action,$actions) ) {
+		logmsg(LOG_WARNING, "eventlog: invalid action '$action' specified");
+		return;
+	}
+
+	$cids = array();
+	if ( $cid===null ) {
+		$cids[] = $cid;
+	} else {
+		// Here we should take into account dependence between cid and team/problem
+		$cids = getCurContests();
+	}
+
+	// First acquire an advisory lock to prevent other event logging,
+	// so that we can obtain a unique timestamp.
+	if ( $DB->q("VALUE SELECT GET_LOCK('domjudge.eventlog',1)") != 1 ) {
+		error("eventlog: failed to obtain lock");
+	}
+
+	// Explicitly construct the time as string to prevent float
+	// representation issues.
+	$now = sprintf('%.3f', microtime(TRUE));
+
+	// TODO: can this be wrapped into a single query?
+	$ids = array();
+	foreach ( $cids as $cid ) {
+		$id = $DB->q('RETURNID INSERT INTO event (eventtime, cid, datatype, dataid, action' .
+		             ( isset($json) ? ', content' : '' ) . ')
+		              SELECT GREATEST(%s,eventtime+0.001), %i, %s, %i, %s' .
+		             ( isset($json) ? ', %s' : ' %_' ) . '
+		              FROM event WHERE cid = %i
+		              ORDER BY eventid DESC LIMIT 1',
+		             $now, $cid, $datatype, $dataid, $action, $json, $cid);
+		$ids[] = $id;
+	}
+
+	if ( $DB->q("VALUE SELECT RELEASE_LOCK('domjudge.eventlog')") != 1 ) {
+		error("eventlog: failed to release lock");
+	}
+
+	if ( count($ids)!==count($cids) ) {
+		error("eventlog: failed to insert $datatype ID $id (".count($ids).'/'.count($cids).')');
+	}
+
+	logmsg(LOG_DEBUG,"eventlog: inserted $datatype ID $id for ".count($cids).' contests');
+}
+
 /**
  * Convert PHP ini values to bytes, as per
  * http://www.php.net/manual/en/function.ini-get.php
