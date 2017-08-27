@@ -46,7 +46,7 @@ class DOMJudgeService {
     	if ( $onlyofteam !== null && $onlyofteam > 0 ) {
         $qb->leftJoin('DOMJudgeBundle:ContestTeam', 'ct')
            ->where('ct.teamid = :teamid')
-           ->setParamter('teamid', $onlyofteam);
+           ->setParameter('teamid', $onlyofteam);
     		// $contests = $DB->q("SELECT * FROM contest
     		//                     LEFT JOIN contestteam USING (cid)
     		//                     WHERE (contestteam.teamid = %i OR contest.public = 1)
