@@ -116,5 +116,3 @@ ALTER TABLE `judging`
   ADD CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`);
 
 DROP TABLE `rankcache_jury`, `rankcache_public`,`scorecache_jury`, `scorecache_public`;
-
---source convert_event_6.0.sql
