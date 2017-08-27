@@ -207,10 +207,12 @@ function problems($args)
 	if ( checkrole('jury') ||
 	     (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0) ) {
 
-		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
+		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color,
+		                  COUNT(testcaseid) AS test_data_count
 		                  FROM problem
 		                  INNER JOIN contestproblem USING (probid)
-		                  WHERE cid = %i AND allow_submit = 1 ORDER BY shortname', $cid);
+				  JOIN testcase USING (probid)
+		                  WHERE cid = %i AND allow_submit = 1 GROUP BY probid ORDER BY shortname', $cid);
 	} else {
 		$pdatas = array();
 	}
@@ -230,8 +232,9 @@ function problems($args)
 		$pdatas[$key]['ordinal'] = $ordinal++;
 	}
 
-	return array_map(function($pdata) {
-		return array(
+	$is_jury = checkrole('jury');
+	return array_map(function($pdata) use ($is_jury) {
+		$ret = array(
 			'id'         => safe_int($pdata['id']),
 			'label'      => $pdata['label'],
 			'short_name' => $pdata['shortname'],
@@ -240,6 +243,10 @@ function problems($args)
 			'color'      => $pdata['color'],
 			'ordinal'    => safe_int($pdata['ordinal']),
 		);
+		if ( $is_jury ) {
+			$ret['test_data_count'] = $pdata['test_data_count'];
+		}
+		return $ret;
 	}, $pdatas);
 }
 $doc = "Get a list of problems in a contest, with for each problem: id, shortname, name and colour.";
