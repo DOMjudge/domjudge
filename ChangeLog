@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 6.0.0 - DEV
+-------------------
+
 Version 5.2.0 - DEV
 -------------------
  - [security] bind PHP session cookie to specific web URI to prevent
