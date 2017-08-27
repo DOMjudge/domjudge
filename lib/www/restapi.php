@@ -103,7 +103,12 @@ class RestApi {
 		}
 		$name = $name . '#' . $_SERVER['REQUEST_METHOD'];
 		if ( !array_key_exists($name, $this->apiFunctions) ) {
-			$this->createError("Function '" . $name . "' does not exist.", BAD_REQUEST);
+			$name_without_dashes = str_replace("-", "_", $name);
+			if ( array_key_exists($name_without_dashes, $this->apiFunctions) ) {
+				$name = $name_without_dashes;
+			} else {
+				$this->createError("Function '" . $name . "' does not exist.", BAD_REQUEST);
+			}
 		}
 		$func = $this->apiFunctions[$name];
 		// Permissions
