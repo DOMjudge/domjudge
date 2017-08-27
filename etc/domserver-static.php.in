@@ -12,7 +12,7 @@ define('ETCDIR',      '@domserver_etcdir@');
 define('WWWDIR',      '@domserver_wwwdir@');
 define('WEBAPPDIR',   '@domserver_webappdir@');
 define('LIBDIR',      '@domserver_libdir@');
-define('LIBDIR',      '@domserver_sqldir@');
+define('SQLDIR',      '@domserver_sqldir@');
 define('LIBVENDORDIR','@domserver_libvendordir@');
 define('LIBWWWDIR',   '@domserver_libwwwdir@');
 define('LIBSUBMITDIR','@domserver_libsubmitdir@');
