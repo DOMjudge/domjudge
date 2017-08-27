@@ -1448,9 +1448,7 @@ function judgement_types($args)
 	global $VERDICTS;
 
 	$res = array();
-	$i = 0;
 	foreach ( $VERDICTS as $name => $label ) {
-		$i++;
 		$penalty = TRUE;
 		$solved = FALSE;
 		if ( $name == 'correct' ) {
@@ -1461,11 +1459,11 @@ function judgement_types($args)
 			$penalty = dbconfig_get('compile_penalty', FALSE);
 		}
 		$res[] = array(
-			'id' => (string)$i,
-			'label' => $label,
-			'name' => str_replace('-',' ',$name),
+			'id'      => $label,
+			'label'   => $label,
+			'name'    => str_replace('-',' ',$name),
 			'penalty' => $penalty,
-			'solved' => $solved,
+			'solved'  => $solved,
 		);
 	}
 
