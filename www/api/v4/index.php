@@ -236,7 +236,7 @@ $api->provideFunction('GET', 'problems', $doc, $args, $exArgs);
  */
 function judgings($args)
 {
-	global $DB, $userdata, $cdatas;
+	global $DB, $userdata, $cdatas, $VERDICTS;
 
 	// FIXME: why do we use the event table for this?
 	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE description = "problem judged"';
@@ -282,7 +282,8 @@ function judgings($args)
 	$q = $DB->q($query, $teamid, $cid, $firstId, $lastId, $judgingid, $submitid, $limit);
 	$res = array();
 	while ( $row = $q->next() ) {
-		$data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result, j.cid FROM judging j
+		$data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result, j.cid, j.starttime, j.endtime
+			        FROM judging j
 		                LEFT JOIN submission s USING (submitid)
 		                WHERE j.judgingid = %i', $row['judgingid']);
 		if ($data == NULL) continue;
@@ -291,13 +292,13 @@ function judgings($args)
 		if ( array_key_exists('result', $args) &&
 		     $args['result'] != $data['result'] ) continue;
 
-		$res[] = array('id'                => safe_int($row['judgingid']),
-		               'submission_id'     => safe_int($row['submitid']),
-			       // FIXME:
-			       // what do we want to see here, the id, the label or a human readable description?
-		               'judgement_type'    => $data['result'],
-			       'time'              => Utils::absTime($row['eventtime']),
-			       'contest_time'      => Utils::relTime($row['eventtime'] - $cdatas[$data['cid']]['starttime']),
+		$res[] = array('id'                 => safe_int($row['judgingid']),
+		               'submission_id'      => safe_int($row['submitid']),
+		               'judgement_type_id'  => $VERDICTS[$data['result']],
+			       'start_time'         => Utils::absTime($data['starttime']),
+			       'start_contest_time' => Utils::relTime($data['starttime'] - $cdatas[$data['cid']]['starttime']),
+			       'end_time'           => Utils::absTime($data['endtime']),
+			       'end_contest_time'   => Utils::relTime($data['endtime'] - $cdatas[$data['cid']]['starttime']),
 		       );
 	}
 	return $res;
@@ -314,12 +315,11 @@ $exArgs = array(array('cid' => 2), array('result' => 'correct'), array('first_id
 $roles = array('jury','team');
 $api->provideFunction('GET', 'judgings', $doc, $args, $exArgs, $roles);
 
-// FIXME: rename above function (and underlying sql table?)?
-function submission_judgements($args)
+function judgements($args)
 {
 	return judgings($args);
 }
-$api->provideFunction('GET', 'submission_judgements', $doc, $args, $exArgs, $roles);
+$api->provideFunction('GET', 'judgements', $doc, $args, $exArgs, $roles);
 
 function judgings_POST($args)
 {
