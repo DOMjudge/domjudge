@@ -22,6 +22,8 @@ ALTER TABLE `contestteam`
 ALTER TABLE `judging_run`
   ADD COLUMN `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run judging ended' AFTER `runtime`;
 
+source convert_event_6.0.sql
+
 --
 -- Transfer data from old to new structure
 --
