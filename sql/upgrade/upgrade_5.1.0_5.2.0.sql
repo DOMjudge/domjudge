@@ -77,10 +77,6 @@ CREATE TABLE `internal_error` (
 ALTER TABLE `testcase`
   MODIFY COLUMN `description` longblob COMMENT 'Description of this testcase';
 
-ALTER TABLE `contestteam`
-  DROP PRIMARY KEY,
-  ADD PRIMARY KEY (`cid`,`teamid`);
-
 --
 -- Transfer data from old to new structure
 --
