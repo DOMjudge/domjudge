@@ -270,6 +270,7 @@ CREATE TABLE `judging_run` (
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
   `runresult` varchar(25) DEFAULT NULL COMMENT 'Result of this run, NULL if not finished yet',
   `runtime` float DEFAULT NULL COMMENT 'Submission running time on this testcase',
+  `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run judging ended',
   `output_run` longblob COMMENT 'Output of running the program',
   `output_diff` longblob COMMENT 'Diffing the program output and testcase output',
   `output_error` longblob COMMENT 'Standard error output of the program',

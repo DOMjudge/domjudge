@@ -2,7 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 /**
- * Compile, compare, and run script executable bundles
+ * Result of a testcase run.
  * @ORM\Entity()
  * @ORM\Table(name="judging_run", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
@@ -41,6 +41,12 @@ class JudgingRun
 	 * @ORM\Column(type="float", name="runtime", options={"comment"="Submission running time on this testcase"}, nullable=true)
 	 */
 	private $runtime = 1;
+
+	/**
+	 * @var double
+	 * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time run judging finished", "unsigned"=true}, nullable=false)
+	 */
+	private $endtime;
 
 	/**
 	 * @var string

@@ -570,9 +570,9 @@ function judging_runs_POST($args)
 	}
 
 	$DB->q('INSERT INTO judging_run (judgingid, testcaseid, runresult,
-	        runtime, output_run, output_diff, output_error, output_system)
-	        VALUES (%i, %i, %s, %f, %s, %s, %s, %s)',
-	       $args['judgingid'], $args['testcaseid'], $args['runresult'], $args['runtime'],
+	        runtime, endtime, output_run, output_diff, output_error, output_system)
+	        VALUES (%i, %i, %s, %f, %s, %s, %s, %s, %s)',
+	       $args['judgingid'], $args['testcaseid'], $args['runresult'], $args['runtime'], now(),
 	       base64_decode($args['output_run']),
 	       base64_decode($args['output_diff']),
 	       base64_decode($args['output_error']),
@@ -1018,11 +1018,12 @@ $api->provideFunction('GET', 'queue', $doc, $args, $exArgs, $roles);
  */
 function runs($args)
 {
-	global $DB, $VERDICTS;
+	global $DB, $cdatas, $VERDICTS;
 
-	$query = 'TABLE SELECT runid, judgingid, runresult, rank
-		  FROM judging_run
+	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid
+		  FROM judging_run jr
 		  LEFT JOIN testcase USING (testcaseid)
+		  LEFT JOIN judging USING (judgingid)
 		  WHERE TRUE';
 
 	$hasFirstId = array_key_exists('first_id', $args);
@@ -1043,12 +1044,14 @@ function runs($args)
 	// TODO: validate limit
 
 	$runs = $DB->q($query, $firstId, $lastId, $judgingid, $limit);
-	return array_map(function($run) use ($VERDICTS) {
+	return array_map(function($run) use ($VERDICTS, $cdatas) {
 		return array(
 			'id'                => safe_int($run['runid']),
 			'judgement_id'      => safe_int($run['judgingid']),
 			'ordinal'           => safe_int($run['rank']),
 			'judgement_type_id' => $VERDICTS[$run['runresult']],
+			'time'              => Utils::absTime($run['endtime']),
+			'contest_time'      => Utils::relTime($run['endtime'] - $cdatas[$run['cid']]['starttime']),
 		);
 	}, $runs);
 }
