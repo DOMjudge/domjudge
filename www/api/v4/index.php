@@ -1175,15 +1175,28 @@ function categories($args)
 	}
 	return $res;
 }
-$doc = 'Get a list of all categories/groups.';
+$doc = 'Get a list of all categories.';
 $api->provideFunction('GET', 'categories', $doc, array(), array(), null, true);
 
 /**
- * Groups information, this is currently only calling categories.
+ * Groups information.
  */
 function groups($args)
 {
-	return categories($args);
+	global $DB;
+	$extra = ($args['public'] ? 'WHERE visible = 1' : '');
+	$q = $DB->q('SELECT categoryid, name, color, visible, sortorder
+	             FROM team_category ' . $extra . ' ORDER BY sortorder');
+	$res = array();
+	while ( $row = $q->next() ) {
+		$res[] = array(
+			'id'         => safe_int($row['categoryid']),
+			'icpc_id'    => safe_int($row['categoryid']),
+			'name'       => $row['name'],
+			'color'      => $row['color'],
+			'sortorder'  => safe_int($row['sortorder']));
+	}
+	return $res;
 }
 $doc = 'Get a list of all groups.';
 $api->provideFunction('GET', 'groups', $doc, array(), array(), null, true);
