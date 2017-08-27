@@ -1418,12 +1418,13 @@ function scoreboard($args)
 
 	$res = array();
 	foreach ( $scoreboard['scores'] as $teamid => $data ) {
-		$row = array('rank' => $data['rank'], 'team' => $teamid);
+		$row = array('rank' => $data['rank'], 'team_id' => $teamid);
 		$row['score'] = array('num_solved' => safe_int($data['num_points']),
 		                      'total_time' => safe_int($data['total_time']));
 		$row['problems'] = array();
 		foreach ( $scoreboard['matrix'][$teamid] as $probid => $pdata ) {
 			$prob = array('label'       => $prob2label[$probid],
+			              'problem_id'  => safe_int($probid),
 			              'num_judged'  => safe_int($pdata['num_submissions']),
 			              'num_pending' => safe_int($pdata['num_pending']),
 			              'solved'      => safe_bool($pdata['is_correct']));
