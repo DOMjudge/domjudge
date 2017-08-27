@@ -130,7 +130,7 @@ CREATE TABLE `contestproblem` (
 CREATE TABLE `contestteam` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
-  PRIMARY KEY (`teamid`,`cid`),
+  PRIMARY KEY (`cid`,`teamid`),
   KEY `cid` (`cid`),
   KEY `teamid` (`teamid`),
   CONSTRAINT `contestteam_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
