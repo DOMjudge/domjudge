@@ -169,6 +169,13 @@ function problems($args)
 {
 	global $DB, $cdatas, $userdata, $cids;
 
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['probid']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?probid={id}");
+		}
+		$args['probid'] = $args['__primary_key'];
+	}
+
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
 	} else {
@@ -184,12 +191,18 @@ function problems($args)
 	if ( checkrole('jury') ||
 	     (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0) ) {
 
-		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color,
+		$query = 'TABLE SELECT probid AS id, shortname AS label, shortname, name, color,
 		                  COUNT(testcaseid) AS test_data_count
 		                  FROM problem
 		                  INNER JOIN contestproblem USING (probid)
 				  JOIN testcase USING (probid)
-		                  WHERE cid = %i AND allow_submit = 1 GROUP BY probid ORDER BY shortname', $cid);
+				  WHERE cid = %i AND allow_submit = 1';
+		
+		$byProbId = array_key_exists('probid', $args);
+		$query .= ($byProbId ? ' AND probid = %i' : ' %_');
+		$probid = ($byProbId ? $args['probid'] : 0);
+
+		$pdatas = $DB->q($query . ' GROUP BY probid ORDER BY shortname', $cid, $probid);
 	} else {
 		$pdatas = array();
 	}
@@ -227,7 +240,7 @@ function problems($args)
 	}, $pdatas);
 }
 $doc = "Get a list of problems in a contest, with for each problem: id, shortname, name and colour.";
-$args = array('cid' => 'Contest ID.');
+$args = array('cid' => 'Contest ID.', 'probid' => 'Problem ID.');
 $exArgs = array(array('cid' => 2));
 $api->provideFunction('GET', 'problems', $doc, $args, $exArgs);
 
@@ -237,6 +250,13 @@ $api->provideFunction('GET', 'problems', $doc, $args, $exArgs);
 function judgings($args)
 {
 	global $DB, $userdata, $cdatas, $VERDICTS;
+
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['judging_id']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?judging_id={id}");
+		}
+		$args['judging_id'] = $args['__primary_key'];
+	}
 
 	// FIXME: why do we use the event table for this?
 	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE description = "problem judged"';
@@ -262,7 +282,6 @@ function judgings($args)
 	$hasLastId = array_key_exists('last_id', $args);
 	$query .= ($hasLastId ? ' AND judgingid <= %i' : ' AND TRUE %_');
 	$lastId = ($hasLastId ? $args['last_id'] : 0);
-
 
 	$hasJudgingid = array_key_exists('judging_id', $args);
 	$query .= ($hasJudgingid ? ' AND judgingid = %i' : ' %_');
@@ -711,6 +730,13 @@ function submissions($args)
 	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid
 	          FROM submission WHERE valid=1';
 
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['id']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?id={id}");
+		}
+		$args['id'] = $args['__primary_key'];
+	}
+
 	$hasCid = array_key_exists('cid', $args);
 	$query .= ($hasCid ? ' AND cid = %i' : ' AND TRUE %_');
 	$cid = ($hasCid ? $args['cid'] : 0);
@@ -1020,6 +1046,13 @@ function runs($args)
 {
 	global $DB, $cdatas, $VERDICTS;
 
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['run_id']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?run_id={id}");
+		}
+		$args['run_id'] = $args['__primary_key'];
+	}
+
 	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid
 		  FROM judging_run jr
 		  LEFT JOIN testcase USING (testcaseid)
@@ -1038,12 +1071,16 @@ function runs($args)
 	$query .= ($hasJudgingid ? ' AND judgingid = %i' : ' %_');
 	$judgingid = ($hasJudgingid ? $args['judging_id'] : 0);
 
+	$hasRunId = array_key_exists('run_id', $args);
+	$query .= ($hasRunId ? ' AND runid = %i' : ' %_');
+	$runid = ($hasRunId ? $args['run_id'] : 0);
+
 	$hasLimit = array_key_exists('limit', $args);
 	$query .= ($hasLimit ? ' LIMIT %i' : ' %_');
 	$limit = ($hasLimit ? $args['limit'] : -1);
 	// TODO: validate limit
 
-	$runs = $DB->q($query, $firstId, $lastId, $judgingid, $limit);
+	$runs = $DB->q($query, $firstId, $lastId, $judgingid, $runid, $limit);
 	return array_map(function($run) use ($VERDICTS, $cdatas) {
 		return array(
 			'id'                => safe_int($run['runid']),
@@ -1105,6 +1142,13 @@ function organizations($args)
 {
 	global $DB;
 
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['affilid']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?affilid={id}");
+		}
+		$args['affilid'] = $args['__primary_key'];
+	}
+
 	// Construct query
 	$query = 'TABLE SELECT affilid, shortname, name, country FROM team_affiliation WHERE';
 
@@ -1112,10 +1156,14 @@ function organizations($args)
 	$query .= ($byCountry ? ' country = %s' : ' TRUE %_');
 	$country = ($byCountry ? $args['country'] : '');
 
+	$byAffilId = array_key_exists('affilid', $args);
+	$query .= ($byAffilId ? ' AND affilid = %i' : ' %_');
+	$affilid = ($byAffilId ? $args['affilid'] : '');
+
 	$query .= ' ORDER BY name';
 
 	// Run query and return result
-	$adatas = $DB->q($query, $country);
+	$adatas = $DB->q($query, $country, $affilid);
 	return array_map(function($adata) {
 		return array(
 			'id'        => safe_int($adata['affilid']),
@@ -1137,6 +1185,13 @@ $api->provideFunction('GET', 'organizations', $doc, $optArgs, $exArgs);
 function teams($args)
 {
 	global $DB;
+
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['teamid']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?teamid={id}");
+		}
+		$args['teamid'] = $args['__primary_key'];
+	}
 
 	// Construct query
 	$query = 'TABLE SELECT teamid AS id, t.name, t.members, t.externalid, a.country AS nationality,
@@ -1214,9 +1269,26 @@ $api->provideFunction('GET', 'categories', $doc, array(), array(), null, true);
 function groups($args)
 {
 	global $DB;
-	$extra = ($args['public'] ? 'WHERE visible = 1' : '');
-	$q = $DB->q('SELECT categoryid, name, color, visible, sortorder
-	             FROM team_category ' . $extra . ' ORDER BY sortorder');
+
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['categoryid']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?categoryid={id}");
+		}
+		$args['categoryid'] = $args['__primary_key'];
+	}
+
+	$query = 'SELECT categoryid, name, color, visible, sortorder
+		  FROM team_category
+		  WHERE TRUE';
+	if ( $args['public'] ) {
+		$query .= ' AND visible=1';
+	}
+
+	$byCatId = array_key_exists('categoryid', $args);
+	$query .= ($byCatId ? ' AND categoryid = %i' : ' %_');
+	$categoryId = ($byCatId ? $args['categoryid'] : 0);
+
+	$q = $DB->q($query . ' ORDER BY sortorder', $categoryId);
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
@@ -1234,12 +1306,26 @@ $api->provideFunction('GET', 'groups', $doc, array(), array(), null, true);
 /**
  * Language information
  */
-function languages()
+function languages($args)
 {
 	global $DB;
 
-	$q = $DB->q('SELECT langid, name, extensions, allow_judge, time_factor
-	             FROM language WHERE allow_submit = 1');
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['langid']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?langid={id}");
+		}
+		$args['langid'] = $args['__primary_key'];
+	}
+
+	$query = 'SELECT langid, name, extensions, allow_judge, time_factor
+	          FROM language WHERE allow_submit = 1';
+
+	$byLangId = array_key_exists('langid', $args);
+	$query .= ($byLangId ? ' AND langid = %s' : ' %_');
+	$langid = ($byLangId ? $args['langid'] : '');
+
+	$q = $DB->q($query, $langid);
+
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
@@ -1253,7 +1339,8 @@ function languages()
 	return $res;
 }
 $doc = 'Get a list of all suported programming languages.';
-$api->provideFunction('GET', 'languages', $doc);
+$args = array('langid' => 'Search for a specific language.');
+$api->provideFunction('GET', 'languages', $doc, $args);
 
 /**
  * Clarification information
@@ -1261,6 +1348,13 @@ $api->provideFunction('GET', 'languages', $doc);
 function clarifications($args)
 {
 	global $cids, $cdatas, $DB;
+
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['clar_id']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?clar_id={id}");
+		}
+		$args['clar_id'] = $args['__primary_key'];
+	}
 
 	if ( empty($cids) ) {
 		return array();
@@ -1275,7 +1369,11 @@ function clarifications($args)
 	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
 	$problem = ($byProblem ? $args['problem'] : null);
 
-	$clar_datas = $DB->q($query, $cids, $problem);
+	$byClarId = array_key_exists('clar_id', $args);
+	$query .= ($byClarId ? ' AND clarid = %i' : ' AND TRUE %_');
+	$clarId = ($byClarId ? $args['clar_id'] : null);
+
+	$clar_datas = $DB->q($query, $cids, $problem, $clarId);
 	return array_map(function($clar_data) use ($cdatas) {
 		return array(
 			'id'           => safe_int($clar_data['clarid']),
@@ -1506,6 +1604,13 @@ function judgement_types($args)
 {
 	global $VERDICTS;
 
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['verdict']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?verdict={id}");
+		}
+		$args['verdict'] = $args['__primary_key'];
+	}
+
 	$res = array();
 	foreach ( $VERDICTS as $name => $label ) {
 		$penalty = TRUE;
@@ -1516,6 +1621,9 @@ function judgement_types($args)
 		}
 		if ( $name == 'compiler-error' ) {
 			$penalty = dbconfig_get('compile_penalty', FALSE);
+		}
+		if ( isset($args['verdict']) && $label !== $args['verdict'] ) {
+			continue;
 		}
 		$res[] = array(
 			'id'      => $label,
