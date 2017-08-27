@@ -1069,6 +1069,39 @@ $exArgs = array(array('country' => 'NLD'));
 $api->provideFunction('GET', 'affiliations', $doc, $optArgs, $exArgs);
 
 /**
+ * Organization information
+ */
+function organizations($args)
+{
+	global $DB;
+
+	// Construct query
+	$query = 'TABLE SELECT affilid, shortname, name, country FROM team_affiliation WHERE';
+
+	$byCountry = array_key_exists('country', $args);
+	$query .= ($byCountry ? ' country = %s' : ' TRUE %_');
+	$country = ($byCountry ? $args['country'] : '');
+
+	$query .= ' ORDER BY name';
+
+	// Run query and return result
+	$adatas = $DB->q($query, $country);
+	return array_map(function($adata) {
+		return array(
+			'id'        => safe_int($adata['affilid']),
+			'icpc_id'   => safe_int($adata['affilid']),
+			'shortname' => $adata['shortname'],
+			'name'      => $adata['name'],
+			'country'   => $adata['country'],
+		);
+	}, $adatas);
+}
+$doc = 'Get a list of affiliations, with for each affiliation: affilid, shortname, name and country.';
+$optArgs = array('country' => 'ISO 3166-1 alpha-3 country code to search for.');
+$exArgs = array(array('country' => 'NLD'));
+$api->provideFunction('GET', 'organizations', $doc, $optArgs, $exArgs);
+
+/**
  * Team information
  */
 function teams($args)
