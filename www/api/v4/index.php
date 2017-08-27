@@ -1101,15 +1101,18 @@ function teams($args)
 	$tdatas = $DB->q($query, $category, $affiliation, $teamid);
 	return array_map(function($tdata) {
 		return array(
-			'id'          => safe_int($tdata['id']),
-			'name'        => $tdata['name'],
-			'members'     => $tdata['members'],
-			'nationality' => $tdata['nationality'],
-			'group_id'    => safe_int($tdata['category']),
-			'group'       => $tdata['group'],
-			'affilid'     => safe_int($tdata['affilid']),
-			'affiliation' => $tdata['affiliation'],
-			'externalid'  => $tdata['externalid'],
+			'id'              => safe_int($tdata['id']),
+			'label'           => safe_int($tdata['id']),
+			'name'            => $tdata['name'],
+			'members'         => $tdata['members'],
+			'nationality'     => $tdata['nationality'],
+			'group_id'        => safe_int($tdata['category']),
+			'group'           => $tdata['group'],
+			'affilid'         => safe_int($tdata['affilid']),
+			'organization_id' => safe_int($tdata['affilid']),
+			'affiliation'     => $tdata['affiliation'],
+			'externalid'      => $tdata['externalid'],
+			'icpc_id'         => $tdata['externalid'],
 		);
 	}, $tdatas);
 }
