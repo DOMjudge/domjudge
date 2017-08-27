@@ -16,6 +16,7 @@ ALTER TABLE `contest` DROP COLUMN `externalid`;
 --
 
 ALTER TABLE `contest`
+  MODIFY COLUMN `unfreezetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetime',
   ADD COLUMN `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Contest ID in an external system' AFTER `cid`,
   ADD UNIQUE KEY `externalid` (`externalid`(190));
 
