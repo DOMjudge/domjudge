@@ -10,30 +10,7 @@ define('DOMJUDGE_API_VERSION', 4);
 
 require('init.php');
 require_once(LIBWWWDIR . '/common.jury.php');
-
-// prints the absolute time as yyyy-mm-ddThh:mm:ss(.uuu)?[+-]zz(:mm)?
-// (with millis if $floored is false)
-function absTime($seconds, $floored = FALSE)
-{
-	$millis = sprintf(".%03d", 1000*($seconds - floor($seconds)));
-	return date("Y-m-d\TH:i:s", $seconds)
-		. ( $floored ? '' : $millis )
-		. date("P", $seconds);
-}
-
-// prints a time diff as relative time as (-)?(h)*h:mm:ss(.uuu)?
-// (with millis if $floored is false)
-function relTime($seconds, $floored = FALSE)
-{
-	$res = ( $seconds < 0 ) ? '-' : '';
-	$seconds = abs($seconds);
-	$hours = (int)($seconds / 3600);
-	$minutes = (int)(($seconds - $hours*3600)/60);
-	$millis = sprintf(".%03d", 1000*($seconds - floor($seconds)));
-	$seconds = $seconds - $hours*3600 - $minutes*60;
-	return sprintf("%d:%02d:%02d", $hours, $minutes, $seconds)
-		. ( $floored ? '' : $millis );
-}
+use DOMJudgeBundle\Utils\Utils;
 
 function infreeze($cdata, $time)
 {
@@ -110,11 +87,11 @@ function cdataHelper($cdata)
 		'shortname'                  => $cdata['shortname'],
 		'name'                       => $cdata['name'],
 		'formal_name'                => $cdata['name'],
-		'start_time'                 => absTime($cdata['starttime']),
-		'end_time'                   => absTime($cdata['endtime']),
-		'duration'                   => relTime($cdata['endtime'] - $cdata['starttime']),
-		'scoreboard_freeze_duration' => relTime($cdata['endtime'] - $cdata['freezetime']),
-		'unfreeze'                   => absTime($cdata['unfreezetime']),
+		'start_time'                 => Utils::absTime($cdata['starttime']),
+		'end_time'                   => Utils::absTime($cdata['endtime']),
+		'duration'                   => Utils::relTime($cdata['endtime'] - $cdata['starttime']),
+		'scoreboard_freeze_duration' => Utils::relTime($cdata['endtime'] - $cdata['freezetime']),
+		'unfreeze'                   => Utils::absTime($cdata['unfreezetime']),
 		'penalty'                    => safe_int(dbconfig_get('penalty_time', 20)),
 	);
 }
@@ -319,8 +296,8 @@ function judgings($args)
 			       // FIXME:
 			       // what do we want to see here, the id, the label or a human readable description?
 		               'judgement_type'    => $data['result'],
-			       'time'              => absTime($row['eventtime']),
-			       'contest_time'      => relTime($row['eventtime'] - $cdatas[$data['cid']]['starttime']),
+			       'time'              => Utils::absTime($row['eventtime']),
+			       'contest_time'      => Utils::relTime($row['eventtime'] - $cdatas[$data['cid']]['starttime']),
 		       );
 	}
 	return $res;
@@ -782,8 +759,8 @@ function submissions($args)
 			'team_id'      => safe_int($row['teamid']),
 			'problem_id'   => safe_int($row['probid']),
 			'language_id'  => $row['langid'],
-			'time'         => absTime($row['submittime']),
-			'contest_time' => relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
+			'time'         => Utils::absTime($row['submittime']),
+			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
 			'contest_id'   => safe_int($row['cid']),
 			);
 	}
