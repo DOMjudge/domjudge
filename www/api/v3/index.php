@@ -495,11 +495,7 @@ function judgings_PUT($args)
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
 			if ( ! dbconfig_get('verification_required', 0) ) {
-				$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-				        submitid, judgingid, description)
-				        VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
-				       now(), $row['cid'], $row['teamid'], $row['langid'],
-				       $row['probid'], $row['submitid'], $judgingid);
+				eventlog('judging', $judgingid, 'update', $row['cid']);
 			}
 		}
 	}
@@ -604,11 +600,7 @@ function judging_runs_POST($args)
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
 			if ( ! dbconfig_get('verification_required', 0) ) {
-				$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-				        submitid, judgingid, description)
-				        VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
-				       now(), $row['cid'], $row['teamid'], $row['langid'],
-				       $row['probid'], $row['submitid'], $args['judgingid']);
+				eventlog('judging', $args['judgingid'], 'update', $row['cid']);
 				if ( $result == 'correct' ) {
 					// prevent duplicate balloons in case of multiple correct submissions
 					$numcorrect = $DB->q('VALUE SELECT count(submitid)

@@ -47,6 +47,7 @@ if ( isset($_POST['upload']) ) {
 			$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
 			$newid = importZippedProblem($zip, empty($id) ? NULL : $id, $cid);
 			$zip->close();
+			eventlog('problem', $newid, empty($id) ? 'create' : 'update', $cid);
 			auditlog('problem', $newid, 'upload zip',
 			         $_FILES['problem_archive']['name'][$fileid]);
 		}

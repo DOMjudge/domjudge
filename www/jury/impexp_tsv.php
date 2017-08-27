@@ -96,6 +96,7 @@ function tsv_groups_set($data)
 	$cnt = 0;
 	foreach ($data as $row) {
 		$DB->q("REPLACE INTO team_category SET %S", $row);
+		eventlog('team_category', $row['categoryid'], 'create/update');
 		auditlog('team_category', $row['categoryid'], 'replaced', 'imported from tsv');
 		$cnt++;
 	}
@@ -146,11 +147,15 @@ function tsv_teams_set($data)
 			if ( empty($affilid) ) {
 				$affilid = $DB->q("RETURNID INSERT INTO team_affiliation SET %S",
 				                  $row['team_affiliation']);
+
+				eventlog('team_affiliation', $affilid, 'create');
 				auditlog('team_affiliation', $affilid, 'added', 'imported from tsv');
 			}
 			$row['team']['affilid'] = $affilid;
 		}
 		$DB->q("REPLACE INTO team SET %S", $row['team']);
+
+		eventlog('team', $row['team']['teamid'], 'create/update');
 		auditlog('team', $row['team']['teamid'], 'replaced', 'imported from tsv');
 		$cnt++;
 	}
@@ -232,6 +237,7 @@ function tsv_accounts_set($data)
 			if ( is_null($teamid) ) {
 				$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $row['team']);
 			}
+			eventlog('team', $teamid, 'create');
 			auditlog('team', $teamid, 'added', 'imported from tsv, autocreated for judge');
 			$row['user']['teamid'] = $teamid;
 		}

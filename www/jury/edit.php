@@ -98,6 +98,8 @@ if ( ! isset($_POST['cancel']) ) {
 		$newid = null;
 		if ( $cmd == 'add' ) {
 			$newid = $DB->q("RETURNID INSERT INTO $t SET %S", $itemdata);
+			$cid = @$itemdata['cid'];
+			eventlog($t, $newid, 'create', $cid);
 			auditlog($t, $newid, 'added');
 
 			$i = 0;
@@ -118,6 +120,18 @@ if ( ! isset($_POST['cancel']) ) {
 			check_sane_keys($prikey);
 
 			$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
+
+			if ( count($KEYS[$t])==1 ) {
+				$datatype = $t;
+				$dataid = $keydata[$i][$tablekey];
+			}
+			if ( $t === 'contestproblem' ||
+			     $t === 'contestteam' ) {
+				$datatype = substr($t,7);
+				$dataid = $keydata[$i][$tablekey];
+			}
+			if ( !empty($datatype) ) eventlog($datatype, $dataid, 'update', $cid);
+
 			auditlog($t, implode(', ', $prikey), 'updated');
 		}
 

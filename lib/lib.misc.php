@@ -741,10 +741,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	// Recalculate scoreboard cache for pending submissions
 	calcScoreRow($contest, $teamid, $probid);
 
-	// Log to event table
-	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
-	        VALUES(%s, %i, %i, %s, %i, %i, "problem submitted")',
-	       now(), $contest, $teamid, $langid, $probid, $id);
+	eventlog('submission', $id, 'create', $contest);
 
 	alert('submit', "submission $id: team $teamid, language $langid, problem $probid");
 

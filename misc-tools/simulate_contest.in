@@ -307,22 +307,17 @@ while ( $cdata['cid']==$cid && difftime(now(),$cdata['endtime'])<0 ) { // bug!
 			                    VALUES (%i, %i, %i, %s, %s)',
 			                   $cid, $subm['teamid'], $probid, $def_lang, $stime);
 
-			$DB->q('INSERT INTO judging
-			        (cid, submitid, starttime, endtime, result, verified)
-			        VALUES (%i, %i, %s, %s, %s, %i)',
-			       $cid, $submitid, $stime, $stime, $subm[$fresult], (int)$verify);
+			$judgingid = $DB->q('RETURNID INSERT INTO judging
+			                     (cid, submitid, starttime, endtime, result, verified)
+			                     VALUES (%i, %i, %s, %s, %s, %i)',
+			                    $cid, $submitid, $stime, $stime, $subm[$fresult], (int)$verify);
 
 			calcScoreRow($cid, $subm['teamid'], $probid);
 
 			$DB->q('COMMIT');
-/*
-	// Log to event table
-	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid,
-	                           probid, submitid, description)
-	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
-	       $s['submittime'], $s['cid'], $s['teamid'], $s['langid'],
-	       $s['probid'], $s['sid']);
-*/
+
+			eventlog('submission', $submitid, 'create', $cid);
+			eventlog('judging', $judgingid, 'create', $cid);
 
 			logmsg(LOG_INFO, "inserted submission $subm[$fteam]/$subm[$fprob]");
 			$subm['inserted'] = TRUE;

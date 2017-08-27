@@ -43,6 +43,7 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                 VALUES (%i, %s, %i, %i, %s, %s)',
 	                $cid, now(), $teamid, $probid, $category, $_POST['bodytext']);
 
+	eventlog('clarification', $newid, 'create', $cid);
 	auditlog('clarification', $newid, 'added', null, null, $cid);
 
 	// redirect back to the original location
