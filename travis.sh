@@ -110,7 +110,11 @@ NUMSUBS=$(curl http://admin:admin@localhost/domjudge/api/submissions | python -m
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
 export CURLOPTS="-sq -m 30 -b $COOKIEJAR"
-curl $CURLOPTS -c $COOKIEJAR -F "cmd=login" -F "login=admin" -F "passwd=admin" "http://localhost/domjudge/jury/"
+
+# Make an initial request which will get us a session id, and grab the csrf token from it
+CSRFTOKEN=$(curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge/login" 2>/dev/null | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')
+# Make a second request with our session + csrf token to actually log in
+curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=admin" "http://localhost/domjudge/login"
 
 while /bin/true; do
 	curl $CURLOPTS "http://localhost/domjudge/jury/check_judgings.php?verify_multiple=1" -o /dev/null
