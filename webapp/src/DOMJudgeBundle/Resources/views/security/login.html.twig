@@ -14,6 +14,7 @@ Please supply your credentials below, or contact a staff member for assistance.
   {% endif %}
 
   <form action="{{ path('login') }}" method="post">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
     <table>
       <tr>
         <td><label for="username">Username:</label></td>
