@@ -41,7 +41,7 @@ server {
 
 	# Or you can install it with a prefix
 	location /domjudge { return 301 /domjudge/; }
-	location ~ /domjudge/(.*) {
+	location ~ /domjudge(/.*) {
 		root @domserver_webappdir@/web;
 		# try to serve file directly, fallback to app.php
 		try_files $1 /domjudge/app.php$is_args$args;
@@ -106,7 +106,7 @@ server {
 
 #	# Or you can install it with a prefix
 #	location /domjudge { return 301 /domjudge/; }
-#	location ~ /domjudge/(.*) {
+#	location ~ /domjudge(/.*) {
 #		root @domserver_webappdir@/web;
 #		# try to serve file directly, fallback to app.php
 #		try_files $1 /domjudge/app.php$is_args$args;
