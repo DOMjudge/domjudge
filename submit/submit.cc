@@ -672,13 +672,13 @@ int getcontests()
 
 	res = doAPIrequest("contests", 0);
 
-	if ( res.isNull() || !res.isObject() ) return 1;
+	if ( res.isNull() || !res.isArray() ) return 1;
 
-	for(Json::Value::iterator it=res.begin(); it!=res.end(); ++it) {
+	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		vector<string> contest;
 
-		contest.push_back((*it)["shortname"].asString());
-		contest.push_back((*it)["name"].asString());
+		contest.push_back(res[i]["shortname"].asString());
+		contest.push_back(res[i]["name"].asString());
 		if ( contest[0]=="" || contest[1]=="" ) {
 			warning(0,"REST API returned unexpected JSON data for contests");
 			return 1;
