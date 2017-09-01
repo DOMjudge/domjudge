@@ -168,20 +168,51 @@ function openZipFile($filename) {
 	return $zip;
 }
 
-// Return resized thumbnail and mime-type (the part after 'image/')
-// from image contents.
-function get_image_thumb_type($image)
+/**
+ * Detects mime-type (the part after 'image/') from image contents.
+ * Returns FALSE on errors and stores error message in $error if set.
+ */
+function get_image_type($image, &$error)
 {
 	if ( !function_exists('gd_info') ) {
-		error("Cannot import image: the PHP GD library is missing.");
+		$error = "Cannot import image: the PHP GD library is missing.";
+		return FALSE;
 	}
 
 	$info = getimagesizefromstring($image);
+	if ( $info === FALSE) {
+		$error = "Could not determine image information.";
+		return FALSE;
+	}
+
 	$type = image_type_to_extension($info[2], FALSE);
 
 	if ( !in_array($type, array('jpeg', 'png', 'gif')) ) {
-		error("Unsupported image type '$type' found.");
+		$error = "Unsupported image type '$type' found.";
+		return FALSE;
 	}
+
+	return $type;
+}
+
+/**
+ * Generate resized thumbnail image and return as as string.
+ * Return FALSE on errors and stores error message in $error if set.
+ */
+function get_image_thumb($image, &$error)
+{
+	if ( !function_exists('gd_info') ) {
+		$error = "Cannot import image: the PHP GD library is missing.";
+		return FALSE;
+	}
+
+	$type = get_image_type($image,$error);
+	if ( $type===FALSE ) {
+		$error = "Could not determine image information.";
+		return FALSE;
+	}
+
+	$info = getimagesizefromstring($image);
 
 	$thumbmaxsize = dbconfig_get('thumbnail_size', 128);
 
@@ -192,12 +223,14 @@ function get_image_thumb_type($image)
 	$orig = imagecreatefromstring($image);
 	$thumb = imagecreatetruecolor($thumbsize[0], $thumbsize[1]);
 	if ( $orig===FALSE || $thumb===FALSE ) {
-		error('Cannot create GD image.');
+		$error = 'Cannot create GD image.';
+		return FALSE;
 	}
 
 	if ( !imagecopyresampled($thumb, $orig, 0, 0, 0, 0,
 	                         $thumbsize[0], $thumbsize[1], $info[0], $info[1]) ) {
-		error('Cannot create resized thumbnail image.');
+		$error = 'Cannot create resized thumbnail image.';
+		return FALSE;
 	}
 
 	// The GD image library doesn't have functionality to output an
@@ -215,14 +248,16 @@ function get_image_thumb_type($image)
 
 	ob_end_clean();
 
-	if ( !$success ) error('Failed to output thumbnail image.');
+	if ( !$success ) {
+		$error = 'Failed to output thumbnail image.';
+		return FALSE;
+	}
 
 	imagedestroy($orig);
 	imagedestroy($thumb);
 
-	return array($thumbstr, $type);
+	return $thumbstr;
 }
-
 
 /**
  * Read problem description file and testdata from zip archive
@@ -461,8 +496,22 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			}
 			$image_file = $image_type = $image_thumb = FALSE;
 			foreach (array('png', 'jpg', 'jpeg', 'gif') as $img_ext) {
-				if ( ($image_file = $zip->getFromName("data/$type/$datafile" . "." . $img_ext)) !== FALSE ) {
-					list($image_thumb, $image_type) = get_image_thumb_type($image_file);
+				$image_fname = "data/$type/$datafile" . '.' . $img_ext;
+				if ( ($image_file = $zip->getFromName($image_fname)) !== FALSE ) {
+					$image_type = get_image_type($image_file,$errormsg);
+					if ( $image_type === FALSE ) {
+						warning("reading '$image_fname': " . $errormsg);
+						$image_file = FALSE;
+					} else if ( $image_type !== ( $img_ext=='jpg' ? 'jpeg' : $img_ext ) ) {
+						warning("extension of '$image_fname' does not match type '$image_type'");
+						$image_file = FALSE;
+					} else {
+						$image_thumb = get_image_thumb($image_file,$errormsg);
+						if ( $image_thumb === FALSE ) {
+							$image_thumb = NULL;
+							warning("reading '$image_fname': " . $errormsg);
+						}
+					}
 					break;
 				}
 			}
