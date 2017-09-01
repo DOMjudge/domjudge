@@ -60,7 +60,7 @@ void initsignals();
  * return on receiving a signal.
  */
 
-void daemonize(const char *) __attribute__((nonnull (1)));
+void daemonize(const char *);
 /* Forks and detaches the current process to run as a daemon. Similar
  * to the daemon() call present in Linux and *BSD, but implented here,
  * because it is not specified by POSIX, SUSv2 or SVr4.
