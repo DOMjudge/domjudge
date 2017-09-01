@@ -1488,6 +1488,10 @@ function scoreboard($args)
 {
 	global $DB, $api, $cdatas, $cids;
 
+	if ( isset($userdata['teamid']) ) {
+		$cdatas = getCurContests(TRUE, $userdata['teamid']);
+	}
+
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
 	} else {
