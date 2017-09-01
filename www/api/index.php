@@ -1227,7 +1227,11 @@ function cmp_prob_label($a, $b) { return $a['label'] > $b['label']; }
  */
 function scoreboard($args)
 {
-	global $DB, $api, $cdatas, $cids;
+	global $DB, $api, $cdatas, $cids, $userdata;
+
+	if ( isset($userdata['teamid']) ) {
+		$cdatas = getCurContests(TRUE, $userdata['teamid']);
+	}
 
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
