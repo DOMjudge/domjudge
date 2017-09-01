@@ -25,32 +25,32 @@ beep()
 
 case "$MSGTYPE" in
 	error) # internal system error
-		beep "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
-		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
-		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000"
+		beep -l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n \
+		     -l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n \
+		     -l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000
 		;;
 
 	warning) # important system warning
-		beep "-l 1000 -d 500 -f 300 -n -l 1000 -d 500 -f 200 -n " \
-		     "-l 1000 -d 500 -f 300 -n -l 1000 -d 500 -f 200"
+		beep -l 1000 -d 500 -f 300 -n -l 1000 -d 500 -f 200 -n \
+		     -l 1000 -d 500 -f 300 -n -l 1000 -d 500 -f 200
 		;;
 
 	usererr) # user error
-		beep "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
-		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n " \
-		     "-l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000"
+		beep -l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n \
+		     -l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000 -n \
+		     -l 1000 -d 500 -f 800 -n -l 1000 -d 500 -f 1000
 		;;
 
 	submit) # team submission received
-#		beep "-f 400 -l 100 -n -f 400 -l 70"
+#		beep -f 400 -l 100 -n -f 400 -l 70
 		;;
 
 	accept) # submission judged and accepted
-		beep "-f 400 -l 100 -n -f 500 -l 70"
+		beep -f 400 -l 100 -n -f 500 -l 70
 		;;
 
 	reject) # submission judged and rejected
-#		beep "-f 400 -l 100 -n -f 350 -l 70"
+#		beep -f 400 -l 100 -n -f 350 -l 70
 		;;
 
 	*)
