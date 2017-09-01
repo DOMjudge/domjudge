@@ -95,6 +95,7 @@ INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_j
 ('java', 'Java', '["java"]', 1, 1, 1, 'java_javac_detect'),
 ('js', 'JavaScript', '["js"]', 0, 1, 1, 'js'),
 ('lua', 'Lua', '["lua"]', 0, 1, 1, 'lua'),
+('kt', 'Kotlin', '["kt"]', 0, 1, 1, 'kt'),
 ('pas', 'Pascal', '["pas","p"]', 0, 1, 1, 'pas'),
 ('pl', 'Perl', '["pl"]', 0, 1, 1, 'pl'),
 ('plg', 'Prolog', '["plg"]', 0, 1, 1, 'plg'),
