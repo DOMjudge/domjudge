@@ -54,7 +54,7 @@ if ( empty($edata['description']) ) {
 echo "</td></tr>\n";
 
 echo "<tr><td>Time:</td><td>"
-	. printtime($edata['time'])
+	. printtime($edata['time'], '%F %T')
 	. "</td></tr>\n";
 if ( isset($edata['judgingid']) ) {
 	echo "<tr><td>Related Judging:</td><td>"
