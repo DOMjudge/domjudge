@@ -181,13 +181,11 @@ function check_add($probid, $rank, $FILES)
 
 	$result = '';
 	if ( !empty($_FILES['add_input']['name']) ||
-		 !empty($_FILES['add_output']['name']) ) {
+	     !empty($_FILES['add_output']['name']) ) {
 
 		$content = array();
 		foreach($FILES as $file) {
-			if ( empty($_FILES['add_'.$file]['name']) ) {
-				warning("No $file file specified for new testcase, ignoring.");
-			} else {
+			if ( !empty($_FILES['add_'.$file]['name']) ) {
 				checkFileUpload ( $_FILES['add_'.$file]['error'] );
 				$content[$file] = dj_file_get_contents($_FILES['add_'.$file]['tmp_name']);
 			}
