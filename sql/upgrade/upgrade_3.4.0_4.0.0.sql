@@ -144,7 +144,8 @@ UPDATE `team`
   SET team.affilid = affil.affilid;
 
 ALTER TABLE `team`
-  DROP COLUMN `affilid_old`,
+  DROP COLUMN `affilid_old`;
+ALTER TABLE `team`
   ADD FOREIGN KEY (`affilid`) REFERENCES `team_affiliation` (`affilid`) ON DELETE SET NULL;
 
 -- Similarly, we move the probid primary key to shortname and create a
