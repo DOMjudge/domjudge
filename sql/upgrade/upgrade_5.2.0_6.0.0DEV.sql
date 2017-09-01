@@ -15,12 +15,12 @@ ALTER TABLE `judging_run` DROP COLUMN `endtime`;
 -- Create additional structures
 --
 
-ALTER TABLE `contest`
-  `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run judging ended';
-
 ALTER TABLE `contestteam`
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`cid`,`teamid`);
+
+ALTER TABLE `judging_run`
+  ADD COLUMN `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run judging ended' AFTER `runtime`;
 
 --
 -- Transfer data from old to new structure
