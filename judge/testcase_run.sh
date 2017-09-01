@@ -26,7 +26,7 @@ cleanup ()
 {
 	# Remove some copied files to save disk space
 	if [ "$WORKDIR" ]; then
-		rm -f "$WORKDIR/../dev/null" "$WORKDIR/../bin/sh" "$WORKDIR/../bin/runpipe"
+		rm -f "$WORKDIR/../dev/null" "$WORKDIR/../bin/sh" "$WORKDIR/../bin/runpipe" 2> /dev/null || true
 
 		# Replace testdata by symlinks to reduce disk usage
 		if [ -f "$WORKDIR/testdata.in" ]; then
@@ -174,8 +174,11 @@ cp "$TESTIN" "$WORKDIR/testdata.in"
 mkdir -p -m 0711 ../bin ../dev
 # Copy the run-script and a statically compiled shell:
 cp -p  "$RUN_SCRIPT"  ./run
-cp -pL "$STATICSHELL" ../bin/sh
-chmod a+rx run ../bin/sh
+chmod a+rx run
+if [ ! -x ../bin/sh ]; then
+	cp -pL "$STATICSHELL" ../bin/sh || true
+	chmod a+rx ../bin/sh || true
+fi
 # If using a custom runjury script, copy additional support programs
 # if required:
 if [ -x "$RUN_JURYPROG" ]; then
