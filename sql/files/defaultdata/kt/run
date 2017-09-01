@@ -54,7 +54,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec kotlin -JXX:+UseSerialGC -JXss64m -JXms${MEMLIMITJAVA}k -JXmx${MEMLIMITJAVA}k -JDONLINE_JUDGE=1 -JDDOMJUDGE=1 '$MAINCLASS' "\$@"
+exec kotlin -J-XX:+UseSerialGC -J-Xss64m -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k -J-DONLINE_JUDGE=1 -J-DDOMJUDGE=1 '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"
