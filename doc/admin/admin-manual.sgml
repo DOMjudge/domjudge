@@ -354,16 +354,16 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
 apt-get install gcc g++ make zip unzip mysql-server \
-	apache2 php5 php5-cli libapache2-mod-php5 \
-	php5-gd php5-curl php5-mysql php5-json \
-	php5-mcrypt php5-gmp \
-	bsdmainutils phpmyadmin ntp \
+	apache2 php php-cli libapache2-mod-php \
+	php-gd php-curl php-mysql php-json \
+	php-mcrypt php-gmp php-xml php-mbstring \
+	bsdmainutils ntp phpmyadmin \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
 </code>
 Note that PHP modules may need to be enabled depending on your distribution.
-E.g. on Ubuntu run <code>php5enmod mcrypt</code> to enable mcrypt.
+E.g. on Ubuntu run <code>phpenmod mcrypt</code> to enable mcrypt.
 
 
 For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
@@ -409,7 +409,7 @@ change the list as appropriate.
 For Debian:
 <code>
 apt-get install make sudo debootstrap libcgroup-dev \
-	php5-cli php5-curl php5-json procps \
+	php-cli php-curl php-json procps \
 	gcc g++ openjdk-7-jre-headless \
 	openjdk-7-jdk ghc fp-compiler
 </code>
