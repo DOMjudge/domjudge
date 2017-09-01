@@ -280,7 +280,7 @@ class Contest
 	/**
 	 * Set activatetime
 	 *
-	 * @param string $activatetime
+	 * @param double $activatetime
 	 *
 	 * @return Contest
 	 */
@@ -294,7 +294,7 @@ class Contest
 	/**
 	 * Get activatetime
 	 *
-	 * @return string
+	 * @return double
 	 */
 	public function getActivatetime()
 	{
@@ -304,7 +304,7 @@ class Contest
 	/**
 	 * Set starttime
 	 *
-	 * @param string $starttime
+	 * @param double $starttime
 	 *
 	 * @return Contest
 	 */
@@ -318,7 +318,7 @@ class Contest
 	/**
 	 * Get starttime
 	 *
-	 * @return string
+	 * @return double
 	 */
 	public function getStarttime()
 	{
@@ -328,7 +328,7 @@ class Contest
 	/**
 	 * Set freezetime
 	 *
-	 * @param string $freezetime
+	 * @param double $freezetime
 	 *
 	 * @return Contest
 	 */
@@ -342,7 +342,7 @@ class Contest
 	/**
 	 * Get freezetime
 	 *
-	 * @return string
+	 * @return double
 	 */
 	public function getFreezetime()
 	{
@@ -352,7 +352,7 @@ class Contest
 	/**
 	 * Set endtime
 	 *
-	 * @param string $endtime
+	 * @param double $endtime
 	 *
 	 * @return Contest
 	 */
@@ -366,7 +366,7 @@ class Contest
 	/**
 	 * Get endtime
 	 *
-	 * @return string
+	 * @return double
 	 */
 	public function getEndtime()
 	{
@@ -376,7 +376,7 @@ class Contest
 	/**
 	 * Set unfreezetime
 	 *
-	 * @param string $unfreezetime
+	 * @param double $unfreezetime
 	 *
 	 * @return Contest
 	 */
@@ -390,7 +390,7 @@ class Contest
 	/**
 	 * Get unfreezetime
 	 *
-	 * @return string
+	 * @return double
 	 */
 	public function getUnfreezetime()
 	{
@@ -400,7 +400,7 @@ class Contest
 	/**
 	 * Set deactivatetime
 	 *
-	 * @param string $deactivatetime
+	 * @param double $deactivatetime
 	 *
 	 * @return Contest
 	 */
@@ -414,7 +414,7 @@ class Contest
 	/**
 	 * Get deactivatetime
 	 *
-	 * @return string
+	 * @return double
 	 */
 	public function getDeactivatetime()
 	{
