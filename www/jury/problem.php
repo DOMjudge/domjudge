@@ -23,7 +23,7 @@ if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
 } elseif ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
-} elseif ( isset($id) ) {
+} elseif ( isset($id) && !isset($_POST['upload']) ) {
 	$extra = '';
 	if ( $current_cid !== null ) {
 		$extra = '&cid=' . urlencode($current_cid);
