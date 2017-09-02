@@ -15,6 +15,7 @@ use FOS\RestBundle\Controller\Annotations\Delete;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use DOMJudgeBundle\Entity\Contest;
 
 /**
@@ -40,6 +41,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Patch("/")
+	 * @Security("has_role('ROLE_ADMIN')")
 	 */
 	public function changeStartTime(Request $request) {
 		$contest = $this->getCurrentActiveContest();
