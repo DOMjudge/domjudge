@@ -149,7 +149,7 @@ CREATE TABLE `event` (
   `dataid` varchar(50) NOT NULL COMMENT 'Identifier in reference table',
   `action` varchar(30) NOT NULL COMMENT 'Description of action performed',
   `content` longblob DEFAULT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed',
-  PRIMARY KEY (`eventid`) USING BTREE,
+  PRIMARY KEY (`eventid`),
   UNIQUE KEY (`eventtime`),
   KEY `cid` (`cid`),
   KEY `datatype` (`datatype`(16)),
