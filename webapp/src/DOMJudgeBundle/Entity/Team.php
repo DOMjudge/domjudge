@@ -137,11 +137,6 @@ class Team
   private $unread_clarifications;
 
   /**
-   * @ORM\OneToMany(targetEntity="Event", mappedBy="team")
-   */
-  private $events;
-
-  /**
    * @ORM\OneToMany(targetEntity="ScoreCache", mappedBy="team")
    */
   private $scorecache;
@@ -673,40 +668,6 @@ class Team
 	public function getReceivedClarifications()
 	{
 		return $this->received_clarifications;
-	}
-
-	/**
-	 * Add event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 *
-	 * @return Team
-	 */
-	public function addEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events[] = $event;
-
-		return $this;
-	}
-
-	/**
-	 * Remove event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 */
-	public function removeEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events->removeElement($event);
-	}
-
-	/**
-	 * Get events
-	 *
-	 * @return \Doctrine\Common\Collections\Collection
-	 */
-	public function getEvents()
-	{
-		return $this->events;
 	}
 
 	/**

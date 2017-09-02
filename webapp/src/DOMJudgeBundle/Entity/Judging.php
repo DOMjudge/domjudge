@@ -137,11 +137,6 @@ class Judging
 	private $runs;
 
 	/**
-	 * @ORM\OneToMany(targetEntity="Event", mappedBy="judging")
-	 */
-	private $events;
-
-	/**
 	 * Get judgingid
 	 *
 	 * @return integer
@@ -622,39 +617,5 @@ class Judging
 	public function getRuns()
 	{
 		return $this->runs;
-	}
-
-	/**
-	 * Add event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 *
-	 * @return Judging
-	 */
-	public function addEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events[] = $event;
-
-		return $this;
-	}
-
-	/**
-	 * Remove event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 */
-	public function removeEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events->removeElement($event);
-	}
-
-	/**
-	 * Get events
-	 *
-	 * @return \Doctrine\Common\Collections\Collection
-	 */
-	public function getEvents()
-	{
-		return $this->events;
 	}
 }

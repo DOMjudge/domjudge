@@ -64,7 +64,7 @@ class InternalError
 	private $contest;
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="Judging", inversedBy="events")
+	 * @ORM\ManyToOne(targetEntity="Judging")
 	 * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid")
 	 */
 	private $judging;

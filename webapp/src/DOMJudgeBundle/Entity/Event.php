@@ -169,9 +169,9 @@ class Event
 	 *
 	 * @return Event
 	 */
-	public function setDataid($datatype)
+	public function setDataid($dataid)
 	{
-		$this->dataid = $datatype;
+		$this->dataid = $dataid;
 
 		return $this;
 	}
@@ -193,9 +193,9 @@ class Event
 	 *
 	 * @return Event
 	 */
-	public function setAction($datatype)
+	public function setAction($action)
 	{
-		$this->action = $datatype;
+		$this->action = $action;
 
 		return $this;
 	}
@@ -217,9 +217,9 @@ class Event
 	 *
 	 * @return Event
 	 */
-	public function setContent($datatype)
+	public function setContent($content)
 	{
-		$this->content = $datatype;
+		$this->content = $content;
 
 		return $this;
 	}

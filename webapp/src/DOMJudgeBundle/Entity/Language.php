@@ -63,12 +63,6 @@ class Language
 	 */
 	private $submissions;
 
-
-	/**
-	 * @ORM\OneToMany(targetEntity="Event", mappedBy="language")
-	 */
-	private $events;
-
 	/**
 	 * Set langid
 	 *
@@ -300,39 +294,5 @@ class Language
 	public function getSubmissions()
 	{
 		return $this->submissions;
-	}
-
-	/**
-	 * Add event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 *
-	 * @return Language
-	 */
-	public function addEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events[] = $event;
-
-		return $this;
-	}
-
-	/**
-	 * Remove event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 */
-	public function removeEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events->removeElement($event);
-	}
-
-	/**
-	 * Get events
-	 *
-	 * @return \Doctrine\Common\Collections\Collection
-	 */
-	public function getEvents()
-	{
-		return $this->events;
 	}
 }

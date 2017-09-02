@@ -123,11 +123,6 @@ class Submission
 	*/
    private $balloons;
 
-   /**
-	* @ORM\OneToMany(targetEntity="Event", mappedBy="submission")
-	*/
-   private $events;
-
 	/**
 	 * Get submitid
 	 *
@@ -581,39 +576,5 @@ class Submission
 	public function getProblem()
 	{
 		return $this->problem;
-	}
-
-	/**
-	 * Add event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 *
-	 * @return Submission
-	 */
-	public function addEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events[] = $event;
-
-		return $this;
-	}
-
-	/**
-	 * Remove event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 */
-	public function removeEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events->removeElement($event);
-	}
-
-	/**
-	 * Get events
-	 *
-	 * @return \Doctrine\Common\Collections\Collection
-	 */
-	public function getEvents()
-	{
-		return $this->events;
 	}
 }

@@ -114,11 +114,6 @@ class Problem
 	private $testcases;
 
 	/**
-	 * @ORM\OneToMany(targetEntity="Event", mappedBy="problem")
-	 */
-	private $events;
-
-	/**
 	 * @ORM\OneToMany(targetEntity="ScoreCache", mappedBy="problem")
 	 */
 	private $scorecache;
@@ -538,40 +533,6 @@ class Problem
 	public function getClarifications()
 	{
 		return $this->clarifications;
-	}
-
-	/**
-	 * Add event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 *
-	 * @return Problem
-	 */
-	public function addEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events[] = $event;
-
-		return $this;
-	}
-
-	/**
-	 * Remove event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 */
-	public function removeEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events->removeElement($event);
-	}
-
-	/**
-	 * Get events
-	 *
-	 * @return \Doctrine\Common\Collections\Collection
-	 */
-	public function getEvents()
-	{
-		return $this->events;
 	}
 
 	/**

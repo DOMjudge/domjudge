@@ -112,18 +112,12 @@ class Clarification
 private $recipient;
 
 
-  /**
-   * @ORM\OneToMany(targetEntity="Event", mappedBy="clarification")
-   */
-  private $events;
-
 	/**
 	 * Constructor
 	 */
 	public function __construct()
 	{
 		$this->replies = new \Doctrine\Common\Collections\ArrayCollection();
-		$this->events = new \Doctrine\Common\Collections\ArrayCollection();
 	}
 
 	/**
@@ -542,39 +536,5 @@ private $recipient;
 	public function getRecipient()
 	{
 		return $this->recipient;
-	}
-
-	/**
-	 * Add event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 *
-	 * @return Clarification
-	 */
-	public function addEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events[] = $event;
-
-		return $this;
-	}
-
-	/**
-	 * Remove event
-	 *
-	 * @param \DOMJudgeBundle\Entity\Event $event
-	 */
-	public function removeEvent(\DOMJudgeBundle\Entity\Event $event)
-	{
-		$this->events->removeElement($event);
-	}
-
-	/**
-	 * Get events
-	 *
-	 * @return \Doctrine\Common\Collections\Collection
-	 */
-	public function getEvents()
-	{
-		return $this->events;
 	}
 }
