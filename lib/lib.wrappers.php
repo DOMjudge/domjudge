@@ -32,12 +32,23 @@ function dj_setcookie($name, $value = null, $expire = 0,
 }
 
 /**
- * Decode a json encoded string and handle errors.
+ * Decode a JSON string and handle errors.
  */
 function dj_json_decode($str) {
 	$res = json_decode($str, TRUE);
-	if ( $res === NULL ) {
-		error("Error decoding JSON data '$str'.");
+	if ( json_last_error() !== JSON_ERROR_NONE ) {
+		error("Error decoding JSON data '$str': ".json_last_error_msg());
+	}
+	return $res;
+}
+
+/**
+ * Encode data to JSON and handle errors.
+ */
+function dj_json_encode($data) {
+	$res = json_encode($data, JSON_PRESERVE_ZERO_FRACTION);
+	if ( json_last_error() !== JSON_ERROR_NONE ) {
+		error("Error encoding data to JSON: ".json_last_error_msg());
 	}
 	return $res;
 }
