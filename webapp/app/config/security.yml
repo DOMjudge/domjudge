@@ -1,6 +1,11 @@
 # To get started with security, check out the documentation:
 # http://symfony.com/doc/current/security.html
 security:
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_JURY, ROLE_API]
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+
+
     encoders:
         DOMJudgeBundle\Entity\User:
             algorithm: bcrypt
@@ -45,4 +50,4 @@ security:
       - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/public, roles: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-      - { path: ^/, roles: ROLE_USER }
+      - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

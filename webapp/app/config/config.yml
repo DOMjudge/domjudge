@@ -74,6 +74,7 @@ jms_serializer:
         json:
             options: JSON_PRETTY_PRINT
 fos_rest:
+    disable_csrf_role: ROLE_API
     view:
         # Lets us return data directly, instead of wrapping in a view
         view_response_listener: force
