@@ -269,6 +269,8 @@ coverity-conf:
 	$(MAKE) maintainer-conf
 
 coverity-build: paths.mk
+# First delete some files to keep Coverity scan happy:
+	-rm -f tests/test-compile-error.*
 	$(MAKE) build build-scripts
 	@VERSION=` grep '^VERSION ='   paths.mk | sed 's/^VERSION = *//'` ; \
 	PUBLISHED=`grep '^PUBLISHED =' paths.mk | sed 's/^PUBLISHED = *//'` ; \
