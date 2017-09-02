@@ -924,6 +924,7 @@ foreach ( $API_endpoints as $endpoint => $data ) {
  * $action      One of: create, update, delete.
  * $cid         Contest ID to log this event for. If null, log it for
  *              all currently active contests.
+ * $json        JSON content after the change. Generated if null.
  */
 // TODO: we should probably integrate this function with auditlog().
 function eventlog($datatype, $dataid, $action, $cid = null, $json = null)
