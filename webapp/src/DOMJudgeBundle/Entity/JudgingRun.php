@@ -43,6 +43,12 @@ class JudgingRun
 	private $runtime = 1;
 
 	/**
+	 * @var double
+	 * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time run judging finished", "unsigned"=true}, nullable=false)
+	 */
+	private $endtime;
+
+	/**
 	 * @var string
 	 * @ORM\Column(type="blob", name="output_run", options={"comment"="Output of running the program"}, nullable=true)
 	 */
