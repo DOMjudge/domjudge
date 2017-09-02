@@ -77,31 +77,37 @@ class User implements UserInterface, \Serializable
 	 * @ORM\ManyToOne(targetEntity="Team", inversedBy="users")
 	 * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
 	 */
-   private $team;
+	 private $team;
+
+	/**
+	  * @ORM\ManyToMany(targetEntity="Role", inversedBy="users")
+	  * @ORM\JoinTable(name="userrole",
+	  *		joinColumns={@ORM\JoinColumn(name="userid", referencedColumnName="userid")},
+	  *		inverseJoinColumns={@ORM\JoinColumn(name="roleid", referencedColumnName="roleid")}
+	  *		)
+	  */
+	private $roles;
 
 
-   public function getRoles() {
-	 return ['ROLE_USER'];
-   }
-   public function getSalt() {
-	 return null;
-   }
-   public function eraseCredentials() {
-   }
-   public function serialize() {
-	 return serialize(array(
-	   $this->userid,
-	   $this->username,
-	   $this->password,
-	 ));
-   }
-   public function unserialize($serialized) {
-	 list(
-	   $this->userid,
-	   $this->username,
-	   $this->password
-	 ) = unserialize($serialized);
-   }
+	public function getSalt() {
+		return null;
+	}
+	public function eraseCredentials() {
+	}
+	public function serialize() {
+		return serialize(array(
+			$this->userid,
+			$this->username,
+			$this->password,
+		));
+	}
+	public function unserialize($serialized) {
+		list(
+			$this->userid,
+			$this->username,
+			$this->password
+		) = unserialize($serialized);
+	}
 
 	/**
 	 * Get userid
@@ -352,4 +358,45 @@ class User implements UserInterface, \Serializable
 	{
 		return $this->team;
 	}
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add role
+     *
+     * @param \DOMJudgeBundle\Entity\Role $role
+     *
+     * @return User
+     */
+    public function addRole(\DOMJudgeBundle\Entity\Role $role)
+    {
+        $this->roles[] = $role;
+
+        return $this;
+    }
+
+    /**
+     * Remove role
+     *
+     * @param \DOMJudgeBundle\Entity\Role $role
+     */
+    public function removeRole(\DOMJudgeBundle\Entity\Role $role)
+    {
+        $this->roles->removeElement($role);
+    }
+
+    /**
+     * Get roles
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRoles()
+    {
+        return $this->roles->toArray();
+    }
 }
