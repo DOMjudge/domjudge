@@ -22,8 +22,8 @@ if ( !file_exists(LIBDIR . '/relations.php') ) {
 require(LIBDIR .  '/relations.php');
 
 $t = @$_POST['table'];
-if(!$t)	error ("No table selected.");
-if(!in_array($t, array_keys($KEYS))) error ("Unknown table.");
+if ( !$t ) error ("No table selected.");
+if ( !in_array($t, array_keys($KEYS)) ) error ("Unknown table.");
 
 $data          =  $_POST['data'];
 $keydata       = @$_POST['keydata'];

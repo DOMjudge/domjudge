@@ -14,10 +14,10 @@ export HOME=/does/not/exist
 # -x hs:    Explicitly only allow Haskell source (no object files or
 #           other intermediate files autodetected by extension, also
 #           disables literate Haskell (.lhs) files)
-# -Wall:	Report all warnings
-# -O:		Optimize
-# -static:	Static link Haskell libraries
-# -optl-static:	Pass '-static' option to the linker
+# -Wall:    Report all warnings
+# -O:       Optimize
+# -static:  Static link Haskell libraries
+# -optl-static:  Pass '-static' option to the linker
 # -optl-pthread: Pass '-pthread' option to the linker (see Debian bug #593402)
 ghc -x hs -Wall -Wwarn -O -static -optl-static -optl-pthread -DONLINE_JUDGE -DDOMJUDGE -o "$DEST" "$@"
 exitcode=$?

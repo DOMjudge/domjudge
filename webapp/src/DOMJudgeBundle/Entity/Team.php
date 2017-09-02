@@ -130,9 +130,9 @@ class Team
   /**
    * @ORM\ManyToMany(targetEntity="Clarification")
    * @ORM\JoinTable(name="team_unread",
-   *	  joinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid")},
-   *	  inverseJoinColumns={@ORM\JoinColumn(name="mesgid", referencedColumnName="clarid")}
-   *	  )
+   *                joinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid")},
+   *                inverseJoinColumns={@ORM\JoinColumn(name="mesgid", referencedColumnName="clarid")}
+   * )
    */
   private $unread_clarifications;
 

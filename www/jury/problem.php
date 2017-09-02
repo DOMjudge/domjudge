@@ -227,7 +227,7 @@ echo addForm($pagename . '?id=' . urlencode($id),
 	echo ' <a href="testcase.php?probid='.urlencode($data['probid']).'">details/edit</a>';
 ?></td></tr>
 <tr><td>Timelimit:   </td><td><?php echo (float)$data['timelimit']?> sec</td></tr>
-<tr><td>Memory limit:</td><td><?php	echo (int)$data['memlimit'].' kB'.(@$defaultmemlimit ? ' (default)' : '')?></td></tr>
+<tr><td>Memory limit:</td><td><?php echo (int)$data['memlimit'].' kB'.(@$defaultmemlimit ? ' (default)' : '')?></td></tr>
 <tr><td>Output limit:</td><td><?php echo (int)$data['outputlimit'].' kB'.(@$defaultoutputlimit ? ' (default)' : '')?></td></tr>
 <?php
 if ( !empty($data['color']) ) {
