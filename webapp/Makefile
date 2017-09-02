@@ -37,3 +37,10 @@ install-docs:
 
 distclean-l:
 	-rm -f $(SUBST_CONFIGS) $(PARAMS)
+
+maintainer-clean-l:
+	-for d in cache logs sessions ; do \
+		for t in dev prod ; do \
+			rm -rf var/$$d/$$t ; \
+		done ; \
+	done
