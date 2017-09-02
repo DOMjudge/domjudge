@@ -978,10 +978,10 @@ function eventlog($datatype, $dataid, $action, $cid = null, $json = null)
 	}
 
 	if ( count($ids)!==count($cids) ) {
-		error("eventlog: failed to insert $datatype ID $id (".count($ids).'/'.count($cids).')');
+		error("eventlog: failed to $action $datatype ID $id (".count($ids).'/'.count($cids).' contests done)');
 	}
 
-	logmsg(LOG_DEBUG,"eventlog: inserted $datatype ID $id for ".count($cids).' contests');
+	logmsg(LOG_DEBUG,"eventlog: ${action}d $datatype ID $id for ".count($cids).' contest(s)');
 }
 
 /**
