@@ -1,118 +1,70 @@
 <?php
+
 namespace DOMJudgeBundle\Entity;
+
 use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Log of all events during a contest
- * @ORM\Entity()
- * @ORM\Table(name="event", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ *
+ * @ORM\Table(name="event", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"}, uniqueConstraints={@ORM\UniqueConstraint(name="eventtime", columns={"eventtime"})}, indexes={@ORM\Index(name="cid", columns={"cid"}), @ORM\Index(name="datatype", columns={"datatype"})})
+ * @ORM\Entity
  */
 class Event
 {
 	/**
-	 * @var int
+	 * @var integer
+	 *
 	 * @ORM\Id
-	 * @ORM\Column(type="integer", name="eventid", options={"comment"="Unique ID"}, nullable=false)
+	 * @ORM\Column(name="eventid", type="integer", nullable=false, options={"comment"="Unique ID"})
+	 * @ORM\GeneratedValue(strategy="IDENTITY")
 	 */
 	private $eventid;
 
 	/**
 	 * @var double
-	 * @ORM\Column(type="decimal", precision=32, scale=9, name="eventtime", options={"comment"="When the event occurred", "unsigned"=true}, nullable=false)
+	 *
+	 * @ORM\Column(name="eventtime", type="decimal", precision=32, scale=9, nullable=false)
 	 */
 	private $eventtime;
 
 	/**
-	 * @var int
-	 * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
-	 */
-	private $cid;
-
-	/**
-	 * @var int
-	 * @ORM\Column(type="integer", name="clarid", options={"comment"="In reply to clarification ID"}, nullable=true)
-	 */
-	private $clarid;
-
-	/**
-	 * @var int
+	 * @var string
 	 *
-	 * @ORM\Column(type="integer", name="langid", options={"comment"="Language ID"}, nullable=true)
+	 * @ORM\Column(name="datatype", type="string", length=25, nullable=false)
 	 */
-	private $langid;
-
-	/**
-	 * @var int
-	 *
-	 * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID"}, nullable=true)
-	 */
-	private $probid;
-
-	/**
-	 * @var int
-	 * @ORM\Column(type="integer", name="submitid", options={"comment"="Submission ID"}, nullable=true)
-	 */
-	private $submitid;
-
-	/**
-	 * @var int
-	 * @ORM\Column(type="integer", name="judgingid", options={"comment"="Judging ID"}, nullable=true)
-	 */
-	private $judgingid;
-
-	/**
-	 * @var int
-	 * @ORM\Column(type="integer", name="teamid", options={"comment"="Team ID"}, nullable=true)
-	 */
-	private $teamid;
+	private $datatype;
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="text", length=4294967295, name="description", options={"comment"="Event Description"}, nullable=false)
+	 *
+	 * @ORM\Column(name="dataid", type="string", length=50, nullable=false)
 	 */
-	private $description;
+	private $dataid;
 
-  /**
-   * @ORM\ManyToOne(targetEntity="Contest", inversedBy="events")
-   * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
-   */
-  private $contest;
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="action", type="string", length=30, nullable=false)
+	 */
+	private $action;
 
-  /**
-   * @ORM\ManyToOne(targetEntity="Clarification", inversedBy="events")
-   * @ORM\JoinColumn(name="clarid", referencedColumnName="clarid")
-   */
-  private $clarification;
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="content", type="blob", nullable=true)
+	 */
+	private $content;
 
-  /**
-   * @ORM\ManyToOne(targetEntity="Language", inversedBy="events")
-   * @ORM\JoinColumn(name="langid", referencedColumnName="langid")
-   */
-  private $language;
-
-  /**
-   * @ORM\ManyToOne(targetEntity="Problem", inversedBy="events")
-   * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
-   */
-  private $problem;
-
-  /**
-   * @ORM\ManyToOne(targetEntity="Submission", inversedBy="events")
-   * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
-   */
-  private $submission;
-
-  /**
-   * @ORM\ManyToOne(targetEntity="Judging", inversedBy="events")
-   * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid")
-   */
-  private $judging;
-
-  /**
-   * @ORM\ManyToOne(targetEntity="Team", inversedBy="events")
-   * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
-   */
-  private $team;
-
+	/**
+	 * @var \Contest
+	 *
+	 * @ORM\ManyToOne(targetEntity="Contest")
+	 * @ORM\JoinColumns({
+	 *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+	 * })
+	 */
+	private $cid;
 
 	/**
 	 * Set eventid
@@ -141,7 +93,7 @@ class Event
 	/**
 	 * Set eventtime
 	 *
-	 * @param string $eventtime
+	 * @param double $eventtime
 	 *
 	 * @return Event
 	 */
@@ -155,7 +107,7 @@ class Event
 	/**
 	 * Get eventtime
 	 *
-	 * @return string
+	 * @return double
 	 */
 	public function getEventtime()
 	{
@@ -187,338 +139,98 @@ class Event
 	}
 
 	/**
-	 * Set clarid
+	 * Set datatype
 	 *
-	 * @param integer $clarid
+	 * @param string $datatype
 	 *
 	 * @return Event
 	 */
-	public function setClarid($clarid)
+	public function setDatatype($datatype)
 	{
-		$this->clarid = $clarid;
+		$this->datatype = $datatype;
 
 		return $this;
 	}
 
 	/**
-	 * Get clarid
-	 *
-	 * @return integer
-	 */
-	public function getClarid()
-	{
-		return $this->clarid;
-	}
-
-	/**
-	 * Set langid
-	 *
-	 * @param integer $langid
-	 *
-	 * @return Event
-	 */
-	public function setLangid($langid)
-	{
-		$this->langid = $langid;
-
-		return $this;
-	}
-
-	/**
-	 * Get langid
-	 *
-	 * @return integer
-	 */
-	public function getLangid()
-	{
-		return $this->langid;
-	}
-
-	/**
-	 * Set probid
-	 *
-	 * @param integer $probid
-	 *
-	 * @return Event
-	 */
-	public function setProbid($probid)
-	{
-		$this->probid = $probid;
-
-		return $this;
-	}
-
-	/**
-	 * Get probid
-	 *
-	 * @return integer
-	 */
-	public function getProbid()
-	{
-		return $this->probid;
-	}
-
-	/**
-	 * Set submitid
-	 *
-	 * @param integer $submitid
-	 *
-	 * @return Event
-	 */
-	public function setSubmitid($submitid)
-	{
-		$this->submitid = $submitid;
-
-		return $this;
-	}
-
-	/**
-	 * Get submitid
-	 *
-	 * @return integer
-	 */
-	public function getSubmitid()
-	{
-		return $this->submitid;
-	}
-
-	/**
-	 * Set judgingid
-	 *
-	 * @param integer $judgingid
-	 *
-	 * @return Event
-	 */
-	public function setJudgingid($judgingid)
-	{
-		$this->judgingid = $judgingid;
-
-		return $this;
-	}
-
-	/**
-	 * Get judgingid
-	 *
-	 * @return integer
-	 */
-	public function getJudgingid()
-	{
-		return $this->judgingid;
-	}
-
-	/**
-	 * Set teamid
-	 *
-	 * @param integer $teamid
-	 *
-	 * @return Event
-	 */
-	public function setTeamid($teamid)
-	{
-		$this->teamid = $teamid;
-
-		return $this;
-	}
-
-	/**
-	 * Get teamid
-	 *
-	 * @return integer
-	 */
-	public function getTeamid()
-	{
-		return $this->teamid;
-	}
-
-	/**
-	 * Set description
-	 *
-	 * @param string $description
-	 *
-	 * @return Event
-	 */
-	public function setDescription($description)
-	{
-		$this->description = $description;
-
-		return $this;
-	}
-
-	/**
-	 * Get description
+	 * Get datatype
 	 *
 	 * @return string
 	 */
-	public function getDescription()
+	public function getDatatype()
 	{
-		return $this->description;
+		return $this->datatype;
 	}
 
 	/**
-	 * Set clarification
+	 * Set dataid
 	 *
-	 * @param \DOMJudgeBundle\Entity\Clarification $clarification
+	 * @param string $dataid
 	 *
 	 * @return Event
 	 */
-	public function setClarification(\DOMJudgeBundle\Entity\Clarification $clarification = null)
+	public function setDataid($datatype)
 	{
-		$this->clarification = $clarification;
+		$this->dataid = $datatype;
 
 		return $this;
 	}
 
 	/**
-	 * Get clarification
+	 * Get dataid
 	 *
-	 * @return \DOMJudgeBundle\Entity\Clarification
+	 * @return string
 	 */
-	public function getClarification()
+	public function getDataid()
 	{
-		return $this->clarification;
+		return $this->dataid;
 	}
 
 	/**
-	 * Set language
+	 * Set action
 	 *
-	 * @param \DOMJudgeBundle\Entity\Language $language
+	 * @param string $action
 	 *
 	 * @return Event
 	 */
-	public function setLanguage(\DOMJudgeBundle\Entity\Language $language = null)
+	public function setAction($datatype)
 	{
-		$this->language = $language;
+		$this->action = $datatype;
 
 		return $this;
 	}
 
 	/**
-	 * Get language
+	 * Get action
 	 *
-	 * @return \DOMJudgeBundle\Entity\Language
+	 * @return string
 	 */
-	public function getLanguage()
+	public function getAction()
 	{
-		return $this->language;
+		return $this->action;
 	}
 
 	/**
-	 * Set problem
+	 * Set content
 	 *
-	 * @param \DOMJudgeBundle\Entity\Problem $problem
+	 * @param string $content
 	 *
 	 * @return Event
 	 */
-	public function setProblem(\DOMJudgeBundle\Entity\Problem $problem = null)
+	public function setContent($datatype)
 	{
-		$this->problem = $problem;
+		$this->content = $datatype;
 
 		return $this;
 	}
 
 	/**
-	 * Get problem
+	 * Get content
 	 *
-	 * @return \DOMJudgeBundle\Entity\Problem
+	 * @return string
 	 */
-	public function getProblem()
+	public function getContent()
 	{
-		return $this->problem;
-	}
-
-	/**
-	 * Set submission
-	 *
-	 * @param \DOMJudgeBundle\Entity\Submission $submission
-	 *
-	 * @return Event
-	 */
-	public function setSubmission(\DOMJudgeBundle\Entity\Submission $submission = null)
-	{
-		$this->submission = $submission;
-
-		return $this;
-	}
-
-	/**
-	 * Get submission
-	 *
-	 * @return \DOMJudgeBundle\Entity\Submission
-	 */
-	public function getSubmission()
-	{
-		return $this->submission;
-	}
-
-	/**
-	 * Set judging
-	 *
-	 * @param \DOMJudgeBundle\Entity\Judging $judging
-	 *
-	 * @return Event
-	 */
-	public function setJudging(\DOMJudgeBundle\Entity\Judging $judging = null)
-	{
-		$this->judging = $judging;
-
-		return $this;
-	}
-
-	/**
-	 * Get judging
-	 *
-	 * @return \DOMJudgeBundle\Entity\Judging
-	 */
-	public function getJudging()
-	{
-		return $this->judging;
-	}
-
-	/**
-	 * Set team
-	 *
-	 * @param \DOMJudgeBundle\Entity\Team $team
-	 *
-	 * @return Event
-	 */
-	public function setTeam(\DOMJudgeBundle\Entity\Team $team = null)
-	{
-		$this->team = $team;
-
-		return $this;
-	}
-
-	/**
-	 * Get team
-	 *
-	 * @return \DOMJudgeBundle\Entity\Team
-	 */
-	public function getTeam()
-	{
-		return $this->team;
-	}
-
-	/**
-	 * Set contest
-	 *
-	 * @param \DOMJudgeBundle\Entity\Contest $contest
-	 *
-	 * @return Event
-	 */
-	public function setContest(\DOMJudgeBundle\Entity\Contest $contest = null)
-	{
-		$this->contest = $contest;
-
-		return $this;
-	}
-
-	/**
-	 * Get contest
-	 *
-	 * @return \DOMJudgeBundle\Entity\Contest
-	 */
-	public function getContest()
-	{
-		return $this->contest;
+		return $this->content;
 	}
 }
