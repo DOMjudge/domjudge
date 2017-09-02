@@ -943,7 +943,7 @@ function eventlog($datatype, $dataid, $action, $cid = null, $json = null)
 	}
 
 	$cids = array();
-	if ( $cid===null ) {
+	if ( $cid!==null ) {
 		$cids[] = $cid;
 	} else {
 		// Here we should take into account dependence between cid and team/problem
