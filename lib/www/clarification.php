@@ -400,7 +400,7 @@ function confirmClar() {
 			}
 		}
 		$fdata = calcFreezeData($cdata);
-		if ( $fdata['cstarted'] ) {
+		if ( $fdata['started'] ) {
 			$problem_options =
 				$DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
 				                             CONCAT(shortname, ": ", name) as name

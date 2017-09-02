@@ -43,7 +43,7 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	$fdata = calcFreezeData($cdata);
 
 	// Don't leak information before start of contest
-	if ( ! $fdata['cstarted'] && ! $jury ) return;
+	if ( ! $fdata['started'] && ! $jury ) return;
 
 	// get the teams, problems and categories
 	$teams = getTeams($filter, $jury, $cdata);
@@ -556,7 +556,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 
 	if ( $fdata['showfinal'] ) {
 		echo "<h4>final standings</h4>\n\n";
-	} elseif ( ! $fdata['cstarted'] ) {
+	} elseif ( ! $fdata['started'] ) {
 		echo "<h4>" . printContestStart($cdata) . "</h4>\n\n";
 		// Stop here (do not leak problem number, descriptions etc).
 		// Alternatively we could only display the list of teams?
@@ -703,7 +703,7 @@ function putTeamRow($cdata, $teamids) {
 	$displayrank = IS_JURY || !$fdata['showfrozen'];
 	$cid = $cdata['cid'];
 
-	if ( ! $fdata['cstarted'] ) {
+	if ( ! $fdata['started'] ) {
 		if ( ! IS_JURY ) {
 
 			global $teamdata;

@@ -606,7 +606,7 @@ function putProblemTextList()
 	global $cid, $cdata, $DB;
 	$fdata = calcFreezeData($cdata);
 
-	if ( !$fdata['cstarted'] ) {
+	if ( !$fdata['started'] ) {
 		echo "<p class=\"nodata\">Problem texts will appear here at contest start.</p>\n\n";
 	} else {
 

@@ -100,7 +100,7 @@ function problemVisible($probid)
 	if ( empty($probid) ) return FALSE;
 
 	$fdata = calcFreezeData($cdata);
-	if ( !$fdata['cstarted'] ) return FALSE;
+	if ( !$fdata['started'] ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
 	               INNER JOIN contestproblem USING (probid)
@@ -110,8 +110,8 @@ function problemVisible($probid)
 
 /**
  * Given an array of contest data, calculates whether the contest
- * has already started ('cstarted'), and if scoreboard is currently
- * frozen ('showfrozen') or final ('showfinal').
+ * has already started, stopped, andd if scoreboard is currently
+ * frozen or final (unfrozen).
  */
 function calcFreezeData($cdata)
 {
@@ -121,7 +121,7 @@ function calcFreezeData($cdata)
 		return array(
 			'showfinal' => false,
 			'showfrozen' => false,
-			'cstarted' => false
+			'started' => false
 		);
 	}
 
@@ -138,7 +138,7 @@ function calcFreezeData($cdata)
 	$fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
 	              difftime($cdata['freezetime'],$now) <= 0;
 	// contest is active but has not yet started
-	$fdata['cstarted'] = difftime($cdata['starttime'],$now) <= 0;
+	$fdata['started'] = difftime($cdata['starttime'],$now) <= 0;
 
 	return $fdata;
 }
@@ -664,7 +664,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 		error("Contest c$contest not found.");
 	}
 	$fdata = calcFreezeData($contestdata);
-	if( !checkrole('jury') && !$fdata['cstarted'] ) {
+	if( !checkrole('jury') && !$fdata['started'] ) {
 		error("The contest is closed, no submissions accepted. [c$contest]");
 	}
 

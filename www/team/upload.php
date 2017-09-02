@@ -20,7 +20,7 @@ if ( is_null($cid) ) {
 	exit;
 }
 $fdata = calcFreezeData($cdata);
-if ( !checkrole('jury') && !$fdata['cstarted'] ) {
+if ( !checkrole('jury') && !$fdata['started'] ) {
 	require(LIBWWWDIR . '/header.php');
 	echo "<p class=\"nodata\">Contest has not yet started.</p>\n";
 	require(LIBWWWDIR . '/footer.php');
