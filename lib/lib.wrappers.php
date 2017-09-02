@@ -37,7 +37,7 @@ function dj_setcookie($name, $value = null, $expire = 0,
 function dj_json_decode($str) {
 	$res = json_decode($str, TRUE);
 	if ( $res === NULL ) {
-		error("Error retrieving API data. API gave us: " . $str);
+		error("Error decoding JSON data '$str'.");
 	}
 	return $res;
 }
