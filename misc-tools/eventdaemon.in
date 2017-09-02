@@ -1,0 +1,246 @@
+#!/usr/bin/env php
+<?php
+/**
+ * @configure_input@
+ *
+ * Generate events for a contest that cannot be generated in other
+ * code. This includes:
+ * - Initial "create events" at MAX(contest:activatetime,daemon start)
+ *   for static data: contest, teams, problems, ...
+ * - Contest state change events: start, freeze, end, finalize, ...
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+
+require('@domserver_etcdir@/domserver-static.php');
+
+require(ETCDIR . '/domserver-config.php');
+
+define('SCRIPT_ID', 'eventdaemon');
+define('LOGFILE', LOGDIR.'/eventdaemon.log');
+
+$verbose = LOG_INFO;
+
+require(LIBDIR . '/init.php');
+
+function usage()
+{
+	echo
+"Usage: ".SCRIPT_ID." [OPTION...]
+
+Generate events for a contest that cannot be generated in other code.
+This includes:
+ * Initial \"create events\" at MAX(contest:activatetime,daemon start)
+   for static data: contest, teams, problems, ...
+ * Contest state change events: start, freeze, end, finalize, ...
+
+Options:
+  -d        Daemonize after startup.
+  -C <cid>  Run for contest with ID or shortname <cid>. The contest
+            defaults to the current active contest if it is unique.
+  -v        Set verbosity to LEVEL (syslog levels).
+  -h        Display this help and exit.
+  -V        Output version information and exit.
+
+";
+	exit;
+}
+
+$options = getopt("C:v:hV");
+// FIXME: getopt doesn't return FALSE on parse failure as documented!
+if ( $options===FALSE ) {
+	echo "Error: parsing options failed.\n";
+	usage();
+}
+
+if ( isset($options['d']) ) $options['daemon']  = $options['d'];
+if ( isset($options['C']) ) $options['cid']     = $options['C'];
+if ( isset($options['v']) ) $options['verbose'] = $options['v'];
+
+if ( isset($options['V']) ) version();
+if ( isset($options['h']) ) usage();
+
+$verbose = LOG_INFO;
+if ( isset($options['verbose']) ) {
+	if ( preg_match('/^\d+$/', $options['verbose'] ) ) {
+		$verbose = $options['verbose'];
+	} else {
+		echo "Invalid value for verbose, must be positive integer\n";
+		exit(1);
+	}
+}
+
+if ( DEBUG & DEBUG_JUDGE ) {
+	$verbose = LOG_DEBUG;
+	putenv('DEBUG=1');
+}
+
+setup_database_connection();
+
+$cids = getCurContests();
+$cid = NULL;
+if ( count($cids)==1 ) $cid = reset($cids);
+if ( isset($options['cid']) ) {
+	$cid = $options['cid'];
+	if ( !preg_match('/^[0-9]+$/', $cid) ) {
+		$cid = $DB->q('MAYBEVALUE SELECT cid FROM contest
+		               WHERE shortname = %s', $options['cid']);
+		if ( empty($cid) ) {
+			error("Contest shortname '".$options['cid']."' not found.");
+		}
+	}
+}
+if ( $cid===NULL ) {
+	error("No contest ID specified and no unique active contest found.");
+}
+
+logmsg(LOG_NOTICE, "Eventdaemon started for cid=$cid [DOMjudge/".DOMJUDGE_VERSION."]");
+
+// If all startup is done, daemonize.
+if ( isset($options['daemon']) ) daemonize(PIDFILE);
+
+$initial_events_loaded = FALSE;
+
+$resturl = $restuser = $restpass = null;
+read_credentials();
+
+while ( TRUE ) {
+	$contests = getCurContests(TRUE, NULL, FALSE);
+
+	if ( !array_key_exists($cid, $contests) ) {
+		error("Contest ID '$cid' not found (anymore) in active contests.");
+	}
+	$contest = $contests[$cid];
+
+	if ( !$initial_events_loaded ) initialize_events($cid);
+
+	$fdata_old = @$fdata;
+	$fdata = calcFreezeData($contest);
+	if ( empty($fdata_old) ) $fdata_old = $fdata;
+
+	// Check for contest state changes:
+	if ( ($fdata_old['running']    !== $fdata['running']) ||
+	     ($fdata_old['showfrozen'] !== $fdata['showfrozen']) ||
+	     ($fdata_old['showfinal']  !== $fdata['showfinal']) ) {
+
+		logmsg(LOG_INFO, "Inserting contest update event.");
+		eventlog('contest', $cid, 'update', $cid);
+	}
+
+	// FIXME: generate contest state change events, ideally triggered
+	// by an alarm.
+	usleep(50000);
+}
+
+function initialize_events($cid)
+{
+	global $API_endpoints, $initial_events_loaded;
+
+	logmsg(LOG_NOTICE, "Initializing configuration events.");
+
+	foreach ( $API_endpoints as $endpoint => $ep_info ) {
+		if ( $ep_info['type']==='configuration' && isset($ep_info['url']) ) {
+
+			$json = request($ep_info['url']);
+			if ( !isset($json) ) error("No response data for endpoint '$endpoint'.");
+
+			$data = dj_json_decode($json);
+			if ( !is_array($data) ) error("Endpoint '$endpoint' did not return a JSON list.");
+
+			// Special case 'contest' since it is a single object:
+			if ( $endpoint==='contest' ) {
+				$row = $data;
+				logmsg(LOG_INFO, "Inserting $endpoint create event.");
+				eventlog($ep_info['table'], $row['id'], 'create', $cid,
+				         dj_json_encode($row));
+				continue;
+			}
+
+			logmsg(LOG_INFO, 'Inserting '.count($data)." $endpoint create event(s).");
+			foreach ( $data as $row ) {
+				eventlog($ep_info['table'], $row['id'], 'create', $cid,
+				         dj_json_encode($row));
+			}
+		}
+	}
+
+	$initial_events_loaded = TRUE;
+}
+
+/**
+ * This function is copied from judgedaemon.main.php and a quick hack.
+ * We should directly call the code that generates the API response.
+ */
+function read_credentials()
+{
+	global $resturl, $restuser, $restpass;
+
+	$credfile = ETCDIR . '/restapi.secret';
+	$credentials = @file($credfile);
+	if (!$credentials) {
+		error("Cannot read REST API credentials file " . $credfile);
+	}
+	foreach ($credentials as $credential) {
+		if ( $credential{0} == '#' ) continue;
+		list ($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
+		if ( $endpointID==='default' ) return;
+	}
+	$resturl = $restuser = $restpass = null;
+}
+
+/**
+ * Perform a request to the REST API and handle any errors.
+ * $url is the part appended to the base DOMjudge $resturl.
+ * $verb is the HTTP method to use: GET, POST, PUT, or DELETE
+ * $data is the urlencoded data passed as GET or POST parameters.
+ * When $failonerror is set to false, any error will be turned into a
+ * warning and null is returned.
+ *
+ * This function is duplicated from judge/judgedaemon.main.php.
+ */
+function request($url, $verb = 'GET', $data = '', $failonerror = true) {
+	global $resturl, $restuser, $restpass, $lastrequest;
+
+	logmsg(LOG_DEBUG, "API request $verb $url");
+
+	$url = $resturl . $url;
+	if ( $verb == 'GET' && !empty($data) ) {
+		$url .= '?' . $data;
+	}
+
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
+	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	if ( $verb == 'POST' ) {
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		if ( is_array($data) ) {
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
+		}
+	} else if ( $verb == 'PUT' || $verb == 'DELETE' ) {
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $verb);
+	}
+	if ( $verb == 'POST' || $verb == 'PUT' ) {
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+	}
+
+	$response = curl_exec($ch);
+	if ( $response === FALSE ) {
+		$errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($ch);
+		if ($failonerror) error($errstr);
+		else { warning($errstr); return null; }
+	}
+	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	if ( $status < 200 || $status >= 300 ) {
+		$errstr = "Error while executing curl $verb to url " . $url .
+		    ": http status code: " . $status . ", response: " . $response;
+		if ($failonerror) { error($errstr); }
+		else { warning($errstr); return null; }
+	}
+
+	curl_close($ch);
+	return $response;
+}

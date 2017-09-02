@@ -8,7 +8,8 @@ OBJECTS =
 
 SUBST_DOMSERVER = save_sources2file restore_sources2db static_scoreboard \
                   combined_scoreboard judging_statistics balloons \
-                  simulate_contest create_accounts multi_rejudge
+                  simulate_contest create_accounts multi_rejudge \
+                  eventdaemon
 
 SUBST_JUDGEHOST = create_cgroups dj_make_chroot
 
