@@ -14,9 +14,12 @@ use FOS\RestBundle\Controller\Annotations\Delete;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+
 use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Utils\Utils;
 
 /**
  * @Route("/api", defaults={ "_format" = "json" })
@@ -129,5 +132,63 @@ class APIController extends FOSRestController {
 		} else {
 			return NULL;
 		}
+	}
+
+	/**
+	 * @Get("/event-feed")
+	 */
+	public function getEventFeed() {
+		$em = $this->getDoctrine()->getManager();
+		$response = new StreamedResponse();
+		$response->headers->set('X-Accel-Buffering', 'no');
+		$response->setCallback(function () use ($em) {
+			$lastUpdate = 0;
+			$lastIdSent = -1;
+			while (TRUE) {
+				// FIXME: filter for contest
+				$q = $em->createQueryBuilder()
+					->from('DOMJudgeBundle:Event', 'e')
+					->select('e.eventid,e.eventtime,e.datatype,e.dataid,e.action,e.content')
+					->where('e.eventid > :lastIdSent')
+					->setParameter('lastIdSent', $lastIdSent)
+					->orderBy('e.eventid', 'ASC')
+					->getQuery();
+				$events = $q->getResult();
+				foreach ($events as $event) {
+					$data = json_decode(stream_get_contents($event['content']));
+					echo json_encode(array(
+						'event'     => $event['datatype'],
+						'event_id'  => $event['eventid'],
+						'data_id'   => $event['dataid'],
+						'timestamp' => $event['eventtime'],
+						'data'      => $data,
+						'action'    => $event['action'],
+					)) . "\n";
+					ob_flush();
+					flush();
+					$lastUpdate = time();
+					$lastIdSent = $event['eventid'];
+				}
+
+				if ( count($events) == 0 ) {
+					// No new events, check if it's time for a heart beat.
+					$now = time();
+					if ( $lastUpdate + 60 < $now ) {
+						# Sent heartbeat roughly every 60s. Guarantee according to spec is 120s.
+						$event = array(
+							'event' => 'heartbeat',
+							'timestamp' => Utils::absTime($now),
+						);
+						echo json_encode($event) . "\n";
+						ob_flush();
+						flush();
+						$lastUpdate = $now;
+					}
+					# Sleep for little while before checking for new events.
+					usleep(50000);
+				}
+			}
+		});
+		return $response;
 	}
 }
