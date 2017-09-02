@@ -150,7 +150,7 @@ CREATE TABLE `event` (
   `action` varchar(30) NOT NULL COMMENT 'Description of action performed',
   `content` longblob DEFAULT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed',
   PRIMARY KEY (`eventid`),
-  UNIQUE KEY (`eventtime`),
+  UNIQUE KEY `eventtime` (`cid`,`eventtime`),
   KEY `cid` (`cid`),
   KEY `datatype` (`datatype`(16)),
   CONSTRAINT `event_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE

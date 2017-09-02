@@ -4,16 +4,8 @@ ALTER TABLE `event`
   ADD COLUMN `action` varchar(30) NOT NULL COMMENT 'Description of action performed' AFTER `dataid`,
   ADD COLUMN `content` longblob DEFAULT NULL COMMENT 'Cached JSON encoded content of the change, as provided in the event feed' AFTER `action`,
   DROP PRIMARY KEY,
-  ADD PRIMARY KEY (`eventid`)
-  ADD KEY `datatype` (`datatype`);
-
--- Make sure primary key uses BTREE for more efficient lookup of ID ranges:
-ALTER TABLE `event`
-  MODIFY COLUMN `eventid` int(4) unsigned NOT NULL,
-  DROP PRIMARY KEY;
-ALTER TABLE `event`
-  ADD PRIMARY KEY (`eventid`) USING BTREE,
-  MODIFY COLUMN `eventid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID';
+  ADD PRIMARY KEY (`eventid`),
+  ADD KEY `datatype` (`datatype`(16));
 
 -- To make sure that all eventtimes are strictly increasing.
 -- FIXME: MySQL does not allow sub-queries on the same table in UPDATE.
@@ -31,7 +23,7 @@ UPDATE `event` SET `datatype` = 'judging', `dataid` = `judgingid`, `action` = 'u
   WHERE `description` = 'problem judged';
 
 ALTER TABLE `event`
-  ADD UNIQUE KEY `eventtime` (`eventtime`),
+  ADD UNIQUE KEY `eventtime` (`cid`,`eventtime`),
   DROP FOREIGN KEY `event_ibfk_2`,
   DROP FOREIGN KEY `event_ibfk_3`,
   DROP FOREIGN KEY `event_ibfk_4`,
