@@ -113,6 +113,7 @@ char  *rootdir;
 char  *stdoutfilename;
 char  *stderrfilename;
 char  *metafilename;
+char  *environment_variables;
 FILE  *metafile;
 
 char  *cgroupname;
@@ -179,6 +180,7 @@ struct option const long_opts[] = {
 	{"stderr",     required_argument, NULL,         'e'},
 	{"streamsize", required_argument, NULL,         's'},
 	{"environment",no_argument,       NULL,         'E'},
+	{"variable",   required_argument, NULL,         'V'},
 	{"outmeta",    required_argument, NULL,         'M'},
 	{"verbose",    no_argument,       NULL,         'v'},
 	{"quiet",      no_argument,       NULL,         'q'},
@@ -300,6 +302,7 @@ Run COMMAND with restrictions.\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
   -s, --streamsize=SIZE  truncate COMMAND stdout/stderr streams at SIZE kB\n\
   -E, --environment      preserve environment variables (default only PATH)\n\
+  -V, --variable         add additonal environment variables (in form KEY=VALUE;KEY2=VALUE2)\n\
   -M, --outmeta=FILE     write metadata (runtime, exitcode, etc.) to FILE\n");
 	printf("\
   -v, --verbose          display some extra warnings and information\n\
@@ -670,6 +673,16 @@ void setrestrictions()
 		if ( path!=NULL ) setenv("PATH",path,1);
 	}
 
+	/* Set additional environment variables. */
+	if (environment_variables != NULL) {
+		putenv(environment_variables);
+		char *token = strtok(environment_variables, ";");
+		while (token != NULL) {
+			putenv(token);
+			token = strtok(NULL, ";");
+		}
+	}
+
 	/* Set resource limits: must be root to raise hard limits.
 	   Note that limits can thus be raised from the systems defaults! */
 
@@ -828,7 +841,7 @@ int main(int argc, char **argv)
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:EM:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:EV:M:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -916,6 +929,9 @@ int main(int argc, char **argv)
 			break;
 		case 'E': /* environment option */
 			preserve_environment = 1;
+			break;
+		case 'V': /* set environment variable */
+			environment_variables = strdup(optarg);
 			break;
 		case 'M': /* outputmeta option */
 			outputmeta = 1;
