@@ -123,12 +123,16 @@ done
 
 logmsg $LOG_INFO "starting compile"
 
+if [ ! -z "$ENTRY_POINT" ]; then
+	ENVIRONMENT_VARS="-V ENTRY_POINT=$ENTRY_POINT"
+fi
+
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
 exitcode=0
 $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
 	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c -f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT \
-	-M "$WORKDIR/compile.meta" -- \
+	-M "$WORKDIR/compile.meta" $ENVIRONMENT_VARS -- \
 	"$COMPILE_SCRIPT" program "$MEMLIMIT" "$@" >"$WORKDIR/compile.tmp" 2>&1 || \
 	exitcode=$?
 

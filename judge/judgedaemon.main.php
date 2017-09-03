@@ -520,6 +520,9 @@ function judge($row)
 	putenv('MEMLIMIT='          . $row['memlimit']);
 	putenv('FILELIMIT='         . $row['outputlimit']);
 	putenv('PROCLIMIT='         . dbconfig_get_rest('process_limit'));
+	if ( $row['entry_point'] !== NULL ) {
+		putenv('ENTRY_POINT=' . $row['entry_point']);
+	}
 
 	// Query output storage limit (in database once for this judging.
 	$output_storage_limit = (int) dbconfig_get_rest('output_storage_limit', 50000);
