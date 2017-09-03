@@ -156,6 +156,10 @@ span.extra {
 	margin-bottom: 5px;
 }
 
+#username span.octicon {
+	line-height: 1.3;
+}
+
 fieldset {
 	margin: 2em;
 	padding: 1em;

@@ -439,7 +439,8 @@ function putClock() {
 			$displayname = "<abbr title=\"$username\">" . $userdata['name'] . "</abbr>";
 		}
 		echo "<div id=\"username\">logged in as " . $displayname
-			. ( have_logout() ? " <a href=\"../auth/logout.php\">×</a>" : "" )
+			. ( have_logout() ? ' <a href="../auth/logout.php">' .
+			    '<span class="octicon octicon-sign-out"></span></a>' : "" )
 			. "</div>";
 	}
 
