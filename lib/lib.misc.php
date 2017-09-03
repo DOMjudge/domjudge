@@ -972,7 +972,7 @@ function eventlog($datatype, $dataid, $action, $cid = null, $json = null)
 	foreach ( $cids as $cid ) {
 		$id = $DB->q('RETURNID INSERT INTO event (eventtime, cid, datatype, dataid, action' .
 		             ( isset($json) ? ', content' : '' ) . ')
-		              SELECT GREATEST(%s,eventtime+0.001), %i, %s, %i, %s' .
+		              SELECT GREATEST(%s,COALESCE(MAX(eventtime),0)+0.001), %i, %s, %i, %s' .
 		             ( isset($json) ? ', %s' : ' %_' ) . '
 		              FROM event WHERE cid = %i
 		              ORDER BY eventid DESC LIMIT 1',
@@ -985,10 +985,12 @@ function eventlog($datatype, $dataid, $action, $cid = null, $json = null)
 	}
 
 	if ( count($ids)!==count($cids) ) {
-		error("eventlog: failed to $action $datatype ID $id (".count($ids).'/'.count($cids).' contests done)');
+		error("eventlog: failed to $action $datatype ID $dataid " .
+		      '('.count($ids).'/'.count($cids).' contests done)');
 	}
 
-	logmsg(LOG_DEBUG,"eventlog: ${action}d $datatype ID $id for ".count($cids).' contest(s)');
+	logmsg(LOG_DEBUG,"eventlog: ${action}d $datatype ID $dataid " .
+	       'for '.count($cids).' contest(s)');
 }
 
 /**
