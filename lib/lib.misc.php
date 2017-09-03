@@ -853,7 +853,7 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null,
  *
  */
 $API_endpoints = array(
-	'contests' => array(
+	'contest' => array( // Note special case singular noun.
 		'url'  => '/',
 		'type' => 'configuration',
 	),
@@ -903,6 +903,11 @@ $API_endpoints = array(
 	'event-feed' => array(
 		'table' => 'event',
 		'type' => 'aggregate',
+	),
+	// From here are DOMjudge extensions:
+	'users' => array(
+		'url' => NULL,
+		'type' => 'configuration',
 	),
 );
 // Add defaults to mapping:
