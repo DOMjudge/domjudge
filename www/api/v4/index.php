@@ -719,7 +719,7 @@ function submissions($args)
 {
 	global $DB, $cdatas, $api;
 
-	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid
+	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid, entry_point
 	          FROM submission WHERE valid=1';
 
 	if ( isset($args['__primary_key']) ) {
@@ -780,6 +780,7 @@ function submissions($args)
 			'time'         => Utils::absTime($row['submittime']),
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
 			'contest_id'   => safe_int($row['cid']),
+			'entry_point'  => $row['entry_point'],
 			);
 	}
 	return $res;
