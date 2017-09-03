@@ -2,7 +2,7 @@ ALTER TABLE `event`
   ADD COLUMN `datatype` varchar(25) NOT NULL COMMENT 'Reference to DB table associated to this entry' AFTER `cid`,
   ADD COLUMN `dataid` varchar(50) NOT NULL COMMENT 'Identifier in reference table' AFTER `datatype`,
   ADD COLUMN `action` varchar(30) NOT NULL COMMENT 'Description of action performed' AFTER `dataid`,
-  ADD COLUMN `content` longblob DEFAULT NULL COMMENT 'Cached JSON encoded content of the change, as provided in the event feed' AFTER `action`,
+  ADD COLUMN `content` longblob NOT NULL COMMENT 'Cached JSON encoded content of the change, as provided in the event feed' AFTER `action`,
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`eventid`),
   ADD KEY `datatype` (`datatype`(16));
@@ -15,11 +15,11 @@ ALTER TABLE `event`
 --    WHERE last.eventid < curr.eventid
 --    ORDER BY last.eventid DESC LIMIT 1 );
 
-UPDATE `event` SET `datatype` = 'clarification', `dataid` = `clarid`, `action` = 'create'
+UPDATE `event` SET `datatype` = 'clarification', `dataid` = `clarid`, `action` = 'create', `content` = 'null'
   WHERE `description` = 'clarification';
-UPDATE `event` SET `datatype` = 'submission', `dataid` = `submitid`, `action` = 'create'
+UPDATE `event` SET `datatype` = 'submission', `dataid` = `submitid`, `action` = 'create', `content` = 'null'
   WHERE `description` = 'problem submitted';
-UPDATE `event` SET `datatype` = 'judging', `dataid` = `judgingid`, `action` = 'update'
+UPDATE `event` SET `datatype` = 'judging', `dataid` = `judgingid`, `action` = 'update', `content` = 'null'
   WHERE `description` = 'problem judged';
 
 ALTER TABLE `event`
