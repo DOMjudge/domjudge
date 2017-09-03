@@ -121,7 +121,9 @@ function calcFreezeData($cdata)
 		return array(
 			'showfinal' => false,
 			'showfrozen' => false,
-			'started' => false
+			'started' => false,
+			'stopped' => false,
+			'running' => false,
 		);
 	}
 
@@ -139,6 +141,8 @@ function calcFreezeData($cdata)
 	              difftime($cdata['freezetime'],$now) <= 0;
 	// contest is active but has not yet started
 	$fdata['started'] = difftime($cdata['starttime'],$now) <= 0;
+	$fdata['stopped'] = difftime($cdata['endtime'],$now) <= 0;
+	$fdata['running'] = ( $fdata['started'] && !$fdata['stopped'] );
 
 	return $fdata;
 }
