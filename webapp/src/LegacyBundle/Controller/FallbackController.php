@@ -65,6 +65,8 @@ class FallbackController extends Controller
 			chdir(dirname($thefile));
 		}
 		ob_start();
+		global $symfony;
+		$symfony = $this->container;
 		require($thefile);
 		$headers = headers_list();
 		header_remove();
