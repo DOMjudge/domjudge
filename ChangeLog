@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 6.0.0 - DEV
 -------------------
+ - Fix runguard bug when stdout/stderr are not redirected to file.
 
 Version 5.2.0 - DEV
 -------------------

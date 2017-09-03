@@ -783,6 +783,7 @@ int main(int argc, char **argv)
 	size_t data_passed[3];
 	ssize_t nread;
 	size_t to_read;
+	int use_splice;
 	char str[256];
 
 	struct itimerval itimer;
@@ -1122,6 +1123,11 @@ int main(int argc, char **argv)
 		   Initialize status here to quelch clang++ warning about
 		   uninitialized value; it is set by the wait() call. */
 		status = 0;
+		/* We start using splice() to copy data from child to parent
+		   I/O file descriptors. If that fails (not all I/O
+		   source - dest combinations support it), then we revert to
+		   using read()/write(). */
+		use_splice = 1;
 		while ( 1 ) {
 
 			FD_ZERO(&readfds);
@@ -1156,10 +1162,26 @@ int main(int argc, char **argv)
 						if (limit_streamsize) {
 							to_read = min(BUF_SIZE, streamsize-data_passed[i]);
 						}
-						nread = splice(child_pipefd[i][PIPE_OUT], NULL,
-									   child_redirfd[i], NULL,
-									   to_read, SPLICE_F_MOVE);
-						data_passed[i] += nread;
+
+						if ( use_splice ) {
+							nread = splice(child_pipefd[i][PIPE_OUT], NULL,
+							               child_redirfd[i], NULL,
+							               to_read, SPLICE_F_MOVE);
+
+							if ( nread==-1 && errno==EINVAL ) {
+								use_splice = 0;
+								verbose("splice failed, switching to read/write");
+								/* Setting errno here to repeat the copy. */
+								errno = EAGAIN;
+							}
+						} else {
+							nread = read(child_pipefd[i][PIPE_OUT], buf, to_read);
+							if ( nread>0 ) {
+								nread = write(child_redirfd[i], buf, nread);
+							}
+						}
+
+						if ( nread>0 ) data_passed[i] += nread;
 
 						/* print message if we're at the streamsize limit */
 						if (limit_streamsize && data_passed[i] == streamsize) {
