@@ -269,10 +269,8 @@ coverity-conf:
 	$(MAKE) maintainer-conf
 
 coverity-build: paths.mk
-# First rename some files to keep Coverity scan happy:
-	for i in tests/test-compile-error.* lib/vendor/symfony/symfony/src/Symfony/Component/PropertyInfo/Tests/Fixtures/Php71Dummy.php ; do \
-		mv $$i $$i-coverity-renamed ; \
-	done
+# First delete some files to keep Coverity scan happy:
+	-rm -f tests/test-compile-error.*
 	$(MAKE) build build-scripts
 	@VERSION=` grep '^VERSION ='   paths.mk | sed 's/^VERSION = *//'` ; \
 	PUBLISHED=`grep '^PUBLISHED =' paths.mk | sed 's/^PUBLISHED = *//'` ; \
@@ -281,9 +279,6 @@ coverity-build: paths.mk
 	elif [ ! -d .git ];             then DESC="unknown source on `date`" ; fi ; \
 	echo "VERSION=$$VERSION" > cov-submit-data-version.sh ; \
 	if [ -n "$$DESC" ]; then echo "DESC=$$DESC" >> cov-submit-data-version.sh ; fi
-	for i in `find . -name \*-coverity-renamed` ; do \
-		mv $$i $${i%-coverity-renamed} ; \
-	done
 
 clean-l:
 # Remove Coverity scan data:
