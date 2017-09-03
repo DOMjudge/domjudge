@@ -633,7 +633,7 @@ function daemonize($pidfile = NULL)
  * validates it and puts it into the database. Additionally it
  * moves it to a backup storage.
  */
-function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $origsubmitid = NULL)
+function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $origsubmitid = NULL, $entry_point = NULL)
 {
 	global $DB;
 
@@ -719,9 +719,9 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	// Insert submission into the database
 	$DB->q('START TRANSACTION');
 	$id = $DB->q('RETURNID INSERT INTO submission
-	              (cid, teamid, probid, langid, submittime, origsubmitid)
-	              VALUES (%i, %i, %i, %s, %s, %i)',
-	             $contest, $teamid, $probid, $langid, $now, $origsubmitid);
+	              (cid, teamid, probid, langid, submittime, origsubmitid, entry_point)
+	              VALUES (%i, %i, %i, %s, %s, %i, %s)',
+	             $contest, $teamid, $probid, $langid, $now, $origsubmitid, $entry_point);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file

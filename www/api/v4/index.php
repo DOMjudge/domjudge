@@ -839,7 +839,8 @@ function submissions_POST($args)
 		}
 	}
 
-	$sid = submit_solution($userdata['teamid'], $probid, $cid, $args['langid'], $FILEPATHS, $FILENAMES);
+	$entry_point = isset($args['entry_point']) ? $args['entry_point'] : NULL;
+	$sid = submit_solution($userdata['teamid'], $probid, $cid, $args['langid'], $FILEPATHS, $FILENAMES, NULL, $entry_point);
 
 	auditlog('submission', $sid, 'added', 'via api', null, $cid);
 
@@ -849,7 +850,9 @@ function submissions_POST($args)
 $args = array('code[]' => 'Array of source files to submit',
               'shortname' => 'Problem shortname',
               'langid' => 'Language ID',
-              'contest' => 'Contest short name. Required if more than one contest is active');
+	      'contest' => 'Contest short name. Required if more than one contest is active',
+	      'entry_point' => 'Optional entry point, e.g. Java main class.',
+);
 $doc = 'Post a new submission. You need to be authenticated with a team role. Returns the submission id. This is used by the submit client.
 
 A trivial command line submisson using the curl binary could look like this:
