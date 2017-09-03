@@ -85,6 +85,12 @@ class Submission
 	private $expected_results;
 
 	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="entry_point", length=255, options={"comment"="Optional entry point. Can be used e.g. for java main class.", "collation"="utf8mb4_bin"}, nullable=true)
+	 */
+	private $entry_point;
+
+	/**
 	 * @ORM\ManyToOne(targetEntity="Contest", inversedBy="submissions")
 	 * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
 	 */
@@ -371,6 +377,30 @@ class Submission
 	public function getExpectedResults()
 	{
 		return $this->expected_results;
+	}
+
+	/**
+	 * Set entry_point
+	 *
+	 * @param string $entryPoint
+	 *
+	 * @return Submission
+	 */
+	public function setEntryPoint($entryPoint)
+	{
+		$this->entry_point = $entryPoint;
+
+		return $this;
+	}
+
+	/**
+	 * Get entry_point
+	 *
+	 * @return string
+	 */
+	public function getEntryPoint()
+	{
+		return $this->entry_point;
 	}
 
 	/**
