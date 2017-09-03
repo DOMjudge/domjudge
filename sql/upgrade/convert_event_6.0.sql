@@ -1,11 +1,13 @@
 ALTER TABLE `event`
-  ADD COLUMN `datatype` varchar(25) NOT NULL COMMENT 'Reference to DB table associated to this entry' AFTER `cid`,
-  ADD COLUMN `dataid` varchar(50) NOT NULL COMMENT 'Identifier in reference table' AFTER `datatype`,
+  ADD COLUMN `endpointtype` varchar(25) NOT NULL COMMENT 'API endpoint associated to this entry' AFTER `cid`,
+  ADD COLUMN `endpointid` varchar(50) NOT NULL COMMENT 'API endpoint (external) ID' AFTER `endpointtype`,
+  ADD COLUMN `datatype` varchar(25) DEFAULT NULL COMMENT 'DB table associated to this entry' AFTER `endpointid`,
+  ADD COLUMN `dataid` varchar(50) DEFAULT NULL COMMENT 'Identifier in reference DB table' AFTER `datatype`,
   ADD COLUMN `action` varchar(30) NOT NULL COMMENT 'Description of action performed' AFTER `dataid`,
   ADD COLUMN `content` longblob NOT NULL COMMENT 'Cached JSON encoded content of the change, as provided in the event feed' AFTER `action`,
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`eventid`),
-  ADD KEY `datatype` (`datatype`(16));
+  ADD KEY `eventtime` (`cid`,`eventtime`);
 
 -- To make sure that all eventtimes are strictly increasing.
 -- FIXME: MySQL does not allow sub-queries on the same table in UPDATE.

@@ -847,67 +847,84 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null,
 }
 
 /* Mapping from REST API endpoints to relevant information:
- * - url: REST API URL of endpoint relative to baseurl, defaults to '/<endpoint>'
  * - type: one of 'configuration', 'live', 'aggregate'
+ * - url: REST API URL of endpoint relative to baseurl, defaults to '/<endpoint>'
  * - table: database table associated to data, defaults to <endpoint> without 's'
+ * - extid: database field for external/API ID, if TRUE same as internal/DB ID.
  *
  */
 $API_endpoints = array(
 	'contest' => array( // Note special case singular noun.
-		'url'  => '/',
-		'type' => 'configuration',
+		'type'  => 'configuration',
+		'url'   => '/',
+		'extid' => 'shortname',
 	),
 	'clarifications' => array(
-		'type' => 'live',
+		'type'  => 'live',
+		'extid' => TRUE,
 	),
 	'languages' => array(
-		'type' => 'configuration',
+		'type'  => 'configuration',
+		'extid' => TRUE, // FIXME
 	),
 	'problems' => array(
-		'type' => 'configuration',
+		'type'  => 'configuration',
+		'extid' => TRUE, // FIXME
 	),
 	'teams' => array(
-		'type' => 'configuration',
+		'type'  => 'configuration',
+		'extid' => TRUE, // 'externalid'
 	),
 	'organizations' => array(
-		'table' => 'team_affiliation',
 		'type'  => 'configuration',
+		'table' => 'team_affiliation',
+		'extid' => 'shortname', // 'externalid'
 	),
 	'groups' => array(
-		'table' => 'team_category',
 		'type'  => 'configuration',
+		'table' => 'team_category',
+		'extid' => TRUE, // FIXME
 	),
 	'submissions' => array(
-		'type' => 'live',
+		'type'  => 'live',
+		'extid' => TRUE, // FIXME: 'externalid' in ICPC-live branch
 	),
-	'judgement-types' => array(
+	'judgement-types' => array( // hardcoded in $VERDICTS and the API
+		'type'  => 'configuration',
 		'table' => NULL,
-		'type' => 'configuration',
 	),
 	'judgements' => array(
+		'type'  => 'live',
 		'table' => 'judging',
-		'type' => 'live',
+		'extid' => TRUE,
 	),
 	'runs' => array(
+		'type'  => 'live',
 		'table' => 'judging_run',
-		'type' => 'live',
+		'extid' => TRUE,
 	),
 	'awards' => array(
+		'type'  => 'aggregate',
 		'table' => NULL,
-		'type' => 'aggregate',
 	),
 	'scoreboard' => array(
+		'type'  => 'aggregate',
 		'table' => NULL,
-		'type' => 'aggregate',
 	),
 	'event-feed' => array(
+		'type'  => 'aggregate',
 		'table' => 'event',
-		'type' => 'aggregate',
 	),
 	// From here are DOMjudge extensions:
 	'users' => array(
-		'url' => NULL,
-		'type' => 'configuration',
+		'type'  => 'configuration',
+		'url'   => NULL,
+		'extid' => TRUE,
+	),
+	'testcases' => array(
+		'type'  => 'configuration',
+		'url'   => NULL,
+		'extid' => TRUE,
 	),
 );
 // Add defaults to mapping:
@@ -924,24 +941,39 @@ foreach ( $API_endpoints as $endpoint => $data ) {
  * Log an event.
  *
  * Arguments:
- * $datatype    One of the table names from $datatypes below.
- * $dataid      Identifier of the element in the table $datatype.
- * $action      One of: create, update, delete.
- * $cid         Contest ID to log this event for. If null, log it for
- *              all currently active contests.
- * $json        JSON content after the change. Generated if null.
+ * $type      Either an API endpoint or a DB table.
+ * $dataid    Identifier of the row in the associated DB table.
+ * $action    One of: create, update, delete.
+ * $cid       Contest ID to log this event for. If null, log it for
+ *            all currently active contests.
+ * $json      JSON content after the change. Generated if null.
+ * $id        Identifier as shown in the REST API. If null it is
+ *            inferred from the content in the database or $json
+ *            passed as argument. Must be specified when deleting an
+ *            entry or if no DB table is associated to $type.
  */
 // TODO: we should probably integrate this function with auditlog().
-function eventlog($datatype, $dataid, $action, $cid = null, $json = null)
+function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null)
 {
-	global $DB, $API_endpoints;
+	global $DB, $API_endpoints, $KEYS;
 
 	$actions = array('create', 'update', 'delete');
 
 	// Gracefully fail since we may call this from the generic
 	// jury/edit.php page where we don't know which table gets updated.
-	if ( !in_array($datatype,array_column($API_endpoints,'table')) ) {
-		logmsg(LOG_WARNING, "eventlog: invalid datatype '$datatype' specified");
+	if ( array_key_exists($type,$API_endpoints) ) {
+		$endpoint = $API_endpoints[$type];
+	} else {
+		foreach ( $API_endpoints as $key => $val ) {
+			if ( $type===$val['table'] ) {
+				$type = $key;
+				$endpoint = $API_endpoints[$type];
+				break;
+			}
+		}
+	}
+	if ( !isset($endpoint) ) {
+		logmsg(LOG_WARNING, "eventlog: invalid endpoint '$type' specified");
 		return;
 	}
 	if ( !in_array($action,$actions) ) {
@@ -949,12 +981,50 @@ function eventlog($datatype, $dataid, $action, $cid = null, $json = null)
 		return;
 	}
 
+	// Look up external/API ID from various sources.
+
+	// First check if it can be taken equal to internal ID:
+	if ( $id===null && @$endpoint['extid']===true ) $id = $dataid;
+
+	// Next try a DB lookup for another field:
+	if ( $id===null && !empty($endpoint['extid']) && $action!=='delete' ) {
+		if ( $endpoint['table']===null ) {
+			error("eventlog: DB table required for API ID lookup of '$type'");
+		}
+
+		$id = $DB->q('MAYBEVALUE SELECT `' . $endpoint['extid'] . '`
+		              FROM `' . $endpoint['table'] . '`
+		              WHERE `' . $KEYS[$endpoint['table']][0] . '` = %s',
+		             $dataid);
+
+		if ( empty($id) ) {
+			// TODO: fall back to internal ID?
+			error("eventlog: no external/API ID found for $endpoint[table] ID $dataid");
+		}
+	}
+
+	// Finally try the specified JSON data:
+	if ( $id===null && $json!==null ) {
+		$data = dj_json_decode($json);
+		if ( !empty($data['id']) ) $id = $data['id'];
+	}
+
+	if ( $id===null ) error('eventlog: API ID not specified or inferred from data');
+
 	$cids = array();
 	if ( $cid!==null ) {
 		$cids[] = $cid;
 	} else {
 		// Here we should take into account dependence between cid and team/problem
 		$cids = getCurContests();
+	}
+
+	// Generate JSON content if not set, always use "null" for deletes.
+	if ( $action === 'delete' ) {
+		$json = 'null';
+	} elseif ( $json === null ) {
+		// TODO:
+		$json = dj_json_encode(array('id' => $id));
 	}
 
 	// First acquire an advisory lock to prevent other event logging,
@@ -970,14 +1040,17 @@ function eventlog($datatype, $dataid, $action, $cid = null, $json = null)
 	// TODO: can this be wrapped into a single query?
 	$ids = array();
 	foreach ( $cids as $cid ) {
-		$id = $DB->q('RETURNID INSERT INTO event (eventtime, cid, datatype, dataid, action' .
-		             ( isset($json) ? ', content' : '' ) . ')
-		              SELECT GREATEST(%s,COALESCE(MAX(eventtime),0)+0.001), %i, %s, %i, %s' .
-		             ( isset($json) ? ', %s' : ' %_' ) . '
-		              FROM event WHERE cid = %i
-		              ORDER BY eventid DESC LIMIT 1',
-		             $now, $cid, $datatype, $dataid, $action, $json, $cid);
-		$ids[] = $id;
+		$eventid = $DB->q('RETURNID INSERT INTO event
+		                   (eventtime, cid, endpointtype, endpointid,
+		                   datatype, dataid, action, content)
+		                   SELECT GREATEST(%s,COALESCE(MAX(eventtime),0)+0.001), %i, %s, %s,
+		                          %s, %s, %s, %s
+		                   FROM event WHERE cid = %i
+		                   ORDER BY eventid DESC LIMIT 1',
+		                  $now, $cid, $type, $id,
+		                  $endpoint['table'], $dataid, $action, $json,
+		                  $cid);
+		$ids[] = $eventid;
 	}
 
 	if ( $DB->q("VALUE SELECT RELEASE_LOCK('domjudge.eventlog')") != 1 ) {
@@ -985,11 +1058,11 @@ function eventlog($datatype, $dataid, $action, $cid = null, $json = null)
 	}
 
 	if ( count($ids)!==count($cids) ) {
-		error("eventlog: failed to $action $datatype ID $dataid " .
+		error("eventlog: failed to $action $type ID $id " .
 		      '('.count($ids).'/'.count($cids).' contests done)');
 	}
 
-	logmsg(LOG_DEBUG,"eventlog: ${action}d $datatype ID $dataid " .
+	logmsg(LOG_DEBUG,"eventlog: ${action}d $type ID $id " .
 	       'for '.count($cids).' contest(s)');
 }
 

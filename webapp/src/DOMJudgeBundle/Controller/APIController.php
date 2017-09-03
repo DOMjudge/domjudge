@@ -146,7 +146,7 @@ class APIController extends FOSRestController {
 				// FIXME: filter for contest
 				$q = $em->createQueryBuilder()
 					->from('DOMJudgeBundle:Event', 'e')
-					->select('e.eventid,e.eventtime,e.datatype,e.dataid,e.action,e.content')
+					->select('e.eventid,e.eventtime,e.endpointtype,e.endpointid,e.datatype,e.dataid,e.action,e.content')
 					->where('e.eventid > :lastIdSent')
 					->setParameter('lastIdSent', $lastIdSent)
 					->orderBy('e.eventid', 'ASC')
@@ -155,9 +155,9 @@ class APIController extends FOSRestController {
 				foreach ($events as $event) {
 					$data = json_decode(stream_get_contents($event['content']));
 					echo json_encode(array(
-						'event'     => $event['datatype'],
+						'event'     => $event['endpointtype'],
 						'event_id'  => $event['eventid'],
-						'data_id'   => $event['dataid'],
+						'data_id'   => $event['endpointid'],
 						'timestamp' => Utils::absTime($event['eventtime']),
 						'data'      => $data,
 						'action'    => $event['action'],

@@ -145,14 +145,15 @@ CREATE TABLE `event` (
   `eventid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `eventtime` decimal(32,9) unsigned NOT NULL COMMENT 'When the event occurred',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `datatype` varchar(25) NOT NULL COMMENT 'Reference to DB table associated to this entry',
-  `dataid` varchar(50) NOT NULL COMMENT 'Identifier in reference table',
+  `endpointtype` varchar(25) NOT NULL COMMENT 'API endpoint associated to this entry',
+  `endpointid` varchar(50) NOT NULL COMMENT 'API endpoint (external) ID',
+  `datatype` varchar(25) DEFAULT NULL COMMENT 'DB table associated to this entry',
+  `dataid` varchar(50) DEFAULT NULL COMMENT 'Identifier in reference DB table',
   `action` varchar(30) NOT NULL COMMENT 'Description of action performed',
   `content` longblob NOT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed',
   PRIMARY KEY (`eventid`),
-  UNIQUE KEY `eventtime` (`cid`,`eventtime`),
+  KEY `eventtime` (`cid`,`eventtime`),
   KEY `cid` (`cid`),
-  KEY `datatype` (`datatype`(16)),
   CONSTRAINT `event_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of all events during a contest';
 

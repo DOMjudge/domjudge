@@ -31,14 +31,28 @@ class Event
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="datatype", type="string", length=25, nullable=false)
+	 * @ORM\Column(name="endpointtype", type="string", length=25, nullable=false)
+	 */
+	private $endpointtype;
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="endpointid", type="string", length=50, nullable=false)
+	 */
+	private $endpointid;
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="datatype", type="string", length=25, nullable=true)
 	 */
 	private $datatype;
 
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="dataid", type="string", length=50, nullable=false)
+	 * @ORM\Column(name="dataid", type="string", length=50, nullable=true)
 	 */
 	private $dataid;
 
