@@ -24,9 +24,4 @@ require_once(LIBWWWDIR . '/restapi.php');
 $cdatas = getCurContests(TRUE, -1);
 $cids = array_keys($cdatas);
 
-if ( ! logged_in() &&
-     isset($_SERVER['PHP_AUTH_USER']) &&
-     isset($_SERVER['PHP_AUTH_PW']) ) {
-	do_login_native($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
-	$userdata['roles'] = get_user_roles($userdata['userid']);
-}
+logged_in();
