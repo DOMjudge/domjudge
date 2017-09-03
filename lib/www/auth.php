@@ -30,18 +30,16 @@ $userdata = NULL;
 // Check if current user has given role, or has superset of this role's
 // privileges
 function checkrole($rolename, $check_superset = TRUE) {
-	global $userdata;
-	if ( empty($userdata) || !array_key_exists('roles', $userdata) ) {
-		return false;
-	}
-	if ( in_array($rolename, $userdata['roles']) ) return true;
-	if ( $check_superset ) {
-		if ( in_array('admin', $userdata['roles']) &&
-		     ($rolename!='team' || $userdata['teamid']!=NULL) ) {
-			return true;
-		}
-	}
-	return false;
+    global $userdata;
+    global $symfony;
+    if ($check_superset) {
+        if ($symfony->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+            if ($rolename != 'team' || $userdata['teamid'] != NULL) {
+                return true;
+            }
+        }
+    }
+    return $symfony->get('security.authorization_checker')->isGranted('ROLE_'.strtoupper($rolename));
 }
 
 // Returns whether the connected user is logged in, sets $username, $teamdata
