@@ -2,15 +2,15 @@
   <div id="menutop">
     <a href="index.php" accesskey="h"><span class="octicon octicon-home"></span> home</a>
 
-    {% if checkrole('balloon') %}
+    {% if is_granted('ROLE_BALLOON') %}
       <a href="balloons.php" accesskey="b"><span class="octicon octicon-location"></span> balloons</a>
     {% endif %}
 
-    {% if checkrole('jury') %}
+    {% if is_granted('ROLE_JURY') %}
       <a href="problems.php" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
     {% endif %}
 
-    {% if IS_ADMIN %}
+    {% if is_granted('ROLE_ADMIN') %}
     	{% if updates['judgehosts']|length > 0 %}
         <a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts ({{ updates['judgehosts']|length }} down)</a>
       {% else %}
@@ -22,7 +22,7 @@
       {% endif %}
     {% endif %}
 
-    {% if checkrole('jury') %}
+    {% if is_granted('ROLE_JURY') %}
       <a href="teams.php" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>
       <a href="users.php" accesskey="u"><span class="octicon octicon-person"></span> users</a>
       {% if updates['clarifications']|length > 0 %}
@@ -43,10 +43,10 @@
     {% if have_printing %}
       <a href="print.php" accesskey="p"><span class="octicon octicon-file-text"></span> print</a>
     {% endif %}
-    {% if checkrole('jury') %}
+    {% if is_granted('ROLE_JURY') %}
       <a href="scoreboard.php" accesskey="b"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
     {% endif %}
-    {% if checkrole('team') %}
+    {% if is_granted('ROLE_TEAM') %}
     	<a target="_top" href="../team/" accesskey="t"><span class="octicon octicon-arrow-right"></span> team</a>
     {% endif %}
   </div>
@@ -63,11 +63,20 @@
         {% endif %}
       </span>
 
-      {% if IS_JURY or contests|length > 1 %}
+      {% if is_granted('ROLE_JURY') or contests|length > 1 %}
         <div id="selectcontest">
-          <form>
+          {# TODO: see about using a proper symfony form here #}
+          <form id="selectcontestform" action="{{path('legacy.jury_change_contest')}}">
+              <label for="cid">contest:</label>
+              <select name="cid" id="cid">
+                  {% if is_granted('ROLE_JURY') %}
+                  <option value="-1">- No contest</option>
+                  {% endif %}
+                  {% for c in contests %}
+                  <option value="{{c.cid}}" {% if c == contest %}selected="selected"{% endif %}>{{c.shortname}}</option>
+                  {% endfor %}
+              </select>
           </form>
-          <!-- TODO: change_contest form here -->
           <script type="text/javascript">
   		      document.getElementById('cid').addEventListener('change', function() {
       		      document.getElementById('selectcontestform').submit();
@@ -76,19 +85,16 @@
         </div>
       {% endif %}
 
-      {# TODO: this needs to be figured out #}
-      {% if true or logged_in %}
-
+      {# Render user information + logout button #}
+      {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <div id="username">logged in as
           {% if app.user and app.user.getName() %}
             <abbr title="{{ app.user.getUsername() }}">{{ app.user.getName() }}</abbr>
           {% else %}
-            TODO:FIXME
-            {# {{ app.user.getUsername() }} #}
+            {{ app.user.getUsername() }}
           {% endif %}
 
-          <a href="{{path('legacy.logout')}}">×</a>
-
+          <a href="{{path('legacy.logout')}}"><span class="octicon octicon-sign-out"></span></a>
         </div>
       {% endif %}
     </div>
