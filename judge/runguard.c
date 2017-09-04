@@ -675,7 +675,6 @@ void setrestrictions()
 
 	/* Set additional environment variables. */
 	if (environment_variables != NULL) {
-		putenv(environment_variables);
 		char *token = strtok(environment_variables, ";");
 		while (token != NULL) {
 			putenv(token);
