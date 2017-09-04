@@ -7,6 +7,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use DOMJudgeBundle\Entity\Team;
 
+/**
+ *@Route("/jury")
+ */
 class TeamController extends Controller
 {
 	/**

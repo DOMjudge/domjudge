@@ -82,7 +82,9 @@ class DOMJudgeService {
 	}
 
 	public function checkrole($rolename, $check_superset = TRUE) {
-		$user = $user = $this->container->get('security.token_storage')->getToken()->getUser();
+		$token = $this->container->get('security.token_storage')->getToken();
+		if ($token == null) return false;
+		$user =$token->getUser();
 
 		$authchecker = $this->container->get('security.authorization_checker');
 		if ($check_superset) {

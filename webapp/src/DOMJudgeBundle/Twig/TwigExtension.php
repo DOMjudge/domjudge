@@ -27,10 +27,9 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
 		// TODO: populate these values properly
 		// They're used by the header template
 		return array(
+			// TODO: this should take into account what contest the user selected
 			'contest' => $this->domjudge->getCurrentContest(),
 			'contests' => $this->domjudge->getCurrentContests(),
-			'IS_ADMIN' => true,
-			'IS_JURY' => true,
 			'have_printing' => false,
 			'updates' => array(
 				'judgehosts' => array(),
