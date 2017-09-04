@@ -3,14 +3,17 @@ namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 
 
 class DOMJudgeService {
 	protected $em;
 	protected $request;
-	public function __construct(EntityManager $em, RequestStack $requestStack) {
+	protected $container;
+	public function __construct(EntityManager $em, RequestStack $requestStack, Container $container) {
 		$this->em = $em;
 		$this->request = $requestStack->getCurrentRequest();
+		$this->container = $container;
 	}
 
 	public function getCurrentContest() {
@@ -76,6 +79,19 @@ class DOMJudgeService {
 
 		$contests = $qb->getQuery()->getResult();
 		return $contests;
+	}
+
+	public function checkrole($rolename, $check_superset = TRUE) {
+		$user = $user = $this->container->get('security.token_storage')->getToken()->getUser();
+
+		$authchecker = $this->container->get('security.authorization_checker');
+		if ($check_superset) {
+			if ($authchecker->isGranted('ROLE_ADMIN') ||
+				($rolename == 'team' && $user->getTeam() != NULL)) {
+					return true;
+			}
+		}
+		return $authchecker->isGranted('ROLE_'.strtoupper($rolename));
 	}
 
 }

@@ -65,8 +65,8 @@ class FallbackController extends Controller
 			chdir(dirname($thefile));
 		}
 		ob_start();
-		global $symfony;
-		$symfony = $this->container;
+		global $G_SYMFONY;
+		$G_SYMFONY = $this->container->get('domjudge.domjudge');
 		require($thefile);
 		$headers = headers_list();
 		header_remove();

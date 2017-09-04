@@ -1,7 +1,7 @@
 services:
   domjudge.domjudge:
     class: DOMJudgeBundle\Service\DOMJudgeService
-    arguments: [ "@doctrine.orm.entity_manager", '@request_stack' ]
+    arguments: [ "@doctrine.orm.entity_manager", '@request_stack', '@service_container' ]
 
   domjudge.twigextension:
     class: DOMJudgeBundle\Twig\TwigExtension

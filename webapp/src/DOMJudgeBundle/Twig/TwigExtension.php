@@ -66,7 +66,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
 
 	// TODO: this should return the correct value!
 	public function checkrole($role) {
-		return true;
+		return $this->domjudge->checkrole($role);
 	}
 
 }
