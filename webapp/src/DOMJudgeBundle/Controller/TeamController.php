@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use DOMJudgeBundle\Entity\Team;
 
 /**
- *@Route("/jury")
+ *@Route("/jury-v2")
  */
 class TeamController extends Controller
 {
