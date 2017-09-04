@@ -2,6 +2,7 @@
 # http://symfony.com/doc/current/security.html
 security:
     role_hierarchy:
+        ROLE_JURY: [ROLE_BALLOON, ROLE_API]
         ROLE_ADMIN: [ROLE_JURY, ROLE_API]
         ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
