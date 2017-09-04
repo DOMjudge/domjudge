@@ -69,7 +69,7 @@ class User implements UserInterface, \Serializable
 	/**
 	 * @var int
 	 *
-	 * @ORM\Column(type="integer", name="teamid", options={"comment"="Team associated with"}, nullable=false)
+	 * @ORM\Column(type="integer", name="teamid", options={"comment"="Team associated with"}, nullable=true)
 	 */
 	private $teamid;
 
