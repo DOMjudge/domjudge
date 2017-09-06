@@ -151,16 +151,6 @@ function send_print($filename, $origname = null, $language = null)
 	if ( isset($language) && array_key_exists($language,$lang_remap) ) {
 		$language = $lang_remap[$language];
 	}
-	switch ($language) {
-	case 'csharp': $language = 'c'; break;
-	case 'hs': $language = 'haskell'; break;
-	case 'pas': $language = 'pascal'; break;
-	case 'pl': $language = 'perl'; break;
-	case 'py':
-	case 'py2':
-	case 'py3':
-		$language = 'python'; break;
-	}
 	$highlight = "";
 	if ( ! empty($language) ) {
 		$highlight = "-E" . escapeshellarg($language);
