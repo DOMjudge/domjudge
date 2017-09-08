@@ -380,7 +380,7 @@ function do_login_oidc() {
 	if (dbconfig_get('allow_openid_auth', false) == false) {
 		error("OpenID authentication disabled by administrator.");
 	}
-	if (empty(BASEURL)) {
+	if ( !defined('BASEURL') || BASEURL=='' ) {
 		error("OpenID authentication requires that 'BASEURL' be configured.");
 	}
 
