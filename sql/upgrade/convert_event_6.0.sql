@@ -1,10 +1,10 @@
 -- Create new event table columns:
 ALTER TABLE `event`
-  ADD COLUMN `endpointtype` varchar(25) NOT NULL COMMENT 'API endpoint associated to this entry' AFTER `cid`,
-  ADD COLUMN `endpointid` varchar(50) NOT NULL COMMENT 'API endpoint (external) ID' AFTER `endpointtype`,
-  ADD COLUMN `datatype` varchar(25) DEFAULT NULL COMMENT 'DB table associated to this entry' AFTER `endpointid`,
-  ADD COLUMN `dataid` varchar(50) DEFAULT NULL COMMENT 'Identifier in reference DB table' AFTER `datatype`,
-  ADD COLUMN `action` varchar(30) NOT NULL COMMENT 'Description of action performed' AFTER `dataid`,
+  ADD COLUMN `endpointtype` varchar(32) NOT NULL COMMENT 'API endpoint associated to this entry' AFTER `cid`,
+  ADD COLUMN `endpointid` varchar(64) NOT NULL COMMENT 'API endpoint (external) ID' AFTER `endpointtype`,
+  ADD COLUMN `datatype` varchar(32) DEFAULT NULL COMMENT 'DB table associated to this entry' AFTER `endpointid`,
+  ADD COLUMN `dataid` varchar(64) DEFAULT NULL COMMENT 'Identifier in reference DB table' AFTER `datatype`,
+  ADD COLUMN `action` varchar(32) NOT NULL COMMENT 'Description of action performed' AFTER `dataid`,
   ADD COLUMN `content` longblob NOT NULL COMMENT 'Cached JSON encoded content of the change, as provided in the event feed' AFTER `action`,
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`eventid`),
