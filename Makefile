@@ -55,15 +55,19 @@ submitclient:
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure
+dist: configure composer-dependencies
 
 # Install PHP dependencies
-build: composer-dependencies
 composer-dependencies:
 ifeq (, $(shell which composer))
 	$(error "'composer' command not found in $(PATH), install it https://getcomposer.org/download/")
 endif
-	$(MAKE) -C webapp app/config/parameters.yml
+# To install Symfony we need a parameters.yml file, but to generate
+# that properly, we need a configured system with dbpasswords.secret
+# generated. To circumvent this, we install a stub parameters.yml
+# file, and set its modification time in the past so that it will get
+# updated later during build with 'make domserver'.
+	$(MAKE) -C webapp params-from-stub
 	composer $(subst 1,-q,$(QUIET)) install
 
 # Generate documentation for distribution. Remove this dependency from

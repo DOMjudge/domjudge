@@ -14,6 +14,13 @@ $(PARAMS): %: %.dist $(TOPDIR)/etc/dbpasswords.secret
 	@[ -n "$(QUIET)" ] || echo "Generating '$@'..."
 	$(TOPDIR)/etc/gensymfonyparams $^ > $@
 
+# Rule to generate $(PARAMS) file from a stub during 'make dist':
+params-from-stub: $(PARAMS).stub
+	if [ ! -r $(PARAMS) ]; then \
+		cp $< $(PARAMS) ; \
+		touch -d '1971-01-01 00:00:00' $(PARAMS) ; \
+	fi
+
 # Don't try to create dbpasswords.secret here if it doesn't exist:
 $(TOPDIR)/etc/dbpasswords.secret:
 
@@ -44,3 +51,5 @@ maintainer-clean-l:
 			rm -rf var/$$d/$$t ; \
 		done ; \
 	done
+
+.PHONY: params-from-stub
