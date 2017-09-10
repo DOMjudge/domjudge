@@ -158,7 +158,7 @@ class APIController extends FOSRestController {
 						'event'     => $event['datatype'],
 						'event_id'  => $event['eventid'],
 						'data_id'   => $event['dataid'],
-						'timestamp' => $event['eventtime'],
+						'timestamp' => Utils::absTime($event['eventtime']),
 						'data'      => $data,
 						'action'    => $event['action'],
 					)) . "\n";
