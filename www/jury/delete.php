@@ -8,11 +8,6 @@
 require('init.php');
 requireAdmin();
 
-if ( !file_exists(LIBDIR . '/relations.php') ) {
-	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
-}
-require(LIBDIR . '/relations.php');
-
 $t = @$_REQUEST['table'];
 $referrer = @$_REQUEST['referrer'];
 $desc = @$_REQUEST['desc'];

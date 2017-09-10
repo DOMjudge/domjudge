@@ -16,11 +16,6 @@ requireAdmin();
 $cmd = @$_POST['cmd'];
 if ( $cmd != 'add' && $cmd != 'edit' ) error ("Unknown action.");
 
-if ( !file_exists(LIBDIR . '/relations.php') ) {
-	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
-}
-require(LIBDIR .  '/relations.php');
-
 $t = @$_POST['table'];
 if ( !$t ) error ("No table selected.");
 if ( !in_array($t, array_keys($KEYS)) ) error ("Unknown table.");
