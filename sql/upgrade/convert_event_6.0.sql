@@ -1,3 +1,4 @@
+-- Create new event table columns:
 ALTER TABLE `event`
   ADD COLUMN `endpointtype` varchar(25) NOT NULL COMMENT 'API endpoint associated to this entry' AFTER `cid`,
   ADD COLUMN `endpointid` varchar(50) NOT NULL COMMENT 'API endpoint (external) ID' AFTER `endpointtype`,
@@ -9,23 +10,26 @@ ALTER TABLE `event`
   ADD PRIMARY KEY (`eventid`),
   ADD KEY `eventtime` (`cid`,`eventtime`);
 
--- To make sure that all eventtimes are strictly increasing.
--- FIXME: MySQL does not allow sub-queries on the same table in UPDATE.
---UPDATE `event` AS `curr` (`eventtime`) VALUES
---  ( SELECT MAX(curr.eventtime,last.eventtime+0.001)
---    FROM `event` AS `last`
---    WHERE last.eventid < curr.eventid
---    ORDER BY last.eventid DESC LIMIT 1 );
 
-UPDATE `event` SET `datatype` = 'clarification', `dataid` = `clarid`, `action` = 'create', `content` = 'null'
+-- Update old data the best we can:
+UPDATE `event`
+  SET `endpointtype` = 'clarifications', `endpointid` = `clarid`,
+      `datatype`     = 'clarification',  `dataid`     = `clarid`,
+      `action` = 'create', `content` = 'null'
   WHERE `description` = 'clarification';
-UPDATE `event` SET `datatype` = 'submission', `dataid` = `submitid`, `action` = 'create', `content` = 'null'
+UPDATE `event`
+  SET `endpointtype` = 'submissions', `endpointid` = `submitid`,
+      `datatype`     = 'submission',  `dataid`     = `submitid`,
+      `action` = 'create', `content` = 'null'
   WHERE `description` = 'problem submitted';
-UPDATE `event` SET `datatype` = 'judging', `dataid` = `judgingid`, `action` = 'update', `content` = 'null'
+UPDATE `event`
+  SET `endpointtype` = 'judgings', `endpointid` = `judgingid`,
+      `datatype`     = 'judging',  `dataid`     = `judgingid`,
+      `action` = 'update', `content` = 'null'
   WHERE `description` = 'problem judged';
 
+-- Drop old columns and indices:
 ALTER TABLE `event`
-  ADD UNIQUE KEY `eventtime` (`cid`,`eventtime`),
   DROP FOREIGN KEY `event_ibfk_2`,
   DROP FOREIGN KEY `event_ibfk_3`,
   DROP FOREIGN KEY `event_ibfk_4`,
