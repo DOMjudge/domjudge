@@ -26,7 +26,9 @@ cleanup ()
 {
 	# Remove some copied files to save disk space
 	if [ "$WORKDIR" ]; then
-		rm -f "$WORKDIR/../dev/null" "$WORKDIR/../bin/sh" "$WORKDIR/../bin/runpipe" 2> /dev/null || true
+		# This assumes that if bin is bind-mounted from the chroot,
+		# then it is read-only so the removal of bin/sh will fail.
+		rm -f "$WORKDIR/../dev/null" "$WORKDIR/../bin/sh" "$WORKDIR/../dj-bin/runpipe" 2> /dev/null || true
 
 		# Replace testdata by symlinks to reduce disk usage
 		if [ -f "$WORKDIR/testdata.in" ]; then
@@ -171,7 +173,7 @@ logmsg $LOG_INFO "setting up testing (chroot) environment"
 cp "$TESTIN" "$WORKDIR/testdata.in"
 
 # shellcheck disable=SC2174
-mkdir -p -m 0711 ../bin ../dev
+mkdir -p -m 0711 ../bin ../dj-bin ../dev
 # Copy the run-script and a statically compiled shell:
 cp -p  "$RUN_SCRIPT"  ./run
 chmod a+rx run
@@ -183,8 +185,8 @@ fi
 # if required:
 if [ -x "$RUN_JURYPROG" ]; then
 	cp -p "$RUN_JURYPROG" ./runjury
-	cp -pL "$RUNPIPE"     ../bin/runpipe
-	chmod a+rx runjury ../bin/runpipe
+	cp -pL "$RUNPIPE"     ../dj-bin/runpipe
+	chmod a+rx runjury ../dj-bin/runpipe
 fi
 
 # We copy /dev/null: mknod (and the major/minor device numbers) are
