@@ -1058,11 +1058,11 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	}
 
 	if ( count($ids)!==count($cids) ) {
-		error("eventlog: failed to $action $type ID $id " .
+		error("eventlog: failed to $action $type/$id " .
 		      '('.count($ids).'/'.count($cids).' contests done)');
 	}
 
-	logmsg(LOG_DEBUG,"eventlog: ${action}d $type ID $id " .
+	logmsg(LOG_DEBUG,"eventlog: ${action}d $type/$id " .
 	       'for '.count($cids).' contest(s)');
 }
 
