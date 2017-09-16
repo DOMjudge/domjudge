@@ -11,7 +11,7 @@
 		"ext-mysqli": "*",
 		"jumbojett/openid-connect-php": "0.1.*",
 		"mustangostang/spyc": "0.5.*",
-		"php": ">= 5.4",
+		"php": ">= 7.0",
 		"ircmaxell/password-compat": "*",
 
 		"doctrine/doctrine-bundle": "^1.6",
