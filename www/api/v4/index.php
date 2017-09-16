@@ -483,6 +483,8 @@ function judgings_POST($args)
 	              ')', $submitid, $row['cid'], now(), $host,
 	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge);
 
+	eventlog('judging', $judgingid, 'create', $row['cid']);
+
 	$row['submitid']    = safe_int($row['submitid']);
 	$row['cid']         = safe_int($row['cid']);
 	$row['teamid']      = safe_int($row['teamid']);
@@ -584,14 +586,17 @@ function judging_runs_POST($args)
 		$args['runresult'] = $results_remap[$args['runresult']];
 	}
 
-	$DB->q('INSERT INTO judging_run (judgingid, testcaseid, runresult,
-	        runtime, endtime, output_run, output_diff, output_error, output_system)
-	        VALUES (%i, %i, %s, %f, %s, %s, %s, %s, %s)',
-	       $args['judgingid'], $args['testcaseid'], $args['runresult'], $args['runtime'], now(),
-	       base64_decode($args['output_run']),
-	       base64_decode($args['output_diff']),
-	       base64_decode($args['output_error']),
-	       base64_decode($args['output_system']));
+	$runid = $DB->q('RETURNID INSERT INTO judging_run (judgingid, testcaseid, runresult,
+	                 runtime, endtime, output_run, output_diff, output_error, output_system)
+	                 VALUES (%i, %i, %s, %f, %s, %s, %s, %s, %s)',
+	                $args['judgingid'], $args['testcaseid'],
+	                $args['runresult'], $args['runtime'], now(),
+	                base64_decode($args['output_run']),
+	                base64_decode($args['output_diff']),
+	                base64_decode($args['output_error']),
+	                base64_decode($args['output_system']));
+
+	eventlog('judging_run', $runid, 'create', $cid);
 
 	// result of this judging_run has been stored. now check whether
 	// we're done or if more testcases need to be judged.
