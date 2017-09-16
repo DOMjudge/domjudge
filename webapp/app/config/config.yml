@@ -78,6 +78,9 @@ fos_rest:
     view:
         # Lets us return data directly, instead of wrapping in a view
         view_response_listener: force
+    serializer:
+        serialize_null: true
+
 # Swiftmailer Configuration
 swiftmailer:
     transport: '%mailer_transport%'
