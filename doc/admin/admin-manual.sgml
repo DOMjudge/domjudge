@@ -2404,6 +2404,7 @@ code.
 This method requires some special steps which can most easily
 be run via makefile rules as follows:
 <code>
+apt install acl
 make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
 make maintainer-install
 </code>
