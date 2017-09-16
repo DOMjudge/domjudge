@@ -386,7 +386,7 @@ Finally, to build the command-line submit client, install the
 following additional software.
 
 <code>
-apt-get install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
+apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
 </code>
 
 <code>
@@ -408,7 +408,7 @@ change the list as appropriate.
 
 For Debian:
 <code>
-apt-get install make sudo debootstrap libcgroup-dev \
+apt install make sudo debootstrap libcgroup-dev \
 	php-cli php-curl php-json procps \
 	gcc g++ openjdk-8-jre-headless \
 	openjdk-8-jdk ghc fp-compiler
@@ -1091,7 +1091,7 @@ document will be placed in the current
 directory or a directory given as argument.
 The following should do it on a Debian-like system:
 <code>
-sudo apt-get install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
+sudo apt install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
 cd &lt;INSTALL_PATH&gt;/docs/team
 ./genteammanual [targetdir]
 </code>
@@ -1106,7 +1106,7 @@ format and prebuilt from SGML sources. Rebuilding these is not normally
 necessary. To rebuild them on a Debian-like system, the following commands
 should do it:
 <code>
-sudo apt-get install linuxdoc-tools make zip ghostscript groff texlive-latex-recommended
+sudo apt install linuxdoc-tools make zip ghostscript groff texlive-latex-recommended
 make -C doc/admin docs
 make -C doc/judge docs
 </code>
@@ -2375,11 +2375,11 @@ additional software to be installed:
        generate the PDF admin, judge and default team manual.
 </itemize>
 
-On Debian(-based) systems, the following apt-get command should
+On Debian(-based) systems, the following apt command should
 install the additionally required packages (next to the
 <ref id="install_config:package-install" name="standard set of packages">):
 <code>
-apt-get install autoconf automake git
+apt install autoconf automake git
 </code>
 
 Composer can be installed by following the documentation located
