@@ -4152,7 +4152,6 @@
         "ext-gmp": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "ext-mcrypt": "*",
         "ext-mysqli": "*",
         "php": ">= 5.4"
     },
