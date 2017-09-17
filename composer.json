@@ -5,10 +5,8 @@
 	"license": "GPL-2.0+",
 	"require": {
 		"ext-curl": "*",
-		"ext-gmp": "*",
 		"ext-json": "*",
 		"ext-mbstring": "*",
-		"ext-mcrypt": "*",
 		"ext-mysqli": "*",
 		"jumbojett/openid-connect-php": "0.1.*",
 		"mustangostang/spyc": "0.5.*",
