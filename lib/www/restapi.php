@@ -216,7 +216,6 @@ class RestApi {
 	private function createResponse($response)
 	{
 		header('Content-Type: application/json');
-		// TODO: use JSON_PRETTY_PRINT available in PHP >= 5.4.0?
 		print json_encode($response);
 		exit;
 	}
