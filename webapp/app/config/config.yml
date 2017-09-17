@@ -39,7 +39,7 @@ twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
     globals:
-      DOMJUDGE_VERSION: 1.2.3
+      DOMJUDGE_VERSION: '%domjudge.version%'
 # Doctrine Configuration
 doctrine:
     dbal:
