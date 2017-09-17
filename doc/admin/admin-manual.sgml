@@ -355,8 +355,7 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 <code>
 apt install gcc g++ make zip unzip mysql-server \
 	apache2 php php-cli libapache2-mod-php \
-	php-gd php-curl php-mysql php-json \
-	php-gmp php-xml php-mbstring \
+	php-gd php-curl php-mysql php-json php-mbstring \
 	bsdmainutils ntp phpmyadmin \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \

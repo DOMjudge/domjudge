@@ -5,7 +5,6 @@
 	"license": "GPL-2.0+",
 	"require": {
 		"ext-curl": "*",
-		"ext-gmp": "*",
 		"ext-json": "*",
 		"ext-mbstring": "*",
 		"ext-mysqli": "*",
