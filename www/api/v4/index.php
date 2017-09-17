@@ -483,7 +483,7 @@ function judgings_POST($args)
 	              ')', $submitid, $row['cid'], now(), $host,
 	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge);
 
-	eventlog('judging', $judgingid, 'create', $row['cid']);
+	eventlog('judging', $jid, 'create', $row['cid']);
 
 	$row['submitid']    = safe_int($row['submitid']);
 	$row['cid']         = safe_int($row['cid']);
@@ -586,6 +586,9 @@ function judging_runs_POST($args)
 		$args['runresult'] = $results_remap[$args['runresult']];
 	}
 
+	$jud = $DB->q('TUPLE SELECT judgingid, cid, result FROM judging
+	               WHERE judgingid = %i', $args['judgingid']);
+
 	$runid = $DB->q('RETURNID INSERT INTO judging_run (judgingid, testcaseid, runresult,
 	                 runtime, endtime, output_run, output_diff, output_error, output_system)
 	                 VALUES (%i, %i, %s, %f, %s, %s, %s, %s, %s)',
@@ -596,7 +599,7 @@ function judging_runs_POST($args)
 	                base64_decode($args['output_error']),
 	                base64_decode($args['output_system']));
 
-	eventlog('judging_run', $runid, 'create', $cid);
+	eventlog('judging_run', $runid, 'create', $jud['cid']);
 
 	// result of this judging_run has been stored. now check whether
 	// we're done or if more testcases need to be judged.
@@ -610,8 +613,6 @@ function judging_runs_POST($args)
 	$numtestcases = $DB->q('VALUE SELECT count(*) FROM testcase WHERE probid = %i', $probid);
 
 	$allresults = array_pad($runresults, $numtestcases, null);
-
-	$before = $DB->q('VALUE SELECT result FROM judging WHERE judgingid = %i', $args['judgingid']);
 
 	if ( ($result = getFinalResult($allresults, $results_prio))!==NULL ) {
 
@@ -638,8 +639,10 @@ function judging_runs_POST($args)
 		// Only update if the current result is different from what we
 		// had before. This should only happen when the old result was
 		// NULL.
-		if ( $before !== $result ) {
-			if ( $before!==NULL ) error('internal bug: the evaluated result changed during judging');
+		if ( $jud['result'] !== $result ) {
+			if ( $jud['result'] !== NULL ) {
+				error('internal bug: the evaluated result changed during judging');
+			}
 
 			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
 			               FROM judging
