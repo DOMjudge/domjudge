@@ -40,6 +40,7 @@ Options:
   -d        Daemonize after startup.
   -C <cid>  Run for contest with ID or shortname <cid>. The contest
             defaults to the current active contest if it is unique.
+  -u        Generate update events for initial events already present.
   -v        Set verbosity to LEVEL (syslog levels).
   -h        Display this help and exit.
   -V        Output version information and exit.
@@ -48,7 +49,7 @@ Options:
 	exit;
 }
 
-$options = getopt("C:v:hV");
+$options = getopt("dC:uv:hV");
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ( $options===FALSE ) {
 	echo "Error: parsing options failed.\n";
@@ -57,6 +58,7 @@ if ( $options===FALSE ) {
 
 if ( isset($options['d']) ) $options['daemon']  = $options['d'];
 if ( isset($options['C']) ) $options['cid']     = $options['C'];
+if ( isset($options['u']) ) $options['update']  = $options['u'];
 if ( isset($options['v']) ) $options['verbose'] = $options['v'];
 
 if ( isset($options['V']) ) version();
@@ -134,6 +136,33 @@ while ( TRUE ) {
 	usleep(50000);
 }
 
+function cmp_by_id($a, $b)
+{
+	if ( is_int($a['id']) && is_int($b['id']) ) return $a['id'] - $b['id'];
+	return strcmp($a['id'], $b['id']);
+}
+
+function insert_event($cid, $endpoint, $data)
+{
+	global $DB, $options;
+
+	$old = $DB->q('MAYBETUPLE SELECT eventid, action FROM event
+	               WHERE cid = %i AND endpointtype = %s AND endpointid = %s
+	               ORDER BY eventid DESC LIMIT 1',
+	              $cid, $endpoint, $data['id']);
+
+	if ( isset($old) && $old['action']!=='delete' ) {
+		if ( isset($options['update']) ) {
+			eventlog($endpoint, $data['id'], 'update', $cid, dj_json_encode($data));
+		} else {
+			logmsg(LOG_DEBUG, "Skipping create $endpoint/" . $data['id'] .
+			       ': already present');
+		}
+	} else {
+		eventlog($endpoint, $data['id'], 'create', $cid, dj_json_encode($data));
+	}
+}
+
 function initialize_events($cid)
 {
 	global $API_endpoints, $initial_events_loaded;
@@ -151,18 +180,15 @@ function initialize_events($cid)
 
 			// Special case 'contest' since it is a single object:
 			if ( $endpoint==='contest' ) {
-				$row = $data;
 				logmsg(LOG_INFO, "Inserting $endpoint create event.");
-				eventlog($ep_info['table'], $row['id'], 'create', $cid,
-				         dj_json_encode($row));
+				insert_event($cid,$endpoint,$data);
 				continue;
 			}
 
+			usort($data, 'cmp_by_id');
+
 			logmsg(LOG_INFO, 'Inserting '.count($data)." $endpoint create event(s).");
-			foreach ( $data as $row ) {
-				eventlog($ep_info['table'], $row['id'], 'create', $cid,
-				         dj_json_encode($row));
-			}
+			foreach ( $data as $row ) insert_event($cid,$endpoint,$row);
 		}
 	}
 
