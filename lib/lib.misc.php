@@ -857,7 +857,7 @@ $API_endpoints = array(
 	'contest' => array( // Note special case singular noun.
 		'type'  => 'configuration',
 		'url'   => '/',
-		'extid' => 'shortname',
+		'extid' => TRUE, //'shortname',
 	),
 	'clarifications' => array(
 		'type'  => 'live',
@@ -878,7 +878,7 @@ $API_endpoints = array(
 	'organizations' => array(
 		'type'  => 'configuration',
 		'table' => 'team_affiliation',
-		'extid' => 'shortname', // 'externalid'
+		'extid' => TRUE, //'shortname', // 'externalid'
 	),
 	'groups' => array(
 		'type'  => 'configuration',
@@ -892,6 +892,7 @@ $API_endpoints = array(
 	'judgement-types' => array( // hardcoded in $VERDICTS and the API
 		'type'  => 'configuration',
 		'table' => NULL,
+		'extid' => TRUE,
 	),
 	'judgements' => array(
 		'type'  => 'live',
@@ -938,6 +939,47 @@ foreach ( $API_endpoints as $endpoint => $data ) {
 }
 
 /**
+ * Map an internal/DB ID to an external/REST endpoint ID.
+ */
+function extid($endpoint, $intid)
+{
+	global $API_endpoints, $KEYS;
+
+	$ep = @$API_endpoints[$endpoint];
+	if ( !isset($ep['extid']) ) error("no int/ext ID mapping defined for $endpoint");
+
+	if ( $ep['extid']===TRUE ) return $intid;
+
+	$extid = $DB->q('MAYBEVALUE SELECT `' . $ep['extid'] . '`
+	                 FROM `' . $ep['table'] . '`
+	                 WHERE `' . $KEYS[$ep['table']][0] . '` = %s',
+	                $intid);
+
+	return $extid;
+}
+
+/**
+ * Map an external/REST endpoint ID back to an internal/DB ID.
+ */
+function intid($endpoint, $extid)
+{
+	global $API_endpoints, $KEYS;
+
+	$ep = @$API_endpoints[$endpoint];
+	if ( !isset($ep['extid']) ) error("no int/ext ID mapping defined for $endpoint");
+
+	if ( $ep['extid']===TRUE ) return $extid;
+
+	// FIXME: may not be unique, need cid?
+	$intid = $DB->q('MAYBEVALUE SELECT `' . $KEYS[$ep['table']][0] . '`
+	                 FROM `' . $ep['table'] . '`
+	                 WHERE `' . $ep['extid'] . '` = %s',
+	                $extid);
+
+	return $intid;
+}
+
+/**
  * Log an event.
  *
  * Arguments:
@@ -955,7 +997,7 @@ foreach ( $API_endpoints as $endpoint => $data ) {
 // TODO: we should probably integrate this function with auditlog().
 function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null)
 {
-	global $DB, $API_endpoints, $KEYS;
+	global $DB, $API_endpoints;
 
 	$actions = array('create', 'update', 'delete');
 
@@ -982,28 +1024,8 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	}
 
 	// Look up external/API ID from various sources.
+	if ( $id===null ) $id = extid($type, $dataid);
 
-	// First check if it can be taken equal to internal ID:
-	if ( $id===null && @$endpoint['extid']===true ) $id = $dataid;
-
-	// Next try a DB lookup for another field:
-	if ( $id===null && !empty($endpoint['extid']) && $action!=='delete' ) {
-		if ( $endpoint['table']===null ) {
-			error("eventlog: DB table required for API ID lookup of '$type'");
-		}
-
-		$id = $DB->q('MAYBEVALUE SELECT `' . $endpoint['extid'] . '`
-		              FROM `' . $endpoint['table'] . '`
-		              WHERE `' . $KEYS[$endpoint['table']][0] . '` = %s',
-		             $dataid);
-
-		if ( empty($id) ) {
-			// TODO: fall back to internal ID?
-			error("eventlog: no external/API ID found for $endpoint[table] ID $dataid");
-		}
-	}
-
-	// Finally try the specified JSON data:
 	if ( $id===null && $json!==null ) {
 		$data = dj_json_decode($json);
 		if ( !empty($data['id']) ) $id = $data['id'];
