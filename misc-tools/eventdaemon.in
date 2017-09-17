@@ -40,7 +40,6 @@ Options:
   -d        Daemonize after startup.
   -C <cid>  Run for contest with ID or shortname <cid>. The contest
             defaults to the current active contest if it is unique.
-  -u        Generate update events for initial events already present.
   -v        Set verbosity to LEVEL (syslog levels).
   -h        Display this help and exit.
   -V        Output version information and exit.
@@ -49,7 +48,7 @@ Options:
 	exit;
 }
 
-$options = getopt("dC:uv:hV");
+$options = getopt("dC:v:hV");
 // FIXME: getopt doesn't return FALSE on parse failure as documented!
 if ( $options===FALSE ) {
 	echo "Error: parsing options failed.\n";
@@ -58,7 +57,6 @@ if ( $options===FALSE ) {
 
 if ( isset($options['d']) ) $options['daemon']  = $options['d'];
 if ( isset($options['C']) ) $options['cid']     = $options['C'];
-if ( isset($options['u']) ) $options['update']  = $options['u'];
 if ( isset($options['v']) ) $options['verbose'] = $options['v'];
 
 if ( isset($options['V']) ) version();
@@ -146,20 +144,24 @@ function insert_event($cid, $endpoint, $data)
 {
 	global $DB, $options;
 
-	$old = $DB->q('MAYBETUPLE SELECT eventid, action FROM event
+	$old = $DB->q('MAYBETUPLE SELECT eventid, action, content FROM event
 	               WHERE cid = %i AND endpointtype = %s AND endpointid = %s
 	               ORDER BY eventid DESC LIMIT 1',
 	              $cid, $endpoint, $data['id']);
 
-	if ( isset($old) && $old['action']!=='delete' ) {
-		if ( isset($options['update']) ) {
-			eventlog($endpoint, $data['id'], 'update', $cid, dj_json_encode($data));
+	$json = dj_json_encode($data);
+
+	// Check if there's already an old event and create/update
+	// depending on previous state.
+	if ( !isset($old) || $old['action']==='delete' ) {
+		eventlog($endpoint, $data['id'], 'create', $cid, $json);
+	} else {
+		if ( empty($old['content']) || $old['content']!==$json ) {
+			eventlog($endpoint, $data['id'], 'update', $cid, $json);
 		} else {
 			logmsg(LOG_DEBUG, "Skipping create $endpoint/" . $data['id'] .
 			       ': already present');
 		}
-	} else {
-		eventlog($endpoint, $data['id'], 'create', $cid, dj_json_encode($data));
 	}
 }
 
