@@ -353,7 +353,7 @@ software on the DOMjudge server as mentioned above when using Debian
 GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
-apt install gcc g++ make zip unzip mysql-server \
+sudo apt install gcc g++ make zip unzip mysql-server \
 	apache2 php php-cli libapache2-mod-php \
 	php-gd php-curl php-mysql php-json php-mbstring \
 	bsdmainutils ntp phpmyadmin \
@@ -362,7 +362,7 @@ apt install gcc g++ make zip unzip mysql-server \
 	texlive-fonts-recommended texlive-lang-european
 </code>
 Note that PHP modules may need to be enabled depending on your distribution.
-E.g. on Ubuntu run <code>phpenmod json</code> to enable the JSON module.
+E.g. on Ubuntu run <code>sudo phpenmod json</code> to enable the JSON module.
 
 
 For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
@@ -370,7 +370,7 @@ For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
 The following command can be used on RedHat Enterprise Linux, and
 related distributions like CentOS and Fedora.
 <code>
-yum install gcc gcc-c++ make zip unzip mariadb-server \
+sudo yum install gcc gcc-c++ make zip unzip mariadb-server \
 	httpd php-gd php-cli php-mbstring php-mysql \
 	ntp linuxdoc-tools \
 	texlive-collection-latexrecommended texlive-wrapfig
@@ -385,11 +385,11 @@ Finally, to build the command-line submit client, install the
 following additional software.
 
 <code>
-apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
+sudo apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
 </code>
 
 <code>
-yum install libcurl-devel jsoncpp-devel file-devel
+sudo yum install libcurl-devel jsoncpp-devel file-devel
 </code>
 The package <tt>jsoncpp-devel</tt> is available in Fedora, but not in
 RHEL/CentOS.
@@ -407,7 +407,7 @@ change the list as appropriate.
 
 For Debian:
 <code>
-apt install make sudo debootstrap libcgroup-dev \
+sudo apt install make sudo debootstrap libcgroup-dev \
 	php-cli php-curl php-json procps \
 	gcc g++ openjdk-8-jre-headless \
 	openjdk-8-jdk ghc fp-compiler
@@ -415,7 +415,7 @@ apt install make sudo debootstrap libcgroup-dev \
 
 For RedHat:
 <code>
-yum install make sudo libcgroup-devel \
+sudo yum install make sudo libcgroup-devel \
 	php-cli php-mbstring php-process procps-ng \
 	gcc gcc-c++ glibc-static libstdc++-static \
 	java-1.7.0-openjdk-headless java-1.7.0-openjdk-devel \
@@ -2377,7 +2377,7 @@ On Debian(-based) systems, the following apt command should
 install the additionally required packages (next to the
 <ref id="install_config:package-install" name="standard set of packages">):
 <code>
-apt install autoconf automake git composer
+sudo apt install autoconf automake git composer
 </code>
 
 Composer is packaged since Debian Stretch and Ubuntu Xenial.
@@ -2402,7 +2402,7 @@ code.
 This method requires some special steps which can most easily
 be run via makefile rules as follows:
 <code>
-apt install acl
+sudo apt install acl
 make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
 make maintainer-install
 </code>
