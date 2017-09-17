@@ -97,6 +97,10 @@ function dj_password_verify($password, $hash, $user = null)
 {
 	// First check for old-style MD5 hashes:
 	if ( !empty($user) && strlen($hash)>0 && $hash[0]!=='$' ) {
+		if ( function_exists('hash_equals') ) {
+			$userhash = md5($user."#".$password);
+			return hash_equals($hash, $userhash);
+		}
 		return md5($user."#".$password)===$hash;
 	}
 	return password_verify($password, $hash);
