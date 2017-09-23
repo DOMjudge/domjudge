@@ -1045,8 +1045,13 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	if ( $action === 'delete' ) {
 		$json = 'null';
 	} elseif ( $json === null ) {
-		// TODO:
-		$json = dj_json_encode(array('id' => $id));
+		if ( $type === 'contest' ) {
+			$url = $endpoint['url'];
+		} else {
+			$url = $endpoint['url'].'/'.$id;
+		}
+		$json = API_request($url);
+		if ( empty($json) ) error("eventlog: got no JSON data from '$url'");
 	}
 
 	// First acquire an advisory lock to prevent other event logging,
@@ -1086,6 +1091,91 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 
 	logmsg(LOG_DEBUG,"eventlog: ${action}d $type/$id " .
 	       'for '.count($cids).' contest(s)');
+}
+
+$resturl = $restuser = $restpass = null;
+
+/**
+ * This function is copied from judgedaemon.main.php and a quick hack.
+ * We should directly call the code that generates the API response.
+ */
+function read_API_credentials()
+{
+	global $resturl, $restuser, $restpass;
+
+	$credfile = ETCDIR . '/restapi.secret';
+	$credentials = @file($credfile);
+	if (!$credentials) {
+		error("Cannot read REST API credentials file " . $credfile);
+	}
+	foreach ($credentials as $credential) {
+		if ( $credential{0} == '#' ) continue;
+		list ($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
+		if ( $endpointID==='default' ) return;
+	}
+	$resturl = $restuser = $restpass = null;
+}
+
+/**
+ * Perform a request to the REST API and handle any errors.
+ * $url is the part appended to the base DOMjudge $resturl.
+ * $verb is the HTTP method to use: GET, POST, PUT, or DELETE
+ * $data is the urlencoded data passed as GET or POST parameters.
+ * When $failonerror is set to false, any error will be turned into a
+ * warning and null is returned.
+ *
+ * This function is duplicated from judge/judgedaemon.main.php.
+ */
+function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
+	global $resturl, $restuser, $restpass, $lastrequest;
+
+	if ( $resturl === null ) {
+		read_API_credentials();
+		if ( $resturl === null ) {
+			error("could not initialize REST API credentials");
+		}
+	}
+
+	logmsg(LOG_DEBUG, "API request $verb $url");
+
+	$url = $resturl . $url;
+	if ( $verb == 'GET' && !empty($data) ) {
+		$url .= '?' . $data;
+	}
+
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
+	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	if ( $verb == 'POST' ) {
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		if ( is_array($data) ) {
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
+		}
+	} else if ( $verb == 'PUT' || $verb == 'DELETE' ) {
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $verb);
+	}
+	if ( $verb == 'POST' || $verb == 'PUT' ) {
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+	}
+
+	$response = curl_exec($ch);
+	if ( $response === FALSE ) {
+		$errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($ch);
+		if ($failonerror) error($errstr);
+		else { warning($errstr); return null; }
+	}
+	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	if ( $status < 200 || $status >= 300 ) {
+		$errstr = "Error while executing curl $verb to url " . $url .
+		    ": http status code: " . $status . ", response: " . $response;
+		if ($failonerror) { error($errstr); }
+		else { warning($errstr); return null; }
+	}
+
+	curl_close($ch);
+	return $response;
 }
 
 /**
