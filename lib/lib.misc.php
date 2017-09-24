@@ -152,8 +152,10 @@ function calcFreezeData($cdata)
  */
 function calcContestTime($walltime, $cid)
 {
-	// get contest data in case of non-public contests
-	$cdatas = getCurContests(TRUE);
+	// Get contest data in case of non-public contests. Also get
+	// future contests (third argument) to correct for previously
+	// submitted jury solutions.
+	$cdatas = getCurContests(TRUE,NULL,TRUE);
 
 	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
 
