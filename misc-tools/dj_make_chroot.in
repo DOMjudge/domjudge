@@ -28,11 +28,11 @@ CHROOTDIR="@judgehost_chrootdir@"
 
 # Fallback Debian and release (codename) to bootstrap (note: overriden right below):
 DISTRO="Debian"
-RELEASE="jessie"
+RELEASE="stretch"
 
 # List of possible architectures to install chroot for:
-DEBIAN_ARCHLIST="amd64,armel,armhf,arm64,i386,mips,mipsel,powerpc,ppc64el,s390x"
-UBUNTU_ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
+DEBIAN_ARCHLIST="amd64,arm64,armel,armhf,i386,mips,mips64el,mipsel,ppc64el,s390x"
+UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 
 # If host system is Debian or Ubuntu, use its release and architecture by default
 if [ "x$(lsb_release -i -s || true)" = 'xDebian' ] || \
@@ -109,7 +109,7 @@ INSTALLDEBS="default-jre-headless locales"
 REMOVEDEBS=""
 
 # Which debootstrap package to install on non-Debian systems:
-DEBOOTDEB="debootstrap_1.0.67_all.deb"
+DEBOOTDEB="debootstrap_1.0.89_all.deb"
 
 # The Debian mirror/proxy below can be passed as environment
 # variables; if none are given the following defaults are used.
@@ -227,8 +227,8 @@ eval $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
 cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
-cp /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || true
-cp /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
+cp -r /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || true
+cp -r /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
 
 if [ "$DISTRO" = 'Debian' ]; then
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
