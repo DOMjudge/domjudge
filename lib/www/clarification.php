@@ -426,6 +426,7 @@ function confirmClar() {
 	} else {
 		$selected = $defclar;
 	}
+	$selected = $clar['cid'] . '-' . $selected;
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options, $selected, true) .
 	     "</td></tr>\n";
