@@ -61,7 +61,7 @@ dist: configure
 dist: composer-dependencies
 composer-dependencies:
 ifeq (, $(shell which composer))
-	$(error "'composer' command not found in $(PATH), install it https://getcomposer.org/download/")
+	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
 endif
 	composer $(subst 1,-q,$(QUIET)) install --no-dev
 

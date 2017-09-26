@@ -2367,8 +2367,7 @@ additional software to be installed:
 <itemize>
 <item> The GNU autoconf/automake toolset
 
-<item> <htmlurl name="Composer" url="https://getcomposer.org">
-       - PHP Package Manager.
+<item> Composer - PHP Package Manager.
 
 <item> Linuxdoc and groff to build the admin and judge
        documentation from SGML sources and a LaTeX installation to
@@ -2379,12 +2378,12 @@ On Debian(-based) systems, the following apt-get command should
 install the additionally required packages (next to the
 <ref id="install_config:package-install" name="standard set of packages">):
 <code>
-sudo apt install autoconf automake git
+sudo apt install autoconf automake git composer
 </code>
 
-Composer can be installed by following the documentation located
-<htmlurl name="here" url="https://getcomposer.org/download">, or since
-Debian Stretch by installing the package <tt>composer</tt>.
+Composer is packaged since Debian Stretch and Ubuntu Xenial.
+Alternatively, it can be installed by following the documentation
+located <htmlurl name="here" url="https://getcomposer.org/download">.
 
 When this software is present, bootstrapping can be done by running
 <tt>make dist</tt>, which creates the <tt>configure</tt> script,
