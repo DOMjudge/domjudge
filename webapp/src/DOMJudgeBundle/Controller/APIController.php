@@ -155,12 +155,10 @@ class APIController extends FOSRestController {
 				foreach ($events as $event) {
 					$data = json_decode(stream_get_contents($event['content']));
 					echo json_encode(array(
-						'event'     => $event['endpointtype'],
-						'event_id'  => $event['eventid'],
-						'data_id'   => $event['endpointid'],
-						'timestamp' => Utils::absTime($event['eventtime']),
+						'id'        => $event['eventid'],
+						'type'      => $event['endpointtype'],
+						'op'        => $event['action'],
 						'data'      => $data,
-						'action'    => $event['action'],
 					)) . "\n";
 					ob_flush();
 					flush();
@@ -169,15 +167,11 @@ class APIController extends FOSRestController {
 				}
 
 				if ( count($events) == 0 ) {
-					// No new events, check if it's time for a heart beat.
+					// No new events, check if it's time for a keep alive.
 					$now = time();
 					if ( $lastUpdate + 60 < $now ) {
-						# Sent heartbeat roughly every 60s. Guarantee according to spec is 120s.
-						$event = array(
-							'event' => 'heartbeat',
-							'timestamp' => Utils::absTime($now),
-						);
-						echo json_encode($event) . "\n";
+						# Send keep alive every 60s. Guarantee according to spec is 120s.
+						echo "\n";
 						ob_flush();
 						flush();
 						$lastUpdate = $now;
