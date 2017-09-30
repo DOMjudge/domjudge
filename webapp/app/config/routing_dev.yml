@@ -12,3 +12,5 @@ _errors:
 
 _main:
     resource: routing.yml
+    defaults:
+            _format: json
