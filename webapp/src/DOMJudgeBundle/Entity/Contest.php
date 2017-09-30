@@ -911,17 +911,17 @@ class Contest
 	 */
 	public function serializeForAPI() {
 		return [
-			'id'						 => $this->getCid(),
-			'external_id'				 => $this->getExternalId(),
-			'shortname'					 => $this->getShortname(),
-			'name'						 => $this->getName(),
-			'formal_name'				 => $this->getName(),
-			'start_time'				 => Utils::absTime($this->getStarttime()),
-			'end_time'					 => Utils::absTime($this->getEndtime()),
-			'duration'					 => Utils::relTime($this->getEndtime() - $this->getStarttime()),
+			'id'                         => $this->getCid(),
+			'external_id'                => $this->getExternalId(),
+			'shortname'                  => $this->getShortname(),
+			'name'                       => $this->getName(),
+			'formal_name'                => $this->getName(),
+			'start_time'                 => Utils::absTime($this->getStarttime()),
+			'end_time'                   => Utils::absTime($this->getEndtime()),
+			'duration'                   => Utils::relTime($this->getEndtime() - $this->getStarttime()),
 			'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
-			'unfreeze'					 => Utils::absTime($this->getUnfreezetime()),
-			'penalty'					 => 20, // FIXME
+			'unfreeze'                   => Utils::absTime($this->getUnfreezetime()),
+			'penalty'                    => 20, // FIXME
 		];
 	}
 
