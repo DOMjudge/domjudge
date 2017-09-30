@@ -1024,6 +1024,10 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		logmsg(LOG_WARNING, "eventlog: invalid action '$action' specified");
 		return;
 	}
+	if ( $endpoint['url']===null ) {
+		logmsg(LOG_DEBUG, "eventlog: no endpoint for '$type', ignoring");
+		return;
+	}
 
 	// Look up external/API ID from various sources.
 	if ( $id===null ) $id = extid($type, $dataid);
