@@ -258,11 +258,16 @@ function judgings($args)
 		$args['judging_id'] = $args['__primary_key'];
 	}
 
-	// FIXME: why do we use the event table for this?
-	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE description = "problem judged"';
+	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime
+	          FROM judging j
+	          LEFT JOIN contest c USING (cid)
+	          LEFT JOIN submission s USING (submitid)
+	          WHERE s.submittime < c.endtime';
 
-	// Note that we rely on the events table not listing judgings of
-	// submissions that were received too late.
+	$hasResult = array_key_exists('result', $args);
+	$query .= ($hasResult ? ' AND result = %s' : ' AND result IS NOT NULL %_');
+	$result = ($hasResult ? $args['result'] : '');
+
 	if ( ! checkrole('jury') ) { // This implies we must be a team
 		$query .= ' AND teamid = %i';
 		$teamid = $userdata['teamid'];
@@ -275,14 +280,6 @@ function judgings($args)
 	$query .= ($hasCid ? ' AND cid = %i' : ' %_');
 	$cid = ($hasCid ? $args['cid'] : 0);
 
-	$hasFirstId = array_key_exists('first_id', $args);
-	$query .= ($hasFirstId ? ' AND judgingid >= %i' : ' AND TRUE %_');
-	$firstId = ($hasFirstId ? $args['first_id'] : 0);
-
-	$hasLastId = array_key_exists('last_id', $args);
-	$query .= ($hasLastId ? ' AND judgingid <= %i' : ' AND TRUE %_');
-	$lastId = ($hasLastId ? $args['last_id'] : 0);
-
 	$hasJudgingid = array_key_exists('judging_id', $args);
 	$query .= ($hasJudgingid ? ' AND judgingid = %i' : ' %_');
 	$judgingid = ($hasJudgingid ? $args['judging_id'] : 0);
@@ -291,45 +288,30 @@ function judgings($args)
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' %_');
 	$submitid = ($hasSubmitid ? $args['submission_id'] : 0);
 
-	$query .= ' ORDER BY eventid';
+	$query .= ' ORDER BY judgingid';
 
-	$hasLimit = array_key_exists('limit', $args);
-	$query .= ($hasLimit ? ' LIMIT %i' : ' %_');
-	$limit = ($hasLimit ? $args['limit'] : -1);
-	// TODO: validate limit
+	$q = $DB->q($query, $result, $teamid, $cid, $judgingid, $submitid);
 
-	$q = $DB->q($query, $teamid, $cid, $firstId, $lastId, $judgingid, $submitid, $limit);
 	$res = array();
 	while ( $row = $q->next() ) {
-		$data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result, j.cid, j.starttime, j.endtime
-			        FROM judging j
-		                LEFT JOIN submission s USING (submitid)
-		                WHERE j.judgingid = %i', $row['judgingid']);
-		if ($data == NULL) continue;
 
-		// This should be encoded directly in the query
-		if ( array_key_exists('result', $args) &&
-		     $args['result'] != $data['result'] ) continue;
-
-		$res[] = array('id'                 => safe_int($row['judgingid']),
-		               'submission_id'      => safe_int($row['submitid']),
-		               'judgement_type_id'  => $VERDICTS[$data['result']],
-			       'start_time'         => Utils::absTime($data['starttime']),
-			       'start_contest_time' => Utils::relTime($data['starttime'] - $cdatas[$data['cid']]['starttime']),
-			       'end_time'           => Utils::absTime($data['endtime']),
-			       'end_contest_time'   => Utils::relTime($data['endtime'] - $cdatas[$data['cid']]['starttime']),
-		       );
+		$res[] = array(
+			'id'                 => safe_int($row['judgingid']),
+			'submission_id'      => safe_int($row['submitid']),
+			'judgement_type_id'  => $VERDICTS[$row['result']],
+			'start_time'         => Utils::absTime($row['starttime']),
+			'start_contest_time' => Utils::relTime($row['starttime'] - $cdatas[$row['cid']]['starttime']),
+			'end_time'           => Utils::absTime($row['endtime']),
+			'end_contest_time'   => Utils::relTime($row['endtime'] - $cdatas[$row['cid']]['starttime']),
+		);
 	}
 	return $res;
 }
 $doc = 'Get all or selected judgings. This includes those post-freeze, so currently limited to jury, or as a team but then restricted your own submissions.';
 $args = array('cid' => 'Contest ID. If not provided, get judgings of all active contests',
-              'result' => 'Search only for judgings with a certain result.',
-              'first_id' => 'Search from a certain ID',
-              'last_id' => 'Search up to a certain ID',
+              'result' => 'Search only for judgings with a certain result',
               'judging_id' => 'Search only for a certain ID',
-              'submission_id' => 'Search only for judgings associated to this submission ID',
-              'limit' => 'Get only the first N judgings');
+              'submission_id' => 'Search only for judgings associated to this submission ID');
 $exArgs = array(array('cid' => 2), array('result' => 'correct'), array('first_id' => 800, 'limit' => 10));
 $roles = array('jury','team');
 $api->provideFunction('GET', 'judgings', $doc, $args, $exArgs, $roles);
