@@ -911,7 +911,7 @@ class Contest
 	 */
 	public function serializeForAPI() {
 		return [
-			'id'                         => $this->getCid(),
+			'id'                         => (string)$this->getCid(),
 			'external_id'                => $this->getExternalId(),
 			'shortname'                  => $this->getShortname(),
 			'name'                       => $this->getName(),

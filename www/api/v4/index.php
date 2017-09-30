@@ -56,6 +56,11 @@ function safe_bool($value)
 	return is_null($value) ? null : (bool)$value;
 }
 
+function safe_string($value)
+{
+	return is_null($value) ? null : (string)$value;
+}
+
 function give_back_judging($judgingid, $submitid) {
 	global $DB;
 
@@ -1506,13 +1511,13 @@ function scoreboard($args)
 
 	$res = array();
 	foreach ( $scoreboard['scores'] as $teamid => $data ) {
-		$row = array('rank' => $data['rank'], 'team_id' => $teamid);
+		$row = array('rank' => $data['rank'], 'team_id' => safe_string($teamid));
 		$row['score'] = array('num_solved' => safe_int($data['num_points']),
 		                      'total_time' => safe_int($data['total_time']));
 		$row['problems'] = array();
 		foreach ( $scoreboard['matrix'][$teamid] as $probid => $pdata ) {
 			$prob = array('label'       => $prob2label[$probid],
-			              'problem_id'  => safe_int($probid),
+			              'problem_id'  => safe_string($probid),
 			              'num_judged'  => safe_int($pdata['num_submissions']),
 			              'num_pending' => safe_int($pdata['num_pending']),
 			              'solved'      => safe_bool($pdata['is_correct']));
