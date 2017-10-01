@@ -725,45 +725,40 @@ function submissions($args)
 	}
 
 	$hasCid = array_key_exists('cid', $args);
-	$query .= ($hasCid ? ' AND cid = %i' : ' AND TRUE %_');
+	$query .= ($hasCid ? ' AND cid = %i' : ' %_');
 	$cid = ($hasCid ? $args['cid'] : 0);
 
 	$hasLanguage = array_key_exists('language_id', $args);
-	$query .= ($hasLanguage ? ' AND langid = %s' : ' AND TRUE %_');
+	$query .= ($hasLanguage ? ' AND langid = %s' : ' %_');
 	$languageId = ($hasLanguage ? $args['language_id'] : 0);
 
-	$hasFirstId = array_key_exists('first_id', $args);
-	$query .= ($hasFirstId ? ' AND submitid >= %i' : ' AND TRUE %_');
-	$firstId = ($hasFirstId ? $args['first_id'] : 0);
-
-	$hasLastId = array_key_exists('last_id', $args);
-	$query .= ($hasLastId ? ' AND submitid <= %i' : ' AND TRUE %_');
-	$lastId = ($hasLastId ? $args['last_id'] : 0);
-
 	$hasSubmitid = array_key_exists('id', $args);
-	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' AND TRUE %_');
+	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' %_');
 	$submitid = ($hasSubmitid ? $args['id'] : 0);
 
-	if ( $cid == 0 && !checkrole('jury') ) {
-		$api->createError("argument 'cid' is mandatory for non-jury users");
+	if ( !$hasSubmitid && $cid == 0 && !checkrole('jury') ) {
+		$api->createError("argument 'id' or 'cid' is mandatory for non-jury users");
 	}
 
+	$teamid = 0;
+	$freezetime = 0;
 	if ( $cid != 0 && infreeze($cdatas[$cid], now()) && !checkrole('jury') ) {
-		$query .= ' AND submittime <= %i';
+		$query .= ' AND ( submittime <= %i';
 		$freezetime = $cdatas[$cid]['freezetime'];
+		if ( checkrole('team') ) {
+			$query .= ' OR teamid = %i';
+			$teamid = $userdata['teamid'];
+		} else {
+			$query .= ' %_';
+		}
+		$query .= ' )';
 	} else {
-		$query .= ' AND TRUE %_';
-		$freezetime = 0;
+		$query .= ' %_ %_';
 	}
 
 	$query .= ' ORDER BY submitid';
 
-	$hasLimit = array_key_exists('limit', $args);
-	$query .= ($hasLimit ? ' LIMIT %i' : ' %_');
-	$limit = ($hasLimit ? $args['limit'] : -1);
-	// TODO: validate limit
-
-	$q = $DB->q($query, $cid, $languageId, $firstId, $lastId, $submitid, $freezetime, $limit);
+	$q = $DB->q($query, $cid, $languageId, $submitid, $freezetime, $teamid);
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
@@ -782,12 +777,9 @@ function submissions($args)
 }
 $args = array('cid' => 'Contest ID. If not provided, get submissions of all active contests',
               'language_id' => 'Search only for submissions in a certain language.',
-              'id' => 'Search only a certain ID',
-              'first_id' => 'Search from a certain ID',
-              'last_id' => 'Search up to a certain ID',
-              'limit' => 'Get only the first N submissions');
+              'id' => 'Search only a certain ID');
 $doc = 'Get a list of all valid submissions.';
-$exArgs = array(array('firstId' => 100, 'limit' => 10), array('language_id' => 'cpp'));
+$exArgs = array(array('id' => 42), array('language_id' => 'cpp'));
 $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
 
 /**
