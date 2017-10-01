@@ -91,6 +91,7 @@ class RestApi {
 	 */
 	public function callFunction($name, $arguments)
 	{
+		global $userdata;
 		if ( $_SERVER['REQUEST_METHOD'] == 'POST' ) {
 			$postmax = phpini_to_bytes(trim(ini_get('post_max_size')));
 			if ( $postmax > 0 && $postmax < $_SERVER['CONTENT_LENGTH'] ) {
@@ -122,8 +123,11 @@ class RestApi {
 				}
 			}
 			if  ( ! $hasrole ) {
-				$this->createError("Permission denied " .
-				                   " for function '" . $name . "'.", FORBIDDEN);
+				$roles = array();
+				if ( is_array($userdata['roles']) ) $roles = $userdata['roles'];
+				$this->createError("Permission denied for function '$name'" .
+				                   " to user '$userdata[name]' with roles " .
+				                   implode(',', $roles) . '.', FORBIDDEN);
 			}
 		}
 
