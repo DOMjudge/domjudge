@@ -269,9 +269,16 @@ function judgings($args)
 	          LEFT JOIN submission s USING (submitid)
 	          WHERE s.submittime < c.endtime';
 
-	$hasResult = array_key_exists('result', $args);
-	$query .= ($hasResult ? ' AND result = %s' : ' AND result IS NOT NULL %_');
-	$result = ($hasResult ? $args['result'] : '');
+	$result = 0;
+	if ( array_key_exists('result', $args) ) {
+		$query .= ' AND result = %s';
+		$result = $args['result'];
+	} else {
+		$query .= ' %_';
+		if ( !(checkrole('admin') || checkrole('judgehost')) ) {
+			$query .= ' AND result IS NOT NULL';
+		}
+	}
 
 	if ( ! checkrole('jury') ) { // This implies we must be a team
 		$query .= ' AND teamid = %i';
