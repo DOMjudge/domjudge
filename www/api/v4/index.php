@@ -318,7 +318,7 @@ $args = array('cid' => 'Contest ID. If not provided, get judgings of all active 
               'judging_id' => 'Search only for a certain ID',
               'submission_id' => 'Search only for judgings associated to this submission ID');
 $exArgs = array(array('cid' => 2), array('result' => 'correct'), array('first_id' => 800, 'limit' => 10));
-$roles = array('jury','team');
+$roles = array('jury','team','judgehost');
 $api->provideFunction('GET', 'judgings', $doc, $args, $exArgs, $roles);
 
 function judgements($args)
