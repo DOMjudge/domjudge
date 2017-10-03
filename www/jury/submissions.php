@@ -6,6 +6,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+require('init.php');
+
 $viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'all');
 
 $view = 0;
@@ -22,7 +24,6 @@ if ( isset($_REQUEST['view']) ) {
 	}
 }
 
-require('init.php');
 $refresh = array(
 	'after' => 15,
 	'url' => 'submissions.php?' .
