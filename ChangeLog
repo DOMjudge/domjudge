@@ -10,6 +10,11 @@ Version 5.2.0 - DEV
  - Add icons to menu bars.
  - Allow to filter submissions on team, problem, language.
  - Show when a problem can not be judged on any judgehost.
+ - Add "internal error" messages to deal more graceously with judgehost
+   problems e.g. due to faulty compile or compare scripts.
+ - Detect low disk space on judgehosts and decrease space usage.
+ - Support OpenID Connect as login authentication provider.
+ - Various improvements to the import/export functionality.
  - Use current contest as default when uploading problem archive.
  - Allow to add user during team creation in UI.
  - Make problem texts always downloadable for jury.
@@ -35,7 +40,9 @@ Version 5.2.0 - DEV
  - Changed semantics of dj_file_contents_get() optional size argument.
  - Make storage and display limits for output/error files configurable.
  - Changed special case handling of color name/hex conversion functions.
+ - Update make_chroot, merge Debian and Ubuntu versions, and other fixes.
  - Add option -y to force yes to some make_chroot script questions.
+ - Many smaller bugfixes, improvements and documentation updates.
 
 Version 5.1.0 - 7 December 2015
 -------------------------------
