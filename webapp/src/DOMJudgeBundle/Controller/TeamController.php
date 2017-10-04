@@ -6,9 +6,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use DOMJudgeBundle\Entity\Team;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
- *@Route("/jury-v2")
+ * @Route("/jury-v2")
+ * @Security("has_role('ROLE_ADMIN')")
  */
 class TeamController extends Controller
 {
@@ -30,7 +32,6 @@ class TeamController extends Controller
 	 */
 	public function showAction(Request $request, Team $team)
 	{
-		dump($team);
 		// replace this example code with whatever you need
 		return $this->render('DOMJudgeBundle:team:show.html.twig',[
 		    'team' => $team
