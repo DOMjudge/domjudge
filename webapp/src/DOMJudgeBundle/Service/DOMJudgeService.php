@@ -86,6 +86,12 @@ class DOMJudgeService {
 		if ($token == null) return false;
 		$user =$token->getUser();
 
+		// Ignore user objects if they aren't a DOMJudgeBundle user
+		// Covers cases where users are not logged in
+		if (!is_a($user, 'DOMJudgeBundle\Entity\User')) {
+			return false;
+		}
+
 		$authchecker = $this->container->get('security.authorization_checker');
 		if ($check_superset) {
 			if ($authchecker->isGranted('ROLE_ADMIN') ||
