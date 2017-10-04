@@ -202,7 +202,7 @@ function problems($args)
 		                  INNER JOIN contestproblem USING (probid)
 				  JOIN testcase USING (probid)
 				  WHERE cid = %i AND allow_submit = 1';
-		
+
 		$byProbId = array_key_exists('probid', $args);
 		$query .= ($byProbId ? ' AND probid = %i' : ' %_');
 		$probid = ($byProbId ? $args['probid'] : 0);
@@ -1089,7 +1089,7 @@ $args = array('first_id' => 'Search from a certain ID',
               'judging_id' => 'Search only for runs associated to this judging ID',
               'limit' => 'Get only the first N runs');
 $exArgs = array(array('first_id' => 800, 'limit' => 10));
-$roles = array('jury');
+$roles = array('jury','judgehost');
 $api->provideFunction('GET', 'runs', $doc, $args, $exArgs, $roles);
 
 
