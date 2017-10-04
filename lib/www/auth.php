@@ -39,8 +39,6 @@ function logged_in()
 {
 	global $DB, $ip, $username, $teamid, $teamdata, $userdata;
 	if ( !empty($username) && !empty($userdata) && !empty($teamdata) ) return TRUE;
-
-	if (session_id() == "") session_start();
 	if ( isset($_SESSION['username']) ) {
 		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
 		                    WHERE username = %s AND enabled = 1', $_SESSION['username']);
