@@ -45,7 +45,9 @@ class FallbackController extends Controller
 				break;
 			}
 		}
-		if ( !$apiMatch ) {
+		if ( $apiMatch ) {
+			$request->setRequestFormat('json');
+		}	else {
 			$_SERVER['PHP_SELF'] = basename($path);
 			$_SERVER['SCRIPT_NAME'] = basename($path);// This is used in a few scripts to set refererrer
 			if (is_dir($thefile)) {
