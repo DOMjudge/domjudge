@@ -307,7 +307,8 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		( $SHOW_AFFILIATIONS ? '<col id="scoreaffil" />' : '' ) .
 		'<col id="scoreteamname" /></colgroup><colgroup><col id="scoresolv" />' .
 		"<col id=\"scoretotal\" /></colgroup>\n<colgroup>" .
-		str_repeat('<col class="scoreprob" />', count($probs)) .
+		( IS_JURY || dbconfig_get('show_teams_submissions', 1) ?
+		  str_repeat('<col class="scoreprob" />', count($probs)) : '' ) .
 		"</colgroup>\n";
 
 	// column headers
@@ -322,7 +323,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 	// Display the per-problem column headers if the display is
 	// for the jury or if the per-problem information is being
 	// displayed to the contestants and the public.
-	if (IS_JURY  ||  dbconfig_get ('show_teams_submissions', 1)) {
+	if (IS_JURY || dbconfig_get('show_teams_submissions', 1)) {
 		foreach( $probs as $pr ) {
 			echo '<th title="problem \'' . specialchars($pr['name']) . '\'" scope="col">';
 			$str = specialchars($pr['shortname']) .
