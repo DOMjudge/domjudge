@@ -413,9 +413,13 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			 '</span>' : '') .
 			($static ? '' : '</a>') .
 			'</td>';
+		$totalTime = $totals['total_time'];
+		if ( dbconfig_get('score_in_seconds', 0) ) {
+			$totalTime = printtimerel($totalTime);
+		}
 		echo
 			'<td class="scorenc">' . jurylink(null,$totals['num_points']) . '</td>' .
-			'<td class="scorett">' . jurylink(null,$totals['total_time'] ) . '</td>';
+			'<td class="scorett">' . jurylink(null, $totalTime) . '</td>';
 
 		// for each problem
 		foreach ( array_keys($probs) as $prob ) {
@@ -440,9 +444,19 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			if( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
 				$str .= ' + ' . $matrix[$team][$prob]['num_pending'];
 			}
-			// if correct, print time scored
+			// If correct, print time scored. The format will vary
+			// depending on the scoreboard resolution setting.
 			if( $matrix[$team][$prob]['is_correct'] ) {
-				$str .= '/' . scoretime($matrix[$team][$prob]['time']);
+				if ( dbconfig_get('score_in_seconds', 0) ) {
+					$str .= ' (' . printtimerel(scoretime($matrix[$team][$prob]['time']));
+					// Display penalty time.
+					if ($matrix[$team][$prob]['num_submissions'] > 1) {
+						$str .= ' + ' . printtimerel(calcPenaltyTime (TRUE, $matrix[$team][$prob]['num_submissions']));
+					}
+					$str .= ')';
+				} else {
+					$str .= '/' . scoretime($matrix[$team][$prob]['time']);
+				}
 			}
 			echo '>' . jurylink('team.php?id=' . urlencode($team) .
 								'&amp;restrict=probid:' . urlencode($prob),

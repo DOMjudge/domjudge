@@ -24,6 +24,9 @@ DELETE FROM `language` WHERE `langid` = 'kt';
 -- Add/remove sample/initial contents
 --
 
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('score_in_seconds', '0', 'bool', 'Should the scoreboard resolution be measured in seconds instead of minutes?');
+
 INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`, `compile_script`) VALUES
 ('kt', 'Kotlin', '["kt"]', 0, 1, 1, 'kt');
 

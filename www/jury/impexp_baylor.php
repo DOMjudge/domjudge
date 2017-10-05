@@ -83,9 +83,19 @@ if ( isset($_REQUEST['upload']) ) {
 		} else {
 			$lastProblem = scoretime($lastProblem);
 		}
+
+		//  If the scoreboard times have been kept in seconds,
+		//  the values need to be converted to minutes before
+		//  uploading to ICPC HQ.
+		$totalTime = $totals['totaltime'];
+		if ( dbconfig_get('score_in_seconds', 0) ) {
+			$lastProblem = (int) floor($lastProblem / 60);
+			$totalTime = (int) floor($totalTime / 60);
+		}
+
 		$data .= '<Standing LastProblemTime="' . $lastProblem . '" ProblemsSolved="' .  $totals['points'] . '" Rank="' . $rank .
 			'" TeamID="' . $row['externalid'] . '" TotalTime="' .
-			$totals['totaltime'] .
+			$totalTime .
 			'"/>';
 	}
 	$data .= '</icpc>';
