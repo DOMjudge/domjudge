@@ -27,6 +27,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('score_in_seconds', '0', 'bool', 'Should the scoreboard resolution be measured in seconds instead of minutes?'),
 ('show_affiliations', '1', 'bool', 'Show country flags and affiliations names on the scoreboard?'),
 ('show_pending', '0', 'bool', 'Show pending submissions on the scoreboard?'),
+('show_teams_submissions', '1', 'bool', 'Show problem columns with submission information on the public and team scoreboards?'),
 ('show_compile', '2', 'int', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.'),
 ('show_sample_output', '0', 'bool', 'Should teams be able to view a diff of their and the reference output to sample testcases?'),
 ('show_balloons_postfreeze', '0', 'bool', 'Give out balloon notifications after the scoreboard has been frozen?'),
