@@ -2,6 +2,9 @@ DOMjudge Programming Contest Judging System
 
 Version 5.3.0 - DEV
 -------------------
+ - Add support for Kotlin by mounting /bin in chroot environment.
+ - Add options to have second scoreboard resolution and to suppress
+   problem information from the scoreboard. Thanks Marc Furon.
 
 Version 5.2.0 - 3 October 2017
 ------------------------------
