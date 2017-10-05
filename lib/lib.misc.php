@@ -325,11 +325,17 @@ function updateRankCache($cid, $team) {
 
 
 /**
- * Time as used on the scoreboard (i.e. truncated minutes).
+ * Time as used on the scoreboard (i.e. truncated minutes or seconds,
+ * depending on the scoreboard resolution setting).
  */
 function scoretime($time)
 {
-	return (int)floor($time / 60);
+	if ( dbconfig_get('score_in_seconds', 0) ) {
+		$result = (int) floor($time);
+	} else {
+		$result = (int) floor($time / 60);
+	}
+	return $result;
 }
 
 /**
@@ -369,7 +375,12 @@ function calcPenaltyTime($solved, $num_submissions)
 {
 	if ( ! $solved ) return 0;
 
-	return ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
+	$result = ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
+	//  Convert the penalty time to seconds if the configuration
+	//  parameter to compute scores to the second is set.
+	if ( dbconfig_get('score_in_seconds', 0) ) $result *= 60;
+
+	return $result;
 }
 
 // From http://www.problemarchive.org/wiki/index.php/Problem_Format
