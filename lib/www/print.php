@@ -135,30 +135,32 @@ function printsize($size, $decimals = 1)
  */
 function printtimerel($rel_time, $use_microseconds = FALSE)
 {
+	$sign = $rel_time < 0 ? '-' : '';
+	$rel_time = abs($rel_time);
+	$frac_str = '';
+
 	if ( $use_microseconds ) {
 		$frac_str = explode('.', sprintf('%.6f', $rel_time))[1];
+		$rel_time = (int) floor($rel_time);
+	} else {
+		// For negative times we still want to floor, but we've
+		// already removed the sign, so take ceil() if negative.
+		$rel_time = (int) ($sign=='-' ? ceil($rel_time) : floor($rel_time));
 	}
-	$rel_time = (int) floor($rel_time);
 
-	$h = floor($rel_time/3600);
+	$h = (int) floor($rel_time/3600);
 	$rel_time %= 3600;
 
-	$m = floor($rel_time/60);
-	if ($m < 10) {
-		$m = '0' . $m;
-	}
+	$m = (int) floor($rel_time/60);
 	$rel_time %= 60;
 
-	$s = $rel_time;
-	if ($s < 10) {
-		$s = '0' . $s;
-	}
+	$s = (int) $rel_time;
 
 	if ( $use_microseconds ) {
 		$s .= '.' . $frac_str;
 	}
 
-	return $h . ':' . $m . ':' . $s;
+	return sprintf($sign.'%01d:%02d:%02d'.$frac_str, $h, $m, $s);
 }
 
 /**
