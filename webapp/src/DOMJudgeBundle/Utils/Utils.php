@@ -7,11 +7,11 @@ namespace DOMJudgeBundle\Utils;
 class Utils {
 	// prints the absolute time as yyyy-mm-ddThh:mm:ss(.uuu)?[+-]zz(:mm)?
 	// (with millis if $floored is false)
-	public static function absTime($seconds, $floored = FALSE) {
-		$millis = sprintf(".%03d", 1000*(round($seconds - floor($seconds), 3)));
-		return date("Y-m-d\TH:i:s", $seconds)
+	public static function absTime($epoch, $floored = FALSE) {
+		$millis = sprintf(".%03d", 1000*(round($epoch - floor($epoch), 3)));
+		return date("Y-m-d\TH:i:s", $epoch)
 			. ( $floored ? '' : $millis )
-			. date("P", $seconds);
+			. date("P", $epoch);
 	}
 
 	// prints a time diff as relative time as (-)?(h)*h:mm:ss(.uuu)?
