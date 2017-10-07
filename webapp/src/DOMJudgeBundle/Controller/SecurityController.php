@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
+use DOMJudgeBundle\Utils\Utils;
 
 class SecurityController extends Controller {
 	/**
@@ -15,7 +16,7 @@ class SecurityController extends Controller {
 		if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
 
 			$user = $this->get('security.token_storage')->getToken()->getUser();
-			$user->setLastLogin(microtime(TRUE));
+			$user->setLastLogin(Utils::now());
 			$user->setLastIpAddress(@$_SERVER['REMOTE_ADDR']);
 			$this->getDoctrine()->getManager()->flush();
 

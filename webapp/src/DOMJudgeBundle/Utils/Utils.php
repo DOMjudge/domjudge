@@ -26,4 +26,23 @@ class Utils {
 		return $sign . sprintf("%d:%02d:%02d", $hours, $minutes, $seconds)
 			. ( $floored ? '' : $millis );
 	}
+
+	/**
+	 * Returns epoch with microsecond resolution. Can be used to
+	 * simulate MySQL UNIX_TIMESTAMP() function to create insert
+	 * queries that do not change when replicated later.
+	 */
+	public static function now()
+	{
+		return microtime(TRUE);
+	}
+
+	/**
+	 * Returns >0, =0, <0 when $time1 >, =, < $time2 respectively.
+	 * Returned value is time difference in seconds.
+	 */
+	public static function difftime($time1, $time2)
+	{
+		return $time1 - $time2;
+	}
 }

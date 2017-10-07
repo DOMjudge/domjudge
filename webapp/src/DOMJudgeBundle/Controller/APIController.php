@@ -69,7 +69,7 @@ class APIController extends FOSRestController {
 				$response = new Response('Invalid "start_time" in request.', 400);
 			} else {
 				$new_start_time = $date->getTimestamp();
-				$now = microtime(TRUE);
+				$now = Utils::now();
 				if ( $new_start_time < $now + 30 ) {
 					$response = new Response('New start_time not far in enough in future.', 403);
 				} else if ( FALSE && $contestObject->getStarttime() != NULL && $contestObject->getStarttime() < $now + 30 ) {

@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 
+use DOMJudgeBundle\Utils\Utils;
+
 /**
  * @Route(service="legacy.controller.fallback")
  */
@@ -26,7 +28,7 @@ class FallbackController extends Controller
 		if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
 
 			$user = $this->get('security.token_storage')->getToken()->getUser();
-			$user->setLastLogin(microtime(TRUE));
+			$user->setLastLogin(Utils::now());
 			$user->setLastIpAddress(@$_SERVER['REMOTE_ADDR']);
 			$this->getDoctrine()->getManager()->flush();
 
