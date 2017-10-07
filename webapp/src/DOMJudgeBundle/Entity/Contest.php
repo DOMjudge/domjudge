@@ -909,7 +909,15 @@ class Contest
 	 *
 	 * @return array
 	 */
-	public function serializeForAPI() {
+	public function serializeForAPI()
+	{
+		$fdata = $this->calcFreezeData();
+		$state = array(
+			'running' => $fdata['running'],
+			'final'   => $fdata['showfinal'],
+		);
+		if ( $this->getFreezeTime()!==null ) $state['frozen'] = $fdata['showfrozen'];
+
 		return [
 			'id'                         => (string)$this->getCid(),
 			'external_id'                => $this->getExternalId(),
@@ -922,6 +930,7 @@ class Contest
 			'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
 			'unfreeze'                   => Utils::absTime($this->getUnfreezetime()),
 			'penalty'                    => 20, // FIXME
+			'state'                      => $state,
 		];
 	}
 
@@ -951,5 +960,39 @@ class Contest
 			},
 			$filtered_data
 		);
+	}
+
+	/**
+	 * Calculates whether the contest has already started, stopped,
+	 * andd if scoreboard is currently frozen or final (unfrozen).
+	 */
+	function calcFreezeData()
+	{
+		$fdata = array(
+			'showfinal' => false,
+			'showfrozen' => false,
+			'started' => false,
+			'stopped' => false,
+			'running' => false,
+		);
+
+		// Show final scores if contest is over and unfreezetime has been
+		// reached, or if contest is over and no freezetime had been set.
+		// We can compare $now and the dbfields stringwise.
+		$now = Utils::now();
+		$fdata['showfinal']  = ( $this->getFreezetime()===null &&
+		                         Utils::difftime($this->getEndtime(),$now) <= 0 ) ||
+		                       ( $this->getUnfreezetime()!==null &&
+		                         Utils::difftime($this->getUnfreezetime(),$now) <= 0 );
+		// Freeze scoreboard if freeze time has been reached and
+		// we're not showing the final score yet.
+		$fdata['showfrozen'] = !$fdata['showfinal'] && $this->getFreezetime()!==null &&
+		                       Utils::difftime($this->getFreezetime(),$now) <= 0;
+		// contest is active but has not yet started
+		$fdata['started'] = Utils::difftime($this->getStarttime(),$now) <= 0;
+		$fdata['stopped'] = Utils::difftime($this->getEndtime(),$now) <= 0;
+		$fdata['running'] = ( $fdata['started'] && !$fdata['stopped'] );
+
+		return $fdata;
 	}
 }
