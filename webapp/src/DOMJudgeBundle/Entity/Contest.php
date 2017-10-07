@@ -273,20 +273,6 @@ class Contest
 	}
 
 	/**
-	 * Set activatetime
-	 *
-	 * @param double $activatetime
-	 *
-	 * @return Contest
-	 */
-	public function setActivatetime($activatetime)
-	{
-		$this->activatetime = $activatetime;
-
-		return $this;
-	}
-
-	/**
 	 * Get activatetime
 	 *
 	 * @return double
@@ -294,20 +280,6 @@ class Contest
 	public function getActivatetime()
 	{
 		return $this->activatetime;
-	}
-
-	/**
-	 * Set starttime
-	 *
-	 * @param double $starttime
-	 *
-	 * @return Contest
-	 */
-	public function setStarttime($starttime)
-	{
-		$this->starttime = $starttime;
-
-		return $this;
 	}
 
 	/**
@@ -321,20 +293,6 @@ class Contest
 	}
 
 	/**
-	 * Set freezetime
-	 *
-	 * @param double $freezetime
-	 *
-	 * @return Contest
-	 */
-	public function setFreezetime($freezetime)
-	{
-		$this->freezetime = $freezetime;
-
-		return $this;
-	}
-
-	/**
 	 * Get freezetime
 	 *
 	 * @return double
@@ -342,20 +300,6 @@ class Contest
 	public function getFreezetime()
 	{
 		return $this->freezetime;
-	}
-
-	/**
-	 * Set endtime
-	 *
-	 * @param double $endtime
-	 *
-	 * @return Contest
-	 */
-	public function setEndtime($endtime)
-	{
-		$this->endtime = $endtime;
-
-		return $this;
 	}
 
 	/**
@@ -369,20 +313,6 @@ class Contest
 	}
 
 	/**
-	 * Set unfreezetime
-	 *
-	 * @param double $unfreezetime
-	 *
-	 * @return Contest
-	 */
-	public function setUnfreezetime($unfreezetime)
-	{
-		$this->unfreezetime = $unfreezetime;
-
-		return $this;
-	}
-
-	/**
 	 * Get unfreezetime
 	 *
 	 * @return double
@@ -390,20 +320,6 @@ class Contest
 	public function getUnfreezetime()
 	{
 		return $this->unfreezetime;
-	}
-
-	/**
-	 * Set deactivatetime
-	 *
-	 * @param double $deactivatetime
-	 *
-	 * @return Contest
-	 */
-	public function setDeactivatetime($deactivatetime)
-	{
-		$this->deactivatetime = $deactivatetime;
-
-		return $this;
 	}
 
 	/**
