@@ -844,7 +844,6 @@ class Contest
 			'end_time'                   => Utils::absTime($this->getEndtime()),
 			'duration'                   => Utils::relTime($this->getEndtime() - $this->getStarttime()),
 			'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
-			'unfreeze'                   => Utils::absTime($this->getUnfreezetime()),
 			'penalty'                    => 20, // FIXME
 			'state'                      => $state,
 		];
