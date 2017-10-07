@@ -24,7 +24,13 @@ class FallbackController extends Controller
 	public function fallback(Request $request, $path)
 	{
 		if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-			$_SESSION['username'] = $this->get('security.token_storage')->getToken()->getUser()->getUsername();
+
+			$user = $this->get('security.token_storage')->getToken()->getUser();
+			$user->setLastLogin(microtime(TRUE));
+			$user->setLastIpAddress(@$_SERVER['REMOTE_ADDR']);
+			$this->getDoctrine()->getManager()->flush();
+
+			$_SESSION['username'] = $user->getUsername();
 		}
 
 

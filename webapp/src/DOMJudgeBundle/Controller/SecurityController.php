@@ -13,6 +13,12 @@ class SecurityController extends Controller {
 	 */
 	public function loginAction(Request $request) {
 		if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+
+			$user = $this->get('security.token_storage')->getToken()->getUser();
+			$user->setLastLogin(microtime(TRUE));
+			$user->setLastIpAddress(@$_SERVER['REMOTE_ADDR']);
+			$this->getDoctrine()->getManager()->flush();
+
 			return $this->redirect($this->generateUrl('legacy.index'));
 		}
 
