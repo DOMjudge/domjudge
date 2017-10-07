@@ -146,6 +146,12 @@ if ( !empty($row['password']) ) {
 } else {
 	echo "not set";
 } ?></td></tr>
+<tr><td>IP address:</td><td><?php
+if ( !empty($row['ip_address']) ) {
+	echo specialchars($row['ip_address']);
+} else {
+	echo "-";
+} ?></td></tr>
 <tr><td>Roles:</td>
     <td><?php
     if ($roles->count() == 0) echo "No roles assigned";
@@ -165,7 +171,7 @@ if ( $row['teamid'] ) {
 } ?></tr>
 <tr><td>Last login:</td><td><?php echo printtime($row['last_login'], '%a %d %b %Y %T %Z')?></td></tr>
 <tr><td>Last IP:   </td><td><?php echo
-    (@$row['ip_address'] ? printhost($row['ip_address'], TRUE):'') ?></td></tr>
+    (@$row['last_ip_address'] ? printhost($row['last_ip_address'], TRUE):'') ?></td></tr>
 </table></div>
 
 <?php
