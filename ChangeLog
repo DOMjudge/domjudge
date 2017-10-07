@@ -5,6 +5,8 @@ Version 5.3.0 - DEV
  - Add support for Kotlin by mounting /bin in chroot environment.
  - Add options to have second scoreboard resolution and to suppress
    problem information from the scoreboard. Thanks Marc Furon.
+ - Change judging feedback dir ownership after compare script ran.
+   Fixes a crash when output validators have stderr output.
 
 Version 5.2.0 - 3 October 2017
 ------------------------------
