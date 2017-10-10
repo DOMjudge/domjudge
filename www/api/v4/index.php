@@ -310,11 +310,11 @@ function judgings($args)
 		$res[] = array(
 			'id'                 => safe_int($row['judgingid']),
 			'submission_id'      => safe_int($row['submitid']),
-			'judgement_type_id'  => $VERDICTS[$row['result']],
+			'judgement_type_id'  => empty($srow['result']) ? null : $VERDICTS[$row['result']],
 			'start_time'         => Utils::absTime($row['starttime']),
 			'start_contest_time' => Utils::relTime($row['starttime'] - $cdatas[$row['cid']]['starttime']),
-			'end_time'           => Utils::absTime($row['endtime']),
-			'end_contest_time'   => Utils::relTime($row['endtime'] - $cdatas[$row['cid']]['starttime']),
+			'end_time'           => empty($row['endtime']) ? null : Utils::absTime($row['endtime']),
+			'end_contest_time'   => empty($row['endtime']) ? null : Utils::relTime($row['endtime'] - $cdatas[$row['cid']]['starttime']),
 		);
 	}
 	return $res;
@@ -1550,18 +1550,20 @@ $api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs, null, true);
  */
 function internal_error_POST($args)
 {
-	global $DB;
+	global $DB, $cdatas, $api;
 
 	checkargs($args, array('description', 'judgehostlog', 'disabled'));
 
-	global $cdatas, $api;
+	// Both cid and judgingid are allowed to be NULL.
+	$cid = @$args['cid'];
+	$judgingid = @$args['judgingid'];
 
 	// group together duplicate internal errors
 	// note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors
 	$errorid = $DB->q('MAYBEVALUE SELECT errorid FROM internal_error
 	                   WHERE description=%s AND disabled=%s AND status=%s' .
-	                  ( isset($args['cid']) ? ' AND cid=%i' : '%_' ),
-	                  $args['description'], $args['disabled'], 'open', $args['cid']);
+	                  ( isset($cid) ? ' AND cid=%i' : '%_' ),
+	                  $args['description'], $args['disabled'], 'open', $cid);
 
 	if ( isset($errorid) ) {
 		// FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog
@@ -1571,12 +1573,12 @@ function internal_error_POST($args)
 	$errorid = $DB->q('RETURNID INSERT INTO internal_error
 	                   (judgingid, cid, description, judgehostlog, time, disabled)
 	                   VALUES (%i, %i, %s, %s, %i, %s)',
-	                  $args['judgingid'], $args['cid'], $args['description'],
+	                  $judgingid, $cid, $args['description'],
 	                  $args['judgehostlog'], now(), $args['disabled']);
 
 	$disabled = dj_json_decode($args['disabled']);
 	// disable what needs to be disabled
-	set_internal_error($disabled, $args['cid'], 0);
+	set_internal_error($disabled, $cid, 0);
 	if ( in_array($disabled['kind'], array('problem', 'language')) ) {
 		// give back judging if we have to
 		$submitid = $DB->q('VALUE SELECT submitid FROM judging WHERE judgingid = %i', $args['judgingid']);
@@ -1587,7 +1589,7 @@ function internal_error_POST($args)
 }
 $doc = 'Report an internal error from the judgedaemon.';
 $args = array('judgingid' => 'ID of the corresponding judging (if exists).',
-	      'cid' => 'Contest ID.',
+              'cid' => 'Contest ID (if associated to one).',
               'description' => 'short description',
               'judgehostlog' => 'last N lines of judgehost log',
               'disabled' => 'reason (JSON encoded)');
