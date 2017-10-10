@@ -17,10 +17,16 @@ MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 MAINCLASS=""
 
-# Amount of memory reserved for the Java virtual machine in kB. The
+# Stack size in the JVM in KB. Note that this will be deducted from
+# the total memory made available for the heap.
+MEMSTACK=65536
+
+# Amount of memory reserved for the Java virtual machine in KB. The
 # default below is just above the maximum memory usage of current
 # versions of the jvm, but might need increasing in some cases.
-MEMRESERVED=350000
+MEMJVM=65536
+
+MEMRESERVED=$((MEMSTACK + MEMJVM))
 
 TMPFILE=$(mktemp --tmpdir domjudge_javac_output.XXXXXX) || exit 1
 
@@ -61,7 +67,7 @@ MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 # -Xmx: maximum size of memory allocation pool
 # -Xms: initial size of memory, improves runtime stability
 # -XX:+UseSerialGC: Serialized garbage collector improves runtime stability
-# -Xss64m: 64MB stack size
+# -Xss${MEMSTACK}k: stack size as configured abve
 cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute java interpreter on source.
@@ -71,7 +77,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec java -XX:+UseSerialGC -Xss64m -Xms${MEMLIMITJAVA}k -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS' "\$@"
+exec java -XX:+UseSerialGC -Xss${MEMSTACK}k -Xms${MEMLIMITJAVA}k -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"
