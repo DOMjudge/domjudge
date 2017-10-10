@@ -16,10 +16,16 @@ MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 MAINCLASS=""
 
-# Amount of memory reserved for the Java virtual machine in kB. The
+# Stack size in the JVM in KB. Note that this will be deducted from
+# the total memory made available for the heap.
+MEMSTACK=65536
+
+# Amount of memory reserved for the Java virtual machine in KB. The
 # default below is just above the maximum memory usage of current
 # versions of the jvm, but might need increasing in some cases.
-MEMRESERVED=350000
+MEMJVM=65536
+
+MEMRESERVED=$((MEMSTACK + MEMJVM))
 
 TMPFILE=$(mktemp --tmpdir domjudge_javac_output.XXXXXX) || exit 1
 
@@ -40,11 +46,12 @@ EXITCODE=$?
 MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 
 # Write executing script:
-# Executes java byte-code interpreter with following options
-# -JXmx: maximum size of memory allocation pool
-# -JXms: initial size of memory, improves runtime stability
-# -JXX:+UseSerialGC: Serialized garbage collector improves runtime stability
-# -JXss64m: 64MB stack size
+# Executes java byte-code interpreter with following options (prefixed
+# with -J to pass from kotlin to java):
+# -Xmx: maximum size of memory allocation pool
+# -Xms: initial size of memory, improves runtime stability
+# -XX:+UseSerialGC: Serialized garbage collector improves runtime stability
+# -Xss${MEMSTACK}k: stack size as configured abve
 cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute java interpreter on source.
@@ -54,7 +61,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec kotlin -J-XX:+UseSerialGC -J-Xss64m -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k -J-DONLINE_JUDGE=1 -J-DDOMJUDGE=1 '$MAINCLASS' "\$@"
+exec kotlin -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k -J-DONLINE_JUDGE=1 -J-DDOMJUDGE=1 '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"
