@@ -1346,24 +1346,23 @@ function clarifications($args)
 		$args['clar_id'] = $args['__primary_key'];
 	}
 
-	if ( empty($cids) ) {
-		return array();
-	}
+	$cid = isset($args['cid']) ? $args['cid'] : reset($cids);
+	if ( !isset($cid) ) return array();
 
 	// Find clarifications, maybe later also provide more info for jury
 	$query = 'TABLE SELECT clarid, submittime, probid, body, cid, sender, recipient
-		  FROM clarification
-	          WHERE cid IN (%Ai)';
+	          FROM clarification
+	          WHERE cid = %i';
 
 	$byProblem = array_key_exists('problem', $args);
-	$query .= ($byProblem ? ' AND probid = %i' : ' AND TRUE %_');
+	$query .= ($byProblem ? ' AND probid = %i' : ' %_');
 	$problem = ($byProblem ? $args['problem'] : null);
 
 	$byClarId = array_key_exists('clar_id', $args);
-	$query .= ($byClarId ? ' AND clarid = %i' : ' AND TRUE %_');
+	$query .= ($byClarId ? ' AND clarid = %i' : ' %_');
 	$clarId = ($byClarId ? $args['clar_id'] : null);
 
-	$clar_datas = $DB->q($query, $cids, $problem, $clarId);
+	$clar_datas = $DB->q($query, $cid, $problem, $clarId);
 	return array_map(function($clar_data) use ($cdatas) {
 		return array(
 			'id'           => safe_int($clar_data['clarid']),
@@ -1377,7 +1376,8 @@ function clarifications($args)
 	}, $clar_datas);
 }
 $doc = 'Get a list of clarifications.';
-$args = array('problem' => 'Search for clarifications about a specific problem.');
+$args = array('cid' => 'Search clarifications for a specific contest, defaults to first active one.',
+              'problem' => 'Search for clarifications about a specific problem.');
 $exArgs = array(array('problem' => 'H'));
 $roles = array('jury');
 $api->provideFunction('GET', 'clarifications', $doc, $args, $exArgs, $roles);
