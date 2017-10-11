@@ -309,6 +309,8 @@ function putClarificationList($clars, $team = NULL)
  */
 function putClarificationForm($action, $respid = NULL, $onlycontest = NULL)
 {
+	global $cdata;
+
 	$cdatas = getCurContests(TRUE);
 	if ( isset($onlycontest) ) {
 		$cdatas = array($onlycontest => $cdatas[$onlycontest]);
@@ -390,16 +392,16 @@ function confirmClar() {
 	$categs = getClarCategories();
 	$defclar = key($categs);
 	$options = array();
-	foreach ($cdatas as $cid => $cdata) {
+	foreach ($cdatas as $cid => $data) {
 
 		foreach($categs as $categid => $categname) {
 			if ( IS_JURY && count($cdatas) > 1 ) {
-				$options["$cid-$categid"] = "{$cdata['shortname']} - $categname";
+				$options["$cid-$categid"] = "{$data['shortname']} - $categname";
 			} else {
 				$options["$cid-$categid"] = $categname;
 			}
 		}
-		$fdata = calcFreezeData($cdata);
+		$fdata = calcFreezeData($data);
 		if ( $fdata['started'] ) {
 			$problem_options =
 				$DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
@@ -410,7 +412,7 @@ function confirmClar() {
 				        ORDER BY shortname ASC', $cid);
 			if ( IS_JURY && count($cdatas) > 1 ) {
 				foreach ($problem_options as &$problem_option) {
-					$problem_option = $cdata['shortname'] . ' - ' . $problem_option;
+					$problem_option = $data['shortname'] . ' - ' . $problem_option;
 				}
 				unset($problem_option);
 			}
@@ -419,14 +421,14 @@ function confirmClar() {
 	}
 	if ( $respid ) {
 		if ( is_null($clar['probid']) ) {
-			$selected = $clar['category'];
+			$selected = $clar['cid'] . '-' . $clar['category'];
 		} else {
-			$selected = $clar['probid'];
+			$selected = $clar['cid'] . '-' . $clar['probid'];
 		}
 	} else {
-		$selected = $defclar;
+		$selected = null;
+		if ( !empty($cdata) ) $selected = $cdata['cid'] . '-' . $defclar;
 	}
-	$selected = $clar['cid'] . '-' . $selected;
 	echo "<tr><td><b>Subject:</b></td><td>\n" .
 	     addSelect('problem', $options, $selected, true) .
 	     "</td></tr>\n";
