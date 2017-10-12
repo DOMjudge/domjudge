@@ -59,12 +59,6 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 // insert a new response (if posted)
 if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
-	// If database supports it, wrap this in a transaction so we
-	// either send the clarification AND mark it unread for everyone,
-	// or we don't. If no transaction support, we just have to hope
-	// this goes well.
-	$DB->q('START TRANSACTION');
-
 	if ( empty($_POST['sendto']) ) {
 		$sendto = null;
 	} elseif ( $_POST['sendto'] == 'domjudge-must-select' ) {
@@ -80,6 +74,12 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$probid = NULL;
 	}
 
+	// If database supports it, wrap this in a transaction so we
+	// either send the clarification AND mark it unread for everyone,
+	// or we don't. If no transaction support, we just have to hope
+	// this goes well.
+	$DB->q('START TRANSACTION');
+
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, respid, submittime, recipient, probid, category, body,
 	                  answered, jury_member)
@@ -89,14 +89,16 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                $cid, $respid, now(), $sendto, $probid, $category,
 	                $_POST['bodytext'], 1, $jury_member);
 
-	eventlog('clarification', $newid, 'create', $cid);
-	auditlog('clarification', $newid, 'added', null, null, $cid);
-
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1, jury_member = ' .
 		       (isset($jury_member) ? '%s' : 'NULL %_') . ' WHERE clarid = %i',
 		       $jury_member, $respid);
 	}
+
+	$DB->q('COMMIT');
+
+	eventlog('clarification', $newid, 'create', $cid);
+	auditlog('clarification', $newid, 'added', null, null, $cid);
 
 	if( is_null($sendto) ) {
 		// mark the messages as unread for the team(s)
@@ -109,8 +111,6 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$DB->q('INSERT INTO team_unread (mesgid, teamid)
 		        VALUES (%i, %i)', $newid, $sendto);
 	}
-
-	$DB->q('COMMIT');
 
 	// redirect back to the original location
 	if ( $isgeneral ) {
