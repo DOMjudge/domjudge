@@ -101,8 +101,10 @@ class RestApi {
 			}
 		}
 		if ( strpos($name, "/") !== FALSE ) {
-			list($name, $primary_key) = explode('/', $name);
-			$arguments['__primary_key'] = $primary_key;
+			list($name, $primary_key) = preg_split('/\/+/', $name, 2);
+			if ( isset($primary_key) && $primary_key!=='' ) {
+				$arguments['__primary_key'] = $primary_key;
+			}
 		}
 		$name = $name . '#' . $_SERVER['REQUEST_METHOD'];
 		if ( !array_key_exists($name, $this->apiFunctions) ) {
