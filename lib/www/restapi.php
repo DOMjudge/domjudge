@@ -233,7 +233,7 @@ class RestApi {
 	private function createResponse($response)
 	{
 		header('Content-Type: application/json');
-		print json_encode($response);
+		print json_encode($response) . "\n";
 		exit;
 	}
 
