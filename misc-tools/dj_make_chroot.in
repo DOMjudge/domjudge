@@ -46,18 +46,30 @@ fi
 
 usage()
 {
-    echo "Usage: $0 [-y] [-d <chrootdir>] [-D <distro>] [-a <architecture>]"
-    echo "Creates a chroot environment with Java JRE support using the"
-    echo "Debian or Ubuntu GNU/Linux distribution."
-    echo
-    echo "This script must be run as root, <chrootdir> is the non-existing target"
-    echo "location of the chroot, <distro> can be set to 'Debian' or 'Ubuntu' to"
-	echo "override any default, and <architecture> one of the following:"
-    echo "Debian: $DEBIAN_ARCHLIST"
-    echo "Ubuntu: $UBUNTU_ARCHLIST"
-    echo
-    echo "If the host runs Debian/Ubuntu, the host architecture and release are used."
-    echo "The default chrootdir is '@judgehost_chrootdir@'."
+	cat <<EOF
+Usage: $0 [options]...
+Creates a chroot environment with Java JRE support using the
+Debian or Ubuntu GNU/Linux distribution.
+
+Options:
+  -a <arch>   Machine archicture to use.
+  -d <dir>    Directory where to build the chroot environment.
+  -D <distro> Linux distribution to use: 'Debian' or 'Ubuntu'.
+  -i <debs>   List of extra package names to install (comma separated).
+  -r <debs>   List of extra package names to remove (comma separated).
+  -l <debs>   List of local package files to install (comma separated).
+  -y          Force overwriting the chroot dir and downloading debootstrap.
+
+This script must be run as root, <chrootdir> is the non-existing
+target location of the chroot (unless '-y' is specified). If the host
+runs Debian/Ubuntu, the host architecture and release are used. The
+default chrootdir is '@judgehost_chrootdir@'.
+
+Available architectures:
+Debian: $DEBIAN_ARCHLIST
+Ubuntu: $UBUNTU_ARCHLIST
+
+EOF
 }
 
 error()
@@ -73,11 +85,14 @@ if [ "$(id -u)" != 0 ]; then
 fi
 
 # Read command-line parameters:
-while getopts 'a:d:D:y' OPT ; do
+while getopts 'a:d:D:i:r:l:y' OPT ; do
 	case $OPT in
 		a) ARCH=$OPTARG ;;
 		d) CHROOTDIR=$OPTARG ;;
 		D) DISTRO=$OPTARG ;;
+		i) INSTALLDEBS_EXTRA=$OPTARG ;;
+		r) REMOVEDEBS_EXTRA=$OPTARG ;;
+		l) LOCALDEBS=$OPTARG ;;
 		y) FORCEYES=1 ;;
 		\?) error "Could not parse options." ;;
 	esac
@@ -154,6 +169,9 @@ DEBOOTDEB="debootstrap_1.0.78+nmu1ubuntu1.1_all.deb"
 [ -z "$DEBPROXY" ] && DEBPROXY=""
 
 fi
+
+INSTALLDEBS="$INSTALLDEBS $(echo $INSTALLDEBS_EXTRA | tr , ' ')"
+REMOVEDEBS=" $REMOVEDEBS  $(echo $REMOVEDEBS_EXTRA  | tr , ' ')"
 
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
@@ -311,9 +329,12 @@ chroot "$CHROOTDIR" /bin/sh -c "ln -s /bin/true /sbin/initctl"
 fi
 
 # Upgrade the system, and install/remove packages as desired
+DIR=$(mktemp -d -p "$CHROOTDIR/tmp" 'dj_chroot_debs_XXXXXX')
+cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
+chroot "$CHROOTDIR" /bin/sh -c "dpkg -i /${DIR#$CHROOTDIR}/*.deb"
 
 # Do some cleanup of the chroot
 chroot "$CHROOTDIR" /bin/sh -c "apt-get remove --purge $REMOVEDEBS"
