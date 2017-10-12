@@ -156,14 +156,15 @@ class RestApi {
 
 		$response = call_user_func($func['callback'], $args);
 		// If a single element was requested, return an object:
-		if  ( isset($arguments['__primary_key']) ) {
+		if  ( isset($arguments['__primary_key']) &&
+		      $_SERVER['REQUEST_METHOD']==='GET' ) {
 			if ( count($response)!=1 ) {
 				$this->createError("Found " . count($response) .
 				                   " elements with ID '" . $arguments['__primary_key'] .
 				                   "' for function '" . $name . "'.", NOT_FOUND);
 
 			}
-			$response = $response[0];
+			$response = reset($response);
 		}
 
 		$this->createResponse($response);
