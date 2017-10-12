@@ -9,6 +9,7 @@
 
 define('BAD_REQUEST', '400 Bad Request');
 define('FORBIDDEN', '403 Forbidden');
+define('NOT_FOUND', '404 Not Found');
 define('METHOD_NOT_ALLOWED', '405 Method Not Allowed');
 define('INTERNAL_SERVER_ERROR', '500 Internal Server Error');
 
@@ -153,7 +154,19 @@ class RestApi {
 			}
 		}
 
-		$this->createResponse(call_user_func($func['callback'], $args));
+		$response = call_user_func($func['callback'], $args);
+		// If a single element was requested, return an object:
+		if  ( isset($arguments['__primary_key']) ) {
+			if ( count($response)!=1 ) {
+				$this->createError("Found " . count($response) .
+				                   " elements with ID '" . $arguments['__primary_key'] .
+				                   "' for function '" . $name . "'.", NOT_FOUND);
+
+			}
+			$response = $response[0];
+		}
+
+		$this->createResponse($response);
 	}
 
 	/**
