@@ -1012,6 +1012,8 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 {
 	global $DB, $API_endpoints;
 
+	logmsg(LOG_DEBUG,"eventlog arguments: '$type' '$dataid' '$action' '$cid' '$json' '$id'");
+
 	$actions = array('create', 'update', 'delete');
 
 	// Gracefully fail since we may call this from the generic
