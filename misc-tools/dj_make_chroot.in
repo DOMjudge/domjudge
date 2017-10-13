@@ -330,7 +330,7 @@ fi
 
 # Upgrade the system, and install/remove packages as desired
 DIR=$(mktemp -d -p "$CHROOTDIR/tmp" 'dj_chroot_debs_XXXXXX')
-cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
+test -n "$LOCALDEBS" && cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
