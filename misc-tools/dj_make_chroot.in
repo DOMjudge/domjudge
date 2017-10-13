@@ -334,7 +334,7 @@ test -n "$LOCALDEBS" && cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
-chroot "$CHROOTDIR" /bin/sh -c "dpkg -i /${DIR#$CHROOTDIR}/*.deb"
+test -n "$LOCALDEBS" && chroot "$CHROOTDIR" /bin/sh -c "dpkg -i /${DIR#$CHROOTDIR}/*.deb"
 
 # Do some cleanup of the chroot
 chroot "$CHROOTDIR" /bin/sh -c "apt-get remove --purge $REMOVEDEBS"
