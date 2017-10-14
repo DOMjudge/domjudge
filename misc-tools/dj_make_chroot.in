@@ -329,13 +329,15 @@ chroot "$CHROOTDIR" /bin/sh -c "ln -s /bin/true /sbin/initctl"
 fi
 
 # Upgrade the system, and install/remove packages as desired
-DIR=$(mktemp -d -p "$CHROOTDIR/tmp" 'dj_chroot_debs_XXXXXX')
-# shellcheck disable=SC2046
-test -n "$LOCALDEBS" && cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
-test -n "$LOCALDEBS" && chroot "$CHROOTDIR" /bin/sh -c "dpkg -i /${DIR#$CHROOTDIR}/*.deb"
+if [ -n "$LOCALDEBS" ]; then
+	DIR=$(mktemp -d -p "$CHROOTDIR/tmp" 'dj_chroot_debs_XXXXXX')
+	# shellcheck disable=SC2046
+	cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
+	chroot "$CHROOTDIR" /bin/sh -c "dpkg -i /${DIR#$CHROOTDIR}/*.deb"
+fi
 
 # Do some cleanup of the chroot
 chroot "$CHROOTDIR" /bin/sh -c "apt-get remove --purge $REMOVEDEBS"
