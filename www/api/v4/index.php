@@ -280,7 +280,7 @@ function judgings($args)
 		}
 	}
 
-	if ( ! checkrole('jury') ) { // This implies we must be a team
+	if ( ! (checkrole('jury') || checkrole('judgehost')) ) { // This implies we must be a team
 		$query .= ' AND teamid = %i';
 		$teamid = $userdata['teamid'];
 	} else {
