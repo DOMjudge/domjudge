@@ -92,6 +92,9 @@ HTML;
 		$langs[$langid] = $langdata['name'];
 	}
 	$langs[''] = 'language';
+	if ( dbconfig_get('require_entry_point', FALSE) ) {
+		echo "Main file/class:" . addInput('entry_point');
+	}
 	echo addSelect('langid', $langs, '', true);
 
 	echo addSubmit('submit', 'submit',

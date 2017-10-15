@@ -49,7 +49,8 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('judgehost_warning', '30', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "warning".'),
 ('judgehost_critical', '120', 'int', 'Time in seconds after a judgehost last checked in before showing its status as "critical".'),
 ('thumbnail_size', '128', 'int', 'Maximum width/height of a thumbnail for uploaded testcase images.'),
-('diskspace_error', '1048576', 'int', 'Minimum free disk space (in kB) on judgehosts.');
+('diskspace_error', '1048576', 'int', 'Minimum free disk space (in kB) on judgehosts.'),
+('require_entry_point', '0', 'bool', 'Require entry point for submissions.');
 
 --
 -- Dumping data for table `executable`

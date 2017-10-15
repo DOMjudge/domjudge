@@ -253,16 +253,17 @@ function hideTcSample(tcid, str)
 	node.parentNode.appendChild(span);
 }
 
-// Autodetection of problem, language in websubmit
-function detectProblemLanguage(filename)
+// Autodetection of problem, language, and entry_point in websubmit
+function detectProblemLanguageEntryPoint(filename)
 {
 	'use strict';
 	var addfile = document.getElementById("addfile");
 	if ( addfile ) addfile.disabled = false;
 
 	var parts = filename.replace(/^.*[\\\/]/, '')
-	            .toLowerCase().split('.').reverse();
+	            .split('.').reverse();
 	if ( parts.length < 2 ) return;
+	var lc_parts = [parts[0].toLowerCase(), parts[1].toLowerCase()];
 
 	// problem ID
 
@@ -271,7 +272,7 @@ function detectProblemLanguage(filename)
 	if ( elt.value !== '' ) return;
 
 	for (var i=0;i<elt.length;i++) {
-		if ( elt.options[i].text.toLowerCase() === parts[1] ) {
+		if ( elt.options[i].text.toLowerCase() === lc_parts[1] ) {
 			elt.selectedIndex = i;
 		}
 	}
@@ -282,13 +283,24 @@ function detectProblemLanguage(filename)
 	// the "autodetect" option has empty value
 	if ( elt.value !== '' ) return;
 
-	var langid = getMainExtension(parts[0]);
+	var langid = getMainExtension(lc_parts[0]);
 	for (var i=0;i<elt.length;i++) {
 		if ( elt.options[i].value === langid ) {
 			elt.selectedIndex = i;
 		}
 	}
 
+	// entry point
+	var elt=document.getElementById('entry_point');
+	// the "autodetect" option has empty value
+	if ( elt == null || elt.value !== '' ) return;
+
+	// FIXME: make this configurable
+	if ( langid == 'java' || langid == 'kt' ) {
+		elt.value = parts[1];
+	} else {
+		elt.value = parts[1] + '.' + parts[0];
+	}
 }
 
 function checkUploadForm()
@@ -389,7 +401,7 @@ function initFileUploads(maxfiles)
 	fileelt.onclick = function() { doReload = false; };
 	fileelt.onchange = fileelt.onmouseout = function () {
 		if ( this.value !== "" ) {
-			detectProblemLanguage(this.value);
+			detectProblemLanguageEntryPoint(this.value);
 		}
 	}
 }

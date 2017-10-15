@@ -98,8 +98,9 @@ int  file_istext(char *filename);
 int  websubmit();
 
 Json::Value doAPIrequest(const char *, int);
-int  getlangexts();
-int  getcontests();
+int getentrypointrequired();
+int getlangexts();
+int getcontests();
 
 /* Helper function for using libcurl in websubmit() and getlangexts() */
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
@@ -159,6 +160,9 @@ vector<vector<string> > languages;
 
 /* Active contests: shortname,name */
 vector<vector<string> > contests;
+
+/* Entry point required? */
+bool require_entry_point;
 
 int main(int argc, char **argv)
 {
@@ -243,13 +247,14 @@ int main(int argc, char **argv)
 		}
 	}
 
+	if ( getentrypointrequired()!=0 ) warning(0,"could not obtain configuration value 'required_entry_point'");
 	if ( getlangexts()!=0 ) warning(0,"could not obtain language extensions");
 	if ( getcontests()!=0 ) warning(0,"could not obtain active contests");
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
 
-	if ( argc<=optind   ) usage2(0,"no file(s) specified");
+	if ( argc<=optind ) usage2(0,"no file(s) specified");
 
 	/* Process all source files */
 	for(i=0; optind+(int)i<argc; i++) {
@@ -332,6 +337,15 @@ int main(int argc, char **argv)
 
 	/* Make sure that baseurl terminates with a '/' for later concatenation. */
 	if ( baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
+
+	/* Guess entry point if not already specified. */
+	if ( entry_point.empty() && require_entry_point ) {
+		if ( language == "Java" || language == "Kotlin" ) {
+			entry_point = filebase;
+		} else {
+			entry_point = filebase + "." + fileext;
+		}
+	}
 
 	logmsg(LOG_DEBUG,"contest is `%s'",contest.c_str());
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
@@ -644,6 +658,18 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 	}
 
 	return result;
+}
+
+int getentrypointrequired()
+{
+	Json::Value res = doAPIrequest("config?name=require_entry_point", 0);
+	if ( res.isNull() || !res.isObject() ) return 1;
+
+	res = res["require_entry_point"];
+	if ( res.isNull() || res.isBool() ) return 1;
+	require_entry_point = res.asBool();
+
+	return 0;
 }
 
 int getlangexts()

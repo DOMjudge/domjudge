@@ -35,7 +35,8 @@ source convert_event_6.0.sql
 --
 -- Add/remove sample/initial contents
 --
-
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
+('require_entry_point', '0', 'bool', 'Require entry point for submissions.');
 
 --
 -- Finally remove obsolete structures after moving data
