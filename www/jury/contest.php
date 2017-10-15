@@ -129,7 +129,7 @@ $(function() {
 </table>
 
 <h3>Problems</h3>
-
+<?php echo addHidden("data[0][mapping][0][items]", ''); ?>
 <?php
 
 $current_problems = $DB->q("TABLE SELECT contestproblem.*, problem.name FROM contestproblem
