@@ -172,7 +172,7 @@ $api->provideFunction('GET', 'user', $doc);
  */
 function problems($args)
 {
-	global $DB, $cdatas, $userdata, $cids;
+	global $DB, $api, $cdatas, $userdata, $cids;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['probid']) ) {
@@ -254,7 +254,7 @@ $api->provideFunction('GET', 'problems', $doc, $args, $exArgs);
  */
 function judgings($args)
 {
-	global $DB, $userdata, $cdatas, $VERDICTS;
+	global $DB, $api, $userdata, $cdatas, $VERDICTS;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['judging_id']) ) {
@@ -1134,7 +1134,7 @@ $api->provideFunction('GET', 'affiliations', $doc, $optArgs, $exArgs);
  */
 function organizations($args)
 {
-	global $DB;
+	global $DB, $api;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['affilid']) ) {
@@ -1262,7 +1262,7 @@ $api->provideFunction('GET', 'categories', $doc, array(), array(), null, true);
  */
 function groups($args)
 {
-	global $DB;
+	global $DB, $api;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['categoryid']) ) {
@@ -1302,7 +1302,7 @@ $api->provideFunction('GET', 'groups', $doc, array(), array(), null, true);
  */
 function languages($args)
 {
-	global $DB;
+	global $DB, $api;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['langid']) ) {
@@ -1341,7 +1341,7 @@ $api->provideFunction('GET', 'languages', $doc, $args);
  */
 function clarifications($args)
 {
-	global $cids, $cdatas, $DB;
+	global $cids, $cdatas, $DB, $api;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['clar_id']) ) {
@@ -1602,7 +1602,7 @@ $api->provideFunction('POST', 'internal_error', $doc, $args, $exArgs, null, true
 
 function judgement_types($args)
 {
-	global $VERDICTS;
+	global $VERDICTS, $api;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['verdict']) ) {
