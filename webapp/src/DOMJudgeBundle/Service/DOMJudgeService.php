@@ -123,7 +123,7 @@ class DOMJudgeService {
 
 		$authchecker = $this->container->get('security.authorization_checker');
 		if ($check_superset) {
-			if ($authchecker->isGranted('ROLE_ADMIN') ||
+			if ($authchecker->isGranted('ROLE_ADMIN') &&
 				($rolename == 'team' && $user->getTeam() != NULL)) {
 					return true;
 			}
