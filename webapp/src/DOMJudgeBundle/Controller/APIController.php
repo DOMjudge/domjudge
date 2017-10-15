@@ -155,9 +155,9 @@ class APIController extends FOSRestController {
 				foreach ($events as $event) {
 					$data = json_decode(stream_get_contents($event['content']));
 					echo json_encode(array(
-						'id'        => $event['eventid'],
-						'type'      => $event['endpointtype'],
-						'op'        => $event['action'],
+						'id'        => (string)$event['eventid'],
+						'type'      => (string)$event['endpointtype'],
+						'op'        => (string)$event['action'],
 						'data'      => $data,
 					)) . "\n";
 					ob_flush();
