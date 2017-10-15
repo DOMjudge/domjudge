@@ -170,8 +170,11 @@ function initialize_events($cid)
 
 	foreach ( $API_endpoints as $endpoint => $ep_info ) {
 		if ( $ep_info['type']==='configuration' && isset($ep_info['url']) ) {
-
-			$json = API_request($ep_info['url']);
+			$url = $ep_info['url'];
+			if ( in_array($endpoint,array('problems','teams')) ) {
+				$url .= '?cid=' . urlencode($cid);
+			}
+			$json = API_request($url);
 			if ( !isset($json) ) error("No response data for endpoint '$endpoint'.");
 
 			$data = dj_json_decode($json);
