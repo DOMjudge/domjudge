@@ -73,69 +73,6 @@ function have_logout()
 	return TRUE;
 }
 
-function do_register() {
-	global $DB, $ip;
-	if ( !dbconfig_get('allow_registration', false) ) {
-		error("Self-Registration is disabled.");
-	}
-	if ( AUTH_METHOD != "PHP_SESSIONS" ) {
-		error("You can only register if the site is using PHP Sessions for authentication.");
-	}
-
-	$login = trim($_POST['login']);
-	$pass = trim($_POST['passwd']);
-	$pass2 = trim($_POST['passwd2']);
-
-	if ( $login == '' || $pass == '') {
-		error("You must enter all fields");
-	}
-
-	if ( !ctype_alnum($login) ) {
-		error("Username must consist of only alphanumeric characters.");
-	}
-
-	if ( $pass != $pass2 ) {
-		error("Your passwords do not match. Please go back and try registering again.");
-	}
-	$user = $DB->q('MAYBETUPLE SELECT * FROM user WHERE username = %s', $login);
-	if ( $user ) {
-		error("That login is already taken.");
-	}
-	$team = $DB->q('MAYBETUPLE SELECT * FROM team WHERE name = %s', $login);
-	if ( $team ) {
-		error("That login is already taken.");
-	}
-
-	// Create the team object
-	$team = array();
-	$team['name'] = $login;
-	$team['categoryid'] = 2; // Self-registered category id
-	$team['enabled'] = 1;
-	$team['comments'] = "Registered by $teamp on " . date('r');
-
-	$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $team);
-	auditlog('team', $teamid, 'registered by ' . $ip);
-
-	// Associate a user with the team we just made
-	$user = array();
-	$user['username'] = $login;
-	$user['password'] = dj_password_hash($pass);
-	$user['name'] = $login;
-	$user['teamid'] = $teamid;
-	$newid = $DB->q("RETURNID INSERT INTO user SET %S", $user);
-	auditlog('user', $newid, 'registered by ' . $ip);
-
-	$DB->q("INSERT INTO `userrole` (`userid`, `roleid`) VALUES ($newid, 3)");
-
-	$title = 'Account Registered';
-	$menu = false;
-
-	require(LIBWWWDIR . '/header.php');
-	echo "<h1>Account registered</h1>\n\n<p><a href=\"./\">Click here to login.</a></p>\n\n";
-	require(LIBWWWDIR . '/footer.php');
-	exit;
-}
-
 function get_user_roles($userid)
 {
 	global $DB;
