@@ -20,7 +20,7 @@ SOURCEDIR="${MAINSOURCE%/*}"
 [ "$SOURCEDIR" = "$MAINSOURCE" ] && SOURCEDIR='.'
 
 # Byte-compile:
-gmcs -o+ -d:ONLINE_JUDGE,DOMJUDGE -out:"$DESTCLI" "$@"
+mcs -o+ -d:ONLINE_JUDGE,DOMJUDGE -out:"$DESTCLI" "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
