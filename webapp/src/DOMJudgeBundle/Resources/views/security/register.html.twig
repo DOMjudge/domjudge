@@ -1,0 +1,37 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Register Account{% endblock %}
+
+{% block body %}
+<h1>Register Account</h1>
+
+<p>Enter the following information to register your account.</p>
+  {{form_start(registration_form)}}
+    {{ form_widget(registration_form._token) }}
+    <div>
+      {{form_errors(registration_form)}}
+      {{form_errors(registration_form.username)}}
+      {{form_errors(registration_form.plainPassword)}}
+    </div>
+    <table>
+      <tr>
+        <td>{{form_label(registration_form.username)}}:</td>
+        <td>{{form_widget(registration_form.username)}}</td>
+      </tr>
+      <tr>
+        <td>{{form_label(registration_form.plainPassword.first)}}:</td>
+        <td>{{form_widget(registration_form.plainPassword.first)}}</td>
+      </tr>
+      <tr>
+        <td>{{form_label(registration_form.plainPassword.second)}}:</td>
+        <td>{{form_widget(registration_form.plainPassword.second)}}</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td><button type="submit">register</button></td>
+      </tr>
+    </table>
+  {{form_end(registration_form)}}
+
+  {% include '::footer.html.twig' %}
+{% endblock %}

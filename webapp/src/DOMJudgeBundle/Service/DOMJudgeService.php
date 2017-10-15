@@ -31,6 +31,35 @@ class DOMJudgeService {
 	}
 
 	/**
+	 * Query configuration variable, with optional default value in case
+	 * the variable does not exist and boolean to indicate if cached
+	 * values can be used.
+	 *
+	 * When $name is null, then all variables will be returned.
+	 */
+	function dbconfig_get($name, $default = null)
+	{
+		if ( is_null ($name) ) {
+			$all_configs = $this->em->getRepository('DOMJudgeBundle:Configuration')->findAll();
+			$ret = array();
+			foreach ( $all_configs as $config ) {
+				$ret[$config->getName()] = $config->getValue();
+			}
+			return $ret;
+		}
+
+		$config = $this->em->getRepository('DOMJudgeBundle:Configuration')->findOneByName($name);
+		if (!empty($config)) {
+			return $config->getValue();
+		}
+
+		if ( $default===null ) {
+			throw new \Exception("Configuration variable '$name' not found.");
+		}
+		return $default;
+	}
+
+	/**
 	 * Will return all the contests that are currently active.
 	 * When fulldata is true, returns the total row as an array
 	 * instead of just the ID (array indices will be contest ID's then).

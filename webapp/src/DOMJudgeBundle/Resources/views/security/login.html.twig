@@ -5,6 +5,12 @@
 {% block body %}
 <h1>Not Authenticated</h1>
 
+{% for message in app.session.flashBag.get('notice') %}
+<div class="flash-notice" style="background:#5bc0de; padding:7px; border-radius: 5px;">
+  {{ message }}
+</div>
+{% endfor %}
+
 <p>
 Please supply your credentials below, or contact a staff member for assistance.
 </p>
@@ -38,6 +44,11 @@ Please supply your credentials below, or contact a staff member for assistance.
       </tr>
     </table>
   </form>
+
+  {% if allow_registration %}
+  <hr style="background:#ddd">
+  <p>Don't have an account? <a href="{{url('register', {}, true)}}">Register now</a>.</p>
+  {% endif %}
 
   {% include '::footer.html.twig' %}
 {% endblock %}

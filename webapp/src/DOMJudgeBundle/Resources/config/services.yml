@@ -9,3 +9,9 @@ services:
     arguments: ['@domjudge.domjudge']
     tags:
         - { name: twig.extension }
+
+  domjudge.user_registration_validator:
+    class: DOMJudgeBundle\Validator\Constraints\UserRegistrationValidator
+    arguments: ["@doctrine.orm.entity_manager"]
+    tags:
+      - { name: validator.constraint_validator }
