@@ -522,6 +522,8 @@ function judge($row)
 	putenv('PROCLIMIT='         . dbconfig_get_rest('process_limit'));
 	if ( $row['entry_point'] !== NULL ) {
 		putenv('ENTRY_POINT=' . $row['entry_point']);
+	} else {
+		putenv('ENTRY_POINT');
 	}
 
 	// Query output storage limit (in database once for this judging.
