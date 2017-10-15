@@ -28,35 +28,46 @@ MEMJVM=65536
 
 MEMRESERVED=$((MEMSTACK + MEMJVM))
 
+# Java needs filename to match main class:
+if [ -z "$ENTRY_POINT" ]; then
+	echo "Info: no ENTRY_POINT provided, trying to detect main class."
+else
+	MAINCLASS="$ENTRY_POINT"
+fi
+
 TMPFILE=$(mktemp --tmpdir domjudge_javac_output.XXXXXX) || exit 1
 
 # Byte-compile:
 javac -encoding UTF-8 -d . "$@" 2> "$TMPFILE"
 EXITCODE=$?
-if [ "$EXITCODE" -ne 0 ]; then
-	# Let's see if should have named the .java differently
-	PUBLICCLASS=$(sed -n -e '/class .* is public, should be declared in a file named /{s/.*file named //;s/\.java.*//;p;q}' "$TMPFILE")
-	if [ -z "$PUBLICCLASS" ]; then
-		cat $TMPFILE
+
+if [ -z "$MAINCLASS" ]; then
+	if [ "$EXITCODE" -ne 0 ]; then
+		# Let's see if should have named the .java differently
+		PUBLICCLASS=$(sed -n -e '/class .* is public, should be declared in a file named /{s/.*file named //;s/\.java.*//;p;q}' "$TMPFILE")
+		if [ -z "$PUBLICCLASS" ]; then
+			cat $TMPFILE
+			rm -f $TMPFILE
+			exit $EXITCODE
+		fi
 		rm -f $TMPFILE
-		exit $EXITCODE
+		echo "Info: renaming main source '$MAINSOURCE' to '$PUBLICCLASS.java'"
+		mv "$MAINSOURCE" "$PUBLICCLASS.java"
+		javac -encoding UTF-8 -d . "$PUBLICCLASS.java"
+		EXITCODE=$?
+		[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 	fi
+
 	rm -f $TMPFILE
-	echo "Info: renaming main source '$MAINSOURCE' to '$PUBLICCLASS.java'"
-	mv "$MAINSOURCE" "$PUBLICCLASS.java"
-	javac -encoding UTF-8 -d . "$PUBLICCLASS.java"
+
+	# Look for class that has the 'main' function:
+	CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
+	            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
+	COMPILESCRIPTDIR="$(dirname "$0")"
+	MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
 	EXITCODE=$?
-	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi
 
-rm -f $TMPFILE
-
-# Look for class that has the 'main' function:
-CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
-            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
-COMPILESCRIPTDIR="$(dirname "$0")"
-MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
-EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:

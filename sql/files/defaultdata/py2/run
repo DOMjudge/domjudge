@@ -14,7 +14,7 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
-MAINSOURCE="$1"
+MAINSOURCE="${ENTRY_POINT:-$1}"
 
 # Check syntax
 python2 -m py_compile "$@"

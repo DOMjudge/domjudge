@@ -26,24 +26,17 @@ MEMJVM=65536
 MEMRESERVED=$((MEMSTACK + MEMJVM))
 
 # Java needs filename to match main class:
-MAINCLASS=Main
-
-SOURCEDIR="${MAINSOURCE%/*}"
-[ "$SOURCEDIR" = "$MAINSOURCE" ] && SOURCEDIR='.'
-TMP="$SOURCEDIR/$MAINCLASS"
-
-cp "$MAINSOURCE" "$TMP.java"
+if [ -z "$ENTRY_POINT" ]; then
+	echo "Info: no ENTRY_POINT provided, assuming 'Main'."
+	MAINCLASS="Main"
+else
+	MAINCLASS="$ENTRY_POINT"
+fi
 
 # Byte-compile:
 javac -encoding UTF-8 -d . "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
-
-# Check for class file:
-if [ ! -f "$TMP.class" ]; then
-	echo "Error: byte-compiled class file '$TMP.class' not found."
-	exit 1
-fi
 
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
 MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))

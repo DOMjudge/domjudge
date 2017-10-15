@@ -27,20 +27,26 @@ MEMJVM=65536
 
 MEMRESERVED=$((MEMSTACK + MEMJVM))
 
-TMPFILE=$(mktemp --tmpdir domjudge_javac_output.XXXXXX) || exit 1
+# Allow overriding Kotlin main class (should not be necessary):
+if [ -n "$ENTRY_POINT" ]; then
+	echo "Info: using main class provided by ENTRY_POINT='$ENTRY_POINT'."
+	MAINCLASS="$ENTRY_POINT"
+fi
 
 # Byte-compile:
 kotlinc "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
-# Look for class that has the 'main' function:
-CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
-            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
-COMPILESCRIPTDIR="$(dirname "$0")"
-MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
-EXITCODE=$?
-[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+if [ -z "$MAINCLASS" ]; then
+	# Look for class that has the 'main' function:
+	CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
+	            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
+	COMPILESCRIPTDIR="$(dirname "$0")"
+	MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
+	EXITCODE=$?
+	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+fi
 
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
 MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
