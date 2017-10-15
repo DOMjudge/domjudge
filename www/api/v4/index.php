@@ -267,7 +267,11 @@ function judgings($args)
 	          FROM judging j
 	          LEFT JOIN contest c USING (cid)
 	          LEFT JOIN submission s USING (submitid)
-	          WHERE s.submittime < c.endtime';
+	          WHERE TRUE ';
+
+	if ( !(checkrole('admin') || checkrole('judgehost')) ) {
+		$query .= ' AND s.submittime < c.endtime';
+	}
 
 	$result = 0;
 	if ( array_key_exists('result', $args) ) {
