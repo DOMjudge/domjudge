@@ -1178,7 +1178,7 @@ $api->provideFunction('GET', 'organizations', $doc, $optArgs, $exArgs);
  */
 function teams($args)
 {
-	global $DB;
+	global $DB, $api;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['teamid']) ) {
@@ -1189,11 +1189,21 @@ function teams($args)
 
 	// Construct query
 	$query = 'TABLE SELECT teamid AS id, t.name, t.members, t.externalid, a.country AS nationality,
-	          t.categoryid AS category, c.name AS `group`, a.affilid, a.name AS affiliation
+	          t.categoryid AS category, c.name AS `group`, a.affilid, a.name AS affiliation,
+	          ct.cid
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
 	          LEFT JOIN team_category c USING (categoryid)
+	          LEFT JOIN contestteam ct USING (teamid)
 	          WHERE t.enabled = 1';
+
+	if ( array_key_exists('cid', $args) ) {
+		$public = $DB->q('MAYBEVALUE SELECT public FROM contest WHERE cid = %i', $args['cid']);
+		if ( !isset($public) ) {
+			$api->createError("Invalid contest ID '" . $args['cid'] . "'");
+		}
+		if ( !$public ) $query .= ' AND cid IS NOT NULL';
+	}
 
 	$byCategory = array_key_exists('category', $args);
 	$query .= ($byCategory ? ' AND categoryid = %i' : ' %_');
@@ -1228,7 +1238,8 @@ function teams($args)
 		);
 	}, $tdatas);
 }
-$args = array('category' => 'ID of a single category/group to search for.',
+$args = array('cid' => 'ID of a contest that teams should be part of.',
+              'category' => 'ID of a single category/group to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
               'teamid' => 'Search for a specific team.');
 $doc = 'Get a list of teams containing teamid, name, group and affiliation.';
