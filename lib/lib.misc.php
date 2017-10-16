@@ -862,83 +862,85 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null,
 /* Mapping from REST API endpoints to relevant information:
  * - type: one of 'configuration', 'live', 'aggregate'
  * - url: REST API URL of endpoint relative to baseurl, defaults to '/<endpoint>'
- * - table: database table associated to data, defaults to <endpoint> without 's'
+ * - tables: array of database table(s) associated to data, defaults to <endpoint> without 's'
  * - extid: database field for external/API ID, if TRUE same as internal/DB ID.
  *
  */
 $API_endpoints = array(
 	'contest' => array( // Note special case singular noun.
-		'type'  => 'configuration',
-		'url'   => '/',
-		'extid' => TRUE, //'shortname',
+		'type'   => 'configuration',
+		'url'    => '/',
+		'extid'  => TRUE, //'shortname',
 	),
 	'clarifications' => array(
-		'type'  => 'live',
-		'extid' => TRUE,
+		'type'   => 'live',
+		'extid'  => TRUE,
 	),
 	'languages' => array(
-		'type'  => 'configuration',
-		'extid' => TRUE, // FIXME
+		'type'   => 'configuration',
+		'extid'  => TRUE, // FIXME
 	),
 	'problems' => array(
-		'type'  => 'configuration',
-		'extid' => TRUE, // FIXME
+		'type'   => 'configuration',
+		'tables' => array('problem', 'contestproblem'),
+		'extid'  => TRUE, // FIXME
 	),
 	'teams' => array(
-		'type'  => 'configuration',
-		'extid' => TRUE, // 'externalid'
+		'type'   => 'configuration',
+		'tables' => array('team', 'contestteam'),
+		'extid'  => TRUE, // 'externalid'
 	),
 	'organizations' => array(
-		'type'  => 'configuration',
-		'table' => 'team_affiliation',
-		'extid' => TRUE, //'shortname', // 'externalid'
+		'type'   => 'configuration',
+		'tables' => array('team_affiliation'),
+		'extid'  => TRUE, //'shortname', // 'externalid'
 	),
 	'groups' => array(
-		'type'  => 'configuration',
-		'table' => 'team_category',
-		'extid' => TRUE, // FIXME
+		'type'   => 'configuration',
+		'tables' => array('team_category'),
+		'extid'  => TRUE, // FIXME
 	),
 	'submissions' => array(
-		'type'  => 'live',
-		'extid' => TRUE, // FIXME: 'externalid' in ICPC-live branch
+		'type'   => 'live',
+		'extid'  => TRUE, // FIXME: 'externalid' in ICPC-live branch
 	),
 	'judgement-types' => array( // hardcoded in $VERDICTS and the API
-		'type'  => 'configuration',
-		'table' => NULL,
-		'extid' => TRUE,
+		'type'   => 'configuration',
+		'tables' => array(),
+		'extid'  => TRUE,
 	),
 	'judgements' => array(
-		'type'  => 'live',
-		'table' => 'judging',
-		'extid' => TRUE,
+		'type'   => 'live',
+		'tables' => array('judging'),
+		'extid'  => TRUE,
 	),
 	'runs' => array(
-		'type'  => 'live',
-		'table' => 'judging_run',
-		'extid' => TRUE,
+		'type'   => 'live',
+		'tables' => array('judging_run'),
+		'extid'  => TRUE,
 	),
 	'awards' => array(
-		'type'  => 'aggregate',
-		'table' => NULL,
+		'type'   => 'aggregate',
+		'tables' => array(),
 	),
 	'scoreboard' => array(
-		'type'  => 'aggregate',
-		'table' => NULL,
+		'type'   => 'aggregate',
+		'tables' => array(),
 	),
 	'event-feed' => array(
-		'type'  => 'aggregate',
-		'table' => 'event',
+		'type'   => 'aggregate',
+		'tables' => array('event'),
 	),
 	// From here are DOMjudge extensions:
 	'users' => array(
-		'type'  => 'configuration',
-		'url'   => NULL,
-		'extid' => TRUE,
+		'type'   => 'configuration',
+		'url'    => NULL,
+		'extid'  => TRUE,
 	),
 	'testcases' => array(
-		'type'  => 'configuration',
-		'url'   => NULL,
-		'extid' => TRUE,
+		'type'   => 'configuration',
+		'url'    => NULL,
+		'extid'  => TRUE,
 	),
 );
 // Add defaults to mapping:
@@ -946,8 +948,8 @@ foreach ( $API_endpoints as $endpoint => $data ) {
 	if ( !array_key_exists('url', $data) ) {
 		$API_endpoints[$endpoint]['url'] = '/'.$endpoint;
 	}
-	if ( !array_key_exists('table', $data) ) {
-		$API_endpoints[$endpoint]['table'] = preg_replace('/s$/', '', $endpoint);
+	if ( !array_key_exists('tables', $data) ) {
+		$API_endpoints[$endpoint]['tables'] = array( preg_replace('/s$/', '', $endpoint) );
 	}
 }
 
@@ -964,8 +966,8 @@ function extid($endpoint, $intid)
 	if ( $ep['extid']===TRUE ) return $intid;
 
 	$extid = $DB->q('MAYBEVALUE SELECT `' . $ep['extid'] . '`
-	                 FROM `' . $ep['table'] . '`
-	                 WHERE `' . $KEYS[$ep['table']][0] . '` = %s',
+	                 FROM `' . $ep['tables'][0] . '`
+	                 WHERE `' . $KEYS[$ep['tables'][0]][0] . '` = %s',
 	                $intid);
 
 	return $extid;
@@ -983,10 +985,12 @@ function intid($endpoint, $extid)
 
 	if ( $ep['extid']===TRUE ) return $extid;
 
+	if ( !$ep['tables'] ) error("no database table known for $endpoint");
+
 	// FIXME: may not be unique, need cid?
-	$intid = $DB->q('MAYBEVALUE SELECT `' . $KEYS[$ep['table']][0] . '`
-	                 FROM `' . $ep['table'] . '`
-	                 WHERE `' . $ep['extid'] . '` = %s',
+	$intid = $DB->q('MAYBEVALUE SELECT `' . $KEYS[$ep['tables']][0] . '`
+	                 FROM `' . $ep['tables'][0] . '`
+	                 WHERE `' . $ep['extid'][0] . '` = %s',
 	                $extid);
 
 	return $intid;
@@ -1021,10 +1025,10 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	if ( array_key_exists($type,$API_endpoints) ) {
 		$endpoint = $API_endpoints[$type];
 	} else {
-		foreach ( $API_endpoints as $key => $val ) {
-			if ( $type===$val['table'] ) {
+		foreach ( $API_endpoints as $key => $ep ) {
+			if ( in_array($type, $ep['tables'], TRUE) ) {
 				$type = $key;
-				$endpoint = $API_endpoints[$type];
+				$endpoint = $ep;
 				break;
 			}
 		}
@@ -1056,8 +1060,17 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	if ( $cid!==null ) {
 		$cids[] = $cid;
 	} else {
-		// Here we should take into account dependence between cid and team/problem
-		$cids = getCurContests();
+		if ( $type==='problems' ) {
+			$cids = $DB->q('TABLE SELECT cid FROM contestproblem WHERE probid = %i', $dataid);
+		} elseif( $type==='teams' ) {
+			$cids = getCurContests(FALSE, $dataid);
+		} else {
+			$cids = getCurContests();
+		}
+	}
+	if ( count($cids)==0 ) {
+		logmsg(LOG_INFO,"eventlog: no active contests associated to update.");
+		return;
 	}
 
 	// Generate JSON content if not set, always use "null" for deletes.
@@ -1086,6 +1099,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	// TODO: can this be wrapped into a single query?
 	$ids = array();
 	foreach ( $cids as $cid ) {
+		$table = ( $endpoint['tables'] ? $endpoint['tables'][0] : NULL );
 		$eventid = $DB->q('RETURNID INSERT INTO event
 		                   (eventtime, cid, endpointtype, endpointid,
 		                   datatype, dataid, action, content)
@@ -1094,7 +1108,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		                   FROM event WHERE cid = %i
 		                   ORDER BY eventid DESC LIMIT 1',
 		                  $now, $cid, $type, $id,
-		                  $endpoint['table'], $dataid, $action, $json,
+		                  $table, $dataid, $action, $json,
 		                  $cid);
 		$ids[] = $eventid;
 	}
