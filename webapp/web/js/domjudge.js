@@ -296,8 +296,10 @@ function detectProblemLanguageEntryPoint(filename)
 	if ( elt == null || elt.value !== '' ) return;
 
 	// FIXME: make this configurable
-	if ( langid == 'java' || langid == 'kt' ) {
+	if ( langid == 'java' ) {
 		elt.value = parts[1];
+	else if (langid == 'kt' ) {
+		elt.value = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
 	} else {
 		elt.value = parts[1] + '.' + parts[0];
 	}

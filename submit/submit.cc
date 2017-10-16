@@ -340,8 +340,11 @@ int main(int argc, char **argv)
 
 	/* Guess entry point if not already specified. */
 	if ( entry_point.empty() && require_entry_point ) {
-		if ( language == "Java" || language == "Kotlin" ) {
+		if ( language == "Java" ) {
 			entry_point = filebase;
+		} else if ( language == "Kotlin" ) {
+			entry_point = filebase + "Kt";
+			entry_point[0] = toupper(entry_point[0]);
 		} else {
 			entry_point = filebase + "." + fileext;
 		}
