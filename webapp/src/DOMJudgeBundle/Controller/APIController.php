@@ -137,18 +137,23 @@ class APIController extends FOSRestController {
 	 */
 	public function getEventFeed() {
 		$em = $this->getDoctrine()->getManager();
+		$contest = $this->getCurrentActiveContest();
+		if ($contest === NULL) {
+			return new Response('No active contest.', 404);
+		}
 		$response = new StreamedResponse();
 		$response->headers->set('X-Accel-Buffering', 'no');
-		$response->setCallback(function () use ($em) {
+		$response->setCallback(function () use ($em, $contest) {
 			$lastUpdate = 0;
 			$lastIdSent = -1;
 			while (TRUE) {
-				// FIXME: filter for contest
 				$q = $em->createQueryBuilder()
 					->from('DOMJudgeBundle:Event', 'e')
 					->select('e.eventid,e.eventtime,e.endpointtype,e.endpointid,e.datatype,e.dataid,e.action,e.content')
 					->where('e.eventid > :lastIdSent')
 					->setParameter('lastIdSent', $lastIdSent)
+					->andWhere('e.cid = :cid')
+					->setParameter('cid', $contest['id'])
 					->orderBy('e.eventid', 'ASC')
 					->getQuery();
 				$events = $q->getResult();
