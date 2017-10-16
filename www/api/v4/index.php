@@ -184,10 +184,10 @@ function problems($args)
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
 	} else {
-		if ( count($cids)==1 ) {
+		if ( count($cids)>=1 ) {
 			$cid = reset($cids);
 		} else {
-			$api->createError("No contest ID specified but active contest is ambiguous.");
+			$api->createError("No active contest found.", NOT_FOUND);
 		}
 	}
 
@@ -254,7 +254,7 @@ $api->provideFunction('GET', 'problems', $doc, $args, $exArgs);
  */
 function judgings($args)
 {
-	global $DB, $api, $userdata, $cdatas, $VERDICTS;
+	global $DB, $api, $userdata, $cdatas, $cids, $VERDICTS;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['judging_id']) ) {
@@ -263,11 +263,21 @@ function judgings($args)
 		$args['judging_id'] = $args['__primary_key'];
 	}
 
+	if ( isset($args['cid']) ) {
+		$cid = safe_int($args['cid']);
+	} else {
+		if ( count($cids)>=1 ) {
+			$cid = reset($cids);
+		} else {
+			$api->createError("No active contest found.", NOT_FOUND);
+		}
+	}
+
 	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime
 	          FROM judging j
 	          LEFT JOIN contest c USING (cid)
 	          LEFT JOIN submission s USING (submitid)
-	          WHERE TRUE ';
+	          WHERE j.cid = %i';
 
 	if ( !(checkrole('admin') || checkrole('judgehost')) ) {
 		$query .= ' AND s.submittime < c.endtime';
@@ -292,10 +302,6 @@ function judgings($args)
 		$teamid = 0;
 	}
 
-	$hasCid = array_key_exists('cid', $args);
-	$query .= ($hasCid ? ' AND cid = %i' : ' %_');
-	$cid = ($hasCid ? $args['cid'] : 0);
-
 	$hasJudgingid = array_key_exists('judging_id', $args);
 	$query .= ($hasJudgingid ? ' AND judgingid = %i' : ' %_');
 	$judgingid = ($hasJudgingid ? $args['judging_id'] : 0);
@@ -306,7 +312,7 @@ function judgings($args)
 
 	$query .= ' ORDER BY judgingid';
 
-	$q = $DB->q($query, $result, $teamid, $cid, $judgingid, $submitid);
+	$q = $DB->q($query, $cid, $result, $teamid, $judgingid, $submitid);
 
 	$res = array();
 	while ( $row = $q->next() ) {
@@ -324,7 +330,7 @@ function judgings($args)
 	return $res;
 }
 $doc = 'Get all or selected judgings. This includes those post-freeze, so currently limited to jury, or as a team but then restricted your own submissions.';
-$args = array('cid' => 'Contest ID. If not provided, get judgings of all active contests',
+$args = array('cid' => 'Contest ID. If not provided, get judgings of current contest.',
               'result' => 'Search only for judgings with a certain result',
               'judging_id' => 'Search only for a certain ID',
               'submission_id' => 'Search only for judgings associated to this submission ID');
@@ -723,10 +729,7 @@ $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
  */
 function submissions($args)
 {
-	global $DB, $cdatas, $api;
-
-	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid, entry_point
-	          FROM submission WHERE valid=1';
+	global $DB, $cdatas, $cids, $api;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['id']) ) {
@@ -735,9 +738,18 @@ function submissions($args)
 		$args['id'] = $args['__primary_key'];
 	}
 
-	$hasCid = array_key_exists('cid', $args);
-	$query .= ($hasCid ? ' AND cid = %i' : ' %_');
-	$cid = ($hasCid ? $args['cid'] : 0);
+	if ( isset($args['cid']) ) {
+		$cid = safe_int($args['cid']);
+	} else {
+		if ( count($cids)>=1 ) {
+			$cid = reset($cids);
+		} else {
+			$api->createError("No active contest found.", NOT_FOUND);
+		}
+	}
+
+	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid, entry_point
+	          FROM submission WHERE valid = 1 AND cid = %i';
 
 	$hasLanguage = array_key_exists('language_id', $args);
 	$query .= ($hasLanguage ? ' AND langid = %s' : ' %_');
@@ -747,13 +759,9 @@ function submissions($args)
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' %_');
 	$submitid = ($hasSubmitid ? $args['id'] : 0);
 
-	if ( !$hasSubmitid && $cid == 0 && !checkrole('jury') ) {
-		$api->createError("argument 'id' or 'cid' is mandatory for non-jury users");
-	}
-
 	$teamid = 0;
 	$freezetime = 0;
-	if ( $cid != 0 && infreeze($cdatas[$cid], now()) && !checkrole('jury') ) {
+	if ( infreeze($cdatas[$cid], now()) && !checkrole('jury') ) {
 		$query .= ' AND ( submittime <= %i';
 		$freezetime = $cdatas[$cid]['freezetime'];
 		if ( checkrole('team') ) {
@@ -786,7 +794,7 @@ function submissions($args)
 	}
 	return $res;
 }
-$args = array('cid' => 'Contest ID. If not provided, get submissions of all active contests',
+$args = array('cid' => 'Contest ID. If not provided, get submissions of current contest.',
               'language_id' => 'Search only for submissions in a certain language.',
               'id' => 'Search only a certain ID');
 $doc = 'Get a list of all valid submissions.';
@@ -1041,7 +1049,7 @@ $api->provideFunction('GET', 'queue', $doc, $args, $exArgs, $roles);
  */
 function runs($args)
 {
-	global $DB, $cdatas, $VERDICTS;
+	global $DB, $cdatas, $cids, $api, $VERDICTS;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['run_id']) ) {
@@ -1050,11 +1058,21 @@ function runs($args)
 		$args['run_id'] = $args['__primary_key'];
 	}
 
+	if ( isset($args['cid']) ) {
+		$cid = safe_int($args['cid']);
+	} else {
+		if ( count($cids)>=1 ) {
+			$cid = reset($cids);
+		} else {
+			$api->createError("No active contest found.", NOT_FOUND);
+		}
+	}
+
 	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid
-		  FROM judging_run jr
-		  LEFT JOIN testcase USING (testcaseid)
-		  LEFT JOIN judging USING (judgingid)
-		  WHERE TRUE';
+	          FROM judging_run jr
+	          LEFT JOIN testcase USING (testcaseid)
+	          LEFT JOIN judging USING (judgingid)
+	          WHERE cid = %i';
 
 	$hasFirstId = array_key_exists('first_id', $args);
 	$query .= ($hasFirstId ? ' AND runid >= %i' : ' AND TRUE %_');
@@ -1077,7 +1095,7 @@ function runs($args)
 	$limit = ($hasLimit ? $args['limit'] : -1);
 	// TODO: validate limit
 
-	$runs = $DB->q($query, $firstId, $lastId, $judgingid, $runid, $limit);
+	$runs = $DB->q($query, $cid, $firstId, $lastId, $judgingid, $runid, $limit);
 	return array_map(function($run) use ($VERDICTS, $cdatas) {
 		return array(
 			'id'                => safe_int($run['runid']),
@@ -1090,7 +1108,8 @@ function runs($args)
 	}, $runs);
 }
 $doc = 'Get all or selected runs.';
-$args = array('first_id' => 'Search from a certain ID',
+$args = array('cid' => 'Contest ID. If not provided, get runs in current contest.',
+              'first_id' => 'Search from a certain ID',
               'last_id' => 'Search up to a certain ID',
               'run_id' => 'Search only for a certain ID',
               'judging_id' => 'Search only for runs associated to this judging ID',
@@ -1181,13 +1200,23 @@ $api->provideFunction('GET', 'organizations', $doc, $optArgs, $exArgs);
  */
 function teams($args)
 {
-	global $DB, $api;
+	global $DB, $api, $cids;
 
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['teamid']) ) {
 			$api->createError("You cannot specify a primary ID both via /{id} and ?teamid={id}");
 		}
 		$args['teamid'] = $args['__primary_key'];
+	}
+
+	if ( isset($args['cid']) ) {
+		$cid = safe_int($args['cid']);
+	} else {
+		if ( count($cids)>=1 ) {
+			$cid = reset($cids);
+		} else {
+			$api->createError("No active contest found.", NOT_FOUND);
+		}
 	}
 
 	// Construct query
@@ -1200,13 +1229,11 @@ function teams($args)
 	          LEFT JOIN contestteam ct USING (teamid)
 	          WHERE t.enabled = 1';
 
-	if ( array_key_exists('cid', $args) ) {
-		$public = $DB->q('MAYBEVALUE SELECT public FROM contest WHERE cid = %i', $args['cid']);
-		if ( !isset($public) ) {
-			$api->createError("Invalid contest ID '" . $args['cid'] . "'");
-		}
-		if ( !$public ) $query .= ' AND cid IS NOT NULL';
+	$public = $DB->q('MAYBEVALUE SELECT public FROM contest WHERE cid = %i', $cid);
+	if ( !isset($public) ) {
+		$api->createError("Invalid contest ID '$cid'.");
 	}
+	if ( !$public ) $query .= ' AND cid IS NOT NULL';
 
 	$byCategory = array_key_exists('category', $args);
 	$query .= ($byCategory ? ' AND categoryid = %i' : ' %_');
@@ -1241,7 +1268,7 @@ function teams($args)
 		);
 	}, $tdatas);
 }
-$args = array('cid' => 'ID of a contest that teams should be part of.',
+$args = array('cid' => 'ID of a contest that teams should be part of, defaults to current contest.',
               'category' => 'ID of a single category/group to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
               'teamid' => 'Search for a specific team.');
@@ -1364,8 +1391,15 @@ function clarifications($args)
 		$args['clar_id'] = $args['__primary_key'];
 	}
 
-	$cid = isset($args['cid']) ? $args['cid'] : reset($cids);
-	if ( !isset($cid) ) return array();
+	if ( isset($args['cid']) ) {
+		$cid = safe_int($args['cid']);
+	} else {
+		if ( count($cids)>=1 ) {
+			$cid = reset($cids);
+		} else {
+			$api->createError("No active contest found.", NOT_FOUND);
+		}
+	}
 
 	// Find clarifications, maybe later also provide more info for jury
 	$query = 'TABLE SELECT clarid, submittime, probid, body, cid, sender, recipient
@@ -1394,7 +1428,7 @@ function clarifications($args)
 	}, $clar_datas);
 }
 $doc = 'Get a list of clarifications.';
-$args = array('cid' => 'Search clarifications for a specific contest, defaults to first active one.',
+$args = array('cid' => 'Search clarifications for a specific contest, defaults to current contest.',
               'problem' => 'Search for clarifications about a specific problem.');
 $exArgs = array(array('problem' => 'H'));
 $roles = array('jury');
