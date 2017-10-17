@@ -197,11 +197,11 @@ function problems($args)
 	     (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0) ) {
 
 		$query = 'TABLE SELECT probid AS id, shortname AS label, shortname, name, color,
-		                  COUNT(testcaseid) AS test_data_count
-		                  FROM problem
-		                  INNER JOIN contestproblem USING (probid)
-				  JOIN testcase USING (probid)
-				  WHERE cid = %i AND allow_submit = 1';
+		                       COUNT(testcaseid) AS test_data_count
+		          FROM problem
+		          INNER JOIN contestproblem USING (probid)
+		          LEFT JOIN testcase USING (probid)
+		          WHERE cid = %i AND allow_submit = 1';
 
 		$byProbId = array_key_exists('probid', $args);
 		$query .= ($byProbId ? ' AND probid = %i' : ' %_');
