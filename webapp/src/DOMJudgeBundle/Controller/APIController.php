@@ -163,6 +163,7 @@ class APIController extends FOSRestController {
 						'id'        => (string)$event['eventid'],
 						'type'      => (string)$event['endpointtype'],
 						'op'        => (string)$event['action'],
+						'time'      => Utils::absTime($event['eventtime']),
 						'data'      => $data,
 					)) . "\n";
 					ob_flush();
