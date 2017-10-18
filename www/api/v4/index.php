@@ -320,7 +320,7 @@ function judgings($args)
 		$res[] = array(
 			'id'                 => safe_int($row['judgingid']),
 			'submission_id'      => safe_int($row['submitid']),
-			'judgement_type_id'  => empty($srow['result']) ? null : $VERDICTS[$row['result']],
+			'judgement_type_id'  => empty($row['result']) ? null : $VERDICTS[$row['result']],
 			'start_time'         => Utils::absTime($row['starttime']),
 			'start_contest_time' => Utils::relTime($row['starttime'] - $cdatas[$row['cid']]['starttime']),
 			'end_time'           => empty($row['endtime']) ? null : Utils::absTime($row['endtime']),
