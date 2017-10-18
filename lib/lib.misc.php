@@ -867,7 +867,7 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null,
  *
  */
 $API_endpoints = array(
-	'contest' => array( // Note special case singular noun.
+	'contests' => array(
 		'type'   => 'configuration',
 		'url'    => '/',
 		'extid'  => TRUE, //'shortname',
@@ -1077,7 +1077,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	if ( $action === 'delete' ) {
 		$json = 'null';
 	} elseif ( $json === null ) {
-		if ( $type === 'contest' ) {
+		if ( $type === 'contests' ) {
 			$url = $endpoint['url'];
 		} else {
 			$url = $endpoint['url'].'/'.$id;
