@@ -529,7 +529,7 @@ function putProblemText($probid)
 		$probname = $prob['shortname'];
 	}
 
-	if ( empty($prob) || !problemVisible($probid) ) {
+	if ( empty($prob) || (!IS_JURY && !problemVisible($probid)) ) {
 		error("Problem p$probid not found or not available");
 	}
 
