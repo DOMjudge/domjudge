@@ -825,7 +825,7 @@ class Contest
 	 *
 	 * @return array
 	 */
-	public function serializeForAPI()
+	public function serializeForAPI($penalty_time)
 	{
 		$fdata = $this->calcFreezeData();
 		$state = array(
@@ -844,7 +844,7 @@ class Contest
 			'end_time'                   => Utils::absTime($this->getEndtime()),
 			'duration'                   => Utils::relTime($this->getEndtime() - $this->getStarttime()),
 			'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
-			'penalty'                    => 20, // FIXME
+			'penalty_time'               => (int)$penalty_time,
 			'state'                      => $state,
 		];
 	}
@@ -861,7 +861,7 @@ class Contest
 	/**
 	 * Helper function to filter active contests.
 	 */
-	public function filterActiveContests($data) {
+	public function filterActiveContests($data, $penalty_time) {
 		$filtered_data = [];
 		foreach ($data as $contest) {
 			if ($contest->isActive()) {
@@ -870,8 +870,8 @@ class Contest
 		}
 
 		return array_map(
-			function(Contest $contest) {
-				return $contest->serializeForAPI();
+			function(Contest $contest) use ($penalty_time) {
+				return $contest->serializeForAPI($penalty_time);
 			},
 			$filtered_data
 		);

@@ -118,7 +118,7 @@ class APIController extends FOSRestController {
 			)
 		);
 
-		return Contest::filterActiveContests($data);
+		return Contest::filterActiveContests($data, $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20));
 	}
 
 	/**
