@@ -239,7 +239,7 @@ function problems($args)
 			'ordinal'    => safe_int($pdata['ordinal']),
 		);
 		if ( $is_jury ) {
-			$ret['test_data_count'] = $pdata['test_data_count'];
+			$ret['test_data_count'] = safe_int($pdata['test_data_count']);
 		}
 		return $ret;
 	}, $pdatas);
