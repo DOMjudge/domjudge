@@ -231,11 +231,28 @@ function judgings($args)
 {
 	global $DB, $userdata;
 
-	$query = 'SELECT submitid, judgingid, eventtime FROM event WHERE description = "problem judged"';
+	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime
+	          FROM judging j
+	          LEFT JOIN contest c USING (cid)
+	          LEFT JOIN submission s USING (submitid)
+	          WHERE TRUE';
 
-	// Note that we rely on the events table not listing judgings of
-	// submissions that were received too late.
-	if ( ! checkrole('jury') ) { // This implies we must be a team
+	if ( !(checkrole('admin') || checkrole('judgehost')) ) {
+		$query .= ' AND s.submittime < c.endtime';
+	}
+
+	$result = 0;
+	if ( array_key_exists('result', $args) ) {
+		$query .= ' AND result = %s';
+		$result = $args['result'];
+	} else {
+		$query .= ' %_';
+		if ( !(checkrole('admin') || checkrole('judgehost')) ) {
+			$query .= ' AND result IS NOT NULL';
+		}
+	}
+
+	if ( ! (checkrole('jury') || checkrole('judgehost')) ) { // This implies we must be a team
 		$query .= ' AND teamid = %i';
 		$teamid = $userdata['teamid'];
 	} else {
@@ -244,7 +261,7 @@ function judgings($args)
 	}
 
 	$hasCid = array_key_exists('cid', $args);
-	$query .= ($hasCid ? ' AND cid = %i' : ' %_');
+	$query .= ($hasCid ? ' AND j.cid = %i' : ' %_');
 	$cid = ($hasCid ? $args['cid'] : 0);
 
 	$hasFromid = array_key_exists('fromid', $args);
@@ -259,29 +276,26 @@ function judgings($args)
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' %_');
 	$submitid = ($hasSubmitid ? $args['submitid'] : 0);
 
-	$query .= ' ORDER BY eventid';
+	$query .= ' ORDER BY judgingid';
 
 	$hasLimit = array_key_exists('limit', $args);
 	$query .= ($hasLimit ? ' LIMIT %i' : ' %_');
 	$limit = ($hasLimit ? $args['limit'] : -1);
 	// TODO: validate limit
 
-	$q = $DB->q($query, $teamid, $cid, $fromId, $judgingid, $submitid, $limit);
+	try {
+		$q = $DB->q($query, $result, $teamid, $cid, $fromId, $judgingid, $submitid, $limit);
+	} catch ( Exception $e ) {
+		var_dump($e->getMessage());
+	}
+
 	$res = array();
 	while ( $row = $q->next() ) {
-		$data = $DB->q('MAYBETUPLE SELECT s.submittime, j.result FROM judging j
-		                LEFT JOIN submission s USING (submitid)
-		                WHERE j.judgingid = %i', $row['judgingid']);
-		if ($data == NULL) continue;
-
-		// This should be encoded directly in the query
-		if ( array_key_exists('result', $args) &&
-		     $args['result'] != $data['result'] ) continue;
 
 		$res[] = array('id'         => safe_int($row['judgingid']),
 		               'submission' => safe_int($row['submitid']),
-		               'outcome'    => $data['result'],
-		               'time'       => safe_float($row['eventtime'],3));
+		               'outcome'    => $row['result'],
+		               'time'       => safe_float($row['endtime'],3));
 	}
 	return $res;
 }
