@@ -230,8 +230,8 @@ function problems($args)
 	$is_jury = checkrole('jury');
 	return array_map(function($pdata) use ($is_jury) {
 		$ret = array(
-			'id'         => safe_int($pdata['id']),
-			'label'      => $pdata['label'],
+			'id'         => safe_string($pdata['id']),
+			'label'      => safe_string($pdata['label']),
 			'short_name' => $pdata['shortname'],
 			'name'       => $pdata['name'],
 			'rgb'        => $pdata['rgb'],
@@ -318,8 +318,8 @@ function judgings($args)
 	while ( $row = $q->next() ) {
 
 		$res[] = array(
-			'id'                 => safe_int($row['judgingid']),
-			'submission_id'      => safe_int($row['submitid']),
+			'id'                 => safe_string($row['judgingid']),
+			'submission_id'      => safe_string($row['submitid']),
 			'judgement_type_id'  => empty($row['result']) ? null : $VERDICTS[$row['result']],
 			'start_time'         => Utils::absTime($row['starttime']),
 			'start_contest_time' => Utils::relTime($row['starttime'] - $cdatas[$row['cid']]['starttime']),
@@ -781,14 +781,14 @@ function submissions($args)
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
-			'id'           => safe_int($row['submitid']),
-			'label'        => safe_int($row['submitid']),
-			'team_id'      => safe_int($row['teamid']),
-			'problem_id'   => safe_int($row['probid']),
-			'language_id'  => $row['langid'],
+			'id'           => safe_string($row['submitid']),
+			'label'        => safe_string($row['submitid']),
+			'team_id'      => safe_string($row['teamid']),
+			'problem_id'   => safe_string($row['probid']),
+			'language_id'  => safe_string($row['langid']),
 			'time'         => Utils::absTime($row['submittime']),
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
-			'contest_id'   => safe_int($row['cid']),
+			'contest_id'   => safe_string($row['cid']),
 			'entry_point'  => $row['entry_point'],
 			);
 	}
@@ -1098,10 +1098,10 @@ function runs($args)
 	$runs = $DB->q($query, $cid, $firstId, $lastId, $judgingid, $runid, $limit);
 	return array_map(function($run) use ($VERDICTS, $cdatas) {
 		return array(
-			'id'                => safe_int($run['runid']),
-			'judgement_id'      => safe_int($run['judgingid']),
+			'id'                => safe_string($run['runid']),
+			'judgement_id'      => safe_string($run['judgingid']),
 			'ordinal'           => safe_int($run['rank']),
-			'judgement_type_id' => $VERDICTS[$run['runresult']],
+			'judgement_type_id' => safe_string($VERDICTS[$run['runresult']]),
 			'time'              => Utils::absTime($run['endtime']),
 			'contest_time'      => Utils::relTime($run['endtime'] - $cdatas[$run['cid']]['starttime']),
 		);
@@ -1182,8 +1182,8 @@ function organizations($args)
 	$adatas = $DB->q($query, $country, $affilid);
 	return array_map(function($adata) {
 		return array(
-			'id'        => safe_int($adata['affilid']),
-			'icpc_id'   => safe_int($adata['affilid']),
+			'id'        => safe_string($adata['affilid']),
+			'icpc_id'   => safe_string($adata['affilid']),
 			'shortname' => $adata['shortname'],
 			'name'      => $adata['name'],
 			'country'   => $adata['country'],
@@ -1253,15 +1253,15 @@ function teams($args)
 	$tdatas = $DB->q($query, $category, $affiliation, $teamid);
 	return array_map(function($tdata) {
 		return array(
-			'id'              => safe_int($tdata['id']),
-			'label'           => safe_int($tdata['id']),
+			'id'              => safe_string($tdata['id']),
+			'label'           => safe_string($tdata['id']),
 			'name'            => $tdata['name'],
 			'members'         => $tdata['members'],
 			'nationality'     => $tdata['nationality'],
-			'group_id'        => safe_int($tdata['category']),
+			'group_id'        => safe_string($tdata['category']),
 			'group'           => $tdata['group'],
-			'affilid'         => safe_int($tdata['affilid']),
-			'organization_id' => safe_int($tdata['affilid']),
+			'affilid'         => safe_string($tdata['affilid']),
+			'organization_id' => safe_string($tdata['affilid']),
 			'affiliation'     => $tdata['affiliation'],
 			'externalid'      => $tdata['externalid'],
 			'icpc_id'         => $tdata['externalid'],
@@ -1327,9 +1327,9 @@ function groups($args)
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
-			'id'         => safe_int($row['categoryid']),
-			'icpc_id'    => safe_int($row['categoryid']),
-			'name'       => $row['name'],
+			'id'         => safe_string($row['categoryid']),
+			'icpc_id'    => safe_string($row['categoryid']),
+			'name'       => safe_string($row['name']),
 			'color'      => $row['color'],
 			'sortorder'  => safe_int($row['sortorder']));
 	}
@@ -1364,8 +1364,8 @@ function languages($args)
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
-			'id'           => $row['langid'],
-			'name'         => $row['name'],
+			'id'           => safe_string($row['langid']),
+			'name'         => safe_string($row['name']),
 			'extensions'   => json_decode($row['extensions']),
 			'allow_judge'  => safe_bool($row['allow_judge']),
 			'time_factor'  => safe_float($row['time_factor']),
@@ -1417,12 +1417,12 @@ function clarifications($args)
 	$clar_datas = $DB->q($query, $cid, $problem, $clarId);
 	return array_map(function($clar_data) use ($cdatas) {
 		return array(
-			'id'           => safe_int($clar_data['clarid']),
+			'id'           => safe_string($clar_data['clarid']),
 			'time'         => Utils::absTime($clar_data['submittime']),
 			'contest_time' => Utils::relTime($clar_data['submittime'] - $cdatas[$clar_data['cid']]['starttime']),
-			'problem_id'   => safe_int($clar_data['probid']),
-			'from_team_id' => safe_int($clar_data['sender']),
-			'to_team_id'   => safe_int($clar_data['recipient']),
+			'problem_id'   => safe_string($clar_data['probid']),
+			'from_team_id' => safe_string($clar_data['sender']),
+			'to_team_id'   => safe_string($clar_data['recipient']),
 			'text'         => $clar_data['body'],
 		);
 	}, $clar_datas);
