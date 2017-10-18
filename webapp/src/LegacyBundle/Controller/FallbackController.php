@@ -71,9 +71,10 @@ class FallbackController extends Controller
 				}
 			}
 		}
-		if (file_exists($thefile)) {
-			chdir(dirname($thefile));
+		if ( !file_exists($thefile) ) {
+			return Response::create('Not found.', 404);
 		}
+		chdir(dirname($thefile));
 		ob_start();
 		global $G_SYMFONY;
 		$G_SYMFONY = $this->container->get('domjudge.domjudge');
