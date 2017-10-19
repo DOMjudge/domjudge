@@ -532,19 +532,22 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 				continue;
 			}
 
-			$DB->q('INSERT INTO testcase (probid, rank, sample,
-			        md5sum_input, md5sum_output, input, output, description' .
-			       ( $image_file !== FALSE ? ', image, image_thumb, image_type' : '' ) .
-			       ')' .
-			       'VALUES (%i, %i, %i, %s, %s, %s, %s, %s' .
-			       ( $image_file !== FALSE ? ', %s, %s, %s' : '%_ %_ %_' ) .
-			       ')',
-			       $probid, $maxrank, $type == 'sample' ? 1 : 0,
-			       $md5in, $md5out,
-			       $testin, $testout, $description,
-			       $image_file, $image_thumb, $image_type);
+			$tc = $DB->q('RETURNID INSERT INTO testcase (probid, rank, sample,
+			              md5sum_input, md5sum_output, input, output, description' .
+			             ( $image_file !== FALSE ? ', image, image_thumb, image_type' : '' ) .
+			             ') VALUES (%i, %i, %i, %s, %s, %s, %s, %s' .
+			             ( $image_file !== FALSE ? ', %s, %s, %s' : '%_ %_ %_' ) .
+			             ')',
+			             $probid, $maxrank, $type == 'sample' ? 1 : 0,
+			             $md5in, $md5out,
+			             $testin, $testout, $description,
+			             $image_file, $image_thumb, $image_type);
 			$maxrank++;
 			$ncases++;
+
+			// FIXME: this should be done after logging a problem create event.
+			eventlog('testcase', $tc, 'create');
+
 			echo "<li>Added $type testcase from: <tt>$datafile.{in,ans}</tt></li>\n";
 		}
 		echo "</ul>\n<p>Added $ncases $type testcase(s).</p>\n";
