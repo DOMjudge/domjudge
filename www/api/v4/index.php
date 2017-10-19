@@ -234,10 +234,14 @@ function problems($args)
 			'label'      => safe_string($pdata['label']),
 			'short_name' => $pdata['shortname'],
 			'name'       => $pdata['name'],
-			'rgb'        => $pdata['rgb'],
-			'color'      => $pdata['color'],
 			'ordinal'    => safe_int($pdata['ordinal']),
 		);
+		if ( !empty($pdata['rgb']) ) {
+			$ret['rgb'] = $pdata['rgb'];
+		}
+		if ( !empty($pdata['color']) ) {
+			$ret['color'] = $pdata['color'];
+		}
 		if ( $is_jury ) {
 			$ret['test_data_count'] = safe_int($pdata['test_data_count']);
 		}
