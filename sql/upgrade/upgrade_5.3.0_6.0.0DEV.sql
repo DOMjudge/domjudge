@@ -19,6 +19,13 @@ ALTER TABLE `contestteam`
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`cid`,`teamid`);
 
+ALTER TABLE `contestproblem`
+  MODIFY COLUMN `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest, used to sort problems in the scoreboard and typically a single letter';
+
+ALTER TABLE `problem`
+  ADD COLUMN `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Problem ID in an external system' AFTER `probid`,
+  ADD KEY `externalid` (`externalid`(190));
+
 ALTER TABLE `judging_run`
   ADD COLUMN `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run judging ended' AFTER `runtime`;
 

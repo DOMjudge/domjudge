@@ -109,7 +109,7 @@ CREATE TABLE `contest` (
 CREATE TABLE `contestproblem` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
-  `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest (string)',
+  `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest, used to sort problems in the scoreboard and typically a single letter',
   `points` int(4) unsigned NOT NULL DEFAULT '1' COMMENT 'Number of points earned by solving this problem',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
@@ -292,6 +292,7 @@ CREATE TABLE `language` (
 
 CREATE TABLE `problem` (
   `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Problem ID in an external system',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `timelimit` float unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time (in seconds) for this problem',
   `memlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum memory available (in kB) for this problem',
@@ -301,7 +302,8 @@ CREATE TABLE `problem` (
   `special_compare_args` varchar(255) DEFAULT NULL COMMENT 'Optional arguments to special_compare script',
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
   `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
-  PRIMARY KEY  (`probid`)
+  PRIMARY KEY  (`probid`),
+  KEY `externalid` (`externalid`(190))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Problems the teams can submit solutions for';
 
 --

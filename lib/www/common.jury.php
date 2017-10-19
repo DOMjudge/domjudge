@@ -264,7 +264,7 @@ function get_image_thumb($image, &$error)
  * and update problem with it, or insert new problem when probid=NULL.
  * Returns probid on success, or generates error on failure.
  */
-function importZippedProblem($zip, $probid = NULL, $cid = -1)
+function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 {
 	global $DB, $teamid, $cdatas;
 	$prop_file = 'domjudge-problem.ini';
@@ -278,66 +278,68 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 	// Read problem properties
 	$ini_array = parse_ini_string($zip->getFromName($prop_file));
 
-	if ( empty($ini_array) ) {
-		if ( $probid===NULL ) {
-			error("Need '" . $prop_file . "' file when adding a new problem.");
+	// Only preserve valid keys:
+	$ini_array_problem = array_intersect_key($ini_array,array_flip($ini_keys_problem));
+	$ini_array_contest_problem = array_intersect_key($ini_array,array_flip($ini_keys_contest_problem));
+
+	// Take problem:externalid from zip filename, and use as backup for
+	// problem:name and contestproblem:shortname if these are not specified.
+	$extid = preg_replace('[^a-zA-Z0-9-_]', '', basename($filename, '.zip'));
+	if ( (string)$extid==='' ) {
+		error("Could not extract an identifier from '" . basename($filename) . "'.");
+	}
+	if ( !array_key_exists('externalid', $ini_array_problem) ) {
+		$ini_array_problem['externalid'] = $extid;
+	}
+
+	// Rename old probid to contestproblem:shortname
+	if ( isset($ini_array_contest_problem['probid']) ) {
+		$shortname = $ini_array_contest_problem['probid'];
+		unset($ini_array_contest_problem['probid']);
+		$ini_array_contest_problem['shortname'] = $shortname;
+	} else {
+		$ini_array_contest_problem['shortname'] = $extid;
+	}
+
+	// Set default of 1 point for a problem if not specified
+	if ( !isset($ini_array_contest_problem['points']) ) $ini_array_contest_problem['points'] = 1;
+
+	if ( $probid===NULL ) {
+		// Set sensible defaults for name and timelimit if not specified:
+		if ( !isset($ini_array_problem['name'])      ) $ini_array_problem['name'] = $ini_array_contest_problem['shortname'];
+		if ( !isset($ini_array_problem['timelimit']) ) $ini_array_problem['timelimit'] = $def_timelimit;
+
+		$probid = $DB->q('RETURNID INSERT INTO problem (' .
+		                 implode(', ',array_keys($ini_array_problem)) .
+		                 ') VALUES (%As)', $ini_array_problem);
+
+		if ($cid != -1) {
+			$ini_array_contest_problem['cid'] = $cid;
+			$ini_array_contest_problem['probid'] = $probid;
+			$DB->q('INSERT INTO contestproblem (' .
+			       implode(', ',array_keys($ini_array_contest_problem)) .
+			       ') VALUES (%As)', $ini_array_contest_problem);
 		}
 	} else {
-		// Only preserve valid keys:
-		$ini_array_problem = array_intersect_key($ini_array,array_flip($ini_keys_problem));
-		$ini_array_contest_problem = array_intersect_key($ini_array,array_flip($ini_keys_contest_problem));
+		if ( count($ini_array_problem)>0 ) {
+			$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array_problem, $probid);
+		}
 
-		// Set default of 1 point for a problem if not specified
-		if ( !isset($ini_array_contest_problem['points']) ) $ini_array_contest_problem['points'] = 1;
-
-		if ( $probid===NULL ) {
-			if ( !isset($ini_array_contest_problem['probid']) ) {
-				error("Need 'probid' in '" . $prop_file . "' when adding a new problem.");
-			}
-			// Set sensible defaults for name and timelimit if not specified:
-			if ( !isset($ini_array_problem['name'])      ) $ini_array_problem['name'] = $ini_array_contest_problem['probid'];
-			if ( !isset($ini_array_problem['timelimit']) ) $ini_array_problem['timelimit'] = $def_timelimit;
-
-			// rename probid to shortname
-			$shortname = $ini_array_contest_problem['probid'];
-			unset($ini_array_contest_problem['probid']);
-			$ini_array_contest_problem['shortname'] = $shortname;
-
-			$probid = $DB->q('RETURNID INSERT INTO problem (' .
-			                 implode(', ',array_keys($ini_array_problem)) .
-			                 ') VALUES (%As)', $ini_array_problem);
-
-			if ($cid != -1) {
+		if ( $cid != -1 ) {
+			if ( $DB->q("MAYBEVALUE SELECT probid FROM contestproblem
+			             WHERE probid = %i AND cid = %i", $probid, $cid) ) {
+				// Remove keys that cannot be modified:
+				unset($ini_array_contest_problem['probid']);
+				if ( count($ini_array_contest_problem)!=0 ) {
+					$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i',
+					       $ini_array_contest_problem, $probid, $cid);
+				}
+			} else {
 				$ini_array_contest_problem['cid'] = $cid;
 				$ini_array_contest_problem['probid'] = $probid;
 				$DB->q('INSERT INTO contestproblem (' .
 				       implode(', ',array_keys($ini_array_contest_problem)) .
 				       ') VALUES (%As)', $ini_array_contest_problem);
-			}
-		} else {
-			if ( count($ini_array_problem)>0 ) {
-				$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array_problem, $probid);
-			}
-
-			if ( $cid != -1 ) {
-				if ( $DB->q("MAYBEVALUE SELECT probid FROM contestproblem
-				             WHERE probid = %i AND cid = %i", $probid, $cid) ) {
-					// Remove keys that cannot be modified:
-					unset($ini_array_contest_problem['probid']);
-					if ( count($ini_array_contest_problem)!=0 ) {
-						$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i',
-						       $ini_array_contest_problem, $probid, $cid);
-					}
-				} else {
-					$shortname = $ini_array_contest_problem['probid'];
-					unset($ini_array_contest_problem['probid']);
-					$ini_array_contest_problem['shortname'] = $shortname;
-					$ini_array_contest_problem['cid'] = $cid;
-					$ini_array_contest_problem['probid'] = $probid;
-					$DB->q('INSERT INTO contestproblem (' .
-					       implode(', ',array_keys($ini_array_contest_problem)) .
-					       ') VALUES (%As)', $ini_array_contest_problem);
-				}
 			}
 		}
 	}

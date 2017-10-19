@@ -45,7 +45,8 @@ if ( isset($_POST['upload']) ) {
 			$cid = $_POST['contest'];
 			checkFileUpload( $_FILES['problem_archive']['error'][$fileid] );
 			$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
-			$newid = importZippedProblem($zip, empty($id) ? NULL : $id, $cid);
+			$newid = importZippedProblem($zip, $_FILES['problem_archive']['name'][$fileid],
+			                             empty($id) ? NULL : $id, $cid);
 			$zip->close();
 			eventlog('problem', $newid, empty($id) ? 'create' : 'update', $cid);
 			auditlog('problem', $newid, 'upload zip',
