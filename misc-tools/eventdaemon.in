@@ -180,8 +180,8 @@ function initialize_events($cid)
 			$data = dj_json_decode($json);
 			if ( !is_array($data) ) error("Endpoint '$endpoint' did not return a JSON list.");
 
-			// Special case 'contest' since it is a single object:
-			if ( $endpoint==='contest' ) {
+			// Special case 'contests' since it is a single object:
+			if ( $endpoint==='contests' ) {
 				logmsg(LOG_INFO, "Inserting $endpoint create event.");
 				insert_event($cid,$endpoint,$data);
 				continue;
