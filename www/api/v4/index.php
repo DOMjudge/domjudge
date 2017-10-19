@@ -1579,10 +1579,14 @@ function scoreboard($args)
 
 			if ( $prob['solved'] ) {
 				$prob['time'] = scoretime($pdata['time']);
-				$first = first_solved($pdata['time'],
-				                      $scoreboard['summary']['problems'][$probid]
-				                      ['best_time_sort'][$data['sortorder']]);
-				$prob['first_to_solve'] = safe_bool($first);
+				// TODO: according the API specification this doesn't
+				// have to be added. Also, the current first_solved()
+				// implementation is incorrent when there are pending
+				// earlier submissions.
+//				$first = first_solved($pdata['time'],
+//				                      $scoreboard['summary']['problems'][$probid]
+//				                      ['best_time_sort'][$data['sortorder']]);
+//				$prob['first_to_solve'] = safe_bool($first);
 			}
 
 			$row['problems'][] = $prob;
