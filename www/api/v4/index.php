@@ -1678,11 +1678,10 @@ function judgement_types($args)
 			continue;
 		}
 		$res[] = array(
-			'id'      => $label,
-			'label'   => $label,
+			'id'      => safe_string($label),
 			'name'    => str_replace('-',' ',$name),
-			'penalty' => $penalty,
-			'solved'  => $solved,
+			'penalty' => safe_bool($penalty),
+			'solved'  => safe_bool($solved),
 		);
 	}
 
