@@ -786,7 +786,6 @@ function submissions($args)
 	while ( $row = $q->next() ) {
 		$res[] = array(
 			'id'           => safe_string($row['submitid']),
-			'label'        => safe_string($row['submitid']),
 			'team_id'      => safe_string($row['teamid']),
 			'problem_id'   => safe_string($row['probid']),
 			'language_id'  => safe_string($row['langid']),
@@ -1224,8 +1223,8 @@ function teams($args)
 	}
 
 	// Construct query
-	$query = 'TABLE SELECT teamid AS id, t.name, t.members, t.externalid, a.country AS nationality,
-	          t.categoryid AS category, c.name AS `group`, a.affilid, a.name AS affiliation,
+	$query = 'TABLE SELECT teamid AS id, t.name, t.members, t.externalid,
+	          t.categoryid, t.affilid, a.name AS affiliation, a.country AS nationality,
 	          ct.cid
 	          FROM team t
 	          LEFT JOIN team_affiliation a USING(affilid)
@@ -1258,13 +1257,10 @@ function teams($args)
 	return array_map(function($tdata) {
 		return array(
 			'id'              => safe_string($tdata['id']),
-			'label'           => safe_string($tdata['id']),
 			'name'            => $tdata['name'],
 			'members'         => $tdata['members'],
 			'nationality'     => $tdata['nationality'],
-			'group_id'        => safe_string($tdata['category']),
-			'group'           => $tdata['group'],
-			'affilid'         => safe_string($tdata['affilid']),
+			'group_id'        => safe_string($tdata['categoryid']),
 			'organization_id' => safe_string($tdata['affilid']),
 			'affiliation'     => $tdata['affiliation'],
 			'externalid'      => $tdata['externalid'],
