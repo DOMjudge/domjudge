@@ -196,35 +196,38 @@ function problems($args)
 	if ( checkrole('jury') ||
 	     (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0) ) {
 
-		$query = 'TABLE SELECT probid AS id, shortname AS label, shortname, name, color,
-		                       COUNT(testcaseid) AS test_data_count
-		          FROM problem
-		          INNER JOIN contestproblem USING (probid)
-		          LEFT JOIN testcase USING (probid)
-		          WHERE cid = %i AND allow_submit = 1';
-
-		$byProbId = array_key_exists('probid', $args);
-		$query .= ($byProbId ? ' AND probid = %i' : ' %_');
-		$probid = ($byProbId ? $args['probid'] : 0);
-
-		$pdatas = $DB->q($query . ' GROUP BY probid ORDER BY shortname', $cid, $probid);
+		// We sort the problems by shortname, i.e in the same way we
+		// sort them in the scoreboard, and return all. Then we assign
+		// the ordinal and finally select a single problem in code to
+		// make sure that the ordinal is the same if we query a single
+		// problem.
+		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color,
+		                               COUNT(testcaseid) AS test_data_count
+		                  FROM problem
+		                  INNER JOIN contestproblem USING (probid)
+		                  LEFT JOIN testcase USING (probid)
+		                  WHERE cid = %i AND allow_submit = 1
+		                  GROUP BY probid ORDER BY shortname', $cid);
 	} else {
 		$pdatas = array();
 	}
 
 	$ordinal = 0;
-	foreach ( $pdatas as $key => $pdata ) {
+	$res = array();
+	foreach ( $pdatas as $pdata ) {
 		if ( !isset($pdata['color']) ) {
-			$pdatas[$key]['rgb'] = null;
+			unset($pdata['color']);
 		} elseif ( preg_match('/^#[[:xdigit:]]{3,6}$/',$pdata['color']) ) {
-			$pdatas[$key]['rgb'] = $pdata['color'];
-			$pdatas[$key]['color'] = hex_to_color($pdata['color']);
+			$pdata['rgb'] = $pdata['color'];
+			$pdata['color'] = hex_to_color($pdata['color']);
 		} else {
-			$pdatas[$key]['rgb'] = color_to_hex($pdata['color']);
+			$pdata['rgb'] = color_to_hex($pdata['color']);
 		}
-		// We sort above table by shortname, i.e in the same way we
-		// sort the problems in the scoreboard.
-		$pdatas[$key]['ordinal'] = $ordinal++;
+		$pdata['ordinal'] = $ordinal++;
+		// If specified, select a single problem after assigning ordinals.
+		if ( !array_key_exists('probid', $args) || $pdata['id']===$args['probid'] ) {
+			$res[] = $pdata;
+		}
 	}
 
 	$is_jury = checkrole('jury');
@@ -246,7 +249,7 @@ function problems($args)
 			$ret['test_data_count'] = safe_int($pdata['test_data_count']);
 		}
 		return $ret;
-	}, $pdatas);
+	}, $res);
 }
 $doc = "Get a list of problems in a contest, with for each problem: id, shortname, name and colour.";
 $args = array('cid' => 'Contest ID.', 'probid' => 'Problem ID.');
