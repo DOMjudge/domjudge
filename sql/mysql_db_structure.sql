@@ -38,6 +38,7 @@ CREATE TABLE `balloon` (
 --
 CREATE TABLE `clarification` (
   `clarid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Clarification ID in an external system, should be unique inside a single contest',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `respid` int(4) unsigned DEFAULT NULL COMMENT 'In reply to clarification ID',
   `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time sent',
@@ -49,6 +50,7 @@ CREATE TABLE `clarification` (
   `body` longtext NOT NULL COMMENT 'Clarification text',
   `answered` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
+  UNIQUE KEY `externalid` (`cid`,`externalid`(190)),
   KEY `respid` (`respid`),
   KEY `probid` (`probid`),
   KEY `cid` (`cid`),
@@ -277,13 +279,15 @@ CREATE TABLE `judging_run` (
 
 CREATE TABLE `language` (
   `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
   `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted in this language?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions in this language judged?',
   `time_factor` float NOT NULL DEFAULT '1' COMMENT 'Language-specific factor multiplied by problem run times',
   `compile_script` varchar(32) DEFAULT NULL COMMENT 'Script to compile source code for this language',
-  PRIMARY KEY  (`langid`)
+  PRIMARY KEY  (`langid`),
+  UNIQUE KEY `externalid` (`externalid`(190))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Programming languages in which teams can submit solutions';
 
 --

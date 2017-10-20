@@ -87,27 +87,27 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 -- Dumping data for table `language`
 --
 
-INSERT INTO `language` (`langid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`, `compile_script`) VALUES
-('adb', 'Ada', '["adb","ads"]', 0, 1, 1, 'adb'),
-('awk', 'AWK', '["awk"]', 0, 1, 1, 'awk'),
-('bash', 'Bash shell', '["bash"]', 0, 1, 1, 'bash'),
-('c', 'C', '["c"]', 1, 1, 1, 'c'),
-('cpp', 'C++', '["cpp","cc","c++"]', 1, 1, 1, 'cpp'),
-('csharp', 'C#', '["csharp","cs"]', 0, 1, 1, 'csharp'),
-('f95', 'Fortran', '["f95","f90"]', 0, 1, 1, 'f95'),
-('hs', 'Haskell', '["hs","lhs"]', 0, 1, 1, 'hs'),
-('java', 'Java', '["java"]', 1, 1, 1, 'java_javac_detect'),
-('js', 'JavaScript', '["js"]', 0, 1, 1, 'js'),
-('lua', 'Lua', '["lua"]', 0, 1, 1, 'lua'),
-('kt', 'Kotlin', '["kt"]', 0, 1, 1, 'kt'),
-('pas', 'Pascal', '["pas","p"]', 0, 1, 1, 'pas'),
-('pl', 'Perl', '["pl"]', 0, 1, 1, 'pl'),
-('plg', 'Prolog', '["plg"]', 0, 1, 1, 'plg'),
-('py2', 'Python 2', '["py2","py"]', 0, 1, 1, 'py2'),
-('py3', 'Python 3', '["py3"]', 0, 1, 1, 'py3'),
-('rb', 'Ruby', '["rb"]', 0, 1, 1, 'rb'),
-('scala', 'Scala', '["scala"]', 0, 1, 1, 'scala'),
-('sh', 'POSIX shell', '["sh"]', 0, 1, 1, 'sh');
+INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`, `compile_script`) VALUES
+('adb', NULL, 'Ada', '["adb","ads"]', 0, 1, 1, 'adb'),
+('awk', NULL, 'AWK', '["awk"]', 0, 1, 1, 'awk'),
+('bash', NULL, 'Bash shell', '["bash"]', 0, 1, 1, 'bash'),
+('c', 'c', 'C', '["c"]', 1, 1, 1, 'c'),
+('cpp', 'cpp', 'C++', '["cpp","cc","c++"]', 1, 1, 1, 'cpp'),
+('csharp', 'csharp', 'C#', '["csharp","cs"]', 0, 1, 1, 'csharp'),
+('f95', NULL, 'Fortran', '["f95","f90"]', 0, 1, 1, 'f95'),
+('hs', 'haskell', 'Haskell', '["hs","lhs"]', 0, 1, 1, 'hs'),
+('java', 'java', 'Java', '["java"]', 1, 1, 1, 'java_javac_detect'),
+('js', 'javascript', 'JavaScript', '["js"]', 0, 1, 1, 'js'),
+('lua', NULL, 'Lua', '["lua"]', 0, 1, 1, 'lua'),
+('kt', 'kotlin', 'Kotlin', '["kt"]', 0, 1, 1, 'kt'),
+('pas', 'pascal' 'Pascal', '["pas","p"]', 0, 1, 1, 'pas'),
+('pl', NULL, 'Perl', '["pl"]', 0, 1, 1, 'pl'),
+('plg', 'prolog', 'Prolog', '["plg"]', 0, 1, 1, 'plg'),
+('py2', 'python2', 'Python 2', '["py2","py"]', 0, 1, 1, 'py2'),
+('py3', 'python3', 'Python 3', '["py3"]', 0, 1, 1, 'py3'),
+('rb', NULL, 'Ruby', '["rb"]', 0, 1, 1, 'rb'),
+('scala', 'scala', 'Scala', '["scala"]', 0, 1, 1, 'scala'),
+('sh', NULL, 'POSIX shell', '["sh"]', 0, 1, 1, 'sh');
 
 
 --

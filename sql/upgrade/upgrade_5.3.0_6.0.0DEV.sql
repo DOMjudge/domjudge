@@ -22,6 +22,14 @@ ALTER TABLE `contestteam`
 ALTER TABLE `contestproblem`
   MODIFY COLUMN `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest, used to sort problems in the scoreboard and typically a single letter';
 
+ALTER TABLE `clarification`
+  ADD COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Clarification ID in an external system, should be unique inside a single contest' AFTER `clarid`,
+  ADD UNIQUE KEY `externalid` (`cid`,`externalid`(190));
+
+ALTER TABLE `language`
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API' AFTER `langid`,
+  ADD KEY `externalid` (`externalid`(190));
+
 ALTER TABLE `problem`
   ADD COLUMN `externalid` DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest' AFTER `probid`,
   ADD KEY `externalid` (`externalid`(190));
@@ -42,8 +50,22 @@ source upgrade/convert_event_6.0.sql
 --
 -- Add/remove sample/initial contents
 --
+
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('require_entry_point', '0', 'bool', 'Require entry point for submissions.');
+
+UPDATE `language` SET `externalid` = 'c'          WHERE `langid` = 'c';
+UPDATE `language` SET `externalid` = 'cpp'        WHERE `langid` = 'cpp';
+UPDATE `language` SET `externalid` = 'csharp'     WHERE `langid` = 'csharp';
+UPDATE `language` SET `externalid` = 'haskell'    WHERE `langid` = 'hs';
+UPDATE `language` SET `externalid` = 'java'       WHERE `langid` = 'java';
+UPDATE `language` SET `externalid` = 'javascript' WHERE `langid` = 'js';
+UPDATE `language` SET `externalid` = 'kotlin'     WHERE `langid` = 'kt';
+UPDATE `language` SET `externalid` = 'pascal'     WHERE `langid` = 'pas';
+UPDATE `language` SET `externalid` = 'prolog'     WHERE `langid` = 'plg';
+UPDATE `language` SET `externalid` = 'python2'    WHERE `langid` = 'py2';
+UPDATE `language` SET `externalid` = 'python3'    WHERE `langid` = 'py3';
+UPDATE `language` SET `externalid` = 'scala'      WHERE `langid` = 'scala';
 
 --
 -- Finally remove obsolete structures after moving data
