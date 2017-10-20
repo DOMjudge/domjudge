@@ -292,7 +292,7 @@ CREATE TABLE `language` (
 
 CREATE TABLE `problem` (
   `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Problem ID in an external system',
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `timelimit` float unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time (in seconds) for this problem',
   `memlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum memory available (in kB) for this problem',

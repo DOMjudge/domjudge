@@ -23,7 +23,7 @@ ALTER TABLE `contestproblem`
   MODIFY COLUMN `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest, used to sort problems in the scoreboard and typically a single letter';
 
 ALTER TABLE `problem`
-  ADD COLUMN `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Problem ID in an external system' AFTER `probid`,
+  ADD COLUMN `externalid` DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest' AFTER `probid`,
   ADD KEY `externalid` (`externalid`(190));
 
 ALTER TABLE `judging_run`
