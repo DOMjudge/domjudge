@@ -4,6 +4,9 @@ Version 5.2.1 - DEV
 -------------------
  - Change judging feedback dir ownership after compare script ran.
    Fixes a crash when output validators have stderr output.
+ - Fix display of user IP address on jury interface.
+ - Fix automatic setting of clarification category in jury interface.
+ - Delete team scoreboard cache data when deleting a team.
 
 Version 5.2.0 - 3 October 2017
 ------------------------------
