@@ -44,7 +44,11 @@ class FallbackController extends Controller
 			'api/'    => '/api/v4/index.php',
 		);
 		$apiMatch = FALSE;
+		$exactApiMatch = FALSE;
 		foreach ( $apiPaths as $apiPath => $apiRedirect ) {
+			if ($apiPath === $path) {
+				$exactApiMatch = TRUE;
+			}
 			if (substr($path, 0, strlen($apiPath)) == $apiPath) {
 				$_SERVER['PHP_SELF'] = 'index.php';
 				$thefile = realpath($this->webDir . $apiRedirect);
@@ -54,7 +58,9 @@ class FallbackController extends Controller
 			}
 		}
 		if ( $apiMatch ) {
-			$request->setRequestFormat('json');
+			if (!$exactApiMatch) {
+				$request->setRequestFormat('json');
+			}
 		}	else {
 			$_SERVER['PHP_SELF'] = basename($path);
 			$_SERVER['SCRIPT_NAME'] = basename($path);// This is used in a few scripts to set refererrer
