@@ -233,6 +233,11 @@ runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGR
 	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
 	                  >compare.tmp 2>&1
 
+# Make sure that all feedback files are owned by the current
+# user/group, so that we can append content.
+$GAINROOT chown -R "$(id -un):" "$WORKDIR/feedback"
+chmod -R go-w feedback
+
 # Make sure that feedback file exists, since we assume this later.
 if [ ! -f feedback/judgemessage.txt ]; then
 	touch feedback/judgemessage.txt
