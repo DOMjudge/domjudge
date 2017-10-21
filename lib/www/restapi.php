@@ -168,6 +168,7 @@ class RestApi {
 		if ($response === '') {
 			// We receive an empty response of a createError or checkargs produces an error
 			// In that case, just return
+			$this->createResponse($response);
 			return;
 		}
 		// If a single element was requested, return an object:
