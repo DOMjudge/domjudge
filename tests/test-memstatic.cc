@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-#define size 128
+#define size 512
 
 char a[size*1024*1024] = { 1 };
 
