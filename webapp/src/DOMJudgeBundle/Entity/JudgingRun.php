@@ -13,7 +13,7 @@ class JudgingRun
 	 * @var int
 	 *
 	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="SEQUENCE")
+	 * @ORM\GeneratedValue(strategy="AUTO")
 	 * @ORM\Column(type="integer", name="runid", options={"comment"="Unique ID"}, nullable=false)
 	 */
 	private $runid;

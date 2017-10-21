@@ -13,7 +13,7 @@ class User implements UserInterface, \Serializable
 	 * @var int
 	 *
 	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="SEQUENCE")
+	 * @ORM\GeneratedValue(strategy="AUTO")
 	 * @ORM\Column(type="integer", name="userid", options={"comment"="Unique ID"}, nullable=false)
 	 */
 	private $userid;

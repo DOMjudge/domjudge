@@ -14,7 +14,7 @@ class Problem
 	 * @var int
 	 *
 	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="SEQUENCE")
+	 * @ORM\GeneratedValue(strategy="AUTO")
 	 * @ORM\Column(type="integer", name="probid", options={"comment"="Unique ID"}, nullable=false)
 	 * @Groups({"details"})
 	 */

@@ -11,7 +11,7 @@ class TeamCategory
 	/**
 	 * @var int
 	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="SEQUENCE")
+	 * @ORM\GeneratedValue(strategy="AUTO")
 	 * @ORM\Column(type="integer", name="categoryid", options={"comment"="Unique ID"}, nullable=false)
 	 */
 	private $categoryid;

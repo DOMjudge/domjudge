@@ -11,7 +11,7 @@ class JudgehostRestriction
 	/**
 	 * @var int
 	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="SEQUENCE")
+	 * @ORM\GeneratedValue(strategy="AUTO")
 	 * @ORM\Column(type="integer", name="restrictionid", options={"comment"="Unique ID"}, nullable=false)
 	 */
 	private $restrictionid;
