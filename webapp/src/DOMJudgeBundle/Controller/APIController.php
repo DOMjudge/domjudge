@@ -31,7 +31,7 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/")
 	 */
-	public function getCurrentActiveContest() {
+	public function getCurrentActiveContestAction() {
 		$contests = $this->getContestsAction();
 		if (count($contests) == 0) {
 			return null;
@@ -44,8 +44,8 @@ class APIController extends FOSRestController {
 	 * @Patch("/")
 	 * @Security("has_role('ROLE_ADMIN')")
 	 */
-	public function changeStartTime(Request $request) {
-		$contest = $this->getCurrentActiveContest();
+	public function changeStartTimeAction(Request $request) {
+		$contest = $this->getCurrentActiveContestAction();
 		if ($contest === NULL) {
 			return NULL;
 		}
@@ -137,7 +137,7 @@ class APIController extends FOSRestController {
 	 */
 	public function getEventFeed() {
 		$em = $this->getDoctrine()->getManager();
-		$contest = $this->getCurrentActiveContest();
+		$contest = $this->getCurrentActiveContestAction();
 		if ($contest === NULL) {
 			return new Response('No active contest.', 404);
 		}

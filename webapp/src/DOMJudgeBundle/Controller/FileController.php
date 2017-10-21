@@ -14,6 +14,7 @@ class FileController extends Controller
 {
 	/**
 	 *@Route("/api/submissions/{sid}/files", name="submission_file")
+	 *@Route("/api/v4/submissions/{sid}/files", name="submission_file_v4")
 	 */
 	public function submissionFiles(Submission $sid)
 	{
