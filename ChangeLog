@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 5.3.1 - DEV
+-------------------
+
 Version 5.3.0 - 21 October 2017
 -------------------------------
  - Add support for Kotlin by mounting /bin in chroot environment.
