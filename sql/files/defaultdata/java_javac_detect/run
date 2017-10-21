@@ -66,6 +66,9 @@ if [ -z "$MAINCLASS" ]; then
 	COMPILESCRIPTDIR="$(dirname "$0")"
 	MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
 	EXITCODE=$?
+else
+	cat $TMPFILE
+	rm -f $TMPFILE
 fi
 
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
