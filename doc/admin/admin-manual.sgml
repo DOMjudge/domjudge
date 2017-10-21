@@ -1219,7 +1219,10 @@ consecutive DOMjudge versions. At the beginning of each script, a check
 is performed which will let MySQL bail out with an error if it should
 not be applied anymore. Note that the scripts must be applied in order
 (sorted by release). These scripts can be applied by running
-<tt>dj_setup_database upgrade</tt>.
+<tt>dj_setup_database upgrade</tt>. Be aware that these scripts are
+conservative in adding and upgrading SQL data, so check that e.g. new
+compile scripts are present or add them manually, and check the
+upgrade scripts manually for any other data upgraded.
 
 
 <chapt>Setting up a contest <label id="contestsetup">
