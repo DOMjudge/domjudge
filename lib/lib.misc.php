@@ -956,7 +956,7 @@ foreach ( $API_endpoints as $endpoint => $data ) {
 /**
  * Map an internal/DB ID to an external/REST endpoint ID.
  */
-function extid($endpoint, $intid)
+function rest_extid($endpoint, $intid)
 {
 	global $API_endpoints, $KEYS;
 
@@ -976,7 +976,7 @@ function extid($endpoint, $intid)
 /**
  * Map an external/REST endpoint ID back to an internal/DB ID.
  */
-function intid($endpoint, $extid)
+function rest_intid($endpoint, $extid)
 {
 	global $API_endpoints, $KEYS;
 
@@ -1047,7 +1047,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	}
 
 	// Look up external/API ID from various sources.
-	if ( $id===null ) $id = extid($type, $dataid);
+	if ( $id===null ) $id = rest_extid($type, $dataid);
 
 	if ( $id===null && $json!==null ) {
 		$data = dj_json_decode($json);
