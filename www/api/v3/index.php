@@ -29,8 +29,10 @@ function checkargs($args, $mandatory)
 	foreach ( $mandatory as $arg ) {
 		if ( !isset($args[$arg]) ) {
 			$api->createError("argument '$arg' is mandatory");
+			return false;
 		}
 	}
+	return true;
 }
 
 function safe_int($value)
@@ -174,7 +176,9 @@ function problems($args)
 {
 	global $DB, $cdatas, $userdata;
 
-	checkargs($args, array('cid'));
+	if (!checkargs($args, array('cid'))) {
+		return '';
+	}
 	$cid = safe_int($args['cid']);
 
 	// Check that user has access to the problems in this contest:
@@ -293,7 +297,9 @@ function judgings_POST($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('judgehost'));
+	if (!checkargs($args, array('judgehost'))) {
+		return '';
+	}
 
 	$host = $args['judgehost'];
 	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $host);
@@ -457,10 +463,12 @@ function judgings_PUT($args)
 
 	if ( !isset($args['__primary_key']) ) {
 		$api->createError("judgingid is mandatory");
+		return '';
 	}
 	$judgingid = $args['__primary_key'];
 	if ( !isset($args['judgehost']) ) {
 		$api->createError("judgehost is mandatory");
+		return '';
 	}
 
 	if ( isset($args['output_compile']) ) {
@@ -521,8 +529,10 @@ function judging_runs_POST($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('judgingid', 'testcaseid', 'runresult', 'runtime',
-	                       'output_run', 'output_diff', 'output_error', 'output_system', 'judgehost'));
+	if (!checkargs($args, array('judgingid', 'testcaseid', 'runresult', 'runtime',
+	                       'output_run', 'output_diff', 'output_error', 'output_system', 'judgehost'))) {
+		return '';
+	}
 
 	$results_remap = dbconfig_get('results_remap');
 	$results_prio = dbconfig_get('results_prio');
@@ -689,6 +699,7 @@ function submissions($args)
 
 	if ( $cid == 0 && !checkrole('jury') ) {
 		$api->createError("argument 'cid' is mandatory for non-jury users");
+		return '';
 	}
 
 	if ( $cid != 0 && infreeze($cdatas[$cid], now()) && !checkrole('jury') ) {
@@ -734,8 +745,12 @@ $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
 function submissions_POST($args)
 {
 	global $userdata, $DB, $api;
-	checkargs($args, array('shortname','langid'));
-	checkargs($userdata, array('teamid'));
+	if (!checkargs($args, array('shortname','langid'))) {
+		return '';
+	}
+	if (!checkargs($userdata, array('teamid'))) {
+		return '';
+	}
 	$contests = getCurContests(TRUE, $userdata['teamid'], false, 'shortname');
 	$contest_shortname = null;
 
@@ -744,12 +759,14 @@ function submissions_POST($args)
 			$contest_shortname = $args['contest'];
 		} else {
 			$api->createError("Cannot find active contest '$args[contest]', or you are not part of it.");
+			return '';
 		}
 	} else {
 		if ( count($contests) == 1 ) {
 			$contest_shortname = key($contests);
 		} else {
 			$api->createError("No contest specified while multiple active contests found.");
+			return '';
 		}
 	}
 	$cid = $contests[$contest_shortname]['cid'];
@@ -799,13 +816,16 @@ function submission_files($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('id'));
+	if (!checkargs($args, array('id'))) {
+		return '';
+	}
 
 	$sources = $DB->q('SELECT filename, sourcecode FROM submission_file
 	                   WHERE submitid = %i ORDER BY rank', $args['id']);
 
 	if ( $sources->count()==0 ) {
 		$api->createError("Cannot find source files for submission '$args[id]'.");
+		return '';
 	}
 
 	$ret = array();
@@ -831,7 +851,9 @@ function testcases($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('judgingid'));
+	if (!checkargs($args, array('judgingid'))) {
+		return '';
+	}
 
 	// endtime is set: judging is fully done; return empty
 	$row = $DB->q('TUPLE SELECT endtime,probid
@@ -868,13 +890,17 @@ function testcase_files($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('testcaseid'));
+	if (!checkargs($args, array('testcaseid'))) {
+		return '';
+	}
 
 	if ( !isset($args['input']) && !isset($args['output']) ) {
 		$api->createError("either input or output is mandatory");
+		return '';
 	}
 	if ( isset($args['input']) && isset($args['output']) ) {
 		$api->createError("cannot select both input and output");
+		return '';
 	}
 	$inout = 'output';
 	if ( isset($args['input']) ) {
@@ -886,6 +912,7 @@ function testcase_files($args)
 
 	if ( is_null($content) ) {
 		$api->createError("Cannot find testcase '$args[testcaseid]'.");
+		return '';
 	}
 
 	return base64_encode($content);
@@ -903,13 +930,16 @@ function executable($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('execid'));
+	if (!checkargs($args, array('execid'))) {
+		return '';
+	}
 
 	$content = $DB->q("MAYBEVALUE SELECT SQL_NO_CACHE zipfile FROM executable
 	                   WHERE execid = %s", $args['execid']);
 
 	if ( is_null($content) ) {
 		$api->createError("Cannot find executable '$args[execid]'.");
+		return '';
 	}
 
 	return base64_encode($content);
@@ -1158,7 +1188,9 @@ function judgehosts_POST($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('hostname'));
+	if (!checkargs($args, array('hostname'))) {
+		return '';
+	}
 
 	$DB->q('INSERT IGNORE INTO judgehost (hostname) VALUES(%s)',
 	       $args['hostname']);
@@ -1196,10 +1228,12 @@ function judgehosts_PUT($args)
 
 	if ( !isset($args['__primary_key']) ) {
 		$api->createError("hostname is mandatory");
+		return '';
 	}
 	$hostname = $args['__primary_key'];
 	if ( !isset($args['active']) ) {
 		$api->createError("active is mandatory");
+		return '';
 	}
 	$active = $args['active'];
 	$DB->q('UPDATE judgehost SET active=%i WHERE hostname=%s', $active, $hostname);
@@ -1233,6 +1267,7 @@ function scoreboard($args)
 			$cid = reset($cids);
 		} else {
 			$api->createError("No contest ID specified but active contest is ambiguous.");
+			return '';
 		}
 	}
 
@@ -1295,7 +1330,9 @@ function internal_error_POST($args)
 {
 	global $DB;
 
-	checkargs($args, array('description', 'judgehostlog', 'disabled'));
+	if (!checkargs($args, array('description', 'judgehostlog', 'disabled'))) {
+		return '';
+	}
 
 	global $cdatas, $api;
 

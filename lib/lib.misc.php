@@ -1160,7 +1160,40 @@ function read_API_credentials()
  * This function is duplicated from judge/judgedaemon.main.php.
  */
 function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
-	global $resturl, $restuser, $restpass, $lastrequest;
+	global $resturl, $restuser, $restpass, $lastrequest, $G_SYMFONY, $apiFromInternal;
+	if (isset($G_SYMFONY)) {
+		// Perform an internal Symfony request to the API
+		$apiFromInternal = true;
+		if ( $resturl === null ) {
+			read_API_credentials();
+			if ( $resturl === null ) {
+				error("could not initialize REST API credentials");
+			}
+		}
+		$url = $resturl . $url;
+		$httpKernel = $G_SYMFONY->getHttpKernel();
+		parse_str($data, $parsedData);
+
+		// Our API checks $_SERVER['REQUEST_METHOD'] but Symfony does not overwrite it, so do this manually
+		$origMethod = $_SERVER['REQUEST_METHOD'];
+		$_SERVER['REQUEST_METHOD'] = $verb;
+
+		$request = \Symfony\Component\HttpFoundation\Request::create($url, $verb, $parsedData);
+		$response = $httpKernel->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
+
+		// Set back the request method, if other code still wants to use it
+		$_SERVER['REQUEST_METHOD'] = $origMethod;
+
+		$status = $response->getStatusCode();
+		if ( $status < 200 || $status >= 300 ) {
+			$errstr = "Error while executing curl $verb to url " . $url .
+				": http status code: " . $status . ", response: " . $response;
+			if ($failonerror) { error($errstr); }
+			else { warning($errstr); return null; }
+		}
+
+		return $response->getContent();
+	}
 
 	if ( $resturl === null ) {
 		read_API_credentials();

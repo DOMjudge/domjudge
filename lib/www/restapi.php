@@ -37,10 +37,12 @@ class RestApi {
 		if ( !in_array($httpMethod, array('GET', 'POST', 'PUT')) ) {
 			$this->createError("Only get/post/put methods supported.",
 			                   INTERNAL_SERVER_ERROR);
+			return;
 		}
 		if ( array_key_exists($name . '#' . $httpMethod, $this->apiFunctions) ) {
 			$this->createError("Multiple definitions of " . $name .
 			                   " for " . $httpMethod . ".", INTERNAL_SERVER_ERROR);
+			return;
 		}
 
 		$callback = $name;
@@ -65,10 +67,12 @@ class RestApi {
 	{
 		if ( !isset($_SERVER['PATH_INFO']) ) {
 			$this->createError("PATH_INFO not set.", INTERNAL_SERVER_ERROR);
+			return;
 		}
 
 		if ( !in_array($_SERVER['REQUEST_METHOD'],array('GET','POST','PUT')) ) {
 			$this->createError("Only get/post/put methods supported.", METHOD_NOT_ALLOWED);
+			return;
 		}
 
 		// trim off starting / of path_info
@@ -98,6 +102,7 @@ class RestApi {
 			if ( $postmax > 0 && $postmax < $_SERVER['CONTENT_LENGTH'] ) {
 				$this->createError("Size of post data too large (" . $_SERVER['CONTENT_LENGTH']
 						. "), increase post_max_size (" . $postmax . ") in your PHP config.");
+				return;
 			}
 		}
 		if ( strpos($name, "/") !== FALSE ) {
@@ -113,6 +118,7 @@ class RestApi {
 				$name = $name_without_dashes;
 			} else {
 				$this->createError("Function '" . $name . "' does not exist.", BAD_REQUEST);
+				return;
 			}
 		}
 		$func = $this->apiFunctions[$name];
@@ -131,6 +137,7 @@ class RestApi {
 				$this->createError("Permission denied for function '$name'" .
 				                   " to user '$userdata[name]' with roles " .
 				                   implode(',', $roles) . '.', FORBIDDEN);
+				return;
 			}
 		}
 
@@ -140,6 +147,7 @@ class RestApi {
 			if ( !array_key_exists($key, $func['optArgs']) && $key != '__primary_key' ) {
 				$this->createError("Invalid argument '" . $key .
 				                   "' for function '" . $name . "'.", BAD_REQUEST);
+				return;
 			}
 			$args[$key] = $value;
 		}
@@ -157,6 +165,11 @@ class RestApi {
 		}
 
 		$response = call_user_func($func['callback'], $args);
+		if ($response === '') {
+			// We receive an empty response of a createError or checkargs produces an error
+			// In that case, just return
+			return;
+		}
 		// If a single element was requested, return an object:
 		if  ( isset($arguments['__primary_key']) &&
 		      $_SERVER['REQUEST_METHOD']==='GET' ) {
@@ -164,6 +177,7 @@ class RestApi {
 				$this->createError("Found " . count($response) .
 				                   " elements with ID '" . $arguments['__primary_key'] .
 				                   "' for function '" . $name . "'.", NOT_FOUND);
+				return;
 
 			}
 			$response = reset($response);
@@ -237,7 +251,6 @@ class RestApi {
 	{
 		header('Content-Type: application/json');
 		print json_encode($response) . "\n";
-		exit;
 	}
 
 	public function createError($message, $code = BAD_REQUEST)

@@ -8,12 +8,15 @@
 
 require_once('../../configure.php');
 
-define('IS_JURY', false);
-define('IS_PUBLIC', true);
+global $apiFromInternal;
+if (!isset($apiFromInternal) || !$apiFromInternal) {
+	define('IS_JURY', false);
+	define('IS_PUBLIC', true);
 
-require_once(LIBDIR . '/init.php');
+	require_once(LIBDIR . '/init.php');
 
-setup_database_connection();
+	setup_database_connection();
+}
 
 require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/print.php');

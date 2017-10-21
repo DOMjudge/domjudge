@@ -131,4 +131,9 @@ class DOMJudgeService {
 		return $authchecker->isGranted('ROLE_'.strtoupper($rolename));
 	}
 
+	public function getHttpKernel()
+	{
+		return $this->container->get('http_kernel');
+	}
+
 }
