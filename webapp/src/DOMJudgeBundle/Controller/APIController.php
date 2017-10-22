@@ -146,6 +146,8 @@ class APIController extends FOSRestController {
 		$response->setCallback(function () use ($em, $contest) {
 			$lastUpdate = 0;
 			$lastIdSent = -1;
+			// Make sure this script doesn't hit the PHP maximum execution timeout.
+			set_time_limit(0);
 			while (TRUE) {
 				$q = $em->createQueryBuilder()
 					->from('DOMJudgeBundle:Event', 'e')
