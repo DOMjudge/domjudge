@@ -100,7 +100,7 @@ INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `allow_sub
 ('js', 'javascript', 'JavaScript', '["js"]', 0, 1, 1, 'js'),
 ('lua', NULL, 'Lua', '["lua"]', 0, 1, 1, 'lua'),
 ('kt', 'kotlin', 'Kotlin', '["kt"]', 0, 1, 1, 'kt'),
-('pas', 'pascal' 'Pascal', '["pas","p"]', 0, 1, 1, 'pas'),
+('pas', 'pascal', 'Pascal', '["pas","p"]', 0, 1, 1, 'pas'),
 ('pl', NULL, 'Perl', '["pl"]', 0, 1, 1, 'pl'),
 ('plg', 'prolog', 'Prolog', '["plg"]', 0, 1, 1, 'plg'),
 ('py2', 'python2', 'Python 2', '["py2","py"]', 0, 1, 1, 'py2'),
