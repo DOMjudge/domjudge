@@ -1046,49 +1046,6 @@ $roles = array('jury','judgehost');
 $api->provideFunction('GET', 'executable', $doc, $args, $exArgs, $roles);
 
 /**
- * Judging Queue
- *
- * FIXME: duplicates code with judgings_post
- * not used in judgedaemon
- */
-function queue($args)
-{
-	global $DB;
-
-	// TODO: make this configurable
-	$cdatas = getCurContests(TRUE);
-	$cids = array_keys($cdatas);
-
-	if ( empty($cids) ) {
-		return array();
-	}
-
-	$hasLimit = array_key_exists('limit', $args);
-	// TODO: validate limit
-
-	$sdatas = $DB->q('TABLE SELECT submitid
-	                  FROM submission s
-	                  LEFT JOIN team t USING (teamid)
-	                  LEFT JOIN problem p USING (probid)
-	                  LEFT JOIN language l USING (langid)
-	                  LEFT JOIN contestproblem cp USING (probid, cid)
-	                  WHERE judgehost IS NULL AND s.cid IN (%Ai)
-	                  AND l.allow_judge = 1 AND cp.allow_judge = 1 AND valid = 1
-	                  ORDER BY judging_last_started ASC, submittime ASC, submitid ASC' .
-	                 ($hasLimit ? ' LIMIT %i' : ' %_'),
-	                 $cids, ($hasLimit ? $args['limit'] : -1));
-
-	return array_map(function($sdata) {
-		return array('submitid' => safe_int($sdata['submitid']));
-	}, $sdatas);
-}
-$args = array('limit' => 'Get only the first N queued submissions');
-$doc = 'Get a list of all queued submission ids.';
-$exArgs = array(array('limit' => 10));
-$roles = array('jury','judgehost');
-$api->provideFunction('GET', 'queue', $doc, $args, $exArgs, $roles);
-
-/**
  * Judging runs information
  */
 function runs($args)
