@@ -870,25 +870,25 @@ $API_endpoints = array(
 	'contests' => array(
 		'type'   => 'configuration',
 		'url'    => '/',
-		'extid'  => TRUE, //'shortname',
+		'extid'  => 'externalid',
 	),
 	'clarifications' => array(
 		'type'   => 'live',
-		'extid'  => TRUE,
+		'extid'  => 'externalid,cid',
 	),
 	'languages' => array(
 		'type'   => 'configuration',
-		'extid'  => TRUE, // FIXME
+		'extid'  => 'externalid',
 	),
 	'problems' => array(
 		'type'   => 'configuration',
 		'tables' => array('problem', 'contestproblem'),
-		'extid'  => TRUE, // FIXME
+		'extid'  => 'externalid',
 	),
 	'teams' => array(
 		'type'   => 'configuration',
 		'tables' => array('team', 'contestteam'),
-		'extid'  => TRUE, // 'externalid'
+		'extid'  => 'externalid',
 	),
 	'organizations' => array(
 		'type'   => 'configuration',
@@ -902,7 +902,7 @@ $API_endpoints = array(
 	),
 	'submissions' => array(
 		'type'   => 'live',
-		'extid'  => TRUE, // FIXME: 'externalid' in ICPC-live branch
+		'extid'  => TRUE, // 'externalid,cid' in ICPC-live branch
 	),
 	'judgement-types' => array( // hardcoded in $VERDICTS and the API
 		'type'   => 'configuration',
@@ -958,14 +958,18 @@ foreach ( $API_endpoints as $endpoint => $data ) {
  */
 function rest_extid($endpoint, $intid)
 {
-	global $API_endpoints, $KEYS;
+	global $DB, $API_endpoints, $KEYS;
+
+	if ( $intid===null ) return null;
 
 	$ep = @$API_endpoints[$endpoint];
 	if ( !isset($ep['extid']) ) error("no int/ext ID mapping defined for $endpoint");
 
 	if ( $ep['extid']===TRUE ) return $intid;
 
-	$extid = $DB->q('MAYBEVALUE SELECT `' . $ep['extid'] . '`
+	$extkey = explode(',', $ep['extid'])[0];
+
+	$extid = $DB->q('MAYBEVALUE SELECT `' . $extkey . '`
 	                 FROM `' . $ep['tables'][0] . '`
 	                 WHERE `' . $KEYS[$ep['tables'][0]][0] . '` = %s',
 	                $intid);
@@ -976,9 +980,11 @@ function rest_extid($endpoint, $intid)
 /**
  * Map an external/REST endpoint ID back to an internal/DB ID.
  */
-function rest_intid($endpoint, $extid)
+function rest_intid($endpoint, $extid, $cid = null)
 {
-	global $API_endpoints, $KEYS;
+	global $DB, $API_endpoints, $KEYS;
+
+	if ( $extid===null ) return null;
 
 	$ep = @$API_endpoints[$endpoint];
 	if ( !isset($ep['extid']) ) error("no int/ext ID mapping defined for $endpoint");
@@ -987,11 +993,19 @@ function rest_intid($endpoint, $extid)
 
 	if ( !$ep['tables'] ) error("no database table known for $endpoint");
 
-	// FIXME: may not be unique, need cid?
-	$intid = $DB->q('MAYBEVALUE SELECT `' . $KEYS[$ep['tables']][0] . '`
+	$keys = explode(',', $ep['extid']);
+	$extkey = $keys[0];
+	if ( count($keys)>1 ) $cidkey = $keys[1];
+
+	if ( isset($cidkey) && $cid===null ) {
+		error("argument 'cid' missing to map to internal ID for $endpoint");
+	}
+
+	$intid = $DB->q('MAYBEVALUE SELECT `' . $KEYS[$ep['tables'][0]][0] . '`
 	                 FROM `' . $ep['tables'][0] . '`
-	                 WHERE `' . $ep['extid'][0] . '` = %s',
-	                $extid);
+	                 WHERE `' . $extkey . '` = %s' .
+	                ( isset($cidkey) ? ' AND cid = %i' : ' %_' ),
+	                $extid, $cid);
 
 	return $intid;
 }
