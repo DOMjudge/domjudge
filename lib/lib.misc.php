@@ -1180,7 +1180,7 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 
 		$status = $response->getStatusCode();
 		if ( $status < 200 || $status >= 300 ) {
-			$errstr = "Error while executing curl $verb to url " . $url .
+			$errstr = "Error while executing internal $verb request to url " . $url .
 				": http status code: " . $status . ", response: " . $response;
 			if ($failonerror) { error($errstr); }
 			else { warning($errstr); return null; }
