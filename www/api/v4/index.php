@@ -6,12 +6,16 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-define('DOMJUDGE_API_VERSION', 4);
+if (!defined('DOMJUDGE_API_VERSION')) {
+	define('DOMJUDGE_API_VERSION', 4);
+}
 
 require('init.php');
 require_once(LIBWWWDIR . '/common.jury.php');
 use DOMJudgeBundle\Utils\Utils;
 
+global $api;
+if (!isset($api)) {
 function infreeze($cdata, $time)
 {
 
@@ -1746,6 +1750,8 @@ $doc = 'Lists all available judgement types.';
 $args = array();
 $exArgs = array();
 $api->provideFunction('GET', 'judgement_types', $doc, $args, $exArgs, null, true);
+
+}
 
 // Now provide the api, which will handle the request
 $api->provideApi();
