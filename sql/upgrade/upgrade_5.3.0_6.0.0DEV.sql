@@ -32,7 +32,7 @@ ALTER TABLE `judging_run`
 ALTER TABLE `submission`
   ADD COLUMN `entry_point` varchar(255) DEFAULT NULL COMMENT 'Optional entry point. Can be used e.g. for java main class.' AFTER `expected_results`;
 
-source convert_event_6.0.sql
+source upgrade/convert_event_6.0.sql
 
 --
 -- Transfer data from old to new structure
