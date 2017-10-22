@@ -1164,13 +1164,7 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	if (isset($G_SYMFONY)) {
 		// Perform an internal Symfony request to the API
 		$apiFromInternal = true;
-		if ( $resturl === null ) {
-			read_API_credentials();
-			if ( $resturl === null ) {
-				error("could not initialize REST API credentials");
-			}
-		}
-		$url = $resturl . $url;
+		$url = 'http://localhost/api/'. $url;
 		$httpKernel = $G_SYMFONY->getHttpKernel();
 		parse_str($data, $parsedData);
 
