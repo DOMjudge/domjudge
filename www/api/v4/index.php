@@ -181,14 +181,6 @@ function problems($args)
 {
 	global $DB, $api, $cdatas, $userdata, $cids;
 
-	if ( isset($args['__primary_key']) ) {
-		if ( isset($args['probid']) ) {
-			$api->createError("You cannot specify a primary ID both via /{id} and ?probid={id}");
-			return '';
-		}
-		$args['probid'] = $args['__primary_key'];
-	}
-
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
 	} else {
@@ -198,6 +190,14 @@ function problems($args)
 			$api->createError("No active contest found.", NOT_FOUND);
 			return '';
 		}
+	}
+
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['probid']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?probid={id}");
+			return '';
+		}
+		$args['probid'] = rest_intid('problems', $args['__primary_key'], $cid);
 	}
 
 	// Check that user has access to the problems in this contest:
@@ -242,7 +242,7 @@ function problems($args)
 	$is_jury = checkrole('jury');
 	return array_map(function($pdata) use ($is_jury) {
 		$ret = array(
-			'id'         => safe_string($pdata['id']),
+			'id'         => safe_string(rest_extid('problems',$pdata['id'])),
 			'label'      => safe_string($pdata['label']),
 			'short_name' => $pdata['shortname'],
 			'name'       => $pdata['name'],
@@ -272,14 +272,6 @@ function judgings($args)
 {
 	global $DB, $api, $userdata, $cdatas, $cids, $VERDICTS;
 
-	if ( isset($args['__primary_key']) ) {
-		if ( isset($args['judging_id']) ) {
-			$api->createError("You cannot specify a primary ID both via /{id} and ?judging_id={id}");
-			return '';
-		}
-		$args['judging_id'] = $args['__primary_key'];
-	}
-
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
 	} else {
@@ -289,6 +281,14 @@ function judgings($args)
 			$api->createError("No active contest found.", NOT_FOUND);
 			return '';
 		}
+	}
+
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['judging_id']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?judging_id={id}");
+			return '';
+		}
+		$args['judging_id'] = rest_intid('judgements', $args['__primary_key'], $cid);
 	}
 
 	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime
@@ -336,8 +336,8 @@ function judgings($args)
 	while ( $row = $q->next() ) {
 
 		$res[] = array(
-			'id'                 => safe_string($row['judgingid']),
-			'submission_id'      => safe_string($row['submitid']),
+			'id'                 => safe_string(rest_extid('judgements', $row['judgingid'])),
+			'submission_id'      => safe_string(rest_extid('submissions', $row['submitid'])),
 			'judgement_type_id'  => empty($row['result']) ? null : $VERDICTS[$row['result']],
 			'start_time'         => Utils::absTime($row['starttime']),
 			'start_contest_time' => Utils::relTime($row['starttime'] - $cdatas[$row['cid']]['starttime']),
@@ -755,14 +755,6 @@ function submissions($args)
 {
 	global $DB, $cdatas, $cids, $api;
 
-	if ( isset($args['__primary_key']) ) {
-		if ( isset($args['id']) ) {
-			$api->createError("You cannot specify a primary ID both via /{id} and ?id={id}");
-			return '';
-		}
-		$args['id'] = $args['__primary_key'];
-	}
-
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
 	} else {
@@ -772,6 +764,14 @@ function submissions($args)
 			$api->createError("No active contest found.", NOT_FOUND);
 			return '';
 		}
+	}
+
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['id']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?id={id}");
+			return '';
+		}
+		$args['id'] = rest_intid('submissions', $args['__primary_key'], $cid);
 	}
 
 	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid, entry_point
@@ -807,13 +807,13 @@ function submissions($args)
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
-			'id'           => safe_string($row['submitid']),
-			'team_id'      => safe_string($row['teamid']),
-			'problem_id'   => safe_string($row['probid']),
-			'language_id'  => safe_string($row['langid']),
+			'id'           => safe_string(rest_extid('submissions', $row['submitid'])),
+			'team_id'      => safe_string(rest_extid('teams', $row['teamid'])),
+			'problem_id'   => safe_string(rest_extid('problems', $row['probid'])),
+			'language_id'  => safe_string(rest_extid('languages', $row['langid'])),
 			'time'         => Utils::absTime($row['submittime']),
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
-			'contest_id'   => safe_string($row['cid']),
+			'contest_id'   => safe_string($row['cid']), // FIXME: remove or use externalid?
 			'entry_point'  => $row['entry_point'],
 			);
 	}
@@ -1052,14 +1052,6 @@ function runs($args)
 {
 	global $DB, $cdatas, $cids, $api, $VERDICTS;
 
-	if ( isset($args['__primary_key']) ) {
-		if ( isset($args['run_id']) ) {
-			$api->createError("You cannot specify a primary ID both via /{id} and ?run_id={id}");
-			return '';
-		}
-		$args['run_id'] = $args['__primary_key'];
-	}
-
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
 	} else {
@@ -1069,6 +1061,14 @@ function runs($args)
 			$api->createError("No active contest found.", NOT_FOUND);
 			return '';
 		}
+	}
+
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['run_id']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?run_id={id}");
+			return '';
+		}
+		$args['run_id'] = rest_intid('runs', $args['__primary_key'], $cid);
 	}
 
 	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid
@@ -1101,8 +1101,8 @@ function runs($args)
 	$runs = $DB->q($query, $cid, $firstId, $lastId, $judgingid, $runid, $limit);
 	return array_map(function($run) use ($VERDICTS, $cdatas) {
 		return array(
-			'id'                => safe_string($run['runid']),
-			'judgement_id'      => safe_string($run['judgingid']),
+			'id'                => safe_string(rest_extid('runs', $run['runid'])),
+			'judgement_id'      => safe_string(rest_extid('judgements', $run['judgingid'])),
 			'ordinal'           => safe_int($run['rank']),
 			'judgement_type_id' => safe_string($VERDICTS[$run['runresult']]),
 			'time'              => Utils::absTime($run['endtime']),
@@ -1166,7 +1166,7 @@ function organizations($args)
 			$api->createError("You cannot specify a primary ID both via /{id} and ?affilid={id}");
 			return '';
 		}
-		$args['affilid'] = $args['__primary_key'];
+		$args['affilid'] = rest_intid('organizations', $args['__primary_key']);
 	}
 
 	// Construct query
@@ -1186,7 +1186,7 @@ function organizations($args)
 	$adatas = $DB->q($query, $country, $affilid);
 	return array_map(function($adata) {
 		return array(
-			'id'        => safe_string($adata['affilid']),
+			'id'        => safe_string(rest_extid('organizations', $adata['affilid'])),
 			'icpc_id'   => safe_string($adata['affilid']),
 			'shortname' => $adata['shortname'],
 			'name'      => $adata['name'],
@@ -1206,14 +1206,6 @@ function teams($args)
 {
 	global $DB, $api, $cids;
 
-	if ( isset($args['__primary_key']) ) {
-		if ( isset($args['teamid']) ) {
-			$api->createError("You cannot specify a primary ID both via /{id} and ?teamid={id}");
-			return '';
-		}
-		$args['teamid'] = $args['__primary_key'];
-	}
-
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
 	} else {
@@ -1223,6 +1215,14 @@ function teams($args)
 			$api->createError("No active contest found.", NOT_FOUND);
 			return '';
 		}
+	}
+
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['teamid']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?teamid={id}");
+			return '';
+		}
+		$args['teamid'] = rest_intid('teams', $args['__primary_key'], $cid);
 	}
 
 	// Construct query
@@ -1260,12 +1260,12 @@ function teams($args)
 	$tdatas = $DB->q($query, $category, $affiliation, $teamid);
 	return array_map(function($tdata) {
 		return array(
-			'id'              => safe_string($tdata['id']),
+			'id'              => safe_string(rest_extid('teams', $tdata['id'])),
 			'name'            => $tdata['name'],
 			'members'         => $tdata['members'],
 			'nationality'     => $tdata['nationality'],
-			'group_id'        => safe_string($tdata['categoryid']),
-			'organization_id' => safe_string($tdata['affilid']),
+			'group_id'        => safe_string(rest_extid('groups', $tdata['categoryid'])),
+			'organization_id' => safe_string(rest_extid('organizations', $tdata['affilid'])),
 			'affiliation'     => $tdata['affiliation'],
 			'externalid'      => $tdata['externalid'],
 			'icpc_id'         => $tdata['externalid'],
@@ -1314,7 +1314,7 @@ function groups($args)
 			$api->createError("You cannot specify a primary ID both via /{id} and ?categoryid={id}");
 			return '';
 		}
-		$args['categoryid'] = $args['__primary_key'];
+		$args['categoryid'] = rest_intid('groups', $args['__primary_key']);
 	}
 
 	$query = 'SELECT categoryid, name, color, visible, sortorder
@@ -1332,7 +1332,7 @@ function groups($args)
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
-			'id'         => safe_string($row['categoryid']),
+			'id'         => safe_string(rest_extid('groups', $row['categoryid'])),
 			'icpc_id'    => safe_string($row['categoryid']),
 			'name'       => safe_string($row['name']),
 			'color'      => $row['color'],
@@ -1355,7 +1355,7 @@ function languages($args)
 			$api->createError("You cannot specify a primary ID both via /{id} and ?langid={id}");
 			return '';
 		}
-		$args['langid'] = $args['__primary_key'];
+		$args['langid'] = rest_intid('languages', $args['__primary_key']);
 	}
 
 	$query = 'SELECT langid, name, extensions, allow_judge, time_factor
@@ -1370,7 +1370,7 @@ function languages($args)
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
-			'id'           => safe_string($row['langid']),
+			'id'           => safe_string(rest_extid('languages', $row['langid'])),
 			'name'         => safe_string($row['name']),
 			'extensions'   => json_decode($row['extensions']),
 			'allow_judge'  => safe_bool($row['allow_judge']),
@@ -1390,14 +1390,6 @@ function clarifications($args)
 {
 	global $cids, $cdatas, $DB, $api;
 
-	if ( isset($args['__primary_key']) ) {
-		if ( isset($args['clar_id']) ) {
-			$api->createError("You cannot specify a primary ID both via /{id} and ?clar_id={id}");
-			return '';
-		}
-		$args['clar_id'] = $args['__primary_key'];
-	}
-
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
 	} else {
@@ -1407,6 +1399,14 @@ function clarifications($args)
 			$api->createError("No active contest found.", NOT_FOUND);
 			return '';
 		}
+	}
+
+	if ( isset($args['__primary_key']) ) {
+		if ( isset($args['clar_id']) ) {
+			$api->createError("You cannot specify a primary ID both via /{id} and ?clar_id={id}");
+			return '';
+		}
+		$args['clar_id'] = rest_intid('clarifications', $args['__primary_key'], $cid);
 	}
 
 	// Find clarifications, maybe later also provide more info for jury
@@ -1425,12 +1425,12 @@ function clarifications($args)
 	$clar_datas = $DB->q($query, $cid, $problem, $clarId);
 	return array_map(function($clar_data) use ($cdatas) {
 		return array(
-			'id'           => safe_string($clar_data['clarid']),
+			'id'           => safe_string(rest_extid('clarifications', $clar_data['clarid'])),
 			'time'         => Utils::absTime($clar_data['submittime']),
 			'contest_time' => Utils::relTime($clar_data['submittime'] - $cdatas[$clar_data['cid']]['starttime']),
-			'problem_id'   => safe_string($clar_data['probid']),
-			'from_team_id' => safe_string($clar_data['sender']),
-			'to_team_id'   => safe_string($clar_data['recipient']),
+			'problem_id'   => safe_string(rest_extid('problems', $clar_data['probid'])),
+			'from_team_id' => safe_string(rest_extid('teams', $clar_data['sender'])),
+			'to_team_id'   => safe_string(rest_extid('teams', $clar_data['recipient'])),
 			'text'         => $clar_data['body'],
 		);
 	}, $clar_datas);
@@ -1575,13 +1575,14 @@ function scoreboard($args)
 
 	$res = array();
 	foreach ( $scoreboard['scores'] as $teamid => $data ) {
-		$row = array('rank' => $data['rank'], 'team_id' => safe_string($teamid));
+		$row = array('rank' => $data['rank'],
+		             'team_id' => safe_string(rest_extid('teams', $teamid)));
 		$row['score'] = array('num_solved' => safe_int($data['num_points']),
 		                      'total_time' => safe_int($data['total_time']));
 		$row['problems'] = array();
 		foreach ( $scoreboard['matrix'][$teamid] as $probid => $pdata ) {
 			$prob = array('label'       => $prob2label[$probid],
-			              'problem_id'  => safe_string($probid),
+			              'problem_id'  => safe_string(rest_extid('problems', $probid)),
 			              'num_judged'  => safe_int($pdata['num_submissions']),
 			              'num_pending' => safe_int($pdata['num_pending']),
 			              'solved'      => safe_bool($pdata['is_correct']));
