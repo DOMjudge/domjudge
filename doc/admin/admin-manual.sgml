@@ -354,9 +354,9 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
 sudo apt install gcc g++ make zip unzip mysql-server \
-	apache2 php php-cli libapache2-mod-php \
+	apache2 php php-cli libapache2-mod-php php-zip \
 	php-gd php-curl php-mysql php-json php-mbstring \
-	bsdmainutils ntp phpmyadmin \
+	acl bsdmainutils ntp phpmyadmin \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
@@ -408,7 +408,7 @@ change the list as appropriate.
 For Debian:
 <code>
 sudo apt install make sudo debootstrap libcgroup-dev \
-	php-cli php-curl php-json procps \
+	php-cli php-curl php-json php-zip procps \
 	gcc g++ openjdk-8-jre-headless \
 	openjdk-8-jdk ghc fp-compiler
 </code>
