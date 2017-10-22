@@ -136,6 +136,8 @@ class APIController extends FOSRestController {
 	 * @Get("/event-feed")
 	 */
 	public function getEventFeed() {
+		# Avoid being killed after 30s of CPU time.
+		set_time_limit(0);
 		$em = $this->getDoctrine()->getManager();
 		$contest = $this->getCurrentActiveContestAction();
 		if ($contest === NULL) {
