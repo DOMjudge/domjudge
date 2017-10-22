@@ -110,6 +110,8 @@ if ( $num_contests > 0 ) {
 	</td>
 </tr>
 <?php
+} else {
+	echo addHidden('data[0][mapping][0][items]', '');
 }
 ?>
 
