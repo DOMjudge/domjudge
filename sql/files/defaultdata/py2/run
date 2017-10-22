@@ -22,6 +22,12 @@ EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 rm -f -- *.pyc
 
+# Check if entry point is valid
+if [ ! -r "$MAINSOURCE" ]; then
+    >&2 echo "error: main source file '$MAINSOURCE' is not readable"
+    exit 1
+fi
+
 # Write executing script:
 cat > "$DEST" <<EOF
 #!/bin/sh

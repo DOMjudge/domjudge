@@ -38,6 +38,11 @@ javac -encoding UTF-8 -d . "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
+# Check if entry point is valid
+javap "$MAINCLASS" > /dev/null
+EXITCODE=$?
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
 MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 

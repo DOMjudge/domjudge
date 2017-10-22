@@ -48,6 +48,11 @@ if [ -z "$MAINCLASS" ]; then
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi
 
+# Check if entry point is valid
+javap "$MAINCLASS" > /dev/null
+EXITCODE=$?
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
 MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 
