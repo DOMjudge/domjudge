@@ -95,6 +95,13 @@ class FallbackController extends Controller
 			$response->headers->set($headerName, trim(implode(':', $pieces)), false);
 		}
 
+		if (!$response->headers->has('Content-Type')) {
+			$contentType = mime_content_type($thefile);
+			if ($contentType !== 'text/x-php') {
+				$response->headers->set('Content-Type', $contentType);
+			}
+		}
+
 		return $response;
 	}
 }
