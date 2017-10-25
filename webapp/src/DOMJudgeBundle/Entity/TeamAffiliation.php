@@ -18,6 +18,13 @@ class TeamAffiliation
 
 	/**
 	 * @var string
+	 * TODO: ORM\Unique on first 190 characters
+	 * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Team affiliation ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+	 */
+	private $externalid;
+
+	/**
+	 * @var string
 	 * @ORM\Column(type="string", name="shortname", length=30, options={"comment"="Short descriptive name"}, nullable=false)
 	 */
 	private $shortname;
@@ -61,6 +68,30 @@ class TeamAffiliation
 	public function getAffilid()
 	{
 		return $this->affilid;
+	}
+
+	/**
+	 * Set externalid
+	 *
+	 * @param string $externalid
+	 *
+	 * @return Team
+	 */
+	public function setExternalid($externalid)
+	{
+		$this->externalid = $externalid;
+
+		return $this;
+	}
+
+	/**
+	 * Get externalid
+	 *
+	 * @return string
+	 */
+	public function getExternalid()
+	{
+		return $this->externalid;
 	}
 
 	/**
