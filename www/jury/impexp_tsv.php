@@ -124,7 +124,8 @@ function tsv_teams_prepare($content)
 			'team_affiliation' => array (
 				'shortname' => @$line[5],
 				'name' => @$line[4],
-				'country' => @$line[6]) );
+				'country' => @$line[6],
+				'externalid' => @$line[7]) );
 	}
 
 	return $data;
@@ -140,10 +141,8 @@ function tsv_teams_set($data)
 		if ( !empty($row['team_affiliation']['shortname']) ) {
 			// First look up if the affiliation already exists.
 			$affilid = $DB->q("MAYBEVALUE SELECT affilid FROM team_affiliation
-			                   WHERE shortname = %s AND name = %s AND country = %s LIMIT 1",
-			                  $row['team_affiliation']['shortname'],
-			                  $row['team_affiliation']['name'],
-			                  $row['team_affiliation']['country']);
+			                   WHERE externalid = %s LIMIT 1",
+			                  $row['team_affiliation']['externalid']);
 			if ( empty($affilid) ) {
 				$affilid = $DB->q("RETURNID INSERT INTO team_affiliation SET %S",
 				                  $row['team_affiliation']);

@@ -34,6 +34,10 @@ ALTER TABLE `problem`
   ADD COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest' AFTER `probid`,
   ADD KEY `externalid` (`externalid`(190));
 
+ALTER TABLE `team_affiliation`
+  ADD COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Team affiliation ID in an external system' AFTER `affilid`,
+  ADD KEY `externalid` (`externalid`(190));
+
 ALTER TABLE `judging_run`
   ADD COLUMN `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run judging ended' AFTER `runtime`;
 
