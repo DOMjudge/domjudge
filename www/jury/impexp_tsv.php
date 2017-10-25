@@ -95,8 +95,8 @@ function tsv_groups_set($data)
 	global $DB;
 	$cnt = 0;
 	foreach ($data as $row) {
-		$DB->q("REPLACE INTO team_category SET %S", $row);
-		eventlog('team_category', $row['categoryid'], 'create/update');
+		$replacecnt = $DB->q("RETURNAFFECTED REPLACE INTO team_category SET %S", $row);
+		eventlog('team_category', $row['categoryid'], $replacecnt == 1 ? 'create' : 'update');
 		auditlog('team_category', $row['categoryid'], 'replaced', 'imported from tsv');
 		$cnt++;
 	}
@@ -152,9 +152,9 @@ function tsv_teams_set($data)
 			}
 			$row['team']['affilid'] = $affilid;
 		}
-		$DB->q("REPLACE INTO team SET %S", $row['team']);
+		$replacecnt = $DB->q("RETURNAFFECTED REPLACE INTO team SET %S", $row['team']);
 
-		eventlog('team', $row['team']['teamid'], 'create/update');
+		eventlog('team', $row['team']['teamid'], $replacecnt == 1 ? 'create' : 'update');
 		auditlog('team', $row['team']['teamid'], 'replaced', 'imported from tsv');
 		$cnt++;
 	}
