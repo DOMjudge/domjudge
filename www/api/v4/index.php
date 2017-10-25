@@ -1142,7 +1142,7 @@ function affiliations($args)
 	$adatas = $DB->q($query, $country);
 	return array_map(function($adata) {
 		return array(
-			'affilid'   => safe_int($adata['affilid']),
+			'affilid'   => safe_string(rest_extid('organizations', $adata['affilid'])),
 			'shortname' => $adata['shortname'],
 			'name'      => $adata['name'],
 			'country'   => $adata['country'],

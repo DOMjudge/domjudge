@@ -893,7 +893,7 @@ $API_endpoints = array(
 	'organizations' => array(
 		'type'   => 'configuration',
 		'tables' => array('team_affiliation'),
-		'extid'  => TRUE, //'shortname', // 'externalid'
+		'extid'  => 'externalid',
 	),
 	'groups' => array(
 		'type'   => 'configuration',
