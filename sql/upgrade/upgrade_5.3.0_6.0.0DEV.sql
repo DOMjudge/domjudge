@@ -27,11 +27,11 @@ ALTER TABLE `clarification`
   ADD UNIQUE KEY `externalid` (`cid`,`externalid`(190));
 
 ALTER TABLE `language`
-  `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API' AFTER `langid`,
+  ADD COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API' AFTER `langid`,
   ADD KEY `externalid` (`externalid`(190));
 
 ALTER TABLE `problem`
-  ADD COLUMN `externalid` DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest' AFTER `probid`,
+  ADD COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest' AFTER `probid`,
   ADD KEY `externalid` (`externalid`(190));
 
 ALTER TABLE `judging_run`
