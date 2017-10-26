@@ -642,6 +642,10 @@ connection caching by Apache threads. 1000 is more appropriate.
 low when using large testcases. This should be changed both in the
 MySQL server and client configuration and be set to about twice the
 maximum testcase size.
+<item><tt>innodb_log_file_size</tt>: The default of 48MB might be too
+low on MySQL servers with version 5.6.20 or newer due to changes to
+the redo log. You should set it 10 times higher than the maximum
+testcase size.
 <item>Root password: MySQL does not have a password for the root user
 by default. It's very desirable to set one.
 <item>When maximising performance is required, you can

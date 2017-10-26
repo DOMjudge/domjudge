@@ -181,10 +181,9 @@ if ( class_exists("ZipArchive") ) {
 }
 
 $mysqldata = array();
-$mysqldatares = $DB->q('SHOW variables WHERE
-                        Variable_name = "max_connections" OR
-                        Variable_name = "max_allowed_packet" OR
-                        Variable_name = "version"');
+$mysqldatares = $DB->q('SHOW variables WHERE Variable_name IN
+                        ("innodb_log_file_size", "max_connections",
+                         "max_allowed_packet", "version")');
 while($row = $mysqldatares->next()) {
 	$mysqldata[$row['Variable_name']] = $row['Value'];
 }
@@ -206,6 +205,12 @@ result('software', 'MySQL maximum packet size',
 	'MySQL\'s max_allowed_packet is set to ' .
 	printsize($mysqldata['max_allowed_packet']) . '. You may ' .
 	'want to raise this to about twice the maximum test case size.');
+
+result('software', 'MySQL innodb logfile size',
+	$mysqldata['innodb_log_file_size'] < 128*1024*1024 ? 'W':'O', '',
+	'MySQL\'s innodb_log_file_size is set to ' .
+	printsize($mysqldata['innodb_log_file_size']) . '. You may ' .
+	'want to raise this to 10x the maximum test case size.');
 
 flushresults();
 
