@@ -356,7 +356,7 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 sudo apt install gcc g++ make zip unzip mysql-server \
 	apache2 php php-cli libapache2-mod-php php-zip \
 	php-gd php-curl php-mysql php-json php-mbstring \
-	acl bsdmainutils ntp phpmyadmin \
+	acl bsdmainutils ntp phpmyadmin libcgroup-dev \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
@@ -372,7 +372,7 @@ related distributions like CentOS and Fedora.
 <code>
 sudo yum install gcc gcc-c++ make zip unzip mariadb-server \
 	httpd php-gd php-cli php-mbstring php-mysql \
-	ntp linuxdoc-tools \
+	ntp linuxdoc-tools libcgroup-devel \
 	texlive-collection-latexrecommended texlive-wrapfig
 </code>
 Note that the TeX Live packages <tt>expdlist</tt>, <tt>moreverb</tt>,
