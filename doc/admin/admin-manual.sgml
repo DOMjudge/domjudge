@@ -508,7 +508,7 @@ can be built and installed separately, respectively by:
 <code>
 make domserver &amp;&amp; sudo make install-domserver
 make judgehost &amp;&amp; sudo make install-judgehost
-make docs &amp;&amp; make install-docs
+make docs &amp;&amp; sudo make install-docs
 </code>
 Note that root privileges are required to set permissions and user and
 group ownership of password files and a few directories. If you run
