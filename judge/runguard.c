@@ -116,7 +116,7 @@ char  *metafilename;
 char  *environment_variables;
 FILE  *metafile;
 
-char  *cgroupname;
+char  cgroupname[255];
 const char *cpuset;
 
 /* Linux Out-Of-Memory adjustment for current process. */
@@ -1035,13 +1035,10 @@ int main(int argc, char **argv)
 	if ( ret!=0 ) {
 		error(0,"libcgroup initialization failed: %s(%d)\n", cgroup_strerror(ret), ret);
 	}
-	/* Define the cgroup name that we will use */
-	cgroupname = (char*)malloc(256);
-	if ( cgroupname==NULL ) {
-		error(errno,"allocating memory for cgroupname");
-	}
-	/* Note: group names must have slashes! */
-	snprintf(cgroupname, 256, "/domjudge/dj_cgroup_%d/", getpid());
+	/* Define the cgroup name that we will use and make sure it will
+	 * be unique. Note: group names must have slashes!
+	 */
+	snprintf(cgroupname, 255, "/domjudge/dj_cgroup_%d_%d/", getpid(), (int)time(NULL));
 
 	cgroup_create();
 
