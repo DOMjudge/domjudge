@@ -145,7 +145,7 @@ int be_quiet;
 int show_help;
 int show_version;
 
-double walltime[2], cputime[2]; /* in seconds, soft and hard limits */
+double walltimelimit[2], cputimelimit[2]; /* in seconds, soft and hard limits */
 int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
 int64_t memsize;
 rlim_t filesize;
@@ -351,12 +351,12 @@ void output_exit_time(int exitcode, double cpudiff)
 	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys",
 	        walldiff, userdiff, sysdiff);
 
-	if ( use_walltime && walldiff > walltime[0] ) {
+	if ( use_walltime && walldiff > walltimelimit[0] ) {
 		walllimit_reached |= soft_timelimit;
 		warning("timelimit exceeded (soft wall time)");
 	}
 
-	if ( use_cputime && cpudiff > cputime[0] ) {
+	if ( use_cputime && cpudiff > cputimelimit[0] ) {
 		cpulimit_reached |= soft_timelimit;
 		warning("timelimit exceeded (soft cpu time)");
 	}
@@ -411,7 +411,7 @@ void output_cgroup_stats(double *cputime)
 	cg_controller = cgroup_get_controller(cg, "memory");
 	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
 	if ( ret!=0 ) {
-		error(0,"get cgroup value: %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"get cgroup value memory.memsw.max_usage_in_bytes: %s(%d)", cgroup_strerror(ret), ret);
 	}
 
 	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
@@ -420,7 +420,7 @@ void output_cgroup_stats(double *cputime)
 	cg_controller = cgroup_get_controller(cg, "cpuacct");
 	ret = cgroup_get_value_int64(cg_controller, "cpuacct.usage", &cpu_time_int);
 	if ( ret!=0 ) {
-		error(0,"get cgroup value: %s(%d)", cgroup_strerror(ret), ret);
+		error(0,"get cgroup value cpuacct.usage: %s(%d)", cgroup_strerror(ret), ret);
 	}
 	*cputime = (double) cpu_time_int / 1.e9;
 
@@ -703,7 +703,7 @@ void setrestrictions()
 		   the hard limit a SIGKILL. The SIGXCPU can be caught, but is
 		   not by default and gives us a reliable way to detect if the
 		   CPU-time limit was reached. */
-		rlim_t cputime_limit = (rlim_t)ceil(cputime[1]);
+		rlim_t cputime_limit = (rlim_t)ceil(cputimelimit[1]);
 		verbose("setting hard CPU-time limit to %d(+1) seconds",(int)cputime_limit);
 		lim.rlim_cur = cputime_limit;
 		lim.rlim_max = cputime_limit+1;
@@ -847,6 +847,7 @@ int main(int argc, char **argv)
 		case 'r': /* rootdir option */
 			use_root = 1;
 			rootdir = (char *) malloc(strlen(optarg)+2);
+			if ( rootdir==NULL ) error(errno,"allocating memory");
 			strcpy(rootdir,optarg);
 			break;
 		case 'u': /* user option: uid or string */
@@ -874,12 +875,12 @@ int main(int argc, char **argv)
 		case 't': /* wallclock time option */
 			use_walltime = 1;
 			outputtimetype = WALL_TIME_TYPE;
-			read_optarg_time("walltime",walltime);
+			read_optarg_time("walltime",walltimelimit);
 			break;
 		case 'C': /* CPU time option */
 			use_cputime = 1;
 			outputtimetype = CPU_TIME_TYPE;
-			read_optarg_time("cputime",cputime);
+			read_optarg_time("cputime",cputimelimit);
 			break;
 		case 'm': /* memsize option */
 			memsize = (rlim_t) read_optarg_int("memory limit",1,LONG_MAX);
@@ -950,6 +951,8 @@ int main(int argc, char **argv)
 			error(0,"getopt returned character code `%c' ??",(char)opt);
 		}
 	}
+
+	verbose("starting in verbose mode, PID = %d", getpid());
 
 	/* Make sure that we change from group root if we change to an
 	   unprivileged user to prevent unintended permissions. */
@@ -1152,13 +1155,13 @@ int main(int argc, char **argv)
 			/* Trigger SIGALRM via setitimer:  */
 			itimer.it_interval.tv_sec  = 0;
 			itimer.it_interval.tv_usec = 0;
-			itimer.it_value.tv_sec  = (int) walltime[1];
-			itimer.it_value.tv_usec = (int)(modf(walltime[1],&tmpd) * 1E6);
+			itimer.it_value.tv_sec  = (int) walltimelimit[1];
+			itimer.it_value.tv_usec = (int)(modf(walltimelimit[1],&tmpd) * 1E6);
 
 			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
 				error(errno,"setting timer");
 			}
-			verbose("setting hard wall-time limit to %.3f seconds",walltime[1]);
+			verbose("setting hard wall-time limit to %.3f seconds",walltimelimit[1]);
 		}
 
 		if ( times(&startticks)==(clock_t) -1 ) {
