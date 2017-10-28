@@ -26,7 +26,7 @@ function filebase($probid, $rank)
 // TODO: check if this duplicates code with the API
 function download($probid, $rank, $file)
 {
-	global $DB;
+	global $DB, $prob;
 	if ( $file=='image' ) {
 		$ext = $DB->q('MAYBEVALUE SELECT image_type
 		               FROM testcase WHERE probid = %i AND rank = %i',
