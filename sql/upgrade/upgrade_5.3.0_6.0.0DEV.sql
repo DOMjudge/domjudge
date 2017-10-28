@@ -28,7 +28,7 @@ ALTER TABLE `clarification`
 
 ALTER TABLE `language`
   ADD COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API' AFTER `langid`,
-  ADD KEY `externalid` (`externalid`(190));
+  ADD UNIQUE KEY `externalid` (`externalid`(190));
 
 ALTER TABLE `problem`
   ADD COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest' AFTER `probid`,
