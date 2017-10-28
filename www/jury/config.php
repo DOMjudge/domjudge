@@ -51,7 +51,7 @@ if ( isset($_POST['save']) ) {
 	dbconfig_store();
 
 	// Redirect to the original page to prevent accidental redo's
-	header('Location: config.php');
+	header('Location: config.php?edited=1');
 	return;
 }
 
@@ -60,6 +60,17 @@ require(LIBWWWDIR . '/header.php');
 
 // Check admin rights after header to generate valid HTML page
 requireAdmin();
+
+if ( isset($_GET['edited']) ) {
+	echo addForm('refresh_cache.php') .
+		msgbox("Warning: Refresh scoreboard cache",
+		       "Some setting changes require recalculating any cached scoreboards.<br />" .
+		       "Affected settings: verification required, score in seconds, " .
+		       "penalty time, compile penalty.<br /><br />" .
+		       addSubmit('recalculate caches now', 'refresh')
+		) .
+		addEndForm();
+}
 
 echo "<h1>Configuration settings</h1>\n\n";
 
