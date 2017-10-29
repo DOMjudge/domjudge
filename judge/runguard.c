@@ -526,6 +526,7 @@ void cgroup_delete()
 		error(0,"cgroup_new_cgroup");
 	}
 	cgroup_add_controller(cg, "cpu");
+	cgroup_add_controller(cg, "cpuacct");
 	cgroup_add_controller(cg, "memory");
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
 		cgroup_add_controller(cg, "cpuset");
