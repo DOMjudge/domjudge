@@ -872,9 +872,10 @@ $API_endpoints = array(
 		'url'    => '/',
 		'extid'  => 'externalid',
 	),
-	'clarifications' => array(
-		'type'   => 'live',
-		'extid'  => 'externalid,cid',
+	'judgement-types' => array( // hardcoded in $VERDICTS and the API
+		'type'   => 'configuration',
+		'tables' => array(),
+		'extid'  => TRUE,
 	),
 	'languages' => array(
 		'type'   => 'configuration',
@@ -885,29 +886,28 @@ $API_endpoints = array(
 		'tables' => array('problem', 'contestproblem'),
 		'extid'  => 'externalid',
 	),
-	'teams' => array(
+	'groups' => array(
 		'type'   => 'configuration',
-		'tables' => array('team', 'contestteam'),
-		'extid'  => 'externalid',
+		'tables' => array('team_category'),
+		'extid'  => TRUE, // FIXME
 	),
 	'organizations' => array(
 		'type'   => 'configuration',
 		'tables' => array('team_affiliation'),
 		'extid'  => 'externalid',
 	),
-	'groups' => array(
+	'teams' => array(
 		'type'   => 'configuration',
-		'tables' => array('team_category'),
-		'extid'  => TRUE, // FIXME
+		'tables' => array('team', 'contestteam'),
+		'extid'  => 'externalid',
+	),
+	'teams-members' => array(
+		'type'   => 'configuration',
+		'tables' => array(),
 	),
 	'submissions' => array(
 		'type'   => 'live',
 		'extid'  => TRUE, // 'externalid,cid' in ICPC-live branch
-	),
-	'judgement-types' => array( // hardcoded in $VERDICTS and the API
-		'type'   => 'configuration',
-		'tables' => array(),
-		'extid'  => TRUE,
 	),
 	'judgements' => array(
 		'type'   => 'live',
@@ -918,6 +918,10 @@ $API_endpoints = array(
 		'type'   => 'live',
 		'tables' => array('judging_run'),
 		'extid'  => TRUE,
+	),
+	'clarifications' => array(
+		'type'   => 'live',
+		'extid'  => 'externalid,cid',
 	),
 	'awards' => array(
 		'type'   => 'aggregate',
