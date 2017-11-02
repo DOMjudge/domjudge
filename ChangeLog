@@ -2,6 +2,11 @@ DOMjudge Programming Contest Judging System
 
 Version 5.3.1 - DEV
 -------------------
+ - Fix runguard reusing cpuacct cgroup potentially giving wrong runtimes.
+ - Increase length of auditlog.action DB column, fixing SQL error when
+   updating some configuration settings (#308).
+ - Fix testcase download filename.
+ - Various small documentation fixes.
 
 Version 5.3.0 - 21 October 2017
 -------------------------------
