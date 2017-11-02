@@ -16,7 +16,7 @@ CREATE TABLE `auditlog` (
   `user` varchar(255) DEFAULT NULL COMMENT 'User who performed this action',
   `datatype` varchar(25) DEFAULT NULL COMMENT 'Reference to DB table associated to this entry',
   `dataid` varchar(50) DEFAULT NULL COMMENT 'Identifier in reference table',
-  `action` varchar(30) DEFAULT NULL COMMENT 'Description of action performed',
+  `action` varchar(64) DEFAULT NULL COMMENT 'Description of action performed',
   `extrainfo` varchar(255) DEFAULT NULL COMMENT 'Optional additional description of the entry',
   PRIMARY KEY (`logid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of all actions performed';
