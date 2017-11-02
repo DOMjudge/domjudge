@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 5.1.4 - DEV
--------------------
+Version 5.1.4 - 2 November 2017
+-------------------------------
  - Fix time string in example SQL file.
  - Add option -y to force yes to some make_chroot script questions.
  - Fix variable names in two places.
