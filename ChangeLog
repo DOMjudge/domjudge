@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 5.2.2 - DEV
+-------------------
+
 Version 5.2.1 - 2 November 2017
 -------------------------------
  - Change judging feedback dir ownership after compare script ran.
