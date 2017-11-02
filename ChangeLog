@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 5.2.1 - DEV
--------------------
+Version 5.2.1 - 2 November 2017
+-------------------------------
  - Change judging feedback dir ownership after compare script ran.
    Fixes a crash when output validators have stderr output.
  - Fix display of user IP address on jury interface.
