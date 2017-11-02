@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 5.3.2 - DEV
+-------------------
+
 Version 5.3.1 - 2 November 2017
 -------------------------------
  - Fix runguard reusing cpuacct cgroup potentially giving wrong runtimes.
