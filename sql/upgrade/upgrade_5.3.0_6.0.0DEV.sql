@@ -51,6 +51,10 @@ source upgrade/convert_event_6.0.sql
 -- Temporarily disable foreign key checks to enable length change:
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 
+ALTER TABLE `judging` DROP FOREIGN KEY `judging_ibfk_3`;
+ALTER TABLE `submission` DROP FOREIGN KEY `submission_ibfk_4`;
+ALTER TABLE `submission` DROP FOREIGN KEY `submission_ibfk_5`;
+
 ALTER TABLE `auditlog`
   MODIFY COLUMN `datatype` varchar(32) DEFAULT NULL COMMENT 'Reference to DB table associated to this entry',
   MODIFY COLUMN `dataid` varchar(64) DEFAULT NULL COMMENT 'Identifier in reference table',
@@ -99,6 +103,13 @@ ALTER TABLE `team_affiliation`
 
 ALTER TABLE `team_category`
   MODIFY COLUMN `color` varchar(32) DEFAULT NULL COMMENT 'Background colour on the scoreboard';
+
+ALTER TABLE `judging`
+  ADD CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`);
+
+ALTER TABLE `submission`
+  ADD CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL;
 
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 
