@@ -15,6 +15,10 @@ if (PHP_VERSION_ID < 70000) {
 
 // When using the HttpCache, you need to call the method in your front controller instead of relying on the configuration parameter
 //Request::enableHttpMethodParameterOverride();
+
+// Uncomment this if using proxies and you need the real client ip address
+// 10.0.0.0/8 should be set to the ip address of your trusted proxies
+// Request::setTrustedProxies(['10.0.0.0/8'], Request::HEADER_X_FORWARDED_ALL);
 $request = Request::createFromGlobals();
 $response = $kernel->handle($request);
 $response->send();

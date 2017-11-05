@@ -31,7 +31,7 @@ class FallbackController extends Controller
         if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             $user = $this->get('security.token_storage')->getToken()->getUser();
             $user->setLastLogin(Utils::now());
-            $user->setLastIpAddress(@$_SERVER['REMOTE_ADDR']);
+            $user->setLastIpAddress($this->DOMJudgeService->getClientIp());
             $this->getDoctrine()->getManager()->flush();
 
             $_SESSION['username'] = $user->getUsername();

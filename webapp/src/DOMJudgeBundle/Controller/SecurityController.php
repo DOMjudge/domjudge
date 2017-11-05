@@ -29,12 +29,12 @@ class SecurityController extends Controller
      */
     public function loginAction(Request $request)
     {
+        $clientIP = $this->container->get('request_stack')->getMasterRequest()->getClientIp();
         if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             $user = $this->get('security.token_storage')->getToken()->getUser();
             $user->setLastLogin(Utils::now());
-            $user->setLastIpAddress(@$_SERVER['REMOTE_ADDR']);
+            $user->setLastIpAddress($this->DOMJudgeService->getClientIp());
             $this->getDoctrine()->getManager()->flush();
-
             return $this->redirect($this->generateUrl('legacy.index'));
         }
 
@@ -46,10 +46,23 @@ class SecurityController extends Controller
         // last username entered by the user
         $lastUsername = $authUtils->getLastUsername();
 
+        $auth_ipaddress_users = [];
+        $authmethods = [];
+        if ($this->container->hasParameter('domjudge.authmethods')) {
+          $authmethods = $this->container->getParameter('domjudge.authmethods');
+        }
+        if (in_array('ipaddress', $authmethods)) {
+          $em = $this->getDoctrine()->getManager();
+          $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipaddress' => $clientIP]);
+        }
+
         return $this->render('DOMJudgeBundle:security:login.html.twig', array(
             'last_username' => $lastUsername,
             'error'         => $error,
-            'allow_registration' => $this->DOMJudgeService->dbconfig_get('allow_registration', false)
+            'allow_registration'    => $this->DOMJudgeService->dbconfig_get('allow_registration', false),
+            'allowed_authmethods'   => $authmethods,
+            'auth_xheaders_present' => $request->headers->get('X-DOMjudge-Autologin'),
+            'auth_ipaddress_users'  => $auth_ipaddress_users,
         ));
     }
 
@@ -87,7 +100,7 @@ class SecurityController extends Controller
             $team->addUser($user);
             $team->setName($user->getUsername());
             $team->setCategory($self_registered_category);
-            $team->setComments('Registered by ' . @$_SERVER['REMOTE_ADDR'] . ' on ' . date('r'));
+            $team->setComments('Registered by ' . $this->DOMJudgeService->getClientIp() . ' on ' . date('r'));
 
             $em->persist($user);
             $em->persist($team);
