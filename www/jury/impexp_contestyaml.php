@@ -111,10 +111,12 @@ if ( isset($_POST['import']) ) {
 	/* clarification answers/categories currently not supported; ignore them.
 		$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
 		$categories = array();
-		foreach ( $contest_yaml_data['clar-categories'] as $category ) {
-			$cat_key = substr(str_replace(array(' ', ',', '.'), '-',
-			                  strtolower($category)), 0, 9);
-			$categories[$cat_key] = $category;
+		if ( is_array(@$contest_yaml_data['clar-categories']) ) {
+			foreach ( $contest_yaml_data['clar-categories'] as $category ) {
+				$cat_key = substr(str_replace(array(' ', ',', '.'), '-',
+				                  strtolower($category)), 0, 9);
+				$categories[$cat_key] = $category;
+			}
 		}
 		$LIBDBCONFIG['clar_categories']['value'] = $categories;
 	*/
@@ -136,21 +138,23 @@ if ( isset($_POST['import']) ) {
 		}
 	*/
 
-		foreach ($contest_yaml_data['problems'] as $problem) {
-			// TODO better lang-id?
+		if ( is_array(@$contest_yaml_data['problems']) ) {
+			foreach ($contest_yaml_data['problems'] as $problem) {
+				// TODO better lang-id?
 
-			// Deal with obsolete attribute names:
-			$probname  = first_defined(@$problem['name'], @$problem['short-name']);
-			$problabel = first_defined(@$problem['label'], @$problem['letter']);
+				// Deal with obsolete attribute names:
+				$probname  = first_defined(@$problem['name'], @$problem['short-name']);
+				$problabel = first_defined(@$problem['label'], @$problem['letter']);
 
-			$probid = $DB->q('RETURNID INSERT INTO problem
-			                  SET name = %s, timelimit = %i',
-			                 $probname, 10);
-			// TODO: ask Fredrik about configuration of timelimit
+				$probid = $DB->q('RETURNID INSERT INTO problem
+				                  SET name = %s, timelimit = %i',
+				                 $probname, 10);
+				// TODO: ask Fredrik about configuration of timelimit
 
-			$DB->q('INSERT INTO contestproblem (cid, probid, shortname, color)
-			        VALUES (%i, %i, %s, %s)',
-			       $cid, $probid, $problabel, $problem['rgb']);
+				$DB->q('INSERT INTO contestproblem (cid, probid, shortname, color)
+				        VALUES (%i, %i, %s, %s)',
+				       $cid, $probid, $problabel, $problem['rgb']);
+			}
 		}
 
 		dbconfig_store();
