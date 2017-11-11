@@ -759,7 +759,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	$id = $DB->q('RETURNID INSERT INTO submission
 	              (cid, teamid, probid, langid, submittime, origsubmitid, entry_point,
 	               externalid, externalresult)
-	              VALUES (%i, %i, %i, %s, %s, %i, %s, %i, %s)',
+	              VALUES (%i, %i, %i, %s, %s, %i, %s, %s, %s)',
 	             $contest, $teamid, $probid, $langid, $submittime, $origsubmitid, $entry_point,
 	             $extid, $extresult);
 

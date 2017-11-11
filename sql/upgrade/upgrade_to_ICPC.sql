@@ -22,9 +22,9 @@ ALTER TABLE contest
   ADD COLUMN `b` smallint(3) unsigned NOT NULL default '0' COMMENT 'Number of extra bronze medals' AFTER `finalizecomment`;
 
 ALTER TABLE `submission`
-  ADD COLUMN `externalid` int(4) unsigned default NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
-  ADD COLUMN `externalresult` varchar(25) default NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
-  ADD UNIQUE KEY `externalid` (`cid`,`externalid`);
+  ADD COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
+  ADD COLUMN `externalresult` varchar(32) DEFAULT NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
+  ADD UNIQUE KEY `externalid` (`cid`,`externalid`(190));
 
 CREATE TABLE `removed_interval` (
   `intervalid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
