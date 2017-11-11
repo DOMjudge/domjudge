@@ -122,7 +122,7 @@ function tsv_teams_prepare($content)
 				'categoryid' => @$line[2],
 				'name' => @$line[3]),
 			'team_affiliation' => array (
-				'shortname' => @$line[5],
+				'shortname' => !empty(@$line[5]) ? @$line[5] : @$line[7],
 				'name' => @$line[4],
 				'country' => @$line[6],
 				'externalid' => @$line[7]) );

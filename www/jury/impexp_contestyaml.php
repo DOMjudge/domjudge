@@ -68,10 +68,10 @@ if ( isset($_POST['import']) ) {
 		$contest['activatetime_string'] = '-1:00';
 		$contest['endtime_string'] = '+' . $contest_yaml_data['duration'];
 		// First try new key then fallback to old 'scoreboard-freeze':
-		$freeze_duration = first_defined($contest_yaml_data['scoreboard-freeze-duration'],
-		                                 $contest_yaml_data['scoreboard-freeze-length']);
-		$freeze_start    = first_defined($contest_yaml_data['scoreboard-freeze'],
-		                                 $contest_yaml_data['freeze']);
+		$freeze_duration = first_defined(@$contest_yaml_data['scoreboard-freeze-duration'],
+		                                 @$contest_yaml_data['scoreboard-freeze-length']);
+		$freeze_start    = first_defined(@$contest_yaml_data['scoreboard-freeze'],
+		                                 @$contest_yaml_data['freeze']);
 		if ( isset($freeze_duration) ) {
 			$contest['freezetime_string'] =
 				'+' . timestring_diff($contest_yaml_data['duration'],$freeze_duration);
@@ -102,24 +102,25 @@ if ( isset($_POST['import']) ) {
 		dbconfig_init();
 
 		// TODO: event-feed-port
-		$penalty = first_defined($contest_yaml_data['penalty-time'],
-		                         $contest_yaml_data['penalty']);
+		$penalty = first_defined(@$contest_yaml_data['penalty-time'],
+		                         @$contest_yaml_data['penalty']);
 		if ( isset($penalty) ) {
 			$LIBDBCONFIG['penalty_time']['value'] = (int)$penalty;
 		}
 
 		if ( isset($contest_yaml_data['default-clars']) ) {
 			$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
-		} else {
-			$LIBDBCONFIG['clar_answers']['value'] = array();
 		}
-		$categories = array();
-		foreach ( $contest_yaml_data['clar-categories'] as $category ) {
-			$cat_key = substr(str_replace(array(' ', ',', '.'), '-',
-			                  strtolower($category)), 0, 9);
-			$categories[$cat_key] = $category;
+
+		if ( is_array(@$contest_yaml_data['clar-categories']) ) {
+			$categories = array();
+			foreach ( $contest_yaml_data['clar-categories'] as $category ) {
+				$cat_key = substr(str_replace(array(' ', ',', '.'), '-',
+				                  strtolower($category)), 0, 9);
+				$categories[$cat_key] = $category;
+			}
+			$LIBDBCONFIG['clar_categories']['value'] = $categories;
 		}
-		$LIBDBCONFIG['clar_categories']['value'] = $categories;
 
 	/* Disable importing language details, as there's very little to actually import:
 		$DB->q("DELETE FROM language");
@@ -138,21 +139,23 @@ if ( isset($_POST['import']) ) {
 		}
 	*/
 
-		foreach ($contest_yaml_data['problems'] as $problem) {
-			// TODO better lang-id?
+		if ( is_array(@$contest_yaml_data['problems']) ) {
+			foreach ($contest_yaml_data['problems'] as $problem) {
+				// TODO better lang-id?
 
-			// Deal with obsolete attribute names:
-			$probname  = first_defined($problem['name'], $problem['short-name']);
-			$problabel = first_defined($problem['label'], $problem['letter']);
+				// Deal with obsolete attribute names:
+				$probname  = first_defined(@$problem['name'], @$problem['short-name']);
+				$problabel = first_defined(@$problem['label'], @$problem['letter']);
 
-			$probid = $DB->q('RETURNID INSERT INTO problem
-			                  SET name = %s, timelimit = %i',
-			                 $probname, 10);
-			// TODO: ask Fredrik about configuration of timelimit
+				$probid = $DB->q('RETURNID INSERT INTO problem
+				                  SET name = %s, timelimit = %i',
+				                 $probname, 10);
+				// TODO: ask Fredrik about configuration of timelimit
 
-			$DB->q('INSERT INTO contestproblem (cid, probid, shortname, color)
-			        VALUES (%i, %i, %s, %s)',
-			       $cid, $probid, $problabel, $problem['rgb']);
+				$DB->q('INSERT INTO contestproblem (cid, probid, shortname, color)
+				        VALUES (%i, %i, %s, %s)',
+				       $cid, $probid, $problabel, $problem['rgb']);
+			}
 		}
 
 		dbconfig_store();

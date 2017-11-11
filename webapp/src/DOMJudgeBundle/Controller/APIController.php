@@ -135,7 +135,7 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/event-feed")
 	 */
-	public function getEventFeed() {
+	public function getEventFeed(Request $request) {
 		# Avoid being killed after 30s of CPU time.
 		set_time_limit(0);
 		$em = $this->getDoctrine()->getManager();
@@ -145,21 +145,36 @@ class APIController extends FOSRestController {
 		}
 		$response = new StreamedResponse();
 		$response->headers->set('X-Accel-Buffering', 'no');
-		$response->setCallback(function () use ($em, $contest) {
+		$response->setCallback(function () use ($em, $contest, $request) {
 			$lastUpdate = 0;
 			$lastIdSent = -1;
+			if ($request->query->has('id')) {
+				$lastIdSent = $request->query->getInt('id');
+			}
+			$typeFilter = false;
+			if ($request->query->has('type')) {
+				$typeFilter = explode(',', $request->query->get('type'));
+			}
 			// Make sure this script doesn't hit the PHP maximum execution timeout.
 			set_time_limit(0);
 			while (TRUE) {
-				$q = $em->createQueryBuilder()
+				$qb = $em->createQueryBuilder()
 					->from('DOMJudgeBundle:Event', 'e')
 					->select('e.eventid,e.eventtime,e.endpointtype,e.endpointid,e.datatype,e.dataid,e.action,e.content')
 					->where('e.eventid > :lastIdSent')
 					->setParameter('lastIdSent', $lastIdSent)
 					->andWhere('e.cid = :cid')
 					->setParameter('cid', $contest['id'])
-					->orderBy('e.eventid', 'ASC')
-					->getQuery();
+					->orderBy('e.eventid', 'ASC');
+
+				if ($typeFilter !== false) {
+					$qb = $qb
+						->andWhere('e.endpointtype IN (:types)')
+						->setParameter(':types', $typeFilter);
+				}
+
+				$q = $qb->getQuery();
+
 				$events = $q->getResult();
 				foreach ($events as $event) {
 					$data = json_decode(stream_get_contents($event['content']));
