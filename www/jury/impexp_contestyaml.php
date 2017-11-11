@@ -108,18 +108,19 @@ if ( isset($_POST['import']) ) {
 			$LIBDBCONFIG['penalty_time']['value'] = (int)$penalty;
 		}
 
-	/* clarification answers/categories currently not supported; ignore them.
-		$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
-		$categories = array();
+		if ( isset($contest_yaml_data['default-clars']) ) {
+			$LIBDBCONFIG['clar_answers']['value'] = $contest_yaml_data['default-clars'];
+		}
+
 		if ( is_array(@$contest_yaml_data['clar-categories']) ) {
+			$categories = array();
 			foreach ( $contest_yaml_data['clar-categories'] as $category ) {
 				$cat_key = substr(str_replace(array(' ', ',', '.'), '-',
 				                  strtolower($category)), 0, 9);
 				$categories[$cat_key] = $category;
 			}
+			$LIBDBCONFIG['clar_categories']['value'] = $categories;
 		}
-		$LIBDBCONFIG['clar_categories']['value'] = $categories;
-	*/
 
 	/* Disable importing language details, as there's very little to actually import:
 		$DB->q("DELETE FROM language");
