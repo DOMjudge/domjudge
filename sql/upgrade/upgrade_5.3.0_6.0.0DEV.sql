@@ -46,6 +46,74 @@ ALTER TABLE `submission`
 
 source upgrade/convert_event_6.0.sql
 
+-- More consistent varchar() lengths, we only increase lengths:
+
+-- Temporarily disable foreign key checks to enable length change:
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+
+ALTER TABLE `judging` DROP FOREIGN KEY `judging_ibfk_3`;
+ALTER TABLE `submission` DROP FOREIGN KEY `submission_ibfk_4`;
+ALTER TABLE `submission` DROP FOREIGN KEY `submission_ibfk_5`;
+
+ALTER TABLE `auditlog`
+  MODIFY COLUMN `datatype` varchar(32) DEFAULT NULL COMMENT 'Reference to DB table associated to this entry',
+  MODIFY COLUMN `dataid` varchar(64) DEFAULT NULL COMMENT 'Identifier in reference table',
+  MODIFY COLUMN `action` varchar(64) DEFAULT NULL COMMENT 'Description of action performed';
+
+ALTER TABLE `clarification`
+  MODIFY COLUMN `jury_member` varchar(255) DEFAULT NULL COMMENT 'Name of jury member who answered this',
+  MODIFY COLUMN `category` varchar(255) DEFAULT NULL COMMENT 'Category associated to this clarification; only set for non problem clars';
+
+ALTER TABLE `configuration`
+  MODIFY COLUMN `name` varchar(32) NOT NULL COMMENT 'Name of the configuration variable',
+  MODIFY COLUMN `type` varchar(32) DEFAULT NULL COMMENT 'Type of the value (metatype for use in the webinterface)';
+
+ALTER TABLE `contestproblem`
+  MODIFY COLUMN `color` varchar(32) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard';
+
+ALTER TABLE `executable`
+  MODIFY COLUMN `type` varchar(32) NOT NULL COMMENT 'Type of executable';
+
+ALTER TABLE `judgehost`
+  MODIFY COLUMN `hostname` varchar(64) NOT NULL COMMENT 'Resolvable hostname of judgehost';
+
+ALTER TABLE `judging`
+  MODIFY COLUMN `judgehost` varchar(64) NOT NULL COMMENT 'Judgehost that performed the judging',
+  MODIFY COLUMN `result` varchar(32) DEFAULT NULL COMMENT 'Result string as defined in config.php',
+  MODIFY COLUMN `jury_member` varchar(255) DEFAULT NULL COMMENT 'Name of jury member who verified this';
+
+ALTER TABLE `language`
+  MODIFY COLUMN `langid` varchar(32) NOT NULL COMMENT 'Unique ID (string)';
+
+ALTER TABLE `judging_run`
+  MODIFY COLUMN `runresult` varchar(32) DEFAULT NULL COMMENT 'Result of this run, NULL if not finished yet';
+
+ALTER TABLE `role`
+  MODIFY COLUMN `role` varchar(32) NOT NULL COMMENT 'Role name';
+
+ALTER TABLE `submission`
+  MODIFY COLUMN `langid` varchar(32) NOT NULL COMMENT 'Language ID',
+  MODIFY COLUMN `judgehost` varchar(64) DEFAULT NULL COMMENT 'Current/last judgehost judging this submission';
+
+ALTER TABLE `team`
+  MODIFY COLUMN `room` varchar(255) DEFAULT NULL COMMENT 'Physical location of team';
+
+ALTER TABLE `team_affiliation`
+  MODIFY COLUMN `shortname` varchar(32) NOT NULL COMMENT 'Short descriptive name';
+
+ALTER TABLE `team_category`
+  MODIFY COLUMN `color` varchar(32) DEFAULT NULL COMMENT 'Background colour on the scoreboard';
+
+ALTER TABLE `judging`
+  ADD CONSTRAINT `judging_ibfk_3` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`);
+
+ALTER TABLE `submission`
+  ADD CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL;
+
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+
+
 --
 -- Transfer data from old to new structure
 --

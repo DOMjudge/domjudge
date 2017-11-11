@@ -14,9 +14,9 @@ CREATE TABLE `auditlog` (
   `logtime` decimal(32,9) unsigned NOT NULL COMMENT 'Timestamp of the logentry',
   `cid` int(4) unsigned DEFAULT NULL COMMENT 'Contest ID associated to this entry',
   `user` varchar(255) DEFAULT NULL COMMENT 'User who performed this action',
-  `datatype` varchar(25) DEFAULT NULL COMMENT 'Reference to DB table associated to this entry',
-  `dataid` varchar(50) DEFAULT NULL COMMENT 'Identifier in reference table',
-  `action` varchar(30) DEFAULT NULL COMMENT 'Description of action performed',
+  `datatype` varchar(32) DEFAULT NULL COMMENT 'Reference to DB table associated to this entry',
+  `dataid` varchar(64) DEFAULT NULL COMMENT 'Identifier in reference table',
+  `action` varchar(64) DEFAULT NULL COMMENT 'Description of action performed',
   `extrainfo` varchar(255) DEFAULT NULL COMMENT 'Optional additional description of the entry',
   PRIMARY KEY (`logid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of all actions performed';
@@ -44,9 +44,9 @@ CREATE TABLE `clarification` (
   `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time sent',
   `sender` int(4) unsigned DEFAULT NULL COMMENT 'Team ID, null means jury',
   `recipient` int(4) unsigned DEFAULT NULL COMMENT 'Team ID, null means to jury or to all',
-  `jury_member` varchar(15) DEFAULT NULL COMMENT 'Name of jury member who answered this',
+  `jury_member` varchar(255) DEFAULT NULL COMMENT 'Name of jury member who answered this',
   `probid` int(4) unsigned DEFAULT NULL COMMENT 'Problem associated to this clarification',
-  `category` varchar(128) DEFAULT NULL COMMENT 'Category associated to this clarification; only set for non problem clars',
+  `category` varchar(255) DEFAULT NULL COMMENT 'Category associated to this clarification; only set for non problem clars',
   `body` longtext NOT NULL COMMENT 'Clarification text',
   `answered` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
@@ -66,9 +66,9 @@ CREATE TABLE `clarification` (
 
 CREATE TABLE `configuration` (
   `configid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `name` varchar(25) NOT NULL COMMENT 'Name of the configuration variable',
+  `name` varchar(32) NOT NULL COMMENT 'Name of the configuration variable',
   `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)',
-  `type` varchar(25) DEFAULT NULL COMMENT 'Type of the value (metatype for use in the webinterface)',
+  `type` varchar(32) DEFAULT NULL COMMENT 'Type of the value (metatype for use in the webinterface)',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description for in the webinterface',
   PRIMARY KEY (`configid`),
   UNIQUE KEY `name` (`name`)
@@ -119,7 +119,7 @@ CREATE TABLE `contestproblem` (
   `points` int(4) unsigned NOT NULL DEFAULT '1' COMMENT 'Number of points earned by solving this problem',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
-  `color` varchar(25) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
+  `color` varchar(32) DEFAULT NULL COMMENT 'Balloon colour to display on the scoreboard',
   `lazy_eval_results` tinyint(1) unsigned DEFAULT NULL COMMENT 'Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting',
   PRIMARY KEY (`cid`,`probid`),
   UNIQUE KEY `shortname` (`cid`,`shortname`(190)),
@@ -151,11 +151,11 @@ CREATE TABLE `event` (
   `eventid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `eventtime` decimal(32,9) unsigned NOT NULL COMMENT 'When the event occurred',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `endpointtype` varchar(25) NOT NULL COMMENT 'API endpoint associated to this entry',
-  `endpointid` varchar(50) NOT NULL COMMENT 'API endpoint (external) ID',
-  `datatype` varchar(25) DEFAULT NULL COMMENT 'DB table associated to this entry',
-  `dataid` varchar(50) DEFAULT NULL COMMENT 'Identifier in reference DB table',
-  `action` varchar(30) NOT NULL COMMENT 'Description of action performed',
+  `endpointtype` varchar(32) NOT NULL COMMENT 'API endpoint associated to this entry',
+  `endpointid` varchar(64) NOT NULL COMMENT 'API endpoint (external) ID',
+  `datatype` varchar(32) DEFAULT NULL COMMENT 'DB table associated to this entry',
+  `dataid` varchar(64) DEFAULT NULL COMMENT 'Identifier in reference DB table',
+  `action` varchar(32) NOT NULL COMMENT 'Description of action performed',
   `content` longblob NOT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed',
   PRIMARY KEY (`eventid`),
   KEY `eventtime` (`cid`,`eventtime`),
@@ -172,7 +172,7 @@ CREATE TABLE `executable` (
   `md5sum` char(32) DEFAULT NULL COMMENT 'Md5sum of zip file',
   `zipfile` longblob COMMENT 'Zip file',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of this executable',
-  `type` varchar(8) NOT NULL COMMENT 'Type of executable',
+  `type` varchar(32) NOT NULL COMMENT 'Type of executable',
   PRIMARY KEY (`execid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Compile, compare, and run script executable bundles';
 
@@ -201,7 +201,7 @@ CREATE TABLE `internal_error` (
 --
 
 CREATE TABLE `judgehost` (
-  `hostname` varchar(50) NOT NULL COMMENT 'Resolvable hostname of judgehost',
+  `hostname` varchar(64) NOT NULL COMMENT 'Resolvable hostname of judgehost',
   `active` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Should this host take on judgings?',
   `polltime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of last poll by autojudger',
   `restrictionid` int(4) unsigned DEFAULT NULL COMMENT 'Optional set of restrictions for this judgehost',
@@ -231,10 +231,10 @@ CREATE TABLE `judging` (
   `submitid` int(4) unsigned NOT NULL COMMENT 'Submission ID being judged',
   `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time judging started',
   `endtime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time judging ended, null = still busy',
-  `judgehost` varchar(50) NOT NULL COMMENT 'Judgehost that performed the judging',
-  `result` varchar(25) DEFAULT NULL COMMENT 'Result string as defined in config.php',
+  `judgehost` varchar(64) NOT NULL COMMENT 'Judgehost that performed the judging',
+  `result` varchar(32) DEFAULT NULL COMMENT 'Result string as defined in config.php',
   `verified` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Result verified by jury member?',
-  `jury_member` varchar(25) DEFAULT NULL COMMENT 'Name of jury member who verified this',
+  `jury_member` varchar(255) DEFAULT NULL COMMENT 'Name of jury member who verified this',
   `verify_comment` varchar(255) DEFAULT NULL COMMENT 'Optional additional information provided by the verifier',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Old judging is marked as invalid when rejudging',
   `output_compile` longblob COMMENT 'Output of the compiling the program',
@@ -262,7 +262,7 @@ CREATE TABLE `judging_run` (
   `runid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `judgingid` int(4) unsigned NOT NULL COMMENT 'Judging ID',
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
-  `runresult` varchar(25) DEFAULT NULL COMMENT 'Result of this run, NULL if not finished yet',
+  `runresult` varchar(32) DEFAULT NULL COMMENT 'Result of this run, NULL if not finished yet',
   `runtime` float DEFAULT NULL COMMENT 'Submission running time on this testcase',
   `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run judging ended',
   `output_run` longblob COMMENT 'Output of running the program',
@@ -282,7 +282,7 @@ CREATE TABLE `judging_run` (
 --
 
 CREATE TABLE `language` (
-  `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
+  `langid` varchar(32) NOT NULL COMMENT 'Unique ID (string)',
   `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
   `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)',
@@ -370,7 +370,7 @@ CREATE TABLE `removed_interval` (
 
 CREATE TABLE `role` (
   `roleid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `role` varchar(25) NOT NULL COMMENT 'Role name',
+  `role` varchar(32) NOT NULL COMMENT 'Role name',
   `description` varchar(255) NOT NULL COMMENT 'Description for the web interface',
   PRIMARY KEY (`roleid`),
   UNIQUE KEY `role` (`role`)
@@ -405,9 +405,9 @@ CREATE TABLE `submission` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
   `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
-  `langid` varchar(8) NOT NULL COMMENT 'Language ID',
+  `langid` varchar(32) NOT NULL COMMENT 'Language ID',
   `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time submitted',
-  `judgehost` varchar(50) DEFAULT NULL COMMENT 'Current/last judgehost judging this submission',
+  `judgehost` varchar(64) DEFAULT NULL COMMENT 'Current/last judgehost judging this submission',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'If false ignore this submission in all scoreboard calculations',
   `rejudgingid` int(4) unsigned DEFAULT NULL COMMENT 'Rejudging ID (if rejudge)',
   `expected_results` varchar(255) DEFAULT NULL COMMENT 'JSON encoded list of expected results - used to validate jury submissions',
@@ -462,7 +462,7 @@ CREATE TABLE `team` (
   `affilid` int(4) unsigned DEFAULT NULL COMMENT 'Team affiliation ID',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether the team is visible and operational',
   `members` longtext COMMENT 'Team member names (freeform)',
-  `room` varchar(15) DEFAULT NULL COMMENT 'Physical location of team',
+  `room` varchar(255) DEFAULT NULL COMMENT 'Physical location of team',
   `comments` longtext COMMENT 'Comments about this team',
   `judging_last_started` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Start time of last judging for priorization',
   `teampage_first_visited` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of first teampage view',
@@ -482,7 +482,7 @@ CREATE TABLE `team` (
 
 CREATE TABLE `team_affiliation` (
   `affilid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `shortname` varchar(30) NOT NULL COMMENT 'Short descriptive name',
+  `shortname` varchar(32) NOT NULL COMMENT 'Short descriptive name',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `country` char(3) DEFAULT NULL COMMENT 'ISO 3166-1 alpha-3 country code',
   `comments` longtext COMMENT 'Comments',
@@ -497,7 +497,7 @@ CREATE TABLE `team_category` (
   `categoryid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `sortorder` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Where to sort this category on the scoreboard',
-  `color` varchar(25) DEFAULT NULL COMMENT 'Background colour on the scoreboard',
+  `color` varchar(32) DEFAULT NULL COMMENT 'Background colour on the scoreboard',
   `visible` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are teams in this category visible?',
   PRIMARY KEY  (`categoryid`),
   KEY `sortorder` (`sortorder`)
