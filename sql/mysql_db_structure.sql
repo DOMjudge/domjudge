@@ -459,11 +459,13 @@ CREATE TABLE `team` (
 
 CREATE TABLE `team_affiliation` (
   `affilid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Team affiliation ID in an external system',
   `shortname` varchar(32) NOT NULL COMMENT 'Short descriptive name',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `country` char(3) DEFAULT NULL COMMENT 'ISO 3166-1 alpha-3 country code',
   `comments` longtext COMMENT 'Comments',
-  PRIMARY KEY  (`affilid`)
+  PRIMARY KEY  (`affilid`),
+  UNIQUE KEY `externalid` (`externalid`(190))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Affilitations for teams (e.g.: university, company)';
 
 --
