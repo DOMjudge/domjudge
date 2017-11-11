@@ -318,7 +318,7 @@ function check_contest($data, $keydata = null)
 		// The true input date/time strings are preserved in the
 		// *_string variables, since these may be relative times
 		// that need to be kept as is.
-		$data[$f] = $data[$f.'_string'];
+		$data[$f] = @$data[$f.'_string'];
 		$data[$f] = check_relative_time($data[$f],
 		                                ($f=='starttime' ? null : $data['starttime']), $f);
 	}

@@ -75,7 +75,7 @@ function dbconfig_store()
 
 	foreach ( $LIBDBCONFIG as $key => $row ) {
 
-		switch ( $type = $row['type'] ) {
+		switch ( $type = @$row['type'] ) {
 		case 'bool':
 		case 'int':
 			if ( !preg_match('/^\s*(-){0,1}[0-9]+\s*$/', $row['value']) ) {
@@ -118,7 +118,7 @@ function dbconfig_store()
 
 		$res = $DB->q('RETURNAFFECTED UPDATE configuration
 		               SET value = %s, type = %s, description = %s
-		               WHERE name = %s', $val, $row['type'], $row['desc'], $key);
+		               WHERE name = %s', $val, $row['type'], @$row['desc'], $key);
 
 		if ( $res>0 ) auditlog('configuration', NULL, 'update '.$key, $val);
 	}
