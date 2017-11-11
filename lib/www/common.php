@@ -446,9 +446,9 @@ function putClock() {
 	echo '<div id="clock">';
 	// timediff to end of contest
 	$fdata = calcFreezeData($cdata);
-	if ( $fdata['cstarted'] && difftime(now(), $cdata['endtime']) < 0 ) {
+	if ( $fdata['started'] && difftime(now(), $cdata['endtime']) < 0 ) {
 		$left = "time left: " . printtimediff(now(),$cdata['endtime']);
-	} else if ( !$fdata['cstarted'] && difftime(now(), $cdata['activatetime']) >= 0 ) {
+	} else if ( !$fdata['started'] && difftime(now(), $cdata['activatetime']) >= 0 ) {
 		if ( $cdata['starttime_enabled'] ) {
 			$left = "time to start: " . printtimediff(now(),$cdata['starttime']);
 		} else {
