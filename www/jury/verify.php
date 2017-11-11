@@ -38,10 +38,7 @@ if ( dbconfig_get('verification_required', 0) ) {
 
 	// log to event table (case of no verification required is handled
 	// in the REST API function judging_runs_POST)
-	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
-	        VALUES (%s, %i, %s, %s, %s, %i, "problem judged")',
-	       now(), $jdata['cid'], $jdata['teamid'], $jdata['langid'],
-	       $jdata['probid'], $jdata['submitid']);
+	eventlog('judging', $id, 'update', $jdata['cid']);
 
 	if ( $jdata['result'] == 'correct' ) {
 		$balloons_enabled = (bool)$DB->q("VALUE SELECT process_balloons FROM contest WHERE cid = %i", $jdata['cid']);

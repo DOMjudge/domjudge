@@ -26,7 +26,9 @@ cleanup ()
 {
 	# Remove some copied files to save disk space
 	if [ "$WORKDIR" ]; then
-		rm -f "$WORKDIR/../dev/null" "$WORKDIR/../bin/sh" "$WORKDIR/../bin/runpipe"
+		# This assumes that if bin is bind-mounted from the chroot,
+		# then it is read-only so the removal of bin/sh will fail.
+		rm -f "$WORKDIR/../dev/null" "$WORKDIR/../bin/sh" "$WORKDIR/../dj-bin/runpipe" 2> /dev/null || true
 
 		# Replace testdata by symlinks to reduce disk usage
 		if [ -f "$WORKDIR/testdata.in" ]; then
@@ -69,6 +71,7 @@ runcheck ()
 }
 
 # Error and logging functions
+# shellcheck disable=SC1090
 . "$DJ_LIBDIR/lib.error.sh"
 
 
@@ -170,17 +173,20 @@ logmsg $LOG_INFO "setting up testing (chroot) environment"
 cp "$TESTIN" "$WORKDIR/testdata.in"
 
 # shellcheck disable=SC2174
-mkdir -p -m 0711 ../bin ../dev
+mkdir -p -m 0711 ../bin ../dj-bin ../dev
 # Copy the run-script and a statically compiled shell:
 cp -p  "$RUN_SCRIPT"  ./run
-cp -pL "$STATICSHELL" ../bin/sh
-chmod a+rx run ../bin/sh
+chmod a+rx run
+if [ ! -x ../bin/sh ]; then
+	cp -pL "$STATICSHELL" ../bin/sh || true
+	chmod a+rx ../bin/sh || true
+fi
 # If using a custom runjury script, copy additional support programs
 # if required:
 if [ -x "$RUN_JURYPROG" ]; then
 	cp -p "$RUN_JURYPROG" ./runjury
-	cp -pL "$RUNPIPE"     ../bin/runpipe
-	chmod a+rx runjury ../bin/runpipe
+	cp -pL "$RUNPIPE"     ../dj-bin/runpipe
+	chmod a+rx runjury ../dj-bin/runpipe
 fi
 
 # We copy /dev/null: mknod (and the major/minor device numbers) are
@@ -231,6 +237,11 @@ runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGR
 	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
 	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
 	                  >compare.tmp 2>&1
+
+# Make sure that all feedback files are owned by the current
+# user/group, so that we can append content.
+$GAINROOT chown -R "$(id -un):" "$WORKDIR/feedback"
+chmod -R go-w feedback
 
 # Make sure that feedback file exists, since we assume this later.
 if [ ! -f feedback/judgemessage.txt ]; then

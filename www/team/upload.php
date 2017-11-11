@@ -20,7 +20,7 @@ if ( is_null($cid) ) {
 	exit;
 }
 $fdata = calcFreezeData($cdata);
-if ( !checkrole('jury') && !$fdata['cstarted'] ) {
+if ( !checkrole('jury') && !$fdata['started'] ) {
 	require(LIBWWWDIR . '/header.php');
 	echo "<p class=\"nodata\">Contest has not yet started.</p>\n";
 	require(LIBWWWDIR . '/footer.php');
@@ -77,7 +77,12 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
 if ( ! isset($lang) ) err("Unable to find language '$langid'");
 $langid = $lang['langid'];
 
-$sid = submit_solution($teamid, $probid, $cid, $langid, $FILEPATHS, $FILENAMES);
+$entry_point = @$_POST['entry_point'];
+if ( empty($entry_point) && dbconfig_get('require_entry_point', FALSE) ) {
+	err("Entry point required, but not specified.");
+}
+
+$sid = submit_solution($teamid, $probid, $cid, $langid, $FILEPATHS, $FILENAMES, NULL, $entry_point);
 
 auditlog('submission', $sid, 'added', 'via teampage', null, $cid);
 

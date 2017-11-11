@@ -1,0 +1,23 @@
+# This is a *stub file* for parameters.yml. It should be replaced by a
+# file generated from parameters.yml.dist (and parameters.yml.dist.in)
+# after configuration. However, already during 'make dist' composer
+# needs a parameters.yml file, so we provide this stub.
+
+parameters:
+    database_host: localhost
+    database_port: ~
+    database_name: domjudge
+    database_user: domjudge
+    database_password: STUB_NO_PASSWORD
+
+    mailer_transport: smtp
+    mailer_host: 127.0.0.1
+    mailer_user: ~
+    mailer_password: ~
+
+    # A secret key that's used to generate certain security-related tokens
+    secret: STUB_NO_SECRET
+
+    # The parameters below are inserted at configure time.
+    domjudge.version: unconfigured
+    domjudge.tmpdir: /tmp

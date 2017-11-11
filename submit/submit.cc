@@ -74,15 +74,16 @@ int show_help;
 int show_version;
 
 struct option const long_opts[] = {
-	{"problem",  required_argument, NULL,         'p'},
-	{"language", required_argument, NULL,         'l'},
-	{"url",      required_argument, NULL,         'u'},
-	{"verbose",  optional_argument, NULL,         'v'},
-	{"contest",  required_argument, NULL,         'c'},
-	{"quiet",    no_argument,       NULL,         'q'},
-	{"help",     no_argument,       &show_help,    1 },
-	{"version",  no_argument,       &show_version, 1 },
-	{ NULL,      0,                 NULL,          0 }
+	{"problem",     required_argument, NULL,         'p'},
+	{"language",    required_argument, NULL,         'l'},
+	{"url",         required_argument, NULL,         'u'},
+	{"verbose",     optional_argument, NULL,         'v'},
+	{"contest",     required_argument, NULL,         'c'},
+	{"entry_point", optional_argument, NULL,         'e'},
+	{"quiet",       no_argument,       NULL,         'q'},
+	{"help",        no_argument,       &show_help,    1 },
+	{"version",     no_argument,       &show_version, 1 },
+	{ NULL,         0,                 NULL,          0 }
 };
 
 void version();
@@ -97,8 +98,9 @@ int  file_istext(char *filename);
 int  websubmit();
 
 Json::Value doAPIrequest(const char *, int);
-int  getlangexts();
-int  getcontests();
+int getentrypointrequired();
+int getlangexts();
+int getcontests();
 
 /* Helper function for using libcurl in websubmit() and getlangexts() */
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
@@ -149,7 +151,7 @@ std::string decode_HTML_entities(std::string str)
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, baseurl, contest;
+string problem, language, extension, baseurl, contest, entry_point;
 vector<string> filenames;
 char *submitdir;
 
@@ -158,6 +160,9 @@ vector<vector<string> > languages;
 
 /* Active contests: shortname,name */
 vector<vector<string> > contests;
+
+/* Entry point required? */
+bool require_entry_point;
 
 int main(int argc, char **argv)
 {
@@ -208,15 +213,16 @@ int main(int argc, char **argv)
 
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:u:c:v::q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:u:c:e:v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
 
-		case 'p': problem   = string(optarg); break;
-		case 'l': extension = string(optarg); break;
-		case 'u': baseurl   = string(optarg); break;
-		case 'c': contest   = string(optarg); break;
+		case 'p': problem     = string(optarg); break;
+		case 'l': extension   = string(optarg); break;
+		case 'u': baseurl     = string(optarg); break;
+		case 'c': contest     = string(optarg); break;
+		case 'e': entry_point = string(optarg); break;
 
 		case 'v': /* verbose option */
 			if ( optarg!=NULL ) {
@@ -241,13 +247,14 @@ int main(int argc, char **argv)
 		}
 	}
 
+	if ( getentrypointrequired()!=0 ) warning(0,"could not obtain configuration value 'required_entry_point'");
 	if ( getlangexts()!=0 ) warning(0,"could not obtain language extensions");
 	if ( getcontests()!=0 ) warning(0,"could not obtain active contests");
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
 
-	if ( argc<=optind   ) usage2(0,"no file(s) specified");
+	if ( argc<=optind ) usage2(0,"no file(s) specified");
 
 	/* Process all source files */
 	for(i=0; optind+(int)i<argc; i++) {
@@ -331,9 +338,22 @@ int main(int argc, char **argv)
 	/* Make sure that baseurl terminates with a '/' for later concatenation. */
 	if ( baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
 
+	/* Guess entry point if not already specified. */
+	if ( entry_point.empty() && require_entry_point ) {
+		if ( language == "Java" ) {
+			entry_point = filebase;
+		} else if ( language == "Kotlin" ) {
+			entry_point = filebase + "Kt";
+			entry_point[0] = toupper(entry_point[0]);
+		} else {
+			entry_point = filebase + "." + fileext;
+		}
+	}
+
 	logmsg(LOG_DEBUG,"contest is `%s'",contest.c_str());
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
+	logmsg(LOG_DEBUG,"entry_point is `%s'",entry_point.c_str());
 	logmsg(LOG_DEBUG,"url is `%s'",baseurl.c_str());
 
 	/* Ask user for confirmation */
@@ -351,6 +371,9 @@ int main(int argc, char **argv)
 		printf("  contest:     %s\n",contest.c_str());
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
+		if ( !entry_point.empty() ) {
+			printf("  entry_point: %s\n",entry_point.c_str());
+		}
 		printf("  url:         %s\n",baseurl.c_str());
 
 		if ( nwarnings>0 ) printf("There are warnings for this submission!\a\n");
@@ -372,19 +395,20 @@ void usage()
 "Submit a solution for a problem.\n"
 "\n"
 "Options (see below for more information)\n"
-"  -c  --contest=CONTEST    submit for contest with identifier name CONTEST.\n"
-"                               Defaults to the value of the\n"
-"                               environment variable 'SUBMITCONTEST'.\n"
-"                               Mandatory when more than one contest is active.\n"
-"  -p, --problem=PROBLEM    submit for problem PROBLEM\n"
-"  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
-"  -v, --verbose[=LEVEL]    increase verbosity or set to LEVEL, where LEVEL\n"
-"                               must be numerically specified as in 'syslog.h'\n"
-"                               defaults to LOG_INFO without argument\n"
-"  -q, --quiet              set verbosity to LOG_ERR and suppress user\n"
-"                               input and warning/info messages\n"
-"      --help               display this help and exit\n"
-"      --version            output version information and exit\n"
+"  -c  --contest=CONTEST          submit for contest with identifier name CONTEST.\n"
+"                                     Defaults to the value of the\n"
+"                                     environment variable 'SUBMITCONTEST'.\n"
+"                                     Mandatory when more than one contest is active.\n"
+"  -p, --problem=PROBLEM          submit for problem PROBLEM\n"
+"  -l, --language=LANGUAGE        submit in language LANGUAGE\n"
+"  -e, --entry_point=ENTRY_POINT  set an explicit entry_point, e.g. the java main class\n"
+"  -v, --verbose[=LEVEL]          increase verbosity or set to LEVEL, where LEVEL\n"
+"                                     must be numerically specified as in 'syslog.h'\n"
+"                                     defaults to LOG_INFO without argument\n"
+"  -q, --quiet                    set verbosity to LOG_ERR and suppress user\n"
+"                                     input and warning/info messages\n"
+"      --help                     display this help and exit\n"
+"      --version                  output version information and exit\n"
 "\n"
 "The following option(s) should not be necessary for normal use\n"
 "  -u, --url=URL            submit to webserver with base address URL\n"
@@ -639,6 +663,18 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 	return result;
 }
 
+int getentrypointrequired()
+{
+	Json::Value res = doAPIrequest("config?name=require_entry_point", 0);
+	if ( res.isNull() || !res.isObject() ) return 1;
+
+	res = res["require_entry_point"];
+	if ( res.isNull() || res.isBool() ) return 1;
+	require_entry_point = res.asBool();
+
+	return 0;
+}
+
 int getlangexts()
 {
 	Json::Value langs, exts;
@@ -672,13 +708,13 @@ int getcontests()
 
 	res = doAPIrequest("contests", 0);
 
-	if ( res.isNull() || !res.isObject() ) return 1;
+	if ( res.isNull() || !res.isArray() ) return 1;
 
-	for(Json::Value::iterator it=res.begin(); it!=res.end(); ++it) {
+	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		vector<string> contest;
 
-		contest.push_back((*it)["shortname"].asString());
-		contest.push_back((*it)["name"].asString());
+		contest.push_back(res[i]["shortname"].asString());
+		contest.push_back(res[i]["name"].asString());
 		if ( contest[0]=="" || contest[1]=="" ) {
 			warning(0,"REST API returned unexpected JSON data for contests");
 			return 1;
@@ -739,6 +775,9 @@ int websubmit()
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
 	if ( !contest.empty() ) {
 		curlformadd(COPYNAME,"contest", COPYCONTENTS,contest.c_str());
+	}
+	if ( !entry_point.empty() ) {
+		curlformadd(COPYNAME,"entry_point", COPYCONTENTS,entry_point.c_str());
 	}
 
 	/* Set options for post */

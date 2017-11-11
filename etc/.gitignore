@@ -4,6 +4,7 @@
 /submit-config.h
 /apache.conf
 /nginx-conf
+/domjudge-fpm.conf
 /config.h.in
 /config.h
 /dbpasswords.secret

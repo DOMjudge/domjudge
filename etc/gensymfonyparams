@@ -1,0 +1,81 @@
+#!/bin/sh
+
+# Script to fill symfony parameters.yml file with database passwords.
+# Two arguments are expected:
+# 1. a template file parameters.yml.dist
+# 2. a file dbpasswords.secret with database credentials
+# The generated file is written to stdout.
+#
+# If dbpasswords.secret does not exist (this can happen during
+# 'make dist', then simply copy from parameters.yml.dist with a
+# note that the file will later be overwritten. This initial file is
+# to make composer happy during installation.
+
+# Exit on any error:
+set -e
+
+error()
+{
+	echo "Error: $*" >&2
+	exit 1
+}
+
+if [ $# -ne 2 ]; then
+	error "exactly two arguments expected."
+fi
+
+PARAMS=$1
+DBPASSWORDS=$2
+
+if [ ! -r "$PARAMS" ]; then
+	error "parameters.yml template file '$PARAMS' not readable."
+fi
+
+if [ ! -r "$DBPASSWORDS" ]; then
+	if [ -n "$QUIET" ]; then
+		echo "Warning: database passwords file '$DBPASSWORDS' not readable;" >&2
+		echo "         generating a stub parameters.yml file..." >&2
+	fi
+
+	cat <<EOF
+##### THIS FILE WILL BE OVERWRITTEN AUTOMATICALLY, DON'T EDIT. #####
+# During DOMjudge installation, this file will be overwritten with #
+# a modified version of parameters.yml.dist. It is only here to    #
+# make composer happy when running 'make dist' and 'configure'.    #
+####################################################################
+
+EOF
+	cat "$PARAMS"
+
+	exit 0
+fi
+
+OLDIFS="$IFS"
+IFS=":"
+# Don't pipe $PASSWDFILE into this while loop as that spawns a
+# subshell and then variables are not retained in the original shell.
+while read -r role host db user passwd; do
+	# Skip lines beginning with a '#'
+	[ "x$role" != "x${role###}" ] && continue
+	DBHOST=$host
+	DBNAME=$db
+	DBUSER=$user
+	PASSWD=$passwd
+done < "$DBPASSWORDS"
+IFS="$OLDIFS"
+
+if [ -z "$PASSWD" ]; then
+	error "no credentials found in '$DBPASSWORDS
+'."
+fi
+
+SECRET=$(head -c20 /dev/urandom | base64 | head -c20 | tr '/+' 'Aa')
+
+echo "# Generated from '$PARAMS' on $(hostname), $(date)."
+echo
+
+sed -e "s/\(database_host:\) .*\$/\1 $DBHOST/" \
+    -e "s/\(database_name:\) .*\$/\1 $DBNAME/" \
+    -e "s/\(database_user:\) .*\$/\1 $DBUSER/" \
+    -e "s/\(database_password:\) .*\$/\1 $PASSWD/" \
+    -e "s/\(secret:\) .*\$/\1 $SECRET/"  "$PARAMS"

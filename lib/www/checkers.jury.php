@@ -20,9 +20,9 @@ function ch_error($string)
 
 function check_mapping_team($data, $mapping_data, $keydata = null)
 {
-	// Only when user information is providede (i.e. on add)
+	// Only when user information is provided (i.e. on add)
 	if ( isset($mapping_data[1]) ) {
-		if ( $data['adduser'] === '1' ) {
+		if ( @$data['adduser'] === '1' ) {
 			$id = $mapping_data[1]['extra']['username'];
 			if ( ! preg_match ( ID_REGEX, $id ) ) {
 				ch_error("Username may only contain characters " . IDENTIFIER_CHARS . ".");
@@ -468,4 +468,3 @@ function check_judging($data, $keydata = null)
 
 	return $data;
 }
-

@@ -15,7 +15,7 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
-MAINSOURCE="$1"
+MAINSOURCE="${ENTRY_POINT:-$1}"
 
 # Check perl syntax:
 for i in "$@" ; do
@@ -36,9 +36,9 @@ fi
 
 export ONLINE_JUDGE=1 DOMJUDGE=1
 
-exec perl "$MAINSOURCE"
+exec perl "$MAINSOURCE" "\$@"
 EOF
 
-chmod a+x "$DEST" "\$@"
+chmod a+x "$DEST"
 
 exit 0

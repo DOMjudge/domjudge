@@ -38,6 +38,7 @@ CREATE TABLE `balloon` (
 --
 CREATE TABLE `clarification` (
   `clarid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Clarification ID in an external system, should be unique inside a single contest',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `respid` int(4) unsigned DEFAULT NULL COMMENT 'In reply to clarification ID',
   `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time sent',
@@ -49,6 +50,7 @@ CREATE TABLE `clarification` (
   `body` longtext NOT NULL COMMENT 'Clarification text',
   `answered` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has been answered by jury?',
   PRIMARY KEY  (`clarid`),
+  UNIQUE KEY `externalid` (`cid`,`externalid`(190)),
   KEY `respid` (`respid`),
   KEY `probid` (`probid`),
   KEY `cid` (`cid`),
@@ -91,7 +93,7 @@ CREATE TABLE `contest` (
   `starttime_string` varchar(64) NOT NULL COMMENT 'Authoritative absolute (only!) string representation of starttime',
   `freezetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of freezetime',
   `endtime_string` varchar(64) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
-  `unfreezetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetrime',
+  `unfreezetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetime',
   `deactivatetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Whether this contest can be active',
   `starttime_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'If disabled, starttime is not used, e.g. to delay contest start',
@@ -113,7 +115,7 @@ CREATE TABLE `contest` (
 CREATE TABLE `contestproblem` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
-  `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest (string)',
+  `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest, used to sort problems in the scoreboard and typically a single letter',
   `points` int(4) unsigned NOT NULL DEFAULT '1' COMMENT 'Number of points earned by solving this problem',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted for this problem?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions for this problem judged?',
@@ -134,7 +136,7 @@ CREATE TABLE `contestproblem` (
 CREATE TABLE `contestteam` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
-  PRIMARY KEY (`teamid`,`cid`),
+  PRIMARY KEY (`cid`,`teamid`),
   KEY `cid` (`cid`),
   KEY `teamid` (`teamid`),
   CONSTRAINT `contestteam_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
@@ -149,28 +151,16 @@ CREATE TABLE `event` (
   `eventid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `eventtime` decimal(32,9) unsigned NOT NULL COMMENT 'When the event occurred',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `clarid` int(4) unsigned DEFAULT NULL COMMENT 'Clarification ID',
-  `langid` varchar(8) DEFAULT NULL COMMENT 'Language ID',
-  `probid` int(4) unsigned DEFAULT NULL COMMENT 'Problem ID',
-  `submitid` int(4) unsigned DEFAULT NULL COMMENT 'Submission ID',
-  `judgingid` int(4) unsigned DEFAULT NULL COMMENT 'Judging ID',
-  `teamid` int(4) unsigned DEFAULT NULL COMMENT 'Team ID',
-  `description` longtext NOT NULL COMMENT 'Event description',
-  PRIMARY KEY  (`eventid`),
+  `endpointtype` varchar(25) NOT NULL COMMENT 'API endpoint associated to this entry',
+  `endpointid` varchar(50) NOT NULL COMMENT 'API endpoint (external) ID',
+  `datatype` varchar(25) DEFAULT NULL COMMENT 'DB table associated to this entry',
+  `dataid` varchar(50) DEFAULT NULL COMMENT 'Identifier in reference DB table',
+  `action` varchar(30) NOT NULL COMMENT 'Description of action performed',
+  `content` longblob NOT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed',
+  PRIMARY KEY (`eventid`),
+  KEY `eventtime` (`cid`,`eventtime`),
   KEY `cid` (`cid`),
-  KEY `clarid` (`clarid`),
-  KEY `langid` (`langid`),
-  KEY `probid` (`probid`),
-  KEY `submitid` (`submitid`),
-  KEY `judgingid` (`judgingid`),
-  KEY `teamid` (`teamid`),
-  CONSTRAINT `event_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
-  CONSTRAINT `event_ibfk_2` FOREIGN KEY (`clarid`) REFERENCES `clarification` (`clarid`) ON DELETE CASCADE,
-  CONSTRAINT `event_ibfk_3` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
-  CONSTRAINT `event_ibfk_4` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
-  CONSTRAINT `event_ibfk_5` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
-  CONSTRAINT `event_ibfk_6` FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE,
-  CONSTRAINT `event_ibfk_7` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
+  CONSTRAINT `event_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Log of all events during a contest';
 
 --
@@ -274,6 +264,7 @@ CREATE TABLE `judging_run` (
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
   `runresult` varchar(25) DEFAULT NULL COMMENT 'Result of this run, NULL if not finished yet',
   `runtime` float DEFAULT NULL COMMENT 'Submission running time on this testcase',
+  `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run judging ended',
   `output_run` longblob COMMENT 'Output of running the program',
   `output_diff` longblob COMMENT 'Diffing the program output and testcase output',
   `output_error` longblob COMMENT 'Standard error output of the program',
@@ -292,13 +283,15 @@ CREATE TABLE `judging_run` (
 
 CREATE TABLE `language` (
   `langid` varchar(8) NOT NULL COMMENT 'Unique ID (string)',
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
   `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted in this language?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions in this language judged?',
   `time_factor` float NOT NULL DEFAULT '1' COMMENT 'Language-specific factor multiplied by problem run times',
   `compile_script` varchar(32) DEFAULT NULL COMMENT 'Script to compile source code for this language',
-  PRIMARY KEY  (`langid`)
+  PRIMARY KEY  (`langid`),
+  UNIQUE KEY `externalid` (`externalid`(190))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Programming languages in which teams can submit solutions';
 
 --
@@ -307,6 +300,7 @@ CREATE TABLE `language` (
 
 CREATE TABLE `problem` (
   `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `timelimit` float unsigned NOT NULL DEFAULT '0' COMMENT 'Maximum run time (in seconds) for this problem',
   `memlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum memory available (in kB) for this problem',
@@ -316,7 +310,8 @@ CREATE TABLE `problem` (
   `special_compare_args` varchar(255) DEFAULT NULL COMMENT 'Optional arguments to special_compare script',
   `problemtext` longblob COMMENT 'Problem text in HTML/PDF/ASCII',
   `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
-  PRIMARY KEY  (`probid`)
+  PRIMARY KEY  (`probid`),
+  KEY `externalid` (`externalid`(190))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Problems the teams can submit solutions for';
 
 --
@@ -418,6 +413,7 @@ CREATE TABLE `submission` (
   `expected_results` varchar(255) DEFAULT NULL COMMENT 'JSON encoded list of expected results - used to validate jury submissions',
   `externalid` int(4) unsigned DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
   `externalresult` varchar(25) DEFAULT NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
+  `entry_point` varchar(255) DEFAULT NULL COMMENT 'Optional entry point. Can be used e.g. for java main class.',
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `externalid` (`cid`,`externalid`),
   KEY `teamid` (`cid`,`teamid`),
@@ -532,7 +528,7 @@ CREATE TABLE `testcase` (
   `output` longblob COMMENT 'Output data',
   `probid` int(4) unsigned NOT NULL COMMENT 'Corresponding problem ID',
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
-  `description` varchar(255) DEFAULT NULL COMMENT 'Description of this testcase',
+  `description` longblob COMMENT 'Description of this testcase',
   `image` longblob COMMENT 'A graphical representation of this testcase',
   `image_thumb` longblob COMMENT 'Aumatically created thumbnail of the image',
   `image_type` varchar(4) DEFAULT NULL COMMENT 'File type of the image and thumbnail',

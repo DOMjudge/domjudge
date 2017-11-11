@@ -14,7 +14,7 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
-MAINSOURCE="$1"
+MAINSOURCE="${ENTRY_POINT:-$1}"
 
 # Filter out files without .py extension from the list of source
 # files. Note that POSIX shell does *not* support arrays, so we store
@@ -37,6 +37,12 @@ python2 -m py_compile $SOURCES
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 rm -f -- *.pyc
+
+# Check if entry point is valid
+if [ ! -r "$MAINSOURCE" ]; then
+    >&2 echo "error: main source file '$MAINSOURCE' is not readable"
+    exit 1
+fi
 
 # Write executing script:
 cat > "$DEST" <<EOF

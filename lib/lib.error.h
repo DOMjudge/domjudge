@@ -46,7 +46,7 @@ void vlogmsg(int, const char *, va_list);
  * ... or va_list  optional arguments for format characters
  */
 
-char *errorstring(const char *, int, const char *) __attribute__((nonnull (1)));
+char *errorstring(const char *, int, const char *);
 /* Error string generating function:
  * Returns a pointer to a dynamically allocated string containing the error
  * message.

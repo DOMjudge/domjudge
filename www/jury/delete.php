@@ -8,11 +8,6 @@
 require('init.php');
 requireAdmin();
 
-if ( !file_exists(LIBDIR . '/relations.php') ) {
-	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
-}
-require(LIBDIR . '/relations.php');
-
 $t = @$_REQUEST['table'];
 $referrer = @$_REQUEST['referrer'];
 $desc = @$_REQUEST['desc'];
@@ -88,6 +83,13 @@ if (isset($_POST['confirm'] ) ) {
 	$DB->q("DELETE FROM $t WHERE %SS LIMIT 1", $k);
 	if ( $t=='problem' ) $DB->q('COMMIT');
 	auditlog($t, implode(', ', $k), 'deleted');
+
+	// No need to do this in a transaction, since the chance of a team
+	// with same ID being created at the same time is neglibible.
+	if ( $t==='team' ) {
+		$DB->q('DELETE FROM scorecache WHERE %SS', $k);
+		$DB->q('DELETE FROM rankcache WHERE %SS', $k);
+	}
 
 	echo "<p>" . ucfirst($t) . " <strong>" . specialchars(implode(", ", $k)) .
 		"</strong> has been deleted.</p>\n\n";

@@ -5,9 +5,9 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
-MAINSOURCE="$1"
+MAINSOURCE="${ENTRY_POINT:-$1}"
 COMPILESCRIPTDIR="$(dirname "$0")"
 
-exec swipl $COMPILESCRIPTDIR/compile.plg $MAINSOURCE $DEST
+exec swipl "$COMPILESCRIPTDIR/compile.plg" "$MAINSOURCE" "$DEST"
 
 exit 0

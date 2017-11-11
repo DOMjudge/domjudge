@@ -1,0 +1,16 @@
+legacy.index:
+    path: /
+legacy.jury_team:
+    path: /jury/team.php
+legacy.jury_delete:
+    path: /jury/delete.php
+legacy.jury_contest:
+    path: /jury/contest.php
+legacy.jury_user:
+    path: /jury/user.php
+legacy.jury_team_category:
+    path: /jury/team_category.php
+legacy.jury_team_affiliation:
+    path: /jury/team_affiliation.php
+legacy.jury_change_contest:
+    path: /jury/change_contest.php

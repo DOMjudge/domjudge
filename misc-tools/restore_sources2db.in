@@ -133,12 +133,7 @@ foreach ( $submissions as $s ) {
 	}
 	$DB->q('COMMIT');
 
-	// Log to event table
-	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid,
-	                           probid, submitid, description)
-	        VALUES(%s, %i, %s, %s, %s, %i, "problem submitted")',
-	       $s['submittime'], $s['cid'], $s['teamid'], $s['langid'],
-	       $s['probid'], $s['sid']);
+	eventlog('submission', $s['sid'], 'create', $s['cid']);
 
 	logmsg(LOG_INFO, "inserted $s[teamid]/$s[probid]/$s[langid], " .
 	       "id s$s[sid]/c$s[cid], main file '$mainfile'");

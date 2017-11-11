@@ -12,6 +12,9 @@ SQLDIR="@domserver_sqldir@"
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
 RESTPWFILE="$ETCDIR/restapi.secret"
 
+DEFAULTDATA_FILES="$SQLDIR/mysql_db_defaultdata.sql $SQLDIR/mysql_db_files_defaultdata.sql"
+EXAMPLES_FILES="$SQLDIR/mysql_db_examples.sql $SQLDIR/mysql_db_files_examples.sql"
+
 verbose()
 {
 	[ -z "$QUIET" ] && echo "$@"
@@ -22,12 +25,14 @@ usage() {
 Usage: $0 [option]... <command>
 
 Commands:
-  status        check database installation status
-  genpass       generate password file
-  install       create database, example contest and users if not existing
-  bare-install  create database, setup defaults if not existing
-  uninstall     remove database users and database, INCLUDING ALL DATA!
-  upgrade       upgrade MySQL database schema to current version
+  status           check database installation status
+  genpass          generate password file
+  install          create database, example contest and users if not existing
+  bare-install     create database, setup defaults if not existing
+  uninstall        remove database users and database, INCLUDING ALL DATA!
+  install-defaults install default data only
+  install-examples install examples only
+  upgrade          upgrade MySQL database schema to current version
 
 Options:
   -u <user>  connect to MySQL with DB admin <user>
@@ -215,17 +220,25 @@ uninstall)
 	remove_db_users
 	;;
 
+install-defaults)
+	read_dbpasswords
+	# shellcheck disable=SC2002
+	cat $DEFAULTDATA_FILES | mysql -D "$DBNAME"
+	;;
+
+install-examples)
+	read_dbpasswords
+	# shellcheck disable=SC2002
+	cat $EXAMPLES_FILES | mysql -D "$DBNAME"
+	;;
+
 bare-install|install)
 	read_dbpasswords
 	create_db_users
-	FILES="$SQLDIR/mysql_db_structure.sql \
-		$SQLDIR/mysql_db_defaultdata.sql \
-		$SQLDIR/mysql_db_files_defaultdata.sql"
+	FILES="$SQLDIR/mysql_db_structure.sql $DEFAULTDATA_FILES"
 
 	if [ "$1" = "install" ]; then
-		FILES="$FILES \
-			$SQLDIR/mysql_db_examples.sql \
-			$SQLDIR/mysql_db_files_examples.sql"
+		FILES="$FILES $EXAMPLES_FILES"
 	fi
 	RESTPW=$(grep -v ^# $RESTPWFILE | cut -f4)
 	# NOTE: the hash function and cost below have to be kept

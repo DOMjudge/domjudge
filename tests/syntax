@@ -1,23 +1,24 @@
 #!/bin/sh
 
 # Run some Syntax checking tests on PHP and Shell scripts
+PHP=$(which php)
 
-if [ -x /usr/bin/php ]; then
-	find .. -name '*.php' | \
+if [ -x $PHP ]; then
+	find .. -path ../lib/vendor -prune -o -path ../webapp/var -prune -o -name '*.php' | \
 	while read -r i ; do
-		php -l "$i" | grep -v "^No syntax errors detected in "
+		$PHP -l "$i" | grep -v "^No syntax errors detected in "
 	done
 
-	grep -rsl "^#\!.*php" ..|egrep -v '/\.(svn|git)/'|grep -v '\.php' | \
+	grep -rsl "^#\!.*php" .. | grep -vE '/\.(svn|git)/' | grep -v '\.php' | \
 	while read -r i ; do
-		php -l "$i" | grep -v "^No syntax errors detected in "
+		$PHP -l "$i" | grep -v "^No syntax errors detected in "
 	done
 else
-	echo "PHP not found in /usr/bin/php"
+	echo "PHP not found"
 fi
 
 if [ -x /usr/bin/checkbashisms ]; then
-	grep -rsl "^#\!.*/bin/sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
+	grep -rsl "^#\!.*/bin/sh" .. | grep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
 	while read -r i ; do
 		if [ "${i##*.}" != "zip" ]; then
 			checkbashisms "$i"
@@ -35,7 +36,7 @@ fi
 # SC2086: there are too many cases where quoting is not necessary and tedious
 
 if [ -x /usr/bin/shellcheck ]; then
-	grep -rslE "^#\!.*/bin/(ba)?sh" .. | egrep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
+	grep -rslE "^#\!.*/bin/(ba)?sh" .. | grep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
 	while read -r i ; do
 		if [ "${i##*.}" != "zip" ]; then
 			shellcheck -f gcc -e 1072,2034,2086 "$i"

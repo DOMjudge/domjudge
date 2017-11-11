@@ -17,39 +17,60 @@ MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 MAINCLASS=""
 
-# Amount of memory reserved for the Java virtual machine in kB. The
+# Stack size in the JVM in KB. Note that this will be deducted from
+# the total memory made available for the heap.
+MEMSTACK=65536
+
+# Amount of memory reserved for the Java virtual machine in KB. The
 # default below is just above the maximum memory usage of current
 # versions of the jvm, but might need increasing in some cases.
 MEMRESERVED=131072
+
+# Java needs filename to match main class:
+if [ -z "$ENTRY_POINT" ]; then
+	echo "Info: no ENTRY_POINT provided, trying to detect main class."
+else
+	MAINCLASS="$ENTRY_POINT"
+fi
 
 TMPFILE=$(mktemp --tmpdir domjudge_javac_output.XXXXXX) || exit 1
 
 # Byte-compile:
 javac -encoding UTF-8 -sourcepath . -d . "$@" 2> "$TMPFILE"
 EXITCODE=$?
-if [ "$EXITCODE" -ne 0 ]; then
-	# Let's see if should have named the .java differently
-	PUBLICCLASS=$(sed -n -e '/class .* is public, should be declared in a file named /{s/.*file named //;s/\.java.*//;p;q}' "$TMPFILE")
-	if [ -z "$PUBLICCLASS" ]; then
-		cat $TMPFILE
+
+if [ -z "$MAINCLASS" ]; then
+	if [ "$EXITCODE" -ne 0 ]; then
+		# Let's see if should have named the .java differently
+		PUBLICCLASS=$(sed -n -e '/class .* is public, should be declared in a file named /{s/.*file named //;s/\.java.*//;p;q}' "$TMPFILE")
+		if [ -z "$PUBLICCLASS" ]; then
+			cat $TMPFILE
+			rm -f $TMPFILE
+			exit $EXITCODE
+		fi
 		rm -f $TMPFILE
-		exit $EXITCODE
+		echo "Info: renaming main source '$MAINSOURCE' to '$PUBLICCLASS.java'"
+		mv "$MAINSOURCE" "$PUBLICCLASS.java"
+		javac -encoding UTF-8 -d . "$PUBLICCLASS.java"
+		EXITCODE=$?
+		[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 	fi
+
 	rm -f $TMPFILE
 	echo "Info: renaming main source '$MAINSOURCE' to '$PUBLICCLASS.java'"
 	mv "$MAINSOURCE" "$PUBLICCLASS.java"
 	javac -encoding UTF-8 -sourcepath . -d . "$PUBLICCLASS.java"
+
 	EXITCODE=$?
-	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+else
+	cat $TMPFILE
+	rm -f $TMPFILE
 fi
 
-rm -f $TMPFILE
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
-# Look for class that has the 'main' function:
-CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
-            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
-COMPILESCRIPTDIR="$(dirname "$0")"
-MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
+# Check if entry point is valid
+javap "$MAINCLASS" > /dev/null
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
@@ -61,7 +82,7 @@ MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 # -Xmx: maximum size of memory allocation pool
 # -Xms: initial size of memory, improves runtime stability
 # -XX:+UseSerialGC: Serialized garbage collector improves runtime stability
-# -Xss64m: 64MB stack size
+# -Xss${MEMSTACK}k: stack size as configured abve
 cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute java interpreter on source.

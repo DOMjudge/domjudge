@@ -286,6 +286,9 @@ if ( !empty($submission['origsubmitid']) ) {
 	echo  " (resubmit of <a href=\"submission.php?id=" . urlencode($origid) . "\">s$origid</a>)";
 }
 echo "</h2>\n\n";
+if ( (string)$submission['entry_point']!=='' ) {
+	echo '<p><b>Entry point</b>: ' . specialchars($submission['entry_point']) . "</p>\n\n";
+}
 if ( $olddata !== NULL ) {
 	echo "<p><a href=\"#diff\">Go to diff to previous submission</a></p>\n\n";
 }

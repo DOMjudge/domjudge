@@ -1,0 +1,78 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Team{% endblock %}
+
+{% block body %}
+{% include '::header.html.twig' %}
+<h1>Teams</h1>
+
+<table class="list sortable">
+  <thead>
+    <tr>
+      <th class="sorttable_numeric" scope="col">ID</th>
+      <th scope="col">teamname</th>
+      <th scope="col">category</th>
+      <th scope="col">affiliation</th>
+      <th scope="col" class="sorttable_numeric"># (private) contests</th>
+      <th scope="col">host</th>
+      <th scope="col">room</th>
+      <th class="sorttable_nosort"></th>
+      <th class="thleft" scope="col">status</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in teams %}
+    {% set status = 0 %}
+    {% if t.getTeampageFirstVisited %}{% set status = 1%}{% endif %}
+
+
+    {% set tpath = path('team_show', {'teamid': t.teamid}) %}
+    {% set tlink = '<a href="#{tpath}">'%}
+    <tr class="category{{t.getCategory().categoryid}}">
+      <td>
+        <a href="{{tpath}}">t{{t.teamid}}</a>
+      </td>
+      <td>
+        <a href="{{tpath}}">{{t.name}}</a>
+      </td>
+      <td>
+        <a href="{{tpath}}">{{t.getCategory()}}</a>
+      </td>
+      {% if t.getAffiliation() %}
+        <td title="{{t.getAffiliation().getName()}}">
+        <a href="{{tpath}}">{{t.getAffiliation().getShortname()}}</a>
+        </td>
+      {% else %}
+        <td>
+          <a href="{{tpath}}">&nbsp;</a>
+        </td>
+      {% endif %}
+      <td>
+        <a href="{{tpath}}">{{t.getContests()|length}}</a>
+      </td>
+      <td>
+        <a href="{{tpath}}"><span class="hostname">{{t.hostname|default('-')}}</span></a>
+      </td>
+      <td>
+        <a href="{{tpath}}">{{t.room}}</a>
+      </td>
+      {% if     status == 0 %}<td class="team-nocon">
+      {% elseif status == 1 %}<td class="team-nosub">
+      {% elseif status == 2 %}<td class="team-nocor">
+      {% elseif status == 3 %}<td class="team-ok">
+      {% endif %}
+        <a href="{{tpath}}">●</a>
+      </td>
+      <td class="teamstat">{# status #}0/0</td>
+      <td class="editdel">
+        <a href="{{path('legacy.jury_team',{cmd: 'edit', id: t.teamid,referrer: 'teams'})}}"><img src="{{asset('images/edit.png')}}" alt="edit" title="edit this team" class="picto"></a>
+        <a href="{{path('legacy.jury_delete',{table: 'team', teamid: t.teamid,referrer: 'teams', desc: t.name})}}"><img src="{{asset('images/delete.png')}}" alt="delete" title="delete this team" class="picto"></a>
+      </td>
+    </tr>
+    {% endfor %}
+
+  </tbody>
+</table>
+<p><a href="{{path('legacy.jury_team', {cmd: 'add'})}}"><img src="{{asset('images/add.png')}}" alt="add" title="add new team" class="picto"></a></p>
+{% endblock %}

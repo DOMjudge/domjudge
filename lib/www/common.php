@@ -392,13 +392,13 @@ function putTeam($teamid) {
 
 	if ( empty($team) ) error ("No team found by this id.");
 
-	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
-	$teamimage = "../images/teams/" . urlencode($team['teamid']) . ".jpg";
+	$countryflag = "images/countries/" . urlencode($team['country']) . ".png";
+	$teamimage = "images/teams/" . urlencode($team['teamid']) . ".jpg";
 
 	echo "<h1>Team ".specialchars($team['name'])."</h1>\n\n";
 
-	if ( is_readable($teamimage) ) {
-		echo '<img id="teampicture" src="' . $teamimage .
+	if ( is_readable(WEBAPPDIR.'/web/'.$teamimage) ) {
+		echo '<img id="teampicture" src="../' . $teamimage .
 			'" alt="Picture of team ' .
 			specialchars($team['name']) . '" />';
 	}
@@ -421,8 +421,8 @@ function putTeam($teamid) {
 		echo "</td></tr>\n";
 		if ( !empty($team['country']) ) {
 			echo '<tr><td>Country:</td><td>';
-			if ( is_readable($countryflag) ) {
-				echo '<img src="' . $countryflag . '" alt="' .
+			if ( is_readable(WEBAPPDIR.'/web/'.$countryflag) ) {
+				echo '<img src="../' . $countryflag . '" alt="' .
 					specialchars($team['country']) . '" /> ';
 			}
 			echo specialchars($team['country']) . "</td></tr>\n";
@@ -492,7 +492,8 @@ function putClock() {
 			$displayname = "<abbr title=\"$username\">" . $userdata['name'] . "</abbr>";
 		}
 		echo "<div id=\"username\">logged in as " . $displayname
-			. ( have_logout() ? " <a href=\"../auth/logout.php\">×</a>" : "" )
+			. ( have_logout() ? ' <a href="../auth/logout.php">' .
+			    '<span class="octicon octicon-sign-out"></span></a>' : "" )
 			. "</div>";
 	}
 
@@ -581,7 +582,7 @@ function putProblemText($probid)
 		$probname = $prob['shortname'];
 	}
 
-	if ( empty($prob) || !problemVisible($probid) ) {
+	if ( empty($prob) || (!IS_JURY && !problemVisible($probid)) ) {
 		error("Problem p$probid not found or not available");
 	}
 
@@ -659,7 +660,7 @@ function putProblemTextList()
 	global $cid, $cdata, $DB;
 	$fdata = calcFreezeData($cdata);
 
-	if ( !$fdata['cstarted'] ) {
+	if ( !$fdata['started'] ) {
 		echo "<p class=\"nodata\">Problem texts will appear here at contest start.</p>\n\n";
 	} else {
 

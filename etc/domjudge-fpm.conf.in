@@ -1,0 +1,30 @@
+; @configure_input@
+
+; PHP-FPM configuration for DOMjudge
+
+[domjudge]
+user = @WEBSERVER_GROUP@
+group = @WEBSERVER_GROUP@
+
+listen = /var/run/php-fpm-domjudge.sock
+listen.owner = @WEBSERVER_GROUP@
+listen.group = @WEBSERVER_GROUP@
+listen.mode = 0660
+
+pm = static
+pm.max_children = 40      ; ~40 per gig of memory(16gb system -> 500)
+pm.max_requests = 5000
+pm.status_path = /fpm_status
+
+request_slowlog_timeout = 10s
+slowlog = /var/log/php-fpm-domjudge.log.slow
+
+php_flag[display_errors] = off
+php_admin_flag[log_errors] = on
+php_admin_value[error_log] = /var/log/fpm-php.domjudge.log
+
+php_admin_value[memory_limit] = 256M
+php_admin_value[upload_max_filesize] = 256M
+php_admin_value[post_max_size] = 256M
+php_admin_value[max_file_uploads] = 100
+;php_admin_value[date.timezone] = America/Denver

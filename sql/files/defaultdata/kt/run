@@ -1,0 +1,80 @@
+#!/bin/sh
+
+# Java compile wrapper-script for 'compile.sh'.
+# See that script for syntax and more info.
+#
+# This script byte-compiles with the kotlinc compiler and
+# generates a shell script to run it with the java interpreter with Kotlin
+# libraries later.
+#
+# NOTICE: this compiler script cannot be used with the USE_CHROOT
+# configuration option turned on, unless proper preconfiguration of
+# the chroot environment has been taken care of!
+
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+MAINSOURCE="$1"
+MAINCLASS=""
+
+# Stack size in the JVM in KB. Note that this will be deducted from
+# the total memory made available for the heap.
+MEMSTACK=65536
+
+# Amount of memory reserved for the Java virtual machine in KB. The
+# default below is just above the maximum memory usage of current
+# versions of the jvm, but might need increasing in some cases.
+MEMJVM=65536
+
+MEMRESERVED=$((MEMSTACK + MEMJVM))
+
+# Allow overriding Kotlin main class (should not be necessary):
+if [ -n "$ENTRY_POINT" ]; then
+	echo "Info: using main class provided by ENTRY_POINT='$ENTRY_POINT'."
+	MAINCLASS="$ENTRY_POINT"
+fi
+
+# Byte-compile:
+kotlinc "$@"
+EXITCODE=$?
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+
+if [ -z "$MAINCLASS" ]; then
+	# Look for class that has the 'main' function:
+	CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
+	            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
+	COMPILESCRIPTDIR="$(dirname "$0")"
+	MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
+	EXITCODE=$?
+	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+fi
+
+# Check if entry point is valid
+javap "$MAINCLASS" > /dev/null
+EXITCODE=$?
+[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+
+# Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
+MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
+
+# Write executing script:
+# Executes java byte-code interpreter with following options (prefixed
+# with -J to pass from kotlin to java):
+# -Xmx: maximum size of memory allocation pool
+# -Xms: initial size of memory, improves runtime stability
+# -XX:+UseSerialGC: Serialized garbage collector improves runtime stability
+# -Xss${MEMSTACK}k: stack size as configured abve
+cat > "$DEST" <<EOF
+#!/bin/sh
+# Generated shell-script to execute java interpreter on source.
+
+# Detect dirname and change dir to prevent class not found errors.
+if [ "\${0%/*}" != "\$0" ]; then
+	cd "\${0%/*}"
+fi
+
+exec kotlin -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k -J-DONLINE_JUDGE=1 -J-DDOMJUDGE=1 '$MAINCLASS' "\$@"
+EOF
+
+chmod a+x "$DEST"
+
+exit 0

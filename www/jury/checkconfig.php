@@ -34,11 +34,6 @@ if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 	exit;
 }
 
-if ( !file_exists(LIBDIR . '/relations.php') ) {
-	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
-}
-
-require_once(LIBDIR . '/relations.php');
 require_once(LIBWWWDIR . '/checkers.jury.php');
 
 
@@ -104,9 +99,9 @@ echo "<table class=\"configcheck\">\n";
 
 // SOFTWARE
 
-if( !function_exists('version_compare') || version_compare( '5.4',PHP_VERSION,'>=') ) {
+if( !function_exists('version_compare') || version_compare( '7.0',PHP_VERSION,'>=') ) {
 	result('software', 'PHP version', 'E',
-		'You have PHP ' . PHP_VERSION . ', but need at least 5.4.0.',
+		'You have PHP ' . PHP_VERSION . ', but need at least 7.0.0.',
 		'See <a href="?phpinfo">phpinfo</a> for details.');
 } else {
 	result('software', 'PHP version', 'O',
@@ -186,10 +181,9 @@ if ( class_exists("ZipArchive") ) {
 }
 
 $mysqldata = array();
-$mysqldatares = $DB->q('SHOW variables WHERE
-                        Variable_name = "max_connections" OR
-                        Variable_name = "max_allowed_packet" OR
-                        Variable_name = "version"');
+$mysqldatares = $DB->q('SHOW variables WHERE Variable_name IN
+                        ("innodb_log_file_size", "max_connections",
+                         "max_allowed_packet", "version")');
 while($row = $mysqldatares->next()) {
 	$mysqldata[$row['Variable_name']] = $row['Value'];
 }
@@ -211,6 +205,12 @@ result('software', 'MySQL maximum packet size',
 	'MySQL\'s max_allowed_packet is set to ' .
 	printsize($mysqldata['max_allowed_packet']) . '. You may ' .
 	'want to raise this to about twice the maximum test case size.');
+
+result('software', 'MySQL innodb logfile size',
+	$mysqldata['innodb_log_file_size'] < 128*1024*1024 ? 'W':'O', '',
+	'MySQL\'s innodb_log_file_size is set to ' .
+	printsize($mysqldata['innodb_log_file_size']) . '. You may ' .
+	'want to raise this to 10x the maximum test case size.');
 
 flushresults();
 
@@ -484,7 +484,7 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 	$res = $DB->q('SELECT DISTINCT country FROM team_affiliation
 	               WHERE country IS NOT NULL ORDER BY country');
 	while ( $row = $res->next() ) {
-		$cflag = '../images/countries/' .
+		$cflag = WEBAPPDIR . '/web/images/countries/' .
 			urlencode($row['country']) . '.png';
 		if ( ! file_exists ( $cflag ) ) {
 			$details .= "Country " . $row['country'] .
@@ -619,7 +619,7 @@ while($row = $res->next()) {
 		$CHECKER_ERRORS[] = 'has no corresponding submitid (in c'.$row['j_cid'] .')';
 	}
 	if($row['s_cid'] != NULL && $row['s_cid'] != $row['j_cid']) {
-		$CHEKCER_ERRORS[] = 'Judging j' .$row['judgingid'] .
+		$CHECKER_ERRORS[] = 'Judging j' .$row['judgingid'] .
 		                    ' is from a different contest (c' . $row['j_cid'] .
 		                    ') than its submission s' . $row['j_submitid'] .
 		                    ' (c' . $row['s_cid'] . ')';

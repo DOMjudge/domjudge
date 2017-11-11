@@ -108,7 +108,7 @@ function problemVisible($probid)
 	if ( empty($probid) ) return FALSE;
 
 	$fdata = calcFreezeData($cdata);
-	if ( !$fdata['cstarted'] ) return FALSE;
+	if ( !$fdata['started'] ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
 	               INNER JOIN contestproblem USING (probid)
@@ -118,8 +118,8 @@ function problemVisible($probid)
 
 /**
  * Given an array of contest data, calculates whether the contest
- * has already started ('cstarted'), and if scoreboard is currently
- * frozen ('showfrozen') or final ('showfinal').
+ * has already started, stopped, andd if scoreboard is currently
+ * frozen or final (unfrozen).
  */
 function calcFreezeData($cdata)
 {
@@ -129,7 +129,9 @@ function calcFreezeData($cdata)
 		return array(
 			'showfinal' => false,
 			'showfrozen' => false,
-			'cstarted' => false
+			'started' => false,
+			'stopped' => false,
+			'running' => false,
 		);
 	}
 
@@ -146,7 +148,9 @@ function calcFreezeData($cdata)
 	$fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
 	              difftime($cdata['freezetime'],$now) <= 0;
 	// contest is active but has not yet started
-	$fdata['cstarted'] = difftime($cdata['starttime'],$now) <= 0;
+	$fdata['started'] = difftime($cdata['starttime'],$now) <= 0;
+	$fdata['stopped'] = difftime($cdata['endtime'],$now) <= 0;
+	$fdata['running'] = ( $fdata['started'] && !$fdata['stopped'] );
 
 	return $fdata;
 }
@@ -159,8 +163,10 @@ function calcFreezeData($cdata)
  */
 function calcContestTime($walltime, $cid)
 {
-	// get contest data in case of non-public contests
-	$cdatas = getCurContests(TRUE);
+	// Get contest data in case of non-public contests. Also get
+	// future contests (third argument) to correct for previously
+	// submitted jury solutions.
+	$cdatas = getCurContests(TRUE,NULL,TRUE);
 
 	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
 
@@ -338,11 +344,17 @@ function updateRankCache($cid, $team) {
 
 
 /**
- * Time as used on the scoreboard (i.e. truncated minutes).
+ * Time as used on the scoreboard (i.e. truncated minutes or seconds,
+ * depending on the scoreboard resolution setting).
  */
 function scoretime($time)
 {
-	return (int)floor($time / 60);
+	if ( dbconfig_get('score_in_seconds', 0) ) {
+		$result = (int) floor($time);
+	} else {
+		$result = (int) floor($time / 60);
+	}
+	return $result;
 }
 
 /**
@@ -382,7 +394,12 @@ function calcPenaltyTime($solved, $num_submissions)
 {
 	if ( ! $solved ) return 0;
 
-	return ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
+	$result = ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
+	//  Convert the penalty time to seconds if the configuration
+	//  parameter to compute scores to the second is set.
+	if ( dbconfig_get('score_in_seconds', 0) ) $result *= 60;
+
+	return $result;
 }
 
 // From http://www.problemarchive.org/wiki/index.php/Problem_Format
@@ -649,7 +666,7 @@ function daemonize($pidfile = NULL)
  * moves it to a backup storage.
  */
 function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
-                         $origsubmitid = NULL, $extid = NULL, $submittime = NULL,
+                         $origsubmitid = NULL, $entry_point = NULL, $extid = NULL, $submittime = NULL,
                          $extresult = NULL)
 {
 	global $DB;
@@ -684,9 +701,8 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 		error("Contest c$contest not found.");
 	}
 	$fdata = calcFreezeData($contestdata);
-	if( !checkrole('jury') && !$fdata['cstarted'] ) {
-	//	error("The contest is closed, no submissions accepted. [c$contest]");
-		return;
+	if( !checkrole('jury') && !$fdata['started'] ) {
+		error("The contest is closed, no submissions accepted. [c$contest]");
 	}
 
 	// Check 2: valid parameters?
@@ -741,10 +757,10 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	// Insert submission into the database
 	$DB->q('START TRANSACTION');
 	$id = $DB->q('RETURNID INSERT INTO submission
-	              (cid, teamid, probid, langid, submittime, origsubmitid,
+	              (cid, teamid, probid, langid, submittime, origsubmitid, entry_point,
 	               externalid, externalresult)
-	              VALUES (%i, %i, %i, %s, %s, %i, %i, %s)',
-	             $contest, $teamid, $probid, $langid, $submittime, $origsubmitid,
+	              VALUES (%i, %i, %i, %s, %s, %i, %s, %i, %s)',
+	             $contest, $teamid, $probid, $langid, $submittime, $origsubmitid, $entry_point,
 	             $extid, $extresult);
 
 	for($rank=0; $rank<count($files); $rank++) {
@@ -765,10 +781,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	// Recalculate scoreboard cache for pending submissions
 	calcScoreRow($contest, $teamid, $probid);
 
-	// Log to event table
-	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
-	        VALUES(%s, %i, %i, %s, %i, %i, "problem submitted")',
-	       $submittime, $contest, $teamid, $langid, $probid, $id);
+	eventlog('submission', $id, 'create', $contest);
 
 	alert('submit', "submission $id: team $teamid, language $langid, problem $probid");
 
@@ -867,6 +880,403 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null,
 	        (logtime, cid, user, datatype, dataid, action, extrainfo)
 	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
 	       now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
+}
+
+/* Mapping from REST API endpoints to relevant information:
+ * - type: one of 'configuration', 'live', 'aggregate'
+ * - url: REST API URL of endpoint relative to baseurl, defaults to '/<endpoint>'
+ * - tables: array of database table(s) associated to data, defaults to <endpoint> without 's'
+ * - extid: database field for external/API ID, if TRUE same as internal/DB ID.
+ *
+ */
+$API_endpoints = array(
+	'contests' => array(
+		'type'   => 'configuration',
+		'url'    => '/',
+		'extid'  => 'externalid',
+	),
+	'judgement-types' => array( // hardcoded in $VERDICTS and the API
+		'type'   => 'configuration',
+		'tables' => array(),
+		'extid'  => TRUE,
+	),
+	'languages' => array(
+		'type'   => 'configuration',
+		'extid'  => 'externalid',
+	),
+	'problems' => array(
+		'type'   => 'configuration',
+		'tables' => array('problem', 'contestproblem'),
+		'extid'  => 'externalid',
+	),
+	'groups' => array(
+		'type'   => 'configuration',
+		'tables' => array('team_category'),
+		'extid'  => TRUE, // FIXME
+	),
+	'organizations' => array(
+		'type'   => 'configuration',
+		'tables' => array('team_affiliation'),
+		'extid'  => 'externalid',
+	),
+	'teams' => array(
+		'type'   => 'configuration',
+		'tables' => array('team', 'contestteam'),
+		'extid'  => 'externalid',
+	),
+	'teams-members' => array(
+		'type'   => 'configuration',
+		'tables' => array(),
+	),
+	'submissions' => array(
+		'type'   => 'live',
+		'extid'  => TRUE, // 'externalid,cid' in ICPC-live branch
+	),
+	'judgements' => array(
+		'type'   => 'live',
+		'tables' => array('judging'),
+		'extid'  => TRUE,
+	),
+	'runs' => array(
+		'type'   => 'live',
+		'tables' => array('judging_run'),
+		'extid'  => TRUE,
+	),
+	'clarifications' => array(
+		'type'   => 'live',
+		'extid'  => 'externalid,cid',
+	),
+	'awards' => array(
+		'type'   => 'aggregate',
+		'tables' => array(),
+	),
+	'scoreboard' => array(
+		'type'   => 'aggregate',
+		'tables' => array(),
+	),
+	'event-feed' => array(
+		'type'   => 'aggregate',
+		'tables' => array('event'),
+	),
+	// From here are DOMjudge extensions:
+	'users' => array(
+		'type'   => 'configuration',
+		'url'    => NULL,
+		'extid'  => TRUE,
+	),
+	'testcases' => array(
+		'type'   => 'configuration',
+		'url'    => NULL,
+		'extid'  => TRUE,
+	),
+);
+// Add defaults to mapping:
+foreach ( $API_endpoints as $endpoint => $data ) {
+	if ( !array_key_exists('url', $data) ) {
+		$API_endpoints[$endpoint]['url'] = '/'.$endpoint;
+	}
+	if ( !array_key_exists('tables', $data) ) {
+		$API_endpoints[$endpoint]['tables'] = array( preg_replace('/s$/', '', $endpoint) );
+	}
+}
+
+/**
+ * Map an internal/DB ID to an external/REST endpoint ID.
+ */
+function rest_extid($endpoint, $intid)
+{
+	global $DB, $API_endpoints, $KEYS;
+
+	if ( $intid===null ) return null;
+
+	$ep = @$API_endpoints[$endpoint];
+	if ( !isset($ep['extid']) ) error("no int/ext ID mapping defined for $endpoint");
+
+	if ( $ep['extid']===TRUE ) return $intid;
+
+	$extkey = explode(',', $ep['extid'])[0];
+
+	$extid = $DB->q('MAYBEVALUE SELECT `' . $extkey . '`
+	                 FROM `' . $ep['tables'][0] . '`
+	                 WHERE `' . $KEYS[$ep['tables'][0]][0] . '` = %s',
+	                $intid);
+
+	return $extid;
+}
+
+/**
+ * Map an external/REST endpoint ID back to an internal/DB ID.
+ */
+function rest_intid($endpoint, $extid, $cid = null)
+{
+	global $DB, $API_endpoints, $KEYS;
+
+	if ( $extid===null ) return null;
+
+	$ep = @$API_endpoints[$endpoint];
+	if ( !isset($ep['extid']) ) error("no int/ext ID mapping defined for $endpoint");
+
+	if ( $ep['extid']===TRUE ) return $extid;
+
+	if ( !$ep['tables'] ) error("no database table known for $endpoint");
+
+	$keys = explode(',', $ep['extid']);
+	$extkey = $keys[0];
+	if ( count($keys)>1 ) $cidkey = $keys[1];
+
+	if ( isset($cidkey) && $cid===null ) {
+		error("argument 'cid' missing to map to internal ID for $endpoint");
+	}
+
+	$intid = $DB->q('MAYBEVALUE SELECT `' . $KEYS[$ep['tables'][0]][0] . '`
+	                 FROM `' . $ep['tables'][0] . '`
+	                 WHERE `' . $extkey . '` = %s' .
+	                ( isset($cidkey) ? ' AND cid = %i' : ' %_' ),
+	                $extid, $cid);
+
+	return $intid;
+}
+
+/**
+ * Log an event.
+ *
+ * Arguments:
+ * $type      Either an API endpoint or a DB table.
+ * $dataid    Identifier of the row in the associated DB table.
+ * $action    One of: create, update, delete.
+ * $cid       Contest ID to log this event for. If null, log it for
+ *            all currently active contests.
+ * $json      JSON content after the change. Generated if null.
+ * $id        Identifier as shown in the REST API. If null it is
+ *            inferred from the content in the database or $json
+ *            passed as argument. Must be specified when deleting an
+ *            entry or if no DB table is associated to $type.
+ */
+// TODO: we should probably integrate this function with auditlog().
+function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null)
+{
+	global $DB, $API_endpoints;
+
+	logmsg(LOG_DEBUG,"eventlog arguments: '$type' '$dataid' '$action' '$cid' '$json' '$id'");
+
+	$actions = array('create', 'update', 'delete');
+
+	// Gracefully fail since we may call this from the generic
+	// jury/edit.php page where we don't know which table gets updated.
+	if ( array_key_exists($type,$API_endpoints) ) {
+		$endpoint = $API_endpoints[$type];
+	} else {
+		foreach ( $API_endpoints as $key => $ep ) {
+			if ( in_array($type, $ep['tables'], TRUE) ) {
+				$type = $key;
+				$endpoint = $ep;
+				break;
+			}
+		}
+	}
+	if ( !isset($endpoint) ) {
+		logmsg(LOG_WARNING, "eventlog: invalid endpoint '$type' specified");
+		return;
+	}
+	if ( !in_array($action,$actions) ) {
+		logmsg(LOG_WARNING, "eventlog: invalid action '$action' specified");
+		return;
+	}
+	if ( $endpoint['url']===null ) {
+		logmsg(LOG_DEBUG, "eventlog: no endpoint for '$type', ignoring");
+		return;
+	}
+
+	// Look up external/API ID from various sources.
+	if ( $id===null ) $id = rest_extid($type, $dataid);
+
+	if ( $id===null && $json!==null ) {
+		$data = dj_json_decode($json);
+		if ( !empty($data['id']) ) $id = $data['id'];
+	}
+
+	if ( $id===null ) error('eventlog: API ID not specified or inferred from data');
+
+	$cids = array();
+	if ( $cid!==null ) {
+		$cids[] = $cid;
+	} else {
+		if ( $type==='problems' ) {
+			$cids = $DB->q('TABLE SELECT cid FROM contestproblem WHERE probid = %i', $dataid);
+		} elseif( $type==='teams' ) {
+			$cids = getCurContests(FALSE, $dataid);
+		} else {
+			$cids = getCurContests();
+		}
+	}
+	if ( count($cids)==0 ) {
+		logmsg(LOG_INFO,"eventlog: no active contests associated to update.");
+		return;
+	}
+
+	// Generate JSON content if not set, always use "null" for deletes.
+	if ( $action === 'delete' ) {
+		$json = 'null';
+	} elseif ( $json === null ) {
+		if ( $type === 'contests' ) {
+			$url = $endpoint['url'];
+		} else {
+			$url = $endpoint['url'].'/'.$id;
+		}
+		$json = API_request($url);
+		if ( empty($json) ) error("eventlog: got no JSON data from '$url'");
+	}
+
+	// First acquire an advisory lock to prevent other event logging,
+	// so that we can obtain a unique timestamp.
+	if ( $DB->q("VALUE SELECT GET_LOCK('domjudge.eventlog',1)") != 1 ) {
+		error("eventlog: failed to obtain lock");
+	}
+
+	// Explicitly construct the time as string to prevent float
+	// representation issues.
+	$now = sprintf('%.3f', microtime(TRUE));
+
+	// TODO: can this be wrapped into a single query?
+	$ids = array();
+	foreach ( $cids as $cid ) {
+		$table = ( $endpoint['tables'] ? $endpoint['tables'][0] : NULL );
+		$eventid = $DB->q('RETURNID INSERT INTO event
+		                   (eventtime, cid, endpointtype, endpointid,
+		                   datatype, dataid, action, content)
+		                   SELECT GREATEST(%s,COALESCE(MAX(eventtime),0)+0.001), %i, %s, %s,
+		                          %s, %s, %s, %s
+		                   FROM event WHERE cid = %i
+		                   ORDER BY eventid DESC LIMIT 1',
+		                  $now, $cid, $type, $id,
+		                  $table, $dataid, $action, $json,
+		                  $cid);
+		$ids[] = $eventid;
+	}
+
+	if ( $DB->q("VALUE SELECT RELEASE_LOCK('domjudge.eventlog')") != 1 ) {
+		error("eventlog: failed to release lock");
+	}
+
+	if ( count($ids)!==count($cids) ) {
+		error("eventlog: failed to $action $type/$id " .
+		      '('.count($ids).'/'.count($cids).' contests done)');
+	}
+
+	logmsg(LOG_DEBUG,"eventlog: ${action}d $type/$id " .
+	       'for '.count($cids).' contest(s)');
+}
+
+$resturl = $restuser = $restpass = null;
+
+/**
+ * This function is copied from judgedaemon.main.php and a quick hack.
+ * We should directly call the code that generates the API response.
+ */
+function read_API_credentials()
+{
+	global $resturl, $restuser, $restpass;
+
+	$credfile = ETCDIR . '/restapi.secret';
+	$credentials = @file($credfile);
+	if (!$credentials) {
+		error("Cannot read REST API credentials file " . $credfile);
+	}
+	foreach ($credentials as $credential) {
+		if ( $credential{0} == '#' ) continue;
+		list ($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
+		if ( $endpointID==='default' ) return;
+	}
+	$resturl = $restuser = $restpass = null;
+}
+
+/**
+ * Perform a request to the REST API and handle any errors.
+ * $url is the part appended to the base DOMjudge $resturl.
+ * $verb is the HTTP method to use: GET, POST, PUT, or DELETE
+ * $data is the urlencoded data passed as GET or POST parameters.
+ * When $failonerror is set to false, any error will be turned into a
+ * warning and null is returned.
+ *
+ * This function is duplicated from judge/judgedaemon.main.php.
+ */
+function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
+	global $resturl, $restuser, $restpass, $lastrequest, $G_SYMFONY, $apiFromInternal;
+	if (isset($G_SYMFONY)) {
+		// Perform an internal Symfony request to the API
+		$apiFromInternal = true;
+		$url = 'http://localhost/api/'. $url;
+		$httpKernel = $G_SYMFONY->getHttpKernel();
+		parse_str($data, $parsedData);
+
+		// Our API checks $_SERVER['REQUEST_METHOD'] but Symfony does not overwrite it, so do this manually
+		$origMethod = $_SERVER['REQUEST_METHOD'];
+		$_SERVER['REQUEST_METHOD'] = $verb;
+
+		$request = \Symfony\Component\HttpFoundation\Request::create($url, $verb, $parsedData);
+		$response = $httpKernel->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
+
+		// Set back the request method, if other code still wants to use it
+		$_SERVER['REQUEST_METHOD'] = $origMethod;
+
+		$status = $response->getStatusCode();
+		if ( $status < 200 || $status >= 300 ) {
+			$errstr = "Error while executing internal $verb request to url " . $url .
+				": http status code: " . $status . ", response: " . $response;
+			if ($failonerror) { error($errstr); }
+			else { warning($errstr); return null; }
+		}
+
+		return $response->getContent();
+	}
+
+	if ( $resturl === null ) {
+		read_API_credentials();
+		if ( $resturl === null ) {
+			error("could not initialize REST API credentials");
+		}
+	}
+
+	logmsg(LOG_DEBUG, "API request $verb $url");
+
+	$url = $resturl . $url;
+	if ( $verb == 'GET' && !empty($data) ) {
+		$url .= '?' . $data;
+	}
+
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
+	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	if ( $verb == 'POST' ) {
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		if ( is_array($data) ) {
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
+		}
+	} else if ( $verb == 'PUT' || $verb == 'DELETE' ) {
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $verb);
+	}
+	if ( $verb == 'POST' || $verb == 'PUT' ) {
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+	}
+
+	$response = curl_exec($ch);
+	if ( $response === FALSE ) {
+		$errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($ch);
+		if ($failonerror) error($errstr);
+		else { warning($errstr); return null; }
+	}
+	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	if ( $status < 200 || $status >= 300 ) {
+		$errstr = "Error while executing curl $verb to url " . $url .
+		    ": http status code: " . $status . ", response: " . $response;
+		if ($failonerror) { error($errstr); }
+		else { warning($errstr); return null; }
+	}
+
+	curl_close($ch);
+	return $response;
 }
 
 /**

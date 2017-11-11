@@ -21,7 +21,7 @@ $langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions
 
 echo "<script type=\"text/javascript\">\n<!--\n";
 
-if ( $fdata['cstarted'] || checkrole('jury') ) {
+if ( $fdata['started'] || checkrole('jury') ) {
 	$probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
 	                    INNER JOIN contestproblem USING (probid)
 	                    WHERE cid = %i AND allow_submit = 1
@@ -49,7 +49,7 @@ echo "<div id=\"submitlist\">\n";
 echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
 
 
-if ( $fdata['cstarted'] || checkrole('jury') ) {
+if ( $fdata['started'] || checkrole('jury') ) {
 	echo <<<HTML
 <script type="text/javascript">
 $(function() {
@@ -92,6 +92,9 @@ HTML;
 		$langs[$langid] = $langdata['name'];
 	}
 	$langs[''] = 'language';
+	if ( dbconfig_get('require_entry_point', FALSE) ) {
+		echo "Main file/class:" . addInput('entry_point');
+	}
 	echo addSelect('langid', $langs, '', true);
 
 	echo addSubmit('submit', 'submit',

@@ -26,7 +26,7 @@ function filebase($probid, $rank)
 // TODO: check if this duplicates code with the API
 function download($probid, $rank, $file)
 {
-	global $DB;
+	global $DB, $prob;
 	if ( $file=='image' ) {
 		$ext = $DB->q('MAYBEVALUE SELECT image_type
 		               FROM testcase WHERE probid = %i AND rank = %i',
@@ -108,7 +108,16 @@ function check_updated_file($probid, $rank, $fileid, $file)
 		}
 
 		if ( $file=='image' ) {
-			list($thumb, $type) = get_image_thumb_type($content);
+			$type = get_image_type($content,$errormsg);
+			debug($type,$_FILES[$fileid]);
+			if ( $type===FALSE ) {
+				error("image: " . $errormsg);
+			}
+			$thumb = get_image_thumb($content,$errormsg);
+			if ( $thumb===FALSE ) {
+				$thumb = NULL;
+				warning("image: ".$errormsg);
+			}
 
 			$DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
 			        WHERE probid = %i AND rank = %i',
@@ -172,13 +181,11 @@ function check_add($probid, $rank, $FILES)
 
 	$result = '';
 	if ( !empty($_FILES['add_input']['name']) ||
-		 !empty($_FILES['add_output']['name']) ) {
+	     !empty($_FILES['add_output']['name']) ) {
 
 		$content = array();
 		foreach($FILES as $file) {
-			if ( empty($_FILES['add_'.$file]['name']) ) {
-				warning("No $file file specified for new testcase, ignoring.");
-			} else {
+			if ( !empty($_FILES['add_'.$file]['name']) ) {
 				checkFileUpload ( $_FILES['add_'.$file]['error'] );
 				$content[$file] = dj_file_get_contents($_FILES['add_'.$file]['tmp_name']);
 			}
@@ -192,7 +199,7 @@ function check_add($probid, $rank, $FILES)
 		       isset($_POST['add_sample']));
 
 		if ( !empty($content['image']) ) {
-			list($thumb, $type) = get_image_thumb_type($content['image']);
+			list($thumb, $type) = get_image_thumb_and_type($content['image']);
 
 			$DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
 			        WHERE probid = %i AND rank = %i',

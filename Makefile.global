@@ -9,7 +9,7 @@ GLOBALINCLUDED=1
 
 # Check for QUIET environment variable:
 ifneq ($(QUIET),)
-QUIET=1
+export QUIET=1
 MAKEFLAGS += --no-print-directory --quiet
 endif
 

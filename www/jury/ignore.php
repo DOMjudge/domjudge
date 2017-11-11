@@ -19,15 +19,13 @@ if ( empty($id) ) {
 }
 
 $cnt = $DB->q('RETURNAFFECTED UPDATE submission s
-               SET s.valid = %i WHERE s.submitid = %i',
-              $val, $id);
-
-auditlog('submission', $id, 'marked ' . ($val?'valid':'invalid'));
+               SET s.valid = %i WHERE s.submitid = %i AND s.valid != %i',
+              $val, $id, $val);
 
 if ( $cnt == 0 ) {
-	error("Submission s$id not found.");
+	error("Submission s$id not found or not changed.");
 } else if ( $cnt > 1 ) {
-	error("Ignored more than one submission.");
+	error("More than one submission found!");
 }
 
 $sdata = $DB->q('TUPLE SELECT submitid, cid, teamid, probid
@@ -35,6 +33,10 @@ $sdata = $DB->q('TUPLE SELECT submitid, cid, teamid, probid
                  WHERE submitid = %i', $id);
 
 calcScoreRow($sdata['cid'], $sdata['teamid'], $sdata['probid']);
+
+// KLUDGE: We can't log an "undelete", so we re-"create":
+eventlog('submission', $id, ($val ? 'create' : 'delete'), $cid);
+auditlog('submission', $id, 'marked ' . ($val?'valid':'invalid'));
 
 /* redirect back. */
 header('Location: submission.php?id=' .

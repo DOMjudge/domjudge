@@ -59,12 +59,6 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 // insert a new response (if posted)
 if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
-	// If database supports it, wrap this in a transaction so we
-	// either send the clarification AND mark it unread for everyone,
-	// or we don't. If no transaction support, we just have to hope
-	// this goes well.
-	$DB->q('START TRANSACTION');
-
 	if ( empty($_POST['sendto']) ) {
 		$sendto = null;
 	} elseif ( $_POST['sendto'] == 'domjudge-must-select' ) {
@@ -80,6 +74,12 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$probid = NULL;
 	}
 
+	// If database supports it, wrap this in a transaction so we
+	// either send the clarification AND mark it unread for everyone,
+	// or we don't. If no transaction support, we just have to hope
+	// this goes well.
+	$DB->q('START TRANSACTION');
+
 	$newid = $DB->q('RETURNID INSERT INTO clarification
 	                 (cid, respid, submittime, recipient, probid, category, body,
 	                  answered, jury_member)
@@ -88,7 +88,6 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	                (isset($jury_member) ? '%s)' : 'NULL %_)'),
 	                $cid, $respid, now(), $sendto, $probid, $category,
 	                $_POST['bodytext'], 1, $jury_member);
-	auditlog('clarification', $newid, 'added', null, null, $cid);
 
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1, jury_member = ' .
@@ -96,11 +95,12 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		       $jury_member, $respid);
 	}
 
-	if( is_null($sendto) ) {
-		// log to event table if clarification to all teams
-		$DB->q('INSERT INTO event (eventtime, cid, clarid, description)
-		        VALUES(%s, %i, %i, "clarification")', now(), $cid, $newid);
+	$DB->q('COMMIT');
 
+	eventlog('clarification', $newid, 'create', $cid);
+	auditlog('clarification', $newid, 'added', null, null, $cid);
+
+	if( is_null($sendto) ) {
 		// mark the messages as unread for the team(s)
 		$teams = $DB->q('COLUMN SELECT teamid FROM team');
 		foreach($teams as $teamid) {
@@ -111,8 +111,6 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$DB->q('INSERT INTO team_unread (mesgid, teamid)
 		        VALUES (%i, %i)', $newid, $sendto);
 	}
-
-	$DB->q('COMMIT');
 
 	// redirect back to the original location
 	if ( $isgeneral ) {

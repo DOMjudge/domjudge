@@ -146,7 +146,7 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with support for PHP &gt;= 5.4 and the mysqli,
+<item> Apache web server with support for PHP &gt;= 7.0 and the mysqli,
        GD, curl and json extensions for PHP. PHP needs to be running as an
        Apache module (the most common configuration); a (fast)CGI setup
        is not currently supported. We also recommend the posix extension
@@ -156,7 +156,7 @@ The following software is required for running DOMjudge.
 
 <item> MySQL or MariaDB &gt;= 5.5.3 database and client software.
 
-<item> PHP &gt;= 5.4 command line interface and the curl, json, mcrypt, and gmp
+<item> PHP &gt;= 7.0 command line interface and the curl and json
        extensions.
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash).
@@ -353,17 +353,16 @@ software on the DOMjudge server as mentioned above when using Debian
 GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
-apt-get install gcc g++ make zip unzip mysql-server \
-	apache2 php5 php5-cli libapache2-mod-php5 \
-	php5-gd php5-curl php5-mysql php5-json \
-	php5-mcrypt php5-gmp \
-	bsdmainutils phpmyadmin ntp \
+sudo apt install gcc g++ make zip unzip mysql-server \
+	apache2 php php-cli libapache2-mod-php php-zip \
+	php-gd php-curl php-mysql php-json php-mbstring \
+	acl bsdmainutils ntp phpmyadmin libcgroup-dev \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
 </code>
 Note that PHP modules may need to be enabled depending on your distribution.
-E.g. on Ubuntu run <code>php5enmod mcrypt</code> to enable mcrypt.
+E.g. on Ubuntu run <code>sudo phpenmod json</code> to enable the JSON module.
 
 
 For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
@@ -371,9 +370,9 @@ For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
 The following command can be used on RedHat Enterprise Linux, and
 related distributions like CentOS and Fedora.
 <code>
-yum install gcc gcc-c++ make zip unzip mariadb-server \
+sudo yum install gcc gcc-c++ make zip unzip mariadb-server \
 	httpd php-gd php-cli php-mbstring php-mysql \
-	ntp linuxdoc-tools \
+	ntp linuxdoc-tools libcgroup-devel \
 	texlive-collection-latexrecommended texlive-wrapfig
 </code>
 Note that the TeX Live packages <tt>expdlist</tt>, <tt>moreverb</tt>,
@@ -386,11 +385,11 @@ Finally, to build the command-line submit client, install the
 following additional software.
 
 <code>
-apt-get install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
+sudo apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
 </code>
 
 <code>
-yum install libcurl-devel jsoncpp-devel file-devel
+sudo yum install libcurl-devel jsoncpp-devel file-devel
 </code>
 The package <tt>jsoncpp-devel</tt> is available in Fedora, but not in
 RHEL/CentOS.
@@ -408,15 +407,15 @@ change the list as appropriate.
 
 For Debian:
 <code>
-apt-get install make sudo debootstrap libcgroup-dev \
-	php5-cli php5-curl php5-json procps \
-	gcc g++ openjdk-7-jre-headless \
-	openjdk-7-jdk ghc fp-compiler
+sudo apt install make sudo debootstrap libcgroup-dev \
+	php-cli php-curl php-json php-zip procps \
+	gcc g++ openjdk-8-jre-headless \
+	openjdk-8-jdk ghc fp-compiler
 </code>
 
 For RedHat:
 <code>
-yum install make sudo libcgroup-devel \
+sudo yum install make sudo libcgroup-devel \
 	php-cli php-mbstring php-process procps-ng \
 	gcc gcc-c++ glibc-static libstdc++-static \
 	java-1.7.0-openjdk-headless java-1.7.0-openjdk-devel \
@@ -509,7 +508,7 @@ can be built and installed separately, respectively by:
 <code>
 make domserver &amp;&amp; sudo make install-domserver
 make judgehost &amp;&amp; sudo make install-judgehost
-make docs &amp;&amp; make install-docs
+make docs &amp;&amp; sudo make install-docs
 </code>
 Note that root privileges are required to set permissions and user and
 group ownership of password files and a few directories. If you run
@@ -606,6 +605,11 @@ snippet from <tt>etc/apache.conf</tt>. It contains examples for
 configuring the DOMjudge pages with an alias directive, or as a
 virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
+<verb>
+ln -s etc/apache.conf /etc/apache2/conf-available/domjudge.conf
+a2enconf domjudge
+service apache2 reload
+</verb>
 
 An Nginx webserver configuration snippet is also provided
 in <tt>etc/nginx-conf</tt>. This alternative webserver is less
@@ -617,7 +621,7 @@ to be able to access at least this part of the web interface.
 
 <sect>Fine tuning server settings
 <p>
-For Apache, there are countless documents on how to maximise performance.
+For Apache, there are countless documents on how to maximize performance.
 Of particular importance is to ensure that the <tt>MaxClients</tt> setting
 is high enough to receive the number of parallel requests you expect, but
 not higher than your amount of RAM allows.
@@ -638,6 +642,10 @@ connection caching by Apache threads. 1000 is more appropriate.
 low when using large testcases. This should be changed both in the
 MySQL server and client configuration and be set to about twice the
 maximum testcase size.
+<item><tt>innodb_log_file_size</tt>: The default of 48MB might be too
+low on MySQL servers with version 5.6.20 or newer due to changes to
+the redo log. You should set it 10 times higher than the maximum
+testcase size.
 <item>Root password: MySQL does not have a password for the root user
 by default. It's very desirable to set one.
 <item>When maximising performance is required, you can
@@ -1086,7 +1094,7 @@ document will be placed in the current
 directory or a directory given as argument.
 The following should do it on a Debian-like system:
 <code>
-sudo apt-get install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
+sudo apt install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
 cd &lt;INSTALL_PATH&gt;/docs/team
 ./genteammanual [targetdir]
 </code>
@@ -1101,7 +1109,7 @@ format and prebuilt from SGML sources. Rebuilding these is not normally
 necessary. To rebuild them on a Debian-like system, the following commands
 should do it:
 <code>
-sudo apt-get install linuxdoc-tools make zip ghostscript groff texlive-latex-recommended
+sudo apt install linuxdoc-tools make zip ghostscript groff texlive-latex-recommended
 make -C doc/admin docs
 make -C doc/judge docs
 </code>
@@ -1168,7 +1176,7 @@ the DOMjudge web interface: the DOMjudge server then needs to be
 able to deliver the uploaded files to the printer. It can be
 enabled via the <tt>enable_printing</tt> configuration option in
 the administrator interface. The exact command used to send the
-files to a printer can be changed the function <tt>send_print()</tt>
+files to a printer can be changed in the function <tt>send_print()</tt>
 in <tt>lib/www/printing.php</tt>.
 
 <sect1>Judging consistency
@@ -1215,7 +1223,10 @@ consecutive DOMjudge versions. At the beginning of each script, a check
 is performed which will let MySQL bail out with an error if it should
 not be applied anymore. Note that the scripts must be applied in order
 (sorted by release). These scripts can be applied by running
-<tt>dj_setup_database upgrade</tt>.
+<tt>dj_setup_database upgrade</tt>. Be aware that these scripts are
+conservative in adding and upgrading SQL data, so check that e.g. new
+compile scripts are present or add them manually, and check the
+upgrade scripts manually for any other data upgraded.
 
 
 <chapt>Setting up a contest <label id="contestsetup">
@@ -1448,9 +1459,9 @@ that is displayed in the jury interface.
 
 A country flag can be displayed on the scoreboard. For this to work,
 the <tt>country</tt> field must match a (flag) picture in
-<tt>www/images/countries/&lt;country&gt;.png</tt>. All
+<tt>webapp/web/images/countries/&lt;country&gt;.png</tt>. All
 country flags are present there, named with their 3-character ISO
-codes. See also <tt>www/images/countries/README</tt>.
+codes. See also <tt>webapp/web/images/countries/README</tt>.
 
 <tag>team_category</tag>
 <tt>categoryid</tt> is the reference ID and <tt>name</tt> is a string:
@@ -2362,24 +2373,23 @@ additional software to be installed:
 <itemize>
 <item> The GNU autoconf/automake toolset
 
-<item> <htmlurl name="Composer" url="https://getcomposer.org">
-       - PHP Package Manager.
+<item> Composer - PHP Package Manager.
 
 <item> Linuxdoc and groff to build the admin and judge
        documentation from SGML sources and a LaTeX installation to
        generate the PDF admin, judge and default team manual.
 </itemize>
 
-On Debian(-based) systems, the following apt-get command should
+On Debian(-based) systems, the following apt command should
 install the additionally required packages (next to the
 <ref id="install_config:package-install" name="standard set of packages">):
 <code>
-apt-get install autoconf automake git
+sudo apt install autoconf automake git composer
 </code>
 
-Composer can be installed by following the documentation located
-<htmlurl name="here" url="https://getcomposer.org/download">, or since
-Debian Stretch by installing the package <tt>composer</tt>.
+Composer is packaged since Debian Stretch and Ubuntu Xenial.
+Alternatively, it can be installed by following the documentation
+located <htmlurl name="here" url="https://getcomposer.org/download">.
 
 When this software is present, bootstrapping can be done by running
 <tt>make dist</tt>, which creates the <tt>configure</tt> script,
@@ -2399,6 +2409,7 @@ code.
 This method requires some special steps which can most easily
 be run via makefile rules as follows:
 <code>
+sudo apt install acl
 make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
 make maintainer-install
 </code>

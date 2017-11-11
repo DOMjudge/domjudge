@@ -520,6 +520,14 @@ function judge($row)
 	putenv('MEMLIMIT='          . $row['memlimit']);
 	putenv('FILELIMIT='         . $row['outputlimit']);
 	putenv('PROCLIMIT='         . dbconfig_get_rest('process_limit'));
+	if ( $row['entry_point'] !== NULL ) {
+		putenv('ENTRY_POINT=' . $row['entry_point']);
+	} else {
+		putenv('ENTRY_POINT');
+	}
+
+	// Query output storage limit (in database once for this judging.
+	$output_storage_limit = (int) dbconfig_get_rest('output_storage_limit', 50000);
 
 	// Query output storage limit (in database once for this judging.
 	$output_storage_limit = (int) dbconfig_get_rest('output_storage_limit', 50000);
@@ -553,13 +561,13 @@ function judge($row)
 	if ( !chdir($workdir) ) error("Could not chdir to '$workdir'");
 
 	// Get the source code from the DB and store in local file(s)
-	$sources = request('submission_files', 'GET', 'id=' . urlencode($row['submitid']));
+	$sources = request('submission_files', 'GET', 'submission_id=' . urlencode($row['submitid']));
 	$sources = dj_json_decode($sources);
 	$files = array();
 	foreach ( $sources as $source ) {
 		$srcfile = "$workdir/compile/$source[filename]";
 		$files[] = "'$source[filename]'";
-		if ( file_put_contents($srcfile, base64_decode($source['content'])) === FALSE ) {
+		if ( file_put_contents($srcfile, base64_decode($source['source'])) === FALSE ) {
 			error("Could not create $srcfile");
 		}
 	}

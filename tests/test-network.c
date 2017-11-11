@@ -10,6 +10,8 @@
  * @EXPECTED_RESULTS@: RUN-ERROR,TIMELIMIT
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>

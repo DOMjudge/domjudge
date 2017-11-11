@@ -1,0 +1,146 @@
+<nav>
+  <div id="menutop">
+    <a href="index.php" accesskey="h"><span class="octicon octicon-home"></span> home</a>
+
+    {% if is_granted('ROLE_BALLOON') %}
+      <a href="balloons.php" accesskey="b"><span class="octicon octicon-location"></span> balloons</a>
+    {% endif %}
+
+    {% if is_granted('ROLE_JURY') %}
+      <a href="problems.php" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
+    {% endif %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+    	{% if updates['judgehosts']|length > 0 %}
+        <a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts ({{ updates['judgehosts']|length }} down)</a>
+      {% else %}
+        <a href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts</a>
+      {% endif %}
+
+      {% if updates['internal_error']|length > 0 %}
+      <a class="new" href="internal_errors.php" accesskey="e" id="menu_internal_error"><span class="octicon octicon-zap"></span> internal error ({{ updates['internal_error']|length }} new)</a>
+      {% endif %}
+    {% endif %}
+
+    {% if is_granted('ROLE_JURY') %}
+      <a href="teams.php" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>
+      <a href="users.php" accesskey="u"><span class="octicon octicon-person"></span> users</a>
+      {% if updates['clarifications']|length > 0 %}
+        <a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications ({{  updates['clarifications']|length }} new)</a>
+      {% else %}
+        <a href="clarifications.php" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications</a>
+      {% endif %}
+
+      <a href="submissions.php" accesskey="s"><span class="octicon octicon-file-code"></span> submissions</a>
+
+      {% if updates['rejudgings']|length > 0 %}
+        <a class="new" href="rejudgings.php" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings ({{ updates['rejudgings']|length }} active)</a>
+      {% else %}
+        <a href="rejudgings.php" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings</a>
+      {% endif %}
+    {% endif %}
+
+    {% if have_printing %}
+      <a href="print.php" accesskey="p"><span class="octicon octicon-file-text"></span> print</a>
+    {% endif %}
+    {% if is_granted('ROLE_JURY') %}
+      <a href="scoreboard.php" accesskey="b"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
+    {% endif %}
+    {% if is_granted('ROLE_TEAM') %}
+    	<a target="_top" href="../team/" accesskey="t"><span class="octicon octicon-arrow-right"></span> team</a>
+    {% endif %}
+  </div>
+
+  <div id="menutopright">
+    <!-- this used to be putClock() -->
+    <div id="clock">
+      {% set now = 'now'|date('U') %}
+      <span id="timeleft">
+        {% if contest.getStartTime() < now and contest.getEndTime() >= now %}
+          time left: {{ now|timediff(contest.getEndTime()) }}
+        {% elseif contest.getActivateTime() < now and contest.getStartTime() >= now %}
+          time to start: {{ now|timediff(contest.getStartTime()) }}
+        {% endif %}
+      </span>
+
+      {% if is_granted('ROLE_JURY') or contests|length > 1 %}
+        <div id="selectcontest">
+          {# TODO: see about using a proper symfony form here #}
+          <form id="selectcontestform" action="{{path('legacy.jury_change_contest')}}">
+              <label for="cid">contest:</label>
+              <select name="cid" id="cid">
+                  {% if is_granted('ROLE_JURY') %}
+                  <option value="-1">- No contest</option>
+                  {% endif %}
+                  {% for c in contests %}
+                  <option value="{{c.cid}}" {% if c == contest %}selected="selected"{% endif %}>{{c.shortname}}</option>
+                  {% endfor %}
+              </select>
+          </form>
+          <script type="text/javascript">
+  		      document.getElementById('cid').addEventListener('change', function() {
+      		      document.getElementById('selectcontestform').submit();
+          	});
+          </script>
+        </div>
+      {% endif %}
+
+      {# Render user information + logout button #}
+      {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <div id="username">logged in as
+          {% if app.user and app.user.getName() %}
+            <abbr title="{{ app.user.getUsername() }}">{{ app.user.getName() }}</abbr>
+          {% else %}
+            {{ app.user.getUsername() }}
+          {% endif %}
+
+          <a href="{{path('legacy.logout')}}"><span class="octicon octicon-sign-out"></span></a>
+        </div>
+      {% endif %}
+    </div>
+
+    <script type="text/javascript">
+      var initial = {{ now }};
+      var activatetime = {{ contest.getActivateTime()|default(-1)}} ;
+      var starttime = {{ contest.getStartTime()|default(-1)}} ;
+      var endtime = {{ contest.getEndTime()|default(-1)}} ;
+      var offset = 0;
+      var date = new Date(initial*1000);
+      var timeleftelt = document.getElementById("timeleft");
+
+      setInterval(function(){updateClock();},1000);
+      updateClock();
+    </script>
+
+
+    {# TODO:
+      $notify_flag  =  isset($_COOKIE["domjudge_notify"])  && (bool)$_COOKIE["domjudge_notify"];
+      $refresh_flag = !isset($_COOKIE["domjudge_refresh"]) || (bool)$_COOKIE["domjudge_refresh"];
+
+    <div id="toggles">
+      {% if refresh %}
+      	{% set refresh_text = refresh_flag ? 'Disable' : 'Enable' %}
+      	<input id="refresh-toggle" type="button" value="{{ refresh_text }} refresh" />
+      {% endif %}
+    #}
+
+    {# // Default hide this from view, only show when javascript and #}
+    {# // notifications are available: #}
+    <div id="notify" style="display: none">
+      {# TODO
+      	addForm('toggle_notify.php', 'get') .
+      	addHidden('enable', ($notify_flag ? 0 : 1)) .
+      	addSubmit(($notify_flag ? 'Dis' : 'En' ) . 'able notifications', 'toggle_notify',
+      	          'return toggleNotifications(' . ($notify_flag ? 'false' : 'true') . ')') .
+      	addEndForm() . "</div>";
+      #}
+      <script type="text/javascript">
+      <!--
+          if ( 'Notification' in window ) {
+      		document.getElementById('notify').style.display = 'block';
+      	}
+      // -->
+      </script>
+    </div>
+  </div>
+</nav>

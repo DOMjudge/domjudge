@@ -6,6 +6,9 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+require('init.php');
+$id = getRequestID();
+
 $viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => "diff", 4 => 'all');
 
 $view = 1; // default view == unverified
@@ -16,9 +19,6 @@ if ( isset($_REQUEST['view']) ) {
 		if ( isset($_REQUEST['view'][$i]) ) $view = $i;
 	}
 }
-
-require('init.php');
-$id = getRequestID();
 
 $refresh = array(
 	'after' => 15,

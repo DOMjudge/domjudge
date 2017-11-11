@@ -6,13 +6,12 @@
 #
 # always include this and make sure it points to the socket of PHP-FPM
 upstream domjudge {
-	server unix:/var/run/php5-fpm-www-data.sock;
+	server unix:/var/run/php-fpm-domjudge.sock; # if using with etc/domjudge-fpm.conf
+	#server unix:/run/php/php7.0-fpm.sock; # default on ubuntu servers
 }
 
 ### http host config ###
 #
-# Use this block if you want DOMjudge to live in
-# the root of your webserver without http
 
 server {
 	listen 80;
@@ -20,50 +19,47 @@ server {
 
 	server_name _default_;
 
-	root @domserver_wwwdir@;
-
 	# set max upload size. Make sure the PHP values also high enough
 	client_max_body_size 64M;
 
-	index index.php;
+	# Uncomment to run it out of the root of your system
+	#location / {
+	#	root @domserver_webappdir@/web;
+	#	try_files $uri /app.php$is_args$args;
+	#
+	#	location ~ ^/app\.php(/|$) {
+	#		fastcgi_split_path_info ^(.+\.php)(/.*)$;
+	#		fastcgi_pass domjudge;
+	#		include fastcgi_params;
+	#		fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
+	#		fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
+	#		# Prevents URIs that include the front controller. This will 404:
+	#		# http://domain.tld/app.php/some-path
+	#		internal;
+	#	}
+	#}
 
-	# Disable VCS metadata access, if present
-	location ~ \.svn {
-		deny all;
-	}
-	location ~ \.git {
-		deny all;
-	}
-	location ~ .gitignore$ {
-		deny all;
-	}
-	location ~ Makefile$ {
-		deny all;
-	}
+	# Or you can install it with a prefix
+	location /domjudge { return 301 /domjudge/; }
+	location ~ /domjudge(/.*) {
+		root @domserver_webappdir@/web;
+		# try to serve file directly, fallback to app.php
+		try_files $1 /domjudge/app.php$is_args$args;
 
-	location / {
-		try_files $uri $uri/ index.php;
-	}
-
-	# Send all requests to the API to /api/index.php
-	location ~ ^/api/(.+)$ {
-		include fastcgi_params;
-		fastcgi_param SCRIPT_FILENAME $document_root/api/index.php;
-		set $path_info $1;
-		if ($path_info = index.php) {
-			set $path_info "";
+		location ~ ^/domjudge/app\.php(/|$) {
+			fastcgi_split_path_info ^(.+\.php)(/.*)$;
+			fastcgi_pass domjudge;
+			include fastcgi_params;
+			fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
+			fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
+			# Prevents URIs that include the front controller. This will 404:
+			# http://domain.tld/app.php/some-path
+			internal;
 		}
-		fastcgi_param PATH_INFO $path_info;
-		fastcgi_pass domjudge;
 	}
 
-	# Handle all PHP files
-	location ~ ^(.+?\.php)(/.*)?$ {
-		include fastcgi_params;
-		fastcgi_param SCRIPT_FILENAME $document_root$1;
-		fastcgi_param PATH_INFO $2;
-		fastcgi_pass domjudge;
-	}
+	error_log /var/log/nginx/domjudge.log;
+	access_log /var/log/nginx/domjudge.log;
 }
 
 # Alternatively, use HTTPS and redirect HTTP to HTTPS:
@@ -89,46 +85,40 @@ server {
 #	ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA;
 # 	ssl_prefer_server_ciphers on;
 
-# 	root @domserver_wwwdir@;
-
 # 	# set max upload size. Make sure the PHP values also high enough
 # 	client_max_body_size 64M;
 
-# 	index index.php;
+#	# Run it out of the root of the system
+#	location / {
+#		root @domserver_webappdir@/web;
+#		try_files $uri /app.php$is_args$args;
+#		location ~ ^/app\.php(/|$) {
+#			fastcgi_split_path_info ^(.+\.php)(/.*)$;
+#			fastcgi_pass domjudge;
+#			include fastcgi_params;
+#			fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
+#			fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
+#			# Prevents URIs that include the front controller. This will 404:
+#			# http://domain.tld/app.php/some-path
+#			internal;
+#		}
+#	}
 
-# 	# Disable VCS metadata access, if present
-# 	location ~ \.svn {
-# 		deny all;
-# 	}
-# 	location ~ \.git {
-# 		deny all;
-# 	}
-# 	location ~ .gitignore$ {
-# 		deny all;
-# 	}
-# 	location ~ Makefile$ {
-# 		deny all;
-# 	}
-
-# 	location / {
-# 		try_files $uri $uri/ index.php;
-# 	}
-
-# 	# Send all requests to the API to /api/index.php
-# 	location ~ ^/api/(.+)$ {
-# 		include fastcgi_params;
-# 		fastcgi_param SCRIPT_FILENAME $document_root/api/index.php;
-# 		fastcgi_param PATH_INFO $1;
-# 		fastcgi_param HTTPS on;
-# 		fastcgi_pass domjudge;
-# 	}
-
-# 	# Handle all PHP files
-# 	location ~ ^(.+?\.php)(/.*)?$ {
-# 		include fastcgi_params;
-# 		fastcgi_param SCRIPT_FILENAME $document_root$1;
-# 		fastcgi_param PATH_INFO $2;
-# 		fastcgi_param HTTPS on;
-# 		fastcgi_pass domjudge;
-# 	}
+#	# Or you can install it with a prefix
+#	location /domjudge { return 301 /domjudge/; }
+#	location ~ /domjudge(/.*) {
+#		root @domserver_webappdir@/web;
+#		# try to serve file directly, fallback to app.php
+#		try_files $1 /domjudge/app.php$is_args$args;
+#		location ~ ^/domjudge/app\.php(/|$) {
+#			fastcgi_split_path_info ^(.+\.php)(/.*)$;
+#			fastcgi_pass domjudge;
+#			include fastcgi_params;
+#			fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
+#			fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
+#			# Prevents URIs that include the front controller. This will 404:
+#			# http://domain.tld/app.php/some-path
+#			internal;
+#		}
+#	}
 # }

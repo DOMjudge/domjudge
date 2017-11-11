@@ -95,7 +95,8 @@ function tsv_groups_set($data)
 	global $DB;
 	$cnt = 0;
 	foreach ($data as $row) {
-		$DB->q("REPLACE INTO team_category SET %S", $row);
+		$replacecnt = $DB->q("RETURNAFFECTED REPLACE INTO team_category SET %S", $row);
+		eventlog('team_category', $row['categoryid'], $replacecnt == 1 ? 'create' : 'update');
 		auditlog('team_category', $row['categoryid'], 'replaced', 'imported from tsv');
 		$cnt++;
 	}
@@ -123,7 +124,8 @@ function tsv_teams_prepare($content)
 			'team_affiliation' => array (
 				'shortname' => @$line[5],
 				'name' => @$line[4],
-				'country' => @$line[6]) );
+				'country' => @$line[6],
+				'externalid' => @$line[7]) );
 	}
 
 	return $data;
@@ -139,18 +141,20 @@ function tsv_teams_set($data)
 		if ( !empty($row['team_affiliation']['shortname']) ) {
 			// First look up if the affiliation already exists.
 			$affilid = $DB->q("MAYBEVALUE SELECT affilid FROM team_affiliation
-			                   WHERE shortname = %s AND name = %s AND country = %s LIMIT 1",
-			                  $row['team_affiliation']['shortname'],
-			                  $row['team_affiliation']['name'],
-			                  $row['team_affiliation']['country']);
+			                   WHERE externalid = %s LIMIT 1",
+			                  $row['team_affiliation']['externalid']);
 			if ( empty($affilid) ) {
 				$affilid = $DB->q("RETURNID INSERT INTO team_affiliation SET %S",
 				                  $row['team_affiliation']);
+
+				eventlog('team_affiliation', $affilid, 'create');
 				auditlog('team_affiliation', $affilid, 'added', 'imported from tsv');
 			}
 			$row['team']['affilid'] = $affilid;
 		}
-		$DB->q("REPLACE INTO team SET %S", $row['team']);
+		$replacecnt = $DB->q("RETURNAFFECTED REPLACE INTO team SET %S", $row['team']);
+
+		eventlog('team', $row['team']['teamid'], $replacecnt == 1 ? 'create' : 'update');
 		auditlog('team', $row['team']['teamid'], 'replaced', 'imported from tsv');
 		$cnt++;
 	}
@@ -189,7 +193,7 @@ function tsv_accounts_prepare($content)
 			case 'team':
 				$line[0] = $teamroleid;
 				// For now we assume we can find the teamid by parsing the username
-				$teamid = preg_replace('#^team-0*#', '', $line[2]);
+				$teamid = preg_replace('/^team-?0*/', '', $line[2]);
 				break;
 			case 'analyst':
 				// Ignore type analyst for now. We don't have a useful mapping yet.
@@ -232,6 +236,7 @@ function tsv_accounts_set($data)
 			if ( is_null($teamid) ) {
 				$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $row['team']);
 			}
+			eventlog('team', $teamid, 'create');
 			auditlog('team', $teamid, 'added', 'imported from tsv, autocreated for judge');
 			$row['user']['teamid'] = $teamid;
 		}

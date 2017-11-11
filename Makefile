@@ -55,15 +55,20 @@ submitclient:
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure
+dist: configure composer-dependencies
 
 # Install PHP dependencies
-dist: composer-dependencies
 composer-dependencies:
 ifeq (, $(shell which composer))
-	$(error "'composer' command not found in $(PATH), install it https://getcomposer.org/download/")
+	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
 endif
-	composer $(subst 1,-q,$(QUIET)) install --no-dev
+# To install Symfony we need a parameters.yml file, but to generate
+# that properly, we need a configured system with dbpasswords.secret
+# generated. To circumvent this, we install a stub parameters.yml
+# file, and set its modification time in the past so that it will get
+# updated later during build with 'make domserver'.
+	$(MAKE) -C webapp params-from-stub
+	composer $(subst 1,-q,$(QUIET)) install
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
@@ -81,16 +86,16 @@ build-scripts:
 
 # List of SUBDIRS for recursive targets:
 build:             SUBDIRS=        lib                      import tests misc-tools
-domserver:         SUBDIRS=etc         sql www              import       misc-tools
-install-domserver: SUBDIRS=etc     lib sql www              import       misc-tools
+domserver:         SUBDIRS=etc         sql www              import       misc-tools webapp
+install-domserver: SUBDIRS=etc     lib sql www              import       misc-tools webapp
 judgehost:         SUBDIRS=etc                 judge                     misc-tools
 install-judgehost: SUBDIRS=etc     lib         judge                     misc-tools
 docs:              SUBDIRS=    doc
-install-docs:      SUBDIRS=    doc         www
+install-docs:      SUBDIRS=    doc         www                                      webapp
 dist:              SUBDIRS=        lib sql                               misc-tools
-clean:             SUBDIRS=etc doc lib sql www judge submit        tests misc-tools
-distclean:         SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
-maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit import tests misc-tools
+clean:             SUBDIRS=etc doc lib sql www judge submit        tests misc-tools webapp
+distclean:         SUBDIRS=etc doc lib sql www judge submit import tests misc-tools webapp
+maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit import tests misc-tools webapp
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
@@ -117,7 +122,9 @@ ifneq "$(FHS_ENABLED)" "yes"
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
 endif
 # Fix permissions and ownership for password files:
-	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(domserver_etcdir) \
+# FIXME: installing restapi.secret with website group is a quick hack
+# to fix eventlog() to query the REST API, see issue #283.
+	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
 		etc/restapi.secret
 	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
 		etc/dbpasswords.secret
@@ -163,7 +170,7 @@ paths.mk:
 MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -D_FORTIFY_SOURCE=2 \
               -fPIE -Wformat -Wformat-security -ansi -pedantic
 MAINT_LDFLAGS=-fPIE -pie -Wl,-z,relro -Wl,-z,now
-maintainer-conf: configure
+maintainer-conf: dist
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
@@ -185,7 +192,7 @@ maintainer-conf: configure
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
-maintainer-install: dist build domserver-create-dirs judgehost-create-dirs
+maintainer-install: build domserver-create-dirs judgehost-create-dirs
 # Replace lib{judge,submit}dir with symlink to prevent lots of symlinks:
 	-rmdir $(judgehost_libjudgedir) $(domserver_libsubmitdir)
 	-rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)
@@ -202,7 +209,63 @@ maintainer-install: dist build domserver-create-dirs judgehost-create-dirs
 # Make tmpdir, submitdir writable for webserver, because
 # judgehost-create-dirs sets wrong permissions:
 	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
-	@echo "Make sure that etc/dbpasswords.secret is readable by the webserver!"
+	@echo ""
+	@echo "========== Maintainer Install Completed =========="
+	@echo ""
+	@echo "Next:"
+	@echo "    - Set up database"
+	@echo "        ./sql/dj_setup_database -u root [-r|-p ROOT_PASS] install"
+	@echo "    - Configure apache2"
+	@echo "        make maintainer-postinstall-apache"
+	@echo "    - Configure nginx"
+	@echo "        make maintainer-postinstall-nginx"
+	@echo ""
+	@echo "Or you can run these commands manually"
+	@echo "    - Give the webserver access to things it needs"
+	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m d:m::rwx          $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   m::rwx          $(CURDIR)/webapp/var"
+	@echo "        # Also make sure you keep access"
+	@echo "        setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
+	@echo "    - Configure webserver"
+	@echo "        Apache 2:"
+	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-enabled/domjudge.conf"
+	@echo "           a2enmod rewrite"
+	@echo "           systemctl restart apache2"
+	@echo "        Nginx + PHP-FPM:"
+	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/"
+	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm /etc/php/7.0/fpm/pool.d/domjudge.conf"
+	@echo "           systemctl restart nginx"
+	@echo "           systemctl restart php-fpm"
+
+maintainer-postinstall-permissions:
+	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret
+# FIXME: this is a quick hack to fix eventlog() to query the REST API,
+# see issue #283.
+	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/restapi.secret
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
+	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
+	setfacl -R -m   u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
+	setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var
+	setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var
+
+maintainer-postinstall-apache: maintainer-postinstall-permissions
+	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
+	ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-enabled/domjudge.conf
+	a2enmod rewrite
+	systemctl restart apache2
+
+maintainer-postinstall-nginx: maintainer-postinstall-permissions
+	@if [ ! -d "/etc/nginx/sites-enabled/" ]; then echo "Couldn't find directory /etc/nginx/sites-enabled/. Is nginx installed?"; false; fi
+	@if [ ! -d "/etc/php/7.0/fpm/pool.d/" ]; then echo "Couldn't find directory /etc/php/7.0/fpm/pool.d/. Is php-fpm installed?"; false; fi
+	ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/domjudge.conf
+	ln -sf $(CURDIR)/etc/domjudge-fpm.conf /etc/php/7.0/fpm/pool.d/domjudge-fpm.conf
+	systemctl restart nginx
+	systemctl restart php7.0-fpm
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:
@@ -215,6 +278,8 @@ coverity-conf:
 	$(MAKE) maintainer-conf
 
 coverity-build: paths.mk
+# First delete some files to keep Coverity scan happy:
+	-rm -f tests/test-compile-error.*
 	$(MAKE) build build-scripts
 	@VERSION=` grep '^VERSION ='   paths.mk | sed 's/^VERSION = *//'` ; \
 	PUBLISHED=`grep '^PUBLISHED =' paths.mk | sed 's/^PUBLISHED = *//'` ; \

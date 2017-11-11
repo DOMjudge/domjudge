@@ -23,10 +23,7 @@ require_once(LIBWWWDIR . '/forms.php');
 require_once(LIBWWWDIR . '/printing.php');
 require_once(LIBWWWDIR . '/auth.php');
 
-// The functions do_login and show_loginpage, if called, do not return.
-if ( @$_POST['cmd']=='login' ) do_login();
-if ( !logged_in() ) show_loginpage();
-
+logged_in();
 define('IS_ADMIN', checkrole('admin'));
 
 if ( !isset($REQUIRED_ROLES) ) $REQUIRED_ROLES = array('jury');
@@ -89,8 +86,8 @@ $updates = array(
 );
 
 // set up twig
-require_once(LIBVENDORDIR . '/autoload.php');
-Twig_Autoloader::register();
+// require_once(LIBVENDORDIR . '/autoload.php');
+// Twig_Autoloader::register();
 $loader = new Twig_Loader_Filesystem(array('.', LIBWWWDIR));
 $twig = new Twig_Environment($loader);
 

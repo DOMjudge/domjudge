@@ -80,7 +80,7 @@ function put_print_form()
 
 function handle_print_upload()
 {
-	global $DB, $username;
+	global $DB;
 
 	ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
 
@@ -99,10 +99,7 @@ function handle_print_upload()
 		if ( ! isset($lang) ) error("Unable to find language '$langid'");
 	}
 
-	if ( IS_JURY ) $whoami = 'JURY/' . $username;
-	else $whoami = $username;
-
-	$ret = send_print($realfilename,$langid,$whoami,$filename);
+	$ret = send_print($realfilename,$filename,$langid);
 
 	echo "<p>" . nl2br(specialchars($ret[1])) . "</p>\n\n";
 
@@ -120,9 +117,8 @@ function handle_print_upload()
  * The following parameters are available. Make sure you escape
  * them correctly before passing them to the shell.
  *   $filename: the on-disk file to be printed out
- *   $language: langid of the programming language this file is in
- *   $team: the originating team
  *   $origname: the original filename as submitted by the team
+ *   $language: langid of the programming language this file is in
  *
  * Returns array with two elements: first a boolean indicating
  * overall success, and second a string to be displayed to the user.
@@ -133,30 +129,66 @@ function handle_print_upload()
  * easy identification. To prevent misuse the amount of pages per
  * job is limited to 10.
  */
-function send_print($filename, $language = null, $team = null, $origname = null)
+function send_print($filename, $origname = null, $language = null)
 {
+	global $DB, $username;
+
+	// Map our language to enscript language:
+	$lang_remap = array(
+		'adb'    => 'ada',
+		'bash'   => 'sh',
+		'csharp' => 'c',
+		'f95'    => 'f90',
+		'hs'     => 'haskell',
+		'js'     => 'javascript',
+		'pas'    => 'pascal',
+		'pl'     => 'perl',
+		'py'     => 'python',
+		'py2'    => 'python',
+		'py3'    => 'python',
+		'rb'     => 'ruby',
+	);
+	if ( isset($language) && array_key_exists($language,$lang_remap) ) {
+		$language = $lang_remap[$language];
+	}
 	switch ($language) {
 	case 'csharp': $language = 'c'; break;
 	case 'hs': $language = 'haskell'; break;
 	case 'pas': $language = 'pascal'; break;
 	case 'pl': $language = 'perl'; break;
-	case 'py': $language = 'python'; break;
+	case 'py':
+	case 'py2':
+	case 'py3':
+		$language = 'python'; break;
 	}
 	$highlight = "";
 	if ( ! empty($language) ) {
 		$highlight = "-E" . escapeshellarg($language);
 	}
 
-	$banner = "TeamID: $team     File: $origname    Page $% of $= ";
+	$teamname = $DB->q('MAYBEVALUE SELECT t.name FROM user u
+	                    LEFT JOIN team t USING (teamid)
+	                    WHERE username = %s', $username);
+
+	$header = "User: $username   Team: $teamname|   File: $origname   |Page $% of $=";
+
+	// For debugging or spooling to a different host.
+	// Also uncomment '-p $tmp' below.
+	//$tmp = tempnam(TMPDIR, 'print_'.$username.'_');
 
 	$cmd = "enscript -C " . $highlight
-	     . " -b " . escapeshellarg($banner)
+	     . " -b " . escapeshellarg($header)
 	     . " -a 0-10 "
-	// for debugging: uncomment next line
-	//   . " -p /tmp/test.ps "
+	     . " -f Courier9 "
+	     //. " -p $tmp "
 	     . escapeshellarg($filename) . " 2>&1";
 
 	exec($cmd, $output, $retval);
+
+	// Make file readable for others than webserver user,
+	// and give it an extension:
+	//chmod($tmp, 0644);
+	//rename($tmp, $tmp.'.ps');
 
 	return array($retval == 0, implode("\n", $output));
 }

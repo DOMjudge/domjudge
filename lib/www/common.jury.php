@@ -168,20 +168,51 @@ function openZipFile($filename) {
 	return $zip;
 }
 
-// Return resized thumbnail and mime-type (the part after 'image/')
-// from image contents.
-function get_image_thumb_type($image)
+/**
+ * Detects mime-type (the part after 'image/') from image contents.
+ * Returns FALSE on errors and stores error message in $error if set.
+ */
+function get_image_type($image, &$error)
 {
 	if ( !function_exists('gd_info') ) {
-		error("Cannot import image: the PHP GD library is missing.");
+		$error = "Cannot import image: the PHP GD library is missing.";
+		return FALSE;
 	}
 
 	$info = getimagesizefromstring($image);
+	if ( $info === FALSE) {
+		$error = "Could not determine image information.";
+		return FALSE;
+	}
+
 	$type = image_type_to_extension($info[2], FALSE);
 
 	if ( !in_array($type, array('jpeg', 'png', 'gif')) ) {
-		error("Unsupported image type '$type' found.");
+		$error = "Unsupported image type '$type' found.";
+		return FALSE;
 	}
+
+	return $type;
+}
+
+/**
+ * Generate resized thumbnail image and return as as string.
+ * Return FALSE on errors and stores error message in $error if set.
+ */
+function get_image_thumb($image, &$error)
+{
+	if ( !function_exists('gd_info') ) {
+		$error = "Cannot import image: the PHP GD library is missing.";
+		return FALSE;
+	}
+
+	$type = get_image_type($image,$error);
+	if ( $type===FALSE ) {
+		$error = "Could not determine image information.";
+		return FALSE;
+	}
+
+	$info = getimagesizefromstring($image);
 
 	$thumbmaxsize = dbconfig_get('thumbnail_size', 128);
 
@@ -192,12 +223,14 @@ function get_image_thumb_type($image)
 	$orig = imagecreatefromstring($image);
 	$thumb = imagecreatetruecolor($thumbsize[0], $thumbsize[1]);
 	if ( $orig===FALSE || $thumb===FALSE ) {
-		error('Cannot create GD image.');
+		$error = 'Cannot create GD image.';
+		return FALSE;
 	}
 
 	if ( !imagecopyresampled($thumb, $orig, 0, 0, 0, 0,
 	                         $thumbsize[0], $thumbsize[1], $info[0], $info[1]) ) {
-		error('Cannot create resized thumbnail image.');
+		$error = 'Cannot create resized thumbnail image.';
+		return FALSE;
 	}
 
 	// The GD image library doesn't have functionality to output an
@@ -215,21 +248,23 @@ function get_image_thumb_type($image)
 
 	ob_end_clean();
 
-	if ( !$success ) error('Failed to output thumbnail image.');
+	if ( !$success ) {
+		$error = 'Failed to output thumbnail image.';
+		return FALSE;
+	}
 
 	imagedestroy($orig);
 	imagedestroy($thumb);
 
-	return array($thumbstr, $type);
+	return $thumbstr;
 }
-
 
 /**
  * Read problem description file and testdata from zip archive
  * and update problem with it, or insert new problem when probid=NULL.
  * Returns probid on success, or generates error on failure.
  */
-function importZippedProblem($zip, $probid = NULL, $cid = -1)
+function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 {
 	global $DB, $teamid, $cdatas;
 	$prop_file = 'domjudge-problem.ini';
@@ -243,66 +278,68 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 	// Read problem properties
 	$ini_array = parse_ini_string($zip->getFromName($prop_file));
 
-	if ( empty($ini_array) ) {
-		if ( $probid===NULL ) {
-			error("Need '" . $prop_file . "' file when adding a new problem.");
+	// Only preserve valid keys:
+	$ini_array_problem = array_intersect_key($ini_array,array_flip($ini_keys_problem));
+	$ini_array_contest_problem = array_intersect_key($ini_array,array_flip($ini_keys_contest_problem));
+
+	// Take problem:externalid from zip filename, and use as backup for
+	// problem:name and contestproblem:shortname if these are not specified.
+	$extid = preg_replace('[^a-zA-Z0-9-_]', '', basename($filename, '.zip'));
+	if ( (string)$extid==='' ) {
+		error("Could not extract an identifier from '" . basename($filename) . "'.");
+	}
+	if ( !array_key_exists('externalid', $ini_array_problem) ) {
+		$ini_array_problem['externalid'] = $extid;
+	}
+
+	// Rename old probid to contestproblem:shortname
+	if ( isset($ini_array_contest_problem['probid']) ) {
+		$shortname = $ini_array_contest_problem['probid'];
+		unset($ini_array_contest_problem['probid']);
+		$ini_array_contest_problem['shortname'] = $shortname;
+	} else {
+		$ini_array_contest_problem['shortname'] = $extid;
+	}
+
+	// Set default of 1 point for a problem if not specified
+	if ( !isset($ini_array_contest_problem['points']) ) $ini_array_contest_problem['points'] = 1;
+
+	if ( $probid===NULL ) {
+		// Set sensible defaults for name and timelimit if not specified:
+		if ( !isset($ini_array_problem['name'])      ) $ini_array_problem['name'] = $ini_array_contest_problem['shortname'];
+		if ( !isset($ini_array_problem['timelimit']) ) $ini_array_problem['timelimit'] = $def_timelimit;
+
+		$probid = $DB->q('RETURNID INSERT INTO problem (' .
+		                 implode(', ',array_keys($ini_array_problem)) .
+		                 ') VALUES (%As)', $ini_array_problem);
+
+		if ($cid != -1) {
+			$ini_array_contest_problem['cid'] = $cid;
+			$ini_array_contest_problem['probid'] = $probid;
+			$DB->q('INSERT INTO contestproblem (' .
+			       implode(', ',array_keys($ini_array_contest_problem)) .
+			       ') VALUES (%As)', $ini_array_contest_problem);
 		}
 	} else {
-		// Only preserve valid keys:
-		$ini_array_problem = array_intersect_key($ini_array,array_flip($ini_keys_problem));
-		$ini_array_contest_problem = array_intersect_key($ini_array,array_flip($ini_keys_contest_problem));
+		if ( count($ini_array_problem)>0 ) {
+			$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array_problem, $probid);
+		}
 
-		// Set default of 1 point for a problem if not specified
-		if ( !isset($ini_array_contest_problem['points']) ) $ini_array_contest_problem['points'] = 1;
-
-		if ( $probid===NULL ) {
-			if ( !isset($ini_array_contest_problem['probid']) ) {
-				error("Need 'probid' in '" . $prop_file . "' when adding a new problem.");
-			}
-			// Set sensible defaults for name and timelimit if not specified:
-			if ( !isset($ini_array_problem['name'])      ) $ini_array_problem['name'] = $ini_array_contest_problem['probid'];
-			if ( !isset($ini_array_problem['timelimit']) ) $ini_array_problem['timelimit'] = $def_timelimit;
-
-			// rename probid to shortname
-			$shortname = $ini_array_contest_problem['probid'];
-			unset($ini_array_contest_problem['probid']);
-			$ini_array_contest_problem['shortname'] = $shortname;
-
-			$probid = $DB->q('RETURNID INSERT INTO problem (' .
-			                 implode(', ',array_keys($ini_array_problem)) .
-			                 ') VALUES (%As)', $ini_array_problem);
-
-			if ($cid != -1) {
+		if ( $cid != -1 ) {
+			if ( $DB->q("MAYBEVALUE SELECT probid FROM contestproblem
+			             WHERE probid = %i AND cid = %i", $probid, $cid) ) {
+				// Remove keys that cannot be modified:
+				unset($ini_array_contest_problem['probid']);
+				if ( count($ini_array_contest_problem)!=0 ) {
+					$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i',
+					       $ini_array_contest_problem, $probid, $cid);
+				}
+			} else {
 				$ini_array_contest_problem['cid'] = $cid;
 				$ini_array_contest_problem['probid'] = $probid;
 				$DB->q('INSERT INTO contestproblem (' .
 				       implode(', ',array_keys($ini_array_contest_problem)) .
 				       ') VALUES (%As)', $ini_array_contest_problem);
-			}
-		} else {
-			if ( count($ini_array_problem)>0 ) {
-				$DB->q('UPDATE problem SET %S WHERE probid = %i', $ini_array_problem, $probid);
-			}
-
-			if ( $cid != -1 ) {
-				if ( $DB->q("MAYBEVALUE SELECT probid FROM contestproblem
-				             WHERE probid = %i AND cid = %i", $probid, $cid) ) {
-					// Remove keys that cannot be modified:
-					unset($ini_array_contest_problem['probid']);
-					if ( count($ini_array_contest_problem)!=0 ) {
-						$DB->q('UPDATE contestproblem SET %S WHERE probid = %i AND cid = %i',
-						       $ini_array_contest_problem, $probid, $cid);
-					}
-				} else {
-					$shortname = $ini_array_contest_problem['probid'];
-					unset($ini_array_contest_problem['probid']);
-					$ini_array_contest_problem['shortname'] = $shortname;
-					$ini_array_contest_problem['cid'] = $cid;
-					$ini_array_contest_problem['probid'] = $probid;
-					$DB->q('INSERT INTO contestproblem (' .
-					       implode(', ',array_keys($ini_array_contest_problem)) .
-					       ') VALUES (%As)', $ini_array_contest_problem);
-				}
 			}
 		}
 	}
@@ -461,8 +498,22 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 			}
 			$image_file = $image_type = $image_thumb = FALSE;
 			foreach (array('png', 'jpg', 'jpeg', 'gif') as $img_ext) {
-				if ( ($image_file = $zip->getFromName("data/$type/$datafile" . "." . $img_ext)) !== FALSE ) {
-					list($image_thumb, $image_type) = get_image_thumb_type($image_file);
+				$image_fname = "data/$type/$datafile" . '.' . $img_ext;
+				if ( ($image_file = $zip->getFromName($image_fname)) !== FALSE ) {
+					$image_type = get_image_type($image_file,$errormsg);
+					if ( $image_type === FALSE ) {
+						warning("reading '$image_fname': " . $errormsg);
+						$image_file = FALSE;
+					} else if ( $image_type !== ( $img_ext=='jpg' ? 'jpeg' : $img_ext ) ) {
+						warning("extension of '$image_fname' does not match type '$image_type'");
+						$image_file = FALSE;
+					} else {
+						$image_thumb = get_image_thumb($image_file,$errormsg);
+						if ( $image_thumb === FALSE ) {
+							$image_thumb = NULL;
+							warning("reading '$image_fname': " . $errormsg);
+						}
+					}
 					break;
 				}
 			}
@@ -481,19 +532,22 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 				continue;
 			}
 
-			$DB->q('INSERT INTO testcase (probid, rank, sample,
-			        md5sum_input, md5sum_output, input, output, description' .
-			       ( $image_file !== FALSE ? ', image, image_thumb, image_type' : '' ) .
-			       ')' .
-			       'VALUES (%i, %i, %i, %s, %s, %s, %s, %s' .
-			       ( $image_file !== FALSE ? ', %s, %s, %s' : '%_ %_ %_' ) .
-			       ')',
-			       $probid, $maxrank, $type == 'sample' ? 1 : 0,
-			       $md5in, $md5out,
-			       $testin, $testout, $description,
-			       $image_file, $image_thumb, $image_type);
+			$tc = $DB->q('RETURNID INSERT INTO testcase (probid, rank, sample,
+			              md5sum_input, md5sum_output, input, output, description' .
+			             ( $image_file !== FALSE ? ', image, image_thumb, image_type' : '' ) .
+			             ') VALUES (%i, %i, %i, %s, %s, %s, %s, %s' .
+			             ( $image_file !== FALSE ? ', %s, %s, %s' : '%_ %_ %_' ) .
+			             ')',
+			             $probid, $maxrank, $type == 'sample' ? 1 : 0,
+			             $md5in, $md5out,
+			             $testin, $testout, $description,
+			             $image_file, $image_thumb, $image_type);
 			$maxrank++;
 			$ncases++;
+
+			// FIXME: this should be done after logging a problem create event.
+			eventlog('testcase', $tc, 'create');
+
 			echo "<li>Added $type testcase from: <tt>$datafile.{in,ans}</tt></li>\n";
 		}
 		echo "</ul>\n<p>Added $ncases $type testcase(s).</p>\n";
@@ -504,7 +558,7 @@ function importZippedProblem($zip, $probid = NULL, $cid = -1)
 		echo "<p>No jury solutions added: problem is not linked to a contest (yet).</p>\n";
 	} else if ( empty($teamid) ) {
 		echo "<p>No jury solutions added: must associate team with your user first.</p>\n";
-	} else if ( $DB->q('VALUE SELECT allow_submit FROM problem
+	} else if ( $DB->q('MAYBEVALUE SELECT allow_submit FROM problem
 	                    INNER JOIN contestproblem using (probid)
 	                    WHERE probid = %i AND cid = %i', $probid, $cid) ) {
 		// First find all submittable languages:
