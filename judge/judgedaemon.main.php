@@ -529,9 +529,6 @@ function judge($row)
 	// Query output storage limit (in database once for this judging.
 	$output_storage_limit = (int) dbconfig_get_rest('output_storage_limit', 50000);
 
-	// Query output storage limit (in database once for this judging.
-	$output_storage_limit = (int) dbconfig_get_rest('output_storage_limit', 50000);
-
 	$cpuset_opt = "";
 	if ( isset($options['daemonid']) ) $cpuset_opt = "-n ${options['daemonid']}";
 
