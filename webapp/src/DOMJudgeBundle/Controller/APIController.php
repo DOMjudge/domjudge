@@ -126,7 +126,7 @@ class APIController extends FOSRestController {
 	 */
 	public function getSingleContestAction(Contest $cid) {
 		if ($cid->isActive()) {
-			return $cid->serializeForAPI();
+			return $cid->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20));
 		} else {
 			return NULL;
 		}
