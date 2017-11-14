@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\Event;
 use DOMJudgeBundle\Utils\Utils;
 
 /**
@@ -161,6 +162,17 @@ class APIController extends FOSRestController {
 		$contest = $this->getCurrentActiveContestAction();
 		if ($contest === NULL) {
 			return new Response('No active contest.', 404);
+		}
+		if ($request->query->has('id')) {
+			$event = $em->getRepository(Event::class)->findOneBy(
+				array(
+					'eventid' => $request->query->getInt('id'),
+					'cid'     => $contest['id'],
+				)
+			);
+			if ( $event===NULL ) {
+				return new Response('Invalid parameter "id" requested.', 400);
+			}
 		}
 		$response = new StreamedResponse();
 		$response->headers->set('X-Accel-Buffering', 'no');
