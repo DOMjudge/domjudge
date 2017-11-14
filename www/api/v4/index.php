@@ -247,6 +247,7 @@ function problems($args)
 			'short_name' => $pdata['shortname'],
 			'name'       => $pdata['name'],
 			'ordinal'    => safe_int($pdata['ordinal']),
+			'time_limit' => safe_float($pdata['timelimit']),
 		);
 		if ( !empty($pdata['rgb']) ) {
 			$ret['rgb'] = $pdata['rgb'];
