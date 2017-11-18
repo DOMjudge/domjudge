@@ -1315,26 +1315,21 @@ function groups($args)
 {
 	global $DB, $api;
 
+	$categoryid = null;
 	if ( isset($args['__primary_key']) ) {
-		if ( isset($args['categoryid']) ) {
-			$api->createError("You cannot specify a primary ID both via /{id} and ?categoryid={id}");
-			return '';
-		}
-		$args['categoryid'] = rest_intid('groups', $args['__primary_key']);
+		$categoryid = rest_intid('groups', $args['__primary_key']);
 	}
 
 	$query = 'SELECT categoryid, name, color, visible, sortorder
-		  FROM team_category
-		  WHERE TRUE';
+	          FROM team_category
+	          WHERE TRUE';
 	if ( $args['public'] ) {
 		$query .= ' AND visible=1';
 	}
 
-	$byCatId = array_key_exists('categoryid', $args);
-	$query .= ($byCatId ? ' AND categoryid = %i' : ' %_');
-	$categoryId = ($byCatId ? $args['categoryid'] : 0);
+	$query .= ( $categoryid!==null ? ' AND categoryid = %i' : ' %_');
 
-	$q = $DB->q($query . ' ORDER BY sortorder', $categoryId);
+	$q = $DB->q($query . ' ORDER BY sortorder', $categoryid);
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(
