@@ -1617,6 +1617,13 @@ function scoreboard($args)
 			$row['problems'][] = $prob;
 		}
 		usort($row['problems'], 'cmp_prob_label');
+
+		if ( isset($args['strict']) ) {
+			foreach ( $row['problems'] as $key => $data ) {
+				unset($row['problems'][$key]['label']);
+			}
+		}
+
 		$res[] = $row;
 	}
 	return $res;
