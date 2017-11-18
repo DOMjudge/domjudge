@@ -210,7 +210,8 @@ function problems($args)
 		// the ordinal and finally select a single problem in code to
 		// make sure that the ordinal is the same if we query a single
 		// problem.
-		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color,
+		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname,
+		                               name, color, timelimit,
 		                               COUNT(testcaseid) AS test_data_count
 		                  FROM problem
 		                  INNER JOIN contestproblem USING (probid)
