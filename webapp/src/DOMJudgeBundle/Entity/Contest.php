@@ -827,13 +827,6 @@ class Contest
 	 */
 	public function serializeForAPI($penalty_time)
 	{
-		$fdata = $this->calcFreezeData();
-		$state = array(
-			'running' => $fdata['running'],
-			'final'   => $fdata['showfinal'],
-		);
-		if ( $this->getFreezeTime()!==null ) $state['frozen'] = $fdata['showfrozen'];
-
 		return [
 			'id'                         => (string)$this->getCid(),
 			'external_id'                => $this->getExternalId(),
@@ -845,7 +838,6 @@ class Contest
 			'duration'                   => Utils::relTime($this->getEndtime() - $this->getStarttime()),
 			'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
 			'penalty_time'               => (int)$penalty_time,
-			'state'                      => $state,
 		];
 	}
 
