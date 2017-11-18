@@ -241,15 +241,17 @@ function problems($args)
 	}
 
 	$is_jury = checkrole('jury');
-	return array_map(function($pdata) use ($is_jury) {
+	return array_map(function($pdata) use ($is_jury, $args) {
 		$ret = array(
 			'id'         => safe_string(rest_extid('problems',$pdata['id'])),
 			'label'      => safe_string($pdata['label']),
-			'short_name' => $pdata['shortname'],
 			'name'       => $pdata['name'],
 			'ordinal'    => safe_int($pdata['ordinal']),
 			'time_limit' => safe_float($pdata['timelimit']),
 		);
+		if ( !isset($args['strict']) ) {
+			$ret['short_name'] = $pdata['shortname'];
+		}
 		if ( !empty($pdata['rgb']) ) {
 			$ret['rgb'] = $pdata['rgb'];
 		}
@@ -815,7 +817,6 @@ function submissions($args)
 			'language_id'  => safe_string(rest_extid('languages', $row['langid'])),
 			'time'         => Utils::absTime($row['submittime']),
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
-			'contest_id'   => safe_string($row['cid']), // FIXME: remove or use externalid?
 			'entry_point'  => $row['entry_point'],
 			);
 	}
@@ -1186,14 +1187,17 @@ function organizations($args)
 
 	// Run query and return result
 	$adatas = $DB->q($query, $country, $affilid);
-	return array_map(function($adata) {
-		return array(
+	return array_map(function($adata) use($args) {
+		$ret = array(
 			'id'        => safe_string(rest_extid('organizations', $adata['affilid'])),
 			'icpc_id'   => safe_string($adata['affilid']),
-			'shortname' => $adata['shortname'],
 			'name'      => $adata['name'],
 			'country'   => $adata['country'],
 		);
+		if ( !isset($args['strict']) ) {
+			$ret['shortname'] = $adata['shortname'];
+		}
+		return $ret;
 	}, $adatas);
 }
 $doc = 'Get a list of affiliations, with for each affiliation: affilid, shortname, name and country.';
@@ -1260,22 +1264,25 @@ function teams($args)
 
 	// Run query and return result
 	$tdatas = $DB->q($query, $category, $affiliation, $teamid);
-	return array_map(function($tdata) {
+	return array_map(function($tdata) use ($args) {
 		$group_ids = array();
 		if ( isset($tdata['categoryid']) ) {
 			$group_ids[] = safe_string(rest_extid('groups', $tdata['categoryid']));
 		}
-		return array(
+		$ret = array(
 			'id'              => safe_string(rest_extid('teams', $tdata['id'])),
 			'name'            => $tdata['name'],
-			'members'         => $tdata['members'],
-			'nationality'     => $tdata['nationality'],
 			'group_ids'       => $group_ids,
 			'organization_id' => safe_string(rest_extid('organizations', $tdata['affilid'])),
-			'affiliation'     => $tdata['affiliation'],
-			'externalid'      => $tdata['externalid'],
 			'icpc_id'         => $tdata['externalid'],
 		);
+		if ( !isset($args['strict']) ) {
+			$ret['members']     = $tdata['members'];
+			$ret['nationality'] = $tdata['nationality'];
+			$ret['affiliation'] = $tdata['affiliation'];
+			$ret['externalid']  = $tdata['externalid'];
+		}
+		return $ret;
 	}, $tdatas);
 }
 $args = array('cid' => 'ID of a contest that teams should be part of, defaults to current contest.',
@@ -1337,12 +1344,16 @@ function groups($args)
 	$q = $DB->q($query . ' ORDER BY sortorder', $categoryId);
 	$res = array();
 	while ( $row = $q->next() ) {
-		$res[] = array(
+		$ret = array(
 			'id'         => safe_string(rest_extid('groups', $row['categoryid'])),
 			'icpc_id'    => safe_string($row['categoryid']),
 			'name'       => safe_string($row['name']),
-			'color'      => $row['color'],
-			'sortorder'  => safe_int($row['sortorder']));
+		);
+		if ( !isset($args['strict']) ) {
+			$ret['color']     = $row['color'];
+			$ret['sortorder'] = safe_int($row['sortorder']);
+		}
+		$res[] = $ret;
 	}
 	return $res;
 }
@@ -1375,13 +1386,16 @@ function languages($args)
 
 	$res = array();
 	while ( $row = $q->next() ) {
-		$res[] = array(
+		$ret = array(
 			'id'           => safe_string(rest_extid('languages', $row['langid'])),
 			'name'         => safe_string($row['name']),
-			'extensions'   => json_decode($row['extensions']),
-			'allow_judge'  => safe_bool($row['allow_judge']),
-			'time_factor'  => safe_float($row['time_factor']),
 			);
+		if ( !isset($args['strict']) ) {
+			$ret['extensions']  = json_decode($row['extensions']);
+			$ret['allow_judge'] = safe_bool($row['allow_judge']);
+			$ret['time_factor'] = safe_float($row['time_factor']);
+		}
+		$res[] = $ret;
 	}
 	return $res;
 }

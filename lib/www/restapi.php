@@ -143,8 +143,12 @@ class RestApi {
 
 		// Arguments
 		$args = array();
+		$valid_args = array_merge($func['optArgs'], array(
+			'__primary_key' => 'ID of single element endpoint',
+			'strict'        => 'Strictly follow Contest API specification',
+		));
 		foreach ( $arguments as $key => $value ) {
-			if ( !array_key_exists($key, $func['optArgs']) && $key != '__primary_key' ) {
+			if ( !array_key_exists($key, $valid_args) ) {
 				$this->createError("Invalid argument '" . $key .
 				                   "' for function '" . $name . "'.", BAD_REQUEST);
 				return;
