@@ -810,14 +810,17 @@ function submissions($args)
 	$q = $DB->q($query, $cid, $languageId, $submitid, $freezetime, $teamid);
 	$res = array();
 	while ( $row = $q->next() ) {
+		$extcid = safe_string(rest_extid('contests', $cid));
+		$extid = safe_string(rest_extid('submissions', $row['submitid']));
 		$res[] = array(
-			'id'           => safe_string(rest_extid('submissions', $row['submitid'])),
+			'id'           => $extid,
 			'team_id'      => safe_string(rest_extid('teams', $row['teamid'])),
 			'problem_id'   => safe_string(rest_extid('problems', $row['probid'])),
 			'language_id'  => safe_string(rest_extid('languages', $row['langid'])),
 			'time'         => Utils::absTime($row['submittime']),
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
 			'entry_point'  => $row['entry_point'],
+			'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")),
 			);
 	}
 	return $res;
