@@ -1260,12 +1260,16 @@ function teams($args)
 	// Run query and return result
 	$tdatas = $DB->q($query, $category, $affiliation, $teamid);
 	return array_map(function($tdata) {
+		$group_ids = array();
+		if ( isset($tdata['categoryid']) ) {
+			$group_ids[] = safe_string(rest_extid('groups', $tdata['categoryid']));
+		}
 		return array(
 			'id'              => safe_string(rest_extid('teams', $tdata['id'])),
 			'name'            => $tdata['name'],
 			'members'         => $tdata['members'],
 			'nationality'     => $tdata['nationality'],
-			'group_id'        => safe_string(rest_extid('groups', $tdata['categoryid'])),
+			'group_ids'       => $group_ids,
 			'organization_id' => safe_string(rest_extid('organizations', $tdata['affilid'])),
 			'affiliation'     => $tdata['affiliation'],
 			'externalid'      => $tdata['externalid'],
