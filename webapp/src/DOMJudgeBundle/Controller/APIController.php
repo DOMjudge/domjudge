@@ -22,6 +22,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Event;
 use DOMJudgeBundle\Utils\Utils;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Route("/api", defaults={ "_format" = "json" })
@@ -130,7 +131,7 @@ class APIController extends FOSRestController {
 		if ($contest->isActive()) {
 			return $contest->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20), $this->getParameter('domjudge.useexternalids'));
 		} else {
-			return NULL;
+			throw new NotFoundHttpException(sprintf('Contest %s not found', $this->getParameter('domjudge.useexternalids') ? $contest->getExternalid() : $contest->getCid()));
 		}
 	}
 
@@ -149,8 +150,52 @@ class APIController extends FOSRestController {
 
 			return $result;
 		} else {
-			return NULL;
+			throw new NotFoundHttpException(sprintf('Contest %s not found', $this->getParameter('domjudge.useexternalids') ? $contest->getExternalid() : $contest->getCid()));
 		}
+	}
+
+	/**
+	 * @Get("/contests/{cid}/judgement-types")
+	 */
+	public function getJudgementTypes() {
+		$etcDir = realpath($this->getParameter('kernel.root_dir') . '/../../etc/');
+		$VERDICTS = [];
+		require_once($etcDir . '/common-config.php');
+		$result = [];
+
+		foreach ($VERDICTS as $name => $label) {
+			$penalty = true;
+			$solved = false;
+			if ($name == 'correct') {
+				$penalty = false;
+				$solved = true;
+			}
+			if ($name == 'compiler-error') {
+				$penalty = $this->get('domjudge.domjudge')->dbconfig_get('compile_penalty', false);
+			}
+			$result[] = [
+				'id' => $label,
+				'name' => str_replace('-', ' ', $name),
+				'penalty' => $penalty,
+				'solved' => $solved,
+			];
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @Get("/contests/{cid}/judgement-types/{id}")
+	 */
+	public function getJudgementType($id) {
+		$judgementTypes = $this->getJudgementTypes();
+		foreach ($judgementTypes as $judgementType) {
+			if ($judgementType['id'] === $id) {
+				return $judgementType;
+			}
+		}
+
+		throw new NotFoundHttpException(sprintf('Judgement type %s not found', $id));
 	}
 
 	/**

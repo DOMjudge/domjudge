@@ -78,10 +78,12 @@ class ApiEntityParamConverter implements ParamConverterInterface {
 			}
 
 			$object = $repo->findOneBy($criteria);
-
-			$request->attributes->set($name, $object);
-
-			return true;
+			if ($object) {
+				$request->attributes->set($name, $object);
+				return true;
+			} else {
+				return false;
+			}
 		} catch (NoResultException $e) {
 			return false;
 		}
