@@ -18,13 +18,20 @@ class Language
 
 	/**
 	 * @var string
+	 * TODO: ORM\Unique on first 190 characters
+	 * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Contest ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+	 */
+	private $externalid;
+
+	/**
+	 * @var string
 	 * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive language name"}, nullable=false)
 	 */
 	private $name;
 
 	/**
-	 * @var string
-	 * @ORM\Column(type="text", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
+	 * @var string[]
+	 * @ORM\Column(type="json_array", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
 	 */
 	private $extensions;
 
@@ -88,6 +95,30 @@ class Language
 	}
 
 	/**
+	 * Set externalid
+	 *
+	 * @param string $externalid
+	 *
+	 * @return Language
+	 */
+	public function setExternalid($externalid)
+	{
+		$this->externalid = $externalid;
+
+		return $this;
+	}
+
+	/**
+	 * Get externalid
+	 *
+	 * @return string
+	 */
+	public function getExternalid()
+	{
+		return $this->externalid;
+	}
+
+	/**
 	 * Set name
 	 *
 	 * @param string $name
@@ -114,11 +145,11 @@ class Language
 	/**
 	 * Set extensions
 	 *
-	 * @param string $extensions
+	 * @param string[] $extensions
 	 *
 	 * @return Language
 	 */
-	public function setExtensions($extensions)
+	public function setExtensions(array $extensions)
 	{
 		$this->extensions = $extensions;
 
@@ -128,7 +159,7 @@ class Language
 	/**
 	 * Get extensions
 	 *
-	 * @return string
+	 * @return string[]
 	 */
 	public function getExtensions()
 	{
@@ -294,5 +325,25 @@ class Language
 	public function getSubmissions()
 	{
 		return $this->submissions;
+	}
+
+	/**
+	 * Helper function to serialize this for the REST API
+	 *
+	 * @return array
+	 */
+	public function serializeForAPI($use_external_ids, $strict)
+	{
+		$result = [
+			'id' => $use_external_ids ? $this->getExternalid() : (string)$this->getLangid(),
+			'name' => $this->getName(),
+		];
+		if (!$strict) {
+			$result['extensions'] = $this->getExtensions();
+			$result['allow_judge'] = $this->getAllowJudge();
+			$result['time_factor'] = $this->getTimeFactor();
+		}
+
+		return $result;
 	}
 }
