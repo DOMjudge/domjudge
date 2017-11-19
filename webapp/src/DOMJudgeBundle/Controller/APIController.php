@@ -156,7 +156,7 @@ class APIController extends FOSRestController {
 	 * @Get("/event-feed")
 	 */
 	public function getEventFeed(Request $request) {
-		# Avoid being killed after 30s of CPU time.
+		// Make sure this script doesn't hit the PHP maximum execution timeout.
 		set_time_limit(0);
 		$em = $this->getDoctrine()->getManager();
 		$contest = $this->getCurrentActiveContestAction();
@@ -186,8 +186,6 @@ class APIController extends FOSRestController {
 			if ($request->query->has('type')) {
 				$typeFilter = explode(',', $request->query->get('type'));
 			}
-			// Make sure this script doesn't hit the PHP maximum execution timeout.
-			set_time_limit(0);
 			while (TRUE) {
 				$qb = $em->createQueryBuilder()
 					->from('DOMJudgeBundle:Event', 'e')
