@@ -22,3 +22,9 @@ services:
       - name: kernel.event_listener
         event: kernel.response
         method: onKernelResponse
+
+  domjudge.api_entity_param_converter:
+    class: DOMJudgeBundle\Request\ParamConverter\ApiEntityParamConverter
+    arguments: ["@doctrine", "%domjudge.api.endpoints%", "%domjudge.useexternalids%"]
+    tags:
+      - { name: request.param_converter, priority: 10, converter: domjudge.api_entity_param_converter }

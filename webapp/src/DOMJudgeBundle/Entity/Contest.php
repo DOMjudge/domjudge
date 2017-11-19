@@ -825,11 +825,10 @@ class Contest
 	 *
 	 * @return array
 	 */
-	public function serializeForAPI($penalty_time)
+	public function serializeForAPI($penalty_time, $use_external_ids)
 	{
 		return [
-			'id'                         => (string)$this->getCid(),
-			'external_id'                => $this->getExternalId(),
+			'id'                         => $use_external_ids ? $this->getExternalId() : (string)$this->getCid(),
 			'shortname'                  => $this->getShortname(),
 			'name'                       => $this->getName(),
 			'formal_name'                => $this->getName(),
@@ -853,7 +852,7 @@ class Contest
 	/**
 	 * Helper function to filter active contests.
 	 */
-	public function filterActiveContests($data, $penalty_time) {
+	public static function filterActiveContests($data, $penalty_time, $use_external_ids) {
 		$filtered_data = [];
 		foreach ($data as $contest) {
 			if ($contest->isActive()) {
@@ -862,8 +861,8 @@ class Contest
 		}
 
 		return array_map(
-			function(Contest $contest) use ($penalty_time) {
-				return $contest->serializeForAPI($penalty_time);
+			function(Contest $contest) use ($use_external_ids, $penalty_time) {
+				return $contest->serializeForAPI($penalty_time, $use_external_ids);
 			},
 			$filtered_data
 		);

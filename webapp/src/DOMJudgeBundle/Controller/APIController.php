@@ -12,6 +12,7 @@ use FOS\RestBundle\Controller\Annotations\Patch;
 use FOS\RestBundle\Controller\Annotations\Head;
 use FOS\RestBundle\Controller\Annotations\Delete;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -119,32 +120,32 @@ class APIController extends FOSRestController {
 			)
 		);
 
-		return Contest::filterActiveContests($data, $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20));
+		return Contest::filterActiveContests($data, $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20), $this->getParameter('domjudge.useexternalids'));
 	}
 
 	/**
-	 * @Get("/contests/{cid}")
+	 * @Get("/contests/{id}")
 	 */
-	public function getSingleContestAction(Contest $cid) {
-		if ($cid->isActive()) {
-			return $cid->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20));
+	public function getSingleContestAction(Contest $contest) {
+		if ($contest->isActive()) {
+			return $contest->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20), $this->getParameter('domjudge.useexternalids'));
 		} else {
 			return NULL;
 		}
 	}
 
 	/**
-	 * @Get("/contests/{cid}/state")
+	 * @Get("/contests/{id}/state")
 	 */
-	public function getContestState(Contest $cid) {
-		if ($cid->isActive()) {
+	public function getContestState(Contest $contest) {
+		if ($contest->isActive()) {
 			$result = [];
-			$result['started'] = $cid->getStarttime() <= time() ? Utils::absTime($cid->getStarttime()) : null;
-			$result['ended'] = ($result['started'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
-			$result['frozen'] = ($result['started'] !== null && $cid->getFreezetime() <= time()) ? Utils::absTime($cid->getFreezetime()) : null;
-			$result['thawed'] = ($result['frozen'] !== null && $cid->getUnfreezetime() <= time()) ? Utils::absTime($cid->getUnfreezetime()) : null;
+			$result['started'] = $contest->getStarttime() <= time() ? Utils::absTime($contest->getStarttime()) : null;
+			$result['ended'] = ($result['started'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
+			$result['frozen'] = ($result['started'] !== null && $contest->getFreezetime() <= time()) ? Utils::absTime($contest->getFreezetime()) : null;
+			$result['thawed'] = ($result['frozen'] !== null && $contest->getUnfreezetime() <= time()) ? Utils::absTime($contest->getUnfreezetime()) : null;
 			// TODO: do not set this for public access (first needs public role)
-			$result['finalized'] = ($result['ended'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
+			$result['finalized'] = ($result['ended'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
 
 			return $result;
 		} else {
