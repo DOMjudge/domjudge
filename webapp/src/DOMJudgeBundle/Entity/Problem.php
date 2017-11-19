@@ -1,10 +1,11 @@
 <?php
 namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Service\DOMJudgeService;
 use JMS\Serializer\Annotation\Groups;
 /**
  * Stores testcases per problem
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="DOMJudgeBundle\Repository\ProblemRepository")
  * @ORM\Table(name="problem", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
 class Problem
@@ -19,6 +20,13 @@ class Problem
 	 * @Groups({"details"})
 	 */
 	private $probid;
+
+	/**
+	 * @var string
+	 * TODO: ORM\Unique on first 190 characters
+	 * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Contest ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+	 */
+	private $externalid;
 
 	/**
 	 * @var string
@@ -126,6 +134,30 @@ class Problem
 	public function getProbid()
 	{
 		return $this->probid;
+	}
+
+	/**
+	 * Set externalid
+	 *
+	 * @param string $externalid
+	 *
+	 * @return Problem
+	 */
+	public function setExternalid($externalid)
+	{
+		$this->externalid = $externalid;
+
+		return $this;
+	}
+
+	/**
+	 * Get externalid
+	 *
+	 * @return string
+	 */
+	public function getExternalid()
+	{
+		return $this->externalid;
 	}
 
 	/**
@@ -567,5 +599,37 @@ class Problem
 	public function getScorecache()
 	{
 		return $this->scorecache;
+	}
+
+	/**
+	 * Helper function to serialize this for the REST API
+	 *
+	 * @return array
+	 */
+	public function serializeForAPI($use_external_ids, $strict)
+	{
+		/** @var ContestProblem $contestProblem */
+		$contestProblem = $this->getContestProblems()->get(0);
+		$result = [
+			'id' => $use_external_ids ? $this->getExternalid() : (string)$this->getProbid(),
+			'label' => $contestProblem->getShortname(),
+			'name' => $this->getName(),
+			'time_limit' => $this->getTimelimit(),
+			'test_data_count' => $this->getTestcases()->count(),
+		];
+
+		$color = $contestProblem->getColor();
+		if (preg_match('/^#[[:xdigit:]]{3,6}$/', $color)) {
+			$result['rgb'] = $color;
+			$result['color'] = DOMJudgeService::hexToColor($color);
+		} else {
+			$result['rgb'] = DOMJudgeService::colorTohex($color);
+			$result['color'] = $color;
+		}
+		if (!$strict) {
+			$result['short_name'] = $contestProblem->getShortname();
+		}
+
+		return $result;
 	}
 }

@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Controller;
 
 use DOMJudgeBundle\Entity\Language;
+use DOMJudgeBundle\Entity\Problem;
 use FOS\RestBundle\Controller\FOSRestController;
 
 use FOS\RestBundle\Controller\Annotations\View;
@@ -219,6 +220,38 @@ class APIController extends FOSRestController {
 		} else {
 			throw new NotFoundHttpException(sprintf('Language %s not found', $id));
 		}
+	}
+
+	/**
+	 * @Get("/contests/{cid}/problems")
+	 */
+	public function getProblems(Request $request, Contest $contest) {
+		// TODO: add security check for public/admin. I can't seem to get checkrole() working
+		$problems = $this->getDoctrine()->getRepository(Problem::class)->findAllForContest($contest);
+
+		$ordinal = 0;
+		return array_map(function(Problem $problem) use (&$ordinal, $request) {
+			return $problem->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true)) + ['ordinal' => $ordinal++];
+		}, $problems);
+	}
+
+	/**
+	 * @Get("/contests/{cid}/problems/{id}")
+	 */
+	public function getProblem(Request $request, Contest $contest, $id) {
+		// TODO: add security check for public/admin. I can't seem to get checkrole() working
+		$problems = $this->getDoctrine()->getRepository(Problem::class)->findAllForContest($contest);
+
+		/**
+		 * @var Problem $problem
+		 */
+		foreach ($problems as $idx => $problem) {
+			if (($this->getParameter('domjudge.useexternalids') && $problem->getExternalid() == $id) || (!$this->getParameter('domjudge.useexternalids')) && $problem->getProbid() == $id) {
+				return $problem->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true)) + ['ordinal' => $idx];
+			}
+		}
+
+		throw new NotFoundHttpException(sprintf('Problem %s not found', $id));
 	}
 
 	/**

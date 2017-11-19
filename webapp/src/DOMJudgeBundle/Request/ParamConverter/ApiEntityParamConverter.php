@@ -59,11 +59,15 @@ class ApiEntityParamConverter implements ParamConverterInterface {
 		$endpointData = $this->endpoints[$endpoint];
 
 		try {
+			$id = $request->attributes->get('id');
+			if ($name === 'contest' && $request->attributes->has('cid')) {
+				$id = $request->attributes->get('cid');
+			}
 			$repo = $this->registry->getManagerForClass($class)->getRepository($class);
 			if ($this->externalIdsEnabled) {
-				$criteria = [$endpointData['externalid'] => $request->attributes->get('id')];
+				$criteria = [$endpointData['externalid'] => $id];
 			} else {
-				$criteria = [$endpointData['primarykey'] => $request->attributes->get('id')];
+				$criteria = [$endpointData['primarykey'] => $id];
 			}
 
 			// Check if the endpoint requires a contest ID
