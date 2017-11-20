@@ -11,7 +11,7 @@ class Judgehost
 	/**
 	 * @var string
 	 * @ORM\Id
-	 * @ORM\Column(type="string", name="hostname", length=50, options={"comment"="Resolvable hostname of judgehost"}, nullable=false)
+	 * @ORM\Column(type="string", name="hostname", length=64, options={"comment"="Resolvable hostname of judgehost"}, nullable=false)
 	 */
 	private $hostname;
 
