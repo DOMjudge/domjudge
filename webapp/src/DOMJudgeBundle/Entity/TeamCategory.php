@@ -30,7 +30,7 @@ class TeamCategory
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", length=25, name="color", options={"comment"="Background colour on the scoreboard"}, nullable=true)
+	 * @ORM\Column(type="string", length=32, name="color", options={"comment"="Background colour on the scoreboard"}, nullable=true)
 	 */
 	private $color;
 

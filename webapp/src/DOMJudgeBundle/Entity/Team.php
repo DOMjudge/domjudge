@@ -56,7 +56,7 @@ class Team
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", length=15, name="room", options={"comment"="Physical location of team"}, nullable=true)
+	 * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"}, nullable=true)
 	 */
 	private $room;
 
