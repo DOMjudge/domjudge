@@ -206,14 +206,15 @@ class APIController extends FOSRestController {
 
 				$events = $q->getResult();
 				foreach ($events as $event) {
-					$data = json_decode(stream_get_contents($event['content']));
+					// FIXME: use the dj_* wrapper as in lib/lib.wrapper.php.
+					$data = json_decode(stream_get_contents($event['content']), TRUE);
 					echo json_encode(array(
 						'id'        => (string)$event['eventid'],
 						'type'      => (string)$event['endpointtype'],
 						'op'        => (string)$event['action'],
 						'time'      => Utils::absTime($event['eventtime']),
 						'data'      => $data,
-					)) . "\n";
+					), JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES) . "\n";
 					ob_flush();
 					flush();
 					$lastUpdate = time();
