@@ -46,7 +46,7 @@ function dj_json_decode($str) {
  * Encode data to JSON and handle errors.
  */
 function dj_json_encode($data) {
-	$res = json_encode($data, JSON_PRESERVE_ZERO_FRACTION);
+	$res = json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES);
 	if ( json_last_error() !== JSON_ERROR_NONE ) {
 		error("Error encoding data to JSON: ".json_last_error_msg());
 	}
