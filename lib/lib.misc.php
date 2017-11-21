@@ -901,10 +901,10 @@ $API_endpoints = array(
 		'tables' => array('team', 'contestteam'),
 		'extid'  => TRUE,
 	),
-	'teams-members' => array(
-		'type'   => 'configuration',
-		'tables' => array(),
-	),
+// 	'teams-members' => array(
+// 		'type'   => 'configuration',
+// 		'tables' => array(),
+// 	),
 	'submissions' => array(
 		'type'   => 'live',
 		'extid'  => TRUE, // 'externalid,cid' in ICPC-live branch
@@ -921,12 +921,12 @@ $API_endpoints = array(
 	),
 	'clarifications' => array(
 		'type'   => 'live',
-		'extid'  => 'externalid,cid',
+		'extid'  => TRUE,
 	),
-	'awards' => array(
-		'type'   => 'aggregate',
-		'tables' => array(),
-	),
+// 	'awards' => array(
+// 		'type'   => 'aggregate',
+// 		'tables' => array(),
+// 	),
 	'scoreboard' => array(
 		'type'   => 'aggregate',
 		'tables' => array(),
