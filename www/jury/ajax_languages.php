@@ -9,4 +9,4 @@ $languages = $DB->q("TABLE SELECT langid AS id, name,
                     ( isset($_GET['enabled']) ? " AND allow_submit = 1 AND allow_judge = 1" : "" ),
                    $_GET['q'], $_GET['q']);
 
-echo json_encode($languages);
+echo dj_json_encode($languages);

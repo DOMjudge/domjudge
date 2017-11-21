@@ -578,7 +578,7 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 			}
 			unset($langid);
 			foreach ( $langs as $key => $exts ) {
-				if ( in_array($extension,json_decode($exts)) ) {
+				if ( in_array($extension,dj_json_decode($exts)) ) {
 					$langid = $key;
 					break;
 				}
@@ -602,7 +602,8 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
 					$sid = submit_solution($teamid, $probid, $cid, $langid,
 							array($tmpfname), array(basename($filename)));
-					$DB->q('UPDATE submission SET expected_results=%s WHERE submitid=%i', json_encode($results), $sid);
+					$DB->q('UPDATE submission SET expected_results=%s WHERE submitid=%i',
+					       dj_json_encode($results), $sid);
 
 					echo "<li>Added jury solution from: <tt>$filename</tt></li>\n";
 					$njurysols++;

@@ -702,7 +702,7 @@ function initScorefilter()
 
 	// Read scoreboard filter options from cookie and explicit POST
 	if ( isset($_COOKIE['domjudge_scorefilter']) ) {
-		$scorefilter = json_decode($_COOKIE['domjudge_scorefilter'], TRUE);
+		$scorefilter = dj_json_decode($_COOKIE['domjudge_scorefilter']);
 	}
 
 	if ( isset($_REQUEST['clear']) ) $scorefilter = array();
@@ -716,7 +716,7 @@ function initScorefilter()
 		}
 	}
 
-	dj_setcookie('domjudge_scorefilter', json_encode($scorefilter));
+	dj_setcookie('domjudge_scorefilter', dj_json_encode($scorefilter));
 
 	return $scorefilter;
 }

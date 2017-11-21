@@ -121,7 +121,7 @@ if ( isset($_REQUEST['upload']) ) {
 	exit;
 }
 
-$json = json_decode($response, TRUE);
+$json = dj_json_decode($response);
 if ( $json === NULL ) {
 	error("Error retrieving API data. API gave us: " . $response);
 }

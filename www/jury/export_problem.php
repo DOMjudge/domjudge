@@ -98,7 +98,7 @@ $solutions = $DB->q('SELECT submitid, expected_results
                      GROUP BY submitid', $cid, $id);
 
 while ( $sol = $solutions->next() ) {
-	$result = json_decode($sol['expected_results']);
+	$result = dj_json_decode($sol['expected_results']);
 	// Only support single outcome solutions:
 	if ( !is_array($result) || count($result)!=1 ) continue;
 	$result = reset($result);

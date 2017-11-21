@@ -324,7 +324,7 @@ function judgings_POST($args)
 	                        INNER JOIN judgehost_restriction USING (restrictionid)
 	                        WHERE hostname = %s', $host);
 	if ( $restrictions ) {
-		$restrictions = json_decode($restrictions, true);
+		$restrictions = dj_json_decode($restrictions);
 		$contests = @$restrictions['contest'];
 		$problems = @$restrictions['problem'];
 		$languages = @$restrictions['language'];
@@ -1115,7 +1115,7 @@ function languages()
 		$res[] = array(
 			'id'           => $row['langid'],
 			'name'         => $row['name'],
-			'extensions'   => json_decode($row['extensions']),
+			'extensions'   => dj_json_decode($row['extensions']),
 			'allow_judge'  => safe_bool($row['allow_judge']),
 			'time_factor'  => safe_float($row['time_factor']),
 			);

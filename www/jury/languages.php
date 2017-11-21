@@ -37,7 +37,7 @@ if( $res->count() == 0 ) {
 				printyn($row['allow_judge']) . "</a>" .
 			"</td><td>" . $link . specialchars($row['time_factor']) . "</a>" .
 			"</td><td>" . $link .
-			specialchars(implode(', ',json_decode($row['extensions']))) . "</a>";
+			specialchars(implode(', ',dj_json_decode($row['extensions']))) . "</a>";
 			if ( IS_ADMIN ) {
 				echo "</td><td class=\"editdel\">" .
 					editLink('language', $row['langid']) . "&nbsp;" .

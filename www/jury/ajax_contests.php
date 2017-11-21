@@ -11,4 +11,4 @@ $contests = $DB->q("TABLE SELECT cid AS id, name, shortname,
                    ( isset($_GET['public']) ? "AND public = %i" : "%_" ),
                    $_GET['q'], $_GET['q'], $_GET['q'], @$_GET['public']);
 
-echo json_encode($contests);
+echo dj_json_encode($contests);

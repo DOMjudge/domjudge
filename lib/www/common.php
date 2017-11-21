@@ -688,7 +688,7 @@ function putgetMainExtension($langdata) {
 	echo "function getMainExtension(ext)\n{\n";
 	echo "\tswitch(ext) {\n";
 	foreach ( $langdata as $langid => $langdata ) {
-		$exts = json_decode($langdata['extensions']);
+		$exts = dj_json_decode($langdata['extensions']);
 		if ( !is_array($exts) ) continue;
 		foreach ( $exts as $ext ) {
 			echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
