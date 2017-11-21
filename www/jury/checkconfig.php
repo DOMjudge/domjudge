@@ -342,7 +342,7 @@ foreach ($judgehosts as &$judgehost) {
 	                        WHERE hostname = %s ORDER BY restrictionid',
 	                       $judgehost['hostname']);
 	if ( $restrictions ) {
-		$restrictions = json_decode($restrictions, true);
+		$restrictions = dj_json_decode($restrictions);
 		$judgehost['contests'] = @$restrictions['contest'];
 		$judgehost['problems'] = @$restrictions['problem'];
 		$judgehost['languages'] = @$restrictions['language'];

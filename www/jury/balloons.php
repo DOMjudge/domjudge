@@ -18,7 +18,7 @@ function initBalloonfilter()
 
 	// Read balloon filter options from cookie and explicit POST
 	if ( isset($_COOKIE['domjudge_balloonfilter']) ) {
-		$balloonfilter = json_decode($_COOKIE['domjudge_balloonfilter'], TRUE);
+		$balloonfilter = dj_json_decode($_COOKIE['domjudge_balloonfilter']);
 	}
 
 	if ( isset($_REQUEST['clear']) ) $balloonfilter = array();
@@ -32,7 +32,7 @@ function initBalloonfilter()
 		}
 	}
 
-	dj_setcookie('domjudge_balloonfilter', json_encode($balloonfilter));
+	dj_setcookie('domjudge_balloonfilter', dj_json_encode($balloonfilter));
 
 	return $balloonfilter;
 }

@@ -45,7 +45,7 @@ if ( !empty($_GET['cmd']) ) {
 		               WHERE restrictionid = %i', $id);
 		if ( !$row ) error("Missing or invalid judgehost restriction id");
 
-		$row['restrictions'] = json_decode($row['restrictions'], true);
+		$row['restrictions'] = dj_json_decode($row['restrictions']);
 
 		echo "<tr><td>ID:</td><td>" .
 		     addHidden('keydata[0][restrictionid]', $row['restrictionid']) .
@@ -141,7 +141,7 @@ echo "<table>\n";
 echo '<tr><td>ID:</td><td>' . specialchars($data['restrictionid']) . "</td></tr>\n";
 echo '<tr><td>Name:</td><td>' . specialchars($data['name']) . "</td></tr>\n";
 
-$restrictions = json_decode($data['restrictions'], true);
+$restrictions = dj_json_decode($data['restrictions']);
 
 foreach ( array('contest','problem','language') as $type ) {
 	echo "<tr><td>Restrict to ${type}s:</td>";

@@ -778,7 +778,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	// submissions.
 	if ( checkrole('jury') && !empty($results) ) {
 		$DB->q('UPDATE submission SET expected_results=%s
-		        WHERE submitid=%i', json_encode($results), $id);
+		        WHERE submitid=%i', dj_json_encode($results), $id);
 	}
 	eventlog('submission', $id, 'create', $contest);
 	$DB->q('COMMIT');

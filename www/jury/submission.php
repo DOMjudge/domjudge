@@ -416,7 +416,7 @@ if ( !isset($jid) ) {
 		$problems = array();
 		$languages = array();
 		if ( isset($judgehost['restrictions']) ) {
-			$restrictions = json_decode($judgehost['restrictions'], true);
+			$restrictions = dj_json_decode($judgehost['restrictions']);
 			$contests = @$restrictions['contest'];
 			$problems = @$restrictions['problem'];
 			$languages = @$restrictions['language'];

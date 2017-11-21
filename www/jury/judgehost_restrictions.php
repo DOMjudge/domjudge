@@ -28,7 +28,7 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 			$_POST['data'][0]['restrictions'][$restriction_name] = $restriction;
 		}
 	}
-	$_POST['data'][0]['restrictions'] = json_encode($_POST['data'][0]['restrictions']);
+	$_POST['data'][0]['restrictions'] = dj_json_encode($_POST['data'][0]['restrictions']);
 	require_once('edit.php');
 	exit;
 }
@@ -56,7 +56,7 @@ if( $res->count() == 0 ) {
 	     "</thead>\n<tbody>\n";
 
 	while($row = $res->next()) {
-		$restrictions = json_decode($row['restrictions'], true);
+		$restrictions = dj_json_decode($row['restrictions']);
 		$link = '<a href="judgehost_restriction.php?id=' . (int)$row['restrictionid'] . '">';
 		echo '<tr><td>' . $link. (int)$row['restrictionid'] .
 		     '</a></td><td>' . $link . specialchars($row['name']) .

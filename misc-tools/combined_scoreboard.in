@@ -95,7 +95,7 @@ foreach ( $sites as $site_id => $site ) {
 
 	// Get contests to find correct one
 	$contests = file_get_contents($site['url'] . '/api/contests', null, $ctx);
-	$contests = json_decode($contests, true);
+	$contests = dj_json_decode($contests);
 	if ( !$contests ) {
 		fprintf(STDERR, "Can not fetch contests of site ${site['url']}!\n");
 		exit(1);
@@ -123,7 +123,7 @@ foreach ( $sites as $site_id => $site ) {
 
 	// Get problems
 	$remote_problems = file_get_contents($site['url'] . '/api/problems?cid=' . $cid, null, $ctx);
-	$remote_problems = json_decode($remote_problems, true);
+	$remote_problems = dj_json_decode($remote_problems);
 	if ( !$remote_problems ) {
 		fprintf(STDERR, "Can not fetch problems of site ${site['url']}!\n");
 		exit(1);
@@ -149,7 +149,7 @@ foreach ( $sites as $site_id => $site ) {
 
 	// Get categories
 	$remote_categories = file_get_contents($site['url'] . '/api/categories?public=' . $public, null, $ctx);
-	$remote_categories = json_decode($remote_categories, true);
+	$remote_categories = dj_json_decode($remote_categories);
 	if ( !$remote_categories ) {
 		fprintf(STDERR, "Can not fetch categories of site ${site['url']}!\n");
 		exit(1);
@@ -166,7 +166,7 @@ foreach ( $sites as $site_id => $site ) {
 
 	// Get teams
 	$remote_teams = file_get_contents($site['url'] . '/api/teams?public=' . $public, null, $ctx);
-	$remote_teams = json_decode($remote_teams, true);
+	$remote_teams = dj_json_decode($remote_teams);
 	if ( !$remote_teams ) {
 		fprintf(STDERR, "Can not fetch teams of site ${site['url']}!\n");
 		exit(1);
@@ -191,7 +191,7 @@ foreach ( $sites as $site_id => $site ) {
 
 	// Get scoreboard
 	$scoreboard = file_get_contents($site['url'] . '/api/scoreboard?cid=' . $cid . '&public=' . $public, null, $ctx);
-	$scoreboard = json_decode($scoreboard, true);
+	$scoreboard = dj_json_decode($scoreboard);
 	if ( !$scoreboard ) {
 		fprintf(STDERR, "Can not fetch scoreboard of site ${site['url']}!\n");
 		exit(1);

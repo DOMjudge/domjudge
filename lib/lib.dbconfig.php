@@ -21,7 +21,7 @@ function dbconfig_init()
 
 	while ( $row = $res->next() ) {
 		$key = $row['name'];
-		$val = json_decode($row['value'], true);
+		$val = dj_json_decode($row['value']);
 
 		switch ( json_last_error() ) {
 		case JSON_ERROR_NONE:
@@ -101,7 +101,7 @@ function dbconfig_store()
 			error("unknown type '$type' for config variable '$key'");
 		}
 
-		$val = json_encode($row['value']);
+		$val = dj_json_encode($row['value']);
 
 		switch ( json_last_error() ) {
 		case JSON_ERROR_NONE:
