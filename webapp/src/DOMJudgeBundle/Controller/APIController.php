@@ -179,12 +179,12 @@ class APIController extends FOSRestController {
 		$response->setCallback(function () use ($em, $contest, $request) {
 			$lastUpdate = 0;
 			$lastIdSent = -1;
-			if ($request->query->has('id')) {
-				$lastIdSent = $request->query->getInt('id');
+			if ($request->query->has('since_id')) {
+				$lastIdSent = $request->query->getInt('since_id');
 			}
 			$typeFilter = false;
-			if ($request->query->has('type')) {
-				$typeFilter = explode(',', $request->query->get('type'));
+			if ($request->query->has('types')) {
+				$typeFilter = explode(',', $request->query->get('types'));
 			}
 			while (TRUE) {
 				$qb = $em->createQueryBuilder()
