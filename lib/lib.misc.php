@@ -1100,8 +1100,8 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		} else {
 			$url = $endpoint['url'].'/'.$id;
 		}
-		$json = API_request($url);
-		if ( empty($json) ) error("eventlog: got no JSON data from '$url'");
+		$json = API_request($url, 'GET', '', false);
+		if ( empty($json) ) logmsg(LOG_WARN,"eventlog: got no JSON data from '$url'");
 	}
 
 	// First acquire an advisory lock to prevent other event logging,
@@ -1198,10 +1198,14 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 
 		$status = $response->getStatusCode();
 		if ( $status < 200 || $status >= 300 ) {
-			$errstr = "Error while executing internal $verb request to url " . $url .
+			$errstr = "executing internal $verb request to url " . $url .
 				": http status code: " . $status . ", response: " . $response;
-			if ($failonerror) { error($errstr); }
-			else { warning($errstr); return null; }
+			if ( $failonerror ) {
+				error($errstr);
+			} else {
+				logmsg(LOG_WARN,$errstr);
+				return null;
+			}
 		}
 
 		return $response->getContent();
@@ -1246,10 +1250,14 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	}
 	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	if ( $status < 200 || $status >= 300 ) {
-		$errstr = "Error while executing curl $verb to url " . $url .
-		    ": http status code: " . $status . ", response: " . $response;
-		if ($failonerror) { error($errstr); }
-		else { warning($errstr); return null; }
+		$errstr = "executing internal $verb request to url " . $url .
+			": http status code: " . $status . ", response: " . $response;
+		if ( $failonerror ) {
+			error($errstr);
+		} else {
+			logmsg(LOG_WARN,$errstr);
+			return null;
+		}
 	}
 
 	curl_close($ch);
