@@ -282,6 +282,20 @@ class Contest
 		return $this->activatetime;
 	}
 
+        /**
+	 * Set starttime
+	 *
+	 * @param double $starttime
+	 *
+	 * @return Contest
+	 */
+	public function setStarttime($starttime)
+	{
+		$this->starttime = $starttime;
+
+		return $this;
+	}
+
 	/**
 	 * Get starttime
 	 *
