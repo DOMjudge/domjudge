@@ -186,6 +186,7 @@ class APIController extends FOSRestController {
 			if ($request->query->has('types')) {
 				$typeFilter = explode(',', $request->query->get('types'));
 			}
+			$isAdmin = $this->isGranted('ROLE_ADMIN');
 			while (TRUE) {
 				$qb = $em->createQueryBuilder()
 					->from('DOMJudgeBundle:Event', 'e')
@@ -201,6 +202,11 @@ class APIController extends FOSRestController {
 						->andWhere('e.endpointtype IN (:types)')
 						->setParameter(':types', $typeFilter);
 				}
+				if ( !$isAdmin ) {
+					$qb = $qb
+						->andWhere('e.endpointtype NOT IN (:types)')
+						->setParameter(':types', ['judgements', 'runs']);
+				}
 
 				$q = $qb->getQuery();
 
@@ -208,6 +214,9 @@ class APIController extends FOSRestController {
 				foreach ($events as $event) {
 					// FIXME: use the dj_* wrapper as in lib/lib.wrapper.php.
 					$data = json_decode(stream_get_contents($event['content']), TRUE);
+					if ( !$isAdmin && $event['endpointtype'] == 'submissions' ) {
+						unset($data['entry_point']);
+					}
 					echo json_encode(array(
 						'id'        => (string)$event['eventid'],
 						'type'      => (string)$event['endpointtype'],
