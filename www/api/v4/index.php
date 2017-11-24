@@ -819,7 +819,7 @@ function submissions($args)
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
 			'contest_id'   => safe_string($row['cid']), // FIXME: remove or use externalid?
 			'entry_point'  => $row['entry_point'],
-			'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")),
+			'files'        => array(array('href' => "/submissions/$extid/files")),
 			);
 	}
 	return $res;
