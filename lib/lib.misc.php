@@ -1072,7 +1072,10 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		if ( !empty($data['id']) ) $id = $data['id'];
 	}
 
-	if ( $id===null ) error('eventlog: API ID not specified or inferred from data');
+	if ( $id===null ) {
+		logmsg(LOG_WARNING, "eventlog: API ID not specified or inferred from data");
+		return;
+	}
 
 	$cids = array();
 	if ( $cid!==null ) {
