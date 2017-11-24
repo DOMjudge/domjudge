@@ -206,7 +206,7 @@ int main(int argc, char **argv)
 	logmsg(LOG_INFO,"started");
 
 	/* Read default for baseurl and contest from environment */
-	baseurl = string(BASEURL);
+	baseurl = string("https://domjudge.bath.ac.uk/domjudge/");
 	contest = "";
 	if ( getenv("SUBMITBASEURL")!=NULL ) baseurl = string(getenv("SUBMITBASEURL"));
 	if ( getenv("SUBMITCONTEST")!=NULL ) contest = string(getenv("SUBMITCONTEST"));
