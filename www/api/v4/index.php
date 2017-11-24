@@ -747,8 +747,7 @@ function config($args)
 $doc = 'Get configuration variables.';
 $args = array('name' => 'Search only a single config variable.');
 $exArgs = array(array('name' => 'sourcesize_limit'));
-$roles = array('jury','judgehost');
-$api->provideFunction('GET', 'config', $doc, $args, $exArgs, $roles);
+$api->provideFunction('GET', 'config', $doc, $args, $exArgs);
 
 /**
  * Submissions information
