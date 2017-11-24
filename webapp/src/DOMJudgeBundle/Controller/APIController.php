@@ -223,7 +223,7 @@ class APIController extends FOSRestController {
 						'op'        => (string)$event['action'],
 						'time'      => Utils::absTime($event['eventtime']),
 						'data'      => $data,
-					), JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES) . "\n";
+					)) . "\n";
 					ob_flush();
 					flush();
 					$lastUpdate = time();

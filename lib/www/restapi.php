@@ -251,7 +251,7 @@ class RestApi {
 	private function createResponse($response)
 	{
 		header('Content-Type: application/json');
-		print dj_json_encode($response) . "\n";
+		print json_encode($response) . "\n";
 	}
 
 	public function createError($message, $code = BAD_REQUEST)
