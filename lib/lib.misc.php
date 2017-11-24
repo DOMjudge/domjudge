@@ -899,7 +899,7 @@ $API_endpoints = array(
 	'teams' => array(
 		'type'   => 'configuration',
 		'tables' => array('team', 'contestteam'),
-		'extid'  => 'externalid',
+		'extid'  => TRUE,
 	),
 	'teams-members' => array(
 		'type'   => 'configuration',
