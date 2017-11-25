@@ -31,6 +31,14 @@ security:
             stateless: true
             anonymous: ~
 
+        # api only does http_basic auth
+        feed:
+            pattern: ^/feed
+            provider: domjudge_db_provider
+            http_basic: ~
+            stateless: true
+            anonymous: ~
+
         # rest of app does form_login
         main:
             pattern: ^/
