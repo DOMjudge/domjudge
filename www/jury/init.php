@@ -26,7 +26,7 @@ require_once(LIBWWWDIR . '/auth.php');
 logged_in();
 define('IS_ADMIN', checkrole('admin'));
 
-if ( !isset($REQUIRED_ROLES) ) $REQUIRED_ROLES = array('jury');
+if ( !isset($REQUIRED_ROLES) ) $REQUIRED_ROLES = array('jury', 'balloon');
 $allowed = false;
 foreach ($REQUIRED_ROLES as $role) {
 	if ( checkrole($role) ) {
