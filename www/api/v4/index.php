@@ -1075,7 +1075,7 @@ function runs($args)
 		$args['run_id'] = rest_intid('runs', $args['__primary_key'], $cid);
 	}
 
-	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid
+	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid, runtime
 	          FROM judging_run jr
 	          LEFT JOIN testcase USING (testcaseid)
 	          LEFT JOIN judging USING (judgingid)
@@ -1111,6 +1111,7 @@ function runs($args)
 			'judgement_type_id' => safe_string($VERDICTS[$run['runresult']]),
 			'time'              => Utils::absTime($run['endtime']),
 			'contest_time'      => Utils::relTime($run['endtime'] - $cdatas[$run['cid']]['starttime']),
+			'run_time'          => safe_float($run['runtime']),
 		);
 	}, $runs);
 }
