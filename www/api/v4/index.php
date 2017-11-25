@@ -881,7 +881,7 @@ function submissions_POST($args)
 	}
 
 	$entry_point = empty($args['entry_point']) ? NULL : $args['entry_point'];
-	if ( dbconfig_get('require_entry_point', FALSE) && !isset($entry_point) ) {
+	if ( $args['langid'] != 'c' && $args['langid'] != 'cpp' && dbconfig_get('require_entry_point', FALSE) && !isset($entry_point) ) {
 		error("Entry point required, but not specified.");
 	}
 	$sid = submit_solution($userdata['teamid'], $probid, $cid, $args['langid'], $FILEPATHS, $FILENAMES, NULL, $entry_point);
