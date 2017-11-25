@@ -30,7 +30,10 @@ $userdata = NULL;
 // Check if current user has given role, or has superset of this role's
 // privileges
 function checkrole($rolename, $check_superset = TRUE) {
-    global $G_SYMFONY;
+    global $G_SYMFONY, $apiFromInternal;
+    if ( isset($apiFromInternal) && $apiFromInternal === TRUE ) {
+	    return TRUE;
+    }
     return $G_SYMFONY->checkrole($rolename, $check_superset);
 }
 
