@@ -293,10 +293,12 @@ function judgings($args)
 		$args['judging_id'] = rest_intid('judgements', $args['__primary_key'], $cid);
 	}
 
-	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime
+	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime,
+	                 MAX(r.runtime) AS maxruntime
 	          FROM judging j
 	          LEFT JOIN contest c USING (cid)
 	          LEFT JOIN submission s USING (submitid)
+	          LEFT JOIN judging_run r USING (judgingid)
 	          WHERE j.cid = %i';
 
 	if ( !(checkrole('admin') || checkrole('judgehost')) ) {
@@ -330,7 +332,7 @@ function judgings($args)
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' %_');
 	$submitid = ($hasSubmitid ? $args['submission_id'] : 0);
 
-	$query .= ' ORDER BY judgingid';
+	$query .= ' GROUP BY j.judgingid ORDER BY j.judgingid';
 
 	$q = $DB->q($query, $cid, $result, $teamid, $judgingid, $submitid);
 
@@ -345,6 +347,7 @@ function judgings($args)
 			'start_contest_time' => Utils::relTime($row['starttime'] - $cdatas[$row['cid']]['starttime']),
 			'end_time'           => empty($row['endtime']) ? null : Utils::absTime($row['endtime']),
 			'end_contest_time'   => empty($row['endtime']) ? null : Utils::relTime($row['endtime'] - $cdatas[$row['cid']]['starttime']),
+			'max_run_time'       => safe_float($row['maxruntime']),
 		);
 	}
 	return $res;
