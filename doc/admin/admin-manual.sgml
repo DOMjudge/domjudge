@@ -360,10 +360,11 @@ sudo apt install gcc g++ make zip unzip mysql-server \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
+# To enable the command-line submit client, also add:
+sudo apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
 </code>
 Note that PHP modules may need to be enabled depending on your distribution.
 E.g. on Ubuntu run <code>sudo phpenmod json</code> to enable the JSON module.
-
 
 For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
 
@@ -374,23 +375,14 @@ sudo yum install gcc gcc-c++ make zip unzip mariadb-server \
 	httpd php-gd php-cli php-mbstring php-mysql \
 	ntp linuxdoc-tools libcgroup-devel \
 	texlive-collection-latexrecommended texlive-wrapfig
+# To enable the command-line submit client, also add:
+sudo yum install libcurl-devel jsoncpp-devel file-devel
 </code>
 Note that the TeX Live packages <tt>expdlist</tt>, <tt>moreverb</tt>,
 and <tt>svn</tt> still have be installed manually to rebuild the team
 manuals. Furthermore, <tt>phpmyadmin</tt> is available from the
 <htmlurl name="Fedora EPEL repository"
 url="https://fedoraproject.org/wiki/EPEL">.
-
-Finally, to build the command-line submit client, install the
-following additional software.
-
-<code>
-sudo apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
-</code>
-
-<code>
-sudo yum install libcurl-devel jsoncpp-devel file-devel
-</code>
 The package <tt>jsoncpp-devel</tt> is available in Fedora, but not in
 RHEL/CentOS.
 
