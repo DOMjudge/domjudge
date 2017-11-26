@@ -100,8 +100,11 @@ function putClar($clar)
 			// FIXME: why does it make sense to keep clars for a dropped problem and relabel them to general issue?
 			echo $prefix . "General issue";
 		} else {
-			// FIXME: add check if the category still exists?
-			echo $prefix . specialchars($categs[$clar['category']]);
+			if ( array_key_exists($clar['category'], $categs) ) {
+				echo $prefix . specialchars($categs[$clar['category']]);
+			} else {
+				echo $prefix . "General issue";
+			}
 		}
 	} else {
 		if ( IS_JURY ) {
@@ -255,8 +258,11 @@ function putClarificationList($clars, $team = NULL)
 			// FIXME: why does it make sense to keep clars for a dropped problem and relabel them to general issue?
 			echo "general";
 		} else {
-			// FIXME: add check if the category still exists?
-			echo specialchars($categs[$clar['category']]);
+			if ( array_key_exists($clar['category'], $categs) ) {
+				echo specialchars($categs[$clar['category']]);
+			} else {
+				echo "general";
+			}
 		}
 		} else {
 			echo "problem ".$clar['shortname'];
