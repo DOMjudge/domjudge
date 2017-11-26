@@ -143,9 +143,9 @@ INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES
-(1, 'admin', 'Administrator', '$2y$10$WkXRuj/UgoMGF80BaqhOJ.b1HW8KcGrUcWV3uAvGrQlp6Ia8w/dgO'), -- Is a hash for 'admin'
-(2, 'judgehost', 'User for judgedaemons', NULL);
+INSERT INTO `user` (`userid`, `username`, `name`, `email`, `password`) VALUES
+(1, 'admin', 'Administrator', 'team@domjudge.org', '$2y$10$WkXRuj/UgoMGF80BaqhOJ.b1HW8KcGrUcWV3uAvGrQlp6Ia8w/dgO'), -- Is a hash for 'admin'
+(2, 'judgehost', 'User for judgedaemons', NULL, NULL);
 
 --
 -- Dumping data for table `userrole`
