@@ -625,6 +625,11 @@ For Apache, there are countless documents on how to maximize performance.
 Of particular importance is to ensure that the <tt>MaxClients</tt> setting
 is high enough to receive the number of parallel requests you expect, but
 not higher than your amount of RAM allows.
+Furthermore, we recommend to turn <tt>KeepAlive</tt> off, or at
+least make sure that <tt>KeepAliveTimeout</tt> is set to only a few
+seconds. Otherwise, a large number of page view requests from teams
+and public can easily exhaust the Apache workers, resulting in an
+unresponsive website, which will also affect the judgedaemons.
 
 <p>
 As for PHP, the use of an opcode cache like the Alternative PHP Cache
