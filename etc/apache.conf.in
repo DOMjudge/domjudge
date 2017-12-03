@@ -87,9 +87,9 @@ RewriteRule Makefile$ - [F]
 
 #<IfModule mod_php7.c>
 #php_value max_file_uploads    100
-#php_value upload_max_filesize 64M
-#php_value post_max_size       64M
-#php_value memory_limit        128M
+#php_value upload_max_filesize 128M
+#php_value post_max_size       128M
+#php_value memory_limit        512M
 #</IfModule>
 
 </Directory>

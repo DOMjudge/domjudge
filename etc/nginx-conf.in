@@ -20,7 +20,7 @@ server {
 	server_name _default_;
 
 	# set max upload size. Make sure the PHP values also high enough
-	client_max_body_size 64M;
+	client_max_body_size 128M;
 
 	# Uncomment to run it out of the root of your system
 	#location / {
@@ -86,7 +86,7 @@ server {
 # 	ssl_prefer_server_ciphers on;
 
 # 	# set max upload size. Make sure the PHP values also high enough
-# 	client_max_body_size 64M;
+# 	client_max_body_size 128M;
 
 #	# Run it out of the root of the system
 #	location / {
