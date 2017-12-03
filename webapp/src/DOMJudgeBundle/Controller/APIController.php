@@ -65,14 +65,14 @@ class APIController extends FOSRestController {
 					'cid' => $args['id'],
 				)
 			);
-			$date = \DateTime::createFromFormat(\DateTime::ATOM, $args['start_time']);
+			$date = new DateTime($args['start_time']);
 			if ( $date === FALSE) {
 				$response = new Response('Invalid "start_time" in request.', 400);
 			} else {
 				$new_start_time = $date->getTimestamp();
 				$now = Utils::now();
 				if ( $new_start_time < $now + 30 ) {
-					$response = new Response('New start_time not far in enough in future.', 403);
+					$response = new Response('New start_time not far enough in the future.', 403);
 				} else if ( FALSE && $contestObject->getStarttime() != NULL && $contestObject->getStarttime() < $now + 30 ) {
 					$response = new Response('Current contest already started or about to start.', 403);
 				} else {
