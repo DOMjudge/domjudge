@@ -79,7 +79,6 @@ class APIController extends FOSRestController {
 					$em->persist($contestObject);
 					$newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
 					$contestObject->setStarttimeString($newStartTimeString);
-					$contestObject->setStarttime($new_start_time);
 					$response = new Response('Contest start time changed to ' . $newStartTimeString, 200);
 					$em->flush();
 				}
