@@ -177,25 +177,35 @@ function tsv_accounts_prepare($content)
 		$l++;
 		$line = explode("\t", trim($line));
 
-		$teamid = $juryteam = null;
+		$teamid = $juryteam = $roleid = null;
 		switch($line[0]) {
 			case 'admin':
-				$line[0] = $adminroleid;
+				$roleid = $adminroleid;
 				break;
 			case 'judge':
-				$line[0] = $juryroleid;
+				$roleid = $juryroleid;
 				$juryteam = array('name' => $line[1], 'categoryid' => $jurycatid, 'members' => $line[1]);
 				break;
 			case 'team':
-				$line[0] = $teamroleid;
-				// For now we assume we can find the teamid by parsing the username
-				$teamid = preg_replace('/^team-?0*/', '', $line[2]);
+				$roleid = $teamroleid;
+				// For now we assume we can find the teamid by parsing
+				// the username and taking the largest suffix number.
+				// Note that https://clics.ecs.baylor.edu/index.php/Contest_Control_System_Requirements#accounts.tsv
+				// assumes team accounts of the form "team-nnn" where
+				// nnn is a zero-padded team number.
+				$teamid = preg_replace('/^[^0-9]*0*([0-9]+)$/', '\1', $line[2]);
+				if ( !preg_match('/^[0-9]+$/', $teamid) ) {
+					error('cannot parse team id on line '.$l.' from "'.$line[2].'"');
+				}
+				if ( !$DB->q('MAYBEVALUE SELECT teamid FROM team WHERE teamid = %i', $teamid) ) {
+					error("unknown team id $teamid on line $l");
+				}
 				break;
 			case 'analyst':
 				// Ignore type analyst for now. We don't have a useful mapping yet.
 				continue 2;
 			default:
-				error('unknown role id on line ' . $l . ': ' . $line[0]);
+				error('unknown role on line ' . $l . ': ' . $line[0]);
 		}
 
 		// accounts.tsv contains data pertaining both to users and userroles.
@@ -211,7 +221,7 @@ function tsv_accounts_prepare($content)
 				),
 			'userrole' => array (
 				'userid' => -1, // need to get appropriate userid later
-				'roleid' => $line[0]
+				'roleid' => $roleid
 				),
 			'team' => $juryteam,
 			);
