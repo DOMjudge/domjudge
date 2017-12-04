@@ -299,7 +299,7 @@ function detectProblemLanguageEntryPoint(filename)
 	if ( langid == 'java' ) {
 		elt.value = parts[1];
 	} else if (langid == 'kt' ) {
-		elt.value = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+		elt.value = parts[1].charAt(0).toUpperCase() + parts[1].slice(1) + "Kt";
 	} else {
 		elt.value = parts[1] + '.' + parts[0];
 	}
