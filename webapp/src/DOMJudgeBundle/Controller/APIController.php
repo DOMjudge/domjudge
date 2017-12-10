@@ -65,7 +65,7 @@ class APIController extends FOSRestController {
 					'cid' => $args['id'],
 				)
 			);
-			$date = new DateTime($args['start_time']);
+			$date = date_create($args['start_time']);
 			if ( $date === FALSE) {
 				$response = new Response('Invalid "start_time" in request.', 400);
 			} else {
