@@ -460,7 +460,6 @@ void cgroup_create()
 		verbose("cpuset undefined");
 	}
 
-	cg_controller = cgroup_add_controller(cg, "cpu");
 	cg_controller = cgroup_add_controller(cg, "cpuacct");
 
 	/* Perform the actual creation of the cgroup */
@@ -525,7 +524,6 @@ void cgroup_delete()
 	if (!cg) {
 		error(0,"cgroup_new_cgroup");
 	}
-	cgroup_add_controller(cg, "cpu");
 	cgroup_add_controller(cg, "cpuacct");
 	cgroup_add_controller(cg, "memory");
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
