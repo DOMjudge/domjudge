@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 5.2.3 - DEV
+-------------------
+
 Version 5.2.2 - 29 December 2017
 --------------------------------
  - Fix runguard crash when deleting cgroups (#311).
