@@ -234,7 +234,16 @@ void error(int errnum, const char *format, ...)
 		vfprintf(stderr,format,ap);
 	}
 	if ( errnum!=0 ) {
-		fprintf(stderr,": %s",strerror(errnum));
+		/* Special case libcgroup error codes. */
+		if ( errnum==ECGOTHER ) {
+			fprintf(stderr,": libcgroup");
+			errnum = errno;
+		}
+		if ( errnum>=ECGROUPNOTCOMPILED && errnum<=ECGROUPNOTCOMPILED ) {
+			fprintf(stderr,": %s",cgroup_strerror(errnum));
+		} else {
+			fprintf(stderr,": %s",strerror(errnum));
+		}
 	}
 	if ( format==NULL && errnum==0 ) {
 		fprintf(stderr,": unknown error");
@@ -243,7 +252,7 @@ void error(int errnum, const char *format, ...)
 	fprintf(stderr,"\nTry `%s --help' for more information.\n",progname);
 	va_end(ap);
 
-	write_meta("internal-error","%s","runguard error");
+	write_meta("internal-error","%s: %d - %s","runguard error", errnum, format);
 
 	exit(exit_failure);
 }
@@ -401,31 +410,29 @@ void output_cgroup_stats(double *cputime)
 
 	if ( !use_cgroup() ) return;
 
-	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
-	if ((ret = cgroup_get_cgroup(cg)) != 0) {
-		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if ( (cg = cgroup_new_cgroup(cgroupname))==NULL ) error(0,"cgroup_new_cgroup");
+	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
+
 	cg_controller = cgroup_get_controller(cg, "memory");
 	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
-	if ( ret!=0 ) {
-		error(0,"get cgroup value memory.memsw.max_usage_in_bytes: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if ( ret!=0 ) error(ret,"get cgroup value memory.memsw.max_usage_in_bytes");
 
 	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
 	write_meta("memory-bytes","%" PRId64, max_usage);
 
 	cg_controller = cgroup_get_controller(cg, "cpuacct");
 	ret = cgroup_get_value_int64(cg_controller, "cpuacct.usage", &cpu_time_int);
-	if ( ret!=0 ) {
-		error(0,"get cgroup value cpuacct.usage: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if ( ret!=0 ) error(ret,"get cgroup value cpuacct.usage");
+
 	*cputime = (double) cpu_time_int / 1.e9;
 
 	cgroup_free(&cg);
 }
+
+/* Temporary shorthand define for error handling. */
+#define cgroup_add_value(type,name,value) \
+	ret = cgroup_add_value_ ## type(cg_controller, name, value); \
+	if ( ret!=0 ) error(ret,"set cgroup value " #name);
 
 void cgroup_create()
 {
@@ -436,40 +443,45 @@ void cgroup_create()
 	if ( !use_cgroup() ) return;
 
 	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
+	if (!cg) error(0,"cgroup_new_cgroup");
 
 	/* Set up the memory restrictions; these two options limit ram use
 	   and ram+swap use. They are the same so no swapping can occur */
-	cg_controller = cgroup_add_controller(cg, "memory");
-	cgroup_add_value_int64(cg_controller, "memory.limit_in_bytes", memsize);
-	cgroup_add_value_int64(cg_controller, "memory.memsw.limit_in_bytes", memsize);
+	if ( (cg_controller = cgroup_add_controller(cg, "memory"))==NULL ) {
+		error(0,"cgroup_add_controller memory");
+	}
+
+	cgroup_add_value(int64, "memory.limit_in_bytes", memsize);
+	cgroup_add_value(int64, "memory.memsw.limit_in_bytes", memsize);
 
 	/* Set up cpu restrictions; we pin the task to a specific set of
 	   cpus. We also give it exclusive access to those cores, and set
 	   no limits on memory nodes */
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
-		cg_controller = cgroup_add_controller(cg, "cpuset");
+		if ( (cg_controller = cgroup_add_controller(cg, "cpuset"))==NULL ) {
+			error(0,"cgroup_add_controller cpuset");
+		}
 		/* To make a cpuset exclusive, some additional setup outside of domjudge is
 		   required, so for now, we will leave this commented out. */
 		/* cgroup_add_value_int64(cg_controller, "cpuset.cpu_exclusive", 1); */
-		cgroup_add_value_string(cg_controller, "cpuset.mems", "0");
-		cgroup_add_value_string(cg_controller, "cpuset.cpus", cpuset);
+		cgroup_add_value(string, "cpuset.mems", "0");
+		cgroup_add_value(string, "cpuset.cpus", cpuset);
 	} else {
 		verbose("cpuset undefined");
 	}
 
-	cg_controller = cgroup_add_controller(cg, "cpuacct");
-
-	/* Perform the actual creation of the cgroup */
-	ret = cgroup_create_cgroup(cg, 1);
-	if ( ret!=0 ) {
-		error(0,"creating cgroup: %s(%d)", cgroup_strerror(ret), ret);
+	if ( (cg_controller = cgroup_add_controller(cg, "cpuacct"))==NULL ) {
+		error(0,"cgroup_add_controller cpuacct");
 	}
 
+	/* Perform the actual creation of the cgroup */
+	if ( (ret = cgroup_create_cgroup(cg, 1))!=0 ) error(ret,"creating cgroup");
+
 	cgroup_free(&cg);
+	verbose("created cgroup '%s'",cgroupname);
 }
+
+#undef cgroup_setval
 
 void cgroup_attach()
 {
@@ -479,19 +491,12 @@ void cgroup_attach()
 	if ( !use_cgroup() ) return;
 
 	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
-	ret = cgroup_get_cgroup(cg);
-	if ( ret!=0 ) {
-		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if (!cg) error(0,"cgroup_new_cgroup");
+
+	if ( (ret = cgroup_get_cgroup(cg))!=0 ) error(ret,"get cgroup information");
 
 	/* Attach task to the cgroup */
-	ret = cgroup_attach_task(cg);
-	if ( ret!=0 ) {
-		error(0,"attach task to cgroup: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if ( (ret = cgroup_attach_task(cg))!=0 ) error(ret,"attach task to cgroup");
 
 	cgroup_free(&cg);
 }
@@ -521,20 +526,21 @@ void cgroup_delete()
 	if ( !use_cgroup() ) return;
 
 	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
-	cgroup_add_controller(cg, "cpuacct");
-	cgroup_add_controller(cg, "memory");
+	if (!cg) error(0,"cgroup_new_cgroup");
+
+	if ( cgroup_add_controller(cg, "cpuacct")==NULL ) error(0,"cgroup_add_controller cpuacct");
+	if ( cgroup_add_controller(cg, "memory")==NULL ) error(0,"cgroup_add_controller cpuacct");
+
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
-		cgroup_add_controller(cg, "cpuset");
+		if ( cgroup_add_controller(cg, "cpuset")==NULL ) error(0,"cgroup_add_controller cpuacct");
 	}
 	/* Clean up our cgroup */
 	ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
-	if ( ret!=0 ) {
-		error(0,"deleting cgroup: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if ( ret!=0 ) error(ret,"deleting cgroup");
+
 	cgroup_free(&cg);
+
+	verbose("deleted cgroup '%s'",cgroupname);
 }
 
 void terminate(int sig)
@@ -1069,6 +1075,7 @@ int main(int argc, char **argv)
 	case  0: /* run controlled command */
 		/* Apply all restrictions for child process. */
 		setrestrictions();
+		verbose("setrestrictions() done");
 
 		/* Connect pipes to command (stdin/)stdout/stderr and close
 		 * unneeded fd's. Do this after setting restrictions to let
@@ -1082,6 +1089,7 @@ int main(int argc, char **argv)
 				error(errno,"closing pipe for fd %d",i);
 			}
 		}
+		verbose("pipes closed in child");
 
 		/* And execute child command. */
 		execvp(cmdname,cmdargs);
@@ -1124,6 +1132,7 @@ int main(int argc, char **argv)
 				error(errno,"opening file '%s'",stderrfilename);
 			}
 		}
+		verbose("redirection done in parent");
 
 		if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
 
