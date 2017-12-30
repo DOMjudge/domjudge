@@ -123,7 +123,7 @@ function debug()
 	if ( DEBUG===0 ) return;
 
 	if ( IS_WEB ) echo "<pre>\n";
-	var_dump(func_get_args());
+	call_user_func_array('var_dump',func_get_args());
 	if ( IS_WEB ) echo "</pre>\n";
 }
 
