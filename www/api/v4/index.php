@@ -434,20 +434,19 @@ function judgings_POST($args)
 
 
 	// Prioritize teams according to last judging time
-	$submitid = $DB->q('MAYBEVALUE SELECT s.submitid
-	                    FROM submission s
-	                    LEFT JOIN team t USING (teamid)
-	                    LEFT JOIN language l USING (langid)
-	                    LEFT JOIN contestproblem cp USING (probid, cid) ' .
-	                   $extra_join .
-	                   'WHERE s.judgehost IS NULL AND s.cid IN (%Ai)
-	                    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
-	                   $extra_where .
-	                   'ORDER BY judging_last_started ASC, submittime ASC, s.submitid ASC
-	                    LIMIT 1',
-	                   $host, $cids, $contests, $problems, $languages);
+	$submitids = $DB->q('COLUMN SELECT s.submitid
+	                     FROM submission s
+	                     LEFT JOIN team t USING (teamid)
+	                     LEFT JOIN language l USING (langid)
+	                     LEFT JOIN contestproblem cp USING (probid, cid) ' .
+	                    $extra_join .
+	                    'WHERE s.judgehost IS NULL AND s.cid IN (%Ai)
+	                     AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
+	                    $extra_where .
+	                    'ORDER BY judging_last_started ASC, submittime ASC, s.submitid ASC',
+	                    $host, $cids, $contests, $problems, $languages);
 
-	if ( $submitid ) {
+	foreach ( $submitids as $submitid ) {
 		// update exactly one submission with our judgehost name
 		// Note: this might still return 0 if another judgehost beat
 		// us to it
@@ -456,8 +455,7 @@ function judgings_POST($args)
 		                  WHERE submitid = %i AND judgehost IS NULL',
 		                  $host, $submitid);
 
-		// TODO: a small optimisation could be made: if numupd=0 but
-		// numopen > 1; not return but retry procudure again immediately
+		if ( $numupd==1 ) break;
 	}
 
 	if ( empty($submitid) || $numupd == 0 ) return '';
