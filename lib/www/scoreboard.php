@@ -23,6 +23,9 @@ require_once(LIBDIR . '/lib.misc.php');
  * The $filter argument may contain subarrays 'affilid', 'country',
  * 'categoryid' of values to filter on these.
  *
+ * The $visible_only determines whether only publicly visible teams
+ * are included, or all. Only relevant when $jury is true.
+ *
  * This function returns an array (scores, summary, matrix)
  * containing the following:
  *
@@ -34,7 +37,7 @@ require_once(LIBDIR . '/lib.misc.php');
  * summary(num_points, total_time, affils[affilid], countries[country], problems[probid]
  *    probid(num_submissions, num_pending, num_correct, best_time_sort[sortorder] )
  */
-function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
+function genScoreBoard($cdata, $jury = FALSE, $filter = NULL, $visible_only = FALSE) {
 
 	global $DB;
 
@@ -46,9 +49,9 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	if ( ! $fdata['started'] && ! $jury ) return;
 
 	// get the teams, problems and categories
-	$teams = getTeams($filter, $jury, $cdata);
+	$teams = getTeams($filter, $jury && !$visible_only, $cdata);
 	$probs = getProblems($cdata);
-	$categs = getCategories($jury);
+	$categs = getCategories($jury && !$visible_only);
 
 	// initialize the arrays we'll build from the data
 	$MATRIX = array();
