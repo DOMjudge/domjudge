@@ -256,7 +256,7 @@ function problems($args)
 			'label'      => safe_string($pdata['label']),
 			'name'       => $pdata['name'],
 			'ordinal'    => safe_int($pdata['ordinal']),
-			'time_limit' => safe_float($pdata['timelimit']),
+			'time_limit' => safe_float($pdata['timelimit'],3),
 		);
 		if ( !isset($args['strict']) ) {
 			$ret['short_name'] = $pdata['shortname'];
@@ -358,7 +358,7 @@ function judgings($args)
 			'start_contest_time' => Utils::relTime($row['starttime'] - $cdatas[$row['cid']]['starttime']),
 			'end_time'           => empty($row['endtime']) ? null : Utils::absTime($row['endtime']),
 			'end_contest_time'   => empty($row['endtime']) ? null : Utils::relTime($row['endtime'] - $cdatas[$row['cid']]['starttime']),
-			'max_run_time'       => safe_float($row['maxruntime']),
+			'max_run_time'       => safe_float($row['maxruntime'],3),
 		);
 	}
 	return $res;
@@ -1123,7 +1123,7 @@ function runs($args)
 			'judgement_type_id' => safe_string($VERDICTS[$run['runresult']]),
 			'time'              => Utils::absTime($run['endtime']),
 			'contest_time'      => Utils::relTime($run['endtime'] - $cdatas[$run['cid']]['starttime']),
-			'run_time'          => safe_float($run['runtime']),
+			'run_time'          => safe_float($run['runtime'],3),
 		);
 	}, $runs);
 }
