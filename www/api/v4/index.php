@@ -68,13 +68,22 @@ function safe_string($value)
 	return is_null($value) ? null : (string)$value;
 }
 
-function give_back_judging($judgingid, $submitid) {
+function give_back_judging($judgingid)
+{
 	global $DB;
 
+	$jdata = $DB->q('TUPLE SELECT judgingid, cid, submitid, judgehost, result
+	                 FROM judging WHERE judgingid = %i', $judgingid);
+
+	$DB->q('START TRANSACTION');
 	$DB->q('UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i',
 	       $judgingid);
 	$DB->q('UPDATE submission SET judgehost = NULL
-		WHERE submitid = %i', $submitid);
+	        WHERE submitid = %i', $jdata['submitid']);
+	$DB->q('COMMIT');
+
+	auditlog('judging', $judgingid, 'given back', null, $jdata['judgehost'], $jdata['cid']);
+	// TODO: consider judging deleted from API viewpoint?
 }
 
 $api = new RestApi();
@@ -1513,8 +1522,7 @@ function judgehosts_POST($args)
 	          AND (j.valid = 1 OR r.valid = 1)';
 	$res = $DB->q($query, $args['hostname']);
 	foreach ( $res as $jud ) {
-		give_back_judging($jud['judgingid'], $jud['submitid']);
-		auditlog('judging', $jud['judgingid'], 'given back', null, $args['hostname'], $jud['cid']);
+		give_back_judging($jud['judgingid']);
 	}
 
 	return array_map(function($jud) {
@@ -1683,8 +1691,7 @@ function internal_error_POST($args)
 	set_internal_error($disabled, $cid, 0);
 	if ( in_array($disabled['kind'], array('problem', 'language')) ) {
 		// give back judging if we have to
-		$submitid = $DB->q('VALUE SELECT submitid FROM judging WHERE judgingid = %i', $args['judgingid']);
-		give_back_judging($args['judgingid'], $submitid);
+		give_back_judging($args['judgingid']);
 	}
 
 	return $errorid;
