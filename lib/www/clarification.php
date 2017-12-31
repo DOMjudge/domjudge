@@ -315,9 +315,9 @@ function putClarificationList($clars, $team = NULL)
  */
 function putClarificationForm($action, $respid = NULL, $onlycontest = NULL)
 {
-	global $cdata;
+	global $cdata, $teamdata;
 
-	$cdatas = getCurContests(TRUE);
+	$cdatas = getCurContests(TRUE, IS_JURY ? NULL : $teamdata['teamid']);
 	if ( isset($onlycontest) ) {
 		$cdatas = array($onlycontest => $cdatas[$onlycontest]);
 	}
