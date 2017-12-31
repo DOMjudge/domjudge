@@ -1588,6 +1588,11 @@ function scoreboard($args)
 		}
 	}
 
+	$only_visible_teams = TRUE;
+	if ( isset($args['allteams']) && $args['allteams'] ) {
+		$only_visible_teams = FALSE;
+	}
+
 	$filter = array();
 	if ( array_key_exists('category', $args) ) {
 		$filter['categoryid'] = array($args['category']);
@@ -1599,7 +1604,7 @@ function scoreboard($args)
 		$filter['affilid'] = array($args['affiliation']);
 	}
 
-	$scoreboard = genScoreBoard($cdatas[$cid], !$args['public'], $filter);
+	$scoreboard = genScoreBoard($cdatas[$cid], !$args['public'], $filter, $only_visible_teams);
 
 	$prob2label = $DB->q('KEYVALUETABLE SELECT probid, shortname
 	                      FROM contestproblem WHERE cid = %i', $cid);
@@ -1648,7 +1653,8 @@ $doc = 'Get the scoreboard. Returns scoreboard for jury members if authenticated
 $args = array('cid' => 'ID of the contest to get the scoreboard for.',
               'category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
-              'country' => 'ISO 3166-1 alpha-3 country code to search for.');
+              'country' => 'ISO 3166-1 alpha-3 country code to search for.',
+              'allteams' => 'If set to true-ish and with jury permissions, also output invisible teams.');
 $exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'),
                 array('cid' => 2, 'country' => 'NLD'));
 $api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs, null, true);
