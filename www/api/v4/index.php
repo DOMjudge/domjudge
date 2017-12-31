@@ -1348,6 +1348,9 @@ function groups($args)
 			'icpc_id'    => safe_string($row['categoryid']),
 			'name'       => safe_string($row['name']),
 		);
+		if ( !$row['visible'] ) {
+			$ret['hidden'] = true;
+		}
 		if ( !isset($args['strict']) ) {
 			$ret['color']     = $row['color'];
 			$ret['sortorder'] = safe_int($row['sortorder']);
