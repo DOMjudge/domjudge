@@ -2,11 +2,21 @@ DOMjudge Programming Contest Judging System
 
 Version 6.0.0 - DEV
 -------------------
+ - Minimum PHP version is now 7.0.
+ - Migrate (parts of) the API and webpages to Symfony.
+ - Update API to conform to ICPC Contest API specification.
+ - Add eventdaemon to create some entries for event-feed API endpoint.
+ - Allow installing DB default data and examples separately.
+ - Add "entry point" field for submissions to override auto detected
+   main class or file.
+ - Reduce memory reserved for JVM overhead and make stack size
+   configurable in Java compile script.
  - Fix runguard bug when stdout/stderr are not redirected to file.
  - Add support for Kotlin by mounting /bin in chroot environment.
  - Add options to have second scoreboard resolution and to suppress
    problem information from the scoreboard. Thanks Marc Furon.
  - [security] Fix team permission for viewing clarification categories.
+ - Many small issues fixed and documentation improvements.
 
 Version 5.2.0 - DEV
 -------------------
