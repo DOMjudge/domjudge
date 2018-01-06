@@ -66,8 +66,7 @@ if ( isset($_POST['upload']) ) {
 		error("Missing filename for problem upload. Maybe you have to increase upload_max_filesize, see config checker.");
 	}
 
-	require(LIBWWWDIR . '/footer.php');
-	exit;
+	return;
 }
 
 if ( !empty($cmd) ):
