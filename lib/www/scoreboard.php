@@ -363,9 +363,14 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 
 	// print the main scoreboard rows
 	$prevsortorder = -1;
+	$usedCategories = array();
 	foreach( $scores as $team => $totals ) {
 		// skip if we have limitteams and the team is not listed
 		if ( !empty($limitteams) && !in_array($team,$limitteams) ) continue;
+
+		if ( isset($teams[$team]['categoryid']) ) {
+			$usedCategories[$teams[$team]['categoryid']] = TRUE;
+		}
 
 		// rank, team name, total points, total time
 		echo '<tr';
@@ -555,13 +560,16 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		echo "<p><br /><br /></p>\n";
 
 		// only print legend when there's more than one category
-		if ( empty($limitteams) && count($categs) > 1 ) {
+		if ( empty($limitteams) && count($usedCategories) > 1 ) {
 			echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
 			    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
 			    "<thead><tr><th scope=\"col\">" .
 			    jurylink('team_categories.php','Categories') .
 			    "</th></tr></thead>\n<tbody>\n";
 			foreach( $categs as $cat ) {
+				if ( !isset($usedCategories[$cat['categoryid']]) ) {
+					continue;
+				}
 				echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
 				              $cat['color'] . ';"' : '') . '>' .
 				    '<td>' .
