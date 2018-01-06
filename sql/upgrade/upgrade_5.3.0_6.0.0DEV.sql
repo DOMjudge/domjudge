@@ -124,7 +124,11 @@ ALTER TABLE `submission`
 --
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
-('require_entry_point', '0', 'bool', 'Require entry point for submissions.');
+('require_entry_point', '0', 'bool', 'Require entry point for submissions.'),
+('show_flags', '1', 'bool', 'Show country flags on the scoreboard?'),
+('show_affiliation_logos', '0', 'bool', 'Show affiliation logos on the scoreboard?');
+
+UPDATE `configuration` SET `description` = 'Show affiliation names on the scoreboard?' WHERE `name` = 'show_affiliations';
 
 UPDATE `language` SET `externalid` = 'c'          WHERE `langid` = 'c';
 UPDATE `language` SET `externalid` = 'cpp'        WHERE `langid` = 'cpp';
