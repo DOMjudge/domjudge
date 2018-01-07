@@ -140,18 +140,28 @@ if ( empty($curcids) )  {
 			// Show a button for setting the time to now(), only when that
 			// makes sense. E.g. only for end contest when contest has started.
 			// No button for 'activate', because when shown by definition always already active
-			if ( IS_ADMIN && (
-					($time == 'start' && !$hasstarted) ||
-					($time == 'end' && $hasstarted && !$hasended &&
-					 (empty($row['freezetime']) || $hasfrozen)) ||
-					($time == 'deactivate' && $hasended &&
-					 (empty($row['unfreezetime']) || $hasunfrozen)) ||
-					($time == 'freeze' && $hasstarted && !$hasended &&
-					 !$hasfrozen) ||
-					($time == 'unfreeze' && $hasfrozen && !$hasunfrozen &&
-					 $hasended))
-			) {
-				echo addSubmit("$time now", "donow[$row[cid]][$time]");
+			if ( IS_ADMIN ) {
+				$now_allowed = TRUE;
+				switch ($time) {
+					case 'start':
+						$now_allowed = !$hasstarted;
+						break;
+					case 'end':
+						$now_allowed = $hasstarted && !$hasended && (empty($row['freezetime']) || $hasfrozen);
+						break;
+					case 'deactivate':
+						$now_allowed = $hasended && (empty($row['unfreezetime']) || $hasunfrozen);
+						break;
+					case 'freeze':
+						$now_allowed = $hasstarted && !$hasended && !$hasfrozen;
+						break;
+					case 'unfreeze':
+						$now_allowed = $hasfrozen && !$hasunfrozen && $hasended;
+						break;
+				}
+				if ( $now_allowed ) {
+					echo addSubmit("$time now", "donow[$row[cid]][$time]");
+				}
 			}
 
 			echo "</td></tr>";
