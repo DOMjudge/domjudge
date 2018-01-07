@@ -751,6 +751,12 @@ function judge($row)
 			}
 		}
 
+		if ( $result === 'compare-error' ) {
+			logmsg(LOG_ERR, "comparing failed for compare script '" . $row['compare'] . "'");
+			disable('problem', 'probid', $row['probid'], "compare script '" . $row['compare'] . "' crashed", $row['judgingid'], $row['cid']);
+			return;
+		}
+
 		request('judging_runs', 'POST', 'judgingid=' . urlencode($row['judgingid'])
 			. '&testcaseid=' . urlencode($tc['testcaseid'])
 			. '&runresult=' . urlencode($result)
@@ -762,7 +768,6 @@ function judge($row)
 			. '&output_diff='  . rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit)
 		);
 		logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
-
 	} // end: for each testcase
 
 	// revoke readablity for domjudge-run user to this workdir

@@ -266,7 +266,7 @@ if [ -s compare.tmp ]; then
 	cat compare.tmp >> feedback/judgemessage.txt
 fi
 if [ $exitcode -ne 42 ] && [ $exitcode -ne 43 ]; then
-	logmsg $LOG_ERR "Comparing failed with exitcode $exitcode, compare script output:\n$(cat compare.tmp)"
+	logmsg $LOG_ERR "Comparing failed with exitcode $exitcode, compare script output:\n$(cat feedback/judgemessage.txt)"
 	cleanexit ${E_COMPARE_ERROR:-1}
 fi
 
