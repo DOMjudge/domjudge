@@ -233,23 +233,23 @@ function get_image_thumb($image, &$error)
 		return FALSE;
 	}
 
-	// The GD image library doesn't have functionality to output an
-	// image to string, so we capture the output buffer.
-	ob_flush();
-	ob_start();
+	if ( !($tmpfname = tempnam(TMPDIR, "thumb-")) ) {
+		$error = 'Cannot create temporary file in directory ' . TMPDIR . '.';
+		return FALSE;
+	}
 
 	$success = FALSE;
 	switch ( $type ) {
-	case 'jpeg': $success = imagejpeg($thumb); break;
-	case 'png':  $success = imagepng($thumb); break;
-	case 'gif':  $success = imagegif($thumb); break;
+	case 'jpeg': $success = imagejpeg($thumb, $tmpfname); break;
+	case 'png':  $success = imagepng($thumb, $tmpfname); break;
+	case 'gif':  $success = imagegif($thumb, $tmpfname); break;
 	}
-	$thumbstr = ob_get_contents();
-
-	ob_end_clean();
-
 	if ( !$success ) {
 		$error = 'Failed to output thumbnail image.';
+		return FALSE;
+	}
+	if ( ($thumbstr = file_get_contents($tmpfname))===FALSE ) {
+		$error = "Cannot read image from temporary file '$tmpfname'.";
 		return FALSE;
 	}
 
