@@ -269,6 +269,7 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 	global $DB, $teamid, $cdatas;
 	$prop_file = 'domjudge-problem.ini';
 	$yaml_file = 'problem.yaml';
+	$tle_file = '.timelimit';
 
 	$ini_keys_problem = array('name', 'timelimit', 'special_run', 'special_compare');
 	$ini_keys_contest_problem = array('probid', 'allow_submit', 'allow_judge', 'points', 'color');
@@ -281,6 +282,12 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 	// Only preserve valid keys:
 	$ini_array_problem = array_intersect_key($ini_array,array_flip($ini_keys_problem));
 	$ini_array_contest_problem = array_intersect_key($ini_array,array_flip($ini_keys_contest_problem));
+
+	// Set timelimit from alternative source:
+	if ( !isset($ini_array_problem['timelimit']) &&
+	     ($str = $zip->getFromName($tle_file))!==FALSE ) {
+		$ini_array_problem['timelimit'] = trim($str);
+	}
 
 	// Take problem:externalid from zip filename, and use as backup for
 	// problem:name and contestproblem:shortname if these are not specified.
