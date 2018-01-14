@@ -328,8 +328,9 @@ Optionally:
        Modifying <tt>chroot-startstop.sh</tt> is typically not
        necessary, but might be in circumstances where your
        interpreters are not installed under <tt>/usr</tt> or require
-       files from other locations. See also the appendix
-       on <ref id="problems:chroot" name="setting up a chroot">.
+       files from other locations. See also the section
+       <ref id="install_config:judgehost:chroot"
+        name="creating a chroot environment">.
 <item> For additional features in the jury web interface, the
        following PHP extensions can be installed:
        <itemize>
@@ -655,27 +656,35 @@ interface.
 <sect>Installation of a judgehost<label id="install_config:judgehost">
 <p>
 
-A few extra steps might need to be taken to completely install and
+Some extra steps have to be taken to completely install and
 configure a judgehost.
 
+<sect1>Unprivileged user and group
+
+<p>
 For running solution programs under a non-privileged user, a user and group have
 to be added to the system(s) that act as judgehost. This user does not
 need a home-directory or password, so the following command would
 suffice to add a user and group `domjudge-run' with minimal privileges.
 
 <!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
+<p>
 On Debian and Redhat based Linux distributions use:
 <verb>
 useradd -d /nonexistent -U -M -s /bin/false domjudge-run
 groupadd domjudge-run
 </verb>
 
+<p>
 For other systems check the specifics of your useradd command.
 This user must also be configured as the user under which programs run
 via <tt>configure --enable-runuser=USER</tt>; the default is
 <tt>domjudge-run</tt>. By default the group is set to the same, this
 can be modified with the option <tt>--enable-rungroup=GROUP</tt>
 
+<sect1>Sudo permissions
+
+<p>
 <tt>Runguard</tt> needs to be able to become root for certain operations
 like changing to the runuser and performing a chroot. Also, the default
 <tt>chroot-startstop.sh</tt> script uses sudo to gain privileges for
@@ -686,18 +695,44 @@ modern sudo versions, place the file in <tt>/etc/sudoers.d/</tt>. If you
 change the user you run the judgedaemon as, or the installation paths, be
 sure to update the sudoers rules accordingly.
 
+<sect1>Creating a chroot environment
+<label id="install_config:judgehost:chroot">
+
+<p>
+The judgedaemon executes submissions inside a chroot environment for
+security reasons. By default it mounts parts of a prebuilt chroot tree
+read-only during this judging process (using the script
+<tt>lib/judge/chroot-startstop.sh</tt>). This is needed to support
+extra languages that require access to interpreters or support
+libraries at runtime, for example Java, C#, and any interpreted
+languages like Python, Perl, Shell script, etc.
+
+<p>
+This chroot tree can be built using the script
+<tt>bin/dj_make_chroot</tt>. On Debian and Ubuntu the same
+distribution and version as the host system are used, on other Linux
+distributions the latest stable Debian release will be used to build
+the chroot. Any extra packages to support languages can be passed with
+the option <tt>-i</tt> or be added to the <tt>INSTALLDEBS</tt>
+variable in the script. The script <tt>bin/dj_run_chroot</tt> runs an
+interactive shell or a command inside the chroot. This can be used for
+example to install new or upgrade existing packages inside the chroot.
+Run these scripts with option <tt>-h</tt> for more information.
+
+Finally, if necessary edit the script <tt>lib/judge/chroot-startstop.sh</tt>
+and adapt it to work with your local system. In case you changed the
+default pre-built chroot directory, make sure to also update the sudo
+rules and the <tt>CHROOTORIGINAL</tt> variable in <tt>chroot-startstop.sh</tt>.
+
 When the chroot setting is enabled (default), a static POSIX shell has
-to be available for copying it to the chroot environment. For Linux
+to be available for copying it into the chroot environment. For Linux
 i386, a static Dash shell is included, which works out of the box,
 also for the Linux Intel/AMD 64 architecture. For
 other architectures or operating systems, a shell has to be added
 manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
-file. If you want to support languages that cannot be compiled to
-statically linked binaries, e.g. byte-compiled languages such as Java,
-or interpreted languages such as Python, then a complete chroot
-environment must be built and configured. See the appendix on
-<ref id="problems:chroot" name="setting up a chroot"> for more
-details.
+file.
+
+<sect1>Linux Control Groups
 
 <p>
 DOMjudge uses Linux Control Groups or cgroups for process isolation in
@@ -718,13 +753,16 @@ commandline to
 <verb>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</verb>
 Then run <tt>update-grub</tt> and reboot.
 
+<p>
 You have now configured the system to use cgroups, but you need to create
 the actual cgroups that DOMjudge will use. For that, you can use the
 script under <tt>misc-tools/create_cgroups</tt>. Edit the script to
-match your situation first.
-This script needs to be re-run after each boot (e.g., add it to
-the judgedaemon init script).
+match your situation first. This script needs to be re-run after each
+boot (it has already been added to the judgedaemon init script).
 
+<sect1>REST API credentials
+
+<p>
 The judgehost connects to the domserver via a REST API. You need to
 create an account for the judgedaemons to use (this may be a
 shared account between all judgedaemons) with a difficult,
@@ -738,10 +776,16 @@ Multiple lines may be specified to allow a judgedaemon to work for multiple
 domservers. The id is used to differentiate between multiple domservers,
 and should be unique within the <tt>restapi.secret</tt> file.
 
-Then start the judgedaemon:
-<code>bin/judgedaemon</code>
+<sect1>Starting the judgedaemon
 
-Upon its first connection to the domserver API the judgehost will be
+<p>
+Finally start the judgedaemon (optionally binding it to CPU core X):
+<code>bin/judgedaemon [-n X]</code>
+If using the <tt>-n X</tt> option, then an extra user
+<tt>domjudge-run-X</tt> must also be created.
+
+<p>
+Upon its first connection to the domserver API, the judgehost will be
 auto-registered and will be by default enabled. If you wish to
 add a new judgehost but have it initially disabled, you can add it
 manually through the DOMjudge web interface and set it to disabled
@@ -892,15 +936,8 @@ scripts are included for most common languages already.
 
 Interpreted languages and non-statically linked binaries (for example,
 Oracle Java) can in principle also be used, but require that all
-dependencies are added to the chroot environment.
-DOMjudge comes with helper scripts to build a chroot environment:
-run <tt>sudo bin/dj_make_chroot</tt>.
-Options can be given change the target directory where to build the
-chroot environment (normally the default from configure is used) and
-to select the target machine architecture.
-Start the script without arguments for usage information. See also sections
-<ref id="install_config:judgehost" name="Installation of a judgehost">
-and <ref id="problems:chroot" name="Problems: Setting up a chroot">.
+runtime dependencies are added to the chroot environment. See section
+<ref id="install_config:judgehost:chroot" name="creating a chroot environment">.
 
 Interpreted languages do not generate an executable and in principle
 do not need a compilation step. However, to be able to use interpreted
@@ -2085,37 +2122,6 @@ the judgehosts which restricts outgoing network access.
 <p>
 
 
-<sect>Setting up a pre-built chroot tree <label id="problems:chroot">
-<p>
-
-With the default configuration, submitted programs are run within a
-minimal chroot environment. For this the programs have to be statically
-linked, because they do not have access to shared libraries.
-
-To be able to run submissions of languages that don't support statically
-linked binaries (think interpreted languages and bytecode compiled
-languages, amongst which Java and C#), one can build a bigger chroot
-environment which contains all necessary ingredients to let the
-submissions run. DOMjudge supports this with some manual setup.
-
-First of all, a chroot tree with those interpreters or runtimes needs to
-be created. The script <tt>bin/dj_make_chroot</tt> can create one from
-Debian or Ubuntu GNU/Linux sources. Add the required packages for the needed
-languages to the <tt>INSTALLDEBS</tt> variable in the script; run the
-script without arguments for basic usage information.
-
-This pre-built chroot tree is not directly used as chroot environment
-for judgings. Instead, some subdirectories of this tree are
-bind-mounted into a chroot tree that is specifically created for each
-judging. The bind-mounting and a few other things are done by the
-script <tt>lib/judge/chroot-startstop.sh</tt>, when the pre-built tree
-is available.
-
-Finally, if necessary edit the script <tt>lib/judge/chroot-startstop.sh</tt>
-and adapt it to work with your local system. In case you changed the
-default pre-built chroot directory, make sure to also update the sudo
-rules and the <tt>CHROOTORIGINAL</tt> variable in <tt>chroot-startstop.sh</tt>.
-
 <sect>Java compilers
 <p>
 Java is difficult to deal with in an automatic way. It is probably
@@ -2123,9 +2129,10 @@ most preferable to use OpenJDK or Oracle Java, because that's the
 version contestants will be used to. The GNU Compiler for Java (GCJ) is
 easier to deal with but may lack some features.
 
-The recommended way of using Java is by setting up the chroot as in the
-previous section, but you can also choose one of the alternatives as
-described below.
+The recommended way of using Java is by setting up the chroot (see
+section <ref id="install_config:judgehost:chroot"
+name="creating a chroot environment">), but you can also choose one of
+the alternatives as described below.
 
 <enum>
 <item> As an alternative the <tt>gcj</tt> compiler from GNU can be
