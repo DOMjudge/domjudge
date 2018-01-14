@@ -50,6 +50,7 @@ $time_start = microtime(TRUE);
 auditlog('scoreboard', null, 'refresh cache');
 
 // no output buffering... we want to see what's going on real-time
+ob_end_flush();
 ob_implicit_flush();
 
 foreach ($contests as $contest) {

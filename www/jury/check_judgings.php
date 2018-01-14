@@ -13,6 +13,9 @@ require(LIBWWWDIR . '/header.php');
 
 requireAdmin();
 
+// Turn off output buffering, to see the page as it (slowly) loads.
+ob_end_flush();
+
 $verify_multiple = isset($_REQUEST['verify_multiple']);
 
 ?>
