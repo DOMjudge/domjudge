@@ -575,50 +575,90 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 		$njurysols = 0;
 		echo "<ul>\n";
 		for ($j = 0; $j < $zip->numFiles; $j++) {
-			$filename = $zip->getNameIndex($j);
-			$filename_parts = explode(".", $filename);
-			$extension = end($filename_parts);
-			if ( !starts_with($filename, 'submissions/') || ends_with($filename, '/') ) {
-				// skipping non-submission files and directories silently
-				// FIXME: (multi-file) submissions can also sit in a subdirectory.
+			$path = $zip->getNameIndex($j);
+			if ( !starts_with($path, 'submissions/') ) {
+				// Skipping non-submission files silently.
 				continue;
 			}
+			$pathcomp = explode('/', $path);
+			if ( !( (count($pathcomp)==3 && !empty($pathcomp[2])) ||
+			        (count($pathcomp)==4 &&  empty($pathcomp[3])) ) ) {
+				// Skipping files and directories at the wrong level.
+				// Note that multi-file submissions sit in a subdirectory.
+				continue;
+			}
+
+			if ( count($pathcomp)==3 ) {
+				// Single file submission
+				$files = array($pathcomp[2]);
+				$indices = array($j);
+			} else {
+				// Multi file submission
+				$files = array();
+				$indices = array();
+				$len = mb_strrpos($path, '/') + 1;
+				$prefix = mb_substr($path, 0, $len);
+				for ($k = 0; $k < $zip->numFiles; $k++) {
+					$file = $zip->getNameIndex($k);
+					// Only allow multi-file submission with all files
+					// directly under the directory.
+					if ( strncmp($prefix,$file,$len)==0 && mb_strlen($file)>$len &&
+					     mb_strrpos($file, '/')+1==$len ) {
+						$files[] = mb_substr($file,$len);
+						$indices[] = $k;
+					}
+				}
+			}
+
 			unset($langid);
-			foreach ( $langs as $key => $exts ) {
-				if ( in_array($extension,dj_json_decode($exts)) ) {
-					$langid = $key;
-					break;
+			foreach ( $files as $file ) {
+				$parts = explode(".", $file);
+				if ( count($parts)==1 ) continue;
+				$extension = end($parts);
+				foreach ( $langs as $key => $exts ) {
+					if ( in_array($extension,dj_json_decode($exts)) ) {
+						$langid = $key;
+						break 2;
+					}
 				}
 			}
 			if ( empty($langid) ) {
-				echo "<li>Could not add jury solution <tt>$filename</tt>: unknown language.</li>\n";
+				echo "<li>Could not add jury solution <tt>$path</tt>: unknown language.</li>\n";
 			} else {
-				if ( !($tmpfname = tempnam(TMPDIR, "ref_solution-")) ) {
-					error("Could not create temporary file in directory " . TMPDIR);
+				$expectedResult = normalizeExpectedResult($pathcomp[1]);
+				$results = NULL;
+				$tmpfiles = array();
+				$totalsize = 0;
+				for ($k=0; $k<count($files); $k++) {
+					$source = $zip->getFromIndex($indices[$k]);
+					if ( $results===NULL ) $results = getExpectedResults($source);
+					if ( !($tmpfname = tempnam(TMPDIR, "ref_solution-")) ) {
+						error("Could not create temporary file in directory " . TMPDIR);
+					}
+					if ( file_put_contents($tmpfname, $source)===FALSE ) {
+						error("Could not write to temporary file '$tmpfname'.");
+					}
+					$tmpfiles[] = $tmpfname;
+					$totalsize += filesize($tmpfname);
 				}
-				$offset = mb_strlen('submissions/');
-				$expectedResult = normalizeExpectedResult(mb_substr($filename, $offset, mb_strpos($filename, '/', $offset) - $offset));
-				$source = $zip->getFromIndex($j);
-				$results = getExpectedResults($source);
 				if ( $results === NULL ) {
 					$results[] = $expectedResult;
 				} else if ( !in_array($expectedResult, $results) ) {
 					warning("annotated result '" . implode(', ', $results) . "' does not match directory for $filename");
 				}
-				file_put_contents($tmpfname, $source);
-				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
+				if( $totalsize <= dbconfig_get('sourcesize_limit')*1024 ) {
 					$sid = submit_solution($teamid, $probid, $cid, $langid,
-							array($tmpfname), array(basename($filename)));
+					                       $tmpfiles, $files);
 					$DB->q('UPDATE submission SET expected_results=%s WHERE submitid=%i',
 					       dj_json_encode($results), $sid);
 
-					echo "<li>Added jury solution from: <tt>$filename</tt></li>\n";
+					echo "<li>Added jury solution from: <tt>$path</tt></li>\n";
 					$njurysols++;
 				} else {
-					echo "<li>Could not add jury solution <tt>$filename</tt>: too large.</li>\n";
+					echo "<li>Could not add jury solution <tt>$path</tt>: too large.</li>\n";
 				}
 
-				unlink($tmpfname);
+				foreach ( $tmpfiles as $f ) unlink($f);
 			}
 		}
 		echo "</ul>\n<p>Added $njurysols jury solution(s).</p>\n";
