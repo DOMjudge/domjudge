@@ -1127,7 +1127,15 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 			$url = $endpoint['url'].'/'.$id;
 		}
 		$json = API_request($url, 'GET', '', false);
-		if ( empty($json) ) logmsg(LOG_WARNING,"eventlog: got no JSON data from '$url'");
+		if ( empty($json) ) {
+			logmsg(LOG_WARNING,"eventlog: got no JSON data from '$url'");
+			// If we didn't get data from the API, then that is
+			// probably because this particular data is not visible,
+			// for example because it belongs to an invisible jury
+			// team. If we don't have data, there's also no point in
+			// trying to insert anything in the eventlog table.
+			return;
+		}
 	}
 
 	// First acquire an advisory lock to prevent other event logging,
