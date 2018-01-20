@@ -1,6 +1,7 @@
 <?php
 namespace DOMJudgeBundle\Controller;
 
+use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
@@ -371,6 +372,40 @@ class APIController extends FOSRestController {
 		$response->headers->set('Accept-Ranges','bytes');
 
 		return $response;
+	}
+
+	/**
+	 * @Get("/contests/{cid}/judgings")
+	 * @Security("has_role('ROLE_ADMIN')")
+	 * TODO: allow for public access for non-frozen judgings
+	 */
+	public function getJudgingsAction(Request $request, Contest $contest) {
+		$judgings = $this->getDoctrine()->getRepository(Judging::class)->findAllForContest($contest);
+
+		$etcDir = realpath($this->getParameter('kernel.root_dir') . '/../../etc/');
+		$VERDICTS = [];
+		require_once($etcDir . '/common-config.php');
+
+		return array_map(function($data) use ($request, $VERDICTS) {
+			/** @var Judging $judging */
+			$judging = $data[0];
+			return $judging->serializeForAPI($data['maxruntime'], $VERDICTS);
+		}, $judgings);
+	}
+
+	/**
+	 * @Get("/contests/{cid}/judgings/{id}")
+	 * @Security("has_role('ROLE_ADMIN')")
+	 * TODO: allow for public access for non-frozen judgings
+	 */
+	public function getJudgingAction(Request $request, Contest $contest, $id) {
+		$judgingData = $this->getDoctrine()->getRepository(Judging::class)->findOneForContest($contest, $id);
+
+		$etcDir = realpath($this->getParameter('kernel.root_dir') . '/../../etc/');
+		$VERDICTS = [];
+		require_once($etcDir . '/common-config.php');
+
+		return $judgingData[0]->serializeForAPI($judgingData['maxruntime'], $VERDICTS);
 	}
 
 	/**
