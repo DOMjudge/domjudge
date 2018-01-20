@@ -69,11 +69,11 @@ CREATE TABLE `configuration` (
   `name` varchar(32) NOT NULL COMMENT 'Name of the configuration variable',
   `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)',
   `type` varchar(32) DEFAULT NULL COMMENT 'Type of the value (metatype for use in the webinterface)',
-  `public` tinyint(1) UNSIGNED DEFAULT '0' COMMENT 'Is this variable publicly visible?',
+  `public` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Is this variable publicly visible?',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description for in the webinterface',
   PRIMARY KEY (`configid`),
   UNIQUE KEY `name` (`name`),
-  KEY `public` (`public`),
+  KEY `public` (`public`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Global configuration variables';
 
 --
