@@ -375,11 +375,11 @@ class APIController extends FOSRestController {
 	}
 
 	/**
-	 * @Get("/contests/{cid}/judgings")
+	 * @Get("/contests/{cid}/judgements")
 	 * @Security("has_role('ROLE_ADMIN')")
 	 * TODO: allow for public access for non-frozen judgings
 	 */
-	public function getJudgingsAction(Request $request, Contest $contest) {
+	public function getJudgementsAction(Request $request, Contest $contest) {
 		$judgings = $this->getDoctrine()->getRepository(Judging::class)->findAllForContest($contest);
 
 		$etcDir = realpath($this->getParameter('kernel.root_dir') . '/../../etc/');
@@ -394,11 +394,11 @@ class APIController extends FOSRestController {
 	}
 
 	/**
-	 * @Get("/contests/{cid}/judgings/{id}")
+	 * @Get("/contests/{cid}/judgements/{id}")
 	 * @Security("has_role('ROLE_ADMIN')")
 	 * TODO: allow for public access for non-frozen judgings
 	 */
-	public function getJudgingAction(Request $request, Contest $contest, $id) {
+	public function getJudgementAction(Request $request, Contest $contest, $id) {
 		$judgingData = $this->getDoctrine()->getRepository(Judging::class)->findOneForContest($contest, $id);
 
 		$etcDir = realpath($this->getParameter('kernel.root_dir') . '/../../etc/');
