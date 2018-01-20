@@ -830,7 +830,7 @@ function submissions($args)
 			'time'         => Utils::absTime($row['submittime']),
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
 			'entry_point'  => $row['entry_point'],
-			'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")),
+			'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")), // TODO: this does not work anymore, but do we need it in v4?
 			);
 	}
 	return $res;

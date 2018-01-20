@@ -3,6 +3,8 @@ namespace DOMJudgeBundle\Controller;
 
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
+use DOMJudgeBundle\Entity\Submission;
+use DOMJudgeBundle\Entity\SubmissionFile;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TeamAffiliation;
 use DOMJudgeBundle\Entity\TeamCategory;
@@ -289,6 +291,78 @@ class APIController extends FOSRestController {
 		$useExternalIds = $this->getParameter('domjudge.useexternalids');
 		$team = $this->getDoctrine()->getRepository(Team::class)->findForContest($contest, $id, $useExternalIds, !$this->get('security.authorization_checker')->isGranted('ROLE_JURY'));
 		return $team->serializeForAPI($useExternalIds, $request->query->getBoolean('strict', true));
+	}
+
+	/**
+	 * @Get("/contests/{cid}/submissions")
+	 */
+	public function getSubmissionsAction(Request $request, Contest $contest) {
+		$submissions = $this->getDoctrine()->getRepository(Submission::class)->findBy([
+			'valid' => 1,
+			'cid' => $contest->getCid()
+		]);
+
+		return array_map(function(Submission $submission) use ($request) {
+			return $submission->serializeForAPI($this->getParameter('domjudge.useexternalids'));
+		}, $submissions);
+	}
+
+	/**
+	 * @Get("/contests/{cid}/submissions/{id}")
+	 */
+	public function getSubmissionAction(Request $request, Contest $contest, $id) {
+		$submission = $this->getDoctrine()->getRepository(Submission::class)->findOneBy([
+			'submitid' => $id,
+			'valid' => 1,
+			'cid' => $contest->getCid()
+		]);
+
+		return $submission->serializeForAPI($this->getParameter('domjudge.useexternalids'));
+	}
+
+	/**
+	 * @Get("/contests/{cid}/submissions/{id}/files")
+	 */
+	public function getSubmissionFilesAction(Request $request, Contest $contest, $id)
+	{
+		$submission = $this->getDoctrine()->getRepository(Submission::class)->findOneBy([
+			'submitid' => $id,
+			'valid' => 1,
+			'cid' => $contest->getCid()
+		]);
+
+		$files = $submission->getFiles();
+
+		$zip = new \ZipArchive;
+		if ( !($tmpfname = tempnam($this->getParameter('domjudge.tmpdir'), "submission_file-")) ) {
+			error("Could not create temporary file.");
+		}
+
+		$res = $zip->open($tmpfname, \ZipArchive::OVERWRITE);
+		if ( $res !== TRUE ) {
+			error("Could not create temporary zip file.");
+		}
+		foreach ($files as $file) {
+			$zip->addFromString($file->getFilename(), stream_get_contents($file->getSourcecode()));
+		}
+		$zip->close();
+
+		$filename = 's' . $submission->getSubmitid() . '.zip';
+
+		$response = new StreamedResponse();
+		$response->setCallback(function () use ($tmpfname) {
+			$fp = fopen($tmpfname, 'rb');
+			fpassthru($fp);
+			unlink($tmpfname);
+		});
+		$response->headers->set('Content-Type', 'application/zip');
+		$response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+		$response->headers->set('Content-Length', filesize($tmpfname));
+		$response->headers->set('Content-Transfer-Encoding', 'binary');
+		$response->headers->set('Connection', 'Keep-Alive');
+		$response->headers->set('Accept-Ranges','bytes');
+
+		return $response;
 	}
 
 	/**

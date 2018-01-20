@@ -1,6 +1,8 @@
 <?php
 namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Utils\Utils;
+
 /**
  * All incoming submissions
  * @ORM\Entity()
@@ -606,5 +608,29 @@ class Submission
 	public function getProblem()
 	{
 		return $this->problem;
+	}
+
+	/**
+	 * Helper function to serialize this for the REST API
+	 *
+	 * @return array
+	 */
+	public function serializeForAPI($use_external_ids)
+	{
+		$result = [
+			'id' => $this->getSubmitid(),
+			'team_id' => $use_external_ids ? $this->getTeam()->getExternalid() : (string)$this->getTeamid(),
+			'problem_id' => $use_external_ids ? $this->getProblem()->getExternalid() : (string)$this->getProbid(),
+			'language_id' => $use_external_ids ? $this->getLanguage()->getExternalid() : (string)$this->getLangid(),
+			'time'  => Utils::absTime($this->getSubmittime()),
+			'contest_time' => Utils::relTime($this->getSubmittime() - $this->getContest()->getStarttime()),
+			'entry_point' => $this->getEntryPoint(),
+			'files' => [['href' => sprintf(
+				'contests/%s/submissions/%s/files',
+				$use_external_ids ? $this->getContest()->getExternalid() : $this->getCid(), $this->getSubmitid()
+			)]],
+		];
+
+		return $result;
 	}
 }
