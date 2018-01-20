@@ -3,6 +3,7 @@ namespace DOMJudgeBundle\Controller;
 
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
+use DOMJudgeBundle\Entity\TeamCategory;
 use FOS\RestBundle\Controller\FOSRestController;
 
 use FOS\RestBundle\Controller\Annotations\View;
@@ -239,6 +240,24 @@ class APIController extends FOSRestController {
 		}
 
 		throw new NotFoundHttpException(sprintf('Problem %s not found', $id));
+	}
+
+	/**
+	 * @Get("/contests/{cid}/groups")
+	 */
+	public function getGroupsAction(Request $request) {
+		$groups = $this->getDoctrine()->getRepository(TeamCategory::class)->findAll();
+
+		return array_map(function(TeamCategory $teamCategory) use ($request) {
+			return $teamCategory->serializeForAPI($request->query->getBoolean('strict', true));
+		}, $groups);
+	}
+
+	/**
+	 * @Get("/contests/{cid}/groups/{teamCategory}")
+	 */
+	public function getGroupAction(Request $request, TeamCategory $teamCategory) {
+		return $teamCategory->serializeForAPI($request->query->getBoolean('strict', true));
 	}
 
 	/**
