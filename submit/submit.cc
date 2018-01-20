@@ -50,6 +50,9 @@ using namespace std;
 #define PROGRAM "submit"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
+/* Use a specific API version, set to empty string for default */
+#define API_VERSION "v4/"
+
 /* Logging and error functions */
 #include "lib.error.h"
 
@@ -585,7 +588,7 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 	Json::Reader reader;
 	Json::Value result;
 
-	url = strdup((baseurl+"api/"+string(funcname)).c_str());
+	url = strdup((baseurl+"api/"+API_VERSION+string(funcname)).c_str());
 
 	curlerrormsg[0] = 0;
 
@@ -740,7 +743,7 @@ int websubmit()
 	Json::Reader reader;
 	Json::Value root;
 
-	url = strdup((baseurl+"api/submissions").c_str());
+	url = strdup((baseurl+"api/"+API_VERSION+"submissions").c_str());
 
 	curlerrormsg[0] = 0;
 
