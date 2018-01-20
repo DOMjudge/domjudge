@@ -16,7 +16,7 @@ ALTER TABLE `judging_run` DROP COLUMN `endtime`;
 --
 
 ALTER TABLE `configuration`
-  ADD COLUMN `public` tinyint(1) UNSIGNED DEFAULT '0' COMMENT 'Is this variable publicly visible?' AFTER `type`,
+  ADD COLUMN `public` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Is this variable publicly visible?' AFTER `type`,
   ADD KEY `public` (`public`);
 
 ALTER TABLE `contestteam`
