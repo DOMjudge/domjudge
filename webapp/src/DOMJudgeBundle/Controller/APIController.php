@@ -3,6 +3,7 @@ namespace DOMJudgeBundle\Controller;
 
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
+use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TeamAffiliation;
 use DOMJudgeBundle\Entity\TeamCategory;
 use FOS\RestBundle\Controller\FOSRestController;
@@ -268,6 +269,26 @@ class APIController extends FOSRestController {
 	 */
 	public function getOrganizationAction(Request $request, TeamAffiliation $teamAffiliation) {
 		return $teamAffiliation->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true));
+	}
+
+	/**
+	 * @Get("/contests/{cid}/teams")
+	 */
+	public function getTeamsAction(Request $request, Contest $contest) {
+		$teams = $this->getDoctrine()->getRepository(Team::class)->findAllForContest($contest, !$this->get('security.authorization_checker')->isGranted('ROLE_JURY'));
+
+		return array_map(function(Team $team) use ($request) {
+			return $team->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true));
+		}, $teams);
+	}
+
+	/**
+	 * @Get("/contests/{cid}/teams/{id}")
+	 */
+	public function getTeamAction(Request $request, Contest $contest, $id) {
+		$useExternalIds = $this->getParameter('domjudge.useexternalids');
+		$team = $this->getDoctrine()->getRepository(Team::class)->findForContest($contest, $id, $useExternalIds, !$this->get('security.authorization_checker')->isGranted('ROLE_JURY'));
+		return $team->serializeForAPI($useExternalIds, $request->query->getBoolean('strict', true));
 	}
 
 	/**

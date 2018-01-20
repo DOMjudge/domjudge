@@ -3,7 +3,7 @@ namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 /**
  * All teams participating in the contest
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="DOMJudgeBundle\Repository\TeamRepository")
  * @ORM\Table(name="team", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
 class Team
@@ -770,5 +770,34 @@ class Team
 	public function getRankcache()
 	{
 		return $this->rankcache;
+	}
+
+	/**
+	 * Helper function to serialize this for the REST API
+	 *
+	 * @return array
+	 */
+	public function serializeForAPI($use_external_ids, $strict)
+	{
+		$groupIds = array();
+		if ($this->getCategory()) {
+			$groupIds[] = (string)$this->getCategoryid();
+		}
+
+		$result = [
+			'id' => $use_external_ids ? $this->getExternalid() : (string)$this->getTeamid(),
+			'icpc_id' => (string)$this->getExternalid(),
+			'name' => $this->getName(),
+			'group_ids' => $groupIds,
+			'organization_id' => $this->getAffiliation() ? ($use_external_ids ? $this->getAffiliation()->getExternalid() : (string)$this->getAffilid()) : null,
+		];
+		if (!$strict) {
+			$result['members'] = $this->getMembers();
+			$result['nationality'] = $this->getAffiliation() ? $this->getAffiliation()->getCountry() : null;
+			$result['affiliation'] = $this->getAffiliation() ? $this->getAffiliation()->getName() : null;
+			$result['externalid'] = $this->getExternalid();
+		}
+
+		return $result;
 	}
 }
