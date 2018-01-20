@@ -1194,7 +1194,9 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	if (isset($G_SYMFONY)) {
 		// Perform an internal Symfony request to the API
 		$apiFromInternal = true;
-		$url = 'http://localhost/api/'. $url;
+		// FIXME: Ugly hack: we still call the v4 API since the
+		// judgedaemon and submit client do not handle the v5 API yet.
+		$url = 'http://localhost/api/v4/'. $url;
 		$httpKernel = $G_SYMFONY->getHttpKernel();
 		parse_str($data, $parsedData);
 
