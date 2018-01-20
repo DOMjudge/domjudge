@@ -13,11 +13,11 @@ domjudge:
       problems:
         tables: [problem, contestproblem]
         primarykey: probid
-      groups:
+      team-categories:
         tables: [team_category]
         externalid: ~
         primarykey: categoryid
-      organizations:
+      team-affiliations:
         tables: [team_affiliation]
         primarykey: affilid
       teams:

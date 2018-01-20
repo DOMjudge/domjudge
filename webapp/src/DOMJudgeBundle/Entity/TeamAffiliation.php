@@ -223,4 +223,24 @@ class TeamAffiliation
 	{
 		return $this->teams;
 	}
+
+	/**
+	 * Helper function to serialize this for the REST API
+	 *
+	 * @return array
+	 */
+	public function serializeForAPI($use_external_ids, $strict)
+	{
+		$result = [
+			'id' => $use_external_ids ? $this->getExternalid() : (string)$this->getAffilid(),
+			'icpc_id' => (string)$this->getAffilid(),
+			'name' => $this->getName(),
+			'country' => $this->getCountry(),
+		];
+		if (!$strict) {
+			$result['shortname'] = $this->getShortname();
+		}
+
+		return $result;
+	}
 }
