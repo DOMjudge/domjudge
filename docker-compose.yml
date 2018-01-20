@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+  mariadb:
+    image: mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=domjudge
+      - MYSQL_USER=domjudge
+      - MYSQL_PASSWORD=domjudge
+      - MYSQL_DATABASE=domjudge
+    ports:
+      - 13306:3306
+    command: --max-connections=1000
+  domjudge:
+    image: domjudge/domjudge-contributor
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - .:/domjudge:cached
+    links:
+      - mariadb:mariadb
+    ports:
+      - 12345:80
+    privileged: true
