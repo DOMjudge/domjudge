@@ -317,6 +317,10 @@ class APIController extends FOSRestController {
 			'cid' => $contest->getCid()
 		]);
 
+		if (!$submission) {
+			throw new NotFoundHttpException(sprintf('Submission %s not found', $id));
+		}
+
 		return $submission->serializeForAPI($this->getParameter('domjudge.useexternalids'));
 	}
 
@@ -330,6 +334,10 @@ class APIController extends FOSRestController {
 			'valid' => 1,
 			'cid' => $contest->getCid()
 		]);
+
+		if (!$submission) {
+			throw new NotFoundHttpException(sprintf('Submission %s not found', $id));
+		}
 
 		$files = $submission->getFiles();
 
