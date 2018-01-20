@@ -156,7 +156,7 @@ function contests()
 		$cdatas = getCurContests(TRUE, $userdata['teamid']);
 	}
 
-	return array_map("cdataHelper", $cdatas);
+	return array_map("cdataHelper", array_values($cdatas));
 }
 $doc = "Get information about all current contests: id, shortname, name, start_time, end_time, duration, scoreboard_freeze_duration, unfreeze, and penalty. ";
 $api->provideFunction('GET', 'contests', $doc);
@@ -770,7 +770,7 @@ $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
  */
 function submissions($args)
 {
-	global $DB, $cdatas, $cids, $api, $requestedCid;
+	global $DB, $userdata, $cdatas, $cids, $api, $requestedCid;
 
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
@@ -1582,7 +1582,7 @@ function cmp_prob_label($a, $b) { return $a['label'] > $b['label']; }
  */
 function scoreboard($args)
 {
-	global $DB, $api, $cdatas, $cids, $requestedCid;
+	global $DB, $api, $userdata, $cdatas, $cids, $requestedCid;
 
 	if ( isset($userdata['teamid']) ) {
 		$cdatas = getCurContests(TRUE, $userdata['teamid']);
