@@ -92,17 +92,17 @@ void usage2(int , const char *, ...) __attribute__((format (printf, 2, 3)));
 void warnuser(const char *, ...)     __attribute__((format (printf, 1, 2)));
 char readanswer(const char *answers);
 #ifdef HAVE_MAGIC_H
-int  file_istext(char *filename);
+bool file_istext(char *filename);
 #endif
 
-int  websubmit();
+bool websubmit();
 
 Json::Value doAPIrequest(const char *, int);
-int getentrypointrequired();
-int getlangexts();
-int getcontests();
+bool readentrypointrequired();
+bool readlangexts();
+bool readcontests();
 
-/* Helper function for using libcurl in websubmit() and getlangexts() */
+/* Helper function for using libcurl in websubmit() and doAPIrequest() */
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 {
 	stringstream *s = (stringstream *) sptr;
@@ -247,9 +247,9 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ( getentrypointrequired()!=0 ) warning(0,"could not obtain configuration value 'required_entry_point'");
-	if ( getlangexts()!=0 ) warning(0,"could not obtain language extensions");
-	if ( getcontests()!=0 ) warning(0,"could not obtain active contests");
+	if ( !readentrypointrequired() ) warning(0,"could not obtain configuration value 'required_entry_point'");
+	if ( !readlangexts() ) warning(0,"could not obtain language extensions");
+	if ( !readcontests() ) warning(0,"could not obtain active contests");
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
@@ -543,11 +543,11 @@ char readanswer(const char *answers)
 
 #ifdef HAVE_MAGIC_H
 
-int file_istext(char *filename)
+bool file_istext(char *filename)
 {
 	magic_t cookie;
 	const char *filetype;
-	int res;
+	bool res;
 
 	if ( (cookie = magic_open(MAGIC_MIME))==NULL ) goto magicerror;
 
@@ -566,7 +566,7 @@ int file_istext(char *filename)
 magicerror:
 	warning(magic_errno(cookie),"%s",magic_error(cookie));
 
-	return 1; // return 'text' by default on error
+	return true; // return 'text' by default on error
 }
 
 #endif /* HAVE_MAGIC_H */
@@ -663,25 +663,29 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 	return result;
 }
 
-int getentrypointrequired()
+/* Tries to retrieve the configuration setting 'require_entry_point'.
+ * Returns boolean value whether successful and stores the result in
+ * the variable 'require_entry_point'. Defaults to storing false if
+ * the API calls fails.
+ */
+bool readentrypointrequired()
 {
 	Json::Value res = doAPIrequest("config?name=require_entry_point", 0);
-	if ( res.isNull() || !res.isObject() ) return 1;
+	if ( res.isNull() || !res.isObject() ) return false;
 
 	res = res["require_entry_point"];
-	if ( res.isNull() || res.isBool() ) return 1;
 	require_entry_point = res.asBool();
 
-	return 0;
+	return res.isBool();
 }
 
-int getlangexts()
+bool readlangexts()
 {
 	Json::Value langs, exts;
 
 	langs = doAPIrequest("languages", 0);
 
-	if ( langs.isNull() ) return 1;
+	if ( langs.isNull() ) return false;
 
 	for(Json::ArrayIndex i=0; i<langs.size(); i++) {
 		vector<string> lang;
@@ -691,7 +695,7 @@ int getlangexts()
 		     !(exts = langs[i]["extensions"]) ||
 		     !exts.isArray() || exts.size()==0 ) {
 			warning(0,"REST API returned unexpected JSON data for languages");
-			return 1;
+			return false;
 		}
 
 		for(Json::ArrayIndex j=0; j<exts.size(); j++) lang.push_back(exts[j].asString());
@@ -699,16 +703,16 @@ int getlangexts()
 		languages.push_back(lang);
 	}
 
-	return 0;
+	return true;
 }
 
-int getcontests()
+bool readcontests()
 {
 	Json::Value res;
 
 	res = doAPIrequest("contests", 0);
 
-	if ( res.isNull() || !res.isArray() ) return 1;
+	if ( res.isNull() || !res.isArray() ) return false;
 
 	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		vector<string> contest;
@@ -717,16 +721,16 @@ int getcontests()
 		contest.push_back(res[i]["name"].asString());
 		if ( contest[0]=="" || contest[1]=="" ) {
 			warning(0,"REST API returned unexpected JSON data for contests");
-			return 1;
+			return false;
 		}
 
 		contests.push_back(contest);
 	}
 
-	return 0;
+	return true;
 }
 
-int websubmit()
+bool websubmit()
 {
 	CURL *handle;
 	CURLcode res;
@@ -754,7 +758,7 @@ int websubmit()
 		curl_easy_cleanup(handle); \
 		curl_formfree(post); \
 		free(url); \
-		return 1; }
+		return false; }
 #define curlformadd(nametype,namecont,valtype,valcont) \
 	if ( curl_formadd(&post, &last, \
 			CURLFORM_ ## nametype, namecont, \
@@ -842,7 +846,7 @@ int websubmit()
 
 	logmsg(LOG_NOTICE,"Submission received, id = s%i", root.asInt());
 
-	return 0;
+	return true;
 }
 
 //  vim:ts=4:sw=4:
