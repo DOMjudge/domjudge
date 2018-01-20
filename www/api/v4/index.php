@@ -759,8 +759,9 @@ function config($args)
 $doc = 'Get configuration variables.';
 $args = array('name' => 'Search only a single config variable.');
 $exArgs = array(array('name' => 'sourcesize_limit'));
-$roles = array('jury','judgehost');
-$api->provideFunction('GET', 'config', $doc, $args, $exArgs, $roles);
+// Role based (partial) access to configuration variables is handled
+// in lib/lib.dbconfig.php.
+$api->provideFunction('GET', 'config', $doc, $args, $exArgs);
 
 /**
  * Submissions information

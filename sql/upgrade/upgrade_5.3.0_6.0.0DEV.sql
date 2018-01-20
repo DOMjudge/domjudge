@@ -15,6 +15,10 @@ ALTER TABLE `judging_run` DROP COLUMN `endtime`;
 -- Create additional structures
 --
 
+ALTER TABLE `configuration`
+  ADD COLUMN `public` tinyint(1) UNSIGNED DEFAULT '0' COMMENT 'Is this variable publicly visible?' AFTER `type`,
+  ADD KEY `public` (`public`);
+
 ALTER TABLE `contestteam`
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`cid`,`teamid`);
@@ -142,6 +146,15 @@ UPDATE `language` SET `externalid` = 'prolog'     WHERE `langid` = 'plg';
 UPDATE `language` SET `externalid` = 'python2'    WHERE `langid` = 'py2';
 UPDATE `language` SET `externalid` = 'python3'    WHERE `langid` = 'py3';
 UPDATE `language` SET `externalid` = 'scala'      WHERE `langid` = 'scala';
+
+UPDATE `configuration` SET `public` = '1' WHERE `name` IN (
+  'clar_categories', 'sourcesize_limit', 'sourcefiles_limit',
+  'score_in_seconds', 'show_flags', 'show_affiliations',
+  'show_affiliation_logos', 'show_pending', 'show_teams_submissions',
+  'show_compile', 'show_sample_output', 'show_balloons_postfreeze',
+  'penalty_time', 'compile_penalty', 'enable_printing',
+  'allow_registration', 'allow_openid_auth', 'openid_autocreate_team',
+  'openid_provider', 'require_entry_point');
 
 --
 -- Finally remove obsolete structures after moving data
