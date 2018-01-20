@@ -31,19 +31,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class APIController extends FOSRestController {
 
-	public $apiVersion = 4;
-
-	/**
-	 * @Get("/")
-	 */
-	public function getCurrentActiveContestAction() {
-		$contests = $this->getContestsAction();
-		if (count($contests) == 0) {
-			return null;
-		} else {
-			return $contests[0];
-		}
-	}
+	public $apiVersion = 5;
 
 	/**
 	 * @Patch("/")
@@ -139,7 +127,7 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{id}/state")
 	 */
-	public function getContestState(Contest $contest) {
+	public function getContestStateAction(Contest $contest) {
 		if ($contest->isActive()) {
 			$result = [];
 			$result['started'] = $contest->getStarttime() <= time() ? Utils::absTime($contest->getStarttime()) : null;
@@ -158,7 +146,7 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{cid}/judgement-types")
 	 */
-	public function getJudgementTypes() {
+	public function getJudgementTypesAction() {
 		$etcDir = realpath($this->getParameter('kernel.root_dir') . '/../../etc/');
 		$VERDICTS = [];
 		require_once($etcDir . '/common-config.php');
@@ -188,7 +176,7 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{cid}/judgement-types/{id}")
 	 */
-	public function getJudgementType($id) {
+	public function getJudgementTypeAction($id) {
 		$judgementTypes = $this->getJudgementTypes();
 		foreach ($judgementTypes as $judgementType) {
 			if ($judgementType['id'] === $id) {
@@ -202,7 +190,7 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{cid}/languages")
 	 */
-	public function getLanguages(Request $request) {
+	public function getLanguagesAction(Request $request) {
 		$languages = $this->getDoctrine()->getRepository(Language::class)->findBy(['allow_submit' => true]);
 
 		return array_map(function(Language $language) use ($request) {
@@ -213,7 +201,7 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{cid}/languages/{id}")
 	 */
-	public function getLanguage(Request $request, $id) {
+	public function getLanguageAction(Request $request, $id) {
 		if ($language = $this->getDoctrine()->getRepository(Language::class)->findOneBy(['langid' => $id, 'allow_submit' => true])) {
 			return $language->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true));
 		} else {
@@ -224,7 +212,7 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{cid}/problems")
 	 */
-	public function getProblems(Request $request, Contest $contest) {
+	public function getProblemsAction(Request $request, Contest $contest) {
 		// TODO: add security check for public/admin. I can't seem to get checkrole() working
 		$problems = $this->getDoctrine()->getRepository(Problem::class)->findAllForContest($contest);
 
@@ -237,7 +225,7 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{cid}/problems/{id}")
 	 */
-	public function getProblem(Request $request, Contest $contest, $id) {
+	public function getProblemAction(Request $request, Contest $contest, $id) {
 		// TODO: add security check for public/admin. I can't seem to get checkrole() working
 		$problems = $this->getDoctrine()->getRepository(Problem::class)->findAllForContest($contest);
 
@@ -256,7 +244,7 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{cid}/event-feed")
 	 */
-	public function getEventFeed(Request $request, Contest $contest) {
+	public function getEventFeedAction(Request $request, Contest $contest) {
 		// Make sure this script doesn't hit the PHP maximum execution timeout.
 		set_time_limit(0);
 		$em = $this->getDoctrine()->getManager();
