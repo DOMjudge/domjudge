@@ -68,13 +68,22 @@ function safe_string($value)
 	return is_null($value) ? null : (string)$value;
 }
 
-function give_back_judging($judgingid, $submitid) {
+function give_back_judging($judgingid)
+{
 	global $DB;
 
+	$jdata = $DB->q('TUPLE SELECT judgingid, cid, submitid, judgehost, result
+	                 FROM judging WHERE judgingid = %i', $judgingid);
+
+	$DB->q('START TRANSACTION');
 	$DB->q('UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i',
 	       $judgingid);
 	$DB->q('UPDATE submission SET judgehost = NULL
-		WHERE submitid = %i', $submitid);
+	        WHERE submitid = %i', $jdata['submitid']);
+	$DB->q('COMMIT');
+
+	auditlog('judging', $judgingid, 'given back', null, $jdata['judgehost'], $jdata['cid']);
+	// TODO: consider judging deleted from API viewpoint?
 }
 
 $api = new RestApi();
@@ -247,7 +256,7 @@ function problems($args)
 			'label'      => safe_string($pdata['label']),
 			'name'       => $pdata['name'],
 			'ordinal'    => safe_int($pdata['ordinal']),
-			'time_limit' => safe_float($pdata['timelimit']),
+			'time_limit' => safe_float($pdata['timelimit'],3),
 		);
 		if ( !isset($args['strict']) ) {
 			$ret['short_name'] = $pdata['shortname'];
@@ -295,10 +304,12 @@ function judgings($args)
 		$args['judging_id'] = rest_intid('judgements', $args['__primary_key'], $cid);
 	}
 
-	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime
+	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime,
+	                 MAX(r.runtime) AS maxruntime
 	          FROM judging j
 	          LEFT JOIN contest c USING (cid)
 	          LEFT JOIN submission s USING (submitid)
+	          LEFT JOIN judging_run r USING (judgingid)
 	          WHERE j.cid = %i';
 
 	if ( !(checkrole('admin') || checkrole('judgehost')) ) {
@@ -332,7 +343,7 @@ function judgings($args)
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' %_');
 	$submitid = ($hasSubmitid ? $args['submission_id'] : 0);
 
-	$query .= ' ORDER BY judgingid';
+	$query .= ' GROUP BY j.judgingid ORDER BY j.judgingid';
 
 	$q = $DB->q($query, $cid, $result, $teamid, $judgingid, $submitid);
 
@@ -347,6 +358,7 @@ function judgings($args)
 			'start_contest_time' => Utils::relTime($row['starttime'] - $cdatas[$row['cid']]['starttime']),
 			'end_time'           => empty($row['endtime']) ? null : Utils::absTime($row['endtime']),
 			'end_contest_time'   => empty($row['endtime']) ? null : Utils::relTime($row['endtime'] - $cdatas[$row['cid']]['starttime']),
+			'max_run_time'       => safe_float($row['maxruntime'],3),
 		);
 	}
 	return $res;
@@ -394,7 +406,7 @@ function judgings_POST($args)
 	                        INNER JOIN judgehost_restriction USING (restrictionid)
 	                        WHERE hostname = %s', $host);
 	if ( $restrictions ) {
-		$restrictions = json_decode($restrictions, true);
+		$restrictions = dj_json_decode($restrictions);
 		$contests = @$restrictions['contest'];
 		$problems = @$restrictions['problem'];
 		$languages = @$restrictions['language'];
@@ -431,20 +443,19 @@ function judgings_POST($args)
 
 
 	// Prioritize teams according to last judging time
-	$submitid = $DB->q('MAYBEVALUE SELECT s.submitid
-	                    FROM submission s
-	                    LEFT JOIN team t USING (teamid)
-	                    LEFT JOIN language l USING (langid)
-	                    LEFT JOIN contestproblem cp USING (probid, cid) ' .
-	                   $extra_join .
-	                   'WHERE s.judgehost IS NULL AND s.cid IN (%Ai)
-	                    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
-	                   $extra_where .
-	                   'ORDER BY judging_last_started ASC, submittime ASC, s.submitid ASC
-	                    LIMIT 1',
-	                   $host, $cids, $contests, $problems, $languages);
+	$submitids = $DB->q('COLUMN SELECT s.submitid
+	                     FROM submission s
+	                     LEFT JOIN team t USING (teamid)
+	                     LEFT JOIN language l USING (langid)
+	                     LEFT JOIN contestproblem cp USING (probid, cid) ' .
+	                    $extra_join .
+	                    'WHERE s.judgehost IS NULL AND s.cid IN (%Ai)
+	                     AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
+	                    $extra_where .
+	                    'ORDER BY judging_last_started ASC, submittime ASC, s.submitid ASC',
+	                    $host, $cids, $contests, $problems, $languages);
 
-	if ( $submitid ) {
+	foreach ( $submitids as $submitid ) {
 		// update exactly one submission with our judgehost name
 		// Note: this might still return 0 if another judgehost beat
 		// us to it
@@ -453,8 +464,7 @@ function judgings_POST($args)
 		                  WHERE submitid = %i AND judgehost IS NULL',
 		                  $host, $submitid);
 
-		// TODO: a small optimisation could be made: if numupd=0 but
-		// numopen > 1; not return but retry procudure again immediately
+		if ( $numupd==1 ) break;
 	}
 
 	if ( empty($submitid) || $numupd == 0 ) return '';
@@ -1077,7 +1087,7 @@ function runs($args)
 		$args['run_id'] = rest_intid('runs', $args['__primary_key'], $cid);
 	}
 
-	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid
+	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid, runtime
 	          FROM judging_run jr
 	          LEFT JOIN testcase USING (testcaseid)
 	          LEFT JOIN judging USING (judgingid)
@@ -1113,6 +1123,7 @@ function runs($args)
 			'judgement_type_id' => safe_string($VERDICTS[$run['runresult']]),
 			'time'              => Utils::absTime($run['endtime']),
 			'contest_time'      => Utils::relTime($run['endtime'] - $cdatas[$run['cid']]['starttime']),
+			'run_time'          => safe_float($run['runtime'],3),
 		);
 	}, $runs);
 }
@@ -1347,6 +1358,9 @@ function groups($args)
 			'icpc_id'    => safe_string($row['categoryid']),
 			'name'       => safe_string($row['name']),
 		);
+		if ( !$row['visible'] ) {
+			$ret['hidden'] = true;
+		}
 		if ( !isset($args['strict']) ) {
 			$ret['color']     = $row['color'];
 			$ret['sortorder'] = safe_int($row['sortorder']);
@@ -1389,7 +1403,7 @@ function languages($args)
 			'name'         => safe_string($row['name']),
 			);
 		if ( !isset($args['strict']) ) {
-			$ret['extensions']  = json_decode($row['extensions']);
+			$ret['extensions']  = dj_json_decode($row['extensions']);
 			$ret['allow_judge'] = safe_bool($row['allow_judge']);
 			$ret['time_factor'] = safe_float($row['time_factor']);
 		}
@@ -1508,8 +1522,7 @@ function judgehosts_POST($args)
 	          AND (j.valid = 1 OR r.valid = 1)';
 	$res = $DB->q($query, $args['hostname']);
 	foreach ( $res as $jud ) {
-		give_back_judging($jud['judgingid'], $jud['submitid']);
-		auditlog('judging', $jud['judgingid'], 'given back', null, $args['hostname'], $jud['cid']);
+		give_back_judging($jud['judgingid']);
 	}
 
 	return array_map(function($jud) {
@@ -1575,6 +1588,11 @@ function scoreboard($args)
 		}
 	}
 
+	$only_visible_teams = TRUE;
+	if ( isset($args['allteams']) && $args['allteams'] ) {
+		$only_visible_teams = FALSE;
+	}
+
 	$filter = array();
 	if ( array_key_exists('category', $args) ) {
 		$filter['categoryid'] = array($args['category']);
@@ -1586,7 +1604,7 @@ function scoreboard($args)
 		$filter['affilid'] = array($args['affiliation']);
 	}
 
-	$scoreboard = genScoreBoard($cdatas[$cid], !$args['public'], $filter);
+	$scoreboard = genScoreBoard($cdatas[$cid], !$args['public'], $filter, $only_visible_teams);
 
 	$prob2label = $DB->q('KEYVALUETABLE SELECT probid, shortname
 	                      FROM contestproblem WHERE cid = %i', $cid);
@@ -1635,7 +1653,8 @@ $doc = 'Get the scoreboard. Returns scoreboard for jury members if authenticated
 $args = array('cid' => 'ID of the contest to get the scoreboard for.',
               'category' => 'ID of a single category to search for.',
               'affiliation' => 'ID of an affiliation to search for.',
-              'country' => 'ISO 3166-1 alpha-3 country code to search for.');
+              'country' => 'ISO 3166-1 alpha-3 country code to search for.',
+              'allteams' => 'If set to true-ish and with jury permissions, also output invisible teams.');
 $exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'),
                 array('cid' => 2, 'country' => 'NLD'));
 $api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs, null, true);
@@ -1678,8 +1697,7 @@ function internal_error_POST($args)
 	set_internal_error($disabled, $cid, 0);
 	if ( in_array($disabled['kind'], array('problem', 'language')) ) {
 		// give back judging if we have to
-		$submitid = $DB->q('VALUE SELECT submitid FROM judging WHERE judgingid = %i', $args['judgingid']);
-		give_back_judging($args['judgingid'], $submitid);
+		give_back_judging($args['judgingid']);
 	}
 
 	return $errorid;

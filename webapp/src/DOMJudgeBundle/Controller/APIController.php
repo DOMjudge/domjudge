@@ -69,21 +69,20 @@ class APIController extends FOSRestController {
 					'cid' => $args['id'],
 				)
 			);
-			$date = \DateTime::createFromFormat(\DateTime::ATOM, $args['start_time']);
+			$date = date_create($args['start_time']);
 			if ( $date === FALSE) {
 				$response = new Response('Invalid "start_time" in request.', 400);
 			} else {
 				$new_start_time = $date->getTimestamp();
 				$now = Utils::now();
 				if ( $new_start_time < $now + 30 ) {
-					$response = new Response('New start_time not far in enough in future.', 403);
+					$response = new Response('New start_time not far enough in the future.', 403);
 				} else if ( FALSE && $contestObject->getStarttime() != NULL && $contestObject->getStarttime() < $now + 30 ) {
 					$response = new Response('Current contest already started or about to start.', 403);
 				} else {
 					$em->persist($contestObject);
 					$newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
 					$contestObject->setStarttimeString($newStartTimeString);
-					$contestObject->setStarttime($new_start_time);
 					$response = new Response('Contest start time changed to ' . $newStartTimeString, 200);
 					$em->flush();
 				}
@@ -258,7 +257,7 @@ class APIController extends FOSRestController {
 	 * @Get("/event-feed")
 	 */
 	public function getEventFeed(Request $request) {
-		# Avoid being killed after 30s of CPU time.
+		// Make sure this script doesn't hit the PHP maximum execution timeout.
 		set_time_limit(0);
 		$em = $this->getDoctrine()->getManager();
 		$contest = $this->getCurrentActiveContestAction();
@@ -281,15 +280,13 @@ class APIController extends FOSRestController {
 		$response->setCallback(function () use ($em, $contest, $request) {
 			$lastUpdate = 0;
 			$lastIdSent = -1;
-			if ($request->query->has('id')) {
-				$lastIdSent = $request->query->getInt('id');
+			if ($request->query->has('since_id')) {
+				$lastIdSent = $request->query->getInt('since_id');
 			}
 			$typeFilter = false;
-			if ($request->query->has('type')) {
-				$typeFilter = explode(',', $request->query->get('type'));
+			if ($request->query->has('types')) {
+				$typeFilter = explode(',', $request->query->get('types'));
 			}
-			// Make sure this script doesn't hit the PHP maximum execution timeout.
-			set_time_limit(0);
 			while (TRUE) {
 				$qb = $em->createQueryBuilder()
 					->from('DOMJudgeBundle:Event', 'e')
@@ -310,14 +307,15 @@ class APIController extends FOSRestController {
 
 				$events = $q->getResult();
 				foreach ($events as $event) {
-					$data = json_decode(stream_get_contents($event['content']));
+					// FIXME: use the dj_* wrapper as in lib/lib.wrapper.php.
+					$data = json_decode(stream_get_contents($event['content']), TRUE);
 					echo json_encode(array(
 						'id'        => (string)$event['eventid'],
 						'type'      => (string)$event['endpointtype'],
 						'op'        => (string)$event['action'],
 						'time'      => Utils::absTime($event['eventtime']),
 						'data'      => $data,
-					)) . "\n";
+					), JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES) . "\n";
 					ob_flush();
 					flush();
 					$lastUpdate = time();

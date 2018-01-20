@@ -14,6 +14,9 @@ require(LIBWWWDIR . '/header.php');
 
 requireAdmin();
 
+// Turn off output buffering, to see the page as it (slowly) loads.
+ob_end_flush();
+
 $time_start = microtime(TRUE);
 
 ?>
@@ -333,7 +336,7 @@ foreach ($judgehosts as &$judgehost) {
 	                        WHERE hostname = %s ORDER BY restrictionid',
 	                       $judgehost['hostname']);
 	if ( $restrictions ) {
-		$restrictions = json_decode($restrictions, true);
+		$restrictions = dj_json_decode($restrictions);
 		$judgehost['contests'] = @$restrictions['contest'];
 		$judgehost['problems'] = @$restrictions['problem'];
 		$judgehost['languages'] = @$restrictions['language'];

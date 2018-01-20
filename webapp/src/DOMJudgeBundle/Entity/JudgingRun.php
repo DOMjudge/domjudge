@@ -32,7 +32,7 @@ class JudgingRun
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="runresult", length=25, options={"comment"="Result of this run, NULL if not finished yet"}, nullable=true)
+	 * @ORM\Column(type="string", name="runresult", length=32, options={"comment"="Result of this run, NULL if not finished yet"}, nullable=true)
 	 */
 	private $runresult;
 

@@ -54,7 +54,7 @@ echo "</p>\n" . addEndForm();
 
 $submissions_filter = array();
 if ( isset($_COOKIE['submissions-filter']) ) {
-	$submissions_filter = json_decode($_COOKIE['submissions-filter'], true);
+	$submissions_filter = dj_json_decode($_COOKIE['submissions-filter']);
 }
 
 echo "<a class=\"collapse\" href=\"javascript:collapse('submissions-filter')\"><img src=\"../images/filter.png\" alt=\"filter&hellip;\" title=\"filter&hellip;\" class=\"picto\" /></a>";

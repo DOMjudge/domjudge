@@ -49,6 +49,7 @@ exclude_paths:
 - "install.sh"
 - "lib/vendor/"
 - "sql/files/defaultdata/float/config.h"
+- "webapp/var/"
 - "webapp/web/js/ace/"
 - "webapp/web/js/flot/"
 - "webapp/web/js/jquery*.js"
@@ -56,3 +57,4 @@ exclude_paths:
 - "webapp/web/js/js.cookie*.js"
 - "webapp/web/js/sorttable.js"
 - "webapp/web/js/tabber.js"
+- "www/api/v3/"

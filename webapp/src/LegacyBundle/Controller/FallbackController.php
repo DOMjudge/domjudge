@@ -85,14 +85,18 @@ class FallbackController extends Controller
 		global $G_SYMFONY;
 		$G_SYMFONY = $this->container->get('domjudge.domjudge');
 		require($thefile);
-		$headers = headers_list();
-		header_remove();
 
 		$response = Response::create(ob_get_clean(), http_response_code());
-		foreach ($headers as $header) {
-			$pieces = explode(':', $header);
-			$headerName = array_shift($pieces);
-			$response->headers->set($headerName, trim(implode(':', $pieces)), false);
+
+		// Headers may already have been sent on pages with streaming output.
+		if ( !headers_sent() ) {
+			$headers = headers_list();
+			header_remove();
+			foreach ($headers as $header) {
+				$pieces = explode(':', $header);
+				$headerName = array_shift($pieces);
+				$response->headers->set($headerName, trim(implode(':', $pieces)), false);
+			}
 		}
 
 		if (!$response->headers->has('Content-Type')) {

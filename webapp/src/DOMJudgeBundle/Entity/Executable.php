@@ -35,7 +35,7 @@ class Executable
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="type", length=8, options={"comment"="Type of executable"}, nullable=false)
+	 * @ORM\Column(type="string", name="type", length=32, options={"comment"="Type of executable"}, nullable=false)
 	 */
 	private $type;
 

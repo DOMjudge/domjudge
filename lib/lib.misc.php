@@ -751,7 +751,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	// submissions.
 	if ( checkrole('jury') && !empty($results) ) {
 		$DB->q('UPDATE submission SET expected_results=%s
-		        WHERE submitid=%i', json_encode($results), $id);
+		        WHERE submitid=%i', dj_json_encode($results), $id);
 	}
 	$DB->q('COMMIT');
 
@@ -1073,7 +1073,10 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		if ( !empty($data['id']) ) $id = $data['id'];
 	}
 
-	if ( $id===null ) error('eventlog: API ID not specified or inferred from data');
+	if ( $id===null ) {
+		logmsg(LOG_WARNING, "eventlog: API ID not specified or inferred from data");
+		return;
+	}
 
 	$cids = array();
 	if ( $cid!==null ) {
@@ -1101,8 +1104,16 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		} else {
 			$url = $endpoint['url'].'/'.$id;
 		}
-		$json = API_request($url);
-		if ( empty($json) ) error("eventlog: got no JSON data from '$url'");
+		$json = API_request($url, 'GET', '', false);
+		if ( empty($json) ) {
+			logmsg(LOG_WARNING,"eventlog: got no JSON data from '$url'");
+			// If we didn't get data from the API, then that is
+			// probably because this particular data is not visible,
+			// for example because it belongs to an invisible jury
+			// team. If we don't have data, there's also no point in
+			// trying to insert anything in the eventlog table.
+			return;
+		}
 	}
 
 	// First acquire an advisory lock to prevent other event logging,
@@ -1199,10 +1210,14 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 
 		$status = $response->getStatusCode();
 		if ( $status < 200 || $status >= 300 ) {
-			$errstr = "Error while executing internal $verb request to url " . $url .
+			$errstr = "executing internal $verb request to url " . $url .
 				": http status code: " . $status . ", response: " . $response;
-			if ($failonerror) { error($errstr); }
-			else { warning($errstr); return null; }
+			if ( $failonerror ) {
+				error($errstr);
+			} else {
+				logmsg(LOG_WARNING,$errstr);
+				return null;
+			}
 		}
 
 		return $response->getContent();
@@ -1247,10 +1262,14 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	}
 	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	if ( $status < 200 || $status >= 300 ) {
-		$errstr = "Error while executing curl $verb to url " . $url .
-		    ": http status code: " . $status . ", response: " . $response;
-		if ($failonerror) { error($errstr); }
-		else { warning($errstr); return null; }
+		$errstr = "executing internal $verb request to url " . $url .
+			": http status code: " . $status . ", response: " . $response;
+		if ( $failonerror ) {
+			error($errstr);
+		} else {
+			logmsg(LOG_WARNING,$errstr);
+			return null;
+		}
 	}
 
 	curl_close($ch);

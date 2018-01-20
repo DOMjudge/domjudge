@@ -139,7 +139,7 @@ if ( empty($data['compile_script']) ) {
 ?>
 </td></tr>
 <tr><td>Extensions:  </td><td><?php
-echo specialchars(implode(', ',json_decode($data['extensions']))) ?></td></tr>
+echo specialchars(implode(', ',dj_json_decode($data['extensions']))) ?></td></tr>
 </table>
 
 <?php

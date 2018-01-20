@@ -59,6 +59,7 @@ Options:
   -r <debs>   List of extra package names to remove (comma separated).
   -l <debs>   List of local package files to install (comma separated).
   -y          Force overwriting the chroot dir and downloading debootstrap.
+  -h          Display this help.
 
 This script must be run as root, <chrootdir> is the non-existing
 target location of the chroot (unless '-y' is specified). If the host
@@ -80,12 +81,8 @@ error()
     exit 1
 }
 
-if [ "$(id -u)" != 0 ]; then
-    echo "Warning: you probably need to run this program as root."
-fi
-
 # Read command-line parameters:
-while getopts 'a:d:D:i:r:l:y' OPT ; do
+while getopts 'a:d:D:i:r:l:yh' OPT ; do
 	case $OPT in
 		a) ARCH=$OPTARG ;;
 		d) CHROOTDIR=$OPTARG ;;
@@ -94,6 +91,7 @@ while getopts 'a:d:D:i:r:l:y' OPT ; do
 		r) REMOVEDEBS_EXTRA=$OPTARG ;;
 		l) LOCALDEBS=$OPTARG ;;
 		y) FORCEYES=1 ;;
+		h) SHOWHELP=1 ;;
 		\?) error "Could not parse options." ;;
 	esac
 done
@@ -102,8 +100,17 @@ if [ $# -gt 0 ]; then
 	error "Additional arguments specified."
 fi
 
+if [ -n "$SHOWHELP" ]; then
+	usage
+	exit 0
+fi
+
 if [ "$DISTRO" != 'Debian' ] && [ "$DISTRO" != 'Ubuntu' ]; then
 	error "Invalid distribution specified, only 'Debian' and 'Ubuntu' are supported."
+fi
+
+if [ "$(id -u)" != 0 ]; then
+    echo "Warning: you probably need to run this program as root."
 fi
 
 [ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."

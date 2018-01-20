@@ -342,6 +342,7 @@ class Contest
 	public function setActivatetimeString($activatetimeString)
 	{
 		$this->activatetime_string = $activatetimeString;
+		$this->activatetime = $this->getAbsoluteTime($activatetimeString);
 
 		return $this;
 	}
@@ -366,6 +367,8 @@ class Contest
 	public function setStarttimeString($starttimeString)
 	{
 		$this->starttime_string = $starttimeString;
+		$date = new DateTime($freezetimeString);
+		$this->freezetime = $date->format('U.v');
 
 		return $this;
 	}
@@ -390,6 +393,7 @@ class Contest
 	public function setFreezetimeString($freezetimeString)
 	{
 		$this->freezetime_string = $freezetimeString;
+		$this->freezetime = $this->getAbsoluteTime($freezetimeString);
 
 		return $this;
 	}
@@ -414,6 +418,7 @@ class Contest
 	public function setEndtimeString($endtimeString)
 	{
 		$this->endtime_string = $endtimeString;
+		$this->endtime = $this->getAbsoluteTime($endtimeString);
 
 		return $this;
 	}
@@ -438,6 +443,7 @@ class Contest
 	public function setUnfreezetimeString($unfreezetimeString)
 	{
 		$this->unfreezetime_string = $unfreezetimeString;
+		$this->unfreezetime = $this->getAbsoluteTime($unfreezetimeString);
 
 		return $this;
 	}
@@ -462,6 +468,7 @@ class Contest
 	public function setDeactivatetimeString($deactivatetimeString)
 	{
 		$this->deactivatetime_string = $deactivatetimeString;
+		$this->deactivatetime = $this->getAbsoluteTime($deactivatetimeString);
 
 		return $this;
 	}
@@ -900,5 +907,18 @@ class Contest
 		$fdata['running'] = ( $fdata['started'] && !$fdata['stopped'] );
 
 		return $fdata;
+	}
+
+	private function getAbsoluteTime($time_string)
+	{
+		if ( preg_match('/^[+-][0-9]+:[0-9]{2}:[0-9]{2}(\.[0-9]{0,6})?$/',$time_string) ) {
+			list($h,$m,$s) = sscanf($time_string,'%d:%d:%f');
+			// FIXME: this floating point calculation may lose
+			// significant decimals at 4th decimal place.
+			return $this->starttime + 3600*$h + 60*$m + $s;
+		} else {
+			$date = new DateTime($time_string);
+			return $date->format('U.v');
+		}
 	}
 }

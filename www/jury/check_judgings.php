@@ -13,6 +13,9 @@ require(LIBWWWDIR . '/header.php');
 
 requireAdmin();
 
+// Turn off output buffering, to see the page as it (slowly) loads.
+ob_end_flush();
+
 $verify_multiple = isset($_REQUEST['verify_multiple']);
 
 ?>
@@ -72,7 +75,7 @@ while( !empty($cids) && $row = $res->next() ) {
 	$results = $row['expected_results'];
 
 	if ( $results !== NULL && $row['verified']==0 ) {
-		$results = json_decode($results);
+		$results = dj_json_decode($results);
 		$nchecked++;
 
 		$result = mb_strtoupper($row['result']);

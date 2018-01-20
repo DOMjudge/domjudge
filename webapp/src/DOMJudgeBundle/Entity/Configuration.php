@@ -19,7 +19,7 @@ class Configuration
 
   /**
    * @var string
-   * @ORM\Column(type="string", name="name", length=25, options={"comment"="Name of the configuration variable"}, nullable=false)
+   * @ORM\Column(type="string", name="name", length=32, options={"comment"="Name of the configuration variable"}, nullable=false)
    */
   private $name;
 
@@ -31,7 +31,7 @@ class Configuration
 
   /**
    * @var string
-   * @ORM\Column(type="string", name="type", length=25, options={"comment"="Type of the value (metatype for use in the webinterface)"}, nullable=true)
+   * @ORM\Column(type="string", name="type", length=32, options={"comment"="Type of the value (metatype for use in the webinterface)"}, nullable=true)
    */
   private $type;
 

@@ -52,7 +52,7 @@ class ContestProblem
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="color", length=255, options={"comment"="Balloon colour to display on the scoreboard"}, nullable=true)
+	 * @ORM\Column(type="string", name="color", length=32, options={"comment"="Balloon colour to display on the scoreboard"}, nullable=true)
 	 */
 	private $color;
 
