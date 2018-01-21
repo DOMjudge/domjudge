@@ -618,7 +618,7 @@ class Submission
 	public function serializeForAPI($use_external_ids)
 	{
 		$result = [
-			'id' => $this->getSubmitid(),
+			'id' => (string)$this->getSubmitid(),
 			'team_id' => $use_external_ids ? $this->getTeam()->getExternalid() : (string)$this->getTeamid(),
 			'problem_id' => $use_external_ids ? $this->getProblem()->getExternalid() : (string)$this->getProbid(),
 			'language_id' => $use_external_ids ? $this->getLanguage()->getExternalid() : (string)$this->getLangid(),

@@ -152,7 +152,7 @@ class APIController extends FOSRestController {
 				$solved = true;
 			}
 			if ($name == 'compiler-error') {
-				$penalty = $this->get('domjudge.domjudge')->dbconfig_get('compile_penalty', false);
+				$penalty = (bool)$this->get('domjudge.domjudge')->dbconfig_get('compile_penalty', false);
 			}
 			$result[] = [
 				'id' => $label,
