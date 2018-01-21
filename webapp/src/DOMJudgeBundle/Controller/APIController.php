@@ -214,8 +214,11 @@ class APIController extends FOSRestController {
 		$problems = $this->getDoctrine()->getRepository(Problem::class)->findAllForContest($contest);
 
 		$ordinal = 0;
-		return array_map(function(Problem $problem) use (&$ordinal, $request) {
-			return $problem->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true)) + ['ordinal' => $ordinal++];
+		return array_map(function($problemData) use (&$ordinal, $request) {
+			/** @var Problem $problem */
+			$problem = $problemData[0];
+			$num_testcases = $problemData['num_testcases'];
+			return $problem->serializeForAPI($num_testcases, $this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true)) + ['ordinal' => $ordinal++];
 		}, $problems);
 	}
 
