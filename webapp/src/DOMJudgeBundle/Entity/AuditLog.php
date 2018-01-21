@@ -37,19 +37,19 @@ class AuditLog
 
   /**
    * @var string
-   * @ORM\Column(type="string", name="datatype", length=25, options={"comment"="Reference to DB table associated to this entry"}, nullable=true)
+   * @ORM\Column(type="string", name="datatype", length=32, options={"comment"="Reference to DB table associated to this entry"}, nullable=true)
    */
   private $datatype;
 
   /**
    * @var string
-   * @ORM\Column(type="string", name="dataid", length=50, options={"comment"="Identifier in reference table"}, nullable=true)
+   * @ORM\Column(type="string", name="dataid", length=64, options={"comment"="Identifier in reference table"}, nullable=true)
    */
   private $dataid;
 
   /**
    * @var string
-   * @ORM\Column(type="string", name="action", length=30, options={"comment"="Description of action performed"}, nullable=true)
+   * @ORM\Column(type="string", name="action", length=64, options={"comment"="Description of action performed"}, nullable=true)
    */
   private $action;
 

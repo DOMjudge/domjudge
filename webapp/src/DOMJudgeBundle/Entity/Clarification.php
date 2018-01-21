@@ -47,7 +47,7 @@ class Clarification
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="jury_member", length=15, options={"comment"="Name of jury member who answered this"}, nullable=true)
+	 * @ORM\Column(type="string", name="jury_member", length=255, options={"comment"="Name of jury member who answered this"}, nullable=true)
 	 */
 	private $jury_member;
 
@@ -60,7 +60,7 @@ class Clarification
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="category", length=128, options={"comment"="Category associated to this clarification; only set for non-problem clars"}, nullable=true)
+	 * @ORM\Column(type="string", name="category", length=255, options={"comment"="Category associated to this clarification; only set for non-problem clars"}, nullable=true)
 	 */
 	private $category;
 

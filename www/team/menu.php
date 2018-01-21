@@ -15,6 +15,8 @@ if ( checkrole('jury') || checkrole('balloon') ) {
 	echo "<a target=\"_top\" href=\"../jury/\" accesskey=\"j\"><span class=\"octicon octicon-arrow-right\"></span> jury</a>\n";
 }
 
+echo "<a target=\"_top\" href=\"https://domjudge.bath.ac.uk/docs.html\" accesskey=\"d\">docs</a>\n";
+
 echo "</div>\n\n<div id=\"menutopright\">\n";
 
 putClock();

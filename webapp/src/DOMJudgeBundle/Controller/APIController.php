@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\Event;
 use DOMJudgeBundle\Utils\Utils;
 
 /**
@@ -126,7 +127,26 @@ class APIController extends FOSRestController {
 	 */
 	public function getSingleContestAction(Contest $cid) {
 		if ($cid->isActive()) {
-			return $cid->serializeForAPI();
+			return $cid->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20));
+		} else {
+			return NULL;
+		}
+	}
+
+	/**
+	 * @Get("/contests/{cid}/state")
+	 */
+	public function getContestState(Contest $cid) {
+		if ($cid->isActive()) {
+			$result = [];
+			$result['started'] = $cid->getStarttime() <= time() ? Utils::absTime($cid->getStarttime()) : null;
+			$result['ended'] = ($result['started'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
+			$result['frozen'] = ($result['started'] !== null && $cid->getFreezetime() <= time()) ? Utils::absTime($cid->getFreezetime()) : null;
+			$result['thawed'] = ($result['frozen'] !== null && $cid->getUnfreezetime() <= time()) ? Utils::absTime($cid->getUnfreezetime()) : null;
+			// TODO: do not set this for public access (first needs public role)
+			$result['finalized'] = ($result['ended'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
+
+			return $result;
 		} else {
 			return NULL;
 		}
@@ -136,27 +156,37 @@ class APIController extends FOSRestController {
 	 * @Get("/event-feed")
 	 */
 	public function getEventFeed(Request $request) {
-		# Avoid being killed after 30s of CPU time.
+		// Make sure this script doesn't hit the PHP maximum execution timeout.
 		set_time_limit(0);
 		$em = $this->getDoctrine()->getManager();
 		$contest = $this->getCurrentActiveContestAction();
 		if ($contest === NULL) {
 			return new Response('No active contest.', 404);
 		}
+		if ($request->query->has('id')) {
+			$event = $em->getRepository(Event::class)->findOneBy(
+				array(
+					'eventid' => $request->query->getInt('id'),
+					'cid'     => $contest['id'],
+				)
+			);
+			if ( $event===NULL ) {
+				return new Response('Invalid parameter "id" requested.', 400);
+			}
+		}
 		$response = new StreamedResponse();
 		$response->headers->set('X-Accel-Buffering', 'no');
 		$response->setCallback(function () use ($em, $contest, $request) {
 			$lastUpdate = 0;
 			$lastIdSent = -1;
-			if ($request->query->has('id')) {
-				$lastIdSent = $request->query->getInt('id');
+			if ($request->query->has('since_id')) {
+				$lastIdSent = $request->query->getInt('since_id');
 			}
 			$typeFilter = false;
-			if ($request->query->has('type')) {
-				$typeFilter = explode(',', $request->query->get('type'));
+			if ($request->query->has('types')) {
+				$typeFilter = explode(',', $request->query->get('types'));
 			}
-			// Make sure this script doesn't hit the PHP maximum execution timeout.
-			set_time_limit(0);
+			$isAdmin = $this->isGranted('ROLE_ADMIN');
 			while (TRUE) {
 				$qb = $em->createQueryBuilder()
 					->from('DOMJudgeBundle:Event', 'e')
@@ -172,12 +202,21 @@ class APIController extends FOSRestController {
 						->andWhere('e.endpointtype IN (:types)')
 						->setParameter(':types', $typeFilter);
 				}
+				if ( !$isAdmin ) {
+					$qb = $qb
+						->andWhere('e.endpointtype NOT IN (:types)')
+						->setParameter(':types', ['judgements', 'runs']);
+				}
 
 				$q = $qb->getQuery();
 
 				$events = $q->getResult();
 				foreach ($events as $event) {
-					$data = json_decode(stream_get_contents($event['content']));
+					// FIXME: use the dj_* wrapper as in lib/lib.wrapper.php.
+					$data = json_decode(stream_get_contents($event['content']), TRUE);
+					if ( !$isAdmin && $event['endpointtype'] == 'submissions' ) {
+						unset($data['entry_point']);
+					}
 					echo json_encode(array(
 						'id'        => (string)$event['eventid'],
 						'type'      => (string)$event['endpointtype'],

@@ -922,12 +922,12 @@ $API_endpoints = array(
 	'teams' => array(
 		'type'   => 'configuration',
 		'tables' => array('team', 'contestteam'),
-		'extid'  => 'externalid',
+		'extid'  => TRUE,
 	),
-	'teams-members' => array(
-		'type'   => 'configuration',
-		'tables' => array(),
-	),
+ 	'teams-members' => array(
+ 		'type'   => 'configuration',
+ 		'tables' => array(),
+ 	),
 	'submissions' => array(
 		'type'   => 'live',
 		'extid'  => TRUE, // 'externalid,cid' in ICPC-live branch
@@ -944,7 +944,7 @@ $API_endpoints = array(
 	),
 	'clarifications' => array(
 		'type'   => 'live',
-		'extid'  => 'externalid,cid',
+		'extid'  => TRUE,
 	),
 	'awards' => array(
 		'type'   => 'aggregate',
@@ -1095,7 +1095,10 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		if ( !empty($data['id']) ) $id = $data['id'];
 	}
 
-	if ( $id===null ) error('eventlog: API ID not specified or inferred from data');
+	if ( $id===null ) {
+		logmsg(LOG_WARNING, "eventlog: API ID not specified or inferred from data");
+		return;
+	}
 
 	$cids = array();
 	if ( $cid!==null ) {
@@ -1123,8 +1126,8 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		} else {
 			$url = $endpoint['url'].'/'.$id;
 		}
-		$json = API_request($url);
-		if ( empty($json) ) error("eventlog: got no JSON data from '$url'");
+		$json = API_request($url, 'GET', '', false);
+		if ( empty($json) ) logmsg(LOG_WARN,"eventlog: got no JSON data from '$url'");
 	}
 
 	// First acquire an advisory lock to prevent other event logging,
@@ -1221,10 +1224,14 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 
 		$status = $response->getStatusCode();
 		if ( $status < 200 || $status >= 300 ) {
-			$errstr = "Error while executing internal $verb request to url " . $url .
+			$errstr = "executing internal $verb request to url " . $url .
 				": http status code: " . $status . ", response: " . $response;
-			if ($failonerror) { error($errstr); }
-			else { warning($errstr); return null; }
+			if ( $failonerror ) {
+				error($errstr);
+			} else {
+				logmsg(LOG_WARN,$errstr);
+				return null;
+			}
 		}
 
 		return $response->getContent();
@@ -1269,10 +1276,14 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	}
 	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 	if ( $status < 200 || $status >= 300 ) {
-		$errstr = "Error while executing curl $verb to url " . $url .
-		    ": http status code: " . $status . ", response: " . $response;
-		if ($failonerror) { error($errstr); }
-		else { warning($errstr); return null; }
+		$errstr = "executing internal $verb request to url " . $url .
+			": http status code: " . $status . ", response: " . $response;
+		if ( $failonerror ) {
+			error($errstr);
+		} else {
+			logmsg(LOG_WARN,$errstr);
+			return null;
+		}
 	}
 
 	curl_close($ch);

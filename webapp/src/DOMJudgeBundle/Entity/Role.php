@@ -19,7 +19,7 @@ class Role implements RoleInterface
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="role", length=25, options={"comment"="Role name"}, nullable=false)
+	 * @ORM\Column(type="string", name="role", length=32, options={"comment"="Role name"}, nullable=false)
 	 */
 	private $dj_role;
 

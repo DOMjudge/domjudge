@@ -45,7 +45,7 @@ class Judging
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="result", length=255, options={"comment"="Result string as defined in config.php"}, nullable=true)
+	 * @ORM\Column(type="string", name="result", length=32, options={"comment"="Result string as defined in config.php"}, nullable=true)
 	 */
 	private $result;
 
@@ -57,7 +57,7 @@ class Judging
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="jury_member", length=25, options={"comment"="Name of jury member who verified this"}, nullable=true)
+	 * @ORM\Column(type="string", name="jury_member", length=255, options={"comment"="Name of jury member who verified this"}, nullable=true)
 	 */
 	private $jury_member;
 

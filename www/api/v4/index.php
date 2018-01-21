@@ -210,7 +210,8 @@ function problems($args)
 		// the ordinal and finally select a single problem in code to
 		// make sure that the ordinal is the same if we query a single
 		// problem.
-		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color,
+		$pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname,
+		                               name, color, timelimit,
 		                               COUNT(testcaseid) AS test_data_count
 		                  FROM problem
 		                  INNER JOIN contestproblem USING (probid)
@@ -247,6 +248,7 @@ function problems($args)
 			'short_name' => $pdata['shortname'],
 			'name'       => $pdata['name'],
 			'ordinal'    => safe_int($pdata['ordinal']),
+			'time_limit' => safe_float($pdata['timelimit']),
 		);
 		if ( !empty($pdata['rgb']) ) {
 			$ret['rgb'] = $pdata['rgb'];
@@ -291,10 +293,12 @@ function judgings($args)
 		$args['judging_id'] = rest_intid('judgements', $args['__primary_key'], $cid);
 	}
 
-	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime
+	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime,
+	                 MAX(r.runtime) AS maxruntime
 	          FROM judging j
 	          LEFT JOIN contest c USING (cid)
 	          LEFT JOIN submission s USING (submitid)
+	          LEFT JOIN judging_run r USING (judgingid)
 	          WHERE j.cid = %i';
 
 	if ( !(checkrole('admin') || checkrole('judgehost')) ) {
@@ -328,7 +332,7 @@ function judgings($args)
 	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' %_');
 	$submitid = ($hasSubmitid ? $args['submission_id'] : 0);
 
-	$query .= ' ORDER BY judgingid';
+	$query .= ' GROUP BY j.judgingid ORDER BY j.judgingid';
 
 	$q = $DB->q($query, $cid, $result, $teamid, $judgingid, $submitid);
 
@@ -343,6 +347,7 @@ function judgings($args)
 			'start_contest_time' => Utils::relTime($row['starttime'] - $cdatas[$row['cid']]['starttime']),
 			'end_time'           => empty($row['endtime']) ? null : Utils::absTime($row['endtime']),
 			'end_contest_time'   => empty($row['endtime']) ? null : Utils::relTime($row['endtime'] - $cdatas[$row['cid']]['starttime']),
+			'max_run_time'       => safe_float($row['maxruntime']),
 		);
 	}
 	return $res;
@@ -745,8 +750,7 @@ function config($args)
 $doc = 'Get configuration variables.';
 $args = array('name' => 'Search only a single config variable.');
 $exArgs = array(array('name' => 'sourcesize_limit'));
-$roles = array('jury','judgehost');
-$api->provideFunction('GET', 'config', $doc, $args, $exArgs, $roles);
+$api->provideFunction('GET', 'config', $doc, $args, $exArgs);
 
 /**
  * Submissions information
@@ -806,8 +810,10 @@ function submissions($args)
 	$q = $DB->q($query, $cid, $languageId, $submitid, $freezetime, $teamid);
 	$res = array();
 	while ( $row = $q->next() ) {
+		$extcid = safe_string(rest_extid('contests', $cid));
+		$extid = safe_string(rest_extid('submissions', $row['submitid']));
 		$res[] = array(
-			'id'           => safe_string(rest_extid('submissions', $row['submitid'])),
+			'id'           => $extid,
 			'team_id'      => safe_string(rest_extid('teams', $row['teamid'])),
 			'problem_id'   => safe_string(rest_extid('problems', $row['probid'])),
 			'language_id'  => safe_string(rest_extid('languages', $row['langid'])),
@@ -815,6 +821,7 @@ function submissions($args)
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
 			'contest_id'   => safe_string($row['cid']), // FIXME: remove or use externalid?
 			'entry_point'  => $row['entry_point'],
+			'files'        => array(array('href' => "submissions/$extid/files")),
 			);
 	}
 	return $res;
@@ -877,7 +884,7 @@ function submissions_POST($args)
 	}
 
 	$entry_point = empty($args['entry_point']) ? NULL : $args['entry_point'];
-	if ( dbconfig_get('require_entry_point', FALSE) && !isset($entry_point) ) {
+	if ( $args['langid'] != 'c' && $args['langid'] != 'cpp' && dbconfig_get('require_entry_point', FALSE) && !isset($entry_point) ) {
 		error("Entry point required, but not specified.");
 	}
 	$sid = submit_solution($userdata['teamid'], $probid, $cid, $args['langid'], $FILEPATHS, $FILENAMES, NULL, $entry_point);
@@ -1071,7 +1078,7 @@ function runs($args)
 		$args['run_id'] = rest_intid('runs', $args['__primary_key'], $cid);
 	}
 
-	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid
+	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid, runtime
 	          FROM judging_run jr
 	          LEFT JOIN testcase USING (testcaseid)
 	          LEFT JOIN judging USING (judgingid)
@@ -1107,6 +1114,7 @@ function runs($args)
 			'judgement_type_id' => safe_string($VERDICTS[$run['runresult']]),
 			'time'              => Utils::absTime($run['endtime']),
 			'contest_time'      => Utils::relTime($run['endtime'] - $cdatas[$run['cid']]['starttime']),
+			'run_time'          => safe_float($run['runtime']),
 		);
 	}, $runs);
 }
@@ -1259,12 +1267,16 @@ function teams($args)
 	// Run query and return result
 	$tdatas = $DB->q($query, $category, $affiliation, $teamid);
 	return array_map(function($tdata) {
+		$group_ids = array();
+		if ( isset($tdata['categoryid']) ) {
+			$group_ids[] = safe_string(rest_extid('groups', $tdata['categoryid']));
+		}
 		return array(
 			'id'              => safe_string(rest_extid('teams', $tdata['id'])),
 			'name'            => $tdata['name'],
 			'members'         => $tdata['members'],
 			'nationality'     => $tdata['nationality'],
-			'group_id'        => safe_string(rest_extid('groups', $tdata['categoryid'])),
+			'group_ids'       => $group_ids,
 			'organization_id' => safe_string(rest_extid('organizations', $tdata['affilid'])),
 			'affiliation'     => $tdata['affiliation'],
 			'externalid'      => $tdata['externalid'],
@@ -1309,26 +1321,21 @@ function groups($args)
 {
 	global $DB, $api;
 
+	$categoryid = null;
 	if ( isset($args['__primary_key']) ) {
-		if ( isset($args['categoryid']) ) {
-			$api->createError("You cannot specify a primary ID both via /{id} and ?categoryid={id}");
-			return '';
-		}
-		$args['categoryid'] = rest_intid('groups', $args['__primary_key']);
+		$categoryid = rest_intid('groups', $args['__primary_key']);
 	}
 
 	$query = 'SELECT categoryid, name, color, visible, sortorder
-		  FROM team_category
-		  WHERE TRUE';
+	          FROM team_category
+	          WHERE TRUE';
 	if ( $args['public'] ) {
 		$query .= ' AND visible=1';
 	}
 
-	$byCatId = array_key_exists('categoryid', $args);
-	$query .= ($byCatId ? ' AND categoryid = %i' : ' %_');
-	$categoryId = ($byCatId ? $args['categoryid'] : 0);
+	$query .= ( $categoryid!==null ? ' AND categoryid = %i' : ' %_');
 
-	$q = $DB->q($query . ' ORDER BY sortorder', $categoryId);
+	$q = $DB->q($query . ' ORDER BY sortorder', $categoryid);
 	$res = array();
 	while ( $row = $q->next() ) {
 		$res[] = array(

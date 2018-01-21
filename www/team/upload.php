@@ -78,7 +78,13 @@ if ( ! isset($lang) ) err("Unable to find language '$langid'");
 $langid = $lang['langid'];
 
 $entry_point = @$_POST['entry_point'];
-if ( empty($entry_point) && dbconfig_get('require_entry_point', FALSE) ) {
+// TODO: This should be moved to the database
+$language_requires_entry_point = $langid == 'java' || $langid == 'kt' || $langid == 'py2' || $langid == 'py3';
+if ( !$language_requires_entry_point ) {
+	$entry_point = NULL;
+}
+
+if ( $language_requires_entry_point && empty($entry_point) && dbconfig_get('require_entry_point', FALSE) ) {
 	err("Entry point required, but not specified.");
 }
 

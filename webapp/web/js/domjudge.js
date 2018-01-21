@@ -299,10 +299,11 @@ function detectProblemLanguageEntryPoint(filename)
 	if ( langid == 'java' ) {
 		elt.value = parts[1];
 	} else if (langid == 'kt' ) {
-		elt.value = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+		elt.value = parts[1].charAt(0).toUpperCase() + parts[1].slice(1) + "Kt";
 	} else {
 		elt.value = parts[1] + '.' + parts[0];
 	}
+	maybeShowEntryPoint(langid);
 }
 
 function checkUploadForm()
@@ -388,6 +389,25 @@ function initReload(refreshtime)
 	setTimeout(function() { reloadPage(); }, refreshtime * 1000);
 }
 
+// TODO: make this configurable
+function maybeShowEntryPoint(langid)
+{
+	'use strict';
+	var entry_point = document.getElementById('entry_point');
+	var entry_point_text = document.getElementById('entry_point_text');
+	var visible = langid == 'java' || langid == 'kt' || langid == 'py2' || langid == 'py3';
+	var display = visible ? 'inline' : 'none';
+	entry_point.style.display = entry_point_text.style.display = display;
+	if ( visible ) {
+		var filename = langid == 'py2' || langid == 'py3';
+		if ( filename ) {
+			entry_point_text.innerHTML = 'Main file:';
+		} else {
+			entry_point_text.innerHTML = 'Main class:';
+		}
+	}
+}
+
 function initFileUploads(maxfiles)
 {
 	'use strict';
@@ -406,6 +426,18 @@ function initFileUploads(maxfiles)
 			detectProblemLanguageEntryPoint(this.value);
 		}
 	}
+
+	var langid_element = document.getElementById("langid");
+	if ( langid_element == null ) return;
+	langid_element.onchange = langid_element.onmouseout = function () {
+		if ( this.value !== "" ) {
+			maybeShowEntryPoint(this.value);
+		}
+	}
+
+	var entry_point_element = document.getElementById('entry_point');
+	var entry_point_text_element = document.getElementById('entry_point_text');
+	entry_point_element.style.display = entry_point_text_element.style.display = 'none';
 }
 
 function collapse(x)

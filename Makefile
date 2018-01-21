@@ -43,7 +43,7 @@ ifeq ($(SUBMITCLIENT_ENABLED),yes)
 build: submitclient
 endif
 
-ifneq ($(DOC_BUILD_ENABLED),no)
+ifeq ($(DOC_BUILD_ENABLED),yes)
 all: docs
 dist: distdocs
 endif

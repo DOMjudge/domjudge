@@ -59,6 +59,7 @@ if ( isset($_POST['import']) ) {
 		$contest['name'] = $contest_yaml_data['name'];
 		$contest['shortname'] = preg_replace($invalid_regex, '_',
 		                                     $contest_yaml_data['short-name']);
+		$contest['externalid'] = $contest['shortname'];
 
 		$starttime = date_create_from_format(DateTime::ISO8601,
 		                                     $contest_yaml_data['start-time']);

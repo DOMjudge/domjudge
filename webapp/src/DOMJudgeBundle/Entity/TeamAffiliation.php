@@ -25,7 +25,7 @@ class TeamAffiliation
 
 	/**
 	 * @var string
-	 * @ORM\Column(type="string", name="shortname", length=30, options={"comment"="Short descriptive name"}, nullable=false)
+	 * @ORM\Column(type="string", name="shortname", length=32, options={"comment"="Short descriptive name"}, nullable=false)
 	 */
 	private $shortname;
 

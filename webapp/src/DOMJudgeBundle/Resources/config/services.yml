@@ -15,3 +15,10 @@ services:
     arguments: ["@doctrine.orm.entity_manager"]
     tags:
       - { name: validator.constraint_validator }
+
+  domjudge.api_headers_listener:
+    class: DOMJudgeBundle\EventListener\ApiHeadersListener
+    tags:
+      - name: kernel.event_listener
+        event: kernel.response
+        method: onKernelResponse
