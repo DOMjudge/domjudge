@@ -111,39 +111,34 @@ class APIController extends FOSRestController {
 	}
 
 	/**
-	 * @Get("/contests/{id}")
+	 * @Get("/contests/{cid}")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
 	public function getSingleContestAction(Contest $contest) {
-		if ($contest->isActive()) {
-			return $contest->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20), $this->getParameter('domjudge.useexternalids'));
-		} else {
-			throw new NotFoundHttpException(sprintf('Contest %s not found', $this->getParameter('domjudge.useexternalids') ? $contest->getExternalid() : $contest->getCid()));
-		}
+		return $contest->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20), $this->getParameter('domjudge.useexternalids'));
 	}
 
 	/**
-	 * @Get("/contests/{id}/state")
+	 * @Get("/contests/{cid}/state")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
 	public function getContestStateAction(Contest $contest) {
-		if ($contest->isActive()) {
-			$result = [];
-			$result['started'] = $contest->getStarttime() <= time() ? Utils::absTime($contest->getStarttime()) : null;
-			$result['ended'] = ($result['started'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
-			$result['frozen'] = ($result['started'] !== null && $contest->getFreezetime() <= time()) ? Utils::absTime($contest->getFreezetime()) : null;
-			$result['thawed'] = ($result['frozen'] !== null && $contest->getUnfreezetime() <= time()) ? Utils::absTime($contest->getUnfreezetime()) : null;
-			// TODO: do not set this for public access (first needs public role)
-			$result['finalized'] = ($result['ended'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
+		$result = [];
+		$result['started'] = $contest->getStarttime() <= time() ? Utils::absTime($contest->getStarttime()) : null;
+		$result['ended'] = ($result['started'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
+		$result['frozen'] = ($result['started'] !== null && $contest->getFreezetime() <= time()) ? Utils::absTime($contest->getFreezetime()) : null;
+		$result['thawed'] = ($result['frozen'] !== null && $contest->getUnfreezetime() <= time()) ? Utils::absTime($contest->getUnfreezetime()) : null;
+		// TODO: do not set this for public access (first needs public role)
+		$result['finalized'] = ($result['ended'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
 
-			return $result;
-		} else {
-			throw new NotFoundHttpException(sprintf('Contest %s not found', $this->getParameter('domjudge.useexternalids') ? $contest->getExternalid() : $contest->getCid()));
-		}
+		return $result;
 	}
 
 	/**
 	 * @Get("/contests/{cid}/judgement-types")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
-	public function getJudgementTypesAction() {
+	public function getJudgementTypesAction(Contest $contest) {
 		$etcDir = realpath($this->getParameter('kernel.root_dir') . '/../../etc/');
 		$VERDICTS = [];
 		require_once($etcDir . '/common-config.php');
@@ -172,9 +167,10 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/judgement-types/{id}")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
-	public function getJudgementTypeAction($id) {
-		$judgementTypes = $this->getJudgementTypesAction();
+	public function getJudgementTypeAction(Contest $contest, $id) {
+		$judgementTypes = $this->getJudgementTypesAction($contest);
 		foreach ($judgementTypes as $judgementType) {
 			if ($judgementType['id'] === $id) {
 				return $judgementType;
@@ -186,8 +182,9 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/languages")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
-	public function getLanguagesAction(Request $request) {
+	public function getLanguagesAction(Request $request, Contest $contest) {
 		$languages = $this->getDoctrine()->getRepository(Language::class)->findBy(['allow_submit' => true]);
 
 		return array_map(function(Language $language) use ($request) {
@@ -197,8 +194,9 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/languages/{id}")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
-	public function getLanguageAction(Request $request, $id) {
+	public function getLanguageAction(Request $request, Contest $contest, $id) {
 		if ($language = $this->getDoctrine()->getRepository(Language::class)->findOneBy(['langid' => $id, 'allow_submit' => true])) {
 			return $language->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true));
 		} else {
@@ -208,6 +206,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/problems")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
 	public function getProblemsAction(Request $request, Contest $contest) {
 		// TODO: add security check for public/admin. I can't seem to get checkrole() working
@@ -224,6 +223,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/problems/{id}")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
 	public function getProblemAction(Request $request, Contest $contest, $id) {
 		// TODO: add security check for public/admin. I can't seem to get checkrole() working
@@ -246,8 +246,9 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/groups")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
-	public function getGroupsAction(Request $request) {
+	public function getGroupsAction(Request $request, Contest $contest) {
 		$groups = $this->getDoctrine()->getRepository(TeamCategory::class)->findAll();
 
 		return array_map(function(TeamCategory $teamCategory) use ($request) {
@@ -257,15 +258,18 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/groups/{id}")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
+	 * @ParamConverter("teamCategory", converter="domjudge.api_entity_param_converter")
 	 */
-	public function getGroupAction(Request $request, TeamCategory $teamCategory) {
+	public function getGroupAction(Request $request, Contest $contest, TeamCategory $teamCategory) {
 		return $teamCategory->serializeForAPI($request->query->getBoolean('strict', true));
 	}
 
 	/**
 	 * @Get("/contests/{cid}/organizations")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
-	public function getOrganizationsAction(Request $request) {
+	public function getOrganizationsAction(Request $request, Contest $contest) {
 		$groups = $this->getDoctrine()->getRepository(TeamAffiliation::class)->findAll();
 
 		return array_map(function(TeamAffiliation $teamAffiliation) use ($request) {
@@ -275,13 +279,16 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/organizations/{id}")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
+	 * @ParamConverter("teamAffiliation", converter="domjudge.api_entity_param_converter")
 	 */
-	public function getOrganizationAction(Request $request, TeamAffiliation $teamAffiliation) {
+	public function getOrganizationAction(Request $request, Contest $contest, TeamAffiliation $teamAffiliation) {
 		return $teamAffiliation->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true));
 	}
 
 	/**
 	 * @Get("/contests/{cid}/teams")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
 	public function getTeamsAction(Request $request, Contest $contest) {
 		$teams = $this->getDoctrine()->getRepository(Team::class)->findAllForContest($contest, !$this->get('security.authorization_checker')->isGranted('ROLE_JURY'));
@@ -293,6 +300,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/teams/{id}")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
 	public function getTeamAction(Request $request, Contest $contest, $id) {
 		$useExternalIds = $this->getParameter('domjudge.useexternalids');
@@ -302,6 +310,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/submissions")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
 	public function getSubmissionsAction(Request $request, Contest $contest) {
 		$submissions = $this->getDoctrine()->getRepository(Submission::class)->findBy([
@@ -316,6 +325,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/submissions/{id}")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
 	public function getSubmissionAction(Request $request, Contest $contest, $id) {
 		$submission = $this->getDoctrine()->getRepository(Submission::class)->findOneBy([
@@ -333,6 +343,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/submissions/{id}/files")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
 	public function getSubmissionFilesAction(Request $request, Contest $contest, $id)
 	{
@@ -382,6 +393,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/judgements")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 * @Security("has_role('ROLE_ADMIN')")
 	 * TODO: allow for public access for non-frozen judgings
 	 */
@@ -401,6 +413,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/judgements/{id}")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 * @Security("has_role('ROLE_ADMIN')")
 	 * TODO: allow for public access for non-frozen judgings
 	 */
@@ -416,6 +429,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/event-feed")
+	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
 	public function getEventFeedAction(Request $request, Contest $contest) {
 		// Make sure this script doesn't hit the PHP maximum execution timeout.
