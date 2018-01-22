@@ -1127,7 +1127,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 			$url = $endpoint['url'].'/'.$id;
 		}
 		$json = API_request($url, 'GET', '', false);
-		if ( empty($json) ) logmsg(LOG_WARN,"eventlog: got no JSON data from '$url'");
+		if ( empty($json) ) logmsg(LOG_WARNING,"eventlog: got no JSON data from '$url'");
 	}
 
 	// First acquire an advisory lock to prevent other event logging,
@@ -1229,7 +1229,7 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 			if ( $failonerror ) {
 				error($errstr);
 			} else {
-				logmsg(LOG_WARN,$errstr);
+				logmsg(LOG_WARNING,$errstr);
 				return null;
 			}
 		}
@@ -1281,7 +1281,7 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 		if ( $failonerror ) {
 			error($errstr);
 		} else {
-			logmsg(LOG_WARN,$errstr);
+			logmsg(LOG_WARNING,$errstr);
 			return null;
 		}
 	}
