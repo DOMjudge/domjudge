@@ -136,17 +136,20 @@ class APIController extends FOSRestController {
 	}
 
 	/**
-	 * @Get("/contests/{cid}/state")
+	 * @Get("/contests/{externalid}/state")
 	 */
-	public function getContestState(Contest $cid) {
-		if ($cid->isActive()) {
+	public function getContestState(Contest $contest) {
+		$isAdmin = $this->isGranted('ROLE_ADMIN');
+		if (($isAdmin && $contest->getEnabled())
+			|| (!$isAdmin && $contest->isActive())) {
 			$result = [];
-			$result['started'] = $cid->getStarttime() <= time() ? Utils::absTime($cid->getStarttime()) : null;
-			$result['ended'] = ($result['started'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
-			$result['frozen'] = ($result['started'] !== null && $cid->getFreezetime() <= time()) ? Utils::absTime($cid->getFreezetime()) : null;
-			$result['thawed'] = ($result['frozen'] !== null && $cid->getUnfreezetime() <= time()) ? Utils::absTime($cid->getUnfreezetime()) : null;
-			// TODO: do not set this for public access (first needs public role)
-			$result['finalized'] = ($result['ended'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
+			$result['started'] = $contest->getStarttime() <= time() ? Utils::absTime($contest->getStarttime()) : null;
+			$result['ended'] = ($result['started'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
+			$result['frozen'] = ($result['started'] !== null && $contest->getFreezetime() <= time()) ? Utils::absTime($contest->getFreezetime()) : null;
+			$result['thawed'] = ($result['frozen'] !== null && $contest->getUnfreezetime() <= time()) ? Utils::absTime($contest->getUnfreezetime()) : null;
+			if ( $isAdmin ) {
+				$result['finalized'] = ($result['ended'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
+			}
 
 			return $result;
 		} else {
