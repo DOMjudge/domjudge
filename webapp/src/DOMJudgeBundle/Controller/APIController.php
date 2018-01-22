@@ -123,11 +123,13 @@ class APIController extends FOSRestController {
 	}
 
 	/**
-	 * @Get("/contests/{cid}")
+	 * @Get("/contests/{externalid}")
 	 */
-	public function getSingleContestAction(Contest $cid) {
-		if ($cid->isActive()) {
-			return $cid->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20));
+	public function getSingleContestAction(Contest $contest) {
+		$isAdmin = $this->isGranted('ROLE_ADMIN');
+		if (($isAdmin && $contest->getEnabled())
+			|| (!$isAdmin && $contest->isActive())) {
+			return $contest->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20));
 		} else {
 			return NULL;
 		}
