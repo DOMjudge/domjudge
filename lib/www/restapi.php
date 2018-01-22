@@ -63,7 +63,7 @@ class RestApi {
 	/**
 	 * Provide the actual API
 	 */
-	public function provideApi()
+	public function provideApi($multiContest = FALSE)
 	{
 		if ( !isset($_SERVER['PATH_INFO']) ) {
 			$this->createError("PATH_INFO not set.", INTERNAL_SERVER_ERROR);
@@ -77,6 +77,17 @@ class RestApi {
 
 		// trim off starting / of path_info
 		$handler = preg_replace('#^/#', '', $_SERVER['PATH_INFO']);
+		if ( $multiContest ) {
+			global $requestedCid, $DB;
+			$handler = preg_replace('#contests/#', '', $handler);
+			$externalCid = preg_replace('#/.*#', '', $handler);
+			$requestedCid = $DB->q('MAYBEVALUE SELECT cid FROM contest WHERE externalid=%s', $externalCid);
+			if ( !isset($requestedCid) ) {
+				$this->createError("Contest not found.", NOT_FOUND);
+				return;
+			}
+			$handler = preg_replace('#[^/]*/#', '', $handler, 1);
+		}
 		if ( empty($handler) ) {
 			$this->showDocs();
 		} else {

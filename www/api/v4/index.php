@@ -188,10 +188,12 @@ $api->provideFunction('GET', 'user', $doc);
  */
 function problems($args)
 {
-	global $DB, $api, $cdatas, $userdata, $cids;
+	global $DB, $api, $cdatas, $userdata, $cids, $requestedCid;
 
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
+	} else if ( isset($requestedCid) ) {
+		$cid = $requestedCid;
 	} else {
 		if ( count($cids)>=1 ) {
 			$cid = reset($cids);
@@ -283,10 +285,12 @@ $api->provideFunction('GET', 'problems', $doc, $args, $exArgs);
  */
 function judgings($args)
 {
-	global $DB, $api, $userdata, $cdatas, $cids, $VERDICTS;
+	global $DB, $api, $userdata, $cdatas, $cids, $VERDICTS, $requestedCid;
 
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
+	} else if ( isset($requestedCid) ) {
+		$cid = $requestedCid;
 	} else {
 		if ( count($cids)>=1 ) {
 			$cid = reset($cids);
@@ -781,10 +785,12 @@ $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
  */
 function submissions($args)
 {
-	global $DB, $userdata, $cdatas, $cids, $api;
+	global $DB, $userdata, $cdatas, $cids, $api, $requestedCid;
 
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
+	} else if ( isset($requestedCid) ) {
+		$cid = $requestedCid;
 	} else {
 		if ( count($cids)>=1 ) {
 			$cid = reset($cids);
@@ -1095,10 +1101,12 @@ $api->provideFunction('GET', 'executable', $doc, $args, $exArgs, $roles);
  */
 function runs($args)
 {
-	global $DB, $cdatas, $cids, $api, $VERDICTS;
+	global $DB, $cdatas, $cids, $api, $VERDICTS, $requestedCid;
 
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
+	} else if ( isset($requestedCid) ) {
+		$cid = $requestedCid;
 	} else {
 		if ( count($cids)>=1 ) {
 			$cid = reset($cids);
@@ -1257,10 +1265,12 @@ $api->provideFunction('GET', 'organizations', $doc, $optArgs, $exArgs);
  */
 function teams($args)
 {
-	global $DB, $api, $cids;
+	global $DB, $api, $cids, $requestedCid;
 
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
+	} else if ( isset($requestedCid) ) {
+		$cid = $requestedCid;
 	} else {
 		if ( count($cids)>=1 ) {
 			$cid = reset($cids);
@@ -1453,10 +1463,12 @@ $api->provideFunction('GET', 'languages', $doc, $args);
  */
 function clarifications($args)
 {
-	global $cids, $cdatas, $DB, $api;
+	global $cids, $cdatas, $DB, $api, $requestedCid;
 
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
+	} else if ( isset($requestedCid) ) {
+		$cid = $requestedCid;
 	} else {
 		if ( count($cids)>=1 ) {
 			$cid = reset($cids);
@@ -1605,7 +1617,7 @@ function cmp_prob_label($a, $b) { return $a['label'] > $b['label']; }
  */
 function scoreboard($args)
 {
-	global $DB, $api, $userdata, $cdatas, $cids;
+	global $DB, $api, $userdata, $cdatas, $cids, $requestedCid;
 
 	if ( isset($userdata['teamid']) ) {
 		$cdatas = getCurContests(TRUE, $userdata['teamid']);
@@ -1613,6 +1625,8 @@ function scoreboard($args)
 
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
+	} else if ( isset($requestedCid) ) {
+		$cid = $requestedCid;
 	} else {
 		if ( count($cids)==1 ) {
 			$cid = reset($cids);
@@ -1790,4 +1804,4 @@ $api->provideFunction('GET', 'judgement_types', $doc, $args, $exArgs, null, true
 }
 
 // Now provide the api, which will handle the request
-$api->provideApi();
+$api->provideApi(TRUE);
