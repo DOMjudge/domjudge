@@ -133,22 +133,25 @@ class APIController extends FOSRestController {
 	}
 
 	/**
-	 * @Get("/contests/{cid}/state")
+	 * @Get("/state")
 	 */
-	public function getContestState(Contest $cid) {
-		if ($cid->isActive()) {
-			$result = [];
-			$result['started'] = $cid->getStarttime() <= time() ? Utils::absTime($cid->getStarttime()) : null;
-			$result['ended'] = ($result['started'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
-			$result['frozen'] = ($result['started'] !== null && $cid->getFreezetime() <= time()) ? Utils::absTime($cid->getFreezetime()) : null;
-			$result['thawed'] = ($result['frozen'] !== null && $cid->getUnfreezetime() <= time()) ? Utils::absTime($cid->getUnfreezetime()) : null;
-			// TODO: do not set this for public access (first needs public role)
-			$result['finalized'] = ($result['ended'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
-
-			return $result;
-		} else {
-			return NULL;
+	public function getContestState(Request $request) {
+		$em = $this->getDoctrine()->getManager();
+		$cid = $this->getCurrentActiveContestAction();
+		if ( $cid===NULL ) {
+			return new Response('No active contest.', 404);
 		}
+		$contest = $em->getRepository(Contest::class)->findOneBy(array('cid' => $cid));
+
+		$result = [];
+		$result['started'] = $contest->getStarttime() <= time() ? Utils::absTime($contest->getStarttime()) : null;
+		$result['ended'] = ($result['started'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
+		$result['frozen'] = ($result['started'] !== null && $contest->getFreezetime() <= time()) ? Utils::absTime($contest->getFreezetime()) : null;
+		$result['thawed'] = ($result['frozen'] !== null && $contest->getUnfreezetime() <= time()) ? Utils::absTime($contest->getUnfreezetime()) : null;
+		// TODO: do not set this for public access (first needs public role)
+		$result['finalized'] = ($result['ended'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
+
+		return $result;
 	}
 
 	/**
