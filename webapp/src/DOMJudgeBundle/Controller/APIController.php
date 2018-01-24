@@ -143,13 +143,18 @@ class APIController extends FOSRestController {
 		}
 		$contest = $em->getRepository(Contest::class)->findOneBy(array('cid' => $cid));
 
+		$time_or_null = function($time, $extra_cond = true) {
+			if ( !$extra_cond || $time===null || time()<$time ) return null;
+			return Utils::absTime($time);
+		};
 		$result = [];
-		$result['started'] = $contest->getStarttime() <= time() ? Utils::absTime($contest->getStarttime()) : null;
-		$result['ended'] = ($result['started'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
-		$result['frozen'] = ($result['started'] !== null && $contest->getFreezetime() <= time()) ? Utils::absTime($contest->getFreezetime()) : null;
-		$result['thawed'] = ($result['frozen'] !== null && $contest->getUnfreezetime() <= time()) ? Utils::absTime($contest->getUnfreezetime()) : null;
+		$result['started']   = $time_or_null($contest->getStarttime());
+		$result['ended']     = $time_or_null($contest->getEndtime(), $result['started']!==null);
+		$result['frozen']    = $time_or_null($contest->getFreezetime(), $result['started']!==null);
+		$result['thawed']    = $time_or_null($contest->getUnfreezetime(), $result['frozen']!==null);
 		// TODO: do not set this for public access (first needs public role)
-		$result['finalized'] = ($result['ended'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
+		// TODO: use real finalized time when we have it (e.g. in ICPC-live branch)
+		$result['finalized'] = $time_or_null($contest->getUnfreezetime(), ($result['ended']!==null && $result['thawed']!==null));
 
 		return $result;
 	}
