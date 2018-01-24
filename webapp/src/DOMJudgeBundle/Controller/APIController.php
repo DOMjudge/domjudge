@@ -124,7 +124,7 @@ class APIController extends FOSRestController {
 	 */
 	public function getContestStateAction(Contest $contest) {
 		$time_or_null = function($time, $extra_cond = true) {
-			if ( !$extra_cond || $time===null || $time<=time() ) return null;
+			if ( !$extra_cond || $time===null || time()<$time ) return null;
 			return Utils::absTime($time);
 		};
 		$result = [];
