@@ -576,7 +576,15 @@ function getRank(row)
 }
 
 function getHeartCol(row) {
-	return row.getElementsByTagName("td")[1];
+	'use strict';
+	var tds = row.getElementsByTagName("td");
+	// search for td before the team name
+	for (var i = 1; i < 4; i++) {
+		if (tds[i].className == "scoretn") {
+			return tds[i - 1];
+		}
+	}
+	return tds[1];
 }
 
 function getTeamname(row)
