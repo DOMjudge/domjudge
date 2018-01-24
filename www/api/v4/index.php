@@ -305,11 +305,14 @@ function judgings($args)
 	}
 
 	$query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime,
-	                 MAX(r.runtime) AS maxruntime
+	                 MAX(jr.runtime) AS maxruntime,
+	                 (j.endtime IS NULL AND j.valid=0 AND
+	                  (r.valid IS NULL OR r.valid=0)) AS aborted
 	          FROM judging j
 	          LEFT JOIN contest c USING (cid)
 	          LEFT JOIN submission s USING (submitid)
-	          LEFT JOIN judging_run r USING (judgingid)
+	          LEFT JOIN judging_run jr USING (judgingid)
+	          LEFT JOIN rejudging r ON s.rejudgingid = r.rejudgingid
 	          WHERE j.cid = %i';
 
 	if ( !(checkrole('admin') || checkrole('judgehost')) ) {
