@@ -83,7 +83,7 @@ class RestApi {
 			$externalCid = preg_replace('#/.*#', '', $handler);
 			$requestedCid = $DB->q('MAYBEVALUE SELECT cid FROM contest WHERE externalid=%s', $externalCid);
 			if ( !isset($requestedCid) ) {
-				$this->createError("Contest not found.", NOT_FOUND);
+				$this->createError("Contest '$externalCid' not found.", NOT_FOUND);
 				return;
 			}
 			$handler = preg_replace('#[^/]*/#', '', $handler, 1);
