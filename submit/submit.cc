@@ -250,7 +250,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ( !readentrypointrequired() ) warning(0,"could not obtain configuration value 'required_entry_point'");
+	if ( !readentrypointrequired() ) warning(0,"could not obtain configuration value 'require_entry_point'");
 	if ( !readlangexts() ) warning(0,"could not obtain language extensions");
 	if ( !readcontests() ) warning(0,"could not obtain active contests");
 
