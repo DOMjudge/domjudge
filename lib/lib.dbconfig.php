@@ -46,6 +46,7 @@ function dbconfig_init()
 			if ( !is_int($val) ) {
 				error("invalid type '$type' for config variable '$key'");
 			}
+			if ( $type=='bool' ) $val = (bool)$val;
 			break;
 		case 'string':
 			if ( !is_string($val) ) {
