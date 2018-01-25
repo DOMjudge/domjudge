@@ -38,7 +38,9 @@ UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 if [ "x$(lsb_release -i -s || true)" = 'xDebian' ] || \
    [ "x$(lsb_release -i -s || true)" = 'xUbuntu' ]; then
 	DISTRO="$(lsb_release -i -s)"
-	RELEASE="$(lsb_release -c -s)"
+	if [ "x$(lsb_release -c -s)" != "xsid" ]; then
+		RELEASE="$(lsb_release -c -s)"
+	fi
 	if [ -z "$ARCH" ]; then
 		ARCH="$(dpkg --print-architecture)"
 	fi
@@ -129,8 +131,8 @@ DEBOOTDEB="debootstrap_1.0.89_all.deb"
 # The Debian mirror/proxy below can be passed as environment
 # variables; if none are given the following defaults are used.
 
-# Debian mirror. httpredir.debian.org will pick the 'closest'.
-[ -z "$DEBMIRROR" ] && DEBMIRROR="http://httpredir.debian.org/debian"
+# Debian mirror. deb.debian.org will pick the 'closest'.
+[ -z "$DEBMIRROR" ] && DEBMIRROR="http://deb.debian.org/debian"
 
 # A local caching proxy to use for apt-get,
 # (typically an install of aptcacher-ng), for example:
@@ -184,6 +186,7 @@ if [ -e "$CHROOTDIR" ]; then
 			error "Chrootdir already exists, exiting."
 		fi
 	fi
+	cleanup
 	rm -rf "$CHROOTDIR"
 fi
 
@@ -346,7 +349,7 @@ chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 # Remove unnecessary setuid bits
 chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
 	/usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
-	/usr/bin/gpasswd /usr/bin/passwd /usr/lib/pt_chown \
+	/usr/bin/gpasswd /usr/bin/passwd \
 	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd" || true
 
 # Disable root account

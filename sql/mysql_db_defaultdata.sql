@@ -26,7 +26,9 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('output_display_limit', '2000', 'int', 'Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use "-1" to disable any limits.'),
 ('verification_required', '0', 'bool', 'Is verification of judgings by jury required before publication?'),
 ('score_in_seconds', '0', 'bool', 'Should the scoreboard resolution be measured in seconds instead of minutes?'),
-('show_affiliations', '1', 'bool', 'Show country flags and affiliations names on the scoreboard?'),
+('show_flags', '0', 'bool', 'Show country flags on the scoreboard?'),
+('show_affiliations', '1', 'bool', 'Show affiliation names on the scoreboard?'),
+('show_affiliation_logos', '1', 'bool', 'Show affiliation logos on the scoreboard?'),
 ('show_pending', '1', 'bool', 'Show pending submissions on the scoreboard?'),
 ('show_teams_submissions', '1', 'bool', 'Show problem columns with submission information on the public and team scoreboards?'),
 ('show_compile', '2', 'int', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.'),
@@ -144,9 +146,9 @@ INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`userid`, `username`, `name`, `password`) VALUES
-(1, 'admin', 'Administrator', '$2y$10$WkXRuj/UgoMGF80BaqhOJ.b1HW8KcGrUcWV3uAvGrQlp6Ia8w/dgO'), -- Is a hash for 'admin'
-(2, 'judgehost', 'User for judgedaemons', NULL);
+INSERT INTO `user` (`userid`, `username`, `name`, `email`, `password`) VALUES
+(1, 'admin', 'Administrator', 'team@domjudge.org', '$2y$10$WkXRuj/UgoMGF80BaqhOJ.b1HW8KcGrUcWV3uAvGrQlp6Ia8w/dgO'), -- Is a hash for 'admin'
+(2, 'judgehost', 'User for judgedaemons', NULL, NULL);
 
 --
 -- Dumping data for table `userrole`

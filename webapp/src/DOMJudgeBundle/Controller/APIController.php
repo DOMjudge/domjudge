@@ -65,21 +65,20 @@ class APIController extends FOSRestController {
 					'cid' => $args['id'],
 				)
 			);
-			$date = \DateTime::createFromFormat(\DateTime::ATOM, $args['start_time']);
+			$date = date_create($args['start_time']);
 			if ( $date === FALSE) {
 				$response = new Response('Invalid "start_time" in request.', 400);
 			} else {
 				$new_start_time = $date->getTimestamp();
 				$now = Utils::now();
 				if ( $new_start_time < $now + 30 ) {
-					$response = new Response('New start_time not far in enough in future.', 403);
+					$response = new Response('New start_time not far enough in the future.', 403);
 				} else if ( FALSE && $contestObject->getStarttime() != NULL && $contestObject->getStarttime() < $now + 30 ) {
 					$response = new Response('Current contest already started or about to start.', 403);
 				} else {
 					$em->persist($contestObject);
 					$newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
 					$contestObject->setStarttimeString($newStartTimeString);
-					$contestObject->setStarttime($new_start_time);
 					$response = new Response('Contest start time changed to ' . $newStartTimeString, 200);
 					$em->flush();
 				}
@@ -142,13 +141,18 @@ class APIController extends FOSRestController {
 		$isAdmin = $this->isGranted('ROLE_ADMIN');
 		if (($isAdmin && $contest->getEnabled())
 			|| (!$isAdmin && $contest->isActive())) {
+			$time_or_null = function($time, $extra_cond = true) {
+				if ( !$extra_cond || $time===null || time()<$time ) return null;
+				return Utils::absTime($time);
+			};
 			$result = [];
-			$result['started'] = $contest->getStarttime() <= time() ? Utils::absTime($contest->getStarttime()) : null;
-			$result['ended'] = ($result['started'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
-			$result['frozen'] = ($result['started'] !== null && $contest->getFreezetime() <= time()) ? Utils::absTime($contest->getFreezetime()) : null;
-			$result['thawed'] = ($result['frozen'] !== null && $contest->getUnfreezetime() <= time()) ? Utils::absTime($contest->getUnfreezetime()) : null;
+			$result['started']   = $time_or_null($contest->getStarttime());
+			$result['ended']     = $time_or_null($contest->getEndtime(), $result['started']!==null);
+			$result['frozen']    = $time_or_null($contest->getFreezetime(), $result['started']!==null);
+			$result['thawed']    = $time_or_null($contest->getUnfreezetime(), $result['frozen']!==null);
 			if ( $isAdmin ) {
-				$result['finalized'] = ($result['ended'] !== null && $contest->getEndtime() <= time()) ? Utils::absTime($contest->getEndtime()) : null;
+				// TODO: use real finalized time when we have it (e.g. in ICPC-live branch)
+				$result['finalized'] = $time_or_null($contest->getUnfreezetime(), ($result['ended']!==null && $result['thawed']!==null));
 			}
 
 			return $result;

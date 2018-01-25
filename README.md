@@ -44,7 +44,7 @@ by running 'make dist', see the online documentation, section
 Copyright & Licencing
 ---------------------
 
-DOMjudge is Copyright (c) 2004 - 2017 by the DOMjudge developers and
+DOMjudge is Copyright (c) 2004 - 2018 by the DOMjudge developers and
 all respective contributors. The current DOMjudge developers are Jaap
 Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst and Tobias
 Werth; see the administrator's manual for a complete list of

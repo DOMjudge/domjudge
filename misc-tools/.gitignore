@@ -9,4 +9,5 @@
 /judging_statistics
 /multi_rejudge
 /dj_make_chroot
+/dj_run_chroot
 /eventdaemon

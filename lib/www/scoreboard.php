@@ -23,6 +23,9 @@ require_once(LIBDIR . '/lib.misc.php');
  * The $filter argument may contain subarrays 'affilid', 'country',
  * 'categoryid' of values to filter on these.
  *
+ * The $visible_only determines whether only publicly visible teams
+ * are included, or all. Only relevant when $jury is true.
+ *
  * This function returns an array (scores, summary, matrix)
  * containing the following:
  *
@@ -34,7 +37,7 @@ require_once(LIBDIR . '/lib.misc.php');
  * summary(num_points, total_time, affils[affilid], countries[country], problems[probid]
  *    probid(num_submissions, num_pending, num_correct, best_time_sort[sortorder] )
  */
-function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
+function genScoreBoard($cdata, $jury = FALSE, $filter = NULL, $visible_only = FALSE) {
 
 	global $DB;
 
@@ -46,9 +49,9 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	if ( ! $fdata['started'] && ! $jury ) return;
 
 	// get the teams, problems and categories
-	$teams = getTeams($filter, $jury, $cdata);
+	$teams = getTeams($filter, $jury && !$visible_only, $cdata);
 	$probs = getProblems($cdata);
-	$categs = getCategories($jury);
+	$categs = getCategories($jury && !$visible_only);
 
 	// initialize the arrays we'll build from the data
 	$MATRIX = array();
@@ -185,7 +188,8 @@ function getTeams($filter, $jury, $cdata) {
 
 	return $DB->q('KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, team.externalid,
 	               team.name, team.categoryid, team.affilid, penalty, sortorder,
-	               country, color, team_affiliation.name AS affilname
+	               country, color, team_affiliation.name AS affilname,
+		       team_affiliation.externalid AS affilid_external
 	               FROM team
 	               INNER JOIN contest ON (contest.cid = %i)
 	               LEFT JOIN contestteam ct USING (teamid, cid)
@@ -224,15 +228,16 @@ function getCategories($jury) {
 function initScores($teams) {
 	$SCORES = array();
 	foreach ($teams as $teamid => $team ) {
-		$SCORES[$teamid]['num_points']  = 0;
-		$SCORES[$teamid]['total_time']  = $team['penalty'];
-		$SCORES[$teamid]['solve_times'] = array();
-		$SCORES[$teamid]['rank']        = 0;
-		$SCORES[$teamid]['teamname']    = $team['name'];
-		$SCORES[$teamid]['categoryid']  = $team['categoryid'];
-		$SCORES[$teamid]['sortorder']   = $team['sortorder'];
-		$SCORES[$teamid]['affilid']     = $team['affilid'];
-		$SCORES[$teamid]['country']     = $team['country'];
+		$SCORES[$teamid]['num_points']       = 0;
+		$SCORES[$teamid]['total_time']       = $team['penalty'];
+		$SCORES[$teamid]['solve_times']      = array();
+		$SCORES[$teamid]['rank']             = 0;
+		$SCORES[$teamid]['teamname']         = $team['name'];
+		$SCORES[$teamid]['categoryid']       = $team['categoryid'];
+		$SCORES[$teamid]['sortorder']        = $team['sortorder'];
+		$SCORES[$teamid]['affilid']          = $team['affilid'];
+		$SCORES[$teamid]['affilid_external'] = $team['affilid_external'];
+		$SCORES[$teamid]['country']          = $team['country'];
 	}
 	return $SCORES;
 }
@@ -289,8 +294,10 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 	unset($sdata);
 
 	// configuration
-	$SHOW_AFFILIATIONS = dbconfig_get('show_affiliations', 1);
-	$SHOW_PENDING      = dbconfig_get('show_pending', 0);
+	$SHOW_FLAGS             = dbconfig_get('show_flags', 1);
+	$SHOW_AFFILIATION_LOGOS = dbconfig_get('show_affiliation_logos', 0);
+	$SHOW_AFFILIATIONS      = dbconfig_get('show_affiliations', 1);
+	$SHOW_PENDING           = dbconfig_get('show_pending', 0);
 
 	// Do not show points if they are all 1
 	$showpoints = FALSE;
@@ -304,7 +311,8 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 
 	// output table column groups (for the styles)
 	echo '<colgroup><col id="scorerank" />' .
-		( $SHOW_AFFILIATIONS ? '<col id="scoreaffil" />' : '' ) .
+		( $SHOW_FLAGS ? '<col id="scoreflags" />' : '' ) .
+		( $SHOW_AFFILIATION_LOGOS ? '<col id="scorelogos" />' : '' ) .
 		'<col id="scoreteamname" /></colgroup><colgroup><col id="scoresolv" />' .
 		"<col id=\"scoretotal\" /></colgroup>\n<colgroup>" .
 		( IS_JURY || dbconfig_get('show_teams_submissions', 1) ?
@@ -312,11 +320,18 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		"</colgroup>\n";
 
 	// column headers
+	$team_colspan = 1;
+	if ( $SHOW_FLAGS ) {
+		$team_colspan++;
+	}
+	if ( $SHOW_AFFILIATION_LOGOS ) {
+		$team_colspan++;
+	}
 	echo "<thead>\n";
 	echo '<tr class="scoreheader">' .
 		'<th title="rank" scope="col">' . jurylink(null,'rank') . '</th>' .
 		'<th title="team name" scope="col"' .
-		( $SHOW_AFFILIATIONS ? ' colspan="2"' : '' ) .
+		( $team_colspan > 1 ? ' colspan="' . $team_colspan . '"' : '' ) .
 		'>' . jurylink(null, 'team') . '</th>' .
 		'<th title="# solved / penalty time" colspan="2" scope="col">' .
 		jurylink(null, 'score') . '</th>' . "\n";
@@ -348,9 +363,14 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 
 	// print the main scoreboard rows
 	$prevsortorder = -1;
+	$usedCategories = array();
 	foreach( $scores as $team => $totals ) {
 		// skip if we have limitteams and the team is not listed
 		if ( !empty($limitteams) && !in_array($team,$limitteams) ) continue;
+
+		if ( isset($teams[$team]['categoryid']) ) {
+			$usedCategories[$teams[$team]['categoryid']] = TRUE;
+		}
 
 		// rank, team name, total points, total time
 		echo '<tr';
@@ -382,7 +402,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		}
 		$prevteam = $team;
 		echo '</td>';
-		if ( $SHOW_AFFILIATIONS ) {
+		if ( $SHOW_FLAGS ) {
 			echo '<td class="scoreaf">';
 			if ( isset($teams[$team]['affilid']) ) {
 				if ( IS_JURY ) {
@@ -405,9 +425,34 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			}
 			echo '</td>';
 		}
+		if ( $SHOW_AFFILIATION_LOGOS ) {
+			echo '<td class="scoreaf">';
+			if ( isset($teams[$team]['affilid']) ) {
+				$affilid = $teams[$team]['affilid'];
+				if ( isset($teams[$team]['affilid_external']) ) {
+					// prefer external affiliation id over internal
+					$affilid = $teams[$team]['affilid_external'];
+				}
+				if ( IS_JURY ) {
+					echo '<a href="team_affiliation.php?id=' .
+						urlencode($teams[$team]['affilid']) . '">';
+				}
+				$affillogo = 'images/affiliations/' .  urlencode($affilid) . '.png';
+				echo ' ';
+				if ( is_readable(WEBAPPDIR.'/web/'.$affillogo) ) {
+					echo '<img src="../' . $affillogo . '"' .
+						' alt="'   . specialchars($teams[$team]['affilname']) . '"' .
+						' title="' . specialchars($teams[$team]['affilname']) . '" />';
+				} else {
+					echo specialchars($affilid);
+				}
+				if ( IS_JURY ) echo '</a>';
+			}
+			echo '</td>';
+		}
 		$affilname = '';
 		if ( $SHOW_AFFILIATIONS && isset($teams[$team]['affilid']) ) {
-				$affilname = specialchars($teams[$team]['affilname']);
+			$affilname = specialchars($teams[$team]['affilname']);
 		}
 		echo
 			'<td class="scoretn"' .
@@ -515,13 +560,16 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		echo "<p><br /><br /></p>\n";
 
 		// only print legend when there's more than one category
-		if ( empty($limitteams) && count($categs) > 1 ) {
+		if ( empty($limitteams) && count($usedCategories) > 1 ) {
 			echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
 			    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
 			    "<thead><tr><th scope=\"col\">" .
 			    jurylink('team_categories.php','Categories') .
 			    "</th></tr></thead>\n<tbody>\n";
 			foreach( $categs as $cat ) {
+				if ( !isset($usedCategories[$cat['categoryid']]) ) {
+					continue;
+				}
 				echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
 				              $cat['color'] . ';"' : '') . '>' .
 				    '<td>' .

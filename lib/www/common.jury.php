@@ -233,23 +233,23 @@ function get_image_thumb($image, &$error)
 		return FALSE;
 	}
 
-	// The GD image library doesn't have functionality to output an
-	// image to string, so we capture the output buffer.
-	ob_flush();
-	ob_start();
+	if ( !($tmpfname = tempnam(TMPDIR, "thumb-")) ) {
+		$error = 'Cannot create temporary file in directory ' . TMPDIR . '.';
+		return FALSE;
+	}
 
 	$success = FALSE;
 	switch ( $type ) {
-	case 'jpeg': $success = imagejpeg($thumb); break;
-	case 'png':  $success = imagepng($thumb); break;
-	case 'gif':  $success = imagegif($thumb); break;
+	case 'jpeg': $success = imagejpeg($thumb, $tmpfname); break;
+	case 'png':  $success = imagepng($thumb, $tmpfname); break;
+	case 'gif':  $success = imagegif($thumb, $tmpfname); break;
 	}
-	$thumbstr = ob_get_contents();
-
-	ob_end_clean();
-
 	if ( !$success ) {
 		$error = 'Failed to output thumbnail image.';
+		return FALSE;
+	}
+	if ( ($thumbstr = file_get_contents($tmpfname))===FALSE ) {
+		$error = "Cannot read image from temporary file '$tmpfname'.";
 		return FALSE;
 	}
 
@@ -269,6 +269,7 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 	global $DB, $teamid, $cdatas;
 	$prop_file = 'domjudge-problem.ini';
 	$yaml_file = 'problem.yaml';
+	$tle_file = '.timelimit';
 
 	$ini_keys_problem = array('name', 'timelimit', 'special_run', 'special_compare');
 	$ini_keys_contest_problem = array('probid', 'allow_submit', 'allow_judge', 'points', 'color');
@@ -281,6 +282,12 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 	// Only preserve valid keys:
 	$ini_array_problem = array_intersect_key($ini_array,array_flip($ini_keys_problem));
 	$ini_array_contest_problem = array_intersect_key($ini_array,array_flip($ini_keys_contest_problem));
+
+	// Set timelimit from alternative source:
+	if ( !isset($ini_array_problem['timelimit']) &&
+	     ($str = $zip->getFromName($tle_file))!==FALSE ) {
+		$ini_array_problem['timelimit'] = trim($str);
+	}
 
 	// Take problem:externalid from zip filename, and use as backup for
 	// problem:name and contestproblem:shortname if these are not specified.
