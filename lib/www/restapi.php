@@ -77,7 +77,7 @@ class RestApi {
 
 		// trim off starting / of path_info
 		$handler = preg_replace('#^/#', '', $_SERVER['PATH_INFO']);
-		if ( $multiContest ) {
+		if ( $multiContest && mb_substr($handler, 0, mb_strlen("contests/")) === "contests/" ) {
 			global $requestedCid, $DB;
 			$handler = preg_replace('#contests/#', '', $handler);
 			$externalCid = preg_replace('#/.*#', '', $handler);
