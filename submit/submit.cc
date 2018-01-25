@@ -676,10 +676,10 @@ bool readentrypointrequired()
 	Json::Value res = doAPIrequest("config?name=require_entry_point", 0);
 	if ( res.isNull() || !res.isObject() ) return false;
 
-	res = res["require_entry_point"];
-	require_entry_point = res.asBool();
+	res = res.get("require_entry_point", 0);
+	require_entry_point = res.asInt();
 
-	return res.isBool();
+	return res.isInt();
 }
 
 bool readlangexts()
