@@ -15,7 +15,9 @@ function dbconfig_init()
 	global $LIBDBCONFIG, $DB;
 
 	$LIBDBCONFIG = array();
-	$res = $DB->q('SELECT * FROM configuration');
+	$res = $DB->q('SELECT * FROM configuration' .
+	              (IS_JURY || checkrole('jury') || checkrole('judgehost') ?
+	               '' : ' WHERE public = 1'));
 
 	while ( $row = $res->next() ) {
 		$key = $row['name'];
@@ -72,6 +74,8 @@ function dbconfig_init()
 function dbconfig_store()
 {
 	global $LIBDBCONFIG, $DB;
+
+	if ( !checkrole('admin') ) error("must have admin role to store configuration settings");
 
 	foreach ( $LIBDBCONFIG as $key => $row ) {
 

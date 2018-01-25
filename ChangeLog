@@ -6,6 +6,7 @@ Version 6.0.0 - DEV
  - Add support for Kotlin by mounting /bin in chroot environment.
  - Add options to have second scoreboard resolution and to suppress
    problem information from the scoreboard. Thanks Marc Furon.
+ - Allow configuration variables to be publicly viewable or not.
  - Add helper script dj_run_chroot to perform chroot operations.
  - [security] Fix team permission for viewing clarification categories.
 
