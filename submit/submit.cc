@@ -677,9 +677,9 @@ bool readentrypointrequired()
 	if ( res.isNull() || !res.isObject() ) return false;
 
 	res = res.get("require_entry_point", 0);
-	require_entry_point = res.asInt();
+	require_entry_point = res.asBool();
 
-	return res.isInt();
+	return res.isBool() || res.isInt();
 }
 
 bool readlangexts()
