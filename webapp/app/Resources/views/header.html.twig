@@ -11,7 +11,7 @@
     {% endif %}
 
     {% if is_granted('ROLE_ADMIN') %}
-    	{% if updates['judgehosts']|length > 0 %}
+      {% if updates['judgehosts']|length > 0 %}
         <a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts ({{ updates['judgehosts']|length }} down)</a>
       {% else %}
         <a href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts</a>
@@ -47,7 +47,7 @@
       <a href="scoreboard.php" accesskey="b"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
     {% endif %}
     {% if is_granted('ROLE_TEAM') %}
-    	<a target="_top" href="../team/" accesskey="t"><span class="octicon octicon-arrow-right"></span> team</a>
+      <a target="_top" href="../team/" accesskey="t"><span class="octicon octicon-arrow-right"></span> team</a>
     {% endif %}
   </div>
 
@@ -78,9 +78,9 @@
               </select>
           </form>
           <script type="text/javascript">
-  		      document.getElementById('cid').addEventListener('change', function() {
-      		      document.getElementById('selectcontestform').submit();
-          	});
+            document.getElementById('cid').addEventListener('change', function() {
+              document.getElementById('selectcontestform').submit();
+            });
           </script>
         </div>
       {% endif %}
@@ -119,8 +119,8 @@
 
     <div id="toggles">
       {% if refresh %}
-      	{% set refresh_text = refresh_flag ? 'Disable' : 'Enable' %}
-      	<input id="refresh-toggle" type="button" value="{{ refresh_text }} refresh" />
+        {% set refresh_text = refresh_flag ? 'Disable' : 'Enable' %}
+        <input id="refresh-toggle" type="button" value="{{ refresh_text }} refresh" />
       {% endif %}
     #}
 
@@ -128,17 +128,17 @@
     {# // notifications are available: #}
     <div id="notify" style="display: none">
       {# TODO
-      	addForm('toggle_notify.php', 'get') .
-      	addHidden('enable', ($notify_flag ? 0 : 1)) .
-      	addSubmit(($notify_flag ? 'Dis' : 'En' ) . 'able notifications', 'toggle_notify',
-      	          'return toggleNotifications(' . ($notify_flag ? 'false' : 'true') . ')') .
-      	addEndForm() . "</div>";
+        addForm('toggle_notify.php', 'get') .
+        addHidden('enable', ($notify_flag ? 0 : 1)) .
+        addSubmit(($notify_flag ? 'Dis' : 'En' ) . 'able notifications', 'toggle_notify',
+                  'return toggleNotifications(' . ($notify_flag ? 'false' : 'true') . ')') .
+        addEndForm() . "</div>";
       #}
       <script type="text/javascript">
       <!--
           if ( 'Notification' in window ) {
-      		document.getElementById('notify').style.display = 'block';
-      	}
+              document.getElementById('notify').style.display = 'block';
+          }
       // -->
       </script>
     </div>
