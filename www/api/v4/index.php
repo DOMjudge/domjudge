@@ -518,6 +518,9 @@ function judgings_POST($args)
 		                            WHERE submitid=%i AND valid=1',
 		                           $submitid);
 	}
+
+	$DB->q('START TRANSACTION');
+
 	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' .
 	              ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '' ) .
 	              ') VALUES(%i,%i,%s,%s' . ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
@@ -525,6 +528,8 @@ function judgings_POST($args)
 	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge);
 
 	eventlog('judging', $jid, 'create', $row['cid']);
+
+	$DB->q('COMMIT');
 
 	$row['submitid']    = safe_int($row['submitid']);
 	$row['cid']         = safe_int($row['cid']);
@@ -566,33 +571,33 @@ function judgings_PUT($args)
 			       base64_decode($args['output_compile']),
 			       $judgingid, $args['judgehost']);
 		} else {
+			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
+			               FROM judging
+			               LEFT JOIN submission s USING(submitid)
+			               WHERE judgingid = %i',$judgingid);
+
+			$DB->q('START TRANSACTION');
 			$DB->q('UPDATE judging SET output_compile = %s,
 			        result = "compiler-error", endtime=%s
 			        WHERE judgingid = %i AND judgehost = %s',
 			       base64_decode($args['output_compile']), now(),
 			       $judgingid, $args['judgehost']);
-			$cid = $DB->q('VALUE SELECT s.cid FROM judging
-			               LEFT JOIN submission s USING(submitid)
-			               WHERE judgingid = %i', $judgingid);
 			auditlog('judging', $judgingid, 'judged', 'compiler-error',
-			         $args['judgehost'], $cid);
-
-			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
-			               FROM judging
-			               LEFT JOIN submission s USING(submitid)
-			               WHERE judgingid = %i',$judgingid);
-			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
-
-			// We call alert here for the failed submission. Note that
-			// this means that these alert messages should be treated
-			// as confidential information.
-			alert('reject', "submission $row[submitid], judging $judgingid: compiler-error");
+			         $args['judgehost'], $row['cid']);
 
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
 			if ( ! dbconfig_get('verification_required', 0) ) {
 				eventlog('judging', $judgingid, 'update', $row['cid']);
 			}
+			$DB->q('COMMIT');
+
+			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
+
+			// We call alert here for the failed submission. Note that
+			// this means that these alert messages should be treated
+			// as confidential information.
+			alert('reject', "submission $row[submitid], judging $judgingid: compiler-error");
 		}
 	}
 
@@ -634,6 +639,8 @@ function judging_runs_POST($args)
 	$jud = $DB->q('TUPLE SELECT judgingid, cid, result FROM judging
 	               WHERE judgingid = %i', $args['judgingid']);
 
+	$DB->q('START TRANSACTION');
+
 	$runid = $DB->q('RETURNID INSERT INTO judging_run (judgingid, testcaseid, runresult,
 	                 runtime, endtime, output_run, output_diff, output_error, output_system)
 	                 VALUES (%i, %i, %s, %f, %s, %s, %s, %s, %s)',
@@ -645,6 +652,8 @@ function judging_runs_POST($args)
 	                base64_decode($args['output_system']));
 
 	eventlog('judging_run', $runid, 'create', $jud['cid']);
+
+	$DB->q('COMMIT');
 
 	// result of this judging_run has been stored. now check whether
 	// we're done or if more testcases need to be judged.
