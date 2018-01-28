@@ -98,7 +98,11 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests")
 	 */
-	public function getContestsAction() {
+	public function getContestsAction(Request $request) {
+		$strict = false;
+		if ($request->query->has('strict')) {
+			$strict = $request->query->getBoolean('strict');
+		}
 		$em = $this->getDoctrine()->getManager();
 		$data = $em->getRepository(Contest::class)->findBy(
 			array(
@@ -123,8 +127,20 @@ class APIController extends FOSRestController {
 	 * @Get("/contests/{cid}")
 	 * @ParamConverter("contest", converter="domjudge.api_entity_param_converter")
 	 */
-	public function getSingleContestAction(Contest $contest) {
-		return $contest->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20), $this->getParameter('domjudge.useexternalids'));
+	public function getSingleContestAction(Request $request, Contest $contest) {
+		$strict = false;
+		if ($request->query->has('strict')) {
+			$strict = $request->query->getBoolean('strict');
+		}
+		$isAdmin = $this->isGranted('ROLE_ADMIN');
+		if (($isAdmin && $contest->getEnabled())
+			|| (!$isAdmin && $contest->isActive())) {
+			$penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
+			$use_ext_ids = $this->getParameter('domjudge.useexternalids');
+			return $contest->serializeForAPI($penalty_time, $use_ext_ids, $strict);
+		} else {
+			return NULL;
+		}
 	}
 
 	/**
@@ -472,6 +488,10 @@ class APIController extends FOSRestController {
 			if ($request->query->has('types')) {
 				$typeFilter = explode(',', $request->query->get('types'));
 			}
+			$strict = false;
+			if ($request->query->has('strict')) {
+				$strict = $request->query->getBoolean('strict');
+			}
 			$isAdmin = $this->isGranted('ROLE_ADMIN');
 			while (TRUE) {
 				$qb = $em->createQueryBuilder()
@@ -503,13 +523,14 @@ class APIController extends FOSRestController {
 					if ( !$isAdmin && $event['endpointtype'] == 'submissions' ) {
 						unset($data['entry_point']);
 					}
-					echo json_encode(array(
+					$result = array(
 						'id'        => (string)$event['eventid'],
 						'type'      => (string)$event['endpointtype'],
 						'op'        => (string)$event['action'],
-						'time'      => Utils::absTime($event['eventtime']),
 						'data'      => $data,
-					), JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES) . "\n";
+					);
+					if ( !$strict ) $result['time'] = Utils::absTime($event['eventtime']);
+					echo json_encode($result, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES) . "\n";
 					ob_flush();
 					flush();
 					$lastUpdate = time();
