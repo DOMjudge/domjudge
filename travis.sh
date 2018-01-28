@@ -44,6 +44,9 @@ sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle
 # delete apport if exists
 sudo apt-get remove -y apport
 
+# travis doesn't run on xenial yet... :-/
+sed -i -e 's/openjdk-8/default/' misc-tools/dj_make_chroot.in
+
 # configure, make and install (but skip documentation)
 make configure
 ./configure --disable-doc-build --with-baseurl='http://localhost/domjudge/'
