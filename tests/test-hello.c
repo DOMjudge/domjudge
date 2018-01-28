@@ -1,7 +1,10 @@
 /*
- * This should give CORRECT on the default problem 'hello'.
+ * This should give WRONG-ANSWER on the default problem 'hello'.
  *
- * @EXPECTED_RESULTS@: CORRECT
+ * While we define ONLINE_JUDGE in master, we don't do this for the World
+ * Finals.
+ *
+ * @EXPECTED_RESULTS@: WRONG-ANSWER
  */
 
 #include <stdio.h>
