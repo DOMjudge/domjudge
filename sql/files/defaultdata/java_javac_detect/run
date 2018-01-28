@@ -40,28 +40,10 @@ javac -encoding UTF-8 -sourcepath . -d . "$@" 2> "$TMPFILE"
 EXITCODE=$?
 
 if [ -z "$MAINCLASS" ]; then
-	if [ "$EXITCODE" -ne 0 ]; then
-		# Let's see if should have named the .java differently
-		PUBLICCLASS=$(sed -n -e '/class .* is public, should be declared in a file named /{s/.*file named //;s/\.java.*//;p;q}' "$TMPFILE")
-		if [ -z "$PUBLICCLASS" ]; then
-			cat $TMPFILE
-			rm -f $TMPFILE
-			exit $EXITCODE
-		fi
-		rm -f $TMPFILE
-		echo "Info: renaming main source '$MAINSOURCE' to '$PUBLICCLASS.java'"
-		mv "$MAINSOURCE" "$PUBLICCLASS.java"
-		javac -encoding UTF-8 -d . "$PUBLICCLASS.java"
-		EXITCODE=$?
-		[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
-	fi
-
-	rm -f $TMPFILE
-	echo "Info: renaming main source '$MAINSOURCE' to '$PUBLICCLASS.java'"
-	mv "$MAINSOURCE" "$PUBLICCLASS.java"
-	javac -encoding UTF-8 -sourcepath . -d . "$PUBLICCLASS.java"
-
-	EXITCODE=$?
+	echo "Error: Entry point is missing."
+	# FIXME: Bring back the code from master - why is this different here?
+	# The old code didn't do anything useful at all, because it didn't set MAINCLASS
+	exit -1
 else
 	cat $TMPFILE
 	rm -f $TMPFILE
