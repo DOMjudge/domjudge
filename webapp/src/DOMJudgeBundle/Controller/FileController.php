@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\SubmissionFile;
 use DOMJudgeBundle\Entity\Team;
@@ -17,13 +18,16 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class FileController extends Controller
 {
 	/**
-	 * @Route("/api/submissions/{sid}/files", name="submission_file")
-	 * @Route("/api/v4/submissions/{sid}/files", name="submission_file_v4")
+	 *@Route("/api/contests/{cid}/submissions/{sid}/files", name="submission_file")
+	 *@Route("/api/v4/contests/{cid}/submissions/{sid}/files", name="submission_file_v4")
 	 * @Security("has_role('ROLE_ADMIN')")
 	 */
-	public function submissionFiles(Submission $sid)
+	public function submissionFiles(Contest $contest, Submission $submission)
 	{
-		$files = $sid->getFiles();
+		$files = $submission->getFiles();
+		if ( $submission->getCid() != $contest->getCid() ) {
+			error("Submission s" . $submission->getSubmitid() . " not found in contest '" . $contest->getExternalid() . "'.");
+		}
 
 		$zip = new \ZipArchive;
 		if ( !($tmpfname = tempnam($this->getParameter('domjudge.tmpdir'), "submission_file-")) ) {
@@ -39,7 +43,7 @@ class FileController extends Controller
 		}
 		$zip->close();
 
-		$filename = 's' . $sid->getSubmitid() . '.zip';
+		$filename = 's' . $submission->getSubmitid() . '.zip';
 
 		$response = new StreamedResponse();
 		$response->setCallback(function () use ($tmpfname) {
