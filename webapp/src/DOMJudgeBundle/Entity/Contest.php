@@ -846,20 +846,23 @@ class Contest
 	 *
 	 * @return array
 	 */
-	public function serializeForAPI($penalty_time)
+	public function serializeForAPI($penalty_time, $strict = false)
 	{
-		return [
+		$res = array(
 			'id'                         => (string)$this->getCid(),
-			'external_id'                => $this->getExternalId(),
-			'shortname'                  => $this->getShortname(),
 			'name'                       => $this->getName(),
 			'formal_name'                => $this->getName(),
 			'start_time'                 => Utils::absTime($this->getStarttime()),
-			'end_time'                   => Utils::absTime($this->getEndtime()),
 			'duration'                   => Utils::relTime($this->getEndtime() - $this->getStarttime()),
 			'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
 			'penalty_time'               => (int)$penalty_time,
-		];
+		);
+		if ( !$strict ) {
+			$res['external_id'] = $this->getExternalId();
+			$res['shortname'] = $this->getShortname();
+			$res['end_time'] = Utils::absTime($this->getEndtime());
+		}
+		return $res;
 	}
 
 	/**

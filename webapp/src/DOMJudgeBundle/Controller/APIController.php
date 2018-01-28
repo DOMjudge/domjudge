@@ -109,7 +109,11 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests")
 	 */
-	public function getContestsAction() {
+	public function getContestsAction(Request $request) {
+		$strict = false;
+		if ($request->query->has('strict')) {
+			$strict = $request->query->getBoolean('strict');
+		}
 		$em = $this->getDoctrine()->getManager();
 		$data = $em->getRepository(Contest::class)->findBy(
 			array(
@@ -132,11 +136,16 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{externalid}")
 	 */
-	public function getSingleContestAction(Contest $contest) {
+	public function getSingleContestAction(Request $request, Contest $contest) {
+		$strict = false;
+		if ($request->query->has('strict')) {
+			$strict = $request->query->getBoolean('strict');
+		}
 		$isAdmin = $this->isGranted('ROLE_ADMIN');
 		if (($isAdmin && $contest->getEnabled())
 			|| (!$isAdmin && $contest->isActive())) {
-			return $contest->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20));
+			$penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
+			return $contest->serializeForAPI($penalty_time, $strict);
 		} else {
 			return NULL;
 		}
@@ -210,6 +219,10 @@ class APIController extends FOSRestController {
 			if ($request->query->has('types')) {
 				$typeFilter = explode(',', $request->query->get('types'));
 			}
+			$strict = false;
+			if ($request->query->has('strict')) {
+				$strict = $request->query->getBoolean('strict');
+			}
 			$isAdmin = $this->isGranted('ROLE_ADMIN');
 			while (TRUE) {
 				$qb = $em->createQueryBuilder()
@@ -241,13 +254,14 @@ class APIController extends FOSRestController {
 					if ( !$isAdmin && $event['endpointtype'] == 'submissions' ) {
 						unset($data['entry_point']);
 					}
-					echo json_encode(array(
+					$result = array(
 						'id'        => (string)$event['eventid'],
 						'type'      => (string)$event['endpointtype'],
 						'op'        => (string)$event['action'],
-						'time'      => Utils::absTime($event['eventtime']),
 						'data'      => $data,
-					)) . "\n";
+					);
+					if ( !$strict ) $result['time'] = Utils::absTime($event['eventtime']);
+					echo json_encode($result) . "\n";
 					ob_flush();
 					flush();
 					$lastUpdate = time();
