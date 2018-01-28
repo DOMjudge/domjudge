@@ -3,19 +3,24 @@
 namespace DOMJudgeBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\SubmissionFile;
 use DOMJudgeBundle\Entity\Team;
 
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+
 class FileController extends Controller
 {
 	/**
-	 *@Route("/api/contests/{externalid}/submissions/{sid}/files", name="submission_file")
-	 *@Route("/api/v4/contests/{externalid}/submissions/{sid}/files", name="submission_file_v4")
+	 * @Route("/api/contests/{externalid}/submissions/{sid}/files", name="submission_file")
+	 * @Route("/api/v4/contests/{externalid}/submissions/{sid}/files", name="submission_file_v4")
+	 * @Security("has_role('ROLE_ADMIN')")
 	 */
 	public function submissionFiles(Contest $contest, Submission $submission)
 	{
