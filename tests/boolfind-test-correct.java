@@ -6,18 +6,15 @@
 
 import java.io.*;
 
-class Main
-{
+class Main {
 	public static BufferedReader in;
 
-	public static void main(String[] args) throws Exception
-	{
+	public static void main(String[] args) throws Exception {
 		in = new BufferedReader(new InputStreamReader(System.in));
 
 		int nruns = Integer.parseInt(in.readLine());
 
-		for(int run=1; run<=nruns; run++) {
-
+		for (int run = 1; run <= nruns; run++) {
 			long n, lo, hi, mid;
 			String answer;
 
@@ -25,13 +22,13 @@ class Main
 
 			lo = 0;
 			hi = n;
-			while ( lo+1<hi ) {
+			while (lo+1 < hi) {
 				mid = (lo+hi)/2;
 				System.out.println("READ " + mid);
 				answer = in.readLine();
-				if ( answer.equals("true") ) {
+				if (answer.equals("true")) {
 					lo = mid;
-				} else if ( answer.equals("false") ) {
+				} else if (answer.equals("false")) {
 					hi = mid;
 				} else {
 					throw new Exception("invalid return value '" + answer + "'");
