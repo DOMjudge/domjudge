@@ -36,7 +36,7 @@ fi
 # SC2086: there are too many cases where quoting is not necessary and tedious
 
 if [ -x /usr/bin/shellcheck ]; then
-	grep -rslE "^#\!.*/bin/(ba)?sh" .. | grep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output))' | \
+	grep -rslE "^#\!.*/bin/(ba)?sh" .. | grep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|import))' | \
 	while read -r i ; do
 		if [ "${i##*.}" != "zip" ]; then
 			shellcheck -f gcc -e 1072,2034,2086 "$i"
