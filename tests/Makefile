@@ -12,10 +12,19 @@ SUBMIT = \
 		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
 		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
-		$(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; \
+		if [ "$${i%test-multifile-multipackage.java.zip}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -e zoo.goo.moo.b.B "$$main" "$$tmp/"* ; \
+		else \
+			$(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; \
+		fi ; \
 		rm -rf "$$tmp" ; \
 	else \
-		$(SUBMITCMD) $(SUBMITOPTS) "$$i" ; \
+		if [ "$${i%.java}" != "$$i" ]; then \
+			entry=`grep "class .* {" "$$i" | sed -e 's/.*class //' | sed -e 's/ .*//'`; \
+			$(SUBMITCMD) $(SUBMITOPTS) -e "$$entry" "$$i" ; \
+		else \
+			$(SUBMITCMD) $(SUBMITOPTS) "$$i" ; \
+		fi ; \
 	fi ; \
 	echo
 
