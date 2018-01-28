@@ -52,7 +52,8 @@ fi
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
 # Check if entry point is valid
-javap "$MAINCLASS" > /dev/null
+COMPILESCRIPTDIR="$(dirname "$0")"
+java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $MAINCLASS
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
