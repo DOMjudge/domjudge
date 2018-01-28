@@ -46,6 +46,7 @@ sudo apt-get remove -y apport
 
 # travis doesn't run on xenial yet... :-/
 sed -i -e 's/openjdk-8/default/' misc-tools/dj_make_chroot.in
+sed -i -e 's/gnu++14/gnu++11/' sql/files/defaultdata/cpp/run
 
 # configure, make and install (but skip documentation)
 make configure
