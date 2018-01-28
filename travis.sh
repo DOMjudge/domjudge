@@ -79,6 +79,7 @@ sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
 sudo bin/create_cgroups
 
 # build chroot
+export DEBMIRROR="http://us.archive.ubuntu.com./ubuntu/"
 cd ${DIR}/misc-tools
 sudo ./dj_make_chroot -a amd64
 
