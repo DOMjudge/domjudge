@@ -106,8 +106,17 @@ class APIController extends FOSRestController {
 				'public' => TRUE,
 			)
 		);
+		$penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
+		$use_ext_ids = $this->getParameter('domjudge.useexternalids');
 
-		return Contest::filterActiveContests($data, $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20), $this->getParameter('domjudge.useexternalids'));
+		$result = [];
+		foreach ($data as $contest) {
+			if ($contest->isActive()) {
+				$result[] = $contest->serializeForAPI($penalty_time, $use_ext_ids);
+			}
+		}
+
+		return $result;
 	}
 
 	/**

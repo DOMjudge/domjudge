@@ -857,25 +857,6 @@ class Contest
 	}
 
 	/**
-	 * Helper function to filter active contests.
-	 */
-	public static function filterActiveContests($data, $penalty_time, $use_external_ids) {
-		$filtered_data = [];
-		foreach ($data as $contest) {
-			if ($contest->isActive()) {
-				$filtered_data[] = $contest;
-			}
-		}
-
-		return array_map(
-			function(Contest $contest) use ($use_external_ids, $penalty_time) {
-				return $contest->serializeForAPI($penalty_time, $use_external_ids);
-			},
-			$filtered_data
-		);
-	}
-
-	/**
 	 * Calculates whether the contest has already started, stopped,
 	 * andd if scoreboard is currently frozen or final (unfrozen).
 	 */
