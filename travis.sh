@@ -142,5 +142,6 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 	done
 	cat /proc/cmdline
 	cat /chroot/domjudge/etc/apt/sources.list
+	curl http://admin:admin@localhost/domjudge/api/v4/submissions | python -m json.tool
 	exit -1;
 fi
