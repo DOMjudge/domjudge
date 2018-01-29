@@ -829,16 +829,19 @@ function submissions($args)
 	while ( $row = $q->next() ) {
 		$extcid = safe_string(rest_extid('contests', $cid));
 		$extid = safe_string(rest_extid('submissions', $row['submitid']));
-		$res[] = array(
+		$ret = array(
 			'id'           => $extid,
 			'team_id'      => safe_string(rest_extid('teams', $row['teamid'])),
 			'problem_id'   => safe_string(rest_extid('problems', $row['probid'])),
 			'language_id'  => safe_string(rest_extid('languages', $row['langid'])),
 			'time'         => Utils::absTime($row['submittime']),
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
-			'entry_point'  => $row['entry_point'],
 			'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")),
 			);
+		if ( checkrole('admin') ) {
+			$ret['entry_point'] = $row['entry_point'];
+		}
+		$res[] = $ret;
 	}
 	return $res;
 }
