@@ -892,7 +892,7 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null,
 $API_endpoints = array(
 	'contests' => array(
 		'type'   => 'configuration',
-		'url'    => '/',
+		'url'    => '/contests',
 		'extid'  => 'externalid',
 	),
 	'judgement-types' => array( // hardcoded in $VERDICTS and the API
@@ -924,10 +924,10 @@ $API_endpoints = array(
 		'tables' => array('team', 'contestteam'),
 		'extid'  => TRUE,
 	),
-	'teams-members' => array(
-		'type'   => 'configuration',
-		'tables' => array(),
-	),
+//	'teams-members' => array(
+//		'type'   => 'configuration',
+//		'tables' => array(),
+//	),
 	'submissions' => array(
 		'type'   => 'live',
 		'extid'  => TRUE, // 'externalid,cid' in ICPC-live branch
