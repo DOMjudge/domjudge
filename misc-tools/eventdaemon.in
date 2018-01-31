@@ -164,16 +164,13 @@ function insert_event($cid, $endpoint, $data)
 
 function initialize_events($cid)
 {
-	global $API_endpoints, $initial_events_loaded;
+	global $API_endpoints, $initial_events_loaded, $contest;
 
 	logmsg(LOG_NOTICE, "Initializing configuration events.");
 
 	foreach ( $API_endpoints as $endpoint => $ep_info ) {
 		if ( $ep_info['type']==='configuration' && isset($ep_info['url']) ) {
-			$url = $ep_info['url'];
-			if ( in_array($endpoint,array('problems','teams')) ) {
-				$url .= '?cid=' . urlencode($cid);
-			}
+			$url = '/contests/' . $contest['externalid'] . $ep_info['url'];
 			$json = API_request($url);
 			if ( !isset($json) ) error("No response data for endpoint '$endpoint'.");
 
