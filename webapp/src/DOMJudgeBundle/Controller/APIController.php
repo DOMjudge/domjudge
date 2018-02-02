@@ -109,7 +109,8 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests")
 	 */
-	public function getContestsAction(Request $request) {
+	public function getContestsAction() {
+		$request = Request::createFromGlobals();
 		$strict = false;
 		if ($request->query->has('strict')) {
 			$strict = $request->query->getBoolean('strict');
@@ -136,7 +137,8 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{externalid}")
 	 */
-	public function getSingleContestAction(Request $request, Contest $contest) {
+	public function getSingleContestAction(Contest $contest) {
+		$request = Request::createFromGlobals();
 		$strict = false;
 		if ($request->query->has('strict')) {
 			$strict = $request->query->getBoolean('strict');
