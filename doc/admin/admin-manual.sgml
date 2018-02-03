@@ -752,6 +752,10 @@ options. Edit <tt>/etc/default/grub</tt> and change the default
 commandline to
 <verb>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</verb>
 Then run <tt>update-grub</tt> and reboot.
+After rebooting check that <tt>/proc/cmdline</tt> actually contains the
+added kernel options. On VM hosting providers such as Google Cloud or
+DigitalOcean, <tt>GRUB_CMDLINE_LINUX_DEFAULT</tt> may be overwritten
+by other files in <tt>/etc/default/grub.d/</tt>.
 
 <p>
 You have now configured the system to use cgroups, but you need to create
