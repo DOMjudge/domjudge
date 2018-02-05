@@ -25,9 +25,10 @@ tr.unseen td {
 	font-weight: bold;
 }
 
-a:link, a:visited { color: blue;   }
+/*a:link, a:visited { color: blue;   }
 a:hover           { color: purple; }
 a:active          { color: red;    }
+*/
 
 .disabled         { color: silver; }
 .disabled a       { color: gray;   }
@@ -74,8 +75,8 @@ tr.unread td {
 }
 .list th {
 	vertical-align: bottom;
-	padding-left: 3px;
-	padding-right: 3px;
+/*	padding-left: 3px;
+	padding-right: 3px;*/
 }
 td {
 	vertical-align: top;
@@ -83,7 +84,7 @@ td {
 
 .list tr { border-bottom: 1px solid silver; }
 .list tr.roweven { background: #ededed; }
-.list tr:hover { background: #ffffcc; }
+.list tr:hover { background: #ffffcc !important; }
 .list thead tr { border-bottom-color: black; }
 .list thead tr:hover { background: white; }
 .list tfoot tr:hover { background: white; }
@@ -144,13 +145,12 @@ span.extra {
 	text-align: right;
 }
 #clock {
-/*	font-size: small; */
+	font-size: small;
 	font-family: monospace;
 	border: 1px dashed #ccc;
 	padding: 4px;
 	color: gray;
 }
-#timeleft { color: #800080;}
 #toggles {
 	margin-top: 5px;
 	margin-bottom: 5px;
@@ -319,8 +319,6 @@ h3.teamoverview {
 	border-top: solid 1px darkgray;
 	border-bottom: solid 1px darkgray;
 	background-color: #c4d8ff;
-	font-size: smaller;
-	font-weight: normal;
 	margin-top: 2ex;
 	padding-left: 1ex;
 }
@@ -382,10 +380,9 @@ h2#teamwelcome {
 #teamwelcometeam {
 	font-weight: bold;
 }
-h3#contestnotstarted {
+#contestnotstarted {
 	color: silver;
 	margin-top: .2ex;
-	margin-left: 8em;
 }
 
 span.fileinputs {
