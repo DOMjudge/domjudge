@@ -41,6 +41,7 @@ twig:
     strict_variables: '%kernel.debug%'
     globals:
       DOMJUDGE_VERSION: '%domjudge.version%'
+      DJ_CHARACTER_SET: 'utf-8'
 # Doctrine Configuration
 doctrine:
     dbal:
