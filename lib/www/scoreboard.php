@@ -631,7 +631,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	}
 
 	// page heading with contestname and start/endtimes
-	echo "<h1>Scoreboard " . specialchars($cdata['name']) . "</h1>\n\n";
+	echo "<h1>" . specialchars($cdata['name']) . "</h1>\n\n";
 
 	if ( $fdata['showfinal'] ) {
 		if ( empty($cdata['finalizetime']) ) {
