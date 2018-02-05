@@ -25,56 +25,54 @@ $row = $DB->q('MAYBETUPLE SELECT p.probid, cp.shortname, p.name AS probname, sub
 
 if( !$row || $row['submittime'] >= $cdata['endtime'] ||
     (dbconfig_get('verification_required',0) && !$row['verified']) ) {
-	echo "<p>Submission not found for this team or not judged yet.</p>\n";
+	echo "<div class=\"alert alert-danger\">Submission not found for this team or not judged yet.</div>\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
 
 // update seen status when viewing submission
 $DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $id);
-
-echo "<h1>Submission details</h1>\n";
-
-if( ! $row['valid'] ) {
-	echo "<p>This submission is being ignored.<br />\n" .
-		"It is not used in determining your score.</p>\n\n";
-}
 ?>
 
-<table>
-<tr><td>Problem:</td>
-	<td><span class="probid"><?php echo specialchars($row['shortname']) ?></span> -
-    <?php echo specialchars($row['probname'])?></td></tr>
-<tr><td>Submitted:</td>
-	<td><?php echo printtime($row['submittime'])?></td></tr>
-<tr><td>Language:</td>
-	<td><?php echo specialchars($row['langname'])?></td></tr>
-</table>
+<h1>Submission details</h1>
 
-<p>Result: <?php echo printresult($row['result'], TRUE)?></p>
+<?php if( ! $row['valid'] ): ?>
+<div class="alert alert-warning">This submission is being ignored. It is not used in determining your score.</div>
+<?php endif; ?>
+
+<div class="d-flex flex-row">
+<div class="p-2">Problem: <b><span class="probid"><?=specialchars($row['shortname'])?></span> -
+    <?=specialchars($row['probname'])?></b></div>
+<div class="p-2">Submitted: <b><?=printtime($row['submittime'])?></b></div>
+<div class="p-2">Language: <b><?=specialchars($row['langname'])?></b></div>
+<div class="p-2">Compilation:
+<?php if ($row['result'] == 'compiler-error'): ?>
+<span class="badge badge-danger">failed</span></div>
+</div>
+<?php else: ?>
+<span class="badge badge-success">successful</span></div>
+</div>
+<div class="d-flex flex-row">
+<div class="p-2">Run result: <?php echo printresult($row['result'], TRUE)?></div>
+</div>
+<?php endif; ?>
+
 <?php
-
 $show_compile = dbconfig_get('show_compile', 2);
 
 if ( ( $show_compile == 2 ) ||
      ( $show_compile == 1 && $row['result'] == 'compiler-error') ) {
 
-	echo "<h2>Compilation output</h2>\n\n";
+	echo "<hr />\n\n";
+
+	echo "<h3>Compilation output</h3>\n\n";
 
 	if ( strlen(@$row['output_compile']) > 0 ) {
-		echo "<pre class=\"output_text\">\n".
+		echo "<pre class=\"output_text pre-scrollable\">\n".
 			specialchars(@$row['output_compile'])."\n</pre>\n\n";
 	} else {
 		echo "<p class=\"nodata\">There were no compiler errors or warnings.</p>\n";
 	}
-
-	if ( $row['result'] == 'compiler-error' ) {
-		echo "<p class=\"compilation-error\">Compilation failed.</p>\n";
-	} else {
-		echo "<p class=\"compilation-success\">Compilation successful.</p>\n";
-	}
-} else {
-	echo "<p class=\"nodata\">Compilation output is disabled.</p>\n";
 }
 
 $show_sample = dbconfig_get('show_sample_output', 0);
@@ -85,6 +83,8 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 	                                             r.judgingid = %i )
 	                WHERE t.probid = %i AND t.sample = 1 ORDER BY rank',
 	               $row['judgingid'], $row['probid']);
+
+	echo "<hr />\n\n";
 
 	echo '<h3>Run(s) on the provided sample data</h3>';
 

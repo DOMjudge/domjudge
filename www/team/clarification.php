@@ -61,10 +61,15 @@ if ( isset($id) ) {
 	} else {
 		echo "<h1>Clarification</h1>\n\n";
 	}
+	echo "<div class=\"container clarificationform\"><div class=\"card card-body\">";
 	putClarification($respid, $teamid);
 
-	echo "<h2>Send Clarification Request</h2>\n\n";
+	echo '</div><div class="mt-3"><button class="btn btn-secondary btn-sm" data-toggle="collapse" data-target="#collapsereplyform" aria-expanded="false" aria-controls="collapsereplyform">reply to this clarification</button></div>';
+	echo "</div>";
+
+	echo '<div class="collapse mt-3 container clarificationform" id="collapsereplyform"><div class="card card-body">';
 	putClarificationForm("clarification.php", $id, $cid);
+	echo '</div></div>';
 } else {
 	// display a clarification request send box
 	echo "<h1>Send Clarification Request</h1>\n\n";

@@ -1,3 +1,5 @@
+</main>
+
 <?php
 /**
  * Common page footer

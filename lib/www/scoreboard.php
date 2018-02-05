@@ -786,10 +786,10 @@ function putTeamRow($cdata, $teamids) {
 		if ( ! IS_JURY ) {
 
 			global $teamdata;
-			echo "<h2 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
-				specialchars($teamdata['name']) . "</span>!</h2>\n\n";
-			echo "<h3 id=\"contestnotstarted\">contest " .
-				printContestStart($cdata) . "</h3>\n\n";
+			echo "<h1 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
+				specialchars($teamdata['name']) . "</span>!</h1>\n\n";
+			echo "<h2 id=\"contestnotstarted\">contest " .
+				printContestStart($cdata) . "</h2>\n\n";
 		}
 
 		return;

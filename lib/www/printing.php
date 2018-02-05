@@ -21,8 +21,15 @@ function put_print_form()
 
 	$langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions FROM language
 	                 WHERE allow_submit = 1 ORDER BY name');
-	echo "<script type=\"text/javascript\">\n<!--\n";
-	echo "function detectLanguage(filename)
+	$langlist = array();
+	foreach($langs as $langid => $langdata) {
+		$langlist[$langid] = $langdata['name'];
+	}
+	$langlist[''] = 'plain text';
+?>
+
+	<script type="text/javascript">
+	function detectLanguage(filename)
 	{
 		var parts = filename.toLowerCase().split('.').reverse();
 		if ( parts.length < 2 ) return;
@@ -40,42 +47,37 @@ function put_print_form()
 			}
 		}
 
-	}\n";
-
-	putgetMainExtension($langs);
-
-	echo "// -->\n</script>\n";
-
-	echo addForm($pagename,'post',null,'multipart/form-data');
-
-	?>
-
-	<table>
-	<tr><td><label for="code">File</label>:</td>
-	<td><input type="file" name="code" id="code" size="40" required onChange='detectLanguage(document.getElementById("code").value);' /></td>
-	</tr>
-	<tr><td colspan="2">&nbsp;</td></tr>
-	<tr><td><label for="langid">Language</label>:</td>
-	    <td><?php
-
-	$langlist = array();
-	foreach($langs as $langid => $langdata) {
-		$langlist[$langid] = $langdata['name'];
 	}
-	$langlist[''] = 'plain text';
-	echo addSelect('langid', $langlist, '', true);
-
-	?></td>
-	</tr>
-	<tr><td colspan="2">&nbsp;</td></tr>
-	<tr><td></td>
-	    <td><?php echo addSubmit('Print code', 'submit'); ?></td>
-	</tr>
-	</table>
 
 	<?php
+	putgetMainExtension($langs);
+	?>
+	</script>
 
-	echo addEndForm();
+<div class="container submitform">
+<form action="<?=specialchars($pagename)?>" method="post" enctype="multipart/form-data">
+	
+  <div class="form-group">
+    <label for="maincode">Source file:</label>
+    <input type="file" class="form-control-file" name="code" id="code" required onchange='detectLanguage(document.getElementById("code").value);' />
+  </div>
+  <div class="form-group">
+    <label for="langid">Language:</label>
+    <select class="custom-select" name="langid" id="langid">
+
+
+<?php
+    foreach($langlist as $langid => $langname) {
+	print '      <option value="' .specialchars($langid). '">' . specialchars($langname) . "</option>\n";
+    }
+?>
+    </select>
+  </div>
+  <input type="submit" name="submit" value="Print code" class="btn btn-primary" /> 
+</form>
+</div>
+
+<?php
 }
 
 function handle_print_upload()
@@ -101,10 +103,10 @@ function handle_print_upload()
 
 	$ret = send_print($realfilename,$filename,$langid);
 
-	echo "<p>" . nl2br(specialchars($ret[1])) . "</p>\n\n";
+	echo "<div>" . nl2br(specialchars($ret[1])) . "</div>\n\n";
 
 	if ( $ret[0] ) {
-		echo "<p>Print successful.</p>";
+		echo "<div class=\"alert alert-success\">Print successful.</div>";
 	} else {
 		error("Error while printing. Contact staff.");
 	}

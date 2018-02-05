@@ -21,7 +21,7 @@ if ( ! have_printing() ) {
 // before allowing to submit printouts.
 $fdata = calcFreezeData($cdata);
 if ( !checkrole('jury') && !$fdata['started'] ) {
-	echo "<p class=\"nodata\">Contest has not yet started.</p>\n";
+	echo "<div class=\"alert alert-secondary\">Contest has not yet started.</div>\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }
