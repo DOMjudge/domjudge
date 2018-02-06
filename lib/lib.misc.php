@@ -1126,6 +1126,11 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		} else {
 			$url = $endpoint['url'].'/'.$id;
 		}
+
+		// Temporary fix for single/multi contest API:
+		$contests = getCurContests(TRUE, NULL, FALSE);
+		$url = '/contests/' . $contests[$cid]['externalid'] . $url;
+
 		$json = API_request($url, 'GET', '', false);
 		if ( empty($json) ) {
 			logmsg(LOG_WARNING,"eventlog: got no JSON data from '$url'");
