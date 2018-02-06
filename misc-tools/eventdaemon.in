@@ -122,8 +122,8 @@ while ( TRUE ) {
 	     ($fdata_old['showfrozen'] !== $fdata['showfrozen']) ||
 	     ($fdata_old['showfinal']  !== $fdata['showfinal']) ) {
 
-		logmsg(LOG_INFO, "Inserting contest update event.");
-		eventlog('contest', $cid, 'update', $cid);
+		logmsg(LOG_INFO, "Inserting contest state update event.");
+		eventlog('state', '', 'update', $cid, null, '');
 	}
 
 	// FIXME: generate contest state change events, ideally triggered
