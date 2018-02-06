@@ -173,4 +173,4 @@ if ( IS_JURY ) {
  */
 if ( $menu ) include("menu.php");
 
-echo '<main role="main" class="container">';
+echo '<main role="main" class="pl-4">';

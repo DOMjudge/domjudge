@@ -36,6 +36,7 @@ $DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $id);
 
 <h1>Submission details</h1>
 
+<div class="container">
 <?php if( ! $row['valid'] ): ?>
 <div class="alert alert-warning">This submission is being ignored. It is not used in determining your score.</div>
 <?php endif; ?>
@@ -130,5 +131,7 @@ if ( $show_sample && @$row['result']!='compiler-error' ) {
 		}
 	}
 }
+
+echo "</div>\n\n";
 
 require(LIBWWWDIR . '/footer.php');
