@@ -1136,13 +1136,9 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		$eventid = $DB->q('RETURNID INSERT INTO event
 		                   (eventtime, cid, endpointtype, endpointid,
 		                   datatype, dataid, action, content)
-		                   SELECT GREATEST(%s,COALESCE(MAX(eventtime),0)+0.001), %i, %s, %s,
-		                          %s, %s, %s, %s
-		                   FROM event WHERE cid = %i
-		                   ORDER BY eventid DESC LIMIT 1',
+		                   VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
 		                  $now, $cid, $type, $id,
-		                  $table, $dataid, $action, $json,
-		                  $cid);
+		                  $table, $dataid, $action, $json);
 		$ids[] = $eventid;
 	}
 
