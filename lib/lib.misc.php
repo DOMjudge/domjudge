@@ -905,6 +905,10 @@ $API_endpoints = array(
 		'type'   => 'configuration',
 		'tables' => array(),
 	),
+	'state' => array(
+		'type'   => 'aggregate',
+		'tables' => array(),
+	),
 	'submissions' => array(
 		'type'   => 'live',
 		'extid'  => TRUE, // 'externalid,cid' in ICPC-live branch
@@ -1098,7 +1102,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	if ( $action === 'delete' ) {
 		$json = 'null';
 	} elseif ( $json === null ) {
-		if ( $type === 'contests' ) {
+		if ( in_array($type, array('contests','state')) ) {
 			$url = $endpoint['url'];
 		} else {
 			$url = $endpoint['url'].'/'.$id;
