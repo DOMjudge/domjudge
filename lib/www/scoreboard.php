@@ -282,7 +282,7 @@ function initSummary($probs) {
  * team's current rank but a question mark.
  */
 function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
-	$limitteams = null, $displayrank = TRUE, $center = FALSE, $showlegends = TRUE)
+	$limitteams = null, $displayrank = TRUE, $center = TRUE, $showlegends = TRUE)
 {
 	// 'unpack' the scoreboard data:
 	$scores  = $sdata['scores'];
@@ -724,7 +724,7 @@ collapse("filter");
 		<?php
 	}
 
-	renderScoreBoardTable($sdata,$myteamid,$static);
+	renderScoreBoardTable($sdata,$myteamid,$static, null,TRUE, !IS_JURY);
 
 	// last modified date, now if we are the jury, else include the
 	// freeze time
