@@ -383,6 +383,7 @@ class Contest
 	{
 		$this->starttime_string = $starttimeString;
 
+		$this->setActivatetimeString($this->getActivatetimeString());
 		$this->setFreezetimeString($this->getFreezetimeString());
 		$this->setEndtimeString($this->getEndtimeString());
 		$this->setUnfreezetimeString($this->getUnfreezetimeString());
@@ -914,11 +915,18 @@ class Contest
 
 	private function getAbsoluteTime($time_string)
 	{
-		if ( preg_match('/^[+-][0-9]+:[0-9]{2}:[0-9]{2}(\.[0-9]{0,6})?$/',$time_string) ) {
-			list($h,$m,$s) = sscanf($time_string,'%d:%d:%f');
-			// FIXME: this floating point calculation may lose
-			// significant decimals at 4th decimal place.
-			return $this->starttime + 3600*$h + 60*$m + $s;
+		if ( preg_match('/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/',$time_string) ) {
+			// FIXME: dedup code with non symfony code
+			$sign = ($time_string[0] == '-' ? -1 : +1);
+			$time_string[0] = 0;
+			$times = explode(':', $time_string, 3);
+			if ( count($times) == 2 ) $times[2] = '00';
+			$hours = $times[0];
+			$minutes = $times[1];
+			$seconds = $times[2];
+			$seconds = $seconds + 60 * ($minutes + 60 * $hours);
+			$seconds *= $sign;
+			return $this->starttime + $seconds;
 		} else {
 			$date = new DateTime($time_string);
 			return $date->format('U.v');
