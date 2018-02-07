@@ -313,11 +313,11 @@ function checkUploadForm()
 	var language = langelt.options[langelt.selectedIndex].value;
 	var languagetxt = langelt.options[langelt.selectedIndex].text;
 	var fileelt = document.getElementById("maincode");
-	var filename = fileelt.value;
+	var filenames = fileelt.files;
+	var filename = filenames[0].name;
 	var probelt = document.getElementById("probid");
 	var problem = probelt.options[probelt.selectedIndex].value;
 	var problemtxt = probelt.options[probelt.selectedIndex].text;
-	var auxfiles = document.getElementsByName("code[]");
 
 	var error = false;
 	if ( language === "" ) {
@@ -337,8 +337,8 @@ function checkUploadForm()
 
 	var auxfileno = 0;
 	// start at one; skip maincode file field
-	for (var i = 1; i < auxfiles.length; i++) {
-		if ( auxfiles[i].value !== "" ) {
+	for (var i = 1; i < filenames.length; i++) {
+		if ( filenames[i].value !== "" ) {
 			auxfileno++;
 		}
 	}
