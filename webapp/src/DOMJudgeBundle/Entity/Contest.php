@@ -899,7 +899,9 @@ class Contest
 
 	private function getAbsoluteTime($time_string)
 	{
-		if ( preg_match('/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/',$time_string) ) {
+		if ( $time_string === NULL ) {
+			return NULL;
+		} else if ( preg_match('/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/',$time_string) ) {
 			// FIXME: dedup code with non symfony code
 			$sign = ($time_string[0] == '-' ? -1 : +1);
 			$time_string[0] = 0;
