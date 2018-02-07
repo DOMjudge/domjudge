@@ -272,7 +272,7 @@ function detectProblemLanguageEntryPoint(filename)
 	if ( elt.value !== '' ) return;
 
 	for (var i=0;i<elt.length;i++) {
-		if ( elt.options[i].text.toLowerCase() === lc_parts[1] ) {
+		if ( elt.options[i].text.split(/ - /)[0].toLowerCase() === lc_parts[1] ) {
 			elt.selectedIndex = i;
 		}
 	}
@@ -312,22 +312,21 @@ function checkUploadForm()
 	var language = langelt.options[langelt.selectedIndex].value;
 	var languagetxt = langelt.options[langelt.selectedIndex].text;
 	var fileelt = document.getElementById("maincode");
-	var filename = fileelt.value;
+	var filenames = fileelt.files;
+	var filename = filenames[0].name;
 	var probelt = document.getElementById("probid");
 	var problem = probelt.options[probelt.selectedIndex].value;
-	var problemtxt = probelt.options[probelt.selectedIndex].text + " - " + getProbDescription(probelt.options[probelt.selectedIndex].text);
-	var auxfiles = document.getElementsByName("code[]");
+	var problemtxt = probelt.options[probelt.selectedIndex].text;
 
 	var error = false;
-	langelt.className = probelt.className = "";
 	if ( language === "" ) {
 		langelt.focus();
-		langelt.className = "errorfield";
+		langelt.className = langelt.className + " errorfield";
 		error = true;
 	}
 	if ( problem === "" ) {
 		probelt.focus();
-		probelt.className = "errorfield";
+		probelt.className = probelt.className + " errorfield";
 		error = true;
 	}
 	if ( filename === "" ) {
@@ -337,8 +336,8 @@ function checkUploadForm()
 
 	var auxfileno = 0;
 	// start at one; skip maincode file field
-	for (var i = 1; i < auxfiles.length; i++) {
-		if ( auxfiles[i].value !== "" ) {
+	for (var i = 1; i < filenames.length; i++) {
+		if ( filenames[i].value !== "" ) {
 			auxfileno++;
 		}
 	}
@@ -393,14 +392,6 @@ function initFileUploads(maxfiles)
 	'use strict';
 	var fileelt = document.getElementById("maincode");
 
-	if ( maxfiles > 1 ) {
-		var fileadd = document.getElementById("addfile");
-		var supportshtml5multi = ("multiple" in fileelt);
-		if ( supportshtml5multi ) {
-			fileadd.style.display = "none";
-		}
-	}
-	fileelt.onclick = function() { doReload = false; };
 	fileelt.onchange = fileelt.onmouseout = function () {
 		if ( this.value !== "" ) {
 			detectProblemLanguageEntryPoint(this.value);
@@ -458,13 +449,13 @@ function updateClock()
 	var fmt = "";
 	if (curtime >= starttime && curtime < endtime ) {
 		var left = endtime - curtime;
-		var what = "time left: ";
+		var what = "";
 	} else if (curtime >= activatetime && curtime < starttime ) {
 		var left = starttime - curtime;
-		var what = "time to start: ";
+		var what = "- ";
 	} else {
 		var left = 0;
-		var what = "";
+		var what = "0:00";
 	}
 
 	if ( left ) {

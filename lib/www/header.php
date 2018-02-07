@@ -8,6 +8,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 if (!defined('DOMJUDGE_VERSION')) die("DOMJUDGE_VERSION not defined.");
+define('ASSET_TAG', DOMJUDGE_VERSION);
 
 header('Content-Type: text/html; charset=' . DJ_CHARACTER_SET);
 
@@ -32,29 +33,67 @@ if(!isset($menu)) {
 <meta charset="<?php echo DJ_CHARACTER_SET?>"/>
 <title><?php echo $title?></title>
 <link rel="icon" href="../images/favicon.png" type="image/png" />
-<link rel="stylesheet" href="../style.css" type="text/css" />
-<link rel="stylesheet" href="../css/octicons/octicons.css" />
-<script type="text/javascript" src="../js/jquery.min.js"></script>
+<?php if ( ! IS_JURY ): ?>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="../css/bootstrap.min.css?v=<?=ASSET_TAG?>" type="text/css" />
+<style>
+body {
+  padding-top: 2rem;
+}
+main {
+  padding: 1rem 3rem;
+}
+.nav-item {
+  padding-left: 1em;
+}
+h1,h2,h3,h4,h5,h6 {
+  text-align: center;
+}
+h1 { font-size: 2em; 
+  padding-top: 3rem;
+}
+h2 { font-size: 1.5em; }
+h3 { font-size: 1.17em; }
+h4 { font-size: 1.12em; }
+h5 { font-size: .83em; }
+h6 { font-size: .75em; }
+.submitform {
+  max-width: 450px;
+}
+.clarificationform {
+  max-width: 800px;
+}
+#submitbut {
+  margin-right: 2rem;
+}
+</style>
+<?php endif; ?>
+<link rel="stylesheet" href="../style.css?v=<?=ASSET_TAG?>" type="text/css" />
+<link rel="stylesheet" href="../css/octicons/octicons.css?v=<?=ASSET_TAG?>" />
+<script type="text/javascript" src="../js/jquery.min.js?v=<?=ASSET_TAG?>"></script>
+<?php if ( ! IS_JURY ): ?>
+<script type="text/javascript" src="../js/bootstrap.min.js?v<?=ASSET_TAG?>"></script>
+<?php endif; ?>
 <?php
 if ( IS_JURY ) {
-	echo "<link rel=\"stylesheet\" href=\"../style_jury.css\" type=\"text/css\" />\n";
+	echo "<link rel=\"stylesheet\" href=\"../style_jury.css?v=" . ASSET_TAG . "\" type=\"text/css\" />\n";
 	if (isset($printercss)) {
-		echo "<link rel=\"stylesheet\" href=\"../style_printer.css\" type=\"text/css\" media=\"print\" />\n";
+		echo "<link rel=\"stylesheet\" href=\"../style_printer.css?v=" . ASSET_TAG . "\" type=\"text/css\" media=\"print\" />\n";
 	}
-	echo "<script type=\"text/javascript\" src=\"../js/jury.js\"></script>\n";
-	echo "<script type=\"text/javascript\" src=\"../js/js.cookie.min.js\"></script>\n";
+	echo "<script type=\"text/javascript\" src=\"../js/jury.js?v=" . ASSET_TAG . "\"></script>\n";
+	echo "<script type=\"text/javascript\" src=\"../js/js.cookie.min.js?v=" . ASSET_TAG . "\"></script>\n";
 	if (isset($jscolor)) {
 		echo "<script type=\"text/javascript\" src=\"" .
-		"../js/jscolor.js\"></script>\n";
+		"../js/jscolor.js?v=" . ASSET_TAG . "\"></script>\n";
 	}
 	if (isset($jqtokeninput)) {
-		echo "<link rel=\"stylesheet\" href=\"../token-input.css\" type=\"text/css\" />";
-		echo "<script type=\"text/javascript\" src=\"../js/jquery.tokeninput.min.js\"></script>\n";
+		echo "<link rel=\"stylesheet\" href=\"../token-input.css?v=" . ASSET_TAG . "\" type=\"text/css\" />";
+		echo "<script type=\"text/javascript\" src=\"../js/jquery.tokeninput.min.js?v=" . ASSET_TAG . "\"></script>\n";
 	}
 	echo "<script type=\"text/javascript\" src=\"" .
-		"../js/sorttable.js\"></script>\n";
+		"../js/sorttable.js?v=" . ASSET_TAG . "\"></script>\n";
 }
-echo "<script type=\"text/javascript\" src=\"../js/domjudge.js\"></script>\n";
+echo "<script type=\"text/javascript\" src=\"../js/domjudge.js?v=" . ASSET_TAG . "\"></script>\n";
 
 if ( ! empty($extrahead) ) echo $extrahead;
 ?>
@@ -134,3 +173,5 @@ if ( IS_JURY ) {
  *       both jury and team have their own menu.php
  */
 if ( $menu ) include("menu.php");
+
+echo '<main role="main" class="pl-4">';

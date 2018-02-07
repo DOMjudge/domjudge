@@ -282,7 +282,7 @@ function initSummary($probs) {
  * team's current rank but a question mark.
  */
 function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
-	$limitteams = null, $displayrank = TRUE, $center = FALSE, $showlegends = TRUE)
+	$limitteams = null, $displayrank = TRUE, $center = TRUE, $showlegends = TRUE)
 {
 	// 'unpack' the scoreboard data:
 	$scores  = $sdata['scores'];
@@ -631,7 +631,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	}
 
 	// page heading with contestname and start/endtimes
-	echo "<h1>Scoreboard " . specialchars($cdata['name']) . "</h1>\n\n";
+	echo "<h1>" . specialchars($cdata['name']) . "</h1>\n\n";
 
 	if ( $fdata['showfinal'] ) {
 		echo "<h4>final standings</h4>\n\n";
@@ -724,7 +724,7 @@ collapse("filter");
 		<?php
 	}
 
-	renderScoreBoardTable($sdata,$myteamid,$static);
+	renderScoreBoardTable($sdata,$myteamid,$static, null,TRUE, !IS_JURY);
 
 	// last modified date, now if we are the jury, else include the
 	// freeze time
@@ -786,10 +786,10 @@ function putTeamRow($cdata, $teamids) {
 		if ( ! IS_JURY ) {
 
 			global $teamdata;
-			echo "<h2 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
-				specialchars($teamdata['name']) . "</span>!</h2>\n\n";
-			echo "<h3 id=\"contestnotstarted\">contest " .
-				printContestStart($cdata) . "</h3>\n\n";
+			echo "<h1 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
+				specialchars($teamdata['name']) . "</span>!</h1>\n\n";
+			echo "<h2 id=\"contestnotstarted\">contest " .
+				printContestStart($cdata) . "</h2>\n\n";
 		}
 
 		return;

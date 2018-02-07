@@ -226,8 +226,7 @@ In the most basic setup the team workstations only need (next to the tools neede
 for program development) a web browser. The web interface fully works with any
 known browser, but a HTML5-capable browser adds more convenience functions. With
 JavaScript disabled, all basic functionality remains working, with the notable
-exception of multiple file uploads on non-HTML5-ready browsers.
-
+exception of multiple file uploads on non-HTML5-ready browsers (IE9 and lower).
 
 <chapt>Installation and configuration <label id="install_config">
 <p>

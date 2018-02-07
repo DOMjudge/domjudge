@@ -10,9 +10,15 @@ require('init.php');
 
 $title = 'Contest problems';
 require(LIBWWWDIR . '/header.php');
+?>
 
-echo "<h1>Contest problems</h1>\n\n";
+<h1>Contest problems</h1>
 
-putProblemTextList();
+<div class="container">
 
+<?php putProblemTextList(); ?>
+
+</div>
+
+<?php
 require(LIBWWWDIR . '/footer.php');

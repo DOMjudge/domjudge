@@ -31,7 +31,8 @@ framework:
         save_path:   "%kernel.root_dir%/../var/sessions/%kernel.environment%"
     fragments: ~
     http_method_override: true
-    assets: ~
+    assets:
+        version: "v=%domjudge.version%"
     php_errors:
         log: true
 
@@ -41,6 +42,7 @@ twig:
     strict_variables: '%kernel.debug%'
     globals:
       DOMJUDGE_VERSION: '%domjudge.version%'
+      DJ_CHARACTER_SET: 'utf-8'
 # Doctrine Configuration
 doctrine:
     dbal:

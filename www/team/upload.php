@@ -86,4 +86,4 @@ $sid = submit_solution($teamid, $probid, $cid, $langid, $FILEPATHS, $FILENAMES, 
 
 auditlog('submission', $sid, 'added', 'via teampage', null, $cid);
 
-header('Location: index.php#submitted=' . urlencode($sid) );
+header('Location: index.php?submitted=' . urlencode($sid) );

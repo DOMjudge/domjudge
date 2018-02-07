@@ -1,22 +1,47 @@
 <?php
+$fdata = calcFreezeData($cdata);
+$started = checkrole('jury') || $fdata['started'];
+?>
 
-echo "<nav><div id=\"menutop\">\n";
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand hidden-sm-down" href="./">DOMjudge</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-echo "<a target=\"_top\" href=\"index.php\" accesskey=\"o\"><span class=\"octicon octicon-home\"></span> overview</a>\n";
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="./"><span class="octicon octicon-home"></span> Home</a>
+          </li>
+          <li class="nav-item">
+<?php if ($started): ?>
+            <a class="nav-link" href="problems.php"><span class="octicon octicon-book"></span> Problemset</a>
+<?php else: ?>
+            <a class="nav-link disabled"><span class="octicon octicon-book"></span> Problemset</a>
+<?php endif; ?>
+          </li>
+<?php if (have_printing()): ?>
+          <li class="nav-item">
+            <a class="nav-link" href="print.php"><span class="octicon octicon-file-text"></span> Print</a>
+	  </li>
+<?php endif; ?>
+          <li class="nav-item">
+            <a class="nav-link" href="scoreboard.php"><span class="octicon octicon-list-ordered"></span> Scoreboard</a>
+          </li>
+<?php if ( checkrole('jury') || checkrole('balloon') ): ?>
+          <li class="nav-item">
+            <a class="nav-link" href="../jury"><span class="octicon octicon-arrow-right"></span> Jury</a>
+	  </li>
+<?php endif; ?>
+         </ul>
+      </div>
 
-echo "<a target=\"_top\" href=\"problems.php\" accesskey=\"t\"><span class=\"octicon octicon-book\"></span> problems</a>\n";
+<?php if ($started): ?>
+      <div id="submitbut"><a class="nav-link justify-content-center" href="submit.php"><button type="button" class="btn btn-success btn-sm"><span class="octicon octicon-cloud-upload"></span> Submit</button></a></div>
+<?php else: ?>
+      <div id="submitbut"><a class="nav-link justify-content-center"><button type="button" class="btn btn-success btn-sm disabled"><span class="octicon octicon-cloud-upload"></span> Submit</button></a></div>
+<?php endif; ?>
 
-if ( have_printing() ) {
-	echo "<a target=\"_top\" href=\"print.php\" accesskey=\"p\"><span class=\"octicon octicon-file-text\"></span> print</a>\n";
-}
-echo "<a target=\"_top\" href=\"scoreboard.php\" accesskey=\"b\"><span class=\"octicon octicon-list-ordered\"></span> scoreboard</a>\n";
-
-if ( checkrole('jury') || checkrole('balloon') ) {
-	echo "<a target=\"_top\" href=\"../jury/\" accesskey=\"j\"><span class=\"octicon octicon-arrow-right\"></span> jury</a>\n";
-}
-
-echo "</div>\n\n<div id=\"menutopright\">\n";
-
-putClock();
-
-echo "</div></nav>\n\n";
+<?php putClock(); ?>
+    </nav>

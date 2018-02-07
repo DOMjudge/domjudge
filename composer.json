@@ -12,7 +12,6 @@
 		"mustangostang/spyc": "0.5.*",
 		"php": ">= 7.0",
 		"ircmaxell/password-compat": "*",
-
 		"doctrine/doctrine-bundle": "^1.6",
 		"doctrine/doctrine-cache-bundle": "^1.2",
 		"doctrine/orm": "^2.5",
@@ -23,10 +22,11 @@
 		"symfony/symfony": "3.2.*",
 		"twig/twig": "2.3.*",
 		"friendsofsymfony/rest-bundle": "^2.2",
-		"jms/serializer-bundle": "^2.0"
+		"jms/serializer-bundle": "^2.0",
+		"twbs/bootstrap": "^4.0.0"
 	},
 	"require-dev": {
-			"sensio/generator-bundle": "^3.0",
+		"sensio/generator-bundle": "^3.0",
 		"phpunit/phpunit": "^6.3"
 	},
 	"autoload": {
