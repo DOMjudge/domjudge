@@ -50,10 +50,16 @@ class APIController extends FOSRestController {
 		$response = NULL;
 		if ( !isset($args['id']) ) {
 			$response = new Response('Missing "id" in request.', 400);
-		} else if ( !isset($args['start_time']) ) {
+		} else if ( !array_key_exists('start_time', $args) ) {
 			$response = new Response('Missing "start_time" in request.', 400);
 		} else if ( $args['id'] != $contest->getExternalid() ) {
 			$response = new Response('Invalid "id" in request.', 400);
+		} else if ( $args['start_time'] === NULL ) {
+			$em = $this->getDoctrine()->getManager();
+			$em->persist($contest);
+			$contest->setStarttimeEnabled(FALSE);
+			$response = new Response('Contest paused :-/.', 200);
+			$em->flush();
 		} else {
 			$em = $this->getDoctrine()->getManager();
 			$date = date_create($args['start_time']);
@@ -69,6 +75,7 @@ class APIController extends FOSRestController {
 				} else {
 					$em->persist($contest);
 					$newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
+					$contest->setStarttimeEnabled(TRUE);
 					$contest->setStarttime($new_start_time);
 					$contest->setStarttimeString($newStartTimeString);
 					$response = new Response('Contest start time changed to ' . $newStartTimeString, 200);
