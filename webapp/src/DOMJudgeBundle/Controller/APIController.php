@@ -64,7 +64,7 @@ class APIController extends FOSRestController {
 				$now = Utils::now();
 				if ( $new_start_time < $now + 30 ) {
 					$response = new Response('New start_time not far enough in the future.', 403);
-				} else if ( FALSE && $contest->getStarttime() != NULL && $contest->getStarttime() < $now + 30 ) {
+				} else if ( $contest->getStarttime() != NULL && $contest->getStarttime() < $now + 30 ) {
 					$response = new Response('Current contest already started or about to start.', 403);
 				} else {
 					$em->persist($contest);
