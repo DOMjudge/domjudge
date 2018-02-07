@@ -3,6 +3,7 @@ namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
 use DOMJudgeBundle\Utils\Utils;
+use \DateTime;
 
 /**
  * Contests that will be run with this install
