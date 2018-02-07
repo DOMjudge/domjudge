@@ -382,8 +382,11 @@ class Contest
 	public function setStarttimeString($starttimeString)
 	{
 		$this->starttime_string = $starttimeString;
-		$date = new DateTime($freezetimeString);
-		$this->freezetime = $date->format('U.v');
+
+		$this->setFreezetimeString($this->getFreezetimeString());
+		$this->setEndtimeString($this->getEndtimeString());
+		$this->setUnfreezetimeString($this->getUnfreezetimeString());
+		$this->setDeactivatetimeString($this->getDeactivatetimeString());
 
 		return $this;
 	}
