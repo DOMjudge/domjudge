@@ -58,6 +58,13 @@ class Contest
 	private $starttime;
 
 	/**
+	 * @var boolean
+	 * @ORM\Column(type="boolean", name="starttime_enabled", options={"comment"="If disabled, starttime is not used, e.g. to delay contest start"}, nullable=false)
+	 * @Groups({"details"})
+	 */
+	private $starttime_enabled;
+
+	/**
 	 * @var double
 	 * @ORM\Column(type="decimal", precision=32, scale=9, name="freezetime", options={"comment"="Time scoreboard is frozen", "unsigned"=true}, nullable=true)
 	 * @Groups({"details", "public"})
@@ -305,6 +312,30 @@ class Contest
 	public function getStarttime()
 	{
 		return $this->starttime;
+	}
+
+        /**
+	 * Set starttime_enabled
+	 *
+	 * @param boolean $starttime_enabled
+	 *
+	 * @return Contest
+	 */
+	public function setStarttimeEnabled($starttime_enabled)
+	{
+		$this->starttime_enabled = $starttime_enabled;
+
+		return $this;
+	}
+
+	/**
+	 * Get starttime_enabled
+	 *
+	 * @return boolean
+	 */
+	public function getStarttimeEnabled()
+	{
+		return $this->starttime_enabled;
 	}
 
 	/**
