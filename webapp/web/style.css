@@ -230,6 +230,9 @@ legend {
 	border-bottom: 2px solid black;
 	white-space: nowrap;
 }
+.scoreheader th {
+	text-align: center;
+}
 
 .problempoints {
 	font-size: smaller;
