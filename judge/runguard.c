@@ -152,7 +152,7 @@ rlim_t filesize;
 rlim_t nproc;
 size_t streamsize;
 
-pid_t child_pid;
+pid_t child_pid = -1;
 
 static volatile sig_atomic_t received_SIGCHLD = 0;
 static volatile sig_atomic_t received_signal = -1;
@@ -226,6 +226,15 @@ void error(int errnum, const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
+	sigset_t sigs;
+
+	/*
+	 * Make sure the signal handler for these (terminate()) does not
+	 * interfere, we are exiting now anyway.
+	 */
+	sigaddset(&sigs, SIGALRM);
+	sigaddset(&sigs, SIGTERM);
+	sigprocmask(SIG_BLOCK, &sigs, NULL);
 
 	fprintf(stderr,"%s",progname);
 
@@ -253,6 +262,24 @@ void error(int errnum, const char *format, ...)
 	va_end(ap);
 
 	write_meta("internal-error","%s: %d - %s","runguard error", errnum, format);
+
+	/* Make sure that all children are killed before terminating */
+	if ( child_pid > 0) {
+		verbose("sending SIGKILL");
+		if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
+			fprintf(stderr,"unable to send SIGKILL to children while terminating "
+					"due to previous error: %s\n", strerror(errno));
+			/*
+			 * continue, there is not much we can do here.
+			 * In the worst case, this will trigger an error
+			 * in testcase_run.sh, as the runuser may still be
+			 * running processes
+			 */
+		}
+
+		/* Wait a while to make sure the process is killed by now. */
+		nanosleep(&killdelay,NULL);
+	}
 
 	exit(exit_failure);
 }
