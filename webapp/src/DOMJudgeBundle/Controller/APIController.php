@@ -181,6 +181,13 @@ class APIController extends FOSRestController {
 	}
 
 	/**
+	 * @Get("/v4/contests/{externalid}/state")
+	 */
+	public function getContestStateV4(Contest $contest) {
+		return $this->getContestState($contest);
+	}
+
+	/**
 	 * @Get("/contests/{externalid}/event-feed")
 	 */
 	public function getEventFeed(Request $request, Contest $contest) {
