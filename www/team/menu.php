@@ -38,9 +38,9 @@ $started = checkrole('jury') || $fdata['started'];
       </div>
 
 <?php if ($started): ?>
-      <div id="submitbut"><a class="nav-link justify-content-center" href="submit.php"><button type="button" class="btn btn-success"><span class="octicon octicon-cloud-upload"></span> Submit</button></a></div>
+      <div id="submitbut"><a class="nav-link justify-content-center" href="submit.php"><button type="button" class="btn btn-success btn-sm"><span class="octicon octicon-cloud-upload"></span> Submit</button></a></div>
 <?php else: ?>
-      <div id="submitbut"><a class="nav-link justify-content-center"><button type="button" class="btn btn-success disabled"><span class="octicon octicon-cloud-upload"></span> Submit</button></a></div>
+      <div id="submitbut"><a class="nav-link justify-content-center"><button type="button" class="btn btn-success btn-sm disabled"><span class="octicon octicon-cloud-upload"></span> Submit</button></a></div>
 <?php endif; ?>
 
 <?php putClock(); ?>
