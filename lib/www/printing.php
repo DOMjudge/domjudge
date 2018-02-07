@@ -22,10 +22,10 @@ function put_print_form()
 	$langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions FROM language
 	                 WHERE allow_submit = 1 ORDER BY name');
 	$langlist = array();
+	$langlist[''] = 'plain text';
 	foreach($langs as $langid => $langdata) {
 		$langlist[$langid] = $langdata['name'];
 	}
-	$langlist[''] = 'plain text';
 ?>
 
 	<script type="text/javascript">
