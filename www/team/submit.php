@@ -70,7 +70,7 @@ $entry_point = dbconfig_get('require_entry_point', FALSE);
 <?php endif; ?>
   <div class="form-group">
     <label for="probid">Problem:</label>
-    <select class="custom-select" name="probid" id="probid">
+    <select class="custom-select" name="probid" id="probid" required>
 <?php
     foreach($probs as $probid => $probname) {
 	print '      <option value="' .specialchars($probid). '">' . specialchars($probname) . "</option>\n";
@@ -80,7 +80,7 @@ $entry_point = dbconfig_get('require_entry_point', FALSE);
   </div>
   <div class="form-group">
     <label for="langid">Language:</label>
-    <select class="custom-select" name="langid" id="langid">
+    <select class="custom-select" name="langid" id="langid" required>
 <?php
     foreach($langs as $langid => $langname) {
 	print '      <option value="' .specialchars($langid). '">' . specialchars($langname) . "</option>\n";
