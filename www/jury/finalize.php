@@ -6,10 +6,10 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-$id = (int)@$_REQUEST['id'];
-
 require('init.php');
 $title = "Finalize contest";
+
+$id = getRequestID(TRUE);
 
 require(LIBWWWDIR . '/header.php');
 
@@ -75,7 +75,7 @@ echo "<table>\n";
 echo "<tr><td>Contest ID:</td><td>";
 echo addHidden('id', $id) . 'c' . $id . "</td></tr>\n";
 echo "<tr><td>Contest name:</td><td>";
-echo specialchars($row['contestname']) . "</td></tr>\n";
+echo specialchars($row['name']) . "</td></tr>\n";
 
 echo "<tr><td>Started:</td><td>";
 echo printtime($row['starttime']) .
@@ -85,7 +85,7 @@ echo "<tr><td><label for=\"b\">B:</label></td>" .
      "<td>" . addInput('b', (int)@$row['b'], 4, 10) .
      "</td></tr>\n";
 echo "<tr><td><label for=\"finalizecomment\">Comment:</label></td>" .
-     "<td>" . addTextArea('finalizecomment', (empty($row['finalizecomment'])?'Finalized by: ':$row['finalizecomment'])) .
+     "<td>" . addTextArea('finalizecomment', (empty($row['finalizecomment'])?'Finalized by: '.$userdata['name']:$row['finalizecomment'])) .
      "</td></tr>\n";
 
 echo "</table>\n\n";
