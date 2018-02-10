@@ -96,7 +96,7 @@ sleep 5s && cat /var/log/nginx/domjudge.log
 
 
 # submit test programs
-cd /${DIR}/tests
+cd ${DIR}/tests
 make check-syntax check test-stress
 
 # wait for and check results
