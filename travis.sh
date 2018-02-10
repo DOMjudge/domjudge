@@ -93,6 +93,7 @@ composer -n require justinrainbow/json-schema
 PATH=${PATH}:${HOME}/vendor/bin
 git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
 CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
+sed -i "/^#URL_EXTRA/a URL_EXTRA='?strict=1'" "$CHECK_API"
 
 # start eventdaemon
 cd /opt/domjudge/domserver/
