@@ -91,7 +91,7 @@ CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 
 # start eventdaemon
 cd /opt/domjudge/domserver/
-bin/eventdaemon &
+#bin/eventdaemon &
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
