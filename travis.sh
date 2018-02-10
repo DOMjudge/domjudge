@@ -82,6 +82,17 @@ sudo bin/create_cgroups
 cd ${DIR}/misc-tools
 sudo ./dj_make_chroot -a amd64
 
+# download domjudge-scripts for API check
+cd $HOME
+composer -n require justinrainbow/json-schema
+PATH=${PATH}:${HOME}/vendor/bin
+git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
+CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
+
+# start eventdaemon
+cd /opt/domjudge/domserver/
+bin/eventdaemon &
+
 # start judgedaemon
 cd /opt/domjudge/judgehost/
 bin/judgedaemon -n 0 &
@@ -139,3 +150,6 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 	cat /chroot/domjudge/etc/apt/sources.list
 	exit -1;
 fi
+
+# check the Contest API, non-failing for now
+$CHECK_API http://admin:admin@localhost/domjudge/api/contests/2 || true
