@@ -452,9 +452,9 @@ function appendAnswer() {
 <?php if (IS_JURY) {
 	echo "<select name=\"sendto\" class=\"custom-select\" id=\"sendto\">\n";
 	foreach($sendto_options as $value => $desc) {
-		echo "<option value=\"" . specialchars($value) .
+		echo "<option value=\"" . specialchars($value) . "\"" .
 			(($value === 'domjudge-must-select') ? ' selected': '') .
-       			"\">" . specialchars($desc) . "</option>\n";
+			">" . specialchars($desc) . "</option>\n";
 	}
 	echo "</select>\n";
 } else {
