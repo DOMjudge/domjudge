@@ -63,7 +63,7 @@ $entry_point = dbconfig_get('require_entry_point', FALSE);
   </div>-->
 <?php if ($entry_point): ?>
   <div class="form-group">
-    <label for="entry_point">Main file/class:</label>
+    <label for="entry_point" id="entry_point_text">Main file/class:</label>
     <input type="text" class="form-control" name="entry_point" id="entry_point" aria-describedby="entrypointhelp" placeholder="main.c">
     <small id="entrypointhelp" class="form-text text-muted">The entry point for your code.</small>
   </div>

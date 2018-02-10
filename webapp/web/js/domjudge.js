@@ -394,9 +394,10 @@ function maybeShowEntryPoint(langid)
 	'use strict';
 	var entry_point = document.getElementById('entry_point');
 	var entry_point_text = document.getElementById('entry_point_text');
+	var entry_point_help = document.getElementById('entrypointhelp');
 	var visible = langid == 'java' || langid == 'kt' || langid == 'py2' || langid == 'py3';
 	var display = visible ? 'inline' : 'none';
-	entry_point.style.display = entry_point_text.style.display = display;
+	entry_point.style.display = entry_point_text.style.display = entry_point_help.style.display = display;
 	if ( visible ) {
 		var filename = langid == 'py2' || langid == 'py3';
 		if ( filename ) {
@@ -428,7 +429,8 @@ function initFileUploads(maxfiles)
 
 	var entry_point_element = document.getElementById('entry_point');
 	var entry_point_text_element = document.getElementById('entry_point_text');
-	entry_point_element.style.display = entry_point_text_element.style.display = 'none';
+	var entry_point_help_element = document.getElementById('entrypointhelp');
+	entry_point_element.style.display = entry_point_text_element.style.display = entry_point_help_element.style.display = 'none';
 }
 
 function collapse(x)
