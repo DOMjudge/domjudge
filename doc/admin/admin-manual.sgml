@@ -270,7 +270,7 @@ On the domserver host:
        it to your needs, reload web server:<newline>
        <tt>
        sudo ln -s &lt;INSTALL_PATH&gt;/domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
-       sudo a2endmod rewrite &&
+       sudo a2enmod rewrite &&
        sudo a2enconf domjudge &&
        sudo apache2ctl graceful
        </tt>
