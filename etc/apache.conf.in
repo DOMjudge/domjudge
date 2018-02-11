@@ -49,33 +49,20 @@ Alias /domjudge @domserver_webappdir@/web
 # This section applies to both options above.
 
 <Directory @domserver_webappdir@/web>
-<IfModule !mod_authz_core.c>
-# For Apache 2.2:
-Order allow,deny
-Allow from all
-</IfModule>
-<IfModule mod_authz_core.c>
-# For Apache 2.4:
 Require all granted
 </IfModule>
 
-<IfModule mod_rewrite.c>
-    Options -MultiViews
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^(.*)$ app.php [QSA,L]
-    # Uncomment to run symfony in debug mode
-    #RewriteRule ^(.*)$ app_dev.php [QSA,L]
-</IfModule>
-
-# Disable VCS metadata access, if present
-<IfModule mod_rewrite.c>
+Options -MultiViews
 RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ app.php [QSA,L]
+# Uncomment to run symfony in debug mode
+#RewriteRule ^(.*)$ app_dev.php [QSA,L]
+
 RewriteRule .svn/ - [F]
 RewriteRule .git/ - [F]
 RewriteRule .gitignore$ - [F]
 RewriteRule Makefile$ - [F]
-</IfModule>
 
 # If you want to allow large file uploads for testcases, you must
 # ensure that the following PHP settings are all set to high enough
@@ -95,9 +82,7 @@ RewriteRule Makefile$ - [F]
 </Directory>
 
 <Directory @domserver_webappdir@/web/bundles>
-    <IfModule mod_rewrite.c>
-        RewriteEngine Off
-    </IfModule>
+    RewriteEngine Off
 </Directory>
 
 # vim: syntax=apachestyle

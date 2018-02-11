@@ -146,13 +146,12 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with support for PHP &gt;= 7.0 and the mysqli,
-       GD, curl and json extensions for PHP. PHP needs to be running as an
-       Apache module (the most common configuration); a (fast)CGI setup
-       is not currently supported. We also recommend the posix extension
-       for extra debugging information. A configuration file for the
-       Nginx webserver is also included, and may be used instead of
-       Apache. However, this setup is less well tested and documented.
+<item> Apache web server with mod_rewrite and support for PHP &gt;= 7.0
+       and the mysqli, GD, curl and json extensions for PHP. We also
+       recommend the posix extension for extra debugging information.
+       A configuration file for the Nginx webserver is also included,
+       and may be used instead of Apache. However, this setup is less
+       well tested and documented.
 
 <item> MySQL or MariaDB &gt;= 5.5.3 database and client software.
 
@@ -271,6 +270,7 @@ On the domserver host:
        it to your needs, reload web server:<newline>
        <tt>
        sudo ln -s &lt;INSTALL_PATH&gt;/domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
+       sudo a2endmod rewrite &&
        sudo a2enconf domjudge &&
        sudo apache2ctl graceful
        </tt>
@@ -599,6 +599,7 @@ virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
 <verb>
 ln -s etc/apache.conf /etc/apache2/conf-available/domjudge.conf
+a2enmod rewrite
 a2enconf domjudge
 service apache2 reload
 </verb>
