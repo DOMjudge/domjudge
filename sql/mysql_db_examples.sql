@@ -7,6 +7,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 
 --
+-- Dumping data for table `clarification`
+--
+
+INSERT INTO `clarification` (`clarid`, `externalid`, `cid`, `respid`, `submittime`, `sender`, `recipient`, `jury_member`, `probid`, `category`, `body`, `answered`) VALUES
+(1, NULL, 2, NULL, '1518385638.901348000', 2, NULL, 'admin', 1, NULL, 'Can you tell me how to solve this problem?', 1),
+(2, NULL, 2, 1, '1518385677.689197000', NULL, 2, 'admin', 1, NULL, '> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.', 1);
+
+--
 -- Dumping data for table `contest`
 --
 
