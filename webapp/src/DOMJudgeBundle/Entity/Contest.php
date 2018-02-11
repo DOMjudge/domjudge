@@ -87,6 +87,13 @@ class Contest
 
 	/**
 	 * @var double
+	 * @ORM\Column(type="decimal", precision=32, scale=9, name="finalizetime", options={"comment"="Time when contest was finalized, null if not yet", "unsigned"=true}, nullable=true)
+	 * @Groups({"details", "public"})
+	 */
+	private $finalizetime;
+
+	/**
+	 * @var double
 	 * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime", options={"comment"="Time contest becomes invisible in team/public views", "unsigned"=true}, nullable=true)
 	 * @Groups({"details", "public"})
 	 */
@@ -366,6 +373,28 @@ class Contest
 	public function getUnfreezetime()
 	{
 		return $this->unfreezetime;
+	}
+
+	/**
+	 * Get finalizetime
+	 *
+	 * @return double
+	 */
+	public function getFinalizetime()
+	{
+		return $this->finalizetime;
+	}
+
+	/**
+	 * Set finalizetime
+	 *
+	 * @param string $finalizetimeString
+	 *
+	 * @return Contest
+	 */
+	public function setFinalizetime($finalizetimeString)
+	{
+		return $this->finalizetime = $this->getAbsoluteTime($finalizetimeString);
 	}
 
 	/**
