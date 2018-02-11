@@ -1108,7 +1108,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 			$url = $endpoint['url'].'/'.$id;
 		}
 		$json = API_request($url, 'GET', '', false);
-		if ( empty($json) ) {
+		if ( empty($json) || $json==='null' ) {
 			logmsg(LOG_WARNING,"eventlog: got no JSON data from '$url'");
 			// If we didn't get data from the API, then that is
 			// probably because this particular data is not visible,
