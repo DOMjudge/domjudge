@@ -1098,9 +1098,9 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		return;
 	}
 
-	// Generate JSON content if not set, always use "null" for deletes.
+	// Generate JSON content if not set, for deletes this is only the ID.
 	if ( $action === 'delete' ) {
-		$json = 'null';
+		$json = "{\"id\":\"$id\"}";
 	} elseif ( $json === null ) {
 		if ( in_array($type, array('contests','state')) ) {
 			$url = $endpoint['url'];
