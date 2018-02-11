@@ -2,6 +2,16 @@
 
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
+# Special sleep function since Travis CI seems to screw with 'sleep'.
+function mysleep()
+{
+	date
+	( set +x ; while true ; do true ; done ) &
+	sleep $1
+	kill $!
+	date
+}
+
 DIR=$(pwd)
 lsb_release -a
 
@@ -92,13 +102,15 @@ CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 # start eventdaemon
 cd /opt/domjudge/domserver/
 #bin/eventdaemon &
+#mysleep 5
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
 bin/judgedaemon -n 0 &
+mysleep 5
 
 # write out current log to learn why it might be broken
-sleep 5s && cat /var/log/nginx/domjudge.log
+cat /var/log/nginx/domjudge.log
 
 
 # submit test programs
