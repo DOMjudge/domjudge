@@ -55,10 +55,10 @@ INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('example-judgehost1', 0);
 -- Dumping data for table `problem`
 --
 
-INSERT INTO `problem` (`probid`, `externalid`, `name`, `timelimit`, `special_run`, `special_compare`) VALUES
-(1, 'hello', 'Hello World', 5, NULL, NULL),
+INSERT INTO `problem` (`probid`, `externalid`, `name`, `timelimit`, `special_run`, `special_compare`, `special_compare_args`) VALUES
+(1, 'hello', 'Hello World', 5, NULL, NULL, NULL),
 (2, 'fltcmp', 'Float special compare test', 5, NULL, 'compare', 'float_tolerance 1E-6'),
-(3, 'boolfind', 'Boolean switch search', 5, 'boolfind_run', 'boolfind_cmp');
+(3, 'boolfind', 'Boolean switch search', 5, 'boolfind_run', 'boolfind_cmp', NULL);
 
 --
 -- Dumping data for table `team_affiliation`
