@@ -64,8 +64,8 @@ INSERT INTO `problem` (`probid`, `externalid`, `name`, `timelimit`, `special_run
 -- Dumping data for table `team_affiliation`
 --
 
-INSERT INTO `team_affiliation` (`shortname`, `name`, `country`, `comments`) VALUES
-('UU', 'Utrecht University', 'NLD', NULL);
+INSERT INTO `team_affiliation` (`externalid`, `shortname`, `name`, `country`, `comments`) VALUES
+('utrecht', 'UU', 'Utrecht University', 'NLD', NULL);
 
 --
 -- Dumping data for table `team_category`
@@ -80,8 +80,8 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 -- Dumping data for table `team`
 --
 
-INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES
-(2, 'Example teamname', 3, 1, NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`teamid`, `externalid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES
+(2, 'exteam', 'Example teamname', 3, 1, NULL, NULL, NULL, NULL);
 
 --
 -- Dumping data for table `testcase`
