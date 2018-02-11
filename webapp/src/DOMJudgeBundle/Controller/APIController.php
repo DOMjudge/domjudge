@@ -168,8 +168,18 @@ class APIController extends FOSRestController {
 			$result['ended']     = $time_or_null($contest->getEndtime(), $result['started']!==null);
 			$result['frozen']    = $time_or_null($contest->getFreezetime(), $result['started']!==null);
 			$result['thawed']    = $time_or_null($contest->getUnfreezetime(), $result['frozen']!==null);
-			// TODO: use real finalized time when we have it (e.g. in ICPC-live branch)
-			$result['finalized'] = $time_or_null($contest->getUnfreezetime(), ($result['ended']!==null && $result['thawed']!==null));
+			if ( $isAdmin ) {
+				$result['finalized'] = $time_or_null($contest->getFinalizetime(), $result['ended']!==null);
+			} else {
+				if ( $result['frozen'] && !$result['thawed'] ) {
+					$result['finalized'] = null;
+				} else {
+					$result['finalized'] = $time_or_null(max($contest->getFinalizetime(),
+					                                         $contest->getUnfreezetime()),
+					                                     $result['ended']!==null &&
+					                                     $contest->getFinalizetime()!==null);
+				}
+			}
 
 			return $result;
 		} else {
