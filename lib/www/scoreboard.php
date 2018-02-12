@@ -518,7 +518,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 				echo '<td class="score_cell">';
 				// Only add data if there's anything interesting to display
 				if ( $number_of_subs != '0' ) {
-					$tries = $number_of_subs . ($subs_string == "1" ? " try" : " tries");
+					$tries = $number_of_subs . ($number_of_subs == "1" ? " try" : " tries");
 					$div = '<div class="' . $score_css_class . '">' . $time
 						. '<span>' . $tries . '</span>' . '</div>';
 					$url = 'team.php?id=' . urlencode($team) . '&amp;restrict=probid:' . urlencode($prob);
