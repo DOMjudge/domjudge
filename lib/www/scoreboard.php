@@ -478,43 +478,53 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		if (IS_JURY || dbconfig_get('show_teams_submissions', 1)) {
 			foreach ( array_keys($probs) as $prob ) {
 
-				echo '<td class=';
 				// CSS class for correct/incorrect/neutral results
-				if( $matrix[$team][$prob]['is_correct'] ) {
-					echo '"score_correct' .
-					     ( first_solved($matrix[$team][$prob]['time'],
-					     @$summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]) ?
-					     ' score_first' : '') . '"';
+				$score_css_class = 'score_neutral';
+				if ( $matrix[$team][$prob]['is_correct'] ) {
+					$score_css_class = 'score_correct';
+					if ( first_solved($matrix[$team][$prob]['time'],
+						@$summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]) ) {
+						$score_css_class .= ' score_first';
+					}
 				} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
-					echo '"score_pending"';
+					$score_css_class = 'score_pending';
 				} elseif ( $matrix[$team][$prob]['num_submissions'] > 0 ) {
-					echo '"score_incorrect"';
-				} else {
-					echo '"score_neutral"';
+					$score_css_class = 'score_incorrect';
 				}
+
 				// number of submissions for this problem
-				$str = $matrix[$team][$prob]['num_submissions'];
+				$number_of_subs = $matrix[$team][$prob]['num_submissions'];
 				// add pending submissions
 				if( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
-					$str .= ' + ' . $matrix[$team][$prob]['num_pending'];
+					$number_of_subs .= ' + ' . $matrix[$team][$prob]['num_pending'];
 				}
+
+
 				// If correct, print time scored. The format will vary
 				// depending on the scoreboard resolution setting.
+				$time = '&nbsp;';
 				if( $matrix[$team][$prob]['is_correct'] ) {
 					if ( dbconfig_get('score_in_seconds', 0) ) {
-						$str .= ' (' . printtimerel(scoretime($matrix[$team][$prob]['time']));
+						$time = printtimerel(scoretime($matrix[$team][$prob]['time']));
 						// Display penalty time.
 						if ($matrix[$team][$prob]['num_submissions'] > 1) {
-							$str .= ' + ' . printtimerel(calcPenaltyTime(TRUE, $matrix[$team][$prob]['num_submissions']));
+							$time .= ' + ' . printtimerel(calcPenaltyTime(TRUE, $matrix[$team][$prob]['num_submissions']));
 						}
-						$str .= ')';
 					} else {
-						$str .= '/' . scoretime($matrix[$team][$prob]['time']);
+						$time = scoretime($matrix[$team][$prob]['time']);
 					}
 				}
-				echo '>' . jurylink('team.php?id=' . urlencode($team) .
-				                    '&amp;restrict=probid:' . urlencode($prob),
-				                    $str) . '</td>';
+
+				echo '<td class="score_cell">';
+				// Only add data if there's anything interesting to display
+				if ( $number_of_subs != '0' ) {
+					$tries = $number_of_subs . ($subs_string == "1" ? " try" : " tries");
+					$div = '<div class="' . $score_css_class . '">' . $time
+						. '<span>' . $tries . '</span>' . '</div>';
+					$url = 'team.php?id=' . urlencode($team) . '&amp;restrict=probid:' . urlencode($prob);
+					echo jurylink($url, $div);
+				}
+				echo '</td>';
 			}
 		}
 		echo "</tr>\n";

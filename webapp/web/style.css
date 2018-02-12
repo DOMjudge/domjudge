@@ -194,12 +194,26 @@ legend {
 	vertical-align: middle;
 	text-align: center;
 }
+.scoreboard td div {
+	width: 3.5em;
+	font-size: 120%;
+	display: inline-block;
+}
+.scoreboard td div span {
+	font-weight: normal;
+	font-size: 70%;
+	display: block;
+}
 .scoreboard tr {
 	border-bottom: 1px solid black;
 	height: 42px;
 }
 .scoreboard td, .scoreboard th {
 	border-right: 1px solid silver;
+}
+.scoreboard td.score_cell {
+	min-width: 4.2em;
+	border-right: none;
 }
 .scoreboard a {
 	display: block;
