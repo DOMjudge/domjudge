@@ -77,6 +77,9 @@ if ( DEBUG & DEBUG_JUDGE ) {
 	putenv('DEBUG=1');
 }
 
+// Daemonize before setting up mysql connection.
+if ( isset($options['daemon']) ) daemonize(PIDFILE);
+
 setup_database_connection();
 
 $cids = getCurContests();
@@ -97,9 +100,6 @@ if ( $cid===NULL ) {
 }
 
 logmsg(LOG_NOTICE, "Eventdaemon started for cid=$cid [DOMjudge/".DOMJUDGE_VERSION."]");
-
-// If all startup is done, daemonize.
-if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
 $initial_events_loaded = FALSE;
 
