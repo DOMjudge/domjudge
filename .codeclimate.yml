@@ -50,7 +50,6 @@ exclude_paths:
 - "lib/vendor/"
 - "sql/files/defaultdata/float/config.h"
 - "webapp/web/js/ace/"
-- "webapp/web/js/flot/"
 - "webapp/web/js/jquery*.js"
 - "webapp/web/js/jscolor.js"
 - "webapp/web/js/js.cookie*.js"
