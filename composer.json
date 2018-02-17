@@ -23,7 +23,8 @@
 		"twig/twig": "2.3.*",
 		"friendsofsymfony/rest-bundle": "^2.2",
 		"jms/serializer-bundle": "^2.0",
-		"twbs/bootstrap": "^4.0.0"
+		"twbs/bootstrap": "^4.0.0",
+		"mbostock/d3": "^3.5"
 	},
 	"require-dev": {
 		"sensio/generator-bundle": "^3.0",
