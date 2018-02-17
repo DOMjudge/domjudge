@@ -50,7 +50,6 @@ Alias /domjudge @domserver_webappdir@/web
 
 <Directory @domserver_webappdir@/web>
 Require all granted
-</IfModule>
 
 Options -MultiViews
 RewriteEngine On
