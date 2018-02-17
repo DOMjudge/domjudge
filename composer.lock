@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "2e55bcb4c53c4d270bef4900b2d97084",
+    "content-hash": "0cc036f7e81f9710e24b8e38d5e9addd",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -1303,6 +1303,43 @@
             "notification-url": "https://packagist.org/downloads/",
             "description": "Bare-bones OpenID Connect client",
             "time": "2016-03-04T02:50:16+00:00"
+        },
+        {
+            "name": "mbostock/d3",
+            "version": "v3.5.17",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mbostock/d3.git",
+                "reference": "9cc9a875e636a1dcf36cc1e07bdf77e1ad6e2c74"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mbostock/d3/zipball/9cc9a875e636a1dcf36cc1e07bdf77e1ad6e2c74",
+                "reference": "9cc9a875e636a1dcf36cc1e07bdf77e1ad6e2c74",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Mike Bostock",
+                    "homepage": "http://bost.ocks.org/mike"
+                }
+            ],
+            "description": "A JavaScript visualization library for HTML and SVG.",
+            "homepage": "http://d3js.org/",
+            "keywords": [
+                "W3C",
+                "animation",
+                "canvas",
+                "dom",
+                "svg",
+                "visualization"
+            ],
+            "time": "2016-05-05T00:29:22+00:00"
         },
         {
             "name": "monolog/monolog",
