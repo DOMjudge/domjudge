@@ -155,6 +155,29 @@ class APIController extends FOSRestController {
 	}
 
 	/**
+	 * @Get("/contests/{externalid}/contest-yaml")
+	 */
+	public function getContestYaml(Contest $contest) {
+		$penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
+		$response = new StreamedResponse();
+		$response->setCallback(function () use ($contest, $penalty_time) {
+				echo "name:                     " . $contest->getName() . "\n";
+				echo "short-name:               " . $contest->getExternalid() . "\n";
+				echo "start-time:               " . Utils::absTime($contest->getStarttime(), TRUE) . "\n";
+				echo "duration:                 " . Utils::relTime($contest->getEndtime() - $contest->getStarttime(), TRUE) . "\n";
+				echo "scoreboard-freeze-length: " . Utils::relTime($contest->getEndtime() - $contest->getFreezetime(), TRUE) . "\n";
+				echo "penalty-time:             " . $penalty_time . "\n";
+		});
+		$response->headers->set('Content-Type', 'text-plain');
+		$response->headers->set('Content-Disposition', 'attachment; filename="contest.yaml"');
+		$response->headers->set('Content-Transfer-Encoding', 'binary');
+		$response->headers->set('Connection', 'Keep-Alive');
+		$response->headers->set('Accept-Ranges','bytes');
+
+		return $response;
+	}
+
+	/**
 	 * @Get("/event-feed")
 	 */
 	public function getEventFeed(Request $request) {
