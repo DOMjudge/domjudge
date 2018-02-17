@@ -914,7 +914,7 @@ class Contest
 	public function serializeForAPI($penalty_time, $strict = false)
 	{
 		$res = array(
-			'id'                         => (string)$this->getCid(),
+			'id'                         => (string)$this->getExternalId(),
 			'name'                       => $this->getName(),
 			'formal_name'                => $this->getName(),
 			'start_time'                 => Utils::absTime($this->getStarttime()),
