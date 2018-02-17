@@ -19,6 +19,7 @@ require('@domserver_etcdir@/domserver-static.php');
 require(ETCDIR . '/domserver-config.php');
 
 define('SCRIPT_ID', 'eventdaemon');
+define('PIDFILE', RUNDIR.'/eventdaemon.pid');
 define('LOGFILE', LOGDIR.'/eventdaemon.log');
 
 $verbose = LOG_INFO;
@@ -77,6 +78,8 @@ if ( DEBUG & DEBUG_JUDGE ) {
 	putenv('DEBUG=1');
 }
 
+initsignals();
+
 // Daemonize before setting up mysql connection.
 if ( isset($options['daemon']) ) daemonize(PIDFILE);
 
@@ -104,6 +107,13 @@ logmsg(LOG_NOTICE, "Eventdaemon started for cid=$cid [DOMjudge/".DOMJUDGE_VERSIO
 $initial_events_loaded = FALSE;
 
 while ( TRUE ) {
+	// Check whether we have received an exit signal
+	if ( function_exists('pcntl_signal_dispatch') ) pcntl_signal_dispatch();
+	if ( $exitsignalled ) {
+		logmsg(LOG_NOTICE, "Received signal, exiting.");
+		exit;
+	}
+
 	$contests = getCurContests(TRUE, NULL, FALSE);
 
 	if ( !array_key_exists($cid, $contests) ) {
