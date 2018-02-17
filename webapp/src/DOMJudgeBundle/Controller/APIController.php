@@ -55,7 +55,7 @@ class APIController extends FOSRestController {
 			$response = new Response('Missing "start_time" in request.', 400);
 		} else if ( $args['id'] != $contest->getExternalid() ) {
 			$response = new Response('Invalid "id" in request.', 400);
-		} else if ( $contest->getStarttime() != NULL && $contest->getStarttimeEnabled() && $contest->getStarttime() < $now + 30 ) {
+		} else if ( !isset($args['force']) && $contest->getStarttime() != NULL && $contest->getStarttimeEnabled() && $contest->getStarttime() < $now + 30 ) {
 			$response = new Response('Current contest already started or about to start.', 403);
 		} else if ( $args['start_time'] === NULL ) {
 			$em = $this->getDoctrine()->getManager();
@@ -70,7 +70,7 @@ class APIController extends FOSRestController {
 				$response = new Response('Invalid "start_time" in request.', 400);
 			} else {
 				$new_start_time = $date->getTimestamp();
-				if ( $new_start_time < $now + 30 ) {
+				if ( !isset($args['force']) && $new_start_time < $now + 30 ) {
 					$response = new Response('New start_time not far enough in the future.', 403);
 				} else {
 					$em->persist($contest);
