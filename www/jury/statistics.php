@@ -96,13 +96,15 @@ var data = <?= json_encode($res->gettable()); ?>;
 var contestlen = <?= $length; ?>;
 
 $(function () {
-	var answers = [{label : "correct", color : "#01DF01", bars : { fill: 1 } },
+	var answers = [
+		{label : "correct", color : "#01DF01", bars : { fill: 1 } },
 		{label : "wrong-answer", color : "red", bars : { fill: 0.6} },
 		{label : "timelimit", color : "orange", bars : { fill: 0.6} },
 		{label : "run-error", color : "#FF3399", bars : { fill: 0.6} },
 		{label : "compiler-error", color : "grey", bars : { fill: 0.6 }, },
 		{label : "no-output", color : "purple", bars : { fill: 0.6 } },
-		{label : "frozen", color : "blue", bars : { fill: 0.6 } }, ];
+		{label : "frozen", color : "blue", bars : { fill: 0.6 } },
+	];
 	var charts = [];
 	for(var i = 0; i < answers.length; i++) {
 		var cur = [];

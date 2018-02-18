@@ -67,7 +67,6 @@ Various JavaScript libraries/snippets are included under www/js/:
 - jscolor.js: copyright Jan Odvarko, licenced under the GNU LGPL.
 - tabber.js: copyright Patrick Fitzgerald, licenced under the MIT licence.
 - Ace editor: licenced under the BSD licence, see COPYING.BSD.
-- Flot: licenced under the MIT licence, see COPYING.MIT.
 - jQuery: licenced under the MIT licence, see COPYING.MIT.
 - jQuery TokenInput: dual licensed under GPL and MIT licences, see COPYING and COPYING.MIT.
 - JavaScript Cookie: licenced under the MIT licence, see COPYING.MIT.
