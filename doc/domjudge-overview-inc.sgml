@@ -121,9 +121,6 @@ to name them here too (with non-GPL licences listed where applicable):
        licence, see <tt>COPYING.BSD</tt>. It was downloaded from
        <url url="https://github.com/ajaxorg/ace-builds">,
        the <tt>src-min-noconflict</tt> version.
-<item> Flot JavaScript library by IOLA and Ole Laursen, licenced
-       under the MIT licence, see <tt>COPYING.MIT</tt>. It was
-       downloaded from <url url="http://www.flotcharts.org/">.
 <item> jQuery JavaScript library by the jQuery Foundation, licenced
        under the MIT licence, see <tt>COPYING.MIT</tt>. It was
        downloaded from <url url="http://jquery.com/">.
