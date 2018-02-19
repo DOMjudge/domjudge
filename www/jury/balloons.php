@@ -162,7 +162,7 @@ $freezecond = array();
 if ( !dbconfig_get('show_balloons_postfreeze',0)) {
 	foreach ($cdatas as $cdata) {
 		if ( isset($cdata['freezetime']) ) {
-			$freezecond[] = '(submittime <= "' . $cdata['freezetime'] . '" AND s.cid = ' . $cdata['cid'] . ')';
+			$freezecond[] = '(submittime < "' . $cdata['freezetime'] . '" AND s.cid = ' . $cdata['cid'] . ')';
 		} else {
 			$freezecond[] = '(s.cid = ' . $cdata['cid'] . ')';
 		}

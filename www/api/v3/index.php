@@ -19,9 +19,9 @@ function infreeze($cdata, $time)
 {
 
 	if ( ( ! empty($cdata['freezetime']) &&
-		difftime($time, $cdata['freezetime'])>0 ) &&
+		difftime($time, $cdata['freezetime'])>=0 ) &&
 		( empty($cdata['unfreezetime']) ||
-		difftime($time, $cdata['unfreezetime'])<=0 ) ) return TRUE;
+		difftime($time, $cdata['unfreezetime'])<0 ) ) return TRUE;
 	return FALSE;
 }
 
@@ -706,7 +706,7 @@ function submissions($args)
 	}
 
 	if ( $cid != 0 && infreeze($cdatas[$cid], now()) && !checkrole('jury') ) {
-		$query .= ' AND submittime <= %i';
+		$query .= ' AND submittime < %i';
 		$freezetime = $cdatas[$cid]['freezetime'];
 	} else {
 		$query .= ' AND TRUE %_';
