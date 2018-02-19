@@ -809,7 +809,7 @@ function submissions($args)
 	}
 
 	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid, entry_point
-	          FROM submission WHERE valid = 1 AND cid = %i';
+	          FROM submission WHERE valid = 1 AND cid = %i AND submittime < %i';
 
 	// Don't expose too-late submissions except if queried for with a
 	// specific ID. This doesn't cause a security risk and is a quick
