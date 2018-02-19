@@ -803,7 +803,7 @@ function submissions($args)
 	}
 
 	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid, entry_point
-	          FROM submission WHERE valid = 1 AND cid = %i';
+	          FROM submission WHERE valid = 1 AND cid = %i AND submittime < %i';
 
 	$hasLanguage = array_key_exists('language_id', $args);
 	$query .= ($hasLanguage ? ' AND langid = %s' : ' %_');
@@ -831,7 +831,9 @@ function submissions($args)
 
 	$query .= ' ORDER BY submitid';
 
-	$q = $DB->q($query, $cid, $languageId, $submitid, $freezetime, $teamid);
+	$q = $DB->q($query, $cid, $cdatas[$cid]['endtime'],
+	            $languageId, $submitid, $freezetime, $teamid);
+
 	$res = array();
 	while ( $row = $q->next() ) {
 		$extcid = safe_string(rest_extid('contests', $cid));
