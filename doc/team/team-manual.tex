@@ -1,6 +1,7 @@
 \input{team-manual-preamble}
 
 \usepackage[english]{babel}
+\usepackage{minted}
 
 % For inclusion of the correct date (last modified) and revision.
 % Use the \SVN command to get language dependent formatting of the
@@ -32,7 +33,7 @@
 Here follows a short summary of the system interface. This is meant as
 a quick introduction, to be able to start using the system. It is,
 however, strongly advised that at least one of your team's members
-reads all of this manual. There are specific details of this
+also reads the rest of this manual. There are specific details of this
 jury system that might become of importance when you run into
 problems. \textbf{BE WARNED!}
 
@@ -50,7 +51,7 @@ examples.
 \subsection*{Submitting solutions}
 
 You can submit solutions%
-\ifcmdsubmit{ with the command-line program \cmd{submit} or }
+\ifcmdsubmit{ with the command-line program \cmd{submit} or}
 from the web interface:
 \begin{description}[\breaklabel\setlabelstyle{\bfseries}]
 \ifcmdsubmit{
@@ -58,14 +59,19 @@ from the web interface:
 Use \cmd{submit <filename>}. If your filename is of the form
 \cmd{<problem>.<extension>} where \cmd{<problem>} is the
 label of the problem and \cmd{<extension>} is a standard extension for
-your language, then these will automatically be detected. For a
-complete reference of all options and examples, see \cmd{submit --help}.
+your language, then these will automatically be detected. It will also try to
+auto-detect the main class (for Java and Kotlin) or the main file (for Python 2
+and Python 3). You can override these auto-detections; for a complete reference
+of all options and examples, see \cmd{submit --help}.
 }
 \item[Web interface]
-From your team page, \url{\BASEURL team}, click the green Submit button
+From your team page, \url{\BASEURL team}, click the green \emph{Submit} button
 in the menu bar. Select the file(s) you want to submit.
 By default, the problem is selected from the base of the (first)
-filename and the language from the extension.
+filename and the language from the extension. Again, the web interface tries
+to auto-detect the main class (for Java and Kotlin) or the main file (for
+Python 2 and Python 3) from the file name. Double check that the guess is
+correct before submitting.
 \end{description}
 
 \subsection*{Viewing scores, submissions, etc.}
@@ -79,14 +85,14 @@ requests and replies is done through the web interface at
 \begin{figure}[p]
   \centering
   \fbox{\includegraphics[width=\textwidth]{team-overview}}
-  \caption{the team web interface overview page.}
+  \caption{The team web interface overview page.}
   \label{fig:team-overview}
 \end{figure}
 
 \begin{figure}[p]
   \centering
   \fbox{\includegraphics[width=\textwidth]{team-scoreboard}}
-  \caption{the scoreboard webpage.}
+  \caption{The scoreboard webpage.}
   \label{fig:team-scoreboard}
 \end{figure}
 
@@ -96,9 +102,7 @@ requests and replies is done through the web interface at
 
 \ifcmdsubmit{
 Submitting solutions can be done in two ways: with the command-line
-program \cmd{submit} or using the web interface. One of the
-interfaces might not be available, depending on the system
-configuration by the jury. A description of both methods follows.
+program \cmd{submit} or using the web interface.
 
 \subsection{Command-line: \cmd{submit}}
 
@@ -106,8 +110,14 @@ configuration by the jury. A description of both methods follows.
 
 The submit program takes the name (label) of the problem from
 \cmd{filename} and the programming language from the extension
-\cmd{ext}. This can be overruled with the options
-\cmd{-p problemname} and \cmd{-l~languageextension}.
+\cmd{ext}. For Java it uses the \cmd{filename} as main class;
+for Kotlin it capitalizes \cmd{filename} and appends \cmd{Kt}
+to compute the main class name. For Python 2 and 3, the first
+filename is used as main file.
+
+These decisions can be overruled with the options
+\cmd{-p problemname}, \cmd{-l~languageextension} and
+\cmd{-e~entry\_point}.
 See \cmd{submit --help} for a complete list of all options,
 extensions and some examples.  Use \cmd{submit~--help | more}
 when the help text does not fit on one screen.
@@ -139,7 +149,8 @@ Solutions can be submitted from the web interface at \url{\BASEURL team}.
 Click the green Submit button at the menu bar on every page.
 Click the file selection button and select one or
 multiple files for submission. \DOMjudge will try to determine the
-problem and language from the base and extension of the (first) filename.
+problem, language and main class (in case of Java and Kotlin) or main file
+(in case of Python 2 and 3) from the base and extension of the (first) filename.
 Otherwise, select the appropriate values.
 Filenames must start with an alphanumerical character and may contain only
 alphanumerical characters and \cmd{+.\_-}.
@@ -166,7 +177,7 @@ time. Each cell in a problem column lists the number of submissions,
 and if the problem was solved, the time of the first correct
 submission in minutes since contest start. This is included in your
 total time together with any penalty time incurred for previous
-incorrect submissions. Optionally the scoreboard can
+incorrect submissions. The scoreboard will
 be `frozen' some time before the end of the contest. The full scoreboard view
 will not be updated anymore, but your team row will. Your team's rank will
 be displayed as `?'. Finally, via the top menu you can also view the
@@ -185,7 +196,7 @@ The submission passed all tests: you solved this problem!
 \item[COMPILER-ERROR]
 There was an error when compiling your program. On the submission
 details page you can inspect the exact error. Note that when
-compilation takes more than \COMPILETIME\ seconds, it is aborted and
+compilation takes more than 60 seconds, it is aborted and
 this counts as a compilation error.
 \textit{Compilation errors do not incur penalty time.}
 
@@ -211,6 +222,9 @@ must comply exactly with the specifications of the jury.
 Bummer, you submitted after the contest ended! Your submission is
 stored but will not be processed anymore.
 \end{description}
+
+Note that the jury has prepared multiple test files for each problem. \DOMjudge
+will report back the first incorrect result as verdict.
 
 \section{Clarifications}
 
@@ -244,11 +258,12 @@ execution and testing on one of the jury computers.
 
 \subsection{Compilation}
 
-Your program will be compiled on a jury computer running Linux.
+Your program will be compiled on a jury computer running the same Ubuntu as
+your team machine.
 All submitted source files will be passed to the compiler which
-generates a single program to run; for languages where
-this is relevant, the first file specified will be considered the
-`main' source file.
+generates a single program to run. For Java and Kotlin the given
+main class will be checked; for Python 2 and Python 3 we do a
+syntax check using the \cmd{py\_compile} module.
 
 Use the provided scripts to compile and run your program locally with
 the same options as on the jury system.
@@ -277,7 +292,7 @@ submissions are subjected:
 
 \begin{description}[\setlabelphantom{number of processes}]
 \item[compile time]
-Compilation of your program may take no longer than \COMPILETIME\
+Compilation of your program may take no longer than 60
 seconds. After that, compilation will be aborted and the result will
 be a compile error. In practice this should never give rise to
 problems. Should this happen to a normal program, please inform the
@@ -285,20 +300,21 @@ jury right away.
 
 \item[source size]
 The total amount of source code in a single submission may not exceed
-\SOURCESIZE\ kilobytes, otherwise your submission will be rejected.
+128 kilobytes, otherwise your submission will be rejected.
 
 \item[memory]
-During execution of your program, there are \MEMLIMIT\ kilobytes of
-memory available. This is the total amount of memory (including
-program code, statically and dynamically defined variables, stack,
-Java VM, \dots)! If your program tries to use more memory, it will
-most likely abort, resulting in a run error.
+During execution of your program, there are 2048 megabytes of
+memory available (unless stated otherwise). This is the total
+amount of memory (including program code, statically and dynamically defined
+variables, stack, Java VM, \dots)! If your program tries to use
+more memory, it will most likely abort, resulting in a run
+error.
 
 \item[number of processes]
 You are not supposed to create multiple processes (threads). This is
 to no avail anyway, because your program has exactly 1 processor core fully
 at its disposal. To increase stability of the jury system, there is a
-maximum of \PROCLIMIT\ processes that can be run simultaneously
+maximum of 64 processes that can be run simultaneously
 (including processes that started your program).
 
 People who have never programmed with multiple processes (or have
@@ -306,18 +322,6 @@ never heard of ``threads'') do not have to worry: a normal program
 runs in one process.
 
 \end{description}
-
-\subsection{Java class naming}
-
-Compilation of Java sources is somewhat complicated by the class
-naming conventions used: there is no fixed entry point; any class can
-contain a method \texttt{main}. Furthermore, a class declared
-\texttt{public} must be located in an identically named file.
-
-DOMjudge works around this is by autodetecting the main class: the
-first class with a method
-``\verb!public static void main(String args[])!'' is used, see also
-the Java code example in appendix~\ref{codeexamples}.
 
 \newpage
 \appendix
@@ -347,22 +351,43 @@ Sample input and output for this problem:
 Note that the number 3 on the first line indicates that 3 testcases
 follow.
 
-A solution for this problem in C:
-\listinginput{1}{../examples/example.c}
+A solution for this problem in C:\\
+\begin{tabular}{|p{0.97\textwidth}|}
+\hline
+\inputminted{c}{../examples/example.c}\\
+\hline
+\end{tabular}
 
 Notice the last \cmd{return 0;} to prevent a \textsc{run-error}!
 
 \newpage
 
-A solution in C++:
-\listinginput{1}{../examples/example.cc}
+A solution in C++:\\
+\begin{tabular}{|p{0.97\textwidth}|}
+\hline
+\inputminted{cpp}{../examples/example.cc}\\
+\hline
+\end{tabular}
 
-A solution in Java:
-\listinginput{1}{../examples/example.java}
+A solution in Java:\\
+\begin{tabular}{|p{0.97\textwidth}|}
+\hline
+\inputminted{java}{../examples/example.java}\\
+\hline
+\end{tabular}
 
-\newpage
+A solution in Kotlin:\\
+\begin{tabular}{|p{0.97\textwidth}|}
+\hline
+\inputminted{kotlin}{../examples/example.kt}\\
+\hline
+\end{tabular}
 
-And finally a solution in Python:
-\listinginput{1}{../examples/example.py}
+And finally a solution in Python:\\
+\begin{tabular}{|p{0.97\textwidth}|}
+\hline
+\inputminted{python}{../examples/example.py}\\
+\hline
+\end{tabular}
 
 \end{document}
