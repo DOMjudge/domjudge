@@ -1,18 +1,13 @@
-import java.io.*;
+import java.util.*;
 
-class Main
-{
-	public static BufferedReader in;
-
-	public static void main(String[] args) throws IOException
-	{
-		in = new BufferedReader(new InputStreamReader(System.in));
-
-		int nTests = Integer.parseInt(in.readLine());
+class Main {
+	public static void main(String[] args) {
+		Scanner scanner = new Scanner(System.in);
+		int nTests = scanner.nextInt();
 
 		for (int i = 0; i < nTests; i++) {
-			String name = in.readLine();
-			System.out.println("Hello "+name+"!");
+			String name = scanner.next();
+			System.out.println("Hello " + name + "!");
 		}
 	}
 }
