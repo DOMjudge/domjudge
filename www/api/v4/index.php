@@ -1233,15 +1233,19 @@ function organizations($args)
 
 	$query .= ' ORDER BY name';
 
+	$show_flags = dbconfig_get('show_flags', TRUE);
+
 	// Run query and return result
 	$adatas = $DB->q($query, $country, $affilid);
-	return array_map(function($adata) use($args) {
+	return array_map(function($adata) use($args, $show_flags) {
 		$ret = array(
 			'id'        => safe_string(rest_extid('organizations', $adata['affilid'])),
 			'icpc_id'   => safe_string($adata['affilid']),
-			'name'      => $adata['name'],
-			'country'   => $adata['country'],
+			'name'      => $adata['name']
 		);
+		if ( $show_flags ) {
+			$ret['country'] = $adata['country'];
+		}
 		if ( !isset($args['strict']) ) {
 			$ret['shortname'] = $adata['shortname'];
 		}
