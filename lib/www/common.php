@@ -423,7 +423,7 @@ function putTeam($teamid) {
 		echo '<tr><td class="p-2">Affiliation:</td><td class="p-2">';
 		echo specialchars($team['affname']);
 		echo "</td></tr>\n";
-		if ( !empty($team['country']) ) {
+		if ( !empty($team['country']) && dbconfig_get('show_flags', TRUE) ) {
 			echo '<tr><td class="p-2">Country:</td><td class="p-2">';
 			if ( is_readable(WEBAPPDIR.'/web/'.$countryflag) ) {
 				echo '<img src="../' . $countryflag . '" alt="' .
