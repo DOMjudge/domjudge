@@ -211,7 +211,8 @@ was truncated and considered incorrect.
 \item[WRONG-ANSWER]
 The output of your program was incorrect. This can happen simply
 because your solution is not correct, but remember that your output
-must comply exactly with the specifications of the jury.
+must comply exactly with the specifications of the jury. See
+section~\ref{testing} below for more details.
 
 \item[TOO-LATE]
 Bummer, you submitted after the contest ended! Your submission is
@@ -234,7 +235,7 @@ reply to everyone if it is relevant for all.
 \section{How are submissions being judged?}\label{howjudged}
 
 The \DOMjudge jury system is fully automated. In principle no human
-interaction is necessary. The judging is done in the following way:
+interaction is necessary. Judging is done in the following way:
 
 \subsection{Submitting solutions}
 
@@ -265,7 +266,7 @@ The jury system defines \cmd{ONLINE\_JUDGE} and \cmd{DOMJUDGE}.
 These are defined as preprocessor symbols in compiled languages and
 as (environment) variables in scripted languages.
 
-\subsection{Testing}
+\subsection{Testing}\label{testing}
 
 After your program has compiled successfully it will be executed and
 its output compared to the output of the jury. Before comparing the
