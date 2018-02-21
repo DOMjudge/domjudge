@@ -171,4 +171,6 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 fi
 
 # check the Contest API
-$CHECK_API -n http://admin:admin@localhost/domjudge/api/contests/demo
+$CHECK_API -d -n http://admin:admin@localhost/domjudge/api/contests/demo || true
+
+cat /tmp/tmp.*/event-feed.json
