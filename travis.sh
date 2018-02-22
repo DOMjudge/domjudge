@@ -107,17 +107,12 @@ sed -i "/^#URL_EXTRA/a URL_EXTRA='?strict=1'" "$CHECK_API"
 
 # start eventdaemon
 cd /opt/domjudge/domserver/
-date
 bin/eventdaemon &
-date
 sleep 5
-date
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
-date
 bin/judgedaemon -n 0 &
-date
 mysleep 5
 
 # write out current log to learn why it might be broken
