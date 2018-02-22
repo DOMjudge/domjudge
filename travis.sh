@@ -170,7 +170,18 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 	exit -1;
 fi
 
+for ((i=0; i<3; i++)); do
+	( curl -k -s -N -n --max-time 10 http://admin:admin@ localhost/domjudge/api/contests/demo/event-feed || true ) | tail -n 10
+	( wget -O - -T 10 -t 1 http://admin:admin@localhost/domjudge/api/contests/demo/event-feed || true ) | tail -n 10
+done
+
 # check the Contest API
+( set +x ; while true ; do true ; done ) &
 $CHECK_API -d -n -t 30 http://admin:admin@localhost/domjudge/api/contests/demo || true
 
 cat /tmp/tmp.*/event-feed.json
+
+for ((i=0; i<3; i++)); do
+	( curl -k -s -N -n --max-time 10 http://admin:admin@ localhost/domjudge/api/contests/demo/event-feed || true ) | tail -n 10
+	( wget -O - -T 10 -t 1 http://admin:admin@localhost/domjudge/api/contests/demo/event-feed || true ) | tail -n 10
+done
