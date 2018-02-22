@@ -108,7 +108,7 @@ sed -i "/^#URL_EXTRA/a URL_EXTRA='?strict=1'" "$CHECK_API"
 # start eventdaemon
 cd /opt/domjudge/domserver/
 bin/eventdaemon &
-mysleep 5
+sleep 5
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
@@ -117,7 +117,6 @@ mysleep 5
 
 # write out current log to learn why it might be broken
 cat /var/log/nginx/domjudge.log
-
 
 # submit test programs
 cd ${DIR}/tests
@@ -170,5 +169,13 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 	exit -1;
 fi
 
+for ((i=1; i<=3; i++)); do
+	( curl -k -s -N -n --max-time $((10*i)) http://admin:admin@ localhost/domjudge/api/contests/demo/event-feed || true ) | tail -n 10
+	( wget -O - -T $((10*i)) -t 1 http://admin:admin@localhost/domjudge/api/contests/demo/event-feed || true ) | tail -n 10
+done
+
 # check the Contest API
-$CHECK_API -n http://admin:admin@localhost/domjudge/api/contests/demo
+( set +x ; while true ; do true ; done ) &
+$CHECK_API -d -n -t 130 http://admin:admin@localhost/domjudge/api/contests/demo || true
+
+cat /tmp/tmp.*/event-feed.json
