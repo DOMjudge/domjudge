@@ -108,12 +108,12 @@ sed -i "/^#URL_EXTRA/a URL_EXTRA='?strict=1'" "$CHECK_API"
 # start eventdaemon
 cd /opt/domjudge/domserver/
 bin/eventdaemon &
-mysleep 5
+sleep 5
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
 bin/judgedaemon -n 0 &
-mysleep 5
+sleep 5
 
 # write out current log to learn why it might be broken
 cat /var/log/nginx/domjudge.log
