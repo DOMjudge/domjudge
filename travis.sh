@@ -173,4 +173,4 @@ mysql domjudge -e 'SELECT max(eventid) FROM event'
 mysql domjudge -e 'SELECT * FROM event WHERE eventid=112\G'
 
 # check the Contest API
-$CHECK_API -n -t120 -a 'strict=1' http://admin:admin@localhost/domjudge/api/contests/demo
+$CHECK_API -n -a 'strict=1' http://admin:admin@localhost/domjudge/api/contests/demo
