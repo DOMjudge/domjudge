@@ -103,7 +103,6 @@ composer -n require justinrainbow/json-schema
 PATH=${PATH}:${HOME}/vendor/bin
 git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
 CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
-sed -i "/^#URL_EXTRA/a URL_EXTRA='?strict=1'" "$CHECK_API"
 
 # start eventdaemon
 cd /opt/domjudge/domserver/
@@ -173,7 +172,5 @@ fi
 mysql domjudge -e 'SELECT max(eventid) FROM event'
 mysql domjudge -e 'SELECT * FROM event WHERE eventid=112\G'
 
-df
-
 # check the Contest API
-$CHECK_API -n -t120 -d -c '-n --noproxy localhost' http://admin:admin@localhost/domjudge/api/contests/demo
+$CHECK_API -n -t120 -d -a 'strict=1' http://admin:admin@localhost/domjudge/api/contests/demo
