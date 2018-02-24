@@ -1213,7 +1213,7 @@ function organizations($args)
 
 	$query .= ' ORDER BY name';
 
-	$show_flags = dbconfig_get('show_flags', TRUE);
+	$show_flags = FALSE;
 
 	// Run query and return result
 	$adatas = $DB->q($query, $country, $affilid);
