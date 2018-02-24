@@ -1404,6 +1404,8 @@ function teams($args)
 
 	$query .= ($args['public'] ? ' AND visible = 1' : '');
 
+	$show_flags = dbconfig_get('show_flags', TRUE);
+
 	// Run query and return result
 	$tdatas = $DB->q($query, $category, $affiliation, $teamid);
 	return array_map(function($tdata) use ($args) {
@@ -1420,9 +1422,11 @@ function teams($args)
 		);
 		if ( !isset($args['strict']) ) {
 			$ret['members']     = $tdata['members'];
-			$ret['nationality'] = $tdata['nationality'];
 			$ret['affiliation'] = $tdata['affiliation'];
 			$ret['externalid']  = $tdata['externalid'];
+			if ( $show_flags ) {
+				$ret['nationality'] = $tdata['nationality'];
+			}
 		}
 		return $ret;
 	}, $tdatas);
