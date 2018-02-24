@@ -107,12 +107,12 @@ CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 # start eventdaemon
 cd /opt/domjudge/domserver/
 bin/eventdaemon &
-mysleep 5
+sleep 5
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
 bin/judgedaemon -n 0 &
-mysleep 5
+sleep 5
 
 # write out current log to learn why it might be broken
 cat /var/log/nginx/domjudge.log
@@ -173,4 +173,4 @@ mysql domjudge -e 'SELECT max(eventid) FROM event'
 mysql domjudge -e 'SELECT * FROM event WHERE eventid=112\G'
 
 # check the Contest API
-$CHECK_API -n -t120 -d -a 'strict=1' http://admin:admin@localhost/domjudge/api/contests/demo
+$CHECK_API -n -t120 -a 'strict=1' http://admin:admin@localhost/domjudge/api/contests/demo
