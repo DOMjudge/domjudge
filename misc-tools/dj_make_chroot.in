@@ -280,6 +280,10 @@ deb $DEBMIRROR $RELEASE           main restricted universe multiverse
 deb $DEBMIRROR $RELEASE-security  main restricted universe multiverse
 deb $DEBMIRROR $RELEASE-updates   main restricted universe multiverse
 #deb $DEBMIRROR $RELEASE-backports main restricted universe multiverse
+
+deb ${DEBMIRROR%/ubuntu}/apt     $RELEASE main
+deb ${DEBMIRROR%/ubuntu}/pycharm $RELEASE main
+
 EOF
 fi
 
