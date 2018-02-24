@@ -492,6 +492,10 @@ class APIController extends FOSRestController {
 			if ($request->query->has('strict')) {
 				$strict = $request->query->getBoolean('strict');
 			}
+			$stream = true;
+			if ($request->query->has('stream')) {
+				$stream = $request->query->getBoolean('stream');
+			}
 			$isAdmin = $this->isGranted('ROLE_ADMIN');
 			while (TRUE) {
 				$qb = $em->createQueryBuilder()
@@ -538,6 +542,7 @@ class APIController extends FOSRestController {
 				}
 
 				if ( count($events) == 0 ) {
+					if ( !$stream ) break;
 					// No new events, check if it's time for a keep alive.
 					$now = time();
 					if ( $lastUpdate + 60 < $now ) {
