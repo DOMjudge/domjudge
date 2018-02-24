@@ -43,7 +43,7 @@ if [ -z "$MAINCLASS" ]; then
 	echo "Error: Entry point is missing."
 	# FIXME: Bring back the code from master - why is this different here?
 	# The old code didn't do anything useful at all, because it didn't set MAINCLASS
-	exit -1
+	exit 1
 else
 	cat $TMPFILE
 	rm -f $TMPFILE
