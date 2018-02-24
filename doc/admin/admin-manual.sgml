@@ -147,7 +147,7 @@ The following software is required for running DOMjudge.
        executables.
 
 <item> Apache web server with mod_rewrite and support for PHP &gt;= 7.0
-       and the mysqli, GD, curl and json extensions for PHP. We also
+       and the mysqli, GD, curl, json and XML extensions for PHP. We also
        recommend the posix extension for extra debugging information.
        A configuration file for the Nginx webserver is also included,
        and may be used instead of Apache. However, this setup is less
@@ -355,7 +355,7 @@ GNU/Linux, or one of its derivate distributions like Ubuntu.
 <code>
 sudo apt install gcc g++ make zip unzip mysql-server \
 	apache2 php php-cli libapache2-mod-php php-zip \
-	php-gd php-curl php-mysql php-json php-mbstring \
+	php-gd php-curl php-mysql php-json php-xml php-mbstring \
 	acl bsdmainutils ntp phpmyadmin libcgroup-dev \
 	linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
@@ -371,7 +371,7 @@ The following command can be used on RedHat Enterprise Linux, and
 related distributions like CentOS and Fedora.
 <code>
 sudo yum install gcc gcc-c++ make zip unzip mariadb-server \
-	httpd php-gd php-cli php-mbstring php-mysql \
+	httpd php-gd php-cli php-mbstring php-mysql php-xml \
 	ntp linuxdoc-tools libcgroup-devel \
 	texlive-collection-latexrecommended texlive-wrapfig
 </code>
@@ -408,7 +408,7 @@ change the list as appropriate.
 For Debian:
 <code>
 sudo apt install make sudo debootstrap libcgroup-dev \
-	php-cli php-curl php-json php-zip procps \
+	php-cli php-curl php-json php-xml php-zip procps \
 	gcc g++ openjdk-8-jre-headless \
 	openjdk-8-jdk ghc fp-compiler
 </code>
@@ -416,7 +416,7 @@ sudo apt install make sudo debootstrap libcgroup-dev \
 For RedHat:
 <code>
 sudo yum install make sudo libcgroup-devel \
-	php-cli php-mbstring php-process procps-ng \
+	php-cli php-mbstring php-xml php-process procps-ng \
 	gcc gcc-c++ glibc-static libstdc++-static \
 	java-1.7.0-openjdk-headless java-1.7.0-openjdk-devel \
 	ghc-compiler fpc
