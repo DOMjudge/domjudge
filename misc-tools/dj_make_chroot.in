@@ -281,10 +281,14 @@ deb $DEBMIRROR $RELEASE-security  main restricted universe multiverse
 deb $DEBMIRROR $RELEASE-updates   main restricted universe multiverse
 #deb $DEBMIRROR $RELEASE-backports main restricted universe multiverse
 
+EOF
+if [ "$TRAVIS" != 'true' ]; then
+cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
 deb ${DEBMIRROR%/ubuntu}/apt     $RELEASE main
 deb ${DEBMIRROR%/ubuntu}/pycharm $RELEASE main
 
 EOF
+fi
 fi
 
 cat > "$CHROOTDIR/etc/apt/apt.conf" <<EOF
