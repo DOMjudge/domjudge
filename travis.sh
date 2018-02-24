@@ -170,5 +170,8 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 	exit -1;
 fi
 
+mysql domjudge -e 'SELECT max(eventid) FROM event'
+mysql domjudge -e 'SELECT * FROM event WHERE eventid=112\G'
+
 # check the Contest API
 $CHECK_API -n -t120 -d http://admin:admin@localhost/domjudge/api/contests/demo
