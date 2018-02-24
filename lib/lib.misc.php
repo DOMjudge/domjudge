@@ -1132,7 +1132,9 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		}
 
 		// Temporary fix for single/multi contest API:
-		$url = '/contests/' . rest_extid('contests', $cid) . $url;
+		if ( isset($cid) ) {
+			$url = '/contests/' . rest_extid('contests', $cid) . $url;
+		}
 
 		$json = API_request($url, 'GET', '', false);
 		if ( empty($json) || $json==='null' ) {
