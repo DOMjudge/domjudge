@@ -231,7 +231,7 @@ legend {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-.scoreboard .scoreaf { white-space: nowrap; border: 0; text-align: left; }
+.scoreboard .scoreaf { white-space: nowrap; border: 0; text-align: center; }
 .scoreboard .scoreaf img { vertical-align: middle; }
 .univ {
 	font-size: 80%;
