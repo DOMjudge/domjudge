@@ -171,4 +171,5 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 fi
 
 # check the Contest API
+unset http_proxy
 $CHECK_API -n http://admin:admin@localhost/domjudge/api/contests/demo
