@@ -209,8 +209,8 @@ AX_PATH(judgehost_logdir,       [$judgehost_root/log])
 AX_PATH(judgehost_rundir,       [$judgehost_root/run])
 AX_PATH(judgehost_tmpdir,       [$judgehost_root/tmp])
 AX_PATH(judgehost_judgedir,     [$judgehost_root/judgings])
-AX_PATH(judgehost_chrootdir,    [/chroot/domjudge])
-AX_PATH(judgehost_cgroupdir,    [/cgroup])
+AX_PATH(judgehost_chrootdir,    [/chroot/${PACKAGE_TARNAME}])
+AX_PATH(judgehost_cgroupdir,    [/sys/fs/cgroup])
 AX_WITH_COMMENT(7,[      ])
 
 # }}}
