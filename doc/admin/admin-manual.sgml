@@ -353,7 +353,7 @@ software on the DOMjudge server as mentioned above when using Debian
 GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
-sudo apt install gcc g++ make zip unzip mysql-server \
+sudo apt install gcc g++ make zip unzip mariadb-server \
 	apache2 php php-cli libapache2-mod-php php-zip \
 	php-gd php-curl php-mysql php-json php-xml php-mbstring \
 	acl bsdmainutils ntp phpmyadmin python-pygments \
@@ -363,9 +363,6 @@ sudo apt install gcc g++ make zip unzip mysql-server \
 </code>
 Note that PHP modules may need to be enabled depending on your distribution.
 E.g. on Ubuntu run <code>sudo phpenmod json</code> to enable the JSON module.
-
-
-For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
 
 The following command can be used on RedHat Enterprise Linux, and
 related distributions like CentOS and Fedora.
