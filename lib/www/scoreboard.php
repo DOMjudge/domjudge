@@ -719,7 +719,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 
 <table class="scorefilter">
 <tr>
-<td><a class="collapse" href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
+<td><a class="scorecollapse" href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
 <td><?= $filtertext ?></td>
 <td><div id="detailfilter">
 <?php
