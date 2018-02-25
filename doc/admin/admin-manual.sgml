@@ -371,7 +371,7 @@ related distributions like CentOS and Fedora.
 <code>
 sudo yum install gcc gcc-c++ make zip unzip mariadb-server \
 	httpd php-gd php-cli php-mbstring php-mysql php-xml \
-	ntp linuxdoc-tools libcgroup-devel \
+	python-pygments ntp linuxdoc-tools libcgroup-devel \
 	texlive-collection-latexrecommended texlive-wrapfig
 # To enable the command-line submit client, also add:
 sudo yum install libcurl-devel jsoncpp-devel file-devel
