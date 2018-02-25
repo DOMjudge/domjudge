@@ -32,11 +32,12 @@ $sdata = $DB->q('TUPLE SELECT submitid, cid, teamid, probid
                  FROM submission
                  WHERE submitid = %i', $id);
 
-calcScoreRow($sdata['cid'], $sdata['teamid'], $sdata['probid']);
-
-// KLUDGE: We can't log an "undelete", so we re-"create":
+// KLUDGE: We can't log an "undelete", so we re-"create".
+// FIXME: We should also delete/recreate any dependent judging(runs).
 eventlog('submission', $id, ($val ? 'create' : 'delete'), $cid);
 auditlog('submission', $id, 'marked ' . ($val?'valid':'invalid'));
+
+calcScoreRow($sdata['cid'], $sdata['teamid'], $sdata['probid']);
 
 /* redirect back. */
 header('Location: submission.php?id=' .

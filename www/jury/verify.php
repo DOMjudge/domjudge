@@ -14,6 +14,15 @@ if ( empty($id) ) error("No judging ID passed to mark as verified.");
 
 $jury_member = $username;
 
+$jdata = $DB->q('MAYBETUPLE SELECT j.result, s.submitid, s.cid, s.teamid, s.probid, s.langid
+                 FROM judging j
+                 LEFT JOIN submission s USING (submitid)
+                 WHERE judgingid = %i', $id);
+
+if ( !$jdata ) error("Judging '$id' not found.");
+
+$DB->q('START TRANSACTION');
+
 // Explicitly unset jury_member when unmarking verified: otherwise this
 // judging would be marked as "claimed".
 $cnt = $DB->q('RETURNAFFECTED UPDATE judging
@@ -22,23 +31,22 @@ $cnt = $DB->q('RETURNAFFECTED UPDATE judging
               $val, $jury_member, $comment, $id);
 auditlog('judging', $id, $val ? 'set verified' : 'set unverified');
 
+if ( $cnt==1 && dbconfig_get('verification_required', 0) ) {
+	// log to event table (case of no verification required is handled
+	// in the REST API function judging_runs_POST)
+	eventlog('judging', $id, 'update', $jdata['cid']);
+}
+
+$DB->q('COMMIT');
+
 if ( $cnt == 0 ) {
-	error("Judging '$id' not found or nothing changed.");
+	error("Judging was not modified.");
 } else if ( $cnt > 1 ) {
 	error("Validated more than one judging.");
 }
 
-$jdata = $DB->q('TUPLE SELECT j.result, s.submitid, s.cid, s.teamid, s.probid, s.langid
-                 FROM judging j
-                 LEFT JOIN submission s USING (submitid)
-                 WHERE judgingid = %i', $id);
-
 if ( dbconfig_get('verification_required', 0) ) {
 	calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
-
-	// log to event table (case of no verification required is handled
-	// in the REST API function judging_runs_POST)
-	eventlog('judging', $id, 'update', $jdata['cid']);
 
 	if ( $jdata['result'] == 'correct' ) {
 		$balloons_enabled = (bool)$DB->q("VALUE SELECT process_balloons FROM contest WHERE cid = %i", $jdata['cid']);

@@ -776,12 +776,11 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 		$DB->q('UPDATE submission SET expected_results=%s
 		        WHERE submitid=%i', json_encode($results), $id);
 	}
+	eventlog('submission', $id, 'create', $contest);
 	$DB->q('COMMIT');
 
 	// Recalculate scoreboard cache for pending submissions
 	calcScoreRow($contest, $teamid, $probid);
-
-	eventlog('submission', $id, 'create', $contest);
 
 	alert('submit', "submission $id: team $teamid, language $langid, problem $probid");
 
