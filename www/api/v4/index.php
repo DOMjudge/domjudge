@@ -316,7 +316,7 @@ function judgings($args)
 	          LEFT JOIN judging_run r USING (judgingid)
 	          WHERE j.cid = %i';
 
-	if ( !(checkrole('admin') || checkrole('judgehost')) ) {
+	if ( !(checkrole('jury') || checkrole('judgehost')) ) {
 		$query .= ' AND s.submittime < c.endtime';
 	}
 
@@ -326,7 +326,7 @@ function judgings($args)
 		$result = $args['result'];
 	} else {
 		$query .= ' %_';
-		if ( !(checkrole('admin') || checkrole('judgehost')) ) {
+		if ( !(checkrole('jury') || checkrole('judgehost')) ) {
 			$query .= ' AND result IS NOT NULL';
 		}
 	}
@@ -840,7 +840,7 @@ function submissions($args)
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
 			'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")),
 			);
-		if ( checkrole('admin') ) {
+		if ( checkrole('jury') ) {
 			$ret['entry_point'] = $row['entry_point'];
 		}
 		$res[] = $ret;

@@ -142,9 +142,9 @@ class APIController extends FOSRestController {
 		if ($request->query->has('strict')) {
 			$strict = $request->query->getBoolean('strict');
 		}
-		$isAdmin = $this->isGranted('ROLE_ADMIN');
-		if (($isAdmin && $contest->getEnabled())
-			|| (!$isAdmin && $contest->isActive())) {
+		$isJury = $this->isGranted('ROLE_JURY');
+		if (($isJury && $contest->getEnabled())
+			|| (!$isJury && $contest->isActive())) {
 			$penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
 			return $contest->serializeForAPI($penalty_time, $strict);
 		} else {
@@ -179,9 +179,9 @@ class APIController extends FOSRestController {
 	 * @Get("/contests/{externalid}/state")
 	 */
 	public function getContestState(Contest $contest) {
-		$isAdmin = $this->isGranted('ROLE_ADMIN');
-		if (($isAdmin && $contest->getEnabled())
-			|| (!$isAdmin && $contest->isActive())) {
+		$isJury = $this->isGranted('ROLE_JURY');
+		if (($isJury && $contest->getEnabled())
+			|| (!$isJury && $contest->isActive())) {
 			$time_or_null = function($time, $extra_cond = true) {
 				if ( !$extra_cond || $time===null || time()<$time ) return null;
 				return Utils::absTime($time);
@@ -191,7 +191,7 @@ class APIController extends FOSRestController {
 			$result['ended']     = $time_or_null($contest->getEndtime(), $result['started']!==null);
 			$result['frozen']    = $time_or_null($contest->getFreezetime(), $result['started']!==null);
 			$result['thawed']    = $time_or_null($contest->getUnfreezetime(), $result['frozen']!==null);
-			if ( $isAdmin ) {
+			if ( $isJury ) {
 				$result['finalized'] = $time_or_null($contest->getFinalizetime(), $result['ended']!==null);
 			} else {
 				if ( $result['frozen'] && !$result['thawed'] ) {
@@ -266,7 +266,7 @@ class APIController extends FOSRestController {
 			if ($request->query->has('stream')) {
 				$stream = $request->query->getBoolean('stream');
 			}
-			$isAdmin = $this->isGranted('ROLE_ADMIN');
+			$isJury = $this->isGranted('ROLE_JURY');
 			while (TRUE) {
 				$qb = $em->createQueryBuilder()
 					->from('DOMJudgeBundle:Event', 'e')
@@ -282,7 +282,7 @@ class APIController extends FOSRestController {
 						->andWhere('e.endpointtype IN (:types)')
 						->setParameter(':types', $typeFilter);
 				}
-				if ( !$isAdmin ) {
+				if ( !$isJury ) {
 					$qb = $qb
 						->andWhere('e.endpointtype NOT IN (:types)')
 						->setParameter(':types', ['judgements', 'runs']);
@@ -294,7 +294,7 @@ class APIController extends FOSRestController {
 				foreach ($events as $event) {
 					// FIXME: use the dj_* wrapper as in lib/lib.wrapper.php.
 					$data = json_decode(stream_get_contents($event['content']), TRUE);
-					if ( !$isAdmin && $event['endpointtype'] == 'submissions' ) {
+					if ( !$isJury && $event['endpointtype'] == 'submissions' ) {
 						unset($data['entry_point']);
 					}
 					$result = array(

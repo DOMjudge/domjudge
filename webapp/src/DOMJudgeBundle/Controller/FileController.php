@@ -20,7 +20,7 @@ class FileController extends Controller
 	/**
 	 * @Route("/api/contests/{externalid}/submissions/{sid}/files", name="submission_file")
 	 * @Route("/api/v4/contests/{externalid}/submissions/{sid}/files", name="submission_file_v4")
-	 * @Security("has_role('ROLE_ADMIN')")
+	 * @Security("has_role('ROLE_JURY')")
 	 */
 	public function submissionFiles(Contest $contest, Submission $submission)
 	{
