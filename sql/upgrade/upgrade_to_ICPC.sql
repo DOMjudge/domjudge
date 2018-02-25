@@ -54,6 +54,7 @@ UPDATE `configuration` SET `value` = '1'  WHERE `name` = 'show_pending';
 UPDATE `configuration` SET `value` = '0'  WHERE `name` = 'compile_penalty';
 UPDATE `configuration` SET `value` = '0'  WHERE `name` = 'lazy_eval_results';
 UPDATE `configuration` SET `value` = '{"memory-limit":99,"output-limit":99,"run-error":99,"timelimit":99,"wrong-answer":99,"no-output":99,"correct":1}' WHERE `name` = 'results_prio';
+UPDATE `configuration` SET `value` = '1 ' WHERE `name` = 'show_limits_on_team_page';
 
 
 --
