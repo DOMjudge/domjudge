@@ -520,13 +520,18 @@ function judgings_POST($args)
 		                           $submitid);
 	}
 	$is_editsubmit = isset($row['origsubmitid']);
-	$judge_name = '';
+	$jury_member = '';
 	if ( $is_editsubmit ) {
-		$judge_name = $DB->q('VALUE SELECT username FROM
+		$jury_members = $DB->q('SELECT username FROM
 			user
 			JOIN team USING (teamid)
 			JOIN submission USING (teamid)
 			WHERE submitid = %s', $submitid);
+		if ( $jury_members->count() != 1 ) {
+			$id_editsubmit = false; // Really is edit/submit but no single owner
+		} else {
+			$jury_member = $jury_members->next()['username'];
+		}
 	}
 
 	$DB->q('START TRANSACTION');
@@ -538,7 +543,7 @@ function judgings_POST($args)
 				  ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
 				  ($is_editsubmit ? ',%s' : '%_') .
 	              ')', $submitid, $row['cid'], now(), $host,
-	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge, $judge_name);
+	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge, $jury_member);
 
 	eventlog('judging', $jid, 'create', $row['cid']);
 
