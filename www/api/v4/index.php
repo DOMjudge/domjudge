@@ -319,7 +319,11 @@ function judgings($args)
 	          LEFT JOIN rejudging r ON s.rejudgingid = r.rejudgingid
 	          WHERE j.cid = %i';
 
-	if ( !(checkrole('jury') || checkrole('judgehost')) ) {
+	// Don't expose judgings of too-late submissions except if
+	// explicitly queried for with a specific ID. See comment in
+	// submissions endpoint.
+	if ( !(checkrole('jury') || checkrole('judgehost')) ||
+	     !isset($args['__primary_key']) ) {
 		$query .= ' AND s.submittime < c.endtime';
 	}
 
@@ -1134,11 +1138,21 @@ function runs($args)
 		$args['run_id'] = rest_intid('runs', $args['__primary_key'], $cid);
 	}
 
-	$query = 'TABLE SELECT runid, judgingid, runresult, rank, jr.endtime, cid, runtime
+	$query = 'TABLE SELECT jr.runid, jr.judgingid, jr.runresult,
+	                       jr.endtime, jr.runtime, j.cid, t.rank
 	          FROM judging_run jr
-	          LEFT JOIN testcase USING (testcaseid)
-	          LEFT JOIN judging USING (judgingid)
-	          WHERE cid = %i';
+	          LEFT JOIN testcase t USING (testcaseid)
+	          LEFT JOIN judging j USING (judgingid)
+	          LEFT JOIN submission s USING (submitid)
+	          LEFT JOIN contest c ON c.cid = j.cid
+	          WHERE j.cid = %i';
+
+	// Don't expose judging runs of too-late submissions except if
+	// explicitly queried for with a specific ID. See comment in
+	// submissions endpoint.
+	if ( !isset($args['__primary_key']) ) {
+		$query .= ' AND s.submittime < c.endtime';
+	}
 
 	$hasFirstId = array_key_exists('first_id', $args);
 	$query .= ($hasFirstId ? ' AND runid >= %i' : ' AND TRUE %_');
