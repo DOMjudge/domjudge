@@ -183,22 +183,22 @@ The following items are optional, but may be required to use certain
 functionality or are generally useful.
 <itemize>
 
-<item> <htmlurl name="phpMyAdmin" url="http://www.phpmyadmin.net/">,
+<item> <htmlurl name="phpMyAdmin" url="https://www.phpmyadmin.net/">,
        to be able to access the database in an emergency
        or for data import/export
 
 <item> An NTP daemon (for keeping the clocks between jury
        system and team workstations in sync)
 
-<item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">
-       and <htmlurl name="libJSONcpp" url="http://jsoncpp.sourceforge.net/">
+<item> <htmlurl name="libcurl" url="https://curl.haxx.se/libcurl/">
+       and <htmlurl name="libJSONcpp" url="https://github.com/open-source-parsers/jsoncpp">
        to use the command line submit client.
 
-<item> <htmlurl name="libmagic" url="http://www.darwinsys.com/file/">
+<item> <htmlurl name="libmagic" url="https://www.darwinsys.com/file/">
        (for command line submit client to detect binary file submissions)
 
 <item> <htmlurl name="PECL xdiff extension"
-        url="http://pecl.php.net/package/xdiff">
+        url="https://pecl.php.net/package/xdiff">
        (to reliably make diffs between submissions, DOMjudge will try
         alternative approaches if it is not available)
 
@@ -212,7 +212,7 @@ Software required for building DOMjudge:
 <item> gcc and g++ with standard libraries. Other compilers and
        libraries might also work: we have successfully compiled
        DOMjudge sources with <htmlurl name="Clang"
-       url="http://clang.llvm.org/"> from the LLVM project; the C
+       url="https://clang.llvm.org/"> from the LLVM project; the C
        library should support the POSIX.1-2008 specification.
 
 <item> GNU make
