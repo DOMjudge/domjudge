@@ -147,7 +147,7 @@ function printsize($size, $decimals = 1)
 	}
 
 	if ( $exact ) $decimals = 0;
-	return sprintf("%s&nbsp;%s", round($display, $decimals), $units[$i]);
+	return sprintf("%.${decimals}lf&nbsp;%s", round($display, $decimals), $units[$i]);
 }
 
 /**
