@@ -21,15 +21,16 @@ $team_mapping = [];
 foreach ($teams as $team) {
 	$team_mapping[$team['externalid']] = $team['name'];
 }
+$awarded = [];
 $ranked = [];
-$unranked = [];
-$group_winners = [];
+$honorable = [];
+$region_winners = [];
 
 foreach (tsv_results_get() as $row) {
 	$team = $team_mapping[$row[0]];
 
 	if ($row[6] !== '') {
-		$group_winners[] = [
+		$region_winners[] = [
 			'group' => $row[6],
 			'team' => $team,
 		];
@@ -44,13 +45,15 @@ foreach (tsv_results_get() as $row) {
 		'max_time' => $row[5],
 	];
 	if ($row['rank'] === '') {
-		$unranked[] = $row;
-	} else {
+		$honorable[] = $row;
+	} elseif ($row['award'] === 'Ranked') {
 		$ranked[] = $row;
+	} else {
+		$awarded[] = $row;
 	}
 }
 
-usort($group_winners, function($a, $b) {
+usort($region_winners, function ($a, $b) {
 	return $a['group'] <=> $b['group'];
 });
 
@@ -59,13 +62,19 @@ $matrix = $sdata['matrix'];
 $summary = $sdata['summary'];
 $first_to_solve = [];
 foreach ($probs as $probData) {
+	$first_to_solve[$probData['probid']] = [
+		'problem' => $probData['shortname'],
+		'problem_name' => $probData['name'],
+		'team' => null,
+		'time' => null,
+	];
 	foreach ($teams as $teamData) {
 		if (!in_array($teamData['categoryid'], $categs)) {
 			continue;
 		}
 		if ($matrix[$teamData['teamid']][$probData['probid']]['is_correct'] && first_solved($matrix[$teamData['teamid']][$probData['probid']]['time'],
 				@$summary['problems'][$probData['probid']]['best_time_sort'][$teamData['sortorder']])) {
-			$first_to_solve[] = [
+			$first_to_solve[$probData['probid']] = [
 				'problem' => $probData['shortname'],
 				'problem_name' => $probData['name'],
 				'team' => $teamData['name'],
@@ -168,11 +177,11 @@ usort($first_to_solve, function ($a, $b) {
 <main role="main" class="">
 	<h1>Results for <?= $cdata['name'] ?></h1>
 
-	<h2>Ranked teams</h2>
+	<h2>Awards</h2>
 	<table class="table">
 		<thead>
 		<tr>
-			<th scope="col">Rank</th>
+			<th scope="col">Place</th>
 			<th scope="col">Team</th>
 			<th scope="col">Award</th>
 			<th scope="col">Solved problems</th>
@@ -181,7 +190,7 @@ usort($first_to_solve, function ($a, $b) {
 		</tr>
 		</thead>
 		<tbody>
-		<?php foreach ($ranked as $row): ?>
+		<?php foreach ($awarded as $row): ?>
 			<tr>
 				<th scope="row"><?= $row['rank'] ?></th>
 				<th scope="row"><?= $row['team'] ?></th>
@@ -194,22 +203,22 @@ usort($first_to_solve, function ($a, $b) {
 		</tbody>
 	</table>
 
-	<h2>Unranked teams</h2>
+	<h2>Other ranked teams</h2>
 	<table class="table">
 		<thead>
 		<tr>
+			<th scope="col">Rank</th>
 			<th scope="col">Team</th>
-			<th scope="col">Award</th>
 			<th scope="col">Solved problems</th>
 			<th scope="col">Total time</th>
 			<th scope="col">Time of last submission</th>
 		</tr>
 		</thead>
 		<tbody>
-		<?php foreach ($unranked as $row): ?>
+		<?php foreach ($ranked as $row): ?>
 			<tr>
+				<th scope="row"><?= $row['rank'] ?></th>
 				<th scope="row"><?= $row['team'] ?></th>
-				<td><?= $row['award'] ?></td>
 				<td><?= $row['solved'] ?></td>
 				<td><?= $row['total_time'] ?></td>
 				<td><?= $row['max_time'] ?></td>
@@ -218,16 +227,28 @@ usort($first_to_solve, function ($a, $b) {
 		</tbody>
 	</table>
 
-	<h2>Group winners</h2>
+	<h2>Honorable mentions</h2>
+	<table class="table">
+		<tbody>
+		<tr>
+			<?php foreach ($honorable as $idx => $row): ?>
+				<td><?= $row['team'] ?></td>
+				<?php if ($idx % 2 === 1 && $row !== end($honorable)): ?><tr></tr><?php endif; ?>
+			<?php endforeach; ?>
+		</tr>
+		</tbody>
+	</table>
+
+	<h2>Region winners</h2>
 	<table class="table">
 		<thead>
 		<tr>
-			<th scope="col">Group</th>
+			<th scope="col">Region</th>
 			<th scope="col">Team</th>
 		</tr>
 		</thead>
 		<tbody>
-		<?php foreach ($group_winners as $row): ?>
+		<?php foreach ($region_winners as $row): ?>
 			<tr>
 				<th scope="row"><?= $row['group'] ?></th>
 				<td><?= $row['team'] ?></td>
@@ -249,8 +270,20 @@ usort($first_to_solve, function ($a, $b) {
 		<?php foreach ($first_to_solve as $row): ?>
 			<tr>
 				<th scope="row"><?= $row['problem'] ?>: <?= $row['problem_name'] ?></th>
-				<td><?= $row['team'] ?></td>
-				<td><?= $row['time'] ?></td>
+				<td>
+					<?php if ($row['team'] !== null): ?>
+						<?= $row['team'] ?>
+					<?php else: ?>
+						<i>Not solved</i>
+					<?php endif ?>
+				</td>
+				<td>
+					<?php if ($row['time'] !== null): ?>
+						<?= $row['time'] ?>
+					<?php else: ?>
+						<i>-</i>
+					<?php endif ?>
+				</td>
 			</tr>
 		<?php endforeach; ?>
 		</tbody>
