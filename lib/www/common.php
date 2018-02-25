@@ -614,10 +614,6 @@ function putSampleTestcase($probid, $seq, $type)
  */
 function putProblemTextList()
 {
-	global $DB;
-
-	$timeFactorDiffers = ($DB->q('VALUE SELECT COUNT(*) FROM language WHERE allow_submit = 1 and time_factor <> 1') != 0);
-
 	$probs = getProblemTextList();
 
 	if ( empty($probs) ) {
@@ -626,31 +622,13 @@ function putProblemTextList()
 	}
 
 	print "<div class=\"row\">\n";
-	print "  <div class=\"col-md-12\">\n";
-	print "    <div class=\"card-deck my-md-3\">\n";
-	foreach ($probs as $idx => $row) {
-		if ($idx % 3 === 0 && $idx !== 0) {
-			print "    </div>\n";
-			print "  </div>\n";
-			print "  <div class=\"col-md-12\">\n";
-			print "    <div class=\"card-deck my-sm-3\">\n";
-		}
+	foreach ($probs as $row) {
 		print '
-<div class="card">
+<div class="card" style="width: 18rem; margin: 1em;">
   <div class="card-body">
     <h3 class="card-title">Problem ' . specialchars($row['shortname']) . '</h3>
     <h4 class="card-subtitle mb-2 text-muted">' . specialchars($row['name']) . '</h4>
 ';
-		if (dbconfig_get('show_limits_on_team_page', false)) {
-			print '<h5 class="card-subtitle mb-2 text-muted">Limits: ';
-			print $row['timelimit'] . ' second' . ($row['timelimit'] > 1 ? 's' : '');
-			if ($timeFactorDiffers) {
-				print '<sup>*</sup>';
-			}
-			print ' / ';
-			print printsize(($row['memlimit'] ?? dbconfig_get('memory_limit', 0)) * 1024, 1);
-			print '</h5>';
-		}
 
 		if ( isset($row['problemtext_type']) ) {
 		print '<div class="text-center"><a class="btn btn-secondary" role="button" href="problem.php?id=' . urlencode($row['probid']) . '">' .
@@ -661,16 +639,10 @@ function putProblemTextList()
 		if ( !empty($row['numsamples']) ) {
 			print '<div><br /></div><h4 class="card-subtitle mb-2">Samples</h4><ol class="text-center list-group list-group-flush">';
 			for($i=1; $i<=$row['numsamples']; ++$i) {
-				$input = 'input';
-				$output = 'output';
-				if ($row['numsamples'] > 1) {
-					$input .= ' #' . $i;
-					$output .= ' #' . $i;
-				}
 				print '<li class="list-group-item"><a class="btn btn-outline-secondary" role="button" href="problem.php?id=' . urlencode($row['probid']) .
-				      '&amp;testcase=' . urlencode($i) . '&amp;type=in">' . $input . '</a> ';
+				      '&amp;testcase=' . urlencode($i) . '&amp;type=in">input</a> ';
 				print '<a class="btn btn-outline-secondary" href="problem.php?id=' . urlencode($row['probid']) .
-				      '&amp;testcase=' . urlencode($i) . '&amp;type=out">' . $output . '</a>';
+				      '&amp;testcase=' . urlencode($i) . '&amp;type=out">output</a>';
 				print "</li>";
 			}
 			print "</ol>";
@@ -680,19 +652,7 @@ function putProblemTextList()
 		  </div>
 		</div>';
 	}
-	print "    </div>";
-	print "  </div>";
 	print "</div>";
-	if ($timeFactorDiffers) {
-		print '
-		<div class="row">
-		  <div class="col-md-12 my-sm-3">
-		    <div class=" alert alert-secondary" role="alert">
-		      * language time factors apply
-		    </div>
-		  </div>
-		</div>';
-	}
 }
 
 function getProblemTextList()
@@ -704,7 +664,7 @@ function getProblemTextList()
 		return array();
 	}
 
-	return $DB->q('TABLE SELECT probid,shortname,name,color,problemtext_type,timelimit,memlimit,SUM(sample) AS numsamples
+	return $DB->q('TABLE SELECT probid,shortname,name,color,problemtext_type,SUM(sample) AS numsamples
 	               FROM problem
 	               LEFT JOIN testcase USING(probid)
 	               LEFT JOIN contestproblem USING (probid)
