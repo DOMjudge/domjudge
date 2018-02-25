@@ -52,7 +52,8 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `description`) V
 ('judgehost_critical', '120', 'int', '0', 'Time in seconds after a judgehost last checked in before showing its status as "critical".'),
 ('thumbnail_size', '128', 'int', '0', 'Maximum width/height of a thumbnail for uploaded testcase images.'),
 ('diskspace_error', '1048576', 'int', '0', 'Minimum free disk space (in kB) on judgehosts.'),
-('require_entry_point', '0', 'bool', '1', 'Require entry point for submissions.');
+('require_entry_point', '0', 'bool', '1', 'Require entry point for submissions.'),
+('show_limits_on_team_page', '0', 'bool', 'Show time and memory limit on the team problems page');
 
 --
 -- Dumping data for table `executable`
