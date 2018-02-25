@@ -130,7 +130,8 @@ ALTER TABLE `submission`
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
 ('require_entry_point', '0', 'bool', 'Require entry point for submissions.'),
 ('show_flags', '1', 'bool', 'Show country flags on the scoreboard?'),
-('show_affiliation_logos', '0', 'bool', 'Show affiliation logos on the scoreboard?');
+('show_affiliation_logos', '0', 'bool', 'Show affiliation logos on the scoreboard?'),
+('show_limits_on_team_page', '0', 'bool', 'Show time and memory limit on the team problems page');
 
 UPDATE `configuration` SET `description` = 'Show affiliation names on the scoreboard?' WHERE `name` = 'show_affiliations';
 

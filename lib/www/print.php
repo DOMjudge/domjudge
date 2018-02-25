@@ -127,7 +127,7 @@ function printsize($size, $decimals = 1)
 	}
 
 	if ( $i==0 ) $decimals = 0;
-	return sprintf("%.${decimals}lf&nbsp;%s", $display, $units[$i]);
+	return sprintf("%s&nbsp;%s", round($display, $decimals), $units[$i]);
 }
 
 /**
