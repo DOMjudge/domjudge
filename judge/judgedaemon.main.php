@@ -74,6 +74,8 @@ function request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 	if ( $verb == 'POST' ) {
 		curl_setopt($ch, CURLOPT_POST, TRUE);
 		if ( is_array($data) ) {
