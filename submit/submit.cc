@@ -348,7 +348,7 @@ int main(int argc, char **argv)
 		} else if ( language == "Kotlin" ) {
 			entry_point = filebase + "Kt";
 			entry_point[0] = toupper(entry_point[0]);
-		} else if ( language == "Python 2 (pypy)" || language == "Python 3" ) {
+		} else if ( language == "Python 2" || language == "Python 2 (pypy)" || language == "Python 3" ) {
 			entry_point = filebase + "." + fileext;
 		}
 	}
