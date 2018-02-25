@@ -848,15 +848,6 @@ function submissions($args)
 		$query .= ' AND submittime < %i';
 	}
 
-	// Don't expose too-late submissions except if queried for with a
-	// specific ID. This doesn't cause a security risk and is a quick
-	// hack to get the eventlog of new submissions to work while not
-	// (explicitly) exposing too-late submissions in the API.
-	if ( isset($args['__primary_key']) ) {
-		$query .= ' %_';
-	} else {
-		$query .= ' AND submittime < %i';
-	}
 	$query .= (checkrole('jury') ? '' : ' AND c.visible = 1');
 
 	$hasLanguage = array_key_exists('language_id', $args);
