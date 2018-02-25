@@ -809,7 +809,17 @@ function submissions($args)
 	}
 
 	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid, entry_point
-	          FROM submission WHERE valid = 1 AND cid = %i AND submittime < %i';
+	          FROM submission WHERE valid = 1 AND cid = %i';
+
+	// Don't expose too-late submissions except if queried for with a
+	// specific ID. This doesn't cause a security risk and is a quick
+	// hack to get the eventlog of new submissions to work while not
+	// (explicitly) exposing too-late submissions in the API.
+	if ( isset($args['__primary_key']) ) {
+		$query .= ' %_';
+	} else {
+		$query .= ' AND submittime < %i';
+	}
 
 	$hasLanguage = array_key_exists('language_id', $args);
 	$query .= ($hasLanguage ? ' AND langid = %s' : ' %_');
