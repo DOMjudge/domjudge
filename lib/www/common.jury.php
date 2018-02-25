@@ -605,6 +605,10 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 				} else if ( !in_array($expectedResult, $results) ) {
 					warning("annotated result '" . implode(', ', $results) . "' does not match directory for $filename");
 				}
+				// FIXME: detect python3 based on shebang value
+				if ( preg_match('/^#!.*python3\b.*/', $source) && $langid == 'py2' ) {
+					$langid = 'py3';
+				}
 				// FIXME: Temporary hack to support importing jury solutions.
 				$entry_point = NULL;
 				if ( $langid == 'py2' || $langid == 'py3' ) {
