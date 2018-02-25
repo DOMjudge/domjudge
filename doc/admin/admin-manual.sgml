@@ -372,7 +372,7 @@ related distributions like CentOS and Fedora.
 <code>
 sudo yum install gcc gcc-c++ make zip unzip mariadb-server \
 	httpd php-gd php-cli php-mbstring php-mysql php-xml \
-	ntp linuxdoc-tools libcgroup-devel \
+	python-pygments ntp linuxdoc-tools libcgroup-devel \
 	texlive-collection-latexrecommended texlive-wrapfig
 </code>
 Note that the TeX Live packages <tt>expdlist</tt>, <tt>moreverb</tt>,
