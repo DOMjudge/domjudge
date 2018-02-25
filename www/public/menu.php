@@ -45,3 +45,6 @@ if ( ! $isstatic ) {
 }
 ?>
     </nav>
+
+
+<img style="width:98%; height: auto; display: block;margin: 20px auto 0 auto;" src="../images/banner.png" />
