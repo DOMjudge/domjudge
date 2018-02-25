@@ -734,3 +734,17 @@ function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
 
 	form.submit();
 }
+
+function toggleExpand()
+{
+	var node = event.target.parentNode.querySelector('[data-expanded]');
+	if (event.target.getAttribute('data-expanded') === '1') {
+		node.innerHTML = node.getAttribute('data-collapsed');
+		event.target.setAttribute('data-expanded', 0);
+		event.target.innerHTML = '[expand]';
+	} else {
+		node.innerHTML = node.getAttribute('data-expanded');
+		event.target.setAttribute('data-expanded', 1);
+		event.target.innerHTML = '[collapse]';
+	}
+}
