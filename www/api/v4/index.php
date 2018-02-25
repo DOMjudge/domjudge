@@ -1468,7 +1468,7 @@ function clarifications($args)
 	}
 
 	// Find clarifications, maybe later also provide more info for jury
-	$query = 'TABLE SELECT clarid, submittime, probid, body, cid, sender, recipient
+	$query = 'TABLE SELECT clarid, submittime, probid, body, cid, sender, recipient, respid
 	          FROM clarification
 	          WHERE cid = %i';
 
@@ -1489,6 +1489,7 @@ function clarifications($args)
 			'problem_id'   => safe_string(rest_extid('problems', $clar_data['probid'])),
 			'from_team_id' => safe_string(rest_extid('teams', $clar_data['sender'])),
 			'to_team_id'   => safe_string(rest_extid('teams', $clar_data['recipient'])),
+			'reply_to_id'  => safe_string(rest_extid('clarifications', $clar_data['respid'])),
 			'text'         => $clar_data['body'],
 		);
 	}, $clar_datas);
