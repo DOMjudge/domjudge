@@ -338,6 +338,9 @@ function putTeam($teamid) {
 
 	global $DB;
 
+	$SHOW_FLAGS             = dbconfig_get('show_flags', 1);
+	$SHOW_AFFILIATIONS      = dbconfig_get('show_affiliations', 1);
+
 	$team = $DB->q('MAYBETUPLE SELECT t.*, c.name AS catname,
 	                a.name AS affname, a.country FROM team t
 	                LEFT JOIN team_category c USING (categoryid)
@@ -369,11 +372,11 @@ function putTeam($teamid) {
 			nl2br(specialchars($team['members'])) . "</td></tr>\n";
 	}
 
-	if ( !empty($team['affilid']) ) {
+	if ( $SHOW_AFFILIATIONS && !empty($team['affilid']) ) {
 		echo '<tr><td class="p-2">Affiliation:</td><td class="p-2">';
 		echo specialchars($team['affname']);
 		echo "</td></tr>\n";
-		if ( !empty($team['country']) ) {
+		if ( $SHOW_FLAGS && !empty($team['country']) ) {
 			echo '<tr><td class="p-2">Country:</td><td class="p-2">';
 			if ( is_readable(WEBAPPDIR.'/web/'.$countryflag) ) {
 				echo '<img src="../' . $countryflag . '" alt="' .

@@ -667,10 +667,13 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	// The static scoreboard does not support filtering
 	if ( $filter!==FALSE && $static!==TRUE ) {
 
+		$SHOW_FLAGS             = dbconfig_get('show_flags', 1);
+		$SHOW_AFFILIATIONS      = dbconfig_get('show_affiliations', 1);
+
 		$categids = $DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category ' .
 		                   (IS_JURY ? '' : 'WHERE visible = 1 ' ));
 		// show only affilids/countries with visible teams
-		if ( empty($categids) ) {
+		if ( empty($categids) || !$SHOW_AFFILIATIONS ) {
 			$affils = array();
 		} else {
 			$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY,
@@ -689,7 +692,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$countries = array();
 		foreach( $affils as $id => $affil ) {
 			$affilids[$id] = $affil['name'];
-			if ( isset($affil['country']) ) $countries[] = $affil['country'];
+			if ( $SHOW_FLAGS && isset($affil['country']) ) $countries[] = $affil['country'];
 		}
 
 		$countries = array_unique($countries);
