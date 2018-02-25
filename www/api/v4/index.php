@@ -539,10 +539,10 @@ function judgings_POST($args)
 
 	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' .
 	              ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '' ) .
-				  ($is_editsubmit ? ', jury_member' : '') .
-				  ') VALUES(%i,%i,%s,%s' .
-				  ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
-				  ($is_editsubmit ? ',%s' : '%_') .
+	              ($is_editsubmit ? ', jury_member' : '') .
+	              ') VALUES(%i,%i,%s,%s' .
+	              ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
+	              ($is_editsubmit ? ',%s' : '%_') .
 	              ')', $submitid, $row['cid'], now(), $host,
 	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge, $jury_member);
 
