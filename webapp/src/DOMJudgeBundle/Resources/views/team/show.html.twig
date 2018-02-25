@@ -55,6 +55,7 @@
         <td>Affiliation:</td><td><a href="{{path('legacy.jury_team_affiliation', {id: team.affiliation.affilid})}}">{{team.affiliation.name}}</a></td>
       </tr>
       <tr>
+{# FIXME: make conditional on show_flags setting #}
         <td>Country:</td><td><img src="{{asset('images/countries/' ~ team.affiliation.country ~ '.png' )}}" /> {{team.affiliation.country}}</td>
       </tr>
       {% endif %}
