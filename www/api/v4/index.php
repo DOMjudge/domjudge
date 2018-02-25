@@ -472,7 +472,8 @@ function judgings_POST($args)
 
 	if ( empty($submitid) || $numupd == 0 ) return '';
 
-	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid, s.rejudgingid, s.entry_point,
+	$row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid,
+				   s.rejudgingid, s.entry_point, s.origsubmitid,
 	               time_factor*timelimit AS maxruntime,
 	               p.memlimit, p.outputlimit,
 	               special_run AS run, special_compare AS compare,
@@ -518,14 +519,26 @@ function judgings_POST($args)
 		                            WHERE submitid=%i AND valid=1',
 		                           $submitid);
 	}
+	$is_editsubmit = isset($row['origsubmitid']);
+	$judge_name = '';
+	if ( $is_editsubmit ) {
+		$judge_name = $DB->q('VALUE SELECT username FROM
+			user
+			JOIN team USING (teamid)
+			JOIN submission USING (teamid)
+			WHERE submitid = %s', $submitid);
+	}
 
 	$DB->q('START TRANSACTION');
 
 	$jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' .
 	              ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '' ) .
-	              ') VALUES(%i,%i,%s,%s' . ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
+				  ($is_editsubmit ? ', jury_member' : '') .
+				  ') VALUES(%i,%i,%s,%s' .
+				  ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
+				  ($is_editsubmit ? ',%s' : '%_') .
 	              ')', $submitid, $row['cid'], now(), $host,
-	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge);
+	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge, $judge_name);
 
 	eventlog('judging', $jid, 'create', $row['cid']);
 
