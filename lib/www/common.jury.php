@@ -605,10 +605,19 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 				} else if ( !in_array($expectedResult, $results) ) {
 					warning("annotated result '" . implode(', ', $results) . "' does not match directory for $filename");
 				}
+				// FIXME: Temporary hack to support importing jury solutions.
+				$entry_point = NULL;
+				if ( $langid == 'py2' || $langid == 'py3' ) {
+					$entry_point = basename($filename);
+				} else if ( $langid == 'java' ) {
+					$entry_point = pathinfo($filename, PATHINFO_FILENAME);
+				} else if ( $langid == 'kt' ) {
+					$entry_point = ucfirst(pathinfo($filename, PATHINFO_FILENAME) . "Kt");
+				}
 				file_put_contents($tmpfname, $source);
 				if( filesize($tmpfname) <= dbconfig_get('sourcesize_limit')*1024 ) {
 					$sid = submit_solution($teamid, $probid, $cid, $langid,
-							array($tmpfname), array(basename($filename)));
+							array($tmpfname), array(basename($filename)), NULL, $entry_point);
 					$DB->q('UPDATE submission SET expected_results=%s WHERE submitid=%i', json_encode($results), $sid);
 
 					echo "<li>Added jury solution from: <tt>$filename</tt></li>\n";
