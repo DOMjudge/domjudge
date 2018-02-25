@@ -140,12 +140,14 @@ function printsize($size, $decimals = 1)
 	$units = array('B', 'KB', 'MB', 'GB');
 	$display = (int)$size;
 
+	$exact = TRUE;
 	for ($i = 0; $i < count($units) && $display > $factor; $i++) {
+		if ( ($display % $factor)!=0 ) $exact = FALSE;
 		$display /= $factor;
 	}
 
-	if ( $i==0 ) $decimals = 0;
-	return sprintf("%s&nbsp;%s", round($display, $decimals), $units[$i]);
+	if ( $exact ) $decimals = 0;
+	return sprintf("%.${decimals}lf&nbsp;%s", round($display, $decimals), $units[$i]);
 }
 
 /**
