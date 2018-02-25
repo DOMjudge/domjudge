@@ -315,7 +315,7 @@ function judgings($args)
 	          LEFT JOIN rejudging r ON s.rejudgingid = r.rejudgingid
 	          WHERE j.cid = %i';
 
-	if ( !(checkrole('admin') || checkrole('judgehost')) ) {
+	if ( !(checkrole('jury') || checkrole('judgehost')) ) {
 		$query .= ' AND s.submittime < c.endtime';
 	}
 
@@ -325,7 +325,7 @@ function judgings($args)
 		$result = $args['result'];
 	} else {
 		$query .= ' %_';
-		if ( !(checkrole('admin') || checkrole('judgehost')) ) {
+		if ( !(checkrole('jury') || checkrole('judgehost')) ) {
 			$query .= ' AND result IS NOT NULL';
 		}
 	}
@@ -835,16 +835,19 @@ function submissions($args)
 	while ( $row = $q->next() ) {
 		$extcid = safe_string(rest_extid('contests', $cid));
 		$extid = safe_string(rest_extid('submissions', $row['submitid']));
-		$res[] = array(
+		$ret = array(
 			'id'           => $extid,
 			'team_id'      => safe_string(rest_extid('teams', $row['teamid'])),
 			'problem_id'   => safe_string(rest_extid('problems', $row['probid'])),
 			'language_id'  => safe_string(rest_extid('languages', $row['langid'])),
 			'time'         => Utils::absTime($row['submittime']),
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
-			'entry_point'  => $row['entry_point'],
 			'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")), // TODO: this does not work anymore, but do we need it in v4?
-			);
+		);
+		if ( checkrole('jury') ) {
+			$ret['entry_point'] = $row['entry_point'];
+		}
+		$res[] = $ret;
 	}
 	return $res;
 }

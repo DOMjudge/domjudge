@@ -10,7 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
  * @Route("/jury-v2")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("has_role('ROLE_JURY')")
  */
 class TeamController extends Controller
 {
