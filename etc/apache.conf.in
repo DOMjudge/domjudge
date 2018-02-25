@@ -19,22 +19,22 @@
 
 # Alternatively, use HTTPS and redirect HTTP to HTTPS:
 
-#Listen 443
-#
-#<VirtualHost *:80>
-#ServerName _default_
-#Redirect permanent / https://domjudge.example.com/
-#</VirtualHost>
-#
-#<VirtualHost *:443>
-#ServerName _default_
-#DocumentRoot @domserver_webappdir@/web
-#
-#SSLEngine on
-#SSLCertificateFile    /path/to/your/SSL-certificate.crt
-#SSLCertificateKeyFile /path/to/your/SSL-key.key
-#SSLCertificateChainFile /path/to/your/certificate-chain.pem
-#</VirtualHost>
+Listen 443
+
+<VirtualHost *:80>
+ServerName _default_
+Redirect permanent / https://2018wf-domjudge.ecs.baylor.edu
+</VirtualHost>
+
+<VirtualHost *:443>
+ServerName _default_
+DocumentRoot @domserver_webappdir@/web
+
+SSLEngine on
+SSLCertificateFile	/etc/ssl/certs/2018wf-domjudge.crt
+SSLCertificateKeyFile	/etc/ssl/private/2018wf-domjudge.pem
+SSLCertificateChainFile /etc/ssl/certs/wf-ca-chain.pem
+</VirtualHost>
 
 
 ### Alias config ###
@@ -42,7 +42,7 @@
 # Alternatively, use this instead of the VirtualHost above when you don't
 # want DOMjudge in the root, but only occupy a subdir, like this:
 # www.example.com/domjudge
-Alias /domjudge @domserver_webappdir@/web
+#Alias / @domserver_webappdir@/web
 
 ### General options ###
 #
