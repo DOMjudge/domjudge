@@ -739,3 +739,23 @@ function renderPage($data, $header = true, $footer = true, $templateFile = null)
 
 	if ( $footer ) require(LIBWWWDIR . '/footer.php');
 }
+
+function descriptionExpand($description) {
+	$descriptionLines = explode("\n", $description);
+	if (count($descriptionLines) <= 3) {
+		return implode('<br />', $descriptionLines);
+	} else {
+		$default = implode('<br />', array_slice($descriptionLines, 0, 3));
+		$defaultEscaped = htmlentities($default);
+		$expandedEsacped = htmlentities(implode('<br />', $descriptionLines));
+		return <<<EOF
+<span>
+	<span data-expanded="$expandedEsacped" data-collapsed="$defaultEscaped">
+	$default
+	</span>
+	<br/>
+	<a href="javascript:;" onclick="toggleExpand()">[expand]</a>
+</span>
+EOF;
+	}
+}
