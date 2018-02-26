@@ -465,25 +465,25 @@ class APIController extends FOSRestController {
 		// Make sure this script doesn't hit the PHP maximum execution timeout.
 		set_time_limit(0);
 		$em = $this->getDoctrine()->getManager();
-		if ($request->query->has('id')) {
+		if ($request->query->has('since_id')) {
+			$since_id = $request->query->getInt('since_id');
 			$event = $em->getRepository(Event::class)->findOneBy(
 				array(
-					'eventid' => $request->query->getInt('id'),
+					'eventid' => $since_id,
 					'cid'     => $contest->getCid(),
 				)
 			);
 			if ( $event===NULL ) {
-				return new Response('Invalid parameter "id" requested.', 400);
+				return new Response('Invalid parameter "since_id" requested.', 400);
 			}
+		} else {
+			$since_id = -1;
 		}
 		$response = new StreamedResponse();
 		$response->headers->set('X-Accel-Buffering', 'no');
-		$response->setCallback(function () use ($em, $contest, $request) {
+		$response->setCallback(function () use ($em, $contest, $request, $since_id) {
 			$lastUpdate = 0;
-			$lastIdSent = -1;
-			if ($request->query->has('since_id')) {
-				$lastIdSent = $request->query->getInt('since_id');
-			}
+			$lastIdSent = $since_id;
 			$typeFilter = false;
 			if ($request->query->has('types')) {
 				$typeFilter = explode(',', $request->query->get('types'));
