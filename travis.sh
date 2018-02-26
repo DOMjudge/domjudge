@@ -101,7 +101,7 @@ sudo ./dj_make_chroot -a amd64
 cd $HOME
 composer -n require justinrainbow/json-schema
 PATH=${PATH}:${HOME}/vendor/bin
-git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
+git clone --depth=1 -b 41a5d0281de7386e42d8e989e4811586891fbcb9 https://github.com/DOMjudge/domjudge-scripts.git
 CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 sed -i "/^#URL_EXTRA/a URL_EXTRA='?strict=1'" "$CHECK_API"
 
