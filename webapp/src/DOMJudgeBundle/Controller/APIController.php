@@ -235,17 +235,6 @@ class APIController extends FOSRestController {
 				return new Response('Invalid parameter "id" requested.', 400);
 			}
 		}
-		if ($request->query->has('id')) {
-			$event = $em->getRepository(Event::class)->findOneBy(
-				array(
-					'eventid' => $request->query->getInt('id'),
-					'cid'     => $contest['id'],
-				)
-			);
-			if ( $event===NULL ) {
-				return new Response('Invalid parameter "id" requested.', 400);
-			}
-		}
 		$response = new StreamedResponse();
 		$response->headers->set('X-Accel-Buffering', 'no');
 		$response->setCallback(function () use ($em, $contest, $request) {
