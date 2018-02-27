@@ -427,7 +427,7 @@ void usage()
 	}
 	if ( contests.size()>=2 ) {
 		printf(
-"For CONTEST use one of the following in lower- or uppercase:\n");
+"For CONTEST use one of the following:\n");
 		for(i=0; i<contests.size(); i++) {
 			printf("   %-15s  %s\n",contests[i][0].c_str(),contests[i][1].c_str());
 		}
