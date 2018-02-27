@@ -316,10 +316,10 @@ flushresults();
 
 // PROBLEMS
 
-$res = $DB->q('SELECT probid, cid, shortname, timelimit, special_compare, special_run
-               FROM problem INNER JOIN contestproblem USING (probid)
-               ORDER BY probid');
-
+$problems = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, cid, shortname,
+                        timelimit, outputlimit, special_compare, special_run
+                    FROM problem INNER JOIN contestproblem USING (probid)
+                    ORDER BY probid');
 
 
 // Select all active judgehosts including restrictions, so we can
@@ -377,18 +377,18 @@ $languages = $DB->q("KEYVALUETABLE SELECT langid, name FROM language
                      ORDER BY langid");
 
 $details = '';
-while($row = $res->next()) {
+foreach ($problems as $prob) {
 	$CHECKER_ERRORS = array();
-	check_problem($row);
+	check_problem($prob);
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
 		foreach($CHECKER_ERRORS as $chk_err) {
-			$details .= 'p'.$row['probid']." in contest c" . $row['cid'] .': ' . $chk_err."\n";
+			$details .= 'p'.$prob['probid']." in contest c" . $prob['cid'] .': ' . $chk_err."\n";
 		}
 	}
 	if ( ! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
 	               WHERE input IS NOT NULL AND output IS NOT NULL AND
-	               probid = %i", $row['probid']) ) {
-		$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": missing in/output testcase.\n";
+	               probid = %i", $prob['probid']) ) {
+		$details .= 'p'.$prob['probid']." in contest c" . $prob['cid'] . ": missing in/output testcase.\n";
 	}
 
 	// Check for each problem,language pair if this can be judged by a judgehost.
@@ -400,32 +400,36 @@ while($row = $res->next()) {
 			                 FROM contestproblem cp, language l
 			                 WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s" .
 			                $judgehost['extra_where'],
-			                $row['probid'], $row['cid'], $langid, $judgehost['contests'],
+			                $prob['probid'], $prob['cid'], $langid, $judgehost['contests'],
 			                $judgehost['problems'], $judgehost['languages']);
 			if ( $found ) $language_ok = true;
 		}
 
 		if (!$language_ok) {
-			$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": no judgehost can judge for language " . $langname . ".\n";
+			$details .= 'p'.$prob['probid']." in contest c" . $prob['cid'] . ": no judgehost can judge for language " . $langname . ".\n";
 		}
 	}
-}
-foreach(array('input','output') as $inout) {
-	$mismatch = $DB->q("SELECT probid, rank FROM testcase
-	                    WHERE md5($inout) != md5sum_$inout
-	                    ORDER BY probid, rank");
-	while($r = $mismatch->next()) {
-		$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
-		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
+
+	// Check testcase md5sum and size
+	foreach(array('input','output') as $inout) {
+		$mismatch = $DB->q("SELECT probid, rank FROM testcase
+		                    WHERE md5($inout) != md5sum_$inout
+		                    ORDER BY probid, rank");
+		while($r = $mismatch->next()) {
+			$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
+			         " MD5 sum mismatch between $inout and md5sum_$inout\n";
+		}
 	}
-}
-$oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
-                    FROM testcase WHERE OCTET_LENGTH(output) > %i
-                    ORDER BY probid, rank",
-                   dbconfig_get('output_limit')*1024);
-while($r = $oversize->next()) {
-	$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
-	    " output size (" . printsize($r['size']) . ") exceeds output_limit\n";
+	$outputlimit = 1024*(isset($prob['outputlimit']) ? $prob['outputlimit'] : dbconfig_get('output_limit'));
+	$oversize = $DB->q("SELECT rank, OCTET_LENGTH(output) AS size
+	                    FROM testcase
+	                    WHERE probid = %i AND OCTET_LENGTH(output) > %i
+	                    ORDER BY rank",
+	                   $prob['probid'], $outputlimit);
+	while($r = $oversize->next()) {
+		$details .= 'p'.$prob['probid'] . ": testcase #" . $r['rank'] .
+		            " output size (" . printsize($r['size']) . ") exceeds output_limit\n";
+	}
 }
 
 $has_errors = $details != '';
