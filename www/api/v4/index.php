@@ -1271,7 +1271,7 @@ function organizations($args)
 	return array_map(function($adata) use($args, $show_flags) {
 		$ret = array(
 			'id'        => safe_string(rest_extid('organizations', $adata['affilid'])),
-			'icpc_id'   => safe_string($adata['affilid']),
+			'icpc_id'   => safe_string(rest_extid('organizations', $adata['affilid'])),
 			'name'      => $adata['name']
 		);
 		if ( $show_flags ) {
