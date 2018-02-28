@@ -104,7 +104,7 @@ function tsv_teams_prepare($content)
 				'shortname' => !empty(@$line[5]) ? @$line[5] : @$line[7],
 				'name' => @$line[4],
 				'country' => @$line[6],
-				'externalid' => @$line[7]) );
+				'externalid' => preg_replace('/^INST-/', '', @$line[7])) );
 	}
 
 	return $data;
