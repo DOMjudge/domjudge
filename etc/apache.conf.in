@@ -23,7 +23,7 @@ Listen 443
 
 <VirtualHost *:80>
 ServerName _default_
-Redirect permanent / https://2018wf-domjudge.ecs.baylor.edu
+DocumentRoot @domserver_webappdir@/web
 </VirtualHost>
 
 <VirtualHost *:443>
