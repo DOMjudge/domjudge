@@ -33,7 +33,7 @@ DocumentRoot @domserver_webappdir@/web
 SSLEngine on
 SSLCertificateFile	/etc/ssl/certs/2018wf-domjudge.crt
 SSLCertificateKeyFile	/etc/ssl/private/2018wf-domjudge.pem
-SSLCertificateChainFile /etc/ssl/certs/wf-ca-chain.pem
+SSLCertificateChainFile /etc/ssl/certs/ca-chain.pem
 </VirtualHost>
 
 
