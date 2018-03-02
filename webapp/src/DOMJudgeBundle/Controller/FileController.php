@@ -25,19 +25,20 @@ class FileController extends Controller
 	 */
 	public function submissionFiles(Contest $contest, Submission $submission)
 	{
-		$files = $submission->getFiles();
 		if ( $submission->getCid() != $contest->getCid() ) {
-			error("Submission s" . $submission->getSubmitid() . " not found in contest '" . $contest->getExternalid() . "'.");
+			return new Response("Submission s" . $submission->getSubmitid() .
+			                    " not found in contest '" . $contest->getExternalid() . "'.");
 		}
 
+		$files = $submission->getFiles();
 		$zip = new \ZipArchive;
 		if ( !($tmpfname = tempnam($this->getParameter('domjudge.tmpdir'), "submission_file-")) ) {
-			error("Could not create temporary file.");
+			return new Response("Could not create temporary file.", 500);
 		}
 
 		$res = $zip->open($tmpfname, \ZipArchive::OVERWRITE);
 		if ( $res !== TRUE ) {
-			error("Could not create temporary zip file.");
+			return new Response("Could not create temporary zip file.", 500);
 		}
 		foreach ($files as $file) {
 			$zip->addFromString($file->getFilename(), stream_get_contents($file->getSourcecode()));
