@@ -25,7 +25,6 @@ class FileController extends Controller
 	 */
 	public function submissionFiles(Contest $contest, Submission $submission)
 	{
-		return new Response('FOO: ' . $submission->getSubmitid(), 404);
 		$files = $submission->getFiles();
 		if ( $submission->getCid() != $contest->getCid() ) {
 			error("Submission s" . $submission->getSubmitid() . " not found in contest '" . $contest->getExternalid() . "'.");
