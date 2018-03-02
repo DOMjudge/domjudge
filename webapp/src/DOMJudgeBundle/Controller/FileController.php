@@ -27,7 +27,7 @@ class FileController extends Controller
 	{
 		if ( $submission->getCid() != $contest->getCid() ) {
 			return new Response("Submission s" . $submission->getSubmitid() .
-			                    " not found in contest '" . $contest->getCid() . "'.");
+			                    " not found in contest '" . $contest->getCid() . "'.", 404);
 		}
 
 		$files = $submission->getFiles();
