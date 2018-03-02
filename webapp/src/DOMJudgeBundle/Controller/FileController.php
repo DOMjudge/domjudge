@@ -7,6 +7,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Submission;
@@ -18,12 +19,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class FileController extends Controller
 {
 	/**
-	 * @Route("/api/contests/{externalid}/submissions/{sid}/files", name="submission_file")
-	 * @Route("/api/v4/contests/{externalid}/submissions/{sid}/files", name="submission_file_v4")
+	 * @Route("/api/contests/{externalid}/submissions/{submitid}/files", name="submission_file")
+	 * @Route("/api/v4/contests/{externalid}/submissions/{submitid}/files", name="submission_file_v4")
 	 * @Security("has_role('ROLE_JURY')")
 	 */
 	public function submissionFiles(Contest $contest, Submission $submission)
 	{
+		return new Response('FOO: ' . $submission->getSubmitid(), 404);
 		$files = $submission->getFiles();
 		if ( $submission->getCid() != $contest->getCid() ) {
 			error("Submission s" . $submission->getSubmitid() . " not found in contest '" . $contest->getExternalid() . "'.");
