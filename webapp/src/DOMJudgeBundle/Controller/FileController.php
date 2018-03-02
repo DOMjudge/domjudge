@@ -7,6 +7,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Submission;
@@ -26,7 +27,7 @@ class FileController extends Controller
 	{
 		if ( $submission->getCid() != $contest->getCid() ) {
 			return new Response("Submission s" . $submission->getSubmitid() .
-			                    " not found in contest '" . $contest->getExternalid() . "'.");
+			                    " not found in contest '" . $contest->getCid() . "'.");
 		}
 
 		$files = $submission->getFiles();
