@@ -411,7 +411,7 @@ function putClock() {
 		$left = "- " . printtimediff(now(),$cdata['starttime']);
 	// contst over
 	} else {
-		$left = "0:00";
+		$left = " contest over";
 	}
 
 	echo "<span class=\"octicon octicon-clock\"></span> <span id=\"timeleft\">$left</span>\n";

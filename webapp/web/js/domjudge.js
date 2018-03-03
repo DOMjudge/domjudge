@@ -455,7 +455,7 @@ function updateClock()
 		var what = "- ";
 	} else {
 		var left = 0;
-		var what = "0:00";
+		var what = "contest over";
 	}
 
 	if ( left ) {
