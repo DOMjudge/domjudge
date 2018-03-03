@@ -116,7 +116,7 @@ class APIController extends FOSRestController {
 		$result = [];
 		foreach ($data as $contest) {
 			if ($contest->isActive()) {
-				$result[] = $contest->serializeForAPI($penalty_time, $use_ext_ids);
+				$result[] = $contest->serializeForAPI($penalty_time, $use_ext_ids, $strict);
 			}
 		}
 
