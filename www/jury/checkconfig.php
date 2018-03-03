@@ -377,6 +377,7 @@ $languages = $DB->q("KEYVALUETABLE SELECT langid, name FROM language
                      ORDER BY langid");
 
 $details = '';
+$details_html = '';
 foreach ($problems as $prob) {
 	$CHECKER_ERRORS = array();
 	check_problem($prob);
@@ -427,12 +428,13 @@ foreach ($problems as $prob) {
 	                    ORDER BY rank",
 	                   $prob['probid'], $outputlimit);
 	while($r = $oversize->next()) {
-		$details .= 'p'.$prob['probid'] . ": testcase #" . $r['rank'] .
-		            " output size (" . printsize($r['size']) . ") exceeds output_limit\n";
+		$details_html .= 'p'.$prob['probid'] . ": testcase #" . $r['rank'] .
+		                 " output size (" . printsize($r['size']) .
+		                 ") exceeds output_limit<br />\n";
 	}
 }
 
-$has_errors = $details != '';
+$has_errors = ( $details != '' || $details_html != '' );
 $probs = $DB->q("TABLE SELECT probid, cid FROM contestproblem
                  WHERE color IS NULL ORDER BY probid");
 foreach($probs as $probdata) {
@@ -451,8 +453,8 @@ foreach($probs as $probdata) {
 }
 
 result('problems, languages, teams', 'Problems integrity',
-	$details == '' ? 'O':($has_errors?'E':'W'),
-	$details);
+       ($details == '' && $details_html == '') ? 'O':($has_errors?'E':'W'),
+       $details, $details_html);
 
 flushresults();
 
