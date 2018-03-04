@@ -346,6 +346,17 @@ echo addForm($pagename, 'get') .
 	addHidden("view[$view]", $viewtypes[$view]) .
 	addSubmit('clear') . addEndForm() . "<br /><br />\n";
 
+$filtered = $DB->q('VALUE SELECT COUNT(s.submitid)
+                    FROM submission s
+                    LEFT JOIN judging j ON (s.submitid = j.submitid AND j.rejudgingid = %i)
+                    WHERE s.cid NOT IN (%As) AND (s.rejudgingid = %i OR j.rejudgingid = %i)',
+                   $id, $cids, $id, $id);
+
+if ( $filtered > 0 ) {
+	echo "<p class=\"nodata\">$filtered submissions are not displayed " .
+		"because they are not part of any active contest(s).</p>\n\n";
+}
+
 putSubmissions($cdatas, $restrictions);
 
 require(LIBWWWDIR . '/footer.php');
