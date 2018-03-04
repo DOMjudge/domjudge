@@ -788,6 +788,181 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 }
 
 /**
+ * Triggers rejudging submissions.
+ * Returns the rejudgingid if $full_rejudge, otherwise NULL.
+ *
+ * $table         Can be one from $tablemap below.
+ * $id            Selects submisions that match this ID in the given table.
+ * $include_all   Determines if also correct submissions or those with
+ *                  pending judgements are included.
+ * $full_rejudge  Creates a full-blown rejudging that has to be approved
+ *                  instead of rejudging on the fly.
+ * $reason        Reason included in a full rejudging.
+ * $userid        Who triggered the full rejudging.
+ */
+function rejudge($table, $id, $include_all, $full_rejudge, $reason = NULL, $userid = NULL)
+{
+	global $DB;
+
+	/* These are the tables that we can deal with. */
+	$tablemap = array (
+		'contest'    => 's.cid',
+		'judgehost'  => 'j.judgehost',
+		'language'   => 's.langid',
+		'problem'    => 's.probid',
+		'submission' => 's.submitid',
+		'team'       => 's.teamid'
+	);
+
+	if ( !isset($tablemap[$table]) ) error("unknown table in rejudging");
+
+	// This can be done in one Update from MySQL 4.0.4 and up, but
+	// that wouldn't allow us to call calcScoreRow() for the right
+	// rows, so we'll just loop over the results one at a time.
+
+	// Only rejudge submissions in active contests.
+	$cids = getCurContests(FALSE);
+
+	// Do not include pending/queued or ignored submissions in rejudge.
+	$restrictions = 'result IS NOT NULL AND s.valid=1 AND ';
+	if ( $include_all ) {
+		if ( !$full_rejudge ) $restrictions = '';
+	} else {
+		$restrictions .= 'result != \'correct\' AND ';
+	}
+	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid, s.rejudgingid
+	               FROM judging j
+	               LEFT JOIN submission s USING (submitid)
+	               WHERE j.cid IN (%Ai) AND j.valid = 1 AND ' .
+	              $restrictions .
+	              $tablemap[$table] . ' = %s', $cids, $id);
+
+	if ( $res->count() == 0 ) error("No judgings matched.");
+
+	if ( $full_rejudge ) {
+		$rejudgingid = $DB->q('RETURNID INSERT INTO rejudging
+		                       (userid_start, starttime, reason) VALUES (%i, %s, %s)',
+		                      $userid, now(), $reason);
+	}
+
+	while ( $jud = $res->next() ) {
+		if ( isset($jud['rejudgingid']) ) {
+			// already associated rejudging
+			if ( $table == 'submission' ) {
+				// clean up rejudging
+				if ( $full_rejudge ) {
+					$DB->q('DELETE FROM rejudging WHERE rejudgingid=%i', $rejudgingid);
+				}
+				error('submission is already part of rejudging r' . specialchars($jud['rejudgingid']));
+			} else {
+				// silently skip that submission
+				continue;
+			}
+		}
+
+		$DB->q('START TRANSACTION');
+
+		if ( !$full_rejudge ) {
+			$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
+			       $jud['judgingid']);
+		}
+
+		$DB->q('UPDATE submission SET judgehost = NULL' .
+		       ( $full_rejudge ? ', rejudgingid=%i ' : '%_ ' ) .
+		       'WHERE submitid = %i AND rejudgingid IS NULL',
+		       @$rejudgingid, $jud['submitid']);
+
+		// Prioritize single submission rejudgings
+		if ( $table == 'submission' ) {
+			$DB->q('UPDATE team SET judging_last_started = NULL
+			        WHERE teamid = %i', $jud['teamid']);
+		}
+
+		if ( !$full_rejudge ) {
+			calcScoreRow($jud['cid'], $jud['teamid'], $jud['probid']);
+		}
+		$DB->q('COMMIT');
+
+		if ( !$full_rejudge ) {
+			auditlog('judging', $jud['judgingid'], 'mark invalid', '(rejudge)');
+		}
+	}
+
+	return $full_rejudge ? $rejudgingid : NULL;
+}
+
+/**
+ * Finish a full rejudging by either applying or cancelling its results.
+ *
+ * $request can be either 'apply' or 'cancel'.
+ */
+function rejudging_finish($rejudgingid, $request, $userid = NULL, $show_progress = FALSE)
+{
+	global $DB;
+
+	if ( !in_array($request, array('apply','cancel'), TRUE) ) {
+		error("Invalid request type");
+	}
+
+	$rejdata = $DB->q('TUPLE SELECT * FROM rejudging
+	                   WHERE rejudgingid=%i', $rejudgingid);
+
+	if ( ! $rejdata ) error("Invalid rejudging ID");
+
+	if ( isset($rejdata['endtime']) ) {
+		error("Rejudging already " . ( $rejdata['valid'] ? 'applied.' : 'canceled.'));
+	}
+
+	$todo = $DB->q('VALUE SELECT COUNT(*) FROM submission
+	                WHERE rejudgingid=%i', $rejudgingid);
+	$done = $DB->q('VALUE SELECT COUNT(*) FROM judging
+	                WHERE rejudgingid=%i AND endtime IS NOT NULL', $rejudgingid);
+	$todo -= $done;
+
+	if ( $request=='apply' && $todo > 0 ) {
+		error("$todo unfinished judgings left, cannot apply rejudging.");
+	}
+
+	$res = $DB->q('SELECT submitid, cid, teamid, probid
+	               FROM submission
+	               WHERE rejudgingid=%i', $rejudgingid);
+
+	auditlog('rejudging', $rejudgingid, $request.'ing rejudge', '(start)');
+
+	while ( $row = $res->next() ) {
+		if ( $show_progress ) echo "s" . specialchars($row['submitid']) . ", ";
+		if ( $request=='apply' ) {
+			$DB->q('START TRANSACTION');
+			// first invalidate old judging, maybe different from prevjudgingid!
+			$DB->q('UPDATE judging SET valid=0
+			        WHERE submitid=%i', $row['submitid']);
+			// then set judging to valid
+			$DB->q('UPDATE judging SET valid=1
+			        WHERE submitid=%i AND rejudgingid=%i', $row['submitid'], $rejudgingid);
+			// remove relation from submission to rejudge
+			$DB->q('UPDATE submission SET rejudgingid=NULL
+			        WHERE submitid=%i', $row['submitid']);
+			// last update cache
+			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
+			$DB->q('COMMIT');
+		} else {
+			// restore old judgehost association
+			$valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging
+			                           WHERE submitid=%i AND valid=1', $row['submitid']);
+			$DB->q('UPDATE submission SET rejudgingid = NULL, judgehost=%s
+			        WHERE rejudgingid = %i', $valid_judgehost, $rejudgingid);
+		}
+	}
+
+	$DB->q('UPDATE rejudging
+	        SET endtime=%s, userid_finish=%i, valid=%i
+	        WHERE rejudgingid=%i',
+	       now(), $userid, ($request=='apply' ? 1 : 0), $rejudgingid);
+
+	auditlog('rejudging', $rejudgingid, $request.'ing rejudge', '(end)');
+}
+
+/**
  * Compute the filename of a given submission. $fdata must be an array
  * that contains the data from submission and submission_file.
  */

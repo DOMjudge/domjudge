@@ -34,29 +34,14 @@ require(LIBWWWDIR . '/header.php');
 
 if ( ! $id ) error("Missing or invalid rejudging id");
 
-$todo = $DB->q('VALUE SELECT COUNT(*) FROM submission
-                WHERE rejudgingid=%i', $id);
-$done = $DB->q('VALUE SELECT COUNT(*) FROM judging
-                WHERE rejudgingid=%i AND endtime IS NOT NULL', $id);
-$todo -= $done;
-
 $rejdata = $DB->q('TUPLE SELECT * FROM rejudging
                    WHERE rejudgingid=%i', $id);
 
 if ( ! $rejdata ) error ("Missing rejudging data");
 
-if ( isset($_REQUEST['apply']) ) {
-	if ( $todo > 0 ) {
-		error("$todo unfinished judgings left, cannot apply rejudging.");
-	} else if ( isset($rejdata['endtime']) ) {
-		error("Rejudging already " . ( $rejdata['valid'] ? 'applied.' : 'canceled.'));
-	}
+if ( isset($_REQUEST['apply']) || isset($_REQUEST['cancel']) ) {
 
-	$res = $DB->q('SELECT submitid, cid, teamid, probid
-	               FROM submission
-	               WHERE rejudgingid=%i', $id);
-
-	auditlog('rejudging', $id, 'applying rejudge', '(start)');
+	$request = isset($_REQUEST['apply']) ? 'apply' : 'cancel';
 
 	$time_start = microtime(TRUE);
 
@@ -66,79 +51,26 @@ if ( isset($_REQUEST['apply']) ) {
 	ob_end_flush();
 
 	echo "<p>\n";
-	while ( $row = $res->next() ) {
-		echo "s" . specialchars($row['submitid']) . ", ";
-		$DB->q('START TRANSACTION');
-		// first invalidate old judging, maybe different from prevjudgingid!
-		$DB->q('UPDATE judging SET valid=0
-		        WHERE submitid=%i', $row['submitid']);
-		// then set judging to valid
-		$DB->q('UPDATE judging SET valid=1
-		        WHERE submitid=%i AND rejudgingid=%i', $row['submitid'], $id);
-		// remove relation from submission to rejudge
-		$DB->q('UPDATE submission SET rejudgingid=NULL
-		        WHERE submitid=%i', $row['submitid']);
-		// last update cache
-		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
-		$DB->q('COMMIT');
-	}
+
+	rejudging_finish($id, $request, $userdata['userid'], TRUE);
+
 	echo "\n</p>\n";
-
-	$DB->q('UPDATE rejudging
-	        SET endtime=%s, userid_finish=%i
-	        WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
-
-	auditlog('rejudging', $id, 'applying rejudge', '(end)');
 
 	$time_end = microtime(TRUE);
 
 	echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) .
-		"\">r$id</a> applied in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
-
-	require(LIBWWWDIR . '/footer.php');
-	return;
-} else if ( isset($_REQUEST['cancel']) ) {
-	if ( isset($rejdata['endtime']) ) {
-		error("Rejudging already " . ( $rejdata['valid'] ? 'applied.' : 'canceled.'));
-	}
-	auditlog('rejudging', $id, 'canceling rejudge', '(start)');
-
-	$res = $DB->q('SELECT submitid, cid, teamid, probid
-	               FROM submission
-	               WHERE rejudgingid=%i', $id);
-	$time_start = microtime(TRUE);
-
-	// no output buffering... we want to see what's going on real-time
-	echo "<br/><p>Canceling rejudge may take some time, please be patient:</p>\n";
-	ob_implicit_flush(true);
-	ob_end_flush();
-
-	echo "<p>\n";
-	while ( $row = $res->next() ) {
-		echo "s" . specialchars($row['submitid']) . ", ";
-		// restore old judgehost association
-		$valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging
-		                           WHERE submitid=%i AND valid=1', $row['submitid']);
-		$DB->q('UPDATE submission SET rejudgingid = NULL, judgehost=%s
-		        WHERE rejudgingid = %i', $valid_judgehost, $id);
-	}
-	echo "\n</p>\n";
-
-	$DB->q('UPDATE rejudging
-	        SET endtime=%s, userid_finish=%i, valid=0
-	        WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
-
-	auditlog('rejudging', $id, 'canceled rejudge', '(end)');
-
-	$time_end = microtime(TRUE);
-
-	echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) .
-		"\">r$id</a> canceled in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
+		"\">r$id</a> ".($request=='apply' ? 'applied' : 'canceled').
+		" in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
 
 	require(LIBWWWDIR . '/footer.php');
 	return;
 }
 
+$todo = $DB->q('VALUE SELECT COUNT(*) FROM submission
+                WHERE rejudgingid=%i', $id);
+$done = $DB->q('VALUE SELECT COUNT(*) FROM judging
+                WHERE rejudgingid=%i AND endtime IS NOT NULL', $id);
+$todo -= $done;
 
 $userdata = $DB->q('KEYVALUETABLE SELECT userid, name FROM user
                     WHERE userid=%i OR userid=%i',
