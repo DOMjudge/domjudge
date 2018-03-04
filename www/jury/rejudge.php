@@ -111,8 +111,7 @@ while ( $jud = $res->next() ) {
 	// Prioritize single submission rejudgings
 	if ( $table == 'submission' ) {
 		$DB->q('UPDATE team SET judging_last_started = NULL
-		        WHERE teamid IN (SELECT teamid FROM submission
-		        WHERE submitid = %i)', $jud['submitid']);
+		        WHERE teamid = %i', $jud['teamid']);
 	}
 
 	if ( !$full_rejudge ) {
