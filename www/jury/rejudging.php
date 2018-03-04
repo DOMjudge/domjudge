@@ -158,17 +158,21 @@ echo "</td></tr>\n";
 foreach ( array('userid_start' => 'Issued by',
                 'userid_finish' => ($rejdata['valid'] ? 'Accepted' : 'Canceled') . ' by')
           as $user => $msg ) {
-	if ( isset($rejdata[$user]) ) {
+	$time = $user == 'userid_start' ? 'starttime' : 'endtime';
+	if ( isset($rejdata[$time]) ) {
 		echo "<tr><td>$msg:</td><td>" .
-			'<a href="user.php?id=' . urlencode($rejdata[$user]) . '">' .
-			specialchars($userdata[$rejdata[$user]])  .
-			"</a></td></tr>\n";
+			( isset($rejdata[$user]) ?
+		      '<a href="user.php?id=' . urlencode($rejdata[$user]) . '">' .
+		      specialchars($userdata[$rejdata[$user]]) . '</a>' :
+		      '<span class="nodata">unknown</span>' ) .
+			"</td></tr>\n";
 	}
 }
 foreach (array('starttime' => 'Start time', 'endtime' => 'Apply time') as $time => $msg) {
 	echo "<tr><td>$msg:</td><td>";
 	if ( isset($rejdata[$time]) ) {
-		echo printtime($rejdata[$time]);
+		echo '<span title="' . printtime($rejdata[$time],'%Y-%m-%d %H:%M:%S (%Z)') . '">' .
+			printtime($rejdata[$time]) . '</span>';
 	} else {
 		echo '<span class="nodata">-</span>';
 	}
