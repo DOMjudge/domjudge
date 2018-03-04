@@ -117,6 +117,47 @@ function cdataHelper($cdata)
 	);
 }
 
+function status()
+{
+	global $DB, $api, $cdatas, $userdata, $cids, $requestedCid;
+
+	if ( isset($args['cid']) ) {
+		$cid = safe_int($args['cid']);
+	} else if ( isset($requestedCid) ) {
+		$cid = $requestedCid;
+	} else {
+		if ( count($cids)>=1 ) {
+			$cid = reset($cids);
+		} else {
+			$api->createError("No active contest found.", NOT_FOUND);
+			return '';
+		}
+	}
+
+	$ret = array();
+	$ret['num_submissions'] = $DB->q(
+		'VALUE SELECT COUNT(s.submitid)
+		 FROM submission s
+		 WHERE s.cid=%s', $cid);
+	$ret['num_queued'] = $DB->q(
+		'VALUE SELECT COUNT(*)
+		 FROM submission s
+		 LEFT JOIN judging j ON (j.submitid = s.submitid AND j.valid != 0)
+		 WHERE s.cid=%s
+  		 AND result IS NULL
+		 AND s.valid = 1', $cid);
+	$ret['num_judging'] = $DB->q(
+		'VALUE SELECT COUNT(*)
+		 FROM submission s
+		 LEFT JOIN judging j USING (submitid)
+		 WHERE s.cid=%s
+  		 AND result IS NULL
+		 AND j.valid = 1
+		 AND s.valid = 1', $cid);
+	return $ret;
+}
+$api->provideFunction('GET', 'status', 'Undocumented for now.', array(), array(), array('jury'));
+
 /**
  * Contest information
  */
