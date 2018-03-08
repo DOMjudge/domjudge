@@ -254,7 +254,7 @@ function problems($args)
 
 	// Check that user has access to the problems in this contest:
 	if ( checkrole('team') ) $cdatas = getCurContests(TRUE, $userdata['teamid']);
-	if ( checkrole('jury') ||
+	if ( checkrole('jury') || checkrole('judgehost') ||
 	     (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0) ) {
 
 		// We sort the problems by shortname, i.e in the same way we
