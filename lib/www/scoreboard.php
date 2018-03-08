@@ -454,14 +454,20 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		if ( $SHOW_AFFILIATIONS && isset($teams[$team]['affilid']) ) {
 			$affilname = specialchars($teams[$team]['affilname']);
 		}
+		// FIXME: use affilname at finals
+		$teamname = specialchars($teams[$team]['name']);
+		if ( isset($affilname) ) {
+			$teamname = $affilname;
+		}
 		echo
 			'<td class="scoretn"' .
 			(!empty($color) ? ' style="background: ' . $color . ';"' : '') .
 			(IS_JURY ? ' title="' . specialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
-			specialchars($teams[$team]['name']) .
-			($SHOW_AFFILIATIONS ? '<br /><span class="univ">' . $affilname .
-			 '</span>' : '') .
+			specialchars($teamname) .
+			// FIXME
+			// ($SHOW_AFFILIATIONS ? '<br /><span class="univ">' . $affilname .
+			//  '</span>' : '') .
 			($static ? '' : '</a>') .
 			'</td>';
 		$totalTime = $totals['total_time'];
