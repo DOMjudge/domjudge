@@ -631,7 +631,17 @@ function putProblemTextList()
 		print '
 <div class="card" style="width: 18rem; margin: 1em;">
   <div class="card-body">
-    <h3 class="card-title">Problem ' . specialchars($row['shortname']) . '</h3>
+    <h3 class="card-title">
+';
+		if ( isset($row['color']) ) {
+			print '
+      <div class="circle" style="background-color: ' . $row['color'] . ';">
+      </div>
+';
+		}
+			print '
+      Problem ' . specialchars($row['shortname']) . '
+    </h3>
     <h4 class="card-subtitle mb-2 text-muted">' . specialchars($row['name']) . '</h4>
 ';
 
