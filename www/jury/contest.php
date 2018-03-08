@@ -300,7 +300,7 @@ $(function() {
 		<th>allow submit</th>
 		<th>allow judge</th>
 		<th>colour
-		<a target="_blank" href="http://www.w3schools.com/cssref/css_colornames.asp">
+		<a target="_blank" href="https://en.wikipedia.org/wiki/Web_colors">
 		<img src="../images/b_help.png" class="smallpicto" alt="?"></a></th>
 		<th>lazy eval</th>
 	</tr>

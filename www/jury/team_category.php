@@ -49,7 +49,7 @@ if ( !empty($_GET['cmd']) ):
 <td><?php echo addInput('data[0][color]', @$row['color'], 15, 25,
 	'class="color {required:false,adjust:false,hash:true,caps:false}"')?>
 <a target="_blank"
-href="http://www.w3schools.com/cssref/css_colornames.asp"><img
+href="https://en.wikipedia.org/wiki/Web_colors"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td>Visible:</td>
