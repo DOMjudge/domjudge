@@ -708,7 +708,7 @@ function putProblemTextList()
 		print '<div class="text-center"><a class="btn btn-secondary" role="button" href="problem.php?id=' . urlencode($row['probid']) . '">' .
 			      '<img src="../images/' . urlencode($row['problemtext_type']) .
                               '.png" alt="' . specialchars($row['problemtext_type']) .
-'" /> problem text</a></div>';
+			      '" /> problem text</a></div>';
 		}
 		if ( !empty($row['numsamples']) ) {
 			print '<div><br /></div><h4 class="card-subtitle mb-2">Samples</h4><ol class="text-center list-group list-group-flush">';
@@ -732,6 +732,15 @@ function putProblemTextList()
 		  </div>
 		</div>';
 	}
+	// Fill row with dummy cards to make them same width
+	$probCount = count($probs);
+	$rest = ((int)($probCount / 3) + 1) * 3;
+	if ( $probCount % 3 != 0 ) {
+		for ( $i = $probCount; $i < $rest; $i++ ) {
+			print '<div style="border: none;" class="card"></div> ';
+		}
+	}
+
 	print "    </div>";
 	print "  </div>";
 	print "</div>";
