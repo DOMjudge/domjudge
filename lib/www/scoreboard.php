@@ -588,12 +588,11 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		if ( empty($limitteams) && count($usedCategories) > 1 ) {
 			$catColors = array();
 			foreach( $categs as $cat ) {
-				if ( isset($usedCategories[$cat['categoryid']]) ) {
-					$color = empty($cat['color']) ? '__EMPTY__' : $cat['color'];
-					$catColors[$color] = TRUE;
+				if ( !empty($cat['color']) ) {
+					$catColors[$cat['color']] = TRUE;
 				}
 			}
-			if ( count($catColors) > 1 ) {
+			if ( count($catColors) ) {
 				echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
 				    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
 				    "<thead><tr><th scope=\"col\">" .
