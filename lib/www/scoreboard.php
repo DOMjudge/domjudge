@@ -461,7 +461,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		}
 		// FIXME: use affilname at finals
 		$teamname = specialchars($teams[$team]['name']);
-		if ( isset($affilname) ) {
+		if ( !empty($affilname) ) {
 			$teamname = $affilname;
 		}
 		echo
