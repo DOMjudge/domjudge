@@ -368,7 +368,12 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		// skip if we have limitteams and the team is not listed
 		if ( !empty($limitteams) && !in_array($team,$limitteams) ) continue;
 
+		$region_leader = '';
 		if ( isset($teams[$team]['categoryid']) ) {
+			if ( $totals['num_points'] && !isset($usedCategories[$teams[$team]['categoryid']]) ) {
+				$region_leader = '<span class="badge badge-warning" style="margin-right: 2em; font-weight: normal;">' .
+					$categs[$teams[$team]['categoryid']]['name'] . '</span>';
+			}
 			$usedCategories[$teams[$team]['categoryid']] = TRUE;
 		}
 
@@ -464,6 +469,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			(!empty($color) ? ' style="background: ' . $color . ';"' : '') .
 			(IS_JURY ? ' title="' . specialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
+			$region_leader .
 			$teamname .
 			// FIXME
 			// ($SHOW_AFFILIATIONS ? '<br /><span class="univ">' . $affilname .
