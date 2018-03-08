@@ -188,6 +188,7 @@ legend {
 .scoreboard {
 	border-collapse: collapse;
 	clear: both;
+	font-family: 'Roboto', sans-serif;
 }
 .scoreboard td {
 	font-size: small;
@@ -224,7 +225,7 @@ legend {
 
 .scoreboard .scoretn {
 	padding: 0px;
-	max-width: 20em;
+	max-width: 30em;
 	text-align: right;
 	font-weight: bold;
 	overflow: hidden;
