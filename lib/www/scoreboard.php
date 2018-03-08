@@ -571,22 +571,30 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 
 		// only print legend when there's more than one category
 		if ( empty($limitteams) && count($usedCategories) > 1 ) {
-			echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
-			    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
-			    "<thead><tr><th scope=\"col\">" .
-			    jurylink('team_categories.php','Categories') .
-			    "</th></tr></thead>\n<tbody>\n";
+			$catColors = array();
 			foreach( $categs as $cat ) {
-				if ( !isset($usedCategories[$cat['categoryid']]) ) {
-					continue;
+				if ( !empty($cat['color']) ) {
+					$catColors[$cat['color']] = TRUE;
 				}
-				echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
-				              $cat['color'] . ';"' : '') . '>' .
-				    '<td>' .
-				    jurylink('team_category.php?id=' . urlencode($cat['categoryid']),
-				             specialchars($cat['name'])) .	"</td></tr>\n";
 			}
-			echo "</tbody>\n</table>\n&nbsp;\n";
+			if ( count($catColors) ) {
+				echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
+				    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
+				    "<thead><tr><th scope=\"col\">" .
+				    jurylink('team_categories.php','Categories') .
+				    "</th></tr></thead>\n<tbody>\n";
+				foreach( $categs as $cat ) {
+					if ( !isset($usedCategories[$cat['categoryid']]) ) {
+						continue;
+					}
+					echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
+						      $cat['color'] . ';"' : '') . '>' .
+					    '<td>' .
+					    jurylink('team_category.php?id=' . urlencode($cat['categoryid']),
+						     specialchars($cat['name'])) .	"</td></tr>\n";
+				}
+				echo "</tbody>\n</table>\n&nbsp;\n";
+			}
 		}
 
 		// Print legend of scorecell colors if per-problem
