@@ -445,6 +445,28 @@ function putTeam($teamid) {
 }
 
 /**
+ * Output progress bar
+ */
+function putProgressBar() {
+	global $cdata;
+
+	$fdata = calcFreezeData($cdata);
+	$left = difftime($cdata['endtime'], now());
+	if ( !$fdata['started'] || $left < 0 ) {
+		return;
+	}
+	$passed = difftime($cdata['starttime'], now());
+	$duration = difftime($cdata['starttime'], $cdata['endtime']);
+	$percent = (int)($passed*100./$duration);
+print '
+<div class="progress" style="margin-top: 45px; height: 10px;">
+  <div class="progress-bar" role="progressbar" style="width: ' . $percent . '%;"
+       aria-valuenow="' . $percent . '" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+';
+}
+
+/**
  * Output clock
  */
 function putClock() {
