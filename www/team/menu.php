@@ -44,3 +44,4 @@ $started = checkrole('jury') || $fdata['started'];
 
 <?php putClock(); ?>
     </nav>
+<?php putProgressBar(); ?>
