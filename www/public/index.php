@@ -29,6 +29,10 @@ require(LIBWWWDIR . '/header.php');
 if ( $isstatic ) {
 	echo '<img style="width:98%; height: auto; display: block; margin: -3rem auto 0 auto;" ' .
 		'src="../images/banner.png" />';
+	// FIXME: Requested by John, remove before finals :-)
+	echo '<div class="alert alert-danger" role="alert">' .
+		'This is just a test contest with random submissions, no real data.' .
+		'</div>';
 }
 
 // call the general putScoreBoard function from scoreboard.php
