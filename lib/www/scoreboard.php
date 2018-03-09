@@ -692,8 +692,58 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	echo '</div>'; // card
 
 	// Stop here (do not leak problem number, descriptions etc).
-	// Alternatively we could only display the list of teams?
-	if ( ! $fdata['started'] && ! IS_JURY ) return;
+	// Display list of teams by group. This is targeted for World Finals.
+	if ( ! $fdata['started'] && ! IS_JURY ) {
+		$affils = $DB->q('TABLE SELECT ta.externalid, ta.name AS taname, cat.name AS catname, categoryid
+				  FROM team_affiliation ta
+				  LEFT JOIN team t USING (affilid)
+				  INNER JOIN contest c ON (c.cid = %i)
+				  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
+				  LEFT JOIN team_category cat USING (categoryid)
+				  WHERE c.cid = %i AND
+				  (c.public = 1 OR ct.teamid IS NOT NULL)
+				  AND cat.visible = 1
+				  ORDER BY catname, taname',
+				 $cdata['cid'], $cdata['cid']);
+
+		$lastCat = NULL;
+		$numCats = 0;
+		foreach ( $affils as $affil ) {
+			if ( $affil['categoryid'] != $lastCat ) {
+				if ( $lastCat != NULL ) {
+					echo '</ul>';
+					echo '</div>';
+					echo '</div>';
+				}
+				if ( $numCats % 3 == 0 ) {
+					echo '</div>';
+					echo '<br /><br />';
+					echo '<div class="card-deck">';
+				}
+				$numCats++;
+				$lastCat = $affil['categoryid'];
+				echo '<div class="card" style="font-family: Roboto, sans-serif;">';
+				echo '<div class="card-header">' . $affil['catname'] . '</div>';
+				echo '<div class="card-body">';
+				echo '<ul class="list-group list-group-flush">';
+			}
+			$affillogo = 'images/affiliations/' .  urlencode($affil['externalid']) . '.png';
+			$logoHTML = '';
+			if ( is_readable(WEBAPPDIR.'/web/'.$affillogo) ) {
+				$logoHTML = '<img src="../' . $affillogo . '" style="padding-right: 10px;" />';
+			}
+			print '<li class="list-group-item">' . $logoHTML . $affil['taname'] . '</li>';
+		}
+		echo '</ul>';
+		echo '</div>';
+		echo '</div>';
+		while ( $numCats % 3 != 0 ) {
+			$numCats++;
+			echo '<div class="card" style="border: none;"></div>';
+		}
+		echo '</div>';
+		return;
+	}
 
 	if ( $fdata['showfrozen'] ) {
 		$timerem = floor(($cdata['endtime'] - $cdata['freezetime'])/60);
