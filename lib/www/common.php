@@ -397,7 +397,7 @@ function putTeam($teamid) {
 /**
  * Output progress bar
  */
-function putProgressBar() {
+function putProgressBar($margin = 0) {
 	global $cdata;
 
 	$fdata = calcFreezeData($cdata);
@@ -409,7 +409,7 @@ function putProgressBar() {
 	$duration = difftime($cdata['starttime'], $cdata['endtime']);
 	$percent = (int)($passed*100./$duration);
 print '
-<div class="progress" style="margin-top: 45px; height: 10px;">
+<div class="progress" style="margin-top: ' . $margin . 'px; height: 10px;">
   <div class="progress-bar" role="progressbar" style="width: ' . $percent . '%;"
        aria-valuenow="' . $percent . '" aria-valuemin="0" aria-valuemax="100"></div>
 </div>
