@@ -672,9 +672,6 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$moreinfo = "contest over, waiting for results";
 	} elseif ( ! $fdata['started'] ) {
 		$moreinfo = printContestStart($cdata);
-		// Stop here (do not leak problem number, descriptions etc).
-		// Alternatively we could only display the list of teams?
-		if ( ! IS_JURY ) return;
 	} else {
 		$moreinfo = "starts: " . printtime($cdata['starttime']) .
 				" - ends: " . printtime($cdata['endtime']);
@@ -693,6 +690,10 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		putProgressBar();
 	}
 	echo '</div>'; // card
+
+	// Stop here (do not leak problem number, descriptions etc).
+	// Alternatively we could only display the list of teams?
+	if ( ! $fdata['started'] && ! IS_JURY ) return;
 
 	if ( $fdata['showfrozen'] ) {
 		$timerem = floor(($cdata['endtime'] - $cdata['freezetime'])/60);
