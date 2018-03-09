@@ -8,20 +8,28 @@
  */
 
 require('init.php');
-$title="Scoreboard";
+$title = "Scoreboard";
+$isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
+
 // set auto refresh
-$refresh=array(
+$refresh = array(
 	"after" => "30",
 	"url" => "./",
 );
+if ( $isstatic ) {
+	$refresh['url'] .= '?static=1';
+}
 
 // This reads and sets a cookie, so must be called before headers are sent.
 $filter = initScorefilter();
 
-$menu = true;
+$menu = !$isstatic;
 require(LIBWWWDIR . '/header.php');
 
-$isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
+if ( $isstatic ) {
+	echo '<img style="width:98%; height: auto; display: block; margin: -3rem auto 0 auto;" ' .
+		'src="../images/banner.png" />';
+}
 
 // call the general putScoreBoard function from scoreboard.php
 putScoreBoard($cdata, null, $isstatic, $filter);
