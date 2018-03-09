@@ -692,8 +692,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 	if ( $static && $fdata['started'] && !$fdata['stopped'] ) {
 		putProgressBar();
 	}
-	echo '<div class="card-body" style="font-family: Roboto, sans-serif;">';
-
+	echo '</div>'; // card
 
 	// Stop here (do not leak problem number, descriptions etc).
 	// Alternatively we could only display the list of teams?
@@ -789,8 +788,6 @@ collapse("filter");
 	}
 
 	renderScoreBoardTable($sdata,$myteamid,$static, null,TRUE, !IS_JURY);
-	echo '</div>'; // card-body
-	echo '</div>'; // card
 
 	// last modified date, now if we are the jury, else include the
 	// freeze time
