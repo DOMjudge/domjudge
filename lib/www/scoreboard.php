@@ -447,7 +447,8 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 				if ( is_readable(WEBAPPDIR.'/web/'.$affillogo) ) {
 					echo '<img src="../' . $affillogo . '"' .
 						' alt="'   . specialchars($teams[$team]['affilname']) . '"' .
-						' title="' . specialchars($teams[$team]['affilname']) . '" />';
+						' title="' . specialchars($teams[$team]['affilname']) . '"' .
+						' width="32" height="32" />';
 				} else {
 					echo specialchars($affilid);
 				}
@@ -730,7 +731,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 			$affillogo = 'images/affiliations/' .  urlencode($affil['externalid']) . '.png';
 			$logoHTML = '';
 			if ( is_readable(WEBAPPDIR.'/web/'.$affillogo) ) {
-				$logoHTML = '<img src="../' . $affillogo . '" style="padding-right: 10px;" />';
+				$logoHTML = '<img src="../' . $affillogo . '" style="margin-right: 10px;" width="32" height="32" />';
 			}
 			print '<li class="list-group-item">' . $logoHTML . $affil['taname'] . '</li>';
 		}
