@@ -660,35 +660,53 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$sdata = genScoreBoard($cdata, IS_JURY, $filter);
 	}
 
-	// page heading with contestname and start/endtimes
-	echo "<h1>" . specialchars($cdata['name']) . "</h1>\n\n";
-
+	$moreinfo = '';
+	$warning = '';
 	if ( $fdata['showfinal'] ) {
 		if ( empty($cdata['finalizetime']) ) {
-			echo "<h4>preliminary results - not final</h4>\n\n";
+			$moreinfo = "preliminary results - not final";
 		} else {
-			echo "<h4>final standings</h4>\n\n";
+			$moreinfo = "final standings";
 		}
+	} elseif ( $fdata['stopped'] ) {
+		$moreinfo = "contest over, waiting for results";
 	} elseif ( ! $fdata['started'] ) {
-		echo "<h4>" . printContestStart($cdata) . "</h4>\n\n";
+		$moreinfo = printContestStart($cdata);
 		// Stop here (do not leak problem number, descriptions etc).
 		// Alternatively we could only display the list of teams?
 		if ( ! IS_JURY ) return;
 	} else {
-		echo "<h4>starts: " . printtime($cdata['starttime']) .
-				" - ends: " . printtime($cdata['endtime']) . "</h4>\n\n";
+		$moreinfo = "starts: " . printtime($cdata['starttime']) .
+				" - ends: " . printtime($cdata['endtime']);
+	}
 
-		if ( $fdata['showfrozen'] ) {
-			$timerem = floor(($cdata['endtime'] - $cdata['freezetime'])/60);
-			if ( IS_JURY ) {
-				echo '<p><em><a href="../public/">The public scoreboard</a> ' .
-					"was frozen with $timerem minutes remaining.</em></p>\n";
-			} else {
-				echo "<p><em>The scoreboard was frozen with $timerem minutes " .
-					"remaining - solutions submitted in the last $timerem " .
-					"minutes of the contest are still shown as pending.</em></p>\n";
-			}
+	if ( IS_JURY ) {
+		echo '<div style="margin-top: 4em;"></div>';
+	}
+	echo '<div class="card">';
+	// page heading with contestname and start/endtimes
+	echo '<div class="card-header" style="font-family: Roboto, sans-serif; display: flex;">';
+	echo '<span style="font-weight: bold;">' . specialchars($cdata['name']) . '</span>'
+		. ' <span style="color: DimGray; margin-left: auto;">' . $moreinfo . '</span>';
+	echo '</div>';
+	if ( $static && $fdata['started'] && !$fdata['stopped'] ) {
+		putProgressBar();
+	}
+	echo '<div class="card-body" style="font-family: Roboto, sans-serif;">';
+
+
+	if ( $fdata['showfrozen'] ) {
+		$timerem = floor(($cdata['endtime'] - $cdata['freezetime'])/60);
+		if ( IS_JURY ) {
+			$warning = '<a href="../public/">The public scoreboard</a> ' .
+				"was frozen with $timerem minutes remaining";
+		} else {
+			$warning = "The scoreboard was frozen with $timerem minutes " .
+				"remaining - solutions submitted in the last $timerem " .
+				"minutes of the contest are still shown as pending.";
 		}
+		echo '<div class="alert alert-warning" role="alert" style="font-size: 80%;">' .
+			$warning . '</div>';
 	}
 
 	// The static scoreboard does not support filtering
@@ -765,6 +783,8 @@ collapse("filter");
 	}
 
 	renderScoreBoardTable($sdata,$myteamid,$static, null,TRUE, !IS_JURY);
+	echo '</div>'; // card-body
+	echo '</div>'; // card
 
 	// last modified date, now if we are the jury, else include the
 	// freeze time
