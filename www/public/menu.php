@@ -35,17 +35,18 @@ $started = checkrole('jury') || $fdata['started'];
       </div>
 <?php
 logged_in(); // fill userdata
-if ( !logged_in() ): ?>
-      <div id="loginbut"><a class="nav-link justify-content-center" href="login.php"><button type="button" class="btn btn-info btn-sm"><span class="octicon octicon-sign-in"></span> Login</button></a></div>
-<?php endif; ?>
 
-<?php
 if ( ! $isstatic ) {
 	putClock();
 }
+$margin = 22;
+if ( !logged_in() ) {
+	echo '<div id="loginbut"><a class="nav-link justify-content-center" href="login.php"><button type="button" class="btn btn-info btn-sm"><span class="octicon octicon-sign-in"></span> Login</button></a></div>';
+	$margin = 26;
+}
 ?>
     </nav>
-<?php putProgressBar(22); ?>
+<?php putProgressBar($margin); ?>
 
 
 <img style="width:98%; height: auto; display: block;margin: 20px auto 0 auto;" src="../images/banner.png" />

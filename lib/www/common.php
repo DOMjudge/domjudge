@@ -470,27 +470,9 @@ print '
  * Output clock
  */
 function putClock() {
-	global $cdata, $username, $userdata;
+	global $cdata, $username, $userdata, $cid, $cdatas;
 
 	echo '<div class="navbar-text">';
-	// timediff to end of contest
-	$fdata = calcFreezeData($cdata);
-	if ( $fdata['started'] && difftime(now(), $cdata['endtime']) < 0 ) {
-		$left = printtimediff(now(),$cdata['endtime']);
-	// time to start of contest
-	} else if ( !$fdata['started'] && difftime(now(), $cdata['activatetime']) >= 0 ) {
-		if ( $cdata['starttime_enabled'] ) {
-			$left = "- " . printtimediff(now(),$cdata['starttime']);
-		} else {
-			$left = "start delayed";
-		}
-	} else {
-		$left = " contest over";
-	}
-
-	echo "<span class=\"octicon octicon-clock\"></span> <span id=\"timeleft\">$left</span>\n";
-
-	global $cid, $cdatas;
 	// Show a contest selection form, if there are contests
 	if ( IS_JURY || count($cdatas) > 1 ) {
 		echo "<div id=\"selectcontest\">\n";
@@ -515,6 +497,24 @@ function putClock() {
 ";
 		echo "</div>\n";
 	}
+	echo '</div><div class="navbar-text">';
+
+	// timediff to end of contest
+	$fdata = calcFreezeData($cdata);
+	if ( $fdata['started'] && difftime(now(), $cdata['endtime']) < 0 ) {
+		$left = printtimediff(now(),$cdata['endtime']);
+	// time to start of contest
+	} else if ( !$fdata['started'] && difftime(now(), $cdata['activatetime']) >= 0 ) {
+		if ( $cdata['starttime_enabled'] ) {
+			$left = "- " . printtimediff(now(),$cdata['starttime']);
+		} else {
+			$left = "start delayed";
+		}
+	} else {
+		$left = " contest over";
+	}
+
+	echo "<span style=\"padding-left: 10px;\" class=\"octicon octicon-clock\"></span> <span id=\"timeleft\">$left</span>\n";
 
 	if ( IS_JURY && logged_in() ) {
 		// Show pretty name if possible
