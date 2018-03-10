@@ -783,6 +783,8 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 			                  GROUP BY affilid',
 			                 $cdata['cid'], array_keys($categids), $cdata['cid']);
 		}
+		// FIXME: temporary disable filtering on affiliation which doesn't make sense at the finals
+		$affils = array();
 
 		$affilids  = array();
 		$countries = array();

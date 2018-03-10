@@ -453,6 +453,7 @@ function putProgressBar($margin = 0) {
 	$fdata = calcFreezeData($cdata);
 	$left = difftime($cdata['endtime'], now());
 	if ( !$fdata['started'] || $left < 0 ) {
+		echo '<div style="margin-top: ' . $margin . 'px;"></div>';
 		return;
 	}
 	$passed = difftime($cdata['starttime'], now());
