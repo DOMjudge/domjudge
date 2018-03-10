@@ -33,9 +33,19 @@ if ( $isstatic ) {
 	echo '<div class="alert alert-danger" role="alert">' .
 		'This is just a test contest with random submissions, no real data.' .
 		'</div>';
-	if ( isset($_REQUEST['contest']) ) {
+
+	$requested_contest = @$_REQUEST['contest'];
+	if ( $requested_contest == 'auto' ) {
+		$requested_contest = $DB->q('MAYBEVALUE SELECT externalid
+					     FROM contest
+					     WHERE public=1
+					     AND enabled=1
+					     ORDER BY activatetime DESC
+					     LIMIT 1');
+	}
+	if ( isset($requested_contest) ) {
 		foreach ( $cdatas as $c ) {
-			if ( $c['externalid'] == $_REQUEST['contest'] ) {
+			if ( $c['externalid'] == $requested_contest ) {
 				$cdata = $c;
 				break;
 			}
