@@ -157,7 +157,7 @@ $(function() {
 
 		Cookies.set('submissions-filter', submissions_filter);
 
-		var $trs = $('.submissions > tbody tr');
+		var $trs = $('table > tbody tr');
 
 		if (filters.length == 0) {
 			$trs.show();
