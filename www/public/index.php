@@ -33,6 +33,14 @@ if ( $isstatic ) {
 	echo '<div class="alert alert-danger" role="alert">' .
 		'This is just a test contest with random submissions, no real data.' .
 		'</div>';
+	if ( isset($_REQUEST['contest']) ) {
+		foreach ( $cdatas as $c ) {
+			if ( $c['externalid'] == $_REQUEST['contest'] ) {
+				$cdata = $c;
+				break;
+			}
+		}
+	}
 }
 
 // call the general putScoreBoard function from scoreboard.php

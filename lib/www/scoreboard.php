@@ -831,6 +831,8 @@ collapse("filter");
 // -->
 </script>
 		<?php
+	} else {
+		echo '<br />';
 	}
 
 	renderScoreBoardTable($sdata,$myteamid,$static, null,TRUE, !IS_JURY);
