@@ -292,8 +292,8 @@ function problems($args)
 		}
 	}
 
-	$is_jury = checkrole('jury');
-	return array_map(function($pdata) use ($is_jury, $args) {
+	$include_test_data_count = checkrole('jury') || checkrole('judgehost');
+	return array_map(function($pdata) use ($include_test_data_count, $args) {
 		$ret = array(
 			'id'         => safe_string(rest_extid('problems',$pdata['id'])),
 			'label'      => safe_string($pdata['label']),
@@ -310,7 +310,7 @@ function problems($args)
 		if ( !empty($pdata['color']) ) {
 			$ret['color'] = $pdata['color'];
 		}
-		if ( $is_jury ) {
+		if ( $include_test_data_count ) {
 			$ret['test_data_count'] = safe_int($pdata['test_data_count']);
 		}
 		return $ret;
