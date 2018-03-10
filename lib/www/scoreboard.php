@@ -544,13 +544,8 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		// is for the jury or the per-problem information is
 		// being shown to contestants and the public.
 		if (IS_JURY || dbconfig_get('show_teams_submissions', 1)) {
-			echo '<tbody><tr id="scoresummary" title="#submitted / #correct">' .
-			     '<td title="total teams">' .
-			     jurylink(null,count($matrix)) . '</td>' .
-			     ( $SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
-			       jurylink('team_affiliations.php',count($summary['affils']) . ' / ' .
-			       count($summary['countries'])) . '</td>' : '' ) .
-			     '<td title=" ">' . jurylink(null,'Summary') . '</td>' .
+			echo '<tbody><tr style="border-top: 2px solid black;">' .
+			     '<td id="scoresummary" title="Summary" colspan=3>Summary</td>' .
 			     $totalCell . '<td title=" "></td>';
 
 			foreach( array_keys($probs) as $prob ) {
