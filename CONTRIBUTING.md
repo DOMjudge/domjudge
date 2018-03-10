@@ -7,8 +7,7 @@ requests. See below for the preferred ways to report these.
 
 ## Questions and problems
 
-Please ask any questions on the
-[DOMjudge-devel mailinglist](https://www.domjudge.org/mailman/listinfo/domjudge-devel).
+Please ask any questions on the [DOMjudge-devel mailinglist](https://www.domjudge.org/mailman/listinfo/domjudge-devel).
 Also if you have a problem and you are not 100% sure this is a bug,
 please first ask/discuss it on the mailinglist.
 
@@ -60,16 +59,13 @@ If you are interested in starting to contribute to DOMjudge, then the
 following are some pointers.
 
 First, install and configure the development version of DOMjudge.
-Either directly from the git reposity, see the
-[developer information](https://www.domjudge.org/docs/admin-manual-10.html)
-section in the admin manual, or via the
-(contributor docker image)[https://github.com/DOMjudge/domjudge-packaging/tree/master/docker-contributor].
-If you follow the admin manual for installation, this is also a great way
-to verify that the documentation is clear and complete, and to report
-anything that is not.
+Either directly from the git reposity, see the [developer information](https://www.domjudge.org/docs/admin-manual-10.html)
+section in the admin manual, or via the [contributor docker image](https://github.com/DOMjudge/domjudge-packaging/tree/master/docker-contributor).
+If you follow the admin manual for installation, this is also a great
+way to verify that the documentation is clear and complete, and to
+report anything that is not.
 
-Start hacking on your own preferred feature(s), or check the list of
-(good first issues)[https://github.com/DOMjudge/domjudge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22].
+Start hacking on your own preferred feature(s), or check the list of [good first issues](https://github.com/DOMjudge/domjudge/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
 We encourage you to contact us to let us know you're working on a feature.
 That way we can suggest good ways to implement it, and whether it would
 be useful for inclusion in the project. See also submitting pull requests
