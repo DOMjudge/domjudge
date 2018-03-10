@@ -364,17 +364,21 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 	// print the main scoreboard rows
 	$prevsortorder = -1;
 	$usedCategories = array();
+	$bestInCat = array();
 	foreach( $scores as $team => $totals ) {
 		// skip if we have limitteams and the team is not listed
 		if ( !empty($limitteams) && !in_array($team,$limitteams) ) continue;
 
 		$region_leader = '';
 		if ( isset($teams[$team]['categoryid']) ) {
-			if ( $totals['num_points'] && !isset($usedCategories[$teams[$team]['categoryid']]) ) {
+			$categoryId = $teams[$team]['categoryid'];
+			if ( $totals['num_points'] &&
+				( !isset($bestInCat[$categoryId]) || $scores[$bestInCat[$categoryId]]['rank'] == $totals['rank'] ) ) {
 				$region_leader = '<span class="badge badge-warning" style="margin-right: 2em; font-weight: normal;">' .
-					$categs[$teams[$team]['categoryid']]['name'] . '</span>';
+					$categs[$categoryId]['name'] . '</span>';
+				$bestInCat[$categoryId] = $team;
 			}
-			$usedCategories[$teams[$team]['categoryid']] = TRUE;
+			$usedCategories[$categoryId] = TRUE;
 		}
 
 		// rank, team name, total points, total time
