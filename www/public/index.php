@@ -26,6 +26,17 @@ $filter = initScorefilter();
 $menu = !$isstatic;
 require(LIBWWWDIR . '/header.php');
 
+if ( $isstatic ) {
+	if ( isset($_REQUEST['contest']) ) {
+		foreach ( $cdatas as $c ) {
+			if ( $c['externalid'] == $_REQUEST['contest'] ) {
+				$cdata = $c;
+				break;
+			}
+		}
+	}
+}
+
 // call the general putScoreBoard function from scoreboard.php
 putScoreBoard($cdata, null, $isstatic, $filter);
 
