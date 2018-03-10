@@ -113,6 +113,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 	$sqlbody =
 	    'FROM submission s
 	     LEFT JOIN team           t  USING (teamid)
+	     LEFT JOIN team_affiliation ta USING (affilid)
 	     LEFT JOIN problem        p  USING (probid)
 	     LEFT JOIN contestproblem cp USING (probid, cid)
 	     LEFT JOIN language       l  USING (langid) ' .
@@ -138,7 +139,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 		return;
 	}
 	$res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.externalresult, s.cid,
-	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
+	               s.submittime, s.judgehost, s.valid, ta.name AS teamname,
 	               cp.shortname, p.name AS probname, l.name AS langname,
 	               j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.endtime, j.judgingid,
 	               (j.endtime IS NULL AND j.valid=0 AND
@@ -239,7 +240,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 		if ( IS_JURY ) {
 			echo '<td title="t' .
 				specialchars($row['teamid']) . '">' .
-				"<a$link>" . specialchars(str_cut($row['teamname'],30)) . '</a></td>';
+				"<a$link>" . specialchars(str_cut($row['teamname'],50)) . '</a></td>';
 		}
 		echo '<td class="probid" title="' . specialchars($row['probname']) . '">' .
 			"<a$link>" . specialchars($row['shortname']) . '</a></td>';
