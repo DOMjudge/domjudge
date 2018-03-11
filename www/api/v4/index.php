@@ -1313,7 +1313,8 @@ function organizations($args)
 		$ret = array(
 			'id'        => safe_string(rest_extid('organizations', $adata['affilid'])),
 			'icpc_id'   => safe_string(rest_extid('organizations', $adata['affilid'])),
-			'name'      => $adata['name']
+			'name'      => $adata['shortname'],
+			'formal_name'      => $adata['name']
 		);
 		if ( $show_flags ) {
 			$ret['country'] = $adata['country'];
