@@ -312,6 +312,11 @@ class db
 			    . $callsite . mysqli_error($this->_connection));
 			case 2006:	// MySQL server has gone away
 			throw new RuntimeException("MySQL server has gone away");
+			case 1153:
+			$query_len = round(strlen($query)/(1024*1024));
+			throw new RuntimeException('MySQL error 1153: ' .
+				'Got a packet bigger than the configured "max_allowed_packet" ' .
+				'(current query was ~' . $query_len . 'MB).');
 			default:
 			throw new RuntimeException("SQL error, " . $callsite
 			    . "Error#" . mysqli_errno($this->_connection) . ": "
