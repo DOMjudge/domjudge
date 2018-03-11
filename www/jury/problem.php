@@ -42,15 +42,20 @@ require(LIBWWWDIR . '/header.php');
 if ( isset($_POST['upload']) ) {
 	if ( !empty($_FILES['problem_archive']['tmp_name'][0]) ) {
 		foreach($_FILES['problem_archive']['tmp_name'] as $fileid => $tmpname) {
-			$cid = $_POST['contest'];
-			checkFileUpload( $_FILES['problem_archive']['error'][$fileid] );
-			$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
-			$newid = importZippedProblem($zip, $_FILES['problem_archive']['name'][$fileid],
-			                             empty($id) ? NULL : $id, $cid);
-			$zip->close();
-			eventlog('problem', $newid, empty($id) ? 'create' : 'update', $cid);
-			auditlog('problem', $newid, 'upload zip',
-			         $_FILES['problem_archive']['name'][$fileid]);
+			try {
+				$cid = $_POST['contest'];
+				checkFileUpload( $_FILES['problem_archive']['error'][$fileid] );
+				$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
+				$newid = importZippedProblem($zip, $_FILES['problem_archive']['name'][$fileid],
+							     empty($id) ? NULL : $id, $cid);
+				eventlog('problem', $newid, empty($id) ? 'create' : 'update', $cid);
+				auditlog('problem', $newid, 'upload zip',
+					 $_FILES['problem_archive']['name'][$fileid]);
+			} catch (RuntimeException $e) {
+				error($e->getMessage());
+			} finally {
+				$zip->close();
+			}
 		}
 		if ( count($_FILES['problem_archive']['tmp_name']) == 1 ) {
 			$probid = empty($newid) ? $id : $newid;
