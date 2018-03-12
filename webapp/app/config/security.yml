@@ -50,6 +50,8 @@ security:
               check_path: login
               csrf_token_generator: security.csrf.token_manager
               use_referer: true
+              default_target_path: legacy.index
+              always_use_default_target_path: true
 
             logout:
                 path:   logout
