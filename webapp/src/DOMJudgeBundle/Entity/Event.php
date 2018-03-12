@@ -153,6 +153,54 @@ class Event
 	}
 
 	/**
+	 * Set endpointtype
+	 *
+	 * @param string $endpointtype
+	 *
+	 * @return Event
+	 */
+	public function setEndpointtype($endpointtype)
+	{
+		$this->endpointtype = $endpointtype;
+
+		return $this;
+	}
+
+	/**
+	 * Get endpointtype
+	 *
+	 * @return string
+	 */
+	public function getEndpointtype()
+	{
+		return $this->endpointtype;
+	}
+
+	/**
+	 * Set endpointid
+	 *
+	 * @param string $endpointid
+	 *
+	 * @return Event
+	 */
+	public function setEndpointid($endpointid)
+	{
+		$this->endpointid = $endpointid;
+
+		return $this;
+	}
+
+	/**
+	 * Get endpointid
+	 *
+	 * @return string
+	 */
+	public function getEndpointid()
+	{
+		return $this->endpointid;
+	}
+
+	/**
 	 * Set datatype
 	 *
 	 * @param string $datatype
