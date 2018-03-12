@@ -254,7 +254,7 @@ function problems($args)
 
 	// Check that user has access to the problems in this contest:
 	if ( checkrole('team') ) $cdatas = getCurContests(TRUE, $userdata['teamid']);
-	if ( checkrole('jury') || checkrole('judgehost') ||
+	if ( checkrole('jury') ||
 	     (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0) ) {
 
 		// We sort the problems by shortname, i.e in the same way we
@@ -292,8 +292,8 @@ function problems($args)
 		}
 	}
 
-	$include_test_data_count = checkrole('jury') || checkrole('judgehost');
-	return array_map(function($pdata) use ($include_test_data_count, $args) {
+	$is_jury = checkrole('jury');
+	return array_map(function($pdata) use ($is_jury, $args) {
 		$ret = array(
 			'id'         => safe_string(rest_extid('problems',$pdata['id'])),
 			'label'      => safe_string($pdata['label']),
@@ -310,7 +310,7 @@ function problems($args)
 		if ( !empty($pdata['color']) ) {
 			$ret['color'] = $pdata['color'];
 		}
-		if ( $include_test_data_count ) {
+		if ( $is_jury ) {
 			$ret['test_data_count'] = safe_int($pdata['test_data_count']);
 		}
 		return $ret;
