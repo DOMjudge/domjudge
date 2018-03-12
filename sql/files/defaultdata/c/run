@@ -5,8 +5,24 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
-MAINSOURCE="$1"
+MAINSOURCE=""
 
+# Filter out files without .c extension from the list of source
+# files. Note that POSIX shell does *not* support arrays, so we store
+# them in a single variable that has to be used unquoted. We don't
+# need to quote the files since they can only contain "nice" characters.
+SOURCES=''
+while [ $# -gt 0 ]; do
+	if [ "x${1%.c}" != "x$1" ]; then
+		SOURCES="$SOURCES $1"
+		[ -z "$MAINSOURCE" ] && MAINSOURCE="$1"
+	fi
+	shift
+done
+if [ -z "$SOURCES" ]; then
+	echo "No source files found with '.c' extension."
+	exit 1
+fi
 # -x c:     Explicitly set compile language to C (no C++ nor object files
 #           autodetected by extension)
 # -g:		Enable debug symbols
@@ -14,5 +30,5 @@ MAINSOURCE="$1"
 # -static:	Static link with all libraries
 # -pipe:	Use pipes for communication between stages of compilation
 # -lm:		Link with math-library (has to be last argument!)
-gcc -x c -g -O2 -std=gnu11 -static -o "$DEST" "$@" -lm
+gcc -x c -g -O2 -std=gnu11 -static -o "$DEST" $SOURCES -lm
 exit $?

@@ -5,7 +5,28 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
-MAINSOURCE="$1"
+MAINSOURCE=""
+
+EXTENSIONS=".cc .cpp .cxx .c++ .C"
+
+# Filter out files without extension .cc from the list of source
+# files. Note that POSIX shell does *not* support arrays, so we store
+# them in a single variable that has to be used unquoted. We don't
+# need to quote the files since they can only contain "nice" characters.
+SOURCES=''
+while [ $# -gt 0 ]; do
+	for ext in $EXTENSIONS ; do
+		if [ "x${1%$ext}" != "x$1" ]; then
+			SOURCES="$SOURCES $1"
+			[ -z "$MAINSOURCE" ] && MAINSOURCE="$1"
+		fi
+	done
+	shift
+done
+if [ -z "$SOURCES" ]; then
+	echo "No source files found with extensions '$EXTENSIONS'."
+	exit 1
+fi
 
 # -x c++:   Explicitly set compile language to C++ (no object files or
 #           other languages autodetected by extension)
@@ -13,5 +34,5 @@ MAINSOURCE="$1"
 # -O2:		Level 2 optimizations (default for speed)
 # -static:	Static link with all libraries
 # -pipe:	Use pipes for communication between stages of compilation
-g++ -x c++ -g -O2 -std=gnu++14 -static -o "$DEST" "$@"
+g++ -x c++ -g -O2 -std=gnu++14 -static -o "$DEST" $SOURCES
 exit $?

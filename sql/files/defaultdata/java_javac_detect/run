@@ -14,7 +14,7 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
-MAINSOURCE="$1"
+MAINSOURCE=""
 MAINCLASS=""
 
 # Stack size in the JVM in KB. Note that this will be deducted from
@@ -26,6 +26,23 @@ MEMSTACK=65536
 # versions of the jvm, but might need increasing in some cases.
 MEMRESERVED=131072
 
+# Filter out files without .java extension from the list of source
+# files. Note that POSIX shell does *not* support arrays, so we store
+# them in a single variable that has to be used unquoted. We don't
+# need to quote the files since they can only contain "nice" characters.
+SOURCES=''
+while [ $# -gt 0 ]; do
+	if [ "x${1%.java}" != "x$1" ]; then
+		SOURCES="$SOURCES $1"
+		[ -z "$MAINSOURCE" ] && MAINSOURCE="$1"
+	fi
+	shift
+done
+if [ -z "$SOURCES" ]; then
+	echo "No source files found with '.java' extension."
+	exit 1
+fi
+
 # Java needs filename to match main class:
 if [ -z "$ENTRY_POINT" ]; then
 	echo "Info: no ENTRY_POINT provided, trying to detect main class."
@@ -36,7 +53,7 @@ fi
 TMPFILE=$(mktemp --tmpdir domjudge_javac_output.XXXXXX) || exit 1
 
 # Byte-compile:
-javac -encoding UTF-8 -sourcepath . -d . "$@" 2> "$TMPFILE"
+javac -encoding UTF-8 -sourcepath . -d . $SOURCES 2> "$TMPFILE"
 EXITCODE=$?
 
 if [ -z "$MAINCLASS" ]; then

@@ -14,7 +14,7 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
-MAINSOURCE="${ENTRY_POINT:-$1}"
+MAINSOURCE="$ENTRY_POINT"
 
 # Filter out files without .py extension from the list of source
 # files. Note that POSIX shell does *not* support arrays, so we store
@@ -24,6 +24,7 @@ SOURCES=''
 while [ $# -gt 0 ]; do
 	if [ "x${1%.py}" != "x$1" ]; then
 		SOURCES="$SOURCES $1"
+		[ -z "$MAINSOURCE" ] && MAINSOURCE="$1"
 	fi
 	shift
 done
