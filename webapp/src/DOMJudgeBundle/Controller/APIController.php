@@ -272,9 +272,14 @@ class APIController extends FOSRestController {
 						->setParameter(':types', $typeFilter);
 				}
 				if ( !$isJury ) {
+					$restricted_types = ['judgements', 'runs', 'clarifications'];
+					if ( $contest->getStarttime() === NULL ||
+					     time() < $contest->getStarttime() ) {
+						$restricted_types[] = 'problems';
+					}
 					$qb = $qb
 						->andWhere('e.endpointtype NOT IN (:restricted_types)')
-						->setParameter(':restricted_types', ['judgements', 'runs']);
+						->setParameter(':restricted_types',$restricted_types);
 				}
 
 				$q = $qb->getQuery();
