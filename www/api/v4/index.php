@@ -1393,7 +1393,7 @@ function teams($args)
 
 	// Run query and return result
 	$tdatas = $DB->q($query, $category, $affiliation, $teamid);
-	return array_map(function($tdata) use ($args) {
+	return array_map(function($tdata) use ($args, $show_flags) {
 		$group_ids = array();
 		if ( isset($tdata['categoryid']) ) {
 			$group_ids[] = safe_string(rest_extid('groups', $tdata['categoryid']));
