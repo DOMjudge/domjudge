@@ -72,6 +72,8 @@ EXITCODE=$?
 
 # Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
 MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
+# FIXME: Use a fixed value of 1920m for World Finals
+MEMLIMITJAVA=1966080
 
 # Write executing script:
 # Executes java byte-code interpreter with following options (prefixed
@@ -89,7 +91,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec kotlin -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k -J-DONLINE_JUDGE=1 -J-DDOMJUDGE=1 '$MAINCLASS' "\$@"
+exec kotlin -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"
