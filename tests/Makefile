@@ -14,6 +14,8 @@ SUBMIT = \
 		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
 		if [ "$${i%test-multifile-multipackage.java.zip}" != "$$i" ]; then \
 			$(SUBMITCMD) $(SUBMITOPTS) -e zoo.goo.moo.b.B "$$main" "$$tmp/"* ; \
+		elif [ "$${i%test-extra-file.java.zip}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -e Main "$$main" "$$tmp/"* ; \
 		else \
 			$(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; \
 		fi ; \
