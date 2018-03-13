@@ -33,8 +33,25 @@ if [ -n "$ENTRY_POINT" ]; then
 	MAINCLASS="$ENTRY_POINT"
 fi
 
+# Filter out files without .kt extension from the list of source
+# files. Note that POSIX shell does *not* support arrays, so we store
+# them in a single variable that has to be used unquoted. We don't
+# need to quote the files since they can only contain "nice" characters.
+SOURCES=''
+while [ $# -gt 0 ]; do
+	if [ "x${1%.kt}" != "x$1" ]; then
+		SOURCES="$SOURCES $1"
+		[ -z "$MAINSOURCE" ] && MAINSOURCE="$1"
+	fi
+	shift
+done
+if [ -z "$SOURCES" ]; then
+	echo "No source files found with '.kt' extension."
+	exit 1
+fi
+
 # Byte-compile:
-kotlinc "$@"
+kotlinc $SOURCES
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
