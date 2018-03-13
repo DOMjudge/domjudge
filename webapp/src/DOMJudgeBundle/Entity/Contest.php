@@ -297,7 +297,7 @@ class Contest
 		return $this->activatetime;
 	}
 
-        /**
+	/**
 	 * Set starttime
 	 *
 	 * @param double $starttime
@@ -312,12 +312,14 @@ class Contest
 	}
 
 	/**
-	 * Get starttime
+	 * Get starttime, or NULL if disabled
 	 *
 	 * @return double
 	 */
 	public function getStarttime()
 	{
+		if ( !$this->getStarttimeEnabled() ) return NULL;
+
 		return $this->starttime;
 	}
 
