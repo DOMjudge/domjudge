@@ -554,11 +554,31 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			     $totalCell . '<td title=" "></td>';
 
 			foreach( array_keys($probs) as $prob ) {
-				$str = $summary['problems'][$prob]['num_submissions'] . '/' .
-				       $summary['problems'][$prob]['num_correct'];
-				echo '<td>' .
-				     jurylink('problem.php?id=' . urlencode($prob),$str) .
-				     '</td>';
+				$numAccepted = '<span class="octicon octicon-thumbsup"> </span>' .
+					'<span style="font-size:90%;" title="number of accepted submissions"> ' .
+					$summary['problems'][$prob]['num_correct'] .
+					'</span>';
+				$numRejected = '<span class="octicon octicon-thumbsdown"> </span>' .
+					'<span style="font-size:90%;" title="number of rejected submissions"> ' .
+					( $summary['problems'][$prob]['num_submissions'] - $summary['problems'][$prob]['num_correct'] ) .
+					'</span>';
+				$numPending = '<span class="octicon octicon-question"> </span>' .
+					'<span style="font-size:90%;" title="number of pending submissions"> ' .
+					$summary['problems'][$prob]['num_pending'] .
+					'</span>';
+				$best = @$summary['problems'][$prob]['best_time_sort'][0];
+				$best = empty($best) ? 'n/a' : ((int)($best/60)) . 'min';
+				$best = '<span class="octicon octicon-clock"> </span>' .
+					'<span style="font-size:90%;" title="first solved"> ' . $best . '</span>';
+
+				$str = 
+					$numAccepted . '<br />' .
+					$numRejected . '<br />' .
+					$numPending . '<br />' .
+					$best;
+				echo '<td style="text-align: left;">' .
+					jurylink('problem.php?id=' . urlencode($prob),$str) .
+					'</td>';
 			}
 			echo "</tr>\n</tbody>\n";
 		}
