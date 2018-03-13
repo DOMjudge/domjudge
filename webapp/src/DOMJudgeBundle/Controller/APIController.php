@@ -524,8 +524,14 @@ class APIController extends FOSRestController {
 				foreach ($events as $event) {
 					// FIXME: use the dj_* wrapper as in lib/lib.wrapper.php.
 					$data = json_decode(stream_get_contents($event['content']), TRUE);
-					if ( !$isJury && $event['endpointtype'] == 'submissions' ) {
-						unset($data['entry_point']);
+					// Filter fields with specific access restrictions.
+					if ( !$isJury ) {
+						if ( $event['endpointtype'] == 'submissions' ) {
+							unset($data['entry_point']);
+						}
+						if ( $event['endpointtype'] == 'problems' ) {
+							unset($data['test_data_count']);
+						}
 					}
 					$result = array(
 						'id'        => (string)$event['eventid'],
