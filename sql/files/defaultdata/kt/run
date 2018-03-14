@@ -51,7 +51,7 @@ if [ -z "$SOURCES" ]; then
 fi
 
 # Byte-compile:
-kotlinc $SOURCES
+kotlinc -d . $SOURCES
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
