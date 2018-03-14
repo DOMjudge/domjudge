@@ -28,11 +28,9 @@ if [ -z "$SOURCES" ]; then
 	exit 1
 fi
 
-# -x c++:   Explicitly set compile language to C++ (no object files or
-#           other languages autodetected by extension)
 # -g:		Enable debug symbols
 # -O2:		Level 2 optimizations (default for speed)
 # -static:	Static link with all libraries
 # -pipe:	Use pipes for communication between stages of compilation
-g++ -x c++ -g -O2 -std=gnu++14 -static -o "$DEST" $SOURCES
+g++ -g -O2 -std=gnu++14 -static -o "$DEST" $SOURCES
 exit $?

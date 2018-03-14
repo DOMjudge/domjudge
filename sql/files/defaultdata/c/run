@@ -23,12 +23,10 @@ if [ -z "$SOURCES" ]; then
 	echo "No source files found with '.c' extension."
 	exit 1
 fi
-# -x c:     Explicitly set compile language to C (no C++ nor object files
-#           autodetected by extension)
 # -g:		Enable debug symbols
 # -O2:		Level 2 optimizations (default for speed)
 # -static:	Static link with all libraries
 # -pipe:	Use pipes for communication between stages of compilation
 # -lm:		Link with math-library (has to be last argument!)
-gcc -x c -g -O2 -std=gnu11 -static -o "$DEST" $SOURCES -lm
+gcc -g -O2 -std=gnu11 -static -o "$DEST" $SOURCES -lm
 exit $?
