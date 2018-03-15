@@ -148,6 +148,8 @@ UPDATE `language` SET `externalid` = 'python2'    WHERE `langid` = 'py2';
 UPDATE `language` SET `externalid` = 'python3'    WHERE `langid` = 'py3';
 UPDATE `language` SET `externalid` = 'scala'      WHERE `langid` = 'scala';
 
+UPDATE `language` SET `extensions` = '["cpp","cc","cxx","c++"]' WHERE `langid` = 'cpp';
+
 UPDATE `configuration` SET `public` = '1' WHERE `name` IN (
   'clar_categories', 'sourcesize_limit', 'sourcefiles_limit',
   'score_in_seconds', 'show_flags', 'show_affiliations',

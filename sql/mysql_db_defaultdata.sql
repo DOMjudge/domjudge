@@ -96,7 +96,7 @@ INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `allow_sub
 ('awk', NULL, 'AWK', '["awk"]', 0, 1, 1, 'awk'),
 ('bash', NULL, 'Bash shell', '["bash"]', 0, 1, 1, 'bash'),
 ('c', 'c', 'C', '["c"]', 1, 1, 1, 'c'),
-('cpp', 'cpp', 'C++', '["cpp","cc","c++"]', 1, 1, 1, 'cpp'),
+('cpp', 'cpp', 'C++', '["cpp","cc","cxx","c++"]', 1, 1, 1, 'cpp'),
 ('csharp', 'csharp', 'C#', '["csharp","cs"]', 0, 1, 1, 'csharp'),
 ('f95', NULL, 'Fortran', '["f95","f90"]', 0, 1, 1, 'f95'),
 ('hs', 'haskell', 'Haskell', '["hs","lhs"]', 0, 1, 1, 'hs'),
