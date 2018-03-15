@@ -7,7 +7,7 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE=""
 
-EXTENSIONS=".cc .cpp .cxx .c++ .C"
+EXTENSIONS=".cc .cpp .cxx .c++"
 
 # Filter out files without extension .cc from the list of source
 # files. Note that POSIX shell does *not* support arrays, so we store
