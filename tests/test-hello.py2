@@ -1,11 +1,7 @@
-# This should give CORRECT on the default problem 'hello'.
+# This should give COMPILER-ERROR on the default problem 'hello'.
 #
-# @EXPECTED_RESULTS@: CORRECT
+# We don't allow the .py2 extension.
+#
+# @EXPECTED_RESULTS@: COMPILER-ERROR
 
-import sys,os;
-
-if os.getenv('DOMJUDGE', 'none') != 'none':
-    print "Hello world!"
-else:
-    print "Environment variable DOMJUDGE not defined."
-    sys.exit(1)
+print("Hello world!")

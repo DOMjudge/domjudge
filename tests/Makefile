@@ -24,6 +24,14 @@ SUBMIT = \
 		if [ "$${i%.java}" != "$$i" ]; then \
 			entry=`grep "class .* {" "$$i" | sed -e 's/.*class //' | sed -e 's/ .*//'`; \
 			$(SUBMITCMD) $(SUBMITOPTS) -e "$$entry" "$$i" ; \
+		elif [ "$${i%as_cpp.*}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -l cpp "$$i" ; \
+		elif [ "$${i%as_c.*}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -l c "$$i" ; \
+		elif [ "$${i%as_py2.*}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -l py2 "$$i" ; \
+		elif [ "$${i%as_py3.*}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -l py3 "$$i" ; \
 		else \
 			$(SUBMITCMD) $(SUBMITOPTS) "$$i" ; \
 		fi ; \
