@@ -91,7 +91,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec kotlin -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
+exec kotlin -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Dfile.encoding=UTF-8 -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"
