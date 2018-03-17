@@ -591,7 +591,9 @@ function judgings_POST($args)
 	              ')', $submitid, $row['cid'], now(), $host,
 	              @$row['rejudgingid'], @$prev_rejudgingid, !$is_rejudge, $jury_member);
 
-	eventlog('judging', $jid, 'create', $row['cid']);
+	if ( !$is_rejudge ) {
+		eventlog('judging', $jid, 'create', $row['cid']);
+	}
 
 	$DB->q('COMMIT');
 
@@ -635,7 +637,7 @@ function judgings_PUT($args)
 			       base64_decode($args['output_compile']),
 			       $judgingid, $args['judgehost']);
 		} else {
-			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
+			$row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid, s.rejudgingid
 			               FROM judging
 			               LEFT JOIN submission s USING(submitid)
 			               WHERE judgingid = %i',$judgingid);
@@ -651,7 +653,7 @@ function judgings_PUT($args)
 
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
-			if ( ! dbconfig_get('verification_required', 0) ) {
+			if ( ! dbconfig_get('verification_required', 0) && !isset($row['rejudgingid']) ) {
 				eventlog('judging', $judgingid, 'update', $row['cid']);
 			}
 			$DB->q('COMMIT');
@@ -700,7 +702,8 @@ function judging_runs_POST($args)
 		$args['runresult'] = $results_remap[$args['runresult']];
 	}
 
-	$jud = $DB->q('TUPLE SELECT judgingid, cid, result FROM judging
+	$jud = $DB->q('TUPLE SELECT judgingid, cid, result, rejudgingid
+		       FROM judging
 	               WHERE judgingid = %i', $args['judgingid']);
 
 	$DB->q('START TRANSACTION');
@@ -715,7 +718,9 @@ function judging_runs_POST($args)
 	                base64_decode($args['output_error']),
 	                base64_decode($args['output_system']));
 
-	eventlog('judging_run', $runid, 'create', $jud['cid']);
+	if ( !isset($jud['rejudgingid']) ) {
+		eventlog('judging_run', $runid, 'create', $jud['cid']);
+	}
 
 	$DB->q('COMMIT');
 
@@ -777,7 +782,9 @@ function judging_runs_POST($args)
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
 			if ( ! dbconfig_get('verification_required', 0) ) {
-				eventlog('judging', $args['judgingid'], 'update', $row['cid']);
+				if ( !isset($jud['rejudgingid']) ) {
+					eventlog('judging', $args['judgingid'], 'update', $row['cid']);
+				}
 				if ( $result == 'correct' ) {
 					// prevent duplicate balloons in case of multiple correct submissions
 					$numcorrect = $DB->q('VALUE SELECT count(submitid)
