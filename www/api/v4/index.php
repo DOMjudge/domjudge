@@ -703,7 +703,7 @@ function judging_runs_POST($args)
 	}
 
 	$jud = $DB->q('TUPLE SELECT judgingid, cid, result, rejudgingid
-		       FROM judging
+	               FROM judging
 	               WHERE judgingid = %i', $args['judgingid']);
 
 	$DB->q('START TRANSACTION');

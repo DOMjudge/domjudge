@@ -54,9 +54,9 @@ if ( isset($_REQUEST['apply']) ) {
 
 	$res = $DB->q('SELECT s.submitid, s.cid, s.teamid, s.probid, j.judgingid
 	               FROM submission s
-		       LEFT JOIN judging j USING(submitid)
-		       WHERE s.rejudgingid=%i
-		       AND j.rejudgingid=%i', $id, $id);
+	               LEFT JOIN judging j USING(submitid)
+	               WHERE s.rejudgingid=%i
+	               AND j.rejudgingid=%i', $id, $id);
 
 	auditlog('rejudging', $id, 'applying rejudge', '(start)');
 
@@ -85,7 +85,7 @@ if ( isset($_REQUEST['apply']) ) {
 		// update event log
 		eventlog('judging', $row['judgingid'], 'create', $row['cid']);
 		$run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
-				   WHERE judgingid=%i', $row['judgingid']);
+		                   WHERE judgingid=%i', $row['judgingid']);
 		foreach ($run_ids as $run_id) {
 			eventlog('judging_run', $run_id, 'create', $row['cid']);
 		}
