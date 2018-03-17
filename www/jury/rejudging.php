@@ -52,9 +52,11 @@ if ( isset($_REQUEST['apply']) ) {
 		error("Rejudging already " . ( $rejdata['valid'] ? 'applied.' : 'canceled.'));
 	}
 
-	$res = $DB->q('SELECT submitid, cid, teamid, probid
-	               FROM submission
-	               WHERE rejudgingid=%i', $id);
+	$res = $DB->q('SELECT s.submitid, s.cid, s.teamid, s.probid, j.judgingid
+	               FROM submission s
+		       LEFT JOIN judging j USING(submitid)
+		       WHERE s.rejudgingid=%i
+		       AND j.rejudgingid=%i', $id, $id);
 
 	auditlog('rejudging', $id, 'applying rejudge', '(start)');
 
@@ -65,6 +67,8 @@ if ( isset($_REQUEST['apply']) ) {
 	ob_implicit_flush(true);
 	ob_end_flush();
 
+	// clear GET array because otherwise the eventlog subrequest will still include the rejudging id
+	$_GET = array();
 	echo "<p>\n";
 	while ( $row = $res->next() ) {
 		echo "s" . specialchars($row['submitid']) . ", ";
@@ -78,6 +82,13 @@ if ( isset($_REQUEST['apply']) ) {
 		// remove relation from submission to rejudge
 		$DB->q('UPDATE submission SET rejudgingid=NULL
 		        WHERE submitid=%i', $row['submitid']);
+		// update event log
+		eventlog('judging', $row['judgingid'], 'create', $row['cid']);
+		$run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
+				   WHERE judgingid=%i', $row['judgingid']);
+		foreach ($run_ids as $run_id) {
+			eventlog('judging_run', $run_id, 'create', $row['cid']);
+		}
 		// last update cache
 		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 		$DB->q('COMMIT');
