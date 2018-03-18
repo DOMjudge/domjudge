@@ -29,7 +29,7 @@ domserver: $(PARAMS) $(SUBST_CONFIGS)
 install-domserver:
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
 # KLUDGE: how to install a tree of files with correct permissions?
-	for d in app bin src web ; do \
+	for d in app bin src web tests ; do \
 		cp -R           -t $(DESTDIR)$(domserver_webappdir) $$d ; \
 		chmod -R a+rX      $(DESTDIR)$(domserver_webappdir)/$$d ; \
 	done
