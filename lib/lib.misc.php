@@ -1108,7 +1108,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		$cids[] = $cid;
 	} else {
 		if ( $type==='problems' ) {
-			$cids = $DB->q('TABLE SELECT cid FROM contestproblem WHERE probid = %i', $dataid);
+			$cids = $DB->q('COLUMN SELECT cid FROM contestproblem WHERE probid = %i', $dataid);
 		} elseif( $type==='teams' ) {
 			$cids = getCurContests(FALSE, $dataid);
 		} else {
