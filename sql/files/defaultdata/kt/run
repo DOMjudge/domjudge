@@ -82,6 +82,7 @@ MEMLIMITJAVA=1966080
 # -Xms: initial size of memory, improves runtime stability
 # -XX:+UseSerialGC: Serialized garbage collector improves runtime stability
 # -Xss${MEMSTACK}k: stack size as configured abve
+# -Dfile.encoding=UTF-8: set file encoding to UTF-8
 cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute java interpreter on source.
@@ -91,7 +92,7 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec kotlin -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Dfile.encoding=UTF-8 -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
+exec kotlin -Dfile.encoding=UTF-8 -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"
