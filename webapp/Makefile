@@ -37,6 +37,8 @@ install-domserver:
 		$(INSTALL_WEBSITE) -m 0775 -d $(DESTDIR)$(domserver_webappdir)/var/$$d ; \
 	done
 	-$(INSTALL_WEBSITE) -t $(DESTDIR)$(domserver_webappdir)/var var/*.php var/*.cache
+	cp        -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist
+	chmod a+r    $(DESTDIR)$(domserver_webappdir)/phpunit.xml.dist
 
 install-docs:
 	$(INSTALL_DATA) -T web/images/countries/README    $(DESTDIR)$(domjudge_docdir)/README.country_flags
