@@ -85,7 +85,13 @@ class FallbackController extends Controller
 		$G_SYMFONY = $this->container->get('domjudge.domjudge');
 		require($thefile);
 
-		$response = Response::create(ob_get_clean(), http_response_code());
+		$http_response_code = http_response_code();
+		if ( $http_response_code === FALSE ) {
+			// When called from phpunit, the response is not set,
+			// which would break the following Response::create call.
+			$http_response_code = 200;
+		}
+		$response = Response::create(ob_get_clean(), $http_response_code);
 
 		// Headers may already have been sent on pages with streaming output.
 		if ( !headers_sent() ) {
