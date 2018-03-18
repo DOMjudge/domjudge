@@ -30,12 +30,11 @@
 
 \section*{Summary}
 
-Here follows a short summary of the system interface. This is meant as
-a quick introduction, to be able to start using the system. It is,
-however, strongly advised that at least one of your team's members
-also reads the rest of this manual. There are specific details of this
-contest control system that might become of importance when you run into
-problems. \textbf{BE WARNED!}
+This page gives a short summary of the system interface. The summary is meant
+as a quick introduction, to be able to start using the system. It is, however,
+strongly advised your team reads the entire document.
+There are specific details of this contest control system that might become of
+importance when you run into problems. \textbf{BE WARNED!}
 
 DOMjudge works through a web interface that can be found at
 \url{\BASEURL team}. See figures~\ref{fig:team-overview}
@@ -108,14 +107,16 @@ program \cmd{submit} or using the web interface.
 
 \textbf{Syntax:} \cmd{submit [options] filename.ext ...}
 
-The submit program takes the name (label) of the problem from
+The submit program makes some guesses based on the name and extension of the
+file to submit:
+It guesses the name (label) of the problem from
 \cmd{filename} and the programming language from the extension
-\cmd{ext}. For Java it uses the \cmd{filename} as main class;
+\cmd{ext}. For Java it uses the \cmd{filename} as a guess for the main class;
 for Kotlin it capitalizes \cmd{filename} and appends \cmd{Kt}
-to compute the main class name. For Python 2 and 3, the first
-filename is used as main file.
+to compute the guess for the main class name. For Python 2 and 3, the first
+filename is used as a guess for the main file.
 
-These decisions can be overruled with the options
+These guesses can be overruled with the options
 \cmd{-p problemname}, \cmd{-l~languageextension} and
 \cmd{-e~entry\_point}.
 See \cmd{submit --help} for a complete list of all options,
@@ -124,7 +125,7 @@ when the help text does not fit on one screen.
 
 \cmd{submit} will check your file and warns you for some problems:
 for example when the file has not been modified for a long time or
-when it's larger than the maximum source code size.
+when it's larger than the maximum source code size (see section~\ref{runlimits}).
 Filenames must start with an alphanumerical character and may contain only
 alphanumerical characters and \cmd{+.\_-}. You can specify multiple files
 to be part of this submission (see section~\ref{howjudged} `How are
@@ -139,8 +140,8 @@ an error message otherwise.
 The submit program uses a directory \cmd{\USERSUBMITDIR} in the
 home directory of your account where it stores temporary files for
 submission and also a log file \cmd{submit.log}. Do not remove or
-change this directory, otherwise the \cmd{submit} program might fail to
-function correctly.
+change this directory or its contents, otherwise the \cmd{submit} program might
+fail to function correctly.
 }
 
 \subsection{Web interface}
@@ -242,8 +243,8 @@ reply to everyone if it is relevant for all.
 
 \section{How are submissions being judged?}\label{howjudged}
 
-The \DOMjudge contest control system is fully automated. In principle no human
-interaction is necessary. Judging is done in the following way:
+The \DOMjudge contest control system is fully automated.
+Judging is done in the following way:
 
 \subsection{Submitting solutions}
 
@@ -274,16 +275,18 @@ the same options as on the autojudges.
 After your program has compiled successfully it will be executed and
 its output compared to the output of the judges. Before comparing the
 output, the exit status of your program is checked: if your program
-gives the correct answer, but exits with a non-zero exit code, the
-result will be a \textsc{run-error}! There are some restrictions during
+exits with a non-zero exit code, the
+result will be a \textsc{run-error} even if the output of the program is correct!
+There are some restrictions during
 execution. If your program violates these it will also be aborted
 with a \textsc{run-error}, see section~\ref{runlimits}.
 
 When comparing program output, it has to exactly match to output of
 the judge, except that some extra whitespace may be ignored. So take
-care that you follow the output specifications. In case of problem
-statements which do not have unique output (e.g. with floating point
-answers), the judges may use a modified comparison function.
+care that you follow the output specifications. The judges may accept
+multiple answers as correct answer (e.g. with floating point answers),
+the \emph{Output} section of the problem statement will contain the details in
+these cases.
 
 \subsection{Restrictions}\label{runlimits}
 
