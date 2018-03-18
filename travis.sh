@@ -35,6 +35,9 @@ EOF
 export SYMFONY_ENV="prod"
 composer install
 
+# run phpunit tests
+lib/vendor/bin/phpunit --stderr -c webapp/phpunit.xml.dist
+
 # downgrade java version outside of chroot since this didn't work
 sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle-java8-installer oracle-java9-installer
 
@@ -63,9 +66,6 @@ sudo service nginx restart
 # configure and restart php-fpm
 sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "$HOME/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/"
 sudo "$HOME/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm"
-
-# run phpunit tests
-lib/vendor/bin/phpunit --stderr -c webapp/phpunit.xml.dist
 
 # add users/group for judgedaemons (FIXME: make them configurable)
 sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-0
