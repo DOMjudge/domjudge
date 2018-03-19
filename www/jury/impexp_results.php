@@ -87,207 +87,120 @@ foreach ($probs as $probData) {
 usort($first_to_solve, function ($a, $b) {
 	return $a['problem'] <=> $b['problem'];
 });
+
+$title = sprintf('Results for %s', $cdata['name']);
+require(LIBWWWDIR . '/impexp_header.php');
 ?>
-<!DOCTYPE html>
-<html lang="en" xml:lang="en">
-<head>
-	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION ?> -->
-	<meta charset="<?php echo DJ_CHARACTER_SET ?>"/>
-	<title>Results for <?= $cdata['name'] ?></title>
-	<style>
-
-		/*!
-		 * Styling based on:
-		 * Bootstrap v4.0.0 (https://getbootstrap.com)
-		 * Copyright 2011-2018 The Bootstrap Authors
-		 * Copyright 2011-2018 Twitter, Inc.
-		 * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
-		 */
-		html {
-			font-family: sans-serif;
-			line-height: 1.15;
-			-webkit-text-size-adjust: 100%;
-			-ms-text-size-adjust: 100%;
-			-ms-overflow-style: scrollbar;
-			-webkit-tap-highlight-color: transparent;
-		}
-
-		body {
-			margin: 0;
-			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-			font-size: 1rem;
-			font-weight: 400;
-			line-height: 1.5;
-			color: #212529;
-			text-align: left;
-			background-color: #fff;
-		}
-
-		table {
-			border-collapse: collapse;
-		}
-
-		.table {
-			width: 100%;
-			max-width: 100%;
-			margin-bottom: 1rem;
-			background-color: transparent;
-		}
-
-		.table th,
-		.table td {
-			padding: 0.75rem;
-			vertical-align: top;
-			border-top: 1px solid #dee2e6;
-		}
-
-		.table thead th {
-			vertical-align: bottom;
-			border-bottom: 2px solid #dee2e6;
-		}
-
-		.table tbody + tbody {
-			border-top: 2px solid #dee2e6;
-		}
-
-		.table .table {
-			background-color: #fff;
-		}
-
-		main {
-			padding: 1rem 3rem;
-		}
-
-		h1, h2 {
-			text-align: center;
-		}
-
-		h1 {
-			font-size: 2em;
-			padding-top: 3rem;
-		}
-
-		h2 {
-			font-size: 1.5em;
-			padding-top: 2rem;
-		}
-	</style>
-</head>
-<body>
-<main role="main" class="">
-	<h1>Results for <?= $cdata['name'] ?></h1>
-
-	<h2>Awards</h2>
-	<table class="table">
-		<thead>
+<h2>Awards</h2>
+<table class="table">
+	<thead>
+	<tr>
+		<th scope="col">Place</th>
+		<th scope="col">Team</th>
+		<th scope="col">Award</th>
+		<th scope="col">Solved problems</th>
+		<th scope="col">Total time</th>
+		<th scope="col">Time of last submission</th>
+	</tr>
+	</thead>
+	<tbody>
+	<?php foreach ($awarded as $row): ?>
 		<tr>
-			<th scope="col">Place</th>
-			<th scope="col">Team</th>
-			<th scope="col">Award</th>
-			<th scope="col">Solved problems</th>
-			<th scope="col">Total time</th>
-			<th scope="col">Time of last submission</th>
+			<th scope="row"><?= $row['rank'] ?></th>
+			<th scope="row"><?= $row['team'] ?></th>
+			<td><?= $row['award'] ?></td>
+			<td><?= $row['solved'] ?></td>
+			<td><?= $row['total_time'] ?></td>
+			<td><?= $row['max_time'] ?></td>
 		</tr>
-		</thead>
-		<tbody>
-		<?php foreach ($awarded as $row): ?>
-			<tr>
-				<th scope="row"><?= $row['rank'] ?></th>
-				<th scope="row"><?= $row['team'] ?></th>
-				<td><?= $row['award'] ?></td>
-				<td><?= $row['solved'] ?></td>
-				<td><?= $row['total_time'] ?></td>
-				<td><?= $row['max_time'] ?></td>
-			</tr>
+	<?php endforeach; ?>
+	</tbody>
+</table>
+
+<h2>Other ranked teams</h2>
+<table class="table">
+	<thead>
+	<tr>
+		<th scope="col">Rank</th>
+		<th scope="col">Team</th>
+		<th scope="col">Solved problems</th>
+		<th scope="col">Total time</th>
+		<th scope="col">Time of last submission</th>
+	</tr>
+	</thead>
+	<tbody>
+	<?php foreach ($ranked as $row): ?>
+		<tr>
+			<th scope="row"><?= $row['rank'] ?></th>
+			<th scope="row"><?= $row['team'] ?></th>
+			<td><?= $row['solved'] ?></td>
+			<td><?= $row['total_time'] ?></td>
+			<td><?= $row['max_time'] ?></td>
+		</tr>
+	<?php endforeach; ?>
+	</tbody>
+</table>
+
+<h2>Honorable mentions</h2>
+<table class="table">
+	<tbody>
+	<tr>
+		<?php foreach ($honorable as $idx => $row): ?>
+			<td><?= $row['team'] ?></td>
+			<?php if ($idx % 2 === 1 && $row !== end($honorable)): ?><tr></tr><?php endif; ?>
 		<?php endforeach; ?>
-		</tbody>
-	</table>
+	</tr>
+	</tbody>
+</table>
 
-	<h2>Other ranked teams</h2>
-	<table class="table">
-		<thead>
+<h2>Region winners</h2>
+<table class="table">
+	<thead>
+	<tr>
+		<th scope="col">Region</th>
+		<th scope="col">Team</th>
+	</tr>
+	</thead>
+	<tbody>
+	<?php foreach ($region_winners as $row): ?>
 		<tr>
-			<th scope="col">Rank</th>
-			<th scope="col">Team</th>
-			<th scope="col">Solved problems</th>
-			<th scope="col">Total time</th>
-			<th scope="col">Time of last submission</th>
+			<th scope="row"><?= $row['group'] ?></th>
+			<td><?= $row['team'] ?></td>
 		</tr>
-		</thead>
-		<tbody>
-		<?php foreach ($ranked as $row): ?>
-			<tr>
-				<th scope="row"><?= $row['rank'] ?></th>
-				<th scope="row"><?= $row['team'] ?></th>
-				<td><?= $row['solved'] ?></td>
-				<td><?= $row['total_time'] ?></td>
-				<td><?= $row['max_time'] ?></td>
-			</tr>
-		<?php endforeach; ?>
-		</tbody>
-	</table>
+	<?php endforeach; ?>
+	</tbody>
+</table>
 
-	<h2>Honorable mentions</h2>
-	<table class="table">
-		<tbody>
+<h2>First to solve</h2>
+<table class="table">
+	<thead>
+	<tr>
+		<th scope="col">Problem</th>
+		<th scope="col">Team</th>
+		<th scope="col">Time</th>
+	</tr>
+	</thead>
+	<tbody>
+	<?php foreach ($first_to_solve as $row): ?>
 		<tr>
-			<?php foreach ($honorable as $idx => $row): ?>
-				<td><?= $row['team'] ?></td>
-				<?php if ($idx % 2 === 1 && $row !== end($honorable)): ?><tr></tr><?php endif; ?>
-			<?php endforeach; ?>
+			<th scope="row"><?= $row['problem'] ?>: <?= $row['problem_name'] ?></th>
+			<td>
+				<?php if ($row['team'] !== null): ?>
+					<?= $row['team'] ?>
+				<?php else: ?>
+					<i>Not solved</i>
+				<?php endif ?>
+			</td>
+			<td>
+				<?php if ($row['time'] !== null): ?>
+					<?= $row['time'] ?>
+				<?php else: ?>
+					<i>-</i>
+				<?php endif ?>
+			</td>
 		</tr>
-		</tbody>
-	</table>
-
-	<h2>Region winners</h2>
-	<table class="table">
-		<thead>
-		<tr>
-			<th scope="col">Region</th>
-			<th scope="col">Team</th>
-		</tr>
-		</thead>
-		<tbody>
-		<?php foreach ($region_winners as $row): ?>
-			<tr>
-				<th scope="row"><?= $row['group'] ?></th>
-				<td><?= $row['team'] ?></td>
-			</tr>
-		<?php endforeach; ?>
-		</tbody>
-	</table>
-
-	<h2>First to solve</h2>
-	<table class="table">
-		<thead>
-		<tr>
-			<th scope="col">Problem</th>
-			<th scope="col">Team</th>
-			<th scope="col">Time</th>
-		</tr>
-		</thead>
-		<tbody>
-		<?php foreach ($first_to_solve as $row): ?>
-			<tr>
-				<th scope="row"><?= $row['problem'] ?>: <?= $row['problem_name'] ?></th>
-				<td>
-					<?php if ($row['team'] !== null): ?>
-						<?= $row['team'] ?>
-					<?php else: ?>
-						<i>Not solved</i>
-					<?php endif ?>
-				</td>
-				<td>
-					<?php if ($row['time'] !== null): ?>
-						<?= $row['time'] ?>
-					<?php else: ?>
-						<i>-</i>
-					<?php endif ?>
-				</td>
-			</tr>
-		<?php endforeach; ?>
-		</tbody>
-	</table>
-</main>
-</body>
-</html>
+	<?php endforeach; ?>
+	</tbody>
+</table>
+<?php
+require(LIBWWWDIR . '/impexp_footer.php');
