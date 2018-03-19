@@ -106,6 +106,8 @@ logmsg(LOG_NOTICE, "Eventdaemon started for cid=$cid [DOMjudge/".DOMJUDGE_VERSIO
 
 $initial_events_loaded = FALSE;
 
+$contest_start_old = 'TBC';
+$contest_start_enabled_old = 'TBC';
 while ( TRUE ) {
 	// Check whether we have received an exit signal
 	if ( function_exists('pcntl_signal_dispatch') ) pcntl_signal_dispatch();
@@ -120,6 +122,13 @@ while ( TRUE ) {
 		error("Contest ID '$cid' not found (anymore) in active contests.");
 	}
 	$contest = $contests[$cid];
+	$contest_start = $contest['starttime'];
+	$contest_start_enabled = $contest['starttime_enabled'];
+	if ( $contest_start_old !== $contest_start || $contest_start_enabled_old !== $contest_start_enabled ) {
+		insert_event($cid, 'contests', dj_json_decode(API_request('/contests/' . $contest['externalid'])));
+		$contest_start_old = $contest_start;
+		$contest_start_enabled_old = $contest_start_enabled;
+	}
 
 	if ( !$initial_events_loaded ) initialize_events($cid);
 
