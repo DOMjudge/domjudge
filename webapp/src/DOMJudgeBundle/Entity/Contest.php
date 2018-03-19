@@ -891,7 +891,7 @@ class Contest
 			'shortname'                  => $this->getShortname(),
 			'name'                       => $this->getName(),
 			'formal_name'                => $this->getName(),
-			'start_time'                 => Utils::absTime($this->getStarttime()),
+			'start_time'                 => $this->getStarttimeEnabled() ? Utils::absTime($this->getStarttime()) : null,
 			'duration'                   => Utils::relTime($this->getEndtime() - $this->getStarttime()),
 			'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
 			'penalty_time'               => (int)$penalty_time,
