@@ -10,6 +10,4 @@ int main() {
 		scanf("%s\n", name);
 		printf("Hello %s!\n", name);
 	}
-
-	return 0;
 }
