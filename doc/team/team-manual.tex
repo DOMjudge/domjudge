@@ -173,7 +173,7 @@ The top of the page shows your team's row in the scoreboard: your position and
 which problems you attempted and solved. Via the menu you can view the public
 scoreboard page with the scores of all teams. Many cells will show
 additional ``title text'' information when hovering over them. The
-score column lists the number of solved problems and the total penalty
+score column lists the number of solved problems and the total time including penalty
 time. Each cell in a problem column lists the number of submissions,
 and if the problem was solved, the time of the first correct
 submission in minutes since contest start. This is included in your
@@ -315,11 +315,11 @@ more memory, it will most likely abort, resulting in a run
 error.
 
 \item[number of processes]
-You are not supposed to create multiple processes (threads). This is
+You are not supposed to explicitly create multiple processes (threads). This is
 to no avail anyway, because your program has exactly 1 processor core fully
-at its disposal. To increase stability of the contest control system, there is a
-maximum of 64 processes that can be run simultaneously
-(including processes that started your program).
+at its disposal. To increase stability of the contest control system, \DOMjudge
+executes submissions in a sandbox where a maximum of 64 processes can be run
+simultaneously (including processes that started your program).
 
 People who have never programmed with multiple processes (or have
 never heard of ``threads'') do not have to worry: a normal program
