@@ -32,6 +32,8 @@ $cnt = $DB->q('RETURNAFFECTED UPDATE judging
 auditlog('judging', $id, $val ? 'set verified' : 'set unverified');
 
 if ( $cnt==1 && dbconfig_get('verification_required', 0) ) {
+	calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
+
 	// log to event table (case of no verification required is handled
 	// in the REST API function judging_runs_POST)
 	eventlog('judging', $id, 'update', $jdata['cid']);
@@ -46,8 +48,6 @@ if ( $cnt == 0 ) {
 }
 
 if ( dbconfig_get('verification_required', 0) ) {
-	calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
-
 	if ( $jdata['result'] == 'correct' ) {
 		$balloons_enabled = (bool)$DB->q("VALUE SELECT process_balloons FROM contest WHERE cid = %i", $jdata['cid']);
 		if ( $balloons_enabled ) {

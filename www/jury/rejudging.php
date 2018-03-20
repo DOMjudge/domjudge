@@ -82,6 +82,8 @@ if ( isset($_REQUEST['apply']) ) {
 		// remove relation from submission to rejudge
 		$DB->q('UPDATE submission SET rejudgingid=NULL
 		        WHERE submitid=%i', $row['submitid']);
+		// last update cache
+		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 		// update event log
 		eventlog('judging', $row['judgingid'], 'create', $row['cid']);
 		$run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
@@ -89,8 +91,6 @@ if ( isset($_REQUEST['apply']) ) {
 		foreach ($run_ids as $run_id) {
 			eventlog('judging_run', $run_id, 'create', $row['cid']);
 		}
-		// last update cache
-		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 		$DB->q('COMMIT');
 	}
 	echo "\n</p>\n";
