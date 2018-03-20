@@ -327,6 +327,42 @@ function updateRankCache($cid, $team) {
 	}
 }
 
+/**
+ * Update the balloons table after a correct submission.
+ *
+ * This function double checks that the judging is correct and
+ * confirmed.
+ */
+function updateBalloons($submitid)
+{
+	global $DB;
+
+	$subm = $DB->q('SELECT s.submitid, s.cid, s.probid, s.teamid, j.result, j.verified
+	                FROM submission s
+	                LEFT JOIN judging j ON j.submitid=s.submitid AND j.valid=1
+	                WHERE s.submitid = %i', $submitid);
+
+	if ( @$subm['result'] !== 'correct' ) return;
+
+	if ( !$subm['verified'] && dbconfig_get('verification_required', 0) ) return;
+
+	// prevent duplicate balloons in case of multiple correct submissions
+	$numcorrect = $DB->q('VALUE SELECT count(b.submitid)
+	                      FROM balloon b
+	                      LEFT JOIN submission s USING(submitid)
+	                      WHERE valid = 1 AND probid = %i
+	                      AND teamid = %i AND cid = %i',
+	                     $subm['probid'], $subm['teamid'], $subm['cid']);
+
+	if ( $numcorrect == 0 ) {
+		$balloons_enabled = (bool)$DB->q('VALUE SELECT process_balloons
+		                                  FROM contest WHERE cid = %i',
+		                                 $subm['cid']);
+		if ( $balloons_enabled ) {
+			$DB->q('INSERT INTO balloon (submitid) VALUES (%i)', $submitid);
+		}
+	}
+}
 
 /**
  * Time as used on the scoreboard (i.e. truncated minutes or seconds,
@@ -923,9 +959,11 @@ function rejudging_finish($rejudgingid, $request, $userid = NULL, $show_progress
 		error("$todo unfinished judgings left, cannot apply rejudging.");
 	}
 
-	$res = $DB->q('SELECT submitid, cid, teamid, probid
-	               FROM submission
-	               WHERE rejudgingid=%i', $rejudgingid);
+	$res = $DB->q('SELECT s.submitid, s.cid, s.teamid, s.probid, j.judgingid, j.result
+	               FROM submission s
+	               LEFT JOIN judging j USING(submitid)
+	               WHERE s.rejudgingid=%i
+	               AND j.rejudgingid=%i', $rejudgingid, $rejudgingid);
 
 	auditlog('rejudging', $rejudgingid, $request.'ing rejudge', '(start)');
 
@@ -945,6 +983,7 @@ function rejudging_finish($rejudgingid, $request, $userid = NULL, $show_progress
 			// last update cache
 			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 			$DB->q('COMMIT');
+			updateBalloons($row['submitid']);
 		} else {
 			// restore old judgehost association
 			$valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging

@@ -47,14 +47,7 @@ if ( $cnt == 0 ) {
 
 if ( dbconfig_get('verification_required', 0) ) {
 	calcScoreRow($jdata['cid'], $jdata['teamid'], $jdata['probid']);
-
-	if ( $jdata['result'] == 'correct' ) {
-		$balloons_enabled = (bool)$DB->q("VALUE SELECT process_balloons FROM contest WHERE cid = %i", $jdata['cid']);
-		if ( $balloons_enabled ) {
-			$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
-			       $jdata['submitid']);
-		}
-	}
+	updateBalloons($jdata['submitid']);
 }
 
 /* redirect to referrer page after verification

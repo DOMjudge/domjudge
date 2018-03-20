@@ -732,24 +732,7 @@ function judging_runs_POST($args)
 			// (case of verification required is handled in www/jury/verify.php)
 			if ( ! dbconfig_get('verification_required', 0) ) {
 				eventlog('judging', $args['judgingid'], 'update', $row['cid']);
-				if ( $result == 'correct' ) {
-					// prevent duplicate balloons in case of multiple correct submissions
-					$numcorrect = $DB->q('VALUE SELECT count(submitid)
-					                      FROM balloon
-					                      LEFT JOIN submission USING(submitid)
-					                      WHERE valid = 1 AND probid = %i
-					                      AND teamid = %i AND cid = %i',
-					                     $row['probid'], $row['teamid'], $row['cid']);
-					if ( $numcorrect == 0 ) {
-						$balloons_enabled = (bool)$DB->q("VALUE SELECT process_balloons
-						                                  FROM contest WHERE cid = %i",
-						                                 $row['cid']);
-						if ( $balloons_enabled ) {
-							$DB->q('INSERT INTO balloon (submitid) VALUES(%i)',
-							       $row['submitid']);
-						}
-					}
-				}
+				updateBalloons($row['submitid']);
 			}
 
 			auditlog('judging', $args['judgingid'], 'judged', $result, $args['judgehost']);
