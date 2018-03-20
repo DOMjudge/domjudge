@@ -359,10 +359,15 @@ function judgings($args)
 
 	// Don't expose judgings of too-late submissions except if
 	// explicitly queried for with a specific ID. See comment in
-	// submissions endpoint.
+	// submissions endpoint. Same with unconfirmed rejudgings and
+	// when verification is required.
 	if ( !(checkrole('jury') || checkrole('judgehost')) ||
 	     !isset($args['__primary_key']) ) {
 		$query .= ' AND s.submittime < c.endtime';
+		$query .= ' AND (j.rejudgingid IS NULL OR j.valid = 1)';
+		if ( dbconfig_get('verification_required', 0) ) {
+			$query .= ' AND j.verified = 1';
+		}
 	}
 
 	$result = 0;
@@ -1201,9 +1206,14 @@ function runs($args)
 
 	// Don't expose judging runs of too-late submissions except if
 	// explicitly queried for with a specific ID. See comment in
-	// submissions endpoint.
+	// submissions endpoint. Same with unconfirmed rejudgings and
+	// when verification is required.
 	if ( !isset($args['__primary_key']) ) {
 		$query .= ' AND s.submittime < c.endtime';
+		$query .= ' AND (j.rejudgingid IS NULL OR j.valid = 1)';
+		if ( dbconfig_get('verification_required', 0) ) {
+			$query .= ' AND j.verified = 1';
+		}
 	}
 
 	$hasFirstId = array_key_exists('first_id', $args);
