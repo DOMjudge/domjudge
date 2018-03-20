@@ -481,6 +481,21 @@ foreach($subject_options as $value => $desc) {
 <textarea class="form-control" name="bodytext" id="bodytext" rows="5" cols="85" required><?=specialchars($body);?></textarea>
 </div>
 
+<?php
+	$std_answers = dbconfig_get('clar_answers');
+	if ( IS_JURY && $respid!==NULL && count($std_answers)>0 ) {
+		$options = array();
+		$default = $std_answers[0];
+		foreach($std_answers as $ans) $options[$ans] = summarizeClarification($ans, 50);
+		echo '<div class="form-group">' .
+			'<label for="bodytext">Std. answer:</label>' .
+			addSelect('answertext', $options, $default, TRUE) .
+			addSubmit('append',  'append',  'return appendAnswer()') .
+			addSubmit('replace', 'replace', 'return replaceAnswer()') .
+			'</div>';
+	}
+?>
+
 <div class="form-group">
 <input type="submit" value="Send" name="submit" class="btn btn-primary" />
 </div>
