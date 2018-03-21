@@ -90,11 +90,15 @@ function putClar($clar)
 	$categs = getClarCategories();
 
 	echo '<tr><td>Subject:</td><td>';
+	if (IS_JURY) {
+		echo '<span class="clarification-subject">';
+	}
 	$prefix = '';
 	if ( IS_JURY && count($cids) > 1 )
 	{
 		$prefix = specialchars($clar['contestshortname']) . ' - ';
 	}
+	$currentSelectedCategory = null;
 	if ( is_null($clar['probid']) ) {
 		if ( is_null($clar['category']) ) {
 			// FIXME: why does it make sense to keep clars for a dropped problem and relabel them to general issue?
@@ -102,18 +106,62 @@ function putClar($clar)
 		} else {
 			if ( array_key_exists($clar['category'], $categs) ) {
 				echo $prefix . specialchars($categs[$clar['category']]);
+				$currentSelectedCategory = $clar['cid'] . '-' . $clar['category'];
 			} else {
 				echo $prefix . "General issue";
 			}
 		}
 	} else {
 		if ( IS_JURY ) {
+			$currentSelectedCategory = $clar['cid'] . '-' . $clar['probid'];
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
 			     '">' . $prefix . 'Problem ' . specialchars($clar['shortname'] . ": " .
 			     $clar['probname']) . '</a>';
 		} else {
 			echo 'Problem ' . specialchars($clar['shortname'] . ": " . $clar['probname']);
 		}
+	}
+	if (IS_JURY) {
+		global $pagename, $cdatas, $DB;
+
+		$subject_options = array();
+		foreach ($cdatas as $cid => $data) {
+			foreach ($categs as $categid => $categname) {
+				if (IS_JURY && count($cdatas) > 1) {
+					$subject_options["$cid-$categid"] = "{$data['shortname']} - $categname";
+				} else {
+					$subject_options["$cid-$categid"] = $categname;
+				}
+			}
+			$fdata = calcFreezeData($data);
+			if ($fdata['started']) {
+				$problem_options =
+					$DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
+				                             CONCAT(shortname, ": ", name) as name
+				        FROM problem
+				        INNER JOIN contestproblem USING (probid)
+				        WHERE cid = %i AND allow_submit = 1
+				        ORDER BY shortname ASC', $cid);
+				if (IS_JURY && count($cdatas) > 1) {
+					foreach ($problem_options as &$problem_option) {
+						$problem_option = $data['shortname'] . ' - ' . $problem_option;
+					}
+					unset($problem_option);
+				}
+				$subject_options += $problem_options;
+			}
+		}
+
+		// Add button to change subject
+		echo '&nbsp;<input type="button" value="Change" class="clarification-subject-change-button" />';
+		echo '</span>';
+		echo '<span class="clarification-subject-form" data-current-selected-category="' . $currentSelectedCategory . '" data-clarification-id="' . $clar['clarid'] . '" style="display: none;">';
+		echo addForm($pagename) .
+			addHidden('id', $clar['clarid']) .
+			addSelect('subject', $subject_options, $currentSelectedCategory, true) .
+			addEndForm();
+		echo '<input type="button" value="Cancel" class="clarification-subject-cancel-button" />';
+		echo '</span>';
 	}
 	echo "</td></tr>\n";
 

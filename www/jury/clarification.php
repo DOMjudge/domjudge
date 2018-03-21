@@ -135,6 +135,17 @@ if ( isset($_POST['answer']) && isset($_POST['answered']) ) {
 	exit;
 }
 
+if (isset($_POST['subject'])) {
+	list($cid, $probid) = explode('-', $_POST['subject']);
+	$category = NULL;
+	if ( !ctype_digit($probid) ) {
+		$category = $probid;
+		$probid = NULL;
+	}
+
+	$DB->q('UPDATE clarification SET cid = %i, category = %s, probid = %i WHERE clarid = %i', $cid, $category, $probid, $id);
+}
+
 require_once(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/clarification.php');
 
@@ -195,5 +206,31 @@ if ( $isgeneral ) {
 	echo "<h1>Send Response</h1>\n\n";
 	putClarificationForm("clarification.php", $respid);
 }
+
+?>
+<script type="text/javascript">
+	$(function() {
+		$('.clarification-subject-change-button').on('click', function() {
+			$(this).closest('.clarification-subject').hide();
+			$(this).closest('td').find('.clarification-subject-form').show();
+		});
+		$('.clarification-subject-cancel-button').on('click', function() {
+			$(this).closest('.clarification-subject-form').hide();
+			$(this).closest('td').find('.clarification-subject').show();
+		});
+		$('.clarification-subject-form select').on('change', function() {
+			var $select = $(this);
+			var $form = $('.clarification-subject-form');
+			var clarId = $form.data('clarification-id');
+			var value = $select.find(':selected').text();
+			if (confirm('Are you sure you want to change the subject of clarification ' + clarId + ' to "' + value + '"?')) {
+				$form.find('form').submit();
+			} else {
+				$select.val($form.data('current-selected-category'));
+			}
+		});
+	});
+</script>
+<?php
 
 require(LIBWWWDIR . '/footer.php');
