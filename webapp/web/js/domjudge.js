@@ -735,7 +735,7 @@ function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
 	form.submit();
 }
 
-function toggleExpand()
+function toggleExpand(event)
 {
 	var node = event.target.parentNode.querySelector('[data-expanded]');
 	if (event.target.getAttribute('data-expanded') === '1') {
