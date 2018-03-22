@@ -1848,7 +1848,8 @@ $args = array('judgingid' => 'ID of the corresponding judging (if exists).',
               'judgehostlog' => 'last N lines of judgehost log',
               'disabled' => 'reason (JSON encoded)');
 $exArgs = array();
-$api->provideFunction('POST', 'internal_error', $doc, $args, $exArgs, null, true);
+$roles = array('judgehost');
+$api->provideFunction('POST', 'internal_error', $doc, $args, $exArgs, $roles, true);
 
 function judgement_types($args)
 {
