@@ -34,6 +34,7 @@ if ( ! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer ) ) {
 
 require(LIBWWWDIR . '/checkers.jury.php');
 
+global $CHECKER_ERRORS;
 if ( ! isset($_POST['cancel']) ) {
 	foreach ($data as $i => $itemdata ) {
 		if ( !empty($skipwhenempty) && empty($itemdata[$skipwhenempty]) ) {
