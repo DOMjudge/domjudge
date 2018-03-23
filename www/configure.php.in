@@ -29,6 +29,7 @@ global $body;		// lib/www/clarification.php
 global $categs;		// www/feed/ext.php
 global $cdata;		// www/team/init.php, www/jury/init.php, www/public/init.php
 global $cdatas;		// www/feed/init.php, www/jury/init.php, www/public/init.php, www/team/init.php
+global $CHECKER_ERRORS;
 global $cids;		// www/feed/init.php, www/jury/init.php, www/jury/judgehost.php,  www/jury/rejudge.php, www/public/init.php, www/team/init.php
 global $cid;		// www/jury/team_output.php
 global $clarifications;		// www/jury/clarifications.php, www/team/index.php
