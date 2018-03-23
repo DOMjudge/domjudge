@@ -337,9 +337,9 @@ function updateBalloons($submitid)
 {
 	global $DB;
 
-	$subm = $DB->q('SELECT s.submitid, s.cid, s.probid, s.teamid, j.result, j.verified
+	$subm = $DB->q('TABLE SELECT s.submitid, s.cid, s.probid, s.teamid, j.result, j.verified
 	                FROM submission s
-	                LEFT JOIN judging j ON j.submitid=s.submitid AND j.valid=1
+	                LEFT JOIN judging j ON (j.submitid=s.submitid AND j.valid=1)
 	                WHERE s.submitid = %i', $submitid);
 
 	if ( @$subm['result'] !== 'correct' ) return;
