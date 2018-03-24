@@ -84,13 +84,23 @@ if ( isset($_REQUEST['apply']) ) {
 		        WHERE submitid=%i', $row['submitid']);
 		// last update cache
 		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
-		// update event log
-		eventlog('judging', $row['judgingid'], 'create', $row['cid']);
+		// update event log, first with judging data as in initial state
+		$judging_json = API_request('/contests/'.rest_extid('contests', $row['cid']).
+		                            '/judgements/'.$row['judgingid'], 'GET', '', false);
+		if ( !empty($judging_json) ) {
+			$judging_data = dj_json_decode($judging_json);
+			foreach ( array('judgement_type_id','end_time','end_contest_time','max_run_time') as $key ) {
+				$judging_data[$key] = null;
+			}
+			$insert_json = dj_json_encode($judging_data);
+		}
+		eventlog('judging', $row['judgingid'], 'create', $row['cid'], @$insert_json);
 		$run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
 		                   WHERE judgingid=%i', $row['judgingid']);
 		foreach ($run_ids as $run_id) {
 			eventlog('judging_run', $run_id, 'create', $row['cid']);
 		}
+		eventlog('judging', $row['judgingid'], 'update', $row['cid']);
 		$DB->q('COMMIT');
 	}
 	echo "\n</p>\n";
