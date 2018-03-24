@@ -183,7 +183,7 @@ maintainer-conf: dist
 	            --with-judgehost_tmpdir=$(CURDIR)/output/tmp \
 	            --with-judgehost_judgedir=$(CURDIR)/output/judgings \
 	            --with-domserver_submitdir=$(CURDIR)/output/submissions \
-	            --with-baseurl='https://2018wf-domjudge.ecs.baylor.edu/' \
+	            --with-baseurl='https://domjudge/' \
 	            CFLAGS='$(MAINT_CXFLAGS)' \
 	            CXXFLAGS='$(MAINT_CXFLAGS)' \
 	            LDFLAGS='$(MAINT_LDFLAGS)' \
