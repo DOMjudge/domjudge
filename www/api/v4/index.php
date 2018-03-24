@@ -929,13 +929,13 @@ function submissions($args)
 			'id'           => $extid,
 			'team_id'      => safe_string(rest_extid('teams', $row['teamid'])),
 			'problem_id'   => safe_string(rest_extid('problems', $row['probid'])),
-			'language_id'  => safe_string(rest_extid('languages', $row['langid'])),
 			'time'         => Utils::absTime($row['submittime']),
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
 			'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")),
 			);
 		if ( checkrole('jury') ) {
 			$ret['entry_point'] = $row['entry_point'];
+			$ret['language_id'] = safe_string(rest_extid('languages', $row['langid']));
 		}
 		$res[] = $ret;
 	}

@@ -292,6 +292,7 @@ class APIController extends FOSRestController {
 					if ( !$isJury ) {
 						if ( $event['endpointtype'] == 'submissions' ) {
 							unset($data['entry_point']);
+							unset($data['language_id']);
 						}
 						if ( $event['endpointtype'] == 'problems' ) {
 							unset($data['test_data_count']);
