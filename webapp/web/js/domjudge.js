@@ -260,8 +260,8 @@ function detectProblemLanguageEntryPoint(filename)
 	var addfile = document.getElementById("addfile");
 	if ( addfile ) addfile.disabled = false;
 
-	var parts = filename.replace(/^.*[\\\/]/, '')
-	            .split('.').reverse();
+	filename = filename.replace(/^.*[\\\/]/, '');
+	var parts = filename.split('.').reverse();
 	if ( parts.length < 2 ) return;
 	var lc_parts = [parts[0].toLowerCase(), parts[1].toLowerCase()];
 
@@ -296,12 +296,14 @@ function detectProblemLanguageEntryPoint(filename)
 	if ( elt == null || elt.value !== '' ) return;
 
 	// FIXME: make this configurable
+	var filebase = filename.replace(/\.[^\.]*$/, '');
+	var fileext = parts[0];
 	if ( langid == 'java' ) {
-		elt.value = parts[1];
+		elt.value = filebase;
 	} else if (langid == 'kt' ) {
-		elt.value = parts[1].charAt(0).toUpperCase() + parts[1].slice(1) + "Kt";
+		elt.value = filebase.charAt(0).toUpperCase() + filebase.slice(1) + "Kt";
 	} else {
-		elt.value = parts[1] + '.' + parts[0];
+		elt.value = filebase + '.' + fileext;
 	}
 	maybeShowEntryPoint(langid);
 }
