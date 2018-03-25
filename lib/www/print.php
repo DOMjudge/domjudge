@@ -61,13 +61,31 @@ function printyn ($val) {
 /**
  * Print a time in default configured time_format, or formatted as
  * specified. The format is according to strftime().
- * FIXME: reintroduce contest relative time: show time from start of
- * contest, after removing ignored intervals.
+ * If $cid is specified, print time relative to that contest start.
  */
-function printtime($datetime, $format = NULL) {
+function printtime($datetime, $format = NULL, $cid = NULL) {
 	if ( empty($datetime) ) return '';
 	if ( is_null($format) ) $format = dbconfig_get('time_format', '%H:%M');
-	return specialchars(strftime($format,floor($datetime)));
+	if ( isset($cid) ) {
+	        $reltime = (int)floor(calcContestTime($datetime,$cid));
+		$sign = ( $reltime<0 ? -1 : 1 );
+		$reltime *= $sign;
+		// We're not showing seconds, while the last minute before
+		// contest start should show as "-0:01", so if there's a
+		// nonzero amount of seconds before the contest, we have to
+		// add a minute.
+		$s = $reltime%60; $reltime = ($reltime - $s)/60;
+		if ( $sign<0 && $s>0 ) $reltime++;
+		$m = $reltime%60; $reltime = ($reltime - $m)/60;
+		$h = $reltime;
+		if ( $sign<0 ) {
+			return sprintf("-%d:%02d", $h, $m);
+		} else {
+			return sprintf("%d:%02d", $h, $m);
+		}
+	} else {
+		return specialchars(strftime($format,floor($datetime)));
+	}
 }
 
 /**
