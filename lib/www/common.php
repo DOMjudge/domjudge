@@ -413,7 +413,7 @@ function putClock() {
 		} else if ( difftime(now(), $cdata['activatetime']) >= 0 &&
 			    difftime(now(), $cdata['starttime'])    <  0 ) {
 			$left = "- " . printtimediff(now(),$cdata['starttime']);
-		// contst over
+		// contest over
 		} else {
 			$left = " contest over";
 		}
