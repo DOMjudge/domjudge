@@ -214,6 +214,7 @@ class APIController extends FOSRestController {
 
 	/**
 	 * @Get("/contests/{cid}/event-feed")
+	 * @Security("has_role('ROLE_JURY')")
 	 */
 	public function getEventFeed(Request $request, Contest $contest) {
 		// Make sure this script doesn't hit the PHP maximum execution timeout.
