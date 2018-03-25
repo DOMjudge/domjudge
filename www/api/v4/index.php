@@ -879,8 +879,11 @@ function submissions($args)
 		$args['id'] = rest_intid('submissions', $args['__primary_key'], $cid);
 	}
 
-	$query = 'SELECT submitid, teamid, probid, langid, submittime, cid, entry_point
-	          FROM submission WHERE valid = 1 AND cid = %i';
+	$query = 'SELECT s.submitid, s.teamid, s.probid, s.langid, s.submittime, s.cid, s.entry_point
+	          FROM submission s
+	          LEFT JOIN team t USING (teamid)
+	          LEFT JOIN team_category c USING (categoryid)
+	          WHERE s.valid = 1 AND s.cid = %i';
 
 	// Don't expose too-late submissions except if queried for with a
 	// specific ID. This doesn't cause a security risk and is a quick
@@ -892,21 +895,23 @@ function submissions($args)
 		$query .= ' AND submittime < %i';
 	}
 
+	$query .= (checkrole('jury') ? '' : ' AND c.visible = 1');
+
 	$hasLanguage = array_key_exists('language_id', $args);
-	$query .= ($hasLanguage ? ' AND langid = %s' : ' %_');
+	$query .= ($hasLanguage ? ' AND s.langid = %s' : ' %_');
 	$languageId = ($hasLanguage ? $args['language_id'] : 0);
 
 	$hasSubmitid = array_key_exists('id', $args);
-	$query .= ($hasSubmitid ? ' AND submitid = %i' : ' %_');
+	$query .= ($hasSubmitid ? ' AND s.submitid = %i' : ' %_');
 	$submitid = ($hasSubmitid ? $args['id'] : 0);
 
 	$teamid = 0;
 	$freezetime = 0;
 	if ( infreeze($cdatas[$cid], now()) && !checkrole('jury') ) {
-		$query .= ' AND ( submittime < %i';
+		$query .= ' AND ( s.submittime < %i';
 		$freezetime = $cdatas[$cid]['freezetime'];
 		if ( checkrole('team') ) {
-			$query .= ' OR teamid = %i';
+			$query .= ' OR s.teamid = %i';
 			$teamid = $userdata['teamid'];
 		} else {
 			$query .= ' %_';
@@ -916,7 +921,7 @@ function submissions($args)
 		$query .= ' %_ %_';
 	}
 
-	$query .= ' ORDER BY submitid';
+	$query .= ' ORDER BY s.submitid';
 
 	$q = $DB->q($query, $cid, $cdatas[$cid]['endtime'],
 	            $languageId, $submitid, $freezetime, $teamid);
