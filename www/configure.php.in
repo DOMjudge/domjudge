@@ -130,6 +130,7 @@ global $loglevel;		// lib/lib.error.php
 global $max_file_check;		// www/jury/checkconfig.php
 global $menu;		// www/public/index.php, www/public/team.php
 global $multiple;		// www/jury/check_judgings.php
+global $mycid;		// www/jury/removed_intervals.php
 global $myhost;		// lib/judge/judgedaemon.main.php
 global $mysqldatares;		// www/jury/checkconfig.php
 global $mysqldata;		// www/jury/checkconfig.php
