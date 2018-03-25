@@ -168,11 +168,12 @@ function send_print($filename, $origname = null, $language = null)
 		$highlight = "-E" . escapeshellarg($language);
 	}
 
-	$teamname = $DB->q('MAYBEVALUE SELECT t.name FROM user u
+	$team = $DB->q('TUPLE SELECT t.name, t.room FROM user u
 	                    LEFT JOIN team t USING (teamid)
 	                    WHERE username = %s', $username);
-
-	$header = "User: $username   Team: $teamname|   File: $origname   |Page $% of $=";
+	$header = "Team: $username " . $team['name'] .
+	          (!empty($team['room']) ? "[".$team['room']."]":"") .
+	          " File: $origname||Page $% of $=";
 
 	// For debugging or spooling to a different host.
 	// Also uncomment '-p $tmp' below.
