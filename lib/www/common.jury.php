@@ -616,6 +616,8 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 				} else if ( $langid == 'java' ) {
 					$entry_point = pathinfo($filename, PATHINFO_FILENAME);
 				} else if ( $langid == 'kt' ) {
+					// FIXME: this is not entirely correct, see
+					// kotlin_base_entry_point() in submit.cc.
 					$entry_point = ucfirst(pathinfo($filename, PATHINFO_FILENAME) . "Kt");
 				}
 				file_put_contents($tmpfname, $source);
