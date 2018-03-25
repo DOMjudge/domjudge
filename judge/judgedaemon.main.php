@@ -644,7 +644,8 @@ function judge($row)
 
 		// get the next testcase
 		$testcase = request('testcases', 'GET', 'judgingid=' . urlencode($row['judgingid']));
-		if ( dj_json_decode($testcase) === NULL ) {
+		$tc = dj_json_decode($testcase);
+		if ( $tc === NULL ) {
 			$disabled = dj_json_encode(array(
 				'kind' => 'problem',
 				'probid' => $row['probid']));
@@ -658,7 +659,6 @@ function judge($row)
 			logmsg(LOG_ERR, "No testcases found for p$row[probid] => internal error " . $error_id);
 			break;
 		}
-		$tc = dj_json_decode($testcase);
 
 		// empty means: no more testcases for this judging.
 		if ( empty($tc) ) break;
