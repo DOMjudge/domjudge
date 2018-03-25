@@ -357,7 +357,7 @@ sudo apt install gcc g++ make zip unzip mariadb-server \
 	apache2 php php-cli libapache2-mod-php php-zip \
 	php-gd php-curl php-mysql php-json php-xml php-mbstring \
 	acl bsdmainutils ntp phpmyadmin python-pygments \
-    libcgroup-dev linuxdoc-tools linuxdoc-tools-text \
+	libcgroup-dev linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
 # To enable the command-line submit client, also add:
