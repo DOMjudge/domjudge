@@ -401,17 +401,22 @@ function putClock() {
 	global $cdata, $username, $userdata;
 
 	echo '<div class="navbar-text">';
-	// timediff to end of contest
-	if ( difftime(now(), $cdata['starttime']) >= 0 &&
-	     difftime(now(), $cdata['endtime'])   <  0 ) {
-		$left = printtimediff(now(),$cdata['endtime']);
-	// time to start of contest
-	} else if ( difftime(now(), $cdata['activatetime']) >= 0 &&
-	            difftime(now(), $cdata['starttime'])    <  0 ) {
-		$left = "- " . printtimediff(now(),$cdata['starttime']);
-	// contst over
+
+	if ( is_null($cdata) ) {
+		$left = " no contest";
 	} else {
-		$left = " contest over";
+		// timediff to end of contest
+		if ( difftime(now(), $cdata['starttime']) >= 0 &&
+		     difftime(now(), $cdata['endtime'])   <  0 ) {
+			$left = printtimediff(now(),$cdata['endtime']);
+		// time to start of contest
+		} else if ( difftime(now(), $cdata['activatetime']) >= 0 &&
+			    difftime(now(), $cdata['starttime'])    <  0 ) {
+			$left = "- " . printtimediff(now(),$cdata['starttime']);
+		// contst over
+		} else {
+			$left = " contest over";
+		}
 	}
 
 	echo "<span class=\"octicon octicon-clock\"></span> <span id=\"timeleft\">$left</span>\n";

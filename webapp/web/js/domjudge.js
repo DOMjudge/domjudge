@@ -453,6 +453,9 @@ function updateClock()
 	} else if (curtime >= activatetime && curtime < starttime ) {
 		var left = starttime - curtime;
 		var what = "- ";
+	} else if (timeleft.innerHTML == " no contest") {
+		var left = 0;
+		var what = " no contest";
 	} else {
 		var left = 0;
 		var what = "contest over";
