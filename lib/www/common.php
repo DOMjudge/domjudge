@@ -480,19 +480,25 @@ function putClock() {
 	}
 	echo '</div><div class="navbar-text">';
 
-	// timediff to end of contest
-	$fdata = calcFreezeData($cdata);
-	if ( $fdata['started'] && difftime(now(), $cdata['endtime']) < 0 ) {
-		$left = printtimediff(now(),$cdata['endtime']);
-	// time to start of contest
-	} else if ( !$fdata['started'] && difftime(now(), $cdata['activatetime']) >= 0 ) {
-		if ( $cdata['starttime_enabled'] ) {
-			$left = "- " . printtimediff(now(),$cdata['starttime']);
-		} else {
-			$left = "start delayed";
-		}
+
+	if ( is_null($cdata) ) {
+		// "no contest" selected
+		$left = 'no contest';
 	} else {
-		$left = " contest over";
+		// timediff to end of contest
+		$fdata = calcFreezeData($cdata);
+		if ( $fdata['started'] && difftime(now(), $cdata['endtime']) < 0 ) {
+			$left = printtimediff(now(),$cdata['endtime']);
+		// time to start of contest
+		} else if ( !$fdata['started'] && difftime(now(), $cdata['activatetime']) >= 0 ) {
+			if ( $cdata['starttime_enabled'] ) {
+				$left = "- " . printtimediff(now(),$cdata['starttime']);
+			} else {
+				$left = "start delayed";
+			}
+		} else {
+			$left = " contest over";
+		}
 	}
 
 	echo "<span style=\"padding-left: 10px;\" class=\"octicon octicon-clock\"></span> <span id=\"timeleft\">$left</span>\n";
