@@ -481,7 +481,7 @@ function updateClock()
 	date.setTime(curtime*1000);
 
 	var fmt = "";
-	if ( timeleftelt.innerHTML=='start delayed' ) { // FIXME
+	if ( timeleftelt.innerHTML=='start delayed' || timeleft.innerHTML == 'no contest' ) { // FIXME
 		var left = 0;
 		var what = timeleftelt.innerHTML;
 	} else if (curtime >= starttime && curtime < endtime ) {
