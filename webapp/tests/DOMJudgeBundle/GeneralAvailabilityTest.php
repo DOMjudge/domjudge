@@ -22,9 +22,8 @@ class GeneralAvailabilityTest extends WebTestCase {
 	    yield ['/login', 200];
 
 	    yield ['/api', 301];
-	    yield ['/api/', 200];
 	    yield ['/api/contests', 200];
-	    yield ['/api/contests/demo', 200];
+	    yield ['/api/contests/2', 200];
 	    // Note that the individual API endpoints are tested with check-api
 	    // and cannot easily be tested here since phpunit doesn't provide a
 	    // fully featured server environment.
