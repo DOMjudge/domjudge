@@ -253,6 +253,19 @@ function hideTcSample(tcid, str)
 	node.parentNode.appendChild(span);
 }
 
+// Construct base part of Kotlin entry point from filename base
+function kotlinBaseEntryPoint(filebase)
+{
+	if ( filebase === '' ) return '_';
+
+	filebase = filebase.replace(/[^a-zA-Z0-9]/, '_');
+	if ( filebase.charAt(0).match(/^[a-zA-Z]$/) ) {
+		return filebase.charAt(0).toUpperCase() + filebase.slice(1);
+	} else {
+		return '_' + filebase;
+	}
+}
+
 // Autodetection of problem, language, and entry_point in websubmit
 function detectProblemLanguageEntryPoint(filename)
 {
@@ -301,7 +314,7 @@ function detectProblemLanguageEntryPoint(filename)
 	if ( langid == 'java' ) {
 		elt.value = filebase;
 	} else if (langid == 'kt' ) {
-		elt.value = filebase.charAt(0).toUpperCase() + filebase.slice(1) + "Kt";
+		elt.value = kotlinBaseEntryPoint(filebase) + "Kt";
 	} else {
 		elt.value = filebase + '.' + fileext;
 	}
