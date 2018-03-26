@@ -1,7 +1,6 @@
 \input{team-manual-preamble}
 
 \usepackage[english]{babel}
-\usepackage{minted}
 
 % For inclusion of the correct date (last modified) and revision.
 % Use the \SVN command to get language dependent formatting of the
@@ -58,19 +57,14 @@ from the web interface:
 Use \cmd{submit <filename>}. If your filename is of the form
 \cmd{<problem>.<extension>} where \cmd{<problem>} is the
 label of the problem and \cmd{<extension>} is a standard extension for
-your language, then these will automatically be detected. It will also try to
-auto-detect the main class (for Java and Kotlin) or the main file (for Python 2
-and Python 3). You can override these auto-detections; for a complete reference
-of all options and examples, see \cmd{submit --help}.
+your language, then these will automatically be detected. For a
+complete reference of all options and examples, see \cmd{submit --help}.
 }
 \item[Web interface]
-From your team page, \url{\BASEURL team}, click the green \emph{Submit} button
-in the menu bar. Select the file(s) you want to submit.
+From your team page, \url{\BASEURL team}, click the green \textbf{Submit}
+button in the menu bar. Select the file(s) you want to submit.
 By default, the problem is selected from the base of the (first)
-filename and the language from the extension. Again, the web interface tries
-to auto-detect the main class (for Java and Kotlin) or the main file (for
-Python 2 and Python 3) from the file name. Double check that the guess is
-correct before submitting.
+filename and the language from the extension.
 \end{description}
 
 \subsection*{Viewing scores, submissions, etc.}
@@ -101,7 +95,9 @@ requests and replies is done through the web interface at
 
 \ifcmdsubmit{
 Submitting solutions can be done in two ways: with the command-line
-program \cmd{submit} or using the web interface.
+program \cmd{submit} or using the web interface. One of the
+interfaces might not be available, depending on the system
+configuration by the jury. A description of both methods follows.
 
 \subsection{Command-line: \cmd{submit}}
 
@@ -109,14 +105,8 @@ program \cmd{submit} or using the web interface.
 
 The submit program takes the name (label) of the problem from
 \cmd{filename} and the programming language from the extension
-\cmd{ext}. For Java it uses the \cmd{filename} as main class;
-for Kotlin it capitalizes \cmd{filename} and appends \cmd{Kt}
-to compute the main class name. For Python 2 and 3, the first
-filename is used as main file.
-
-These decisions can be overruled with the options
-\cmd{-p problemname}, \cmd{-l~languageextension} and
-\cmd{-e~entry\_point}.
+\cmd{ext}. This can be overruled with the options
+\cmd{-p problemname} and \cmd{-l~languageextension}.
 See \cmd{submit --help} for a complete list of all options,
 extensions and some examples.  Use \cmd{submit~--help | more}
 when the help text does not fit on one screen.
@@ -149,8 +139,7 @@ Solutions can be submitted from the web interface at \url{\BASEURL team}.
 Click the green Submit button at the menu bar on every page.
 Click the file selection button and select one or
 multiple files for submission. \DOMjudge will try to determine the
-problem, language and main class (in case of Java and Kotlin) or main file
-(in case of Python 2 and 3) from the base and extension of the (first) filename.
+problem and language from the base and extension of the (first) filename.
 Otherwise, select the appropriate values.
 Filenames must start with an alphanumerical character and may contain only
 alphanumerical characters and \cmd{+.\_-}.
@@ -177,7 +166,7 @@ penalty time. Each cell in a problem column lists the number of submissions,
 and if the problem was solved, the time of the first correct
 submission in minutes since contest start. This is included in your
 total time together with any penalty time incurred for previous
-incorrect submissions. The scoreboard will
+incorrect submissions. Optionally the scoreboard can
 be `frozen' some time before the end of the contest. The full scoreboard view
 will not be updated anymore, but your team row will. Your team's rank will
 be displayed as `?'. Finally, via the top menu you can also view the
@@ -195,10 +184,8 @@ The submission passed all tests: you solved this problem!
 
 \item[COMPILER-ERROR]
 There was an error when compiling your program. On the submission
-details page you can inspect the exact error. Note that when
-compilation takes more than 60 seconds, it is aborted and
-this counts as a compilation error.
-\textit{Compilation errors do not incur penalty time.}
+details page you can inspect the exact error (this option might be
+disabled).
 
 \item[TIMELIMIT]
 Your program took longer than the maximum allowed time for this
@@ -232,9 +219,6 @@ Bummer, you submitted after the contest ended! Your submission is
 stored but will not be processed anymore.
 \end{description}
 
-Note that the jury has prepared multiple test files for each problem. \DOMjudge
-will report back the first incorrect result as verdict.
-
 \section{Clarifications}
 
 All communication with the jury is to be done through clarifications.
@@ -267,12 +251,11 @@ execution and testing on one of the jury computers.
 
 \subsection{Compilation}
 
-Your program will be compiled on a jury computer running the same Ubuntu as
-your team machine.
+Your program will be compiled on a jury computer running Linux.
 All submitted source files will be passed to the compiler which
-generates a single program to run. For Java and Kotlin the given
-main class will be checked; for Python 2 and Python 3 we do a
-syntax check using the \cmd{py\_compile} module.
+generates a single program to run; for languages where
+this is relevant, the first file specified will be considered the
+`main' source file, or e.g. a class name will be derived from it.
 
 Using a different compiler or operating system than the jury should
 not be a problem. Be careful however, not to use any special compiler
@@ -309,7 +292,7 @@ submissions are subjected:
 
 \begin{description}[\setlabelphantom{number of processes}]
 \item[compile time]
-Compilation of your program may take no longer than 60
+Compilation of your program may take no longer than \COMPILETIME\
 seconds. After that, compilation will be aborted and the result will
 be a compile error. In practice this should never give rise to
 problems. Should this happen to a normal program, please inform the
@@ -320,12 +303,11 @@ The total amount of source code in a single submission may not exceed
 \SOURCESIZE\ kilobytes, otherwise your submission will be rejected.
 
 \item[memory]
-During execution of your program, there are \MEMLIMIT\ megabytes of
-memory available (unless stated otherwise). This is the total
-amount of memory (including program code, statically and dynamically defined
-variables, stack, Java VM, \dots)! If your program tries to use
-more memory, it will most likely abort, resulting in a run
-error.
+During execution of your program, there are \MEMLIMIT\ kilobytes of
+memory available. This is the total amount of memory (including
+program code, statically and dynamically defined variables, stack,
+Java VM, \dots)! If your program tries to use more memory, it will
+most likely abort, resulting in a run error.
 
 \item[number of processes]
 You are not supposed to explicitly create multiple processes (threads). This is
@@ -381,62 +363,29 @@ Sample input and output for this problem:
 Note that the number 3 on the first line indicates that 3 testcases
 follow.
 
-A solution for this problem in C:\\
-\begin{tabular}{|p{0.97\textwidth}|}
-\hline
-\inputminted{c}{../examples/example.c}\\
-\hline
-\end{tabular}
+A solution for this problem in C:
+\inputminted{c}{../examples/example.c}
 
 \newpage
 
-A solution in C++:\\
-\begin{tabular}{|p{0.97\textwidth}|}
-\hline
-\inputminted{cpp}{../examples/example.cc}\\
-\hline
-\end{tabular}
+A solution in C++:
+\inputminted{cpp}{../examples/example.cc}
 
-A solution in Java:\\
-\begin{tabular}{|p{0.97\textwidth}|}
-\hline
-\inputminted{java}{../examples/example.java}\\
-\hline
-\end{tabular}
+A solution in Java:
+\inputminted{java}{../examples/example.java}
 
-A solution in Kotlin:\\
-\begin{tabular}{|p{0.97\textwidth}|}
-\hline
-\inputminted{kotlin}{../examples/example.kt}\\
-\hline
-\end{tabular}
+A solution in Python:
+\inputminted{python}{../examples/example.py}
+
+\newpage
 
 A solution in C\#:
-\begin{tabular}{|p{0.97\textwidth}|}
-\hline
 \inputminted{csharp}{../examples/example.cs}
-\hline
-\end{tabular}
 
 A solution in Pascal:
-\begin{tabular}{|p{0.97\textwidth}|}
-\hline
 \inputminted{pascal}{../examples/example.pas}
-\hline
-\end{tabular}
 
-A solution in Haskell:
-\begin{tabular}{|p{0.97\textwidth}|}
-\hline
+And finally a solution in Haskell:
 \inputminted{haskell}{../examples/example.hs}
-\hline
-\end{tabular}
-
-And finally a solution in Python:\\
-\begin{tabular}{|p{0.97\textwidth}|}
-\hline
-\inputminted{python}{../examples/example.py}\\
-\hline
-\end{tabular}
 
 \end{document}

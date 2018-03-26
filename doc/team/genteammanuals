@@ -29,7 +29,7 @@ fi
 
 # Set LaTeX command and flags if not given:
 [ -z "$LATEX" ] && LATEX=pdflatex
-[ -z "$LATEXFLAGS" ] && LATEXFLAGS='--interaction=errorstopmode -enable-write18'
+[ -z "$LATEXFLAGS" ] && LATEXFLAGS='--interaction=errorstopmode --shell-escape'
 
 TEXCONFIG=$(mktemp --tmpdir domjudge-texconfig.XXXXXX)
 
