@@ -17,17 +17,19 @@ $categs = $DB->q('COLUMN SELECT categoryid FROM team_category WHERE visible = 1'
 $sdata = genScoreBoard($cdata, true, array('categoryid' => $categs));
 $teams = $sdata['teams'];
 
-$team_mapping = [];
-foreach ($teams as $team) {
-	$team_mapping[$team['externalid']] = $team['name'];
-}
+// Note: we're using affiliation names here for the WFs!
+$team_names = $DB->q('KEYVALUETABLE SELECT t.externalid, a.name
+                      FROM team t
+                      LEFT JOIN team_affiliation a USING (affilid)
+                      WHERE t.externalid IS NOT NULL');
+
 $awarded = [];
 $ranked = [];
 $honorable = [];
 $region_winners = [];
 
 foreach (tsv_results_get() as $row) {
-	$team = $team_mapping[$row[0]];
+	$team = $team_names[$row[0]];
 
 	if ($row[6] !== '') {
 		$region_winners[] = [
@@ -77,7 +79,7 @@ foreach ($probs as $probData) {
 			$first_to_solve[$probData['probid']] = [
 				'problem' => $probData['shortname'],
 				'problem_name' => $probData['name'],
-				'team' => $teamData['name'],
+				'team' => $team_names[$teamData['externalid']],
 				'time' => scoretime($matrix[$teamData['teamid']][$probData['probid']]['time']),
 			];
 		}
