@@ -114,20 +114,22 @@ if ( ! isset($_POST['cancel']) ) {
 			}
 			check_sane_keys($prikey);
 
-			$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
+			$changed = $DB->q("RETURNAFFECTED UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
 
-			if ( count($KEYS[$t])==1 ) {
-				$datatype = $t;
-				$dataid = $keydata[$i][$tablekey];
-			}
-			if ( $t === 'contestproblem' ||
-			     $t === 'contestteam' ) {
-				$datatype = substr($t,7);
-				$dataid = $keydata[$i][$tablekey];
-			}
-			if ( !empty($datatype) ) eventlog($datatype, $dataid, 'update', $cid);
+			if ( $changed ) {
+				if ( count($KEYS[$t])==1 ) {
+					$datatype = $t;
+					$dataid = $keydata[$i][$tablekey];
+				}
+				if ( $t === 'contestproblem' ||
+				     $t === 'contestteam' ) {
+					$datatype = substr($t,7);
+					$dataid = $keydata[$i][$tablekey];
+				}
+				if ( !empty($datatype) ) eventlog($datatype, $dataid, 'update', $cid);
 
-			auditlog($t, implode(', ', $prikey), 'updated');
+				auditlog($t, implode(', ', $prikey), 'updated');
+			}
 		}
 
 		// special case for many-to-one and many-to-many mappings
