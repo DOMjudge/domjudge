@@ -1220,8 +1220,10 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 	global $resturl, $restuser, $restpass, $lastrequest, $G_SYMFONY, $apiFromInternal;
 	if (isset($G_SYMFONY)) {
 		// Perform an internal Symfony request to the API
+		logmsg(LOG_DEBUG, "API internal request $verb $url");
+
 		$apiFromInternal = true;
-		$url = 'http://localhost/api/'. $url;
+		$url = 'http://localhost/api'. $url;
 		$httpKernel = $G_SYMFONY->getHttpKernel();
 		parse_str($data, $parsedData);
 
