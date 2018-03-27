@@ -791,7 +791,7 @@ function descriptionExpand($description) {
 	$default
 	</span>
 	<br/>
-	<a href="javascript:;" onclick="toggleExpand()">[expand]</a>
+	<a href="javascript:;" onclick="toggleExpand(event)">[expand]</a>
 </span>
 EOF;
 	}
