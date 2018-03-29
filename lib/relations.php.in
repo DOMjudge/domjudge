@@ -34,25 +34,24 @@ $RELATIONS['clarification']['recipient'] = 'team.teamid&NOCONSTRAINT';
  * Check whether some primary key is referenced in any
  * table as a foreign key.
  *
- * Returns null or an array "table name => action" where matches are found.
+ * Returns an array "table name => action" of matches found.
  */
 function fk_check($keyfield, $value) {
 	global $RELATIONS, $DB;
 
 	$ret = array();
-	foreach ( $RELATIONS as $table => $keys ) {
-		foreach ( $keys as $key => $val ) {
-			@list( $foreign, $action ) = explode('&', $val);
+	foreach ( $RELATIONS as $table => $table_rels ) {
+		foreach ( $table_rels as $column => $constraint ) {
+			@list( $foreign, $action ) = explode('&', $constraint);
 			if ( empty($action) ) $action = 'CASCADE';
 			if ( $foreign == $keyfield ) {
-				$c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $key = %s", $value);
+				$c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $column = %s", $value);
 				if ( $c > 0 ) $ret[$table] = $action;
 			}
 		}
 	}
 
-	if ( count($ret) ) return $ret;
-	return null;
+	return $ret;
 }
 
 /**
@@ -74,9 +73,9 @@ function fk_dependent_tables($table)
 		if ( in_array($curr_table,$ret) ) continue;
 		if ( $curr_table!=$table ) $ret[] = $curr_table;
 
-		foreach ( $RELATIONS as $next_table => $data ) {
-			foreach ( $data as $val ) {
-				@list( $foreign, $action ) = explode('&', $val);
+		foreach ( $RELATIONS as $next_table => $table_rels ) {
+			foreach ( $table_rels as $constraint ) {
+				@list( $foreign, $action ) = explode('&', $constraint);
 				@list( $foreign_table, $foreign_key ) = explode('.', $foreign);
 				if ( empty($action) ) $action = 'CASCADE';
 				if ( $foreign_table==$curr_table && $action=='CASCADE' ) {

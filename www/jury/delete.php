@@ -38,30 +38,30 @@ if ( isset($_POST['cancel']) ) {
 $title = 'Delete from ' . $t;
 require(LIBWWWDIR . '/header.php');
 
-// Check if we can really delete this.
+// Check if we can really delete this. Note that this does *not* take
+// into account recursive constraints.
 $warnings = array();
 foreach($k as $key => $val) {
-	if ( ($tables = fk_check ("$t.$key", $val))!==NULL ) {
-		foreach ( $tables as $table => $action ) {
-			switch ( $action ) {
-			case 'RESTRICT':
-				error("$t.$key \"$val\" is still referenced in $table, cannot delete.");
-			case 'CASCADE':
-				$deps = fk_dependent_tables($table);
-				$warn = "cascade to $table";
-				if ( count($deps)>0 ) {
-					$warn .= ", and possibly to dependent tables " . implode(", ",$deps);
-				}
-				$warnings[] = $warn;
-				break;
-			case 'SETNULL':
-				$warnings[] = "create dangling references in $table";
-				break;
-			case 'NOCONSTRAINT':
-				break;
-			default:
-				error("$t.$key is referenced in $table with unknown action '$action'.");
+	$tables = fk_check("$t.$key", $val);
+	foreach ( $tables as $table => $action ) {
+		switch ( $action ) {
+		case 'RESTRICT':
+			error("$t.$key \"$val\" is still referenced in $table, cannot delete.");
+		case 'CASCADE':
+			$deps = fk_dependent_tables($table);
+			$warn = "cascade to $table";
+			if ( count($deps)>0 ) {
+				$warn .= ", and possibly to dependent tables " . implode(", ",$deps);
 			}
+			$warnings[] = $warn;
+			break;
+		case 'SETNULL':
+			$warnings[] = "create dangling references in $table";
+			break;
+		case 'NOCONSTRAINT':
+			break;
+		default:
+			error("$t.$key is referenced in $table with unknown action '$action'.");
 		}
 	}
 }
