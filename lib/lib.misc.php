@@ -1083,7 +1083,7 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null,
 $API_endpoints = array(
 	'contests' => array(
 		'type'   => 'configuration',
-		'url'    => '/',
+		'url'    => '',
 		'extid'  => 'externalid',
 	),
 	'judgement-types' => array( // hardcoded in $VERDICTS and the API
