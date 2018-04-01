@@ -81,6 +81,10 @@
 			font-size: 1.5em;
 			padding-top: 2rem;
 		}
+
+		pre {
+			margin: 0;
+		}
 	</style>
 </head>
 <body>
