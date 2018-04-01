@@ -126,8 +126,6 @@ require(LIBWWWDIR . '/impexp_header.php');
 		<th scope="col">Rank</th>
 		<th scope="col">Team</th>
 		<th scope="col">Solved problems</th>
-		<th scope="col">Total time</th>
-		<th scope="col">Time of last submission</th>
 	</tr>
 	</thead>
 	<tbody>
@@ -136,8 +134,6 @@ require(LIBWWWDIR . '/impexp_header.php');
 			<th scope="row"><?= $row['rank'] ?></th>
 			<th scope="row"><?= $row['team'] ?></th>
 			<td><?= $row['solved'] ?></td>
-			<td><?= $row['total_time'] ?></td>
-			<td><?= $row['max_time'] ?></td>
 		</tr>
 	<?php endforeach; ?>
 	</tbody>
