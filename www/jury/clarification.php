@@ -144,6 +144,7 @@ if (isset($_POST['subject'])) {
 	}
 
 	$DB->q('UPDATE clarification SET cid = %i, category = %s, probid = %i WHERE clarid = %i', $cid, $category, $probid, $id);
+	auditlog('clarification', $id, 'subject changed');
 }
 
 require_once(LIBWWWDIR . '/header.php');
