@@ -1350,7 +1350,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	$now = sprintf('%.3f', microtime(TRUE));
 
 	// TODO: can this be wrapped into a single query?
-	$ids = array();
+	$eventids = array();
 	foreach ( $cids as $cid ) {
 		$table = ( $endpoint['tables'] ? $endpoint['tables'][0] : NULL );
 		$eventid = $DB->q('RETURNID INSERT INTO event
@@ -1359,16 +1359,16 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		                   VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
 		                  $now, $cid, $type, $id,
 		                  $table, $dataid, $action, $json);
-		$ids[] = $eventid;
+		$eventids[] = $eventid;
 	}
 
 	if ( $DB->q("VALUE SELECT RELEASE_LOCK('domjudge.eventlog')") != 1 ) {
 		error("eventlog: failed to release lock");
 	}
 
-	if ( count($ids)!==count($cids) ) {
+	if ( count($eventids)!==count($cids) ) {
 		error("eventlog: failed to $action $type/$id " .
-		      '('.count($ids).'/'.count($cids).' contests done)');
+		      '('.count($eventids).'/'.count($cids).' contests done)');
 	}
 
 	logmsg(LOG_DEBUG,"eventlog: ${action}d $type/$id " .
