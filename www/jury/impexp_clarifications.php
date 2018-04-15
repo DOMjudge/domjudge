@@ -14,7 +14,7 @@ require(LIBDIR . '/lib.impexp.php');
 
 requireAdmin();
 
-$categories = getClarCategories();
+$queues = getClarQueues();
 $clarifications = $DB->q('SELECT c.*, cp.shortname
             FROM clarification c
             LEFT JOIN problem p USING(probid)
@@ -28,33 +28,25 @@ $team_names = $DB->q('KEYVALUETABLE SELECT t.teamid, a.name
 
 $grouped = [];
 
-Symfony\Component\VarDumper\VarDumper::setHandler(null);
-
 while ($clarification = $clarifications->next()) {
-	if (isset($categories[$clarification['category']])) {
-		$category = $categories[$clarification['category']];
-	} elseif (isset($clarification['probid'])) {
-		$category = 'Problem ' . $clarification['shortname'];
-	} else {
-		$category = 'General';
-	}
+	$queue = $clarification['queue'];
 
-	if (!isset($grouped[$category])) {
-		$grouped[$category] = [];
+	if (!isset($grouped[$queue])) {
+		$grouped[$queue] = [];
 	}
 
 	if (isset($clarification['respid'])) {
-		$grouped[$category][$clarification['respid']]['reply'] = $clarification;
+		$grouped[$queue][$clarification['respid']]['reply'] = $clarification;
 	} else {
-		$grouped[$category][$clarification['clarid']] = $clarification;
+		$grouped[$queue][$clarification['clarid']] = $clarification;
 	}
 }
 
 $title = sprintf('Clarifications for %s', $cdata['name']);
 require(LIBWWWDIR . '/impexp_header.php');
 ?>
-<?php foreach ($grouped as $category => $clarifications): ?>
-	<h2><?= $category ?></h2>
+<?php foreach ($grouped as $queue => $clarifications): ?>
+	<h2><?= $queues[$queue] ?></h2>
 	<table class="table">
 		<thead>
 		<tr>

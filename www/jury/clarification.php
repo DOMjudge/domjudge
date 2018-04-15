@@ -69,9 +69,12 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 	list($cid, $probid) = explode('-', $_POST['problem']);
 	$category = NULL;
+	$queue = NULL;
 	if ( !ctype_digit($probid) ) {
 		$category = $probid;
 		$probid = NULL;
+	} else {
+		$queue = dbconfig_get('clar_default_problem_queue');
 	}
 
 	// If database supports it, wrap this in a transaction so we
@@ -81,12 +84,12 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	$DB->q('START TRANSACTION');
 
 	$newid = $DB->q('RETURNID INSERT INTO clarification
-	                 (cid, respid, submittime, recipient, probid, category, body,
+	                 (cid, respid, submittime, recipient, probid, category, queue, body,
 	                  answered, jury_member)
 	                 VALUES (%i, ' .
-	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %s, %i, ' .
+	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %s, %s, %i, ' .
 	                (isset($jury_member) ? '%s)' : 'NULL %_)'),
-	                $cid, $respid, now(), $sendto, $probid, $category,
+	                $cid, $respid, now(), $sendto, $probid, $category, $queue,
 	                $_POST['bodytext'], 1, $jury_member);
 
 	if ( ! $isgeneral ) {
@@ -145,6 +148,11 @@ if (isset($_POST['subject'])) {
 
 	$DB->q('UPDATE clarification SET cid = %i, category = %s, probid = %i WHERE clarid = %i', $cid, $category, $probid, $id);
 	auditlog('clarification', $id, 'subject changed');
+}
+
+if (isset($_POST['queue'])) {
+	$DB->q('UPDATE clarification SET queue = %s WHERE clarid = %i', $_POST['queue'], $id);
+	auditlog('clarification', $id, 'queue changed');
 }
 
 require_once(LIBWWWDIR . '/header.php');
@@ -211,24 +219,26 @@ if ( $isgeneral ) {
 ?>
 <script type="text/javascript">
 	$(function() {
-		$('.clarification-subject-change-button').on('click', function() {
-			$(this).closest('.clarification-subject').hide();
-			$(this).closest('td').find('.clarification-subject-form').show();
-		});
-		$('.clarification-subject-cancel-button').on('click', function() {
-			$(this).closest('.clarification-subject-form').hide();
-			$(this).closest('td').find('.clarification-subject').show();
-		});
-		$('.clarification-subject-form select').on('change', function() {
-			var $select = $(this);
-			var $form = $('.clarification-subject-form');
-			var clarId = $form.data('clarification-id');
-			var value = $select.find(':selected').text();
-			if (confirm('Are you sure you want to change the subject of clarification ' + clarId + ' to "' + value + '"?')) {
-				$form.find('form').submit();
-			} else {
-				$select.val($form.data('current-selected-category'));
-			}
+		$(['subject', 'queue']).each(function(_, field) {
+			$('.clarification-' + field + '-change-button').on('click', function () {
+				$(this).closest('.clarification-' + field).hide();
+				$(this).closest('td').find('.clarification-' + field + '-form').show();
+			});
+			$('.clarification-' + field + '-cancel-button').on('click', function () {
+				$(this).closest('.clarification-' + field + '-form').hide();
+				$(this).closest('td').find('.clarification-' + field).show();
+			});
+			$('.clarification-' + field + '-form select').on('change', function () {
+				var $select = $(this);
+				var $form = $('.clarification-' + field + '-form');
+				var clarId = $form.data('clarification-id');
+				var value = $select.find(':selected').text();
+				if (confirm('Are you sure you want to change the ' + field + ' of clarification ' + clarId + ' to "' + value + '"?')) {
+					$form.find('form').submit();
+				} else {
+					$select.val($form.data('current-selected-' + field));
+				}
+			});
 		});
 	});
 </script>

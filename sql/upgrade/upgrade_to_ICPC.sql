@@ -38,6 +38,8 @@ CREATE TABLE `removed_interval` (
   CONSTRAINT `removed_interval_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Time intervals removed from the contest for scoring';
 
+ALTER TABLE `clarification`
+  ADD COLUMN `queue` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Queue associated to this clarification' AFTER `category`;
 --
 -- Transfer data from old to new structure
 --
@@ -47,7 +49,9 @@ CREATE TABLE `removed_interval` (
 --
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
-('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers');
+('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers'),
+('clar_queues', '{"sysops":"SysOps issue","judges":"Judges issue","operations":"Operations issues","ccs":"CCS issues"}', 'array_keyval', 'List of clarification queues'),
+('clar_default_problem_queue', '"judges"', 'string', 'Category to assign to problem clarifications');
 
 UPDATE `configuration` SET `value` = '60' WHERE `name` = 'script_timelimit';
 UPDATE `configuration` SET `value` = '1'  WHERE `name` = 'show_pending';

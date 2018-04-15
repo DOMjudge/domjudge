@@ -47,6 +47,19 @@ function getClarCategories()
 }
 
 /**
+ * Returns the list of clarification queues as a key,value array.
+ */
+function getClarQueues()
+{
+	$queues = dbconfig_get('clar_queues');
+
+	$clarqueues = [null => 'Unassigned issues'];
+	foreach ( $queues as $key => $val ) $clarqueues[$key] = $val;
+
+	return $clarqueues;
+}
+
+/**
  * Output a single clarification.
  * Helperfunction for putClarification, do _not_ use directly!
  */
@@ -165,6 +178,25 @@ function putClar($clar)
 	}
 	echo "</td></tr>\n";
 
+	if (IS_JURY) {
+		global $pagename;
+		$queues = getClarQueues();
+		echo '<tr><td>Queue:</td><td>';
+		echo '<span class="clarification-queue">';
+		echo $queues[$clar['queue']];
+		// Add button to change queue
+		echo '&nbsp;<input type="button" value="Change" class="clarification-queue-change-button" />';
+		echo '</span>';
+		echo '<span class="clarification-queue-form" data-current-selected-queue="' . $clar['queue'] . '" data-clarification-id="' . $clar['clarid'] . '" style="display: none;">';
+		echo addForm($pagename) .
+			addHidden('id', $clar['clarid']) .
+			addSelect('queue', $queues, $clar['queue'], true) .
+			addEndForm();
+		echo '<input type="button" value="Cancel" class="clarification-queue-cancel-button" />';
+		echo '</span>';
+	}
+	echo "</td></tr>\n";
+
 	echo '<tr><td>Time:</td><td>';
 	echo printtime($clar['submittime'], NULL, $clar['cid']);
 	echo "</td></tr>\n";
@@ -249,11 +281,13 @@ function putClarificationList($clars, $team = NULL)
 	     "<th scope=\"col\">time</th>" .
 	     "<th scope=\"col\">from</th>" .
 	     "<th scope=\"col\">to</th><th scope=\"col\">subject</th>" .
+	    ( IS_JURY ? "<th scope=\"col\">queue</th>" : "") .
 	     "<th scope=\"col\">text</th>" .
 		( IS_JURY ? "<th scope=\"col\">answered</th><th scope=\"col\">by</th>" : "") .
 	     "</tr>\n</thead>\n<tbody>\n";
 
 	$categs = getClarCategories();
+	$queues = getClarQueues();
 
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams
@@ -316,6 +350,12 @@ function putClarificationList($clars, $team = NULL)
 			echo "problem ".$clar['shortname'];
 		}
 		echo "</a></td>";
+
+		if ( IS_JURY ) {
+			echo '<td>' . $link;
+			echo specialchars($queues[$clar['queue']]);
+			echo "</a></td>";
+		}
 
 		echo '<td class="clartext">' . $link .
 		    summarizeClarification($clar['body']) . "</a></td>";
