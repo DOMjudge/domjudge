@@ -70,7 +70,9 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	list($cid, $probid) = explode('-', $_POST['problem']);
 	$category = NULL;
 	$queue = NULL;
-	if ( !ctype_digit($probid) ) {
+	if ($respid !== NULL) {
+		$queue = $DB->q('MAYBEVALUE SELECT queue FROM clarification WHERE clarid = %i', $respid);
+	} elseif ( !ctype_digit($probid) ) {
 		$category = $probid;
 		$probid = NULL;
 	} else {
