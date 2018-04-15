@@ -27,6 +27,7 @@ requireAdmin();
 </li>
 <li>HTML, export:
 	<a href="impexp_results.php" target="_blank">results.html</a>,
+	<a href="impexp_results.php?mode=icpcsite" target="_blank">results.html for on ICPC site</a>,
 	<a href="impexp_clarifications.php" target="_blank">clarifications.html</a>
 </li>
 <li>
