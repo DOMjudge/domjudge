@@ -23,7 +23,7 @@ $clarifications = $DB->q('SELECT c.*, cp.shortname, p.name AS probname
             WHERE c.cid = %i ORDER BY category, probid, submittime, clarid', $cdata['cid']);
 
 // Note: we're using affiliation names here for the WFs!
-$team_names = $DB->q('KEYVALUETABLE SELECT t.teamid, a.name
+$team_names = $DB->q('KEYVALUETABLE SELECT t.teamid, a.shortname
                       FROM team t
                       LEFT JOIN team_affiliation a USING (affilid)');
 
@@ -97,7 +97,7 @@ require(LIBWWWDIR . '/impexp_header.php');
 							}
 						}
 					} else {
-						echo 'Problem ' . specialchars($clarification['shortname'] . ": " . $clarification['probname']);
+						echo specialchars($clarification['shortname'] . ": " . $clarification['probname']);
 					}
 					?>
 				</td>
