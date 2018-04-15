@@ -14,7 +14,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `description`) V
 ('clar_categories', '{"general":"General issue","tech":"Technical issue"}', 'array_keyval', '1', 'List of additional clarification categories'),
 ('script_timelimit', '30', 'int', '0', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.'),
 ('clar_queues', '{}', 'array_keyval', '1', 'List of clarification queues'),
-('clar_default_problem_queue', '"judges"', 'string', '1', 'Queue to assign to problem clarifications');
+('clar_default_problem_queue', '"judges"', 'string', '1', 'Queue to assign to problem clarifications'),
 ('script_memory_limit', '2097152', 'int', '0', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.'),
 ('script_filesize_limit', '540672', 'int', '0', 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate or final* result written by compilers.'),
 ('memory_limit', '524288', 'int', '0', 'Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB! Can be overridden per problem.'),
