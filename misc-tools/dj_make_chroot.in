@@ -159,7 +159,7 @@ INSTALLDEBS="openjdk-8-jre-headless pypy locales"
 # However running mono within chroot still gives errors...
 
 # Packages to remove after upgrade (space separated):
-REMOVEDEBS=""
+REMOVEDEBS="python3-pycurl python3-software-properties"
 
 # Which debootstrap package to install on non-Ubuntu systems:
 # This is only used when the default distro changed from Debian to
