@@ -26,9 +26,11 @@ $team_names = $DB->q('KEYVALUETABLE SELECT t.teamid, a.name
                       FROM team t
                       LEFT JOIN team_affiliation a USING (affilid)');
 
+$clarificationsById = [];
 $grouped = [];
 
 while ($clarification = $clarifications->next()) {
+	$clarificationsById[$clarification['clarid']] = $clarification;
 	$queue = $clarification['queue'];
 
 	if (!isset($grouped[$queue])) {
@@ -36,7 +38,9 @@ while ($clarification = $clarifications->next()) {
 	}
 
 	if (isset($clarification['respid'])) {
-		$grouped[$queue][$clarification['respid']]['reply'] = $clarification;
+		$originalClarification = $clarificationsById[$clarification['respid']];
+		$originalQueue = $originalClarification['queue'];
+		$grouped[$originalQueue][$clarification['respid']]['reply'] = $clarification;
 	} else {
 		$grouped[$queue][$clarification['clarid']] = $clarification;
 	}
@@ -50,6 +54,7 @@ require(LIBWWWDIR . '/impexp_header.php');
 	<table class="table">
 		<thead>
 		<tr>
+			<th scope="col">ID</th>
 			<th scope="col">Contest time</th>
 			<th scope="col">From</th>
 			<th scope="col">To</th>
@@ -73,6 +78,7 @@ require(LIBWWWDIR . '/impexp_header.php');
 			}
 			?>
 			<tr>
+				<td><?= $clarification['clarid'] ?></td>
 				<td><?= printtime($clarification['submittime'], NULL, $clarification['cid']) ?></td>
 				<td><?= $from ?></td>
 				<td><?= $to ?></td>
