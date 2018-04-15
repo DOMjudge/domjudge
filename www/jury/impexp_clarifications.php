@@ -15,7 +15,8 @@ require(LIBDIR . '/lib.impexp.php');
 requireAdmin();
 
 $queues = getClarQueues();
-$clarifications = $DB->q('SELECT c.*, cp.shortname
+$categs = getClarCategories();
+$clarifications = $DB->q('SELECT c.*, cp.shortname, p.name AS probname
             FROM clarification c
             LEFT JOIN problem p USING(probid)
             LEFT JOIN contestproblem cp USING (probid, cid)
@@ -58,6 +59,7 @@ require(LIBWWWDIR . '/impexp_header.php');
 			<th scope="col">Contest time</th>
 			<th scope="col">From</th>
 			<th scope="col">To</th>
+			<th scope="col">Subject</th>
 			<th scope="col">Contents</th>
 			<th scope="col">Answered?</th>
 			<th scope="col">Reply</th>
@@ -82,6 +84,23 @@ require(LIBWWWDIR . '/impexp_header.php');
 				<td><?= printtime($clarification['submittime'], NULL, $clarification['cid']) ?></td>
 				<td><?= $from ?></td>
 				<td><?= $to ?></td>
+				<td>
+					<?php
+					if (is_null($clarification['probid'])) {
+						if (is_null($clarification['category'])) {
+							echo 'General';
+						} else {
+							if (array_key_exists($clarification['category'], $categs)) {
+								echo specialchars($categs[$clarification['category']]);
+							} else {
+								echo 'General';
+							}
+						}
+					} else {
+						echo 'Problem ' . specialchars($clarification['shortname'] . ": " . $clarification['probname']);
+					}
+					?>
+				</td>
 				<td>
 					<pre><?= specialchars(wrap_unquoted($clarification['body'], 80)) ?></pre>
 				</td>
