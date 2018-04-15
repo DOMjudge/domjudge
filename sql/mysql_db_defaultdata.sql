@@ -14,7 +14,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `description`) V
 ('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', '1', 'List of predefined clarification answers'),
 ('clar_categories', '{"general":"General issue","tech":"Technical issue"}', 'array_keyval', '1', 'List of additional clarification categories'),
 ('clar_queues', '{"sysops":"SysOps issue","judges":"Judges issue","operations":"Operations issues"}', 'array_keyval', '1', 'List of clarification queues'),
-('clar_default_problem_queue', '"judges"', 'string', '1', 'Category to assign to problem clarifications');
+('clar_default_problem_queue', '"judges"', 'string', '1', 'Category to assign to problem clarifications'),
 ('script_timelimit', '60', 'int', '0', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.'),
 ('script_memory_limit', '2097152', 'int', '0', 'Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.'),
 ('script_filesize_limit', '540672', 'int', '0', 'Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate or final* result written by compilers.'),
