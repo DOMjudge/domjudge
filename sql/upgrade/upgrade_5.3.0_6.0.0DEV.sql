@@ -127,11 +127,13 @@ ALTER TABLE `submission`
 -- Add/remove sample/initial contents
 --
 
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
-('require_entry_point', '0', 'bool', 'Require entry point for submissions.'),
-('show_flags', '1', 'bool', 'Show country flags on the scoreboard?'),
-('show_affiliation_logos', '0', 'bool', 'Show affiliation logos on the scoreboard?'),
-('show_limits_on_team_page', '0', 'bool', 'Show time and memory limit on the team problems page');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`, `public`) VALUES
+('require_entry_point', '0', 'bool', 'Require entry point for submissions.', 0),
+('show_flags', '1', 'bool', 'Show country flags on the scoreboard?', 0),
+('show_affiliation_logos', '0', 'bool', 'Show affiliation logos on the scoreboard?', 0),
+('show_limits_on_team_page', '0', 'bool', 'Show time and memory limit on the team problems page', 0),
+('clar_queues', '{}', 'array_keyval', 'List of clarification queues', 1),
+('clar_default_problem_queue', '"judges"', 'string', 'Category to assign to problem clarifications', 1);
 
 UPDATE `configuration` SET `description` = 'Show affiliation names in the interfaces?' WHERE `name` = 'show_affiliations';
 

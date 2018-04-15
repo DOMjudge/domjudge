@@ -29,9 +29,12 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 	list($cid, $probid) = explode('-', $_POST['problem']);
 	$category = NULL;
+	$queue = NULL;
 	if ( !ctype_digit($probid) ) {
 		$category = $probid;
 		$probid = NULL;
+	} else {
+		$queue = dbconfig_get('clar_default_problem_queue');
 	}
 
 	// Disallow problems that are not submittable or
@@ -39,9 +42,9 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	if ( !problemVisible($probid) ) $probid = NULL;
 
 	$newid = $DB->q('RETURNID INSERT INTO clarification
-	                 (cid, submittime, sender, probid, category, body)
-	                 VALUES (%i, %s, %i, %i, %s, %s)',
-	                $cid, now(), $teamid, $probid, $category, $_POST['bodytext']);
+	                 (cid, submittime, sender, probid, category, queue, body)
+	                 VALUES (%i, %s, %i, %i, %s, %s, %s)',
+	                $cid, now(), $teamid, $probid, $category, $queue, $_POST['bodytext']);
 
 	eventlog('clarification', $newid, 'create', $cid);
 	auditlog('clarification', $newid, 'added', null, null, $cid);
