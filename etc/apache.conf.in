@@ -24,6 +24,9 @@ Listen 443
 <VirtualHost *:80>
 ServerName _default_
 DocumentRoot @domserver_webappdir@/web
+# Redirect to HTTPS
+RewriteEngine on
+RewriteRule ^(.*)$ https://%{SERVER_NAME}$1
 </VirtualHost>
 
 <VirtualHost *:443>
