@@ -285,7 +285,6 @@ EOF
 if [ "$TRAVIS" != 'true' ]; then
 cat >> "$CHROOTDIR/etc/apt/sources.list" <<EOF
 deb ${DEBMIRROR%/ubuntu}/apt     $RELEASE main
-deb ${DEBMIRROR%/ubuntu}/pycharm $RELEASE main
 
 EOF
 fi
