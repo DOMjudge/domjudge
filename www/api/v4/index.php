@@ -1199,12 +1199,23 @@ function runs($args)
 		}
 	}
 
+	$multipleIds = false;
+
 	if ( isset($args['__primary_key']) ) {
 		if ( isset($args['run_id']) ) {
 			$api->createError("You cannot specify a primary ID both via /{id} and ?run_id={id}");
 			return '';
 		}
-		$args['run_id'] = rest_intid('runs', $args['__primary_key'], $cid);
+
+		// If 'multiple' has been passed, we need to keep track if this
+		if (isset($args['multiple']) && $args['multiple']) {
+			$multipleIds = true;
+			$args['run_id'] = array_map(function($id) {
+				return rest_intid('runs', $id, $cid);
+			}, explode(',', $args['__primary_key']));
+		} else {
+			$args['run_id'] = rest_intid('runs', $args['__primary_key'], $cid);
+		}
 	}
 
 	$query = 'TABLE SELECT jr.runid, jr.judgingid, jr.runresult,
@@ -1241,8 +1252,13 @@ function runs($args)
 	$judgingid = ($hasJudgingid ? $args['judging_id'] : 0);
 
 	$hasRunId = array_key_exists('run_id', $args);
-	$query .= ($hasRunId ? ' AND runid = %i' : ' %_');
-	$runid = ($hasRunId ? $args['run_id'] : 0);
+	if ($multipleIds) {
+		$query .= ($hasRunId ? ' AND runid IN (%Ai)' : ' %_');
+		$runid = ($hasRunId ? $args['run_id'] : 0);
+	} else {
+		$query .= ($hasRunId ? ' AND runid = %i' : ' %_');
+		$runid = ($hasRunId ? $args['run_id'] : 0);
+	}
 
 	$hasLimit = array_key_exists('limit', $args);
 	$query .= ($hasLimit ? ' LIMIT %i' : ' %_');

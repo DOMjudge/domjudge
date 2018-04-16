@@ -99,8 +99,8 @@ if ( isset($_REQUEST['apply']) ) {
 		eventlog('judging', $row['judgingid'], 'create', $row['cid'], @$insert_json);
 		$run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
 		                   WHERE judgingid=%i', $row['judgingid']);
-		foreach ($run_ids as $run_id) {
-			eventlog('judging_run', $run_id, 'create', $row['cid']);
+		if (!empty($run_ids)) {
+			eventlog('judging_run', $run_ids, 'create', $row['cid']);
 		}
 		eventlog('judging', $row['judgingid'], 'update', $row['cid']);
 		$DB->q('COMMIT');

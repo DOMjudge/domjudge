@@ -155,7 +155,8 @@ class RestApi {
 		// Arguments
 		$args = array();
 		$valid_args = array_merge($func['optArgs'], array(
-			'__primary_key' => 'ID of single element endpoint',
+			'__primary_key' => 'ID of single element endpoint or ID\'s if multiple is true',
+			'multiple'      => 'If true, allow __primary_key to contain multiple ID\'s',
 			'strict'        => 'Strictly follow Contest API specification',
 		));
 		foreach ( $arguments as $key => $value ) {
@@ -186,8 +187,9 @@ class RestApi {
 			$this->createResponse($response);
 			return;
 		}
-		// If a single element was requested, return an object:
+		// If a single element was requested, return an object, but only for non-multiple requests:
 		if  ( isset($arguments['__primary_key']) &&
+		      !isset($arguments['multiple']) &&
 		      $_SERVER['REQUEST_METHOD']==='GET' ) {
 			if ( count($response)!=1 ) {
 				$this->createError("Found " . count($response) .
