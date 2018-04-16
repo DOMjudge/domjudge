@@ -919,8 +919,8 @@ class Contest
 			'id'                         => (string)$this->getExternalId(),
 			'name'                       => $this->getName(),
 			'formal_name'                => $this->getName(),
-			'start_time'                 => $this->getStarttimeEnabled() ? Utils::absTime($this->getStarttime()) : null,
-			'duration'                   => Utils::relTime($this->getEndtime() - $this->getStarttime()),
+			'start_time'                 => Utils::absTime($this->getStarttime()),
+			'duration'                   => Utils::relTime($this->getEndtime() - $this->starttime),
 			'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
 			'penalty_time'               => (int)$penalty_time,
 		);
