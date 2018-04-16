@@ -133,7 +133,7 @@ while ( TRUE ) {
 	if ( !$initial_events_loaded ) initialize_events($cid);
 
 	$fdata_old = @$fdata;
-	$fdata = calcFreezeData($contest);
+	$fdata = calcFreezeData($contest, TRUE);
 	if ( empty($fdata_old) ) $fdata_old = $fdata;
 
 	// Check for contest state changes:
