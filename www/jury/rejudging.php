@@ -66,6 +66,7 @@ if ( isset($_REQUEST['apply']) ) {
 	echo "<br/><p>Applying rejudge may take some time, please be patient:</p>\n";
 	ob_implicit_flush(true);
 	ob_end_flush();
+	set_time_limit(0);
 
 	// clear GET array because otherwise the eventlog subrequest will still include the rejudging id
 	$_GET = array();
@@ -87,6 +88,7 @@ if ( isset($_REQUEST['apply']) ) {
 		// update event log, first with judging data as in initial state
 		$judging_json = API_request('/contests/'.rest_extid('contests', $row['cid']).
 		                            '/judgements/'.$row['judgingid'], 'GET', '', false);
+		$insert_json = NULL;
 		if ( !empty($judging_json) ) {
 			$judging_data = dj_json_decode($judging_json);
 			foreach ( array('judgement_type_id','end_time','end_contest_time','max_run_time') as $key ) {
