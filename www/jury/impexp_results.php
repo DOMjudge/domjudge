@@ -59,7 +59,7 @@ foreach (tsv_results_get() as $row) {
 		$row['class'] = '';
 	}
 	if ($row['rank'] === '') {
-		$honorable[] = $row;
+		$honorable[] = $row['team'];
 	} elseif ($row['award'] === 'Ranked') {
 		$ranked[] = $row;
 	} else {
@@ -70,6 +70,9 @@ foreach (tsv_results_get() as $row) {
 usort($region_winners, function ($a, $b) {
 	return $a['group'] <=> $b['group'];
 });
+
+$collator = new Collator('en_US');
+$collator->sort($honorable);
 
 $probs = $sdata['problems'];
 $matrix = $sdata['matrix'];
@@ -340,11 +343,9 @@ usort($first_to_solve, function ($a, $b) {
 				<th colspan="2">Honorable mention</th>
 			</tr>
 			<tr>
-				<?php foreach ($honorable
-
-				as $idx => $row): ?>
-				<td class="name"><?= $row['team'] ?></td>
-				<?php if ($idx % 2 === 1 && $row !== end($honorable)): ?>
+				<?php foreach ($honorable as $idx => $team): ?>
+				<td class="name"><?= $team ?></td>
+				<?php if ($idx % 2 === 1 && $team !== end($honorable)): ?>
 			</tr>
 			<tr><?php endif; ?>
 				<?php endforeach; ?>
@@ -455,11 +456,9 @@ usort($first_to_solve, function ($a, $b) {
 	<table class="table">
 		<tbody>
 		<tr>
-			<?php foreach ($honorable
-
-			as $idx => $row): ?>
-			<td><?= $row['team'] ?></td>
-			<?php if ($idx % 2 === 1 && $row !== end($honorable)): ?>
+			<?php foreach ($honorable as $idx => $team): ?>
+			<td><?= $team ?></td>
+			<?php if ($idx % 2 === 1 && $team !== end($honorable)): ?>
 		</tr>
 		<tr><?php endif; ?>
 			<?php endforeach; ?>
