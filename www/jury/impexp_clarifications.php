@@ -55,7 +55,7 @@ td:first-child {
     padding-right: 10px;
 }
 tr.top-line {
-	border-top: 2px solid #ccc;
+	border-top: 4px solid #ccc;
 }
 tr.top-line td {
 	padding-top: 8px;
