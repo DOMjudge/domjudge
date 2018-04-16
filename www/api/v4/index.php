@@ -756,7 +756,14 @@ function judging_runs_POST($args)
 			}
 
 			auditlog('judging', $args['judgingid'], 'judged', $result, $args['judgehost']);
+
+			$just_finished = true;
 		}
+	}
+
+	// Send an event for an endtime update if not done yet.
+	if ( count($runresults) == $numtestcases && empty($just_finished) ) {
+		eventlog('judging', $args['judgingid'], 'update', $jud['cid']);
 	}
 
 	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s',
