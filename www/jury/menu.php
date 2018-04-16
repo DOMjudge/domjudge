@@ -3,9 +3,6 @@ global $updates;
 ?>
 <nav><div id="menutop">
 <a href="index.php" accesskey="h"><span class="octicon octicon-home"></span> home</a>
-<?php	if ( checkrole('balloon') ) { ?>
-<a href="balloons.php" accesskey="b"><span class="octicon octicon-location"></span> balloons</a>
-<?php	} ?>
 <?php	if ( checkrole('jury') ) { ?>
 <a href="problems.php" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
 <?php	} ?>
