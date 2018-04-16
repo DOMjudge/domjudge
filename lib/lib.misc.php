@@ -122,7 +122,7 @@ function problemVisible($probid)
  * has already started, stopped, andd if scoreboard is currently
  * frozen or final (unfrozen).
  */
-function calcFreezeData($cdata)
+function calcFreezeData($cdata, $isjury = FALSE)
 {
 	$fdata = array();
 
@@ -140,10 +140,14 @@ function calcFreezeData($cdata)
 	// reached, or if contest is over and no freezetime had been set.
 	// We can compare $now and the dbfields stringwise.
 	$now = now();
-	$fdata['showfinal']  = ( !isset($cdata['freezetime']) &&
-	                difftime($cdata['endtime'],$now) <= 0 ) ||
-	              ( isset($cdata['unfreezetime']) &&
-	                difftime($cdata['unfreezetime'], $now) <= 0 );
+	$fdata['showfinal']  = isset($cdata['finalizetime']) &&
+			difftime($cdata['finalizetime'],$now) <= 0;
+	if ( !$isjury ) {
+		$fdata['showfinal'] = $fdata['showfinal'] &&
+			(!isset($cdata['freezetime']) ||
+			 ( isset($cdata['unfreezetime']) &&
+			   difftime($cdata['unfreezetime'], $now) <= 0 ));
+	}
 	// freeze scoreboard if freeze time has been reached and
 	// we're not showing the final score yet
 	$fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
