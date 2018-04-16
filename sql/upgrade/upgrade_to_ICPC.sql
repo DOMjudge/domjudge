@@ -48,10 +48,10 @@ ALTER TABLE `clarification`
 -- Add/remove sample/initial contents
 --
 
-INSERT INTO `configuration` (`name`, `value`, `type`, `description`) VALUES
-('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers'),
-('clar_queues', '{"sysops":"SysOps issue","judges":"Judges issue","operations":"Operations issues","ccs":"CCS issues"}', 'array_keyval', 'List of clarification queues'),
-('clar_default_problem_queue', '"judges"', 'string', 'Category to assign to problem clarifications');
+INSERT INTO `configuration` (`name`, `value`, `type`, `description`, `public`) VALUES
+('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers', 0),
+('clar_queues', '{"sysops":"SysOps issue","judges":"Judges issue","operations":"Operations issues","ccs":"CCS issues"}', 'array_keyval', 'List of clarification queues', 1),
+('clar_default_problem_queue', '"judges"', 'string', 'Category to assign to problem clarifications', 1);
 
 UPDATE `configuration` SET `value` = '60' WHERE `name` = 'script_timelimit';
 UPDATE `configuration` SET `value` = '1'  WHERE `name` = 'show_pending';
