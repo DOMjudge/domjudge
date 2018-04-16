@@ -29,6 +29,11 @@ $honorable = [];
 $region_winners = [];
 
 $useIcpcLayout = isset($_GET['mode']) && $_GET['mode'] === 'icpcsite';
+$download = isset($_GET['download']);
+if ($download) {
+	header('Content-type: text/html');
+	header('Content-disposition: attachment; filename=results.html');
+}
 
 foreach (tsv_results_get() as $row) {
 	$team = $team_names[$row[0]];
@@ -105,6 +110,9 @@ usort($first_to_solve, function ($a, $b) {
 
 ?>
 <?php if ($useIcpcLayout): ?>
+	<?php if (!$download): ?>
+		<a href="?mode=icpcsite&download">Download</a>
+	<?php endif; ?>
 	<div id="xwikicontent">
 		<style type="text/css">
 			table {
