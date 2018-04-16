@@ -72,10 +72,11 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	$queue = NULL;
 	if ($respid !== NULL) {
 		$queue = $DB->q('MAYBEVALUE SELECT queue FROM clarification WHERE clarid = %i', $respid);
-	} elseif ( !ctype_digit($probid) ) {
+	}
+	if ( !ctype_digit($probid) ) {
 		$category = $probid;
 		$probid = NULL;
-	} else {
+	} elseif ( $queue===NULL && $respid===NULL ) {
 		$queue = dbconfig_get('clar_default_problem_queue');
 	}
 
