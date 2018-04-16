@@ -50,6 +50,17 @@ while ($clarification = $clarifications->next()) {
 $title = sprintf('Clarifications for %s', $cdata['name']);
 require(LIBWWWDIR . '/impexp_header.php');
 ?>
+<style>
+td:first-child {
+    padding-right: 10px;
+}
+tr.top-line {
+	border-top: 2px solid #ccc;
+}
+tr.top-line td {
+	padding-top: 8px;
+}
+</style>
 <?php foreach ($grouped as $queue => $clarifications): ?>
 	<h2><?= $queues[$queue] ?></h2>
 	<table class="table">
@@ -59,10 +70,8 @@ require(LIBWWWDIR . '/impexp_header.php');
 			<th scope="col">Contest time</th>
 			<th scope="col">From</th>
 			<th scope="col">To</th>
-			<th scope="col">Subject</th>
 			<th scope="col">Contents</th>
 			<th scope="col">Answered?</th>
-			<th scope="col">Reply</th>
 		</tr>
 		</thead>
 		<tbody>
@@ -79,7 +88,7 @@ require(LIBWWWDIR . '/impexp_header.php');
 				$to = ($clarification['sender']) ? 'Jury' : 'All';
 			}
 			?>
-			<tr>
+			<tr class="top-line">
 				<td><?= $clarification['clarid'] ?></td>
 				<td><?= printtime($clarification['submittime'], NULL, $clarification['cid']) ?></td>
 				<td><?= $from ?></td>
@@ -101,18 +110,22 @@ require(LIBWWWDIR . '/impexp_header.php');
 					}
 					?>
 				</td>
-				<td>
+				<td><?= $clarification['answered'] ? 'Yes' : 'No' ?></td>
+			</tr>
+			<tr>
+				<td><b>Content</b></td>
+				<td colspan="5">
 					<pre><?= specialchars(wrap_unquoted($clarification['body'], 80)) ?></pre>
 				</td>
-				<td><?= $clarification['answered'] ? 'Yes' : 'No' ?></td>
-				<td>
-					<?php if (isset($clarification['reply'])): ?>
-						<pre><?= specialchars(wrap_unquoted($clarification['reply']['body'], 80)) ?></pre>
-					<?php else: ?>
-						-
-					<?php endif; ?>
-				</td>
 			</tr>
+			<?php if (isset($clarification['reply'])): ?>
+				<tr>
+					<td><b>Reply</b></td>
+					<td colspan="5">
+						<pre><?= specialchars(wrap_unquoted($clarification['reply']['body'], 80)) ?></pre>
+					</td>
+				</tr>
+			<?php endif; ?>
 		<?php endforeach; ?>
 		</tbody>
 	</table>

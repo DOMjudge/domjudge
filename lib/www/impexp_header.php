@@ -25,7 +25,7 @@
 		body {
 			margin: 0;
 			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-			font-size: 1rem;
+			font-size: 14px;
 			font-weight: 400;
 			line-height: 1.5;
 			color: #212529;
@@ -46,7 +46,7 @@
 
 		.table th,
 		.table td {
-			padding: 0.75rem;
+			padding: 2px;
 			vertical-align: top;
 			border-top: 1px solid #dee2e6;
 		}
@@ -65,7 +65,7 @@
 		}
 
 		main {
-			padding: 1rem 3rem;
+			padding: 1rem 1rem;
 		}
 
 		h1, h2 {
@@ -74,7 +74,7 @@
 
 		h1 {
 			font-size: 2em;
-			padding-top: 3rem;
+			padding-top: 0;
 		}
 
 		h2 {
@@ -84,6 +84,7 @@
 
 		pre {
 			margin: 0;
+			white-space: pre-wrap;
 		}
 	</style>
 </head>
