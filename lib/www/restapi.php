@@ -189,7 +189,7 @@ class RestApi {
 		}
 		// If a single element was requested, return an object, but only for non-multiple requests:
 		if  ( isset($arguments['__primary_key']) &&
-		      !isset($arguments['multiple']) &&
+		      !($arguments['multiple'] ?? false) &&
 		      $_SERVER['REQUEST_METHOD']==='GET' ) {
 			if ( count($response)!=1 ) {
 				$this->createError("Found " . count($response) .
