@@ -103,10 +103,13 @@ foreach ($probs as $probData) {
 
 usort($first_to_solve, function ($a, $b) {
 	if ($a['time'] === null) {
-		return 1;
+		$a['time'] = PHP_INT_MAX;
 	}
 	if ($b['time'] === null) {
-		return -1;
+		$b['time'] = PHP_INT_MAX;
+	}
+	if ($a['time'] === $b['time']) {
+		return $a['problem'] <=> $b['problem'];
 	}
 	return $a['time'] <=> $b['time'];
 });
