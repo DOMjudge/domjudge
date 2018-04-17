@@ -170,10 +170,10 @@ function insert_event($cid, $endpoint, $data)
 	// Check if there's already an old event and create/update
 	// depending on previous state.
 	if ( !isset($old) || $old['action']==='delete' ) {
-		eventlog($endpoint, $data['id'], 'create', $cid, $json);
+		eventlog($endpoint, NULL, 'create', $cid, $json, $data['id']);
 	} else {
 		if ( empty($old['content']) || $old['content']!==$json ) {
-			eventlog($endpoint, $data['id'], 'update', $cid, $json);
+			eventlog($endpoint, NULL, 'update', $cid, $json, $data['id']);
 		} else {
 			logmsg(LOG_DEBUG, "Skipping create $endpoint/" . $data['id'] .
 			       ': already present');
