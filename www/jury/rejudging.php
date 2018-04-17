@@ -73,6 +73,8 @@ if ( isset($_REQUEST['apply']) ) {
 	echo "<p>\n";
 	while ( $row = $res->next() ) {
 		echo "s" . specialchars($row['submitid']) . ", ";
+		ob_implicit_flush(true);
+		ob_end_flush();
 		$DB->q('START TRANSACTION');
 		// first invalidate old judging, maybe different from prevjudgingid!
 		$DB->q('UPDATE judging SET valid=0
