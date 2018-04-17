@@ -1128,7 +1128,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		$id = [$id];
 	}
 
-	if ( count(array_filter($id, function($elem) { return $elem === null; })) !== count($dataid) ) {
+	if ( $type !== 'state' && count(array_filter($id, function($elem) { return $elem === null; })) !== count($dataid) ) {
 		logmsg(LOG_WARNING, "eventlog: API ID not specified or inferred from data");
 		return;
 	}
