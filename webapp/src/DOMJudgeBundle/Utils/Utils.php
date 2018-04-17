@@ -13,6 +13,7 @@ class Utils {
 	// prints the absolute time as yyyy-mm-ddThh:mm:ss(.uuu)?[+-]zz(:mm)?
 	// (with millis if $floored is false)
 	public static function absTime($epoch, $floored = FALSE) {
+		if ( $epoch===NULL ) return NULL;
 		$millis = Utils::getMillis($epoch);
 		return date("Y-m-d\TH:i:s", $epoch)
 			. ( $floored ? '' : $millis )
