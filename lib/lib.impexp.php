@@ -354,7 +354,10 @@ function tsv_results_get()
 	$categs = $DB->q('COLUMN SELECT categoryid FROM team_category WHERE visible = 1');
 	$sb = genScoreBoard($cdata, true, array('categoryid' => $categs));
 	$additional_bronze = $DB->q('VALUE SELECT b FROM contest WHERE cid = %i', $cdata['cid']);
-	$extid_to_name = $DB->q('KEYVALUETABLE SELECT externalid, name FROM team ORDER BY externalid');
+	$extid_to_name = $DB->q('KEYVALUETABLE SELECT t.externalid, a.name
+                      FROM team t
+                      LEFT JOIN team_affiliation a USING (affilid)
+                      WHERE t.externalid IS NOT NULL ORDER BY t.externalid');
 
 	$numteams = sizeof($sb['scores']);
 
