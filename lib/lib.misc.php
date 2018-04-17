@@ -1124,6 +1124,10 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		if ( !empty($data['id']) ) $id = $data['id'];
 	}
 
+	if ($id !== null && !is_array($id)) {
+		$id = [$id];
+	}
+
 	if ( count(array_filter($id)) !== count($dataid) ) {
 		logmsg(LOG_WARNING, "eventlog: API ID not specified or inferred from data");
 		return;
@@ -1152,7 +1156,8 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 
 	// Generate JSON content if not set, for deletes this is only the ID.
 	if ( $action === 'delete' ) {
-		$json = "{\"id\":\"$id\"}";
+		$firstId = $id[0];
+		$json = "{\"id\":\"$firstId\"}";
 	} elseif ( $json === null ) {
 		if ( in_array($type, array('contests','state')) ) {
 			$url = $endpoint['url'];
@@ -1213,7 +1218,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 			                   (eventtime, cid, endpointtype, endpointid,
 			                   datatype, dataid, action, content)
 			                   VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
-			                  $now, $cid, $type, $id,
+			                  $now, $cid, $type, $id[0],
 			                  $table, $dataid[0], $action, $json);
 			$ids[] = $eventid;
 		}
