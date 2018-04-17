@@ -475,6 +475,9 @@ function importZippedProblem($zip, $filename, $probid = NULL, $cid = -1)
 		}
 	}
 
+        // FIXME: this is very specific to the way we do it at the finals
+        eventlog('problems', $probid, 'create', $cid);
+
 	// Insert/update testcases
 	$maxrank = 1 + $DB->q('VALUE SELECT max(rank) FROM testcase
 	                       WHERE probid = %i', $probid);
