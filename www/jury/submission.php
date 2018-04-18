@@ -345,6 +345,8 @@ if ( ! $submdata['valid'] ) {
 	<?php echo  specialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
 <img title="view source code" alt="" src="../images/code.png"/>
 <a href="show_source.php?id=<?= $id ?>" style="font-weight:bold;">view source code</a>
+&nbsp;&nbsp;
+<a href="https://kattis/external-submission/<?= $cdata['externalid'] ?>/<?= $id ?>" target="_blank">View in Kattis</a>
 <?php
 
 if ( isset($submdata['externalid']) ) {
