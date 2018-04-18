@@ -37,6 +37,10 @@ if ( empty($table) || empty($id) ) {
 	error("unknown table in rejudging");
 }
 
+if ( !IS_ADMIN ) {
+	error("rejudging submissions requires admin rights");
+}
+
 if ( !IS_ADMIN && $include_all ) {
 	error("rejudging pending/correct submissions requires admin rights");
 }

@@ -59,6 +59,10 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 // insert a new response (if posted)
 if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
+	if ( !IS_ADMIN ) {
+		error("responding to clarifications requires admin rights");
+	}
+
 	if ( empty($_POST['sendto']) ) {
 		$sendto = null;
 	} elseif ( $_POST['sendto'] == 'domjudge-must-select' ) {
@@ -129,6 +133,10 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 // (un)set 'answered' (if posted)
 if ( isset($_POST['answer']) && isset($_POST['answered']) ) {
+	if ( !IS_ADMIN ) {
+		error("modifying clarifications requires admin rights");
+	}
+
 	$answered = (int)$_POST['answered'];
 	$DB->q('UPDATE clarification SET answered = %i, jury_member = ' .
 	       ($answered ? '%s ' : 'NULL %_ ') . 'WHERE clarid = %i',
@@ -142,6 +150,10 @@ if ( isset($_POST['answer']) && isset($_POST['answered']) ) {
 }
 
 if (isset($_POST['subject'])) {
+	if ( !IS_ADMIN ) {
+		error("modifying clarifications requires admin rights");
+	}
+
 	list($cid, $probid) = explode('-', $_POST['subject']);
 	$category = NULL;
 	if ( !ctype_digit($probid) ) {
@@ -154,6 +166,10 @@ if (isset($_POST['subject'])) {
 }
 
 if (isset($_POST['queue'])) {
+	if ( !IS_ADMIN ) {
+		error("modifying clarifications requires admin rights");
+	}
+
 	$DB->q('UPDATE clarification SET queue = %s WHERE clarid = %i', $_POST['queue'], $id);
 	auditlog('clarification', $id, 'queue changed');
 }
