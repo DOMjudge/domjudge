@@ -233,6 +233,7 @@ function initScores($teams) {
 		$SCORES[$teamid]['solve_times']      = array();
 		$SCORES[$teamid]['rank']             = 0;
 		$SCORES[$teamid]['teamname']         = $team['name'];
+		$SCORES[$teamid]['affilname']        = $team['affilname'];
 		$SCORES[$teamid]['categoryid']       = $team['categoryid'];
 		$SCORES[$teamid]['sortorder']        = $team['sortorder'];
 		$SCORES[$teamid]['affilid']          = $team['affilid'];
@@ -1184,7 +1185,7 @@ function cmp($a, $b) {
 	if ( $scorecmp != 0 ) return $scorecmp;
 	// else, order by teamname alphabetically
 	if ( $a['teamname'] != $b['teamname'] ) {
-		return strcasecmp($a['teamname'],$b['teamname']);
+		return strcasecmp($a['affilname'],$b['affilname']);
 	}
 	// undecided, should never happen in practice
 	return 0;
