@@ -762,7 +762,8 @@ function judging_runs_POST($args)
 	}
 
 	// Send an event for an endtime update if not done yet.
-	if ( count($runresults) == $numtestcases && empty($just_finished) ) {
+	if ( !isset($jud['rejudgingid']) &&
+	     count($runresults) == $numtestcases && empty($just_finished) ) {
 		eventlog('judging', $args['judgingid'], 'update', $jud['cid']);
 	}
 
