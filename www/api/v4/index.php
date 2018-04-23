@@ -855,7 +855,7 @@ function submissions($args)
 			'language_id'  => safe_string(rest_extid('languages', $row['langid'])),
 			'time'         => Utils::absTime($row['submittime']),
 			'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
-			'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")), // TODO: this does not work anymore, but do we need it in v4?
+			'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")),
 		);
 		if ( checkrole('jury') ) {
 			$ret['entry_point'] = $row['entry_point'];
