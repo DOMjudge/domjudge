@@ -200,25 +200,4 @@ class TeamCategory
 	{
 		return $this->teams;
 	}
-
-	/**
-	 * Helper function to serialize this for the REST API
-	 *
-	 * @return array
-	 */
-	public function serializeForAPI($strict)
-	{
-		$result = [
-			'id' => (string)$this->getCategoryid(),
-			'icpc_id' => (string)$this->getCategoryid(),
-			'name' => $this->getName(),
-			'hidden' => !$this->getVisible(),
-		];
-		if (!$strict) {
-			$result['color'] = $this->getColor();
-			$result['sortorder'] = (int)$this->getSortorder();
-		}
-
-		return $result;
-	}
 }
