@@ -4,65 +4,51 @@ domjudge:
     endpoints:
       contests:
         url: /
-        primarykey: cid
       judgement-types:
         tables: []
-        externalid: ~
-      languages:
-        primarykey: langid
+        externalidfield: ~
+      languages: ~
       problems:
         tables: [problem, contestproblem]
-        primarykey: probid
       groups:
         tables: [team_category]
-        externalid: ~
-        primarykey: categoryid
+        externalidfield: ~
       organizations:
         tables: [team_affiliation]
-        primarykey: affilid
       teams:
         tables: [team, contestteam]
-        primarykey: teamid
       teams-members:
         tables: []
       submissions:
         type: live
-        externalid: ~
-        primarykey: submitid
+        externalidfield: ~
       judgements:
         type: live
         tables: [judging]
-        externalid: ~
-        primarykey: judgingid
+        externalidfield: ~
       runs:
         type: live
         tables: [judging_run]
-        externalid: ~
-        primarykey: runid
+        externalidfield: ~
       clarifications:
         type: live
-        contestid: cid
-        primarykey: clarid
+        contestidfield: cid
       awards:
         type: aggregate
         tables: []
-        externalid: ~
+        externalidfield: ~
       scoreboard:
         type: aggregate
         tables: []
-        externalid: ~
+        externalidfield: ~
       event-feed:
         type: aggregate
         tables: [event]
-        externalid: ~
-        primarykey: eventid
+        externalidfield: ~
       # From here are DOMjudge extensions:
       users:
         url: ~
-        externalid: ~
-        primarykey: userid
+        externalidfield: ~
       testcases:
         url: ~
-        externalid: ~
-        primarykey: testcaseid
-
+        externalidfield: ~

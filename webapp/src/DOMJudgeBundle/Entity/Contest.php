@@ -836,17 +836,19 @@ class Contest
 	 *
 	 * @return array
 	 */
-	public function serializeForAPI($penalty_time, $use_external_ids, $strict = false)
+	public function serializeForAPI($penalty_time)
 	{
-		$res = array(
-			'id'                         => $use_external_ids ? $this->getExternalId() : (string)$this->getCid(),
+		return [
+			'id'                         => (string)$this->getCid(),
+			'external_id'                => $this->getExternalId(),
+			'shortname'                  => $this->getShortname(),
 			'name'                       => $this->getName(),
 			'formal_name'                => $this->getName(),
 			'start_time'                 => Utils::absTime($this->getStarttime()),
 			'duration'                   => Utils::relTime($this->getEndtime() - $this->getStarttime()),
 			'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
 			'penalty_time'               => (int)$penalty_time,
-		);
+		];
 		if ( !$strict ) {
 			$res['shortname'] = $this->getShortname();
 			$res['end_time'] = Utils::absTime($this->getEndtime());
@@ -914,7 +916,7 @@ class Contest
 			$seconds *= $sign;
 			return $this->starttime + $seconds;
 		} else {
-			$date = new DateTime($time_string);
+			$date = new \DateTime($time_string);
 			return $date->format('U.v');
 		}
 	}

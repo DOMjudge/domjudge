@@ -12,7 +12,6 @@ use FOS\RestBundle\Controller\Annotations\Patch;
 use FOS\RestBundle\Controller\Annotations\Head;
 use FOS\RestBundle\Controller\Annotations\Delete;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -137,45 +136,28 @@ class APIController extends FOSRestController {
 	}
 
 	/**
-	 * @Get("/contests/{id}")
+	 * @Get("/contests/{cid}")
 	 */
-	public function getSingleContestAction(Request $request, Contest $contest) {
-		if ($contest->isActive()) {
-			$strict = false;
-			if ($request->query->has('strict')) {
-				$strict = $request->query->getBoolean('strict');
-			}
-			$isJury = $this->isGranted('ROLE_JURY');
-			if (($isJury && $contest->getEnabled())
-				|| (!$isJury && $contest->isActive())) {
-				$penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
-				$use_ext_ids = $this->getParameter('domjudge.useexternalids');
-				return $contest->serializeForAPI($penalty_time, $use_ext_ids, $strict);
-			} else {
-				return NULL;
-			}
+	public function getSingleContestAction(Contest $cid) {
+		if ($cid->isActive()) {
+			return $cid->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20));
 		} else {
 			return NULL;
 		}
 	}
 
 	/**
-	 * @Get("/contests/{id}/state")
+	 * @Get("/contests/{cid}/state")
 	 */
-	public function getContestState(Contest $contest) {
-		if ($contest->isActive()) {
-			$time_or_null = function($time, $extra_cond = true) {
-				if ( !$extra_cond || $time===null || time()<$time ) return null;
-				return Utils::absTime($time);
-			};
+	public function getContestState(Contest $cid) {
+		if ($cid->isActive()) {
 			$result = [];
-			$result['started']   = $time_or_null($contest->getStarttime());
-			$result['ended']     = $time_or_null($contest->getEndtime(), $result['started']!==null);
-			$result['frozen']    = $time_or_null($contest->getFreezetime(), $result['started']!==null);
-			$result['thawed']    = $time_or_null($contest->getUnfreezetime(), $result['frozen']!==null);
+			$result['started'] = $cid->getStarttime() <= time() ? Utils::absTime($cid->getStarttime()) : null;
+			$result['ended'] = ($result['started'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
+			$result['frozen'] = ($result['started'] !== null && $cid->getFreezetime() <= time()) ? Utils::absTime($cid->getFreezetime()) : null;
+			$result['thawed'] = ($result['frozen'] !== null && $cid->getUnfreezetime() <= time()) ? Utils::absTime($cid->getUnfreezetime()) : null;
 			// TODO: do not set this for public access (first needs public role)
-			// TODO: use real finalized time when we have it (e.g. in ICPC-live branch)
-			$result['finalized'] = $time_or_null($contest->getUnfreezetime(), ($result['ended']!==null && $result['thawed']!==null));
+			$result['finalized'] = ($result['ended'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
 
 			return $result;
 		} else {
