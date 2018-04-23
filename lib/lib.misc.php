@@ -1078,7 +1078,6 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null,
  * - tables: array of database table(s) associated to data, defaults to <endpoint> without 's'
  * - extid: database field for external/API ID, if TRUE same as internal/DB ID.
  *
- * TODO: at some point get rid of this and use the 'domjudge.api.endpoints' Symfony parameter
  */
 $API_endpoints = array(
 	'contests' => array(

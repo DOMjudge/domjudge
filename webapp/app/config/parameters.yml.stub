@@ -18,9 +18,6 @@ parameters:
     # A secret key that's used to generate certain security-related tokens
     secret: STUB_NO_SECRET
 
-    # Set to true to enable external ID's in the API
-    domjudge.useexternalids: false
-
     # The parameters below are inserted at configure time.
     domjudge.version: unconfigured
     domjudge.tmpdir: /tmp

@@ -28,9 +28,6 @@ parameters:
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt
 
-    # Set to true to enable external ID's in the API
-    domjudge.useexternalids: false
-
     # The parameters below are inserted at configure time.
     domjudge.version: @DOMJUDGE_VERSION@
     domjudge.tmpdir: @domserver_tmpdir@

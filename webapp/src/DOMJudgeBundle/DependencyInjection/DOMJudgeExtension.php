@@ -16,28 +16,5 @@ class DOMJudgeExtension extends Extension
 			new FileLocator(__DIR__.'/../Resources/config')
 		);
 		$loader->load('services.yml');
-
-		$configuration = new Configuration();
-
-		$config = $this->processConfiguration($configuration, $configs);
-
-		$endpoints = $config['api']['endpoints'];
-
-		// Add defaults to mapping:
-		foreach ($endpoints as $endpoint => $data) {
-			if (!array_key_exists('url', $data)) {
-				$endpoints[$endpoint]['url'] = '/' . $endpoint;
-			}
-			if ($data['tables'] === [null]) {
-				$endpoints[$endpoint]['tables'] = array(preg_replace('/s$/', '', $endpoint));
-			}
-		}
-
-		$container->setParameter('domjudge.api.endpoints', $endpoints);
-	}
-
-	public function getAlias()
-	{
-		return 'domjudge';
 	}
 }
