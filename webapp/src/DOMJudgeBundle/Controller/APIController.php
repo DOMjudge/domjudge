@@ -123,12 +123,11 @@ class APIController extends FOSRestController {
 			)
 		);
 		$penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
-		$use_ext_ids = $this->getParameter('domjudge.useexternalids');
 
 		$result = [];
 		foreach ($data as $contest) {
 			if ($contest->isActive()) {
-				$result[] = $contest->serializeForAPI($penalty_time, $use_ext_ids, $strict);
+				$result[] = $contest->serializeForAPI($penalty_time, $strict);
 			}
 		}
 

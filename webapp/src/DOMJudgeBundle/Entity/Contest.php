@@ -836,9 +836,9 @@ class Contest
 	 *
 	 * @return array
 	 */
-	public function serializeForAPI($penalty_time)
+	public function serializeForAPI($penalty_time, $strict = false)
 	{
-		return [
+		$res = [
 			'id'                         => (string)$this->getCid(),
 			'external_id'                => $this->getExternalId(),
 			'shortname'                  => $this->getShortname(),
