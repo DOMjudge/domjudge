@@ -5,11 +5,9 @@ namespace DOMJudgeBundle\Request\ParamConverter;
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\NoResultException;
-use DOMJudgeBundle\Entity\Contest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ApiEntityParamConverter implements ParamConverterInterface {
 	/**
@@ -85,19 +83,13 @@ class ApiEntityParamConverter implements ParamConverterInterface {
 
 			$object = $repo->findOneBy($criteria);
 			if ($object) {
-				// For the contest parameter we should make sure the contest is active
-				/** @var Contest $object */
-				if ($name === 'contest' && !$object->isActive()) {
-					throw new NotFoundHttpException(sprintf('%s object not found.', $class));
-				}
-
 				$request->attributes->set($name, $object);
 				return true;
 			} else {
-				throw new NotFoundHttpException(sprintf('%s object not found.', $class));
+				return false;
 			}
 		} catch (NoResultException $e) {
-			throw new NotFoundHttpException(sprintf('%s object not found.', $class));
+			return false;
 		}
 	}
 
