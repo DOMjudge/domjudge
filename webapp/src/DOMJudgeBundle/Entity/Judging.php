@@ -1,11 +1,9 @@
 <?php
 namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
-use DOMJudgeBundle\Utils\Utils;
-
 /**
  * Result of judging a submission
- * @ORM\Entity(repositoryClass="DOMJudgeBundle\Repository\JudgingRepository")
+ * @ORM\Entity()
  * @ORM\Table(name="judging", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
 class Judging
@@ -619,25 +617,5 @@ class Judging
 	public function getRuns()
 	{
 		return $this->runs;
-	}
-
-	/**
-	 * Helper function to serialize this for the REST API
-	 *
-	 * @return array
-	 */
-	public function serializeForAPI($maxruntime, $verdicts)
-	{
-		$result = [
-			'id'                 => (string)$this->getJudgingid(),
-			'submission_id'      => (string)$this->getSubmitid(),
-			'judgement_type_id'  => empty($this->getResult()) ? null : $verdicts[$this->getResult()],
-			'start_time'         => Utils::absTime($this->getStarttime()),
-			'start_contest_time' => Utils::relTime($this->getStarttime() - $this->getContest()->getStarttime()),
-			'end_time'           => empty($this->getEndtime()) ? null : Utils::absTime($this->getEndtime()),
-			'end_contest_time'   => empty($this->getEndtime()) ? null : Utils::relTime($this->getEndtime() - $this->getContest()->getStarttime()),
-			'max_run_time'       => $maxruntime === null ? null : round($maxruntime, 3),
-		];
-		return $result;
 	}
 }
