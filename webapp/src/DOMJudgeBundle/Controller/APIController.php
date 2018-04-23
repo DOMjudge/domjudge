@@ -263,12 +263,9 @@ class APIController extends FOSRestController {
 		/**
 		 * @var Problem $problem
 		 */
-		foreach ($problems as $idx => $problemData) {
-			/** @var Problem $problem */
-			$problem = $problemData[0];
-			$num_testcases = $problemData['num_testcases'];
+		foreach ($problems as $idx => $problem) {
 			if (($this->getParameter('domjudge.useexternalids') && $problem->getExternalid() == $id) || (!$this->getParameter('domjudge.useexternalids')) && $problem->getProbid() == $id) {
-				return $problem->serializeForAPI($num_testcases, $this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true)) + ['ordinal' => $idx];
+				return $problem->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true)) + ['ordinal' => $idx];
 			}
 		}
 
