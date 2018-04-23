@@ -37,10 +37,11 @@ class FallbackController extends Controller
 
 
 		$thefile = realpath($this->webDir . $request->getPathInfo());
-		// API is handled separately for the legacy API's
+		// API is handled separately, current default is v4.
 		$apiPaths = array(
 			'api/v3/' => '/api/v3/index.php',
 			'api/v4/' => '/api/v4/index.php',
+			'api/'    => '/api/v4/index.php',
 		);
 		$apiMatch = FALSE;
 		$exactApiMatch = FALSE;
