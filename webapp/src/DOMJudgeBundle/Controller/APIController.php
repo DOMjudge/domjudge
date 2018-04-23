@@ -1,7 +1,6 @@
 <?php
 namespace DOMJudgeBundle\Controller;
 
-use DOMJudgeBundle\Entity\Language;
 use FOS\RestBundle\Controller\FOSRestController;
 
 use FOS\RestBundle\Controller\Annotations\View;
@@ -227,28 +226,6 @@ class APIController extends FOSRestController {
 		}
 
 		throw new NotFoundHttpException(sprintf('Judgement type %s not found', $id));
-	}
-
-	/**
-	 * @Get("/contests/{cid}/languages")
-	 */
-	public function getLanguages(Request $request) {
-		$languages = $this->getDoctrine()->getRepository(Language::class)->findBy(['allow_submit' => true]);
-
-		return array_map(function(Language $language) use ($request) {
-			return $language->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true));
-		}, $languages);
-	}
-
-	/**
-	 * @Get("/contests/{cid}/languages/{id}")
-	 */
-	public function getLanguage(Request $request, $id) {
-		if ($language = $this->getDoctrine()->getRepository(Language::class)->findOneBy(['langid' => $id, 'allow_submit' => true])) {
-			return $language->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true));
-		} else {
-			throw new NotFoundHttpException(sprintf('Language %s not found', $id));
-		}
 	}
 
 	/**
