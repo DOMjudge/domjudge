@@ -147,25 +147,6 @@ class APIController extends FOSRestController {
 	}
 
 	/**
-	 * @Get("/contests/{cid}/state")
-	 */
-	public function getContestState(Contest $cid) {
-		if ($cid->isActive()) {
-			$result = [];
-			$result['started'] = $cid->getStarttime() <= time() ? Utils::absTime($cid->getStarttime()) : null;
-			$result['ended'] = ($result['started'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
-			$result['frozen'] = ($result['started'] !== null && $cid->getFreezetime() <= time()) ? Utils::absTime($cid->getFreezetime()) : null;
-			$result['thawed'] = ($result['frozen'] !== null && $cid->getUnfreezetime() <= time()) ? Utils::absTime($cid->getUnfreezetime()) : null;
-			// TODO: do not set this for public access (first needs public role)
-			$result['finalized'] = ($result['ended'] !== null && $cid->getEndtime() <= time()) ? Utils::absTime($cid->getEndtime()) : null;
-
-			return $result;
-		} else {
-			return null;
-		}
-	}
-
-	/**
 	 * @Get("/event-feed")
 	 */
 	public function getEventFeed(Request $request) {
