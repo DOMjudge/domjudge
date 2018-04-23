@@ -606,7 +606,7 @@ class Problem
 	 *
 	 * @return array
 	 */
-	public function serializeForAPI($num_testcases, $use_external_ids, $strict)
+	public function serializeForAPI($use_external_ids, $strict)
 	{
 		/** @var ContestProblem $contestProblem */
 		$contestProblem = $this->getContestProblems()->get(0);
@@ -615,7 +615,7 @@ class Problem
 			'label' => $contestProblem->getShortname(),
 			'name' => $this->getName(),
 			'time_limit' => $this->getTimelimit(),
-			'test_data_count' => (int)$num_testcases,
+			'test_data_count' => $this->getTestcases()->count(),
 		];
 
 		$color = $contestProblem->getColor();

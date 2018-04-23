@@ -10,11 +10,10 @@ class ProblemRepository extends EntityRepository {
 		return $this->createQueryBuilder('p')
 			->join('p.contest_problems', 'cp')
 			->join('p.testcases', 'tc')
-			->select('p', 'cp', 'COUNT(tc.testcaseid) AS num_testcases')
+			->select('p', 'cp', 'tc')
 			->where('cp.cid = :cid')
 			->andWhere('cp.allow_submit = true')
 			->setParameter(':cid', $contest->getCid())
-			->groupBy('p.probid')
 			->orderBy('cp.shortname')
 			->getQuery()
 			->getResult();
