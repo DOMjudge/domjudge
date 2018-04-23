@@ -28,7 +28,7 @@ use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * @Route("/api/v5", defaults={ "_format" = "json" })
+ * @Route("/api", defaults={ "_format" = "json" })
  */
 class APIController extends FOSRestController {
 

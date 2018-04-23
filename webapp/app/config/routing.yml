@@ -3,10 +3,10 @@ domjudge:
     type: annotation
     prefix: /
 
-domjudge_default_api:
+domjudge_api_v5:
     type: rest
     resource: '@DOMJudgeBundle/Controller/APIController.php'
-    prefix: /api
+    prefix: /api/v5
     defaults: { _format: "json" }
 
 logout:
