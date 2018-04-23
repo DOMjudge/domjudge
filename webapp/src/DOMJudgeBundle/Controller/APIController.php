@@ -3,7 +3,6 @@ namespace DOMJudgeBundle\Controller;
 
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
-use DOMJudgeBundle\Entity\TeamAffiliation;
 use DOMJudgeBundle\Entity\TeamCategory;
 use FOS\RestBundle\Controller\FOSRestController;
 
@@ -277,28 +276,10 @@ class APIController extends FOSRestController {
 	}
 
 	/**
-	 * @Get("/contests/{cid}/groups/{id}")
+	 * @Get("/contests/{cid}/groups/{teamCategory}")
 	 */
 	public function getGroupAction(Request $request, TeamCategory $teamCategory) {
 		return $teamCategory->serializeForAPI($request->query->getBoolean('strict', true));
-	}
-
-	/**
-	 * @Get("/contests/{cid}/organizations")
-	 */
-	public function getOrganizationsAction(Request $request) {
-		$groups = $this->getDoctrine()->getRepository(TeamAffiliation::class)->findAll();
-
-		return array_map(function(TeamAffiliation $teamAffiliation) use ($request) {
-			return $teamAffiliation->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true));
-		}, $groups);
-	}
-
-	/**
-	 * @Get("/contests/{cid}/organizations/{id}")
-	 */
-	public function getOrganizationAction(Request $request, TeamAffiliation $teamAffiliation) {
-		return $teamAffiliation->serializeForAPI($this->getParameter('domjudge.useexternalids'), $request->query->getBoolean('strict', true));
 	}
 
 	/**
