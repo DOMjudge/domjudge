@@ -54,7 +54,7 @@ foreach (tsv_results_get() as $row) {
 		'max_time' => $row[5],
 	];
 	if (preg_match('/^(.*) Medal$/', $row['award'], $matches)) {
-		$row['class'] = $matches[1];
+		$row['class'] = strtolower($matches[1]);
 	} else {
 		$row['class'] = '';
 	}
