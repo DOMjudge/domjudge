@@ -80,8 +80,8 @@ class RestApi {
 		if ( $multiContest ) {
 			global $requestedCid, $DB;
 			$handler = preg_replace('#contests/#', '', $handler);
-			$externalCid = preg_replace('#/.*#', '', $handler);
-			$requestedCid = $DB->q('MAYBEVALUE SELECT cid FROM contest WHERE externalid=%s', $externalCid);
+			$cid = preg_replace('#/.*#', '', $handler);
+			$requestedCid = $DB->q('MAYBEVALUE SELECT cid FROM contest WHERE cid=%s', $cid);
 			if ( !isset($requestedCid) ) {
 				$this->createError("Contest not found.", NOT_FOUND);
 				return;
