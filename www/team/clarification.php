@@ -35,6 +35,9 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$probid = NULL;
 	} else {
 		$queue = dbconfig_get('clar_default_problem_queue');
+		if ($queue === "") {
+			$queue = null;
+		}
 	}
 
 	// Disallow problems that are not submittable or

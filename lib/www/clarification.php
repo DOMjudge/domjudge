@@ -181,19 +181,22 @@ function putClar($clar)
 	if (IS_JURY) {
 		global $pagename;
 		$queues = getClarQueues();
-		echo '<tr><td>Queue:</td><td>';
-		echo '<span class="clarification-queue">';
-		echo $queues[$clar['queue']];
-		// Add button to change queue
-		echo '&nbsp;<input type="button" value="Change" class="clarification-queue-change-button" />';
-		echo '</span>';
-		echo '<span class="clarification-queue-form" data-current-selected-queue="' . $clar['queue'] . '" data-clarification-id="' . $clar['clarid'] . '" style="display: none;">';
-		echo addForm($pagename) .
-			addHidden('id', $clar['clarid']) .
-			addSelect('queue', $queues, $clar['queue'], true) .
-			addEndForm();
-		echo '<input type="button" value="Cancel" class="clarification-queue-cancel-button" />';
-		echo '</span>';
+		// Do not display the queue if we have only one queue ("Unassigned issues")
+		if (count($queues) > 1) {
+			echo '<tr><td>Queue:</td><td>';
+			echo '<span class="clarification-queue">';
+			echo $queues[$clar['queue']];
+			// Add button to change queue
+			echo '&nbsp;<input type="button" value="Change" class="clarification-queue-change-button" />';
+			echo '</span>';
+			echo '<span class="clarification-queue-form" data-current-selected-queue="' . $clar['queue'] . '" data-clarification-id="' . $clar['clarid'] . '" style="display: none;">';
+			echo addForm($pagename) .
+				addHidden('id', $clar['clarid']) .
+				addSelect('queue', $queues, $clar['queue'], true) .
+				addEndForm();
+			echo '<input type="button" value="Cancel" class="clarification-queue-cancel-button" />';
+			echo '</span>';
+		}
 	}
 	echo "</td></tr>\n";
 
@@ -275,19 +278,19 @@ function putClarificationList($clars, $team = NULL)
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
+	$categs = getClarCategories();
+	$queues = getClarQueues();
+
 	echo "<table class=\"table table-striped table-hover table-sm list sortable\">\n<thead class=\"thead-light\">\n<tr>" .
 	     ( IS_JURY ? "<th scope=\"col\">ID</th>" : "") .
 	     ( IS_JURY && count($cids) > 1 ? "<th scope=\"col\">contest</th>" : "") .
 	     "<th scope=\"col\">time</th>" .
 	     "<th scope=\"col\">from</th>" .
 	     "<th scope=\"col\">to</th><th scope=\"col\">subject</th>" .
-	    ( IS_JURY ? "<th scope=\"col\">queue</th>" : "") .
+	    ( IS_JURY && count($queues) > 1 ? "<th scope=\"col\">queue</th>" : "") .
 	     "<th scope=\"col\">text</th>" .
 		( IS_JURY ? "<th scope=\"col\">answered</th><th scope=\"col\">by</th>" : "") .
 	     "</tr>\n</thead>\n<tbody>\n";
-
-	$categs = getClarCategories();
-	$queues = getClarQueues();
 
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams
@@ -351,7 +354,7 @@ function putClarificationList($clars, $team = NULL)
 		}
 		echo "</a></td>";
 
-		if ( IS_JURY ) {
+		if ( IS_JURY && count($queues) > 1 ) {
 			echo '<td>' . $link;
 			echo specialchars($queues[$clar['queue']]);
 			echo "</a></td>";

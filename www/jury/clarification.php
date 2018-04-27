@@ -78,6 +78,9 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$probid = NULL;
 	} elseif ( $queue===NULL && $respid===NULL ) {
 		$queue = dbconfig_get('clar_default_problem_queue');
+		if ($queue === "") {
+			$queue = null;
+		}
 	}
 
 	// If database supports it, wrap this in a transaction so we
