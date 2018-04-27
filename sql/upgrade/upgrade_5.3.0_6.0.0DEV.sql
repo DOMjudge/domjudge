@@ -133,7 +133,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`, `public`) V
 ('show_affiliation_logos', '0', 'bool', 'Show affiliation logos on the scoreboard?', 0),
 ('show_limits_on_team_page', '0', 'bool', 'Show time and memory limit on the team problems page', 0),
 ('clar_queues', '{}', 'array_keyval', 'List of clarification queues', 1),
-('clar_default_problem_queue', '"judges"', 'string', 'Category to assign to problem clarifications', 1);
+('clar_default_problem_queue', '""', 'string', 'Category to assign to problem clarifications', 1);
 
 UPDATE `configuration` SET `description` = 'Show affiliation names in the interfaces?' WHERE `name` = 'show_affiliations';
 
