@@ -335,7 +335,8 @@ function cmp_extid_name($a, $b) {
 	}
 	$name_a = $extid_to_name[$a[0]];
 	$name_b = $extid_to_name[$b[0]];
-	return strcmp($name_a, $name_b);
+	$collator = new Collator('en_US');
+	return $collator->compare($name_a, $name_b);
 }
 
 function tsv_results_get()
