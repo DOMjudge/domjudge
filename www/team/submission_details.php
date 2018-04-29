@@ -35,7 +35,7 @@ $DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $id);
 ?>
 
 <h1>Submission details</h1>
-
+<h3><a href=<?php echo "\"" . "download_submission.php?id=" . $id . "\"" ?>>Download Submission</a></h3>
 <div class="container">
 <?php if( ! $row['valid'] ): ?>
 <div class="alert alert-warning">This submission is being ignored. It is not used in determining your score.</div>
