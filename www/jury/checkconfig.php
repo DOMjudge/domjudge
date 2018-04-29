@@ -14,6 +14,9 @@ require(LIBWWWDIR . '/header.php');
 
 requireAdmin();
 
+// Turn off output buffering, to see the page as it (slowly) loads.
+ob_end_flush();
+
 $time_start = microtime(TRUE);
 
 ?>
@@ -34,11 +37,6 @@ if ( $_SERVER['QUERY_STRING'] == 'phpinfo' ) {
 	exit;
 }
 
-if ( !file_exists(LIBDIR . '/relations.php') ) {
-	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
-}
-
-require_once(LIBDIR . '/relations.php');
 require_once(LIBWWWDIR . '/checkers.jury.php');
 
 
@@ -104,9 +102,9 @@ echo "<table class=\"configcheck\">\n";
 
 // SOFTWARE
 
-if( !function_exists('version_compare') || version_compare( '5.4',PHP_VERSION,'>=') ) {
+if( !function_exists('version_compare') || version_compare( '7.0',PHP_VERSION,'>=') ) {
 	result('software', 'PHP version', 'E',
-		'You have PHP ' . PHP_VERSION . ', but need at least 5.4.0.',
+		'You have PHP ' . PHP_VERSION . ', but need at least 7.0.0.',
 		'See <a href="?phpinfo">phpinfo</a> for details.');
 } else {
 	result('software', 'PHP version', 'O',
@@ -186,10 +184,9 @@ if ( class_exists("ZipArchive") ) {
 }
 
 $mysqldata = array();
-$mysqldatares = $DB->q('SHOW variables WHERE
-                        Variable_name = "max_connections" OR
-                        Variable_name = "max_allowed_packet" OR
-                        Variable_name = "version"');
+$mysqldatares = $DB->q('SHOW variables WHERE Variable_name IN
+                        ("innodb_log_file_size", "max_connections",
+                         "max_allowed_packet", "tx_isolation", "version")');
 while($row = $mysqldatares->next()) {
 	$mysqldata[$row['Variable_name']] = $row['Value'];
 }
@@ -207,10 +204,22 @@ result('software', 'MySQL maximum connections',
 	'prevent connection refusal during the contest.');
 
 result('software', 'MySQL maximum packet size',
-	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O', '',
+	$mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O',
 	'MySQL\'s max_allowed_packet is set to ' .
 	printsize($mysqldata['max_allowed_packet']) . '. You may ' .
 	'want to raise this to about twice the maximum test case size.');
+
+result('software', 'MySQL innodb logfile size',
+	$mysqldata['innodb_log_file_size'] < 128*1024*1024 ? 'W':'O',
+	'MySQL\'s innodb_log_file_size is set to ' .
+	printsize($mysqldata['innodb_log_file_size']) . '. You may ' .
+	'want to raise this to 10x the maximum test case size.');
+
+result('software', 'MySQL transaction isolation level',
+	in_array($mysqldata['tx_isolation'],array('REPEATABLE-READ','SERIALIZABLE')) ? 'O':'W',
+	'MySQL\'s transaction isolation level is set to ' . $mysqldata['tx_isolation'] .
+	'. You should set this to REPEATABLE-READ or SERIALIZABLE to ' .
+	'prevent data inconsistencies.');
 
 flushresults();
 
@@ -307,10 +316,10 @@ flushresults();
 
 // PROBLEMS
 
-$res = $DB->q('SELECT probid, cid, shortname, timelimit, special_compare, special_run
-               FROM problem INNER JOIN contestproblem USING (probid)
-               ORDER BY probid');
-
+$problems = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, cid, shortname,
+                        timelimit, outputlimit, special_compare, special_run
+                    FROM problem INNER JOIN contestproblem USING (probid)
+                    ORDER BY probid');
 
 
 // Select all active judgehosts including restrictions, so we can
@@ -333,7 +342,7 @@ foreach ($judgehosts as &$judgehost) {
 	                        WHERE hostname = %s ORDER BY restrictionid',
 	                       $judgehost['hostname']);
 	if ( $restrictions ) {
-		$restrictions = json_decode($restrictions, true);
+		$restrictions = dj_json_decode($restrictions);
 		$judgehost['contests'] = @$restrictions['contest'];
 		$judgehost['problems'] = @$restrictions['problem'];
 		$judgehost['languages'] = @$restrictions['language'];
@@ -368,18 +377,19 @@ $languages = $DB->q("KEYVALUETABLE SELECT langid, name FROM language
                      ORDER BY langid");
 
 $details = '';
-while($row = $res->next()) {
+$details_html = '';
+foreach ($problems as $prob) {
 	$CHECKER_ERRORS = array();
-	check_problem($row);
+	check_problem($prob);
 	if ( count ( $CHECKER_ERRORS ) > 0 ) {
 		foreach($CHECKER_ERRORS as $chk_err) {
-			$details .= 'p'.$row['probid']." in contest c" . $row['cid'] .': ' . $chk_err."\n";
+			$details .= 'p'.$prob['probid']." in contest c" . $prob['cid'] .': ' . $chk_err."\n";
 		}
 	}
 	if ( ! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
 	               WHERE input IS NOT NULL AND output IS NOT NULL AND
-	               probid = %i", $row['probid']) ) {
-		$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": missing in/output testcase.\n";
+	               probid = %i", $prob['probid']) ) {
+		$details .= 'p'.$prob['probid']." in contest c" . $prob['cid'] . ": missing in/output testcase.\n";
 	}
 
 	// Check for each problem,language pair if this can be judged by a judgehost.
@@ -391,35 +401,40 @@ while($row = $res->next()) {
 			                 FROM contestproblem cp, language l
 			                 WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s" .
 			                $judgehost['extra_where'],
-			                $row['probid'], $row['cid'], $langid, $judgehost['contests'],
+			                $prob['probid'], $prob['cid'], $langid, $judgehost['contests'],
 			                $judgehost['problems'], $judgehost['languages']);
 			if ( $found ) $language_ok = true;
 		}
 
 		if (!$language_ok) {
-			$details .= 'p'.$row['probid']." in contest c" . $row['cid'] . ": no judgehost can judge for language " . $langname . ".\n";
+			$details .= 'p'.$prob['probid']." in contest c" . $prob['cid'] . ": no judgehost can judge for language " . $langname . ".\n";
 		}
 	}
-}
-foreach(array('input','output') as $inout) {
-	$mismatch = $DB->q("SELECT probid, rank FROM testcase
-	                    WHERE md5($inout) != md5sum_$inout
-	                    ORDER BY probid, rank");
-	while($r = $mismatch->next()) {
-		$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
-		    " MD5 sum mismatch between $inout and md5sum_$inout\n";
+
+	// Check testcase md5sum and size
+	foreach(array('input','output') as $inout) {
+		$mismatch = $DB->q("SELECT probid, rank FROM testcase
+		                    WHERE md5($inout) != md5sum_$inout
+		                    ORDER BY probid, rank");
+		while($r = $mismatch->next()) {
+			$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
+			         " MD5 sum mismatch between $inout and md5sum_$inout\n";
+		}
+	}
+	$outputlimit = 1024*(isset($prob['outputlimit']) ? $prob['outputlimit'] : dbconfig_get('output_limit'));
+	$oversize = $DB->q("SELECT rank, OCTET_LENGTH(output) AS size
+	                    FROM testcase
+	                    WHERE probid = %i AND OCTET_LENGTH(output) > %i
+	                    ORDER BY rank",
+	                   $prob['probid'], $outputlimit);
+	while($r = $oversize->next()) {
+		$details_html .= 'p'.$prob['probid'] . ": testcase #" . $r['rank'] .
+		                 " output size (" . printsize($r['size']) .
+		                 ") exceeds output_limit<br />\n";
 	}
 }
-$oversize = $DB->q("SELECT probid, rank, OCTET_LENGTH(output) AS size
-                    FROM testcase WHERE OCTET_LENGTH(output) > %i
-                    ORDER BY probid, rank",
-                   dbconfig_get('output_limit')*1024);
-while($r = $oversize->next()) {
-	$details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
-	    " output size (" . printsize($r['size']) . ") exceeds output_limit\n";
-}
 
-$has_errors = $details != '';
+$has_errors = ( $details != '' || $details_html != '' );
 $probs = $DB->q("TABLE SELECT probid, cid FROM contestproblem
                  WHERE color IS NULL ORDER BY probid");
 foreach($probs as $probdata) {
@@ -438,8 +453,8 @@ foreach($probs as $probdata) {
 }
 
 result('problems, languages, teams', 'Problems integrity',
-	$details == '' ? 'O':($has_errors?'E':'W'),
-	$details);
+       ($details == '' && $details_html == '') ? 'O':($has_errors?'E':'W'),
+       $details, $details_html);
 
 flushresults();
 
@@ -484,7 +499,7 @@ if ( dbconfig_get('show_affiliations', 1) ) {
 	$res = $DB->q('SELECT DISTINCT country FROM team_affiliation
 	               WHERE country IS NOT NULL ORDER BY country');
 	while ( $row = $res->next() ) {
-		$cflag = '../images/countries/' .
+		$cflag = WEBAPPDIR . '/web/images/countries/' .
 			urlencode($row['country']) . '.png';
 		if ( ! file_exists ( $cflag ) ) {
 			$details .= "Country " . $row['country'] .

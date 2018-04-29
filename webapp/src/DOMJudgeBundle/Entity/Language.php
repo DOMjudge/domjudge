@@ -9,330 +9,290 @@ use Doctrine\ORM\Mapping as ORM;
 class Language
 {
 
-    /**
-     * @var string
-     * @ORM\Id
-     * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
-     */
-    private $langid;
+	/**
+	 * @var string
+	 * @ORM\Id
+	 * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
+	 */
+	private $langid;
 
-    /**
-     * @var string
-     * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive language name"}, nullable=false)
-     */
-    private $name;
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive language name"}, nullable=false)
+	 */
+	private $name;
 
-    /**
-     * @var string
-     * @ORM\Column(type="text", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
-     */
-    private $extensions;
+	/**
+	 * @var string
+	 * @ORM\Column(type="text", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
+	 */
+	private $extensions;
 
-    /**
-     * @var boolean
-     * @ORM\Column(type="boolean", name="allow_submit", options={"comment"="Are submissions accepted in this language?"}, nullable=false)
-     */
-    private $allow_submit = true;
+	/**
+	 * @var boolean
+	 * @ORM\Column(type="boolean", name="allow_submit", options={"comment"="Are submissions accepted in this language?"}, nullable=false)
+	 */
+	private $allow_submit = true;
 
-    /**
-     * @var boolean
-     * @ORM\Column(type="boolean", name="allow_judge", options={"comment"="Are submissions in this language judged?"}, nullable=false)
-     */
-    private $allow_judge = true;
+	/**
+	 * @var boolean
+	 * @ORM\Column(type="boolean", name="allow_judge", options={"comment"="Are submissions in this language judged?"}, nullable=false)
+	 */
+	private $allow_judge = true;
 
-    /**
-     * @var double
-     * @ORM\Column(type="float", name="time_factor", options={"comment"="Language-specific factor multiplied by problem run times"}, nullable=false)
-     */
-    private $time_factor = 1;
+	/**
+	 * @var double
+	 * @ORM\Column(type="float", name="time_factor", options={"comment"="Language-specific factor multiplied by problem run times"}, nullable=false)
+	 */
+	private $time_factor = 1;
 
-    /**
-     * @var string
-     * @ORM\Column(type="string", name="compile_script", length=32, options={"comment"="Script to compile source code for this language"}, nullable=true)
-     */
-    private $compile_script;
+	/**
+	 * @var string
+	 * @ORM\Column(type="string", name="compile_script", length=32, options={"comment"="Script to compile source code for this language"}, nullable=true)
+	 */
+	private $compile_script;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Executable", inversedBy="languages")
-     * @ORM\JoinColumn(name="compile_script", referencedColumnName="execid")
-     */
-    private $compile_executable;
+	/**
+	 * @ORM\ManyToOne(targetEntity="Executable", inversedBy="languages")
+	 * @ORM\JoinColumn(name="compile_script", referencedColumnName="execid")
+	 */
+	private $compile_executable;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Submission", mappedBy="language")
-     */
-    private $submissions;
+	/**
+	 * @ORM\OneToMany(targetEntity="Submission", mappedBy="language")
+	 */
+	private $submissions;
 
+	/**
+	 * Set langid
+	 *
+	 * @param string $langid
+	 *
+	 * @return Language
+	 */
+	public function setLangid($langid)
+	{
+		$this->langid = $langid;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Event", mappedBy="language")
-     */
-    private $events;
+		return $this;
+	}
 
-    /**
-     * Set langid
-     *
-     * @param string $langid
-     *
-     * @return Language
-     */
-    public function setLangid($langid)
-    {
-        $this->langid = $langid;
+	/**
+	 * Get langid
+	 *
+	 * @return string
+	 */
+	public function getLangid()
+	{
+		return $this->langid;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set name
+	 *
+	 * @param string $name
+	 *
+	 * @return Language
+	 */
+	public function setName($name)
+	{
+		$this->name = $name;
 
-    /**
-     * Get langid
-     *
-     * @return string
-     */
-    public function getLangid()
-    {
-        return $this->langid;
-    }
+		return $this;
+	}
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Language
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
+	/**
+	 * Get name
+	 *
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->name;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set extensions
+	 *
+	 * @param string $extensions
+	 *
+	 * @return Language
+	 */
+	public function setExtensions($extensions)
+	{
+		$this->extensions = $extensions;
 
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
+		return $this;
+	}
 
-    /**
-     * Set extensions
-     *
-     * @param string $extensions
-     *
-     * @return Language
-     */
-    public function setExtensions($extensions)
-    {
-        $this->extensions = $extensions;
+	/**
+	 * Get extensions
+	 *
+	 * @return string
+	 */
+	public function getExtensions()
+	{
+		return $this->extensions;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set allowSubmit
+	 *
+	 * @param boolean $allowSubmit
+	 *
+	 * @return Language
+	 */
+	public function setAllowSubmit($allowSubmit)
+	{
+		$this->allow_submit = $allowSubmit;
 
-    /**
-     * Get extensions
-     *
-     * @return string
-     */
-    public function getExtensions()
-    {
-        return $this->extensions;
-    }
+		return $this;
+	}
 
-    /**
-     * Set allowSubmit
-     *
-     * @param boolean $allowSubmit
-     *
-     * @return Language
-     */
-    public function setAllowSubmit($allowSubmit)
-    {
-        $this->allow_submit = $allowSubmit;
+	/**
+	 * Get allowSubmit
+	 *
+	 * @return boolean
+	 */
+	public function getAllowSubmit()
+	{
+		return $this->allow_submit;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set allowJudge
+	 *
+	 * @param boolean $allowJudge
+	 *
+	 * @return Language
+	 */
+	public function setAllowJudge($allowJudge)
+	{
+		$this->allow_judge = $allowJudge;
 
-    /**
-     * Get allowSubmit
-     *
-     * @return boolean
-     */
-    public function getAllowSubmit()
-    {
-        return $this->allow_submit;
-    }
+		return $this;
+	}
 
-    /**
-     * Set allowJudge
-     *
-     * @param boolean $allowJudge
-     *
-     * @return Language
-     */
-    public function setAllowJudge($allowJudge)
-    {
-        $this->allow_judge = $allowJudge;
+	/**
+	 * Get allowJudge
+	 *
+	 * @return boolean
+	 */
+	public function getAllowJudge()
+	{
+		return $this->allow_judge;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set timeFactor
+	 *
+	 * @param float $timeFactor
+	 *
+	 * @return Language
+	 */
+	public function setTimeFactor($timeFactor)
+	{
+		$this->time_factor = $timeFactor;
 
-    /**
-     * Get allowJudge
-     *
-     * @return boolean
-     */
-    public function getAllowJudge()
-    {
-        return $this->allow_judge;
-    }
+		return $this;
+	}
 
-    /**
-     * Set timeFactor
-     *
-     * @param float $timeFactor
-     *
-     * @return Language
-     */
-    public function setTimeFactor($timeFactor)
-    {
-        $this->time_factor = $timeFactor;
+	/**
+	 * Get timeFactor
+	 *
+	 * @return float
+	 */
+	public function getTimeFactor()
+	{
+		return $this->time_factor;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set compileScript
+	 *
+	 * @param string $compileScript
+	 *
+	 * @return Language
+	 */
+	public function setCompileScript($compileScript)
+	{
+		$this->compile_script = $compileScript;
 
-    /**
-     * Get timeFactor
-     *
-     * @return float
-     */
-    public function getTimeFactor()
-    {
-        return $this->time_factor;
-    }
+		return $this;
+	}
 
-    /**
-     * Set compileScript
-     *
-     * @param string $compileScript
-     *
-     * @return Language
-     */
-    public function setCompileScript($compileScript)
-    {
-        $this->compile_script = $compileScript;
+	/**
+	 * Get compileScript
+	 *
+	 * @return string
+	 */
+	public function getCompileScript()
+	{
+		return $this->compile_script;
+	}
 
-        return $this;
-    }
+	/**
+	 * Set compileExecutable
+	 *
+	 * @param \DOMJudgeBundle\Entity\Executable $compileExecutable
+	 *
+	 * @return Language
+	 */
+	public function setCompileExecutable(\DOMJudgeBundle\Entity\Executable $compileExecutable = null)
+	{
+		$this->compile_executable = $compileExecutable;
 
-    /**
-     * Get compileScript
-     *
-     * @return string
-     */
-    public function getCompileScript()
-    {
-        return $this->compile_script;
-    }
+		return $this;
+	}
 
-    /**
-     * Set compileExecutable
-     *
-     * @param \DOMJudgeBundle\Entity\Executable $compileExecutable
-     *
-     * @return Language
-     */
-    public function setCompileExecutable(\DOMJudgeBundle\Entity\Executable $compileExecutable = null)
-    {
-        $this->compile_executable = $compileExecutable;
+	/**
+	 * Get compileExecutable
+	 *
+	 * @return \DOMJudgeBundle\Entity\Executable
+	 */
+	public function getCompileExecutable()
+	{
+		return $this->compile_executable;
+	}
+	/**
+	 * Constructor
+	 */
+	public function __construct()
+	{
+		$this->submissions = new \Doctrine\Common\Collections\ArrayCollection();
+	}
 
-        return $this;
-    }
+	/**
+	 * Add submission
+	 *
+	 * @param \DOMJudgeBundle\Entity\Submission $submission
+	 *
+	 * @return Language
+	 */
+	public function addSubmission(\DOMJudgeBundle\Entity\Submission $submission)
+	{
+		$this->submissions[] = $submission;
 
-    /**
-     * Get compileExecutable
-     *
-     * @return \DOMJudgeBundle\Entity\Executable
-     */
-    public function getCompileExecutable()
-    {
-        return $this->compile_executable;
-    }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->submissions = new \Doctrine\Common\Collections\ArrayCollection();
-    }
+		return $this;
+	}
 
-    /**
-     * Add submission
-     *
-     * @param \DOMJudgeBundle\Entity\Submission $submission
-     *
-     * @return Language
-     */
-    public function addSubmission(\DOMJudgeBundle\Entity\Submission $submission)
-    {
-        $this->submissions[] = $submission;
+	/**
+	 * Remove submission
+	 *
+	 * @param \DOMJudgeBundle\Entity\Submission $submission
+	 */
+	public function removeSubmission(\DOMJudgeBundle\Entity\Submission $submission)
+	{
+		$this->submissions->removeElement($submission);
+	}
 
-        return $this;
-    }
-
-    /**
-     * Remove submission
-     *
-     * @param \DOMJudgeBundle\Entity\Submission $submission
-     */
-    public function removeSubmission(\DOMJudgeBundle\Entity\Submission $submission)
-    {
-        $this->submissions->removeElement($submission);
-    }
-
-    /**
-     * Get submissions
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getSubmissions()
-    {
-        return $this->submissions;
-    }
-
-    /**
-     * Add event
-     *
-     * @param \DOMJudgeBundle\Entity\Event $event
-     *
-     * @return Language
-     */
-    public function addEvent(\DOMJudgeBundle\Entity\Event $event)
-    {
-        $this->events[] = $event;
-
-        return $this;
-    }
-
-    /**
-     * Remove event
-     *
-     * @param \DOMJudgeBundle\Entity\Event $event
-     */
-    public function removeEvent(\DOMJudgeBundle\Entity\Event $event)
-    {
-        $this->events->removeElement($event);
-    }
-
-    /**
-     * Get events
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getEvents()
-    {
-        return $this->events;
-    }
+	/**
+	 * Get submissions
+	 *
+	 * @return \Doctrine\Common\Collections\Collection
+	 */
+	public function getSubmissions()
+	{
+		return $this->submissions;
+	}
 }

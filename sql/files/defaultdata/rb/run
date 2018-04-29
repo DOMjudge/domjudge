@@ -15,7 +15,7 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
-MAINSOURCE="$1"
+MAINSOURCE="${ENTRY_POINT:-$1}"
 
 # Check syntax (prints "Syntax OK" but filtering would obscure the exitcode):
 for i in "$@" ; do

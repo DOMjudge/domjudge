@@ -7,10 +7,32 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 
-# -viwn:	Verbose warnings, notes and informational messages
-# -02:		Level 2 optimizations (default for speed)
-# -Sg:		Support label and goto commands (for those who need it ;-)
-# -XS:		Static link with all libraries
+if [ -n "$ENTRY_POINT" ]; then
+	MAINSOURCE="$ENTRY_POINT"
+else
+	# Fpc only accepts a single source file, and will detect and compile
+	# unit dependencies itself. Let's try to autodetect the main program.
+	NUMSOURCES=0
+	for i in "$@" ; do
+		NUMSOURCES=$((NUMSOURCES+1))
+		if grep -E '^[[:space:]]*program[[:space:]]+[A-Za-z_0-9]+([[:space:]]*\([[:space:]]*[A-Za-z_0-9]+[[:space:]]*,[[:space:]]*[A-Za-z_0-9]+[[:space:]]*\))?[[:space:]]*;' "$i" >/dev/null ; then
+			FOUND="$i"
+		fi
+	done
+	if [ $NUMSOURCES = 1 ]; then
+		true # Skip this case.
+	elif [ -n "$FOUND" ]; then
+		echo "Using '$FOUND' as main program file."
+		MAINSOURCE="$FOUND"
+	else
+		echo "Warning: could not detect main program file, using '$MAINSOURCE'."
+	fi
+fi
+
+# -viwn:    Verbose warnings, notes and informational messages
+# -02:      Level 2 optimizations (default for speed)
+# -Sg:      Support label and goto commands (for those who need it ;-)
+# -XS:      Static link with all libraries
 fpc -viwn -O2 -Sg -XS -dONLINE_JUDGE -dDOMJUDGE -o"$DEST" "$MAINSOURCE"
 exitcode=$?
 

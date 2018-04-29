@@ -56,7 +56,7 @@ voor een aantal voorbeelden hiervan.
 \subsection*{Insturen van oplossingen}
 
 Insturen van oplossingen gaat via%
-\ifcmdsubmit{ het command-line programma \cmd{submit} dan wel}
+\ifcmdsubmit{ het command-line programma \cmd{submit} dan wel }
 de web-interface:
 \begin{description}[\breaklabel\setlabelstyle{\bfseries}]
 \ifcmdsubmit{
@@ -68,9 +68,9 @@ de programmeertaal, dan worden deze automatisch gedetecteerd. Voor de
 complete documentatie en alle opties, zie \cmd{submit --help}.
 }
 \item[Web-Interface]
-Vanaf je teampagina op \url{\BASEURL team} kun je bestand(en)
-selecteren met de \textbf{browse} knop in de linker kolom en deze met
-de \textbf{submit} knop insturen.
+Op je teampagina op \url{\BASEURL team}, klik de groene \textbf{Submit}-
+knop. Vervolgens kun je bestand(en) selecteren met de \textbf{browse}-knop
+en deze met de \textbf{submit} knop insturen.
 Standaard wordt het probleem uit het deel van de bestandsnaam v\'o\'or
 de punt gehaald en de programmeertaal uit de extensie.
 
@@ -86,14 +86,14 @@ Het bekijken van inzendingen, scores en sturen en lezen van
 \begin{figure}[p]
   \centering
   \fbox{\includegraphics[width=\textwidth]{team-overview}}
-  \caption{de team web-interface overzichtspagina.}
+  \caption{De team web-interface overzichtspagina.}
   \label{fig:team-overview}
 \end{figure}
 
 \begin{figure}[p]
   \centering
   \fbox{\includegraphics[width=\textwidth]{team-scoreboard}}
-  \caption{de scorebord pagina.}
+  \caption{De scorebord pagina.}
   \label{fig:team-scoreboard}
 \end{figure}
 
@@ -146,9 +146,10 @@ submitprogramma niet meer correct functioneert.
 
 \subsection{Web-interface}
 
-Vanaf je teampagina \url{\BASEURL team} kun je oplossingen insturen
-door een of meer bestanden te selecteren met de \textbf{browse} knop in de
-linker kolom. \DOMjudge probeert het probleem te detecteren uit de
+Vanaf je teampagina \url{\BASEURL team} kun je op de groene \textbf{Submit}-knop
+drukken in de menubalk. Hier kun je oplossingen insturen
+door een of meer bestanden te selecteren met de \textbf{browse}-knop.
+\DOMjudge probeert het probleem te detecteren uit de
 basis van de eerste bestandsnaam (v\'o\'or de punt) en de programmeertaal uit
 de extensie. Als dat niet lukt, kun je deze handmatig selecteren.
 Bestandsnamen moeten beginnen met een alfanumeriek teken en
@@ -224,7 +225,8 @@ uitvoer is afgekapt en wordt fout gerekend.
 De uitvoer van je programma was niet correct. Het kan zijn dat je
 oplossing niet correct is, maar let ook goed op dat je de antwoorden
 precies zoals beschreven uitvoert: de uitvoer moet exact kloppen met
-de specificatie van de jury!
+de specificatie van de jury! Zie sectie~\ref{testing} hieronder voor
+meer details.
 
 \item[TOO-LATE]
 Helaas, je hebt ingestuurd nadat de wedstrijd al afgelopen was!
@@ -268,8 +270,8 @@ uitgevoerd en getest te worden op \'e\'en van de jury-computers.
 Je programma wordt op een jury-computer onder Linux gecompileerd.
 Alle ingestuurde sourcebestanden worden aan de compiler gegeven die
 hier \'e\'en uit te voeren programma van maakt. Het als eerste
-opgegeven bestand wordt beschouwd als de `main' source, voor talen
-waarbij dat relevant is.
+opgegeven bestand wordt beschouwd als de `main' source, of gebruikt om
+een `class name' van af te leiden voor talen waarbij dat relevant is.
 
 Als je een andere compiler of besturingssysteem gebruikt dan de jury,
 moet dat in principe geen probleem zijn, maar let wel op dat
@@ -280,7 +282,7 @@ Binnen het jury-systeem worden \cmd{ONLINE\_JUDGE} en \cmd{DOMJUDGE}
 gedefinieerd: als preprocessor symbolen in gecompileerde talen, als
 (environment) variabelen in scripttalen.
 
-\subsection{Testen}
+\subsection{Testen}\label{testing}
 
 Als je programma succesvol gecompileerd is, wordt het gedraaid en de
 uitvoer vergeleken met de correcte uitvoer van de jury. Er wordt eerst
@@ -382,26 +384,26 @@ testgevallen volgen.
 Een oplossing voor dit probleem in C:
 \listinginput{1}{../examples/example.c}
 
-Let op de \cmd{return 0;} aan het einde, zodat we geen
-\textsc{run-error} krijgen!
-
 \newpage
 
 Een oplossing in C++ kan als volgt:
-\listinginput{1}{../examples/example.cc}
+\inputminted{cpp}{../examples/example.cc}
 
 Een oplossing in Java:
-\listinginput{1}{../examples/example.java}
+\inputminted{java}{../examples/example.java}
+
+Een oplossing in Python:
+\inputminted{python}{../examples/example.py}
 
 \newpage
 
 Een oplossing in C\#:
-\listinginput{1}{../examples/example.cs}
+\inputminted{csharp}{../examples/example.cs}
 
 Een oplossing in Pascal:
-\listinginput{1}{../examples/example.pas}
+\inputminted{pascal}{../examples/example.pas}
 
 En tenslotte een oplossing in Haskell:
-\listinginput{1}{../examples/example.hs}
+\inputminted{haskell}{../examples/example.hs}
 
 \end{document}

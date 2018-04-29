@@ -146,17 +146,16 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with support for PHP &gt;= 7.0 and the mysqli,
-       GD, curl and json extensions for PHP. PHP needs to be running as an
-       Apache module (the most common configuration); a (fast)CGI setup
-       is not currently supported. We also recommend the posix extension
-       for extra debugging information. A configuration file for the
-       Nginx webserver is also included, and may be used instead of
-       Apache. However, this setup is less well tested and documented.
+<item> Apache web server with mod_rewrite and support for PHP &gt;= 7.0
+       and the mysqli, GD, curl, json and XML extensions for PHP. We also
+       recommend the posix extension for extra debugging information.
+       A configuration file for the Nginx webserver is also included,
+       and may be used instead of Apache. However, this setup is less
+       well tested and documented.
 
 <item> MySQL or MariaDB &gt;= 5.5.3 database and client software.
 
-<item> PHP &gt;= 7.0 command line interface and the curl, json, mcrypt, and gmp
+<item> PHP &gt;= 7.0 command line interface and the curl and json
        extensions.
 
 <item> A POSIX compliant shell in <tt>/bin/sh</tt> (e.g. bash or ash).
@@ -184,22 +183,22 @@ The following items are optional, but may be required to use certain
 functionality or are generally useful.
 <itemize>
 
-<item> <htmlurl name="phpMyAdmin" url="http://www.phpmyadmin.net/">,
+<item> <htmlurl name="phpMyAdmin" url="https://www.phpmyadmin.net/">,
        to be able to access the database in an emergency
        or for data import/export
 
 <item> An NTP daemon (for keeping the clocks between jury
        system and team workstations in sync)
 
-<item> <htmlurl name="libcurl" url="http://curl.haxx.se/libcurl/">
-       and <htmlurl name="libJSONcpp" url="http://jsoncpp.sourceforge.net/">
+<item> <htmlurl name="libcurl" url="https://curl.haxx.se/libcurl/">
+       and <htmlurl name="libJSONcpp" url="https://github.com/open-source-parsers/jsoncpp">
        to use the command line submit client.
 
-<item> <htmlurl name="libmagic" url="http://www.darwinsys.com/file/">
+<item> <htmlurl name="libmagic" url="https://www.darwinsys.com/file/">
        (for command line submit client to detect binary file submissions)
 
 <item> <htmlurl name="PECL xdiff extension"
-        url="http://pecl.php.net/package/xdiff">
+        url="https://pecl.php.net/package/xdiff">
        (to reliably make diffs between submissions, DOMjudge will try
         alternative approaches if it is not available)
 
@@ -213,7 +212,7 @@ Software required for building DOMjudge:
 <item> gcc and g++ with standard libraries. Other compilers and
        libraries might also work: we have successfully compiled
        DOMjudge sources with <htmlurl name="Clang"
-       url="http://clang.llvm.org/"> from the LLVM project; the C
+       url="https://clang.llvm.org/"> from the LLVM project; the C
        library should support the POSIX.1-2008 specification.
 
 <item> GNU make
@@ -226,8 +225,7 @@ In the most basic setup the team workstations only need (next to the tools neede
 for program development) a web browser. The web interface fully works with any
 known browser, but a HTML5-capable browser adds more convenience functions. With
 JavaScript disabled, all basic functionality remains working, with the notable
-exception of multiple file uploads on non-HTML5-ready browsers.
-
+exception of multiple file uploads on non-HTML5-ready browsers (IE9 and lower).
 
 <chapt>Installation and configuration <label id="install_config">
 <p>
@@ -272,6 +270,7 @@ On the domserver host:
        it to your needs, reload web server:<newline>
        <tt>
        sudo ln -s &lt;INSTALL_PATH&gt;/domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
+       sudo a2enmod rewrite &&
        sudo a2enconf domjudge &&
        sudo apache2ctl graceful
        </tt>
@@ -328,8 +327,9 @@ Optionally:
        Modifying <tt>chroot-startstop.sh</tt> is typically not
        necessary, but might be in circumstances where your
        interpreters are not installed under <tt>/usr</tt> or require
-       files from other locations. See also the appendix
-       on <ref id="problems:chroot" name="setting up a chroot">.
+       files from other locations. See also the section
+       <ref id="install_config:judgehost:chroot"
+        name="creating a chroot environment">.
 <item> For additional features in the jury web interface, the
        following PHP extensions can be installed:
        <itemize>
@@ -353,45 +353,34 @@ software on the DOMjudge server as mentioned above when using Debian
 GNU/Linux, or one of its derivate distributions like Ubuntu.
 
 <code>
-apt-get install gcc g++ make zip unzip mysql-server \
-	apache2 php php-cli libapache2-mod-php \
-	php-gd php-curl php-mysql php-json \
-	php-mcrypt php-gmp php-xml php-mbstring \
-	bsdmainutils ntp phpmyadmin \
-	linuxdoc-tools linuxdoc-tools-text \
+sudo apt install gcc g++ make zip unzip mariadb-server \
+	apache2 php php-cli libapache2-mod-php php-zip \
+	php-gd php-curl php-mysql php-json php-xml php-mbstring \
+	acl bsdmainutils ntp phpmyadmin python-pygments \
+	libcgroup-dev linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
 	texlive-fonts-recommended texlive-lang-european
+# To enable the command-line submit client, also add:
+sudo apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
 </code>
 Note that PHP modules may need to be enabled depending on your distribution.
-E.g. on Ubuntu run <code>phpenmod mcrypt</code> to enable mcrypt.
-
-
-For Debian 9 Stretch and up, add <tt>php-mbstring</tt>.
+E.g. on Ubuntu run <code>sudo phpenmod json</code> to enable the JSON module.
 
 The following command can be used on RedHat Enterprise Linux, and
 related distributions like CentOS and Fedora.
 <code>
-yum install gcc gcc-c++ make zip unzip mariadb-server \
-	httpd php-gd php-cli php-mbstring php-mysql \
-	ntp linuxdoc-tools \
+sudo yum install gcc gcc-c++ make zip unzip mariadb-server \
+	httpd php-gd php-cli php-mbstring php-mysql php-xml \
+	python-pygments ntp linuxdoc-tools libcgroup-devel \
 	texlive-collection-latexrecommended texlive-wrapfig
+# To enable the command-line submit client, also add:
+sudo yum install libcurl-devel jsoncpp-devel file-devel
 </code>
 Note that the TeX Live packages <tt>expdlist</tt>, <tt>moreverb</tt>,
 and <tt>svn</tt> still have be installed manually to rebuild the team
 manuals. Furthermore, <tt>phpmyadmin</tt> is available from the
 <htmlurl name="Fedora EPEL repository"
 url="https://fedoraproject.org/wiki/EPEL">.
-
-Finally, to build the command-line submit client, install the
-following additional software.
-
-<code>
-apt-get install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
-</code>
-
-<code>
-yum install libcurl-devel jsoncpp-devel file-devel
-</code>
 The package <tt>jsoncpp-devel</tt> is available in Fedora, but not in
 RHEL/CentOS.
 
@@ -408,16 +397,16 @@ change the list as appropriate.
 
 For Debian:
 <code>
-apt-get install make sudo debootstrap libcgroup-dev \
-	php-cli php-curl php-json procps \
+sudo apt install make sudo debootstrap libcgroup-dev \
+	php-cli php-curl php-json php-xml php-zip procps \
 	gcc g++ openjdk-8-jre-headless \
 	openjdk-8-jdk ghc fp-compiler
 </code>
 
 For RedHat:
 <code>
-yum install make sudo libcgroup-devel \
-	php-cli php-mbstring php-process procps-ng \
+sudo yum install make sudo libcgroup-devel \
+	php-cli php-mbstring php-xml php-process procps-ng \
 	gcc gcc-c++ glibc-static libstdc++-static \
 	java-1.7.0-openjdk-headless java-1.7.0-openjdk-devel \
 	ghc-compiler fpc
@@ -509,7 +498,7 @@ can be built and installed separately, respectively by:
 <code>
 make domserver &amp;&amp; sudo make install-domserver
 make judgehost &amp;&amp; sudo make install-judgehost
-make docs &amp;&amp; make install-docs
+make docs &amp;&amp; sudo make install-docs
 </code>
 Note that root privileges are required to set permissions and user and
 group ownership of password files and a few directories. If you run
@@ -608,6 +597,7 @@ virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
 <verb>
 ln -s etc/apache.conf /etc/apache2/conf-available/domjudge.conf
+a2enmod rewrite
 a2enconf domjudge
 service apache2 reload
 </verb>
@@ -626,6 +616,11 @@ For Apache, there are countless documents on how to maximize performance.
 Of particular importance is to ensure that the <tt>MaxClients</tt> setting
 is high enough to receive the number of parallel requests you expect, but
 not higher than your amount of RAM allows.
+Furthermore, we recommend to turn <tt>KeepAlive</tt> off, or at
+least make sure that <tt>KeepAliveTimeout</tt> is set to only a few
+seconds. Otherwise, a large number of page view requests from teams
+and public can easily exhaust the Apache workers, resulting in an
+unresponsive website, which will also affect the judgedaemons.
 
 <p>
 As for PHP, the use of an opcode cache like the Alternative PHP Cache
@@ -643,6 +638,10 @@ connection caching by Apache threads. 1000 is more appropriate.
 low when using large testcases. This should be changed both in the
 MySQL server and client configuration and be set to about twice the
 maximum testcase size.
+<item><tt>innodb_log_file_size</tt>: The default of 48MB might be too
+low on MySQL servers with version 5.6.20 or newer due to changes to
+the redo log. You should set it 10 times higher than the maximum
+testcase size.
 <item>Root password: MySQL does not have a password for the root user
 by default. It's very desirable to set one.
 <item>When maximising performance is required, you can
@@ -655,27 +654,35 @@ interface.
 <sect>Installation of a judgehost<label id="install_config:judgehost">
 <p>
 
-A few extra steps might need to be taken to completely install and
+Some extra steps have to be taken to completely install and
 configure a judgehost.
 
+<sect1>Unprivileged user and group
+
+<p>
 For running solution programs under a non-privileged user, a user and group have
 to be added to the system(s) that act as judgehost. This user does not
 need a home-directory or password, so the following command would
 suffice to add a user and group `domjudge-run' with minimal privileges.
 
 <!-- NOTE: update this, then also update the copy of this under chapter 2.1 -->
+<p>
 On Debian and Redhat based Linux distributions use:
 <verb>
 useradd -d /nonexistent -U -M -s /bin/false domjudge-run
 groupadd domjudge-run
 </verb>
 
+<p>
 For other systems check the specifics of your useradd command.
 This user must also be configured as the user under which programs run
 via <tt>configure --enable-runuser=USER</tt>; the default is
 <tt>domjudge-run</tt>. By default the group is set to the same, this
 can be modified with the option <tt>--enable-rungroup=GROUP</tt>
 
+<sect1>Sudo permissions
+
+<p>
 <tt>Runguard</tt> needs to be able to become root for certain operations
 like changing to the runuser and performing a chroot. Also, the default
 <tt>chroot-startstop.sh</tt> script uses sudo to gain privileges for
@@ -686,18 +693,44 @@ modern sudo versions, place the file in <tt>/etc/sudoers.d/</tt>. If you
 change the user you run the judgedaemon as, or the installation paths, be
 sure to update the sudoers rules accordingly.
 
+<sect1>Creating a chroot environment
+<label id="install_config:judgehost:chroot">
+
+<p>
+The judgedaemon executes submissions inside a chroot environment for
+security reasons. By default it mounts parts of a prebuilt chroot tree
+read-only during this judging process (using the script
+<tt>lib/judge/chroot-startstop.sh</tt>). This is needed to support
+extra languages that require access to interpreters or support
+libraries at runtime, for example Java, C#, and any interpreted
+languages like Python, Perl, Shell script, etc.
+
+<p>
+This chroot tree can be built using the script
+<tt>bin/dj_make_chroot</tt>. On Debian and Ubuntu the same
+distribution and version as the host system are used, on other Linux
+distributions the latest stable Debian release will be used to build
+the chroot. Any extra packages to support languages can be passed with
+the option <tt>-i</tt> or be added to the <tt>INSTALLDEBS</tt>
+variable in the script. The script <tt>bin/dj_run_chroot</tt> runs an
+interactive shell or a command inside the chroot. This can be used for
+example to install new or upgrade existing packages inside the chroot.
+Run these scripts with option <tt>-h</tt> for more information.
+
+Finally, if necessary edit the script <tt>lib/judge/chroot-startstop.sh</tt>
+and adapt it to work with your local system. In case you changed the
+default pre-built chroot directory, make sure to also update the sudo
+rules and the <tt>CHROOTORIGINAL</tt> variable in <tt>chroot-startstop.sh</tt>.
+
 When the chroot setting is enabled (default), a static POSIX shell has
-to be available for copying it to the chroot environment. For Linux
+to be available for copying it into the chroot environment. For Linux
 i386, a static Dash shell is included, which works out of the box,
 also for the Linux Intel/AMD 64 architecture. For
 other architectures or operating systems, a shell has to be added
 manually. Then simply point the <tt>lib/sh-static</tt> symlink to this
-file. If you want to support languages that cannot be compiled to
-statically linked binaries, e.g. byte-compiled languages such as Java,
-or interpreted languages such as Python, then a complete chroot
-environment must be built and configured. See the appendix on
-<ref id="problems:chroot" name="setting up a chroot"> for more
-details.
+file.
+
+<sect1>Linux Control Groups
 
 <p>
 DOMjudge uses Linux Control Groups or cgroups for process isolation in
@@ -717,14 +750,21 @@ options. Edit <tt>/etc/default/grub</tt> and change the default
 commandline to
 <verb>GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"</verb>
 Then run <tt>update-grub</tt> and reboot.
+After rebooting check that <tt>/proc/cmdline</tt> actually contains the
+added kernel options. On VM hosting providers such as Google Cloud or
+DigitalOcean, <tt>GRUB_CMDLINE_LINUX_DEFAULT</tt> may be overwritten
+by other files in <tt>/etc/default/grub.d/</tt>.
 
+<p>
 You have now configured the system to use cgroups, but you need to create
 the actual cgroups that DOMjudge will use. For that, you can use the
 script under <tt>misc-tools/create_cgroups</tt>. Edit the script to
-match your situation first.
-This script needs to be re-run after each boot (e.g., add it to
-the judgedaemon init script).
+match your situation first. This script needs to be re-run after each
+boot (it has already been added to the judgedaemon init script).
 
+<sect1>REST API credentials
+
+<p>
 The judgehost connects to the domserver via a REST API. You need to
 create an account for the judgedaemons to use (this may be a
 shared account between all judgedaemons) with a difficult,
@@ -738,10 +778,16 @@ Multiple lines may be specified to allow a judgedaemon to work for multiple
 domservers. The id is used to differentiate between multiple domservers,
 and should be unique within the <tt>restapi.secret</tt> file.
 
-Then start the judgedaemon:
-<code>bin/judgedaemon</code>
+<sect1>Starting the judgedaemon
 
-Upon its first connection to the domserver API the judgehost will be
+<p>
+Finally start the judgedaemon (optionally binding it to CPU core X):
+<code>bin/judgedaemon [-n X]</code>
+If using the <tt>-n X</tt> option, then an extra user
+<tt>domjudge-run-X</tt> must also be created.
+
+<p>
+Upon its first connection to the domserver API, the judgehost will be
 auto-registered and will be by default enabled. If you wish to
 add a new judgehost but have it initially disabled, you can add it
 manually through the DOMjudge web interface and set it to disabled
@@ -892,15 +938,8 @@ scripts are included for most common languages already.
 
 Interpreted languages and non-statically linked binaries (for example,
 Oracle Java) can in principle also be used, but require that all
-dependencies are added to the chroot environment.
-DOMjudge comes with helper scripts to build a chroot environment:
-run <tt>sudo bin/dj_make_chroot</tt>.
-Options can be given change the target directory where to build the
-chroot environment (normally the default from configure is used) and
-to select the target machine architecture.
-Start the script without arguments for usage information. See also sections
-<ref id="install_config:judgehost" name="Installation of a judgehost">
-and <ref id="problems:chroot" name="Problems: Setting up a chroot">.
+runtime dependencies are added to the chroot environment. See section
+<ref id="install_config:judgehost:chroot" name="creating a chroot environment">.
 
 Interpreted languages do not generate an executable and in principle
 do not need a compilation step. However, to be able to use interpreted
@@ -1091,7 +1130,7 @@ document will be placed in the current
 directory or a directory given as argument.
 The following should do it on a Debian-like system:
 <code>
-sudo apt-get install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
+sudo apt install make texlive-latex-extra texlive-latex-recommended texlive-lang-european
 cd &lt;INSTALL_PATH&gt;/docs/team
 ./genteammanual [targetdir]
 </code>
@@ -1106,7 +1145,7 @@ format and prebuilt from SGML sources. Rebuilding these is not normally
 necessary. To rebuild them on a Debian-like system, the following commands
 should do it:
 <code>
-sudo apt-get install linuxdoc-tools make zip ghostscript groff texlive-latex-recommended
+sudo apt install linuxdoc-tools make zip ghostscript groff texlive-latex-recommended
 make -C doc/admin docs
 make -C doc/judge docs
 </code>
@@ -1173,7 +1212,7 @@ the DOMjudge web interface: the DOMjudge server then needs to be
 able to deliver the uploaded files to the printer. It can be
 enabled via the <tt>enable_printing</tt> configuration option in
 the administrator interface. The exact command used to send the
-files to a printer can be changed the function <tt>send_print()</tt>
+files to a printer can be changed in the function <tt>send_print()</tt>
 in <tt>lib/www/printing.php</tt>.
 
 <sect1>Judging consistency
@@ -1220,7 +1259,10 @@ consecutive DOMjudge versions. At the beginning of each script, a check
 is performed which will let MySQL bail out with an error if it should
 not be applied anymore. Note that the scripts must be applied in order
 (sorted by release). These scripts can be applied by running
-<tt>dj_setup_database upgrade</tt>.
+<tt>dj_setup_database upgrade</tt>. Be aware that these scripts are
+conservative in adding and upgrading SQL data, so check that e.g. new
+compile scripts are present or add them manually, and check the
+upgrade scripts manually for any other data upgraded.
 
 
 <chapt>Setting up a contest <label id="contestsetup">
@@ -1453,9 +1495,9 @@ that is displayed in the jury interface.
 
 A country flag can be displayed on the scoreboard. For this to work,
 the <tt>country</tt> field must match a (flag) picture in
-<tt>www/images/countries/&lt;country&gt;.png</tt>. All
+<tt>webapp/web/images/countries/&lt;country&gt;.png</tt>. All
 country flags are present there, named with their 3-character ISO
-codes. See also <tt>www/images/countries/README</tt>.
+codes. See also <tt>webapp/web/images/countries/README</tt>.
 
 <tag>team_category</tag>
 <tt>categoryid</tt> is the reference ID and <tt>name</tt> is a string:
@@ -2082,37 +2124,6 @@ the judgehosts which restricts outgoing network access.
 <p>
 
 
-<sect>Setting up a pre-built chroot tree <label id="problems:chroot">
-<p>
-
-With the default configuration, submitted programs are run within a
-minimal chroot environment. For this the programs have to be statically
-linked, because they do not have access to shared libraries.
-
-To be able to run submissions of languages that don't support statically
-linked binaries (think interpreted languages and bytecode compiled
-languages, amongst which Java and C#), one can build a bigger chroot
-environment which contains all necessary ingredients to let the
-submissions run. DOMjudge supports this with some manual setup.
-
-First of all, a chroot tree with those interpreters or runtimes needs to
-be created. The script <tt>bin/dj_make_chroot</tt> can create one from
-Debian or Ubuntu GNU/Linux sources. Add the required packages for the needed
-languages to the <tt>INSTALLDEBS</tt> variable in the script; run the
-script without arguments for basic usage information.
-
-This pre-built chroot tree is not directly used as chroot environment
-for judgings. Instead, some subdirectories of this tree are
-bind-mounted into a chroot tree that is specifically created for each
-judging. The bind-mounting and a few other things are done by the
-script <tt>lib/judge/chroot-startstop.sh</tt>, when the pre-built tree
-is available.
-
-Finally, if necessary edit the script <tt>lib/judge/chroot-startstop.sh</tt>
-and adapt it to work with your local system. In case you changed the
-default pre-built chroot directory, make sure to also update the sudo
-rules and the <tt>CHROOTORIGINAL</tt> variable in <tt>chroot-startstop.sh</tt>.
-
 <sect>Java compilers
 <p>
 Java is difficult to deal with in an automatic way. It is probably
@@ -2120,9 +2131,10 @@ most preferable to use OpenJDK or Oracle Java, because that's the
 version contestants will be used to. The GNU Compiler for Java (GCJ) is
 easier to deal with but may lack some features.
 
-The recommended way of using Java is by setting up the chroot as in the
-previous section, but you can also choose one of the alternatives as
-described below.
+The recommended way of using Java is by setting up the chroot (see
+section <ref id="install_config:judgehost:chroot"
+name="creating a chroot environment">), but you can also choose one of
+the alternatives as described below.
 
 <enum>
 <item> As an alternative the <tt>gcj</tt> compiler from GNU can be
@@ -2367,24 +2379,23 @@ additional software to be installed:
 <itemize>
 <item> The GNU autoconf/automake toolset
 
-<item> <htmlurl name="Composer" url="https://getcomposer.org">
-       - PHP Package Manager.
+<item> Composer - PHP Package Manager.
 
 <item> Linuxdoc and groff to build the admin and judge
        documentation from SGML sources and a LaTeX installation to
        generate the PDF admin, judge and default team manual.
 </itemize>
 
-On Debian(-based) systems, the following apt-get command should
+On Debian(-based) systems, the following apt command should
 install the additionally required packages (next to the
 <ref id="install_config:package-install" name="standard set of packages">):
 <code>
-apt-get install autoconf automake git
+sudo apt install autoconf automake git composer
 </code>
 
-Composer can be installed by following the documentation located
-<htmlurl name="here" url="https://getcomposer.org/download">, or since
-Debian Stretch by installing the package <tt>composer</tt>.
+Composer is packaged since Debian Stretch and Ubuntu Xenial.
+Alternatively, it can be installed by following the documentation
+located <htmlurl name="here" url="https://getcomposer.org/download">.
 
 When this software is present, bootstrapping can be done by running
 <tt>make dist</tt>, which creates the <tt>configure</tt> script,
@@ -2404,6 +2415,7 @@ code.
 This method requires some special steps which can most easily
 be run via makefile rules as follows:
 <code>
+sudo apt install acl
 make maintainer-conf [CONFIGURE_FLAGS=&lt;extra options for ./configure&gt;]
 make maintainer-install
 </code>

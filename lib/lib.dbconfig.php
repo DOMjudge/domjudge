@@ -15,11 +15,13 @@ function dbconfig_init()
 	global $LIBDBCONFIG, $DB;
 
 	$LIBDBCONFIG = array();
-	$res = $DB->q('SELECT * FROM configuration');
+	$res = $DB->q('SELECT * FROM configuration' .
+	              (IS_JURY || checkrole('jury') || checkrole('judgehost') ?
+	               '' : ' WHERE public = 1'));
 
 	while ( $row = $res->next() ) {
 		$key = $row['name'];
-		$val = json_decode($row['value'], true);
+		$val = dj_json_decode($row['value']);
 
 		switch ( json_last_error() ) {
 		case JSON_ERROR_NONE:
@@ -44,6 +46,7 @@ function dbconfig_init()
 			if ( !is_int($val) ) {
 				error("invalid type '$type' for config variable '$key'");
 			}
+			if ( $type=='bool' ) $val = (bool)$val;
 			break;
 		case 'string':
 			if ( !is_string($val) ) {
@@ -73,9 +76,11 @@ function dbconfig_store()
 {
 	global $LIBDBCONFIG, $DB;
 
+	if ( !checkrole('admin') ) error("must have admin role to store configuration settings");
+
 	foreach ( $LIBDBCONFIG as $key => $row ) {
 
-		switch ( $type = $row['type'] ) {
+		switch ( $type = @$row['type'] ) {
 		case 'bool':
 		case 'int':
 			if ( !preg_match('/^\s*(-){0,1}[0-9]+\s*$/', $row['value']) ) {
@@ -97,7 +102,7 @@ function dbconfig_store()
 			error("unknown type '$type' for config variable '$key'");
 		}
 
-		$val = json_encode($row['value']);
+		$val = dj_json_encode($row['value']);
 
 		switch ( json_last_error() ) {
 		case JSON_ERROR_NONE:
@@ -118,7 +123,7 @@ function dbconfig_store()
 
 		$res = $DB->q('RETURNAFFECTED UPDATE configuration
 		               SET value = %s, type = %s, description = %s
-		               WHERE name = %s', $val, $row['type'], $row['desc'], $key);
+		               WHERE name = %s', $val, $row['type'], @$row['desc'], $key);
 
 		if ( $res>0 ) auditlog('configuration', NULL, 'update '.$key, $val);
 	}

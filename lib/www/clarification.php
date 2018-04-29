@@ -47,6 +47,19 @@ function getClarCategories()
 }
 
 /**
+ * Returns the list of clarification queues as a key,value array.
+ */
+function getClarQueues()
+{
+	$queues = dbconfig_get('clar_queues');
+
+	$clarqueues = [null => 'Unassigned issues'];
+	foreach ( $queues as $key => $val ) $clarqueues[$key] = $val;
+
+	return $clarqueues;
+}
+
+/**
  * Output a single clarification.
  * Helperfunction for putClarification, do _not_ use directly!
  */
@@ -90,26 +103,99 @@ function putClar($clar)
 	$categs = getClarCategories();
 
 	echo '<tr><td>Subject:</td><td>';
+	if (IS_JURY) {
+		echo '<span class="clarification-subject">';
+	}
 	$prefix = '';
 	if ( IS_JURY && count($cids) > 1 )
 	{
 		$prefix = specialchars($clar['contestshortname']) . ' - ';
 	}
+	$currentSelectedCategory = null;
 	if ( is_null($clar['probid']) ) {
 		if ( is_null($clar['category']) ) {
 			// FIXME: why does it make sense to keep clars for a dropped problem and relabel them to general issue?
 			echo $prefix . "General issue";
 		} else {
-			// FIXME: add check if the category still exists?
-			echo $prefix . specialchars($categs[$clar['category']]);
+			if ( array_key_exists($clar['category'], $categs) ) {
+				echo $prefix . specialchars($categs[$clar['category']]);
+				$currentSelectedCategory = $clar['cid'] . '-' . $clar['category'];
+			} else {
+				echo $prefix . "General issue";
+			}
 		}
 	} else {
 		if ( IS_JURY ) {
+			$currentSelectedCategory = $clar['cid'] . '-' . $clar['probid'];
 			echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
 			     '">' . $prefix . 'Problem ' . specialchars($clar['shortname'] . ": " .
 			     $clar['probname']) . '</a>';
 		} else {
 			echo 'Problem ' . specialchars($clar['shortname'] . ": " . $clar['probname']);
+		}
+	}
+	if (IS_JURY) {
+		global $pagename, $cdatas, $DB;
+
+		$subject_options = array();
+		foreach ($cdatas as $cid => $data) {
+			foreach ($categs as $categid => $categname) {
+				if (IS_JURY && count($cdatas) > 1) {
+					$subject_options["$cid-$categid"] = "{$data['shortname']} - $categname";
+				} else {
+					$subject_options["$cid-$categid"] = $categname;
+				}
+			}
+			$fdata = calcFreezeData($data);
+			if ($fdata['started']) {
+				$problem_options =
+					$DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
+				                             CONCAT(shortname, ": ", name) as name
+				        FROM problem
+				        INNER JOIN contestproblem USING (probid)
+				        WHERE cid = %i AND allow_submit = 1
+				        ORDER BY shortname ASC', $cid);
+				if (IS_JURY && count($cdatas) > 1) {
+					foreach ($problem_options as &$problem_option) {
+						$problem_option = $data['shortname'] . ' - ' . $problem_option;
+					}
+					unset($problem_option);
+				}
+				$subject_options += $problem_options;
+			}
+		}
+
+		// Add button to change subject
+		echo '&nbsp;<input type="button" value="Change" class="clarification-subject-change-button" />';
+		echo '</span>';
+		echo '<span class="clarification-subject-form" data-current-selected-category="' . $currentSelectedCategory . '" data-clarification-id="' . $clar['clarid'] . '" style="display: none;">';
+		echo addForm($pagename) .
+			addHidden('id', $clar['clarid']) .
+			addSelect('subject', $subject_options, $currentSelectedCategory, true) .
+			addEndForm();
+		echo '<input type="button" value="Cancel" class="clarification-subject-cancel-button" />';
+		echo '</span>';
+	}
+	echo "</td></tr>\n";
+
+	if (IS_JURY) {
+		global $pagename;
+		$queues = getClarQueues();
+		// Do not display the queue if we have only one queue ("Unassigned issues")
+		if (count($queues) > 1) {
+			echo '<tr><td>Queue:</td><td>';
+			echo '<span class="clarification-queue">';
+			echo $queues[$clar['queue']];
+			// Add button to change queue
+			echo '&nbsp;<input type="button" value="Change" class="clarification-queue-change-button" />';
+			echo '</span>';
+			echo '<span class="clarification-queue-form" data-current-selected-queue="' . $clar['queue'] . '" data-clarification-id="' . $clar['clarid'] . '" style="display: none;">';
+			echo addForm($pagename) .
+				addHidden('id', $clar['clarid']) .
+				addSelect('queue', $queues, $clar['queue'], true) .
+				addEndForm();
+			echo '<input type="button" value="Cancel" class="clarification-queue-cancel-button" />';
+			echo '</span>';
 		}
 	}
 	echo "</td></tr>\n";
@@ -192,17 +278,19 @@ function putClarificationList($clars, $team = NULL)
 		error("access denied to clarifications: you seem to be team nor jury");
 	}
 
-	echo "<table class=\"list sortable\">\n<thead>\n<tr>" .
+	$categs = getClarCategories();
+	$queues = getClarQueues();
+
+	echo "<table class=\"table table-striped table-hover table-sm list sortable\">\n<thead class=\"thead-light\">\n<tr>" .
 	     ( IS_JURY ? "<th scope=\"col\">ID</th>" : "") .
 	     ( IS_JURY && count($cids) > 1 ? "<th scope=\"col\">contest</th>" : "") .
 	     "<th scope=\"col\">time</th>" .
 	     "<th scope=\"col\">from</th>" .
 	     "<th scope=\"col\">to</th><th scope=\"col\">subject</th>" .
+	    ( IS_JURY && count($queues) > 1 ? "<th scope=\"col\">queue</th>" : "") .
 	     "<th scope=\"col\">text</th>" .
 		( IS_JURY ? "<th scope=\"col\">answered</th><th scope=\"col\">by</th>" : "") .
 	     "</tr>\n</thead>\n<tbody>\n";
-
-	$categs = getClarCategories();
 
 	while ( $clar = $clars->next() ) {
 		// check viewing permission for teams
@@ -255,13 +343,22 @@ function putClarificationList($clars, $team = NULL)
 			// FIXME: why does it make sense to keep clars for a dropped problem and relabel them to general issue?
 			echo "general";
 		} else {
-			// FIXME: add check if the category still exists?
-			echo specialchars($categs[$clar['category']]);
+			if ( array_key_exists($clar['category'], $categs) ) {
+				echo specialchars($categs[$clar['category']]);
+			} else {
+				echo "general";
+			}
 		}
 		} else {
 			echo "problem ".$clar['shortname'];
 		}
 		echo "</a></td>";
+
+		if ( IS_JURY && count($queues) > 1 ) {
+			echo '<td>' . $link;
+			echo specialchars($queues[$clar['queue']]);
+			echo "</a></td>";
+		}
 
 		echo '<td class="clartext">' . $link .
 		    summarizeClarification($clar['body']) . "</a></td>";
@@ -309,7 +406,9 @@ function putClarificationList($clars, $team = NULL)
  */
 function putClarificationForm($action, $respid = NULL, $onlycontest = NULL)
 {
-	$cdatas = getCurContests(TRUE);
+	global $cdata, $teamdata, $DB;
+
+	$cdatas = getCurContests(TRUE, IS_JURY ? NULL : $teamdata['teamid']);
 	if ( isset($onlycontest) ) {
 		$cdatas = array($onlycontest => $cdatas[$onlycontest]);
 	}
@@ -319,9 +418,85 @@ function putClarificationForm($action, $respid = NULL, $onlycontest = NULL)
 		return;
 	}
 
-	require_once('forms.php');
+	// get clarification this form is responding to
+	if ( $respid ) {
+		$clar = $DB->q('MAYBETUPLE SELECT c.*, t.name AS toname, f.name AS fromname
+		                FROM clarification c
+		                LEFT JOIN team t ON (t.teamid = c.recipient)
+		                LEFT JOIN team f ON (f.teamid = c.sender)
+		                WHERE c.clarid = %i', $respid);
+	}
 
-	global $DB;
+	if ( IS_JURY ) { // list all possible recipients in the "sendto" box
+		$sendto_options = array('domjudge-must-select' => '(select...)', '' => 'ALL');
+		if ( ! $respid ) {
+			$teams = $DB->q('KEYVALUETABLE SELECT teamid, name
+			                 FROM team
+			                 ORDER BY categoryid ASC, team.name
+			                 COLLATE '. DJ_MYSQL_COLLATION . ' ASC');
+			$sendto_options += $teams;
+		} else {
+			if ( $clar['sender'] ) {
+				$sendto_options[$clar['sender']] =
+					$clar['fromname'] . ' (t' . $clar['sender'] . ')';
+			} else if ( $clar['recipient'] ) {
+				$sendto_options[$clar['recipient']] =
+					$clar['toname'] . ' (t' . $clar['recipient'] . ')';
+			}
+		}
+	}
+
+	// Select box for a specific problem (only when the contest
+	// has started) or other issues.
+	$categs = getClarCategories();
+	$defclar = key($categs);
+	$subject_options = array();
+	foreach ($cdatas as $cid => $data) {
+
+		foreach($categs as $categid => $categname) {
+			if ( IS_JURY && count($cdatas) > 1 ) {
+				$subject_options["$cid-$categid"] = "{$data['shortname']} - $categname";
+			} else {
+				$subject_options["$cid-$categid"] = $categname;
+			}
+		}
+		$fdata = calcFreezeData($data);
+		if ( $fdata['started'] ) {
+			$problem_options =
+				$DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
+				                             CONCAT(shortname, ": ", name) as name
+				        FROM problem
+				        INNER JOIN contestproblem USING (probid)
+				        WHERE cid = %i AND allow_submit = 1
+				        ORDER BY shortname ASC', $cid);
+			if ( IS_JURY && count($cdatas) > 1 ) {
+				foreach ($problem_options as &$problem_option) {
+					$problem_option = $data['shortname'] . ' - ' . $problem_option;
+				}
+				unset($problem_option);
+			}
+			$subject_options += $problem_options;
+		}
+	}
+
+	if ( $respid ) {
+		if ( is_null($clar['probid']) ) {
+			$subject_selected = $clar['cid'] . '-' . $clar['category'];
+		} else {
+			$subject_selected = $clar['cid'] . '-' . $clar['probid'];
+		}
+	} else {
+		$subject_selected = null;
+		if ( !empty($cdata) ) {
+			$subject_selected = $cdata['cid'] . '-' . $defclar;
+		}
+	}
+
+	$body = "";
+	if ( $respid ) {
+		$text = explode("\n",wrap_unquoted($clar['body']),75);
+		foreach($text as $line) $body .= "> $line\n";
+	}
 ?>
 
 <script type="text/javascript">
@@ -344,115 +519,52 @@ function confirmClar() {
 // -->
 </script>
 
-<?php
-	echo addForm($action, 'post', 'sendclar');
-	echo "<table>\n";
+<div class="container clarificationform">
+<form action="<?=specialchars($action)?>" method="post" id="sendclar" onsubmit="return confirmClar();">
 
-	if ( $respid ) {
-		$clar = $DB->q('MAYBETUPLE SELECT c.*, t.name AS toname, f.name AS fromname
-		                FROM clarification c
-		                LEFT JOIN team t ON (t.teamid = c.recipient)
-		                LEFT JOIN team f ON (f.teamid = c.sender)
-		                WHERE c.clarid = %i', $respid);
+<?php if (IS_JURY && !empty($respid)): ?>
+<input type="hidden" name="id" value="<?=specialchars($respid);?>" />
+<?php endif; ?>
+
+<div class="form-group">
+<label for="sendto">Send to:</label>
+<?php if (IS_JURY) {
+	echo "<select name=\"sendto\" class=\"custom-select\" id=\"sendto\">\n";
+	foreach($sendto_options as $value => $desc) {
+		echo "<option value=\"" . specialchars($value) . "\"" .
+			(($value === 'domjudge-must-select') ? ' selected': '') .
+			">" . specialchars($desc) . "</option>\n";
 	}
-
-	if ( IS_JURY ) { // list all possible recipients in the "sendto" box
-		echo "<tr><td><b><label for=\"sendto\">Send to</label>:</b></td><td>\n";
-
-		if ( !empty($respid) ) {
-			echo addHidden('id',$respid);
-		}
-
-		$options = array('domjudge-must-select' => '(select...)', '' => 'ALL');
-		if ( ! $respid ) {
-			$teams = $DB->q('KEYVALUETABLE SELECT teamid, name
-			                 FROM team
-			                 ORDER BY categoryid ASC, team.name
-			                 COLLATE '. DJ_MYSQL_COLLATION . ' ASC');
-			$options += $teams;
-		} else {
-			if ( $clar['sender'] ) {
-				$options[$clar['sender']] =
-					$clar['fromname'] . ' (t' . $clar['sender'] . ')';
-			} else if ( $clar['recipient'] ) {
-				$options[$clar['recipient']] =
-					$clar['toname'] . ' (t' . $clar['recipient'] . ')';
-			}
-		}
-		echo addSelect('sendto', $options, 'domjudge-must-select', true);
-		echo "</td></tr>\n";
-	} else {
-		echo "<tr><td><b>To:</b></td><td>Jury</td></tr>\n";
-	}
-
-	// Select box for a specific problem (only when the contest
-	// has started) or other issues.
-	$categs = getClarCategories();
-	$defclar = key($categs);
-	$options = array();
-	foreach ($cdatas as $cid => $cdata) {
-
-		foreach($categs as $categid => $categname) {
-			if ( IS_JURY && count($cdatas) > 1 ) {
-				$options["$cid-$categid"] = "{$cdata['shortname']} - $categname";
-			} else {
-				$options["$cid-$categid"] = $categname;
-			}
-		}
-		$fdata = calcFreezeData($cdata);
-		if ( $fdata['cstarted'] ) {
-			$problem_options =
-				$DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
-				                             CONCAT(shortname, ": ", name) as name
-				        FROM problem
-				        INNER JOIN contestproblem USING (probid)
-				        WHERE cid = %i AND allow_submit = 1
-				        ORDER BY shortname ASC', $cid);
-			if ( IS_JURY && count($cdatas) > 1 ) {
-				foreach ($problem_options as &$problem_option) {
-					$problem_option = $cdata['shortname'] . ' - ' . $problem_option;
-				}
-				unset($problem_option);
-			}
-			$options += $problem_options;
-		}
-	}
-	if ( $respid ) {
-		if ( is_null($clar['probid']) ) {
-			$selected = $clar['category'];
-		} else {
-			$selected = $clar['probid'];
-		}
-	} else {
-		$selected = $defclar;
-	}
-	echo "<tr><td><b>Subject:</b></td><td>\n" .
-	     addSelect('problem', $options, $selected, true) .
-	     "</td></tr>\n";
-
-	?>
-<tr>
-<td><b><label for="bodytext">Text</label>:</b></td>
-<td><?php
-$body = "";
-if ( $respid ) {
-	$text = explode("\n",wrap_unquoted($clar['body']),75);
-	foreach($text as $line) $body .= "> $line\n";
+	echo "</select>\n";
+} else {
+	echo "<select id=\"sendto\" class=\"custom-select disabled\" disabled>\n<option>Jury</option>\n</select>\n";
 }
-echo addTextArea('bodytext', $body, 80, 10, 'required');
-?></td></tr>
-<tr>
-<td>&nbsp;</td>
-<td><?php echo addSubmit('Send', 'submit', 'return confirmClar()'); ?></td>
-</tr>
-</table>
-</form>
-<script type="text/javascript">
-<!--
-document.forms['sendclar'].bodytext.focus();
-document.forms['sendclar'].bodytext.select();
-// -->
-</script>
-<?php
+?>
+</div>
 
+<div class="form-group">
+<label for="subject">Subject:</label>
+<select name="problem" id="subject" class="custom-select">
+<?php
+foreach($subject_options as $value => $desc) {
+	echo "<option value=\"" . specialchars($value) . "\"" .
+		(($value === $subject_selected) ? ' selected': '') .
+       		">" . specialchars($desc) . "</option>\n";
+}
+?>
+</select>
+</div>
+
+<div class="form-group">
+<label for="bodytext">Message:</label>
+<textarea class="form-control" name="bodytext" id="bodytext" rows="5" cols="85" required><?=specialchars($body);?></textarea>
+</div>
+
+<div class="form-group">
+<input type="submit" value="Send" name="submit" class="btn btn-primary" />
+</div>
+</form>
+</div>
+
+<?php
 }

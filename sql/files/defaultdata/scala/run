@@ -15,7 +15,7 @@ scalac "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
-MAINCLASS="$(basename "$MAINSOURCE" .scala)"
+MAINCLASS="${ENTRY_POINT:-$(basename "$MAINSOURCE" .scala)}"
 
 cat > "$DEST" <<EOF
 #!/bin/sh

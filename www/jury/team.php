@@ -110,6 +110,8 @@ if ( $num_contests > 0 ) {
 	</td>
 </tr>
 <?php
+} else {
+	echo addHidden('data[0][mapping][0][items]', '');
 }
 ?>
 
@@ -193,9 +195,12 @@ if ( isset($_GET['edited']) ) {
 
 $users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %i', $id);
 
-$affillogo   = "../images/affiliations/" . urlencode($row['affilid']) . ".png";
-$countryflag = "../images/countries/"    . urlencode($row['country']) . ".png";
-$teamimage   = "../images/teams/"        . urlencode($row['teamid'])  . ".jpg";
+$SHOW_FLAGS             = dbconfig_get('show_flags', 1);
+$SHOW_AFFILIATIONS      = dbconfig_get('show_affiliations', 1);
+
+$affillogo   = "images/affiliations/" . urlencode($row['affilid']) . ".png";
+$countryflag = "images/countries/"    . urlencode($row['country']) . ".png";
+$teamimage   = "images/teams/"        . urlencode($row['teamid'])  . ".jpg";
 
 echo "<h1>Team ".specialchars($row['name'])."</h1>\n\n";
 
@@ -256,19 +261,19 @@ echo '<tr><td>Category:</td><td><a href="team_category.php?id=' .
 	urlencode($row['categoryid']) . '">' .
 	specialchars($row['catname']) . "</a></td></tr>\n";
 
-if ( !empty($row['affilid']) ) {
+if ( $SHOW_AFFILIATIONS && !empty($row['affilid']) ) {
 	echo '<tr><td>Affiliation:</td><td>';
-	if ( is_readable($affillogo) ) {
-		echo '<img src="' . $affillogo . '" alt="' .
+	if ( is_readable(WEBAPPDIR.'/web/'.$affillogo) ) {
+		echo '<img src="../' . $affillogo . '" alt="' .
 			specialchars($row['affshortname']) . '" /> ';
 	}
 	echo '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">' .
 		specialchars($row['affname']) . "</a></td></tr>\n";
 }
-if ( !empty($row['country']) ) {
+if ( $SHOW_FLAGS && !empty($row['country']) ) {
 	echo '<tr><td>Country:</td><td>';
-	if ( is_readable($countryflag) ) {
-		echo '<img src="' . $countryflag . '" alt="' .
+	if ( is_readable(WEBAPPDIR.'/web/'.$countryflag) ) {
+		echo '<img src="../' . $countryflag . '" alt="' .
 			specialchars($row['country']) . '" /> ';
 	}
 	echo specialchars($row['country']) . "</td></tr>\n";

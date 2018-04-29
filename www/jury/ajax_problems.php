@@ -19,4 +19,4 @@ if (isset($_GET['fromcontest'])) {
 	                   $_GET['q'], $_GET['q']);
 }
 
-echo json_encode($problems);
+echo dj_json_encode($problems);

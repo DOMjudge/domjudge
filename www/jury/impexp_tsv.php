@@ -95,7 +95,8 @@ function tsv_groups_set($data)
 	global $DB;
 	$cnt = 0;
 	foreach ($data as $row) {
-		$DB->q("REPLACE INTO team_category SET %S", $row);
+		$replacecnt = $DB->q("RETURNAFFECTED REPLACE INTO team_category SET %S", $row);
+		eventlog('team_category', $row['categoryid'], $replacecnt == 1 ? 'create' : 'update');
 		auditlog('team_category', $row['categoryid'], 'replaced', 'imported from tsv');
 		$cnt++;
 	}
@@ -121,9 +122,10 @@ function tsv_teams_prepare($content)
 				'categoryid' => @$line[2],
 				'name' => @$line[3]),
 			'team_affiliation' => array (
-				'shortname' => @$line[5],
+				'shortname' => !empty(@$line[5]) ? @$line[5] : @$line[7],
 				'name' => @$line[4],
-				'country' => @$line[6]) );
+				'country' => @$line[6],
+				'externalid' => @$line[7]) );
 	}
 
 	return $data;
@@ -139,18 +141,20 @@ function tsv_teams_set($data)
 		if ( !empty($row['team_affiliation']['shortname']) ) {
 			// First look up if the affiliation already exists.
 			$affilid = $DB->q("MAYBEVALUE SELECT affilid FROM team_affiliation
-			                   WHERE shortname = %s AND name = %s AND country = %s LIMIT 1",
-			                  $row['team_affiliation']['shortname'],
-			                  $row['team_affiliation']['name'],
-			                  $row['team_affiliation']['country']);
+			                   WHERE externalid = %s LIMIT 1",
+			                  $row['team_affiliation']['externalid']);
 			if ( empty($affilid) ) {
 				$affilid = $DB->q("RETURNID INSERT INTO team_affiliation SET %S",
 				                  $row['team_affiliation']);
+
+				eventlog('team_affiliation', $affilid, 'create');
 				auditlog('team_affiliation', $affilid, 'added', 'imported from tsv');
 			}
 			$row['team']['affilid'] = $affilid;
 		}
-		$DB->q("REPLACE INTO team SET %S", $row['team']);
+		$replacecnt = $DB->q("RETURNAFFECTED REPLACE INTO team SET %S", $row['team']);
+
+		eventlog('team', $row['team']['teamid'], $replacecnt == 1 ? 'create' : 'update');
 		auditlog('team', $row['team']['teamid'], 'replaced', 'imported from tsv');
 		$cnt++;
 	}
@@ -177,25 +181,35 @@ function tsv_accounts_prepare($content)
 		$l++;
 		$line = explode("\t", trim($line));
 
-		$teamid = $juryteam = null;
+		$teamid = $juryteam = $roleid = null;
 		switch($line[0]) {
 			case 'admin':
-				$line[0] = $adminroleid;
+				$roleid = $adminroleid;
 				break;
 			case 'judge':
-				$line[0] = $juryroleid;
+				$roleid = $juryroleid;
 				$juryteam = array('name' => $line[1], 'categoryid' => $jurycatid, 'members' => $line[1]);
 				break;
 			case 'team':
-				$line[0] = $teamroleid;
-				// For now we assume we can find the teamid by parsing the username
-				$teamid = preg_replace('#^team0*#', '', $line[2]);
+				$roleid = $teamroleid;
+				// For now we assume we can find the teamid by parsing
+				// the username and taking the largest suffix number.
+				// Note that https://clics.ecs.baylor.edu/index.php/Contest_Control_System_Requirements#accounts.tsv
+				// assumes team accounts of the form "team-nnn" where
+				// nnn is a zero-padded team number.
+				$teamid = preg_replace('/^[^0-9]*0*([0-9]+)$/', '\1', $line[2]);
+				if ( !preg_match('/^[0-9]+$/', $teamid) ) {
+					error('cannot parse team id on line '.$l.' from "'.$line[2].'"');
+				}
+				if ( !$DB->q('MAYBEVALUE SELECT teamid FROM team WHERE teamid = %i', $teamid) ) {
+					error("unknown team id $teamid on line $l");
+				}
 				break;
 			case 'analyst':
 				// Ignore type analyst for now. We don't have a useful mapping yet.
 				continue 2;
 			default:
-				error('unknown role id on line ' . $l . ': ' . $line[0]);
+				error('unknown role on line ' . $l . ': ' . $line[0]);
 		}
 
 		// accounts.tsv contains data pertaining both to users and userroles.
@@ -211,7 +225,7 @@ function tsv_accounts_prepare($content)
 				),
 			'userrole' => array (
 				'userid' => -1, // need to get appropriate userid later
-				'roleid' => $line[0]
+				'roleid' => $roleid
 				),
 			'team' => $juryteam,
 			);
@@ -232,6 +246,7 @@ function tsv_accounts_set($data)
 			if ( is_null($teamid) ) {
 				$teamid = $DB->q("RETURNID INSERT INTO team SET %S", $row['team']);
 			}
+			eventlog('team', $teamid, 'create');
 			auditlog('team', $teamid, 'added', 'imported from tsv, autocreated for judge');
 			$row['user']['teamid'] = $teamid;
 		}
@@ -367,7 +382,7 @@ function tsv_results_get()
 	$cnt = 0;
 	foreach ($sb['scores'] as $teamid => $srow) {
 		$cnt++;
-		$median = $srow['num_correct'];
+		$median = $srow['num_points'];
 		if ($cnt > $numteams/2) { // XXX: lower or upper median?
 			break;
 		}
@@ -383,7 +398,7 @@ function tsv_results_get()
 		}
 
 		$rank = $srow['rank'];
-		$num_correct = $srow['num_correct'];
+		$num_correct = $srow['num_points'];
 		if ( $rank <= 4 ) {
 			$awardstring = "Gold Medal";
 		} else if ( $rank <= 8 ) {
@@ -409,7 +424,7 @@ function tsv_results_get()
 		}
 
 		$data[] = array(@$sb['teams'][$teamid]['externalid'],
-				$rank, $awardstring, $srow['num_correct'],
+				$rank, $awardstring, $srow['num_points'],
 				$srow['total_time'], $maxtime, $groupwinner);
 	}
 

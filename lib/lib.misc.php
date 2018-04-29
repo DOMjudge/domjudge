@@ -100,7 +100,7 @@ function problemVisible($probid)
 	if ( empty($probid) ) return FALSE;
 
 	$fdata = calcFreezeData($cdata);
-	if ( !$fdata['cstarted'] ) return FALSE;
+	if ( !$fdata['started'] ) return FALSE;
 
 	return $DB->q('MAYBETUPLE SELECT probid FROM problem
 	               INNER JOIN contestproblem USING (probid)
@@ -110,8 +110,8 @@ function problemVisible($probid)
 
 /**
  * Given an array of contest data, calculates whether the contest
- * has already started ('cstarted'), and if scoreboard is currently
- * frozen ('showfrozen') or final ('showfinal').
+ * has already started, stopped, andd if scoreboard is currently
+ * frozen or final (unfrozen).
  */
 function calcFreezeData($cdata)
 {
@@ -121,7 +121,9 @@ function calcFreezeData($cdata)
 		return array(
 			'showfinal' => false,
 			'showfrozen' => false,
-			'cstarted' => false
+			'started' => false,
+			'stopped' => false,
+			'running' => false,
 		);
 	}
 
@@ -138,7 +140,9 @@ function calcFreezeData($cdata)
 	$fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
 	              difftime($cdata['freezetime'],$now) <= 0;
 	// contest is active but has not yet started
-	$fdata['cstarted'] = difftime($cdata['starttime'],$now) <= 0;
+	$fdata['started'] = difftime($cdata['starttime'],$now) <= 0;
+	$fdata['stopped'] = difftime($cdata['endtime'],$now) <= 0;
+	$fdata['running'] = ( $fdata['started'] && !$fdata['stopped'] );
 
 	return $fdata;
 }
@@ -152,8 +156,10 @@ function calcFreezeData($cdata)
  */
 function calcContestTime($walltime, $cid)
 {
-	// get contest data in case of non-public contests
-	$cdatas = getCurContests(TRUE);
+	// Get contest data in case of non-public contests. Also get
+	// future contests (third argument) to correct for previously
+	// submitted jury solutions.
+	$cdatas = getCurContests(TRUE,NULL,TRUE);
 
 	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
 
@@ -193,7 +199,7 @@ function calcScoreRow($cid, $team, $prob) {
 	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
 	                  WHERE teamid = %i AND probid = %i AND s.cid = %i AND s.valid = 1 ' .
 	                 ( dbconfig_get('compile_penalty', 1) ? "" :
-	                   "AND j.result != 'compiler-error' ") .
+	                   "AND (j.result IS NULL OR j.result != 'compiler-error') ") .
 	                 'AND submittime < c.endtime
 	                  ORDER BY submittime',
 	                 $team, $prob, $cid);
@@ -321,13 +327,55 @@ function updateRankCache($cid, $team) {
 	}
 }
 
+/**
+ * Update the balloons table after a correct submission.
+ *
+ * This function double checks that the judging is correct and
+ * confirmed.
+ */
+function updateBalloons($submitid)
+{
+	global $DB;
+
+	$subm = $DB->q('TUPLE SELECT s.submitid, s.cid, s.probid, s.teamid, j.result, j.verified
+	                FROM submission s
+	                LEFT JOIN judging j ON (j.submitid=s.submitid AND j.valid=1)
+	                WHERE s.submitid = %i', $submitid);
+
+	if ( @$subm['result'] !== 'correct' ) return;
+
+	if ( !$subm['verified'] && dbconfig_get('verification_required', 0) ) return;
+
+	// prevent duplicate balloons in case of multiple correct submissions
+	$numcorrect = $DB->q('VALUE SELECT count(b.submitid)
+	                      FROM balloon b
+	                      LEFT JOIN submission s USING(submitid)
+	                      WHERE valid = 1 AND probid = %i
+	                      AND teamid = %i AND cid = %i',
+	                     $subm['probid'], $subm['teamid'], $subm['cid']);
+
+	if ( $numcorrect == 0 ) {
+		$balloons_enabled = (bool)$DB->q('VALUE SELECT process_balloons
+		                                  FROM contest WHERE cid = %i',
+		                                 $subm['cid']);
+		if ( $balloons_enabled ) {
+			$DB->q('INSERT INTO balloon (submitid) VALUES (%i)', $submitid);
+		}
+	}
+}
 
 /**
- * Time as used on the scoreboard (i.e. truncated minutes).
+ * Time as used on the scoreboard (i.e. truncated minutes or seconds,
+ * depending on the scoreboard resolution setting).
  */
 function scoretime($time)
 {
-	return (int)floor($time / 60);
+	if ( dbconfig_get('score_in_seconds', 0) ) {
+		$result = (int) floor($time);
+	} else {
+		$result = (int) floor($time / 60);
+	}
+	return $result;
 }
 
 /**
@@ -367,7 +415,12 @@ function calcPenaltyTime($solved, $num_submissions)
 {
 	if ( ! $solved ) return 0;
 
-	return ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
+	$result = ( $num_submissions - 1 ) * dbconfig_get('penalty_time', 20);
+	//  Convert the penalty time to seconds if the configuration
+	//  parameter to compute scores to the second is set.
+	if ( dbconfig_get('score_in_seconds', 0) ) $result *= 60;
+
+	return $result;
 }
 
 // From http://www.problemarchive.org/wiki/index.php/Problem_Format
@@ -633,7 +686,7 @@ function daemonize($pidfile = NULL)
  * validates it and puts it into the database. Additionally it
  * moves it to a backup storage.
  */
-function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $origsubmitid = NULL)
+function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $origsubmitid = NULL, $entry_point = NULL)
 {
 	global $DB;
 
@@ -664,7 +717,7 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 		error("Contest c$contest not found.");
 	}
 	$fdata = calcFreezeData($contestdata);
-	if( !checkrole('jury') && !$fdata['cstarted'] ) {
+	if( !checkrole('jury') && !$fdata['started'] ) {
 		error("The contest is closed, no submissions accepted. [c$contest]");
 	}
 
@@ -719,9 +772,9 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	// Insert submission into the database
 	$DB->q('START TRANSACTION');
 	$id = $DB->q('RETURNID INSERT INTO submission
-	              (cid, teamid, probid, langid, submittime, origsubmitid)
-	              VALUES (%i, %i, %i, %s, %s, %i)',
-	             $contest, $teamid, $probid, $langid, $now, $origsubmitid);
+	              (cid, teamid, probid, langid, submittime, origsubmitid, entry_point)
+	              VALUES (%i, %i, %i, %s, %s, %i, %s)',
+	             $contest, $teamid, $probid, $langid, $now, $origsubmitid, $entry_point);
 
 	for($rank=0; $rank<count($files); $rank++) {
 		$DB->q('INSERT INTO submission_file
@@ -734,17 +787,13 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	// submissions.
 	if ( checkrole('jury') && !empty($results) ) {
 		$DB->q('UPDATE submission SET expected_results=%s
-		        WHERE submitid=%i', json_encode($results), $id);
+		        WHERE submitid=%i', dj_json_encode($results), $id);
 	}
+	eventlog('submission', $id, 'create', $contest);
 	$DB->q('COMMIT');
 
 	// Recalculate scoreboard cache for pending submissions
 	calcScoreRow($contest, $teamid, $probid);
-
-	// Log to event table
-	$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid, submitid, description)
-	        VALUES(%s, %i, %i, %s, %i, %i, "problem submitted")',
-	       now(), $contest, $teamid, $langid, $probid, $id);
 
 	alert('submit', "submission $id: team $teamid, language $langid, problem $probid");
 
@@ -772,6 +821,191 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 	}
 
 	return $id;
+}
+
+/**
+ * Triggers rejudging submissions.
+ * Returns the rejudgingid if $full_rejudge, otherwise NULL.
+ *
+ * $table         Can be one from $tablemap below.
+ * $id            Selects submisions that match this ID in the given table.
+ * $include_all   Determines if also correct submissions or those with
+ *                  pending judgements are included.
+ * $full_rejudge  Creates a full-blown rejudging that has to be approved
+ *                  instead of rejudging on the fly.
+ * $reason        Reason included in a full rejudging.
+ * $userid        Who triggered the full rejudging.
+ */
+function rejudge($table, $id, $include_all, $full_rejudge, $reason = NULL, $userid = NULL)
+{
+	global $DB;
+
+	/* These are the tables that we can deal with. */
+	$tablemap = array (
+		'contest'    => 's.cid',
+		'judgehost'  => 'j.judgehost',
+		'language'   => 's.langid',
+		'problem'    => 's.probid',
+		'submission' => 's.submitid',
+		'team'       => 's.teamid'
+	);
+
+	if ( !isset($tablemap[$table]) ) error("unknown table in rejudging");
+
+	// This can be done in one Update from MySQL 4.0.4 and up, but
+	// that wouldn't allow us to call calcScoreRow() for the right
+	// rows, so we'll just loop over the results one at a time.
+
+	// Only rejudge submissions in active contests.
+	$cids = getCurContests(FALSE);
+
+	// Do not include pending/queued or ignored submissions in rejudge.
+	$restrictions = 'result IS NOT NULL AND s.valid=1 AND ';
+	if ( $include_all ) {
+		if ( !$full_rejudge ) $restrictions = '';
+	} else {
+		$restrictions .= 'result != \'correct\' AND ';
+	}
+	$res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid, s.rejudgingid
+	               FROM judging j
+	               LEFT JOIN submission s USING (submitid)
+	               WHERE j.cid IN (%Ai) AND j.valid = 1 AND ' .
+	              $restrictions .
+	              $tablemap[$table] . ' = %s', $cids, $id);
+
+	if ( $res->count() == 0 ) error("No judgings matched.");
+
+	if ( $full_rejudge ) {
+		$rejudgingid = $DB->q('RETURNID INSERT INTO rejudging
+		                       (userid_start, starttime, reason) VALUES (%i, %s, %s)',
+		                      $userid, now(), $reason);
+	}
+
+	while ( $jud = $res->next() ) {
+		if ( isset($jud['rejudgingid']) ) {
+			// already associated rejudging
+			if ( $table == 'submission' ) {
+				// clean up rejudging
+				if ( $full_rejudge ) {
+					$DB->q('DELETE FROM rejudging WHERE rejudgingid=%i', $rejudgingid);
+				}
+				error('submission is already part of rejudging r' . specialchars($jud['rejudgingid']));
+			} else {
+				// silently skip that submission
+				continue;
+			}
+		}
+
+		$DB->q('START TRANSACTION');
+
+		if ( !$full_rejudge ) {
+			$DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i',
+			       $jud['judgingid']);
+		}
+
+		$DB->q('UPDATE submission SET judgehost = NULL' .
+		       ( $full_rejudge ? ', rejudgingid=%i ' : '%_ ' ) .
+		       'WHERE submitid = %i AND rejudgingid IS NULL',
+		       @$rejudgingid, $jud['submitid']);
+
+		// Prioritize single submission rejudgings
+		if ( $table == 'submission' ) {
+			$DB->q('UPDATE team SET judging_last_started = NULL
+			        WHERE teamid = %i', $jud['teamid']);
+		}
+
+		if ( !$full_rejudge ) {
+			calcScoreRow($jud['cid'], $jud['teamid'], $jud['probid']);
+		}
+		$DB->q('COMMIT');
+
+		if ( !$full_rejudge ) {
+			auditlog('judging', $jud['judgingid'], 'mark invalid', '(rejudge)');
+		}
+	}
+
+	return $full_rejudge ? $rejudgingid : NULL;
+}
+
+/**
+ * Finish a full rejudging by either applying or cancelling its results.
+ *
+ * $request can be either 'apply' or 'cancel'.
+ */
+function rejudging_finish($rejudgingid, $request, $userid = NULL, $show_progress = FALSE)
+{
+	global $DB;
+
+	if ( !in_array($request, array('apply','cancel'), TRUE) ) {
+		error("Invalid request type");
+	}
+
+	$rejdata = $DB->q('TUPLE SELECT * FROM rejudging
+	                   WHERE rejudgingid=%i', $rejudgingid);
+
+	if ( ! $rejdata ) error("Invalid rejudging ID");
+
+	if ( isset($rejdata['endtime']) ) {
+		error("Rejudging already " . ( $rejdata['valid'] ? 'applied.' : 'canceled.'));
+	}
+
+	$todo = $DB->q('VALUE SELECT COUNT(*) FROM submission
+	                WHERE rejudgingid=%i', $rejudgingid);
+	$done = $DB->q('VALUE SELECT COUNT(*) FROM judging
+	                WHERE rejudgingid=%i AND endtime IS NOT NULL', $rejudgingid);
+	$todo -= $done;
+
+	if ( $request=='apply' && $todo > 0 ) {
+		error("$todo unfinished judgings left, cannot apply rejudging.");
+	}
+
+	$res = $DB->q('SELECT s.submitid, s.cid, s.teamid, s.probid, j.judgingid, j.result
+	               FROM submission s
+	               LEFT JOIN judging j USING(submitid)
+	               WHERE s.rejudgingid=%i
+	               AND j.rejudgingid=%i', $rejudgingid, $rejudgingid);
+
+	auditlog('rejudging', $rejudgingid, $request.'ing rejudge', '(start)');
+
+	while ( $row = $res->next() ) {
+		if ( $show_progress ) echo "s" . specialchars($row['submitid']) . ", ";
+		if ( $request=='apply' ) {
+			$DB->q('START TRANSACTION');
+			// first invalidate old judging, maybe different from prevjudgingid!
+			$DB->q('UPDATE judging SET valid=0
+			        WHERE submitid=%i', $row['submitid']);
+			// then set judging to valid
+			$DB->q('UPDATE judging SET valid=1
+			        WHERE submitid=%i AND rejudgingid=%i', $row['submitid'], $rejudgingid);
+			// remove relation from submission to rejudge
+			$DB->q('UPDATE submission SET rejudgingid=NULL
+			        WHERE submitid=%i', $row['submitid']);
+			// update event log
+			eventlog('judging', $row['judgingid'], 'create', $row['cid']);
+			$run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
+				WHERE judgingid=%i', $row['judgingid']);
+			foreach ($run_ids as $run_id) {
+				eventlog('judging_run', $run_id, 'create', $row['cid']);
+			}
+			// last update cache
+			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
+			$DB->q('COMMIT');
+			updateBalloons($row['submitid']);
+		} else {
+			// restore old judgehost association
+			$valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging
+			                           WHERE submitid=%i AND valid=1', $row['submitid']);
+			$DB->q('UPDATE submission SET rejudgingid = NULL, judgehost=%s
+			        WHERE rejudgingid = %i', $valid_judgehost, $rejudgingid);
+		}
+	}
+
+	$DB->q('UPDATE rejudging
+	        SET endtime=%s, userid_finish=%i, valid=%i
+	        WHERE rejudgingid=%i',
+	       now(), $userid, ($request=='apply' ? 1 : 0), $rejudgingid);
+
+	auditlog('rejudging', $rejudgingid, $request.'ing rejudge', '(end)');
 }
 
 /**
@@ -843,6 +1077,432 @@ function auditlog($datatype, $dataid, $action, $extrainfo = null,
 	        (logtime, cid, user, datatype, dataid, action, extrainfo)
 	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
 	       now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
+}
+
+/* Mapping from REST API endpoints to relevant information:
+ * - type: one of 'configuration', 'live', 'aggregate'
+ * - url: REST API URL of endpoint relative to baseurl, defaults to '/<endpoint>'
+ * - tables: array of database table(s) associated to data, defaults to <endpoint> without 's'
+ * - extid: database field for external/API ID, if TRUE same as internal/DB ID.
+ *
+ */
+$API_endpoints = array(
+	'contests' => array(
+		'type'   => 'configuration',
+		'url'    => '',
+		'extid'  => 'externalid',
+	),
+	'judgement-types' => array( // hardcoded in $VERDICTS and the API
+		'type'   => 'configuration',
+		'tables' => array(),
+		'extid'  => TRUE,
+	),
+	'languages' => array(
+		'type'   => 'configuration',
+		'extid'  => 'externalid',
+	),
+	'problems' => array(
+		'type'   => 'configuration',
+		'tables' => array('problem', 'contestproblem'),
+		'extid'  => 'externalid',
+	),
+	'groups' => array(
+		'type'   => 'configuration',
+		'tables' => array('team_category'),
+		'extid'  => TRUE, // FIXME
+	),
+	'organizations' => array(
+		'type'   => 'configuration',
+		'tables' => array('team_affiliation'),
+		'extid'  => 'externalid',
+	),
+	'teams' => array(
+		'type'   => 'configuration',
+		'tables' => array('team', 'contestteam'),
+		'extid'  => 'externalid',
+	),
+	'teams-members' => array(
+		'type'   => 'configuration',
+		'tables' => array(),
+	),
+	'state' => array(
+		'type'   => 'aggregate',
+		'tables' => array(),
+	),
+	'submissions' => array(
+		'type'   => 'live',
+		'extid'  => TRUE, // 'externalid,cid' in ICPC-live branch
+	),
+	'judgements' => array(
+		'type'   => 'live',
+		'tables' => array('judging'),
+		'extid'  => TRUE,
+	),
+	'runs' => array(
+		'type'   => 'live',
+		'tables' => array('judging_run'),
+		'extid'  => TRUE,
+	),
+	'clarifications' => array(
+		'type'   => 'live',
+		'extid'  => 'externalid,cid',
+	),
+	'awards' => array(
+		'type'   => 'aggregate',
+		'tables' => array(),
+	),
+	'scoreboard' => array(
+		'type'   => 'aggregate',
+		'tables' => array(),
+	),
+	'event-feed' => array(
+		'type'   => 'aggregate',
+		'tables' => array('event'),
+	),
+	// From here are DOMjudge extensions:
+	'users' => array(
+		'type'   => 'configuration',
+		'url'    => NULL,
+		'extid'  => TRUE,
+	),
+	'testcases' => array(
+		'type'   => 'configuration',
+		'url'    => NULL,
+		'extid'  => TRUE,
+	),
+);
+// Add defaults to mapping:
+foreach ( $API_endpoints as $endpoint => $data ) {
+	if ( !array_key_exists('url', $data) ) {
+		$API_endpoints[$endpoint]['url'] = '/'.$endpoint;
+	}
+	if ( !array_key_exists('tables', $data) ) {
+		$API_endpoints[$endpoint]['tables'] = array( preg_replace('/s$/', '', $endpoint) );
+	}
+}
+
+/**
+ * Map an internal/DB ID to an external/REST endpoint ID.
+ */
+function rest_extid($endpoint, $intid)
+{
+	global $DB, $API_endpoints, $KEYS;
+
+	if ( $intid===null ) return null;
+
+	$ep = @$API_endpoints[$endpoint];
+	if ( !isset($ep['extid']) ) error("no int/ext ID mapping defined for $endpoint");
+
+	if ( $ep['extid']===TRUE ) return $intid;
+
+	$extkey = explode(',', $ep['extid'])[0];
+
+	$extid = $DB->q('MAYBEVALUE SELECT `' . $extkey . '`
+	                 FROM `' . $ep['tables'][0] . '`
+	                 WHERE `' . $KEYS[$ep['tables'][0]][0] . '` = %s',
+	                $intid);
+
+	return $extid;
+}
+
+/**
+ * Map an external/REST endpoint ID back to an internal/DB ID.
+ */
+function rest_intid($endpoint, $extid, $cid = null)
+{
+	global $DB, $API_endpoints, $KEYS;
+
+	if ( $extid===null ) return null;
+
+	$ep = @$API_endpoints[$endpoint];
+	if ( !isset($ep['extid']) ) error("no int/ext ID mapping defined for $endpoint");
+
+	if ( $ep['extid']===TRUE ) return $extid;
+
+	if ( !$ep['tables'] ) error("no database table known for $endpoint");
+
+	$keys = explode(',', $ep['extid']);
+	$extkey = $keys[0];
+	if ( count($keys)>1 ) $cidkey = $keys[1];
+
+	if ( isset($cidkey) && $cid===null ) {
+		error("argument 'cid' missing to map to internal ID for $endpoint");
+	}
+
+	$intid = $DB->q('MAYBEVALUE SELECT `' . $KEYS[$ep['tables'][0]][0] . '`
+	                 FROM `' . $ep['tables'][0] . '`
+	                 WHERE `' . $extkey . '` = %s' .
+	                ( isset($cidkey) ? ' AND cid = %i' : ' %_' ),
+	                $extid, $cid);
+
+	return $intid;
+}
+
+/**
+ * Log an event.
+ *
+ * Arguments:
+ * $type      Either an API endpoint or a DB table.
+ * $dataid    Identifier of the row in the associated DB table.
+ * $action    One of: create, update, delete.
+ * $cid       Contest ID to log this event for. If null, log it for
+ *            all currently active contests.
+ * $json      JSON content after the change. Generated if null.
+ * $id        Identifier as shown in the REST API. If null it is
+ *            inferred from the content in the database or $json
+ *            passed as argument. Must be specified when deleting an
+ *            entry or if no DB table is associated to $type.
+ */
+// TODO: we should probably integrate this function with auditlog().
+function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null)
+{
+	global $DB, $API_endpoints;
+
+	logmsg(LOG_DEBUG,"eventlog arguments: '$type' '$dataid' '$action' '$cid' '$json' '$id'");
+
+	$actions = array('create', 'update', 'delete');
+
+	// Gracefully fail since we may call this from the generic
+	// jury/edit.php page where we don't know which table gets updated.
+	if ( array_key_exists($type,$API_endpoints) ) {
+		$endpoint = $API_endpoints[$type];
+	} else {
+		foreach ( $API_endpoints as $key => $ep ) {
+			if ( in_array($type, $ep['tables'], TRUE) ) {
+				$type = $key;
+				$endpoint = $ep;
+				break;
+			}
+		}
+	}
+	if ( !isset($endpoint) ) {
+		logmsg(LOG_WARNING, "eventlog: invalid endpoint '$type' specified");
+		return;
+	}
+	if ( !in_array($action,$actions) ) {
+		logmsg(LOG_WARNING, "eventlog: invalid action '$action' specified");
+		return;
+	}
+	if ( $endpoint['url']===null ) {
+		logmsg(LOG_DEBUG, "eventlog: no endpoint for '$type', ignoring");
+		return;
+	}
+
+	// Look up external/API ID from various sources.
+	if ( $id===null ) $id = rest_extid($type, $dataid);
+
+	if ( $id===null && $json!==null ) {
+		$data = dj_json_decode($json);
+		if ( !empty($data['id']) ) $id = $data['id'];
+	}
+
+	if ( $id===null ) {
+		logmsg(LOG_WARNING, "eventlog: API ID not specified or inferred from data");
+		return;
+	}
+
+	$cids = array();
+	if ( $cid!==null ) {
+		$cids[] = $cid;
+	} else {
+		if ( $type==='problems' ) {
+			$cids = $DB->q('COLUMN SELECT cid FROM contestproblem WHERE probid = %i', $dataid);
+		} elseif( $type==='teams' ) {
+			$cids = getCurContests(FALSE, $dataid);
+		} else {
+			$cids = getCurContests();
+		}
+	}
+	if ( count($cids)==0 ) {
+		logmsg(LOG_INFO,"eventlog: no active contests associated to update.");
+		return;
+	}
+
+	// Generate JSON content if not set, for deletes this is only the ID.
+	if ( $action === 'delete' ) {
+		$json = "{\"id\":\"$id\"}";
+	} elseif ( $json === null ) {
+		if ( in_array($type, array('contests','state')) ) {
+			$url = $endpoint['url'];
+		} else {
+			$url = $endpoint['url'].'/'.$id;
+		}
+
+		// Temporary fix for single/multi contest API:
+		if ( isset($cid) ) {
+			$url = '/contests/' . rest_extid('contests', $cid) . $url;
+		}
+
+		$json = API_request($url, 'GET', '', false);
+		if ( empty($json) || $json==='null' ) {
+			logmsg(LOG_WARNING,"eventlog: got no JSON data from '$url'");
+			// If we didn't get data from the API, then that is
+			// probably because this particular data is not visible,
+			// for example because it belongs to an invisible jury
+			// team. If we don't have data, there's also no point in
+			// trying to insert anything in the eventlog table.
+			return;
+		}
+	}
+
+	// First acquire an advisory lock to prevent other event logging,
+	// so that we can obtain a unique timestamp.
+	if ( $DB->q("VALUE SELECT GET_LOCK('domjudge.eventlog',1)") != 1 ) {
+		error("eventlog: failed to obtain lock");
+	}
+
+	// Explicitly construct the time as string to prevent float
+	// representation issues.
+	$now = sprintf('%.3f', microtime(TRUE));
+
+	// TODO: can this be wrapped into a single query?
+	$eventids = array();
+	foreach ( $cids as $cid ) {
+		$table = ( $endpoint['tables'] ? $endpoint['tables'][0] : NULL );
+		$eventid = $DB->q('RETURNID INSERT INTO event
+		                   (eventtime, cid, endpointtype, endpointid,
+		                   datatype, dataid, action, content)
+		                   VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
+		                  $now, $cid, $type, $id,
+		                  $table, $dataid, $action, $json);
+		$eventids[] = $eventid;
+	}
+
+	if ( $DB->q("VALUE SELECT RELEASE_LOCK('domjudge.eventlog')") != 1 ) {
+		error("eventlog: failed to release lock");
+	}
+
+	if ( count($eventids)!==count($cids) ) {
+		error("eventlog: failed to $action $type/$id " .
+		      '('.count($eventids).'/'.count($cids).' contests done)');
+	}
+
+	logmsg(LOG_DEBUG,"eventlog: ${action}d $type/$id " .
+	       'for '.count($cids).' contest(s)');
+}
+
+$resturl = $restuser = $restpass = null;
+
+/**
+ * This function is copied from judgedaemon.main.php and a quick hack.
+ * We should directly call the code that generates the API response.
+ */
+function read_API_credentials()
+{
+	global $resturl, $restuser, $restpass;
+
+	$credfile = ETCDIR . '/restapi.secret';
+	$credentials = @file($credfile);
+	if (!$credentials) {
+		error("Cannot read REST API credentials file " . $credfile);
+	}
+	foreach ($credentials as $credential) {
+		if ( $credential{0} == '#' ) continue;
+		list ($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
+		if ( $endpointID==='default' ) return;
+	}
+	$resturl = $restuser = $restpass = null;
+}
+
+/**
+ * Perform a request to the REST API and handle any errors.
+ * $url is the part appended to the base DOMjudge $resturl.
+ * $verb is the HTTP method to use: GET, POST, PUT, or DELETE
+ * $data is the urlencoded data passed as GET or POST parameters.
+ * When $failonerror is set to false, any error will be turned into a
+ * warning and null is returned.
+ *
+ * This function is duplicated from judge/judgedaemon.main.php.
+ */
+function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
+	global $resturl, $restuser, $restpass, $lastrequest, $G_SYMFONY, $apiFromInternal;
+	if (isset($G_SYMFONY)) {
+		// Perform an internal Symfony request to the API
+		logmsg(LOG_DEBUG, "API internal request $verb $url");
+
+		$apiFromInternal = true;
+		// FIXME: Ugly hack: we still call the v4 API since the
+		// judgedaemon and submit client do not handle the v5 API yet.
+		$url = 'http://localhost/api/v4'. $url;
+		$httpKernel = $G_SYMFONY->getHttpKernel();
+		parse_str($data, $parsedData);
+
+		// Our API checks $_SERVER['REQUEST_METHOD'] but Symfony does not overwrite it, so do this manually
+		$origMethod = $_SERVER['REQUEST_METHOD'];
+		$_SERVER['REQUEST_METHOD'] = $verb;
+
+		$request = \Symfony\Component\HttpFoundation\Request::create($url, $verb, $parsedData);
+		$response = $httpKernel->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
+
+		// Set back the request method, if other code still wants to use it
+		$_SERVER['REQUEST_METHOD'] = $origMethod;
+
+		$status = $response->getStatusCode();
+		if ( $status < 200 || $status >= 300 ) {
+			$errstr = "executing internal $verb request to url " . $url .
+				": http status code: " . $status . ", response: " . $response;
+			if ( $failonerror ) {
+				error($errstr);
+			} else {
+				logmsg(LOG_WARNING,$errstr);
+				return null;
+			}
+		}
+
+		return $response->getContent();
+	}
+
+	if ( $resturl === null ) {
+		read_API_credentials();
+		if ( $resturl === null ) {
+			error("could not initialize REST API credentials");
+		}
+	}
+
+	logmsg(LOG_DEBUG, "API request $verb $url");
+
+	$url = $resturl . $url;
+	if ( $verb == 'GET' && !empty($data) ) {
+		$url .= '?' . $data;
+	}
+
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
+	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	if ( $verb == 'POST' ) {
+		curl_setopt($ch, CURLOPT_POST, TRUE);
+		if ( is_array($data) ) {
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
+		}
+	} else if ( $verb == 'PUT' || $verb == 'DELETE' ) {
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $verb);
+	}
+	if ( $verb == 'POST' || $verb == 'PUT' ) {
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+	}
+
+	$response = curl_exec($ch);
+	if ( $response === FALSE ) {
+		$errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($ch);
+		if ($failonerror) error($errstr);
+		else { warning($errstr); return null; }
+	}
+	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	if ( $status < 200 || $status >= 300 ) {
+		$errstr = "executing internal $verb request to url " . $url .
+			": http status code: " . $status . ", response: " . $response;
+		if ( $failonerror ) {
+			error($errstr);
+		} else {
+			logmsg(LOG_WARNING,$errstr);
+			return null;
+		}
+	}
+
+	curl_close($ch);
+	return $response;
 }
 
 /**

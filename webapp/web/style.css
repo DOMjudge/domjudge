@@ -25,9 +25,10 @@ tr.unseen td {
 	font-weight: bold;
 }
 
-a:link, a:visited { color: blue;   }
+/*a:link, a:visited { color: blue;   }
 a:hover           { color: purple; }
 a:active          { color: red;    }
+*/
 
 .disabled         { color: silver; }
 .disabled a       { color: gray;   }
@@ -74,8 +75,8 @@ tr.unread td {
 }
 .list th {
 	vertical-align: bottom;
-	padding-left: 3px;
-	padding-right: 3px;
+/*	padding-left: 3px;
+	padding-right: 3px;*/
 }
 td {
 	vertical-align: top;
@@ -83,7 +84,7 @@ td {
 
 .list tr { border-bottom: 1px solid silver; }
 .list tr.roweven { background: #ededed; }
-.list tr:hover { background: #ffffcc; }
+.list tr:hover { background: #ffffcc !important; }
 .list thead tr { border-bottom-color: black; }
 .list thead tr:hover { background: white; }
 .list tfoot tr:hover { background: white; }
@@ -144,16 +145,19 @@ span.extra {
 	text-align: right;
 }
 #clock {
-/*	font-size: small; */
+	font-size: small;
 	font-family: monospace;
 	border: 1px dashed #ccc;
 	padding: 4px;
 	color: gray;
 }
-#timeleft { color: #800080;}
 #toggles {
 	margin-top: 5px;
 	margin-bottom: 5px;
+}
+
+#username span.octicon {
+	line-height: 1.3;
 }
 
 fieldset {
@@ -190,12 +194,26 @@ legend {
 	vertical-align: middle;
 	text-align: center;
 }
+.scoreboard td div {
+	width: 3.5em;
+	font-size: 120%;
+	display: inline-block;
+}
+.scoreboard td div span {
+	font-weight: normal;
+	font-size: 70%;
+	display: block;
+}
 .scoreboard tr {
 	border-bottom: 1px solid black;
 	height: 42px;
 }
 .scoreboard td, .scoreboard th {
 	border-right: 1px solid silver;
+}
+.scoreboard td.score_cell {
+	min-width: 4.2em;
+	border-right: none;
 }
 .scoreboard a {
 	display: block;
@@ -213,7 +231,7 @@ legend {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-.scoreboard .scoreaf { white-space: nowrap; border: 0; }
+.scoreboard .scoreaf { white-space: nowrap; border: 0; text-align: left; }
 .scoreboard .scoreaf img { vertical-align: middle; }
 .univ {
 	font-size: 80%;
@@ -225,6 +243,9 @@ legend {
 	font-variant: small-caps;
 	border-bottom: 2px solid black;
 	white-space: nowrap;
+}
+.scoreheader th {
+	text-align: center;
 }
 
 .problempoints {
@@ -259,9 +280,8 @@ td.scorenc { border-color: silver; border-right: 0; }
 	border-bottom: none;
 	font-variant: small-caps;
 }
-.scorethisisme .scoretn {
-	background: #ff6600;
-	font-weight: bold;
+.scorethisisme  {
+	background: #ffff99;
 }
 
 .scorelegend {
@@ -316,8 +336,6 @@ h3.teamoverview {
 	border-top: solid 1px darkgray;
 	border-bottom: solid 1px darkgray;
 	background-color: #c4d8ff;
-	font-size: smaller;
-	font-weight: normal;
 	margin-top: 2ex;
 	padding-left: 1ex;
 }
@@ -379,10 +397,9 @@ h2#teamwelcome {
 #teamwelcometeam {
 	font-weight: bold;
 }
-h3#contestnotstarted {
+#contestnotstarted {
 	color: silver;
 	margin-top: .2ex;
-	margin-left: 8em;
 }
 
 span.fileinputs {

@@ -51,17 +51,21 @@ if ( !empty($cmd) ):
     echo "</td></tr>\n";
 
 ?>
+<!-- Add fake input fields to disable autocompletion in modern browsers. -->
+<input id="username" style="display:none" type="text" name="fakeusernameremembered">
+<input id="password" style="display:none" type="password" name="fakepasswordremembered">
+
 <tr><td><label for="data_0__name_">Full name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 35, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__email_">Email:</label></td>
-<td><?php echo addInputField('email', 'data[0][email]', @$row['email'], ' size="35" maxlength="255" autocomplete="off"')?></td></tr>
+<td><?php echo addInputField('email', 'data[0][email]', @$row['email'], ' size="35" maxlength="255" autocomplete="new-password"')?></td></tr>
 
 <tr><td><label for="data_0__password_">Password:</label></td><td><?php
 if ( !empty($row['password']) ) {
 	echo "<em>set</em>";
 } else {
 	echo "<em>not set</em>";
-} ?> - to change: <?php echo addInputField('password', 'data[0][password]', "", ' size="19" maxlength="255"')?></td></tr>
+} ?> - to change: <?php echo addInputField('password', 'data[0][password]', "", ' size="19" maxlength="255" autocomplete="new-password"')?></td></tr>
 <tr><td><label for="data_0__ip_address_">IP Address:</label></td>
 <td><?php echo addInput('data[0][ip_address]', @$row['ip_address'], 35, 255)?></td></tr>
 
@@ -149,6 +153,12 @@ if ( !empty($row['password']) ) {
 } else {
 	echo "not set";
 } ?></td></tr>
+<tr><td>IP address:</td><td><?php
+if ( !empty($row['ip_address']) ) {
+	echo specialchars($row['ip_address']);
+} else {
+	echo "-";
+} ?></td></tr>
 <tr><td>Roles:</td>
     <td><?php
     if ($roles->count() == 0) echo "No roles assigned";
@@ -168,7 +178,7 @@ if ( $row['teamid'] ) {
 } ?></tr>
 <tr><td>Last login:</td><td><?php echo printtime($row['last_login'], '%a %d %b %Y %T %Z')?></td></tr>
 <tr><td>Last IP:   </td><td><?php echo
-    (@$row['ip_address'] ? printhost($row['ip_address'], TRUE):'') ?></td></tr>
+    (@$row['last_ip_address'] ? printhost($row['last_ip_address'], TRUE):'') ?></td></tr>
 </table></div>
 
 <?php

@@ -9,7 +9,7 @@ configure.php: configure.php.in $(TOPDIR)/paths.mk
 domserver: configure.php
 
 install-domserver:
-	for d in public team jury auth ; do \
+	for d in public team jury auth feed ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/$$d $$d/*.php ; \
 	done
 	for version in v3 v4; do \

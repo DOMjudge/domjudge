@@ -25,10 +25,7 @@ require_once(LIBWWWDIR . '/printing.php');
 require_once(LIBWWWDIR . '/auth.php');
 require_once(LIBWWWDIR . '/forms.php');
 
-// The functions do_login and show_loginpage, if called, do not return.
-if ( @$_POST['cmd']=='login' ) do_login();
-if ( !logged_in() ) show_loginpage();
-
+logged_in();
 if ( !checkrole('team') ) {
 	error("You do not have permission to perform that action (Missing role: 'team')");
 }

@@ -8,9 +8,7 @@ require('init.php');
 $title = specialchars($teamdata['name']);
 require(LIBWWWDIR . '/header.php');
 
-// Don't use HTTP meta refresh, but javascript: otherwise we cannot
-// cancel it when the user starts editing the submit form. This also
-// provides graceful degradation without javascript present.
+// Don't use HTTP meta refresh, but javascript: otherwise we cannot FIXME still relevant?
 $refreshtime = 30;
 
 $submitted = @$_GET['submitted'];
@@ -21,7 +19,7 @@ $langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions
 
 echo "<script type=\"text/javascript\">\n<!--\n";
 
-if ( $fdata['cstarted'] || checkrole('jury') ) {
+if ( $fdata['started'] || checkrole('jury') ) {
 	$probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
 	                    INNER JOIN contestproblem USING (probid)
 	                    WHERE cid = %i AND allow_submit = 1
@@ -44,12 +42,22 @@ echo "// -->\n</script>\n";
 // Put overview of team submissions (like scoreboard)
 putTeamRow($cdata, array($teamid));
 
-echo "<div id=\"submitlist\">\n";
+//echo "<div id=\"submitlist\">\n";
 
-echo "<h3 class=\"teamoverview\">Submissions</h3>\n\n";
+if ( $submitted ):
+?>
 
+<div class="mt-4 alert alert-success alert-dismissible show" role="alert">
+  <a href="./" class="close" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </a>
+  <strong>Submission done!</strong> Watch for the verdict in the list below.
+</div>
+<?php
+endif;
 
-if ( $fdata['cstarted'] || checkrole('jury') ) {
+/* submitform moved away
+if ( ($fdata['started'] || checkrole('jury') )) {
 	echo <<<HTML
 <script type="text/javascript">
 $(function() {
@@ -81,17 +89,6 @@ HTML;
 	echo " />\n";
 
 
-	$probs = array();
-	foreach($probdata as $probinfo) {
-		$probs[$probinfo['probid']]=$probinfo['shortname'];
-	}
-	$probs[''] = 'problem';
-	echo addSelect('probid', $probs, '', true);
-	$langs = array();
-	foreach($langdata as $langid => $langdata) {
-		$langs[$langid] = $langdata['name'];
-	}
-	$langs[''] = 'language';
 	echo addSelect('langid', $langs, '', true);
 
 	echo addSubmit('submit', 'submit',
@@ -110,12 +107,21 @@ HTML;
 	echo "</p>\n</form>\n\n";
 }
 // call putSubmissions function from common.php for this team.
+*/
+
+?>
+<div class="row">
+<div class="col">
+<h3 class="teamoverview">Submissions</h3>
+
+<?php
+
 $restrictions = array( 'teamid' => $teamid );
 putSubmissions(array($cdata['cid'] => $cdata), $restrictions, null, $submitted);
-
-echo "</div>\n\n";
-
-echo "<div id=\"clarlist\">\n";
+?>
+</div>
+<div class="col">
+<?php
 
 $requests = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname
                     FROM clarification c
@@ -156,11 +162,11 @@ if ( $requests->count() == 0 ) {
 	putClarificationList($requests,$teamid);
 }
 
-echo addForm('clarification.php','get') .
-	"<p>" . addSubmit('request clarification') . "</p>" .
-	addEndForm();
+?>
+<div class="m-1"><a href="clarification.php" class="btn btn-secondary btn-sm">request clarification</a></div>
 
+</div>
 
-echo "</div>\n";
-
+</div>
+<?php
 require(LIBWWWDIR . '/footer.php');

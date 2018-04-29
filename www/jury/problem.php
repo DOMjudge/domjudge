@@ -23,7 +23,7 @@ if ( isset($_POST['cmd']) ) {
 	$pcmd = $_POST['cmd'];
 } elseif ( isset($_GET['cmd'] ) ) {
 	$cmd = $_GET['cmd'];
-} elseif ( isset($id) ) {
+} elseif ( isset($id) && !isset($_POST['upload']) ) {
 	$extra = '';
 	if ( $current_cid !== null ) {
 		$extra = '&cid=' . urlencode($current_cid);
@@ -42,13 +42,20 @@ require(LIBWWWDIR . '/header.php');
 if ( isset($_POST['upload']) ) {
 	if ( !empty($_FILES['problem_archive']['tmp_name'][0]) ) {
 		foreach($_FILES['problem_archive']['tmp_name'] as $fileid => $tmpname) {
-			$cid = $_POST['contest'];
-			checkFileUpload( $_FILES['problem_archive']['error'][$fileid] );
-			$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
-			$newid = importZippedProblem($zip, empty($id) ? NULL : $id, $cid);
-			$zip->close();
-			auditlog('problem', $newid, 'upload zip',
-			         $_FILES['problem_archive']['name'][$fileid]);
+			try {
+				$cid = $_POST['contest'];
+				checkFileUpload( $_FILES['problem_archive']['error'][$fileid] );
+				$zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
+				$newid = importZippedProblem($zip, $_FILES['problem_archive']['name'][$fileid],
+							     empty($id) ? NULL : $id, $cid);
+				eventlog('problem', $newid, empty($id) ? 'create' : 'update', $cid);
+				auditlog('problem', $newid, 'upload zip',
+					 $_FILES['problem_archive']['name'][$fileid]);
+			} catch (RuntimeException $e) {
+				error($e->getMessage());
+			} finally {
+				$zip->close();
+			}
 		}
 		if ( count($_FILES['problem_archive']['tmp_name']) == 1 ) {
 			$probid = empty($newid) ? $id : $newid;
@@ -64,8 +71,7 @@ if ( isset($_POST['upload']) ) {
 		error("Missing filename for problem upload. Maybe you have to increase upload_max_filesize, see config checker.");
 	}
 
-	require(LIBWWWDIR . '/footer.php');
-	exit;
+	return;
 }
 
 if ( !empty($cmd) ):
@@ -227,7 +233,7 @@ echo addForm($pagename . '?id=' . urlencode($id),
 	echo ' <a href="testcase.php?probid='.urlencode($data['probid']).'">details/edit</a>';
 ?></td></tr>
 <tr><td>Timelimit:   </td><td><?php echo (float)$data['timelimit']?> sec</td></tr>
-<tr><td>Memory limit:</td><td><?php	echo (int)$data['memlimit'].' kB'.(@$defaultmemlimit ? ' (default)' : '')?></td></tr>
+<tr><td>Memory limit:</td><td><?php echo (int)$data['memlimit'].' kB'.(@$defaultmemlimit ? ' (default)' : '')?></td></tr>
 <tr><td>Output limit:</td><td><?php echo (int)$data['outputlimit'].' kB'.(@$defaultoutputlimit ? ' (default)' : '')?></td></tr>
 <?php
 if ( !empty($data['color']) ) {

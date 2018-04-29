@@ -98,7 +98,7 @@ $solutions = $DB->q('SELECT submitid, expected_results
                      GROUP BY submitid', $cid, $id);
 
 while ( $sol = $solutions->next() ) {
-	$result = json_decode($sol['expected_results']);
+	$result = dj_json_decode($sol['expected_results']);
 	// Only support single outcome solutions:
 	if ( !is_array($result) || count($result)!=1 ) continue;
 	$result = reset($result);
@@ -111,20 +111,16 @@ while ( $sol = $solutions->next() ) {
 	}
 	if ( !isset($probresult) ) continue; // unsupported result
 
-	$dirname = 'submissions/' . $probresult . '/';
+	// NOTE: we store *all* submissions inside a subdirectory, also
+	// single-file submissions. This is to prevent filename clashes
+	// since we can't change the filename to something unique, since
+	// that could break e.g. Java sources, even if _we_ support this
+	// by default.
+	$dirname = 'submissions/' . $probresult . '/s'.$sol['submitid'].'/';
 
 	$sources = $DB->q('SELECT sourcecode, filename
                        FROM submission_file
                        WHERE submitid = %i ORDER BY rank ASC', $sol['submitid']);
-
-	// Save multi-file submissions in a subdirectory.
-	if ( $sources->count()>1 ) $dirname .= 's'.$sol['submitid'].'/';
-
-	// FIXME: single-file submissions may have clashing filenames. Now
-	// we simply overwrite any previous one, but we should probably
-	// store them inside subdirectories; we can't change the filename
-	// to something unique, since that could break e.g. Java sources,
-	// even if _we_ support this by default.
 
 	while ( $source = $sources->next() ) {
 		$zip->addFromString($dirname.$source['filename'], $source['sourcecode']);

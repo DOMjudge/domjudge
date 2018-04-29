@@ -23,13 +23,10 @@ require_once(LIBWWWDIR . '/forms.php');
 require_once(LIBWWWDIR . '/printing.php');
 require_once(LIBWWWDIR . '/auth.php');
 
-// The functions do_login and show_loginpage, if called, do not return.
-if ( @$_POST['cmd']=='login' ) do_login();
-if ( !logged_in() ) show_loginpage();
-
+logged_in();
 define('IS_ADMIN', checkrole('admin'));
 
-if ( !isset($REQUIRED_ROLES) ) $REQUIRED_ROLES = array('jury');
+if ( !isset($REQUIRED_ROLES) ) $REQUIRED_ROLES = array('jury', 'balloon');
 $allowed = false;
 foreach ($REQUIRED_ROLES as $role) {
 	if ( checkrole($role) ) {
@@ -43,7 +40,7 @@ if (!$allowed) {
 require_once(LIBWWWDIR . '/common.jury.php');
 if ( $_SERVER['REQUEST_METHOD'] == 'POST' && empty($_POST) && empty($_FILES)
   && isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > 0 ) {
-	error("POST data exceeded php.ini's 'post_max_size' directive.");
+	error("POST data exceeded php.ini's 'post_max_size' directive (currently set to " . ini_get('post_max_size') . ')');
 }
 
 $cdatas = getCurContests(TRUE, null, TRUE);
@@ -95,11 +92,12 @@ $loader = new Twig_Loader_Filesystem(array('.', LIBWWWDIR));
 $twig = new Twig_Environment($loader);
 
 $twig_safe = array('is_safe' => array('html'));
-$twig->addFilter(new Twig_SimpleFilter('host',      'printhost', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('humansize', 'printsize', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('time',      'printtime', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('timediff',  'printtimediff', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('result',    'printresult', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('jud_busy',  'printjudgingbusy', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('yesno',     'printyn', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('host',               'printhost', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('humansize',          'printsize', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('time',               'printtime', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('timediff',           'printtimediff', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('result',             'printresult', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('jud_busy',           'printjudgingbusy', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('yesno',              'printyn', $twig_safe));
+$twig->addFilter(new Twig_SimpleFilter('description_expand', 'descriptionExpand', $twig_safe));
 unset($twig_safe);

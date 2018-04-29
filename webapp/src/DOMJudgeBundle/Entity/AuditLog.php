@@ -12,7 +12,7 @@ class AuditLog
    * @var int
    *
    * @ORM\Id
-   * @ORM\GeneratedValue(strategy="SEQUENCE")
+   * @ORM\GeneratedValue(strategy="AUTO")
    * @ORM\Column(type="integer", name="logid", options={"comment"="Unique ID"}, nullable=false)
    */
   private $logid;
@@ -37,19 +37,19 @@ class AuditLog
 
   /**
    * @var string
-   * @ORM\Column(type="string", name="datatype", length=25, options={"comment"="Reference to DB table associated to this entry"}, nullable=true)
+   * @ORM\Column(type="string", name="datatype", length=32, options={"comment"="Reference to DB table associated to this entry"}, nullable=true)
    */
   private $datatype;
 
   /**
    * @var string
-   * @ORM\Column(type="string", name="dataid", length=50, options={"comment"="Identifier in reference table"}, nullable=true)
+   * @ORM\Column(type="string", name="dataid", length=64, options={"comment"="Identifier in reference table"}, nullable=true)
    */
   private $dataid;
 
   /**
    * @var string
-   * @ORM\Column(type="string", name="action", length=30, options={"comment"="Description of action performed"}, nullable=true)
+   * @ORM\Column(type="string", name="action", length=64, options={"comment"="Description of action performed"}, nullable=true)
    */
   private $action;
 
@@ -59,181 +59,181 @@ class AuditLog
    */
   private $extrainfo;
 
-    /**
-     * Get logid
-     *
-     * @return integer
-     */
-    public function getLogid()
-    {
-        return $this->logid;
-    }
+	/**
+	 * Get logid
+	 *
+	 * @return integer
+	 */
+	public function getLogid()
+	{
+		return $this->logid;
+	}
 
-    /**
-     * Set logtime
-     *
-     * @param string $logtime
-     *
-     * @return AuditLog
-     */
-    public function setLogtime($logtime)
-    {
-        $this->logtime = $logtime;
+	/**
+	 * Set logtime
+	 *
+	 * @param string $logtime
+	 *
+	 * @return AuditLog
+	 */
+	public function setLogtime($logtime)
+	{
+		$this->logtime = $logtime;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get logtime
-     *
-     * @return string
-     */
-    public function getLogtime()
-    {
-        return $this->logtime;
-    }
+	/**
+	 * Get logtime
+	 *
+	 * @return string
+	 */
+	public function getLogtime()
+	{
+		return $this->logtime;
+	}
 
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return AuditLog
-     */
-    public function setCid($cid)
-    {
-        $this->cid = $cid;
+	/**
+	 * Set cid
+	 *
+	 * @param integer $cid
+	 *
+	 * @return AuditLog
+	 */
+	public function setCid($cid)
+	{
+		$this->cid = $cid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
-    {
-        return $this->cid;
-    }
+	/**
+	 * Get cid
+	 *
+	 * @return integer
+	 */
+	public function getCid()
+	{
+		return $this->cid;
+	}
 
-    /**
-     * Set user
-     *
-     * @param string $user
-     *
-     * @return AuditLog
-     */
-    public function setUser($user)
-    {
-        $this->user = $user;
+	/**
+	 * Set user
+	 *
+	 * @param string $user
+	 *
+	 * @return AuditLog
+	 */
+	public function setUser($user)
+	{
+		$this->user = $user;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get user
-     *
-     * @return string
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
+	/**
+	 * Get user
+	 *
+	 * @return string
+	 */
+	public function getUser()
+	{
+		return $this->user;
+	}
 
-    /**
-     * Set datatype
-     *
-     * @param string $datatype
-     *
-     * @return AuditLog
-     */
-    public function setDatatype($datatype)
-    {
-        $this->datatype = $datatype;
+	/**
+	 * Set datatype
+	 *
+	 * @param string $datatype
+	 *
+	 * @return AuditLog
+	 */
+	public function setDatatype($datatype)
+	{
+		$this->datatype = $datatype;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get datatype
-     *
-     * @return string
-     */
-    public function getDatatype()
-    {
-        return $this->datatype;
-    }
+	/**
+	 * Get datatype
+	 *
+	 * @return string
+	 */
+	public function getDatatype()
+	{
+		return $this->datatype;
+	}
 
-    /**
-     * Set dataid
-     *
-     * @param string $dataid
-     *
-     * @return AuditLog
-     */
-    public function setDataid($dataid)
-    {
-        $this->dataid = $dataid;
+	/**
+	 * Set dataid
+	 *
+	 * @param string $dataid
+	 *
+	 * @return AuditLog
+	 */
+	public function setDataid($dataid)
+	{
+		$this->dataid = $dataid;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get dataid
-     *
-     * @return string
-     */
-    public function getDataid()
-    {
-        return $this->dataid;
-    }
+	/**
+	 * Get dataid
+	 *
+	 * @return string
+	 */
+	public function getDataid()
+	{
+		return $this->dataid;
+	}
 
-    /**
-     * Set action
-     *
-     * @param string $action
-     *
-     * @return AuditLog
-     */
-    public function setAction($action)
-    {
-        $this->action = $action;
+	/**
+	 * Set action
+	 *
+	 * @param string $action
+	 *
+	 * @return AuditLog
+	 */
+	public function setAction($action)
+	{
+		$this->action = $action;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get action
-     *
-     * @return string
-     */
-    public function getAction()
-    {
-        return $this->action;
-    }
+	/**
+	 * Get action
+	 *
+	 * @return string
+	 */
+	public function getAction()
+	{
+		return $this->action;
+	}
 
-    /**
-     * Set extrainfo
-     *
-     * @param string $extrainfo
-     *
-     * @return AuditLog
-     */
-    public function setExtrainfo($extrainfo)
-    {
-        $this->extrainfo = $extrainfo;
+	/**
+	 * Set extrainfo
+	 *
+	 * @param string $extrainfo
+	 *
+	 * @return AuditLog
+	 */
+	public function setExtrainfo($extrainfo)
+	{
+		$this->extrainfo = $extrainfo;
 
-        return $this;
-    }
+		return $this;
+	}
 
-    /**
-     * Get extrainfo
-     *
-     * @return string
-     */
-    public function getExtrainfo()
-    {
-        return $this->extrainfo;
-    }
+	/**
+	 * Get extrainfo
+	 *
+	 * @return string
+	 */
+	public function getExtrainfo()
+	{
+		return $this->extrainfo;
+	}
 }

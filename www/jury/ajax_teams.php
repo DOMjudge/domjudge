@@ -10,4 +10,4 @@ $teams = $DB->q("TABLE SELECT teamid AS id, name,
                 ( isset($_GET['enabled']) ? " AND enabled = 1" : "" ),
                 $_GET['q'], $_GET['q']);
 
-echo json_encode($teams);
+echo dj_json_encode($teams);

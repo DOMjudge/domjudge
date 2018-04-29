@@ -129,7 +129,7 @@ $(function() {
 </table>
 
 <h3>Problems</h3>
-
+<?php echo addHidden("data[0][mapping][0][items]", ''); ?>
 <?php
 
 $current_problems = $DB->q("TABLE SELECT contestproblem.*, problem.name FROM contestproblem
@@ -296,7 +296,7 @@ $(function() {
 		<th>allow submit</th>
 		<th>allow judge</th>
 		<th>colour
-		<a target="_blank" href="http://www.w3schools.com/cssref/css_colornames.asp">
+		<a target="_blank" href="https://en.wikipedia.org/wiki/Web_colors">
 		<img src="../images/b_help.png" class="smallpicto" alt="?"></a></th>
 		<th>lazy eval</th>
 	</tr>

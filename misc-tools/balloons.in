@@ -95,8 +95,7 @@ while ( TRUE ) {
 
 	foreach ($cdatas as $cid => $cdata) {
 		if ( isset($cdata['freezetime']) && !$infreeze &&
-		     difftime(now(), $cdata['freezetime']) > 0
-		) {
+		     difftime(now(), $cdata['freezetime']) >= 0 ) {
 			$infreeze = TRUE;
 			logmsg(LOG_NOTICE,
 			       "Scoreboard of contest c${cid} is frozen since " .
@@ -104,9 +103,8 @@ while ( TRUE ) {
 		}
 		$freezecond = '';
 		if ( !dbconfig_get('show_balloons_postfreeze', 0) &&
-		     isset($cdata['freezetime'])
-		) {
-			$freezecond = 'AND submittime <= "' . $cdata['freezetime'] . '"';
+		     isset($cdata['freezetime']) ) {
+			$freezecond = 'AND submittime < "' . $cdata['freezetime'] . '"';
 		}
 
 		do {

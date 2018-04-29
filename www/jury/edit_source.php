@@ -36,7 +36,7 @@ if ( isset($_POST['origsubmitid']) ) {
 	               WHERE submitid = %i', $_POST['origsubmitid']);
 
 	$newid = submit_solution($teamid, $_POST['probid'], $cid, $_POST['langid'],
-	                $files, $filenames, $_POST['origsubmitid']);
+	                         $files, $filenames, $_POST['origsubmitid'], $_POST['entry_point']);
 
 	foreach($files as $file)
 	{
@@ -108,7 +108,8 @@ echo addSelect('langid', $langs, $submission['langid'], true);
 
 echo addHidden('teamid', $submission['teamid']);
 echo addHidden('origsubmitid', $submission['origsubmitid'] === NULL ? $id : $submission['origsubmitid']);
-echo addSubmit('submit');
+echo addSubmit('submit') . "<br />";
+echo 'Optional entry point: ' . addInput('entry_point', $submission['entry_point'], 15);
 
 echo addEndForm();
 

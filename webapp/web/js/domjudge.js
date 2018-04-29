@@ -253,16 +253,17 @@ function hideTcSample(tcid, str)
 	node.parentNode.appendChild(span);
 }
 
-// Autodetection of problem, language in websubmit
-function detectProblemLanguage(filename)
+// Autodetection of problem, language, and entry_point in websubmit
+function detectProblemLanguageEntryPoint(filename)
 {
 	'use strict';
 	var addfile = document.getElementById("addfile");
 	if ( addfile ) addfile.disabled = false;
 
 	var parts = filename.replace(/^.*[\\\/]/, '')
-	            .toLowerCase().split('.').reverse();
+	            .split('.').reverse();
 	if ( parts.length < 2 ) return;
+	var lc_parts = [parts[0].toLowerCase(), parts[1].toLowerCase()];
 
 	// problem ID
 
@@ -271,7 +272,7 @@ function detectProblemLanguage(filename)
 	if ( elt.value !== '' ) return;
 
 	for (var i=0;i<elt.length;i++) {
-		if ( elt.options[i].text.toLowerCase() === parts[1] ) {
+		if ( elt.options[i].text.split(/ - /)[0].toLowerCase() === lc_parts[1] ) {
 			elt.selectedIndex = i;
 		}
 	}
@@ -282,13 +283,26 @@ function detectProblemLanguage(filename)
 	// the "autodetect" option has empty value
 	if ( elt.value !== '' ) return;
 
-	var langid = getMainExtension(parts[0]);
+	var langid = getMainExtension(lc_parts[0]);
 	for (var i=0;i<elt.length;i++) {
 		if ( elt.options[i].value === langid ) {
 			elt.selectedIndex = i;
 		}
 	}
 
+	// entry point
+	var elt=document.getElementById('entry_point');
+	// the "autodetect" option has empty value
+	if ( elt == null || elt.value !== '' ) return;
+
+	// FIXME: make this configurable
+	if ( langid == 'java' ) {
+		elt.value = parts[1];
+	} else if (langid == 'kt' ) {
+		elt.value = parts[1].charAt(0).toUpperCase() + parts[1].slice(1) + "Kt";
+	} else {
+		elt.value = parts[1] + '.' + parts[0];
+	}
 }
 
 function checkUploadForm()
@@ -298,22 +312,21 @@ function checkUploadForm()
 	var language = langelt.options[langelt.selectedIndex].value;
 	var languagetxt = langelt.options[langelt.selectedIndex].text;
 	var fileelt = document.getElementById("maincode");
-	var filename = fileelt.value;
+	var filenames = fileelt.files;
+	var filename = filenames[0].name;
 	var probelt = document.getElementById("probid");
 	var problem = probelt.options[probelt.selectedIndex].value;
-	var problemtxt = probelt.options[probelt.selectedIndex].text + " - " + getProbDescription(probelt.options[probelt.selectedIndex].text);
-	var auxfiles = document.getElementsByName("code[]");
+	var problemtxt = probelt.options[probelt.selectedIndex].text;
 
 	var error = false;
-	langelt.className = probelt.className = "";
 	if ( language === "" ) {
 		langelt.focus();
-		langelt.className = "errorfield";
+		langelt.className = langelt.className + " errorfield";
 		error = true;
 	}
 	if ( problem === "" ) {
 		probelt.focus();
-		probelt.className = "errorfield";
+		probelt.className = probelt.className + " errorfield";
 		error = true;
 	}
 	if ( filename === "" ) {
@@ -323,8 +336,8 @@ function checkUploadForm()
 
 	var auxfileno = 0;
 	// start at one; skip maincode file field
-	for (var i = 1; i < auxfiles.length; i++) {
-		if ( auxfiles[i].value !== "" ) {
+	for (var i = 1; i < filenames.length; i++) {
+		if ( filenames[i].value !== "" ) {
 			auxfileno++;
 		}
 	}
@@ -379,17 +392,9 @@ function initFileUploads(maxfiles)
 	'use strict';
 	var fileelt = document.getElementById("maincode");
 
-	if ( maxfiles > 1 ) {
-		var fileadd = document.getElementById("addfile");
-		var supportshtml5multi = ("multiple" in fileelt);
-		if ( supportshtml5multi ) {
-			fileadd.style.display = "none";
-		}
-	}
-	fileelt.onclick = function() { doReload = false; };
 	fileelt.onchange = fileelt.onmouseout = function () {
 		if ( this.value !== "" ) {
-			detectProblemLanguage(this.value);
+			detectProblemLanguageEntryPoint(this.value);
 		}
 	}
 }
@@ -444,13 +449,16 @@ function updateClock()
 	var fmt = "";
 	if (curtime >= starttime && curtime < endtime ) {
 		var left = endtime - curtime;
-		var what = "time left: ";
+		var what = "";
 	} else if (curtime >= activatetime && curtime < starttime ) {
 		var left = starttime - curtime;
-		var what = "time to start: ";
+		var what = "- ";
+	} else if (timeleft.innerHTML == " no contest") {
+		var left = 0;
+		var what = " no contest";
 	} else {
 		var left = 0;
-		var what = "";
+		var what = "contest over";
 	}
 
 	if ( left ) {
@@ -527,7 +535,15 @@ function getRank(row)
 }
 
 function getHeartCol(row) {
-	return row.getElementsByTagName("td")[1];
+	'use strict';
+	var tds = row.getElementsByTagName("td");
+	// search for td before the team name
+	for (var i = 1; i < 4; i++) {
+		if (tds[i].className == "scoretn") {
+			return tds[i - 1];
+		}
+	}
+	return tds[1];
 }
 
 function getTeamname(row)
@@ -645,5 +661,19 @@ function initFavouriteTeams()
 		copy.setAttribute("style", style);
 		var tbody = scoreboard[1].parentNode;
 		tbody.insertBefore(copy, scoreboard[i + 1]);
+	}
+}
+
+function toggleExpand(event)
+{
+	var node = event.target.parentNode.querySelector('[data-expanded]');
+	if (event.target.getAttribute('data-expanded') === '1') {
+		node.innerHTML = node.getAttribute('data-collapsed');
+		event.target.setAttribute('data-expanded', 0);
+		event.target.innerHTML = '[expand]';
+	} else {
+		node.innerHTML = node.getAttribute('data-expanded');
+		event.target.setAttribute('data-expanded', 1);
+		event.target.innerHTML = '[collapse]';
 	}
 }

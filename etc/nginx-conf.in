@@ -20,7 +20,7 @@ server {
 	server_name _default_;
 
 	# set max upload size. Make sure the PHP values also high enough
-	client_max_body_size 64M;
+	client_max_body_size 128M;
 
 	# Uncomment to run it out of the root of your system
 	#location / {
@@ -40,7 +40,8 @@ server {
 	#}
 
 	# Or you can install it with a prefix
-	location ~ /domjudge(.*) {
+	location /domjudge { return 301 /domjudge/; }
+	location ~ /domjudge(/.*) {
 		root @domserver_webappdir@/web;
 		# try to serve file directly, fallback to app.php
 		try_files $1 /domjudge/app.php$is_args$args;
@@ -85,7 +86,7 @@ server {
 # 	ssl_prefer_server_ciphers on;
 
 # 	# set max upload size. Make sure the PHP values also high enough
-# 	client_max_body_size 64M;
+# 	client_max_body_size 128M;
 
 #	# Run it out of the root of the system
 #	location / {
@@ -104,7 +105,8 @@ server {
 #	}
 
 #	# Or you can install it with a prefix
-#	location ~ /domjudge(.*) {
+#	location /domjudge { return 301 /domjudge/; }
+#	location ~ /domjudge(/.*) {
 #		root @domserver_webappdir@/web;
 #		# try to serve file directly, fallback to app.php
 #		try_files $1 /domjudge/app.php$is_args$args;

@@ -14,4 +14,4 @@ header("Cache-Control: no-cache, must-revalidate");
 header("Expires: Wed, 10 Feb 1971 05:00:00 GMT");
 header("Content-type: text/plain");
 
-echo json_encode($updates);
+echo dj_json_encode($updates);

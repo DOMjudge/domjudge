@@ -65,12 +65,25 @@ function XMLgetnode($path, $paren = NULL)
 	return $nodelist->item(0);
 }
 
+function safe_float($value, $decimals = null)
+{
+	if ( is_null($value) ) return null;
+	if ( is_null($decimals) ) return (float)$value;
+
+	// Truncate the string version to a specified number of decimals,
+	// since PHP floats seem not very reliable in not giving e.g.
+	// 1.9999 instead of 2.0.
+	$decpos = strpos((string)$value, '.');
+	if ( $decpos===FALSE ) return (float)$value;
+	return (float)substr((string)$value, 0, $decpos+$decimals+1);
+}
+
 /**
  * Formats a floating point timestamp by truncating it to milliseconds.
  */
 function formattime($time)
 {
-	return floor(1000*$time)/1000;
+	return safe_float($time, 8);
 }
 
 // Get problems, languages, affiliations, categories and events
@@ -210,15 +223,23 @@ $compile_penalty = dbconfig_get('compile_penalty', 0);
 
 // write out runs
 while ( $row = $events->next() ) {
-	if ($row['description'] != 'problem submitted' && $row['description'] != 'problem judged') {
+	if ( !in_array($row['endpointtype'], array('submissions', 'judgements'), TRUE) ) {
 		continue;
 	}
+
+	if ( empty($row['content']) ) {
+		error("Missing JSON data for event ID ".$row['eventid'].
+		      " endpoint ".$row['endpointtype'].'/'.$row['endpointid']);
+	}
+	$eventdata = dj_json_decode($row['content']);
+
+	$submitid = $row['endpointtype']=='submissions' ? $eventdata['id'] : $eventdata['submission_id'];
 
 	$data = $DB->q('MAYBETUPLE SELECT submittime, teamid, probid, name AS langname, valid
 	                FROM submission
 	                LEFT JOIN language USING (langid)
 	                WHERE valid = 1 AND submitid = %i',
-	               $row['submitid']);
+	               $submitid);
 
 	if ( empty($data) ||
 	     difftime($data['submittime'], $cdata['endtime'])>=0 ||
@@ -226,20 +247,20 @@ while ( $row = $events->next() ) {
 	     !isset($team_to_id[$data['teamid']]) ) continue;
 
 	$run = XMLaddnode($root, 'run');
-	XMLaddnode($run, 'id', $row['submitid']);
+	XMLaddnode($run, 'id', $submitid);
 	XMLaddnode($run, 'problem', $prob_to_id[$data['probid']]);
 	XMLaddnode($run, 'team', $team_to_id[$data['teamid']]);
 	XMLaddnode($run, 'timestamp', formattime($row['eventtime']));
 	XMLaddnode($run, 'time', formattime(calcContestTime($data['submittime'],$cid)));
 	XMLaddnode($run, 'language', $data['langname']);
 
-	if ($row['description'] == 'problem submitted') {
+	if ( $row['endpointtype'] == 'submissions' ) {
 		XMLaddnode($run, 'judged', 'False');
 		XMLaddnode($run, 'status', 'fresh');
-	} else {
+	} else { // judgements
 		$jdata = $DB->q('MAYBETUPLE SELECT result, starttime FROM judging j
 		                 LEFT JOIN submission USING(submitid)
-		                 WHERE j.valid = 1 AND judgingid = %i', $row['judgingid']);
+		                 WHERE j.valid = 1 AND judgingid = %i', $row['dataid']);
 
 		if ( !isset($jdata['result']) ) continue;
 
@@ -250,7 +271,7 @@ while ( $row = $events->next() ) {
 		                 FROM judging_run
 		                 LEFT JOIN testcase USING (testcaseid)
 		                 WHERE runresult IS NOT NULL AND judgingid = %i',
-		                $row['judgingid']);
+		                $row['dataid']);
 
 		// We don't store single judging_run timestamps, so calculate
 		// these cumulatively from judging starttime.
@@ -262,7 +283,7 @@ while ( $row = $events->next() ) {
 			XMLaddnode($testcase, 'judged', 'True');
 			XMLaddnode($testcase, 'judgement', $VERDICTS[$jrun['runresult']]);
 			XMLaddnode($testcase, 'n', $ntestcases);
-			XMLaddnode($testcase, 'run-id', $row['submitid']);
+			XMLaddnode($testcase, 'run-id', $submitid);
 			XMLaddnode($testcase, 'solved', ($jrun['runresult']=='correct' ? 'True' : 'False'));
 			XMLaddnode($testcase, 'time', formattime($jrun['runtime']));
 			XMLaddnode($testcase, 'timestamp', formattime($timestamp));

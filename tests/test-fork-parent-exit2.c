@@ -3,8 +3,15 @@
  * itself after sleeping for a couple of seconds. Runguard should kill all
  * child processes on normal exit, when using Linux cgroups.
  *
- * As the childs are doing some work, this submission should have a CPU time in
- * the range of seconds if we're accounting properly for forked grandchildren.
+ * As the childs are doing some work, this submission should have a
+ * CPU time in the range of seconds if we're accounting properly for
+ * forked grandchildren. The expected result will depend on whether
+ * the program is bound to a single CPU core or not:
+ * - If bound to a single CPU core, the cpu time should be almost
+ *   equal to the wall clock time, giving WRONG-ANSWER.
+ * - If not bound to a single core, the cpu time should be the factor
+ *   of the number of cores higher than wall clock time, and probably
+ *   give a TIMELIMIT.
  *
  * @EXPECTED_RESULTS@: CHECK-MANUALLY
  */

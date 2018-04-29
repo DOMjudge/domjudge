@@ -4,7 +4,7 @@ DOMjudge
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
 [![Code Climate](https://codeclimate.com/github/DOMjudge/domjudge/badges/gpa.svg)](https://codeclimate.com/github/DOMjudge/domjudge)
 
-This is the Programming Contest Jury System "DOMjudge" version 5.2.0DEV
+This is the Programming Contest Jury System "DOMjudge" version 6.0.0DEV
 
 DOMjudge is a system for running a programming contest, like the
 ACM ICPC regional and world championship programming contests.
@@ -44,7 +44,7 @@ by running 'make dist', see the online documentation, section
 Copyright & Licencing
 ---------------------
 
-DOMjudge is Copyright (c) 2004 - 2017 by the DOMjudge developers and
+DOMjudge is Copyright (c) 2004 - 2018 by the DOMjudge developers and
 all respective contributors. The current DOMjudge developers are Jaap
 Eldering, Nicky Gerritsen, Keith Johnson, Thijs Kinkhorst and Tobias
 Werth; see the administrator's manual for a complete list of
@@ -67,7 +67,6 @@ Various JavaScript libraries/snippets are included under www/js/:
 - jscolor.js: copyright Jan Odvarko, licenced under the GNU LGPL.
 - tabber.js: copyright Patrick Fitzgerald, licenced under the MIT licence.
 - Ace editor: licenced under the BSD licence, see COPYING.BSD.
-- Flot: licenced under the MIT licence, see COPYING.MIT.
 - jQuery: licenced under the MIT licence, see COPYING.MIT.
 - jQuery TokenInput: dual licensed under GPL and MIT licences, see COPYING and COPYING.MIT.
 - JavaScript Cookie: licenced under the MIT licence, see COPYING.MIT.

@@ -8,11 +8,6 @@
 require('init.php');
 requireAdmin();
 
-if ( !file_exists(LIBDIR . '/relations.php') ) {
-	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
-}
-require(LIBDIR . '/relations.php');
-
 $t = @$_REQUEST['table'];
 $referrer = @$_REQUEST['referrer'];
 $desc = @$_REQUEST['desc'];
@@ -43,30 +38,30 @@ if ( isset($_POST['cancel']) ) {
 $title = 'Delete from ' . $t;
 require(LIBWWWDIR . '/header.php');
 
-// Check if we can really delete this.
+// Check if we can really delete this. Note that this does *not* take
+// into account recursive constraints.
 $warnings = array();
 foreach($k as $key => $val) {
-	if ( ($tables = fk_check ("$t.$key", $val))!==NULL ) {
-		foreach ( $tables as $table => $action ) {
-			switch ( $action ) {
-			case 'RESTRICT':
-				error("$t.$key \"$val\" is still referenced in $table, cannot delete.");
-			case 'CASCADE':
-				$deps = fk_dependent_tables($table);
-				$warn = "cascade to $table";
-				if ( count($deps)>0 ) {
-					$warn .= ", and possibly to dependent tables " . implode(", ",$deps);
-				}
-				$warnings[] = $warn;
-				break;
-			case 'SETNULL':
-				$warnings[] = "create dangling references in $table";
-				break;
-			case 'NOCONSTRAINT':
-				break;
-			default:
-				error("$t.$key is referenced in $table with unknown action '$action'.");
+	$tables = fk_check("$t.$key", $val);
+	foreach ( $tables as $table => $action ) {
+		switch ( $action ) {
+		case 'RESTRICT':
+			error("$t.$key \"$val\" is still referenced in $table, cannot delete.");
+		case 'CASCADE':
+			$deps = fk_dependent_tables($table);
+			$warn = "cascade to $table";
+			if ( count($deps)>0 ) {
+				$warn .= ", and possibly to dependent tables " . implode(", ",$deps);
 			}
+			$warnings[] = $warn;
+			break;
+		case 'SETNULL':
+			$warnings[] = "create dangling references in $table";
+			break;
+		case 'NOCONSTRAINT':
+			break;
+		default:
+			error("$t.$key is referenced in $table with unknown action '$action'.");
 		}
 	}
 }
@@ -88,6 +83,13 @@ if (isset($_POST['confirm'] ) ) {
 	$DB->q("DELETE FROM $t WHERE %SS LIMIT 1", $k);
 	if ( $t=='problem' ) $DB->q('COMMIT');
 	auditlog($t, implode(', ', $k), 'deleted');
+
+	// No need to do this in a transaction, since the chance of a team
+	// with same ID being created at the same time is neglibible.
+	if ( $t==='team' ) {
+		$DB->q('DELETE FROM scorecache WHERE %SS', $k);
+		$DB->q('DELETE FROM rankcache WHERE %SS', $k);
+	}
 
 	echo "<p>" . ucfirst($t) . " <strong>" . specialchars(implode(", ", $k)) .
 		"</strong> has been deleted.</p>\n\n";

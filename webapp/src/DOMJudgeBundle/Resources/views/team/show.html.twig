@@ -25,7 +25,7 @@
           {% for user in team.users %}
           <a href="{{ path('legacy.jury_user', {id: user.userid}) }}">{{user.name}}</a>
           {% else %}
-          None
+          <a href="{{ path('legacy.jury_user', {cmd: 'add', forteam: '2'}) }}"><small>(add)</small></a>
           {% endfor %}
         </td>
       </tr>
@@ -55,7 +55,8 @@
         <td>Affiliation:</td><td><a href="{{path('legacy.jury_team_affiliation', {id: team.affiliation.affilid})}}">{{team.affiliation.name}}</a></td>
       </tr>
       <tr>
-        <td>Country:</td><td>{{team.affiliation.country}}</td>
+{# FIXME: make conditional on show_flags setting #}
+        <td>Country:</td><td><img src="{{asset('images/countries/' ~ team.affiliation.country ~ '.png' )}}" /> {{team.affiliation.country}}</td>
       </tr>
       {% endif %}
     </tbody>

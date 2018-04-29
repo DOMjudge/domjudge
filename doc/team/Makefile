@@ -30,6 +30,7 @@ $(MANUALSPDF): %pdf: %tex team-manual-preamble.tex $(TOPDIR)/etc/domserver-confi
 
 clean-l:
 	-rm -f $(addprefix team-manual*.,aux log out)
+	-rm -rf _minted-team-manual*
 
 distclean-l:
 	-rm -f gentexconfig

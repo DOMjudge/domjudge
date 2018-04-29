@@ -32,12 +32,23 @@ function dj_setcookie($name, $value = null, $expire = 0,
 }
 
 /**
- * Decode a json encoded string and handle errors.
+ * Decode a JSON string and handle errors.
  */
 function dj_json_decode($str) {
 	$res = json_decode($str, TRUE);
-	if ( $res === NULL ) {
-		error("Error retrieving API data. API gave us: " . $str);
+	if ( json_last_error() !== JSON_ERROR_NONE ) {
+		error("Error decoding JSON data '$str': ".json_last_error_msg());
+	}
+	return $res;
+}
+
+/**
+ * Encode data to JSON and handle errors.
+ */
+function dj_json_encode($data) {
+	$res = json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES);
+	if ( json_last_error() !== JSON_ERROR_NONE ) {
+		error("Error encoding data to JSON: ".json_last_error_msg());
 	}
 	return $res;
 }
@@ -97,7 +108,8 @@ function dj_password_verify($password, $hash, $user = null)
 {
 	// First check for old-style MD5 hashes:
 	if ( !empty($user) && strlen($hash)>0 && $hash[0]!=='$' ) {
-		return md5($user."#".$password)===$hash;
+		$userhash = md5($user."#".$password);
+		return hash_equals($hash, $userhash);
 	}
 	return password_verify($password, $hash);
 }

@@ -1,0 +1,35 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}Login{% endblock %}
+
+{% block extrahead %}
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="./css/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" href="style_login.css" type="text/css" />
+{% endblock %}
+
+{% block body %}
+
+  <form class="form-signin" action="{{ path('login') }}" method="post">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+    <img class="mb-4" src="images/DOMjudgelogo.png" alt="DOMjudge" width="72">
+      <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+
+  {% if error %}
+      <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+  {% endif %}
+
+      <label for="username" class="sr-only">Username</label>
+      <input type="text" id="username" name="_username" class="form-control" placeholder="Username" required autofocus>
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" id="inputPassword" name="_password" class="form-control" placeholder="Password" required>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      <p class="mt-5 mb-3 small text-muted">DOMjudge {{DOMJUDGE_VERSION}}</p>
+
+  {% if allow_registration %}
+  <div>Don't have an account? <a href="{{url('register', {}, true)}}">Register now</a>.</div>
+  {% endif %}
+  </form>
+
+  {% include '::footer.html.twig' %}
+{% endblock %}

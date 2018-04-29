@@ -23,6 +23,9 @@ require_once(LIBDIR . '/lib.misc.php');
  * The $filter argument may contain subarrays 'affilid', 'country',
  * 'categoryid' of values to filter on these.
  *
+ * The $visible_only determines whether only publicly visible teams
+ * are included, or all. Only relevant when $jury is true.
+ *
  * This function returns an array (scores, summary, matrix)
  * containing the following:
  *
@@ -34,7 +37,7 @@ require_once(LIBDIR . '/lib.misc.php');
  * summary(num_points, total_time, affils[affilid], countries[country], problems[probid]
  *    probid(num_submissions, num_pending, num_correct, best_time_sort[sortorder] )
  */
-function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
+function genScoreBoard($cdata, $jury = FALSE, $filter = NULL, $visible_only = FALSE) {
 
 	global $DB;
 
@@ -43,12 +46,12 @@ function genScoreBoard($cdata, $jury = FALSE, $filter = NULL) {
 	$fdata = calcFreezeData($cdata);
 
 	// Don't leak information before start of contest
-	if ( ! $fdata['cstarted'] && ! $jury ) return;
+	if ( ! $fdata['started'] && ! $jury ) return;
 
 	// get the teams, problems and categories
-	$teams = getTeams($filter, $jury, $cdata);
+	$teams = getTeams($filter, $jury && !$visible_only, $cdata);
 	$probs = getProblems($cdata);
-	$categs = getCategories($jury);
+	$categs = getCategories($jury && !$visible_only);
 
 	// initialize the arrays we'll build from the data
 	$MATRIX = array();
@@ -185,7 +188,8 @@ function getTeams($filter, $jury, $cdata) {
 
 	return $DB->q('KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, team.externalid,
 	               team.name, team.categoryid, team.affilid, penalty, sortorder,
-	               country, color, team_affiliation.name AS affilname
+	               country, color, team_affiliation.name AS affilname,
+		       team_affiliation.externalid AS affilid_external
 	               FROM team
 	               INNER JOIN contest ON (contest.cid = %i)
 	               LEFT JOIN contestteam ct USING (teamid, cid)
@@ -224,15 +228,16 @@ function getCategories($jury) {
 function initScores($teams) {
 	$SCORES = array();
 	foreach ($teams as $teamid => $team ) {
-		$SCORES[$teamid]['num_points']  = 0;
-		$SCORES[$teamid]['total_time']  = $team['penalty'];
-		$SCORES[$teamid]['solve_times'] = array();
-		$SCORES[$teamid]['rank']        = 0;
-		$SCORES[$teamid]['teamname']    = $team['name'];
-		$SCORES[$teamid]['categoryid']  = $team['categoryid'];
-		$SCORES[$teamid]['sortorder']   = $team['sortorder'];
-		$SCORES[$teamid]['affilid']     = $team['affilid'];
-		$SCORES[$teamid]['country']     = $team['country'];
+		$SCORES[$teamid]['num_points']       = 0;
+		$SCORES[$teamid]['total_time']       = $team['penalty'];
+		$SCORES[$teamid]['solve_times']      = array();
+		$SCORES[$teamid]['rank']             = 0;
+		$SCORES[$teamid]['teamname']         = $team['name'];
+		$SCORES[$teamid]['categoryid']       = $team['categoryid'];
+		$SCORES[$teamid]['sortorder']        = $team['sortorder'];
+		$SCORES[$teamid]['affilid']          = $team['affilid'];
+		$SCORES[$teamid]['affilid_external'] = $team['affilid_external'];
+		$SCORES[$teamid]['country']          = $team['country'];
 	}
 	return $SCORES;
 }
@@ -277,7 +282,7 @@ function initSummary($probs) {
  * team's current rank but a question mark.
  */
 function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
-	$limitteams = null, $displayrank = TRUE, $center = FALSE, $showlegends = TRUE)
+	$limitteams = null, $displayrank = TRUE, $center = TRUE, $showlegends = TRUE)
 {
 	// 'unpack' the scoreboard data:
 	$scores  = $sdata['scores'];
@@ -289,8 +294,10 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 	unset($sdata);
 
 	// configuration
-	$SHOW_AFFILIATIONS = dbconfig_get('show_affiliations', 1);
-	$SHOW_PENDING      = dbconfig_get('show_pending', 0);
+	$SHOW_FLAGS             = dbconfig_get('show_flags', 1);
+	$SHOW_AFFILIATION_LOGOS = dbconfig_get('show_affiliation_logos', 0);
+	$SHOW_AFFILIATIONS      = dbconfig_get('show_affiliations', 1);
+	$SHOW_PENDING           = dbconfig_get('show_pending', 0);
 
 	// Do not show points if they are all 1
 	$showpoints = FALSE;
@@ -304,47 +311,66 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 
 	// output table column groups (for the styles)
 	echo '<colgroup><col id="scorerank" />' .
-		( $SHOW_AFFILIATIONS ? '<col id="scoreaffil" />' : '' ) .
+		( $SHOW_FLAGS ? '<col id="scoreflags" />' : '' ) .
+		( $SHOW_AFFILIATION_LOGOS ? '<col id="scorelogos" />' : '' ) .
 		'<col id="scoreteamname" /></colgroup><colgroup><col id="scoresolv" />' .
 		"<col id=\"scoretotal\" /></colgroup>\n<colgroup>" .
-		str_repeat('<col class="scoreprob" />', count($probs)) .
+		( IS_JURY || dbconfig_get('show_teams_submissions', 1) ?
+		  str_repeat('<col class="scoreprob" />', count($probs)) : '' ) .
 		"</colgroup>\n";
 
 	// column headers
+	$team_colspan = 1;
+	if ( $SHOW_FLAGS ) {
+		$team_colspan++;
+	}
+	if ( $SHOW_AFFILIATION_LOGOS ) {
+		$team_colspan++;
+	}
 	echo "<thead>\n";
 	echo '<tr class="scoreheader">' .
 		'<th title="rank" scope="col">' . jurylink(null,'rank') . '</th>' .
 		'<th title="team name" scope="col"' .
-		( $SHOW_AFFILIATIONS ? ' colspan="2"' : '' ) .
+		( $team_colspan > 1 ? ' colspan="' . $team_colspan . '"' : '' ) .
 		'>' . jurylink(null, 'team') . '</th>' .
 		'<th title="# solved / penalty time" colspan="2" scope="col">' .
 		jurylink(null, 'score') . '</th>' . "\n";
-	foreach( $probs as $pr ) {
-		echo '<th title="problem \'' . specialchars($pr['name']) . '\'" scope="col">';
-		$str = specialchars($pr['shortname']) .
-		       (!empty($pr['color']) ? ' <div class="circle" style="background: ' .
-			specialchars($pr['color']) . ';"></div>' : '') ;
+	// Display the per-problem column headers if the display is
+	// for the jury or if the per-problem information is being
+	// displayed to the contestants and the public.
+	if (IS_JURY || dbconfig_get('show_teams_submissions', 1)) {
+		foreach( $probs as $pr ) {
+			echo '<th title="problem \'' . specialchars($pr['name']) . '\'" scope="col">';
+			$str = specialchars($pr['shortname']) .
+			       (!empty($pr['color']) ? ' <div class="circle" style="background: ' .
+			       specialchars($pr['color']) . ';"></div>' : '') ;
 
-		if ( !$static && (IS_JURY || $pr['hastext']>0) ) {
-			echo '<a href="problem.php?id=' . urlencode($pr['probid']) .
-				'">' . $str . '</a>';
-		} else {
-			echo '<a>' . $str . '</a>';
+			if ( !$static && (IS_JURY || $pr['hastext']>0) ) {
+				echo '<a href="problem.php?id=' . urlencode($pr['probid']) .
+				     '">' . $str . '</a>';
+			} else {
+				echo '<a>' . $str . '</a>';
+			}
+			if ($showpoints) {
+				$points = $pr['points'];
+				$pts = ( $points == 1 ? '1 point' : "$points points" );
+				echo "<span class='problempoints'>[$pts]</span>";
+			}
+			echo '</th>';
 		}
-		if ($showpoints) {
-			$points = $pr['points'];
-			$pts = ( $points == 1 ? '1 point' : "$points points" );
-			echo "<span class='problempoints'>[$pts]</span>";
-		}
-		echo '</th>';
 	}
 	echo "</tr>\n</thead>\n\n<tbody>\n";
 
 	// print the main scoreboard rows
 	$prevsortorder = -1;
+	$usedCategories = array();
 	foreach( $scores as $team => $totals ) {
 		// skip if we have limitteams and the team is not listed
 		if ( !empty($limitteams) && !in_array($team,$limitteams) ) continue;
+
+		if ( isset($teams[$team]['categoryid']) ) {
+			$usedCategories[$teams[$team]['categoryid']] = TRUE;
+		}
 
 		// rank, team name, total points, total time
 		echo '<tr';
@@ -376,7 +402,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		}
 		$prevteam = $team;
 		echo '</td>';
-		if ( $SHOW_AFFILIATIONS ) {
+		if ( $SHOW_FLAGS ) {
 			echo '<td class="scoreaf">';
 			if ( isset($teams[$team]['affilid']) ) {
 				if ( IS_JURY ) {
@@ -384,11 +410,11 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 						urlencode($teams[$team]['affilid']) . '">';
 				}
 				if ( isset($teams[$team]['country']) ) {
-					$countryflag = '../images/countries/' .
+					$countryflag = 'images/countries/' .
 						urlencode($teams[$team]['country']) . '.png';
 					echo ' ';
-					if ( is_readable($countryflag) ) {
-						echo '<img src="' . $countryflag . '"' .
+					if ( is_readable(WEBAPPDIR.'/web/'.$countryflag) ) {
+						echo '<img src="../' . $countryflag . '"' .
 							' alt="'   . specialchars($teams[$team]['country']) . '"' .
 							' title="' . specialchars($teams[$team]['country']) . '" />';
 					} else {
@@ -399,9 +425,34 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			}
 			echo '</td>';
 		}
+		if ( $SHOW_AFFILIATION_LOGOS ) {
+			echo '<td class="scoreaf">';
+			if ( isset($teams[$team]['affilid']) ) {
+				$affilid = $teams[$team]['affilid'];
+				if ( isset($teams[$team]['affilid_external']) ) {
+					// prefer external affiliation id over internal
+					$affilid = $teams[$team]['affilid_external'];
+				}
+				if ( IS_JURY ) {
+					echo '<a href="team_affiliation.php?id=' .
+						urlencode($teams[$team]['affilid']) . '">';
+				}
+				$affillogo = 'images/affiliations/' .  urlencode($affilid) . '.png';
+				echo ' ';
+				if ( is_readable(WEBAPPDIR.'/web/'.$affillogo) ) {
+					echo '<img src="../' . $affillogo . '"' .
+						' alt="'   . specialchars($teams[$team]['affilname']) . '"' .
+						' title="' . specialchars($teams[$team]['affilname']) . '" />';
+				} else {
+					echo specialchars($affilid);
+				}
+				if ( IS_JURY ) echo '</a>';
+			}
+			echo '</td>';
+		}
 		$affilname = '';
 		if ( $SHOW_AFFILIATIONS && isset($teams[$team]['affilid']) ) {
-				$affilname = specialchars($teams[$team]['affilname']);
+			$affilname = specialchars($teams[$team]['affilname']);
 		}
 		echo
 			'<td class="scoretn"' .
@@ -413,40 +464,68 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			 '</span>' : '') .
 			($static ? '' : '</a>') .
 			'</td>';
+		$totalTime = $totals['total_time'];
+		if ( dbconfig_get('score_in_seconds', 0) ) {
+			$totalTime = printtimerel($totalTime);
+		}
 		echo
 			'<td class="scorenc">' . jurylink(null,$totals['num_points']) . '</td>' .
-			'<td class="scorett">' . jurylink(null,$totals['total_time'] ) . '</td>';
+			'<td class="scorett">' . jurylink(null, $totalTime) . '</td>';
 
-		// for each problem
-		foreach ( array_keys($probs) as $prob ) {
+		// For each problem, display specific information if the
+		// display is for the jury or if the per-problem information
+		// is to be displayed to contestants and the public.
+		if (IS_JURY || dbconfig_get('show_teams_submissions', 1)) {
+			foreach ( array_keys($probs) as $prob ) {
 
-			echo '<td class=';
-			// CSS class for correct/incorrect/neutral results
-			if( $matrix[$team][$prob]['is_correct'] ) {
-				echo '"score_correct' .
-					( first_solved($matrix[$team][$prob]['time'],
-					               @$summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]) ?
-				      ' score_first' : '') . '"';
-			} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
-				echo '"score_pending"';
-			} elseif ( $matrix[$team][$prob]['num_submissions'] > 0 ) {
-				echo '"score_incorrect"';
-			} else {
-				echo '"score_neutral"';
+				// CSS class for correct/incorrect/neutral results
+				$score_css_class = 'score_neutral';
+				if ( $matrix[$team][$prob]['is_correct'] ) {
+					$score_css_class = 'score_correct';
+					if ( first_solved($matrix[$team][$prob]['time'],
+						@$summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]) ) {
+						$score_css_class .= ' score_first';
+					}
+				} elseif ( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
+					$score_css_class = 'score_pending';
+				} elseif ( $matrix[$team][$prob]['num_submissions'] > 0 ) {
+					$score_css_class = 'score_incorrect';
+				}
+
+				// number of submissions for this problem
+				$number_of_subs = $matrix[$team][$prob]['num_submissions'];
+				// add pending submissions
+				if( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
+					$number_of_subs .= ' + ' . $matrix[$team][$prob]['num_pending'];
+				}
+
+
+				// If correct, print time scored. The format will vary
+				// depending on the scoreboard resolution setting.
+				$time = '&nbsp;';
+				if( $matrix[$team][$prob]['is_correct'] ) {
+					if ( dbconfig_get('score_in_seconds', 0) ) {
+						$time = printtimerel(scoretime($matrix[$team][$prob]['time']));
+						// Display penalty time.
+						if ($matrix[$team][$prob]['num_submissions'] > 1) {
+							$time .= ' + ' . printtimerel(calcPenaltyTime(TRUE, $matrix[$team][$prob]['num_submissions']));
+						}
+					} else {
+						$time = scoretime($matrix[$team][$prob]['time']);
+					}
+				}
+
+				echo '<td class="score_cell">';
+				// Only add data if there's anything interesting to display
+				if ( $number_of_subs != '0' ) {
+					$tries = $number_of_subs . ($number_of_subs == "1" ? " try" : " tries");
+					$div = '<div class="' . $score_css_class . '">' . $time
+						. '<span>' . $tries . '</span>' . '</div>';
+					$url = 'team.php?id=' . urlencode($team) . '&amp;restrict=probid:' . urlencode($prob);
+					echo jurylink($url, $div);
+				}
+				echo '</td>';
 			}
-			// number of submissions for this problem
-			$str = $matrix[$team][$prob]['num_submissions'];
-			// add pending submissions
-			if( $matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING ) {
-				$str .= ' + ' . $matrix[$team][$prob]['num_pending'];
-			}
-			// if correct, print time scored
-			if( $matrix[$team][$prob]['is_correct'] ) {
-				$str .= '/' . scoretime($matrix[$team][$prob]['time']);
-			}
-			echo '>' . jurylink('team.php?id=' . urlencode($team) .
-								'&amp;restrict=probid:' . urlencode($prob),
-			                    $str) . '</td>';
 		}
 		echo "</tr>\n";
 	}
@@ -461,23 +540,43 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		} else {
 			$totalCell = '<td class="scorenc" title=" "></td>';  // Empty
 		}
-		echo '<tbody><tr id="scoresummary" title="#submitted / #correct">' .
-			'<td title="total teams">' .
-			jurylink(null,count($matrix)) . '</td>' .
-			( $SHOW_AFFILIATIONS ? '<td class="scoreaffil" title="#affiliations / #countries">' .
-			  jurylink('team_affiliations.php',count($summary['affils']) . ' / ' .
-			           count($summary['countries'])) . '</td>' : '' ) .
-			'<td title=" ">' . jurylink(null,'Summary') . '</td>' .
-			$totalCell . '<td title=" "></td>';
+		// Print the summary line details only if the display
+		// is for the jury or the per-problem information is
+		// being shown to contestants and the public.
+		if (IS_JURY || dbconfig_get('show_teams_submissions', 1)) {
+			echo '<tbody><tr style="border-top: 2px solid black;">' .
+			     '<td id="scoresummary" title="Summary" colspan=3>Summary</td>' .
+			     $totalCell . '<td title=" "></td>';
 
-		foreach( array_keys($probs) as $prob ) {
-			$str = $summary['problems'][$prob]['num_submissions'] . '/' .
-			       $summary['problems'][$prob]['num_correct'];
-			echo '<td>' .
-				jurylink('problem.php?id=' . urlencode($prob),$str) .
-				'</td>';
+			foreach( array_keys($probs) as $prob ) {
+				$numAccepted = '<span class="octicon octicon-thumbsup"> </span>' .
+					'<span style="font-size:90%;" title="number of accepted submissions"> ' .
+					$summary['problems'][$prob]['num_correct'] .
+					'</span>';
+				$numRejected = '<span class="octicon octicon-thumbsdown"> </span>' .
+					'<span style="font-size:90%;" title="number of rejected submissions"> ' .
+					( $summary['problems'][$prob]['num_submissions'] - $summary['problems'][$prob]['num_correct'] ) .
+					'</span>';
+				$numPending = '<span class="octicon octicon-question"> </span>' .
+					'<span style="font-size:90%;" title="number of pending submissions"> ' .
+					$summary['problems'][$prob]['num_pending'] .
+					'</span>';
+				$best = @$summary['problems'][$prob]['best_time_sort'][0];
+				$best = empty($best) ? 'n/a' : ((int)($best/60)) . 'min';
+				$best = '<span class="octicon octicon-clock"> </span>' .
+					'<span style="font-size:90%;" title="first solved"> ' . $best . '</span>';
+
+				$str = 
+					$numAccepted . '<br />' .
+					$numRejected . '<br />' .
+					$numPending . '<br />' .
+					$best;
+				echo '<td style="text-align: left;">' .
+					jurylink('problem.php?id=' . urlencode($prob),$str) .
+					'</td>';
+			}
+			echo "</tr>\n</tbody>\n";
 		}
-		echo "</tr>\n</tbody>\n";
 	}
 
 	echo "</table>\n\n";
@@ -486,40 +585,53 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 		echo "<p><br /><br /></p>\n";
 
 		// only print legend when there's more than one category
-		if ( empty($limitteams) && count($categs) > 1 ) {
-			echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
-			    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
-			    "<thead><tr><th scope=\"col\">" .
-			    jurylink('team_categories.php','Categories') .
-			    "</th></tr></thead>\n<tbody>\n";
+		if ( empty($limitteams) && count($usedCategories) > 1 ) {
+			$catColors = array();
 			foreach( $categs as $cat ) {
-				echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
-				              $cat['color'] . ';"' : '') . '>' .
-				    '<td>' .
-				    jurylink('team_category.php?id=' . urlencode($cat['categoryid']),
-				             specialchars($cat['name'])) .	"</td></tr>\n";
+				if ( !empty($cat['color']) ) {
+					$catColors[$cat['color']] = TRUE;
+				}
 			}
-			echo "</tbody>\n</table>\n&nbsp;\n";
+			if ( count($catColors) ) {
+				echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
+				    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
+				    "<thead><tr><th scope=\"col\">" .
+				    jurylink('team_categories.php','Categories') .
+				    "</th></tr></thead>\n<tbody>\n";
+				foreach( $categs as $cat ) {
+					if ( !isset($usedCategories[$cat['categoryid']]) ) {
+						continue;
+					}
+					echo '<tr' . (!empty($cat['color']) ? ' style="background: ' .
+						      $cat['color'] . ';"' : '') . '>' .
+					    '<td>' .
+					    jurylink('team_category.php?id=' . urlencode($cat['categoryid']),
+						     specialchars($cat['name'])) .	"</td></tr>\n";
+				}
+				echo "</tbody>\n</table>\n&nbsp;\n";
+			}
 		}
 
-		// print legend of scorecell colors
-		$cellcolors = array('first'     => 'Solved first',
-		                    'correct'   => 'Solved',
-		                    'incorrect' => 'Tried, incorrect',
-		                    'pending'   => 'Tried, pending',
-		                    'neutral'   => 'Untried');
+		// Print legend of scorecell colors if per-problem
+		// information is being shown.
+		if (IS_JURY || dbconfig_get('show_teams_submissions', 1)) {
+			$cellcolors = array('first'     => 'Solved first',
+			                    'correct'   => 'Solved',
+			                    'incorrect' => 'Tried, incorrect',
+			                    'pending'   => 'Tried, pending',
+			                    'neutral'   => 'Untried');
 
-
-		echo "<table id=\"cell_legend\" class=\"scoreboard scorelegend" .
-		    (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
-		    "<thead><tr><th scope=\"col\">" . jurylink(null,'Cell colours') .
-		    "</th></tr></thead>\n<tbody>\n";
-		foreach( $cellcolors as $color => $desc ) {
-			if ( $color=='pending' && !dbconfig_get('show_pending', 0) ) continue;
-			echo '<tr class="score_' . $color . '">' .
-			    '<td>' . jurylink(null, $desc) . "</td></tr>\n";
+			echo "<table id=\"cell_legend\" class=\"scoreboard scorelegend" .
+			     (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
+			     "<thead><tr><th scope=\"col\">" . jurylink(null,'Cell colours') .
+			     "</th></tr></thead>\n<tbody>\n";
+			foreach( $cellcolors as $color => $desc ) {
+				if ( $color=='pending' && !dbconfig_get('show_pending', 0) ) continue;
+				echo '<tr class="score_' . $color . '">' .
+				     '<td>' . jurylink(null, $desc) . "</td></tr>\n";
+			}
+			echo "</tbody>\n</table>\n\n";
 		}
-		echo "</tbody>\n</table>\n\n";
 	}
 
 	return;
@@ -551,37 +663,115 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$sdata = genScoreBoard($cdata, IS_JURY, $filter);
 	}
 
-	// page heading with contestname and start/endtimes
-	echo "<h1>Scoreboard " . specialchars($cdata['name']) . "</h1>\n\n";
-
+	$moreinfo = '';
+	$warning = '';
 	if ( $fdata['showfinal'] ) {
-		echo "<h4>final standings</h4>\n\n";
-	} elseif ( ! $fdata['cstarted'] ) {
-		echo "<h4>" . printContestStart($cdata) . "</h4>\n\n";
-		// Stop here (do not leak problem number, descriptions etc).
-		// Alternatively we could only display the list of teams?
-		if ( ! IS_JURY ) return;
-	} else {
-		echo "<h4>starts: " . printtime($cdata['starttime']) .
-				" - ends: " . printtime($cdata['endtime']) ;
-
-		if ( $fdata['showfrozen'] ) {
-			echo " (";
-			if ( IS_JURY ) {
-				echo '<a href="../public/">the public scoreboard</a> is ';
-			}
-			echo "frozen since " . printtime($cdata['freezetime']) .")";
+		if ( empty($cdata['finalizetime']) ) {
+			$moreinfo = "preliminary results - not final";
+		} else {
+			$moreinfo = "final standings";
 		}
-		echo "</h4>\n\n";
+	} elseif ( $fdata['stopped'] ) {
+		$moreinfo = "contest over, waiting for results";
+	} elseif ( ! $fdata['started'] ) {
+		$moreinfo = printContestStart($cdata);
+	} else {
+		$moreinfo = "starts: " . printtime($cdata['starttime']) .
+				" - ends: " . printtime($cdata['endtime']);
+	}
+
+	if ( IS_JURY ) {
+		echo '<div style="margin-top: 4em;"></div>';
+	}
+	echo '<div class="card">';
+	// page heading with contestname and start/endtimes
+	echo '<div class="card-header" style="font-family: Roboto, sans-serif; display: flex;">';
+	echo '<span style="font-weight: bold;">' . specialchars($cdata['name']) . '</span>'
+		. ' <span style="color: DimGray; margin-left: auto;">' . $moreinfo . '</span>';
+	echo '</div>';
+	if ( $static && $fdata['started'] && !$fdata['stopped'] ) {
+		putProgressBar();
+	}
+	echo '</div>'; // card
+
+	// Stop here (do not leak problem number, descriptions etc).
+	// Display list of teams by group. This is targeted for World Finals.
+	if ( ! $fdata['started'] && ! IS_JURY ) {
+		$affils = $DB->q('TABLE SELECT ta.externalid, ta.name AS taname, cat.name AS catname, categoryid
+				  FROM team_affiliation ta
+				  LEFT JOIN team t USING (affilid)
+				  INNER JOIN contest c ON (c.cid = %i)
+				  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
+				  LEFT JOIN team_category cat USING (categoryid)
+				  WHERE c.cid = %i AND
+				  (c.public = 1 OR ct.teamid IS NOT NULL)
+				  AND cat.visible = 1
+				  ORDER BY catname, taname',
+				 $cdata['cid'], $cdata['cid']);
+
+		$lastCat = NULL;
+		$numCats = 0;
+		foreach ( $affils as $affil ) {
+			if ( $affil['categoryid'] != $lastCat ) {
+				if ( $lastCat != NULL ) {
+					echo '</ul>';
+					echo '</div>';
+					echo '</div>';
+				}
+				if ( $numCats % 3 == 0 ) {
+					echo '</div>';
+					echo '<br /><br />';
+					echo '<div class="card-deck">';
+				}
+				$numCats++;
+				$lastCat = $affil['categoryid'];
+				echo '<div class="card" style="font-family: Roboto, sans-serif;">';
+				echo '<div class="card-header">' . $affil['catname'] . '</div>';
+				echo '<div class="card-body">';
+				echo '<ul class="list-group list-group-flush">';
+			}
+			$affillogo = 'images/affiliations/' .  urlencode($affil['externalid']) . '.png';
+			$logoHTML = '';
+			if ( is_readable(WEBAPPDIR.'/web/'.$affillogo) ) {
+				$logoHTML = '<img src="../' . $affillogo . '" style="padding-right: 10px;" />';
+			}
+			print '<li class="list-group-item">' . $logoHTML . $affil['taname'] . '</li>';
+		}
+		echo '</ul>';
+		echo '</div>';
+		echo '</div>';
+		while ( $numCats % 3 != 0 ) {
+			$numCats++;
+			echo '<div class="card" style="border: none;"></div>';
+		}
+		echo '</div>';
+		return;
+	}
+
+	if ( $fdata['showfrozen'] ) {
+		$timerem = floor(($cdata['endtime'] - $cdata['freezetime'])/60);
+		if ( IS_JURY ) {
+			$warning = '<a href="../public/">The public scoreboard</a> ' .
+				"was frozen with $timerem minutes remaining";
+		} else {
+			$warning = "The scoreboard was frozen with $timerem minutes " .
+				"remaining - solutions submitted in the last $timerem " .
+				"minutes of the contest are still shown as pending.";
+		}
+		echo '<div class="alert alert-warning" role="alert" style="font-size: 80%;">' .
+			$warning . '</div>';
 	}
 
 	// The static scoreboard does not support filtering
 	if ( $filter!==FALSE && $static!==TRUE ) {
 
+		$SHOW_FLAGS             = dbconfig_get('show_flags', 1);
+		$SHOW_AFFILIATIONS      = dbconfig_get('show_affiliations', 1);
+
 		$categids = $DB->q('KEYVALUETABLE SELECT categoryid, name FROM team_category ' .
 		                   (IS_JURY ? '' : 'WHERE visible = 1 ' ));
 		// show only affilids/countries with visible teams
-		if ( empty($categids) ) {
+		if ( empty($categids) || !$SHOW_AFFILIATIONS ) {
 			$affils = array();
 		} else {
 			$affils = $DB->q('KEYTABLE SELECT affilid AS ARRAYKEY,
@@ -600,7 +790,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 		$countries = array();
 		foreach( $affils as $id => $affil ) {
 			$affilids[$id] = $affil['name'];
-			if ( isset($affil['country']) ) $countries[] = $affil['country'];
+			if ( $SHOW_FLAGS && isset($affil['country']) ) $countries[] = $affil['country'];
 		}
 
 		$countries = array_unique($countries);
@@ -623,7 +813,7 @@ function putScoreBoard($cdata, $myteamid = NULL, $static = FALSE, $filter = FALS
 
 <table class="scorefilter">
 <tr>
-<td><a class="collapse" href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
+<td><a class="scorecollapse" href="javascript:collapse('filter')"><img src="../images/filter.png" alt="filter&hellip;" title="filter&hellip;" class="picto" /></a></td>
 <td><?= $filtertext ?></td>
 <td><div id="detailfilter">
 <?php
@@ -643,17 +833,15 @@ collapse("filter");
 // -->
 </script>
 		<?php
+	} else {
+		echo '<br />';
 	}
 
-	renderScoreBoardTable($sdata,$myteamid,$static);
+	renderScoreBoardTable($sdata,$myteamid,$static, null,TRUE, !IS_JURY);
 
 	// last modified date, now if we are the jury, else include the
 	// freeze time
-	if( ! IS_JURY && $fdata['showfrozen'] ) {
-		$lastupdate = printtime($cdata['freezetime'],'%a %d %b %Y %T %Z');
-	} else {
-		$lastupdate = printtime(now(),'%a %d %b %Y %T %Z');
-	}
+	$lastupdate = printtime(now(),'%a %d %b %Y %T %Z');
 	echo "<p id=\"lastmod\">Last Update: $lastupdate<br />\n" .
 	     "using <a href=\"https://www.domjudge.org/\">DOMjudge</a></p>\n\n";
 
@@ -671,7 +859,7 @@ function initScorefilter()
 
 	// Read scoreboard filter options from cookie and explicit POST
 	if ( isset($_COOKIE['domjudge_scorefilter']) ) {
-		$scorefilter = json_decode($_COOKIE['domjudge_scorefilter'], TRUE);
+		$scorefilter = dj_json_decode($_COOKIE['domjudge_scorefilter']);
 	}
 
 	if ( isset($_REQUEST['clear']) ) $scorefilter = array();
@@ -685,7 +873,7 @@ function initScorefilter()
 		}
 	}
 
-	dj_setcookie('domjudge_scorefilter', json_encode($scorefilter));
+	dj_setcookie('domjudge_scorefilter', dj_json_encode($scorefilter));
 
 	return $scorefilter;
 }
@@ -703,14 +891,14 @@ function putTeamRow($cdata, $teamids) {
 	$displayrank = IS_JURY || !$fdata['showfrozen'];
 	$cid = $cdata['cid'];
 
-	if ( ! $fdata['cstarted'] ) {
+	if ( ! $fdata['started'] ) {
 		if ( ! IS_JURY ) {
 
 			global $teamdata;
-			echo "<h2 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
-				specialchars($teamdata['name']) . "</span>!</h2>\n\n";
-			echo "<h3 id=\"contestnotstarted\">contest " .
-				printContestStart($cdata) . "</h3>\n\n";
+			echo "<h1 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
+				specialchars($teamdata['name']) . "</span>!</h1>\n\n";
+			echo "<h2 id=\"contestnotstarted\">contest " .
+				printContestStart($cdata) . "</h2>\n\n";
 		}
 
 		return;

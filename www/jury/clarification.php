@@ -59,12 +59,6 @@ if ( isset($_REQUEST['claim']) || isset($_REQUEST['unclaim']) ) {
 // insert a new response (if posted)
 if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
-	// If database supports it, wrap this in a transaction so we
-	// either send the clarification AND mark it unread for everyone,
-	// or we don't. If no transaction support, we just have to hope
-	// this goes well.
-	$DB->q('START TRANSACTION');
-
 	if ( empty($_POST['sendto']) ) {
 		$sendto = null;
 	} elseif ( $_POST['sendto'] == 'domjudge-must-select' ) {
@@ -75,20 +69,34 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 	list($cid, $probid) = explode('-', $_POST['problem']);
 	$category = NULL;
+	$queue = NULL;
+	if ($respid !== NULL) {
+		$queue = $DB->q('MAYBEVALUE SELECT queue FROM clarification WHERE clarid = %i', $respid);
+	}
 	if ( !ctype_digit($probid) ) {
 		$category = $probid;
 		$probid = NULL;
+	} elseif ( $queue===NULL && $respid===NULL ) {
+		$queue = dbconfig_get('clar_default_problem_queue');
+		if ($queue === "") {
+			$queue = null;
+		}
 	}
 
+	// If database supports it, wrap this in a transaction so we
+	// either send the clarification AND mark it unread for everyone,
+	// or we don't. If no transaction support, we just have to hope
+	// this goes well.
+	$DB->q('START TRANSACTION');
+
 	$newid = $DB->q('RETURNID INSERT INTO clarification
-	                 (cid, respid, submittime, recipient, probid, category, body,
+	                 (cid, respid, submittime, recipient, probid, category, queue, body,
 	                  answered, jury_member)
 	                 VALUES (%i, ' .
-	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %s, %i, ' .
+	                ($respid===NULL ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %s, %s, %i, ' .
 	                (isset($jury_member) ? '%s)' : 'NULL %_)'),
-	                $cid, $respid, now(), $sendto, $probid, $category,
+	                $cid, $respid, now(), $sendto, $probid, $category, $queue,
 	                $_POST['bodytext'], 1, $jury_member);
-	auditlog('clarification', $newid, 'added', null, null, $cid);
 
 	if ( ! $isgeneral ) {
 		$DB->q('UPDATE clarification SET answered = 1, jury_member = ' .
@@ -96,11 +104,12 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		       $jury_member, $respid);
 	}
 
-	if( is_null($sendto) ) {
-		// log to event table if clarification to all teams
-		$DB->q('INSERT INTO event (eventtime, cid, clarid, description)
-		        VALUES(%s, %i, %i, "clarification")', now(), $cid, $newid);
+	$DB->q('COMMIT');
 
+	eventlog('clarification', $newid, 'create', $cid);
+	auditlog('clarification', $newid, 'added', null, null, $cid);
+
+	if( is_null($sendto) ) {
 		// mark the messages as unread for the team(s)
 		$teams = $DB->q('COLUMN SELECT teamid FROM team');
 		foreach($teams as $teamid) {
@@ -111,8 +120,6 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 		$DB->q('INSERT INTO team_unread (mesgid, teamid)
 		        VALUES (%i, %i)', $newid, $sendto);
 	}
-
-	$DB->q('COMMIT');
 
 	// redirect back to the original location
 	if ( $isgeneral ) {
@@ -135,6 +142,22 @@ if ( isset($_POST['answer']) && isset($_POST['answered']) ) {
 	// redirect back to the original location
 	header('Location: clarification.php?id=' . $id);
 	exit;
+}
+
+if (isset($_POST['subject'])) {
+	list($cid, $probid) = explode('-', $_POST['subject']);
+	$category = NULL;
+	if ( !ctype_digit($probid) ) {
+		$category = $probid;
+		$probid = NULL;
+	}
+
+	$DB->q('UPDATE clarification SET cid = %i, category = %s, probid = %i WHERE clarid = %i', $cid, $category, $probid, $id);
+}
+
+if (isset($_POST['queue'])) {
+	$DB->q('UPDATE clarification SET queue = %s WHERE clarid = %i', $_POST['queue'], $id);
+	auditlog('clarification', $id, 'queue changed');
 }
 
 require_once(LIBWWWDIR . '/header.php');
@@ -197,5 +220,33 @@ if ( $isgeneral ) {
 	echo "<h1>Send Response</h1>\n\n";
 	putClarificationForm("clarification.php", $respid);
 }
+
+?>
+<script type="text/javascript">
+	$(function() {
+		$(['subject', 'queue']).each(function(_, field) {
+			$('.clarification-' + field + '-change-button').on('click', function () {
+				$(this).closest('.clarification-' + field).hide();
+				$(this).closest('td').find('.clarification-' + field + '-form').show();
+			});
+			$('.clarification-' + field + '-cancel-button').on('click', function () {
+				$(this).closest('.clarification-' + field + '-form').hide();
+				$(this).closest('td').find('.clarification-' + field).show();
+			});
+			$('.clarification-' + field + '-form select').on('change', function () {
+				var $select = $(this);
+				var $form = $('.clarification-' + field + '-form');
+				var clarId = $form.data('clarification-id');
+				var value = $select.find(':selected').text();
+				if (confirm('Are you sure you want to change the ' + field + ' of clarification ' + clarId + ' to "' + value + '"?')) {
+					$form.find('form').submit();
+				} else {
+					$select.val($form.data('current-selected-' + field));
+				}
+			});
+		});
+	});
+</script>
+<?php
 
 require(LIBWWWDIR . '/footer.php');

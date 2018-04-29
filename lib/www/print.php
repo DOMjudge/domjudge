@@ -61,13 +61,31 @@ function printyn ($val) {
 /**
  * Print a time in default configured time_format, or formatted as
  * specified. The format is according to strftime().
- * FIXME: reintroduce contest relative time: show time from start of
- * contest, after removing ignored intervals.
+ * If $cid is specified, print time relative to that contest start.
  */
-function printtime($datetime, $format = NULL) {
+function printtime($datetime, $format = NULL, $cid = NULL) {
 	if ( empty($datetime) ) return '';
 	if ( is_null($format) ) $format = dbconfig_get('time_format', '%H:%M');
-	return specialchars(strftime($format,floor($datetime)));
+	if ( isset($cid) ) {
+	        $reltime = (int)floor(calcContestTime($datetime,$cid));
+		$sign = ( $reltime<0 ? -1 : 1 );
+		$reltime *= $sign;
+		// We're not showing seconds, while the last minute before
+		// contest start should show as "-0:01", so if there's a
+		// nonzero amount of seconds before the contest, we have to
+		// add a minute.
+		$s = $reltime%60; $reltime = ($reltime - $s)/60;
+		if ( $sign<0 && $s>0 ) $reltime++;
+		$m = $reltime%60; $reltime = ($reltime - $m)/60;
+		$h = $reltime;
+		if ( $sign<0 ) {
+			return sprintf("-%d:%02d", $h, $m);
+		} else {
+			return sprintf("%d:%02d", $h, $m);
+		}
+	} else {
+		return specialchars(strftime($format,floor($datetime)));
+	}
 }
 
 /**
@@ -122,12 +140,14 @@ function printsize($size, $decimals = 1)
 	$units = array('B', 'KB', 'MB', 'GB');
 	$display = (int)$size;
 
+	$exact = TRUE;
 	for ($i = 0; $i < count($units) && $display > $factor; $i++) {
+		if ( ($display % $factor)!=0 ) $exact = FALSE;
 		$display /= $factor;
 	}
 
-	if ( $i==0 ) $decimals = 0;
-	return sprintf("%.${decimals}lf&nbsp;%s", $display, $units[$i]);
+	if ( $exact ) $decimals = 0;
+	return sprintf("%.${decimals}lf&nbsp;%s", round($display, $decimals), $units[$i]);
 }
 
 /**
@@ -135,30 +155,32 @@ function printsize($size, $decimals = 1)
  */
 function printtimerel($rel_time, $use_microseconds = FALSE)
 {
+	$sign = $rel_time < 0 ? '-' : '';
+	$rel_time = abs($rel_time);
+	$frac_str = '';
+
 	if ( $use_microseconds ) {
 		$frac_str = explode('.', sprintf('%.6f', $rel_time))[1];
+		$rel_time = (int) floor($rel_time);
+	} else {
+		// For negative times we still want to floor, but we've
+		// already removed the sign, so take ceil() if negative.
+		$rel_time = (int) ($sign=='-' ? ceil($rel_time) : floor($rel_time));
 	}
-	$rel_time = (int) floor($rel_time);
 
-	$h = floor($rel_time/3600);
+	$h = (int) floor($rel_time/3600);
 	$rel_time %= 3600;
 
-	$m = floor($rel_time/60);
-	if ($m < 10) {
-		$m = '0' . $m;
-	}
+	$m = (int) floor($rel_time/60);
 	$rel_time %= 60;
 
-	$s = $rel_time;
-	if ($s < 10) {
-		$s = '0' . $s;
-	}
+	$s = (int) $rel_time;
 
 	if ( $use_microseconds ) {
 		$s .= '.' . $frac_str;
 	}
 
-	return $h . ':' . $m . ':' . $s;
+	return sprintf($sign.'%01d:%02d:%02d'.$frac_str, $h, $m, $s);
 }
 
 /**

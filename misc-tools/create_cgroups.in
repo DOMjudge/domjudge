@@ -1,5 +1,5 @@
 #!/bin/sh
-# This script will create cgroups for DOMjudge to use in /cgroup/
+# This script will create cgroups for DOMjudge to use in /sys/fs/cgroup/
 # They need to be re-created after system boot; you may want to
 # add this script to an init script.
 

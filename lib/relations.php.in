@@ -34,25 +34,24 @@ $RELATIONS['clarification']['recipient'] = 'team.teamid&NOCONSTRAINT';
  * Check whether some primary key is referenced in any
  * table as a foreign key.
  *
- * Returns null or an array "table name => action" where matches are found.
+ * Returns an array "table name => action" of matches found.
  */
 function fk_check($keyfield, $value) {
 	global $RELATIONS, $DB;
 
 	$ret = array();
-	foreach ( $RELATIONS as $table => $keys ) {
-		foreach ( $keys as $key => $val ) {
-			@list( $foreign, $action ) = explode('&', $val);
+	foreach ( $RELATIONS as $table => $table_rels ) {
+		foreach ( $table_rels as $column => $constraint ) {
+			@list( $foreign, $action ) = explode('&', $constraint);
 			if ( empty($action) ) $action = 'CASCADE';
 			if ( $foreign == $keyfield ) {
-				$c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $key = %s", $value);
+				$c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $column = %s", $value);
 				if ( $c > 0 ) $ret[$table] = $action;
 			}
 		}
 	}
 
-	if ( count($ret) ) return $ret;
-	return null;
+	return $ret;
 }
 
 /**
@@ -74,9 +73,9 @@ function fk_dependent_tables($table)
 		if ( in_array($curr_table,$ret) ) continue;
 		if ( $curr_table!=$table ) $ret[] = $curr_table;
 
-		foreach ( $RELATIONS as $next_table => $data ) {
-			foreach ( $data as $val ) {
-				@list( $foreign, $action ) = explode('&', $val);
+		foreach ( $RELATIONS as $next_table => $table_rels ) {
+			foreach ( $table_rels as $constraint ) {
+				@list( $foreign, $action ) = explode('&', $constraint);
 				@list( $foreign_table, $foreign_key ) = explode('.', $foreign);
 				if ( empty($action) ) $action = 'CASCADE';
 				if ( $foreign_table==$curr_table && $action=='CASCADE' ) {
@@ -87,4 +86,44 @@ function fk_dependent_tables($table)
 	}
 
 	return $ret;
+}
+
+/**
+ * Given a table and column,value pair, find all rows in that table
+ * where column=value and recursively any dependent rows in tables
+ * that reference those. $depth is an internal variable.
+ *
+ * Returns in $results an array of tuples [tablename, [key => value, ...]].
+ * The results are ordered such that referential integrity is
+ * preserved if they are deleted as given.
+ */
+function fk_dependent_rows(&$results, $table, $column, $value, $depth = 0)
+{
+	global $RELATIONS, $KEYS, $DB;
+
+	if ( !array_key_exists($table, $KEYS) ) error("invalid table '$table'");
+	if ( $depth>=10 ) error("fk_dependent_rows recursion depth exceeded at $depth");
+
+	$keys = $KEYS[$table];
+	$rows = $DB->q("TABLE SELECT %Al FROM $table WHERE `$column` = %s", $keys, $value);
+
+	foreach ( $RELATIONS as $next_table => $table_rels ) {
+		foreach ( $table_rels as $next_column => $constraint ) {
+			@list( $foreign, $action ) = explode('&', $constraint);
+			list( $foreign_table, $foreign_key ) = explode('.', $foreign);
+			if ( empty($action) ) $action = 'CASCADE';
+			if ( in_array($action,array('SETNULL','NOCONSTRAINT')) ) continue;
+			if ( $foreign_table == $table ) {
+				foreach ( $rows as $row ) {
+					fk_dependent_rows($results, $next_table, $next_column,
+					                  $row[$foreign_key], $depth+1);
+				}
+			}
+		}
+	}
+
+	foreach ( $rows as $row ) {
+		$res = array($table, $row);
+		if ( !in_array($results,$res) ) $results[] = $res;
+	}
 }

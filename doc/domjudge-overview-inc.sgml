@@ -66,6 +66,7 @@ Michael Baer,
 Jeroen Bransen,
 Stijn van Drongelen,
 Rob Franken,
+Marc Furon,
 Jacob Kleerekoper,
 Ruud Koot,
 Jan Kuipers,
@@ -81,7 +82,7 @@ and Jeroen van Wolffelaar.
 Some code has been ported from the ETH Zurich fork by Christoph
 Krautz, Thomas Rast et al.
 
-DOMjudge is Copyright (c) 2004 - 2017 by the DOMjudge developers and its contributors.
+DOMjudge is Copyright (c) 2004 - 2018 by the DOMjudge developers and its contributors.
 
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the <url name="GNU General Public License"
@@ -120,9 +121,6 @@ to name them here too (with non-GPL licences listed where applicable):
        licence, see <tt>COPYING.BSD</tt>. It was downloaded from
        <url url="https://github.com/ajaxorg/ace-builds">,
        the <tt>src-min-noconflict</tt> version.
-<item> Flot JavaScript library by IOLA and Ole Laursen, licenced
-       under the MIT licence, see <tt>COPYING.MIT</tt>. It was
-       downloaded from <url url="http://www.flotcharts.org/">.
 <item> jQuery JavaScript library by the jQuery Foundation, licenced
        under the MIT licence, see <tt>COPYING.MIT</tt>. It was
        downloaded from <url url="http://jquery.com/">.

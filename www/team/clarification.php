@@ -29,9 +29,15 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 
 	list($cid, $probid) = explode('-', $_POST['problem']);
 	$category = NULL;
+	$queue = NULL;
 	if ( !ctype_digit($probid) ) {
 		$category = $probid;
 		$probid = NULL;
+	} else {
+		$queue = dbconfig_get('clar_default_problem_queue');
+		if ($queue === "") {
+			$queue = null;
+		}
 	}
 
 	// Disallow problems that are not submittable or
@@ -39,10 +45,11 @@ if ( isset($_POST['submit']) && !empty($_POST['bodytext']) ) {
 	if ( !problemVisible($probid) ) $probid = NULL;
 
 	$newid = $DB->q('RETURNID INSERT INTO clarification
-	                 (cid, submittime, sender, probid, category, body)
-	                 VALUES (%i, %s, %i, %i, %s, %s)',
-	                $cid, now(), $teamid, $probid, $category, $_POST['bodytext']);
+	                 (cid, submittime, sender, probid, category, queue, body)
+	                 VALUES (%i, %s, %i, %i, %s, %s, %s)',
+	                $cid, now(), $teamid, $probid, $category, $queue, $_POST['bodytext']);
 
+	eventlog('clarification', $newid, 'create', $cid);
 	auditlog('clarification', $newid, 'added', null, null, $cid);
 
 	// redirect back to the original location
@@ -60,10 +67,15 @@ if ( isset($id) ) {
 	} else {
 		echo "<h1>Clarification</h1>\n\n";
 	}
+	echo "<div class=\"container clarificationform\"><div class=\"card card-body\">";
 	putClarification($respid, $teamid);
 
-	echo "<h2>Send Clarification Request</h2>\n\n";
+	echo '</div><div class="mt-3"><button class="btn btn-secondary btn-sm" data-toggle="collapse" data-target="#collapsereplyform" aria-expanded="false" aria-controls="collapsereplyform">reply to this clarification</button></div>';
+	echo "</div>";
+
+	echo '<div class="collapse mt-3 container clarificationform" id="collapsereplyform"><div class="card card-body">';
 	putClarificationForm("clarification.php", $id, $cid);
+	echo '</div></div>';
 } else {
 	// display a clarification request send box
 	echo "<h1>Send Clarification Request</h1>\n\n";

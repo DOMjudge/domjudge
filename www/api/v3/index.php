@@ -6,19 +6,22 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-define('DOMJUDGE_API_VERSION', 3);
+if (!defined('DOMJUDGE_API_VERSION')) {
+	define('DOMJUDGE_API_VERSION', 3);
+}
 
 require('init.php');
 require_once(LIBWWWDIR . '/common.jury.php');
 
-
+global $api;
+if (!isset($api)) {
 function infreeze($cdata, $time)
 {
 
 	if ( ( ! empty($cdata['freezetime']) &&
-		difftime($time, $cdata['freezetime'])>0 ) &&
+		difftime($time, $cdata['freezetime'])>=0 ) &&
 		( empty($cdata['unfreezetime']) ||
-		difftime($time, $cdata['unfreezetime'])<=0 ) ) return TRUE;
+		difftime($time, $cdata['unfreezetime'])<0 ) ) return TRUE;
 	return FALSE;
 }
 
@@ -29,8 +32,10 @@ function checkargs($args, $mandatory)
 	foreach ( $mandatory as $arg ) {
 		if ( !isset($args[$arg]) ) {
 			$api->createError("argument '$arg' is mandatory");
+			return false;
 		}
 	}
+	return true;
 }
 
 function safe_int($value)
@@ -174,7 +179,9 @@ function problems($args)
 {
 	global $DB, $cdatas, $userdata;
 
-	checkargs($args, array('cid'));
+	if (!checkargs($args, array('cid'))) {
+		return '';
+	}
 	$cid = safe_int($args['cid']);
 
 	// Check that user has access to the problems in this contest:
@@ -293,7 +300,9 @@ function judgings_POST($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('judgehost'));
+	if (!checkargs($args, array('judgehost'))) {
+		return '';
+	}
 
 	$host = $args['judgehost'];
 	$DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $host);
@@ -315,7 +324,7 @@ function judgings_POST($args)
 	                        INNER JOIN judgehost_restriction USING (restrictionid)
 	                        WHERE hostname = %s', $host);
 	if ( $restrictions ) {
-		$restrictions = json_decode($restrictions, true);
+		$restrictions = dj_json_decode($restrictions);
 		$contests = @$restrictions['contest'];
 		$problems = @$restrictions['problem'];
 		$languages = @$restrictions['language'];
@@ -457,10 +466,12 @@ function judgings_PUT($args)
 
 	if ( !isset($args['__primary_key']) ) {
 		$api->createError("judgingid is mandatory");
+		return '';
 	}
 	$judgingid = $args['__primary_key'];
 	if ( !isset($args['judgehost']) ) {
 		$api->createError("judgehost is mandatory");
+		return '';
 	}
 
 	if ( isset($args['output_compile']) ) {
@@ -495,11 +506,7 @@ function judgings_PUT($args)
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
 			if ( ! dbconfig_get('verification_required', 0) ) {
-				$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-				        submitid, judgingid, description)
-				        VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
-				       now(), $row['cid'], $row['teamid'], $row['langid'],
-				       $row['probid'], $row['submitid'], $judgingid);
+				eventlog('judging', $judgingid, 'update', $row['cid']);
 			}
 		}
 	}
@@ -525,8 +532,10 @@ function judging_runs_POST($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('judgingid', 'testcaseid', 'runresult', 'runtime',
-	                       'output_run', 'output_diff', 'output_error', 'output_system', 'judgehost'));
+	if (!checkargs($args, array('judgingid', 'testcaseid', 'runresult', 'runtime',
+	                       'output_run', 'output_diff', 'output_error', 'output_system', 'judgehost'))) {
+		return '';
+	}
 
 	$results_remap = dbconfig_get('results_remap');
 	$results_prio = dbconfig_get('results_prio');
@@ -604,11 +613,7 @@ function judging_runs_POST($args)
 			// log to event table if no verification required
 			// (case of verification required is handled in www/jury/verify.php)
 			if ( ! dbconfig_get('verification_required', 0) ) {
-				$DB->q('INSERT INTO event (eventtime, cid, teamid, langid, probid,
-				        submitid, judgingid, description)
-				        VALUES(%s, %i, %i, %s, %i, %i, %i, "problem judged")',
-				       now(), $row['cid'], $row['teamid'], $row['langid'],
-				       $row['probid'], $row['submitid'], $args['judgingid']);
+				eventlog('judging', $args['judgingid'], 'update', $row['cid']);
 				if ( $result == 'correct' ) {
 					// prevent duplicate balloons in case of multiple correct submissions
 					$numcorrect = $DB->q('VALUE SELECT count(submitid)
@@ -697,10 +702,11 @@ function submissions($args)
 
 	if ( $cid == 0 && !checkrole('jury') ) {
 		$api->createError("argument 'cid' is mandatory for non-jury users");
+		return '';
 	}
 
 	if ( $cid != 0 && infreeze($cdatas[$cid], now()) && !checkrole('jury') ) {
-		$query .= ' AND submittime <= %i';
+		$query .= ' AND submittime < %i';
 		$freezetime = $cdatas[$cid]['freezetime'];
 	} else {
 		$query .= ' AND TRUE %_';
@@ -742,8 +748,12 @@ $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
 function submissions_POST($args)
 {
 	global $userdata, $DB, $api;
-	checkargs($args, array('shortname','langid'));
-	checkargs($userdata, array('teamid'));
+	if (!checkargs($args, array('shortname','langid'))) {
+		return '';
+	}
+	if (!checkargs($userdata, array('teamid'))) {
+		return '';
+	}
 	$contests = getCurContests(TRUE, $userdata['teamid'], false, 'shortname');
 	$contest_shortname = null;
 
@@ -752,12 +762,14 @@ function submissions_POST($args)
 			$contest_shortname = $args['contest'];
 		} else {
 			$api->createError("Cannot find active contest '$args[contest]', or you are not part of it.");
+			return '';
 		}
 	} else {
 		if ( count($contests) == 1 ) {
 			$contest_shortname = key($contests);
 		} else {
 			$api->createError("No contest specified while multiple active contests found.");
+			return '';
 		}
 	}
 	$cid = $contests[$contest_shortname]['cid'];
@@ -807,13 +819,16 @@ function submission_files($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('id'));
+	if (!checkargs($args, array('id'))) {
+		return '';
+	}
 
 	$sources = $DB->q('SELECT filename, sourcecode FROM submission_file
 	                   WHERE submitid = %i ORDER BY rank', $args['id']);
 
 	if ( $sources->count()==0 ) {
 		$api->createError("Cannot find source files for submission '$args[id]'.");
+		return '';
 	}
 
 	$ret = array();
@@ -839,7 +854,9 @@ function testcases($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('judgingid'));
+	if (!checkargs($args, array('judgingid'))) {
+		return '';
+	}
 
 	// endtime is set: judging is fully done; return empty
 	$row = $DB->q('TUPLE SELECT endtime,probid
@@ -876,13 +893,17 @@ function testcase_files($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('testcaseid'));
+	if (!checkargs($args, array('testcaseid'))) {
+		return '';
+	}
 
 	if ( !isset($args['input']) && !isset($args['output']) ) {
 		$api->createError("either input or output is mandatory");
+		return '';
 	}
 	if ( isset($args['input']) && isset($args['output']) ) {
 		$api->createError("cannot select both input and output");
+		return '';
 	}
 	$inout = 'output';
 	if ( isset($args['input']) ) {
@@ -894,6 +915,7 @@ function testcase_files($args)
 
 	if ( is_null($content) ) {
 		$api->createError("Cannot find testcase '$args[testcaseid]'.");
+		return '';
 	}
 
 	return base64_encode($content);
@@ -911,13 +933,16 @@ function executable($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('execid'));
+	if (!checkargs($args, array('execid'))) {
+		return '';
+	}
 
 	$content = $DB->q("MAYBEVALUE SELECT SQL_NO_CACHE zipfile FROM executable
 	                   WHERE execid = %s", $args['execid']);
 
 	if ( is_null($content) ) {
 		$api->createError("Cannot find executable '$args[execid]'.");
+		return '';
 	}
 
 	return base64_encode($content);
@@ -1090,7 +1115,7 @@ function languages()
 		$res[] = array(
 			'id'           => $row['langid'],
 			'name'         => $row['name'],
-			'extensions'   => json_decode($row['extensions']),
+			'extensions'   => dj_json_decode($row['extensions']),
 			'allow_judge'  => safe_bool($row['allow_judge']),
 			'time_factor'  => safe_float($row['time_factor']),
 			);
@@ -1166,7 +1191,9 @@ function judgehosts_POST($args)
 {
 	global $DB, $api;
 
-	checkargs($args, array('hostname'));
+	if (!checkargs($args, array('hostname'))) {
+		return '';
+	}
 
 	$DB->q('INSERT IGNORE INTO judgehost (hostname) VALUES(%s)',
 	       $args['hostname']);
@@ -1204,10 +1231,12 @@ function judgehosts_PUT($args)
 
 	if ( !isset($args['__primary_key']) ) {
 		$api->createError("hostname is mandatory");
+		return '';
 	}
 	$hostname = $args['__primary_key'];
 	if ( !isset($args['active']) ) {
 		$api->createError("active is mandatory");
+		return '';
 	}
 	$active = $args['active'];
 	$DB->q('UPDATE judgehost SET active=%i WHERE hostname=%s', $active, $hostname);
@@ -1228,7 +1257,11 @@ function cmp_prob_label($a, $b) { return $a['label'] > $b['label']; }
  */
 function scoreboard($args)
 {
-	global $DB, $api, $cdatas, $cids;
+	global $DB, $api, $cdatas, $cids, $userdata;
+
+	if ( isset($userdata['teamid']) ) {
+		$cdatas = getCurContests(TRUE, $userdata['teamid']);
+	}
 
 	if ( isset($args['cid']) ) {
 		$cid = safe_int($args['cid']);
@@ -1237,6 +1270,7 @@ function scoreboard($args)
 			$cid = reset($cids);
 		} else {
 			$api->createError("No contest ID specified but active contest is ambiguous.");
+			return '';
 		}
 	}
 
@@ -1299,7 +1333,9 @@ function internal_error_POST($args)
 {
 	global $DB;
 
-	checkargs($args, array('description', 'judgehostlog', 'disabled'));
+	if (!checkargs($args, array('description', 'judgehostlog', 'disabled'))) {
+		return '';
+	}
 
 	global $cdatas, $api;
 
@@ -1406,6 +1442,8 @@ $doc = 'Lists all available judgement types.';
 $args = array();
 $exArgs = array();
 $api->provideFunction('GET', 'judgement_types', $doc, $args, $exArgs, null, true);
+
+}
 
 // Now provide the api, which will handle the request
 $api->provideApi();

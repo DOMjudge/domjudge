@@ -116,6 +116,18 @@ function warning($string) {
 }
 
 /**
+ * Write debugging output using var_dump(). Uses <pre> in web context.
+ */
+function debug()
+{
+	if ( DEBUG===0 ) return;
+
+	if ( IS_WEB ) echo "<pre>\n";
+	call_user_func_array('var_dump',func_get_args());
+	if ( IS_WEB ) echo "</pre>\n";
+}
+
+/**
  * Handle exceptions by calling error().
  */
 function exception_handler($e) {

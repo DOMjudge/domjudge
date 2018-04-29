@@ -20,8 +20,8 @@ if ( ! have_printing() ) {
 // Seems reasonable to require that there's a contest running
 // before allowing to submit printouts.
 $fdata = calcFreezeData($cdata);
-if ( !checkrole('jury') && !$fdata['cstarted'] ) {
-	echo "<p class=\"nodata\">Contest has not yet started.</p>\n";
+if ( !checkrole('jury') && !$fdata['started'] ) {
+	echo "<div class=\"alert alert-secondary\">Contest has not yet started.</div>\n";
 	require(LIBWWWDIR . '/footer.php');
 	exit;
 }

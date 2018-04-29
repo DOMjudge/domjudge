@@ -3,6 +3,18 @@ domjudge:
     type: annotation
     prefix: /
 
+domjudge_api_v4:
+    type: rest
+    resource: '@DOMJudgeBundle/Controller/APIController.php'
+    prefix: /api/v4
+    defaults: { _format: "json" }
+
+logout:
+    path: /logout
+
+overriden_routes:
+    resource: "@DOMJudgeBundle/Resources/config/routing.yml"
+
 fallback:
     path: /{path}
     defaults: { _controller: "legacy.controller.fallback:fallback" }

@@ -113,9 +113,10 @@ char  *rootdir;
 char  *stdoutfilename;
 char  *stderrfilename;
 char  *metafilename;
+char  *environment_variables;
 FILE  *metafile;
 
-char  *cgroupname;
+char  cgroupname[255];
 const char *cpuset;
 
 /* Linux Out-Of-Memory adjustment for current process. */
@@ -138,19 +139,20 @@ int limit_streamsize;
 int outputmeta;
 int outputtimetype;
 int no_coredump;
+int preserve_environment;
 int be_verbose;
 int be_quiet;
 int show_help;
 int show_version;
 
-double walltime[2], cputime[2]; /* in seconds, soft and hard limits */
+double walltimelimit[2], cputimelimit[2]; /* in seconds, soft and hard limits */
 int walllimit_reached, cpulimit_reached; /* 1=soft, 2=hard, 3=both limits reached */
 int64_t memsize;
 rlim_t filesize;
 rlim_t nproc;
 size_t streamsize;
 
-pid_t child_pid;
+pid_t child_pid = -1;
 
 static volatile sig_atomic_t received_SIGCHLD = 0;
 static volatile sig_atomic_t received_signal = -1;
@@ -177,6 +179,8 @@ struct option const long_opts[] = {
 	{"stdout",     required_argument, NULL,         'o'},
 	{"stderr",     required_argument, NULL,         'e'},
 	{"streamsize", required_argument, NULL,         's'},
+	{"environment",no_argument,       NULL,         'E'},
+	{"variable",   required_argument, NULL,         'V'},
 	{"outmeta",    required_argument, NULL,         'M'},
 	{"verbose",    no_argument,       NULL,         'v'},
 	{"quiet",      no_argument,       NULL,         'q'},
@@ -222,6 +226,15 @@ void error(int errnum, const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
+	sigset_t sigs;
+
+	/*
+	 * Make sure the signal handler for these (terminate()) does not
+	 * interfere, we are exiting now anyway.
+	 */
+	sigaddset(&sigs, SIGALRM);
+	sigaddset(&sigs, SIGTERM);
+	sigprocmask(SIG_BLOCK, &sigs, NULL);
 
 	fprintf(stderr,"%s",progname);
 
@@ -230,7 +243,16 @@ void error(int errnum, const char *format, ...)
 		vfprintf(stderr,format,ap);
 	}
 	if ( errnum!=0 ) {
-		fprintf(stderr,": %s",strerror(errnum));
+		/* Special case libcgroup error codes. */
+		if ( errnum==ECGOTHER ) {
+			fprintf(stderr,": libcgroup");
+			errnum = errno;
+		}
+		if ( errnum>=ECGROUPNOTCOMPILED && errnum<=ECGROUPNOTCOMPILED ) {
+			fprintf(stderr,": %s",cgroup_strerror(errnum));
+		} else {
+			fprintf(stderr,": %s",strerror(errnum));
+		}
 	}
 	if ( format==NULL && errnum==0 ) {
 		fprintf(stderr,": unknown error");
@@ -239,7 +261,25 @@ void error(int errnum, const char *format, ...)
 	fprintf(stderr,"\nTry `%s --help' for more information.\n",progname);
 	va_end(ap);
 
-	write_meta("internal-error","%s","runguard error");
+	write_meta("internal-error","%s: %d - %s","runguard error", errnum, format);
+
+	/* Make sure that all children are killed before terminating */
+	if ( child_pid > 0) {
+		verbose("sending SIGKILL");
+		if ( kill(-child_pid,SIGKILL)!=0 && errno!=ESRCH ) {
+			fprintf(stderr,"unable to send SIGKILL to children while terminating "
+					"due to previous error: %s\n", strerror(errno));
+			/*
+			 * continue, there is not much we can do here.
+			 * In the worst case, this will trigger an error
+			 * in testcase_run.sh, as the runuser may still be
+			 * running processes
+			 */
+		}
+
+		/* Wait a while to make sure the process is killed by now. */
+		nanosleep(&killdelay,NULL);
+	}
 
 	exit(exit_failure);
 }
@@ -297,6 +337,8 @@ Run COMMAND with restrictions.\n\
   -o, --stdout=FILE      redirect COMMAND stdout output to FILE\n\
   -e, --stderr=FILE      redirect COMMAND stderr output to FILE\n\
   -s, --streamsize=SIZE  truncate COMMAND stdout/stderr streams at SIZE kB\n\
+  -E, --environment      preserve environment variables (default only PATH)\n\
+  -V, --variable         add additonal environment variables (in form KEY=VALUE;KEY2=VALUE2)\n\
   -M, --outmeta=FILE     write metadata (runtime, exitcode, etc.) to FILE\n");
 	printf("\
   -v, --verbose          display some extra warnings and information\n\
@@ -307,6 +349,8 @@ Run COMMAND with restrictions.\n\
 Note that root privileges are needed for the `root' and `user' options.\n\
 If `user' is set, then `group' defaults to the same to prevent security\n\
 issues, since otherwise the process would retain group root permissions.\n\
+Additionally, Linux cgroup support is required for the `memsize' and\n\
+`cputime' options, and to report actual memory usage.\n\
 The COMMAND path is relative to the changed ROOT directory if specified.\n\
 TIME may be specified as a float; two floats separated by `:' are treated\n\
 as soft and hard limits. The runtime written to file is that of the last\n\
@@ -343,12 +387,12 @@ void output_exit_time(int exitcode, double cpudiff)
 	verbose("runtime is %.3f seconds real, %.3f user, %.3f sys",
 	        walldiff, userdiff, sysdiff);
 
-	if ( use_walltime && walldiff > walltime[0] ) {
+	if ( use_walltime && walldiff > walltimelimit[0] ) {
 		walllimit_reached |= soft_timelimit;
 		warning("timelimit exceeded (soft wall time)");
 	}
 
-	if ( use_cputime && cpudiff > cputime[0] ) {
+	if ( use_cputime && cpudiff > cputimelimit[0] ) {
 		cpulimit_reached |= soft_timelimit;
 		warning("timelimit exceeded (soft cpu time)");
 	}
@@ -374,6 +418,16 @@ void output_exit_time(int exitcode, double cpudiff)
 	write_meta("time-result","%s",output_timelimit_str[timelimit_reached]);
 }
 
+/* Return whether we need to use cgroups. This is checked in the
+ * cgroup_* functions below. If not used they return without
+ * performing any action.
+ */
+int use_cgroup()
+{
+	return use_cputime || memsize!=RLIM_INFINITY ||
+	    ( cpuset!=NULL && strlen(cpuset)>0 );
+}
+
 void output_cgroup_stats(double *cputime)
 {
 	int ret;
@@ -381,31 +435,31 @@ void output_cgroup_stats(double *cputime)
 	struct cgroup *cg;
 	struct cgroup_controller *cg_controller;
 
-	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
-	if ((ret = cgroup_get_cgroup(cg)) != 0) {
-		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if ( !use_cgroup() ) return;
+
+	if ( (cg = cgroup_new_cgroup(cgroupname))==NULL ) error(0,"cgroup_new_cgroup");
+	if ((ret = cgroup_get_cgroup(cg)) != 0) error(ret,"get cgroup information");
+
 	cg_controller = cgroup_get_controller(cg, "memory");
 	ret = cgroup_get_value_int64(cg_controller, "memory.memsw.max_usage_in_bytes", &max_usage);
-	if ( ret!=0 ) {
-		error(0,"get cgroup value: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if ( ret!=0 ) error(ret,"get cgroup value memory.memsw.max_usage_in_bytes");
 
 	verbose("total memory used: %" PRId64 " kB", max_usage/1024);
 	write_meta("memory-bytes","%" PRId64, max_usage);
 
 	cg_controller = cgroup_get_controller(cg, "cpuacct");
 	ret = cgroup_get_value_int64(cg_controller, "cpuacct.usage", &cpu_time_int);
-	if ( ret!=0 ) {
-		error(0,"get cgroup value: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if ( ret!=0 ) error(ret,"get cgroup value cpuacct.usage");
+
 	*cputime = (double) cpu_time_int / 1.e9;
 
 	cgroup_free(&cg);
 }
+
+/* Temporary shorthand define for error handling. */
+#define cgroup_add_value(type,name,value) \
+	ret = cgroup_add_value_ ## type(cg_controller, name, value); \
+	if ( ret!=0 ) error(ret,"set cgroup value " #name);
 
 void cgroup_create()
 {
@@ -413,62 +467,63 @@ void cgroup_create()
 	struct cgroup *cg;
 	struct cgroup_controller *cg_controller;
 
+	if ( !use_cgroup() ) return;
+
 	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
+	if (!cg) error(0,"cgroup_new_cgroup");
 
 	/* Set up the memory restrictions; these two options limit ram use
 	   and ram+swap use. They are the same so no swapping can occur */
-	cg_controller = cgroup_add_controller(cg, "memory");
-	cgroup_add_value_int64(cg_controller, "memory.limit_in_bytes", memsize);
-	cgroup_add_value_int64(cg_controller, "memory.memsw.limit_in_bytes", memsize);
+	if ( (cg_controller = cgroup_add_controller(cg, "memory"))==NULL ) {
+		error(0,"cgroup_add_controller memory");
+	}
+
+	cgroup_add_value(int64, "memory.limit_in_bytes", memsize);
+	cgroup_add_value(int64, "memory.memsw.limit_in_bytes", memsize);
 
 	/* Set up cpu restrictions; we pin the task to a specific set of
 	   cpus. We also give it exclusive access to those cores, and set
 	   no limits on memory nodes */
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
-		cg_controller = cgroup_add_controller(cg, "cpuset");
+		if ( (cg_controller = cgroup_add_controller(cg, "cpuset"))==NULL ) {
+			error(0,"cgroup_add_controller cpuset");
+		}
 		/* To make a cpuset exclusive, some additional setup outside of domjudge is
 		   required, so for now, we will leave this commented out. */
 		/* cgroup_add_value_int64(cg_controller, "cpuset.cpu_exclusive", 1); */
-		cgroup_add_value_string(cg_controller, "cpuset.mems", "0");
-		cgroup_add_value_string(cg_controller, "cpuset.cpus", cpuset);
+		cgroup_add_value(string, "cpuset.mems", "0");
+		cgroup_add_value(string, "cpuset.cpus", cpuset);
 	} else {
 		verbose("cpuset undefined");
 	}
 
-	cg_controller = cgroup_add_controller(cg, "cpu");
-	cg_controller = cgroup_add_controller(cg, "cpuacct");
-
-	/* Perform the actual creation of the cgroup */
-	ret = cgroup_create_cgroup(cg, 1);
-	if ( ret!=0 ) {
-		error(0,"creating cgroup: %s(%d)", cgroup_strerror(ret), ret);
+	if ( (cg_controller = cgroup_add_controller(cg, "cpuacct"))==NULL ) {
+		error(0,"cgroup_add_controller cpuacct");
 	}
 
+	/* Perform the actual creation of the cgroup */
+	if ( (ret = cgroup_create_cgroup(cg, 1))!=0 ) error(ret,"creating cgroup");
+
 	cgroup_free(&cg);
+	verbose("created cgroup '%s'",cgroupname);
 }
+
+#undef cgroup_setval
 
 void cgroup_attach()
 {
 	int ret;
 	struct cgroup *cg;
 
+	if ( !use_cgroup() ) return;
+
 	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
-	ret = cgroup_get_cgroup(cg);
-	if ( ret!=0 ) {
-		error(0,"get cgroup information: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if (!cg) error(0,"cgroup_new_cgroup");
+
+	if ( (ret = cgroup_get_cgroup(cg))!=0 ) error(ret,"get cgroup information");
 
 	/* Attach task to the cgroup */
-	ret = cgroup_attach_task(cg);
-	if ( ret!=0 ) {
-		error(0,"attach task to cgroup: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if ( (ret = cgroup_attach_task(cg))!=0 ) error(ret,"attach task to cgroup");
 
 	cgroup_free(&cg);
 }
@@ -478,6 +533,8 @@ void cgroup_kill()
 	int ret;
 	void *handle = NULL;
 	pid_t pid;
+
+	if ( !use_cgroup() ) return;
 
 	/* kill any remaining tasks, and wait for them to be gone */
 	while(1) {
@@ -493,21 +550,24 @@ void cgroup_delete()
 	int ret;
 	struct cgroup *cg;
 
+	if ( !use_cgroup() ) return;
+
 	cg = cgroup_new_cgroup(cgroupname);
-	if (!cg) {
-		error(0,"cgroup_new_cgroup");
-	}
-	cgroup_add_controller(cg, "cpu");
-	cgroup_add_controller(cg, "memory");
+	if (!cg) error(0,"cgroup_new_cgroup");
+
+	if ( cgroup_add_controller(cg, "cpuacct")==NULL ) error(0,"cgroup_add_controller cpuacct");
+	if ( cgroup_add_controller(cg, "memory")==NULL ) error(0,"cgroup_add_controller cpuacct");
+
 	if ( cpuset!=NULL && strlen(cpuset)>0 ) {
-		cgroup_add_controller(cg, "cpuset");
+		if ( cgroup_add_controller(cg, "cpuset")==NULL ) error(0,"cgroup_add_controller cpuacct");
 	}
 	/* Clean up our cgroup */
 	ret = cgroup_delete_cgroup_ext(cg, CGFLAG_DELETE_IGNORE_MIGRATION | CGFLAG_DELETE_RECURSIVE);
-	if ( ret!=0 ) {
-		error(0,"deleting cgroup: %s(%d)", cgroup_strerror(ret), ret);
-	}
+	if ( ret!=0 ) error(ret,"deleting cgroup");
+
 	cgroup_free(&cg);
+
+	verbose("deleted cgroup '%s'",cgroupname);
 }
 
 void terminate(int sig)
@@ -638,10 +698,21 @@ void setrestrictions()
 	struct rlimit lim;
 
 	/* Clear environment to prevent all kinds of security holes, save PATH */
-	path = getenv("PATH");
-	environ[0] = NULL;
-	/* FIXME: Clean path before setting it again? */
-	if ( path!=NULL ) setenv("PATH",path,1);
+	if ( !preserve_environment ) {
+		path = getenv("PATH");
+		environ[0] = NULL;
+		/* FIXME: Clean path before setting it again? */
+		if ( path!=NULL ) setenv("PATH",path,1);
+	}
+
+	/* Set additional environment variables. */
+	if (environment_variables != NULL) {
+		char *token = strtok(environment_variables, ";");
+		while (token != NULL) {
+			putenv(token);
+			token = strtok(NULL, ";");
+		}
+	}
 
 	/* Set resource limits: must be root to raise hard limits.
 	   Note that limits can thus be raised from the systems defaults! */
@@ -664,7 +735,7 @@ void setrestrictions()
 		   the hard limit a SIGKILL. The SIGXCPU can be caught, but is
 		   not by default and gives us a reliable way to detect if the
 		   CPU-time limit was reached. */
-		rlim_t cputime_limit = (rlim_t)ceil(cputime[1]);
+		rlim_t cputime_limit = (rlim_t)ceil(cputimelimit[1]);
 		verbose("setting hard CPU-time limit to %d(+1) seconds",(int)cputime_limit);
 		lim.rlim_cur = cputime_limit;
 		lim.rlim_max = cputime_limit+1;
@@ -783,6 +854,7 @@ int main(int argc, char **argv)
 	size_t data_passed[3];
 	ssize_t nread;
 	size_t to_read;
+	int use_splice;
 	char str[256];
 
 	struct itimerval itimer;
@@ -794,18 +866,20 @@ int main(int argc, char **argv)
 	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
 	outputmeta = walllimit_reached = cpulimit_reached = 0;
 	outputtimetype = CPU_TIME_TYPE;
+	preserve_environment = 0;
 	memsize = filesize = nproc = RLIM_INFINITY;
 	redir_stdout = redir_stderr = limit_streamsize = 0;
 	be_verbose = be_quiet = 0;
 	show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:M:vq",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+r:u:g:t:C:m:f:p:P:co:e:s:EV:M:vq",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
 		case 'r': /* rootdir option */
 			use_root = 1;
 			rootdir = (char *) malloc(strlen(optarg)+2);
+			if ( rootdir==NULL ) error(errno,"allocating memory");
 			strcpy(rootdir,optarg);
 			break;
 		case 'u': /* user option: uid or string */
@@ -833,12 +907,12 @@ int main(int argc, char **argv)
 		case 't': /* wallclock time option */
 			use_walltime = 1;
 			outputtimetype = WALL_TIME_TYPE;
-			read_optarg_time("walltime",walltime);
+			read_optarg_time("walltime",walltimelimit);
 			break;
 		case 'C': /* CPU time option */
 			use_cputime = 1;
 			outputtimetype = CPU_TIME_TYPE;
-			read_optarg_time("cputime",cputime);
+			read_optarg_time("cputime",cputimelimit);
 			break;
 		case 'm': /* memsize option */
 			memsize = (rlim_t) read_optarg_int("memory limit",1,LONG_MAX);
@@ -885,6 +959,12 @@ int main(int argc, char **argv)
 				streamsize *= 1024;
 			}
 			break;
+		case 'E': /* environment option */
+			preserve_environment = 1;
+			break;
+		case 'V': /* set environment variable */
+			environment_variables = strdup(optarg);
+			break;
 		case 'M': /* outputmeta option */
 			outputmeta = 1;
 			metafilename = strdup(optarg);
@@ -903,6 +983,8 @@ int main(int argc, char **argv)
 			error(0,"getopt returned character code `%c' ??",(char)opt);
 		}
 	}
+
+	verbose("starting in verbose mode, PID = %d", getpid());
 
 	/* Make sure that we change from group root if we change to an
 	   unprivileged user to prevent unintended permissions. */
@@ -985,13 +1067,10 @@ int main(int argc, char **argv)
 	if ( ret!=0 ) {
 		error(0,"libcgroup initialization failed: %s(%d)\n", cgroup_strerror(ret), ret);
 	}
-	/* Define the cgroup name that we will use */
-	cgroupname = (char*)malloc(256);
-	if ( cgroupname==NULL ) {
-		error(errno,"allocating memory for cgroupname");
-	}
-	/* Note: group names must have slashes! */
-	snprintf(cgroupname, 256, "/domjudge/dj_cgroup_%d/", getpid());
+	/* Define the cgroup name that we will use and make sure it will
+	 * be unique. Note: group names must have slashes!
+	 */
+	snprintf(cgroupname, 255, "/domjudge/dj_cgroup_%d_%d/", getpid(), (int)time(NULL));
 
 	cgroup_create();
 
@@ -1023,6 +1102,7 @@ int main(int argc, char **argv)
 	case  0: /* run controlled command */
 		/* Apply all restrictions for child process. */
 		setrestrictions();
+		verbose("setrestrictions() done");
 
 		/* Connect pipes to command (stdin/)stdout/stderr and close
 		 * unneeded fd's. Do this after setting restrictions to let
@@ -1036,6 +1116,7 @@ int main(int argc, char **argv)
 				error(errno,"closing pipe for fd %d",i);
 			}
 		}
+		verbose("pipes closed in child");
 
 		/* And execute child command. */
 		execvp(cmdname,cmdargs);
@@ -1078,6 +1159,7 @@ int main(int argc, char **argv)
 				error(errno,"opening file '%s'",stderrfilename);
 			}
 		}
+		verbose("redirection done in parent");
 
 		if ( sigemptyset(&emptymask)!=0 ) error(errno,"creating empty signal mask");
 
@@ -1105,13 +1187,13 @@ int main(int argc, char **argv)
 			/* Trigger SIGALRM via setitimer:  */
 			itimer.it_interval.tv_sec  = 0;
 			itimer.it_interval.tv_usec = 0;
-			itimer.it_value.tv_sec  = (int) walltime[1];
-			itimer.it_value.tv_usec = (int)(modf(walltime[1],&tmpd) * 1E6);
+			itimer.it_value.tv_sec  = (int) walltimelimit[1];
+			itimer.it_value.tv_usec = (int)(modf(walltimelimit[1],&tmpd) * 1E6);
 
 			if ( setitimer(ITIMER_REAL,&itimer,NULL)!=0 ) {
 				error(errno,"setting timer");
 			}
-			verbose("setting hard wall-time limit to %.3f seconds",walltime[1]);
+			verbose("setting hard wall-time limit to %.3f seconds",walltimelimit[1]);
 		}
 
 		if ( times(&startticks)==(clock_t) -1 ) {
@@ -1122,6 +1204,11 @@ int main(int argc, char **argv)
 		   Initialize status here to quelch clang++ warning about
 		   uninitialized value; it is set by the wait() call. */
 		status = 0;
+		/* We start using splice() to copy data from child to parent
+		   I/O file descriptors. If that fails (not all I/O
+		   source - dest combinations support it), then we revert to
+		   using read()/write(). */
+		use_splice = 1;
 		while ( 1 ) {
 
 			FD_ZERO(&readfds);
@@ -1156,10 +1243,26 @@ int main(int argc, char **argv)
 						if (limit_streamsize) {
 							to_read = min(BUF_SIZE, streamsize-data_passed[i]);
 						}
-						nread = splice(child_pipefd[i][PIPE_OUT], NULL,
-									   child_redirfd[i], NULL,
-									   to_read, SPLICE_F_MOVE);
-						data_passed[i] += nread;
+
+						if ( use_splice ) {
+							nread = splice(child_pipefd[i][PIPE_OUT], NULL,
+							               child_redirfd[i], NULL,
+							               to_read, SPLICE_F_MOVE);
+
+							if ( nread==-1 && errno==EINVAL ) {
+								use_splice = 0;
+								verbose("splice failed, switching to read/write");
+								/* Setting errno here to repeat the copy. */
+								errno = EAGAIN;
+							}
+						} else {
+							nread = read(child_pipefd[i][PIPE_OUT], buf, to_read);
+							if ( nread>0 ) {
+								nread = write(child_redirfd[i], buf, nread);
+							}
+						}
+
+						if ( nread>0 ) data_passed[i] += nread;
 
 						/* print message if we're at the streamsize limit */
 						if (limit_streamsize && data_passed[i] == streamsize) {

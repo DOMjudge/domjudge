@@ -28,17 +28,19 @@ CHROOTDIR="@judgehost_chrootdir@"
 
 # Fallback Debian and release (codename) to bootstrap (note: overriden right below):
 DISTRO="Debian"
-RELEASE="jessie"
+RELEASE="stretch"
 
 # List of possible architectures to install chroot for:
-DEBIAN_ARCHLIST="amd64,armel,armhf,arm64,i386,mips,mipsel,powerpc,ppc64el,s390x"
-UBUNTU_ARCHLIST="amd64,armel,i386,ia64,mips,mipsel,powerpc,s390,sparc"
+DEBIAN_ARCHLIST="amd64,arm64,armel,armhf,i386,mips,mips64el,mipsel,ppc64el,s390x"
+UBUNTU_ARCHLIST="amd64,arm64,armhf,i386,powerpc,ppc64el,s390x"
 
 # If host system is Debian or Ubuntu, use its release and architecture by default
 if [ "x$(lsb_release -i -s || true)" = 'xDebian' ] || \
    [ "x$(lsb_release -i -s || true)" = 'xUbuntu' ]; then
 	DISTRO="$(lsb_release -i -s)"
-	RELEASE="$(lsb_release -c -s)"
+	if [ "x$(lsb_release -c -s)" != "xsid" ]; then
+		RELEASE="$(lsb_release -c -s)"
+	fi
 	if [ -z "$ARCH" ]; then
 		ARCH="$(dpkg --print-architecture)"
 	fi
@@ -46,18 +48,31 @@ fi
 
 usage()
 {
-    echo "Usage: $0 [-d <chrootdir>] [-D <distro>] [-a <architecture>]"
-    echo "Creates a chroot environment with Java JRE support using the"
-    echo "Debian or Ubuntu GNU/Linux distribution."
-    echo
-    echo "This script must be run as root, <chrootdir> is the non-existing target"
-    echo "location of the chroot, <distro> can be set to 'Debian' or 'Ubuntu' to"
-	echo "override any default, and <architecture> one of the following:"
-    echo "Debian: $DEBIAN_ARCHLIST"
-    echo "Ubuntu: $UBUNTU_ARCHLIST"
-    echo
-    echo "If the host runs Debian/Ubuntu, the host architecture and release are used."
-    echo "The default chrootdir is '@judgehost_chrootdir@'."
+	cat <<EOF
+Usage: $0 [options]...
+Creates a chroot environment with Java JRE support using the
+Debian or Ubuntu GNU/Linux distribution.
+
+Options:
+  -a <arch>   Machine archicture to use.
+  -d <dir>    Directory where to build the chroot environment.
+  -D <distro> Linux distribution to use: 'Debian' or 'Ubuntu'.
+  -i <debs>   List of extra package names to install (comma separated).
+  -r <debs>   List of extra package names to remove (comma separated).
+  -l <debs>   List of local package files to install (comma separated).
+  -y          Force overwriting the chroot dir and downloading debootstrap.
+  -h          Display this help.
+
+This script must be run as root, <chrootdir> is the non-existing
+target location of the chroot (unless '-y' is specified). If the host
+runs Debian/Ubuntu, the host architecture and release are used. The
+default chrootdir is '@judgehost_chrootdir@'.
+
+Available architectures:
+Debian: $DEBIAN_ARCHLIST
+Ubuntu: $UBUNTU_ARCHLIST
+
+EOF
 }
 
 error()
@@ -68,16 +83,17 @@ error()
     exit 1
 }
 
-if [ "$(id -u)" != 0 ]; then
-    echo "Warning: you probably need to run this program as root."
-fi
-
 # Read command-line parameters:
-while getopts 'a:d:D:' OPT ; do
+while getopts 'a:d:D:i:r:l:yh' OPT ; do
 	case $OPT in
 		a) ARCH=$OPTARG ;;
 		d) CHROOTDIR=$OPTARG ;;
 		D) DISTRO=$OPTARG ;;
+		i) INSTALLDEBS_EXTRA=$OPTARG ;;
+		r) REMOVEDEBS_EXTRA=$OPTARG ;;
+		l) LOCALDEBS=$OPTARG ;;
+		y) FORCEYES=1 ;;
+		h) SHOWHELP=1 ;;
 		\?) error "Could not parse options." ;;
 	esac
 done
@@ -86,8 +102,17 @@ if [ $# -gt 0 ]; then
 	error "Additional arguments specified."
 fi
 
+if [ -n "$SHOWHELP" ]; then
+	usage
+	exit 0
+fi
+
 if [ "$DISTRO" != 'Debian' ] && [ "$DISTRO" != 'Ubuntu' ]; then
 	error "Invalid distribution specified, only 'Debian' and 'Ubuntu' are supported."
+fi
+
+if [ "$(id -u)" != 0 ]; then
+    echo "Warning: you probably need to run this program as root."
 fi
 
 [ -z "$CHROOTDIR" ] && error "No chroot directory given or default known."
@@ -108,13 +133,13 @@ INSTALLDEBS="default-jre-headless locales"
 REMOVEDEBS=""
 
 # Which debootstrap package to install on non-Debian systems:
-DEBOOTDEB="debootstrap_1.0.67_all.deb"
+DEBOOTDEB="debootstrap_1.0.89_all.deb"
 
 # The Debian mirror/proxy below can be passed as environment
 # variables; if none are given the following defaults are used.
 
-# Debian mirror. httpredir.debian.org will pick the 'closest'.
-[ -z "$DEBMIRROR" ] && DEBMIRROR="http://httpredir.debian.org/debian"
+# Debian mirror. deb.debian.org will pick the 'closest'.
+[ -z "$DEBMIRROR" ] && DEBMIRROR="http://deb.debian.org/debian"
 
 # A local caching proxy to use for apt-get,
 # (typically an install of aptcacher-ng), for example:
@@ -154,15 +179,21 @@ DEBOOTDEB="debootstrap_1.0.78+nmu1ubuntu1.1_all.deb"
 
 fi
 
+INSTALLDEBS="$INSTALLDEBS $(echo $INSTALLDEBS_EXTRA | tr , ' ')"
+REMOVEDEBS=" $REMOVEDEBS  $(echo $REMOVEDEBS_EXTRA  | tr , ' ')"
+
 # To prevent (libc6) upgrade questions:
 export DEBIAN_FRONTEND=noninteractive
 
 if [ -e "$CHROOTDIR" ]; then
-	printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
-	read -r yn
-	if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
-		error "Chrootdir already exists, exiting."
+	if [ ! "$FORCEYES" ]; then
+		printf "'%s' already exists. Remove? (y/N) " "$CHROOTDIR"
+		read -r yn
+		if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
+			error "Chrootdir already exists, exiting."
+		fi
 	fi
+	cleanup
 	rm -rf "$CHROOTDIR"
 fi
 
@@ -173,10 +204,12 @@ CHROOTDIR="$PWD"
 if [ ! -x /usr/sbin/debootstrap ]; then
 
 	echo "This script will install debootstrap on your system."
-	printf "Continue? (y/N) "
-	read -r yn
-	if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
-		exit 1;
+	if [ ! "$FORCEYES" ]; then
+		printf "Continue? (y/N) "
+		read -r yn
+		if [ "$yn" != "y" ] && [ "$yn" != "Y" ]; then
+			exit 1;
+		fi
 	fi
 
 	if [ -f /etc/debian_version ]; then
@@ -222,8 +255,8 @@ eval $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 rm -f "$CHROOTDIR/etc/resolv.conf"
 cp /etc/resolv.conf /etc/hosts /etc/hostname "$CHROOTDIR/etc" || true
 cp /etc/ssl/certs/ca-certificates.crt "$CHROOTDIR/etc/ssl/certs/" || true
-cp /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || true
-cp /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
+cp -r /usr/share/ca-certificates/* "$CHROOTDIR/usr/share/ca-certificates" || true
+cp -r /usr/local/share/ca-certificates/* "$CHROOTDIR/usr/local/share/ca-certificates" || true
 
 if [ "$DISTRO" = 'Debian' ]; then
 cat > "$CHROOTDIR/etc/apt/sources.list" <<EOF
@@ -309,6 +342,12 @@ fi
 chroot "$CHROOTDIR" /bin/sh -c "apt-get update && apt-get dist-upgrade"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 chroot "$CHROOTDIR" /bin/sh -c "apt-get install $INSTALLDEBS"
+if [ -n "$LOCALDEBS" ]; then
+	DIR=$(mktemp -d -p "$CHROOTDIR/tmp" 'dj_chroot_debs_XXXXXX')
+	# shellcheck disable=SC2046
+	cp $(echo "$LOCALDEBS" | tr , ' ') "$DIR"
+	chroot "$CHROOTDIR" /bin/sh -c "dpkg -i /${DIR#$CHROOTDIR}/*.deb"
+fi
 
 # Do some cleanup of the chroot
 chroot "$CHROOTDIR" /bin/sh -c "apt-get remove --purge $REMOVEDEBS"
@@ -318,7 +357,7 @@ chroot "$CHROOTDIR" /bin/sh -c "apt-get clean"
 # Remove unnecessary setuid bits
 chroot "$CHROOTDIR" /bin/sh -c "chmod a-s /usr/bin/wall /usr/bin/newgrp \
 	/usr/bin/chage /usr/bin/chfn /usr/bin/chsh /usr/bin/expiry \
-	/usr/bin/gpasswd /usr/bin/passwd /usr/lib/pt_chown \
+	/usr/bin/gpasswd /usr/bin/passwd \
 	/bin/su /bin/mount /bin/umount /sbin/unix_chkpwd" || true
 
 # Disable root account

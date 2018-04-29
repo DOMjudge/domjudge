@@ -62,6 +62,8 @@ function parseRunDiff($difftext){
  *    set to an ID to filter on that respective team, language, etc.
  * Output is limited to the number $limit, or unlimited by default.
  * If $highlight is a submission ID, then that one is highlighted.
+ *
+ * FIXME: this has way too many IS_JURY branches, should be separated out.
  */
 function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 {
@@ -160,7 +162,8 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 
 	// print the table with the submissions.
 	// table header
-	echo "<table class=\"list sortable submissions\">\n<thead>\n<tr>" .
+//	echo "<table class=\"list sortable submissions\">\n<thead>\n<tr>" .
+	echo "<table class=\"table table-striped table-hover table-sm list sortable\">\n<thead class=\"thead-light\">\n<tr>" .
 
 		(IS_JURY ? "<th scope=\"col\" class=\"sorttable_numeric\">ID</th>" : '') .
 		(IS_JURY && count($cids) > 1 ? "<th scope=\"col\" class=\"sorttable_numeric\">contest</th>" : '') .
@@ -197,10 +200,11 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null)
 			$link = '';
 		}
 
-		echo "<tr class=\"" .
-			( $iseven ? 'roweven': 'rowodd' );
-		$iseven = !$iseven;
-
+		echo "<tr class=\"";
+		if ( IS_JURY ) {
+			echo ( $iseven ? 'roweven': 'rowodd' );
+			$iseven = !$iseven;
+		}
 		$subcnt++;
 
 		if ( !$row['valid'] ) {
@@ -334,6 +338,9 @@ function putTeam($teamid) {
 
 	global $DB;
 
+	$SHOW_FLAGS             = dbconfig_get('show_flags', 1);
+	$SHOW_AFFILIATIONS      = dbconfig_get('show_affiliations', 1);
+
 	$team = $DB->q('MAYBETUPLE SELECT t.*, c.name AS catname,
 	                a.name AS affname, a.country FROM team t
 	                LEFT JOIN team_category c USING (categoryid)
@@ -342,37 +349,37 @@ function putTeam($teamid) {
 
 	if ( empty($team) ) error ("No team found by this id.");
 
-	$countryflag = "../images/countries/" . urlencode($team['country']) . ".png";
-	$teamimage = "../images/teams/" . urlencode($team['teamid']) . ".jpg";
+	$countryflag = "images/countries/" . urlencode($team['country']) . ".png";
+	$teamimage = "images/teams/" . urlencode($team['teamid']) . ".jpg";
 
 	echo "<h1>Team ".specialchars($team['name'])."</h1>\n\n";
 
-	if ( is_readable($teamimage) ) {
-		echo '<img id="teampicture" src="' . $teamimage .
+	if ( is_readable(WEBAPPDIR.'/web/'.$teamimage) ) {
+		echo '<img id="teampicture" src="../' . $teamimage .
 			'" alt="Picture of team ' .
 			specialchars($team['name']) . '" />';
 	}
 
 ?>
 
-<table>
-<tr><td>Name:    </td><td><?php echo specialchars($team['name'])?></td></tr>
-<tr><td>Category:</td><td><?php echo specialchars($team['catname'])?></td></tr>
+<table class="p-2">
+<tr><td class="p-2">Name:    </td><td class="p-2"><?php echo specialchars($team['name'])?></td></tr>
+<tr><td class="p-2">Category:</td><td class="p-2"><?php echo specialchars($team['catname'])?></td></tr>
 <?php
 
 	if ( !empty($team['members']) ) {
-		echo '<tr><td>Members:</td><td>' .
+		echo '<tr><td class="p-2">Members:</td><td class="p-2">' .
 			nl2br(specialchars($team['members'])) . "</td></tr>\n";
 	}
 
-	if ( !empty($team['affilid']) ) {
-		echo '<tr><td>Affiliation:</td><td>';
+	if ( $SHOW_AFFILIATIONS && !empty($team['affilid']) ) {
+		echo '<tr><td class="p-2">Affiliation:</td><td class="p-2">';
 		echo specialchars($team['affname']);
 		echo "</td></tr>\n";
-		if ( !empty($team['country']) ) {
-			echo '<tr><td>Country:</td><td>';
-			if ( is_readable($countryflag) ) {
-				echo '<img src="' . $countryflag . '" alt="' .
+		if ( $SHOW_FLAGS && !empty($team['country']) ) {
+			echo '<tr><td class="p-2">Country:</td><td class="p-2">';
+			if ( is_readable(WEBAPPDIR.'/web/'.$countryflag) ) {
+				echo '<img src="../' . $countryflag . '" alt="' .
 					specialchars($team['country']) . '" /> ';
 			}
 			echo specialchars($team['country']) . "</td></tr>\n";
@@ -380,7 +387,7 @@ function putTeam($teamid) {
 	}
 
 	if ( !empty($team['room']) ) {
-		echo '<tr><td>Location:</td><td>' .
+		echo '<tr><td class="p-2">Location:</td><td class="p-2">' .
 			specialchars($team['room']) . "</td></tr>\n";
 	}
 
@@ -388,25 +395,34 @@ function putTeam($teamid) {
 }
 
 /**
+ * Output progress bar
+ */
+function putProgressBar($margin = 0) {
+	global $cdata;
+
+	$fdata = calcFreezeData($cdata);
+	$left = difftime($cdata['endtime'], now());
+	if ( !$fdata['started'] || $left < 0 ) {
+		return;
+	}
+	$passed = difftime($cdata['starttime'], now());
+	$duration = difftime($cdata['starttime'], $cdata['endtime']);
+	$percent = (int)($passed*100./$duration);
+print '
+<div class="progress" style="margin-top: ' . $margin . 'px; height: 10px;">
+  <div class="progress-bar" role="progressbar" style="width: ' . $percent . '%;"
+       aria-valuenow="' . $percent . '" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+';
+}
+
+/**
  * Output clock
  */
 function putClock() {
-	global $cdata, $username, $userdata;
+	global $cdata, $username, $userdata, $cid, $cdatas;
 
-	echo '<div id="clock">';
-	// timediff to end of contest
-	if ( difftime(now(), $cdata['starttime']) >= 0 &&
-	     difftime(now(), $cdata['endtime'])   <  0 ) {
-		$left = "time left: " . printtimediff(now(),$cdata['endtime']);
-	} else if ( difftime(now(), $cdata['activatetime']) >= 0 &&
-	            difftime(now(), $cdata['starttime'])    <  0 ) {
-		$left = "time to start: " . printtimediff(now(),$cdata['starttime']);
-	} else {
-		$left = "";
-	}
-	echo "<span id=\"timeleft\">" . $left . "</span>";
-
-	global $cid, $cdatas;
+	echo '<div class="navbar-text">';
 	// Show a contest selection form, if there are contests
 	if ( IS_JURY || count($cdatas) > 1 ) {
 		echo "<div id=\"selectcontest\">\n";
@@ -431,15 +447,34 @@ function putClock() {
 ";
 		echo "</div>\n";
 	}
+	echo '</div><div class="navbar-text">';
 
-	if ( logged_in() ) {
+	// timediff to end of contest
+	$fdata = calcFreezeData($cdata);
+	if ( $fdata['started'] && difftime(now(), $cdata['endtime']) < 0 ) {
+		$left = printtimediff(now(),$cdata['endtime']);
+	// time to start of contest
+	} else if ( !$fdata['started'] && difftime(now(), $cdata['activatetime']) >= 0 ) {
+		if ( $cdata['starttime_enabled'] ) {
+			$left = "- " . printtimediff(now(),$cdata['starttime']);
+		} else {
+			$left = "start delayed";
+		}
+	} else {
+		$left = " contest over";
+	}
+
+	echo "<span style=\"padding-left: 10px;\" class=\"octicon octicon-clock\"></span> <span id=\"timeleft\">$left</span>\n";
+
+	if ( IS_JURY && logged_in() ) {
 		// Show pretty name if possible
 		$displayname = $username;
 		if ($userdata['name']) {
 			$displayname = "<abbr title=\"$username\">" . $userdata['name'] . "</abbr>";
 		}
 		echo "<div id=\"username\">logged in as " . $displayname
-			. ( have_logout() ? " <a href=\"../auth/logout.php\">×</a>" : "" )
+			. ( have_logout() ? ' <a href="../auth/logout.php">' .
+			    '<span class="octicon octicon-sign-out"></span></a>' : "" )
 			. "</div>";
 	}
 
@@ -528,7 +563,7 @@ function putProblemText($probid)
 		$probname = $prob['shortname'];
 	}
 
-	if ( empty($prob) || !problemVisible($probid) ) {
+	if ( empty($prob) || (!IS_JURY && !problemVisible($probid)) ) {
 		error("Problem p$probid not found or not available");
 	}
 
@@ -603,49 +638,121 @@ function putSampleTestcase($probid, $seq, $type)
  */
 function putProblemTextList()
 {
+	global $DB;
+
+	$timeFactorDiffers = ($DB->q('VALUE SELECT COUNT(*) FROM language WHERE allow_submit = 1 and time_factor <> 1') != 0);
+
+	$probs = getProblemTextList();
+
+	if ( empty($probs) ) {
+		echo "<div class=\"alert alert-secondary\">No problem texts available at this point.</div>\n\n";
+		return;
+	}
+
+	print "<div class=\"row\">\n";
+	print "  <div class=\"col-md-12\">\n";
+	print "    <div class=\"card-deck my-md-3\">\n";
+	foreach ($probs as $idx => $row) {
+		if ($idx % 3 === 0 && $idx !== 0) {
+			print "    </div>\n";
+			print "  </div>\n";
+			print "  <div class=\"col-md-12\">\n";
+			print "    <div class=\"card-deck my-sm-3\">\n";
+		}
+		print '
+<div class="card">
+  <div class="card-body">
+    <h3 class="card-title">
+';
+		if ( isset($row['color']) ) {
+			print '
+      <div class="circle" style="background-color: ' . $row['color'] . ';">
+      </div>
+';
+		}
+			print '
+      Problem ' . specialchars($row['shortname']) . '
+    </h3>
+    <h4 class="card-subtitle mb-2 text-muted">' . specialchars($row['name']) . '</h4>
+';
+		if (dbconfig_get('show_limits_on_team_page', false)) {
+			print '<h5 class="card-subtitle mb-2 text-muted">Limits: ';
+			print $row['timelimit'] . ' second' . ($row['timelimit'] > 1 ? 's' : '');
+			if ($timeFactorDiffers) {
+				print '<sup>*</sup>';
+			}
+			print ' / ';
+			print printsize(($row['memlimit'] ?? dbconfig_get('memory_limit', 0)) * 1024, 1);
+			print '</h5>';
+		}
+
+		if ( isset($row['problemtext_type']) ) {
+		print '<div class="text-center"><a class="btn btn-secondary" role="button" href="problem.php?id=' . urlencode($row['probid']) . '">' .
+			      '<img src="../images/' . urlencode($row['problemtext_type']) .
+                              '.png" alt="' . specialchars($row['problemtext_type']) .
+			      '" /> problem text</a></div>';
+		}
+		if ( !empty($row['numsamples']) ) {
+			print '<div><br /></div><h4 class="card-subtitle mb-2">Samples</h4><ol class="text-center list-group list-group-flush">';
+			for($i=1; $i<=$row['numsamples']; ++$i) {
+				$input = 'input';
+				$output = 'output';
+				if ($row['numsamples'] > 1) {
+					$input .= ' #' . $i;
+					$output .= ' #' . $i;
+				}
+				print '<li class="list-group-item"><a class="btn btn-outline-secondary" role="button" href="problem.php?id=' . urlencode($row['probid']) .
+				      '&amp;testcase=' . urlencode($i) . '&amp;type=in">' . $input . '</a> ';
+				print '<a class="btn btn-outline-secondary" href="problem.php?id=' . urlencode($row['probid']) .
+				      '&amp;testcase=' . urlencode($i) . '&amp;type=out">' . $output . '</a>';
+				print "</li>";
+			}
+			print "</ol>";
+		}
+
+		print '
+		  </div>
+		</div>';
+	}
+	// Fill row with dummy cards to make them same width
+	$probCount = count($probs);
+	$rest = ((int)($probCount / 3) + 1) * 3;
+	if ( $probCount % 3 != 0 ) {
+		for ( $i = $probCount; $i < $rest; $i++ ) {
+			print '<div style="border: none;" class="card"></div> ';
+		}
+	}
+
+	print "    </div>";
+	print "  </div>";
+	print "</div>";
+	if ($timeFactorDiffers) {
+		print '
+		<div class="row">
+		  <div class="col-md-12 my-sm-3">
+		    <div class=" alert alert-secondary" role="alert">
+		      * language time factors apply
+		    </div>
+		  </div>
+		</div>';
+	}
+}
+
+function getProblemTextList()
+{
 	global $cid, $cdata, $DB;
 	$fdata = calcFreezeData($cdata);
 
-	if ( !$fdata['cstarted'] ) {
-		echo "<p class=\"nodata\">Problem texts will appear here at contest start.</p>\n\n";
-	} else {
-
-		// otherwise, display list
-		$res = $DB->q('SELECT probid,shortname,name,color,problemtext_type,SUM(sample) AS numsamples
-		               FROM problem
-		               INNER JOIN testcase USING(probid)
-		               INNER JOIN contestproblem USING (probid)
-		               WHERE cid = %i AND allow_submit = 1
-		               GROUP BY probid ORDER BY shortname', $cid);
-
-		if ( $res->count() > 0 ) {
-			echo "<ul>\n";
-			while($row = $res->next()) {
-				print '<li><strong> Problem ' . specialchars($row['shortname']) . ': ' .
-				      specialchars($row['name']) . "</strong><br />\n";
-				if ( isset($row['problemtext_type']) ) {
-				print '<img src="../images/' . urlencode($row['problemtext_type']) .
-					      '.png" alt="' . specialchars($row['problemtext_type']) .
-					      '" /> <a href="problem.php?id=' . urlencode($row['probid']) . '">' .
-					      'problem statement</a><br />';
-				}
-				if ( !empty($row['numsamples']) ) {
-					for($i=1; $i<=$row['numsamples']; ++$i) {
-						print '<img src="../images/b_save.png" alt="download" /> ';
-						print '<a href="problem.php?id=' . urlencode($row['probid']) .
-						      '&amp;testcase=' . urlencode($i) . '&amp;type=in">sample input</a> | ';
-						print '<a href="problem.php?id=' . urlencode($row['probid']) .
-						      '&amp;testcase=' . urlencode($i) . '&amp;type=out">sample output</a>';
-						print "<br />";
-					}
-				}
-				print "<br /></li>\n";
-			}
-			echo "</ul>\n";
-		} else {
-			echo "<p class=\"nodata\">No problem texts available for this contest.</p>\n\n";
-		}
+	if ( !$fdata['started'] ) {
+		return array();
 	}
+
+	return $DB->q('TABLE SELECT probid,shortname,name,color,problemtext_type,timelimit,memlimit,SUM(sample) AS numsamples
+	               FROM problem
+	               LEFT JOIN testcase USING(probid)
+	               LEFT JOIN contestproblem USING (probid)
+	               WHERE cid = %i AND allow_submit = 1
+	               GROUP BY probid ORDER BY shortname', $cid);
 }
 
 /**
@@ -687,7 +794,7 @@ function putgetMainExtension($langdata) {
 	echo "function getMainExtension(ext)\n{\n";
 	echo "\tswitch(ext) {\n";
 	foreach ( $langdata as $langid => $langdata ) {
-		$exts = json_decode($langdata['extensions']);
+		$exts = dj_json_decode($langdata['extensions']);
 		if ( !is_array($exts) ) continue;
 		foreach ( $exts as $ext ) {
 			echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
@@ -714,4 +821,24 @@ function renderPage($data, $header = true, $footer = true, $templateFile = null)
 	echo $twig->loadTemplate($templateFile)->render($data);
 
 	if ( $footer ) require(LIBWWWDIR . '/footer.php');
+}
+
+function descriptionExpand($description) {
+	$descriptionLines = explode("\n", $description);
+	if (count($descriptionLines) <= 3) {
+		return implode('<br />', $descriptionLines);
+	} else {
+		$default = implode('<br />', array_slice($descriptionLines, 0, 3));
+		$defaultEscaped = htmlentities($default);
+		$expandedEsacped = htmlentities(implode('<br />', $descriptionLines));
+		return <<<EOF
+<span>
+	<span data-expanded="$expandedEsacped" data-collapsed="$defaultEscaped">
+	$default
+	</span>
+	<br/>
+	<a href="javascript:;" onclick="toggleExpand(event)">[expand]</a>
+</span>
+EOF;
+	}
 }

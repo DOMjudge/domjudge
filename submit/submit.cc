@@ -50,6 +50,9 @@ using namespace std;
 #define PROGRAM "submit"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
+/* Use a specific API version, set to empty string for default */
+#define API_VERSION "v4/"
+
 /* Logging and error functions */
 #include "lib.error.h"
 
@@ -74,15 +77,16 @@ int show_help;
 int show_version;
 
 struct option const long_opts[] = {
-	{"problem",  required_argument, NULL,         'p'},
-	{"language", required_argument, NULL,         'l'},
-	{"url",      required_argument, NULL,         'u'},
-	{"verbose",  optional_argument, NULL,         'v'},
-	{"contest",  required_argument, NULL,         'c'},
-	{"quiet",    no_argument,       NULL,         'q'},
-	{"help",     no_argument,       &show_help,    1 },
-	{"version",  no_argument,       &show_version, 1 },
-	{ NULL,      0,                 NULL,          0 }
+	{"problem",     required_argument, NULL,         'p'},
+	{"language",    required_argument, NULL,         'l'},
+	{"url",         required_argument, NULL,         'u'},
+	{"verbose",     optional_argument, NULL,         'v'},
+	{"contest",     required_argument, NULL,         'c'},
+	{"entry_point", optional_argument, NULL,         'e'},
+	{"quiet",       no_argument,       NULL,         'q'},
+	{"help",        no_argument,       &show_help,    1 },
+	{"version",     no_argument,       &show_version, 1 },
+	{ NULL,         0,                 NULL,          0 }
 };
 
 void version();
@@ -91,16 +95,17 @@ void usage2(int , const char *, ...) __attribute__((format (printf, 2, 3)));
 void warnuser(const char *, ...)     __attribute__((format (printf, 1, 2)));
 char readanswer(const char *answers);
 #ifdef HAVE_MAGIC_H
-int  file_istext(char *filename);
+bool file_istext(char *filename);
 #endif
 
-int  websubmit();
+bool websubmit();
 
 Json::Value doAPIrequest(const char *, int);
-int  getlangexts();
-int  getcontests();
+bool readentrypointrequired();
+bool readlangexts();
+bool readcontests();
 
-/* Helper function for using libcurl in websubmit() and getlangexts() */
+/* Helper function for using libcurl in websubmit() and doAPIrequest() */
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 {
 	stringstream *s = (stringstream *) sptr;
@@ -149,7 +154,7 @@ std::string decode_HTML_entities(std::string str)
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, baseurl, contest;
+string problem, language, extension, baseurl, contest, entry_point;
 vector<string> filenames;
 char *submitdir;
 
@@ -158,6 +163,9 @@ vector<vector<string> > languages;
 
 /* Active contests: shortname,name */
 vector<vector<string> > contests;
+
+/* Entry point required? */
+bool require_entry_point;
 
 int main(int argc, char **argv)
 {
@@ -208,15 +216,16 @@ int main(int argc, char **argv)
 
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:u:c:v::q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:u:c:e:v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
 
-		case 'p': problem   = string(optarg); break;
-		case 'l': extension = string(optarg); break;
-		case 'u': baseurl   = string(optarg); break;
-		case 'c': contest   = string(optarg); break;
+		case 'p': problem     = string(optarg); break;
+		case 'l': extension   = string(optarg); break;
+		case 'u': baseurl     = string(optarg); break;
+		case 'c': contest     = string(optarg); break;
+		case 'e': entry_point = string(optarg); break;
 
 		case 'v': /* verbose option */
 			if ( optarg!=NULL ) {
@@ -241,13 +250,14 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ( getlangexts()!=0 ) warning(0,"could not obtain language extensions");
-	if ( getcontests()!=0 ) warning(0,"could not obtain active contests");
+	if ( !readentrypointrequired() ) warning(0,"could not obtain configuration value 'require_entry_point'");
+	if ( !readlangexts() ) warning(0,"could not obtain language extensions");
+	if ( !readcontests() ) warning(0,"could not obtain active contests");
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
 
-	if ( argc<=optind   ) usage2(0,"no file(s) specified");
+	if ( argc<=optind ) usage2(0,"no file(s) specified");
 
 	/* Process all source files */
 	for(i=0; optind+(int)i<argc; i++) {
@@ -331,9 +341,22 @@ int main(int argc, char **argv)
 	/* Make sure that baseurl terminates with a '/' for later concatenation. */
 	if ( baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
 
+	/* Guess entry point if not already specified. */
+	if ( entry_point.empty() && require_entry_point ) {
+		if ( language == "Java" ) {
+			entry_point = filebase;
+		} else if ( language == "Kotlin" ) {
+			entry_point = filebase + "Kt";
+			entry_point[0] = toupper(entry_point[0]);
+		} else if ( language == "Python 2" || language == "Python 2 (pypy)" || language == "Python 3" ) {
+			entry_point = filebase + "." + fileext;
+		}
+	}
+
 	logmsg(LOG_DEBUG,"contest is `%s'",contest.c_str());
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
+	logmsg(LOG_DEBUG,"entry_point is `%s'",entry_point.c_str());
 	logmsg(LOG_DEBUG,"url is `%s'",baseurl.c_str());
 
 	/* Ask user for confirmation */
@@ -351,6 +374,9 @@ int main(int argc, char **argv)
 		printf("  contest:     %s\n",contest.c_str());
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
+		if ( !entry_point.empty() ) {
+			printf("  entry_point: %s\n",entry_point.c_str());
+		}
 		printf("  url:         %s\n",baseurl.c_str());
 
 		if ( nwarnings>0 ) printf("There are warnings for this submission!\a\n");
@@ -372,19 +398,20 @@ void usage()
 "Submit a solution for a problem.\n"
 "\n"
 "Options (see below for more information)\n"
-"  -c  --contest=CONTEST    submit for contest with identifier name CONTEST.\n"
-"                               Defaults to the value of the\n"
-"                               environment variable 'SUBMITCONTEST'.\n"
-"                               Mandatory when more than one contest is active.\n"
-"  -p, --problem=PROBLEM    submit for problem PROBLEM\n"
-"  -l, --language=LANGUAGE  submit in language LANGUAGE\n"
-"  -v, --verbose[=LEVEL]    increase verbosity or set to LEVEL, where LEVEL\n"
-"                               must be numerically specified as in 'syslog.h'\n"
-"                               defaults to LOG_INFO without argument\n"
-"  -q, --quiet              set verbosity to LOG_ERR and suppress user\n"
-"                               input and warning/info messages\n"
-"      --help               display this help and exit\n"
-"      --version            output version information and exit\n"
+"  -c  --contest=CONTEST          submit for contest with identifier name CONTEST.\n"
+"                                     Defaults to the value of the\n"
+"                                     environment variable 'SUBMITCONTEST'.\n"
+"                                     Mandatory when more than one contest is active.\n"
+"  -p, --problem=PROBLEM          submit for problem PROBLEM\n"
+"  -l, --language=LANGUAGE        submit in language LANGUAGE\n"
+"  -e, --entry_point=ENTRY_POINT  set an explicit entry_point, e.g. the java main class\n"
+"  -v, --verbose[=LEVEL]          increase verbosity or set to LEVEL, where LEVEL\n"
+"                                     must be numerically specified as in 'syslog.h'\n"
+"                                     defaults to LOG_INFO without argument\n"
+"  -q, --quiet                    set verbosity to LOG_ERR and suppress user\n"
+"                                     input and warning/info messages\n"
+"      --help                     display this help and exit\n"
+"      --version                  output version information and exit\n"
 "\n"
 "The following option(s) should not be necessary for normal use\n"
 "  -u, --url=URL            submit to webserver with base address URL\n"
@@ -403,7 +430,7 @@ void usage()
 	}
 	if ( contests.size()>=2 ) {
 		printf(
-"For CONTEST use one of the following in lower- or uppercase:\n");
+"For CONTEST use one of the following:\n");
 		for(i=0; i<contests.size(); i++) {
 			printf("   %-15s  %s\n",contests[i][0].c_str(),contests[i][1].c_str());
 		}
@@ -519,11 +546,11 @@ char readanswer(const char *answers)
 
 #ifdef HAVE_MAGIC_H
 
-int file_istext(char *filename)
+bool file_istext(char *filename)
 {
 	magic_t cookie;
 	const char *filetype;
-	int res;
+	bool res;
 
 	if ( (cookie = magic_open(MAGIC_MIME))==NULL ) goto magicerror;
 
@@ -542,7 +569,7 @@ int file_istext(char *filename)
 magicerror:
 	warning(magic_errno(cookie),"%s",magic_error(cookie));
 
-	return 1; // return 'text' by default on error
+	return true; // return 'text' by default on error
 }
 
 #endif /* HAVE_MAGIC_H */
@@ -561,7 +588,7 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 	Json::Reader reader;
 	Json::Value result;
 
-	url = strdup((baseurl+"api/"+string(funcname)).c_str());
+	url = strdup((baseurl+"api/"+API_VERSION+string(funcname)).c_str());
 
 	curlerrormsg[0] = 0;
 
@@ -639,13 +666,29 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 	return result;
 }
 
-int getlangexts()
+/* Tries to retrieve the configuration setting 'require_entry_point'.
+ * Returns boolean value whether successful and stores the result in
+ * the variable 'require_entry_point'. Defaults to storing false if
+ * the API calls fails.
+ */
+bool readentrypointrequired()
+{
+	Json::Value res = doAPIrequest("config?name=require_entry_point", 0);
+	if ( res.isNull() || !res.isObject() ) return false;
+
+	res = res.get("require_entry_point", 0);
+	require_entry_point = res.asBool();
+
+	return res.isBool() || res.isInt();
+}
+
+bool readlangexts()
 {
 	Json::Value langs, exts;
 
 	langs = doAPIrequest("languages", 0);
 
-	if ( langs.isNull() ) return 1;
+	if ( langs.isNull() ) return false;
 
 	for(Json::ArrayIndex i=0; i<langs.size(); i++) {
 		vector<string> lang;
@@ -655,7 +698,7 @@ int getlangexts()
 		     !(exts = langs[i]["extensions"]) ||
 		     !exts.isArray() || exts.size()==0 ) {
 			warning(0,"REST API returned unexpected JSON data for languages");
-			return 1;
+			return false;
 		}
 
 		for(Json::ArrayIndex j=0; j<exts.size(); j++) lang.push_back(exts[j].asString());
@@ -663,34 +706,34 @@ int getlangexts()
 		languages.push_back(lang);
 	}
 
-	return 0;
+	return true;
 }
 
-int getcontests()
+bool readcontests()
 {
 	Json::Value res;
 
 	res = doAPIrequest("contests", 0);
 
-	if ( res.isNull() || !res.isObject() ) return 1;
+	if ( res.isNull() || !res.isArray() ) return false;
 
-	for(Json::Value::iterator it=res.begin(); it!=res.end(); ++it) {
+	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		vector<string> contest;
 
-		contest.push_back((*it)["shortname"].asString());
-		contest.push_back((*it)["name"].asString());
+		contest.push_back(res[i]["shortname"].asString());
+		contest.push_back(res[i]["name"].asString());
 		if ( contest[0]=="" || contest[1]=="" ) {
 			warning(0,"REST API returned unexpected JSON data for contests");
-			return 1;
+			return false;
 		}
 
 		contests.push_back(contest);
 	}
 
-	return 0;
+	return true;
 }
 
-int websubmit()
+bool websubmit()
 {
 	CURL *handle;
 	CURLcode res;
@@ -704,7 +747,7 @@ int websubmit()
 	Json::Reader reader;
 	Json::Value root;
 
-	url = strdup((baseurl+"api/submissions").c_str());
+	url = strdup((baseurl+"api/"+API_VERSION+"submissions").c_str());
 
 	curlerrormsg[0] = 0;
 
@@ -718,7 +761,7 @@ int websubmit()
 		curl_easy_cleanup(handle); \
 		curl_formfree(post); \
 		free(url); \
-		return 1; }
+		return false; }
 #define curlformadd(nametype,namecont,valtype,valcont) \
 	if ( curl_formadd(&post, &last, \
 			CURLFORM_ ## nametype, namecont, \
@@ -739,6 +782,9 @@ int websubmit()
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
 	if ( !contest.empty() ) {
 		curlformadd(COPYNAME,"contest", COPYCONTENTS,contest.c_str());
+	}
+	if ( !entry_point.empty() ) {
+		curlformadd(COPYNAME,"entry_point", COPYCONTENTS,entry_point.c_str());
 	}
 
 	/* Set options for post */
@@ -803,7 +849,7 @@ int websubmit()
 
 	logmsg(LOG_NOTICE,"Submission received, id = s%i", root.asInt());
 
-	return 0;
+	return true;
 }
 
 //  vim:ts=4:sw=4:

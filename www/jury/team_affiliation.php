@@ -71,8 +71,10 @@ endif;
 $data = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
 if ( ! $data ) error("Missing or invalid affiliation id");
 
-$affillogo = "../images/affiliations/" . urlencode($data['affilid']) . ".png";
-$countryflag = "../images/countries/" . urlencode($data['country']) . ".png";
+$SHOW_FLAGS             = dbconfig_get('show_flags', 1);
+
+$affillogo = "images/affiliations/" . urlencode($data['affilid']) . ".png";
+$countryflag = "images/countries/" . urlencode($data['country']) . ".png";
 
 echo "<h1>Affiliation: ".specialchars($data['name'])."</h1>\n\n";
 
@@ -83,20 +85,23 @@ echo '<tr><td>Name:</td><td>' . specialchars($data['name']) . "</td></tr>\n";
 
 echo '<tr><td>Logo:</td><td>';
 
-if ( is_readable($affillogo) ) {
-	echo '<img src="' . $affillogo . '" alt="' .
+if ( is_readable(WEBAPPDIR.'/web/'.$affillogo) ) {
+	echo '<img src="../' . $affillogo . '" alt="' .
 		specialchars($data['shortname']) . "\" /></td></tr>\n";
 } else {
 	echo "not available</td></tr>\n";
 }
 
-echo '<tr><td>Country:</td><td>' . specialchars($data['country']);
+if ( $SHOW_FLAGS ) {
 
-if ( is_readable($countryflag) ) {
-	echo ' <img src="' . $countryflag . '" alt="' .
-		specialchars($data['country']) . "\" />";
+	echo '<tr><td>Country:</td><td>' . specialchars($data['country']);
+
+	if ( is_readable(WEBAPPDIR.'/web/'.$countryflag) ) {
+		echo ' <img src="../' . $countryflag . '" alt="' .
+			specialchars($data['country']) . "\" />";
+	}
+	echo "</td></tr>\n";
 }
-echo "</td></tr>\n";
 
 if ( !empty($data['comments']) ) {
 	echo '<tr><td>Comments:</td><td>' .

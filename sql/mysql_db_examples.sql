@@ -7,6 +7,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 
 --
+-- Dumping data for table `clarification`
+--
+
+INSERT INTO `clarification` (`clarid`, `externalid`, `cid`, `respid`, `submittime`, `sender`, `recipient`, `jury_member`, `probid`, `category`, `body`, `answered`) VALUES
+(1, NULL, 2, NULL, '1518385638.901348000', 2, NULL, 'admin', 1, NULL, 'Can you tell me how to solve this problem?', 1),
+(2, NULL, 2, 1, '1518385677.689197000', NULL, 2, 'admin', 1, NULL, '> Can you tell me how to solve this problem?\r\n\r\nNo, read the problem statement.', 1);
+
+--
 -- Dumping data for table `contest`
 --
 
@@ -55,16 +63,17 @@ INSERT INTO `judgehost` (`hostname`, `active`) VALUES ('example-judgehost1', 0);
 -- Dumping data for table `problem`
 --
 
-INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`) VALUES (1, 'Hello World', 5, NULL, NULL);
-INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`, `special_compare_args`) VALUES (2, 'Float special compare test', 5, NULL, 'compare', 'float_tolerance 1E-6');
-INSERT INTO `problem` (`probid`, `name`, `timelimit`, `special_run`, `special_compare`) VALUES (3, 'Boolean switch search', 5, 'boolfind_run', 'boolfind_cmp');
+INSERT INTO `problem` (`probid`, `externalid`, `name`, `timelimit`, `special_run`, `special_compare`, `special_compare_args`) VALUES
+(1, 'hello', 'Hello World', 5, NULL, NULL, NULL),
+(2, 'fltcmp', 'Float special compare test', 5, NULL, 'compare', 'float_tolerance 1E-6'),
+(3, 'boolfind', 'Boolean switch search', 5, 'boolfind_run', 'boolfind_cmp', NULL);
 
 --
 -- Dumping data for table `team_affiliation`
 --
 
-INSERT INTO `team_affiliation` (`shortname`, `name`, `country`, `comments`) VALUES
-('UU', 'Utrecht University', 'NLD', NULL);
+INSERT INTO `team_affiliation` (`externalid`, `shortname`, `name`, `country`, `comments`) VALUES
+('utrecht', 'UU', 'Utrecht University', 'NLD', NULL);
 
 --
 -- Dumping data for table `team_category`
@@ -79,8 +88,8 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 -- Dumping data for table `team`
 --
 
-INSERT INTO `team` (`teamid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES
-(2, 'Example teamname', 3, 1, NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`teamid`, `externalid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES
+(2, 'exteam', 'Example teamname', 3, 1, NULL, NULL, NULL, NULL);
 
 --
 -- Dumping data for table `testcase`

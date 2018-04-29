@@ -30,7 +30,7 @@
 set -e
 
 # Chroot subdirs needed: (optional lib64 only needed for amd64 architecture)
-SUBDIRMOUNTS="etc usr lib lib64"
+SUBDIRMOUNTS="etc usr lib lib64 bin"
 
 # Location of the pre-built chroot tree and where to bind mount from:
 CHROOTORIGINAL="@judgehost_chrootdir@"

@@ -6,6 +6,9 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+require('init.php');
+$id = getRequestID();
+
 $viewtypes = array(0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => "diff", 4 => 'all');
 
 $view = 1; // default view == unverified
@@ -16,9 +19,6 @@ if ( isset($_REQUEST['view']) ) {
 		if ( isset($_REQUEST['view'][$i]) ) $view = $i;
 	}
 }
-
-require('init.php');
-$id = getRequestID();
 
 $refresh = array(
 	'after' => 15,
@@ -34,29 +34,14 @@ require(LIBWWWDIR . '/header.php');
 
 if ( ! $id ) error("Missing or invalid rejudging id");
 
-$todo = $DB->q('VALUE SELECT COUNT(*) FROM submission
-                WHERE rejudgingid=%i', $id);
-$done = $DB->q('VALUE SELECT COUNT(*) FROM judging
-                WHERE rejudgingid=%i AND endtime IS NOT NULL', $id);
-$todo -= $done;
-
 $rejdata = $DB->q('TUPLE SELECT * FROM rejudging
                    WHERE rejudgingid=%i', $id);
 
 if ( ! $rejdata ) error ("Missing rejudging data");
 
-if ( isset($_REQUEST['apply']) ) {
-	if ( $todo > 0 ) {
-		error("$todo unfinished judgings left, cannot apply rejudging.");
-	} else if ( isset($rejdata['endtime']) ) {
-		error("Rejudging already " . ( $rejdata['valid'] ? 'applied.' : 'canceled.'));
-	}
+if ( isset($_REQUEST['apply']) || isset($_REQUEST['cancel']) ) {
 
-	$res = $DB->q('SELECT submitid, cid, teamid, probid
-	               FROM submission
-	               WHERE rejudgingid=%i', $id);
-
-	auditlog('rejudging', $id, 'applying rejudge', '(start)');
+	$request = isset($_REQUEST['apply']) ? 'apply' : 'cancel';
 
 	$time_start = microtime(TRUE);
 
@@ -65,80 +50,29 @@ if ( isset($_REQUEST['apply']) ) {
 	ob_implicit_flush(true);
 	ob_end_flush();
 
+	// clear GET array because otherwise the eventlog subrequest will still include the rejudging id
+	$_GET = array();
 	echo "<p>\n";
-	while ( $row = $res->next() ) {
-		echo "s" . specialchars($row['submitid']) . ", ";
-		$DB->q('START TRANSACTION');
-		// first invalidate old judging, maybe different from prevjudgingid!
-		$DB->q('UPDATE judging SET valid=0
-		        WHERE submitid=%i', $row['submitid']);
-		// then set judging to valid
-		$DB->q('UPDATE judging SET valid=1
-		        WHERE submitid=%i AND rejudgingid=%i', $row['submitid'], $id);
-		// remove relation from submission to rejudge
-		$DB->q('UPDATE submission SET rejudgingid=NULL
-		        WHERE submitid=%i', $row['submitid']);
-		// last update cache
-		calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
-		$DB->q('COMMIT');
-	}
+
+	rejudging_finish($id, $request, $userdata['userid'], TRUE);
+
 	echo "\n</p>\n";
-
-	$DB->q('UPDATE rejudging
-	        SET endtime=%s, userid_finish=%i
-	        WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
-
-	auditlog('rejudging', $id, 'applying rejudge', '(end)');
 
 	$time_end = microtime(TRUE);
 
 	echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) .
-		"\">r$id</a> applied in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
-
-	require(LIBWWWDIR . '/footer.php');
-	return;
-} else if ( isset($_REQUEST['cancel']) ) {
-	if ( isset($rejdata['endtime']) ) {
-		error("Rejudging already " . ( $rejdata['valid'] ? 'applied.' : 'canceled.'));
-	}
-	auditlog('rejudging', $id, 'canceling rejudge', '(start)');
-
-	$res = $DB->q('SELECT submitid, cid, teamid, probid
-	               FROM submission
-	               WHERE rejudgingid=%i', $id);
-	$time_start = microtime(TRUE);
-
-	// no output buffering... we want to see what's going on real-time
-	echo "<br/><p>Canceling rejudge may take some time, please be patient:</p>\n";
-	ob_implicit_flush(true);
-	ob_end_flush();
-
-	echo "<p>\n";
-	while ( $row = $res->next() ) {
-		echo "s" . specialchars($row['submitid']) . ", ";
-		// restore old judgehost association
-		$valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging
-		                           WHERE submitid=%i AND valid=1', $row['submitid']);
-		$DB->q('UPDATE submission SET rejudgingid = NULL, judgehost=%s
-		        WHERE rejudgingid = %i', $valid_judgehost, $id);
-	}
-	echo "\n</p>\n";
-
-	$DB->q('UPDATE rejudging
-	        SET endtime=%s, userid_finish=%i, valid=0
-	        WHERE rejudgingid=%i', now(), $userdata['userid'], $id);
-
-	auditlog('rejudging', $id, 'canceled rejudge', '(end)');
-
-	$time_end = microtime(TRUE);
-
-	echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) .
-		"\">r$id</a> canceled in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
+		"\">r$id</a> ".($request=='apply' ? 'applied' : 'canceled').
+		" in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
 
 	require(LIBWWWDIR . '/footer.php');
 	return;
 }
 
+$todo = $DB->q('VALUE SELECT COUNT(*) FROM submission
+                WHERE rejudgingid=%i', $id);
+$done = $DB->q('VALUE SELECT COUNT(*) FROM judging
+                WHERE rejudgingid=%i AND endtime IS NOT NULL', $id);
+$todo -= $done;
 
 $userdata = $DB->q('KEYVALUETABLE SELECT userid, name FROM user
                     WHERE userid=%i OR userid=%i',
@@ -158,17 +92,21 @@ echo "</td></tr>\n";
 foreach ( array('userid_start' => 'Issued by',
                 'userid_finish' => ($rejdata['valid'] ? 'Accepted' : 'Canceled') . ' by')
           as $user => $msg ) {
-	if ( isset($rejdata[$user]) ) {
+	$time = $user == 'userid_start' ? 'starttime' : 'endtime';
+	if ( isset($rejdata[$time]) ) {
 		echo "<tr><td>$msg:</td><td>" .
-			'<a href="user.php?id=' . urlencode($rejdata[$user]) . '">' .
-			specialchars($userdata[$rejdata[$user]])  .
-			"</a></td></tr>\n";
+			( isset($rejdata[$user]) ?
+		      '<a href="user.php?id=' . urlencode($rejdata[$user]) . '">' .
+		      specialchars($userdata[$rejdata[$user]]) . '</a>' :
+		      '<span class="nodata">unknown</span>' ) .
+			"</td></tr>\n";
 	}
 }
 foreach (array('starttime' => 'Start time', 'endtime' => 'Apply time') as $time => $msg) {
 	echo "<tr><td>$msg:</td><td>";
 	if ( isset($rejdata[$time]) ) {
-		echo printtime($rejdata[$time]);
+		echo '<span title="' . printtime($rejdata[$time],'%Y-%m-%d %H:%M:%S (%Z)') . '">' .
+			printtime($rejdata[$time]) . '</span>';
 	} else {
 		echo '<span class="nodata">-</span>';
 	}
@@ -341,6 +279,17 @@ echo addForm($pagename, 'get') .
 	addHidden('id', $id) .
 	addHidden("view[$view]", $viewtypes[$view]) .
 	addSubmit('clear') . addEndForm() . "<br /><br />\n";
+
+$filtered = $DB->q('VALUE SELECT COUNT(s.submitid)
+                    FROM submission s
+                    LEFT JOIN judging j ON (s.submitid = j.submitid AND j.rejudgingid = %i)
+                    WHERE s.cid NOT IN (%As) AND (s.rejudgingid = %i OR j.rejudgingid = %i)',
+                   $id, $cids, $id, $id);
+
+if ( $filtered > 0 ) {
+	echo "<p class=\"nodata\">$filtered submissions are not displayed " .
+		"because they are not part of any active contest(s).</p>\n\n";
+}
 
 putSubmissions($cdatas, $restrictions);
 
