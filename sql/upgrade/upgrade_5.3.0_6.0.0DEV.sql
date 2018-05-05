@@ -117,6 +117,9 @@ ALTER TABLE `submission`
 
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 
+ALTER TABLE `clarification`
+  ADD COLUMN `queue` varchar(255) DEFAULT NULL COMMENT 'Queue associated to this clarification' AFTER `category`;
+
 
 --
 -- Transfer data from old to new structure
