@@ -20,6 +20,8 @@ Version 6.0.0 - DEV
  - Use d3 charts instead of float for statistics.
  - Update ACE editor to version 1.3.3.
  - [security] Fix team permission for viewing clarification categories.
+ - [security] Ensure only users with admin role can update executables.
+   Thanks Niklas Hoehne for reporting!
  - Many small issues fixed and documentation improvements.
 
 Version 5.2.0 - DEV
