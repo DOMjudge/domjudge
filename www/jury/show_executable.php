@@ -27,7 +27,9 @@ if ( isset($_POST['storeid']) ) {
 		error("failed to create temporary directory");
 	}
 	chmod($tmpexecdir, 0700);
-	system("unzip -q $tmpfname -d '$tmpexecdir'", $retval);
+	system("unzip -Z $tmpfname | grep -q ^l", $retval);
+	if ( $retval===0 ) error ("Zipfile contains symlinks");
+	system("unzip -j -q $tmpfname -d '$tmpexecdir'", $retval);
 	if ( $retval!=0 ) {
 		error("Could not unzip executable to temporary directory.");
 	}
@@ -38,7 +40,7 @@ if ( isset($_POST['storeid']) ) {
 			// this file was skipped before
 			continue;
 		}
-		$filename = $zip->getNameIndex($j);
+		$filename = basename($zip->getNameIndex($j));
 
 		// overwrite it
 		if ( FALSE === file_put_contents($tmpexecdir . "/" . $filename, str_replace("\r\n", "\n", $_POST['texta' . $j])) ) {
@@ -101,7 +103,7 @@ if ( FALSE === file_put_contents($tmpfname, $executable['zipfile']) ) {
 $zip = openZipFile($tmpfname);
 $skippedBinary = array();
 for ($j = 0; $j < $zip->numFiles; $j++) {
-	$filename = $zip->getNameIndex($j);
+	$filename = basename($zip->getNameIndex($j));
 	if ($filename[strlen($filename)-1] == "/") {
 		if ( $edit_mode ) {
 			echo addHidden("skipped[$j]", 1);

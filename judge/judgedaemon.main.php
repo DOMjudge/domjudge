@@ -193,7 +193,9 @@ function fetch_executable($workdirpath, $execid, $md5sum)
 		}
 
 		logmsg(LOG_DEBUG, "Unzipping");
-		system("unzip -q -d $execpath $execzippath", $retval);
+		system("unzip -Z $execzippath | grep -q ^l", $retval);
+		if ( $retval===0 ) error ("Zipfile $execzippath contains symlinks");
+		system("unzip -j -q -d $execpath $execzippath", $retval);
 		if ( $retval!=0 ) error("Could not unzip zipfile in $execpath");
 
 		$do_compile = TRUE;
