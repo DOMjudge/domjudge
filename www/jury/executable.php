@@ -22,6 +22,8 @@ if ( isset($_GET['cmd'] ) ) {
 }
 
 if ( isset($_GET['fetch']) ) {
+	requireAdmin();
+
 	$filename = $id . ".zip";
 
 	$size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH(zipfile)
@@ -44,6 +46,8 @@ if ( isset($_GET['fetch']) ) {
 }
 
 if ( isset($_POST['upload']) ) {
+	requireAdmin();
+
 	if ( !empty($_FILES['executable_archive']['tmp_name'][0]) ) {
 		foreach($_FILES['executable_archive']['tmp_name'] as $fileid => $tmpname) {
 			checkFileUpload( $_FILES['executable_archive']['error'][$fileid] );
@@ -160,11 +164,12 @@ $data = $DB->q('MAYBETUPLE SELECT execid, description, md5sum, type,
 if ( ! $data ) error("Missing or invalid executable id");
 
 echo "<h1>Executable ".specialchars($id)."</h1>\n\n";
-
-echo addForm($pagename . '?id=' . urlencode($id),
-             'post', null, 'multipart/form-data') . "<p>\n" .
-	addHidden('id', $id) .
-	"</p>\n";
+if ( IS_ADMIN ) {
+	echo addForm($pagename . '?id=' . urlencode($id),
+		     'post', null, 'multipart/form-data') . "<p>\n" .
+		addHidden('id', $id) .
+		"</p>\n";
+}
 ?>
 <table>
 <tr><td>ID:          </td><td class="execid"><?php echo specialchars($data['execid'])?></td></tr>
@@ -215,9 +220,11 @@ if ( IS_ADMIN && class_exists("ZipArchive") ) {
 		"</tr>\n";
 }
 
-echo "</table>\n" . addEndForm();
+echo "</table>\n";
 
 if ( IS_ADMIN ) {
+	addEndForm();
+
 	echo "<p>" .
 		'<a href="executable.php?fetch&amp;id=' . urlencode($id) .
 		'"><img src="../images/b_save.png" ' .
