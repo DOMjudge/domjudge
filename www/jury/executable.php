@@ -77,6 +77,9 @@ if ( isset($_POST['upload']) ) {
 				       $desc, md5($content), $content, $type, $id);
 				$newid = $id;
 			} else {
+				if ( $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s', $newid) ) {
+					error('Executable with id "' . $newid . '" already exists.');
+				}
 				$DB->q('INSERT INTO executable (execid, description, md5sum, zipfile, type)
 				        VALUES (%s, %s, %s, %s, %s)',
 				       $newid, $desc, md5($content), $content, $type);
