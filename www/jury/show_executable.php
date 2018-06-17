@@ -10,6 +10,8 @@ require('init.php');
 
 // store files
 if ( isset($_POST['storeid']) ) {
+	requireAdmin();
+
 	$id = $_POST['storeid'];
 	$executable = $DB->q('MAYBETUPLE SELECT * FROM executable
 	                      WHERE execid = %s', $id);
@@ -70,13 +72,15 @@ if ( empty($executable) ) error ("Executable $id not found");
 
 // Download was requested
 if ( isset($_GET['fetch']) ) {
+	requireAdmin();
+
 	error("downloading of single files not implemented yet");
 }
 
 $title = "Executable: $id";
 require(LIBWWWDIR . '/header.php');
 
-$edit_mode = ( isset($_GET['edit_source']) );
+$edit_mode = ( IS_ADMIN && isset($_GET['edit_source']) );
 
 echo '<h2>' . ( $edit_mode ? 'Edit content of e' : 'E' ) . "xecutable " .specialchars($id). "</h2>\n\n";
 
@@ -119,7 +123,7 @@ for ($j = 0; $j < $zip->numFiles; $j++) {
 	// FIXME: skip files based on size?
 	if ( $edit_mode ) {
 		$html .= addTextArea('texta'. $j, $content, 120, 40) . "<br/>\n";
-	} else {
+	} elseif ( IS_ADMIN ) {
 		$html .= "<a href=\"show_executable.php?id=" . urlencode($id) . "&amp;fetch=" . $j . "\">" .
 			"<img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a> " .
 			"<a href=\"show_executable.php?edit_source=1&id=" . urlencode($id) . "&amp;rank=" . $j . "\">" .
@@ -170,7 +174,7 @@ echo $html;
 
 if ( $edit_mode ) {
 	echo addHidden('storeid', $id);
-	echo addSubmit('save');
+	echo addSubmit('save all');
 
 	echo addEndForm();
 }
