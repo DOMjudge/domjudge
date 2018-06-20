@@ -223,7 +223,7 @@ if ( IS_ADMIN && class_exists("ZipArchive") ) {
 echo "</table>\n";
 
 if ( IS_ADMIN ) {
-	addEndForm();
+	echo addEndForm();
 
 	echo "<p>" .
 		'<a href="executable.php?fetch&amp;id=' . urlencode($id) .
