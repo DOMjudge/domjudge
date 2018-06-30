@@ -135,6 +135,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `description`, `public`) V
 ('show_flags', '1', 'bool', 'Show country flags on the scoreboard?', 0),
 ('show_affiliation_logos', '0', 'bool', 'Show affiliation logos on the scoreboard?', 0),
 ('show_limits_on_team_page', '0', 'bool', 'Show time and memory limit on the team problems page', 0),
+('show_relative_time', '0', 'bool', 'Print times of contest events relative to contest start (instead of absolute).', '1'),
 ('clar_queues', '{}', 'array_keyval', 'List of clarification queues', 1),
 ('clar_default_problem_queue', '""', 'string', 'Category to assign to problem clarifications', 1);
 

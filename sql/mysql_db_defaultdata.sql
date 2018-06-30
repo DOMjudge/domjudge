@@ -41,6 +41,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `description`) V
 ('results_remap', '{}', 'array_keyval', '0', 'Remap testcase result, e.g. to disable a specific result type such as ''no-output''.'),
 ('lazy_eval_results', '1', 'bool', '0', 'Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged.'),
 ('enable_printing', '0', 'bool', '1', 'Enable teams and jury to send source code to a printer via the DOMjudge web interface.'),
+('show_relative_time', '0', 'bool', '1', 'Print times of contest events relative to contest start (instead of absolute).'),
 ('time_format', '"%H:%M"', 'string', '0', 'The format used to print times. For formatting options see the PHP \'strftime\' function.'),
 ('default_compare', '"compare"', 'string', '0', 'The script used to compare outputs if no special compare script specified.'),
 ('default_run', '"run"', 'string', '0', 'The script used to run submissions if no special run script specified.'),
