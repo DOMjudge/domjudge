@@ -201,7 +201,7 @@ function putClar($clar)
 	echo "</td></tr>\n";
 
 	echo '<tr><td>Time:</td><td>';
-	echo printtime($clar['submittime']);
+	echo printtime($clar['submittime'], NULL, $clar['cid']);
 	echo "</td></tr>\n";
 
 	echo '<tr><td></td><td class="filename">';
@@ -312,7 +312,7 @@ function putClarificationList($clars, $team = NULL)
 		echo ( IS_JURY && count($cids) > 1 ? ('<td>' . $link .
 						      $clar['contestshortname'] . '</a></td>') : '');
 
-		echo '<td>' . $link . printtime($clar['submittime']) . '</a></td>';
+		echo '<td>' . $link . printtime($clar['submittime'], NULL, $clar['cid']) . '</a></td>';
 
 		if ( $clar['sender'] == NULL ) {
 			$sender = 'Jury';

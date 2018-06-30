@@ -67,7 +67,7 @@ function printtime($datetime, $format = NULL, $cid = NULL) {
 	if ( empty($datetime) ) return '';
 	if ( is_null($format) ) $format = dbconfig_get('time_format', '%H:%M');
 	if ( isset($cid) && dbconfig_get('show_relative_time', 0) ) {
-	        $reltime = (int)floor(calcContestTime($datetime,$cid));
+		$reltime = (int)floor(calcContestTime($datetime,$cid));
 		$sign = ( $reltime<0 ? -1 : 1 );
 		$reltime *= $sign;
 		// We're not showing seconds, while the last minute before

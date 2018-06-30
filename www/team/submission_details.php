@@ -14,7 +14,7 @@ $id = getRequestID();
 
 
 // select also on teamid so we can only select our own submissions
-$row = $DB->q('MAYBETUPLE SELECT p.probid, cp.shortname, p.name AS probname, submittime,
+$row = $DB->q('MAYBETUPLE SELECT p.probid, j.cid, cp.shortname, p.name AS probname, submittime,
                s.valid, l.name AS langname, result, output_compile, verified, judgingid
                FROM judging j
                LEFT JOIN submission s      USING (submitid)
@@ -44,7 +44,7 @@ $DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $id);
 <div class="d-flex flex-row">
 <div class="p-2">Problem: <b><span class="probid"><?=specialchars($row['shortname'])?></span> -
     <?=specialchars($row['probname'])?></b></div>
-<div class="p-2">Submitted: <b><?=printtime($row['submittime'])?></b></div>
+<div class="p-2">Submitted: <b><?=printtime($row['submittime'], NULL, $row['cid'])?></b></div>
 <div class="p-2">Language: <b><?=specialchars($row['langname'])?></b></div>
 <div class="p-2">Compilation:
 <?php if ($row['result'] == 'compiler-error'): ?>

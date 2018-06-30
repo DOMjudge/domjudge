@@ -326,7 +326,7 @@ if ( ! $submdata['valid'] ) {
 	<?php echo specialchars($submdata['langname'])?></a>&nbsp;&nbsp;
 <img title="submittime" alt="Submittime:" src="../images/submittime.png"/>
 	<?php echo '<span title="' . printtime($submdata['submittime'],'%Y-%m-%d %H:%M:%S (%Z)') . '">' .
-	           printtime($submdata['submittime']) . '</span>' ?>&nbsp;&nbsp;
+	           printtime($submdata['submittime'], NULL, $submdata['cid']) . '</span>' ?>&nbsp;&nbsp;
 <img title="allowed runtime" alt="Allowed runtime:" src="../images/allowedtime.png"/>
 	<?php echo  specialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
 <img title="view source code" alt="" src="../images/code.png"/>
@@ -359,7 +359,7 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 		$rinfo = isset($jud['rejudgingid']) ? 'r' . $jud['rejudgingid'] . ' (' . $jud['reason'] . ')' : '';
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
-			'<td>' . $link . printtime($jud['starttime']) . '</a></td>' .
+			'<td>' . $link . printtime($jud['starttime'], NULL, $jud['cid']) . '</a></td>' .
 			'<td>' . $link . specialchars($jud['max_runtime']) .
 			                 (isset($jud['max_runtime']) ? ' s' : '') . '</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
