@@ -59,3 +59,9 @@ define('DJ_MYSQL_CONNECT_FLAGS', null);
 // accept SSL by default. Not normally necessary if you run the DOMserver
 // and database on the same machine.
 // define('DJ_MYSQL_CONNECT_FLAGS', MYSQLI_CLIENT_SSL);
+
+// Enable this to support removing time intervals from the contest.
+// Although we use this feature at the ICPC World Finals, we strongly
+// discourage using it, and we don't guarantee the code is completely
+// bug-free. This code is rarely tested!
+define('ALLOW_REMOVED_INTERVALS', false);

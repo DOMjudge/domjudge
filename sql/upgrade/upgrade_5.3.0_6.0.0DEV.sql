@@ -120,6 +120,20 @@ ALTER TABLE `submission`
 ALTER TABLE `clarification`
   ADD COLUMN `queue` varchar(255) DEFAULT NULL COMMENT 'Queue associated to this clarification' AFTER `category`;
 
+-- Add `removed_interval` table
+
+CREATE TABLE `removed_interval` (
+  `intervalid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
+  `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Initial time of removed interval',
+  `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Final time of removed interval',
+  `starttime_string` varchar(64) NOT NULL COMMENT 'Authoritative (absolute only) string representation of starttime',
+  `endtime_string` varchar(64) NOT NULL COMMENT 'Authoritative (absolute only) string representation of endtime',
+  PRIMARY KEY (`intervalid`),
+  KEY `cid` (`cid`),
+  CONSTRAINT `removed_interval_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Time intervals removed from the contest for scoring';
+
 
 --
 -- Transfer data from old to new structure

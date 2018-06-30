@@ -58,6 +58,15 @@ function getCurContests($fulldata = FALSE, $onlyofteam = NULL,
 		return array_keys($contests);
 	}
 
+	if ( ALLOW_REMOVED_INTERVALS ) {
+		foreach ($contests as $cid => &$contest) {
+			$res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
+			               FROM removed_interval WHERE cid = %i', $cid);
+
+			$contest['removed_intervals'] = $res;
+		}
+	}
+
 	return $contests;
 }
 
@@ -148,11 +157,10 @@ function calcFreezeData($cdata)
 }
 
 /**
- * Calculate contest time from wall-clock time.
+ * Calculate contest time from wall-clock time (and removed intervals).
  * Returns time since contest start in seconds.
- * This function is currently a stub around timediff, but introduced
- * to allow minimal changes wrt. the removed intervals required for
- * the ICPC specification.
+ * NOTE: It is assumed that removed intervals do not overlap and that
+ * they all fall within the contest start and end times.
  */
 function calcContestTime($walltime, $cid)
 {
@@ -162,6 +170,16 @@ function calcContestTime($walltime, $cid)
 	$cdatas = getCurContests(TRUE,NULL,TRUE);
 
 	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
+
+	if ( ALLOW_REMOVED_INTERVALS ) {
+		foreach ( $cdatas[$cid]['removed_intervals'] as $intv ) {
+			if ( difftime($intv['starttime'], $walltime)<0 ) {
+				$contesttime -= min(
+					difftime($walltime,        $intv['starttime']),
+					difftime($intv['endtime'], $intv['starttime']));
+			}
+		}
+	}
 
 	return $contesttime;
 }

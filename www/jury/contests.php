@@ -184,6 +184,9 @@ $res = $DB->q('TABLE SELECT contest.*, COUNT(teamid) AS numteams
                LEFT JOIN contestteam USING (cid)
                GROUP BY cid ORDER BY starttime DESC');
 $numprobs = $DB->q('KEYVALUETABLE SELECT cid, COUNT(probid) FROM contest LEFT JOIN contestproblem USING(cid) GROUP BY cid');
+if ( ALLOW_REMOVED_INTERVALS ) {
+	$numintvs = $DB->q('KEYVALUETABLE SELECT cid, COUNT(intervalid) FROM removed_interval GROUP BY cid');
+}
 
 if( count($res) == 0 ) {
 	echo "<p class=\"nodata\">No contests defined</p>\n\n";
@@ -193,6 +196,9 @@ if( count($res) == 0 ) {
 	     "<tr><th scope=\"col\" class=\"sorttable_numeric\">CID</th>";
 	echo "<th scope=\"col\">shortname</th>";
 	foreach($times as $time) echo "<th scope=\"col\">$time</th>";
+	if ( ALLOW_REMOVED_INTERVALS ) {
+		echo "<th scope=\"col\">removed<br />intervals</th>";
+	}
 	echo "<th scope=\"col\">process<br />balloons?</th>";
 	echo "<th scope=\"col\">public?</th>";
 	echo "<th scope=\"col\" class=\"sorttable_numeric\"># teams</th>";
@@ -217,6 +223,9 @@ if( count($res) == 0 ) {
 			echo "<td title=\"".printtime(@$row[$time. 'time'],'%Y-%m-%d %H:%M:%S (%Z)') . "\">" .
 			      $link . ( isset($row[$time.'time']) ?
 			      printtime($row[$time.'time']) : '-' ) . "</a></td>\n";
+		}
+		if ( ALLOW_REMOVED_INTERVALS ) {
+			echo "<td>" . $link . (isset($numintvs[$row['cid']])?$numintvs[$row['cid']]:0) . "</a></td>\n";
 		}
 		echo "<td>" . $link . ($row['process_balloons'] ? 'yes' : 'no') . "</a></td>\n";
 		echo "<td>" . $link . ($row['public'] ? 'yes' : 'no') . "</a></td>\n";

@@ -240,7 +240,9 @@ $human_rel_datetime = "±[HHH]H:MM[:SS[.uuuuuu]]";
 // Returns an absolute Unix Epoch timestamp from a formatted absolute
 // or relative (to $basetime timestamp, if set) time. $field is a
 // descriptive name of the current time for error messages.
-function check_relative_time($time, $basetime, $field)
+// If an array $removed_intervals is given, these are use to adjust
+// the calculated timestamps for relative times.
+function check_relative_time($time, $basetime, $field, $removed_intervals = null)
 {
 	global $pattern_datetime, $pattern_offset, $human_abs_datetime, $human_rel_datetime;
 
@@ -272,7 +274,16 @@ function check_relative_time($time, $basetime, $field)
 			if ($neg) {
 				$seconds *= -1;
 			}
-			$ret = $basetime + $seconds;
+			// calculate the absolute time, adjusting for removed intervals
+			$abstime = $basetime + $seconds;
+			if ( is_array($removed_intervals) ) {
+				foreach ( $removed_intervals as $intv ) {
+					if ( difftime($intv['starttime'],$abstime)<=0 ) {
+						$abstime += difftime($intv['endtime'],$intv['starttime']);
+					}
+				}
+			}
+			$ret = $abstime;
 		} else {
 			ch_error($field . " is not correctly formatted, expecting: $human_rel_datetime");
 			return null;
@@ -306,8 +317,59 @@ function check_relative_time($time, $basetime, $field)
 	return $ret;
 }
 
-function check_contest($data, $keydata = null)
+function check_removed_intervals($contest, $intervals)
 {
+	foreach ( $intervals as $data ) {
+		foreach ( array('starttime','endtime') as $f ) {
+			// The true input date/time strings are preserved in the
+			// *_string variables. These are in absolute format only.
+			$data[$f] = $data[$f.'_string'];
+			$data[$f] = check_relative_time($data[$f], $contest['starttime'],
+			                                'removed_interval '.$f, $removed_intervals);
+		}
+	}
+
+	foreach ( $intervals as $data ) {
+		if ( difftime($data['endtime'], $data['starttime']) <= 0 ) {
+			ch_error('Interval ends before (or when) it starts');
+		}
+
+		if ( difftime($data['starttime'], $contest['starttime']) < 0 ) {
+			ch_error("Interval starttime '$data[starttime_string]' outside of contest");
+		}
+		if ( difftime($data['endtime'], $contest['endtime']) > 0 ) {
+			ch_error("Interval endtime '$data[endtime_string]' outside of contest");
+		}
+
+		foreach( $intervals as $other ) {
+			if ( @$data['intervalid']===@$other['intervalid'] ) continue;
+			if ( (difftime($data['starttime'], $other['starttime']) >= 0 &&
+			      difftime($data['starttime'], $other['endtime']  ) <  0 ) ||
+			     (difftime($data['endtime'],   $other['starttime']) >  0 &&
+			      difftime($data['endtime'],   $other['endtime']  ) <= 0 ) ) {
+				ch_error('Removed intervals ' .
+				         (isset($data['intervalid'])  ? $data['intervalid']  : 'new') .
+				         ' and ' .
+				         (isset($other['intervalid']) ? $other['intervalid'] : 'new') .
+				         ' overlap');
+			}
+		}
+	}
+}
+
+function check_contest($data, $keydata = null, $removed_intervals = null)
+{
+	global $DB;
+
+	// Contest removed intervals are required to correctly calculate
+	// absolute contest times from relative ones. Use the ones
+	// provides as argument or from the database if available.
+	if ( ALLOW_REMOVED_INTERVALS &&
+		 !isset($removed_intervals) && isset($keydata['cid']) ) {
+		$removed_intervals = $DB->q('TABLE SELECT * FROM removed_interval
+		                             WHERE cid = %i ORDER BY starttime', $keydata['cid']);
+	}
+
 	if ( isset($data['shortname']) && ! preg_match ( ID_REGEX, $data['shortname'] ) ) {
 		ch_error("Contest shortname may only contain characters " . IDENTIFIER_CHARS . ".");
 	}
@@ -320,7 +382,8 @@ function check_contest($data, $keydata = null)
 		// that need to be kept as is.
 		$data[$f] = @$data[$f.'_string'];
 		$data[$f] = check_relative_time($data[$f],
-		                                ($f=='starttime' ? null : $data['starttime']), $f);
+		                                ($f=='starttime' ? null : $data['starttime']),
+		                                $f, $removed_intervals);
 	}
 
 	// are required times specified?
@@ -363,6 +426,15 @@ function check_contest($data, $keydata = null)
 		     difftime($data['deactivatetime'], $data['endtime']) < 0 ) {
 			ch_error('Deactivatetime must be larger than endtime.');
 		}
+	}
+
+	// Check removed_intervals with contest times adapted to these,
+	// i.e. we check self-consistency, while a new removed_interval
+	// could have been specified that initially has its endtime beyond
+	// the contest endtime, but _not_ after correcting the contest
+	// endtime for it.
+	if ( ALLOW_REMOVED_INTERVALS && isset($keydata['cid']) ) {
+		check_removed_intervals($data,$removed_intervals);
 	}
 
 	return $data;
