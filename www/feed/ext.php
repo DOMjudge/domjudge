@@ -120,6 +120,8 @@ $root       = XMLaddnode($xmldoc, 'contest');
 $reset      = XMLaddnode($root, 'reset');
 $info       = XMLaddnode($root, 'info');
 
+$fdata = calcFreezeData($cdata);
+
 // write out general info
 $length = calcContestTime($cdata['endtime'],$cid);
 $lengthString = sprintf('%02d:%02d:%02d', $length/(60*60), ($length/60) % 60, $length % 60);
@@ -135,8 +137,7 @@ XMLaddnode($info, 'contest-id', $cdata['externalid']);
 XMLaddnode($info, 'length', $lengthString);
 XMLaddnode($info, 'scoreboard-freeze-length', $freezelengthString);
 XMLaddnode($info, 'penalty', dbconfig_get('penalty_time', 20));
-$started = now() - $cdata['starttime'] >= 0;
-XMLaddnode($info, 'started', $started ? 'True' : 'False');
+XMLaddnode($info, 'started', $fdata['cstarted'] ? 'True' : 'False');
 XMLaddnode($info, 'starttime', formattime($cdata['starttime']));
 XMLaddnode($info, 'title', $cdata['name']);
 XMLaddnode($info, 'short-title', $cdata['shortname']);

@@ -19,6 +19,9 @@ ALTER TABLE `configuration`
   ADD COLUMN `public` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Is this variable publicly visible?' AFTER `type`,
   ADD KEY `public` (`public`);
 
+ALTER TABLE contest
+  ADD COLUMN `starttime_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'If disabled, starttime is not used, e.g. to delay contest start';
+
 ALTER TABLE `contestteam`
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`cid`,`teamid`);

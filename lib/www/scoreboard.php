@@ -1093,6 +1093,7 @@ function jurylink($target, $content) {
 function printContestStart($cdata)
 {
 	$res = "scheduled to start ";
+	if ( !$cdata['starttime_enabled'] ) $res = "start delayed, was scheduled ";
 	if ( printtime(now(),'%Y%m%d') == printtime($cdata['starttime'],'%Y%m%d') ) {
 		// Today
 		$res .= "at " . printtime($cdata['starttime']);

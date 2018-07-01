@@ -126,7 +126,7 @@ function calcFreezeData($cdata)
 {
 	$fdata = array();
 
-	if ( empty($cdata) ) {
+	if ( empty($cdata) || !$cdata['starttime_enabled'] ) {
 		return array(
 			'showfinal' => false,
 			'showfrozen' => false,
