@@ -48,12 +48,23 @@ class APIController extends FOSRestController {
 	public function changeStartTimeAction(Request $request, Contest $contest) {
 		$args = $request->request->all();
 		$response = NULL;
+		$now = Utils::now();
 		if ( !isset($args['id']) ) {
 			$response = new Response('Missing "id" in request.', 400);
 		} else if ( !isset($args['start_time']) ) {
 			$response = new Response('Missing "start_time" in request.', 400);
 		} else if ( $args['id'] != $contest->getExternalid() ) {
 			$response = new Response('Invalid "id" in request.', 400);
+		} else if ( $contest->getStarttime() != NULL &&
+		            $contest->getStarttimeEnabled() &&
+		            $contest->getStarttime() < $now + 30 ) {
+			$response = new Response('Current contest already started or about to start.', 403);
+		} else if ( $args['start_time'] === NULL ) {
+			$em = $this->getDoctrine()->getManager();
+			$em->persist($contest);
+			$contest->setStarttimeEnabled(FALSE);
+			$response = new Response('Contest paused :-/.', 200);
+			$em->flush();
 		} else {
 			$em = $this->getDoctrine()->getManager();
 			$date = date_create($args['start_time']);
@@ -61,11 +72,8 @@ class APIController extends FOSRestController {
 				$response = new Response('Invalid "start_time" in request.', 400);
 			} else {
 				$new_start_time = $date->getTimestamp();
-				$now = Utils::now();
 				if ( $new_start_time < $now + 30 ) {
 					$response = new Response('New start_time not far enough in the future.', 403);
-				} else if ( FALSE && $contest->getStarttime() != NULL && $contest->getStarttime() < $now + 30 ) {
-					$response = new Response('Current contest already started or about to start.', 403);
 				} else {
 					$em->persist($contest);
 					$newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
