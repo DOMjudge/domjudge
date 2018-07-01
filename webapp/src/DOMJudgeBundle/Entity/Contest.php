@@ -290,12 +290,28 @@ class Contest
 	}
 
 	/**
-	 * Get starttime
+	 * Set starttime
+	 *
+	 * @param double $starttime
+	 *
+	 * @return Contest
+	 */
+	public function setStarttime($starttime)
+	{
+		$this->starttime = $starttime;
+
+		return $this;
+	}
+
+	/**
+	 * Get starttime, or NULL if disabled
 	 *
 	 * @return double
 	 */
 	public function getStarttime()
 	{
+		if ( !$this->getStarttimeEnabled() ) return NULL;
+
 		return $this->starttime;
 	}
 

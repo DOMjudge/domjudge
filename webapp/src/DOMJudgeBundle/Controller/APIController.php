@@ -57,7 +57,6 @@ class APIController extends FOSRestController {
 			$response = new Response('Invalid "id" in request.', 400);
 		} else if ( !isset($args['force']) &&
 		            $contest->getStarttime() != NULL &&
-		            $contest->getStarttimeEnabled() &&
 		            $contest->getStarttime() < $now + 30 ) {
 			$response = new Response('Current contest already started or about to start.', 403);
 		} else if ( $args['start_time'] === NULL ) {
