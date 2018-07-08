@@ -496,15 +496,15 @@ function updateClock()
 	date.setTime(curtime*1000);
 
 	var fmt = "";
-	if (curtime >= starttime && curtime < endtime ) {
+	if ( timeleftelt.innerHTML=='start delayed' || timeleft.innerHTML == 'no contest' ) { // FIXME
+		var left = 0;
+		var what = timeleftelt.innerHTML;
+	} else if (curtime >= starttime && curtime < endtime ) {
 		var left = endtime - curtime;
 		var what = "";
 	} else if (curtime >= activatetime && curtime < starttime ) {
 		var left = starttime - curtime;
 		var what = "- ";
-	} else if (timeleft.innerHTML == " no contest") {
-		var left = 0;
-		var what = " no contest";
 	} else {
 		var left = 0;
 		var what = "contest over";
