@@ -39,7 +39,7 @@ function err($string)
 	echo "<h2>Submit - error</h2>\n\n";
 
 	echo '<div id="uploadstatus">';
-	logmsg(LOG_WARNING, $string);
+	echo specialchars($string);
 	echo '</div>';
 
 	require(LIBWWWDIR . '/footer.php');
