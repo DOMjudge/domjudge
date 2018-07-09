@@ -200,6 +200,7 @@ $title = 'Submission s'.@$id;
 if ( ! $id ) error("Missing or invalid submission id");
 
 $submdata = $DB->q('MAYBETUPLE SELECT s.teamid, s.probid, s.langid, s.origsubmitid,
+                    s.externalid,
                     s.submittime, s.valid, c.cid, c.shortname AS contestshortname,
                     c.name AS contestname, t.name AS teamname, l.name AS langname,
                     cp.shortname AS probshortname, p.name AS probname,
@@ -620,7 +621,7 @@ if ( !empty($jud['result']) ) {
 		$val = ! $jud['verified'];
 
 		echo addForm('verify.php') .
-		   addHidden('id',  $jud['judgingid']) .
+		    addHidden('id',  $jud['judgingid']) .
 		    addHidden('val', $val) .
 		    addHidden('redirect', @$_SERVER['HTTP_REFERER']);
 	}
@@ -636,7 +637,20 @@ if ( !empty($jud['result']) ) {
 
 	if ( $verify_change_allowed ) {
 		echo '; ' . addSubmit(($val ? '' : 'un') . 'mark verified', 'verify');
+
 		if ( $val ) echo ' with comment ' . addInput('comment', '', 25);
+
+		if ( $val && defined('ICAT_URL') ) {
+			$url = ICAT_URL.'/insert_entry.php';
+			echo addInputField('button','post_icat','post to iCAT',
+				" onclick=\"postVerifyCommentToICAT(".
+				"'$url','$username','".
+				$submdata['teamid']."','" .
+				$submdata['probshortname']."','".
+				$submdata['externalid']."');".
+				" alert('Comment posted to iCAT.');\"");
+		}
+
 		echo "</p>" . addEndForm();
 	} else {
 		echo "</p>\n";
