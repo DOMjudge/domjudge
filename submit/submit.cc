@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <ctype.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <getopt.h>
@@ -166,6 +167,20 @@ vector<vector<string> > contests;
 
 /* Entry point required? */
 bool require_entry_point;
+
+string kotlin_base_entry_point(string filebase)
+{
+	if ( filebase.empty() ) return "_";
+	for(size_t i=0; i<filebase.length(); i++) {
+		if ( !isalnum(filebase[i]) ) filebase[i] = '_';
+	}
+	if ( isalpha(filebase[0]) ) {
+		filebase[0] = toupper(filebase[0]);
+	} else {
+		filebase = '_' + filebase;
+	}
+	return filebase;
+}
 
 int main(int argc, char **argv)
 {
@@ -346,8 +361,7 @@ int main(int argc, char **argv)
 		if ( language == "Java" ) {
 			entry_point = filebase;
 		} else if ( language == "Kotlin" ) {
-			entry_point = filebase + "Kt";
-			entry_point[0] = toupper(entry_point[0]);
+			entry_point = kotlin_base_entry_point(filebase) + "Kt";
 		} else if ( language == "Python 2" || language == "Python 2 (pypy)" || language == "Python 3" ) {
 			entry_point = filebase + "." + fileext;
 		}
