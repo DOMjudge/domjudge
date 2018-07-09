@@ -77,9 +77,14 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
 if ( ! isset($lang) ) err("Unable to find language '$langid'");
 $langid = $lang['langid'];
 
-$entry_point = @$_POST['entry_point'];
-if ( empty($entry_point) && dbconfig_get('require_entry_point', FALSE) ) {
-	err("Entry point required, but not specified.");
+// TODO: this should be database-based configuration
+$entry_point = NULL;
+$language_requires_entry_point = $langid == 'java' || $langid == 'kt' || $langid == 'py2' || $langid == 'py3';
+if ( $language_requires_entry_point && dbconfig_get('require_entry_point', FALSE) ) {
+	if ( empty($_POST['entry_point']) ) {
+		err("Entry point required, but not specified.");
+	}
+	$entry_point = $_POST['entry_point'];
 }
 
 $sid = submit_solution($teamid, $probid, $cid, $langid, $FILEPATHS, $FILENAMES, NULL, $entry_point);
