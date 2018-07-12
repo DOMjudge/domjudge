@@ -561,18 +561,20 @@ foreach($subject_options as $value => $desc) {
 </div>
 
 <?php
+if ( IS_JURY && $respid!==NULL ) {
 	$std_answers = dbconfig_get('clar_answers');
-	if ( IS_JURY && $respid!==NULL && count($std_answers)>0 ) {
+	if ( count($std_answers) > 0 ) {
 		$options = array();
 		$default = $std_answers[0];
 		foreach($std_answers as $ans) $options[$ans] = summarizeClarification($ans, 50);
 		echo '<div class="form-group">' .
-			'<label for="bodytext">Std. answer:</label>' .
+			'<label for="answertext">Std. answer:</label> ' .
 			addSelect('answertext', $options, $default, TRUE) .
-			addSubmit('append',  'append',  'return appendAnswer()') .
-			addSubmit('replace', 'replace', 'return replaceAnswer()') .
+			addButton('append',  'append',  'return clarificationAppendAnswer()') .
+			addButton('replace', 'replace', 'return clarificationAppendAnswer(true)') .
 			'</div>';
 	}
+}
 ?>
 
 <div class="form-group">

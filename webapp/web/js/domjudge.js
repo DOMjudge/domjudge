@@ -763,3 +763,10 @@ function toggleExpand(event)
 		event.target.innerHTML = '[collapse]';
 	}
 }
+
+function clarificationAppendAnswer(replace = false) {
+	var newtext = document.forms['sendclar'].answertext.value;
+	var elem = document.getElementById('bodytext');
+	if ( replace ) { elem.value = newtext; } else { elem.value += '\n' + newtext; }
+	return false;
+}
