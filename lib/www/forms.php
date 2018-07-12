@@ -133,6 +133,16 @@ function addReset($value) {
 }
 
 /**
+ * A normal non-submit button.
+ */
+function addButton($name, $value, $onclick = null, $enable = true, $extraattrs = "") {
+	return addInputField('button', $name, $value,
+		(empty($onclick) ? null : ' onclick="'.specialchars($onclick).'"') .
+		($enable ? '' : ' disabled="disabled"') .
+		(empty($extraattrs) ? '' : " $extraattrs"));
+}
+
+/**
  * Textarea form element.
  */
 function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '') {
