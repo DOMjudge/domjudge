@@ -120,11 +120,11 @@ function tsv_teams_set($data)
 		if ( !empty($row['team_affiliation']['shortname']) ) {
 			// First look up if the affiliation already exists.
 			$affilid = $DB->q("MAYBEVALUE SELECT affilid FROM team_affiliation
-					   WHERE externalid = %s LIMIT 1",
-				$row['team_affiliation']['externalid']);
+			                   WHERE externalid = %s LIMIT 1",
+			                  $row['team_affiliation']['externalid']);
 			if ( empty($affilid) ) {
 				$affilid = $DB->q("RETURNID INSERT INTO team_affiliation SET %S",
-					$row['team_affiliation']);
+				                  $row['team_affiliation']);
 
 				eventlog('team_affiliation', $affilid, 'create');
 				auditlog('team_affiliation', $affilid, 'added', 'imported from tsv');
@@ -153,7 +153,7 @@ function tsv_accounts_prepare($content)
 	$jurycatid = $DB->q('MAYBEVALUE SELECT categoryid FROM team_category WHERE name = "Jury"');
 	if ( !$jurycatid ) {
 		$jurycatid = $DB->q('RETURNID INSERT INTO team_category (name,sortorder,visible)
-				     VALUES ("Jury", 100, 0)');
+		                     VALUES ("Jury", 100, 0)');
 	}
 
 	foreach($content as $line) {
@@ -278,8 +278,8 @@ function tsv_teams_get()
 {
 	global $DB;
 	return $DB->q('TABLE SELECT teamid, t.externalid, categoryid, t.name, a.name as affilname, a.shortname, a.country
-		       FROM team t LEFT JOIN team_affiliation a USING(affilid)
-		       WHERE enabled = 1');
+	               FROM team t LEFT JOIN team_affiliation a USING(affilid)
+	               WHERE enabled = 1');
 
 }
 
@@ -358,9 +358,9 @@ function tsv_results_get()
 //	$additional_bronze = $DB->q('VALUE SELECT b FROM contest WHERE cid = %i', $cdata['cid']);
 	$additional_bronze = 0;
 	$extid_to_name = $DB->q('KEYVALUETABLE SELECT t.externalid, a.name
-                      FROM team t
-                      LEFT JOIN team_affiliation a USING (affilid)
-                      WHERE t.externalid IS NOT NULL ORDER BY t.externalid');
+	                         FROM team t
+	                         LEFT JOIN team_affiliation a USING (affilid)
+	                         WHERE t.externalid IS NOT NULL ORDER BY t.externalid');
 
 	$numteams = sizeof($sb['scores']);
 
@@ -410,8 +410,8 @@ function tsv_results_get()
 		}
 
 		$data[] = array(@$sb['teams'][$teamid]['externalid'],
-			$rank, $awardstring, $srow['num_points'],
-			$srow['total_time'], $maxtime, $groupwinner);
+		                $rank, $awardstring, $srow['num_points'],
+		                $srow['total_time'], $maxtime, $groupwinner);
 	}
 
 	// sort by rank/name
