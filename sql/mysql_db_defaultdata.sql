@@ -12,7 +12,7 @@
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `description`) VALUES
 ('clar_categories', '{"general":"General issue","tech":"Technical issue"}', 'array_keyval', '1', 'List of additional clarification categories'),
-('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', 'List of predefined clarification answers', 0),
+('clar_answers', '["No comment","Read the problem statement carefully"]', 'array_val', '0', 'List of predefined clarification answers'),
 ('clar_queues', '{}', 'array_keyval', '1', 'List of clarification queues'),
 ('clar_default_problem_queue', '""', 'string', '1', 'Queue to assign to problem clarifications'),
 ('script_timelimit', '30', 'int', '0', 'Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.'),
