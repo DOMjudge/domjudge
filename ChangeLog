@@ -9,6 +9,7 @@ Version 6.0.0 - DEV
  - Allow installing DB default data and examples separately.
  - Add "entry point" field for submissions to override auto detected
    main class or file.
+ - Port option to disable starttime (pause countdown) from ICPC-live.
  - Reduce memory reserved for JVM overhead and make stack size
    configurable in Java compile script.
  - Fix runguard bug when stdout/stderr are not redirected to file.

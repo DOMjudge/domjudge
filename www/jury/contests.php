@@ -8,7 +8,13 @@
 
 require('init.php');
 require(LIBWWWDIR . '/checkers.jury.php');
-$times = array ('activate','start','freeze','end','unfreeze','deactivate');
+
+define('STARTTIME_UPDATE_MIN_SECONDS_BEFORE', 30);
+
+$times = array('activate','start','freeze','end','unfreeze','deactivate');
+$start_actions = array('delay_start', 'resume_start');
+$actions = array_merge($times, $start_actions);
+
 $now = now();
 
 if ( isset($_POST['donow']) ) {
@@ -16,40 +22,50 @@ if ( isset($_POST['donow']) ) {
 	requireAdmin();
 
 	$docid = $_POST['cid'];
+	$docdata = $cdatas[$docid];
 
 	// The first array encodes the contest ID, second level the time.
 	$time = key(reset($_POST['donow']));
-	if ( !in_array($time, $times) && $time!='delay_start' ) error("Unknown value for timetype");
+	if ( !in_array($time, $actions, TRUE) ) error("Unknown value '$time' for timetype");
 
 	$now = floor($now);
 	$nowstring = strftime('%Y-%m-%d %H:%M:%S ',$now) . date_default_timezone_get();
 	auditlog('contest', $docid, $time. ' now', $nowstring);
 
-	// Special case delay start (only sets starttime_undefined).
-	if ( $time=='delay_start' ) {
-		$DB->q('UPDATE contest SET starttime_enabled = 0
-		        WHERE cid = %i', $docid);
+	// Special case delay/resume start (only sets/unsets starttime_undefined).
+	if ( in_array($time, $start_actions, TRUE) ) {
+		$enabled = $time==='delay_start' ? 0 : 1;
+		if ( difftime($docdata['starttime'],$now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE ) {
+			error("Cannot $time less than ".STARTTIME_UPDATE_MIN_SECONDS_BEFORE.
+			      " seconds before contest start.");
+		}
+		$DB->q('UPDATE contest SET starttime_enabled = %i
+		        WHERE cid = %i', $enabled, $docid);
 		header ("Location: ./contests.php?edited=1");
 		exit;
 	}
 
 	// starttime is special because other, relative times depend on it.
 	if ( $time == 'start' ) {
-		$docdata = $cdatas[$docid];
+		if ( $docdata['starttime_enabled'] &&
+		     difftime($docdata['starttime'], $now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE ) {
+			error("Cannot update starttime less than ".STARTTIME_UPDATE_MIN_SECONDS_BEFORE.
+			      " seconds before contest start.");
+		}
 		$docdata['starttime'] = $now;
 		$docdata['starttime_string'] = $nowstring;
 		foreach(array('endtime','freezetime','unfreezetime','activatetime','deactivatetime') as $f) {
 			$docdata[$f] = check_relative_time($docdata[$f.'_string'], $docdata['starttime'], $f);
 		}
-		$DB->q('UPDATE contest SET starttime = %s, starttime_string = %s, starttime_enabled = 1,
-		        endtime = %s, freezetime = %s, unfreezetime = %s,
-		        activatetime = %s, deactivatetime = %s
+		$DB->q('UPDATE contest SET starttime = %f, starttime_string = %s, starttime_enabled = 1,
+		        endtime = %f, freezetime = %f, unfreezetime = %f,
+		        activatetime = %f, deactivatetime = %f
 		        WHERE cid = %i', $docdata['starttime'], $docdata['starttime_string'],
 		       $docdata['endtime'], $docdata['freezetime'], $docdata['unfreezetime'],
 		       $docdata['activatetime'], $docdata['deactivatetime'], $docid);
 		header ("Location: ./contests.php?edited=1");
 	} else {
-		$DB->q('UPDATE contest SET ' . $time . 'time = %s, ' . $time . 'time_string = %s
+		$DB->q('UPDATE contest SET ' . $time . 'time = %f, ' . $time . 'time_string = %s
 		        WHERE cid = %i', $now, $nowstring, $docid);
 		header ("Location: ./contests.php");
 	}
@@ -180,8 +196,10 @@ if ( empty($curcids) )  {
 				}
 			}
 
-			if ( $time=='start' && !$hasstarted && $row['starttime_enabled'] ) {
-				echo addSubmit('delay start', "donow[$row[cid]][delay_start]");
+			$close_to_start = difftime($row['starttime'], $now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
+			if ( $time=='start' && !$close_to_start ) {
+				$type = $row['starttime_enabled'] ? 'delay' : 'resume';
+				echo addSubmit($type.' start', "donow[$row[cid]][${type}_start]");
 			}
 
 			echo "</td></tr>";
