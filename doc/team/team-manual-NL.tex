@@ -64,22 +64,25 @@ de web-interface:
 Gebruik \cmd{submit <bestandsnaam>}. Als je bestandsnaam de vorm
 \cmd{<probleem>.<extensie>} heeft, met \cmd{<probleem>} het
 label van het probleem en \cmd{<extensie>} een standaard-extensie van
-de programmeertaal, dan worden deze automatisch gedetecteerd. Voor de
-complete documentatie en alle opties, zie \cmd{submit --help}.
+de programmeertaal, dan worden deze automatisch gedetecteerd. Ook
+detecteert het de main-klasse (Java/Kotlin) of main-bestand (Python).
+Voor de complete documentatie en alle opties, zie \cmd{submit --help}.
 }
 \item[Web-Interface]
 Op je teampagina op \url{\BASEURL team}, klik de groene \textbf{Submit}-
-knop. Vervolgens kun je bestand(en) selecteren met de \textbf{browse}-knop
-en deze met de \textbf{submit} knop insturen.
+knop. Vervolgens kun je bestand(en) selecteren met de \textbf{browse}-knop.
 Standaard wordt het probleem uit het deel van de bestandsnaam v\'o\'or
-de punt gehaald en de programmeertaal uit de extensie.
+de punt gehaald en de programmeertaal uit de extensie. Ook worden
+de main-klasse (Java/Kotlin) of main-bestand (Python)
+gedetecterd. Is alles in orde, dan kun je het met de \textbf{submit}-knop
+insturen.
 
 \end{description}
 
 \subsection*{Bekijken van scores, inzendingen, e.d.}
 
 Het bekijken van inzendingen, scores en sturen en lezen van
-``clarification requests \& replies'' gaat via de web-interface in de rechter kolom.
+``clarification requests \& replies'' gaat ook via de web-interface.
 
 \emph{Einde samenvatting.}
 
@@ -93,7 +96,7 @@ Het bekijken van inzendingen, scores en sturen en lezen van
 \begin{figure}[p]
   \centering
   \fbox{\includegraphics[width=\textwidth]{team-scoreboard}}
-  \caption{De scorebord pagina.}
+  \caption{Het scorebord.}
   \label{fig:team-scoreboard}
 \end{figure}
 
@@ -114,8 +117,12 @@ Hieronder worden beide methodes beschreven.
 
 Het submitprogramma haalt de naam (label) van het probleem uit
 \cmd{bestandsnaam} en de programmeertaal uit de extensie
-\cmd{ext}. Dit kan handmatig aangepast worden met de opties
-\cmd{-p probleemnaam} en \cmd{-l taalextensie}. Zie
+\cmd{ext}. Voor Java gebruikt het de bestandsnaam als naam
+van de main-klasse, en voor Kotlin geeft het de bestandsnaam
+een hoofdletter en plakt er \cmd{Kt} achter.
+Dit kan handmatig aangepast worden met de opties
+\cmd{-p probleemnaam}, \cmd{-l taalextensie} en 
+\cmd{-e~entry_point}. Zie
 \cmd{submit --help} voor een compleet overzicht van mogelijke
 opties en extensies en een aantal voorbeelden. Als deze
 helptekst niet op \'e\'en scherm past, gebruik dan
@@ -142,19 +149,24 @@ in de homedirectory van het account. Hier slaat het tijdelijk
 bestanden op voor inzending en staat ook een logfile \cmd{submit.log}.
 Verwijder deze directory niet en pas hem niet aan, omdat anders het
 submitprogramma niet meer correct functioneert.
-}
 
 \subsection{Web-interface}
+}
 
 Vanaf je teampagina \url{\BASEURL team} kun je op de groene \textbf{Submit}-knop
 drukken in de menubalk. Hier kun je oplossingen insturen
 door een of meer bestanden te selecteren met de \textbf{browse}-knop.
-\DOMjudge probeert het probleem te detecteren uit de
-basis van de eerste bestandsnaam (v\'o\'or de punt) en de programmeertaal uit
-de extensie. Als dat niet lukt, kun je deze handmatig selecteren.
 Bestandsnamen moeten beginnen met een alfanumeriek teken en
 mogen daarna slechts bestaan uit alfanumerieke tekens en
 \cmd{+.\_-}.
+
+\DOMjudge probeert het probleem te detecteren uit de
+basis van de eerste bestandsnaam (v\'o\'or de punt) en de programmeertaal uit
+de extensie. Voor talen waarbij dat nodig is, moet een 'entry point'
+opgegeven worden, dat automatisch vooringevuld wordt. Voor Java gebruikt het de bestandsnaam als naam
+van de main-klasse, en voor Kotlin geeft het de bestandsnaam
+een hoofdletter en plakt er \cmd{Kt} achter.
+Als dat niet lukt, kun je deze opties handmatig selecteren en invullen.
 
 Nadat je op de submitknop geklikt hebt en dit bevestigd hebt, word je
 teruggestuurd naar de overzichtspagina. Daarop staat een
@@ -195,11 +207,15 @@ Voor een ingestuurde oplossing zijn de volgende uitslagen mogelijk
 \begin{description}[\setleftmargin{4.5cm}]
 \item[CORRECT]
 Je oplossing heeft alle tests weerstaan: je hebt dit probleem opgelost!
+\textit{Correcte inzendingen krijgen geen straftijd.}
 
 \item[COMPILER-ERROR]
 Het compileren van je programma gaf een fout. Bij de details
 van deze inzending kun je de precieze foutmelding inzien
 (deze optie kan uitgezet zijn).
+Als compileren meer dan 60 seconden duurt wordt het afgebroken,
+dit telt ook als een compiler error.
+\textit{Compilatie-fouten krijgen geen straftijd.}
 
 \item[TIMELIMIT]
 Je programma draaide langer dan de maximaal toegestane tijd en is
@@ -231,6 +247,10 @@ meer details.
 \item[TOO-LATE]
 Helaas, je hebt ingestuurd nadat de wedstrijd al afgelopen was!
 Je inzending is opgeslagen maar wordt niet verder behandeld.
+
+Let wel dat de jury meerdere testgevalen per probleem kan hebben opgesteld.
+\DOMjudge geeft dan het eerte incorrecte resultaat als oordeel.
+
 \end{description}
 
 \section{Clarifications}
@@ -339,19 +359,6 @@ niet weten wat dat is), hoeven zich geen zorgen te maken: standaard
 draait een gecompileerd programma in \'e\'en proces.
 
 \end{description}
-
-\subsection{Java klassenaamgeving}
-
-Het compileren van Java broncode wordt gecompliceerd door de
-klassenaamgeving van Java: er is geen vast startpunt van de code;
-iedere klasse kan een methode \texttt{main} bevatten. Een klasse die
-\texttt{public} gedeclareerd is, moet verder in een bestand met
-dezelfde naam staan.
-
-In de standaard configuratie detecteert DOMjudge automatisch de
-hoofdklasse. Anders moet de hoofdklasse ``\verb!Main!'' heten en een
-methode ``\verb!public static void main(String args[])!'' hebben. Zie
-ook het Java codevoorbeeld in appendix~\ref{codeexamples}.
 
 \newpage
 \appendix
