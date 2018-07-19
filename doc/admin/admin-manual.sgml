@@ -1136,10 +1136,6 @@ cd &lt;INSTALL_PATH&gt;/docs/team
 </code>
 
 <p>
-The team manual is currently available in two languages: English and
-Dutch. We welcome any translations to other languages.
-
-<p>
 The administrator's and judge's manuals are available in PDF and HTML
 format and prebuilt from SGML sources. Rebuilding these is not normally
 necessary. To rebuild them on a Debian-like system, the following commands
