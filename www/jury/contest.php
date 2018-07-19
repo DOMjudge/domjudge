@@ -31,7 +31,7 @@ if ( !empty($_GET['cmd']) ):
 	echo "<table>\n";
 
 	if ( $cmd == 'edit' ) {
-		$row = $DB->q('MAYBETUPLE SELECT * FROM contest WHERE cid = %s', $id);
+		$row = $DB->q('MAYBETUPLE SELECT * FROM contest WHERE cid = %i', $id);
 		if ( !$row ) error("Missing or invalid contest id");
 
 		echo "<tr><td>Contest ID:</td><td>" .
@@ -363,6 +363,9 @@ if ( in_array($data['cid'], $cids) ) {
 if ( !$data['enabled'] ) {
 	echo "<p><em>This contest is disabled.</em></p>\n\n";
 }
+if ( !empty($data['finalizetime']) ) {
+	echo "<p><em>This contest is final.</em></p>\n\n";
+}
 
 $teams = $DB->q("TABLE SELECT team.*
                  FROM team INNER JOIN contestteam USING (teamid)
@@ -436,6 +439,19 @@ if ( IS_ADMIN ) {
 	if ( in_array($data['cid'], $cids) ) {
 		echo rejudgeForm('contest', $data['cid']) . "<br />\n\n";
 	}
+}
+
+
+if ( !empty($data['finalizetime']) ) {
+	echo "<h3>Finalized</h3>\n\n";
+	echo "<table>\n" .
+	    "<tr><td>Finalized at:</td><td>" . printtime($data['finalizetime'], '%Y-%m-%d %H:%M:%S (%Z)') . "</td></tr>\n" .
+	     "<tr><td>B:</td><td>" . htmlspecialchars($data['b']) . "</td></tr>\n" .
+	    "</table>\n<p>Comment:</p>\n<pre class=\"output_text\">" . htmlspecialchars($data['finalizecomment']) . "</pre>\n";
+
+	echo "<p><a href=\"finalize.php?id=" . (int)$data['cid'] . "\">update finalization</a></p>\n\n";
+} else {
+	echo "<p><a href=\"finalize.php?id=" . (int)$data['cid'] . "\">finalize this contest</a></p>\n\n";
 }
 
 if ( ALLOW_REMOVED_INTERVALS ) {

@@ -11,7 +11,7 @@ require(LIBWWWDIR . '/checkers.jury.php');
 
 define('STARTTIME_UPDATE_MIN_SECONDS_BEFORE', 30);
 
-$times = array('activate','start','freeze','end','unfreeze','deactivate');
+$times = array('activate','start','freeze','end','unfreeze','finalize','deactivate');
 $start_actions = array('delay_start', 'resume_start');
 $actions = array_merge($times, $start_actions);
 
@@ -27,6 +27,11 @@ if ( isset($_POST['donow']) ) {
 	// The first array encodes the contest ID, second level the time.
 	$time = key(reset($_POST['donow']));
 	if ( !in_array($time, $actions, TRUE) ) error("Unknown value '$time' for timetype");
+
+	if ( $time === 'finalize' ) {
+		header('Location: finalize.php?id=' . (int)$docid);
+		exit;
+	}
 
 	$now = floor($now);
 	$nowstring = strftime('%Y-%m-%d %H:%M:%S ',$now) . date_default_timezone_get();
@@ -130,6 +135,7 @@ if ( empty($curcids) )  {
 			     difftime($row['freezetime'], $now) <= 0;
 		$hasunfrozen = !empty($row['unfreezetime']) &&
 			       difftime($row['unfreezetime'], $now) <= 0;
+		$isfinal = !empty($row['finalizetime']);
 
 		$contestname = specialchars(sprintf('%s (%s - c%d)',
 							$row['name'],
@@ -189,6 +195,9 @@ if ( empty($curcids) )  {
 						break;
 					case 'unfreeze':
 						$now_allowed = $hasfrozen && !$hasunfrozen && $hasended;
+						break;
+					case 'finalize':
+						$now_allowed = $hasended && !$isfinal;
 						break;
 				}
 				if ( $now_allowed ) {
