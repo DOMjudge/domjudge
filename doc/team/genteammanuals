@@ -43,6 +43,8 @@ fi
 # shellcheck disable=SC2059
 {
 for f in $SOURCES ; do
+	# Skip non-existing files due to unexpanded globbing:
+	[ -f "$f" ] || continue
 	[ "$QUIET" ] || printf "Running $NRUNS passes of '%s'..." "$LATEX $LATEXFLAGS $f"
 	run=1
 	while [ "$run" -le "$NRUNS" ]; do
