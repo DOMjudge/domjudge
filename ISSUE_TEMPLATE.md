@@ -1,4 +1,4 @@
-NOTE: If this is a _discussion starter_ or you need any _installation help_,
+NOTE: If this is a _discussion starter_, you need any _installation help_ or have a _question_ on how to accomplish shomething,
 rather send an email to our 
 [DOMjudge-devel mailinglist](https://www.domjudge.org/mailman/listinfo/domjudge-devel)
 instead of filing an issue here.
