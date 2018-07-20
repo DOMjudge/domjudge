@@ -20,10 +20,10 @@ ALTER TABLE `configuration`
   ADD KEY `public` (`public`);
 
 ALTER TABLE contest
-  ADD COLUMN `starttime_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'If disabled, starttime is not used, e.g. to delay contest start',
-  ADD COLUMN `finalizetime` DATETIME NULL COMMENT 'Time when contest was finalized, null if not yet',
-  ADD COLUMN `finalizecomment` TEXT NULL COMMENT 'Comments by the finalizer',
-  ADD COLUMN `b` smallint(3) unsigned NOT NULL default '0' COMMENT 'Number of extra bronze medals';
+  ADD COLUMN `starttime_enabled` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'If disabled, starttime is not used, e.g. to delay contest start' AFTER `enabled`,
+  ADD COLUMN `finalizetime` DATETIME NULL COMMENT 'Time when contest was finalized, null if not yet' AFTER `deactivatetime_string`,
+  ADD COLUMN `finalizecomment` TEXT NULL COMMENT 'Comments by the finalizer' AFTER `finalizetime`,
+  ADD COLUMN `b` smallint(3) unsigned NOT NULL default '0' COMMENT 'Number of extra bronze medals' AFTER `finalizecomment`;
 
 ALTER TABLE `contestteam`
   DROP PRIMARY KEY,
