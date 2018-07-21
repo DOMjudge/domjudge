@@ -61,7 +61,7 @@ if (count($blockers) > 0 ) {
 if ( isset ($_POST['cmd']) && $_POST['cmd'] == 'finalize' ) {
 
 	$DB->q('UPDATE contest SET
-	        finalizetime = %s, finalizecomment = %s, b = %i
+	        finalizetime = %f, finalizecomment = %s, b = %i
 	        WHERE cid = %i', now(), $_POST['finalizecomment'], $_POST['b'], $id);
 	auditlog('contest', $id, 'finalized', $_POST['finalizecomment']);
 
