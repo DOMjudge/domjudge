@@ -207,10 +207,8 @@ if ( isset($_POST['import']) ) {
 
 	// TODO: event-feed-port
 	$contest_data['penalty-time'] = dbconfig_get('penalty_time');
-	/*
 	$contest_data['default-clars'] = dbconfig_get('clar_answers');
 	$contest_data['clar-categories'] = array_values(dbconfig_get('clar_categories'));
-	*/
 	$contest_data['languages'] = array();
 	$q = $DB->q("SELECT * FROM language");
 	while ( $lang = $q->next() ) {
