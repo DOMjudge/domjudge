@@ -354,9 +354,7 @@ function tsv_results_get()
 
 	$categs = $DB->q('COLUMN SELECT categoryid FROM team_category WHERE visible = 1');
 	$sb = genScoreBoard($cdata, true, array('categoryid' => $categs));
-	// TODO: re-enable when we have ported 'b'
-//	$additional_bronze = $DB->q('VALUE SELECT b FROM contest WHERE cid = %i', $cdata['cid']);
-	$additional_bronze = 0;
+	$additional_bronze = $DB->q('VALUE SELECT b FROM contest WHERE cid = %i', $cdata['cid']);
 	$extid_to_name = $DB->q('KEYVALUETABLE SELECT t.externalid, a.name
 	                         FROM team t
 	                         LEFT JOIN team_affiliation a USING (affilid)
