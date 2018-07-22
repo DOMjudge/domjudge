@@ -722,7 +722,8 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames, $ori
 		error("Tried to submit more than the allowed number of source files.");
 	}
 	if ( !is_array($filenames) || count($filenames)!=count($files) ) {
-		error("Nonmatching (number of) filenames specified.");
+		error("Nonmatching (number of) filenames specified: " .
+		      count($filenames) . " vs. " . count($files));
 	}
 
 	if ( count($filenames)!=count(array_unique($filenames)) ) {
