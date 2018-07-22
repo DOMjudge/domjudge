@@ -178,6 +178,41 @@ class APIController extends FOSRestController {
 	}
 
 	/**
+	 * @Get("/contests/{cid}/state")
+	 */
+	public function getContestState(Contest $contest) {
+		$isJury = $this->isGranted('ROLE_JURY');
+		if (($isJury && $contest->getEnabled())
+			|| (!$isJury && $contest->isActive())) {
+			$time_or_null = function($time, $extra_cond = true) {
+				if ( !$extra_cond || $time===null || Utils::now()<$time ) return null;
+				return Utils::absTime($time);
+			};
+			$result = [];
+			$result['started']   = $time_or_null($contest->getStarttime());
+			$result['ended']     = $time_or_null($contest->getEndtime(), $result['started']!==null);
+			$result['frozen']    = $time_or_null($contest->getFreezetime(), $result['started']!==null);
+			$result['thawed']    = $time_or_null($contest->getUnfreezetime(), $result['frozen']!==null);
+			if ( $isJury ) {
+				$result['finalized'] = $time_or_null($contest->getFinalizetime(), $result['ended']!==null);
+			} else {
+				if ( $result['frozen'] && !$result['thawed'] ) {
+					$result['finalized'] = null;
+				} else {
+					$result['finalized'] = $time_or_null(max($contest->getFinalizetime(),
+					                                         $contest->getUnfreezetime()),
+					                                     $result['ended']!==null &&
+					                                     $contest->getFinalizetime()!==null);
+				}
+			}
+
+			return $result;
+		} else {
+			return NULL;
+		}
+	}
+
+	/**
 	 * @Get("/event-feed")
 	 */
 	public function getEventFeed(Request $request) {
