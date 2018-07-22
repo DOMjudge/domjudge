@@ -138,9 +138,17 @@ class APIController extends FOSRestController {
 	/**
 	 * @Get("/contests/{cid}")
 	 */
-	public function getSingleContestAction(Contest $cid) {
-		if ($cid->isActive()) {
-			return $cid->serializeForAPI($this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20));
+	public function getSingleContestAction(Contest $contest) {
+		$request = Request::createFromGlobals();
+		$strict = false;
+		if ($request->query->has('strict')) {
+			$strict = $request->query->getBoolean('strict');
+		}
+		$isJury = $this->isGranted('ROLE_JURY');
+		if (($isJury && $contest->getEnabled())
+			|| (!$isJury && $contest->isActive())) {
+			$penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
+			return $contest->serializeForAPI($penalty_time, $strict);
 		} else {
 			return NULL;
 		}
