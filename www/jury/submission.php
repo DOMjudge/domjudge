@@ -677,8 +677,8 @@ if ( !empty($jud['result']) ) {
 	}
 
 	if ( !empty($submdata['externalresult'])
-		&& $jud['result'] !== $submdata['externalresult']
-		&& defined('EXT_CCS_URL') ) {
+	     && $jud['result'] !== $submdata['externalresult']
+	     && defined('EXT_CCS_URL') ) {
 		echo msgbox('results differ',
 		            'This submission was judged as '
 		            . '<a href="' . EXT_CCS_URL

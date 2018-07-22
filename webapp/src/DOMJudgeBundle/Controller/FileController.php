@@ -19,8 +19,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class FileController extends Controller
 {
 	/**
-	 *@Route("/api/contests/{cid}/submissions/{sid}/files", name="submission_file")
-	 *@Route("/api/v4/contests/{cid}/submissions/{sid}/files", name="submission_file_v4")
+	 * @Route("/api/contests/{cid}/submissions/{sid}/files", name="submission_file")
+	 * @Route("/api/v4/contests/{cid}/submissions/{sid}/files", name="submission_file_v4")
 	 * @Security("has_role('ROLE_ADMIN')")
 	 */
 	public function submissionFiles(Contest $contest, Submission $submission)
