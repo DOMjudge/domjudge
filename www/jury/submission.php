@@ -200,7 +200,7 @@ if ( !isset($jid) && isset($rejudgingid) ) {
 // If external id is set but not id, try to deduce it from the database.
 if ( isset($ext_id) && ! $id ) {
 	if ( !isset($cid) ) {
-		error("Cannot determine sbumission from external ID without " .
+		error("Cannot determine submission from external ID without " .
 		      "selecting a contest.");
 	}
 	$id = $DB->q('MAYBEVALUE SELECT submitid FROM submission
