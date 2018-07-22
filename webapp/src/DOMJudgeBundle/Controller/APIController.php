@@ -213,16 +213,12 @@ class APIController extends FOSRestController {
 	}
 
 	/**
-	 * @Get("/event-feed")
+	 * @Get("/contests/{cid}/event-feed")
 	 */
-	public function getEventFeed(Request $request) {
+	public function getEventFeed(Request $request, Contest $contest) {
 		// Make sure this script doesn't hit the PHP maximum execution timeout.
 		set_time_limit(0);
 		$em = $this->getDoctrine()->getManager();
-		$contest = $this->getCurrentActiveContestAction();
-		if ($contest === NULL) {
-			return new Response('No active contest.', 404);
-		}
 		if ($request->query->has('since_id')) {
 			$since_id = $request->query->getInt('since_id');
 			$event = $em->getRepository(Event::class)->findOneBy(
@@ -262,7 +258,7 @@ class APIController extends FOSRestController {
 					->where('e.eventid > :lastIdSent')
 					->setParameter('lastIdSent', $lastIdSent)
 					->andWhere('e.cid = :cid')
-					->setParameter('cid', $contest['id'])
+					->setParameter('cid', $contest->getCid())
 					->orderBy('e.eventid', 'ASC');
 
 				if ($typeFilter !== false) {
