@@ -1451,9 +1451,7 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 		logmsg(LOG_DEBUG, "API internal request $verb $url");
 
 		$apiFromInternal = true;
-		// FIXME: Ugly hack: we still call the v4 API since the
-		// judgedaemon and submit client do not handle the v5 API yet.
-		$url = 'http://localhost/api/v4'. $url;
+		$url = 'http://localhost/api'. $url;
 		$httpKernel = $G_SYMFONY->getHttpKernel();
 		parse_str($data, $parsedData);
 
