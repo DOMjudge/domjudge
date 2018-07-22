@@ -344,6 +344,14 @@ if ( ! $submdata['valid'] ) {
 
 <?php
 
+if ( isset($submdata['externalid']) && defined('EXT_CCS_URL') ) {
+	echo "&nbsp;&nbsp;External ID: <a href=\"" . EXT_CCS_URL . urlencode($submdata['externalid']) .
+		"\" target=\"extCCS\">" . specialchars($submdata['externalid']) . "</a>, " .
+		printresult($submdata['externalresult']);
+}
+
+echo "</p>\n";
+
 if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 	echo "<table class=\"list\">\n" .
 		"<caption>Judgings</caption>\n<thead>\n" .
@@ -662,6 +670,19 @@ if ( !empty($jud['result']) ) {
 		echo "</p>" . addEndForm();
 	} else {
 		echo "</p>\n";
+	}
+
+	if ( !empty($submdata['externalresult'])
+		&& $jud['result'] !== $submdata['externalresult']
+		&& defined('EXT_CCS_URL') ) {
+		echo msgbox('results differ',
+		            'This submission was judged as '
+		            . '<a href="' . EXT_CCS_URL
+		            . urlencode($submdata['externalid']) . '" target="extCCS">'
+		            . printresult($submdata['externalresult']) . '</a>'
+		            . ' by the external CCS, but as '
+		            . printresult($jud['result'])
+		            . ' by DOMjudge.');
 	}
 } else { // judging does not have a result yet
 		echo "<p><b>Judging is not ready yet!</b></p>\n";
