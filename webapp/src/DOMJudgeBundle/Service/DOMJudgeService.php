@@ -5,6 +5,7 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 
+use DOMJudgeBundle\Utils\Utils;
 
 class DOMJudgeService {
 	protected $em;
@@ -73,7 +74,7 @@ class DOMJudgeService {
 	public function getCurrentContests($fulldata = FALSE, $onlyofteam = NULL,
 	                                   $alsofuture = FALSE, $key = 'cid') {
 
-		$now = time();
+		$now = Utils::now();
 		$qb = $this->em->createQueryBuilder();
 		$qb->select('c')->from('DOMJudgeBundle:Contest', 'c');
 		if ( $onlyofteam !== null && $onlyofteam > 0 ) {

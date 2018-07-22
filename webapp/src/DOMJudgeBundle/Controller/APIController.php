@@ -206,7 +206,7 @@ class APIController extends FOSRestController {
 				if ( !$isJury ) {
 					$restricted_types = ['judgements', 'runs', 'clarifications'];
 					if ( $contest->getStarttime() === NULL ||
-					     time() < $contest->getStarttime() ) {
+					     Utils::now() < $contest->getStarttime() ) {
 						$restricted_types[] = 'problems';
 					}
 					$qb = $qb
@@ -240,14 +240,14 @@ class APIController extends FOSRestController {
 					echo json_encode($result, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES) . "\n";
 					ob_flush();
 					flush();
-					$lastUpdate = time();
+					$lastUpdate = Utils::now();
 					$lastIdSent = $event['eventid'];
 				}
 
 				if ( count($events) == 0 ) {
 					if ( !$stream ) break;
 					// No new events, check if it's time for a keep alive.
-					$now = time();
+					$now = Utils::now();
 					if ( $lastUpdate + 60 < $now ) {
 						# Send keep alive every 60s. Guarantee according to spec is 120s.
 						echo "\n";
