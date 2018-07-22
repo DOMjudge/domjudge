@@ -316,15 +316,14 @@ while ( $row = $events->next() ) {
 	}
 }
 
-// We don't support a finalize attribute in DOMjudge master branch, so
-// just output some fake data if the contest has finished.
-if ( difftime(now(), $cdata['endtime'])>=0 ) {
+if ( isset($cdata['finalizetime']) ) {
 	$node = XMLaddnode($root, 'finalized');
-	XMLaddnode($node, 'timestamp', formattime($cdata['endtime']));
+	XMLaddnode($node, 'timestamp', $cdata['finalizetime']);
+	// FIXME: b is not in master (yet). But perhaps it doesn't even make sense to bother with the old feed.
 	XMLaddnode($node, 'last-gold', 0);
 	XMLaddnode($node, 'last-silver', 0);
 	XMLaddnode($node, 'last-bronze', 0);
-	XMLaddnode($node, 'comment', 'Automatically finalized by DOMjudge');
+	XMLaddnode($node, 'comment', $cdata['finalizecomment']);
 }
 
 header('Content-Type: text/xml; charset=' . DJ_CHARACTER_SET);
