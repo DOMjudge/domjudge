@@ -18,23 +18,36 @@ require(ETCDIR . '/domserver-config.php');
 define('SCRIPT_ID', 'import-XMLfeed');
 define('LOGFILE', LOGDIR.'/import.log');
 
-require(LIBDIR . '/init.php');
+// We define IS_JURY and include lib/www/auth.php to make
+// checkrole('jury') return true in submit_solution() in
+// lib/lib.misc.php.
+define('IS_JURY', TRUE);
 
-require(LIBEXTDIR . '/spyc/spyc.php');
+require(LIBDIR . '/init.php');
+require_once(LIBWWWDIR . '/auth.php');
+require_once(LIBWWWDIR . '/checkers.jury.php');
+
+require_once(LIBVENDORDIR . '/autoload.php');
 
 setup_database_connection();
 
-$verbose = LOG_NOTICE;
+$verbose = LOG_INFO;
 $waittime = 5;
 
-$cdata = getCurContest(TRUE);
-$cid = $cdata['cid'];
+$cdatas = getCurContests(TRUE);
+$cids = array_keys($cdatas);
+if ( count($cdatas)!=1 ) {
+	error("Feed only supports exactly one active contest.");
+}
+// get first=only elt from arrays
+$cdata = reset($cdatas);
+$cid = reset($cids);
 
 $config = spyc_load_file(ETCDIR . '/import-forwardfeed.yaml');
 
-$resturl = $config['restapi']['url'];
-$restuser = @$config['restapi']['user'];
-$restpass = @$config['restapi']['pass'];
+$resturl = $config['url'];
+$restuser = @$config['user'];
+$restpass = @$config['pass'];
 
 $feedurl = $config['feedurl'];
 
@@ -42,16 +55,13 @@ function request($url, $verb = 'GET', $data = '') {
 	global $resturl, $restuser, $restpass;
 
 	$url = $resturl . "/" . $url;
-	if ( $verb == 'GET' ) {
-		$url .= '?' . $data;
-	}
+	if ( $verb == 'GET' && !empty($data) ) $url .= '?' . $data;
 
 	$ch = curl_init($url);
 	curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
 	curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 	curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
 	if ( $verb == 'POST' ) {
 		curl_setopt($ch, CURLOPT_POST, TRUE);
 		if ( is_array($data) ) {
@@ -78,17 +88,6 @@ function request($url, $verb = 'GET', $data = '') {
 	return $response;
 }
 
-/**
- * Decode a json encoded string and handle errors.
- */
-function dj_json_decode($str) {
-	$res = json_decode($str, TRUE);
-	if ( $res === NULL ) {
-		error("Error retrieving API data. API gave us: " . $str);
-	}
-	return $res;
-}
-
 
 logmsg(LOG_NOTICE, "XML feed import started [DOMjudge/".DOMJUDGE_VERSION."]");
 
@@ -106,29 +105,93 @@ function val($node, $tag) {
 	return $node->getElementsByTagName($tag)->item(0)->nodeValue;
 }
 
-function stderr($msg) {
-	file_put_contents('php://stderr', $msg);
+function update_contest_times($data)
+{
+	global $DB, $cdata, $cid;
+
+	// Preserve relative times:
+	foreach (array('activatetime', 'freezetime', 'unfreezetime') as $time) {
+		$timestr = $time.'_string';
+		if ( !empty($cdata[$timestr]) && strpos('+-',$cdata[$timestr][0])!==FALSE ) {
+			$data[$timestr] = $cdata[$timestr];
+		} else {
+			$data[$timestr] = NULL;
+		}
+	}
+
+	// Code below copied from www/jury/edit.php
+	$CHECKER_ERRORS = array();
+	$itemdata = check_contest($data,array('cid' => $cid));
+	if ( count($CHECKER_ERRORS) ) {
+		error("Errors while processing contest $cid:\n" .
+		      implode(";\n", $CHECKER_ERRORS));
+	}
+
+	$DB->q("UPDATE contest SET %S WHERE cid = %i", $itemdata, $cid);
+	auditlog('contest', $cid, 'updated');
+}
+
+function check_contest_times($update = FALSE)
+{
+	global $DB, $cdata, $cid, $xpath;
+
+	$infos = $xpath->query('/contest/info');
+	$contest = $infos->item($infos->length-1);
+
+	sscanf(val($contest,'length'),"%d:%d:%d",$h,$m,$s);
+	$length = 3600*$h + 60*$m + $s;
+
+	// Special-case contest starttime "undefined":
+	if ( val($contest,'starttime')=='undefined' ) {
+		logmsg(LOG_NOTICE, 'Read contest starttime "undefined", disabling contest.');
+
+		$data = array('starttime_string' => '2999-01-01 00:00',
+		              'endtime_string' => sprintf('+%02d:%02d', $h,$m),
+		              'activatetime_string' => '-1:00',
+		              'enabled' => 0);
+
+		update_contest_times($data);
+		logmsg(LOG_INFO, "Contest c$cid disabled.");
+		return;
+	}
+
+	if ( difftime(val($contest,'starttime'),$cdata['starttime'])!=0 ||
+	     $length!=difftime($cdata['endtime'],$cdata['starttime']) ) {
+		warning("Contest times do not match with external CCS data.");
+
+		if ( $update ) {
+			$data = array('starttime_string' => strftime('%Y-%m-%d %H:%M:%S', (int)val($contest,'starttime')),
+			              'endtime_string' => sprintf('+%02d:%02d', $h,$m),
+			              'activatetime_string' => '-1:00',
+			              'enabled' => 1);
+
+			update_contest_times($data);
+			logmsg(LOG_INFO, "Contest c$cid start/end times updated.");
+		}
+	}
 }
 
 // First check if we have the right contest, teams, problems, and
 // languages loaded.
 `mv $feedurl $feedurl.mine.xml`;
-$feedXML = file_get_contents($feedurl . '.mine.xml');
-$feedDOM = DOMDocument::loadXML($feedXML);
-if ( $feedDOM == NULL ) error("Could not read XML feed from '$feedurl'.");
+logmsg(LOG_DEBUG,"moved '$feedurl' to '$feedurl.mine.xml'");
+$feedXML = file_get_contents($feedurl . ".mine.xml");
+// Make sure the document is valid XML with a closing contest tag.
+//if ( strpos($feedXML, '</contest>')!==FALSE ) $feedXML .= "\n\n</contest>\n";
+$feedDOM = new DOMDocument();
+$feedDOM->loadXML($feedXML);
+if ( $feedDOM == NULL ) error("Could not read XML feed from '$feedurl.mine.xml'.");
+$xpath = new DOMXpath($feedDOM);
 
-$contest = $feedDOM->getElementsByTagName('/contest/info');
-sscanf(val($contest,'length'),"%d:%d:%d",$h,$m,$s);
-$length = 3600*$h + 60*$m + $s;
-if ( difftime(val($contest,'starttime'),$cdata['starttime'])!=0 ||
-     $length!=difftime($cdata['endtime'],$cdata['starttime']) ) {
-	error("Contest times do not match with external CCS data.");
-}
+check_contest_times();
 
-$problems = $feedDOM->getElementsByTagName('/contest/problem');
+`mv $feedurl.mine.xml $feedurl`;
+logmsg(LOG_DEBUG,"moved *to* '$feedurl' from '$feedurl.mine.xml'");
+
+$problems = $xpath->query('/contest/problem');
 foreach ( $problems as $prob ) {
 
-	$id = $DB->q('MAYBEVALUE SELECT probid FROM problem
+	$id = $DB->q('MAYBEVALUE SELECT probid FROM contestproblem
 	              WHERE probid = %s AND cid = %i AND allow_submit = 1',
 	             remap('problem',val($prob,'id')), $cid);
 
@@ -137,7 +200,7 @@ foreach ( $problems as $prob ) {
 	}
 }
 
-$languages = $feedDOM->getElementsByTagName('/contest/language');
+$languages = $xpath->query('/contest/language');
 foreach ( $languages as $lang ) {
 
 	$id = $DB->q('MAYBEVALUE SELECT langid FROM language
@@ -147,13 +210,17 @@ foreach ( $languages as $lang ) {
 	if ( empty($id) ) {
 		error("Language ID '".val($lang,'id')."' from external CCS not available locally.");
 	}
+
+	// The language name, not ID, is in the XML 'run' element, so add
+	// a mapping from the name also to our ID.
+	$config['remapping']['language'][val($lang,'name')] = $id;
 }
 
-$teams = $feedDOM->getElementsByTagName('/contest/team');
+$teams = $xpath->query('/contest/team');
 foreach ( $teams as $team ) {
 
-	$id = $DB->q('MAYBEVALUE SELECT login FROM team
-	              WHERE login = %s AND enabled = 1',
+	$id = $DB->q('MAYBEVALUE SELECT teamid FROM team
+	              WHERE teamid = %s AND enabled = 1',
 	             remap('team',val($team,'id')));
 
 	if ( empty($id) ) {
@@ -172,46 +239,60 @@ while ( TRUE ) {
 	}
 
 	if ( !is_readable("testfeed.xml") ) {
-		stderr(".\n");
+		file_put_contents('php://stderr', ".");
+		sleep($waittime);
 		continue;
 	}
 	`mv $feedurl $feedurl.mine.xml`;
+	logmsg(LOG_DEBUG,"moved '$feedurl' to '$feedurl.mine.xml'");
+
 	$feedXML = file_get_contents($feedurl . '.mine.xml');
-	$feedDOM = DOMDocument::loadXML($feedXML);
-	if ( $feedDOM == NULL ) continue;
-	$runs = $feedDOM->getElementsByTagName('run');
+	$feedDOM->loadXML($feedXML);
+	if ( $feedDOM == NULL ) error("Could not parse '$feedurl.mine.xml'");
+	$xpath = new DOMXpath($feedDOM);
+
+	// Check and update any changes in contest starttime
+	check_contest_times(TRUE);
+
+	$runs = $xpath->query('/contest/run');
 
 	foreach ( $runs as $run ) {
 
 		$id = val($run, 'id');
+		logmsg(LOG_DEBUG,"Found submission (id = $id)");
 
 		$res = $DB->q('MAYBETUPLE SELECT submitid, teamid, probid, langid, submittime
-		               FROM submission WHERE externalid = %i', $id);
+		               FROM submission WHERE cid = %i AND externalid = %i', $cid, $id);
 
 		if ( !empty($res) ) {
-			if ( $res['teamid']!=remap('team',$subm['team']) ||
-			     $res['probid']!=remap('problem',$subm['problem']) ||
-			     $res['langid']!=remap('language',$subm['language']) ||
-			     ($res['submittime']!=$subm['time'] && val($run, 'judged')!=='True') ) {
-				error("External submission '".$subm['id']."' already exists as s".
-				      $res['submitid']." with non-matching data.");
+			if ( $res['teamid']!=remap('team',    val($run,'team')) ||
+			     $res['probid']!=remap('problem', val($run,'problem')) ||
+			     $res['langid']!=remap('language',val($run,'language')) ||
+			     (abs((float)$res['submittime']-(float)val($run,'timestamp'))>0.1 &&
+			      strcasecmp(val($run, 'judged'),'true')!=0) ) {
+				error("External submission '".val($run,'id')."' already exists as s".
+				      $res['submitid']." with non-matching data: " .
+				      $res['teamid']." ?= ".remap('team',    val($run,'team'))    .", ".
+				      $res['probid']." ?= ".remap('problem', val($run,'problem')) .", ".
+				      $res['langid']." ?= ".remap('language',val($run,'language')).
+				      (strcasecmp(val($run, 'judged'),'true')==0 ? '' : ', submittime diff = '.
+				       abs((float)$res['submittime']-(float)val($run,'timestamp')) ." sec"));
 			}
-			logmsg(LOG_DEBUG,"Skipping re-import of submission '".
-			       $id."' (s".$res['submitid'].")");
-			continue;
-		}
-
-
-		if ( val($run, 'judged')!=='True' ) {
+			if ( val($run, 'judged') !== 'True' ) {
+				logmsg(LOG_DEBUG,"Skipping re-import of submission '".
+						$id."' (s".$res['submitid'].")");
+				continue;
+			}
+		} else {
 			// We're inserting a new submission
-			$res = dj_json_decode(request('submission_files','GET','id='.$subm['id']));
+			$res = dj_json_decode(request('submissionFiles/'.val($run,'id'),'GET'));
 
 			$files = array();
 			$filenames = array();
 
 			foreach ( $res as $f ) {
 				$filenames[] = $f['filename'];
-				if ( !($tmpfname = mkstemps(TMPDIR."/import_feed-XXXXXX",0)) ) {
+				if ( !($tmpfname = tempnam(TMPDIR,"import_XMLfeed")) ) {
 					error("Could not create temporary file.");
 				}
 				file_put_contents($tmpfname, base64_decode($f['content']));
@@ -221,24 +302,28 @@ while ( TRUE ) {
 
 			$id = submit_solution(remap('team',    val($run,'team')),
 			                      remap('problem', val($run,'problem')),
+			                      $cid,
 			                      remap('language',val($run,'language')),
 			                      $files, $filenames, NULL,
 			                      $id, val($run, 'timestamp'));
 
-			logmsg(LOG_INFO,"Imported submission '".$subm['id']."' as s$id");
+			logmsg(LOG_INFO,"Imported submission '".val($run,'id')."' as s$id");
 
 			foreach ( $files as $file ) unlink($file);
+		}
 
-		} else {
+		if ( val($run, 'judged')==='True' ) {
 			// We're inserting a new judging
 
 			$DB->q('UPDATE submission SET externalresult = %s
-			        WHERE externalid = %i',
-			       remap('result',val($run,'result')), $id);
+			        WHERE cid = %i AND externalid = %i',
+			       remap('result',val($run,'result')), $cid, $id);
 
 			logmsg(LOG_INFO, "Updated external result for s".$id.
 			       " to '".remap('result',val($run,'result'))."'");
 		}
+
+		logmsg(LOG_DEBUG, "Submission handled.");
 	}
 
 	sleep($waittime);

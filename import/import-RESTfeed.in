@@ -17,17 +17,24 @@ require(ETCDIR . '/domserver-config.php');
 define('SCRIPT_ID', 'import-RESTfeed');
 define('LOGFILE', LOGDIR.'/import.log');
 
-require(LIBDIR . '/init.php');
+// We define IS_JURY and include lib/www/auth.php to make
+// checkrole('jury') return true in submit_solution() in
+// lib/lib.misc.php.
+define('IS_JURY', TRUE);
 
-require(LIBEXTDIR . '/spyc/spyc.php');
+require(LIBDIR . '/init.php');
+require_once(LIBWWWDIR . '/auth.php');
+
+require_once(LIBVENDORDIR . '/autoload.php');
 
 setup_database_connection();
 
 $verbose = LOG_NOTICE;
+$loglevel = LOG_INFO;
 $waittime = 5;
 
-$cdata = getCurContest(TRUE);
-$cid = $cdata['cid'];
+$cdatas = getCurContests(TRUE);
+$cids = array_keys($cdatas);
 
 $config = spyc_load_file(ETCDIR . '/import-forwardfeed.yaml');
 
@@ -74,17 +81,6 @@ function request($url, $verb = 'GET', $data = '') {
 	return $response;
 }
 
-/**
- * Decode a json encoded string and handle errors.
- */
-function dj_json_decode($str) {
-	$res = json_decode($str, TRUE);
-	if ( $res === NULL ) {
-		error("Error retrieving API data. API gave us: " . $str);
-	}
-	return $res;
-}
-
 
 logmsg(LOG_NOTICE, "Forwarding-feed import started [DOMjudge/".DOMJUDGE_VERSION."]");
 
@@ -101,19 +97,37 @@ function remap($type, $id)
 	return $config['remapping'][$type][$id];
 }
 
-$contest = dj_json_decode(request('contest'));
-if ( remap('contest',$contest['id'])!=$cid ) {
-	error("Contest ID does not match with external CCS data.");
+function getTeamID($externalid) {
+	global $DB;
+	return $DB->q('MAYBEVALUE SELECT teamid FROM team
+	               WHERE teamid = %s AND enabled = 1',
+	              $externalid);
 }
+
+$contest = dj_json_decode(request('contest'));
+$cid = remap('contest',$contest['id']);
+if ( !isset($cdatas[$cid]) ) {
+	error("Contest id $cid not known or active.");
+}
+$cdata = $cdatas[$cid];
+
 if ( difftime($contest['start'],$cdata['starttime'])!=0 ||
      $contest['length']!=difftime($cdata['endtime'],$cdata['starttime']) ) {
-	error("Contest times do not match with external CCS data.");
+	$readableStart = date("Y-m-d H:i:s", $contest['start']);
+	warning("Contest times do not match with external CCS data.
+  Start:
+  - ours:   $cdata[starttime]
+  - theirs: $contest[start]
+            $readableStart
+  Length:
+  - ours:   " . difftime($cdata['endtime'],$cdata['starttime']) . "
+  - theirs: $contest[length]");
 }
 
 $problems = dj_json_decode(request('problems'));
 foreach ( $problems as $prob ) {
-
-	$id = $DB->q('MAYBEVALUE SELECT probid FROM problem
+ 
+	$id = $DB->q('MAYBEVALUE SELECT probid FROM problem INNER JOIN contestproblem USING(probid)
 	              WHERE probid = %s AND cid = %i AND allow_submit = 1',
 	             remap('problem',$prob['id']), $cid);
 
@@ -137,9 +151,10 @@ foreach ( $languages as $lang ) {
 $teams = dj_json_decode(request('teams'));
 foreach ( $teams as $team ) {
 
-	$id = $DB->q('MAYBEVALUE SELECT login FROM team
-	              WHERE login = %s AND enabled = 1',
-	             remap('team',$team['id']));
+	$id = getTeamID(remap('team', $team['id']));
+
+// 	$DB->q('UPDATE team SET name = %s WHERE login = %s',
+// 	       $team['name'],remap('team',$team['id']));
 
 	if ( empty($id) ) {
 		error("Team ID '".$team['id']."' from external CCS not available locally.");
@@ -168,10 +183,11 @@ while ( TRUE ) {
 		$lastsubmitid = max($lastsubmitid,$subm['id']);
 
 		$res = $DB->q('MAYBETUPLE SELECT submitid, teamid, probid, langid, submittime
-		               FROM submission WHERE externalid = %i', $subm['id']);
+		               FROM submission WHERE cid = %i AND externalid = %i',
+		              $cid, $subm['id']);
 
 		if ( !empty($res) ) {
-			if ( $res['teamid']!=remap('team',$subm['team']) ||
+			if ( $res['teamid']!=getTeamID(remap('team',$subm['team'])) ||
 			     $res['probid']!=remap('problem',$subm['problem']) ||
 			     $res['langid']!=remap('language',$subm['language']) ||
 			     $res['submittime']!=$subm['time'] ) {
@@ -190,7 +206,7 @@ while ( TRUE ) {
 
 		foreach ( $res as $f ) {
 			$filenames[] = $f['filename'];
-			if ( !($tmpfname = mkstemps(TMPDIR."/import_feed-XXXXXX",0)) ) {
+			if ( !($tmpfname = tempnam(TMPDIR,"import_RESTfeed")) ) {
 				error("Could not create temporary file.");
 			}
 			file_put_contents($tmpfname, base64_decode($f['content']));
@@ -198,8 +214,22 @@ while ( TRUE ) {
 		}
 		// FIXME: put 'mainclass' file at front of list?
 
-		$id = submit_solution(remap('team',$subm['team']),
+		$teamid = getTeamID(remap('team',$subm['team']));
+
+		if ( empty($teamid) ) {
+			error("Got submission for non-existent local team with Team ID '".
+			      $subm['team']."' and external ID '".remap('team',$subm['team'])."'");
+		}
+
+		if ( $subm['time'] < $cdata['starttime'] || $subm['time'] < $contest['start'] ) {
+			logmsg(LOG_DEBUG, "Skipping import of submission '".
+			       $subm['id']."' which was submitted too early");
+			continue;
+		}
+
+		$id = submit_solution($teamid,
 		                      remap('problem',$subm['problem']),
+		                      $cid,
 		                      remap('language',$subm['language']),
 		                      $files, $filenames, NULL,
 		                      $subm['id'], $subm['time']);
@@ -218,8 +248,8 @@ while ( TRUE ) {
 		$lastjudgingid = max($lastjudgingid,$jud['id']);
 
 		$DB->q('UPDATE submission SET externalresult = %s
-		        WHERE externalid = %i',
-		       remap('result',$jud['outcome']), $jud['submission']);
+		        WHERE cid = %i AND externalid = %i',
+		       remap('result',$jud['outcome']), $cid, $jud['submission']);
 
 		logmsg(LOG_INFO, "Updated external result for s".$jud['submission'].
 		       " to '".remap('result',$jud['outcome'])."'");
