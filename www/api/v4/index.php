@@ -1893,4 +1893,4 @@ $api->provideFunction('GET', 'judgement_types', $doc, $args, $exArgs, null, true
 }
 
 // Now provide the api, which will handle the request
-$api->provideApi(FALSE);
+$api->provideApi(TRUE);
