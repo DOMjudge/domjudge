@@ -887,8 +887,6 @@ class Contest
 	{
 		$res = [
 			'id'                         => (string)$this->getCid(),
-			'external_id'                => $this->getExternalId(),
-			'shortname'                  => $this->getShortname(),
 			'name'                       => $this->getName(),
 			'formal_name'                => $this->getName(),
 			'start_time'                 => Utils::absTime($this->getStarttime()),
@@ -897,6 +895,7 @@ class Contest
 			'penalty_time'               => (int)$penalty_time,
 		];
 		if ( !$strict ) {
+			$res['external_id'] = $this->getExternalId();
 			$res['shortname'] = $this->getShortname();
 			$res['end_time'] = Utils::absTime($this->getEndtime());
 		}
