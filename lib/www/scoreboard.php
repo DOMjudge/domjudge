@@ -364,12 +364,28 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 	// print the main scoreboard rows
 	$prevsortorder = -1;
 	$usedCategories = array();
+	$bestInCat = array();
+	foreach( $scores as $team => $totals ) {
+		// skip if we have limitteams and the team is not listed
+		if ( !empty($limitteams) && !in_array($team,$limitteams) ) continue;
+		if ( isset($teams[$team]['categoryid']) ) {
+			$categoryId = $teams[$team]['categoryid'];
+			$usedCategories[$categoryId] = TRUE;
+		}
+	}
 	foreach( $scores as $team => $totals ) {
 		// skip if we have limitteams and the team is not listed
 		if ( !empty($limitteams) && !in_array($team,$limitteams) ) continue;
 
-		if ( isset($teams[$team]['categoryid']) ) {
-			$usedCategories[$teams[$team]['categoryid']] = TRUE;
+		$region_leader = '';
+		if ( count($usedCategories) > 1 && isset($teams[$team]['categoryid']) ) {
+			$categoryId = $teams[$team]['categoryid'];
+			if ( $totals['num_points'] &&
+				( !isset($bestInCat[$categoryId]) || $scores[$bestInCat[$categoryId]]['rank'] == $totals['rank'] ) ) {
+				$region_leader = '<span class="badge badge-warning" style="margin-right: 2em; font-weight: normal;">' .
+					$categs[$categoryId]['name'] . '</span>';
+				$bestInCat[$categoryId] = $team;
+			}
 		}
 
 		// rank, team name, total points, total time
@@ -459,6 +475,7 @@ function renderScoreBoardTable($sdata, $myteamid = null, $static = FALSE,
 			(!empty($color) ? ' style="background: ' . $color . ';"' : '') .
 			(IS_JURY ? ' title="' . specialchars($team) . '"' : '') . '>' .
 			($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
+			$region_leader .
 			specialchars($teams[$team]['name']) .
 			($SHOW_AFFILIATIONS ? '<br /><span class="univ">' . $affilname .
 			 '</span>' : '') .
