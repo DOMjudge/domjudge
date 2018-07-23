@@ -1120,7 +1120,7 @@ $API_endpoints = array(
 	'contests' => array(
 		'type'   => 'configuration',
 		'url'    => '',
-		'extid'  => 'externalid',
+		'extid'  => TRUE,
 	),
 	'judgement-types' => array( // hardcoded in $VERDICTS and the API
 		'type'   => 'configuration',
