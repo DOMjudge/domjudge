@@ -125,7 +125,7 @@ while ( TRUE ) {
 	$contest_start = $contest['starttime'];
 	$contest_start_enabled = $contest['starttime_enabled'];
 	if ( $contest_start_old !== $contest_start || $contest_start_enabled_old !== $contest_start_enabled ) {
-		insert_event($cid, 'contests', dj_json_decode(API_request('/contests/' . $contest['externalid'])));
+		insert_event($cid, 'contests', dj_json_decode(API_request('/contests/' . $contest['cid'])));
 		$contest_start_old = $contest_start;
 		$contest_start_enabled_old = $contest_start_enabled;
 	}
@@ -189,7 +189,7 @@ function initialize_events($cid)
 
 	foreach ( $API_endpoints as $endpoint => $ep_info ) {
 		if ( $ep_info['type']==='configuration' && isset($ep_info['url']) ) {
-			$url = '/contests/' . $contest['externalid'] . $ep_info['url'];
+			$url = '/contests/' . $contest['cid'] . $ep_info['url'];
 			$json = API_request($url);
 			if ( !isset($json) ) error("No response data for endpoint '$endpoint'.");
 
