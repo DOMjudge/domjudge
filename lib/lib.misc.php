@@ -1151,10 +1151,10 @@ $API_endpoints = array(
 		'tables' => array('team', 'contestteam'),
 		'extid'  => TRUE,
 	),
-	'teams-members' => array(
-		'type'   => 'configuration',
-		'tables' => array(),
-	),
+#	'team-members' => array(
+#		'type'   => 'configuration',
+#		'tables' => array(),
+#	),
 	'state' => array(
 		'type'   => 'aggregate',
 		'tables' => array(),
