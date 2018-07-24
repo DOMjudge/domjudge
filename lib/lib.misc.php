@@ -1134,7 +1134,7 @@ $API_endpoints = array(
 	'problems' => array(
 		'type'   => 'configuration',
 		'tables' => array('problem', 'contestproblem'),
-		'extid'  => 'externalid',
+		'extid'  => TRUE,
 	),
 	'groups' => array(
 		'type'   => 'configuration',
@@ -1149,7 +1149,7 @@ $API_endpoints = array(
 	'teams' => array(
 		'type'   => 'configuration',
 		'tables' => array('team', 'contestteam'),
-		'extid'  => 'externalid',
+		'extid'  => TRUE,
 	),
 	'teams-members' => array(
 		'type'   => 'configuration',
@@ -1175,7 +1175,7 @@ $API_endpoints = array(
 	),
 	'clarifications' => array(
 		'type'   => 'live',
-		'extid'  => 'externalid,cid',
+		'extid'  => TRUE,
 	),
 	'awards' => array(
 		'type'   => 'aggregate',
