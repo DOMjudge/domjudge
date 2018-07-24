@@ -193,19 +193,18 @@ class APIController extends FOSRestController {
 			$result['ended']     = $time_or_null($contest->getEndtime(), $result['started']!==null);
 			$result['frozen']    = $time_or_null($contest->getFreezetime(), $result['started']!==null);
 			$result['thawed']    = $time_or_null($contest->getUnfreezetime(), $result['frozen']!==null);
-			if ( $isJury ) {
-				$result['finalized'] = $time_or_null($contest->getFinalizetime(), $result['ended']!==null);
-			} else {
-				if ( $result['frozen'] && !$result['thawed'] ) {
-					$result['finalized'] = null;
+			$result['finalized'] = $time_or_null($contest->getFinalizetime(), $result['ended']!==null);
+			$result['end_of_updates'] = null;
+			if ( $result['finalized']!==null &&
+			     ($result['thawed']!==null || $result['frozen']===null) ) {
+
+				if ( $result['thawed']!==null &&
+				     $contest->getFreezetime()>$contest->getFinalizetime() ) {
+					$result['end_of_updates'] = $result['thawed'];
 				} else {
-					$result['finalized'] = $time_or_null(max($contest->getFinalizetime(),
-					                                         $contest->getUnfreezetime()),
-					                                     $result['ended']!==null &&
-					                                     $contest->getFinalizetime()!==null);
+					$result['end_of_updates'] = $result['finalized'];
 				}
 			}
-
 			return $result;
 		} else {
 			return NULL;
