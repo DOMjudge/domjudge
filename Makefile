@@ -209,6 +209,8 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 # Make tmpdir, submitdir writable for webserver, because
 # judgehost-create-dirs sets wrong permissions:
 	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
+# Make sure we're running from a clean state:
+	$(MAKE) -C webapp clear-cache
 	@echo ""
 	@echo "========== Maintainer Install Completed =========="
 	@echo ""

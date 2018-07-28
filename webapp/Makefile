@@ -21,6 +21,11 @@ params-from-stub: $(PARAMS).stub
 		touch -d '1971-01-01 00:00:00' $(PARAMS) ; \
 	fi
 
+# Clear Symfony cache for maintainer-mode operation:
+clear-cache:
+	bin/console --env=dev cache:clear
+	bin/console --env=prod cache:clear
+
 # Don't try to create dbpasswords.secret here if it doesn't exist:
 $(TOPDIR)/etc/dbpasswords.secret:
 
@@ -54,4 +59,4 @@ maintainer-clean-l:
 		done ; \
 	done
 
-.PHONY: params-from-stub
+.PHONY: params-from-stub clear-cache
