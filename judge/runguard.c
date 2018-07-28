@@ -262,6 +262,9 @@ void error(int errnum, const char *format, ...)
 	va_end(ap);
 
 	write_meta("internal-error","%s: %d - %s","runguard error", errnum, format);
+	if ( outputmeta && metafile != NULL && fclose(metafile)!=0 ) {
+		fprintf(stderr,"\nError writing to metafile '%s'.\n",metafilename);
+	}
 
 	/* Make sure that all children are killed before terminating */
 	if ( child_pid > 0) {
