@@ -998,7 +998,10 @@ function rejudging_finish($rejudgingid, $request, $userid = NULL, $show_progress
 	auditlog('rejudging', $rejudgingid, $request.'ing rejudge', '(start)');
 
 	while ( $row = $res->next() ) {
-		if ( $show_progress ) echo "s" . specialchars($row['submitid']) . ", ";
+		if ( $show_progress ) {
+			echo "s" . specialchars($row['submitid']) . ", ";
+			sleep(1);
+		}
 		if ( $request=='apply' ) {
 			$DB->q('START TRANSACTION');
 			// first invalidate old judging, maybe different from prevjudgingid!
@@ -1014,8 +1017,8 @@ function rejudging_finish($rejudgingid, $request, $userid = NULL, $show_progress
 			eventlog('judging', $row['judgingid'], 'create', $row['cid']);
 			$run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
 				WHERE judgingid=%i', $row['judgingid']);
-			foreach ($run_ids as $run_id) {
-				eventlog('judging_run', $run_id, 'create', $row['cid']);
+			if (!empty($run_ids)) {
+				eventlog('judging_run', $run_ids, 'create', $row['cid']);
 			}
 			// last update cache
 			calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
@@ -1213,6 +1216,8 @@ foreach ( $API_endpoints as $endpoint => $data ) {
 
 /**
  * Map an internal/DB ID to an external/REST endpoint ID.
+ *
+ * TODO: add support for multiple $intid's, so we can use this in the eventlog() function and not have a loop there
  */
 function rest_extid($endpoint, $intid)
 {
@@ -1237,6 +1242,8 @@ function rest_extid($endpoint, $intid)
 
 /**
  * Map an external/REST endpoint ID back to an internal/DB ID.
+ *
+ * TODO: add support for multiple $extid's, so we can use this in the API and not have a loop there
  */
 function rest_intid($endpoint, $extid, $cid = null)
 {
@@ -1273,22 +1280,44 @@ function rest_intid($endpoint, $extid, $cid = null)
  *
  * Arguments:
  * $type      Either an API endpoint or a DB table.
- * $dataid    Identifier of the row in the associated DB table.
+ * $dataids   Identifier(s) of the row in the associated DB table
+ *            as either one ID or an array of ID's.
  * $action    One of: create, update, delete.
  * $cid       Contest ID to log this event for. If null, log it for
  *            all currently active contests.
  * $json      JSON content after the change. Generated if null.
- * $id        Identifier as shown in the REST API. If null it is
+ * $ids       Identifier(s) as shown in the REST API. If null it is
  *            inferred from the content in the database or $json
  *            passed as argument. Must be specified when deleting an
  *            entry or if no DB table is associated to $type.
+ *            Can be null, one ID or an array of ID's.
  */
 // TODO: we should probably integrate this function with auditlog().
-function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null)
+function eventlog($type, $dataids, $action, $cid = null, $json = null, $ids = null)
 {
 	global $DB, $API_endpoints;
 
-	logmsg(LOG_DEBUG,"eventlog arguments: '$type' '$dataid' '$action' '$cid' '$json' '$id'");
+	if (!is_array($dataids)) {
+		$dataids = [$dataids];
+	}
+
+	if (count($dataids) > 1 && isset($ids)) {
+		logmsg(LOG_WARNING, "eventlog: passing multiple dataid's while also passing one or more ID's not allowed yet");
+		return;
+	}
+
+	if (count($dataids) > 1 && isset($json)) {
+		logmsg(LOG_WARNING, "eventlog: passing multiple dataid's while also passing a JSON object not allowed yet");
+		return;
+	}
+
+	// Make a combined string to keep track of the data ID's
+	// TODO: if some data ID's contain a comma, this breaks
+	$dataidsCombined = implode(',', $dataids);
+	// TODO: if some ID's contain a comma, this breaks
+	$idsCombined = $ids === null ? null : is_array($ids) ? implode(',', $ids) : $ids;
+
+	logmsg(LOG_DEBUG,"eventlog arguments: '$type' '$dataidsCombined' '$action' '$cid' '$json' '$idsCombined'");
 
 	$actions = array('create', 'update', 'delete');
 
@@ -1319,26 +1348,42 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	}
 
 	// Look up external/API ID from various sources.
-	if ( $id===null ) $id = rest_extid($type, $dataid);
-
-	if ( $id===null && $json!==null ) {
-		$data = dj_json_decode($json);
-		if ( !empty($data['id']) ) $id = $data['id'];
+	if ( $ids===null ) {
+		$ids = array_map(function($dataid) use ($type) {
+			return rest_extid($type, $dataid);
+		}, $dataids);
 	}
 
-	if ( $id===null ) {
+	if ( $ids===[null] && $json!==null ) {
+		$data = dj_json_decode($json);
+		if ( !empty($data['id']) ) $ids = [$data['id']];
+	}
+
+	if (!is_array($ids)) {
+		$ids = [$ids];
+	}
+
+	// State is a special case, as it works without an ID
+	if ($type !== 'state' && count(array_filter($ids)) !== count($dataids) ) {
 		logmsg(LOG_WARNING, "eventlog: API ID not specified or inferred from data");
 		return;
 	}
+
+	// Make sure ID arrays are 0-indexed
+	$dataids = array_values($dataids);
+	$ids = array_values($ids);
 
 	$cids = array();
 	if ( $cid!==null ) {
 		$cids[] = $cid;
 	} else {
 		if ( $type==='problems' ) {
-			$cids = $DB->q('COLUMN SELECT cid FROM contestproblem WHERE probid = %i', $dataid);
+			$cids = $DB->q('COLUMN SELECT DISTINCT cid FROM contestproblem WHERE probid IN (%Ai)', $dataids);
 		} elseif( $type==='teams' ) {
-			$cids = getCurContests(FALSE, $dataid);
+			$cids = [];
+			foreach ($dataids as $dataid) {
+				$cids = array_unique(array_merge($cids, getCurContests(FALSE, $dataid)));
+			}
 		} else {
 			$cids = getCurContests();
 		}
@@ -1348,14 +1393,29 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		return;
 	}
 
+	// TODO: if some ID's contain a comma, this breaks
+	$idsCombined = implode(',', $ids);
+
+	// We should pass multiple ID's if instructed to do so
+	$multiple = count($dataids) > 1 || count($ids) > 1;
+
 	// Generate JSON content if not set, for deletes this is only the ID.
 	if ( $action === 'delete' ) {
-		$json = "{\"id\":\"$id\"}";
+		$json = array_values(array_map(function($id) {
+			return ['id' => $id];
+		}, $ids));
+
+		// If we do not have multiple ID's, the code assumes the JSON is only for one element
+		if (!$multiple) {
+			$json = $json[0];
+		}
+
+		$json = dj_json_encode($json);
 	} elseif ( $json === null ) {
 		if ( in_array($type, array('contests','state')) ) {
 			$url = $endpoint['url'];
 		} else {
-			$url = $endpoint['url'].'/'.$id;
+			$url = $endpoint['url'].'/'.$idsCombined;
 		}
 
 		// Temporary fix for single/multi contest API:
@@ -1364,7 +1424,7 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 		}
 
 		$json = API_request($url, 'GET', '', false);
-		if ( empty($json) || $json==='null' ) {
+		if ( empty($json) || $json==='null' || ($multiple && $json === '[]') ) {
 			logmsg(LOG_WARNING,"eventlog: got no JSON data from '$url'");
 			// If we didn't get data from the API, then that is
 			// probably because this particular data is not visible,
@@ -1374,6 +1434,11 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 			return;
 		}
 	}
+
+	// Decode the JSON, because if we have passed multiple ID's,
+	// we need to look up things in the JSON and always decoding
+	// simplifies the structure of this function
+	$json = dj_json_decode($json);
 
 	// First acquire an advisory lock to prevent other event logging,
 	// so that we can obtain a unique timestamp.
@@ -1386,28 +1451,35 @@ function eventlog($type, $dataid, $action, $cid = null, $json = null, $id = null
 	$now = sprintf('%.3f', microtime(TRUE));
 
 	// TODO: can this be wrapped into a single query?
-	$eventids = array();
+	$eventids = [];
 	foreach ( $cids as $cid ) {
 		$table = ( $endpoint['tables'] ? $endpoint['tables'][0] : NULL );
-		$eventid = $DB->q('RETURNID INSERT INTO event
-		                   (eventtime, cid, endpointtype, endpointid,
-		                   datatype, dataid, action, content)
-		                   VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
-		                  $now, $cid, $type, $id,
-		                  $table, $dataid, $action, $json);
-		$eventids[] = $eventid;
+		foreach ($dataids as $idx => $dataid) {
+			if ($multiple) {
+				$jsonElement = dj_json_encode($json[$idx]);
+			} else {
+				$jsonElement = dj_json_encode($json);
+			}
+			$eventid = $DB->q('RETURNID INSERT INTO event
+			                  (eventtime, cid, endpointtype, endpointid,
+			                   datatype, dataid, action, content)
+			                   VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
+			$now, $cid, $type, $ids[$idx],
+			$table, $dataid, $action, $jsonElement);
+			$eventids[] = $eventid;
+		}
 	}
 
 	if ( $DB->q("VALUE SELECT RELEASE_LOCK('domjudge.eventlog')") != 1 ) {
 		error("eventlog: failed to release lock");
 	}
 
-	if ( count($eventids)!==count($cids) ) {
-		error("eventlog: failed to $action $type/$id " .
-		      '('.count($eventids).'/'.count($cids).' contests done)');
+	if ( count($ids) !== count($cids) * count($dataids) ) {
+		error("eventlog: failed to $action $type/$idsCombined " .
+		      '('.count($ids).'/'.(count($cids) * count($dataids)).' contests done)');
 	}
 
-	logmsg(LOG_DEBUG,"eventlog: ${action}d $type/$id " .
+	logmsg(LOG_DEBUG,"eventlog: ${action}d $type/$idsCombined " .
 	       'for '.count($cids).' contest(s)');
 }
 
@@ -1455,15 +1527,27 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true) {
 		$httpKernel = $G_SYMFONY->getHttpKernel();
 		parse_str($data, $parsedData);
 
-		// Our API checks $_SERVER['REQUEST_METHOD'] but Symfony does not overwrite it, so do this manually
+		// Our API checks $_SERVER['REQUEST_METHOD'], $_GET and $_POST but Symfony does not overwrite it, so do this manually
 		$origMethod = $_SERVER['REQUEST_METHOD'];
+		$origPost = $_POST;
+		$origGet = $_GET;
+		$_POST = [];
+		$_GET = [];
+		// TODO: other verbs
+		if ($verb === 'GET') {
+			$_GET = $parsedData;
+		} elseif ($verb === 'POST') {
+			$_POST = $parsedData;
+		}
 		$_SERVER['REQUEST_METHOD'] = $verb;
 
 		$request = \Symfony\Component\HttpFoundation\Request::create($url, $verb, $parsedData);
 		$response = $httpKernel->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
 
-		// Set back the request method, if other code still wants to use it
+		// Set back the request method and superglobals, if other code still wants to use it
 		$_SERVER['REQUEST_METHOD'] = $origMethod;
+		$_GET = $origGet;
+		$_POST = $origPost;
 
 		$status = $response->getStatusCode();
 		if ( $status < 200 || $status >= 300 ) {

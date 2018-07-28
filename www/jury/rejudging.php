@@ -48,9 +48,12 @@ if ( isset($_REQUEST['apply']) || isset($_REQUEST['cancel']) ) {
 	$time_start = microtime(TRUE);
 
 	// no output buffering... we want to see what's going on real-time
+	header('X-Accel-Buffering: no');
 	echo "<br/><p>Applying rejudge may take some time, please be patient:</p>\n";
+	while (ob_get_level()) {
+		ob_end_flush();
+	}
 	ob_implicit_flush(true);
-	ob_end_flush();
 
 	// clear GET array because otherwise the eventlog subrequest will still include the rejudging id
 	$_GET = array();
@@ -59,6 +62,9 @@ if ( isset($_REQUEST['apply']) || isset($_REQUEST['cancel']) ) {
 	rejudging_finish($id, $request, $userdata['userid'], TRUE);
 
 	echo "\n</p>\n";
+
+	// Start output buffering again to not crash the FallbackController
+	ob_start();
 
 	$time_end = microtime(TRUE);
 

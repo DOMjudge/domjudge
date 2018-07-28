@@ -119,7 +119,8 @@ class RestApi {
 		if ( strpos($name, "/") !== FALSE ) {
 			list($name, $primary_key) = preg_split('/\/+/', $name, 2);
 			if ( isset($primary_key) && $primary_key!=='' ) {
-				$arguments['__primary_key'] = $primary_key;
+				// Primary key can either be one or multiple ID's joined by ",", so split them
+				$arguments['__primary_key'] = explode(',', $primary_key);
 			}
 		}
 		$name = $name . '#' . $_SERVER['REQUEST_METHOD'];
@@ -155,7 +156,7 @@ class RestApi {
 		// Arguments
 		$args = array();
 		$valid_args = array_merge($func['optArgs'], array(
-			'__primary_key' => 'ID of single element endpoint',
+			'__primary_key' => 'ID of single element endpoint or multiple ID\'s separated by a comma',
 			'strict'        => 'Strictly follow Contest API specification',
 		));
 		foreach ( $arguments as $key => $value ) {
@@ -186,12 +187,13 @@ class RestApi {
 			$this->createResponse($response);
 			return;
 		}
-		// If a single element was requested, return an object:
+		// If a single element was requested, return an object, but only for non-multiple requests:
 		if  ( isset($arguments['__primary_key']) &&
+		      count($arguments['__primary_key']) === 1 &&
 		      $_SERVER['REQUEST_METHOD']==='GET' ) {
 			if ( count($response)!=1 ) {
 				$this->createError("Found " . count($response) .
-				                   " elements with ID '" . $arguments['__primary_key'] .
+				                   " elements with ID '" . implode(',', $arguments['__primary_key']) .
 				                   "' for function '" . $name . "'.", NOT_FOUND);
 				return;
 
@@ -272,7 +274,7 @@ class RestApi {
 	public function createError($message, $code = BAD_REQUEST)
 	{
 		$protocol = (isset($_SERVER['SERVER_PROTOCOL']) ?
-		             $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
+			     $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
 		header($protocol . " " . $code);
 		$this->createResponse(array('error' => $message));
 	}
