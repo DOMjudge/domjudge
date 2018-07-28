@@ -28,7 +28,7 @@ if ( $cmd == 'add' || $cmd == 'edit' ) {
 			$_POST['data'][0]['restrictions'][$restriction_name] = $restriction;
 		}
 	}
-	$_POST['data'][0]['restrictions'] = dj_json_encode($_POST['data'][0]['restrictions']);
+	$_POST['data'][0]['restrictions'] = json_encode($_POST['data'][0]['restrictions']);
 	require_once('edit.php');
 	exit;
 }
