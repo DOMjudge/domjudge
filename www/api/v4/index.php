@@ -1531,7 +1531,7 @@ function languages($args)
 		$args['langid'] = rest_intid('languages', $args['__primary_key']);
 	}
 
-	$query = 'SELECT langid, name, extensions, allow_judge, time_factor
+	$query = 'SELECT langid, name, extensions, require_entry_point, entry_point_description, allow_judge, time_factor
 	          FROM language WHERE allow_submit = 1';
 
 	$byLangId = array_key_exists('langid', $args);
@@ -1548,6 +1548,8 @@ function languages($args)
 			);
 		if ( !isset($args['strict']) ) {
 			$ret['extensions']  = dj_json_decode($row['extensions']);
+			$ret['require_entry_point'] = safe_bool($row['require_entry_point']);
+			$ret['entry_point_description'] = safe_string($row['entry_point_description']);
 			$ret['allow_judge'] = safe_bool($row['allow_judge']);
 			$ret['time_factor'] = safe_float($row['time_factor']);
 		}
