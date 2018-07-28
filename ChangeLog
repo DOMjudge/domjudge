@@ -23,6 +23,8 @@ Version 6.0.0 - DEV
  - [security] Fix team permission for viewing clarification categories.
  - [security] Ensure only users with admin role can update executables.
    Thanks Niklas Hoehne for reporting!
+ - New layout for team and public web interface using Bootstrap.
+ - Add (optional) clarification queues.
  - Many small issues fixed and documentation improvements.
 
 Version 5.2.0 - DEV
