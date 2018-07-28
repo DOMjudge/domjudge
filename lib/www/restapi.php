@@ -267,15 +267,21 @@ class RestApi {
 
 	private function createResponse($response)
 	{
-		header('Content-Type: application/json');
+		// Only send headers if not done already. Headers might be sent if calling the API internally
+		if (!headers_sent()) {
+			header('Content-Type: application/json');
+		}
 		print dj_json_encode($response) . "\n";
 	}
 
 	public function createError($message, $code = BAD_REQUEST)
 	{
-		$protocol = (isset($_SERVER['SERVER_PROTOCOL']) ?
-			     $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
-		header($protocol . " " . $code);
+		// Only send headers if not done already. Headers might be sent if calling the API internally
+		if (!headers_sent()) {
+			$protocol = (isset($_SERVER['SERVER_PROTOCOL']) ?
+			             $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
+			header($protocol . " " . $code);
+		}
 		$this->createResponse(array('error' => $message));
 	}
 }
