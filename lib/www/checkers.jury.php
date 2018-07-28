@@ -325,7 +325,7 @@ function check_removed_intervals($contest, $intervals)
 			// *_string variables. These are in absolute format only.
 			$data[$f] = $data[$f.'_string'];
 			$data[$f] = check_relative_time($data[$f], $contest['starttime'],
-			                                'removed_interval '.$f, $removed_intervals);
+			                                'removed_interval '.$f, $intervals);
 		}
 	}
 
