@@ -770,3 +770,7 @@ function clarificationAppendAnswer(replace = false) {
 	if ( replace ) { elem.value = newtext; } else { elem.value += '\n' + newtext; }
 	return false;
 }
+
+function confirmLogout() {
+	return confirm("Really log out?");
+}
