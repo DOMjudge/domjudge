@@ -10,39 +10,39 @@ $bar_size = 10;
 
 $title = "Statistics";
 
-if ( !empty($_GET['probid']) && is_numeric($_GET['probid']) ) {
-	$probid = (int)$_GET['probid'];
+if (!empty($_GET['probid']) && is_numeric($_GET['probid'])) {
+    $probid = (int)$_GET['probid'];
 }
 
 $unfrozen = false;
-if ( !empty($_GET['unfrozen']) ) {
-	$unfrozen = (bool)$_GET['unfrozen'];
+if (!empty($_GET['unfrozen'])) {
+    $unfrozen = (bool)$_GET['unfrozen'];
 }
 
-if ( !empty($cid) && isset($probid) ) {
-	$shortname = $DB->q('VALUE SELECT shortname FROM problem p
+if (!empty($cid) && isset($probid)) {
+    $shortname = $DB->q('VALUE SELECT shortname FROM problem p
 						 INNER JOIN contestproblem cp USING (probid)
 						 WHERE cp.cid = %i AND p.probid = %i', $cid, $probid);
-	$title .= " - Problem " . specialchars($shortname);
+    $title .= " - Problem " . specialchars($shortname);
 }
 
 require(LIBWWWDIR . '/header.php');
 echo "<h1>" . specialchars($title) . "</h1>\n\n";
 
-if ( empty($cid) ) {
-	echo "<p class=\"nodata\">No active contest available</p>\n\n";
+if (empty($cid)) {
+    echo "<p class=\"nodata\">No active contest available</p>\n\n";
 
-	require(LIBWWWDIR . '/footer.php');
-	exit;
+    require(LIBWWWDIR . '/footer.php');
+    exit;
 }
 
 $res = $DB->q('
 SELECT
 	COUNT(result) as count,
 	(FLOOR(submittime - c.starttime) DIV %i) * %i AS minute,' .
-	( (!isset($unfrozen) || !$unfrozen) ? 
-		'if(c.freezetime IS NOT NULL && submittime >= freezetime,
-		"frozen", result)' : 'result' ) . ' as fresult
+    ((!isset($unfrozen) || !$unfrozen) ?
+        'if(c.freezetime IS NOT NULL && submittime >= freezetime,
+		"frozen", result)' : 'result') . ' as fresult
 FROM
 	submission s
 	JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
@@ -56,8 +56,8 @@ WHERE
 	visible = 1 AND
 	(ct.teamid IS NOT NULL OR c.public = 1) AND
 	s.cid = %i AND s.valid = 1 ' .
-	( isset($probid) ? 'AND s.probid = %i ' : '%_' ) .
-	'AND submittime < c.endtime AND submittime >= c.starttime
+    (isset($probid) ? 'AND s.probid = %i ' : '%_') .
+    'AND submittime < c.endtime AND submittime >= c.starttime
 	GROUP BY minute, fresult', $bar_size * 60, $bar_size, $cid, $probid);
 
 // All problems
@@ -65,18 +65,19 @@ $problems = $DB->q('SELECT p.probid,p.name FROM problem p
 			INNER JOIN contestproblem USING (probid)
 			WHERE cid = %i ORDER by shortname', $cid);
 
-function relativeUrl($params) {
-	$params = array_merge($_GET, $params);
-	return strtok($_SERVER["REQUEST_URI"],'?') . '?' .
-		http_build_query($params);
+function relativeUrl($params)
+{
+    $params = array_merge($_GET, $params);
+    return strtok($_SERVER["REQUEST_URI"], '?') . '?' .
+        http_build_query($params);
 }
 
 print '<p>';
 print '<a href="statistics.php">All problems</a>&nbsp;&nbsp;&nbsp;';
-while($row = $problems->next()) {
-	print '<a href="' .
-		relativeUrl(array('unfrozen' => !!$unfrozen, 'probid' => $row['probid'])) . '">' .
-		specialchars($row['name']) . '</a>&nbsp;&nbsp;&nbsp;';
+while ($row = $problems->next()) {
+    print '<a href="' .
+        relativeUrl(array('unfrozen' => !!$unfrozen, 'probid' => $row['probid'])) . '">' .
+        specialchars($row['name']) . '</a>&nbsp;&nbsp;&nbsp;';
 }
 print '</p>';
 print('<a href="' . relativeUrl(array("unfrozen" => !$unfrozen)) . '">Toggle freeze</a>');

@@ -14,10 +14,10 @@ require(LIBWWWDIR . '/header.php');
 echo "<h1>Submit</h1>\n\n";
 
 $fdata = calcFreezeData($cdata);
-if ( ! $fdata['started'] && ! checkrole('jury') ) {
-	echo '<div class="container submitform"><div class="alert alert-danger" role="alert">Contest has not yet started - cannot submit.</div></div>';
-	require(LIBWWWDIR . '/footer.php');
-	exit;
+if (! $fdata['started'] && ! checkrole('jury')) {
+    echo '<div class="container submitform"><div class="alert alert-danger" role="alert">Contest has not yet started - cannot submit.</div></div>';
+    require(LIBWWWDIR . '/footer.php');
+    exit;
 }
 
 $langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions
@@ -32,21 +32,21 @@ print "<script>";
 putgetMainExtension($langdata);
 print "</script>";
 
-$maxfiles = dbconfig_get('sourcefiles_limit',100);
+$maxfiles = dbconfig_get('sourcefiles_limit', 100);
 
 $probs = array();
 $probs[''] = 'Select a problem';
-foreach($probdata as $probinfo) {
-	$probs[$probinfo['probid']]=$probinfo['shortname'] . ' - ' .$probinfo['name'];
+foreach ($probdata as $probinfo) {
+    $probs[$probinfo['probid']]=$probinfo['shortname'] . ' - ' .$probinfo['name'];
 }
 
 $langs = array();
 $langs[''] = 'Select a language';
-foreach($langdata as $langid => $langdata) {
-	$langs[$langid] = $langdata['name'];
+foreach ($langdata as $langid => $langdata) {
+    $langs[$langid] = $langdata['name'];
 }
 
-$entry_point = dbconfig_get('require_entry_point', FALSE);
+$entry_point = dbconfig_get('require_entry_point', false);
 ?>
 <div class="container submitform">
 <form action="upload.php" method="post" enctype="multipart/form-data" onsubmit="return checkUploadForm();">
@@ -72,8 +72,8 @@ $entry_point = dbconfig_get('require_entry_point', FALSE);
     <label for="probid">Problem:</label>
     <select class="custom-select" name="probid" id="probid" required>
 <?php
-    foreach($probs as $probid => $probname) {
-	print '      <option value="' .specialchars($probid). '">' . specialchars($probname) . "</option>\n";
+    foreach ($probs as $probid => $probname) {
+        print '      <option value="' .specialchars($probid). '">' . specialchars($probname) . "</option>\n";
     }
 ?>
     </select>
@@ -82,8 +82,8 @@ $entry_point = dbconfig_get('require_entry_point', FALSE);
     <label for="langid">Language:</label>
     <select class="custom-select" name="langid" id="langid" required>
 <?php
-    foreach($langs as $langid => $langname) {
-	print '      <option value="' .specialchars($langid). '">' . specialchars($langname) . "</option>\n";
+    foreach ($langs as $langid => $langname) {
+        print '      <option value="' .specialchars($langid). '">' . specialchars($langname) . "</option>\n";
     }
 ?>
     </select>

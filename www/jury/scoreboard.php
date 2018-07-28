@@ -9,11 +9,11 @@
 
 require('init.php');
 $refresh = array(
-	'after' => 30,
-	'url' => 'scoreboard.php',
+    'after' => 30,
+    'url' => 'scoreboard.php',
 );
 $title = 'Scoreboard';
-$printercss = TRUE;
+$printercss = true;
 
 require(LIBWWWDIR . '/scoreboard.php');
 
@@ -23,6 +23,6 @@ $filter = initScorefilter();
 require(LIBWWWDIR . '/header.php');
 
 // call the general putScoreBoard function from scoreboard.php
-putScoreBoard($cdata, NULL, FALSE, $filter);
+putScoreBoard($cdata, null, false, $filter);
 
 require(LIBWWWDIR . '/footer.php');

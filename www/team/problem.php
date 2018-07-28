@@ -9,18 +9,20 @@
 require('init.php');
 
 $id = getRequestID();
-if ( empty($id) ) error("Missing problem id");
+if (empty($id)) {
+    error("Missing problem id");
+}
 
-if ( !isset($_GET['testcase']) ) {
-	// download a given problem statement
-	putProblemText($id);
+if (!isset($_GET['testcase'])) {
+    // download a given problem statement
+    putProblemText($id);
 } else {
-	if ( is_numeric($_GET['testcase']) && isset($_GET['type']) &&
-	   ( $_GET['type'] === 'in' || $_GET['type'] === 'out' ) ) {
-		$testcasetype = $_GET['type'];
-		$testcaseseq = $_GET['testcase'];
-		putSampleTestcase($id, $testcaseseq, $testcasetype);
-	} else {
-		error ("Invalid arguments for sample testcase.");
-	}
+    if (is_numeric($_GET['testcase']) && isset($_GET['type']) &&
+       ($_GET['type'] === 'in' || $_GET['type'] === 'out')) {
+        $testcasetype = $_GET['type'];
+        $testcaseseq = $_GET['testcase'];
+        putSampleTestcase($id, $testcaseseq, $testcasetype);
+    } else {
+        error("Invalid arguments for sample testcase.");
+    }
 }

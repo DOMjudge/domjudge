@@ -20,10 +20,14 @@ require_once(LIBWWWDIR . '/common.php');
 require_once(LIBWWWDIR . '/auth.php');
 
 $target = 'public/';
-if ( logged_in() ) {
-	if     ( checkrole('jury') )       $target = 'jury/';
-	elseif ( checkrole('team',false) ) $target = 'team/';
-	elseif ( checkrole('balloon') )    $target = 'jury/balloons.php';
+if (logged_in()) {
+    if (checkrole('jury')) {
+        $target = 'jury/';
+    } elseif (checkrole('team', false)) {
+        $target = 'team/';
+    } elseif (checkrole('balloon')) {
+        $target = 'jury/balloons.php';
+    }
 }
 
 header('HTTP/1.1 302 Please see this page');

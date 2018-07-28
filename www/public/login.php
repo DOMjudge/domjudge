@@ -8,7 +8,9 @@
 
 require('init.php');
 
-if ( @$_POST['cmd']=='register' ) do_register();
+if (@$_POST['cmd']=='register') {
+    do_register();
+}
 logged_in();
 
 header("Location: ./");

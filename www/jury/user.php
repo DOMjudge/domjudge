@@ -12,19 +12,19 @@ $id = getRequestID();
 $title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
                  'user' . ($id ? ' '.specialchars(@$id) : ''));
 
-if ( isset($_GET['cmd'] ) ) {
+if (isset($_GET['cmd'])) {
     $cmd = $_GET['cmd'];
 } else {
-	$refresh = array(
-		'after' => 15,
-		'url' => $pagename . '?id=' . urlencode($id) .
-			(isset($_GET['restrict']) ? '&restrict=' . urlencode($_GET['restrict']) : ''),
-	);
+    $refresh = array(
+        'after' => 15,
+        'url' => $pagename . '?id=' . urlencode($id) .
+            (isset($_GET['restrict']) ? '&restrict=' . urlencode($_GET['restrict']) : ''),
+    );
 }
 
 require(LIBWWWDIR . '/header.php');
 
-if ( !empty($cmd) ):
+if (!empty($cmd)):
 
     requireAdmin();
 
@@ -34,16 +34,18 @@ if ( !empty($cmd) ):
 
     echo "<table>\n";
 
-    if ( $cmd == 'edit' ) {
+    if ($cmd == 'edit') {
         $row = $DB->q('MAYBETUPLE SELECT * FROM user WHERE userid = %i', $id);
-		if ( !$row ) error("Missing or invalid user id");
+        if (!$row) {
+            error("Missing or invalid user id");
+        }
 
-		echo "<tr><td>User ID:</td><td>" .
-		    addHidden('keydata[0][userid]', $row['userid']) .
-		    specialchars($row['userid']) . "</td></tr>\n" .
-		    "<tr><td>Username:</td><td class=\"username\">" .
-		    addHidden('keydata[0][username]', $row['username']) .
-		    specialchars($row['username']);
+        echo "<tr><td>User ID:</td><td>" .
+            addHidden('keydata[0][userid]', $row['userid']) .
+            specialchars($row['userid']) . "</td></tr>\n" .
+            "<tr><td>Username:</td><td class=\"username\">" .
+            addHidden('keydata[0][username]', $row['username']) .
+            specialchars($row['username']);
     } else {
         echo "<tr><td><label for=\"data_0__login_\">Username:</label></td><td class=\"username\">";
         echo addInput('data[0][username]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required');
@@ -61,10 +63,10 @@ if ( !empty($cmd) ):
 <td><?php echo addInputField('email', 'data[0][email]', @$row['email'], ' size="35" maxlength="255" autocomplete="new-password"')?></td></tr>
 
 <tr><td><label for="data_0__password_">Password:</label></td><td><?php
-if ( !empty($row['password']) ) {
-	echo "<em>set</em>";
+if (!empty($row['password'])) {
+    echo "<em>set</em>";
 } else {
-	echo "<em>not set</em>";
+    echo "<em>not set</em>";
 } ?> - to change: <?php echo addInputField('password', 'data[0][password]', "", ' size="19" maxlength="255" autocomplete="new-password"')?></td></tr>
 <tr><td><label for="data_0__ip_address_">IP Address:</label></td>
 <td><?php echo addInput('data[0][ip_address]', @$row['ip_address'], 35, 255)?></td></tr>
@@ -105,7 +107,7 @@ echo addHidden('data[0][mapping][0][fk][0]', 'userid') .
      addHidden('data[0][mapping][0][fk][1]', 'roleid') .
      addHidden('data[0][mapping][0][table]', 'userrole');
 echo addHidden('cmd', $cmd) .
-    addHidden('table','user') .
+    addHidden('table', 'user') .
     addHidden('referrer', @$_GET['referrer']) .
     addSubmit('Save') .
     addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
@@ -123,13 +125,15 @@ $roles = $DB->q('SELECT role.* FROM userrole
                  LEFT JOIN role USING(roleid)
                  WHERE userrole.userid = %i', $id);
 
-if ( ! $row ) error("Missing or invalid user id");
+if (! $row) {
+    error("Missing or invalid user id");
+}
 
 $userimage = "../images/users/" . urlencode($row['username']) . ".jpg";
 
 echo "<h1>User ".specialchars($row['name'])."</h1>\n\n";
 
-if ( $row['enabled'] != 1 ) {
+if ($row['enabled'] != 1) {
     echo "<p><em>User is disabled</em></p>\n\n";
 }
 
@@ -140,53 +144,53 @@ if ( $row['enabled'] != 1 ) {
 <tr><td>Login:     </td><td class="teamid"><?php echo specialchars($row['username']) ?></td></tr>
 <tr><td>Name:      </td><td><?php echo specialchars($row['name']) ?></td></tr>
 <tr><td>Email:      </td><td><?php
-if ( !empty($row['email']) ) {
-	echo "<a href=\"mailto:" . urlencode($row['email']) . "\">" .
-	     specialchars($row['email']) . "</a>";
+if (!empty($row['email'])) {
+    echo "<a href=\"mailto:" . urlencode($row['email']) . "\">" .
+         specialchars($row['email']) . "</a>";
 } else {
-	echo "-";
+    echo "-";
 }
 ?></td></tr>
 <tr><td>Password:  </td><td><?php
-if ( !empty($row['password']) ) {
-	echo "set";
+if (!empty($row['password'])) {
+    echo "set";
 } else {
-	echo "not set";
+    echo "not set";
 } ?></td></tr>
 <tr><td>IP address:</td><td><?php
-if ( !empty($row['ip_address']) ) {
-	echo specialchars($row['ip_address']);
+if (!empty($row['ip_address'])) {
+    echo specialchars($row['ip_address']);
 } else {
-	echo "-";
+    echo "-";
 } ?></td></tr>
 <tr><td>Roles:</td>
     <td><?php
-    if ($roles->count() == 0) echo "No roles assigned";
-    else {
-        while( $role = $roles->next() ) {
+    if ($roles->count() == 0) {
+        echo "No roles assigned";
+    } else {
+        while ($role = $roles->next()) {
             echo "${role['role']} - ${role['description']}<br>";
         }
     }
     ?></td></tr>
 <tr><td>Team:</td><?php
-if ( $row['teamid'] ) {
-	echo "<td class=\"teamid\"><a href=\"team.php?id=" .
-	     urlencode($row['teamid']) . "\">" .
-	     specialchars($row['teamname'] . " (t" .$row['teamid'].")") . "</a></td>";
-} else {
-	echo "<td>-</td>";
-} ?></tr>
+if ($row['teamid']) {
+        echo "<td class=\"teamid\"><a href=\"team.php?id=" .
+         urlencode($row['teamid']) . "\">" .
+         specialchars($row['teamname'] . " (t" .$row['teamid'].")") . "</a></td>";
+    } else {
+        echo "<td>-</td>";
+    } ?></tr>
 <tr><td>Last login:</td><td><?php echo printtime($row['last_login'], '%a %d %b %Y %T %Z')?></td></tr>
-<tr><td>Last IP:   </td><td><?php echo
-    (@$row['last_ip_address'] ? printhost($row['last_ip_address'], TRUE):'') ?></td></tr>
+<tr><td>Last IP:   </td><td><?php echo(@$row['last_ip_address'] ? printhost($row['last_ip_address'], true):'') ?></td></tr>
 </table></div>
 
 <?php
-if ( IS_ADMIN ) {
-    echo "<p class=\"nomorecol\">" .
+if (IS_ADMIN) {
+        echo "<p class=\"nomorecol\">" .
         editLink('user', $id). "\n" .
-        delLink('user','userid',$id,$row['name']) .
+        delLink('user', 'userid', $id, $row['name']) .
         "</p>\n\n";
-}
+    }
 
 require(LIBWWWDIR . '/footer.php');

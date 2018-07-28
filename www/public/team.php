@@ -9,7 +9,9 @@
 require('init.php');
 
 $id = getRequestID();
-if ( empty($id) ) error("Missing or invalid team id");
+if (empty($id)) {
+    error("Missing or invalid team id");
+}
 
 $title = 'Team t'.specialchars($id);
 $menu = false;

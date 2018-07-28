@@ -9,51 +9,51 @@
 require('init.php');
 $title = 'Submit';
 
-if ( !isset($_POST['submit']) ) {
-	header('Location: ./');
-	return;
+if (!isset($_POST['submit'])) {
+    header('Location: ./');
+    return;
 }
-if ( is_null($cid) ) {
-	require(LIBWWWDIR . '/header.php');
-	echo "<p class=\"nodata\">No active contest</p>\n";
-	require(LIBWWWDIR . '/footer.php');
-	exit;
+if (is_null($cid)) {
+    require(LIBWWWDIR . '/header.php');
+    echo "<p class=\"nodata\">No active contest</p>\n";
+    require(LIBWWWDIR . '/footer.php');
+    exit;
 }
 $fdata = calcFreezeData($cdata);
-if ( !checkrole('jury') && !$fdata['started'] ) {
-	require(LIBWWWDIR . '/header.php');
-	echo "<p class=\"nodata\">Contest has not yet started.</p>\n";
-	require(LIBWWWDIR . '/footer.php');
-	exit;
+if (!checkrole('jury') && !$fdata['started']) {
+    require(LIBWWWDIR . '/header.php');
+    echo "<p class=\"nodata\">Contest has not yet started.</p>\n";
+    require(LIBWWWDIR . '/footer.php');
+    exit;
 }
 
 
 /** helper to output an error message. */
 function err($string)
 {
-	// Annoying PHP: we need to import global variables here...
-	global $title;
+    // Annoying PHP: we need to import global variables here...
+    global $title;
 
-	require(LIBWWWDIR . '/header.php');
+    require(LIBWWWDIR . '/header.php');
 
-	echo "<h2>Submit - error</h2>\n\n";
+    echo "<h2>Submit - error</h2>\n\n";
 
-	echo '<div id="uploadstatus">';
-	echo specialchars($string);
-	echo '</div>';
+    echo '<div id="uploadstatus">';
+    echo specialchars($string);
+    echo '</div>';
 
-	require(LIBWWWDIR . '/footer.php');
-	exit;
+    require(LIBWWWDIR . '/footer.php');
+    exit;
 }
 
 // rebuild array of filenames, paths to get rid of empty upload fields
 $FILEPATHS = $FILENAMES = array();
-foreach($_FILES['code']['tmp_name'] as $fileid => $tmpname ) {
-	if ( !empty($tmpname) ) {
-		checkFileUpload($_FILES['code']['error'][$fileid]);
-		$FILEPATHS[] = $_FILES['code']['tmp_name'][$fileid];
-		$FILENAMES[] = $_FILES['code']['name'][$fileid];
-	}
+foreach ($_FILES['code']['tmp_name'] as $fileid => $tmpname) {
+    if (!empty($tmpname)) {
+        checkFileUpload($_FILES['code']['error'][$fileid]);
+        $FILEPATHS[] = $_FILES['code']['tmp_name'][$fileid];
+        $FILENAMES[] = $_FILES['code']['name'][$fileid];
+    }
 }
 
 // FIXME: the following checks are also performed inside
@@ -61,12 +61,17 @@ foreach($_FILES['code']['tmp_name'] as $fileid => $tmpname ) {
 
 /* Determine the problem */
 $probid = @$_POST['probid'];
-$prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
+$prob = $DB->q(
+    'MAYBETUPLE SELECT probid, name FROM problem
                 INNER JOIN contestproblem USING (probid)
                 WHERE allow_submit = 1 AND probid = %i AND cid = %i',
-               $probid, $cid);
+               $probid,
+    $cid
+);
 
-if ( ! isset($prob) ) err("Unable to find problem p$probid");
+if (! isset($prob)) {
+    err("Unable to find problem p$probid");
+}
 $probid = $prob['probid'];
 
 /* Determine the language */
@@ -74,21 +79,23 @@ $langid = @$_POST['langid'];
 $lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
                 WHERE langid = %s AND allow_submit = 1', $langid);
 
-if ( ! isset($lang) ) err("Unable to find language '$langid'");
+if (! isset($lang)) {
+    err("Unable to find language '$langid'");
+}
 $langid = $lang['langid'];
 
 // TODO: this should be database-based configuration
-$entry_point = NULL;
+$entry_point = null;
 $language_requires_entry_point = $langid == 'java' || $langid == 'kt' || $langid == 'py2' || $langid == 'py3';
-if ( $language_requires_entry_point && dbconfig_get('require_entry_point', FALSE) ) {
-	if ( empty($_POST['entry_point']) ) {
-		err("Entry point required, but not specified.");
-	}
-	$entry_point = $_POST['entry_point'];
+if ($language_requires_entry_point && dbconfig_get('require_entry_point', false)) {
+    if (empty($_POST['entry_point'])) {
+        err("Entry point required, but not specified.");
+    }
+    $entry_point = $_POST['entry_point'];
 }
 
-$sid = submit_solution($teamid, $probid, $cid, $langid, $FILEPATHS, $FILENAMES, NULL, $entry_point);
+$sid = submit_solution($teamid, $probid, $cid, $langid, $FILEPATHS, $FILENAMES, null, $entry_point);
 
 auditlog('submission', $sid, 'added', 'via teampage', null, $cid);
 
-header('Location: index.php?submitted=' . urlencode($sid) );
+header('Location: index.php?submitted=' . urlencode($sid));

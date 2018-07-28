@@ -1,8 +1,10 @@
 <?php
-if ( !defined('LIBDIR') ) die ("LIBDIR not defined.");
+if (!defined('LIBDIR')) {
+    die("LIBDIR not defined.");
+}
 
-if( DEBUG & DEBUG_TIMINGS ) {
-	require_once(LIBDIR . '/lib.timer.php');
+if (DEBUG & DEBUG_TIMINGS) {
+    require_once(LIBDIR . '/lib.timer.php');
 }
 
 require_once(LIBDIR . '/lib.error.php');
@@ -10,8 +12,8 @@ require_once(LIBDIR . '/lib.misc.php');
 require_once(LIBDIR . '/lib.dbconfig.php');
 require_once(LIBDIR . '/use_db.php');
 
-if ( !file_exists(LIBDIR . '/relations.php') ) {
-	error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
+if (!file_exists(LIBDIR . '/relations.php')) {
+    error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
 }
 require_once(LIBDIR . '/relations.php');
 
@@ -27,8 +29,8 @@ require_once(LIBDIR . '/relations.php');
 // that's the highest IEEE double supports anyways and higher seems to
 // give spurious output with json_encode().
 $precision = ini_get('precision');
-if ( $precision===FALSE || empty($precision) ) {
-	error("Could not read PHP setting 'precision'");
+if ($precision===false || empty($precision)) {
+    error("Could not read PHP setting 'precision'");
 }
 ini_set('precision', '16');
 

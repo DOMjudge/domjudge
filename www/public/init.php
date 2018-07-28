@@ -23,17 +23,17 @@ require_once(LIBWWWDIR . '/auth.php');
 require_once(LIBWWWDIR . '/scoreboard.php');
 require_once(LIBWWWDIR . '/forms.php');
 
-$cdatas = getCurContests(TRUE, -1);
+$cdatas = getCurContests(true, -1);
 $cids = array_keys($cdatas);
 
 $isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
 
 // If the cookie has a existing contest, use it
-if ( isset($_COOKIE['domjudge_cid']) && isset($cdatas[$_COOKIE['domjudge_cid']]) )  {
-	$cid = $_COOKIE['domjudge_cid'];
-	$cdata = $cdatas[$cid];
-} elseif ( count($cids) >= 1 ) {
-	// Otherwise, select the first contest
-	$cid = $cids[0];
-	$cdata = $cdatas[$cid];
+if (isset($_COOKIE['domjudge_cid']) && isset($cdatas[$_COOKIE['domjudge_cid']])) {
+    $cid = $_COOKIE['domjudge_cid'];
+    $cdata = $cdatas[$cid];
+} elseif (count($cids) >= 1) {
+    // Otherwise, select the first contest
+    $cid = $cids[0];
+    $cdata = $cdatas[$cid];
 }

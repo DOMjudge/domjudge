@@ -8,151 +8,174 @@
 
 require('init.php');
 
-$id = getRequestID(FALSE);
+$id = getRequestID(false);
 $title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
                  'executable' . ($id ? ' '.specialchars(@$id) : ''));
 
-if ( isset($_GET['cmd'] ) ) {
-	$cmd = $_GET['cmd'];
+if (isset($_GET['cmd'])) {
+    $cmd = $_GET['cmd'];
 } else {
-	$refresh = array(
-		'after' => 15,
-		'url' => $pagename.'?id='.urlencode($id),
-	);
+    $refresh = array(
+        'after' => 15,
+        'url' => $pagename.'?id='.urlencode($id),
+    );
 }
 
-if ( isset($_GET['fetch']) ) {
-	requireAdmin();
+if (isset($_GET['fetch'])) {
+    requireAdmin();
 
-	$filename = $id . ".zip";
+    $filename = $id . ".zip";
 
-	$size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH(zipfile)
+    $size = $DB->q(
+        "MAYBEVALUE SELECT OCTET_LENGTH(zipfile)
 	                FROM executable WHERE execid = %s",
-	               $id);
+                   $id
+    );
 
-	// sanity check before we start to output headers
-	if ( $size===NULL || !is_numeric($size) ) {
-		error("Problem while fetching executable");
-	}
+    // sanity check before we start to output headers
+    if ($size===null || !is_numeric($size)) {
+        error("Problem while fetching executable");
+    }
 
-	header("Content-Type: application/zip; name=\"$filename\"");
-	header("Content-Disposition: attachment; filename=\"$filename\"");
-	header("Content-Length: $size");
+    header("Content-Type: application/zip; name=\"$filename\"");
+    header("Content-Disposition: attachment; filename=\"$filename\"");
+    header("Content-Length: $size");
 
-	echo $DB->q("VALUE SELECT SQL_NO_CACHE zipfile FROM executable
+    echo $DB->q("VALUE SELECT SQL_NO_CACHE zipfile FROM executable
 	             WHERE execid = %s", $id);
 
-	exit(0);
+    exit(0);
 }
 
-if ( isset($_POST['upload']) ) {
-	requireAdmin();
+if (isset($_POST['upload'])) {
+    requireAdmin();
 
-	if ( !empty($_FILES['executable_archive']['tmp_name'][0]) ) {
-		foreach($_FILES['executable_archive']['tmp_name'] as $fileid => $tmpname) {
-			checkFileUpload( $_FILES['executable_archive']['error'][$fileid] );
-			$zip = openZipFile($_FILES['executable_archive']['tmp_name'][$fileid]);
-			$prop_file = 'domjudge-executable.ini';
-			$newid = $_FILES['executable_archive']['name'][$fileid];
-			$newid = substr($newid, 0, strlen($newid) - strlen(".zip"));
-			$desc = $newid;
-			$type = 'unknown';
-			if ( isset($_POST['type']) ) {
-				$type = $_POST['type'];
-			}
-			if ( !empty($id) ) {
-				$desc = $DB->q('VALUE SELECT description FROM executable WHERE execid=%s', $id);
-				$type = $DB->q('VALUE SELECT type FROM executable WHERE execid=%s', $id);
-			}
-			$ini_array = parse_ini_string($zip->getFromName($prop_file));
-			if ( !empty($ini_array) ) {
-				$newid = $ini_array['execid'];
-				$desc = $ini_array['description'];
-				$type = $ini_array['type'];
-			}
-			$content = dj_file_get_contents($_FILES['executable_archive']['tmp_name'][$fileid]);
-			if ( !empty($id) ) {
-				$DB->q('UPDATE executable SET description=%s, md5sum=%s, zipfile=%s, type=%s
+    if (!empty($_FILES['executable_archive']['tmp_name'][0])) {
+        foreach ($_FILES['executable_archive']['tmp_name'] as $fileid => $tmpname) {
+            checkFileUpload($_FILES['executable_archive']['error'][$fileid]);
+            $zip = openZipFile($_FILES['executable_archive']['tmp_name'][$fileid]);
+            $prop_file = 'domjudge-executable.ini';
+            $newid = $_FILES['executable_archive']['name'][$fileid];
+            $newid = substr($newid, 0, strlen($newid) - strlen(".zip"));
+            $desc = $newid;
+            $type = 'unknown';
+            if (isset($_POST['type'])) {
+                $type = $_POST['type'];
+            }
+            if (!empty($id)) {
+                $desc = $DB->q('VALUE SELECT description FROM executable WHERE execid=%s', $id);
+                $type = $DB->q('VALUE SELECT type FROM executable WHERE execid=%s', $id);
+            }
+            $ini_array = parse_ini_string($zip->getFromName($prop_file));
+            if (!empty($ini_array)) {
+                $newid = $ini_array['execid'];
+                $desc = $ini_array['description'];
+                $type = $ini_array['type'];
+            }
+            $content = dj_file_get_contents($_FILES['executable_archive']['tmp_name'][$fileid]);
+            if (!empty($id)) {
+                $DB->q(
+                    'UPDATE executable SET description=%s, md5sum=%s, zipfile=%s, type=%s
 				        WHERE execid=%s',
-				       $desc, md5($content), $content, $type, $id);
-				$newid = $id;
-			} else {
-				if ( $DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s', $newid) ) {
-					error('Executable with id "' . $newid . '" already exists.');
-				}
-				$DB->q('INSERT INTO executable (execid, description, md5sum, zipfile, type)
+                       $desc,
+                    md5($content),
+                    $content,
+                    $type,
+                    $id
+                );
+                $newid = $id;
+            } else {
+                if ($DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s', $newid)) {
+                    error('Executable with id "' . $newid . '" already exists.');
+                }
+                $DB->q(
+                    'INSERT INTO executable (execid, description, md5sum, zipfile, type)
 				        VALUES (%s, %s, %s, %s, %s)',
-				       $newid, $desc, md5($content), $content, $type);
-			}
-			$zip->close();
-			auditlog('executable', $id, 'upload zip',
-			         $_FILES['executable_archive']['name'][$fileid]);
-		}
-		if ( count($_FILES['executable_archive']['tmp_name']) == 1 ) {
-			header('Location: '.$pagename.'?id='.urlencode((empty($newid)?$id:$newid)));
-		} else {
-			header('Location: executables.php');
-		}
-	} else {
-		error("Missing filename for executable upload");
-	}
+                       $newid,
+                    $desc,
+                    md5($content),
+                    $content,
+                    $type
+                );
+            }
+            $zip->close();
+            auditlog(
+                'executable',
+                $id,
+                'upload zip',
+                     $_FILES['executable_archive']['name'][$fileid]
+            );
+        }
+        if (count($_FILES['executable_archive']['tmp_name']) == 1) {
+            header('Location: '.$pagename.'?id='.urlencode((empty($newid)?$id:$newid)));
+        } else {
+            header('Location: executables.php');
+        }
+    } else {
+        error("Missing filename for executable upload");
+    }
 }
 
 require(LIBWWWDIR . '/header.php');
 
-if ( !empty($cmd) ):
+if (!empty($cmd)):
 
-	requireAdmin();
+    requireAdmin();
 
-	echo "<h2>$title</h2>\n\n";
+    echo "<h2>$title</h2>\n\n";
 
-	echo addForm('edit.php', 'post', null, 'multipart/form-data');
+    echo addForm('edit.php', 'post', null, 'multipart/form-data');
 
-	echo "<table>\n";
+    echo "<table>\n";
 
-	if ( $cmd == 'edit' ) {
-		echo "<tr><td>Executable ID:</td><td class=\"exec\">";
-		$row = $DB->q('TUPLE SELECT execid, description, md5sum, type,
+    if ($cmd == 'edit') {
+        echo "<tr><td>Executable ID:</td><td class=\"exec\">";
+        $row = $DB->q('TUPLE SELECT execid, description, md5sum, type,
 		               OCTET_LENGTH(zipfile) AS size
 		               FROM executable
 		               WHERE execid = %s', $id);
-		echo addHidden('keydata[0][execid]', $row['execid']);
-		echo specialchars($row['execid']);
-	} else {
-		echo "<tr><td><label for=\"data_0__execid_\">Executable ID:</label></td><td>";
-		echo addInput('data[0][execid]', null, 8, 10,
-		              " required pattern=\"" . IDENTIFIER_CHARS . "+\"");
-		echo " (alphanumerics only)";
-	}
-	echo "</td></tr>\n";
+        echo addHidden('keydata[0][execid]', $row['execid']);
+        echo specialchars($row['execid']);
+    } else {
+        echo "<tr><td><label for=\"data_0__execid_\">Executable ID:</label></td><td>";
+        echo addInput(
+            'data[0][execid]',
+            null,
+            8,
+            10,
+                      " required pattern=\"" . IDENTIFIER_CHARS . "+\""
+        );
+        echo " (alphanumerics only)";
+    }
+    echo "</td></tr>\n";
 
 // FIXME: unzip and show zip here
 ?>
 <tr><td><label for="data_0__description_">Executable description:</label></td>
 <td><?php echo addInput('data[0][description]', @$row['description'], 30, 255, 'required')?></td></tr>
 <tr><td><label for="data_0__type_">Executable type:</label></td>
-<td><?php echo addSelect('data[0][type]', $executable_types, @$row['type'], True)?></td></tr>
+<td><?php echo addSelect('data[0][type]', $executable_types, @$row['type'], true)?></td></tr>
 <tr><td>Content:     </td><td><a href="show_executable.php?edit_source=1&amp;id=<?php echo specialchars($id)?>">edit file contents</a></td></tr>
 </table>
 
 <?php
 echo addHidden('cmd', $cmd) .
-	addHidden('table','executable') .
-	addHidden('referrer', @$_GET['referrer']) .
-	addSubmit('Save') .
-	addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
-	addEndForm();
+    addHidden('table', 'executable') .
+    addHidden('referrer', @$_GET['referrer']) .
+    addSubmit('Save') .
+    addSubmit('Cancel', 'cancel', null, true, 'formnovalidate') .
+    addEndForm();
 
 
-if ( class_exists("ZipArchive") ) {
-	echo "<br /><em>or</em><br /><br />\n" .
-	addForm($pagename, 'post', null, 'multipart/form-data') .
-	addHidden('id', @$row['execid']) .
-	'<label for="executable_archive__">Upload executable archive:</label>' .
-	($cmd == 'add' ? addSelect('type', $executable_types) : '') .
-	addFileField('executable_archive[]') .
-	addSubmit('Upload', 'upload') .
-	addEndForm();
+if (class_exists("ZipArchive")) {
+    echo "<br /><em>or</em><br /><br />\n" .
+    addForm($pagename, 'post', null, 'multipart/form-data') .
+    addHidden('id', @$row['execid']) .
+    '<label for="executable_archive__">Upload executable archive:</label>' .
+    ($cmd == 'add' ? addSelect('type', $executable_types) : '') .
+    addFileField('executable_archive[]') .
+    addSubmit('Upload', 'upload') .
+    addEndForm();
 }
 
 require(LIBWWWDIR . '/footer.php');
@@ -164,14 +187,20 @@ $data = $DB->q('MAYBETUPLE SELECT execid, description, md5sum, type,
                                   OCTET_LENGTH(zipfile) AS size
                 FROM executable WHERE execid = %s', $id);
 
-if ( ! $data ) error("Missing or invalid executable id");
+if (! $data) {
+    error("Missing or invalid executable id");
+}
 
 echo "<h1>Executable ".specialchars($id)."</h1>\n\n";
-if ( IS_ADMIN ) {
-	echo addForm($pagename . '?id=' . urlencode($id),
-		     'post', null, 'multipart/form-data') . "<p>\n" .
-		addHidden('id', $id) .
-		"</p>\n";
+if (IS_ADMIN) {
+    echo addForm(
+        $pagename . '?id=' . urlencode($id),
+             'post',
+        null,
+        'multipart/form-data'
+    ) . "<p>\n" .
+        addHidden('id', $id) .
+        "</p>\n";
 }
 ?>
 <table>
@@ -183,57 +212,59 @@ if ( IS_ADMIN ) {
 <tr><td>content:     </td><td><a href="show_executable.php?id=<?php echo specialchars($id)?>">view file contents</a></td></tr>
 <tr><td>used as <?=$data['type'] ?> script:</td><td>
 <?php
-if ( $data['type'] == 'compare' ) {
-	$res = $DB->q('SELECT probid AS id FROM problem
+if ($data['type'] == 'compare') {
+    $res = $DB->q('SELECT probid AS id FROM problem
 	               WHERE special_compare = %s ORDER BY probid', $data['execid']);
-	$page = "problem";
-	$prefix = "p";
-} else if ( $data['type'] == 'compile' ) {
-	$res = $DB->q('SELECT langid AS id FROM language
+    $page = "problem";
+    $prefix = "p";
+} elseif ($data['type'] == 'compile') {
+    $res = $DB->q('SELECT langid AS id FROM language
 	               WHERE compile_script = %s ORDER BY langid', $data['execid']);
-	$page = "language";
-	$prefix = "";
-} else if ( $data['type'] == 'run' ) {
-	$res = $DB->q('SELECT probid AS id FROM problem
+    $page = "language";
+    $prefix = "";
+} elseif ($data['type'] == 'run') {
+    $res = $DB->q('SELECT probid AS id FROM problem
 	               WHERE special_run = %s ORDER BY probid', $data['execid']);
-	$page = "problem";
-	$prefix = "p";
+    $page = "problem";
+    $prefix = "p";
 }
-$used = FALSE;
-if ( ($data['type'] == 'compare' || $data['type'] == 'run') &&
-     dbconfig_get('default_'.$data['type']) == $data['execid'] ) {
-	$used = TRUE;
-	echo '<em>default ' . $data['type'] . '</em> ';
+$used = false;
+if (($data['type'] == 'compare' || $data['type'] == 'run') &&
+     dbconfig_get('default_'.$data['type']) == $data['execid']) {
+    $used = true;
+    echo '<em>default ' . $data['type'] . '</em> ';
 }
-while( $row = $res->next() ) {
-	$used = TRUE;
-	echo '<a href="' . $page . '.php?id=' . $row['id'] . '">'
-	    . $prefix . $row['id'] . '</a> ';
+while ($row = $res->next()) {
+    $used = true;
+    echo '<a href="' . $page . '.php?id=' . $row['id'] . '">'
+        . $prefix . $row['id'] . '</a> ';
 }
-if ( ! $used ) echo "<span class=\"nodata\">none</span>";
+if (! $used) {
+    echo "<span class=\"nodata\">none</span>";
+}
 
 ?>
 </td></tr>
 <?php
-if ( IS_ADMIN && class_exists("ZipArchive") ) {
-	echo '<tr>' .
-		'<td>Executable archive:</td>' .
-		'<td>' . addFileField('executable_archive[]') .
-		addSubmit('Upload', 'upload') . '</td>' .
-		"</tr>\n";
+if (IS_ADMIN && class_exists("ZipArchive")) {
+    echo '<tr>' .
+        '<td>Executable archive:</td>' .
+        '<td>' . addFileField('executable_archive[]') .
+        addSubmit('Upload', 'upload') . '</td>' .
+        "</tr>\n";
 }
 
 echo "</table>\n";
 
-if ( IS_ADMIN ) {
-	echo addEndForm();
+if (IS_ADMIN) {
+    echo addEndForm();
 
-	echo "<p>" .
-		'<a href="executable.php?fetch&amp;id=' . urlencode($id) .
-		'"><img src="../images/b_save.png" ' .
-		' title="export executable as zip-file" alt="export" /></a>' .
-		editLink('executable',$id) . "\n" .
-		delLink('executable','execid', $id, $data['description']) . "</p>\n\n";
+    echo "<p>" .
+        '<a href="executable.php?fetch&amp;id=' . urlencode($id) .
+        '"><img src="../images/b_save.png" ' .
+        ' title="export executable as zip-file" alt="export" /></a>' .
+        editLink('executable', $id) . "\n" .
+        delLink('executable', 'execid', $id, $data['description']) . "</p>\n\n";
 }
 
 require(LIBWWWDIR . '/footer.php');

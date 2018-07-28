@@ -10,11 +10,11 @@ require('init.php');
 
 require(LIBWWWDIR . '/scoreboard.php');
 
-if (count($cdatas) != 1 ) {
-	error("Feed only supports exactly one active contest.");
+if (count($cdatas) != 1) {
+    error("Feed only supports exactly one active contest.");
 } else {
-	$cdata = reset($cdatas);
-	$cid   = reset($cids);
+    $cdata = reset($cdatas);
+    $cid   = reset($cids);
 }
 
 
@@ -28,54 +28,66 @@ if (count($cdatas) != 1 ) {
  * $value is an optional element value and $attrs an array whose
  * key,value pairs are added as node attributes. All strings are specialchars
  */
-function XMLaddnode($paren, $name, $value = NULL, $attrs = NULL)
+function XMLaddnode($paren, $name, $value = null, $attrs = null)
 {
-	global $xmldoc;
+    global $xmldoc;
 
-	if ( $value === NULL ) {
-		$node = $xmldoc->createElement(specialchars($name,ENT_XML1));
-	} else {
-		$node = $xmldoc->createElement(specialchars($name,ENT_XML1),
-		                               specialchars($value,ENT_XML1));
-	}
+    if ($value === null) {
+        $node = $xmldoc->createElement(specialchars($name, ENT_XML1));
+    } else {
+        $node = $xmldoc->createElement(
+            specialchars($name, ENT_XML1),
+                                       specialchars($value, ENT_XML1)
+        );
+    }
 
-	if ( count($attrs) > 0 ) {
-		foreach( $attrs as $key => $value ) {
-			$node->setAttribute(specialchars($key,ENT_XML1),
-			                    specialchars($value,ENT_XML1));
-		}
-	}
+    if (count($attrs) > 0) {
+        foreach ($attrs as $key => $value) {
+            $node->setAttribute(
+                specialchars($key, ENT_XML1),
+                                specialchars($value, ENT_XML1)
+            );
+        }
+    }
 
-	$paren->appendChild($node);
-	return $node;
+    $paren->appendChild($node);
+    return $node;
 }
 
 /**
  * Retrieve node by a path from root, or relative to paren if non-null.
  * Generates error if no or more than one nodes are found.
  */
-function XMLgetnode($path, $paren = NULL)
+function XMLgetnode($path, $paren = null)
 {
-	global $xpath;
+    global $xpath;
 
-	$nodelist = $xpath->query($path,$paren);
+    $nodelist = $xpath->query($path, $paren);
 
-	if ( $nodelist->length!=1 ) error("Not exactly one XML node found");
+    if ($nodelist->length!=1) {
+        error("Not exactly one XML node found");
+    }
 
-	return $nodelist->item(0);
+    return $nodelist->item(0);
 }
 
 function safe_float($value, $decimals = null)
 {
-	if ( is_null($value) ) return null;
-	if ( is_null($decimals) ) return (float)$value;
+    if (is_null($value)) {
+        return null;
+    }
+    if (is_null($decimals)) {
+        return (float)$value;
+    }
 
-	// Truncate the string version to a specified number of decimals,
-	// since PHP floats seem not very reliable in not giving e.g.
-	// 1.9999 instead of 2.0.
-	$decpos = strpos((string)$value, '.');
-	if ( $decpos===FALSE ) return (float)$value;
-	return (float)substr((string)$value, 0, $decpos+$decimals+1);
+    // Truncate the string version to a specified number of decimals,
+    // since PHP floats seem not very reliable in not giving e.g.
+    // 1.9999 instead of 2.0.
+    $decpos = strpos((string)$value, '.');
+    if ($decpos===false) {
+        return (float)$value;
+    }
+    return (float)substr((string)$value, 0, $decpos+$decimals+1);
 }
 
 /**
@@ -83,7 +95,7 @@ function safe_float($value, $decimals = null)
  */
 function formattime($time)
 {
-	return safe_float($time, 8);
+    return safe_float($time, 8);
 }
 
 // Get problems, languages, affiliations, categories and events
@@ -123,13 +135,13 @@ $info       = XMLaddnode($root, 'info');
 $fdata = calcFreezeData($cdata);
 
 // write out general info
-$length = calcContestTime($cdata['endtime'],$cid);
+$length = calcContestTime($cdata['endtime'], $cid);
 $lengthString = sprintf('%02d:%02d:%02d', $length/(60*60), ($length/60) % 60, $length % 60);
-if ( isset($cdata['freezetime']) ) {
-	$freezelength = calcContestTime($cdata['endtime'],$cid)
-	               -calcContestTime($cdata['freezetime'],$cid);
+if (isset($cdata['freezetime'])) {
+    $freezelength = calcContestTime($cdata['endtime'], $cid)
+                   -calcContestTime($cdata['freezetime'], $cid);
 } else {
-	$freezelength = 0;
+    $freezelength = 0;
 }
 $freezelengthString = sprintf('%02d:%02d:%02d', $freezelength/(60*60), ($freezelength/60) % 60, $freezelength % 60);
 
@@ -144,186 +156,198 @@ XMLaddnode($info, 'short-title', $cdata['shortname']);
 
 // write out languages
 $id_cnt = 0;
-foreach( $langs as $lang => $data ) {
-	$id_cnt++;
-	$lang_to_id[$lang] = $id_cnt;
-	$node = XMLaddnode($root, 'language');
-	XMLaddnode($node, 'id', $id_cnt);
-	XMLaddnode($node, 'name', $data['name']);
+foreach ($langs as $lang => $data) {
+    $id_cnt++;
+    $lang_to_id[$lang] = $id_cnt;
+    $node = XMLaddnode($root, 'language');
+    XMLaddnode($node, 'id', $id_cnt);
+    XMLaddnode($node, 'name', $data['name']);
 }
 
 // write out regions
-foreach( $categs as $region => $data ) {
-	$node = XMLaddnode($root, 'region');
-	XMLaddnode($node, 'external-id', $region);
-	XMLaddnode($node, 'name', $data['name']);
+foreach ($categs as $region => $data) {
+    $node = XMLaddnode($root, 'region');
+    XMLaddnode($node, 'external-id', $region);
+    XMLaddnode($node, 'name', $data['name']);
 }
 
 // write out possible verdicts
-foreach ( $VERDICTS as $long_verdict => $acronym ) {
-	$node = XMLaddnode($root, 'judgement');
-	XMLaddnode($node, 'acronym', $acronym);
-	XMLaddnode($node, 'name', $long_verdict);
-	XMLaddnode($node, 'solved', $long_verdict==='correct' ? 'True' : 'False');
-	$penalty = true;
-	if ( $long_verdict==='correct' ||
-	     ($long_verdict==='compiler-error' &&
-	      $compile_penalty==0) ) $penalty = false;
-	XMLaddnode($node, 'penalty', $penalty ? 'True' : 'False');
+foreach ($VERDICTS as $long_verdict => $acronym) {
+    $node = XMLaddnode($root, 'judgement');
+    XMLaddnode($node, 'acronym', $acronym);
+    XMLaddnode($node, 'name', $long_verdict);
+    XMLaddnode($node, 'solved', $long_verdict==='correct' ? 'True' : 'False');
+    $penalty = true;
+    if ($long_verdict==='correct' ||
+         ($long_verdict==='compiler-error' &&
+          $compile_penalty==0)) {
+        $penalty = false;
+    }
+    XMLaddnode($node, 'penalty', $penalty ? 'True' : 'False');
 }
 
 
 // write out problems
 $id_cnt = 0;
-foreach( $probs as $prob => $data ) {
-	$id_cnt++;
-	$prob_to_id[$prob] = $id_cnt;
-	$node = XMLaddnode($root, 'problem');
-	XMLaddnode($node, 'id', $id_cnt);
-	XMLaddnode($node, 'label', $data['shortname']);
-	XMLaddnode($node, 'name', $data['name']);
-	if ( preg_match('/^#[0-9A-Fa-f]{3,6}$/', $data['color']) ) {
-		XMLaddnode($node, 'rgb', substr($data['color'],1));
-	} else {
-		XMLaddnode($node, 'color', $data['color']);
-	}
+foreach ($probs as $prob => $data) {
+    $id_cnt++;
+    $prob_to_id[$prob] = $id_cnt;
+    $node = XMLaddnode($root, 'problem');
+    XMLaddnode($node, 'id', $id_cnt);
+    XMLaddnode($node, 'label', $data['shortname']);
+    XMLaddnode($node, 'name', $data['name']);
+    if (preg_match('/^#[0-9A-Fa-f]{3,6}$/', $data['color'])) {
+        XMLaddnode($node, 'rgb', substr($data['color'], 1));
+    } else {
+        XMLaddnode($node, 'color', $data['color']);
+    }
 }
 
 // write out teams
 $id_cnt = 0;
-foreach( $teams as $team => $data ) {
-	if (!isset($categs[$data['categoryid']])) continue;
-	$id_cnt++;
-	$team_to_id[$team] = $id_cnt;
-	$node = XMLaddnode($root, 'team');
-	XMLaddnode($node, 'id', $id_cnt);
-	XMLaddnode($node, 'name', $data['name']);
-	if ( isset($data['externalid']) ) {
-		XMLaddnode($node, 'external-id', $data['externalid']);
-	}
-	if ( isset($data['affilid']) ) {
-		XMLaddnode($node, 'nationality', $affils[$data['affilid']]['country']);
-		XMLaddnode($node, 'university', $affils[$data['affilid']]['name']);
-	}
-	XMLaddnode($node, 'region', $categs[$data['categoryid']]['name']);
+foreach ($teams as $team => $data) {
+    if (!isset($categs[$data['categoryid']])) {
+        continue;
+    }
+    $id_cnt++;
+    $team_to_id[$team] = $id_cnt;
+    $node = XMLaddnode($root, 'team');
+    XMLaddnode($node, 'id', $id_cnt);
+    XMLaddnode($node, 'name', $data['name']);
+    if (isset($data['externalid'])) {
+        XMLaddnode($node, 'external-id', $data['externalid']);
+    }
+    if (isset($data['affilid'])) {
+        XMLaddnode($node, 'nationality', $affils[$data['affilid']]['country']);
+        XMLaddnode($node, 'university', $affils[$data['affilid']]['name']);
+    }
+    XMLaddnode($node, 'region', $categs[$data['categoryid']]['name']);
 }
 
 // write out clars
-while ( $row = $clars->next() ) {
-	$node = XMLaddnode($root, 'clar');
-	XMLaddnode($node, 'id', $row['clarid']);
-	XMLaddnode($node, 'team', $team_to_id[$row['sender']]);
-	XMLaddnode($node, 'problem', $prob_to_id[$row['probid']]);
-	XMLaddnode($node, 'time', formattime(calcContestTime($row['submittime'],$cid)));
-	XMLaddnode($node, 'timestamp', formattime($row['submittime']));
-	XMLaddnode($node, 'question', $row['question']);
-	if ( isset($row['answer']) ) {
-		XMLaddnode($node, 'answer', $row['answer']);
-		XMLaddnode($node, 'answered', 'True');
-		XMLaddnode($node, 'to-all', isset($row['recipient']) ? 'False' : 'True');
-	} else {
-		XMLaddnode($node, 'answered', 'False');
-	}
+while ($row = $clars->next()) {
+    $node = XMLaddnode($root, 'clar');
+    XMLaddnode($node, 'id', $row['clarid']);
+    XMLaddnode($node, 'team', $team_to_id[$row['sender']]);
+    XMLaddnode($node, 'problem', $prob_to_id[$row['probid']]);
+    XMLaddnode($node, 'time', formattime(calcContestTime($row['submittime'], $cid)));
+    XMLaddnode($node, 'timestamp', formattime($row['submittime']));
+    XMLaddnode($node, 'question', $row['question']);
+    if (isset($row['answer'])) {
+        XMLaddnode($node, 'answer', $row['answer']);
+        XMLaddnode($node, 'answered', 'True');
+        XMLaddnode($node, 'to-all', isset($row['recipient']) ? 'False' : 'True');
+    } else {
+        XMLaddnode($node, 'answered', 'False');
+    }
 }
 
 $compile_penalty = dbconfig_get('compile_penalty', 0);
 
 // write out runs
-while ( $row = $events->next() ) {
-	if ( !in_array($row['endpointtype'], array('submissions', 'judgements'), TRUE) ) {
-		continue;
-	}
+while ($row = $events->next()) {
+    if (!in_array($row['endpointtype'], array('submissions', 'judgements'), true)) {
+        continue;
+    }
 
-	if ( empty($row['content']) ) {
-		error("Missing JSON data for event ID ".$row['eventid'].
-		      " endpoint ".$row['endpointtype'].'/'.$row['endpointid']);
-	}
-	$eventdata = dj_json_decode($row['content']);
+    if (empty($row['content'])) {
+        error("Missing JSON data for event ID ".$row['eventid'].
+              " endpoint ".$row['endpointtype'].'/'.$row['endpointid']);
+    }
+    $eventdata = dj_json_decode($row['content']);
 
-	$submitid = $row['endpointtype']=='submissions' ? $eventdata['id'] : $eventdata['submission_id'];
+    $submitid = $row['endpointtype']=='submissions' ? $eventdata['id'] : $eventdata['submission_id'];
 
-	$data = $DB->q('MAYBETUPLE SELECT submittime, teamid, probid, name AS langname, valid
+    $data = $DB->q(
+        'MAYBETUPLE SELECT submittime, teamid, probid, name AS langname, valid
 	                FROM submission
 	                LEFT JOIN language USING (langid)
 	                WHERE valid = 1 AND submitid = %i',
-	               $submitid);
+                   $submitid
+    );
 
-	if ( empty($data) ||
-	     difftime($data['submittime'], $cdata['endtime'])>=0 ||
-	     !isset($prob_to_id[$data['probid']]) ||
-	     !isset($team_to_id[$data['teamid']]) ) continue;
+    if (empty($data) ||
+         difftime($data['submittime'], $cdata['endtime'])>=0 ||
+         !isset($prob_to_id[$data['probid']]) ||
+         !isset($team_to_id[$data['teamid']])) {
+        continue;
+    }
 
-	$run = XMLaddnode($root, 'run');
-	XMLaddnode($run, 'id', $submitid);
-	XMLaddnode($run, 'problem', $prob_to_id[$data['probid']]);
-	XMLaddnode($run, 'team', $team_to_id[$data['teamid']]);
-	XMLaddnode($run, 'timestamp', formattime($row['eventtime']));
-	XMLaddnode($run, 'time', formattime(calcContestTime($data['submittime'],$cid)));
-	XMLaddnode($run, 'language', $data['langname']);
+    $run = XMLaddnode($root, 'run');
+    XMLaddnode($run, 'id', $submitid);
+    XMLaddnode($run, 'problem', $prob_to_id[$data['probid']]);
+    XMLaddnode($run, 'team', $team_to_id[$data['teamid']]);
+    XMLaddnode($run, 'timestamp', formattime($row['eventtime']));
+    XMLaddnode($run, 'time', formattime(calcContestTime($data['submittime'], $cid)));
+    XMLaddnode($run, 'language', $data['langname']);
 
-	if ( $row['endpointtype'] == 'submissions' ) {
-		XMLaddnode($run, 'judged', 'False');
-		XMLaddnode($run, 'status', 'fresh');
-	} else { // judgements
-		$jdata = $DB->q('MAYBETUPLE SELECT result, starttime FROM judging j
+    if ($row['endpointtype'] == 'submissions') {
+        XMLaddnode($run, 'judged', 'False');
+        XMLaddnode($run, 'status', 'fresh');
+    } else { // judgements
+        $jdata = $DB->q('MAYBETUPLE SELECT result, starttime FROM judging j
 		                 LEFT JOIN submission USING(submitid)
 		                 WHERE j.valid = 1 AND judgingid = %i', $row['dataid']);
 
-		if ( !isset($jdata['result']) ) continue;
+        if (!isset($jdata['result'])) {
+            continue;
+        }
 
-		$ntestcases = $DB->q('VALUE SELECT count(*) FROM testcase
+        $ntestcases = $DB->q('VALUE SELECT count(*) FROM testcase
 		                      WHERE probid = %i', $data['probid']);
 
-		$jruns = $DB->q('SELECT rank, runresult, runtime
+        $jruns = $DB->q(
+            'SELECT rank, runresult, runtime
 		                 FROM judging_run
 		                 LEFT JOIN testcase USING (testcaseid)
 		                 WHERE runresult IS NOT NULL AND judgingid = %i',
-		                $row['dataid']);
+                        $row['dataid']
+        );
 
-		// We don't store single judging_run timestamps, so calculate
-		// these cumulatively from judging starttime.
-		$timestamp = (float)$jdata['starttime'];
+        // We don't store single judging_run timestamps, so calculate
+        // these cumulatively from judging starttime.
+        $timestamp = (float)$jdata['starttime'];
 
-		while ( $jrun = $jruns->next() ) {
-			$testcase = XMLaddnode($root, 'testcase');
-			XMLaddnode($testcase, 'i', $jrun['rank']);
-			XMLaddnode($testcase, 'judged', 'True');
-			XMLaddnode($testcase, 'judgement', $VERDICTS[$jrun['runresult']]);
-			XMLaddnode($testcase, 'n', $ntestcases);
-			XMLaddnode($testcase, 'run-id', $submitid);
-			XMLaddnode($testcase, 'solved', ($jrun['runresult']=='correct' ? 'True' : 'False'));
-			XMLaddnode($testcase, 'time', formattime($jrun['runtime']));
-			XMLaddnode($testcase, 'timestamp', formattime($timestamp));
-			$timestamp += (float)$jrun['runtime'];
-		}
+        while ($jrun = $jruns->next()) {
+            $testcase = XMLaddnode($root, 'testcase');
+            XMLaddnode($testcase, 'i', $jrun['rank']);
+            XMLaddnode($testcase, 'judged', 'True');
+            XMLaddnode($testcase, 'judgement', $VERDICTS[$jrun['runresult']]);
+            XMLaddnode($testcase, 'n', $ntestcases);
+            XMLaddnode($testcase, 'run-id', $submitid);
+            XMLaddnode($testcase, 'solved', ($jrun['runresult']=='correct' ? 'True' : 'False'));
+            XMLaddnode($testcase, 'time', formattime($jrun['runtime']));
+            XMLaddnode($testcase, 'timestamp', formattime($timestamp));
+            $timestamp += (float)$jrun['runtime'];
+        }
 
-		XMLaddnode($run, 'judged', 'True');
-		XMLaddnode($run, 'status', 'done');
-		XMLaddnode($run, 'judging-time', formattime(calcContestTime($jdata['starttime'],$cid)));
-		XMLaddnode($run, 'judging-timestamp', formattime($jdata['starttime']));
-		XMLaddnode($run, 'result', $VERDICTS[$jdata['result']]);
-		if ( $jdata['result'] == 'correct' ) {
-			XMLaddnode($run, 'solved', 'True');
-			XMLaddnode($run, 'penalty', 'False');
-		} else {
-			XMLaddnode($run, 'solved', 'False');
-			if ( $compile_penalty == 0 && $jdata['result'] == 'compiler-error' ) {
-				XMLaddnode($run, 'penalty', 'False');
-			} else {
-				XMLaddnode($run, 'penalty', 'True');
-			}
-		}
-	}
+        XMLaddnode($run, 'judged', 'True');
+        XMLaddnode($run, 'status', 'done');
+        XMLaddnode($run, 'judging-time', formattime(calcContestTime($jdata['starttime'], $cid)));
+        XMLaddnode($run, 'judging-timestamp', formattime($jdata['starttime']));
+        XMLaddnode($run, 'result', $VERDICTS[$jdata['result']]);
+        if ($jdata['result'] == 'correct') {
+            XMLaddnode($run, 'solved', 'True');
+            XMLaddnode($run, 'penalty', 'False');
+        } else {
+            XMLaddnode($run, 'solved', 'False');
+            if ($compile_penalty == 0 && $jdata['result'] == 'compiler-error') {
+                XMLaddnode($run, 'penalty', 'False');
+            } else {
+                XMLaddnode($run, 'penalty', 'True');
+            }
+        }
+    }
 }
 
-if ( isset($cdata['finalizetime']) ) {
-	$node = XMLaddnode($root, 'finalized');
-	XMLaddnode($node, 'timestamp', $cdata['finalizetime']);
-	// FIXME: b is not in master (yet). But perhaps it doesn't even make sense to bother with the old feed.
-	XMLaddnode($node, 'last-gold', 0);
-	XMLaddnode($node, 'last-silver', 0);
-	XMLaddnode($node, 'last-bronze', 0);
-	XMLaddnode($node, 'comment', $cdata['finalizecomment']);
+if (isset($cdata['finalizetime'])) {
+    $node = XMLaddnode($root, 'finalized');
+    XMLaddnode($node, 'timestamp', $cdata['finalizetime']);
+    // FIXME: b is not in master (yet). But perhaps it doesn't even make sense to bother with the old feed.
+    XMLaddnode($node, 'last-gold', 0);
+    XMLaddnode($node, 'last-silver', 0);
+    XMLaddnode($node, 'last-bronze', 0);
+    XMLaddnode($node, 'comment', $cdata['finalizecomment']);
 }
 
 header('Content-Type: text/xml; charset=' . DJ_CHARACTER_SET);

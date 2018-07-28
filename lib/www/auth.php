@@ -18,21 +18,30 @@ $ip = @$_SERVER['REMOTE_ADDR'];
 
 session_name('domjudge_session');
 
-session_set_cookie_params(0, preg_replace('/\/(api|jury|public|team)\/?$/', '/',
-                                          dirname($_SERVER['PHP_SELF'])),
-                          null, false, true);
+session_set_cookie_params(
+    0,
+    preg_replace(
+    '/\/(api|jury|public|team)\/?$/',
+    '/',
+                                          dirname($_SERVER['PHP_SELF'])
+),
+                          null,
+    false,
+    true
+);
 
-$teamid = NULL;
-$username = NULL;
-$teamdata = NULL;
-$userdata = NULL;
+$teamid = null;
+$username = null;
+$teamdata = null;
+$userdata = null;
 
 // Check if current user has given role, or has superset of this role's
 // privileges
-function checkrole($rolename, $check_superset = TRUE) {
+function checkrole($rolename, $check_superset = true)
+{
     global $G_SYMFONY, $apiFromInternal;
-    if ( isset($apiFromInternal) && $apiFromInternal === TRUE ) {
-	    return TRUE;
+    if (isset($apiFromInternal) && $apiFromInternal === true) {
+        return true;
     }
     return $G_SYMFONY->checkrole($rolename, $check_superset);
 }
@@ -40,46 +49,52 @@ function checkrole($rolename, $check_superset = TRUE) {
 // Returns whether the connected user is logged in, sets $username, $teamdata
 function logged_in()
 {
-	global $DB, $ip, $username, $teamid, $teamdata, $userdata;
-	if ( !empty($username) && !empty($userdata) && !empty($teamdata) ) return TRUE;
-	if ( isset($_SESSION['username']) ) {
-		$userdata = $DB->q('MAYBETUPLE SELECT * FROM user
+    global $DB, $ip, $username, $teamid, $teamdata, $userdata;
+    if (!empty($username) && !empty($userdata) && !empty($teamdata)) {
+        return true;
+    }
+    if (isset($_SESSION['username'])) {
+        $userdata = $DB->q('MAYBETUPLE SELECT * FROM user
 		                    WHERE username = %s AND enabled = 1', $_SESSION['username']);
-	}
+    }
 
-	if ( !empty($userdata) ) {
-		$username = $userdata['username'];
-		$teamdata = $DB->q('MAYBETUPLE SELECT * FROM team
+    if (!empty($userdata)) {
+        $username = $userdata['username'];
+        $teamdata = $DB->q('MAYBETUPLE SELECT * FROM team
 		                    WHERE teamid = %i AND enabled = 1', $userdata['teamid']);
 
-		// Pull the list of roles that a user has
-		$userdata['roles'] = get_user_roles($userdata['userid']);
-	}
-	if ( !empty($teamdata) ) {
-		$teamid = $teamdata['teamid'];
-		// Is this the first visit? Record that in the team table.
-		if ( empty($teamdata['teampage_first_visited']) ) {
-			$hostname = empty($ip) ? 'PHPUNIT' : gethostbyaddr($ip);
-			$DB->q('UPDATE team SET teampage_first_visited = %s, hostname = %s
+        // Pull the list of roles that a user has
+        $userdata['roles'] = get_user_roles($userdata['userid']);
+    }
+    if (!empty($teamdata)) {
+        $teamid = $teamdata['teamid'];
+        // Is this the first visit? Record that in the team table.
+        if (empty($teamdata['teampage_first_visited'])) {
+            $hostname = empty($ip) ? 'PHPUNIT' : gethostbyaddr($ip);
+            $DB->q(
+                'UPDATE team SET teampage_first_visited = %s, hostname = %s
 			        WHERE teamid = %i',
-			       now(), $hostname, $teamid);
-		}
-	}
+                   now(),
+                $hostname,
+                $teamid
+            );
+        }
+    }
 
-	return $username!==NULL;
+    return $username!==null;
 }
 
 // Returns whether the active authentication method has logout functionality.
 function have_logout()
 {
     // symfony always has logout
-	return TRUE;
+    return true;
 }
 
 function get_user_roles($userid)
 {
-	global $DB;
-	return $DB->q('COLUMN SELECT role.role FROM userrole
+    global $DB;
+    return $DB->q('COLUMN SELECT role.role FROM userrole
 	               LEFT JOIN role USING (roleid)
 	               WHERE userrole.userid = %s', $userid);
 }

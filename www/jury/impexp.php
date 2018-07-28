@@ -32,12 +32,12 @@ requireAdmin();
 </li>
 <li>
 <?php echo addForm('impexp_tsv.php', 'post', null, 'multipart/form-data') .
-	'Tab separated, import: ' .
-	'<label for="fmt">type:</label> ' .
-	addSelect('fmt',array('groups','teams','accounts')) .
+    'Tab separated, import: ' .
+    '<label for="fmt">type:</label> ' .
+    addSelect('fmt', array('groups','teams','accounts')) .
         ', <label for="tsv">file:</label>' .
         addFileField('tsv') .
-        addHidden('act','im') .
+        addHidden('act', 'im') .
         addSubmit('import') .
         addEndForm();
 ?>
@@ -58,9 +58,9 @@ find the Contest ID (e.g. <code>Southwestern-Europe-2014</code>) in the URL.
 echo addForm("impexp_baylor.php");
 echo "<table>\n";
 echo "<tr><td><label for=\"contest\">Contest ID:</label></td>" .
-	"<td>" . addInput('contest', @$contest, null, null, 'required') . "</td></tr>\n";
+    "<td>" . addInput('contest', @$contest, null, null, 'required') . "</td></tr>\n";
 echo "<tr><td><label for=\"token\">Access token:</label></td>" .
-	"<td>" . addInput('token', @$token, null, null, 'required') . "</td></tr>\n";
+    "<td>" . addInput('token', @$token, null, null, 'required') . "</td></tr>\n";
 echo "</table>\n";
 echo addSubmit('Fetch teams', 'fetch') .
      addSubmit('Upload standings', 'upload') . addEndForm();

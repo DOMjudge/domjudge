@@ -1,5 +1,6 @@
 <?php
 namespace DOMJudgeBundle\Validator\Constraints;
+
 use Symfony\Component\Validator\Constraint;
 
 /**

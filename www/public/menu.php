@@ -21,12 +21,12 @@ $started = checkrole('jury') || $fdata['started'];
             <a class="nav-link disabled"><span class="octicon octicon-book"></span> Problemset</a>
 <?php endif; ?>
           </li>
-<?php if ( checkrole('team') ): ?>
+<?php if (checkrole('team')): ?>
           <li class="nav-item">
             <a class="nav-link" href="../team/"><span class="octicon octicon-arrow-right"></span> Team</a>
 	  </li>
 <?php endif; ?>
-<?php if ( checkrole('jury') || checkrole('balloon') ): ?>
+<?php if (checkrole('jury') || checkrole('balloon')): ?>
           <li class="nav-item">
             <a class="nav-link" href="../jury"><span class="octicon octicon-arrow-right"></span> Jury</a>
 	  </li>
@@ -36,14 +36,14 @@ $started = checkrole('jury') || $fdata['started'];
 <?php
 logged_in(); // fill userdata
 
-if ( !logged_in() ) {
-	echo '<div id="loginbut"><a class="nav-link justify-content-center" href="login.php"><button type="button" class="btn btn-info btn-sm"><span class="octicon octicon-sign-in"></span> Login</button></a></div>';
+if (!logged_in()) {
+    echo '<div id="loginbut"><a class="nav-link justify-content-center" href="login.php"><button type="button" class="btn btn-info btn-sm"><span class="octicon octicon-sign-in"></span> Login</button></a></div>';
 } else {
-	echo '<div id="logoutbut"><a class="nav-link justify-content-center" href="../logout"><button type="button" class="btn btn-outline-info btn-sm"><span class="octicon octicon-sign-out"></span> Logout</button></a></div>';
+    echo '<div id="logoutbut"><a class="nav-link justify-content-center" href="../logout"><button type="button" class="btn btn-outline-info btn-sm"><span class="octicon octicon-sign-out"></span> Logout</button></a></div>';
 }
 
-if ( ! $isstatic ) {
-	putClock();
+if (! $isstatic) {
+    putClock();
 }
 ?>
     </nav>

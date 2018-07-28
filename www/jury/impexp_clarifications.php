@@ -31,22 +31,22 @@ $clarificationsById = [];
 $grouped = [];
 
 while ($clarification = $clarifications->next()) {
-	$clarificationsById[$clarification['clarid']] = $clarification;
-	$queue = $clarification['queue'];
+    $clarificationsById[$clarification['clarid']] = $clarification;
+    $queue = $clarification['queue'];
 
-	if (isset($clarification['respid'])) {
-		$originalClarification = $clarificationsById[$clarification['respid']];
-		$originalQueue = $originalClarification['queue'];
-		if (!isset($grouped[$originalQueue])) {
-			$grouped[$originalQueue] = [];
-		}
-		$grouped[$originalQueue][$clarification['respid']]['reply'] = $clarification;
-	} else {
-		if (!isset($grouped[$queue])) {
-			$grouped[$queue] = [];
-		}
-		$grouped[$queue][$clarification['clarid']] = $clarification;
-	}
+    if (isset($clarification['respid'])) {
+        $originalClarification = $clarificationsById[$clarification['respid']];
+        $originalQueue = $originalClarification['queue'];
+        if (!isset($grouped[$originalQueue])) {
+            $grouped[$originalQueue] = [];
+        }
+        $grouped[$originalQueue][$clarification['respid']]['reply'] = $clarification;
+    } else {
+        if (!isset($grouped[$queue])) {
+            $grouped[$queue] = [];
+        }
+        $grouped[$queue][$clarification['clarid']] = $clarification;
+    }
 }
 
 $title = sprintf('Clarifications for %s', $cdata['name']);
@@ -79,38 +79,38 @@ require(LIBWWWDIR . '/impexp_header.php');
 		<tbody>
 		<?php foreach ($clarifications as $clarification): ?>
 			<?php
-			if (!empty($clarification['sender'])) {
-				$from = specialchars($team_names[$clarification['sender']]);
-			} else {
-				$from = 'Jury' . ' (' . specialchars($clarification['jury_member']) . ')';
-			}
-			if ($clarification['recipient'] && empty($clarification['sender'])) {
-				$to = specialchars($team_names[$clarification['recipient']]);
-			} else {
-				$to = ($clarification['sender']) ? 'Jury' : 'All';
-			}
-			?>
+            if (!empty($clarification['sender'])) {
+                $from = specialchars($team_names[$clarification['sender']]);
+            } else {
+                $from = 'Jury' . ' (' . specialchars($clarification['jury_member']) . ')';
+            }
+            if ($clarification['recipient'] && empty($clarification['sender'])) {
+                $to = specialchars($team_names[$clarification['recipient']]);
+            } else {
+                $to = ($clarification['sender']) ? 'Jury' : 'All';
+            }
+            ?>
 			<tr class="top-line">
 				<td><?= $clarification['clarid'] ?></td>
-				<td><?= printtime($clarification['submittime'], NULL, $clarification['cid']) ?></td>
+				<td><?= printtime($clarification['submittime'], null, $clarification['cid']) ?></td>
 				<td><?= $from ?></td>
 				<td><?= $to ?></td>
 				<td>
 					<?php
-					if (is_null($clarification['probid'])) {
-						if (is_null($clarification['category'])) {
-							echo 'General';
-						} else {
-							if (array_key_exists($clarification['category'], $categs)) {
-								echo specialchars($categs[$clarification['category']]);
-							} else {
-								echo 'General';
-							}
-						}
-					} else {
-						echo specialchars($clarification['shortname'] . ": " . $clarification['probname']);
-					}
-					?>
+                    if (is_null($clarification['probid'])) {
+                        if (is_null($clarification['category'])) {
+                            echo 'General';
+                        } else {
+                            if (array_key_exists($clarification['category'], $categs)) {
+                                echo specialchars($categs[$clarification['category']]);
+                            } else {
+                                echo 'General';
+                            }
+                        }
+                    } else {
+                        echo specialchars($clarification['shortname'] . ": " . $clarification['probname']);
+                    }
+                    ?>
 				</td>
 				<td><?= $clarification['answered'] ? 'Yes' : 'No' ?></td>
 			</tr>

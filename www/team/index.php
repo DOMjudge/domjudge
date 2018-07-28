@@ -19,21 +19,21 @@ $langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions
 
 echo "<script type=\"text/javascript\">\n<!--\n";
 
-if ( $fdata['started'] || checkrole('jury') ) {
-	$probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
+if ($fdata['started'] || checkrole('jury')) {
+    $probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
 	                    INNER JOIN contestproblem USING (probid)
 	                    WHERE cid = %i AND allow_submit = 1
 	                    ORDER BY shortname', $cid);
 
-	putgetMainExtension($langdata);
+    putgetMainExtension($langdata);
 
-	echo "function getProbDescription(probid)\n{\n";
-	echo "\tswitch(probid) {\n";
-	foreach($probdata as $probinfo) {
-		echo "\t\tcase '" . specialchars($probinfo['shortname']) .
-		    "': return '" . specialchars($probinfo['name']) . "';\n";
-	}
-	echo "\t\tdefault: return '';\n\t}\n}\n\n";
+    echo "function getProbDescription(probid)\n{\n";
+    echo "\tswitch(probid) {\n";
+    foreach ($probdata as $probinfo) {
+        echo "\t\tcase '" . specialchars($probinfo['shortname']) .
+            "': return '" . specialchars($probinfo['name']) . "';\n";
+    }
+    echo "\t\tdefault: return '';\n\t}\n}\n\n";
 }
 
 echo "initReload(" . $refreshtime . ");\n";
@@ -44,7 +44,7 @@ putTeamRow($cdata, array($teamid));
 
 //echo "<div id=\"submitlist\">\n";
 
-if ( $submitted ):
+if ($submitted):
 ?>
 
 <div class="mt-4 alert alert-success alert-dismissible show" role="alert">
@@ -58,53 +58,53 @@ endif;
 
 /* submitform moved away
 if ( ($fdata['started'] || checkrole('jury') )) {
-	echo <<<HTML
+    echo <<<HTML
 <script type="text/javascript">
 $(function() {
-	var matches = location.hash.match(/submitted=(\d+)/);
-	if (matches) {
-		var \$p = \$('<p class="submissiondone" />').html('submission done <a href="#">x</a>');
-		\$('#submitlist > .teamoverview').after(\$p);
-		\$('table.submissions tr[data-submission-id=' + matches[1] + ']').addClass('highlight');
+    var matches = location.hash.match(/submitted=(\d+)/);
+    if (matches) {
+        var \$p = \$('<p class="submissiondone" />').html('submission done <a href="#">x</a>');
+        \$('#submitlist > .teamoverview').after(\$p);
+        \$('table.submissions tr[data-submission-id=' + matches[1] + ']').addClass('highlight');
 
-		\$('.submissiondone a').on('click', function() {
-			\$(this).parent().remove();
-			\$('table.submissions tr.highlight').removeClass('highlight');
-			reloadLocation = 'index.php';
-		});
-	}
+        \$('.submissiondone a').on('click', function() {
+            \$(this).parent().remove();
+            \$('table.submissions tr.highlight').removeClass('highlight');
+            reloadLocation = 'index.php';
+        });
+    }
 });
 </script>
 HTML;
-	$maxfiles = dbconfig_get('sourcefiles_limit',100);
+    $maxfiles = dbconfig_get('sourcefiles_limit',100);
 
-	echo addForm('upload.php','post',null,'multipart/form-data', null,
-		     ' onreset="resetUploadForm('.$refreshtime .', '.$maxfiles.');"') .
-	    "<p id=\"submitform\">\n\n";
+    echo addForm('upload.php','post',null,'multipart/form-data', null,
+             ' onreset="resetUploadForm('.$refreshtime .', '.$maxfiles.');"') .
+        "<p id=\"submitform\">\n\n";
 
-	echo "<input type=\"file\" name=\"code[]\" id=\"maincode\" required";
-	if ( $maxfiles > 1 ) {
-		echo " multiple";
-	}
-	echo " />\n";
+    echo "<input type=\"file\" name=\"code[]\" id=\"maincode\" required";
+    if ( $maxfiles > 1 ) {
+        echo " multiple";
+    }
+    echo " />\n";
 
 
-	echo addSelect('langid', $langs, '', true);
+    echo addSelect('langid', $langs, '', true);
 
-	echo addSubmit('submit', 'submit',
-		       "return checkUploadForm();");
+    echo addSubmit('submit', 'submit',
+               "return checkUploadForm();");
 
-	echo addReset('cancel');
+    echo addReset('cancel');
 
-	if ( $maxfiles > 1 ) {
-		echo "<br /><span id=\"auxfiles\"></span>\n" .
-		    "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
-		    "value=\"Add another file\" onclick=\"addFileUpload();\" " .
-		    "disabled=\"disabled\" />\n";
-	}
-	echo "<script type=\"text/javascript\">initFileUploads($maxfiles);</script>\n\n";
+    if ( $maxfiles > 1 ) {
+        echo "<br /><span id=\"auxfiles\"></span>\n" .
+            "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
+            "value=\"Add another file\" onclick=\"addFileUpload();\" " .
+            "disabled=\"disabled\" />\n";
+    }
+    echo "<script type=\"text/javascript\">initFileUploads($maxfiles);</script>\n\n";
 
-	echo "</p>\n</form>\n\n";
+    echo "</p>\n</form>\n\n";
 }
 // call putSubmissions function from common.php for this team.
 */
@@ -132,7 +132,8 @@ $requests = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromna
                     WHERE c.cid = %i AND c.sender = %i
                     ORDER BY submittime DESC, clarid DESC', $cid, $teamid);
 
-$clarifications = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname,
+$clarifications = $DB->q(
+    'SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname,
                           u.mesgid AS unread
                           FROM clarification c
                           LEFT JOIN problem p USING (probid)
@@ -143,23 +144,26 @@ $clarifications = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS 
                           WHERE c.cid = %i AND c.sender IS NULL
                           AND ( c.recipient IS NULL OR c.recipient = %i )
                           ORDER BY c.submittime DESC, c.clarid DESC',
-                         $teamid, $cid, $teamid);
+                         $teamid,
+    $cid,
+    $teamid
+);
 
 echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 
 # FIXME: column width and wrapping/shortening of clarification text
-if ( $clarifications->count() == 0 ) {
-	echo "<p class=\"nodata\">No clarifications.</p>\n\n";
+if ($clarifications->count() == 0) {
+    echo "<p class=\"nodata\">No clarifications.</p>\n\n";
 } else {
-	putClarificationList($clarifications,$teamid);
+    putClarificationList($clarifications, $teamid);
 }
 
 echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
 
-if ( $requests->count() == 0 ) {
-	echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
+if ($requests->count() == 0) {
+    echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
 } else {
-	putClarificationList($requests,$teamid);
+    putClarificationList($requests, $teamid);
 }
 
 ?>

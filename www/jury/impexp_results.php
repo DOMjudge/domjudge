@@ -18,7 +18,7 @@ $sdata = genScoreBoard($cdata, true, array('categoryid' => $categs));
 $teams = $sdata['teams'];
 $team_names = [];
 foreach ($teams as $team) {
-	$team_names[$team['externalid']] = $team['name'];
+    $team_names[$team['externalid']] = $team['name'];
 }
 
 $awarded = [];
@@ -29,44 +29,44 @@ $region_winners = [];
 $useIcpcLayout = isset($_GET['mode']) && $_GET['mode'] === 'icpcsite';
 $download = isset($_GET['download']);
 if ($download) {
-	header('Content-type: text/html');
-	header('Content-disposition: attachment; filename=results.html');
+    header('Content-type: text/html');
+    header('Content-disposition: attachment; filename=results.html');
 }
 
 foreach (tsv_results_get() as $row) {
-	$team = $team_names[$row[0]];
+    $team = $team_names[$row[0]];
 
-	if ($row[6] !== '') {
-		$region_winners[] = [
-			'group' => $row[6],
-			'team' => $team,
-		];
-	}
+    if ($row[6] !== '') {
+        $region_winners[] = [
+            'group' => $row[6],
+            'team' => $team,
+        ];
+    }
 
-	$row = [
-		'team' => $team,
-		'rank' => $row[1],
-		'award' => $row[2],
-		'solved' => $row[3],
-		'total_time' => $row[4],
-		'max_time' => $row[5],
-	];
-	if (preg_match('/^(.*) Medal$/', $row['award'], $matches)) {
-		$row['class'] = strtolower($matches[1]);
-	} else {
-		$row['class'] = '';
-	}
-	if ($row['rank'] === '') {
-		$honorable[] = $row['team'];
-	} elseif ($row['award'] === 'Ranked') {
-		$ranked[] = $row;
-	} else {
-		$awarded[] = $row;
-	}
+    $row = [
+        'team' => $team,
+        'rank' => $row[1],
+        'award' => $row[2],
+        'solved' => $row[3],
+        'total_time' => $row[4],
+        'max_time' => $row[5],
+    ];
+    if (preg_match('/^(.*) Medal$/', $row['award'], $matches)) {
+        $row['class'] = strtolower($matches[1]);
+    } else {
+        $row['class'] = '';
+    }
+    if ($row['rank'] === '') {
+        $honorable[] = $row['team'];
+    } elseif ($row['award'] === 'Ranked') {
+        $ranked[] = $row;
+    } else {
+        $awarded[] = $row;
+    }
 }
 
 usort($region_winners, function ($a, $b) {
-	return $a['group'] <=> $b['group'];
+    return $a['group'] <=> $b['group'];
 });
 
 $collator = new Collator('en_US');
@@ -77,39 +77,41 @@ $matrix = $sdata['matrix'];
 $summary = $sdata['summary'];
 $first_to_solve = [];
 foreach ($probs as $probData) {
-	$first_to_solve[$probData['probid']] = [
-		'problem' => $probData['shortname'],
-		'problem_name' => $probData['name'],
-		'team' => null,
-		'time' => null,
-	];
-	foreach ($teams as $teamData) {
-		if (!in_array($teamData['categoryid'], $categs)) {
-			continue;
-		}
-		if ($matrix[$teamData['teamid']][$probData['probid']]['is_correct'] && first_solved($matrix[$teamData['teamid']][$probData['probid']]['time'],
-				@$summary['problems'][$probData['probid']]['best_time_sort'][$teamData['sortorder']])) {
-			$first_to_solve[$probData['probid']] = [
-				'problem' => $probData['shortname'],
-				'problem_name' => $probData['name'],
-				'team' => $team_names[$teamData['externalid']],
-				'time' => scoretime($matrix[$teamData['teamid']][$probData['probid']]['time']),
-			];
-		}
-	}
+    $first_to_solve[$probData['probid']] = [
+        'problem' => $probData['shortname'],
+        'problem_name' => $probData['name'],
+        'team' => null,
+        'time' => null,
+    ];
+    foreach ($teams as $teamData) {
+        if (!in_array($teamData['categoryid'], $categs)) {
+            continue;
+        }
+        if ($matrix[$teamData['teamid']][$probData['probid']]['is_correct'] && first_solved(
+            $matrix[$teamData['teamid']][$probData['probid']]['time'],
+                @$summary['problems'][$probData['probid']]['best_time_sort'][$teamData['sortorder']]
+        )) {
+            $first_to_solve[$probData['probid']] = [
+                'problem' => $probData['shortname'],
+                'problem_name' => $probData['name'],
+                'team' => $team_names[$teamData['externalid']],
+                'time' => scoretime($matrix[$teamData['teamid']][$probData['probid']]['time']),
+            ];
+        }
+    }
 }
 
 usort($first_to_solve, function ($a, $b) {
-	if ($a['time'] === null) {
-		$a['time'] = PHP_INT_MAX;
-	}
-	if ($b['time'] === null) {
-		$b['time'] = PHP_INT_MAX;
-	}
-	if ($a['time'] === $b['time']) {
-		return $a['problem'] <=> $b['problem'];
-	}
-	return $a['time'] <=> $b['time'];
+    if ($a['time'] === null) {
+        $a['time'] = PHP_INT_MAX;
+    }
+    if ($b['time'] === null) {
+        $b['time'] = PHP_INT_MAX;
+    }
+    if ($a['time'] === $b['time']) {
+        return $a['problem'] <=> $b['problem'];
+    }
+    return $a['time'] <=> $b['time'];
 });
 
 ?>
@@ -404,9 +406,9 @@ usort($first_to_solve, function ($a, $b) {
 	</div>
 <?php else: ?>
 	<?php
-	$title = sprintf('Results for %s', $cdata['name']);
-	require(LIBWWWDIR . '/impexp_header.php');
-	?>
+    $title = sprintf('Results for %s', $cdata['name']);
+    require(LIBWWWDIR . '/impexp_header.php');
+    ?>
 	<h2>Awards</h2>
 	<table class="table">
 		<thead>
@@ -517,6 +519,6 @@ usort($first_to_solve, function ($a, $b) {
 		</tbody>
 	</table>
 	<?php
-	require(LIBWWWDIR . '/impexp_footer.php');
-	?>
+    require(LIBWWWDIR . '/impexp_footer.php');
+    ?>
 <?php endif; ?>

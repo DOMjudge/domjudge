@@ -1,7 +1,9 @@
 <?php
 namespace DOMJudgeBundle\Entity;
+
 use Symfony\Component\Security\Core\Role\RoleInterface;
 use Doctrine\ORM\Mapping as ORM;
+
 /**
  * Possible user roles
  * @ORM\Entity()
@@ -9,92 +11,93 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Role implements RoleInterface
 {
-	/**
-	 * @var int
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 * @ORM\Column(type="integer", name="roleid", options={"comment"="Unique ID"}, nullable=false)
-	 */
-	private $roleid;
+    /**
+     * @var int
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer", name="roleid", options={"comment"="Unique ID"}, nullable=false)
+     */
+    private $roleid;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="role", length=32, options={"comment"="Role name"}, nullable=false)
-	 */
-	private $dj_role;
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="role", length=32, options={"comment"="Role name"}, nullable=false)
+     */
+    private $dj_role;
 
-	/**
-	 * @var string
-	 * @ORM\Column(type="string", name="description", length=255, options={"comment"="Role name"}, nullable=false)
-	 */
-	private $description;
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="description", length=255, options={"comment"="Role name"}, nullable=false)
+     */
+    private $description;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="User", mappedBy="roles")
-	 */
-	private $users;
+    /**
+     * @ORM\ManyToMany(targetEntity="User", mappedBy="roles")
+     */
+    private $users;
 
-	public function getRole() {
-		return "ROLE_" . strtoupper($this->dj_role);
-	}
+    public function getRole()
+    {
+        return "ROLE_" . strtoupper($this->dj_role);
+    }
 
-	/**
-	 * Get roleid
-	 *
-	 * @return integer
-	 */
-	public function getRoleid()
-	{
-		return $this->roleid;
-	}
+    /**
+     * Get roleid
+     *
+     * @return integer
+     */
+    public function getRoleid()
+    {
+        return $this->roleid;
+    }
 
-	/**
-	 * Set description
-	 *
-	 * @param string $description
-	 *
-	 * @return Role
-	 */
-	public function setDescription($description)
-	{
-		$this->description = $description;
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return Role
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Get description
-	 *
-	 * @return string
-	 */
-	public function getDescription()
-	{
-		return $this->description;
-	}
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
 
-	/**
-	* Set djRole
-	*
-	* @param string $djRole
-	*
-	* @return Role
-	*/
-	public function setDjRole($djRole)
-	{
-		$this->dj_role = $djRole;
+    /**
+    * Set djRole
+    *
+    * @param string $djRole
+    *
+    * @return Role
+    */
+    public function setDjRole($djRole)
+    {
+        $this->dj_role = $djRole;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	* Get djRole
-	*
-	* @return string
-	*/
-	public function getDjRole()
-	{
-		return $this->dj_role;
-	}
+    /**
+    * Get djRole
+    *
+    * @return string
+    */
+    public function getDjRole()
+    {
+        return $this->dj_role;
+    }
     /**
      * Constructor
      */

@@ -10,8 +10,8 @@ $pagename = basename($_SERVER['PHP_SELF']);
 
 require('init.php');
 $refresh = array(
-	'after' => 30,
-	'url' => 'scoreboard.php',
+    'after' => 30,
+    'url' => 'scoreboard.php',
 );
 $title = 'Scoreboard';
 
@@ -21,6 +21,6 @@ $filter = initScorefilter();
 require(LIBWWWDIR . '/header.php');
 
 // call the general putScoreBoard function from scoreboad.php
-putScoreBoard($cdata, $teamid, FALSE, $filter);
+putScoreBoard($cdata, $teamid, false, $filter);
 
 require(LIBWWWDIR . '/footer.php');
