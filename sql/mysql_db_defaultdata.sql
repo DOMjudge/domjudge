@@ -102,7 +102,7 @@ INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_e
 ('csharp', 'csharp', 'C#', '["csharp","cs"]', 0, NULL, 0, 1, 1, 'csharp'),
 ('f95', NULL, 'Fortran', '["f95","f90"]', 0, NULL, 0, 1, 1, 'f95'),
 ('hs', 'haskell', 'Haskell', '["hs","lhs"]', 0, NULL, 0, 1, 1, 'hs'),
-('java', 'java', 'Java', '["java"]', 1, "Main class", 1, 1, 1, 'java_javac_detect'),
+('java', 'java', 'Java', '["java"]', 0, "Main class", 1, 1, 1, 'java_javac_detect'),
 ('js', 'javascript', 'JavaScript', 0, NULL, '["js"]', 0, 1, 1, 'js'),
 ('lua', NULL, 'Lua', '["lua"]', 0, NULL, 0, 1, 1, 'lua'),
 ('kt', 'kotlin', 'Kotlin', '["kt"]', 1, "Main class", 0, 1, 1, 'kt'),
