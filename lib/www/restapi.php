@@ -181,7 +181,11 @@ class RestApi {
 			}
 		}
 
-		$response = call_user_func($func['callback'], $args);
+		try {
+			$response = call_user_func($func['callback'], $args);
+		} catch (RuntimeException $e) {
+			$this->createError("Server-side runtime exception: " . $e->getMessage(), INTERNAL_SERVER_ERROR);
+		}
 		if ($response === '') {
 			// We receive an empty response of a createError or checkargs produces an error
 			// In that case, just return
