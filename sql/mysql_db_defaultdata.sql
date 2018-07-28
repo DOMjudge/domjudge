@@ -56,7 +56,6 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `description`) V
 ('judgehost_critical', '120', 'int', '0', 'Time in seconds after a judgehost last checked in before showing its status as "critical".'),
 ('thumbnail_size', '128', 'int', '0', 'Maximum width/height of a thumbnail for uploaded testcase images.'),
 ('diskspace_error', '1048576', 'int', '0', 'Minimum free disk space (in kB) on judgehosts.'),
-('require_entry_point', '0', 'bool', '1', 'Require entry point for submissions.'),
 ('show_limits_on_team_page', '0', 'bool', '1', 'Show time and memory limit on the team problems page');
 
 --
@@ -94,27 +93,27 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 -- Dumping data for table `language`
 --
 
-INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `allow_submit`, `allow_judge`, `time_factor`, `compile_script`) VALUES
-('adb', NULL, 'Ada', '["adb","ads"]', 0, 1, 1, 'adb'),
-('awk', NULL, 'AWK', '["awk"]', 0, 1, 1, 'awk'),
-('bash', NULL, 'Bash shell', '["bash"]', 0, 1, 1, 'bash'),
-('c', 'c', 'C', '["c"]', 1, 1, 1, 'c'),
-('cpp', 'cpp', 'C++', '["cpp","cc","cxx","c++"]', 1, 1, 1, 'cpp'),
-('csharp', 'csharp', 'C#', '["csharp","cs"]', 0, 1, 1, 'csharp'),
-('f95', NULL, 'Fortran', '["f95","f90"]', 0, 1, 1, 'f95'),
-('hs', 'haskell', 'Haskell', '["hs","lhs"]', 0, 1, 1, 'hs'),
-('java', 'java', 'Java', '["java"]', 1, 1, 1, 'java_javac_detect'),
-('js', 'javascript', 'JavaScript', '["js"]', 0, 1, 1, 'js'),
-('lua', NULL, 'Lua', '["lua"]', 0, 1, 1, 'lua'),
-('kt', 'kotlin', 'Kotlin', '["kt"]', 0, 1, 1, 'kt'),
-('pas', 'pascal', 'Pascal', '["pas","p"]', 0, 1, 1, 'pas'),
-('pl', NULL, 'Perl', '["pl"]', 0, 1, 1, 'pl'),
-('plg', 'prolog', 'Prolog', '["plg"]', 0, 1, 1, 'plg'),
-('py2', 'python2', 'Python 2', '["py2","py"]', 0, 1, 1, 'py2'),
-('py3', 'python3', 'Python 3', '["py3"]', 0, 1, 1, 'py3'),
-('rb', NULL, 'Ruby', '["rb"]', 0, 1, 1, 'rb'),
-('scala', 'scala', 'Scala', '["scala"]', 0, 1, 1, 'scala'),
-('sh', NULL, 'POSIX shell', '["sh"]', 0, 1, 1, 'sh');
+INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_entry_point`, `entry_point_description`, `allow_submit`, `allow_judge`, `time_factor`, `compile_script`) VALUES
+('adb', NULL, 'Ada', '["adb","ads"]', 0, NULL, 0, 1, 1, 'adb'),
+('awk', NULL, 'AWK', '["awk"]', 0, NULL, 0, 1, 1, 'awk'),
+('bash', NULL, 'Bash shell', '["bash"]', 0, NULL, 0, 1, 1, 'bash'),
+('c', 'c', 'C', '["c"]', 0, NULL, 1, 1, 1, 'c'),
+('cpp', 'cpp', 'C++', '["cpp","cc","cxx","c++"]', 0, NULL, 1, 1, 1, 'cpp'),
+('csharp', 'csharp', 'C#', '["csharp","cs"]', 0, NULL, 0, 1, 1, 'csharp'),
+('f95', NULL, 'Fortran', '["f95","f90"]', 0, NULL, 0, 1, 1, 'f95'),
+('hs', 'haskell', 'Haskell', '["hs","lhs"]', 0, NULL, 0, 1, 1, 'hs'),
+('java', 'java', 'Java', '["java"]', 1, "Main class", 1, 1, 1, 'java_javac_detect'),
+('js', 'javascript', 'JavaScript', 0, NULL, '["js"]', 0, 1, 1, 'js'),
+('lua', NULL, 'Lua', '["lua"]', 0, NULL, 0, 1, 1, 'lua'),
+('kt', 'kotlin', 'Kotlin', '["kt"]', 1, "Main class", 0, 1, 1, 'kt'),
+('pas', 'pascal', 'Pascal', '["pas","p"]', 0, NULL, 0, 1, 1, 'pas'),
+('pl', NULL, 'Perl', '["pl"]', 0, NULL, 0, 1, 1, 'pl'),
+('plg', 'prolog', 'Prolog', '["plg"]', 0, NULL, 0, 1, 1, 'plg'),
+('py2', 'python2', 'Python 2', '["py2","py"]', 1, "Main file", 0, 1, 1, 'py2'),
+('py3', 'python3', 'Python 3', '["py3"]', 1, "Main file", 0, 1, 1, 'py3'),
+('rb', NULL, 'Ruby', '["rb"]', 0, NULL, 0, 1, 1, 'rb'),
+('scala', 'scala', 'Scala', '["scala"]', 0, NULL, 0, 1, 1, 'scala'),
+('sh', NULL, 'POSIX shell', '["sh"]', 0, NULL, 0, 1, 1, 'sh');
 
 
 --

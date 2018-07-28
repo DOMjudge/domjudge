@@ -749,9 +749,13 @@ function submit_solution($team, $prob, $contest, $lang, $files, $filenames,
 	}
 
 	// Check 2: valid parameters?
-	if( ! $langid = $DB->q('MAYBEVALUE SELECT langid FROM language
+	if( ! $langdata = $DB->q('MAYBETUPLE SELECT langid, require_entry_point FROM language
 	                        WHERE langid = %s AND allow_submit = 1', $lang) ) {
 		error("Language '$lang' not found in database or not submittable.");
+	}
+	$langid = $langdata['langid'];
+	if ( $langdata['require_entry_point'] && empty($entry_point) ) {
+		error("Entry point required for '$langid' but none given.");
 	}
 	if( ! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team
 	                        WHERE teamid = %i' .
