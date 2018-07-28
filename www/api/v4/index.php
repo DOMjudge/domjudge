@@ -997,11 +997,23 @@ function submissions_POST($args)
 		}
 	}
 
-	$entry_point = empty($args['entry_point']) ? NULL : $args['entry_point'];
-	if ( dbconfig_get('require_entry_point', FALSE) && !isset($entry_point) ) {
-		error("Entry point required, but not specified.");
+	$lang = $DB->q('MAYBETUPLE SELECT langid, name, require_entry_point, entry_point_description
+	                FROM language
+	                WHERE langid = %s AND allow_submit = 1', $args['langid']);
+
+	if ( ! isset($lang) ) err("Unable to find language '$langid' or not submittable");
+	$langid = $lang['langid'];
+
+	$entry_point = NULL;
+	if ( $lang['require_entry_point'] ) {
+		if ( empty($args['entry_point']) ) {
+			$ep_desc = ($lang['entry_point_description'] ? : 'Entry point');
+			error("$ep_desc required, but not specified.");
+		}
+		$entry_point = $args['entry_point'];
 	}
-	$sid = submit_solution($userdata['teamid'], $probid, $cid, $args['langid'], $FILEPATHS, $FILENAMES, NULL, $entry_point);
+
+	$sid = submit_solution($userdata['teamid'], $probid, $cid, $langid, $FILEPATHS, $FILENAMES, NULL, $entry_point);
 
 	auditlog('submission', $sid, 'added', 'via api', null, $cid);
 
