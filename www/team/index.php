@@ -14,7 +14,7 @@ $refreshtime = 30;
 $submitted = @$_GET['submitted'];
 
 $fdata = calcFreezeData($cdata);
-$langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions
+$langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions, require_entry_point, entry_point_description
                     FROM language WHERE allow_submit = 1');
 
 echo "<script type=\"text/javascript\">\n<!--\n";
