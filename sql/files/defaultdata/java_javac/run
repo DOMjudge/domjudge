@@ -34,7 +34,7 @@ else
 fi
 
 # Byte-compile:
-javac -encoding UTF-8 -d . "$@"
+javac -encoding UTF-8 -sourcepath . -d . "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
@@ -52,6 +52,7 @@ MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 # -Xms: initial size of memory, improves runtime stability
 # -XX:+UseSerialGC: Serialized garbage collector improves runtime stability
 # -Xss${MEMSTACK}k: stack size as configured abve
+# -Dfile.encoding=UTF-8: set file encoding to UTF-8
 cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute java interpreter on source.
@@ -61,7 +62,10 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec java -XX:+UseSerialGC -Xss${MEMSTACK}k -Xms${MEMLIMITJAVA}k -Xmx${MEMLIMITJAVA}k -DONLINE_JUDGE=1 -DDOMJUDGE=1 '$MAINCLASS' "\$@"
+# Add -DONLINE_JUDGE or -DDOMJUDGE below if you want it make easier for teams
+# to do local debugging.
+
+exec java -Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss${MEMSTACK}k -Xms${MEMLIMITJAVA}k -Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"

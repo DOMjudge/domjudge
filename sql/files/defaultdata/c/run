@@ -5,7 +5,9 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
-MAINSOURCE="$1"
+
+# Add -DONLINE_JUDGE or -DDOMJUDGE below if you want it make easier for teams
+# to do local debugging.
 
 # -x c:     Explicitly set compile language to C (no C++ nor object files
 #           autodetected by extension)
@@ -14,5 +16,5 @@ MAINSOURCE="$1"
 # -static:  Static link with all libraries
 # -pipe:    Use pipes for communication between stages of compilation
 # -lm:      Link with math-library (has to be last argument!)
-gcc -x c -Wall -O2 -static -pipe -DONLINE_JUDGE -DDOMJUDGE -o "$DEST" "$@" -lm
+gcc -x c -Wall -O2 -static -pipe -o "$DEST" "$@" -lm
 exit $?

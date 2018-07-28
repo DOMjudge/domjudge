@@ -35,7 +35,9 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-exec awk -v ONLINE_JUDGE=1 -v DOMJUDGE=1 $FILEARGS "\$@"
+# Add -v ONLINE_JUDGE=1 -v DOMJUDGE=1 below to make it easier for teams to do
+# local debugging.
+exec awk $FILEARGS "\$@"
 EOF
 
 chmod a+x "$DEST"

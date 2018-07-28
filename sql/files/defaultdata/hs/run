@@ -11,6 +11,9 @@ MAINSOURCE="$1"
 # https://ghc.haskell.org/trac/ghc/ticket/11678
 export HOME=/does/not/exist
 
+# Add -DONLINE_JUDGE or -DDOMJUDGE below if you want it make easier for teams
+# to do local debugging.
+
 # -x hs:    Explicitly only allow Haskell source (no object files or
 #           other intermediate files autodetected by extension, also
 #           disables literate Haskell (.lhs) files)
@@ -19,7 +22,7 @@ export HOME=/does/not/exist
 # -static:  Static link Haskell libraries
 # -optl-static:  Pass '-static' option to the linker
 # -optl-pthread: Pass '-pthread' option to the linker (see Debian bug #593402)
-ghc -x hs -Wall -Wwarn -O -static -optl-static -optl-pthread -DONLINE_JUDGE -DDOMJUDGE -o "$DEST" "$@"
+ghc -x hs -Wall -Wwarn -O -static -optl-static -optl-pthread -o "$DEST" "$@"
 exitcode=$?
 
 # clean created files:

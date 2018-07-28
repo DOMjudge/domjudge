@@ -20,7 +20,9 @@ SOURCEDIR="${MAINSOURCE%/*}"
 [ "$SOURCEDIR" = "$MAINSOURCE" ] && SOURCEDIR='.'
 
 # Byte-compile:
-mcs -o+ -d:ONLINE_JUDGE,DOMJUDGE -out:"$DESTCLI" "$@"
+# Add -d:ONLINE_JUDGE,DOMJUDGE below if you want to make it easier for teams to
+# do local debugging.
+mcs -o+ -out:"$DESTCLI" "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 

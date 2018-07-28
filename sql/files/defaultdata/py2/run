@@ -39,9 +39,13 @@ if [ "\${0%/*}" != "\$0" ]; then
 fi
 
 # set non-existing HOME variable to make python happy
-export ONLINE_JUDGE=1 DOMJUDGE=1 HOME=/does/not/exist
+export HOME=/does/not/exist
 
-exec python2 "$MAINSOURCE" "\$@"
+# Uncomment the line below if you want it make easier for teams to do local
+# debugging.
+# export ONLINE_JUDGE=1 DOMJUDGE=1
+
+exec pypy "$MAINSOURCE" "\$@"
 EOF
 
 chmod a+x "$DEST"

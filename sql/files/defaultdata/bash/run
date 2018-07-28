@@ -40,7 +40,9 @@ if [ "\${0%/*}" != "\$0" ]; then
 	cd "\${0%/*}"
 fi
 
-export ONLINE_JUDGE=1 DOMJUDGE=1
+# Uncomment the line below if you want to make it easier for teams to do local
+# debugging.
+# export ONLINE_JUDGE=1 DOMJUDGE=1
 
 exec bash $RUNOPTIONS "$MAINSOURCE" "\$@"
 EOF
