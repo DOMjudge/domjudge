@@ -380,7 +380,7 @@ if ( count($jdata) > 1 || ( count($jdata)==1 && !isset($jid) ) ) {
 		$rinfo = isset($jud['rejudgingid']) ? 'r' . $jud['rejudgingid'] . ' (' . $jud['reason'] . ')' : '';
 
 		echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
-			'<td>' . $link . printtime($jud['starttime'], NULL, $jud['cid']) . '</a></td>' .
+			'<td>' . $link . printtime($jud['starttime'], NULL, $submdata['cid']) . '</a></td>' .
 			'<td>' . $link . specialchars($jud['max_runtime']) .
 			                 (isset($jud['max_runtime']) ? ' s' : '') . '</a></td>' .
 			'<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
