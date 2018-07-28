@@ -154,6 +154,11 @@ fi
 if [ $exitcode -ne 0 ]; then
 	echo "Compiling failed with exitcode $exitcode, compiler output:" >compile.out
 	cat compile.tmp >>compile.out
+	if [ ! -s compile.meta ]; then
+		echo "\n--------------------------------------------------------------------------------\n" >> compile.out
+		echo "Since the file 'compile.meta' is empty, above error is most likely caused by a crash in runguard." >> compile.out
+		echo "internal-error: runguard crash" > compile.meta
+	fi
 	cleanexit ${E_COMPILER_ERROR:--1}
 fi
 if [ ! -f compile/program ] || [ ! -x compile/program ]; then
