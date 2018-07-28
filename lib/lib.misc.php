@@ -71,6 +71,24 @@ function getCurContests($fulldata = FALSE, $onlyofteam = NULL,
 }
 
 /**
+ * Returns data for a single contest.
+ */
+function getContest($cid)
+{
+	global $DB;
+	$contest = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $cid);
+
+	if ( ALLOW_REMOVED_INTERVALS ) {
+		$res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
+		               FROM removed_interval WHERE cid = %i', $cid);
+
+		$contest['removed_intervals'] = $res;
+	}
+
+	return $contest;
+}
+
+/**
  * Parse 'id' from HTTP GET or POST variables and check that it is a
  * valid number, or string consisting of IDENTIFIER_CHARS.
  *
@@ -168,15 +186,12 @@ function calcFreezeData($cdata, $isjury = FALSE)
  */
 function calcContestTime($walltime, $cid)
 {
-	// Get contest data in case of non-public contests. Also get
-	// future contests (third argument) to correct for previously
-	// submitted jury solutions.
-	$cdatas = getCurContests(TRUE,NULL,TRUE);
+	$cdata = getContest($cid);
 
-	$contesttime = difftime($walltime, $cdatas[$cid]['starttime']);
+	$contesttime = difftime($walltime, $cdata['starttime']);
 
 	if ( ALLOW_REMOVED_INTERVALS ) {
-		foreach ( $cdatas[$cid]['removed_intervals'] as $intv ) {
+		foreach ( $cdata['removed_intervals'] as $intv ) {
 			if ( difftime($intv['starttime'], $walltime)<0 ) {
 				$contesttime -= min(
 					difftime($walltime,        $intv['starttime']),
