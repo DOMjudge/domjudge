@@ -1001,7 +1001,7 @@ function submissions_POST($args)
 	                FROM language
 	                WHERE langid = %s AND allow_submit = 1', $args['langid']);
 
-	if ( ! isset($lang) ) err("Unable to find language '$langid' or not submittable");
+	if ( ! isset($lang) ) error("Unable to find language '$langid' or not submittable");
 	$langid = $lang['langid'];
 
 	$entry_point = NULL;
