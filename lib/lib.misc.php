@@ -1000,7 +1000,6 @@ function rejudging_finish($rejudgingid, $request, $userid = NULL, $show_progress
 	while ( $row = $res->next() ) {
 		if ( $show_progress ) {
 			echo "s" . specialchars($row['submitid']) . ", ";
-			sleep(1);
 		}
 		if ( $request=='apply' ) {
 			$DB->q('START TRANSACTION');
