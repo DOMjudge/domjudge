@@ -1938,12 +1938,12 @@ database.
 <p>
 
 In many cases you might want to create a copy of the scoreboard for
-external viewing from the internet. The command
-<tt>bin/static_scoreboard</tt> is provided just for that. It writes to
-stdout a version of the scoreboard with refresh meta-tags and links to
-team pages removed. This command can for example be run every minute
-and the output be placed as static content on a publicly reachable
-webserver.
+external viewing from the internet. Just for that, the public interface
+can be called with the url parameter <tt>?static=1</tt>. It produces
+a version of the scoreboard with refresh meta-tags, login facilities
+and links to team pages removed. This can for example be requested
+every minute via <tt>curl</tt> and the output be placed as static
+content on a publicly reachable webserver.
 
 <sect>Balloons
 <p>

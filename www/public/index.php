@@ -1,6 +1,6 @@
 <?php
 /**
- * Produce a total score. Call with parameter 'static' for
+ * Produce a total score. Call with URL parameter 'static' for
  * output suitable for static HTML pages.
  *
  * Part of the DOMjudge Programming Contest Jury System and licenced
@@ -9,7 +9,7 @@
 
 require('init.php');
 $title = "Scoreboard";
-$isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
+$isstatic = isset($_REQUEST['static']);
 
 // set auto refresh
 $refresh = array(
