@@ -70,7 +70,7 @@ if ( isset($_REQUEST['apply']) || isset($_REQUEST['cancel']) ) {
 
 	echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) .
 		"\">r$id</a> ".($request=='apply' ? 'applied' : 'canceled').
-		" in ".round($time_end - $time_start,2)." seconds.</p>\n\n";
+		" in ".sprintf('%.2f', $time_end - $time_start)." seconds.</p>\n\n";
 
 	require(LIBWWWDIR . '/footer.php');
 	return;
