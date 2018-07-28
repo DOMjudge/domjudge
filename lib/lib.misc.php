@@ -1015,7 +1015,7 @@ function rejudging_finish($rejudgingid, $request, $userid = NULL, $show_progress
 			// update event log
 			eventlog('judging', $row['judgingid'], 'create', $row['cid']);
 			$run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
-				WHERE judgingid=%i', $row['judgingid']);
+			                   WHERE judgingid=%i', $row['judgingid']);
 			if (!empty($run_ids)) {
 				eventlog('judging_run', $run_ids, 'create', $row['cid']);
 			}
