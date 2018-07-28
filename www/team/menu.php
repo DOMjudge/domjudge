@@ -42,7 +42,7 @@ $started = checkrole('jury') || $fdata['started'];
       <div id="submitbut"><a class="nav-link justify-content-center"><button type="button" class="btn btn-success btn-sm disabled"><span class="octicon octicon-cloud-upload"></span> Submit</button></a></div>
 <?php endif; ?>
 
-<div id="logoutbut"><a class="nav-link justify-content-center" href="../logout"><button type="button" class="btn btn-outline-info btn-sm" onclick="confirmLogout();"><span class="octicon octicon-sign-out"></span> Logout</button></a></div>
+<div id="logoutbut"><a class="nav-link justify-content-center" href="../logout"><button type="button" class="btn btn-outline-info btn-sm" onclick="return confirmLogout();"><span class="octicon octicon-sign-out"></span> Logout</button></a></div>
 
 <?php putClock(); ?>
     </nav>
