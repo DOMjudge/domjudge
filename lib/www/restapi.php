@@ -120,6 +120,7 @@ class RestApi {
 			list($name, $primary_key) = preg_split('/\/+/', $name, 2);
 			if ( isset($primary_key) && $primary_key!=='' ) {
 				// Primary key can either be one or multiple ID's joined by ",", so split them
+				// TODO: if some ID's contain a comma, this breaks
 				$arguments['__primary_key'] = explode(',', $primary_key);
 			}
 		}
