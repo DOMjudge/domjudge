@@ -19,7 +19,7 @@ function put_print_form()
 {
 	global $DB, $pagename;
 
-	$langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions FROM language
+	$langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions, require_entry_point, entry_point_description FROM language
 	                 WHERE allow_submit = 1 ORDER BY name');
 	$langlist = array();
 	$langlist[''] = 'plain text';

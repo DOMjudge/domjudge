@@ -38,6 +38,8 @@ ALTER TABLE `clarification`
 
 ALTER TABLE `language`
   ADD COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API' AFTER `langid`,
+  ADD COLUMN `require_entry_point` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Whether submissions require a code entry point to be specified.' AFTER `extensions`,
+  ADD COLUMN `entry_point_description` VARCHAR(255) NULL COMMENT 'The description used in the UI for the entry point field.' AFTER `require_entry_point`,
   ADD UNIQUE KEY `externalid` (`externalid`(190));
 
 ALTER TABLE `problem`
@@ -153,7 +155,6 @@ CREATE TABLE `removed_interval` (
 --
 
 INSERT INTO `configuration` (`name`, `value`, `type`, `description`, `public`) VALUES
-('require_entry_point', '0', 'bool', 'Require entry point for submissions.', 0),
 ('show_flags', '1', 'bool', 'Show country flags on the scoreboard?', 0),
 ('show_affiliation_logos', '0', 'bool', 'Show affiliation logos on the scoreboard?', 0),
 ('show_limits_on_team_page', '0', 'bool', 'Show time and memory limit on the team problems page', 0),
@@ -179,6 +180,9 @@ UPDATE `language` SET `externalid` = 'scala'      WHERE `langid` = 'scala';
 
 UPDATE `language` SET `extensions` = '["cpp","cc","cxx","c++"]' WHERE `langid` = 'cpp';
 
+UPDATE `language` SET `require_entry_point` = 1, `entry_point_description` = 'Main class' WHERE `langid` = 'java' or `langid` = 'kt';
+UPDATE `language` SET `require_entry_point` = 1, `entry_point_description` = 'Main file' WHERE `langid` = 'py2' or `langid` = 'py3';
+
 UPDATE `configuration` SET `public` = '1' WHERE `name` IN (
   'clar_categories', 'sourcesize_limit', 'sourcefiles_limit',
   'score_in_seconds', 'show_flags', 'show_affiliations',
@@ -186,7 +190,7 @@ UPDATE `configuration` SET `public` = '1' WHERE `name` IN (
   'show_compile', 'show_sample_output', 'show_balloons_postfreeze',
   'penalty_time', 'compile_penalty', 'enable_printing',
   'allow_registration', 'allow_openid_auth', 'openid_autocreate_team',
-  'openid_provider', 'require_entry_point');
+  'openid_provider');
 
 --
 -- Finally remove obsolete structures after moving data

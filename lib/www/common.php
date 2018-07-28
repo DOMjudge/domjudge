@@ -826,16 +826,26 @@ function langidToAce($langid) {
  * Output JavaScript function that contains the language extensions as
  * configured in the database so the frontend can use them to automatically
  * detect the language from the filename extension.
+ * Also output a function that returns the entry point description for
+ * a language if an entry point is required.
  */
 function putgetMainExtension($langdata) {
 	echo "function getMainExtension(ext)\n{\n";
 	echo "\tswitch(ext) {\n";
-	foreach ( $langdata as $langid => $langdata ) {
-		$exts = dj_json_decode($langdata['extensions']);
+	foreach ( $langdata as $langid => $data ) {
+		$exts = dj_json_decode($data['extensions']);
 		if ( !is_array($exts) ) continue;
 		foreach ( $exts as $ext ) {
 			echo "\t\tcase '" . $ext . "': return '" . $langid . "';\n";
 		}
+	}
+	echo "\t\tdefault: return '';\n\t}\n}\n\n";
+	echo "function getEntryPoints(mainext)\n{\n";
+	echo "\tswitch(mainext) {\n";
+	foreach ( $langdata as $langid => $data ) {
+		if ( !$data['require_entry_point'] ) continue;
+		$desc = $data['entry_point_description'] ?: "Entry point";
+		echo "\t\tcase '" . $langid . "': return '" . $desc . "';\n";
 	}
 	echo "\t\tdefault: return '';\n\t}\n}\n\n";
 }

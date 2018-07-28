@@ -153,3 +153,6 @@ div.submissions-filter ul.token-input-list {
 .tc_list_small {
 	max-width:500px;
 }
+.has_tooltip {
+	text-decoration: dotted underline;
+}

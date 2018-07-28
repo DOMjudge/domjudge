@@ -1013,11 +1013,23 @@ function submissions_POST($args)
 		}
 	}
 
-	$entry_point = empty($args['entry_point']) ? NULL : $args['entry_point'];
-	if ( dbconfig_get('require_entry_point', FALSE) && !isset($entry_point) ) {
-		error("Entry point required, but not specified.");
+	$lang = $DB->q('MAYBETUPLE SELECT langid, name, require_entry_point, entry_point_description
+	                FROM language
+	                WHERE langid = %s AND allow_submit = 1', $args['langid']);
+
+	if ( ! isset($lang) ) error("Unable to find language '$args[langid]' or not submittable");
+	$langid = $lang['langid'];
+
+	$entry_point = NULL;
+	if ( $lang['require_entry_point'] ) {
+		if ( empty($args['entry_point']) ) {
+			$ep_desc = ($lang['entry_point_description'] ? : 'Entry point');
+			error("$ep_desc required, but not specified.");
+		}
+		$entry_point = $args['entry_point'];
 	}
-	$sid = submit_solution($userdata['teamid'], $probid, $cid, $args['langid'], $FILEPATHS, $FILENAMES, NULL, $entry_point);
+
+	$sid = submit_solution($userdata['teamid'], $probid, $cid, $langid, $FILEPATHS, $FILENAMES, NULL, $entry_point);
 
 	auditlog('submission', $sid, 'added', 'via api', null, $cid);
 
@@ -1553,7 +1565,7 @@ function languages($args)
 		$args['langids'] = [$args['langid']];
 	}
 
-	$query = 'SELECT langid, name, extensions, allow_judge, time_factor
+	$query = 'SELECT langid, name, extensions, require_entry_point, entry_point_description, allow_judge, time_factor
 	          FROM language WHERE allow_submit = 1';
 
 	$byLangIds = array_key_exists('langids', $args);
@@ -1570,6 +1582,8 @@ function languages($args)
 			);
 		if ( !isset($args['strict']) ) {
 			$ret['extensions']  = dj_json_decode($row['extensions']);
+			$ret['require_entry_point'] = safe_bool($row['require_entry_point']);
+			$ret['entry_point_description'] = safe_string($row['entry_point_description']);
 			$ret['allow_judge'] = safe_bool($row['allow_judge']);
 			$ret['time_factor'] = safe_float($row['time_factor']);
 		}

@@ -20,7 +20,7 @@ if ( ! $fdata['started'] && ! checkrole('jury') ) {
 	exit;
 }
 
-$langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions
+$langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions, require_entry_point, entry_point_description
                     FROM language WHERE allow_submit = 1');
 
 $probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
@@ -46,7 +46,6 @@ foreach($langdata as $langid => $langdata) {
 	$langs[$langid] = $langdata['name'];
 }
 
-$entry_point = dbconfig_get('require_entry_point', FALSE);
 ?>
 <div class="container submitform">
 <form action="upload.php" method="post" enctype="multipart/form-data" onsubmit="return checkUploadForm();">
@@ -61,13 +60,6 @@ $entry_point = dbconfig_get('require_entry_point', FALSE);
     <label for="maincode" class="custom-file-label">Source file<?=($maxfiles > 1 ? 's':'')?></label>
   </div>
   </div>-->
-<?php if ($entry_point): ?>
-  <div class="form-group">
-    <label for="entry_point">Main file/class:</label>
-    <input type="text" class="form-control" name="entry_point" id="entry_point" aria-describedby="entrypointhelp">
-    <small id="entrypointhelp" class="form-text text-muted">The entry point for your code.</small>
-  </div>
-<?php endif; ?>
   <div class="form-group">
     <label for="probid">Problem:</label>
     <select class="custom-select" name="probid" id="probid" required>
@@ -87,6 +79,11 @@ $entry_point = dbconfig_get('require_entry_point', FALSE);
     }
 ?>
     </select>
+  </div>
+  <div class="form-group">
+    <label for="entry_point" id="entry_point_text">Entry point:</label>
+    <input type="text" class="form-control" name="entry_point" id="entry_point" aria-describedby="entrypointhelp">
+    <small id="entrypointhelp" class="form-text text-muted">The entry point for your code.</small>
   </div>
   <input type="submit" name="submit" value="Submit" class="btn btn-primary" /> 
 </form>

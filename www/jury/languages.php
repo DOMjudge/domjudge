@@ -20,6 +20,7 @@ if( $res->count() == 0 ) {
 } else {
 	echo "<table class=\"list sortable\">\n<thead>\n" .
 		"<tr><th scope=\"col\">ID/ext</th><th scope=\"col\">name</th>" .
+		"<th scope=\"col\">entry<br />point</th>" .
 		"<th scope=\"col\">allow<br />submit</th>" .
 		"<th scope=\"col\">allow<br />judge</th><th scope=\"col\">timefactor</th>" .
 		"<th scope=\"col\">extensions</th><th scope=\"col\"></th>" .
@@ -31,6 +32,10 @@ if( $res->count() == 0 ) {
 			( $row['allow_submit'] ? '': ' class="disabled"').
 			"><td>" . $link . specialchars($row['langid'])."</a>".
 			"</td><td>" . $link . specialchars($row['name'])."</a>".
+			"</td><td " . ($row['require_entry_point'] && !empty($row['entry_point_description']) ?
+				' class="has_tooltip" title="' . specialchars($row['entry_point_description']) . '"' :
+				'' ) . ">" . $link .
+				printyn($row['require_entry_point']) . "</a>" .
 			"</td><td>" . $link .
 				printyn($row['allow_submit']) . "</a>" .
 			"</td><td>" . $link .

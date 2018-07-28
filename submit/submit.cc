@@ -102,8 +102,7 @@ bool file_istext(char *filename);
 bool websubmit();
 
 Json::Value doAPIrequest(const char *, int);
-bool readentrypointrequired();
-bool readlangexts();
+bool readlanguages();
 bool readcontests();
 
 /* Helper function for using libcurl in websubmit() and doAPIrequest() */
@@ -165,9 +164,6 @@ vector<vector<string> > languages;
 /* Active contests: shortname,name */
 vector<vector<string> > contests;
 
-/* Entry point required? */
-bool require_entry_point;
-
 string kotlin_base_entry_point(string filebase)
 {
 	if ( filebase.empty() ) return "_";
@@ -191,6 +187,7 @@ int main(int argc, char **argv)
 	struct stat fstats;
 	string filebase, fileext;
 	time_t fileage;
+	string require_entry_point;
 
 	progname = argv[0];
 	stdlog = NULL;
@@ -265,8 +262,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ( !readentrypointrequired() ) warning(0,"could not obtain configuration value 'require_entry_point'");
-	if ( !readlangexts() ) warning(0,"could not obtain language extensions");
+	if ( !readlanguages() ) warning(0,"could not obtain language data");
 	if ( !readcontests() ) warning(0,"could not obtain active contests");
 
 	if ( show_help ) usage();
@@ -323,10 +319,11 @@ int main(int argc, char **argv)
 	/* Check for languages matching file extension */
 	extension = stringtolower(extension);
 	for(i=0; i<languages.size(); i++) {
-		for(j=1; j<languages[i].size(); j++) {
+		for(j=2; j<languages[i].size(); j++) {
 			if ( languages[i][j]==extension ) {
 				language  = languages[i][0];
-				extension = languages[i][1];
+				require_entry_point = languages[i][1];
+				extension = languages[i][2];
 			}
 		}
 	}
@@ -357,7 +354,7 @@ int main(int argc, char **argv)
 	if ( baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
 
 	/* Guess entry point if not already specified. */
-	if ( entry_point.empty() && require_entry_point ) {
+	if ( entry_point.empty() && require_entry_point == "true" ) {
 		if ( language == "Java" ) {
 			entry_point = filebase;
 		} else if ( language == "Kotlin" ) {
@@ -365,6 +362,10 @@ int main(int argc, char **argv)
 		} else if ( language == "Python 2" || language == "Python 2 (pypy)" || language == "Python 3" ) {
 			entry_point = filebase + "." + fileext;
 		}
+	}
+
+	if ( entry_point.empty() && require_entry_point == "true" ) {
+		error(0, "Entry point required but not specified nor detected.");
 	}
 
 	logmsg(LOG_DEBUG,"contest is `%s'",contest.c_str());
@@ -464,8 +465,8 @@ void usage()
 		printf(
 "For LANGUAGE use one of the following extensions in lower- or uppercase:\n");
 		for(i=0; i<languages.size(); i++) {
-			printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
-			for(j=2; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
+			printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][2].c_str());
+			for(j=3; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
 			printf("\n");
 		}
 	}
@@ -680,23 +681,7 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 	return result;
 }
 
-/* Tries to retrieve the configuration setting 'require_entry_point'.
- * Returns boolean value whether successful and stores the result in
- * the variable 'require_entry_point'. Defaults to storing false if
- * the API calls fails.
- */
-bool readentrypointrequired()
-{
-	Json::Value res = doAPIrequest("config?name=require_entry_point", 0);
-	if ( res.isNull() || !res.isObject() ) return false;
-
-	res = res.get("require_entry_point", 0);
-	require_entry_point = res.asBool();
-
-	return res.isBool() || res.isInt();
-}
-
-bool readlangexts()
+bool readlanguages()
 {
 	Json::Value langs, exts;
 
@@ -708,6 +693,7 @@ bool readlangexts()
 		vector<string> lang;
 
 		lang.push_back(langs[i]["name"].asString());
+		lang.push_back(langs[i]["require_entry_point"].asString());
 		if ( lang[0]=="" ||
 		     !(exts = langs[i]["extensions"]) ||
 		     !exts.isArray() || exts.size()==0 ) {

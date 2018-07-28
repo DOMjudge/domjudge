@@ -71,18 +71,18 @@ $probid = $prob['probid'];
 
 /* Determine the language */
 $langid = @$_POST['langid'];
-$lang = $DB->q('MAYBETUPLE SELECT langid, name FROM language
+$lang = $DB->q('MAYBETUPLE SELECT langid, name, require_entry_point, entry_point_description
+                FROM language
                 WHERE langid = %s AND allow_submit = 1', $langid);
 
 if ( ! isset($lang) ) err("Unable to find language '$langid'");
 $langid = $lang['langid'];
 
-// TODO: this should be database-based configuration
 $entry_point = NULL;
-$language_requires_entry_point = $langid == 'java' || $langid == 'kt' || $langid == 'py2' || $langid == 'py3';
-if ( $language_requires_entry_point && dbconfig_get('require_entry_point', FALSE) ) {
+if ( $lang['require_entry_point'] ) {
 	if ( empty($_POST['entry_point']) ) {
-		err("Entry point required, but not specified.");
+		$ep_desc = ($lang['entry_point_description'] ? : 'Entry point');
+		err("$ep_desc required, but not specified.");
 	}
 	$entry_point = $_POST['entry_point'];
 }

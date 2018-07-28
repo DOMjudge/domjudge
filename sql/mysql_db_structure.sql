@@ -289,6 +289,8 @@ CREATE TABLE `language` (
   `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
   `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)',
+  `require_entry_point` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Whether submissions require a code entry point to be specified.',
+  `entry_point_description` varchar(255) DEFAULT NULL COMMENT 'The description used in the UI for the entry point field',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions accepted in this language?',
   `allow_judge` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Are submissions in this language judged?',
   `time_factor` float NOT NULL DEFAULT '1' COMMENT 'Language-specific factor multiplied by problem run times',

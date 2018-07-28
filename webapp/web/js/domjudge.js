@@ -253,19 +253,6 @@ function hideTcSample(tcid, str)
 	node.parentNode.appendChild(span);
 }
 
-// Construct base part of Kotlin entry point from filename base
-function kotlinBaseEntryPoint(filebase)
-{
-	if ( filebase === '' ) return '_';
-
-	filebase = filebase.replace(/[^a-zA-Z0-9]/, '_');
-	if ( filebase.charAt(0).match(/^[a-zA-Z]$/) ) {
-		return filebase.charAt(0).toUpperCase() + filebase.slice(1);
-	} else {
-		return '_' + filebase;
-	}
-}
-
 // Autodetection of problem, language, and entry_point in websubmit
 function detectProblemLanguageEntryPoint(filename)
 {
@@ -305,20 +292,8 @@ function detectProblemLanguageEntryPoint(filename)
 
 	// entry point
 	var elt=document.getElementById('entry_point');
-	// the "autodetect" option has empty value
-	if ( elt == null || elt.value !== '' ) return;
 
-	// FIXME: make this configurable
-	var filebase = filename.replace(/\.[^\.]*$/, '');
-	var fileext = parts[0];
-	if ( langid == 'java' ) {
-		elt.value = filebase;
-	} else if (langid == 'kt' ) {
-		elt.value = kotlinBaseEntryPoint(filebase) + "Kt";
-	} else {
-		elt.value = filebase + '.' + fileext;
-	}
-	maybeShowEntryPoint(langid);
+	maybeShowEntryPoint(langid, filename);
 }
 
 function checkUploadForm()
@@ -403,23 +378,52 @@ function initReload(refreshtime)
 	setTimeout(function() { reloadPage(); }, refreshtime * 1000);
 }
 
-// TODO: make this configurable
-function maybeShowEntryPoint(langid)
+function maybeShowEntryPoint(langid, filename = null)
 {
-	'use strict';
 	var entry_point = document.getElementById('entry_point');
 	var entry_point_text = document.getElementById('entry_point_text');
 	var entry_point_help = document.getElementById('entrypointhelp');
-	var visible = langid == 'java' || langid == 'kt' || langid == 'py2' || langid == 'py3';
-	var display = visible ? 'inline' : 'none';
+
+	var entry_point_desc = getEntryPoints(langid);
+	var display = entry_point_desc ? 'inline' : 'none';
 	entry_point.style.display = entry_point_text.style.display = entry_point_help.style.display = display;
-	if ( visible ) {
-		var filename = langid == 'py2' || langid == 'py3';
-		if ( filename ) {
-			entry_point_text.innerHTML = 'Main file:';
-		} else {
-			entry_point_text.innerHTML = 'Main class:';
+	if ( entry_point_desc ) {
+		entry_point_text.innerHTML = entry_point_desc + ':';
+		entry_point.required = true;
+	} else {
+		entry_point.required = false;
+	}
+
+	if ( filename ) {
+		switch (langid) {
+			case 'java':
+				entry_point.value = entryPointDetectJava(filename);
+				break;
+			case 'kt':
+				entry_point.value = entryPointDetectKt(filename);
+				break;
+			default:
+				entry_point.value = filename;
 		}
+	}
+}
+
+function entryPointDetectJava(filename)
+{
+	var filebase = filename.replace(/\.[^\.]*$/, '');
+	return filebase;
+}
+
+function entryPointDetectKt(filename)
+{
+	var filebase = filename.replace(/\.[^\.]*$/, '');
+	if ( filebase === '' ) return '_Kt';
+
+	filebase = filebase.replace(/[^a-zA-Z0-9]/, '_');
+	if ( filebase.charAt(0).match(/^[a-zA-Z]$/) ) {
+		return filebase.charAt(0).toUpperCase() + filebase.slice(1) + 'Kt';
+	} else {
+		return '_' + filebase + 'Kt';
 	}
 }
 

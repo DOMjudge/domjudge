@@ -64,6 +64,13 @@ if ( !empty($cmd) ):
 <tr><td><label for="data_0__name_">Language name:</label></td>
 <td><?php echo addInput('data[0][name]', @$row['name'], 20, 255, 'required')?></td></tr>
 
+<tr><td>Require entry point:</td>
+<td><?php echo addRadioButton('data[0][require_entry_point]', (!isset($row['require_entry_point']) || $row['require_entry_point']), 1)?> <label for="data_0__require_entry_point_1">yes</label>
+<?php echo addRadioButton('data[0][require_entry_point]', (isset($row['require_entry_point']) && !$row['require_entry_point']), 0)?> <label for="data_0__require_entry_point_0">no</label></td></tr>
+
+<tr><td><label for="data_0__entry_point_description_">Entry point description:</label></td>
+<td><?php echo addInput('data[0][entry_point_description]', (isset($row['entry_point_description'])?$row['entry_point_description']:''), 20, 255)?></td></tr>
+
 <tr><td>Allow submit:</td>
 <td><?php echo addRadioButton('data[0][allow_submit]', (!isset($row['allow_submit']) || $row['allow_submit']), 1)?> <label for="data_0__allow_submit_1">yes</label>
 <?php echo addRadioButton('data[0][allow_submit]', (isset($row['allow_submit']) && !$row['allow_submit']), 0)?> <label for="data_0__allow_submit_0">no</label></td></tr>
@@ -117,6 +124,12 @@ echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
 <table>
 <tr><td>ID/extension:</td><td><?php echo specialchars($data['langid'])?></td></tr>
 <tr><td>Name:        </td><td><?php echo specialchars($data['name'])?></td></tr>
+
+<tr><td>Entry point: </td><td><?php echo printyn($data['require_entry_point']) .
+	($data['require_entry_point'] && !empty($data['entry_point_description']) ?
+	' (' . specialchars($data['entry_point_description']) . ')' : '') ?>
+</td></tr>
+
 <tr><td>Allow submit:</td><td><?php echo printyn($data['allow_submit']) . ' '.
 	addSubmit('toggle', 'cmd[toggle_submit]',
 		"return confirm('" . ($data['allow_submit'] ? 'Disallow' : 'Allow') .
