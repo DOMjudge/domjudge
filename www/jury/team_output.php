@@ -22,7 +22,9 @@ $row = $DB->q('MAYBETUPLE SELECT OCTET_LENGTH(r.output_run) as size, t.rank,
                WHERE runid=%i', $cid, $runid);
 
 // sanity check before we start to output headers
-if ( $row===NULL || !is_numeric($row['size']) ) error("Problem while fetching team output");
+if ($row===null || !is_numeric($row['size'])) {
+    error("Problem while fetching team output");
+}
 
 $filename = 'p' . $row['probid'] . '.t' . $row['rank'] . '.' .
             $row['shortname'] . '.run' . $runid . '.team' . $row['teamid'] . '.out';

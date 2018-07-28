@@ -14,11 +14,17 @@ require('init.php');
 requireAdmin();
 
 $cmd = @$_POST['cmd'];
-if ( $cmd != 'add' && $cmd != 'edit' ) error ("Unknown action.");
+if ($cmd != 'add' && $cmd != 'edit') {
+    error("Unknown action.");
+}
 
 $t = @$_POST['table'];
-if ( !$t ) error ("No table selected.");
-if ( !in_array($t, array_keys($KEYS)) ) error ("Unknown table.");
+if (!$t) {
+    error("No table selected.");
+}
+if (!in_array($t, array_keys($KEYS))) {
+    error("Unknown table.");
+}
 
 $data          =  $_POST['data'];
 $keydata       = @$_POST['keydata'];
@@ -26,221 +32,222 @@ $unset         = @$_POST['unset'];
 $skipwhenempty = @$_POST['skipwhenempty'];
 $referrer      = @$_POST['referrer'];
 
-if ( empty($data) ) error ("No data.");
+if (empty($data)) {
+    error("No data.");
+}
 // ensure referrer only contains a single filename, not complete URLs
-if ( ! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer ) ) {
-	error ("Invalid characters in referrer.");
+if (! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer)) {
+    error("Invalid characters in referrer.");
 }
 
 require(LIBWWWDIR . '/checkers.jury.php');
 
-if ( ! isset($_POST['cancel']) ) {
-	foreach ($data as $i => $itemdata ) {
-		if ( !empty($skipwhenempty) && empty($itemdata[$skipwhenempty]) ) {
-			continue;
-		}
+if (! isset($_POST['cancel'])) {
+    foreach ($data as $i => $itemdata) {
+        if (!empty($skipwhenempty) && empty($itemdata[$skipwhenempty])) {
+            continue;
+        }
 
-		// set empty string to null
-		foreach ( $itemdata  as $k => $v ) {
-			if ( $v === "" ) {
-				$itemdata[$k] = null;
-			}
-		}
+        // set empty string to null
+        foreach ($itemdata  as $k => $v) {
+            if ($v === "") {
+                $itemdata[$k] = null;
+            }
+        }
 
-		// unset things explicitly requested
-		if ( !empty($unset[$i]) ) {
-			foreach ( $unset[$i] as $k => $v ) {
-				$itemdata[$k] = null;
-			}
-		}
+        // unset things explicitly requested
+        if (!empty($unset[$i])) {
+            foreach ($unset[$i] as $k => $v) {
+                $itemdata[$k] = null;
+            }
+        }
 
-		// special case for many-to-many mappings
-		$mappingdata = null;
-		if ( is_array(@$itemdata['mapping']) ) {
-			$mappingdata = $itemdata['mapping'];
+        // special case for many-to-many mappings
+        $mappingdata = null;
+        if (is_array(@$itemdata['mapping'])) {
+            $mappingdata = $itemdata['mapping'];
 
-			unset($itemdata['mapping']);
-		}
+            unset($itemdata['mapping']);
+        }
 
-		// First allow to check mappings
-		$fn = "check_mapping_$t";
-		if ( function_exists($fn) ) {
-			$CHECKER_ERRORS = array();
-			$mappingdata = $fn($itemdata, $mappingdata, $keydata[$i]);
-			if ( count($CHECKER_ERRORS) ) {
-				error("Errors while processing $t " .
-				      @implode(', ', @$keydata[$i]) . ":\n" .
-				      implode(";\n", $CHECKER_ERRORS));
-			}
+        // First allow to check mappings
+        $fn = "check_mapping_$t";
+        if (function_exists($fn)) {
+            $CHECKER_ERRORS = array();
+            $mappingdata = $fn($itemdata, $mappingdata, $keydata[$i]);
+            if (count($CHECKER_ERRORS)) {
+                error("Errors while processing $t " .
+                      @implode(', ', @$keydata[$i]) . ":\n" .
+                      implode(";\n", $CHECKER_ERRORS));
+            }
+        }
 
-		}
+        // Then check normal data
+        $fn = "check_$t";
+        if (function_exists($fn)) {
+            $CHECKER_ERRORS = array();
+            $itemdata = $fn($itemdata, $keydata[$i]);
+            if (count($CHECKER_ERRORS)) {
+                error("Errors while processing $t " .
+                    @implode(', ', @$keydata[$i]) . ":\n" .
+                    implode(";\n", $CHECKER_ERRORS));
+            }
+        }
 
-		// Then check normal data
-		$fn = "check_$t";
-		if ( function_exists($fn) ) {
-			$CHECKER_ERRORS = array();
-			$itemdata = $fn($itemdata, $keydata[$i]);
-			if ( count($CHECKER_ERRORS) ) {
-				error("Errors while processing $t " .
-					@implode(', ', @$keydata[$i]) . ":\n" .
-					implode(";\n", $CHECKER_ERRORS));
-			}
+        check_sane_keys($itemdata);
 
-		}
+        $newid = null;
+        if ($cmd == 'add') {
+            $newid = $DB->q("RETURNID INSERT INTO $t SET %S", $itemdata);
+            $cid = @$itemdata['cid'];
+            eventlog($t, $newid, 'create', $cid);
+            auditlog($t, $newid, 'added');
 
-		check_sane_keys($itemdata);
+            $i = 0;
+            // save the primary key for the insert
+            foreach ($KEYS[$t] as $tablekey) {
+                if ($i == 0) { // Assume first primary key is the autoincrement one
+                    $prikey[$tablekey] = $newid;
+                }
+                if (isset($itemdata[$tablekey])) {
+                    $prikey[$tablekey] = $itemdata[$tablekey];
+                }
+                $i++;
+            }
+        } elseif ($cmd == 'edit') {
+            foreach ($KEYS[$t] as $tablekey) {
+                $prikey[$tablekey] = $keydata[$i][$tablekey];
+            }
+            check_sane_keys($prikey);
 
-		$newid = null;
-		if ( $cmd == 'add' ) {
-			$newid = $DB->q("RETURNID INSERT INTO $t SET %S", $itemdata);
-			$cid = @$itemdata['cid'];
-			eventlog($t, $newid, 'create', $cid);
-			auditlog($t, $newid, 'added');
+            $changed = $DB->q("RETURNAFFECTED UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
 
-			$i = 0;
-			// save the primary key for the insert
-			foreach($KEYS[$t] as $tablekey) {
-				if ( $i == 0 ) { // Assume first primary key is the autoincrement one
-					$prikey[$tablekey] = $newid;
-				}
-				if ( isset($itemdata[$tablekey]) ) {
-					$prikey[$tablekey] = $itemdata[$tablekey];
-				}
-				$i++;
-			}
-		} elseif ( $cmd == 'edit' ) {
-			foreach($KEYS[$t] as $tablekey) {
-					$prikey[$tablekey] = $keydata[$i][$tablekey];
-			}
-			check_sane_keys($prikey);
+            if ($changed) {
+                if (count($KEYS[$t])==1) {
+                    $datatype = $t;
+                    $dataid = $keydata[$i][$tablekey];
+                }
+                if ($t === 'contestproblem' ||
+                     $t === 'contestteam') {
+                    $datatype = substr($t, 7);
+                    $dataid = $keydata[$i][$tablekey];
+                }
+                if (!empty($datatype)) {
+                    eventlog($datatype, $dataid, 'update', $cid);
+                }
 
-			$changed = $DB->q("RETURNAFFECTED UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
+                auditlog($t, implode(', ', $prikey), 'updated');
+            }
+        }
 
-			if ( $changed ) {
-				if ( count($KEYS[$t])==1 ) {
-					$datatype = $t;
-					$dataid = $keydata[$i][$tablekey];
-				}
-				if ( $t === 'contestproblem' ||
-				     $t === 'contestteam' ) {
-					$datatype = substr($t,7);
-					$dataid = $keydata[$i][$tablekey];
-				}
-				if ( !empty($datatype) ) eventlog($datatype, $dataid, 'update', $cid);
+        // special case for many-to-one and many-to-many mappings
+        if ($mappingdata != null) {
+            foreach ($mappingdata as $mapping) {
+                if (count($mapping['fk']) == 2) {
+                    // Many-to-many
 
-				auditlog($t, implode(', ', $prikey), 'updated');
-			}
-		}
+                    // If the items is not an array, it is set by tokenizer and it should be split on ,
+                    if (!is_array($mapping['items'])) {
+                        $mapping['items'] = explode(',', $mapping['items']);
+                    }
 
-		// special case for many-to-one and many-to-many mappings
-		if ( $mappingdata != null ) {
-			foreach ( $mappingdata as $mapping ) {
-				if (count($mapping['fk']) == 2) {
-					// Many-to-many
+                    $junctiontable = $mapping['table'];
+                    $fk = $mapping['fk'];
 
-					// If the items is not an array, it is set by tokenizer and it should be split on ,
-					if ( !is_array($mapping['items']) ) {
-						$mapping['items'] = explode(',', $mapping['items']);
-					}
+                    // Make sure this is a valid mapping
+                    check_manymany_mapping($junctiontable, $fk);
 
-					$junctiontable = $mapping['table'];
-					$fk = $mapping['fk'];
+                    // Remove all old mappings
+                    $DB->q('DELETE FROM %l WHERE %S', $junctiontable, $prikey);
+                    foreach ($mapping['items'] as $key => $mapdest) {
+                        // Skip empty rows
+                        if (empty($mapdest)) {
+                            continue;
+                        }
+                        $columns = array($fk[0], $fk[1]);
+                        $values = array($prikey[$fk[0]], $mapdest);
+                        if (isset($mapping['extra'][$key])) {
+                            foreach ($mapping['extra'][$key] as $column => $value) {
+                                $columns[] = $column;
+                                // set empty string to null
+                                $values[] = ($value === "" ? null : $value);
+                            }
+                        }
 
-					// Make sure this is a valid mapping
-					check_manymany_mapping($junctiontable, $fk);
+                        $query = "INSERT INTO %l (";
+                        $query .= implode(',', array_fill(0, count($columns), '%l'));
+                        $query .= ') VALUES (';
+                        $query .= implode(',', array_fill(0, count($values), '%s'));
+                        $query .= ')';
+                        $arguments = array($query, $junctiontable);
+                        $arguments = array_merge($arguments, $columns);
+                        $arguments = array_merge($arguments, $values);
+                        $ret = call_user_func_array(array($DB, 'q'), $arguments);
+                    }
+                } else {
+                    // Many-to-one
 
-					// Remove all old mappings
-					$DB->q('DELETE FROM %l WHERE %S', $junctiontable, $prikey);
-					foreach ( $mapping['items'] as $key => $mapdest ) {
-						// Skip empty rows
-						if ( empty($mapdest) ) {
-							continue;
-						}
-						$columns = array($fk[0], $fk[1]);
-						$values = array($prikey[$fk[0]], $mapdest);
-						if ( isset($mapping['extra'][$key]) ) {
-							foreach ( $mapping['extra'][$key] as $column => $value ) {
-								$columns[] = $column;
-								// set empty string to null
-								$values[] = ($value === "" ? null : $value);
-							}
-						}
+                    $targettable = $mapping['table'];
+                    $fk = $mapping['fk'];
 
-						$query = "INSERT INTO %l (";
-						$query .= implode(',', array_fill(0, count($columns), '%l'));
-						$query .= ') VALUES (';
-						$query .= implode(',', array_fill(0, count($values), '%s'));
-						$query .= ')';
-						$arguments = array($query, $junctiontable);
-						$arguments = array_merge($arguments, $columns);
-						$arguments = array_merge($arguments, $values);
-						$ret = call_user_func_array(array($DB, 'q'), $arguments);
-					}
-				} else {
-					// Many-to-one
+                    // Make sure this is a valid mapping
+                    check_manyone_mapping($targettable, $fk);
 
-					$targettable = $mapping['table'];
-					$fk = $mapping['fk'];
+                    $columns = array($fk);
+                    $values = array($prikey[$fk]);
+                    if (isset($mapping['extra'])) {
+                        foreach ($mapping['extra'] as $column => $value) {
+                            $columns[] = $column;
+                            // set empty string to null
+                            $values[] = ($value === "" ? null : $value);
+                        }
+                    }
 
-					// Make sure this is a valid mapping
-					check_manyone_mapping($targettable, $fk);
+                    $query = "INSERT INTO %l (";
+                    $query .= implode(',', array_fill(0, count($columns), '%l'));
+                    $query .= ') VALUES (';
+                    $query .= implode(',', array_fill(0, count($values), '%s'));
+                    $query .= ')';
+                    $arguments = array($query, $targettable);
+                    $arguments = array_merge($arguments, $columns);
+                    $arguments = array_merge($arguments, $values);
+                    $ret = call_user_func_array(array($DB, 'q'), $arguments);
+                }
+            }
+        }
 
-					$columns = array($fk);
-					$values = array($prikey[$fk]);
-					if ( isset($mapping['extra']) ) {
-						foreach ( $mapping['extra'] as $column => $value ) {
-							$columns[] = $column;
-							// set empty string to null
-							$values[] = ($value === "" ? null : $value);
-						}
-					}
-
-					$query = "INSERT INTO %l (";
-					$query .= implode(',', array_fill(0, count($columns), '%l'));
-					$query .= ') VALUES (';
-					$query .= implode(',', array_fill(0, count($values), '%s'));
-					$query .= ')';
-					$arguments = array($query, $targettable);
-					$arguments = array_merge($arguments, $columns);
-					$arguments = array_merge($arguments, $values);
-					$ret = call_user_func_array(array($DB, 'q'), $arguments);
-				}
-			}
-		}
-
-		// Allow post-edit functioms
-		$fn = "post_$t";
-		if ( function_exists($fn) ) {
-			$CHECKER_ERRORS = array();
-			$fn($prikey, $cmd);
-			if ( count($CHECKER_ERRORS) ) {
-				error("Errors while post-processing $t " .
-				      @implode(', ', @$keydata[$i]) . ":\n" .
-				      implode(";\n", $CHECKER_ERRORS));
-			}
-
-		}
-	}
-	// If the form contained uploadable files, process these now.
-	if ( isset($_FILES['data']) ) {
-		foreach($_FILES['data']['tmp_name'] as $id => $tmpnames) {
-			foreach($tmpnames as $field => $tmpname) {
-				if ( !empty ($tmpname) ) {
-					checkFileUpload($_FILES['data']['error'][$id][$field]);
-					$itemdata = array($field => dj_file_get_contents($tmpname));
-					$DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
-				}
-			}
-		}
-	}
+        // Allow post-edit functioms
+        $fn = "post_$t";
+        if (function_exists($fn)) {
+            $CHECKER_ERRORS = array();
+            $fn($prikey, $cmd);
+            if (count($CHECKER_ERRORS)) {
+                error("Errors while post-processing $t " .
+                      @implode(', ', @$keydata[$i]) . ":\n" .
+                      implode(";\n", $CHECKER_ERRORS));
+            }
+        }
+    }
+    // If the form contained uploadable files, process these now.
+    if (isset($_FILES['data'])) {
+        foreach ($_FILES['data']['tmp_name'] as $id => $tmpnames) {
+            foreach ($tmpnames as $field => $tmpname) {
+                if (!empty($tmpname)) {
+                    checkFileUpload($_FILES['data']['error'][$id][$field]);
+                    $itemdata = array($field => dj_file_get_contents($tmpname));
+                    $DB->q("UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
+                }
+            }
+        }
+    }
 }
 
 // Throw the user back to the page he came from, if not available
 // to the overview for the edited data.
-if ( !empty($referrer) ) {
-	$returnto = $referrer;
+if (!empty($referrer)) {
+    $returnto = $referrer;
 } else {
-	$returnto = ($t == 'team_category' ? 'team_categories' : $t.'s'). '.php';
+    $returnto = ($t == 'team_category' ? 'team_categories' : $t.'s'). '.php';
 }
 
 header('Location: '.$returnto);
@@ -250,39 +257,42 @@ header('Location: '.$returnto);
  * strange characters in the field name, so we can use that safely
  * in a SQL query.
  */
-function check_sane_keys($itemdata) {
-	foreach(array_keys($itemdata) as $key) {
-		if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $key ) ) {
-			error ("Invalid characters in field name \"$key\".");
-		}
-	}
+function check_sane_keys($itemdata)
+{
+    foreach (array_keys($itemdata) as $key) {
+        if (! preg_match('/^' . IDENTIFIER_CHARS . '+$/', $key)) {
+            error("Invalid characters in field name \"$key\".");
+        }
+    }
 }
 
 // Verify a many-to-many mapping is valid
-function check_manymany_mapping($table, $keys) {
-	if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $table ) ) {
-		error ("Invalid characters in table name \"$table\".");
-	}
+function check_manymany_mapping($table, $keys)
+{
+    if (! preg_match('/^' . IDENTIFIER_CHARS . '+$/', $table)) {
+        error("Invalid characters in table name \"$table\".");
+    }
 
-	global $KEYS;
-	foreach($keys as $key) {
-		if (!in_array($key, $KEYS[$table])) {
-			error("Invalid many-to-many mapping. Key \"$key\", table \"$table\"");
-		}
+    global $KEYS;
+    foreach ($keys as $key) {
+        if (!in_array($key, $KEYS[$table])) {
+            error("Invalid many-to-many mapping. Key \"$key\", table \"$table\"");
+        }
 
-		if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $key ) ) {
-			error ("Invalid characters in field name \"$key\".");
-		}
-	}
+        if (! preg_match('/^' . IDENTIFIER_CHARS . '+$/', $key)) {
+            error("Invalid characters in field name \"$key\".");
+        }
+    }
 }
 
 // Verify a many-to-one mapping is valid
-function check_manyone_mapping($table, $key) {
-	if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $table ) ) {
-		error ("Invalid characters in table name \"$table\".");
-	}
+function check_manyone_mapping($table, $key)
+{
+    if (! preg_match('/^' . IDENTIFIER_CHARS . '+$/', $table)) {
+        error("Invalid characters in table name \"$table\".");
+    }
 
-	if ( ! preg_match ('/^' . IDENTIFIER_CHARS . '+$/', $key ) ) {
-		error ("Invalid characters in field name \"$key\".");
-	}
+    if (! preg_match('/^' . IDENTIFIER_CHARS . '+$/', $key)) {
+        error("Invalid characters in field name \"$key\".");
+    }
 }

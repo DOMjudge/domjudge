@@ -13,23 +13,23 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>Print source</h1>\n\n";
 
-if ( ! have_printing() ) {
-	error("Printing disabled.");
+if (! have_printing()) {
+    error("Printing disabled.");
 }
 
 // Seems reasonable to require that there's a contest running
 // before allowing to submit printouts.
 $fdata = calcFreezeData($cdata);
-if ( !checkrole('jury') && !$fdata['started'] ) {
-	echo "<div class=\"alert alert-secondary\">Contest has not yet started.</div>\n";
-	require(LIBWWWDIR . '/footer.php');
-	exit;
+if (!checkrole('jury') && !$fdata['started']) {
+    echo "<div class=\"alert alert-secondary\">Contest has not yet started.</div>\n";
+    require(LIBWWWDIR . '/footer.php');
+    exit;
 }
 
-if ( isset($_POST['langid']) ) {
-	handle_print_upload();
+if (isset($_POST['langid'])) {
+    handle_print_upload();
 } else {
-	put_print_form();
+    put_print_form();
 }
 
 require(LIBWWWDIR . '/footer.php');

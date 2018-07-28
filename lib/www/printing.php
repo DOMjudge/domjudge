@@ -12,21 +12,20 @@
  */
 function have_printing()
 {
-	return dbconfig_get('enable_printing',0);
+    return dbconfig_get('enable_printing', 0);
 }
 
 function put_print_form()
 {
-	global $DB, $pagename;
+    global $DB, $pagename;
 
-	$langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions, require_entry_point, entry_point_description FROM language
+    $langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions, require_entry_point, entry_point_description FROM language
 	                 WHERE allow_submit = 1 ORDER BY name');
-	$langlist = array();
-	$langlist[''] = 'plain text';
-	foreach($langs as $langid => $langdata) {
-		$langlist[$langid] = $langdata['name'];
-	}
-?>
+    $langlist = array();
+    $langlist[''] = 'plain text';
+    foreach ($langs as $langid => $langdata) {
+        $langlist[$langid] = $langdata['name'];
+    } ?>
 
 	<script type="text/javascript">
 	function detectLanguage(filename)
@@ -50,8 +49,7 @@ function put_print_form()
 	}
 
 	<?php
-	putgetMainExtension($langs);
-	?>
+    putgetMainExtension($langs); ?>
 	</script>
 
 <div class="container submitform">
@@ -67,10 +65,9 @@ function put_print_form()
 
 
 <?php
-    foreach($langlist as $langid => $langname) {
-	print '      <option value="' .specialchars($langid). '">' . specialchars($langname) . "</option>\n";
-    }
-?>
+    foreach ($langlist as $langid => $langname) {
+        print '      <option value="' .specialchars($langid). '">' . specialchars($langname) . "</option>\n";
+    } ?>
     </select>
   </div>
   <input type="submit" name="submit" value="Print code" class="btn btn-primary" /> 
@@ -82,34 +79,36 @@ function put_print_form()
 
 function handle_print_upload()
 {
-	global $DB;
+    global $DB;
 
-	ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
+    ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
 
-	checkFileUpload($_FILES['code']['error']);
+    checkFileUpload($_FILES['code']['error']);
 
-	$filename = $_FILES['code']['name'];
-	$realfilename = $_FILES['code']['tmp_name'];
+    $filename = $_FILES['code']['name'];
+    $realfilename = $_FILES['code']['tmp_name'];
 
-	/* Determine the language */
-	$langid = @$_POST['langid'];
-	/* sanity check only */
-	if ( $langid != "" ) {
-		$lang = $DB->q('MAYBETUPLE SELECT langid FROM language
+    /* Determine the language */
+    $langid = @$_POST['langid'];
+    /* sanity check only */
+    if ($langid != "") {
+        $lang = $DB->q('MAYBETUPLE SELECT langid FROM language
 		                WHERE langid = %s AND allow_submit = 1', $langid);
 
-		if ( ! isset($lang) ) error("Unable to find language '$langid'");
-	}
+        if (! isset($lang)) {
+            error("Unable to find language '$langid'");
+        }
+    }
 
-	$ret = send_print($realfilename,$filename,$langid);
+    $ret = send_print($realfilename, $filename, $langid);
 
-	echo "<div>" . nl2br(specialchars($ret[1])) . "</div>\n\n";
+    echo "<div>" . nl2br(specialchars($ret[1])) . "</div>\n\n";
 
-	if ( $ret[0] ) {
-		echo "<div class=\"alert alert-success\">Print successful.</div>";
-	} else {
-		error("Error while printing. Contact staff.");
-	}
+    if ($ret[0]) {
+        echo "<div class=\"alert alert-success\">Print successful.</div>";
+    } else {
+        error("Error while printing. Contact staff.");
+    }
 }
 
 /**
@@ -133,65 +132,65 @@ function handle_print_upload()
  */
 function send_print($filename, $origname = null, $language = null)
 {
-	global $DB, $username;
+    global $DB, $username;
 
-	// Map our language to enscript language:
-	$lang_remap = array(
-		'adb'    => 'ada',
-		'bash'   => 'sh',
-		'csharp' => 'c',
-		'f95'    => 'f90',
-		'hs'     => 'haskell',
-		'js'     => 'javascript',
-		'pas'    => 'pascal',
-		'pl'     => 'perl',
-		'py'     => 'python',
-		'py2'    => 'python',
-		'py3'    => 'python',
-		'rb'     => 'ruby',
-	);
-	if ( isset($language) && array_key_exists($language,$lang_remap) ) {
-		$language = $lang_remap[$language];
-	}
-	switch ($language) {
-	case 'csharp': $language = 'c'; break;
-	case 'hs': $language = 'haskell'; break;
-	case 'pas': $language = 'pascal'; break;
-	case 'pl': $language = 'perl'; break;
-	case 'py':
-	case 'py2':
-	case 'py3':
-		$language = 'python'; break;
-	}
-	$highlight = "";
-	if ( ! empty($language) ) {
-		$highlight = "-E" . escapeshellarg($language);
-	}
+    // Map our language to enscript language:
+    $lang_remap = array(
+        'adb'    => 'ada',
+        'bash'   => 'sh',
+        'csharp' => 'c',
+        'f95'    => 'f90',
+        'hs'     => 'haskell',
+        'js'     => 'javascript',
+        'pas'    => 'pascal',
+        'pl'     => 'perl',
+        'py'     => 'python',
+        'py2'    => 'python',
+        'py3'    => 'python',
+        'rb'     => 'ruby',
+    );
+    if (isset($language) && array_key_exists($language, $lang_remap)) {
+        $language = $lang_remap[$language];
+    }
+    switch ($language) {
+    case 'csharp': $language = 'c'; break;
+    case 'hs': $language = 'haskell'; break;
+    case 'pas': $language = 'pascal'; break;
+    case 'pl': $language = 'perl'; break;
+    case 'py':
+    case 'py2':
+    case 'py3':
+        $language = 'python'; break;
+    }
+    $highlight = "";
+    if (! empty($language)) {
+        $highlight = "-E" . escapeshellarg($language);
+    }
 
-	$team = $DB->q('TUPLE SELECT t.name, t.room FROM user u
+    $team = $DB->q('TUPLE SELECT t.name, t.room FROM user u
 	                    LEFT JOIN team t USING (teamid)
 	                    WHERE username = %s', $username);
-	$header = "Team: $username " . $team['name'] .
-	          (!empty($team['room']) ? "[".$team['room']."]":"") .
-	          " File: $origname||Page $% of $=";
+    $header = "Team: $username " . $team['name'] .
+              (!empty($team['room']) ? "[".$team['room']."]":"") .
+              " File: $origname||Page $% of $=";
 
-	// For debugging or spooling to a different host.
-	// Also uncomment '-p $tmp' below.
-	//$tmp = tempnam(TMPDIR, 'print_'.$username.'_');
+    // For debugging or spooling to a different host.
+    // Also uncomment '-p $tmp' below.
+    //$tmp = tempnam(TMPDIR, 'print_'.$username.'_');
 
-	$cmd = "enscript -C " . $highlight
-	     . " -b " . escapeshellarg($header)
-	     . " -a 0-10 "
-	     . " -f Courier9 "
-	     //. " -p $tmp "
-	     . escapeshellarg($filename) . " 2>&1";
+    $cmd = "enscript -C " . $highlight
+         . " -b " . escapeshellarg($header)
+         . " -a 0-10 "
+         . " -f Courier9 "
+         //. " -p $tmp "
+         . escapeshellarg($filename) . " 2>&1";
 
-	exec($cmd, $output, $retval);
+    exec($cmd, $output, $retval);
 
-	// Make file readable for others than webserver user,
-	// and give it an extension:
-	//chmod($tmp, 0644);
-	//rename($tmp, $tmp.'.ps');
+    // Make file readable for others than webserver user,
+    // and give it an extension:
+    //chmod($tmp, 0644);
+    //rename($tmp, $tmp.'.ps');
 
-	return array($retval == 0, implode("\n", $output));
+    return array($retval == 0, implode("\n", $output));
 }

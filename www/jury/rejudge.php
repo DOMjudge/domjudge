@@ -17,29 +17,39 @@ $id           = @$_POST['id'];
 $reason       = @$_POST['reason'];
 $include_all  = !empty($_POST['include_all']);
 $full_rejudge = @$_POST['full_rejudge'];
-if ( !isset($full_rejudge) ) {
-	$full_rejudge = FALSE;
+if (!isset($full_rejudge)) {
+    $full_rejudge = false;
 }
 
-if ( empty($table) || empty($id) ) {
-	error("no table or id passed for selection in rejudging");
+if (empty($table) || empty($id)) {
+    error("no table or id passed for selection in rejudging");
 }
 
-if ( empty($reason) ) $reason = $table . ': ' . $id;
+if (empty($reason)) {
+    $reason = $table . ': ' . $id;
+}
 
-if ( !IS_ADMIN && $include_all ) {
-	error("rejudging pending/correct submissions requires admin rights");
+if (!IS_ADMIN && $include_all) {
+    error("rejudging pending/correct submissions requires admin rights");
 }
 
 // Special case 'submission' for admin overrides
-if ( IS_ADMIN && ($table == 'submission') ) $include_all = true;
+if (IS_ADMIN && ($table == 'submission')) {
+    $include_all = true;
+}
 
-$rejudgingid = rejudge($table, $id, $include_all, $full_rejudge,
-                       $reason, $userdata['userid']);
+$rejudgingid = rejudge(
+    $table,
+    $id,
+    $include_all,
+    $full_rejudge,
+                       $reason,
+    $userdata['userid']
+);
 
 /** redirect back. */
-if ( $full_rejudge ) {
-	header('Location: rejudging.php?id='.urlencode($rejudgingid));
+if ($full_rejudge) {
+    header('Location: rejudging.php?id='.urlencode($rejudgingid));
 } else {
-	header('Location: '.$table.'.php?id='.urlencode($id));
+    header('Location: '.$table.'.php?id='.urlencode($id));
 }

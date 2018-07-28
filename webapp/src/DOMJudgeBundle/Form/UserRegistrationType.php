@@ -11,12 +11,10 @@ use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 
 use DOMJudgeBundle\Validator\Constraints;
 
-
 class UserRegistrationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
         $builder
         ->add('username', TextType::class, [
           'constraints' => new Constraints\UserRegistration()
@@ -30,8 +28,9 @@ class UserRegistrationType extends AbstractType
         ;
     }
 
-    public function configureOptions(OptionsResolver $resolver) {
-      $resolver->setDefaults(array(
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults(array(
         'data_class' => 'DOMJudgeBundle\Entity\User',
       ));
     }

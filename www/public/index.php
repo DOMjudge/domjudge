@@ -13,11 +13,11 @@ $isstatic = isset($_REQUEST['static']);
 
 // set auto refresh
 $refresh = array(
-	"after" => "30",
-	"url" => "./",
+    "after" => "30",
+    "url" => "./",
 );
-if ( $isstatic ) {
-	$refresh['url'] .= '?static=1';
+if ($isstatic) {
+    $refresh['url'] .= '?static=1';
 }
 
 // This reads and sets a cookie, so must be called before headers are sent.
@@ -26,28 +26,32 @@ $filter = initScorefilter();
 $menu = !$isstatic;
 require(LIBWWWDIR . '/header.php');
 
-if ( $isstatic && isset($_REQUEST['contest']) ) {
-	if ($_REQUEST['contest'] === 'auto') {
-		$a = null;
-		foreach($cdatas as $c) {
-			if (!$c['public'] || !$c['enabled']) continue;
-			if (is_null($a) || $a < $c['activatetime']) {
-				$a = $c['activatetime'];
-				$cdata = $c;
-			}
-		}
-	} else {
-		$found = false;
-		foreach($cdatas as $c) {
-			if($c['externalid'] == $_REQUEST['contest'] ||
-				$c['cid'] == $_REQUEST['contest'] ) {
-				$cdata = $c;
-				$found = true;
-				break;
-			}
-		}
-		if (!$found) error("Specified contest not found");
-	}
+if ($isstatic && isset($_REQUEST['contest'])) {
+    if ($_REQUEST['contest'] === 'auto') {
+        $a = null;
+        foreach ($cdatas as $c) {
+            if (!$c['public'] || !$c['enabled']) {
+                continue;
+            }
+            if (is_null($a) || $a < $c['activatetime']) {
+                $a = $c['activatetime'];
+                $cdata = $c;
+            }
+        }
+    } else {
+        $found = false;
+        foreach ($cdatas as $c) {
+            if ($c['externalid'] == $_REQUEST['contest'] ||
+                $c['cid'] == $_REQUEST['contest']) {
+                $cdata = $c;
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            error("Specified contest not found");
+        }
+    }
 }
 
 // call the general putScoreBoard function from scoreboard.php

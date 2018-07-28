@@ -17,18 +17,20 @@ require(LIBWWWDIR . '/clarification.php');
 
 echo "<h1>Clarifications</h1>\n\n";
 
-if ( empty($cids) ) {
-	warning('No active contest(s)');
-	require(LIBWWWDIR . '/footer.php');
-	exit;
+if (empty($cids)) {
+    warning('No active contest(s)');
+    require(LIBWWWDIR . '/footer.php');
+    exit;
 }
 
 $contestids = $cids;
-if ( $cid !== null ) {
+if ($cid !== null) {
     $contestids = array($cid);
 }
 // cid -1 will never happen, but otherwise the array is empty and that is not supported
-if ( empty($contestids) ) $contestids = array(-1);
+if (empty($contestids)) {
+    $contestids = array(-1);
+}
 
 echo "<p><a href=\"clarification.php\">Send Clarification</a></p>\n";
 echo "<p><a href=\"#newrequests\">View New Clarification Requests</a></p>\n";
@@ -58,27 +60,27 @@ $clarifications = $DB->q($sqlbody .
                           ORDER BY submittime DESC, clarid DESC', $contestids);
 
 echo '<h3 id="newrequests">' .
-	"New Requests:</h3>\n";
-if ( $newrequests->count() == 0 ) {
-	echo "<p class=\"nodata\">No new clarification requests.</p>\n\n";
+    "New Requests:</h3>\n";
+if ($newrequests->count() == 0) {
+    echo "<p class=\"nodata\">No new clarification requests.</p>\n\n";
 } else {
-	putClarificationList($newrequests,NULL);
+    putClarificationList($newrequests, null);
 }
 
 echo '<h3 id="oldrequests">' .
-	"Old Requests:</h3>\n";
-if ( $oldrequests->count() == 0 ) {
-	echo "<p class=\"nodata\">No old clarification requests.</p>\n\n";
+    "Old Requests:</h3>\n";
+if ($oldrequests->count() == 0) {
+    echo "<p class=\"nodata\">No old clarification requests.</p>\n\n";
 } else {
-	putClarificationList($oldrequests,NULL);
+    putClarificationList($oldrequests, null);
 }
 
 echo '<h3 id="clarifications">' .
-	"General Clarifications:</h3>\n";
-if ( $clarifications->count() == 0 ) {
-	echo "<p class=\"nodata\">No general clarifications.</p>\n\n";
+    "General Clarifications:</h3>\n";
+if ($clarifications->count() == 0) {
+    echo "<p class=\"nodata\">No general clarifications.</p>\n\n";
 } else {
-	putClarificationList($clarifications,NULL);
+    putClarificationList($clarifications, null);
 }
 
 require(LIBWWWDIR . '/footer.php');

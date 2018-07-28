@@ -12,10 +12,10 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>DOMjudge Jury interface</h1>\n\n";
 
-if ( is_readable('../images/DOMjudgelogo.png') ) {
-	echo "<p><a href=\"https://www.domjudge.org/\">" .
-		"<img src=\"../images/DOMjudgelogo.png\" id=\"djlogo\" " .
-		"alt=\"DOMjudge logo\" title=\"The DOMjudge logo: free as in beer!\" /></a></p>\n\n";
+if (is_readable('../images/DOMjudgelogo.png')) {
+    echo "<p><a href=\"https://www.domjudge.org/\">" .
+        "<img src=\"../images/DOMjudgelogo.png\" id=\"djlogo\" " .
+        "alt=\"DOMjudge logo\" title=\"The DOMjudge logo: free as in beer!\" /></a></p>\n\n";
 }
 
 ?>
@@ -24,7 +24,8 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <h3>Overviews:</h3>
 <ul>
 <li><a href="balloons.php">Balloon Status</a></li>
-<?php if ( checkrole('jury') ) { ?>
+<?php if (checkrole('jury')) {
+    ?>
 <li><a href="clarifications.php">Clarifications</a></li>
 <li><a href="contests.php">Contests</a></li>
 <li><a href="executables.php">Executables</a></li>
@@ -40,10 +41,11 @@ if ( is_readable('../images/DOMjudgelogo.png') ) {
 <li><a href="teams.php">Teams</a></li>
 <li><a href="team_categories.php">Team Categories</a></li>
 <li><a href="team_affiliations.php">Team Affiliations</a></li>
-<?php } ?>
+<?php
+} ?>
 </ul>
 
-<?php if ( IS_ADMIN ): ?>
+<?php if (IS_ADMIN): ?>
 
 <h3>Administrator:</h3>
 

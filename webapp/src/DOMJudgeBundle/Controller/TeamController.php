@@ -14,27 +14,27 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class TeamController extends Controller
 {
-	/**
-	 *@Route("/teams/", name="teams_index")
-	 */
-	public function indexAction(Request $request)
-	{
-		$em = $this->getDoctrine()->getManager();
-		$teams = $em->getRepository('DOMJudgeBundle:Team')->findAll();
-		// replace this example code with whatever you need
-		return $this->render('DOMJudgeBundle:team:index.html.twig',[
-		    'teams' => $teams
-		]);
-	}
+    /**
+     *@Route("/teams/", name="teams_index")
+     */
+    public function indexAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $teams = $em->getRepository('DOMJudgeBundle:Team')->findAll();
+        // replace this example code with whatever you need
+        return $this->render('DOMJudgeBundle:team:index.html.twig', [
+            'teams' => $teams
+        ]);
+    }
 
-	/**
-	 *@Route("/teams/{teamid}", name="team_show")
-	 */
-	public function showAction(Request $request, Team $team)
-	{
-		// replace this example code with whatever you need
-		return $this->render('DOMJudgeBundle:team:show.html.twig',[
-		    'team' => $team
-		]);
-	}
+    /**
+     *@Route("/teams/{teamid}", name="team_show")
+     */
+    public function showAction(Request $request, Team $team)
+    {
+        // replace this example code with whatever you need
+        return $this->render('DOMJudgeBundle:team:show.html.twig', [
+            'team' => $team
+        ]);
+    }
 }

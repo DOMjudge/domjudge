@@ -19,13 +19,13 @@ require_once(LIBWWWDIR . '/auth.php');
 setup_database_connection();
 logged_in();
 
-if ( !checkrole('full_event_reader') ) {
-	error ("User role full_event_reader required.");
+if (!checkrole('full_event_reader')) {
+    error("User role full_event_reader required.");
 }
 
 define('IS_JURY', true);
 define('IS_PUBLIC', false);
 
 
-$cdatas = getCurContests(TRUE);
+$cdatas = getCurContests(true);
 $cids = array_keys($cdatas);

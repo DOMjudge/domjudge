@@ -10,12 +10,12 @@ require_once('../../configure.php');
 
 global $apiFromInternal;
 if (!isset($apiFromInternal) || !$apiFromInternal) {
-	define('IS_JURY', false);
-	define('IS_PUBLIC', true);
+    define('IS_JURY', false);
+    define('IS_PUBLIC', true);
 
-	require_once(LIBDIR . '/init.php');
+    require_once(LIBDIR . '/init.php');
 
-	setup_database_connection();
+    setup_database_connection();
 }
 
 require_once(LIBWWWDIR . '/common.php');
@@ -24,7 +24,7 @@ require_once(LIBWWWDIR . '/scoreboard.php');
 require_once(LIBWWWDIR . '/auth.php');
 require_once(LIBWWWDIR . '/restapi.php');
 
-$cdatas = getCurContests(TRUE, -1);
+$cdatas = getCurContests(true, -1);
 $cids = array_keys($cdatas);
 
 logged_in();
