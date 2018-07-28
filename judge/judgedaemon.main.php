@@ -497,11 +497,17 @@ while ( TRUE ) {
 	// restart the judging loop
 }
 
-function disable($kind, $idcolumn, $id, $description, $judgingid, $cid) {
+function disable($kind, $idcolumn, $id, $description, $judgingid, $cid, $extra_log = NULL) {
 	$disabled = dj_json_encode(array(
 		'kind' => $kind,
 		$idcolumn => $id));
 	$judgehostlog = read_judgehostlog();
+	if ( isset($extra_log) ) {
+		$judgehostlog .= "\n\n"
+			. "--------------------------------------------------------------------------------"
+			. "\n\n"
+			. $extra_log;
+	}
 	$error_id = request('internal_error', 'POST',
 		'judgingid=' . urlencode($judgingid) .
 		'&cid=' . urlencode($cid) .
@@ -597,6 +603,19 @@ function judge($row)
 		// revoke readablity for domjudge-run user to this workdir
 		chmod($workdir, 0700);
 		return;
+	}
+	// Try to read metadata from file
+	if ( is_readable($workdir . '/compile.meta') ) {
+		$metadata = spyc_load_file($workdir . '/compile.meta');
+		if ( isset($metadata['internal-error']) ) {
+			alert('error');
+			$description = "Running compile.sh caused a runguard error/crash: '" . $metadata['internal-error'] . "'";
+			logmsg(LOG_ERR, $description);
+			disable('judgehost', 'hostname', $myhost, $description, $row['judgingid'], $row['cid'], dj_file_get_contents($workdir . '/compile.out', 50000));
+			// revoke readablity for domjudge-run user to this workdir
+			chmod($workdir, 0700);
+			return;
+		}
 	}
 	$compile_success =  ($EXITCODES[$retval]!='compiler-error');
 

@@ -1832,7 +1832,7 @@ function internal_error_POST($args)
 	$disabled = dj_json_decode($args['disabled']);
 	// disable what needs to be disabled
 	set_internal_error($disabled, $cid, 0);
-	if ( in_array($disabled['kind'], array('problem', 'language')) ) {
+	if ( in_array($disabled['kind'], array('problem', 'language', 'judgehost'))  && isset($args['judgingid']) ) {
 		// give back judging if we have to
 		give_back_judging($args['judgingid']);
 	}
