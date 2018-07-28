@@ -1373,19 +1373,28 @@ function eventlog($type, $dataids, $action, $cid = null, $json = null, $ids = nu
 	$dataids = array_values($dataids);
 	$ids = array_values($ids);
 
-	$cids = array();
+	$cids = [];
 	if ( $cid!==null ) {
 		$cids[] = $cid;
+		$expectedEvents = count($dataids);
 	} else {
 		if ( $type==='problems' ) {
-			$cids = $DB->q('COLUMN SELECT DISTINCT cid FROM contestproblem WHERE probid IN (%Ai)', $dataids);
-		} elseif( $type==='teams' ) {
-			$cids = [];
+			$expectedEvents = 0;
 			foreach ($dataids as $dataid) {
-				$cids = array_unique(array_merge($cids, getCurContests(FALSE, $dataid)));
+				$cidsForId = $DB->q('COLUMN SELECT DISTINCT cid FROM contestproblem WHERE probid = %Ai', $dataid);
+				$expectedEvents += count($cidsForId);
+				$cids = array_unique(array_merge($cids, $cidsForId));
+			}
+		} elseif( $type==='teams' ) {
+			$expectedEvents = 0;
+			foreach ($dataids as $dataid) {
+				$cidsForId = getCurContests(FALSE, $dataid);
+				$expectedEvents += count($cidsForId);
+				$cids = array_unique(array_merge($cids, $cidsForId));
 			}
 		} else {
 			$cids = getCurContests();
+			$expectedEvents = count($dataids) * count($cids);
 		}
 	}
 	if ( count($cids)==0 ) {
@@ -1474,9 +1483,9 @@ function eventlog($type, $dataids, $action, $cid = null, $json = null, $ids = nu
 		error("eventlog: failed to release lock");
 	}
 
-	if ( count($ids) !== count($cids) * count($dataids) ) {
+	if ( count($eventids) !== $expectedEvents ) {
 		error("eventlog: failed to $action $type/$idsCombined " .
-		      '('.count($ids).'/'.(count($cids) * count($dataids)).' contests done)');
+		      '('.count($eventids).'/'.$expectedEvents.' events done)');
 	}
 
 	logmsg(LOG_DEBUG,"eventlog: ${action}d $type/$idsCombined " .
