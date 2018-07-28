@@ -26,14 +26,27 @@ $filter = initScorefilter();
 $menu = !$isstatic;
 require(LIBWWWDIR . '/header.php');
 
-if ( $isstatic ) {
-	if ( isset($_REQUEST['contest']) ) {
-		foreach ( $cdatas as $c ) {
-			if ( $c['externalid'] == $_REQUEST['contest'] ) {
+if ( $isstatic && isset($_REQUEST['contest']) ) {
+	if ($_REQUEST['contest'] === 'auto') {
+		$a = null;
+		foreach($cdatas as $c) {
+			if (!$c['public'] || !$c['enabled']) continue;
+			if (is_null($a) || $a < $c['activatetime']) {
+				$a = $c['activatetime'];
 				$cdata = $c;
+			}
+		}
+	} else {
+		$found = false;
+		foreach($cdatas as $c) {
+			if($c['externalid'] == $_REQUEST['contest'] ||
+				$c['cid'] == $_REQUEST['contest'] ) {
+				$cdata = $c;
+				$found = true;
 				break;
 			}
 		}
+		if (!$found) error("Specified contest not found");
 	}
 }
 
