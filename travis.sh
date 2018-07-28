@@ -90,8 +90,8 @@ CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 
 # start eventdaemon
 cd /opt/domjudge/domserver/
-#bin/eventdaemon &
-#sleep 5
+bin/eventdaemon &
+sleep 5
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
@@ -152,5 +152,5 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 	exit -1;
 fi
 
-# check the Contest API, non-failing for now
-$CHECK_API -n http://admin:admin@localhost/domjudge/api || true
+# Check the Contest API:
+$CHECK_API -n -C -a 'strict=1' http://admin:admin@localhost/domjudge/api
