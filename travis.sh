@@ -88,6 +88,13 @@ PATH=${PATH}:${HOME}/vendor/bin
 git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
 CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 
+# Database changes to make the REST API and event feed match better.
+cat <<EOF | sudo mysql domjudge
+DELETE FROM clarification;
+UPDATE contest SET freezetime = UNIX_TIMESTAMP()+15 WHERE cid = 2;
+UPDATE team_category SET visible = 1;
+EOF
+
 # start eventdaemon
 cd /opt/domjudge/domserver/
 bin/eventdaemon &
