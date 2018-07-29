@@ -153,4 +153,4 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 fi
 
 # Check the Contest API:
-$CHECK_API -n -C -a 'strict=1' http://admin:admin@localhost/domjudge/api
+$CHECK_API -d -n -C -a 'strict=1' http://admin:admin@localhost/domjudge/api
