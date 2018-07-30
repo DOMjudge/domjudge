@@ -1,11 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "hash": "422b11f9511af576f6fe868b10e969fb",
-    "content-hash": "c136ca5847e64d970f6d05f337ba746b",
+    "content-hash": "d682f4db069e13e002ba7709d826836c",
     "packages": [
         {
             "name": "ircmaxell/password-compat",
@@ -47,7 +46,7 @@
                 "hashing",
                 "password"
             ],
-            "time": "2014-11-20 16:49:30"
+            "time": "2014-11-20T16:49:30+00:00"
         },
         {
             "name": "jumbojett/openid-connect-php",
@@ -77,7 +76,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "description": "Bare-bones OpenID Connect client",
-            "time": "2016-03-04 02:50:16"
+            "time": "2016-03-04T02:50:16+00:00"
         },
         {
             "name": "mustangostang/spyc",
@@ -124,7 +123,7 @@
                 "yaml",
                 "yml"
             ],
-            "time": "2013-02-21 10:52:01"
+            "time": "2013-02-21T10:52:01+00:00"
         },
         {
             "name": "phpseclib/phpseclib",
@@ -222,7 +221,7 @@
                 "x.509",
                 "x509"
             ],
-            "time": "2015-01-28 21:50:33"
+            "time": "2015-01-28T21:50:33+00:00"
         },
         {
             "name": "twig/twig",
@@ -283,7 +282,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2016-10-25 19:17:17"
+            "time": "2016-10-25T19:17:17+00:00"
         }
     ],
     "packages-dev": [],
@@ -294,10 +293,8 @@
     "prefer-lowest": false,
     "platform": {
         "ext-curl": "*",
-        "ext-gmp": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "ext-mcrypt": "*",
         "ext-mysqli": "*",
         "php": ">= 5.4"
     },
