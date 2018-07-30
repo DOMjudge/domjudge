@@ -124,6 +124,10 @@ CSRFTOKEN=$(curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge/login" 2>/de
 # Make a second request with our session + csrf token to actually log in
 curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=admin" "http://localhost/domjudge/login"
 
+# Send a general clarification to later test if we see the event.
+curl $CURLOPTS -F "sendto=" -F "problem=2-" -F "bodytext=Testing" -F "submit=Send" \
+	 "http://localhost/domjudge/jury/clarification.php" -o /dev/null
+
 while /bin/true; do
 	curl $CURLOPTS "http://localhost/domjudge/jury/check_judgings.php?verify_multiple=1" -o /dev/null
 	NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/check_judgings.php" | grep "submissions checked" | cut -d\  -f1)
