@@ -1,11 +1,9 @@
 DOMjudge Programming Contest Judging System
 
-Version 5.2.4 - DEV
--------------------
-
-Version 5.2.3 - 28 July 2018
+Version 5.2.3 - 30 July 2018
 ----------------------------
  - Executables: allow edits only by admin.
+ - Allow build with PHP >= 7.2.
 
 Version 5.2.2 - 29 December 2017
 --------------------------------
