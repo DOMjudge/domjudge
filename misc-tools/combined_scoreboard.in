@@ -38,10 +38,12 @@
 // If username and password are omitted, none will be used
 // If contest is omitted, the first active one will be used
 $sites = array(
-	array('url' => "http://example.com/domjudge/", 'username' => "", 'password' => "", 'contest' => 'demo'),
-	);
+    array('url' => "http://example.com/domjudge/", 'username' => "", 'password' => "", 'contest' => 'demo'),
+    );
 
-if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+if (isset($_SERVER['REMOTE_ADDR'])) {
+    die("Commandline use only");
+}
 
 require('@domserver_etcdir@/domserver-static.php');
 require(ETCDIR . '/domserver-config.php');
@@ -51,14 +53,14 @@ define('SCRIPT_ID', 'combined_scoreboard');
 // Read options
 $opts = getopt('jc:');
 
-if ( isset($opts['j']) ) {
-	$public = 0;
-	define('IS_JURY', TRUE);
-	define('IS_PUBLIC', FALSE);
+if (isset($opts['j'])) {
+    $public = 0;
+    define('IS_JURY', true);
+    define('IS_PUBLIC', false);
 } else {
-	$public = 1;
-	define('IS_JURY', FALSE);
-	define('IS_PUBLIC', TRUE);
+    $public = 1;
+    define('IS_JURY', false);
+    define('IS_PUBLIC', true);
 }
 
 // Needed for accessing contest ID from database:
@@ -80,163 +82,172 @@ $teams  = array();
 $probs  = array();
 $categs = array();
 
-foreach ( $sites as $site_id => $site ) {
-	$ctx = null;
-	if ( !empty($site['username']) && !empty($site['password']) ) {
-		$cred = sprintf('Authorization: Basic %s',
-				base64_encode($site['username'] . ':' . $site['password']));
-		$opts = array(
-			'http' => array(
-				'method' => 'GET',
-				'header' => $cred)
-		);
-		$ctx = stream_context_create($opts);
-	}
+foreach ($sites as $site_id => $site) {
+    $ctx = null;
+    if (!empty($site['username']) && !empty($site['password'])) {
+        $cred = sprintf(
+            'Authorization: Basic %s',
+                base64_encode($site['username'] . ':' . $site['password'])
+        );
+        $opts = array(
+            'http' => array(
+                'method' => 'GET',
+                'header' => $cred)
+        );
+        $ctx = stream_context_create($opts);
+    }
 
-	// Get contests to find correct one
-	$contests = file_get_contents($site['url'] . '/api/contests', null, $ctx);
-	$contests = dj_json_decode($contests);
-	if ( !$contests ) {
-		fprintf(STDERR, "Can not fetch contests of site ${site['url']}!\n");
-		exit(1);
-	}
+    // Get contests to find correct one
+    $contests = file_get_contents($site['url'] . '/api/contests', null, $ctx);
+    $contests = dj_json_decode($contests);
+    if (!$contests) {
+        fprintf(STDERR, "Can not fetch contests of site ${site['url']}!\n");
+        exit(1);
+    }
 
-	$cid = null;
-	if ( !empty($site['contest']) ) {
-		foreach ( $contests as $contest ) {
-			if ( $contest['shortname'] == $site['contest'] ) {
-				$cid = $contest['id'];
-				break;
-			}
-		}
-	} else {
-		if ( !empty($contests) ) {
-			$contest = current($contests);
-			$cid = $contest['id'];
-		}
-	}
+    $cid = null;
+    if (!empty($site['contest'])) {
+        foreach ($contests as $contest) {
+            if ($contest['shortname'] == $site['contest']) {
+                $cid = $contest['id'];
+                break;
+            }
+        }
+    } else {
+        if (!empty($contests)) {
+            $contest = current($contests);
+            $cid = $contest['id'];
+        }
+    }
 
-	if ( $cid === null ) {
-		fprintf(STDERR, "Can not find contest of site ${site['url']}!\n");
-		exit(1);
-	}
+    if ($cid === null) {
+        fprintf(STDERR, "Can not find contest of site ${site['url']}!\n");
+        exit(1);
+    }
 
-	// Get problems
-	$remote_problems = file_get_contents($site['url'] . '/api/problems?cid=' . $cid, null, $ctx);
-	$remote_problems = dj_json_decode($remote_problems);
-	if ( !$remote_problems ) {
-		fprintf(STDERR, "Can not fetch problems of site ${site['url']}!\n");
-		exit(1);
-	}
+    // Get problems
+    $remote_problems = file_get_contents($site['url'] . '/api/problems?cid=' . $cid, null, $ctx);
+    $remote_problems = dj_json_decode($remote_problems);
+    if (!$remote_problems) {
+        fprintf(STDERR, "Can not fetch problems of site ${site['url']}!\n");
+        exit(1);
+    }
 
-	foreach ( $remote_problems as $problem ) {
-		$probs[$problem['id']] = array(
-			'probid' => $problem['id'],
-			'shortname' => $problem['shortname'],
-			'name' => $problem['name'],
-			'color' => $problem['color']
-		);
+    foreach ($remote_problems as $problem) {
+        $probs[$problem['id']] = array(
+            'probid' => $problem['id'],
+            'shortname' => $problem['shortname'],
+            'name' => $problem['name'],
+            'color' => $problem['color']
+        );
 
-		if ( !isset($summary['problems'][$problem['id']]) ) {
-			$summary['problems'][$problem['id']] = array(
-				'num_submissions' => 0,
-				'num_pending' => 0,
-				'num_correct' => 0,
-				'best_time_sort' => array()
-			);
-		}
-	}
+        if (!isset($summary['problems'][$problem['id']])) {
+            $summary['problems'][$problem['id']] = array(
+                'num_submissions' => 0,
+                'num_pending' => 0,
+                'num_correct' => 0,
+                'best_time_sort' => array()
+            );
+        }
+    }
 
-	// Get categories
-	$remote_categories = file_get_contents($site['url'] . '/api/categories?public=' . $public, null, $ctx);
-	$remote_categories = dj_json_decode($remote_categories);
-	if ( !$remote_categories ) {
-		fprintf(STDERR, "Can not fetch categories of site ${site['url']}!\n");
-		exit(1);
-	}
+    // Get categories
+    $remote_categories = file_get_contents($site['url'] . '/api/categories?public=' . $public, null, $ctx);
+    $remote_categories = dj_json_decode($remote_categories);
+    if (!$remote_categories) {
+        fprintf(STDERR, "Can not fetch categories of site ${site['url']}!\n");
+        exit(1);
+    }
 
-	foreach ( $remote_categories as $category ) {
-		$categs[$category['categoryid']] = array(
-			'categoryid' => $category['categoryid'],
-			'name' => $category['name'],
-			'color' => $category['color'],
-			'sortorder' => $category['sortorder'],
-		);
-	}
+    foreach ($remote_categories as $category) {
+        $categs[$category['categoryid']] = array(
+            'categoryid' => $category['categoryid'],
+            'name' => $category['name'],
+            'color' => $category['color'],
+            'sortorder' => $category['sortorder'],
+        );
+    }
 
-	// Get teams
-	$remote_teams = file_get_contents($site['url'] . '/api/teams?public=' . $public, null, $ctx);
-	$remote_teams = dj_json_decode($remote_teams);
-	if ( !$remote_teams ) {
-		fprintf(STDERR, "Can not fetch teams of site ${site['url']}!\n");
-		exit(1);
-	}
+    // Get teams
+    $remote_teams = file_get_contents($site['url'] . '/api/teams?public=' . $public, null, $ctx);
+    $remote_teams = dj_json_decode($remote_teams);
+    if (!$remote_teams) {
+        fprintf(STDERR, "Can not fetch teams of site ${site['url']}!\n");
+        exit(1);
+    }
 
-	foreach ( $remote_teams as $team ) {
-		$category = $categs[$team['category']];
-		$teamid = $site_id . '-' . $team['id'];
-		$teams[$teamid] = array(
-			'teamid' => $teamid,
-			'name' => $team['name'],
-			'categoryid' => $team['category'],
-			'affilid' => $team['affilid'],
-			'country' => $team['nationality'],
-			'color' => $category['color'],
-			'affilname' => $team['affiliation'],
-		);
+    foreach ($remote_teams as $team) {
+        $category = $categs[$team['category']];
+        $teamid = $site_id . '-' . $team['id'];
+        $teams[$teamid] = array(
+            'teamid' => $teamid,
+            'name' => $team['name'],
+            'categoryid' => $team['category'],
+            'affilid' => $team['affilid'],
+            'country' => $team['nationality'],
+            'color' => $category['color'],
+            'affilname' => $team['affiliation'],
+        );
 
-		if ( ! empty($team['affilid']) ) $summary['affils'][$team['affilid']] = 0;
-		if ( ! empty($team['nationality']) ) $summary['countries'][$team['nationality']] = 0;
-	}
+        if (! empty($team['affilid'])) {
+            $summary['affils'][$team['affilid']] = 0;
+        }
+        if (! empty($team['nationality'])) {
+            $summary['countries'][$team['nationality']] = 0;
+        }
+    }
 
-	// Get scoreboard
-	$scoreboard = file_get_contents($site['url'] . '/api/scoreboard?cid=' . $cid . '&public=' . $public, null, $ctx);
-	$scoreboard = dj_json_decode($scoreboard);
-	if ( !$scoreboard ) {
-		fprintf(STDERR, "Can not fetch scoreboard of site ${site['url']}!\n");
-		exit(1);
-	}
+    // Get scoreboard
+    $scoreboard = file_get_contents($site['url'] . '/api/scoreboard?cid=' . $cid . '&public=' . $public, null, $ctx);
+    $scoreboard = dj_json_decode($scoreboard);
+    if (!$scoreboard) {
+        fprintf(STDERR, "Can not fetch scoreboard of site ${site['url']}!\n");
+        exit(1);
+    }
 
-	foreach ( $scoreboard as $teamid => $problems )
-	{
-		$teamid = $site_id . '-' . $teamid;
+    foreach ($scoreboard as $teamid => $problems) {
+        $teamid = $site_id . '-' . $teamid;
 
-		$scores[$teamid] = array(
-			'num_correct' => 0,
-			'total_time' => 0,
-			'solve_times' => array(),
-			'rank' => 0,
-			'teamname' => $teams[$teamid]['name'],
-			'categoryid' => $teams[$teamid]['categoryid'],
-			'sortorder' => $categs[$teams[$teamid]['categoryid']]['sortorder'],
-			'affilid' => $teams[$teamid]['affilid'],
-			'country' => $teams[$teamid]['country'],
-		);
+        $scores[$teamid] = array(
+            'num_correct' => 0,
+            'total_time' => 0,
+            'solve_times' => array(),
+            'rank' => 0,
+            'teamname' => $teams[$teamid]['name'],
+            'categoryid' => $teams[$teamid]['categoryid'],
+            'sortorder' => $categs[$teams[$teamid]['categoryid']]['sortorder'],
+            'affilid' => $teams[$teamid]['affilid'],
+            'country' => $teams[$teamid]['country'],
+        );
 
-		foreach ( $problems as $probid => $score ) {
-			$matrix[$teamid][$probid] = $score;
+        foreach ($problems as $probid => $score) {
+            $matrix[$teamid][$probid] = $score;
 
-			if ( $score['is_correct'] ) {
-				$scores[$teamid]['num_correct']++;
-				$scores[$teamid]['total_time'] += ($score['time'] + $score['penalty']);
-				$scores[$teamid]['solve_times'][] = $score['time'];
+            if ($score['is_correct']) {
+                $scores[$teamid]['num_correct']++;
+                $scores[$teamid]['total_time'] += ($score['time'] + $score['penalty']);
+                $scores[$teamid]['solve_times'][] = $score['time'];
 
-				// store per sortorder the first solve time
-				if ( !isset($summary['problems'][$probid]['best_time_sort'][$scores[$teamid]['sortorder']]) ||
-					$score['time']<$summary['problems'][$probid]['best_time_sort'][$scores[$teamid]['sortorder']] ) {
-					$summary['problems'][$probid]['best_time_sort'][$scores[$teamid]['sortorder']] = $score['time'];
-				}
-			}
+                // store per sortorder the first solve time
+                if (!isset($summary['problems'][$probid]['best_time_sort'][$scores[$teamid]['sortorder']]) ||
+                    $score['time']<$summary['problems'][$probid]['best_time_sort'][$scores[$teamid]['sortorder']]) {
+                    $summary['problems'][$probid]['best_time_sort'][$scores[$teamid]['sortorder']] = $score['time'];
+                }
+            }
 
-			$summary['problems'][$probid]['num_submissions'] += $score['num_submissions'];
-			$summary['problems'][$probid]['num_pending'] += $score['num_pending'];
-			$summary['problems'][$probid]['num_correct'] += ($score['is_correct'] ? 1 : 0);
-		}
+            $summary['problems'][$probid]['num_submissions'] += $score['num_submissions'];
+            $summary['problems'][$probid]['num_pending'] += $score['num_pending'];
+            $summary['problems'][$probid]['num_correct'] += ($score['is_correct'] ? 1 : 0);
+        }
 
-		$summary['num_correct'] += $scores[$teamid]['num_correct'];
-		if ( ! empty($teams[$teamid]['affilid']) ) $summary['affils'][$scores[$teamid]['affilid']]++;
-		if ( ! empty($teams[$teamid]['country']) ) $summary['countries'][$scores[$teamid]['country']]++;
-	}
+        $summary['num_correct'] += $scores[$teamid]['num_correct'];
+        if (! empty($teams[$teamid]['affilid'])) {
+            $summary['affils'][$scores[$teamid]['affilid']]++;
+        }
+        if (! empty($teams[$teamid]['country'])) {
+            $summary['countries'][$scores[$teamid]['country']]++;
+        }
+    }
 }
 
 // sort the merged scores using our custom comparison function
@@ -244,22 +255,22 @@ uasort($scores, 'cmp');
 
 // Calculate ranks
 $prevsortorder = -1;
-foreach( $scores as $team => $totals ) {
+foreach ($scores as $team => $totals) {
 
-	// rank, team name, total correct, total time
-	if ( $totals['sortorder'] != $prevsortorder ) {
-		$prevsortorder = $totals['sortorder'];
-		$rank = 0; // reset team position on switch to different category
-		$prevteam = null;
-	}
-	$rank++;
-	// Use previous' team rank when scores are equal
-	if ( isset($prevteam) && cmpscore($scores[$prevteam], $totals)==0 ) {
-		$scores[$team]['rank'] = $scores[$prevteam]['rank'];
-	} else {
-		$scores[$team]['rank'] = $rank;
-	}
-	$prevteam = $team;
+    // rank, team name, total correct, total time
+    if ($totals['sortorder'] != $prevsortorder) {
+        $prevsortorder = $totals['sortorder'];
+        $rank = 0; // reset team position on switch to different category
+        $prevteam = null;
+    }
+    $rank++;
+    // Use previous' team rank when scores are equal
+    if (isset($prevteam) && cmpscore($scores[$prevteam], $totals)==0) {
+        $scores[$team]['rank'] = $scores[$prevteam]['rank'];
+    } else {
+        $scores[$team]['rank'] = $rank;
+    }
+    $prevteam = $team;
 }
 
 $sdata = array('scores'     => $scores,
@@ -269,25 +280,24 @@ $sdata = array('scores'     => $scores,
                'teams'      => $teams,
                'categories' => $categs);
 
-$cdatas = getCurContests(TRUE);
+$cdatas = getCurContests(true);
 $cdata = null;
-if ( isset($opts['c']) )
-{
-	foreach ( $cdatas as $contest ) {
-		if ( $contest['shortname'] == $opts['c'] ) {
-			$cdata = $contest;
-			break;
-		}
-	}
+if (isset($opts['c'])) {
+    foreach ($cdatas as $contest) {
+        if ($contest['shortname'] == $opts['c']) {
+            $cdata = $contest;
+            break;
+        }
+    }
 } else {
-	if ( !empty($cdatas) ) {
-		$cdata = current($cdatas);
-	}
+    if (!empty($cdatas)) {
+        $cdata = current($cdatas);
+    }
 }
 
-if ( $cdata === null ) {
-	fprintf(STDERR, "Local contest not found!\n");
-	exit(1);
+if ($cdata === null) {
+    fprintf(STDERR, "Local contest not found!\n");
+    exit(1);
 }
 
 // Change dir to get correct relative path to affiliation/country images
@@ -299,6 +309,6 @@ $title="Scoreboard";
 $menu = false;
 require(LIBWWWDIR . '/header.php');
 
-putScoreBoard($cdata, NULL, TRUE, FALSE, $sdata);
+putScoreBoard($cdata, null, true, false, $sdata);
 
 require(LIBWWWDIR . '/footer.php');

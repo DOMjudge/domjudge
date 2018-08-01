@@ -15,7 +15,9 @@
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
-if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+if (isset($_SERVER['REMOTE_ADDR'])) {
+    die("Commandline use only");
+}
 
 # categoryid the team should be in and the roles the user should get.
 # The set of roles should at least contain the team role.
@@ -30,13 +32,13 @@ require(LIBDIR . '/init.php');
 setup_database_connection();
 
 $stdin = fopen('php://stdin', 'r');
-while(fscanf(STDIN, "%s %s\n", $u, $p)) {
-	$tid = $DB->q("RETURNID INSERT INTO team (name,categoryid)
+while (fscanf(STDIN, "%s %s\n", $u, $p)) {
+    $tid = $DB->q("RETURNID INSERT INTO team (name,categoryid)
 	               VALUES (%s,%i)", $u, $CATID);
-	$id = $DB->q("RETURNID INSERT INTO user (username,name,password,teamid)
+    $id = $DB->q("RETURNID INSERT INTO user (username,name,password,teamid)
 	              VALUES (%s,%s,%s,%i)", $u, $u, dj_password_hash($p), $tid);
-	foreach($ROLES as $role) {
-		$DB->q("INSERT INTO userrole (userid,roleid) VALUES(%i,%i)", $id, $role);
-	}
-	echo "Added $u\n";
+    foreach ($ROLES as $role) {
+        $DB->q("INSERT INTO userrole (userid,roleid) VALUES(%i,%i)", $id, $role);
+    }
+    echo "Added $u\n";
 }

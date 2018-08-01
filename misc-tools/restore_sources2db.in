@@ -20,7 +20,9 @@
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
-if ( isset($_SERVER['REMOTE_ADDR']) ) die ("Commandline use only");
+if (isset($_SERVER['REMOTE_ADDR'])) {
+    die("Commandline use only");
+}
 
 require('@domserver_etcdir@/domserver-static.php');
 require(ETCDIR . '/domserver-config.php');
@@ -33,16 +35,18 @@ require(LIBDIR . '/init.php');
 setup_database_connection();
 
 $sourcesdir = SUBMITDIR;
-if ( ! empty($_SERVER['argv'][1]) ) $sourcesdir = $_SERVER['argv'][1];
+if (! empty($_SERVER['argv'][1])) {
+    $sourcesdir = $_SERVER['argv'][1];
+}
 
-if ( !(is_dir($sourcesdir) && is_readable($sourcesdir)) ) {
-	error("'$sourcesdir' is no directory or not readable");
+if (!(is_dir($sourcesdir) && is_readable($sourcesdir))) {
+    error("'$sourcesdir' is no directory or not readable");
 }
 
 logmsg(LOG_NOTICE, "started, sources dir = '$sourcesdir'");
 
-if ( !($dh = @opendir($sourcesdir)) ) {
-	error("cannot read directory '$sourcesdir'");
+if (!($dh = @opendir($sourcesdir))) {
+    error("cannot read directory '$sourcesdir'");
 }
 
 $submissions = array();
@@ -54,89 +58,114 @@ $probname2id = $DB->q("KEYVALUETABLE SELECT CONCAT(cid, '-', shortname), probid
 $res = $DB->q("MAYBETUPLE SELECT * FROM information_schema.COLUMNS
                WHERE TABLE_SCHEMA = 'domjudge-test' AND
                TABLE_NAME = 'team' AND COLUMN_NAME = 'login'");
-if ( !empty($res) ) {
-	$teamlogin2id = $DB->q('KEYVALUETABLE SELECT login, teamid FROM team');
+if (!empty($res)) {
+    $teamlogin2id = $DB->q('KEYVALUETABLE SELECT login, teamid FROM team');
 }
 
-while ( ($src = readdir($dh))!==FALSE ) {
+while (($src = readdir($dh))!==false) {
+    $f = $sourcesdir . '/' . $src;
 
-	$f = $sourcesdir . '/' . $src;
+    if (!(is_file($f) && is_readable($f))) {
+        logmsg(LOG_DEBUG, "skipping '$src': not a readable file");
+        continue;
+    }
 
-	if ( !(is_file($f) && is_readable($f)) ) {
-		logmsg(LOG_DEBUG, "skipping '$src': not a readable file");
-		continue;
-	}
+    // Reconstruct submission data from filename and mtime
+    $fdata = explode('.', $src, 7);
+    // Detect and support obsolete (version <=3.2) sourcefile format
+    if (count($fdata)==5) {
+        logmsg(LOG_DEBUG, "detected old sourcefile format: '$src'");
+        list($cid, $sid, $teamid, $probid, $langid) = $fdata;
+        if ($cid[0]=='c') {
+            $cid = substr($cid, 1);
+        }
+        if ($sid[0]=='s') {
+            $sid = substr($sid, 1);
+        }
+        $rank = 0;
+        $filename = 'source.'.$langid;
+    } elseif (count($fdata)==7) {
+        list($cid, $sid, $teamid, $probid, $langid, $rank, $filename) = $fdata;
+        if ($cid[0]=='c') {
+            $cid = substr($cid, 1);
+        }
+        if ($sid[0]=='s') {
+            $sid = substr($sid, 1);
+        }
+        if ($teamid[0]=='t') {
+            $teamid = substr($teamid, 1);
+        }
+        if ($probid[0]=='p') {
+            $probid = substr($probid, 1);
+        }
+    } else {
+        logmsg(LOG_DEBUG, "skipping '$src': does not match pattern");
+        continue;
+    }
 
-	// Reconstruct submission data from filename and mtime
-	$fdata = explode('.', $src, 7);
-	// Detect and support obsolete (version <=3.2) sourcefile format
-	if ( count($fdata)==5 ) {
-		logmsg(LOG_DEBUG, "detected old sourcefile format: '$src'");
-		list($cid, $sid, $teamid, $probid, $langid) = $fdata;
-		if ( $cid[0]=='c' ) $cid = substr($cid,1);
-		if ( $sid[0]=='s' ) $sid = substr($sid,1);
-		$rank = 0;
-		$filename = 'source.'.$langid;
-	} else if ( count($fdata)==7 ) {
-		list($cid, $sid, $teamid, $probid, $langid, $rank, $filename) = $fdata;
-		if ( $cid[0]=='c' ) $cid = substr($cid,1);
-		if ( $sid[0]=='s' ) $sid = substr($sid,1);
-		if ( $teamid[0]=='t' ) $teamid = substr($teamid,1);
-		if ( $probid[0]=='p' ) $probid = substr($probid,1);
-	} else {
-		logmsg(LOG_DEBUG, "skipping '$src': does not match pattern");
-		continue;
-	}
+    $submittime = filemtime($f);
 
-	$submittime = filemtime($f);
+    // Convert old-style probid to new numeric one:
+    if (!ctype_digit($probid) && !empty($probname2id[$cid.'-'.$probid])) {
+        $probid = $probname2id[$cid.'-'.$probid];
+    }
 
-	// Convert old-style probid to new numeric one:
-	if ( !ctype_digit($probid) && !empty($probname2id[$cid.'-'.$probid]) ) {
-		$probid = $probname2id[$cid.'-'.$probid];
-	}
+    // Convert old-style team login to new numeric teamid:
+    if (!ctype_digit($teamid) && !empty($teamlogin2id[$teamid])) {
+        $teamid = $teamlogin2id[$teamid];
+    }
 
-	// Convert old-style team login to new numeric teamid:
-	if ( !ctype_digit($teamid) && !empty($teamlogin2id[$teamid]) ) {
-		$teamid = $teamlogin2id[$teamid];
-	}
-
-	// Store submission in array
-	if ( !isset($submissions[$sid]) ) {
-		$submissions[$sid] = array('cid' => $cid,
-		                           'sid' => $sid,
-		                           'teamid' => $teamid,
-		                           'probid' => $probid,
-		                           'langid' => $langid,
-		                           'submittime' => $submittime,
-		                           'files' => array() );
-	}
-	$submissions[$sid]['files'][$rank] = array('source' => $f, 'name' => $filename);
+    // Store submission in array
+    if (!isset($submissions[$sid])) {
+        $submissions[$sid] = array('cid' => $cid,
+                                   'sid' => $sid,
+                                   'teamid' => $teamid,
+                                   'probid' => $probid,
+                                   'langid' => $langid,
+                                   'submittime' => $submittime,
+                                   'files' => array() );
+    }
+    $submissions[$sid]['files'][$rank] = array('source' => $f, 'name' => $filename);
 }
 
 closedir($dh);
 
-foreach ( $submissions as $s ) {
+foreach ($submissions as $s) {
 
-	// Insert submissions into the database
-	$DB->q('START TRANSACTION');
-	$DB->q('INSERT INTO submission
+    // Insert submissions into the database
+    $DB->q('START TRANSACTION');
+    $DB->q(
+        'INSERT INTO submission
 	        (submitid,cid,teamid,probid,langid,submittime)
-	        VALUES (%i, %i, %s, %s, %s, %s)', $s['sid'], $s['cid'],
-	       $s['teamid'], $s['probid'], $s['langid'], $s['submittime']);
+	        VALUES (%i, %i, %s, %s, %s, %s)',
+        $s['sid'],
+        $s['cid'],
+           $s['teamid'],
+        $s['probid'],
+        $s['langid'],
+        $s['submittime']
+    );
 
-	$mainfile = NULL;
-	foreach ( $s['files'] as $rank => $file ) {
-		$DB->q('INSERT INTO submission_file (submitid, filename, rank, sourcecode)
-		        VALUES (%i, %s, %i, %s)', $s['sid'], $file['name'], $rank,
-		       dj_file_get_contents($file['source']));
-		if ( empty($mainfile) ) $mainfile = $file['name'];
-	}
-	$DB->q('COMMIT');
+    $mainfile = null;
+    foreach ($s['files'] as $rank => $file) {
+        $DB->q(
+            'INSERT INTO submission_file (submitid, filename, rank, sourcecode)
+		        VALUES (%i, %s, %i, %s)',
+            $s['sid'],
+            $file['name'],
+            $rank,
+               dj_file_get_contents($file['source'])
+        );
+        if (empty($mainfile)) {
+            $mainfile = $file['name'];
+        }
+    }
+    $DB->q('COMMIT');
 
-	eventlog('submission', $s['sid'], 'create', $s['cid']);
+    eventlog('submission', $s['sid'], 'create', $s['cid']);
 
-	logmsg(LOG_INFO, "inserted $s[teamid]/$s[probid]/$s[langid], " .
-	       "id s$s[sid]/c$s[cid], main file '$mainfile'");
+    logmsg(LOG_INFO, "inserted $s[teamid]/$s[probid]/$s[langid], " .
+           "id s$s[sid]/c$s[cid], main file '$mainfile'");
 }
 
 logmsg(LOG_NOTICE, "finished, restored " . count($submissions) .

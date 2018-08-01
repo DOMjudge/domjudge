@@ -12,19 +12,19 @@ $silent = (@$_SERVER['argv'][1] == "-q");
 
 function t($n, $t, $r)
 {
-	global $done, $failed, $silent;
+    global $done, $failed, $silent;
 
-	$done++;
-	if ( $t === $r ) {
-		if ( !$silent ) {
-			echo "TEST $n: OK\n";
-		}
-	} else {
-		echo "TEST $n: FAIL\n";
-		$failed++;
-		var_dump($t);
-		var_dump($r);
-	}
+    $done++;
+    if ($t === $r) {
+        if (!$silent) {
+            echo "TEST $n: OK\n";
+        }
+    } else {
+        echo "TEST $n: FAIL\n";
+        $failed++;
+        var_dump($t);
+        var_dump($r);
+    }
 }
 
 function empty_error_handler($errno, $errstr, $errfile, $errline)
@@ -48,7 +48,7 @@ require('../lib/lib.dbconfig.php');
 $LIBDBCONFIG = array();
 
 $now = (int)now();
-t('printtime1', printtime($now), strftime('%H:%M',$now));
+t('printtime1', printtime($now), strftime('%H:%M', $now));
 
 require('../lib/www/checkers.jury.php');
 

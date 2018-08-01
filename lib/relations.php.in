@@ -36,22 +36,27 @@ $RELATIONS['clarification']['recipient'] = 'team.teamid&NOCONSTRAINT';
  *
  * Returns an array "table name => action" of matches found.
  */
-function fk_check($keyfield, $value) {
-	global $RELATIONS, $DB;
+function fk_check($keyfield, $value)
+{
+    global $RELATIONS, $DB;
 
-	$ret = array();
-	foreach ( $RELATIONS as $table => $table_rels ) {
-		foreach ( $table_rels as $column => $constraint ) {
-			@list( $foreign, $action ) = explode('&', $constraint);
-			if ( empty($action) ) $action = 'CASCADE';
-			if ( $foreign == $keyfield ) {
-				$c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $column = %s", $value);
-				if ( $c > 0 ) $ret[$table] = $action;
-			}
-		}
-	}
+    $ret = array();
+    foreach ($RELATIONS as $table => $table_rels) {
+        foreach ($table_rels as $column => $constraint) {
+            @list($foreign, $action) = explode('&', $constraint);
+            if (empty($action)) {
+                $action = 'CASCADE';
+            }
+            if ($foreign == $keyfield) {
+                $c = $DB->q("VALUE SELECT count(*) FROM $table WHERE $column = %s", $value);
+                if ($c > 0) {
+                    $ret[$table] = $action;
+                }
+            }
+        }
+    }
 
-	return $ret;
+    return $ret;
 }
 
 /**
@@ -61,31 +66,37 @@ function fk_check($keyfield, $value) {
  */
 function fk_dependent_tables($table)
 {
-	global $RELATIONS;
+    global $RELATIONS;
 
-	$ret = array();
-	// We do a BFS through the list of tables.
-	$queue = array($table);
-	while ( count($queue)>0 ) {
-		$curr_table = reset($queue);
-		unset($queue[array_search($curr_table,$queue)]);
+    $ret = array();
+    // We do a BFS through the list of tables.
+    $queue = array($table);
+    while (count($queue)>0) {
+        $curr_table = reset($queue);
+        unset($queue[array_search($curr_table, $queue)]);
 
-		if ( in_array($curr_table,$ret) ) continue;
-		if ( $curr_table!=$table ) $ret[] = $curr_table;
+        if (in_array($curr_table, $ret)) {
+            continue;
+        }
+        if ($curr_table!=$table) {
+            $ret[] = $curr_table;
+        }
 
-		foreach ( $RELATIONS as $next_table => $table_rels ) {
-			foreach ( $table_rels as $constraint ) {
-				@list( $foreign, $action ) = explode('&', $constraint);
-				@list( $foreign_table, $foreign_key ) = explode('.', $foreign);
-				if ( empty($action) ) $action = 'CASCADE';
-				if ( $foreign_table==$curr_table && $action=='CASCADE' ) {
-					$queue[] = $next_table;
-				}
-			}
-		}
-	}
+        foreach ($RELATIONS as $next_table => $table_rels) {
+            foreach ($table_rels as $constraint) {
+                @list($foreign, $action) = explode('&', $constraint);
+                @list($foreign_table, $foreign_key) = explode('.', $foreign);
+                if (empty($action)) {
+                    $action = 'CASCADE';
+                }
+                if ($foreign_table==$curr_table && $action=='CASCADE') {
+                    $queue[] = $next_table;
+                }
+            }
+        }
+    }
 
-	return $ret;
+    return $ret;
 }
 
 /**
@@ -99,31 +110,46 @@ function fk_dependent_tables($table)
  */
 function fk_dependent_rows(&$results, $table, $column, $value, $depth = 0)
 {
-	global $RELATIONS, $KEYS, $DB;
+    global $RELATIONS, $KEYS, $DB;
 
-	if ( !array_key_exists($table, $KEYS) ) error("invalid table '$table'");
-	if ( $depth>=10 ) error("fk_dependent_rows recursion depth exceeded at $depth");
+    if (!array_key_exists($table, $KEYS)) {
+        error("invalid table '$table'");
+    }
+    if ($depth>=10) {
+        error("fk_dependent_rows recursion depth exceeded at $depth");
+    }
 
-	$keys = $KEYS[$table];
-	$rows = $DB->q("TABLE SELECT %Al FROM $table WHERE `$column` = %s", $keys, $value);
+    $keys = $KEYS[$table];
+    $rows = $DB->q("TABLE SELECT %Al FROM $table WHERE `$column` = %s", $keys, $value);
 
-	foreach ( $RELATIONS as $next_table => $table_rels ) {
-		foreach ( $table_rels as $next_column => $constraint ) {
-			@list( $foreign, $action ) = explode('&', $constraint);
-			list( $foreign_table, $foreign_key ) = explode('.', $foreign);
-			if ( empty($action) ) $action = 'CASCADE';
-			if ( in_array($action,array('SETNULL','NOCONSTRAINT')) ) continue;
-			if ( $foreign_table == $table ) {
-				foreach ( $rows as $row ) {
-					fk_dependent_rows($results, $next_table, $next_column,
-					                  $row[$foreign_key], $depth+1);
-				}
-			}
-		}
-	}
+    foreach ($RELATIONS as $next_table => $table_rels) {
+        foreach ($table_rels as $next_column => $constraint) {
+            @list($foreign, $action) = explode('&', $constraint);
+            list($foreign_table, $foreign_key) = explode('.', $foreign);
+            if (empty($action)) {
+                $action = 'CASCADE';
+            }
+            if (in_array($action, array('SETNULL','NOCONSTRAINT'))) {
+                continue;
+            }
+            if ($foreign_table == $table) {
+                foreach ($rows as $row) {
+                    fk_dependent_rows(
+                        $results,
+                        $next_table,
+                        $next_column,
+                                      $row[$foreign_key],
+                        $depth+1
+                    );
+                }
+            }
+        }
+    }
 
-	foreach ( $rows as $row ) {
-		$res = array($table, $row);
-		if ( !in_array($results,$res) ) $results[] = $res;
-	}
+    foreach ($rows as $row) {
+        $res = array($table, $row);
+        if (!in_array($results, $res)) {
+            $results[] = $res;
+        }
+    }
 }
