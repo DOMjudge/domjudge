@@ -70,23 +70,23 @@ $updates = array(
     'clarifications' =>
     (empty($cid) ? array() :
       $DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
-	          FROM clarification
-	          WHERE sender IS NOT NULL AND cid = %i AND answered = 0', $cid)),
+              FROM clarification
+              WHERE sender IS NOT NULL AND cid = %i AND answered = 0', $cid)),
     'judgehosts' =>
     $DB->q(
         'TABLE SELECT hostname, polltime
-	        FROM judgehost
-	        WHERE active = 1 AND unix_timestamp()-polltime >= %i',
+            FROM judgehost
+            WHERE active = 1 AND unix_timestamp()-polltime >= %i',
            dbconfig_get('judgehost_critical', 120)
     ),
     'rejudgings' =>
     $DB->q('TABLE SELECT rejudgingid
-	        FROM rejudging
-	        WHERE endtime IS NULL'),
+            FROM rejudging
+            WHERE endtime IS NULL'),
     'internal_error' =>
     $DB->q('TABLE SELECT errorid
-	        FROM internal_error
-	        WHERE status=%s', 'open'),
+            FROM internal_error
+            WHERE status=%s', 'open'),
 );
 
 // set up twig

@@ -85,7 +85,7 @@ foreach ($langdata as $langid => $langdata) {
     <input type="text" class="form-control" name="entry_point" id="entry_point" aria-describedby="entrypointhelp">
     <small id="entrypointhelp" class="form-text text-muted">The entry point for your code.</small>
   </div>
-  <input type="submit" name="submit" value="Submit" class="btn btn-primary" /> 
+  <input type="submit" name="submit" value="Submit" class="btn btn-primary" />
 </form>
     <script type="text/javascript">initFileUploads(<?=$maxfiles?>);</script>
 </div>

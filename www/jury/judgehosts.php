@@ -34,21 +34,21 @@ if ($cmd == 'add' || $cmd == 'edit') {
     requireAdmin();
 
     $restrictions = $DB->q('KEYVALUETABLE SELECT restrictionid, name
-	                        FROM judgehost_restriction ORDER BY restrictionid');
+                            FROM judgehost_restriction ORDER BY restrictionid');
     $restrictions = array(null => '-- No restrictions --') + $restrictions;
 
     echo addForm('edit.php'); ?>
 <script type="text/template" id="judgehost_template">
 <tr>
-	<td>
-		<?php echo addInput("data[{id}][hostname]", null, 20, 50, 'pattern="[A-Za-z0-9._-]+"'); ?>
-	</td>
-	<td>
-		<?php echo addSelect("data[{id}][active]", array(1=>'yes',0=>'no'), '1', true); ?>
-	</td>
-	<td>
-		<?php echo addSelect("data[{id}][restrictionid]", $restrictions, null, true); ?>
-	</td>
+    <td>
+        <?php echo addInput("data[{id}][hostname]", null, 20, 50, 'pattern="[A-Za-z0-9._-]+"'); ?>
+    </td>
+    <td>
+        <?php echo addSelect("data[{id}][active]", array(1=>'yes',0=>'no'), '1', true); ?>
+    </td>
+    <td>
+        <?php echo addSelect("data[{id}][restrictionid]", $restrictions, null, true); ?>
+    </td>
 </tr>
 </script>
 <?php

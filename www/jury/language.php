@@ -94,8 +94,8 @@ if (!empty($cmd)):
 <td>
 <?php
 $execmap = $DB->q("KEYVALUETABLE SELECT execid,description FROM executable
-			WHERE type = 'compile'
-			ORDER BY execid");
+            WHERE type = 'compile'
+            ORDER BY execid");
 $execmap[''] = 'none';
 echo addSelect('data[0][compile_script]', $execmap, @$row['compile_script'], true);
 ?>

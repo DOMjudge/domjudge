@@ -35,7 +35,7 @@ function systemDiff($oldfile, $newfile)
     $oldname = basename($oldfile);
     $newname = basename($newfile);
     return `diff -Bdt --strip-trailing-cr -U2 \
-	             --label $oldname --label $newname $oldfile $newfile 2>&1`;
+                 --label $oldname --label $newname $oldfile $newfile 2>&1`;
 }
 
 function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid)
@@ -223,7 +223,7 @@ if (empty($submission)) {
 // Download was requested
 if (isset($_GET['fetch'])) {
     $row = $DB->q('TUPLE SELECT filename, sourcecode FROM submission_file
-	               WHERE submitid = %i AND rank = %i', $id, $_GET['fetch']);
+                   WHERE submitid = %i AND rank = %i', $id, $_GET['fetch']);
     header("Content-Type: text/plain; name=\"" . $row['filename'] .
            "\"; charset=" . DJ_CHARACTER_SET);
     header("Content-Disposition: attachment; filename=\"" . $row['filename'] . "\"");
@@ -260,32 +260,32 @@ $html .= "</div>";
 
 if ($submission['origsubmitid']) {
     $origdata    = $DB->q('TUPLE SELECT * FROM submission
-	                       WHERE submitid = %i', $submission['origsubmitid']);
+                           WHERE submitid = %i', $submission['origsubmitid']);
     $origsources = $DB->q('TABLE SELECT * FROM submission_file
-	                       WHERE submitid = %i', $submission['origsubmitid']);
+                           WHERE submitid = %i', $submission['origsubmitid']);
     $olddata     = $DB->q(
         'MAYBETUPLE SELECT * FROM submission
-	                       WHERE probid = %i AND langid = %s AND submittime < %s
-	                       AND origsubmitid = %i ORDER BY submittime DESC LIMIT 1',
+                           WHERE probid = %i AND langid = %s AND submittime < %s
+                           AND origsubmitid = %i ORDER BY submittime DESC LIMIT 1',
                           $submission['probid'],
         $submission['langid'],
                           $submission['submittime'],
         $submission['origsubmitid']
     );
     $oldsources  = $DB->q('TABLE SELECT * FROM submission_file
-	                       WHERE submitid = %i', $olddata['submitid']);
+                           WHERE submitid = %i', $olddata['submitid']);
 } else {
     $olddata     = $DB->q(
         'MAYBETUPLE SELECT * FROM submission
-	                       WHERE teamid = %i AND probid = %i AND langid = %s AND submittime < %s
-	                       ORDER BY submittime DESC LIMIT 1',
+                           WHERE teamid = %i AND probid = %i AND langid = %s AND submittime < %s
+                           ORDER BY submittime DESC LIMIT 1',
                           $submission['teamid'],
         $submission['probid'],
         $submission['langid'],
                           $submission['submittime']
     );
     $oldsources  = $DB->q('TABLE SELECT * FROM submission_file
-	                       WHERE submitid = %i', $olddata['submitid']);
+                           WHERE submitid = %i', $olddata['submitid']);
 }
 
 if ($olddata !== null) {

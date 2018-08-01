@@ -17,8 +17,8 @@ if (isset($id)) {
         $req = null;
     } else {
         $req = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
-		               LEFT JOIN team t ON (t.teamid = q.sender)
-		               WHERE q.cid IN (%Ai) AND q.clarid = %i', $cids, $id);
+                       LEFT JOIN team t ON (t.teamid = q.sender)
+                       WHERE q.cid IN (%Ai) AND q.clarid = %i', $cids, $id);
     }
 
     if (! $req) {
@@ -95,9 +95,9 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
 
     $newid = $DB->q(
         'RETURNID INSERT INTO clarification
-	                 (cid, respid, submittime, recipient, probid, category, queue, body,
-	                  answered, jury_member)
-	                 VALUES (%i, ' .
+                     (cid, respid, submittime, recipient, probid, category, queue, body,
+                      answered, jury_member)
+                     VALUES (%i, ' .
                     ($respid===null ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %s, %s, %i, ' .
                     (isset($jury_member) ? '%s)' : 'NULL %_)'),
                     $cid,
@@ -131,11 +131,11 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
         $teams = $DB->q('COLUMN SELECT teamid FROM team');
         foreach ($teams as $teamid) {
             $DB->q('INSERT INTO team_unread (mesgid, teamid)
-			        VALUES (%i, %i)', $newid, $teamid);
+                    VALUES (%i, %i)', $newid, $teamid);
         }
     } else {
         $DB->q('INSERT INTO team_unread (mesgid, teamid)
-		        VALUES (%i, %i)', $newid, $sendto);
+                VALUES (%i, %i)', $newid, $sendto);
     }
 
     // redirect back to the original location
@@ -206,8 +206,8 @@ if (! $isgeneral) {
 
     if (! empty($req['respid'])) {
         $orig = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
-	                LEFT JOIN team t ON (t.teamid = q.sender)
-	                WHERE q.clarid = %i', $respid);
+                    LEFT JOIN team t ON (t.teamid = q.sender)
+                    WHERE q.clarid = %i', $respid);
         echo '<p>See the <a href="clarification.php?id=' . $respid .
         '">original clarification ' . $respid . '</a> by ' .
         ($orig['sender']==null ? 'Jury' :
@@ -242,29 +242,29 @@ if ($isgeneral) {
 
 ?>
 <script type="text/javascript">
-	$(function() {
-		$(['subject', 'queue']).each(function(_, field) {
-			$('.clarification-' + field + '-change-button').on('click', function () {
-				$(this).closest('.clarification-' + field).hide();
-				$(this).closest('td').find('.clarification-' + field + '-form').show();
-			});
-			$('.clarification-' + field + '-cancel-button').on('click', function () {
-				$(this).closest('.clarification-' + field + '-form').hide();
-				$(this).closest('td').find('.clarification-' + field).show();
-			});
-			$('.clarification-' + field + '-form select').on('change', function () {
-				var $select = $(this);
-				var $form = $('.clarification-' + field + '-form');
-				var clarId = $form.data('clarification-id');
-				var value = $select.find(':selected').text();
-				if (confirm('Are you sure you want to change the ' + field + ' of clarification ' + clarId + ' to "' + value + '"?')) {
-					$form.find('form').submit();
-				} else {
-					$select.val($form.data('current-selected-' + field));
-				}
-			});
-		});
-	});
+    $(function() {
+        $(['subject', 'queue']).each(function(_, field) {
+            $('.clarification-' + field + '-change-button').on('click', function () {
+                $(this).closest('.clarification-' + field).hide();
+                $(this).closest('td').find('.clarification-' + field + '-form').show();
+            });
+            $('.clarification-' + field + '-cancel-button').on('click', function () {
+                $(this).closest('.clarification-' + field + '-form').hide();
+                $(this).closest('td').find('.clarification-' + field).show();
+            });
+            $('.clarification-' + field + '-form select').on('change', function () {
+                var $select = $(this);
+                var $form = $('.clarification-' + field + '-form');
+                var clarId = $form.data('clarification-id');
+                var value = $select.find(':selected').text();
+                if (confirm('Are you sure you want to change the ' + field + ' of clarification ' + clarId + ' to "' + value + '"?')) {
+                    $form.find('form').submit();
+                } else {
+                    $select.val($form.data('current-selected-' + field));
+                }
+            });
+        });
+    });
 </script>
 <?php
 

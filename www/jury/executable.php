@@ -28,7 +28,7 @@ if (isset($_GET['fetch'])) {
 
     $size = $DB->q(
         "MAYBEVALUE SELECT OCTET_LENGTH(zipfile)
-	                FROM executable WHERE execid = %s",
+                    FROM executable WHERE execid = %s",
                    $id
     );
 
@@ -42,7 +42,7 @@ if (isset($_GET['fetch'])) {
     header("Content-Length: $size");
 
     echo $DB->q("VALUE SELECT SQL_NO_CACHE zipfile FROM executable
-	             WHERE execid = %s", $id);
+                 WHERE execid = %s", $id);
 
     exit(0);
 }
@@ -76,7 +76,7 @@ if (isset($_POST['upload'])) {
             if (!empty($id)) {
                 $DB->q(
                     'UPDATE executable SET description=%s, md5sum=%s, zipfile=%s, type=%s
-				        WHERE execid=%s',
+                        WHERE execid=%s',
                        $desc,
                     md5($content),
                     $content,
@@ -90,7 +90,7 @@ if (isset($_POST['upload'])) {
                 }
                 $DB->q(
                     'INSERT INTO executable (execid, description, md5sum, zipfile, type)
-				        VALUES (%s, %s, %s, %s, %s)',
+                        VALUES (%s, %s, %s, %s, %s)',
                        $newid,
                     $desc,
                     md5($content),
@@ -131,9 +131,9 @@ if (!empty($cmd)):
     if ($cmd == 'edit') {
         echo "<tr><td>Executable ID:</td><td class=\"exec\">";
         $row = $DB->q('TUPLE SELECT execid, description, md5sum, type,
-		               OCTET_LENGTH(zipfile) AS size
-		               FROM executable
-		               WHERE execid = %s', $id);
+                       OCTET_LENGTH(zipfile) AS size
+                       FROM executable
+                       WHERE execid = %s', $id);
         echo addHidden('keydata[0][execid]', $row['execid']);
         echo specialchars($row['execid']);
     } else {
@@ -214,17 +214,17 @@ if (IS_ADMIN) {
 <?php
 if ($data['type'] == 'compare') {
     $res = $DB->q('SELECT probid AS id FROM problem
-	               WHERE special_compare = %s ORDER BY probid', $data['execid']);
+                   WHERE special_compare = %s ORDER BY probid', $data['execid']);
     $page = "problem";
     $prefix = "p";
 } elseif ($data['type'] == 'compile') {
     $res = $DB->q('SELECT langid AS id FROM language
-	               WHERE compile_script = %s ORDER BY langid', $data['execid']);
+                   WHERE compile_script = %s ORDER BY langid', $data['execid']);
     $page = "language";
     $prefix = "";
 } elseif ($data['type'] == 'run') {
     $res = $DB->q('SELECT probid AS id FROM problem
-	               WHERE special_run = %s ORDER BY probid', $data['execid']);
+                   WHERE special_run = %s ORDER BY probid', $data['execid']);
     $page = "problem";
     $prefix = "p";
 }

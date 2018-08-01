@@ -32,7 +32,7 @@ function download($probid, $rank, $file)
     if ($file=='image') {
         $ext = $DB->q(
             'MAYBEVALUE SELECT image_type
-		               FROM testcase WHERE probid = %i AND rank = %i',
+                       FROM testcase WHERE probid = %i AND rank = %i',
                       $probid,
             $rank
         );
@@ -45,7 +45,7 @@ function download($probid, $rank, $file)
 
     $size = $DB->q(
         "MAYBEVALUE SELECT OCTET_LENGTH($file)
-	                FROM testcase WHERE probid = %i AND rank = %i",
+                    FROM testcase WHERE probid = %i AND rank = %i",
                    $probid,
         $rank
     );
@@ -62,7 +62,7 @@ function download($probid, $rank, $file)
     // This may not be good enough for large testsets, but streaming them
     // directly from the database query result seems overkill to implement.
     echo $DB->q("VALUE SELECT SQL_NO_CACHE $file FROM testcase
-	             WHERE probid = %i AND rank = %i", $probid, $rank);
+                 WHERE probid = %i AND rank = %i", $probid, $rank);
 }
 
 function reorder_case($rank, $move, $data, $probid)
@@ -90,11 +90,11 @@ function reorder_case($rank, $move, $data, $probid)
         $tmprank = 999999;
         $DB->q('START TRANSACTION');
         $DB->q('UPDATE testcase SET rank = %i
-		        WHERE probid = %i AND rank = %i', $tmprank, $probid, $other);
+                WHERE probid = %i AND rank = %i', $tmprank, $probid, $other);
         $DB->q('UPDATE testcase SET rank = %i
-		        WHERE probid = %i AND rank = %i', $other, $probid, $rank);
+                WHERE probid = %i AND rank = %i', $other, $probid, $rank);
         $DB->q('UPDATE testcase SET rank = %i
-		        WHERE probid = %i AND rank = %i', $rank, $probid, $tmprank);
+                WHERE probid = %i AND rank = %i', $rank, $probid, $tmprank);
         $DB->q('COMMIT');
         auditlog('testcase', $probid, 'switch rank', "$rank <=> $other");
     }
@@ -113,7 +113,7 @@ function check_updated_file($probid, $rank, $fileid, $file)
         $content = dj_file_get_contents($_FILES[$fileid]['tmp_name'][$rank]);
         if ($DB->q(
             "VALUE SELECT count(testcaseid)
-		             FROM testcase WHERE probid = %i AND rank = %i",
+                     FROM testcase WHERE probid = %i AND rank = %i",
                     $probid,
             $rank
         )==0) {
@@ -134,7 +134,7 @@ function check_updated_file($probid, $rank, $fileid, $file)
 
             $DB->q(
                 'UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
-			        WHERE probid = %i AND rank = %i',
+                    WHERE probid = %i AND rank = %i',
                    $content,
                 $thumb,
                 $type,
@@ -144,7 +144,7 @@ function check_updated_file($probid, $rank, $fileid, $file)
         } else {
             $DB->q(
                 "UPDATE testcase SET md5sum_$file = %s, $file = %s
-			        WHERE probid = %i AND rank = %i",
+                    WHERE probid = %i AND rank = %i",
                    md5($content),
                 $content,
                 $probid,
@@ -180,7 +180,7 @@ function check_update($probid, $rank, $FILES)
 
     // check for updated sample
     $affected = $DB->q('RETURNAFFECTED UPDATE testcase SET sample = %i WHERE probid = %i
-		AND rank = %i', isset($_POST['sample'][$rank]), $probid, $rank);
+        AND rank = %i', isset($_POST['sample'][$rank]), $probid, $rank);
     if ($affected) {
         $result .= "<li>Set testcase $rank to be " .
                (isset($_POST['sample'][$rank]) ? "" : "not ") .
@@ -190,7 +190,7 @@ function check_update($probid, $rank, $FILES)
     // check for updated description
     if (isset($_POST['description'][$rank])) {
         $DB->q('UPDATE testcase SET description = %s WHERE probid = %i
-		        AND rank = %i', $_POST['description'][$rank], $probid, $rank);
+                AND rank = %i', $_POST['description'][$rank], $probid, $rank);
         auditlog('testcase', $probid, 'updated description', "rank $rank");
 
         $result .= "<li>Updated description for testcase $rank</li>\n";
@@ -216,8 +216,8 @@ function check_add($probid, $rank, $FILES)
 
         $DB->q(
             "INSERT INTO testcase
-		        (probid,rank,md5sum_input,md5sum_output,input,output,description,sample)
-		        VALUES (%i,%i,%s,%s,%s,%s,%s,%i)",
+                (probid,rank,md5sum_input,md5sum_output,input,output,description,sample)
+                VALUES (%i,%i,%s,%s,%s,%s,%s,%i)",
                $probid,
             $rank,
             md5(@$content['input']),
@@ -233,7 +233,7 @@ function check_add($probid, $rank, $FILES)
 
             $DB->q(
                 'UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
-			        WHERE probid = %i AND rank = %i',
+                    WHERE probid = %i AND rank = %i',
                    @$content['image'],
                 $thumb,
                 $type,
@@ -268,11 +268,11 @@ function read_testdata($probid)
 {
     global $DB;
     return $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, testcaseid, rank,
-	               description, sample, image_type,
-	               OCTET_LENGTH(input)  AS size_input,  md5sum_input,
-	               OCTET_LENGTH(output) AS size_output, md5sum_output,
-	               OCTET_LENGTH(image)  AS size_image
-	               FROM testcase WHERE probid = %i ORDER BY rank', $probid);
+                   description, sample, image_type,
+                   OCTET_LENGTH(input)  AS size_input,  md5sum_input,
+                   OCTET_LENGTH(output) AS size_output, md5sum_output,
+                   OCTET_LENGTH(image)  AS size_image
+                   FROM testcase WHERE probid = %i ORDER BY rank', $probid);
 }
 
 // Download testcase
@@ -319,7 +319,7 @@ if (count($data)<(int)key($data)) {
     $newrank = 1;
     foreach ($data as $rank => $row) {
         $DB->q('UPDATE testcase SET rank = %i
-		        WHERE probid = %i AND rank = %i', $newrank++, $probid, $rank);
+                WHERE probid = %i AND rank = %i', $newrank++, $probid, $rank);
     }
 
     $result .= "<li>Test case rankings reordered.</li>\n";

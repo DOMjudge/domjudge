@@ -21,9 +21,9 @@ echo "<script type=\"text/javascript\">\n<!--\n";
 
 if ($fdata['started'] || checkrole('jury')) {
     $probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
-	                    INNER JOIN contestproblem USING (probid)
-	                    WHERE cid = %i AND allow_submit = 1
-	                    ORDER BY shortname', $cid);
+                        INNER JOIN contestproblem USING (probid)
+                        WHERE cid = %i AND allow_submit = 1
+                        ORDER BY shortname', $cid);
 
     putgetMainExtension($langdata);
 

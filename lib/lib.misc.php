@@ -37,24 +37,24 @@ function getCurContests(
     }
     if ($onlyofteam !== null && $onlyofteam > 0) {
         $contests = $DB->q("SELECT * FROM contest
-		                    LEFT JOIN contestteam USING (cid)
-		                    WHERE (contestteam.teamid = %i OR contest.public = 1)
-		                    AND enabled = 1 ${extra}
-		                    AND ( deactivatetime IS NULL OR
-		                          deactivatetime > UNIX_TIMESTAMP() )
-		                    ORDER BY activatetime", $onlyofteam);
+                            LEFT JOIN contestteam USING (cid)
+                            WHERE (contestteam.teamid = %i OR contest.public = 1)
+                            AND enabled = 1 ${extra}
+                            AND ( deactivatetime IS NULL OR
+                                  deactivatetime > UNIX_TIMESTAMP() )
+                            ORDER BY activatetime", $onlyofteam);
     } elseif ($onlyofteam === -1) {
         $contests = $DB->q("SELECT * FROM contest
-		                    WHERE enabled = 1 AND public = 1 ${extra}
-		                    AND ( deactivatetime IS NULL OR
-		                          deactivatetime > UNIX_TIMESTAMP() )
-		                    ORDER BY activatetime");
+                            WHERE enabled = 1 AND public = 1 ${extra}
+                            AND ( deactivatetime IS NULL OR
+                                  deactivatetime > UNIX_TIMESTAMP() )
+                            ORDER BY activatetime");
     } else {
         $contests = $DB->q("SELECT * FROM contest
-		                    WHERE enabled = 1 ${extra}
-		                    AND ( deactivatetime IS NULL OR
-		                          deactivatetime > UNIX_TIMESTAMP() )
-		                    ORDER BY activatetime");
+                            WHERE enabled = 1 ${extra}
+                            AND ( deactivatetime IS NULL OR
+                                  deactivatetime > UNIX_TIMESTAMP() )
+                            ORDER BY activatetime");
     }
     $contests = $contests->getkeytable($key);
     if (!$fulldata) {
@@ -64,7 +64,7 @@ function getCurContests(
     if (ALLOW_REMOVED_INTERVALS) {
         foreach ($contests as $cid => &$contest) {
             $res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
-			               FROM removed_interval WHERE cid = %i', $cid);
+                           FROM removed_interval WHERE cid = %i', $cid);
 
             $contest['removed_intervals'] = $res;
         }
@@ -83,7 +83,7 @@ function getContest($cid)
 
     if (ALLOW_REMOVED_INTERVALS) {
         $res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
-		               FROM removed_interval WHERE cid = %i', $cid);
+                       FROM removed_interval WHERE cid = %i', $cid);
 
         $contest['removed_intervals'] = $res;
     }
@@ -140,8 +140,8 @@ function problemVisible($probid)
 
     return $DB->q(
         'MAYBETUPLE SELECT probid FROM problem
-	               INNER JOIN contestproblem USING (probid)
-	               WHERE cid = %i AND allow_submit = 1 AND probid = %i',
+                   INNER JOIN contestproblem USING (probid)
+                   WHERE cid = %i AND allow_submit = 1 AND probid = %i',
                   $cdata['cid'],
         $probid
     ) !== null;
@@ -245,15 +245,15 @@ function calcScoreRow($cid, $team, $prob)
     // resets the contest time after successful judging.
     $result = $DB->q(
         'SELECT result, verified, submittime,
-	                  (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze
-	                  FROM submission s
-	                  LEFT JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
-	                  LEFT OUTER JOIN contest c ON(c.cid=s.cid)
-	                  WHERE teamid = %i AND probid = %i AND s.cid = %i AND s.valid = 1 ' .
+                      (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze
+                      FROM submission s
+                      LEFT JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
+                      LEFT OUTER JOIN contest c ON(c.cid=s.cid)
+                      WHERE teamid = %i AND probid = %i AND s.cid = %i AND s.valid = 1 ' .
                      (dbconfig_get('compile_penalty', 1) ? "" :
                        "AND (j.result IS NULL OR j.result != 'compiler-error') ") .
                      'AND submittime < c.endtime
-	                  ORDER BY submittime',
+                      ORDER BY submittime',
                      $team,
         $prob,
         $cid
@@ -303,10 +303,10 @@ function calcScoreRow($cid, $team, $prob)
     // insert or update the values in the public/team scores table
     $DB->q(
         'REPLACE INTO scorecache
-	        (cid, teamid, probid,
-	         submissions_restricted, pending_restricted, solvetime_restricted, is_correct_restricted,
-	         submissions_public, pending_public, solvetime_public, is_correct_public)
-	        VALUES (%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i)',
+            (cid, teamid, probid,
+             submissions_restricted, pending_restricted, solvetime_restricted, is_correct_restricted,
+             submissions_public, pending_public, solvetime_public, is_correct_public)
+            VALUES (%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i)',
            $cid,
         $team,
         $prob,
@@ -358,9 +358,9 @@ function updateRankCache($cid, $team)
 
     // Fetch values from scoreboard cache per problem
     $scoredata = $DB->q("SELECT *, cp.points
-	                     FROM scorecache
-	                     LEFT JOIN contestproblem cp USING(probid,cid)
-	                     WHERE cid = %i and teamid = %i", $cid, $team);
+                         FROM scorecache
+                         LEFT JOIN contestproblem cp USING(probid,cid)
+                         WHERE cid = %i and teamid = %i", $cid, $team);
 
     $num_points = array('public' => 0, 'restricted' => 0);
     $total_time = array('public' => $team_penalty, 'restricted' => $team_penalty);
@@ -381,9 +381,9 @@ function updateRankCache($cid, $team)
     // Update the rank cache table
     $DB->q(
         "REPLACE INTO rankcache (cid, teamid,
-	        points_restricted, totaltime_restricted,
-	        points_public, totaltime_public)
-	        VALUES (%i,%i,%i,%i,%i,%i)",
+            points_restricted, totaltime_restricted,
+            points_public, totaltime_public)
+            VALUES (%i,%i,%i,%i,%i,%i)",
            $cid,
         $team,
            $num_points['restricted'],
@@ -409,9 +409,9 @@ function updateBalloons($submitid)
     global $DB;
 
     $subm = $DB->q('TUPLE SELECT s.submitid, s.cid, s.probid, s.teamid, j.result, j.verified
-	                FROM submission s
-	                LEFT JOIN judging j ON (j.submitid=s.submitid AND j.valid=1)
-	                WHERE s.submitid = %i', $submitid);
+                    FROM submission s
+                    LEFT JOIN judging j ON (j.submitid=s.submitid AND j.valid=1)
+                    WHERE s.submitid = %i', $submitid);
 
     if (@$subm['result'] !== 'correct') {
         return;
@@ -424,10 +424,10 @@ function updateBalloons($submitid)
     // prevent duplicate balloons in case of multiple correct submissions
     $numcorrect = $DB->q(
         'VALUE SELECT count(b.submitid)
-	                      FROM balloon b
-	                      LEFT JOIN submission s USING(submitid)
-	                      WHERE valid = 1 AND probid = %i
-	                      AND teamid = %i AND cid = %i',
+                          FROM balloon b
+                          LEFT JOIN submission s USING(submitid)
+                          WHERE valid = 1 AND probid = %i
+                          AND teamid = %i AND cid = %i',
                          $subm['probid'],
         $subm['teamid'],
         $subm['cid']
@@ -436,7 +436,7 @@ function updateBalloons($submitid)
     if ($numcorrect == 0) {
         $balloons_enabled = (bool)$DB->q(
             'VALUE SELECT process_balloons
-		                                  FROM contest WHERE cid = %i',
+                                          FROM contest WHERE cid = %i',
                                          $subm['cid']
         );
         if ($balloons_enabled) {
@@ -858,7 +858,7 @@ function submit_solution(
 
     // Check 2: valid parameters?
     if (! $langdata = $DB->q('MAYBETUPLE SELECT langid, require_entry_point FROM language
-	                        WHERE langid = %s AND allow_submit = 1', $lang)) {
+                            WHERE langid = %s AND allow_submit = 1', $lang)) {
         error("Language '$lang' not found in database or not submittable.");
     }
     $langid = $langdata['langid'];
@@ -866,14 +866,14 @@ function submit_solution(
         error("Entry point required for '$langid' but none given.");
     }
     if (! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team
-	                        WHERE teamid = %i' .
+                            WHERE teamid = %i' .
                            (checkrole('jury') ? '' : ' AND enabled = 1'), $team)) {
         error("Team '$team' not found in database or not enabled.");
     }
     $probdata = $DB->q(
         'MAYBETUPLE SELECT probid, points FROM problem
-	                    INNER JOIN contestproblem USING (probid)
-	                    WHERE probid = %s AND cid = %i AND allow_submit = 1',
+                        INNER JOIN contestproblem USING (probid)
+                        WHERE probid = %s AND cid = %i AND allow_submit = 1',
                        $prob,
         $contest
     );
@@ -916,9 +916,9 @@ function submit_solution(
     $DB->q('START TRANSACTION');
     $id = $DB->q(
         'RETURNID INSERT INTO submission
-		      (cid, teamid, probid, langid, submittime, origsubmitid, entry_point,
-	               externalid, externalresult)
-	              VALUES (%i, %i, %i, %s, %s, %i, %s, %s, %s)',
+              (cid, teamid, probid, langid, submittime, origsubmitid, entry_point,
+                   externalid, externalresult)
+                  VALUES (%i, %i, %i, %s, %s, %i, %s, %s, %s)',
                  $contest,
         $teamid,
         $probid,
@@ -933,7 +933,7 @@ function submit_solution(
     for ($rank=0; $rank<count($files); $rank++) {
         $DB->q(
             'INSERT INTO submission_file
-		        (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
+                (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
                $id,
             $filenames[$rank],
             $rank,
@@ -946,7 +946,7 @@ function submit_solution(
     // submissions.
     if (checkrole('jury') && !empty($results)) {
         $DB->q('UPDATE submission SET expected_results=%s
-		        WHERE submitid=%i', dj_json_encode($results), $id);
+                WHERE submitid=%i', dj_json_encode($results), $id);
     }
     eventlog('submission', $id, 'create', $contest);
     $DB->q('COMMIT');
@@ -1030,9 +1030,9 @@ function rejudge($table, $id, $include_all, $full_rejudge, $reason = null, $user
         $restrictions .= 'result != \'correct\' AND ';
     }
     $res = $DB->q('SELECT j.judgingid, s.submitid, s.teamid, s.probid, j.cid, s.rejudgingid
-	               FROM judging j
-	               LEFT JOIN submission s USING (submitid)
-	               WHERE j.cid IN (%Ai) AND j.valid = 1 AND ' .
+                   FROM judging j
+                   LEFT JOIN submission s USING (submitid)
+                   WHERE j.cid IN (%Ai) AND j.valid = 1 AND ' .
                   $restrictions .
                   $tablemap[$table] . ' = %s', $cids, $id);
 
@@ -1043,7 +1043,7 @@ function rejudge($table, $id, $include_all, $full_rejudge, $reason = null, $user
     if ($full_rejudge) {
         $rejudgingid = $DB->q(
             'RETURNID INSERT INTO rejudging
-		                       (userid_start, starttime, reason) VALUES (%i, %s, %s)',
+                               (userid_start, starttime, reason) VALUES (%i, %s, %s)',
                               $userid,
             now(),
             $reason
@@ -1085,7 +1085,7 @@ function rejudge($table, $id, $include_all, $full_rejudge, $reason = null, $user
         // Prioritize single submission rejudgings
         if ($table == 'submission') {
             $DB->q('UPDATE team SET judging_last_started = NULL
-			        WHERE teamid = %i', $jud['teamid']);
+                    WHERE teamid = %i', $jud['teamid']);
         }
 
         if (!$full_rejudge) {
@@ -1115,7 +1115,7 @@ function rejudging_finish($rejudgingid, $request, $userid = null, $show_progress
     }
 
     $rejdata = $DB->q('TUPLE SELECT * FROM rejudging
-	                   WHERE rejudgingid=%i', $rejudgingid);
+                       WHERE rejudgingid=%i', $rejudgingid);
 
     if (! $rejdata) {
         error("Invalid rejudging ID");
@@ -1126,9 +1126,9 @@ function rejudging_finish($rejudgingid, $request, $userid = null, $show_progress
     }
 
     $todo = $DB->q('VALUE SELECT COUNT(*) FROM submission
-	                WHERE rejudgingid=%i', $rejudgingid);
+                    WHERE rejudgingid=%i', $rejudgingid);
     $done = $DB->q('VALUE SELECT COUNT(*) FROM judging
-	                WHERE rejudgingid=%i AND endtime IS NOT NULL', $rejudgingid);
+                    WHERE rejudgingid=%i AND endtime IS NOT NULL', $rejudgingid);
     $todo -= $done;
 
     if ($request=='apply' && $todo > 0) {
@@ -1136,10 +1136,10 @@ function rejudging_finish($rejudgingid, $request, $userid = null, $show_progress
     }
 
     $res = $DB->q('SELECT s.submitid, s.cid, s.teamid, s.probid, j.judgingid, j.result
-	               FROM submission s
-	               LEFT JOIN judging j USING(submitid)
-	               WHERE s.rejudgingid=%i
-	               AND j.rejudgingid=%i', $rejudgingid, $rejudgingid);
+                   FROM submission s
+                   LEFT JOIN judging j USING(submitid)
+                   WHERE s.rejudgingid=%i
+                   AND j.rejudgingid=%i', $rejudgingid, $rejudgingid);
 
     auditlog('rejudging', $rejudgingid, $request.'ing rejudge', '(start)');
 
@@ -1151,17 +1151,17 @@ function rejudging_finish($rejudgingid, $request, $userid = null, $show_progress
             $DB->q('START TRANSACTION');
             // first invalidate old judging, maybe different from prevjudgingid!
             $DB->q('UPDATE judging SET valid=0
-			        WHERE submitid=%i', $row['submitid']);
+                    WHERE submitid=%i', $row['submitid']);
             // then set judging to valid
             $DB->q('UPDATE judging SET valid=1
-			        WHERE submitid=%i AND rejudgingid=%i', $row['submitid'], $rejudgingid);
+                    WHERE submitid=%i AND rejudgingid=%i', $row['submitid'], $rejudgingid);
             // remove relation from submission to rejudge
             $DB->q('UPDATE submission SET rejudgingid=NULL
-			        WHERE submitid=%i', $row['submitid']);
+                    WHERE submitid=%i', $row['submitid']);
             // update event log
             eventlog('judging', $row['judgingid'], 'create', $row['cid']);
             $run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
-			                   WHERE judgingid=%i', $row['judgingid']);
+                               WHERE judgingid=%i', $row['judgingid']);
             if (!empty($run_ids)) {
                 eventlog('judging_run', $run_ids, 'create', $row['cid']);
             }
@@ -1172,16 +1172,16 @@ function rejudging_finish($rejudgingid, $request, $userid = null, $show_progress
         } else {
             // restore old judgehost association
             $valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging
-			                           WHERE submitid=%i AND valid=1', $row['submitid']);
+                                       WHERE submitid=%i AND valid=1', $row['submitid']);
             $DB->q('UPDATE submission SET rejudgingid = NULL, judgehost=%s
-			        WHERE rejudgingid = %i', $valid_judgehost, $rejudgingid);
+                    WHERE rejudgingid = %i', $valid_judgehost, $rejudgingid);
         }
     }
 
     $DB->q(
         'UPDATE rejudging
-	        SET endtime=%s, userid_finish=%i, valid=%i
-	        WHERE rejudgingid=%i',
+            SET endtime=%s, userid_finish=%i, valid=%i
+            WHERE rejudgingid=%i',
            now(),
         $userid,
         ($request=='apply' ? 1 : 0),
@@ -1263,8 +1263,8 @@ function auditlog(
 
     $DB->q(
         'INSERT INTO auditlog
-	        (logtime, cid, user, datatype, dataid, action, extrainfo)
-	        VALUES(%s, %i, %s, %s, %s, %s, %s)',
+            (logtime, cid, user, datatype, dataid, action, extrainfo)
+            VALUES(%s, %i, %s, %s, %s, %s, %s)',
            now(),
         $cid,
         $user,
@@ -1403,8 +1403,8 @@ function rest_extid($endpoint, $intid)
 
     $extid = $DB->q(
         'MAYBEVALUE SELECT `' . $extkey . '`
-	                 FROM `' . $ep['tables'][0] . '`
-	                 WHERE `' . $KEYS[$ep['tables'][0]][0] . '` = %s',
+                     FROM `' . $ep['tables'][0] . '`
+                     WHERE `' . $KEYS[$ep['tables'][0]][0] . '` = %s',
                     $intid
     );
 
@@ -1449,8 +1449,8 @@ function rest_intid($endpoint, $extid, $cid = null)
 
     $intid = $DB->q(
         'MAYBEVALUE SELECT `' . $KEYS[$ep['tables'][0]][0] . '`
-	                 FROM `' . $ep['tables'][0] . '`
-	                 WHERE `' . $extkey . '` = %s' .
+                     FROM `' . $ep['tables'][0] . '`
+                     WHERE `' . $extkey . '` = %s' .
                     (isset($cidkey) ? ' AND cid = %i' : ' %_'),
                     $extid,
         $cid
@@ -1657,9 +1657,9 @@ function eventlog($type, $dataids, $action, $cid = null, $json = null, $ids = nu
             }
             $eventid = $DB->q(
                 'RETURNID INSERT INTO event
-			                  (eventtime, cid, endpointtype, endpointid,
-			                   datatype, dataid, action, content)
-			                   VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
+                              (eventtime, cid, endpointtype, endpointid,
+                               datatype, dataid, action, content)
+                               VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
             $now,
                 $cid,
                 $type,

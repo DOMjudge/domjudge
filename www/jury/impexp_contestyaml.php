@@ -170,7 +170,7 @@ if (isset($_POST['import'])) {
 
                 $probid = $DB->q(
                     'RETURNID INSERT INTO problem
-				                  SET name = %s, timelimit = %i',
+                                  SET name = %s, timelimit = %i',
                                  $probname,
                     10
                 );
@@ -178,7 +178,7 @@ if (isset($_POST['import'])) {
 
                 $DB->q(
                     'INSERT INTO contestproblem (cid, probid, shortname, color)
-				        VALUES (%i, %i, %s, %s)',
+                        VALUES (%i, %i, %s, %s)',
                        $cid,
                     $probid,
                     $problabel,
@@ -211,7 +211,7 @@ if (isset($_POST['import'])) {
     }
     if (ALLOW_REMOVED_INTERVALS) {
         $res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
-			FROM removed_interval WHERE cid = %i', $cid);
+            FROM removed_interval WHERE cid = %i', $cid);
 
         $contest_row['removed_intervals'] = $res;
     }
@@ -246,8 +246,8 @@ if (isset($_POST['import'])) {
     if (!empty($cid)) {
         $q = $DB->q(
             "SELECT * FROM problem
-		             INNER JOIN contestproblem USING (probid)
-		             WHERE cid = %i",
+                     INNER JOIN contestproblem USING (probid)
+                     WHERE cid = %i",
                     $cid
         );
         while ($prob = $q->next()) {

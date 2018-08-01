@@ -103,7 +103,7 @@ function rejudgeForm($table, $id)
         // (nothing to rejudge) or if the result is already correct
         global $DB;
         $validresult = $DB->q('MAYBEVALUE SELECT result FROM judging WHERE
-		                       submitid = %i AND valid = 1', $id);
+                               submitid = %i AND valid = 1', $id);
 
         if (IS_ADMIN) {
             if (! $validresult) {
@@ -355,7 +355,7 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
 
         if ($cid != -1) {
             if ($DB->q("MAYBEVALUE SELECT probid FROM contestproblem
-			             WHERE probid = %i AND cid = %i", $probid, $cid)) {
+                         WHERE probid = %i AND cid = %i", $probid, $cid)) {
                 // Remove keys that cannot be modified:
                 unset($ini_array_contest_problem['probid']);
                 if (count($ini_array_contest_problem)!=0) {
@@ -385,7 +385,7 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
             if (isset($problem_yaml_data['uuid']) && $cid != -1) {
                 $DB->q(
                     'UPDATE contestproblem SET shortname=%s
-				        WHERE cid=%i AND probid=%i',
+                        WHERE cid=%i AND probid=%i',
                        $problem_yaml_data['uuid'],
                     $cid,
                     $probid
@@ -454,21 +454,21 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
 
                         $ovzip = dj_file_get_contents("$tmpzipfiledir/outputvalidator.zip");
                         $probname = $DB->q("VALUE SELECT name FROM problem
-						                    WHERE probid=%i", $probid);
+                                            WHERE probid=%i", $probid);
                         $ovname = $extid . "_cmp";
                         if ($DB->q("MAYBEVALUE SELECT execid FROM executable
-						             WHERE execid=%s", $ovname)) {
+                                     WHERE execid=%s", $ovname)) {
                             // avoid name clash
                             $clashcnt = 2;
                             while ($DB->q("MAYBEVALUE SELECT execid FROM executable
-							                WHERE execid=%s", $ovname . "_" . $clashcnt)) {
+                                            WHERE execid=%s", $ovname . "_" . $clashcnt)) {
                                 $clashcnt++;
                             }
                             $ovname = $ovname . "_" . $clashcnt;
                         }
                         $DB->q(
                             "INSERT INTO executable (execid, md5sum, zipfile,
-						        description, type) VALUES (%s, %s, %s, %s, %s)",
+                                description, type) VALUES (%s, %s, %s, %s, %s)",
                                $ovname,
                             md5($ovzip),
                             $ovzip,
@@ -477,7 +477,7 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
                         );
 
                         $DB->q("UPDATE problem SET special_compare=%s
-						        WHERE probid=%i", $ovname, $probid);
+                                WHERE probid=%i", $ovname, $probid);
 
                         echo "<p>Added output validator '$ovname'.</p>\n";
                     }
@@ -503,7 +503,7 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
         $text = $zip->getFromName('problem.' . $type);
         if ($text!==false) {
             $DB->q('UPDATE problem SET problemtext = %s, problemtext_type = %s
-			        WHERE probid = %i', $text, $type, $probid);
+                    WHERE probid = %i', $text, $type, $probid);
             echo "<p>Added problem statement from: <tt>problem.$type</tt></p>\n";
             break;
         }
@@ -511,7 +511,7 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
 
     // Insert/update testcases
     $maxrank = 1 + $DB->q('VALUE SELECT max(rank) FROM testcase
-	                       WHERE probid = %i', $probid);
+                           WHERE probid = %i', $probid);
 
     // first insert sample, then secret data in alphabetical order
     foreach (array('sample', 'secret') as $type) {
@@ -565,8 +565,8 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
             // Skip testcases that already exist identically
             $id = $DB->q(
                 'MAYBEVALUE SELECT testcaseid FROM testcase
-			              WHERE md5sum_input = %s AND md5sum_output = %s AND
-			              description = %s AND sample = %i AND probid = %i',
+                          WHERE md5sum_input = %s AND md5sum_output = %s AND
+                          description = %s AND sample = %i AND probid = %i',
                          $md5in,
                 $md5out,
                 $description,
@@ -580,7 +580,7 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
 
             $tc = $DB->q(
                 'RETURNID INSERT INTO testcase (probid, rank, sample,
-			              md5sum_input, md5sum_output, input, output, description' .
+                          md5sum_input, md5sum_output, input, output, description' .
                          ($image_file !== false ? ', image, image_thumb, image_type' : '') .
                          ') VALUES (%i, %i, %i, %s, %s, %s, %s, %s' .
                          ($image_file !== false ? ', %s, %s, %s' : '%_ %_ %_') .
@@ -614,11 +614,11 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
     } elseif (empty($teamid)) {
         echo "<p>No jury solutions added: must associate team with your user first.</p>\n";
     } elseif ($DB->q('MAYBEVALUE SELECT allow_submit FROM problem
-	                    INNER JOIN contestproblem using (probid)
-	                    WHERE probid = %i AND cid = %i', $probid, $cid)) {
+                        INNER JOIN contestproblem using (probid)
+                        WHERE probid = %i AND cid = %i', $probid, $cid)) {
         // First find all submittable languages:
         $langs = $DB->q('KEYVALUETABLE SELECT langid, extensions
-		                 FROM language WHERE allow_submit = 1');
+                         FROM language WHERE allow_submit = 1');
 
         $njurysols = 0;
         echo "<ul>\n";
@@ -744,8 +744,8 @@ function set_internal_error($disabled, $cid, $value)
         case 'problem':
             $DB->q(
                 'RETURNAFFECTED UPDATE contestproblem
-				SET allow_judge=%i
-				WHERE cid=%i AND probid=%i',
+                SET allow_judge=%i
+                WHERE cid=%i AND probid=%i',
                 $value,
                 $cid,
                 $disabled['probid']
@@ -754,8 +754,8 @@ function set_internal_error($disabled, $cid, $value)
         case 'judgehost':
             $DB->q(
                 'RETURNAFFECTED UPDATE judgehost
-				SET active=%i
-				WHERE hostname=%s',
+                SET active=%i
+                WHERE hostname=%s',
                 $value,
                 $disabled['hostname']
             );
@@ -763,8 +763,8 @@ function set_internal_error($disabled, $cid, $value)
         case 'language':
             $DB->q(
                 'RETURNAFFECTED UPDATE language
-				SET allow_judge=%i
-				WHERE langid=%s',
+                SET allow_judge=%i
+                WHERE langid=%s',
                 $value,
                 $disabled['langid']
             );

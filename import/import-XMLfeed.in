@@ -202,7 +202,7 @@ $problems = $xpath->query('/contest/problem');
 foreach ($problems as $prob) {
     $id = $DB->q(
         'MAYBEVALUE SELECT probid FROM contestproblem
-	              WHERE probid = %s AND cid = %i AND allow_submit = 1',
+                  WHERE probid = %s AND cid = %i AND allow_submit = 1',
                  remap('problem', val($prob, 'id')),
         $cid
     );
@@ -216,7 +216,7 @@ $languages = $xpath->query('/contest/language');
 foreach ($languages as $lang) {
     $id = $DB->q(
         'MAYBEVALUE SELECT langid FROM language
-	              WHERE langid = %s AND allow_submit = 1',
+                  WHERE langid = %s AND allow_submit = 1',
                  remap('language', val($lang, 'id'))
     );
 
@@ -233,7 +233,7 @@ $teams = $xpath->query('/contest/team');
 foreach ($teams as $team) {
     $id = $DB->q(
         'MAYBEVALUE SELECT teamid FROM team
-	              WHERE teamid = %s AND enabled = 1',
+                  WHERE teamid = %s AND enabled = 1',
                  remap('team', val($team, 'id'))
     );
 
@@ -279,7 +279,7 @@ while (true) {
         logmsg(LOG_DEBUG, "Found submission (id = $id)");
 
         $res = $DB->q('MAYBETUPLE SELECT submitid, teamid, probid, langid, submittime
-		               FROM submission WHERE cid = %i AND externalid = %i', $cid, $id);
+                       FROM submission WHERE cid = %i AND externalid = %i', $cid, $id);
 
         if (!empty($res)) {
             if ($res['teamid']!=remap('team', val($run, 'team')) ||
@@ -341,7 +341,7 @@ while (true) {
 
             $DB->q(
                 'UPDATE submission SET externalresult = %s
-			        WHERE cid = %i AND externalid = %i',
+                    WHERE cid = %i AND externalid = %i',
                    remap('result', val($run, 'result')),
                 $cid,
                 $id

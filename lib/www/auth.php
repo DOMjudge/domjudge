@@ -55,13 +55,13 @@ function logged_in()
     }
     if (isset($_SESSION['username'])) {
         $userdata = $DB->q('MAYBETUPLE SELECT * FROM user
-		                    WHERE username = %s AND enabled = 1', $_SESSION['username']);
+                            WHERE username = %s AND enabled = 1', $_SESSION['username']);
     }
 
     if (!empty($userdata)) {
         $username = $userdata['username'];
         $teamdata = $DB->q('MAYBETUPLE SELECT * FROM team
-		                    WHERE teamid = %i AND enabled = 1', $userdata['teamid']);
+                            WHERE teamid = %i AND enabled = 1', $userdata['teamid']);
 
         // Pull the list of roles that a user has
         $userdata['roles'] = get_user_roles($userdata['userid']);
@@ -73,7 +73,7 @@ function logged_in()
             $hostname = empty($ip) ? 'PHPUNIT' : gethostbyaddr($ip);
             $DB->q(
                 'UPDATE team SET teampage_first_visited = %s, hostname = %s
-			        WHERE teamid = %i',
+                    WHERE teamid = %i',
                    now(),
                 $hostname,
                 $teamid
@@ -95,6 +95,6 @@ function get_user_roles($userid)
 {
     global $DB;
     return $DB->q('COLUMN SELECT role.role FROM userrole
-	               LEFT JOIN role USING (roleid)
-	               WHERE userrole.userid = %s', $userid);
+                   LEFT JOIN role USING (roleid)
+                   WHERE userrole.userid = %s', $userid);
 }

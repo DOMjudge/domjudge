@@ -43,7 +43,7 @@ $res = $DB->q('SELECT * FROM submission');
 
 while ($subm = $res->next()) {
     $sources = $DB->q('KEYTABLE SELECT rank AS ARRAYKEY, sourcecode, filename
-	                   FROM submission_file WHERE submitid = %i', $subm['submitid']);
+                       FROM submission_file WHERE submitid = %i', $subm['submitid']);
 
     foreach ($sources as $rank => $source) {
         $fdata = $subm;

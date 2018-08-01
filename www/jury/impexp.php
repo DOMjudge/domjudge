@@ -20,15 +20,15 @@ requireAdmin();
 <li><a href="impexp_contestyaml.php">Contest data (contest.yaml)</a></li>
 <li><a href="problems.php">Problem archive</a></li>
 <li>Tab separated, export:
-	<a href="impexp_tsv.php?act=ex&amp;fmt=groups">groups.tsv</a>,
-	<a href="impexp_tsv.php?act=ex&amp;fmt=teams">teams.tsv</a>,
-	<a href="impexp_tsv.php?act=ex&amp;fmt=scoreboard">scoreboard.tsv</a>,
-	<a href="impexp_tsv.php?act=ex&amp;fmt=results">results.tsv</a>
+    <a href="impexp_tsv.php?act=ex&amp;fmt=groups">groups.tsv</a>,
+    <a href="impexp_tsv.php?act=ex&amp;fmt=teams">teams.tsv</a>,
+    <a href="impexp_tsv.php?act=ex&amp;fmt=scoreboard">scoreboard.tsv</a>,
+    <a href="impexp_tsv.php?act=ex&amp;fmt=results">results.tsv</a>
 </li>
 <li>HTML, export:
-	<a href="impexp_results.php" target="_blank">results.html</a>,
-	<a href="impexp_results.php?mode=icpcsite" target="_blank">results.html for on ICPC site</a>,
-	<a href="impexp_clarifications.php" target="_blank">clarifications.html</a>
+    <a href="impexp_results.php" target="_blank">results.html</a>,
+    <a href="impexp_results.php?mode=icpcsite" target="_blank">results.html for on ICPC site</a>,
+    <a href="impexp_clarifications.php" target="_blank">clarifications.html</a>
 </li>
 <li>
 <?php echo addForm('impexp_tsv.php', 'post', null, 'multipart/form-data') .

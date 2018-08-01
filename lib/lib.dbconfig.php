@@ -132,8 +132,8 @@ function dbconfig_store()
         }
 
         $res = $DB->q('RETURNAFFECTED UPDATE configuration
-		               SET value = %s, type = %s, description = %s
-		               WHERE name = %s', $val, $row['type'], @$row['desc'], $key);
+                       SET value = %s, type = %s, description = %s
+                       WHERE name = %s', $val, $row['type'], @$row['desc'], $key);
 
         if ($res>0) {
             auditlog('configuration', null, 'update '.$key, $val);

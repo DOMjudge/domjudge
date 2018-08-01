@@ -120,13 +120,13 @@ while (true) {
 
         do {
             $res = $DB->q("SELECT b.*, s.probid, s.submittime,
-			               t.teamid, t.name AS teamname, t.room, c.name AS catname
-			               FROM balloon b
-			               LEFT JOIN submission s USING (submitid)
-			               LEFT JOIN team t USING (teamid)
-			               LEFT JOIN team_category c USING (categoryid)
-			               WHERE s.cid = %i AND b.done = 0 $freezecond
-			               ORDER BY submitid ASC", $cid);
+                           t.teamid, t.name AS teamname, t.room, c.name AS catname
+                           FROM balloon b
+                           LEFT JOIN submission s USING (submitid)
+                           LEFT JOIN team t USING (teamid)
+                           LEFT JOIN team_category c USING (categoryid)
+                           WHERE s.cid = %i AND b.done = 0 $freezecond
+                           ORDER BY submitid ASC", $cid);
 
             while ($row = $res->next()) {
                 $team = array('name' => $row['teamname'],
@@ -140,12 +140,12 @@ while (true) {
                 if (defined('BALLOON_CMD') && BALLOON_CMD) {
                     $probs_solved = $DB->q(
                         'COLUMN SELECT probid FROM scorecache
-					                        WHERE cid = %i AND teamid = %i AND is_correct_restricted = 1',
+                                            WHERE cid = %i AND teamid = %i AND is_correct_restricted = 1',
                                            $cid,
                         $row['teamid']
                     );
                     $probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,shortname,name,color
-					                      FROM problem WHERE cid = %i', $cid);
+                                          FROM problem WHERE cid = %i', $cid);
 
                     // current limitation is that this gets reset if the balloon daemon is restarted
                     $comment = '';

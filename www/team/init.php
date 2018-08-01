@@ -55,17 +55,17 @@ $updates = array('clarifications' => array(), 'judgings' => array());
 if (count($cids)) {
     $updates['clarifications'] =
     $DB->q('TABLE SELECT clarid, submittime, sender, recipient, probid, body
-	        FROM team_unread
-	        LEFT JOIN clarification ON(mesgid=clarid)
-	        WHERE teamid = %i AND cid IN (%Ai)', $teamid, $cids);
+            FROM team_unread
+            LEFT JOIN clarification ON(mesgid=clarid)
+            WHERE teamid = %i AND cid IN (%Ai)', $teamid, $cids);
 }
 if (!empty($cid)) {
     $updates['judgings'] =
     $DB->q('TABLE SELECT s.submitid, j.judgingid, j.result, s.submittime
-	        FROM judging j
-	        LEFT JOIN submission s USING(submitid)
-	        WHERE s.teamid = %i AND j.cid = %i AND j.seen = 0
-	        AND j.valid=1 AND s.submittime < %i' .
+            FROM judging j
+            LEFT JOIN submission s USING(submitid)
+            WHERE s.teamid = %i AND j.cid = %i AND j.seen = 0
+            AND j.valid=1 AND s.submittime < %i' .
            (dbconfig_get('verification_required', 0) ?
              ' AND j.verified = 1' : ''), $teamid, $cid, $cdata['endtime']);
 }

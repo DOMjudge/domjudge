@@ -54,7 +54,7 @@ function display_compile_output($output, $success)
     if ($success) {
         echo "<script type=\"text/javascript\">
 <!--
-	collapse('compile');
+    collapse('compile');
 // -->
 </script>\n";
     }
@@ -203,13 +203,13 @@ if (isset($jid) && isset($rejudgingid)) {
 // If jid is set but not id, try to deduce it the id from the database.
 if (isset($jid) && ! $id) {
     $id = $DB->q('MAYBEVALUE SELECT submitid FROM judging
-	              WHERE judgingid = %i', $jid);
+                  WHERE judgingid = %i', $jid);
 }
 
 // If jid is not set but rejudgingid is, try to deduce the jid from the database.
 if (!isset($jid) && isset($rejudgingid)) {
     $jid = $DB->q('MAYBEVALUE SELECT judgingid FROM judging
-	               WHERE submitid=%i AND rejudgingid = %i', $id, $rejudgingid);
+                   WHERE submitid=%i AND rejudgingid = %i', $id, $rejudgingid);
 }
 
 // If external id is set but not id, try to deduce it from the database.
@@ -219,7 +219,7 @@ if (isset($ext_id) && ! $id) {
               "selecting a contest.");
     }
     $id = $DB->q('MAYBEVALUE SELECT submitid FROM submission
-	              WHERE cid = %i AND externalid = %i', $cid, $ext_id);
+                  WHERE cid = %i AND externalid = %i', $cid, $ext_id);
 }
 
 $title = 'Submission s'.@$id;
@@ -355,17 +355,17 @@ if (! $submdata['valid']) {
 <img title="team" alt="Team:" src="../images/team.png"/> <a href="team.php?id=<?php echo urlencode($submdata['teamid'])?>&amp;cid=<?php echo urlencode($submdata['cid'])?>">
     <?php echo specialchars($submdata['teamname'] . " (t" . $submdata['teamid'].")")?></a>&nbsp;&nbsp;
 <img title="contest" alt="Contest:" src="../images/contest.png"/> <a href="contest.php?id=<?php echo $submdata['cid']?>">
-	<span class="contestid"><?php echo specialchars($submdata['contestshortname'])?></span></a>&nbsp;&nbsp;
+    <span class="contestid"><?php echo specialchars($submdata['contestshortname'])?></span></a>&nbsp;&nbsp;
 <img title="problem" alt="Problem:" src="../images/problem.png"/> <a href="problem.php?id=<?php echo $submdata['probid']?>&amp;cid=<?php echo urlencode($submdata['cid'])?>">
-	<span class="probid"><?php echo specialchars($submdata['probshortname'])?></span>:
-	<?php echo specialchars($submdata['probname'])?></a>&nbsp;&nbsp;
+    <span class="probid"><?php echo specialchars($submdata['probshortname'])?></span>:
+    <?php echo specialchars($submdata['probname'])?></a>&nbsp;&nbsp;
 <img title="language" alt="Language:" src="../images/lang.png"/> <a href="language.php?id=<?php echo $submdata['langid']?>">
-	<?php echo specialchars($submdata['langname'])?></a>&nbsp;&nbsp;
+    <?php echo specialchars($submdata['langname'])?></a>&nbsp;&nbsp;
 <img title="submittime" alt="Submittime:" src="../images/submittime.png"/>
-	<?php echo '<span title="' . printtime($submdata['submittime'], '%Y-%m-%d %H:%M:%S (%Z)') . '">' .
+    <?php echo '<span title="' . printtime($submdata['submittime'], '%Y-%m-%d %H:%M:%S (%Z)') . '">' .
                printtime($submdata['submittime'], null, $submdata['cid']) . '</span>' ?>&nbsp;&nbsp;
 <img title="allowed runtime" alt="Allowed runtime:" src="../images/allowedtime.png"/>
-	<?php echo  specialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
+    <?php echo  specialchars($submdata['maxruntime']) ?>s&nbsp;&nbsp;
 <img title="view source code" alt="" src="../images/code.png"/>
 <a href="show_source.php?id=<?= $id ?>" style="font-weight:bold;">view source code</a>
 </p>
@@ -421,9 +421,9 @@ if (!isset($jid)) {
     // Check if there is an active judgehost that can judge this
     // submission. Otherwise, generate an error.
     $judgehosts = $DB->q('TABLE SELECT hostname, restrictionid, restrictions
-	                      FROM judgehost
-	                      LEFT JOIN judgehost_restriction USING (restrictionid)
-	                      WHERE active = 1');
+                          FROM judgehost
+                          LEFT JOIN judgehost_restriction USING (restrictionid)
+                          WHERE active = 1');
     $can_be_judged = false;
 
     foreach ($judgehosts as $judgehost) {
@@ -466,12 +466,12 @@ if (!isset($jid)) {
 
         $submitid = $DB->q(
             'MAYBEVALUE SELECT s.submitid
-		                    FROM submission s
-		                    LEFT JOIN language l USING (langid)
-		                    LEFT JOIN contestproblem cp USING (probid, cid) ' .
+                            FROM submission s
+                            LEFT JOIN language l USING (langid)
+                            LEFT JOIN contestproblem cp USING (probid, cid) ' .
                            $extra_join .
                            'WHERE s.submitid = %i AND s.judgehost IS NULL
-		                    AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
+                            AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
                            $extra_where . 'LIMIT 1',
                            $id,
             $contests,
@@ -489,17 +489,17 @@ if (!isset($jid)) {
     }
 
     $lang_allowed = $DB->q('VALUE SELECT allow_judge
-	                        FROM language
-	                        LEFT JOIN submission USING (langid)
-	                        WHERE submitid = %i', $id);
+                            FROM language
+                            LEFT JOIN submission USING (langid)
+                            WHERE submitid = %i', $id);
     if ($lang_allowed == 0) {
         error("Submission language is currently not allowed to be judged!");
     }
 
     $prob_allowed = $DB->q('VALUE SELECT allow_judge
-	                        FROM contestproblem cp
-	                        LEFT JOIN submission USING (probid)
-	                        WHERE submitid = %i AND cp.cid = %i', $id, $submdata['cid']);
+                            FROM contestproblem cp
+                            LEFT JOIN submission USING (probid)
+                            WHERE submitid = %i AND cp.cid = %i', $id, $submdata['cid']);
     if ($prob_allowed == 0) {
         error("Problem is currently not allowed to be judged!");
     }
@@ -552,9 +552,9 @@ if (isset($submdata['origsubmitid'])) {
 } else {
     $lastsubmitid = $DB->q(
         'MAYBEVALUE SELECT submitid
-	                        FROM submission
-	                        WHERE teamid = %i AND probid = %i AND submittime < %s
-	                        ORDER BY submittime DESC LIMIT 1',
+                            FROM submission
+                            WHERE teamid = %i AND probid = %i AND submittime < %s
+                            ORDER BY submittime DESC LIMIT 1',
                            $submdata['teamid'],
         $submdata['probid'],
                            $submdata['submittime']
@@ -564,16 +564,16 @@ if (isset($submdata['origsubmitid'])) {
 $lastjud = null;
 if ($lastsubmitid !== null) {
     $lastjud = $DB->q('MAYBETUPLE SELECT judgingid, result, verify_comment, endtime
-	                   FROM judging
-	                   WHERE submitid = %s AND valid = 1
-	                   ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
+                       FROM judging
+                       WHERE submitid = %s AND valid = 1
+                       ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
     if ($lastjud !== null) {
         $lastruns = $DB->q(
             'TABLE SELECT r.runtime, r.runresult, rank, description
-		                    FROM testcase t
-		                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
-		                    r.judgingid = %i )
-		                    WHERE t.probid = %s ORDER BY rank',
+                            FROM testcase t
+                            LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
+                            r.judgingid = %i )
+                            WHERE t.probid = %s ORDER BY rank',
                            $lastjud['judgingid'],
             $submdata['probid']
         );
@@ -882,13 +882,13 @@ foreach ($runs as $run) {
 
 ?>
 <script type="text/javascript">
-	function display_correctruns(show) {
-		elements = document.getElementsByClassName('run_correct');
-		for (i = 0; i < elements.length; i++) {
-			elements[i].style.display = show ? 'block' : 'none';
-		}
-	}
-	display_correctruns(false);
+    function display_correctruns(show) {
+        elements = document.getElementsByClassName('run_correct');
+        for (i = 0; i < elements.length; i++) {
+            elements[i].style.display = show ? 'block' : 'none';
+        }
+    }
+    display_correctruns(false);
 </script>
 <?php
 

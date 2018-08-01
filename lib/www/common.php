@@ -110,16 +110,16 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
     // corresponding judging and the old (active) judging result:
     $sqlbody =
         'FROM submission s
-	     LEFT JOIN team           t  USING (teamid)
-	     LEFT JOIN problem        p  USING (probid)
-	     LEFT JOIN contestproblem cp USING (probid, cid)
-	     LEFT JOIN language       l  USING (langid) ' .
+         LEFT JOIN team           t  USING (teamid)
+         LEFT JOIN problem        p  USING (probid)
+         LEFT JOIN contestproblem cp USING (probid, cid)
+         LEFT JOIN language       l  USING (langid) ' .
         (isset($restrictions['rejudgingid']) ?
         'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.rejudgingid = %i)
-	     LEFT JOIN judging        jold ON (j.prevjudgingid IS NULL AND s.submitid = jold.submitid AND jold.valid = 1 OR j.prevjudgingid = jold.judgingid) ' :
+         LEFT JOIN judging        jold ON (j.prevjudgingid IS NULL AND s.submitid = jold.submitid AND jold.valid = 1 OR j.prevjudgingid = jold.judgingid) ' :
         'LEFT JOIN judging        j    ON (s.submitid = j.submitid    AND j.valid = 1) %_ ') .
         'LEFT JOIN rejudging      r    ON (j.rejudgingid = r.rejudgingid)
-	     WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $rejudgingclause .
+         WHERE s.cid IN (%Ai) ' . $verifyclause . $judgedclause . $rejudgingclause .
         (isset($restrictions['teamid'])      ? 'AND s.teamid = %i '      : '%_ ') .
         (isset($restrictions['categoryid'])  ? 'AND t.categoryid = %i '  : '%_ ') .
         (isset($restrictions['probid'])      ? 'AND s.probid = %i '      : '%_ ') .
@@ -137,11 +137,11 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
     }
     $res = $DB->q(
         'SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
-	               s.submittime, s.judgehost, s.valid, t.name AS teamname,
-	               cp.shortname, p.name AS probname, l.name AS langname,
-	               j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.endtime, j.judgingid,
-	               (j.endtime IS NULL AND j.valid=0 AND
-	                (r.valid IS NULL OR r.valid=0)) AS aborted ' .
+                   s.submittime, s.judgehost, s.valid, t.name AS teamname,
+                   cp.shortname, p.name AS probname, l.name AS langname,
+                   j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.endtime, j.judgingid,
+                   (j.endtime IS NULL AND j.valid=0 AND
+                    (r.valid IS NULL OR r.valid=0)) AS aborted ' .
                   (isset($restrictions['rejudgingid']) ? ', jold.result AS oldresult ' : '') .
                   $sqlbody .
                   'ORDER BY s.submittime DESC, s.submitid DESC ' .
@@ -309,10 +309,10 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
                 $probid = $row['probid'];
                 $runinfo = $DB->q(
                     'TABLE SELECT r.runresult, t.rank
-						FROM testcase t
-						LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid
-							AND r.judgingid = %i )
-						WHERE t.probid = %i ORDER BY rank',
+                        FROM testcase t
+                        LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid
+                            AND r.judgingid = %i )
+                        WHERE t.probid = %i ORDER BY rank',
                         $judgingid,
                     $probid
                 );
@@ -400,10 +400,10 @@ function putTeam($teamid)
     $SHOW_AFFILIATIONS      = dbconfig_get('show_affiliations', 1);
 
     $team = $DB->q('MAYBETUPLE SELECT t.*, c.name AS catname,
-	                a.name AS affname, a.country FROM team t
-	                LEFT JOIN team_category c USING (categoryid)
-	                LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
-	                WHERE teamid = %i', $teamid);
+                    a.name AS affname, a.country FROM team t
+                    LEFT JOIN team_category c USING (categoryid)
+                    LEFT JOIN team_affiliation a ON (t.affilid = a.affilid)
+                    WHERE teamid = %i', $teamid);
 
     if (empty($team)) {
         error("No team found by this id.");
@@ -502,9 +502,9 @@ function putClock()
         echo 'contest: ' . addSelect('cid', $values, $cid, true);
         echo addEndForm();
         echo "<script type=\"text/javascript\">
-		      document.getElementById('cid').addEventListener('change', function() {
-		      document.getElementById('selectcontestform').submit();
-	});
+              document.getElementById('cid').addEventListener('change', function() {
+              document.getElementById('selectcontestform').submit();
+    });
 </script>
 ";
         echo "</div>\n";
@@ -549,16 +549,16 @@ function putClock()
     echo "</div>";
 
     echo "<script type=\"text/javascript\">
-	var initial = " . time() . ";
-	var activatetime = " . (isset($cdata['activatetime']) ? $cdata['activatetime'] : -1) . ";
-	var starttime = " . (isset($cdata['starttime']) ? $cdata['starttime'] : -1) . ";
-	var endtime = " . (isset($cdata['endtime']) ? $cdata['endtime'] : -1) . ";
-	var offset = 0;
-	var date = new Date(initial*1000);
-	var timeleftelt = document.getElementById(\"timeleft\");
+    var initial = " . time() . ";
+    var activatetime = " . (isset($cdata['activatetime']) ? $cdata['activatetime'] : -1) . ";
+    var starttime = " . (isset($cdata['starttime']) ? $cdata['starttime'] : -1) . ";
+    var endtime = " . (isset($cdata['endtime']) ? $cdata['endtime'] : -1) . ";
+    var offset = 0;
+    var date = new Date(initial*1000);
+    var timeleftelt = document.getElementById(\"timeleft\");
 
-	setInterval(function(){updateClock();},1000);
-	updateClock();
+    setInterval(function(){updateClock();},1000);
+    updateClock();
 </script>\n";
 }
 
@@ -630,16 +630,16 @@ function putProblemText($probid)
     if (IS_JURY) {
         $prob = $DB->q(
             "MAYBETUPLE SELECT problemtext, problemtext_type
-		                FROM problem p
-		                WHERE OCTET_LENGTH(problemtext) > 0 AND probid = %i",
+                        FROM problem p
+                        WHERE OCTET_LENGTH(problemtext) > 0 AND probid = %i",
                        $probid
         );
         $probname = $probid;
     } else {
         $prob = $DB->q("MAYBETUPLE SELECT shortname, problemtext, problemtext_type
-		                FROM problem INNER JOIN contestproblem USING (probid)
-		                WHERE OCTET_LENGTH(problemtext) > 0 and allow_submit = 1
-		                AND probid = %i AND cid = %i", $probid, $cdata['cid']);
+                        FROM problem INNER JOIN contestproblem USING (probid)
+                        WHERE OCTET_LENGTH(problemtext) > 0 and allow_submit = 1
+                        AND probid = %i AND cid = %i", $probid, $cdata['cid']);
         $probname = $prob['shortname'];
     }
 
@@ -689,10 +689,10 @@ function putSampleTestcase($probid, $seq, $type)
 
     $sample = $DB->q(
         'MAYBETUPLE SELECT shortname, ' . $type . 'put AS content
-	                  FROM problem INNER JOIN testcase USING (probid)
-	                  INNER JOIN contestproblem USING (probid)
-	                  WHERE probid = %i AND cid = %i AND allow_submit = 1
-	                  AND sample = 1 ORDER BY testcaseid ASC LIMIT %i,1',
+                      FROM problem INNER JOIN testcase USING (probid)
+                      INNER JOIN contestproblem USING (probid)
+                      WHERE probid = %i AND cid = %i AND allow_submit = 1
+                      AND sample = 1 ORDER BY testcaseid ASC LIMIT %i,1',
                       $probid,
         $cdata['cid'],
         $seq-1
@@ -795,8 +795,8 @@ function putProblemTextList()
         }
 
         print '
-		  </div>
-		</div>';
+          </div>
+        </div>';
     }
     // Fill row with dummy cards to make them same width
     $probCount = count($probs);
@@ -812,13 +812,13 @@ function putProblemTextList()
     print "</div>";
     if ($timeFactorDiffers) {
         print '
-		<div class="row">
-		  <div class="col-md-12 my-sm-3">
-		    <div class=" alert alert-secondary" role="alert">
-		      * language time factors apply
-		    </div>
-		  </div>
-		</div>';
+        <div class="row">
+          <div class="col-md-12 my-sm-3">
+            <div class=" alert alert-secondary" role="alert">
+              * language time factors apply
+            </div>
+          </div>
+        </div>';
     }
 }
 
@@ -832,11 +832,11 @@ function getProblemTextList()
     }
 
     return $DB->q('TABLE SELECT probid,shortname,name,color,problemtext_type,timelimit,memlimit,SUM(sample) AS numsamples
-	               FROM problem
-	               LEFT JOIN testcase USING(probid)
-	               LEFT JOIN contestproblem USING (probid)
-	               WHERE cid = %i AND allow_submit = 1
-	               GROUP BY probid ORDER BY shortname', $cid);
+                   FROM problem
+                   LEFT JOIN testcase USING(probid)
+                   LEFT JOIN contestproblem USING (probid)
+                   WHERE cid = %i AND allow_submit = 1
+                   GROUP BY probid ORDER BY shortname', $cid);
 }
 
 /**
@@ -939,11 +939,11 @@ function descriptionExpand($description)
         $expandedEsacped = htmlentities(implode('<br />', $descriptionLines));
         return <<<EOF
 <span>
-	<span data-expanded="$expandedEsacped" data-collapsed="$defaultEscaped">
-	$default
-	</span>
-	<br/>
-	<a href="javascript:;" onclick="toggleExpand(event)">[expand]</a>
+    <span data-expanded="$expandedEsacped" data-collapsed="$defaultEscaped">
+    $default
+    </span>
+    <br/>
+    <a href="javascript:;" onclick="toggleExpand(event)">[expand]</a>
 </span>
 EOF;
     }

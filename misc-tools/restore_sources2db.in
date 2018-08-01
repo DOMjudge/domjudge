@@ -136,8 +136,8 @@ foreach ($submissions as $s) {
     $DB->q('START TRANSACTION');
     $DB->q(
         'INSERT INTO submission
-	        (submitid,cid,teamid,probid,langid,submittime)
-	        VALUES (%i, %i, %s, %s, %s, %s)',
+            (submitid,cid,teamid,probid,langid,submittime)
+            VALUES (%i, %i, %s, %s, %s, %s)',
         $s['sid'],
         $s['cid'],
            $s['teamid'],
@@ -150,7 +150,7 @@ foreach ($submissions as $s) {
     foreach ($s['files'] as $rank => $file) {
         $DB->q(
             'INSERT INTO submission_file (submitid, filename, rank, sourcecode)
-		        VALUES (%i, %s, %i, %s)',
+                VALUES (%i, %s, %i, %s)',
             $s['sid'],
             $file['name'],
             $rank,

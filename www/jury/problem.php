@@ -70,7 +70,7 @@ if (isset($_POST['upload'])) {
         if (count($_FILES['problem_archive']['tmp_name']) == 1) {
             $probid = empty($newid) ? $id : $newid;
             $probname = $DB->q('VALUE SELECT name FROM problem
-			                    WHERE probid = %i', $probid);
+                                WHERE probid = %i', $probid);
 
             echo '<p><a href="' . $pagename.'?id='.urlencode($probid) .
                 '">Return to problem p' . specialchars($probid) .
@@ -97,12 +97,12 @@ if (!empty($cmd)):
     if ($cmd == 'edit') {
         echo "<tr><td>Problem ID:</td><td>";
         $row = $DB->q('TUPLE SELECT p.probid,p.name,
-		                            p.timelimit,p.memlimit,p.outputlimit,
-		                            p.special_run,p.special_compare, p.special_compare_args,
-		                            p.problemtext_type, COUNT(testcaseid) AS testcases
-		               FROM problem p
-		               LEFT JOIN testcase USING (probid)
-		               WHERE probid = %i GROUP BY probid', $id);
+                                    p.timelimit,p.memlimit,p.outputlimit,
+                                    p.special_run,p.special_compare, p.special_compare_args,
+                                    p.problemtext_type, COUNT(testcaseid) AS testcases
+                       FROM problem p
+                       LEFT JOIN testcase USING (probid)
+                       WHERE probid = %i GROUP BY probid', $id);
         echo addHidden('keydata[0][probid]', $row['probid']);
         echo "p" . specialchars($row['probid']);
         echo "</td></tr>\n";
@@ -299,10 +299,10 @@ if ($current_cid === null) {
     echo "<h3>Contests</h3>\n\n";
 
     $res = $DB->q('TABLE SELECT c.*, cp.shortname AS problemshortname,
-	                            cp.allow_submit, cp.allow_judge, cp.color
-	               FROM contest c
-	               INNER JOIN contestproblem cp USING (cid)
-	               WHERE cp.probid = %i ORDER BY starttime DESC', $id);
+                                cp.allow_submit, cp.allow_judge, cp.color
+                   FROM contest c
+                   INNER JOIN contestproblem cp USING (cid)
+                   WHERE cp.probid = %i ORDER BY starttime DESC', $id);
 
     if (count($res) == 0) {
         echo "<p class=\"nodata\">No contests defined</p>\n\n";

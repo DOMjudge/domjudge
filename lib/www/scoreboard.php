@@ -69,12 +69,12 @@ function genScoreBoard($cdata, $jury = false, $filter = null, $visible_only = fa
 
     // Get all stuff from the cached table from this contest
     $query = "SELECT points,
-	          teamid, probid,
-	          submissions_$variant AS submissions,
-	          pending_$variant AS pending,
-	          solvetime_$variant AS solvetime,
-	          is_correct_$variant AS is_correct
-	          FROM scorecache JOIN contestproblem USING(probid,cid) WHERE cid = %i";
+              teamid, probid,
+              submissions_$variant AS submissions,
+              pending_$variant AS pending,
+              solvetime_$variant AS solvetime,
+              is_correct_$variant AS is_correct
+              FROM scorecache JOIN contestproblem USING(probid,cid) WHERE cid = %i";
     $scoredata = $DB->q($query, $cid);
 
     // loop all info the scoreboard cache and put it in our own datastructure
@@ -180,11 +180,11 @@ function getProblems($cdata)
     global $DB;
 
     return $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, probid, points, shortname,
-	               name, color, LENGTH(problemtext) AS hastext
-	               FROM problem
-	               INNER JOIN contestproblem USING (probid)
-	               WHERE cid = %i AND allow_submit = 1
-	               ORDER BY shortname', $cdata['cid']);
+                   name, color, LENGTH(problemtext) AS hastext
+                   FROM problem
+                   INNER JOIN contestproblem USING (probid)
+                   WHERE cid = %i AND allow_submit = 1
+                   ORDER BY shortname', $cdata['cid']);
 }
 
 /**
@@ -198,15 +198,15 @@ function getTeams($filter, $jury, $cdata)
 
     return $DB->q(
         'KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, team.externalid,
-	               team.name, team.categoryid, team.affilid, penalty, sortorder,
-	               country, color, team_affiliation.name AS affilname,
-		       team_affiliation.externalid AS affilid_external
-	               FROM team
-	               INNER JOIN contest ON (contest.cid = %i)
-	               LEFT JOIN contestteam ct USING (teamid, cid)
-	               LEFT JOIN team_category USING (categoryid)
-	               LEFT JOIN team_affiliation USING (affilid)
-	               WHERE team.enabled = 1 AND (ct.teamid IS NOT NULL OR contest.public = 1)' .
+                   team.name, team.categoryid, team.affilid, penalty, sortorder,
+                   country, color, team_affiliation.name AS affilname,
+               team_affiliation.externalid AS affilid_external
+                   FROM team
+                   INNER JOIN contest ON (contest.cid = %i)
+                   LEFT JOIN contestteam ct USING (teamid, cid)
+                   LEFT JOIN team_category USING (categoryid)
+                   LEFT JOIN team_affiliation USING (affilid)
+                   WHERE team.enabled = 1 AND (ct.teamid IS NOT NULL OR contest.public = 1)' .
                   ($jury ? '' : ' AND visible = 1') .
                   (isset($filter['affilid']) ? ' AND team.affilid IN (%As) ' : ' %_') .
                   (isset($filter['country']) ? ' AND country IN (%As) ' : ' %_') .
@@ -230,7 +230,7 @@ function getCategories($jury)
     global $DB;
 
     return $DB->q('KEYTABLE SELECT categoryid AS ARRAYKEY,
-	               categoryid, name, color FROM team_category ' .
+                   categoryid, name, color FROM team_category ' .
                   ($jury ? '' : 'WHERE visible = 1 ') .
                   'ORDER BY sortorder,name,categoryid');
 }
@@ -757,15 +757,15 @@ function putScoreBoard($cdata, $myteamid = null, $static = false, $filter = fals
     if (! $fdata['started'] && ! IS_JURY) {
         $affils = $DB->q(
             'TABLE SELECT ta.externalid, ta.name AS taname, cat.name AS catname, categoryid
-				  FROM team_affiliation ta
-				  LEFT JOIN team t USING (affilid)
-				  INNER JOIN contest c ON (c.cid = %i)
-				  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
-				  LEFT JOIN team_category cat USING (categoryid)
-				  WHERE c.cid = %i AND
-				  (c.public = 1 OR ct.teamid IS NOT NULL)
-				  AND cat.visible = 1
-				  ORDER BY catname, taname',
+                  FROM team_affiliation ta
+                  LEFT JOIN team t USING (affilid)
+                  INNER JOIN contest c ON (c.cid = %i)
+                  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
+                  LEFT JOIN team_category cat USING (categoryid)
+                  WHERE c.cid = %i AND
+                  (c.public = 1 OR ct.teamid IS NOT NULL)
+                  AND cat.visible = 1
+                  ORDER BY catname, taname',
                  $cdata['cid'],
             $cdata['cid']
         );
@@ -836,14 +836,14 @@ function putScoreBoard($cdata, $myteamid = null, $static = false, $filter = fals
         } else {
             $affils = $DB->q(
                 'KEYTABLE SELECT affilid AS ARRAYKEY,
-			                  team_affiliation.name, country
-			                  FROM team_affiliation
-			                  LEFT JOIN team t USING (affilid)
-			                  INNER JOIN contest c ON (c.cid = %i)
-			                  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
-			                  WHERE categoryid IN (%As) AND c.cid = %i AND
-			                  (c.public = 1 OR ct.teamid IS NOT NULL)
-			                  GROUP BY affilid',
+                              team_affiliation.name, country
+                              FROM team_affiliation
+                              LEFT JOIN team t USING (affilid)
+                              INNER JOIN contest c ON (c.cid = %i)
+                              LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
+                              WHERE categoryid IN (%As) AND c.cid = %i AND
+                              (c.public = 1 OR ct.teamid IS NOT NULL)
+                              GROUP BY affilid',
                              $cdata['cid'],
                 array_keys($categids),
                 $cdata['cid']
@@ -896,7 +896,7 @@ function putScoreBoard($cdata, $myteamid = null, $static = false, $filter = fals
 collapse("filter");
 // -->
 </script>
-		<?php
+        <?php
     } else {
         echo '<br />';
     }
@@ -985,10 +985,10 @@ function putTeamRow($cdata, $teamids)
         // Calculate rank, num points and total time from rank cache
         foreach ($teams as $teamid => $team) {
             $totals = $DB->q("MAYBETUPLE SELECT points_restricted AS points,
-			                  totaltime_restricted AS totaltime
-			                  FROM rankcache
-			                  WHERE cid = %i
-			                  AND teamid = %i", $cid, $teamid);
+                              totaltime_restricted AS totaltime
+                              FROM rankcache
+                              WHERE cid = %i
+                              AND teamid = %i", $cid, $teamid);
             if ($totals != null) {
                 $SCORES[$teamid]['num_points'] = $totals['points'];
                 $SCORES[$teamid]['total_time'] = $totals['totaltime'];
@@ -1002,9 +1002,9 @@ function putTeamRow($cdata, $teamids)
         $MATRIX = array();
         $scoredata = $DB->q(
             "SELECT cid, teamid, probid, submissions_restricted AS submissions,
-		                     pending_restricted AS pending, solvetime_restricted AS solvetime,
-		                     is_correct_restricted AS is_correct
-		                     FROM scorecache WHERE cid = %i AND teamid = %i",
+                             pending_restricted AS pending, solvetime_restricted AS solvetime,
+                             is_correct_restricted AS is_correct
+                             FROM scorecache WHERE cid = %i AND teamid = %i",
             $cid,
                             current($teamids)
         );
@@ -1099,19 +1099,19 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = false)
     $totaltime = (isset($teamtotals['totaltime']) ? $teamtotals['totaltime'] : 0);
 
     $sortorder = $DB->q('VALUE SELECT sortorder
-	                     FROM team_category
-	                     LEFT JOIN team USING (categoryid)
-	                     WHERE teamid = %i', $teamid);
+                         FROM team_category
+                         LEFT JOIN team USING (categoryid)
+                         WHERE teamid = %i', $teamid);
 
     // Number of teams that definitely ranked higher
     $better = $DB->q(
         "VALUE SELECT COUNT(team.teamid)
-	                  FROM rankcache AS rc
-	                  LEFT JOIN team USING (teamid)
-	                  LEFT JOIN team_category USING (categoryid)
-	                  WHERE cid = %i AND sortorder = %i AND enabled = 1
-	                  AND (points_$variant > %i OR
-	                  (points_$variant = %i AND totaltime_$variant < %i))",
+                      FROM rankcache AS rc
+                      LEFT JOIN team USING (teamid)
+                      LEFT JOIN team_category USING (categoryid)
+                      WHERE cid = %i AND sortorder = %i AND enabled = 1
+                      AND (points_$variant > %i OR
+                      (points_$variant = %i AND totaltime_$variant < %i))",
                      $cid,
         $sortorder,
         $points,
@@ -1125,11 +1125,11 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = false)
     if ($points > 0) {
         $tied = $DB->q(
             "COLUMN SELECT team.teamid
-		                FROM rankcache AS rc
-		                LEFT JOIN team USING (teamid)
-		                LEFT JOIN team_category USING (categoryid)
-		                WHERE cid = %i AND sortorder = %i AND enabled = 1
-		                AND points_$variant = %i AND totaltime_$variant = %i",
+                        FROM rankcache AS rc
+                        LEFT JOIN team USING (teamid)
+                        LEFT JOIN team_category USING (categoryid)
+                        WHERE cid = %i AND sortorder = %i AND enabled = 1
+                        AND points_$variant = %i AND totaltime_$variant = %i",
                        $cid,
             $sortorder,
             $points,
@@ -1149,11 +1149,11 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = false)
             // Get submission times for each of the teams
             $scoredata = $DB->q(
                 "SELECT teamid, solvetime_$variant AS solvetime
-			                     FROM scorecache AS sc
-			                     LEFT JOIN problem p USING (probid)
-			                     LEFT JOIN contestproblem cp USING (probid, cid)
-			                     WHERE sc.cid = %i AND is_correct_$variant = 1
-			                     AND allow_submit = 1 AND teamid IN (%Ai)",
+                                 FROM scorecache AS sc
+                                 LEFT JOIN problem p USING (probid)
+                                 LEFT JOIN contestproblem cp USING (probid, cid)
+                                 WHERE sc.cid = %i AND is_correct_$variant = 1
+                                 AND allow_submit = 1 AND teamid IN (%Ai)",
                                 $cid,
                 $tied
             );

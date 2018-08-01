@@ -66,13 +66,13 @@ if (isset($_REQUEST['upload'])) {
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
     $data = '<?xml version="1.0" encoding="UTF-8"?><icpc computeCitations="1" name="Upload_via_DOMjudge_' . date("c") . '">';
     $teams = $DB->q('SELECT teamid, externalid FROM team
-	                 WHERE externalid IS NOT NULL AND enabled=1');
+                     WHERE externalid IS NOT NULL AND enabled=1');
     while ($row = $teams->next()) {
         $totals = $DB->q(
             'MAYBETUPLE SELECT points_restricted AS points,
-		                                    totaltime_restricted AS totaltime
-		                  FROM rankcache
-		                  WHERE cid = %i AND teamid = %i',
+                                            totaltime_restricted AS totaltime
+                          FROM rankcache
+                          WHERE cid = %i AND teamid = %i',
                          $cid,
             $row['teamid']
         );
@@ -81,7 +81,7 @@ if (isset($_REQUEST['upload'])) {
         }
         $rank = calcTeamRank($cdata, $row['teamid'], $totals, true);
         $lastProblem = $DB->q('MAYBEVALUE SELECT MAX(solvetime_restricted) FROM scorecache
-		                       WHERE teamid=%i AND cid=%i', $row['teamid'], $cid);
+                               WHERE teamid=%i AND cid=%i', $row['teamid'], $cid);
         if ($lastProblem === null) {
             $lastProblem = 0;
         } else {
@@ -141,11 +141,11 @@ foreach ($json['contest']['group'] as $group) {
     foreach ($group['team'] as $team) {
         // Note: affiliations are not updated and not deleted even if all teams have canceled
         $affilid = $DB->q('MAYBEVALUE SELECT affilid FROM team_affiliation
-				   WHERE name=%s', $team['institutionName']);
+                   WHERE name=%s', $team['institutionName']);
         if (empty($affilid)) {
             $affilid = $DB->q(
                 'RETURNID INSERT INTO team_affiliation
-			                   (name, shortname, country) VALUES (%s, %s, %s)',
+                               (name, shortname, country) VALUES (%s, %s, %s)',
                               $team['institutionName'],
                               $team['institutionShortName'],
                 $team['country']
@@ -166,13 +166,13 @@ foreach ($json['contest']['group'] as $group) {
 
         // Note: teams are not deleted but disabled depending on their status
         $id = $DB->q('MAYBEVALUE SELECT teamid FROM team
-		              WHERE externalid=%i', $team['teamId']);
+                      WHERE externalid=%i', $team['teamId']);
         $enabled = $team['status'] === 'ACCEPTED';
         if (empty($id)) {
             $id = $DB->q(
                 'RETURNID INSERT INTO team
-			              (name, categoryid, affilid, enabled, members, comments, externalid, room)
-			              VALUES (%s, %i, %i, %i, %s, %s, %i, %s)',
+                          (name, categoryid, affilid, enabled, members, comments, externalid, room)
+                          VALUES (%s, %i, %i, %i, %s, %s, %i, %s)',
                          $team['teamName'],
                 $participants,
                 $affilid,
@@ -185,7 +185,7 @@ foreach ($json['contest']['group'] as $group) {
             $username = sprintf("team%04d", $id);
             $userid = $DB->q(
                 'RETURNID INSERT INTO user (username, name, teamid, email)
-			                  VALUES (%s,%s,%i,%s)',
+                              VALUES (%s,%s,%i,%s)',
                              $username,
                 $team['teamName'],
                 $id,
@@ -197,8 +197,8 @@ foreach ($json['contest']['group'] as $group) {
             $username = sprintf("team%04d", $id);
             $cnt = $DB->q(
                 'RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i,
-			               affilid=%i, enabled=%i, members=%s, comments=%s, room=%s
-			               WHERE teamid=%i',
+                           affilid=%i, enabled=%i, members=%s, comments=%s, room=%s
+                           WHERE teamid=%i',
                           $team['teamName'],
                 $participants,
                 $affilid,
@@ -209,7 +209,7 @@ foreach ($json['contest']['group'] as $group) {
                 $id
             );
             $cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s, email=%s
-			                WHERE username=%s', $team['teamName'], $mails, $username);
+                            WHERE username=%s', $team['teamName'], $mails, $username);
             if ($cnt > 0) {
                 $updated_teams[] = $team['teamName'];
             }

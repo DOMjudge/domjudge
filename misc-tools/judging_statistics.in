@@ -188,7 +188,7 @@ $reports = explode(',', strtolower($opts['R']));
 // Report per problem
 if (in_array('problems', $reports)) {
     $problegend = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY, name, timelimit
-	                      FROM problem WHERE probid IN (%Ai)', array_keys($problems));
+                          FROM problem WHERE probid IN (%Ai)', array_keys($problems));
 
     echo "Per problem statistics:\n";
     echo "=======================\n\n";
@@ -279,9 +279,9 @@ if (in_array('variations', $reports)) {
             }
             // Check for differences in the list of judging_run results.
             $judruns = $DB->q('KEYVALUETABLE SELECT rank, runresult
-			                   FROM judging_run
-			                   LEFT JOIN testcase USING(testcaseid)
-			                   WHERE judgingid = %i', $jid);
+                               FROM judging_run
+                               LEFT JOIN testcase USING(testcaseid)
+                               WHERE judgingid = %i', $jid);
             if (!in_array($judruns, $runresults)) {
                 $runresults[] = $judruns;
             }
@@ -297,15 +297,15 @@ if (in_array('variations', $reports)) {
         // Check for variations in runtimes across judgings:
         $rows = $DB->q(
             'SELECT r.testcaseid, t.rank,
-		                MIN(r.runtime) AS runtime_min,
-		                MAX(r.runtime) AS runtime_max,
-		                AVG(r.runtime) AS runtime_avg,
-		                (MAX(r.runtime)-MIN(r.runtime)) AS runtime_spread,
-		                COUNT(j.judgingid) AS njudgings
-		                FROM judging_run r
-		                LEFT JOIN judging j USING (judgingid)
-		                LEFT JOIN testcase t USING (testcaseid)
-		                WHERE j.submitid = %i GROUP BY r.testcaseid',
+                        MIN(r.runtime) AS runtime_min,
+                        MAX(r.runtime) AS runtime_max,
+                        AVG(r.runtime) AS runtime_avg,
+                        (MAX(r.runtime)-MIN(r.runtime)) AS runtime_spread,
+                        COUNT(j.judgingid) AS njudgings
+                        FROM judging_run r
+                        LEFT JOIN judging j USING (judgingid)
+                        LEFT JOIN testcase t USING (testcaseid)
+                        WHERE j.submitid = %i GROUP BY r.testcaseid',
                        $submitid
         );
 
@@ -413,12 +413,12 @@ if (in_array('misc', $reports)) {
     echo "=========================\n\n";
 
     $rows = $DB->q('SELECT submitid, MIN(judgingid), submittime,
-	                MIN(starttime) - submittime AS timediff, COUNT(judgingid)
-	                FROM submission s
-	                INNER JOIN judging USING (submitid)
-	                WHERE submitid IN (%As)
-	                GROUP BY submitid HAVING timediff > 5
-	                ORDER BY timediff DESC', array_keys($submissions));
+                    MIN(starttime) - submittime AS timediff, COUNT(judgingid)
+                    FROM submission s
+                    INNER JOIN judging USING (submitid)
+                    WHERE submitid IN (%As)
+                    GROUP BY submitid HAVING timediff > 5
+                    ORDER BY timediff DESC', array_keys($submissions));
 
     if ($rows->count()==0) {
         printf("No submissions with judgings delayed by 5+ seconds.\n\n");

@@ -91,29 +91,29 @@ Relative time format: <b><kbd><?php echo $human_rel_datetime ?></kbd></b><br />
 <?php echo addRadioButton('data[0][public]', (isset($row['public']) && !$row['public']), 0)?> <label for="data_0__public_0">no</label></td><td></td></tr>
 
 <tr id="teams" <?php if (!isset($row['public']) || $row['public']): ?>style="display: none; "<?php endif; ?>>
-	<td>Teams:</td>
-	<td>
+    <td>Teams:</td>
+    <td>
 <?php
     $prepopulate = $DB->q("TABLE SELECT teamid AS id, name,
-	                       CONCAT(name, ' (t', teamid, ')') AS search
-	                       FROM team INNER JOIN contestteam USING (teamid)
-	                       WHERE cid = %i", $id);
+                           CONCAT(name, ' (t', teamid, ')') AS search
+                           FROM team INNER JOIN contestteam USING (teamid)
+                           WHERE cid = %i", $id);
 
 ?>
-		<?php echo addInput('data[0][mapping][1][items]', '', 50); ?>
-		<script type="text/javascript">
-			$(function() {
-				$('#data_0__mapping__1__items_').tokenInput('ajax_teams.php', {
-					propertyToSearch: 'search',
-					hintText: 'Type to search for team ID or name',
-					noResultsText: 'No teams found',
-					preventDuplicates: true,
-					excludeCurrent: true,
-					prePopulate: <?php echo json_encode($prepopulate); ?>
-				});
-			});
-		</script>
-	</td><td></td>
+        <?php echo addInput('data[0][mapping][1][items]', '', 50); ?>
+        <script type="text/javascript">
+            $(function() {
+                $('#data_0__mapping__1__items_').tokenInput('ajax_teams.php', {
+                    propertyToSearch: 'search',
+                    hintText: 'Type to search for team ID or name',
+                    noResultsText: 'No teams found',
+                    preventDuplicates: true,
+                    excludeCurrent: true,
+                    prePopulate: <?php echo json_encode($prepopulate); ?>
+                });
+            });
+        </script>
+    </td><td></td>
 </tr>
 
 <tr><td>Enabled:</td><td>
@@ -122,13 +122,13 @@ Relative time format: <b><kbd><?php echo $human_rel_datetime ?></kbd></b><br />
 
 <script type="text/javascript">
 $(function() {
-	$('#data_0__public_0, #data_0__public_1').on('change', function() {
-		if ( $('#data_0__public_0:checked, #data_0__public_1:checked').val() == 1) {
-			$('#teams').hide();
-		} else {
-			$('#teams').show();
-		}
-	});
+    $('#data_0__public_0, #data_0__public_1').on('change', function() {
+        if ( $('#data_0__public_0:checked, #data_0__public_1:checked').val() == 1) {
+            $('#teams').hide();
+        } else {
+            $('#teams').show();
+        }
+    });
 });
 </script>
 
@@ -160,176 +160,176 @@ $problem_name_mapping = $DB->q("KEYVALUETABLE SELECT probid, name FROM problem")
 <input type="text" id="problems_token_input" name="problems" />
 <script type="text/javascript">
 $(function() {
-	$('#problems_token_input').tokenInput('ajax_problems.php', {
-		overwriteClasses: {
-			tokenList: 'token-input-list token-input-list-wide'
-		},
-		propertyToSearch: 'search',
-		hintText: 'Type to search for problem ID or name',
-		noResultsText: 'No problems found',
-		preventDuplicates: true,
-		excludeCurrent: true,
-		prePopulate: <?php echo json_encode($prepopulate); ?>,
-		onAdd: function(item) {
-			addRow(item.id);
-		},
-		onDelete: function(item) {
-			deleteRow(item.id);
-		}
-	});
+    $('#problems_token_input').tokenInput('ajax_problems.php', {
+        overwriteClasses: {
+            tokenList: 'token-input-list token-input-list-wide'
+        },
+        propertyToSearch: 'search',
+        hintText: 'Type to search for problem ID or name',
+        noResultsText: 'No problems found',
+        preventDuplicates: true,
+        excludeCurrent: true,
+        prePopulate: <?php echo json_encode($prepopulate); ?>,
+        onAdd: function(item) {
+            addRow(item.id);
+        },
+        onDelete: function(item) {
+            deleteRow(item.id);
+        }
+    });
 
-	var current_problems = <?php echo json_encode($current_problems); ?>;
-	var problem_name_mapping = <?php echo json_encode($problem_name_mapping); ?>;
+    var current_problems = <?php echo json_encode($current_problems); ?>;
+    var problem_name_mapping = <?php echo json_encode($problem_name_mapping); ?>;
 
-	$.each(current_problems, function(i, problem) {
-		addRow(problem.probid);
-	});
+    $.each(current_problems, function(i, problem) {
+        addRow(problem.probid);
+    });
 
-	function addRow(probId) {
-		var $template = $('#contestproblem_template');
-		var $table = $('#problems_table');
-		var maxId = $table.data('max-id');
-		if ( maxId === undefined ) {
-			// If not set on the table yet, we start at 0
-			maxId = 0;
-		} else {
-			// Oterwise we should add 1 to the old value
-			maxId++;
-		}
+    function addRow(probId) {
+        var $template = $('#contestproblem_template');
+        var $table = $('#problems_table');
+        var maxId = $table.data('max-id');
+        if ( maxId === undefined ) {
+            // If not set on the table yet, we start at 0
+            maxId = 0;
+        } else {
+            // Oterwise we should add 1 to the old value
+            maxId++;
+        }
 
-		// Set it back on the table
-		$table.data('max-id', maxId);
+        // Set it back on the table
+        $table.data('max-id', maxId);
 
-		var contest_problem_data = {
-			shortname: '',
-			points: 1,
-			allow_submit: true,
-			allow_judge: true,
-			color: '',
-			lazy_eval_results: ''
-		};
+        var contest_problem_data = {
+            shortname: '',
+            points: 1,
+            allow_submit: true,
+            allow_judge: true,
+            color: '',
+            lazy_eval_results: ''
+        };
 
-		for ( var i = 0; i < current_problems.length; i++ ) {
-			if ( current_problems[i].probid == probId ) {
-				contest_problem_data = current_problems[i];
-				break;
-			}
-		}
+        for ( var i = 0; i < current_problems.length; i++ ) {
+            if ( current_problems[i].probid == probId ) {
+                contest_problem_data = current_problems[i];
+                break;
+            }
+        }
 
-		var templateContents = $template.text()
-			.replace(/\{id\}/g, maxId)
-			.replace(/\{probid\}/g, probId)
-			.replace(/\{name\}/g, problem_name_mapping[probId])
-			.replace(/\{shortname\}/g, contest_problem_data.shortname)
-			.replace(/\{points\}/g, contest_problem_data.points)
-			.replace(/\{color\}/g, contest_problem_data.color)
-			.replace(/\{lazy_eval_results\}/g, contest_problem_data.lazy_eval_results);
+        var templateContents = $template.text()
+            .replace(/\{id\}/g, maxId)
+            .replace(/\{probid\}/g, probId)
+            .replace(/\{name\}/g, problem_name_mapping[probId])
+            .replace(/\{shortname\}/g, contest_problem_data.shortname)
+            .replace(/\{points\}/g, contest_problem_data.points)
+            .replace(/\{color\}/g, contest_problem_data.color)
+            .replace(/\{lazy_eval_results\}/g, contest_problem_data.lazy_eval_results);
 
-		$('tbody', $table).append(templateContents);
+        $('tbody', $table).append(templateContents);
 
-		// Set allow submit / allow judge
-		var submit_id = '#data_0__mapping__0__extra__' + maxId + '__allow_submit_';
-		if ( contest_problem_data.allow_submit ) {
-			submit_id += '1';
-		} else {
-			submit_id += '0';
-		}
-		$(submit_id).attr('checked', 'checked');
+        // Set allow submit / allow judge
+        var submit_id = '#data_0__mapping__0__extra__' + maxId + '__allow_submit_';
+        if ( contest_problem_data.allow_submit ) {
+            submit_id += '1';
+        } else {
+            submit_id += '0';
+        }
+        $(submit_id).attr('checked', 'checked');
 
-		var judge_id = '#data_0__mapping__0__extra__' + maxId + '__allow_judge_';
-		if ( contest_problem_data.allow_judge ) {
-			judge_id += '1';
-		} else {
-			judge_id += '0';
-		}
-		$(judge_id).attr('checked', 'checked');
+        var judge_id = '#data_0__mapping__0__extra__' + maxId + '__allow_judge_';
+        if ( contest_problem_data.allow_judge ) {
+            judge_id += '1';
+        } else {
+            judge_id += '0';
+        }
+        $(judge_id).attr('checked', 'checked');
 
-		jscolor.bind();
-	}
+        jscolor.bind();
+    }
 
-	function deleteRow(probId) {
-		var $tr = $('#problems_table tr[data-problem=' + probId + ']');
-		$tr.remove();
-	}
+    function deleteRow(probId) {
+        var $tr = $('#problems_table tr[data-problem=' + probId + ']');
+        $tr.remove();
+    }
 });
 </script>
 <br />
 <script type="text/template" id="contestproblem_template">
 <tr data-problem="{probid}">
-	<td>
-		<?php echo addHidden("data[0][mapping][0][items][{id}]", '{probid}'); ?>
-		p{probid}
-	</td>
-	<td>
-		{name}
-	</td>
-	<td>
-		<?php echo addInput("data[0][mapping][0][extra][{id}][shortname]", '{shortname}', 8, 10, 'required'); ?>
-	</td>
-	<td>
-		<?php echo addInputField(
+    <td>
+        <?php echo addHidden("data[0][mapping][0][items][{id}]", '{probid}'); ?>
+        p{probid}
+    </td>
+    <td>
+        {name}
+    </td>
+    <td>
+        <?php echo addInput("data[0][mapping][0][extra][{id}][shortname]", '{shortname}', 8, 10, 'required'); ?>
+    </td>
+    <td>
+        <?php echo addInputField(
     'number',
     "data[0][mapping][0][extra][{id}][points]",
                                  '{points}',
     ' style="width:10ex" min="0" max="9999" required'
 ); ?>
-	</td>
-	<td>
-		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", true, 1); ?>
-		<label for='data_0__mapping__0__extra__{id}__allow_submit_1'>yes</label>
-		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", false, 0); ?>
-		<label for='data_0__mapping__0__extra__{id}__allow_submit_0'>no</label>
-	</td>
-	<td>
-		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_judge]", true, 1); ?>
-		<label for='data_0__mapping__0__extra__{id}__allow_judge_1'>yes</label>
-		<?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_judge]", false, 0); ?>
-		<label for='data_0__mapping__0__extra__{id}__allow_judge_0'>no</label>
-	</td>
-	<td>
-		<?php echo addInput(
+    </td>
+    <td>
+        <?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", true, 1); ?>
+        <label for='data_0__mapping__0__extra__{id}__allow_submit_1'>yes</label>
+        <?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_submit]", false, 0); ?>
+        <label for='data_0__mapping__0__extra__{id}__allow_submit_0'>no</label>
+    </td>
+    <td>
+        <?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_judge]", true, 1); ?>
+        <label for='data_0__mapping__0__extra__{id}__allow_judge_1'>yes</label>
+        <?php echo addRadioButton("data[0][mapping][0][extra][{id}][allow_judge]", false, 0); ?>
+        <label for='data_0__mapping__0__extra__{id}__allow_judge_0'>no</label>
+    </td>
+    <td>
+        <?php echo addInput(
                                      "data[0][mapping][0][extra][{id}][color]",
                                      '{color}',
                                      10,
                                      25,
                             'class="color {required:false,adjust:false,hash:true,caps:false}"'
                                  ); ?>
-	</td>
-	<td>
-		<?php echo addInputField(
+    </td>
+    <td>
+        <?php echo addInputField(
                                 'number',
                                 "data[0][mapping][0][extra][{id}][lazy_eval_results]",
                                  '{lazy_eval_results}',
                                 ' style="width:10ex" min="0" max="1"'
                             ); ?>
-	</td>
+    </td>
 </tr>
 </script>
 <table id="problems_table">
-	<thead>
-	<tr>
-		<th>ID</th>
-		<th>name</th>
-		<th>short name</th>
-	        <th>points</th>
-		<th>allow submit</th>
-		<th>allow judge</th>
-		<th>colour
-		<a target="_blank" href="https://en.wikipedia.org/wiki/Web_colors">
-		<img src="../images/b_help.png" class="smallpicto" alt="?"></a></th>
-		<th>lazy eval</th>
-	</tr>
-	</thead>
-	<tbody>
-		<!-- Will be filled in javascript -->
-	</tbody>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>name</th>
+        <th>short name</th>
+            <th>points</th>
+        <th>allow submit</th>
+        <th>allow judge</th>
+        <th>colour
+        <a target="_blank" href="https://en.wikipedia.org/wiki/Web_colors">
+        <img src="../images/b_help.png" class="smallpicto" alt="?"></a></th>
+        <th>lazy eval</th>
+    </tr>
+    </thead>
+    <tbody>
+        <!-- Will be filled in javascript -->
+    </tbody>
 </table>
 
 <script type="text/javascript">
 function clearTeamsOnPublic() {
-	if ( $('#data_0__public_0:checked, #data_0__public_1:checked').val() == 1) {
-		$('#data_0__mapping__1__items_').val('');
-	}
+    if ( $('#data_0__public_0:checked, #data_0__public_1:checked').val() == 1) {
+        $('#data_0__mapping__1__items_').val('');
+    }
 }
 </script>
 
@@ -473,7 +473,7 @@ if (ALLOW_REMOVED_INTERVALS) {
     echo "<h3>Removed intervals</h3>\n\n";
 
     $removals = $DB->q('TABLE SELECT * FROM removed_interval
-	                    WHERE cid = %i ORDER BY starttime', $id);
+                        WHERE cid = %i ORDER BY starttime', $id);
 
     if (count($removals)==0 && ! IS_ADMIN) {
         echo "<p class=\"nodata\">None.</p>\n\n";

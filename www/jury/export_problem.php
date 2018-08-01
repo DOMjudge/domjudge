@@ -76,7 +76,7 @@ while ($tc = $testcases->next()) {
     $fname = 'data/' . ($tc['sample'] ? 'sample/' : 'secret/') . $tc['rank'];
     foreach (array('in','out') as $inout) {
         $content = $DB->q("VALUE SELECT SQL_NO_CACHE " . $inout . "put FROM testcase
-		                   WHERE testcaseid = %i", $tc['testcaseid']);
+                           WHERE testcaseid = %i", $tc['testcaseid']);
         $zip->addFromString($fname.'.'.str_replace('out', 'ans', $inout), $content);
         unset($content);
     }
@@ -89,7 +89,7 @@ while ($tc = $testcases->next()) {
     }
     if (!empty($tc['image_type'])) {
         $content = $DB->q("VALUE SELECT SQL_NO_CACHE image FROM testcase
-		                   WHERE testcaseid = %i", $tc['testcaseid']);
+                           WHERE testcaseid = %i", $tc['testcaseid']);
         $zip->addFromString($fname.'.'.$tc['image_type'], $content);
         unset($content);
     }

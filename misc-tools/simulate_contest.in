@@ -162,7 +162,7 @@ function parse_scoreboard($fd)
     global $DB, $cid, $csvsep;
 
     $contest_len = (int)$DB->q('VALUE SELECT (endtime - starttime)/60
-	                            FROM contest WHERE cid = %i', $cid);
+                                FROM contest WHERE cid = %i', $cid);
 
     if (($line = fgets($fd))===false) {
         error("could not read header line.");
@@ -290,7 +290,7 @@ fclose($fd);
 if (!$DB->q('MAYBEVALUE SELECT categoryid FROM team_category
               WHERE categoryid = %i', $categ)) {
     $DB->q('INSERT INTO team_category
-	        (categoryid, name) VALUES (%i, %s)', $categ, 'Simulated teams');
+            (categoryid, name) VALUES (%i, %s)', $categ, 'Simulated teams');
     logmsg(LOG_INFO, "team category $categ, 'Simulated teams' created");
 }
 
@@ -302,13 +302,13 @@ foreach ($submissions as &$subm) {
         $teamname = $def_teamprefix.$subm[$fteam];
 
         $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team
-		                  WHERE name = %s', $teamname);
+                          WHERE name = %s', $teamname);
 
         if (!isset($teamid)) {
             $teamid = $DB->q(
                 'RETURNID INSERT INTO team
-			                  (name, categoryid, comments)
-			                  VALUES (%s, %i, "fake simulation team")',
+                              (name, categoryid, comments)
+                              VALUES (%s, %i, "fake simulation team")',
                              $teamname,
                 $categ
             );
@@ -343,8 +343,8 @@ while ($cdata['cid']==$cid && difftime(now(), $cdata['endtime'])<0) { // bug!
 
             $submitid = $DB->q(
                 'RETURNID INSERT INTO submission
-			                    (cid, teamid, probid, langid, submittime)
-			                    VALUES (%i, %i, %i, %s, %s)',
+                                (cid, teamid, probid, langid, submittime)
+                                VALUES (%i, %i, %i, %s, %s)',
                                $cid,
                 $subm['teamid'],
                 $probid,
@@ -354,8 +354,8 @@ while ($cdata['cid']==$cid && difftime(now(), $cdata['endtime'])<0) { // bug!
 
             $judgingid = $DB->q(
                 'RETURNID INSERT INTO judging
-			                     (cid, submitid, starttime, endtime, result, verified)
-			                     VALUES (%i, %i, %s, %s, %s, %i)',
+                                 (cid, submitid, starttime, endtime, result, verified)
+                                 VALUES (%i, %i, %s, %s, %s, %i)',
                                 $cid,
                 $submitid,
                 $stime,

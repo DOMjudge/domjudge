@@ -260,9 +260,9 @@ while ($row = $events->next()) {
 
     $data = $DB->q(
         'MAYBETUPLE SELECT submittime, teamid, probid, name AS langname, valid
-	                FROM submission
-	                LEFT JOIN language USING (langid)
-	                WHERE valid = 1 AND submitid = %i',
+                    FROM submission
+                    LEFT JOIN language USING (langid)
+                    WHERE valid = 1 AND submitid = %i',
                    $submitid
     );
 
@@ -286,21 +286,21 @@ while ($row = $events->next()) {
         XMLaddnode($run, 'status', 'fresh');
     } else { // judgements
         $jdata = $DB->q('MAYBETUPLE SELECT result, starttime FROM judging j
-		                 LEFT JOIN submission USING(submitid)
-		                 WHERE j.valid = 1 AND judgingid = %i', $row['dataid']);
+                         LEFT JOIN submission USING(submitid)
+                         WHERE j.valid = 1 AND judgingid = %i', $row['dataid']);
 
         if (!isset($jdata['result'])) {
             continue;
         }
 
         $ntestcases = $DB->q('VALUE SELECT count(*) FROM testcase
-		                      WHERE probid = %i', $data['probid']);
+                              WHERE probid = %i', $data['probid']);
 
         $jruns = $DB->q(
             'SELECT rank, runresult, runtime
-		                 FROM judging_run
-		                 LEFT JOIN testcase USING (testcaseid)
-		                 WHERE runresult IS NOT NULL AND judgingid = %i',
+                         FROM judging_run
+                         LEFT JOIN testcase USING (testcaseid)
+                         WHERE runresult IS NOT NULL AND judgingid = %i',
                         $row['dataid']
         );
 

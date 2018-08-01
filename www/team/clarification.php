@@ -13,7 +13,7 @@ $id = getRequestID();
 
 if (isset($id)) {
     $req = $DB->q('MAYBETUPLE SELECT * FROM clarification
-	               WHERE cid = %i AND clarid = %i', $cid, $id);
+                   WHERE cid = %i AND clarid = %i', $cid, $id);
     if (! $req) {
         error("clarification $id not found");
     }
@@ -48,8 +48,8 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
 
     $newid = $DB->q(
         'RETURNID INSERT INTO clarification
-	                 (cid, submittime, sender, probid, category, queue, body)
-	                 VALUES (%i, %s, %i, %i, %s, %s, %s)',
+                     (cid, submittime, sender, probid, category, queue, body)
+                     VALUES (%i, %s, %i, %i, %s, %s, %s)',
                     $cid,
         now(),
         $teamid,

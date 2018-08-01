@@ -34,9 +34,9 @@ setup_database_connection();
 $stdin = fopen('php://stdin', 'r');
 while (fscanf(STDIN, "%s %s\n", $u, $p)) {
     $tid = $DB->q("RETURNID INSERT INTO team (name,categoryid)
-	               VALUES (%s,%i)", $u, $CATID);
+                   VALUES (%s,%i)", $u, $CATID);
     $id = $DB->q("RETURNID INSERT INTO user (username,name,password,teamid)
-	              VALUES (%s,%s,%s,%i)", $u, $u, dj_password_hash($p), $tid);
+                  VALUES (%s,%s,%s,%i)", $u, $u, dj_password_hash($p), $tid);
     foreach ($ROLES as $role) {
         $DB->q("INSERT INTO userrole (userid,roleid) VALUES(%i,%i)", $id, $role);
     }

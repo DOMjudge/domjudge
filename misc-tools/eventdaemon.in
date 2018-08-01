@@ -108,7 +108,7 @@ if (isset($options['cid'])) {
     $cid = $options['cid'];
     if (!preg_match('/^[0-9]+$/', $cid)) {
         $cid = $DB->q('MAYBEVALUE SELECT cid FROM contest
-		               WHERE shortname = %s', $options['cid']);
+                       WHERE shortname = %s', $options['cid']);
         if (empty($cid)) {
             error("Contest shortname '".$options['cid']."' not found.");
         }
@@ -185,8 +185,8 @@ function insert_event($cid, $endpoint, $data)
 
     $old = $DB->q(
         'MAYBETUPLE SELECT eventid, action, content FROM event
-	               WHERE cid = %i AND endpointtype = %s AND endpointid = %s
-	               ORDER BY eventid DESC LIMIT 1',
+                   WHERE cid = %i AND endpointtype = %s AND endpointid = %s
+                   ORDER BY eventid DESC LIMIT 1',
                   $cid,
         $endpoint,
         $data['id']

@@ -388,7 +388,7 @@ $detail = '';
 $has_errors = false;
 while ($cdata = $res->next()) {
     $cp = $DB->q('SELECT * FROM contestproblem
-	              WHERE cid = %i ORDER BY shortname', $cdata['cid']);
+                  WHERE cid = %i ORDER BY shortname', $cdata['cid']);
 
     $detail .=  "c".(int)$cdata['cid'].": ";
 
@@ -443,8 +443,8 @@ foreach ($judgehosts as &$judgehost) {
     $judgehost['languages'] = array();
     $restrictions = $DB->q(
         'MAYBEVALUE SELECT restrictions FROM judgehost
-	                        INNER JOIN judgehost_restriction USING (restrictionid)
-	                        WHERE hostname = %s ORDER BY restrictionid',
+                            INNER JOIN judgehost_restriction USING (restrictionid)
+                            WHERE hostname = %s ORDER BY restrictionid',
                            $judgehost['hostname']
     );
     if ($restrictions) {
@@ -493,8 +493,8 @@ foreach ($problems as $prob) {
         }
     }
     if (! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
-	               WHERE input IS NOT NULL AND output IS NOT NULL AND
-	               probid = %i", $prob['probid'])) {
+                   WHERE input IS NOT NULL AND output IS NOT NULL AND
+                   probid = %i", $prob['probid'])) {
         $details .= 'p'.$prob['probid']." in contest c" . $prob['cid'] . ": missing in/output testcase.\n";
     }
 
@@ -507,8 +507,8 @@ foreach ($problems as $prob) {
             }
             $found = $DB->q(
                 "MAYBEVALUE SELECT cp.probid
-			                 FROM contestproblem cp, language l
-			                 WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s" .
+                             FROM contestproblem cp, language l
+                             WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s" .
                             $judgehost['extra_where'],
                             $prob['probid'],
                 $prob['cid'],
@@ -530,8 +530,8 @@ foreach ($problems as $prob) {
     // Check testcase md5sum and size
     foreach (array('input','output') as $inout) {
         $mismatch = $DB->q("SELECT probid, rank FROM testcase
-		                    WHERE md5($inout) != md5sum_$inout
-		                    ORDER BY probid, rank");
+                            WHERE md5($inout) != md5sum_$inout
+                            ORDER BY probid, rank");
         while ($r = $mismatch->next()) {
             $details .= 'p'.$r['probid'] . ": testcase #" . $r['rank'] .
                      " MD5 sum mismatch between $inout and md5sum_$inout\n";
@@ -540,9 +540,9 @@ foreach ($problems as $prob) {
     $outputlimit = 1024*(isset($prob['outputlimit']) ? $prob['outputlimit'] : dbconfig_get('output_limit'));
     $oversize = $DB->q(
         "SELECT rank, OCTET_LENGTH(output) AS size
-	                    FROM testcase
-	                    WHERE probid = %i AND OCTET_LENGTH(output) > %i
-	                    ORDER BY rank",
+                        FROM testcase
+                        WHERE probid = %i AND OCTET_LENGTH(output) > %i
+                        ORDER BY rank",
                        $prob['probid'],
         $outputlimit
     );
@@ -625,7 +625,7 @@ if (dbconfig_get('show_affiliations', 1)) {
     }
 
     $res = $DB->q('SELECT DISTINCT country FROM team_affiliation
-	               WHERE country IS NOT NULL ORDER BY country');
+                   WHERE country IS NOT NULL ORDER BY country');
     while ($row = $res->next()) {
         $cflag = WEBAPPDIR . '/web/images/countries/' .
             urlencode($row['country']) . '.png';

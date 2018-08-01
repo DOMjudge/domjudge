@@ -17,7 +17,7 @@ function setClarificationViewed($clar, $team)
     global $DB;
     $DB->q(
         'DELETE FROM team_unread
-	        WHERE mesgid = %i AND teamid = %i',
+            WHERE mesgid = %i AND teamid = %i',
            $clar,
         $team
     );
@@ -158,11 +158,11 @@ function putClar($clar)
             if ($fdata['started']) {
                 $problem_options =
                     $DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
-				                             CONCAT(shortname, ": ", name) as name
-				        FROM problem
-				        INNER JOIN contestproblem USING (probid)
-				        WHERE cid = %i AND allow_submit = 1
-				        ORDER BY shortname ASC', $cid);
+                                             CONCAT(shortname, ": ", name) as name
+                        FROM problem
+                        INNER JOIN contestproblem USING (probid)
+                        WHERE cid = %i AND allow_submit = 1
+                        ORDER BY shortname ASC', $cid);
                 if (IS_JURY && count($cdatas) > 1) {
                     foreach ($problem_options as &$problem_option) {
                         $problem_option = $data['shortname'] . ' - ' . $problem_option;
@@ -236,18 +236,18 @@ function putClarification($id, $team = null)
 
     $clars = $DB->q(
         'SELECT c.*, cp.shortname, p.name AS probname,
-	                 t.name AS toname, f.name AS fromname,
-	                 co.shortname AS contestshortname
-	                 FROM clarification c
-	                 LEFT JOIN problem p ON (c.probid = p.probid)
-	                 LEFT JOIN team t ON (t.teamid = c.recipient)
-	                 LEFT JOIN team f ON (f.teamid = c.sender)
-	                 LEFT JOIN contest co ON (co.cid = c.cid)
-	                 LEFT JOIN contestproblem cp ON (cp.probid = c.probid AND
-	                                                 cp.cid = c.cid AND
-	                                                 cp.allow_submit = 1)
-	                 WHERE c.respid = %i OR c.clarid = %i
-	                 ORDER BY c.submittime, c.clarid',
+                     t.name AS toname, f.name AS fromname,
+                     co.shortname AS contestshortname
+                     FROM clarification c
+                     LEFT JOIN problem p ON (c.probid = p.probid)
+                     LEFT JOIN team t ON (t.teamid = c.recipient)
+                     LEFT JOIN team f ON (f.teamid = c.sender)
+                     LEFT JOIN contest co ON (co.cid = c.cid)
+                     LEFT JOIN contestproblem cp ON (cp.probid = c.probid AND
+                                                     cp.cid = c.cid AND
+                                                     cp.allow_submit = 1)
+                     WHERE c.respid = %i OR c.clarid = %i
+                     ORDER BY c.submittime, c.clarid',
                     $clar['clarid'],
         $clar['clarid']
     );
@@ -436,19 +436,19 @@ function putClarificationForm($action, $respid = null, $onlycontest = null)
     // get clarification this form is responding to
     if ($respid) {
         $clar = $DB->q('MAYBETUPLE SELECT c.*, t.name AS toname, f.name AS fromname
-		                FROM clarification c
-		                LEFT JOIN team t ON (t.teamid = c.recipient)
-		                LEFT JOIN team f ON (f.teamid = c.sender)
-		                WHERE c.clarid = %i', $respid);
+                        FROM clarification c
+                        LEFT JOIN team t ON (t.teamid = c.recipient)
+                        LEFT JOIN team f ON (f.teamid = c.sender)
+                        WHERE c.clarid = %i', $respid);
     }
 
     if (IS_JURY) { // list all possible recipients in the "sendto" box
         $sendto_options = array('domjudge-must-select' => '(select...)', '' => 'ALL');
         if (! $respid) {
             $teams = $DB->q('KEYVALUETABLE SELECT teamid, name
-			                 FROM team
-			                 ORDER BY categoryid ASC, team.name
-			                 COLLATE '. DJ_MYSQL_COLLATION . ' ASC');
+                             FROM team
+                             ORDER BY categoryid ASC, team.name
+                             COLLATE '. DJ_MYSQL_COLLATION . ' ASC');
             $sendto_options += $teams;
         } else {
             if ($clar['sender']) {
@@ -478,11 +478,11 @@ function putClarificationForm($action, $respid = null, $onlycontest = null)
         if ($fdata['started']) {
             $problem_options =
                 $DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
-				                             CONCAT(shortname, ": ", name) as name
-				        FROM problem
-				        INNER JOIN contestproblem USING (probid)
-				        WHERE cid = %i AND allow_submit = 1
-				        ORDER BY shortname ASC', $cid);
+                                             CONCAT(shortname, ": ", name) as name
+                        FROM problem
+                        INNER JOIN contestproblem USING (probid)
+                        WHERE cid = %i AND allow_submit = 1
+                        ORDER BY shortname ASC', $cid);
             if (IS_JURY && count($cdatas) > 1) {
                 foreach ($problem_options as &$problem_option) {
                     $problem_option = $data['shortname'] . ' - ' . $problem_option;
@@ -518,17 +518,17 @@ function putClarificationForm($action, $respid = null, $onlycontest = null)
 <!--
 function confirmClar() {
 <?php if (IS_JURY): ?>
-	var sendto_field = document.forms['sendclar'].sendto;
-	var sendto = sendto_field.value;
-	var sendto_text = sendto_field.options[sendto_field.selectedIndex].text;
+    var sendto_field = document.forms['sendclar'].sendto;
+    var sendto = sendto_field.value;
+    var sendto_text = sendto_field.options[sendto_field.selectedIndex].text;
 
-	if ( sendto=='domjudge-must-select' ) {
-		alert('You must select a recipient for this clarification.');
-		return false;
-	}
-	return confirm("Send clarification to " + sendto_text + "?");
+    if ( sendto=='domjudge-must-select' ) {
+        alert('You must select a recipient for this clarification.');
+        return false;
+    }
+    return confirm("Send clarification to " + sendto_text + "?");
 <?php else : ?>
-	return confirm("Send clarification request to Jury?");
+    return confirm("Send clarification request to Jury?");
 <?php endif; ?>
 }
 // -->

@@ -41,7 +41,7 @@ if (!empty($_GET['cmd'])) {
 
     if ($cmd == 'edit') {
         $row = $DB->q('MAYBETUPLE SELECT * FROM judgehost_restriction
-		               WHERE restrictionid = %i', $id);
+                       WHERE restrictionid = %i', $id);
         if (!$row) {
             error("Missing or invalid judgehost restriction id");
         }
@@ -93,16 +93,16 @@ $prepopulate = array();
         } ?>
 <tr><td></td><td><?php echo addInput("data[0][restrictions][$type]", '', 50); ?></td></tr>
 <script type="text/javascript">
-	$(function() {
-		$('#data_0__restrictions__<?php echo $type; ?>_').tokenInput('<?php echo $type_settings['ajax']; ?>', {
-			propertyToSearch: 'search',
-			hintText: '<?php echo $type_settings['hintText']; ?>',
-			noResultsText: '<?php echo $type_settings['noResultsText']; ?>',
-			preventDuplicates: true,
-			excludeCurrent: true,
-			prePopulate: <?php echo json_encode($prepopulate); ?>
-		});
-	});
+    $(function() {
+        $('#data_0__restrictions__<?php echo $type; ?>_').tokenInput('<?php echo $type_settings['ajax']; ?>', {
+            propertyToSearch: 'search',
+            hintText: '<?php echo $type_settings['hintText']; ?>',
+            noResultsText: '<?php echo $type_settings['noResultsText']; ?>',
+            preventDuplicates: true,
+            excludeCurrent: true,
+            prePopulate: <?php echo json_encode($prepopulate); ?>
+        });
+    });
 </script>
 <?php
     }

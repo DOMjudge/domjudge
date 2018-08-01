@@ -46,7 +46,7 @@ if (isset($_POST['donow'])) {
                   " seconds before contest start.");
         }
         $DB->q('UPDATE contest SET starttime_enabled = %i
-		        WHERE cid = %i', $enabled, $docid);
+                WHERE cid = %i', $enabled, $docid);
         header("Location: ./contests.php?edited=1");
         exit;
     }
@@ -65,9 +65,9 @@ if (isset($_POST['donow'])) {
         }
         $DB->q(
             'UPDATE contest SET starttime = %f, starttime_string = %s, starttime_enabled = 1,
-		        endtime = %f, freezetime = %f, unfreezetime = %f,
-		        activatetime = %f, deactivatetime = %f
-		        WHERE cid = %i',
+                endtime = %f, freezetime = %f, unfreezetime = %f,
+                activatetime = %f, deactivatetime = %f
+                WHERE cid = %i',
             $docdata['starttime'],
             $docdata['starttime_string'],
                $docdata['endtime'],
@@ -80,7 +80,7 @@ if (isset($_POST['donow'])) {
         header("Location: ./contests.php?edited=1");
     } else {
         $DB->q('UPDATE contest SET ' . $time . 'time = %f, ' . $time . 'time_string = %s
-		        WHERE cid = %i', $now, $nowstring, $docid);
+                WHERE cid = %i', $now, $nowstring, $docid);
         header("Location: ./contests.php");
     }
     exit;
@@ -111,8 +111,8 @@ if (empty($curcids)) {
     echo "none</legend>\n\n";
 
     $row = $DB->q('MAYBETUPLE SELECT * FROM contest
-	               WHERE activatetime > UNIX_TIMESTAMP() AND enabled = 1
-	               ORDER BY activatetime LIMIT 1');
+                   WHERE activatetime > UNIX_TIMESTAMP() AND enabled = 1
+                   ORDER BY activatetime LIMIT 1');
 
     if ($row) {
         echo "<form action=\"contests.php\" method=\"post\">\n";

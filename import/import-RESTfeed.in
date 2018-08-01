@@ -107,7 +107,7 @@ function getTeamID($externalid)
     global $DB;
     return $DB->q(
         'MAYBEVALUE SELECT teamid FROM team
-	               WHERE teamid = %s AND enabled = 1',
+                   WHERE teamid = %s AND enabled = 1',
                   $externalid
     );
 }
@@ -136,7 +136,7 @@ $problems = dj_json_decode(request('problems'));
 foreach ($problems as $prob) {
     $id = $DB->q(
         'MAYBEVALUE SELECT probid FROM problem INNER JOIN contestproblem USING(probid)
-	              WHERE probid = %s AND cid = %i AND allow_submit = 1',
+                  WHERE probid = %s AND cid = %i AND allow_submit = 1',
                  remap('problem', $prob['id']),
         $cid
     );
@@ -150,7 +150,7 @@ $languages = dj_json_decode(request('languages'));
 foreach ($languages as $lang) {
     $id = $DB->q(
         'MAYBEVALUE SELECT langid FROM language
-	              WHERE langid = %s AND allow_submit = 1',
+                  WHERE langid = %s AND allow_submit = 1',
                  remap('language', $lang['id'])
     );
 
@@ -195,7 +195,7 @@ while (true) {
 
         $res = $DB->q(
             'MAYBETUPLE SELECT submitid, teamid, probid, langid, submittime
-		               FROM submission WHERE cid = %i AND externalid = %i',
+                       FROM submission WHERE cid = %i AND externalid = %i',
                       $cid,
             $subm['id']
         );
@@ -269,7 +269,7 @@ while (true) {
 
         $DB->q(
             'UPDATE submission SET externalresult = %s
-		        WHERE cid = %i AND externalid = %i',
+                WHERE cid = %i AND externalid = %i',
                remap('result', $jud['outcome']),
             $cid,
             $jud['submission']

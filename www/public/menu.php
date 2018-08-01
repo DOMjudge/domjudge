@@ -11,10 +11,10 @@ $started = checkrole('jury') || $fdata['started'];
 
       <div class="collapse navbar-collapse" id="menuDefault">
         <ul class="navbar-nav mr-auto">
-	  <li class="nav-item<?=($pagename === 'index.php'?' active':'')?>">
+      <li class="nav-item<?=($pagename === 'index.php'?' active':'')?>">
             <a class="nav-link" href="./"><span class="octicon octicon-list-ordered"></span> Scoreboard</a>
           </li>
-	  <li class="nav-item<?=($pagename === 'problems.php'?' active':'')?>">
+      <li class="nav-item<?=($pagename === 'problems.php'?' active':'')?>">
 <?php if ($started): ?>
             <a class="nav-link" href="problems.php"><span class="octicon octicon-book"></span> Problemset</a>
 <?php else: ?>
@@ -24,12 +24,12 @@ $started = checkrole('jury') || $fdata['started'];
 <?php if (checkrole('team')): ?>
           <li class="nav-item">
             <a class="nav-link" href="../team/"><span class="octicon octicon-arrow-right"></span> Team</a>
-	  </li>
+      </li>
 <?php endif; ?>
 <?php if (checkrole('jury') || checkrole('balloon')): ?>
           <li class="nav-item">
             <a class="nav-link" href="../jury"><span class="octicon octicon-arrow-right"></span> Jury</a>
-	  </li>
+      </li>
 <?php endif; ?>
          </ul>
       </div>

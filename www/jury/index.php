@@ -65,11 +65,11 @@ if (is_readable('../images/DOMjudgelogo.png')) {
 
 <ul>
 <li><a href="doc/judge/judge-manual.html">Judge manual</a>
-	(also <a href="doc/judge/judge-manual.pdf">PDF</a>)</li>
+    (also <a href="doc/judge/judge-manual.pdf">PDF</a>)</li>
 <li><a href="doc/admin/admin-manual.html">Administrator manual</a>
-	(also <a href="doc/admin/admin-manual.pdf">PDF</a>)</li>
+    (also <a href="doc/admin/admin-manual.pdf">PDF</a>)</li>
 <li><a href="doc/team/team-manual.pdf">Team manual</a>
-	(PDF only)</li>
+    (PDF only)</li>
 </ul>
 
 

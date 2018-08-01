@@ -10,10 +10,10 @@ $started = checkrole('jury') || $fdata['started'];
 
       <div class="collapse navbar-collapse" id="menuDefault">
         <ul class="navbar-nav mr-auto">
-	  <li class="nav-item<?=($pagename === 'index.php'?' active':'')?>">
+      <li class="nav-item<?=($pagename === 'index.php'?' active':'')?>">
             <a class="nav-link" href="./"><span class="octicon octicon-home"></span> Home</a>
           </li>
-	  <li class="nav-item<?=($pagename === 'problems.php'?' active':'')?>">
+      <li class="nav-item<?=($pagename === 'problems.php'?' active':'')?>">
 <?php if ($started): ?>
             <a class="nav-link" href="problems.php"><span class="octicon octicon-book"></span> Problemset</a>
 <?php else: ?>
@@ -21,17 +21,17 @@ $started = checkrole('jury') || $fdata['started'];
 <?php endif; ?>
           </li>
 <?php if (have_printing()): ?>
-	  <li class="nav-item<?=($pagename === 'print.php'?' active':'')?>">
+      <li class="nav-item<?=($pagename === 'print.php'?' active':'')?>">
             <a class="nav-link" href="print.php"><span class="octicon octicon-file-text"></span> Print</a>
-	  </li>
+      </li>
 <?php endif; ?>
-	  <li class="nav-item<?=($pagename === 'scoreboard.php'?' active':'')?>">
+      <li class="nav-item<?=($pagename === 'scoreboard.php'?' active':'')?>">
             <a class="nav-link" href="scoreboard.php"><span class="octicon octicon-list-ordered"></span> Scoreboard</a>
           </li>
 <?php if (checkrole('jury') || checkrole('balloon')): ?>
           <li class="nav-item">
             <a class="nav-link" href="../jury"><span class="octicon octicon-arrow-right"></span> Jury</a>
-	  </li>
+      </li>
 <?php endif; ?>
          </ul>
       </div>

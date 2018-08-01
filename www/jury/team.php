@@ -87,28 +87,28 @@ echo addSelect('data[0][affilid]', $amap, @$row['affilid'], true);
 $num_contests = $DB->q("VALUE SELECT COUNT(*) FROM contest c WHERE c.public = 0");
 if ($num_contests > 0) {
     $prepopulate = $DB->q("TABLE SELECT c.cid AS id, c.name, c.shortname,
-	                       CONCAT(c.name, ' (', c.shortname, ' - c', c.cid, ')') AS search
-	                       FROM contest c INNER JOIN contestteam USING (cid)
-	                       WHERE teamid = %i", $id); ?>
+                           CONCAT(c.name, ' (', c.shortname, ' - c', c.cid, ')') AS search
+                           FROM contest c INNER JOIN contestteam USING (cid)
+                           WHERE teamid = %i", $id); ?>
 
 <!-- contest selection -->
 <tr>
-	<td>Private contests:</td>
-	<td>
-		<?php echo addInput('data[0][mapping][0][items]', '', 50); ?>
-		<script type="text/javascript">
-			$(function() {
-				$('#data_0__mapping__0__items_').tokenInput('ajax_contests.php?public=0', {
-					propertyToSearch: 'search',
-					hintText: 'Type to search for contest ID, name, or short name',
-					noResultsText: 'No private contests found',
-					preventDuplicates: true,
-					excludeCurrent: true,
-					prePopulate: <?php echo json_encode($prepopulate); ?>
-				});
-			});
-		</script>
-	</td>
+    <td>Private contests:</td>
+    <td>
+        <?php echo addInput('data[0][mapping][0][items]', '', 50); ?>
+        <script type="text/javascript">
+            $(function() {
+                $('#data_0__mapping__0__items_').tokenInput('ajax_contests.php?public=0', {
+                    propertyToSearch: 'search',
+                    hintText: 'Type to search for contest ID, name, or short name',
+                    noResultsText: 'No private contests found',
+                    preventDuplicates: true,
+                    excludeCurrent: true,
+                    prePopulate: <?php echo json_encode($prepopulate); ?>
+                });
+            });
+        </script>
+    </td>
 </tr>
 <?php
 } else {
@@ -127,21 +127,21 @@ if ($cmd == 'add') {
 <tr id="user_extra_data"><td><label for="data_0__mapping__1__extra__username_">Username:</label></td>
 <td><?php echo addInput('data[0][mapping][1][extra][username]', null, 8, 15, 'pattern="' . IDENTIFIER_CHARS . '+" title="Alphanumerics only" required')?></td></tr>
 <script type="text/javascript">
-	$(function() {
-		var show_hide_user_extra_data = function() {
-			if ($('#data_0__adduser_:checked').val()) {
-				$('#user_extra_data').show();
-				$('#data_0__mapping__1__extra__username_').prop("required", true);
-			} else {
-				$('#user_extra_data').hide();
-				$('#data_0__mapping__1__extra__username_').prop("required", false);
-			}
-		};
+    $(function() {
+        var show_hide_user_extra_data = function() {
+            if ($('#data_0__adduser_:checked').val()) {
+                $('#user_extra_data').show();
+                $('#data_0__mapping__1__extra__username_').prop("required", true);
+            } else {
+                $('#user_extra_data').hide();
+                $('#data_0__mapping__1__extra__username_').prop("required", false);
+            }
+        };
 
-		show_hide_user_extra_data();
+        show_hide_user_extra_data();
 
-		$('#data_0__adduser_').on('change', show_hide_user_extra_data);
-	});
+        $('#data_0__adduser_').on('change', show_hide_user_extra_data);
+    });
 </script>
 <?php
 }

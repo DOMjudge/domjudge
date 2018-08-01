@@ -61,13 +61,13 @@ $duplicate = $DB->q('MAYBEVALUE SELECT externalid FROM submission
                      WHERE cid = %i AND externalid = %i', $cid, $extid);
 if ($duplicate !== null) {
     $origtime = $DB->q('VALUE SELECT submittime FROM submission
-	                    WHERE cid = %i AND externalid = %i', $cid, $extid);
+                        WHERE cid = %i AND externalid = %i', $cid, $extid);
     if ($origtime !== $submittime) {
         error("duplicate submission ID with different submittime found");
     }
     // update judging result (in case of a rejudge)
     $DB->q('UPDATE submission SET externalresult = %s
-	        WHERE cid = %i AND externalid = %i', $extresult, $cid, $extid);
+            WHERE cid = %i AND externalid = %i', $extresult, $cid, $extid);
     exit;
 }
 

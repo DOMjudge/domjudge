@@ -33,7 +33,7 @@ if (!isset($menu)) {
 <!DOCTYPE html>
 <html lang="en" xml:lang="en">
 <head>
-	<!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
+    <!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
 <meta charset="<?php echo DJ_CHARACTER_SET?>"/>
 <title><?php echo $title?></title>
 <link rel="icon" href="../images/favicon.png" type="image/png" />
@@ -53,7 +53,7 @@ main {
 h1,h2,h3,h4,h5,h6 {
   text-align: center;
 }
-h1 { font-size: 2em; 
+h1 { font-size: 2em;
   padding-top: 3rem;
 }
 h2 { font-size: 1.5em; }
@@ -110,43 +110,43 @@ if (isset($refresh)) {
 var refreshHandler = null;
 var refreshEnabled = false;
 function enableRefresh() {
-	if (refreshEnabled) {
-		return;
-	}
-	refreshHandler = setTimeout(function () {
-		window.location = '<?php echo $refresh['url']; ?>';
-	}, <?php echo $refresh['after'] * 1000; ?>);
-	refreshEnabled = true;
-	window.Cookies && Cookies.set('domjudge_refresh', 1);
+    if (refreshEnabled) {
+        return;
+    }
+    refreshHandler = setTimeout(function () {
+        window.location = '<?php echo $refresh['url']; ?>';
+    }, <?php echo $refresh['after'] * 1000; ?>);
+    refreshEnabled = true;
+    window.Cookies && Cookies.set('domjudge_refresh', 1);
 }
 
 function disableRefresh() {
-	if (!refreshEnabled) {
-		return;
-	}
-	clearTimeout(refreshHandler);
-	refreshEnabled = false;
-	window.Cookies && Cookies.set('domjudge_refresh', 0);
+    if (!refreshEnabled) {
+        return;
+    }
+    clearTimeout(refreshHandler);
+    refreshEnabled = false;
+    window.Cookies && Cookies.set('domjudge_refresh', 0);
 }
 
 function toggleRefresh() {
-	if ( refreshEnabled ) {
-		disableRefresh();
-	} else {
-		enableRefresh();
-	}
+    if ( refreshEnabled ) {
+        disableRefresh();
+    } else {
+        enableRefresh();
+    }
 
-	var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';
-	$('#refresh-toggle').val(text);
+    var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';
+    $('#refresh-toggle').val(text);
 }
 
 <?php
 if (IS_JURY) {
         ?>
 $(function () {
-	$('#refresh-toggle').on('click', function () {
-		toggleRefresh();
-	});
+    $('#refresh-toggle').on('click', function () {
+        toggleRefresh();
+    });
 });
 
 <?php

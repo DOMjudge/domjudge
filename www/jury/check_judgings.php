@@ -39,9 +39,9 @@ $verifier = 'auto-verifier';
 $res = null;
 if (!empty($cids)) {
     $res = $DB->q("SELECT s.*, j.judgingid, j.result, j.verified, j.jury_member
-	               FROM submission s
-	               LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
-	               WHERE s.cid IN (%Ai) AND j.result IS NOT NULL", $cids);
+                   FROM submission s
+                   LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
+                   WHERE s.cid IN (%Ai) AND j.result IS NOT NULL", $cids);
 }
 
 $section = 0;
@@ -62,7 +62,7 @@ function flushresults($header, $results, $collapse = false)
     if ($collapse) {
         echo "<script type=\"text/javascript\">
 <!--
-	collapse($section);
+    collapse($section);
 // -->
 </script>\n\n";
     }
@@ -88,7 +88,7 @@ while (!empty($cids) && $row = $res->next()) {
             if ($verify_multiple) {
                 // Judging result is as expected, set judging to verified:
                 $DB->q('UPDATE judging SET verified = 1, jury_member = %s
-				        WHERE judgingid = %i', $verifier, $row['judgingid']);
+                        WHERE judgingid = %i', $verifier, $row['judgingid']);
                 $multiple[] = "<a href=\"submission.php?id=" . $sid
                     . "\">s$sid</a> verified as $result, "
                     . "out of multiple possible outcomes ("
@@ -102,7 +102,7 @@ while (!empty($cids) && $row = $res->next()) {
         } else {
             // Judging result is as expected, set judging to verified:
             $DB->q('UPDATE judging SET verified = 1, jury_member = %s
-			        WHERE judgingid = %i', $verifier, $row['judgingid']);
+                    WHERE judgingid = %i', $verifier, $row['judgingid']);
             $verified[] = "<a href=\"submission.php?id=" . $sid .
                 "\">s$sid</a> verified as '$result'";
         }

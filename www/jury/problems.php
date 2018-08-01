@@ -23,8 +23,8 @@ $res = $DB->q('SELECT p.probid,p.name,p.timelimit,p.memlimit,p.outputlimit,
 // Get number of active contests per problem
 if (count($cids)!=0) {
     $activecontests = $DB->q("KEYVALUETABLE SELECT probid, count(cid)
-	                          FROM contestproblem
-	                          WHERE cid IN (%As) GROUP BY probid", $cids);
+                              FROM contestproblem
+                              WHERE cid IN (%As) GROUP BY probid", $cids);
 } else {
     $activecontests = array();
 }
@@ -88,7 +88,7 @@ if (IS_ADMIN) {
     if (class_exists("ZipArchive")) {
         $selected_cid = ($cid === null) ? -1 : $cid;
         $contests = $DB->q("KEYVALUETABLE SELECT cid,
-		                    CONCAT('c', cid, ': ', shortname, ' - ', name) FROM contest");
+                            CONCAT('c', cid, ': ', shortname, ' - ', name) FROM contest");
         $values = array(-1 => 'Do not link to a contest');
         foreach ($contests as $cid => $contest) {
             $values[$cid] = $contest;

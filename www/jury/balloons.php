@@ -156,16 +156,16 @@ if (sizeof($filteron) > 0) {
 collapse("filter");
 // -->
 </script>
-		<?php
+        <?php
 
 // Problem metadata: colours and names.
 if (empty($cids)) {
     $probs_data = array();
 } else {
     $probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,cid
-	                      FROM problem
-	                      INNER JOIN contestproblem USING (probid)
-	                      WHERE cid IN (%Ai)', $contestids);
+                          FROM problem
+                          INNER JOIN contestproblem USING (probid)
+                          WHERE cid IN (%Ai)', $contestids);
 }
 
 $freezecond = array();
@@ -191,16 +191,16 @@ $res = null;
 if (!empty($contestids)) {
     $res = $DB->q(
         "SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
-	               t.teamid, t.name AS teamname, t.room, c.name AS catname,
-	               s.cid, co.shortname
-	               FROM balloon b
-	               LEFT JOIN submission s USING (submitid)
-	               LEFT JOIN problem p USING (probid)
-	               LEFT JOIN contestproblem cp USING (probid, cid)
-	               LEFT JOIN team t USING(teamid)
-	               LEFT JOIN team_category c USING(categoryid)
-	               LEFT JOIN contest co USING (cid)
-	               WHERE s.cid IN (%Ai) $freezecond" .
+                   t.teamid, t.name AS teamname, t.room, c.name AS catname,
+                   s.cid, co.shortname
+                   FROM balloon b
+                   LEFT JOIN submission s USING (submitid)
+                   LEFT JOIN problem p USING (probid)
+                   LEFT JOIN contestproblem cp USING (probid, cid)
+                   LEFT JOIN team t USING(teamid)
+                   LEFT JOIN team_category c USING(categoryid)
+                   LEFT JOIN contest co USING (cid)
+                   WHERE s.cid IN (%Ai) $freezecond" .
                    (isset($filter['affilid']) ? ' AND t.affilid IN (%As) ' : ' %_') .
                    (isset($filter['room']) ? ' AND t.room IN (%As) ' : ' %_') .
                    " ORDER BY done ASC, (1-2*CAST(done AS SIGNED))*CAST(balloonid AS SIGNED) ASC",

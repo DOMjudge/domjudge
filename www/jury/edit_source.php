@@ -15,9 +15,9 @@ if (empty($teamid) || !checkrole('team')) {
 // submit code
 if (isset($_POST['origsubmitid'])) {
     $sources = $DB->q('TABLE SELECT *
-	                   FROM submission_file
-	                   LEFT JOIN submission USING(submitid)
-	                   WHERE submitid = %i ORDER BY rank', $_POST['origsubmitid']);
+                       FROM submission_file
+                       LEFT JOIN submission USING(submitid)
+                       WHERE submitid = %i ORDER BY rank', $_POST['origsubmitid']);
 
     $files = array();
     $filenames = array();
@@ -32,7 +32,7 @@ if (isset($_POST['origsubmitid'])) {
     }
 
     $cid = $DB->q('VALUE SELECT cid FROM submission
-	               WHERE submitid = %i', $_POST['origsubmitid']);
+                   WHERE submitid = %i', $_POST['origsubmitid']);
 
     $newid = submit_solution(
         $teamid,

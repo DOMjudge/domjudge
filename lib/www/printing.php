@@ -20,41 +20,41 @@ function put_print_form()
     global $DB, $pagename;
 
     $langs = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions, require_entry_point, entry_point_description FROM language
-	                 WHERE allow_submit = 1 ORDER BY name');
+                     WHERE allow_submit = 1 ORDER BY name');
     $langlist = array();
     $langlist[''] = 'plain text';
     foreach ($langs as $langid => $langdata) {
         $langlist[$langid] = $langdata['name'];
     } ?>
 
-	<script type="text/javascript">
-	function detectLanguage(filename)
-	{
-		var parts = filename.toLowerCase().split('.').reverse();
-		if ( parts.length < 2 ) return;
+    <script type="text/javascript">
+    function detectLanguage(filename)
+    {
+        var parts = filename.toLowerCase().split('.').reverse();
+        if ( parts.length < 2 ) return;
 
-		// language ID
+        // language ID
 
-		var elt=document.getElementById('langid');
-		// the 'autodetect' option has empty value
-		if ( elt.value != '' ) return;
+        var elt=document.getElementById('langid');
+        // the 'autodetect' option has empty value
+        if ( elt.value != '' ) return;
 
-		var langid = getMainExtension(parts[0]);
-		for (i=0;i<elt.length;i++) {
-			if ( elt.options[i].value == langid ) {
-				elt.selectedIndex = i;
-			}
-		}
+        var langid = getMainExtension(parts[0]);
+        for (i=0;i<elt.length;i++) {
+            if ( elt.options[i].value == langid ) {
+                elt.selectedIndex = i;
+            }
+        }
 
-	}
+    }
 
-	<?php
+    <?php
     putgetMainExtension($langs); ?>
-	</script>
+    </script>
 
 <div class="container submitform">
 <form action="<?=specialchars($pagename)?>" method="post" enctype="multipart/form-data">
-	
+
   <div class="form-group">
     <label for="maincode">Source file:</label>
     <input type="file" class="form-control-file" name="code" id="code" required onchange='detectLanguage(document.getElementById("code").value);' />
@@ -70,7 +70,7 @@ function put_print_form()
     } ?>
     </select>
   </div>
-  <input type="submit" name="submit" value="Print code" class="btn btn-primary" /> 
+  <input type="submit" name="submit" value="Print code" class="btn btn-primary" />
 </form>
 </div>
 
@@ -93,7 +93,7 @@ function handle_print_upload()
     /* sanity check only */
     if ($langid != "") {
         $lang = $DB->q('MAYBETUPLE SELECT langid FROM language
-		                WHERE langid = %s AND allow_submit = 1', $langid);
+                        WHERE langid = %s AND allow_submit = 1', $langid);
 
         if (! isset($lang)) {
             error("Unable to find language '$langid'");
@@ -168,8 +168,8 @@ function send_print($filename, $origname = null, $language = null)
     }
 
     $team = $DB->q('TUPLE SELECT t.name, t.room FROM user u
-	                    LEFT JOIN team t USING (teamid)
-	                    WHERE username = %s', $username);
+                        LEFT JOIN team t USING (teamid)
+                        WHERE username = %s', $username);
     $header = "Team: $username " . $team['name'] .
               (!empty($team['room']) ? "[".$team['room']."]":"") .
               " File: $origname||Page $% of $=";

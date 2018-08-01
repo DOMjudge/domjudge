@@ -29,7 +29,7 @@ if (isset($_REQUEST['cid'])) {
 if (! isset($_REQUEST['refresh'])) {
     if (count($contests)==1) {
         $cname = $DB->q('VALUE SELECT shortname FROM contest
-		                 WHERE cid = %i', reset($contests));
+                         WHERE cid = %i', reset($contests));
     }
     echo addForm($pagename);
     echo msgbox(
@@ -59,15 +59,15 @@ foreach ($contests as $contest) {
     // get the contest, teams and problems
     $teams = $DB->q(
         'TABLE SELECT t.teamid FROM team t
-	                 INNER JOIN contest c ON c.cid = %i
-	                 LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = c.cid
-	                 WHERE (c.public = 1 OR ct.teamid IS NOT NULL) ORDER BY teamid',
+                     INNER JOIN contest c ON c.cid = %i
+                     LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = c.cid
+                     WHERE (c.public = 1 OR ct.teamid IS NOT NULL) ORDER BY teamid',
                     $contest
     );
     $probs = $DB->q(
         'TABLE SELECT probid, cid FROM problem
-	                 INNER JOIN contestproblem USING (probid)
-	                 WHERE cid = %i ORDER BY shortname',
+                     INNER JOIN contestproblem USING (probid)
+                     WHERE cid = %i ORDER BY shortname',
                     $contest
     );
 
@@ -109,13 +109,13 @@ echo "<p>Deleting irrelevant data...</p>\n\n";
 // Drop all teams and problems that do not exist in each contest
 foreach ($contests as $contest) {
     $probids = $DB->q('COLUMN SELECT probid FROM problem
-	                   INNER JOIN contestproblem USING (probid)
-	                   WHERE cid = %i ORDER BY shortname', $contest);
+                       INNER JOIN contestproblem USING (probid)
+                       WHERE cid = %i ORDER BY shortname', $contest);
     $teamids = $DB->q(
         'COLUMN SELECT t.teamid FROM team t
-	                   INNER JOIN contest c ON c.cid = %i
-	                   LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = c.cid
-	                   WHERE (c.public = 1 OR ct.teamid IS NOT NULL) ORDER BY teamid',
+                       INNER JOIN contest c ON c.cid = %i
+                       LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = c.cid
+                       WHERE (c.public = 1 OR ct.teamid IS NOT NULL) ORDER BY teamid',
                       $contest
     );
     // probid -1 will never happen, but otherwise the array is empty and that is not supported

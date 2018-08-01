@@ -107,8 +107,8 @@ echo '<div id="notify" style="display: none">' .
 <script type="text/javascript">
 <!--
     if ( 'Notification' in window ) {
-		document.getElementById('notify').style.display = 'block';
-	}
+        document.getElementById('notify').style.display = 'block';
+    }
 // -->
 </script>
 

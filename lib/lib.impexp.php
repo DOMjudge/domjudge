@@ -124,7 +124,7 @@ function tsv_teams_set($data)
             // First look up if the affiliation already exists.
             $affilid = $DB->q(
                 "MAYBEVALUE SELECT affilid FROM team_affiliation
-			                   WHERE externalid = %s LIMIT 1",
+                               WHERE externalid = %s LIMIT 1",
                               $row['team_affiliation']['externalid']
             );
             if (empty($affilid)) {
@@ -160,7 +160,7 @@ function tsv_accounts_prepare($content)
     $jurycatid = $DB->q('MAYBEVALUE SELECT categoryid FROM team_category WHERE name = "Jury"');
     if (!$jurycatid) {
         $jurycatid = $DB->q('RETURNID INSERT INTO team_category (name,sortorder,visible)
-		                     VALUES ("Jury", 100, 0)');
+                             VALUES ("Jury", 100, 0)');
     }
 
     foreach ($content as $line) {
@@ -288,8 +288,8 @@ function tsv_teams_get()
 {
     global $DB;
     return $DB->q('TABLE SELECT teamid, t.externalid, categoryid, t.name, a.name as affilname, a.shortname, a.country
-	               FROM team t LEFT JOIN team_affiliation a USING(affilid)
-	               WHERE enabled = 1');
+                   FROM team t LEFT JOIN team_affiliation a USING(affilid)
+                   WHERE enabled = 1');
 }
 
 function tsv_scoreboard_get()
@@ -366,9 +366,9 @@ function tsv_results_get()
     $sb = genScoreBoard($cdata, true, array('categoryid' => $categs));
     $additional_bronze = $DB->q('VALUE SELECT b FROM contest WHERE cid = %i', $cdata['cid']);
     $extid_to_name = $DB->q('KEYVALUETABLE SELECT t.externalid, a.name
-	                         FROM team t
-	                         LEFT JOIN team_affiliation a USING (affilid)
-	                         WHERE t.externalid IS NOT NULL ORDER BY t.externalid');
+                             FROM team t
+                             LEFT JOIN team_affiliation a USING (affilid)
+                             WHERE t.externalid IS NOT NULL ORDER BY t.externalid');
 
     $numteams = sizeof($sb['scores']);
 

@@ -55,10 +55,10 @@ function post_team($prikey, $cmd)
         global $DB;
         // Add team user-role to user for this team
         $DB->q("INSERT INTO userrole (userid, roleid)
-		        SELECT userid, roleid FROM user
-		        LEFT JOIN team USING (teamid)
-		        LEFT JOIN role ON role.role = 'team'
-		        WHERE teamid = %i", $prikey['teamid']);
+                SELECT userid, roleid FROM user
+                LEFT JOIN team USING (teamid)
+                LEFT JOIN role ON role.role = 'team'
+                WHERE teamid = %i", $prikey['teamid']);
     }
 }
 
@@ -155,7 +155,7 @@ function check_problem($data, $keydata = null)
     if (!empty($data['special_compare'])) {
         if (! $DB->q(
             'MAYBEVALUE SELECT execid FROM executable
-		               WHERE execid = %s AND type = %s',
+                       WHERE execid = %s AND type = %s',
                       $data['special_compare'],
             'compare'
         )) {
@@ -166,7 +166,7 @@ function check_problem($data, $keydata = null)
     if (!empty($data['special_run'])) {
         if (! $DB->q(
             'MAYBEVALUE SELECT execid FROM executable
-		               WHERE execid = %s AND type = %s',
+                       WHERE execid = %s AND type = %s',
                       $data['special_run'],
             'run'
         )) {
@@ -204,7 +204,7 @@ function check_language($data, $keydata = null)
         global $DB;
         if (! $DB->q(
             'MAYBEVALUE SELECT execid FROM executable
-		               WHERE execid = %s AND type = %s',
+                       WHERE execid = %s AND type = %s',
                       $data['compile_script'],
             'compile'
         )) {
@@ -386,7 +386,7 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
     if (ALLOW_REMOVED_INTERVALS &&
          !isset($removed_intervals) && isset($keydata['cid'])) {
         $removed_intervals = $DB->q('TABLE SELECT * FROM removed_interval
-		                             WHERE cid = %i ORDER BY starttime', $keydata['cid']);
+                                     WHERE cid = %i ORDER BY starttime', $keydata['cid']);
     }
 
     if (isset($data['shortname']) && ! preg_match(ID_REGEX, $data['shortname'])) {

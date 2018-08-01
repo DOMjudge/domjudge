@@ -59,7 +59,7 @@ case 'add':
     }
 
     $removals = $DB->q('TABLE SELECT * FROM removed_interval
-	                    WHERE cid = %i ORDER BY starttime', $mycid);
+                        WHERE cid = %i ORDER BY starttime', $mycid);
 
     // Add new interval, correctly sorted.
     $removals[] = $intv;
@@ -76,7 +76,7 @@ case 'add':
 case 'delete':
     $removals = $DB->q(
         'TABLE SELECT * FROM removed_interval
-	                    WHERE cid = %i AND intervalid != %i ORDER BY starttime',
+                        WHERE cid = %i AND intervalid != %i ORDER BY starttime',
                        $mycid,
         $_REQUEST['intervalid']
     );

@@ -38,9 +38,9 @@ if ($res->count() == 0) {
          "</thead>\n<tbody>\n";
     while ($row = $res->next()) {
         $todo = $DB->q('VALUE SELECT COUNT(*) FROM submission
-		                WHERE rejudgingid=%i', $row['rejudgingid']);
+                        WHERE rejudgingid=%i', $row['rejudgingid']);
         $done = $DB->q('VALUE SELECT COUNT(*) FROM judging
-		                WHERE rejudgingid=%i AND endtime IS NOT NULL', $row['rejudgingid']);
+                        WHERE rejudgingid=%i AND endtime IS NOT NULL', $row['rejudgingid']);
         $todo -= $done;
         $link = '<a href="rejudging.php?id=' . urlencode($row['rejudgingid']) . '">';
         $class = '';

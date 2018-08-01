@@ -80,15 +80,15 @@ if (!isset($api)) {
         global $DB;
 
         $jdata = $DB->q('TUPLE SELECT judgingid, cid, submitid, judgehost, result
-	                 FROM judging WHERE judgingid = %i', $judgingid);
+                         FROM judging WHERE judgingid = %i', $judgingid);
 
         $DB->q('START TRANSACTION');
         $DB->q(
-        'UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i',
-           $judgingid
-    );
+            'UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i',
+            $judgingid
+        );
         $DB->q('UPDATE submission SET judgehost = NULL
-	        WHERE submitid = %i', $jdata['submitid']);
+                WHERE submitid = %i', $jdata['submitid']);
         $DB->q('COMMIT');
 
         auditlog('judging', $judgingid, 'given back', null, $jdata['judgehost'], $jdata['cid']);
@@ -145,30 +145,30 @@ if (!isset($api)) {
 
         $ret = array();
         $ret['num_submissions'] = $DB->q(
-        'VALUE SELECT COUNT(s.submitid)
-		 FROM submission s
-		 WHERE s.cid=%s',
-        $cid
-    );
+            'VALUE SELECT COUNT(s.submitid)
+             FROM submission s
+             WHERE s.cid=%s',
+            $cid
+        );
         $ret['num_queued'] = $DB->q(
-        'VALUE SELECT COUNT(*)
-		 FROM submission s
-		 LEFT JOIN judging j ON (j.submitid = s.submitid AND j.valid != 0)
-		 WHERE s.cid=%s
-  		 AND result IS NULL
-		 AND s.valid = 1',
-        $cid
-    );
+            'VALUE SELECT COUNT(*)
+             FROM submission s
+             LEFT JOIN judging j ON (j.submitid = s.submitid AND j.valid != 0)
+             WHERE s.cid=%s
+             AND result IS NULL
+             AND s.valid = 1',
+            $cid
+        );
         $ret['num_judging'] = $DB->q(
-        'VALUE SELECT COUNT(*)
-		 FROM submission s
-		 LEFT JOIN judging j USING (submitid)
-		 WHERE s.cid=%s
-  		 AND result IS NULL
-		 AND j.valid = 1
-		 AND s.valid = 1',
-        $cid
-    );
+            'VALUE SELECT COUNT(*)
+             FROM submission s
+             LEFT JOIN judging j USING (submitid)
+             WHERE s.cid=%s
+             AND result IS NULL
+             AND j.valid = 1
+             AND s.valid = 1',
+            $cid
+        );
         return $ret;
     }
     $api->provideFunction('GET', 'status', 'Undocumented for now.', array(), array(), array('jury'));
@@ -284,13 +284,13 @@ if (!isset($api)) {
             // make sure that the ordinal is the same if we query a single
             // problem.
             $pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname,
-		                               name, color, timelimit,
-		                               COUNT(testcaseid) AS test_data_count
-		                  FROM problem
-		                  INNER JOIN contestproblem USING (probid)
-		                  LEFT JOIN testcase USING (probid)
-		                  WHERE cid = %i AND allow_submit = 1
-		                  GROUP BY probid ORDER BY shortname', $cid);
+                                           name, color, timelimit,
+                                           COUNT(testcaseid) AS test_data_count
+                              FROM problem
+                              INNER JOIN contestproblem USING (probid)
+                              LEFT JOIN testcase USING (probid)
+                              WHERE cid = %i AND allow_submit = 1
+                              GROUP BY probid ORDER BY shortname', $cid);
         } else {
             $pdatas = array();
         }
@@ -375,15 +375,15 @@ if (!isset($api)) {
         }
 
         $query = 'SELECT j.judgingid, j.cid, j.submitid, j.result, j.starttime, j.endtime,
-	                 MAX(jr.runtime) AS maxruntime,
-	                 (j.endtime IS NULL AND j.valid=0 AND
-	                  (r.valid IS NULL OR r.valid=0)) AS aborted
-	          FROM judging j
-	          LEFT JOIN contest c USING (cid)
-	          LEFT JOIN submission s USING (submitid)
-	          LEFT JOIN judging_run jr USING (judgingid)
-	          LEFT JOIN rejudging r ON s.rejudgingid = r.rejudgingid
-	          WHERE j.cid = %i';
+                         MAX(jr.runtime) AS maxruntime,
+                         (j.endtime IS NULL AND j.valid=0 AND
+                          (r.valid IS NULL OR r.valid=0)) AS aborted
+                  FROM judging j
+                  LEFT JOIN contest c USING (cid)
+                  LEFT JOIN submission s USING (submitid)
+                  LEFT JOIN judging_run jr USING (judgingid)
+                  LEFT JOIN rejudging r ON s.rejudgingid = r.rejudgingid
+                  WHERE j.cid = %i';
 
         // Don't expose judgings of too-late submissions except if
         // explicitly queried for with a specific ID. See comment in
@@ -488,8 +488,8 @@ if (!isset($api)) {
         $problems = array();
         $languages = array();
         $restrictions = $DB->q('MAYBEVALUE SELECT restrictions FROM judgehost
-	                        INNER JOIN judgehost_restriction USING (restrictionid)
-	                        WHERE hostname = %s', $host);
+                                INNER JOIN judgehost_restriction USING (restrictionid)
+                                WHERE hostname = %s', $host);
         if ($restrictions) {
             $restrictions = dj_json_decode($restrictions);
             $contests = @$restrictions['contest'];
@@ -530,13 +530,13 @@ if (!isset($api)) {
         // Prioritize teams according to last judging time
         $submitids = $DB->q(
         'COLUMN SELECT s.submitid
-	                     FROM submission s
-	                     LEFT JOIN team t USING (teamid)
-	                     LEFT JOIN language l USING (langid)
-	                     LEFT JOIN contestproblem cp USING (probid, cid) ' .
+                         FROM submission s
+                         LEFT JOIN team t USING (teamid)
+                         LEFT JOIN language l USING (langid)
+                         LEFT JOIN contestproblem cp USING (probid, cid) ' .
                         $extra_join .
                         'WHERE s.judgehost IS NULL AND s.cid IN (%Ai)
-	                     AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
+                         AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
                         $extra_where .
                         'ORDER BY judging_last_started ASC, submittime ASC, s.submitid ASC',
                         $host,
@@ -552,8 +552,8 @@ if (!isset($api)) {
             // us to it
             $numupd = $DB->q(
             'RETURNAFFECTED UPDATE submission
-		                  SET judgehost = %s
-		                  WHERE submitid = %i AND judgehost IS NULL',
+                          SET judgehost = %s
+                          WHERE submitid = %i AND judgehost IS NULL',
                           $host,
             $submitid
         );
@@ -568,21 +568,21 @@ if (!isset($api)) {
         }
 
         $row = $DB->q('TUPLE SELECT s.submitid, s.cid, s.teamid, s.probid, s.langid,
-				   s.rejudgingid, s.entry_point, s.origsubmitid,
-	               time_factor*timelimit AS maxruntime,
-	               p.memlimit, p.outputlimit,
-	               special_run AS run, special_compare AS compare,
-	               special_compare_args AS compare_args, compile_script
-	               FROM submission s
-	               LEFT JOIN problem p USING (probid)
-	               LEFT JOIN language l USING (langid)
-	               WHERE submitid = %i', $submitid);
+                       s.rejudgingid, s.entry_point, s.origsubmitid,
+                       time_factor*timelimit AS maxruntime,
+                       p.memlimit, p.outputlimit,
+                       special_run AS run, special_compare AS compare,
+                       special_compare_args AS compare_args, compile_script
+                       FROM submission s
+                       LEFT JOIN problem p USING (probid)
+                       LEFT JOIN language l USING (langid)
+                       WHERE submitid = %i', $submitid);
 
         $DB->q(
-        'UPDATE team SET judging_last_started = %s WHERE teamid = %i',
-           now(),
-        $row['teamid']
-    );
+            'UPDATE team SET judging_last_started = %s WHERE teamid = %i',
+            now(),
+            $row['teamid']
+        );
 
         if (empty($row['memlimit'])) {
             $row['memlimit'] = dbconfig_get('memory_limit');
@@ -598,14 +598,14 @@ if (!isset($api)) {
         }
 
         $compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
-	                          WHERE execid = %s', $row['compare']);
+                              WHERE execid = %s', $row['compare']);
         $row['compare_md5sum'] = $compare_md5sum;
         $run_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
-	                      WHERE execid = %s', $row['run']);
+                          WHERE execid = %s', $row['run']);
         $row['run_md5sum'] = $run_md5sum;
         if (!empty($row['compile_script'])) {
             $compile_script_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
-		                                 WHERE execid = %s', $row['compile_script']);
+                                         WHERE execid = %s', $row['compile_script']);
             $row['compile_script_md5sum'] = $compile_script_md5sum;
         }
 
@@ -613,20 +613,19 @@ if (!isset($api)) {
         if ($is_rejudge) {
             // FIXME: what happens if there is no valid judging?
             $prev_rejudgingid = $DB->q(
-            'MAYBEVALUE SELECT judgingid
-		                            FROM judging
-		                            WHERE submitid=%i AND valid=1',
-                                   $submitid
+                'MAYBEVALUE SELECT judgingid
+                 FROM judging
+                 WHERE submitid=%i AND valid=1',
+                $submitid
         );
         }
         $is_editsubmit = isset($row['origsubmitid']);
         $jury_member = '';
         if ($is_editsubmit) {
-            $jury_members = $DB->q('SELECT username FROM
-			user
-			JOIN team USING (teamid)
-			JOIN submission USING (teamid)
-			WHERE submitid = %s', $submitid);
+            $jury_members = $DB->q('SELECT username FROM user
+                                    JOIN team USING (teamid)
+                                    JOIN submission USING (teamid)
+                                    WHERE submitid = %s', $submitid);
             if ($jury_members->count() != 1) {
                 $id_editsubmit = false; // Really is edit/submit but no single owner
             } else {
@@ -637,22 +636,22 @@ if (!isset($api)) {
         $DB->q('START TRANSACTION');
 
         $jid = $DB->q(
-        'RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' .
-                  ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '') .
-                  ($is_editsubmit ? ', jury_member' : '') .
-                  ') VALUES(%i,%i,%s,%s' .
-                  ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
-                  ($is_editsubmit ? ',%s' : '%_') .
-                  ')',
-        $submitid,
-        $row['cid'],
-        now(),
-        $host,
-                  @$row['rejudgingid'],
-        @$prev_rejudgingid,
-        !$is_rejudge,
-        $jury_member
-    );
+            'RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' .
+            ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '') .
+            ($is_editsubmit ? ', jury_member' : '') .
+            ') VALUES(%i,%i,%s,%s' .
+            ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
+            ($is_editsubmit ? ',%s' : '%_') .
+            ')',
+            $submitid,
+            $row['cid'],
+            now(),
+            $host,
+            @$row['rejudgingid'],
+            @$prev_rejudgingid,
+            !$is_rejudge,
+            $jury_member
+        );
 
         if (!$is_rejudge) {
             eventlog('judging', $jid, 'create', $row['cid']);
@@ -701,22 +700,22 @@ if (!isset($api)) {
             if ($args['compile_success']) {
                 $DB->q(
                 'UPDATE judging SET output_compile = %s
-			        WHERE judgingid = %i AND judgehost = %s',
+                    WHERE judgingid = %i AND judgehost = %s',
                    base64_decode($args['output_compile']),
                    $judgingid,
                 $args['judgehost']
             );
             } else {
                 $row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid, s.rejudgingid
-			               FROM judging
-			               LEFT JOIN submission s USING(submitid)
-			               WHERE judgingid = %i', $judgingid);
+                           FROM judging
+                           LEFT JOIN submission s USING(submitid)
+                           WHERE judgingid = %i', $judgingid);
 
                 $DB->q('START TRANSACTION');
                 $DB->q(
                 'UPDATE judging SET output_compile = %s,
-			        result = "compiler-error", endtime=%s
-			        WHERE judgingid = %i AND judgehost = %s',
+                    result = "compiler-error", endtime=%s
+                    WHERE judgingid = %i AND judgehost = %s',
                    base64_decode($args['output_compile']),
                 now(),
                    $judgingid,
@@ -757,9 +756,9 @@ if (!isset($api)) {
     }
     $doc = 'Update a judging.';
     $args = array('judgingid' => 'Judging corresponds to this specific judgingid.',
-    'judgehost' => 'Judging is judged by this specific judgehost.',
-    'compile_success' => 'Did the compilation succeed?',
-    'output_compile' => 'Ouput of compilation phase (base64 encoded).');
+                  'judgehost' => 'Judging is judged by this specific judgehost.',
+                  'compile_success' => 'Did the compilation succeed?',
+                  'output_compile' => 'Ouput of compilation phase (base64 encoded).');
     $exArgs = array();
     $roles = array('judgehost');
     $api->provideFunction('PUT', 'judgings', $doc, $args, $exArgs, $roles);
@@ -786,15 +785,15 @@ if (!isset($api)) {
         }
 
         $jud = $DB->q('TUPLE SELECT judgingid, cid, result, rejudgingid
-		       FROM judging
-	               WHERE judgingid = %i', $args['judgingid']);
+               FROM judging
+                   WHERE judgingid = %i', $args['judgingid']);
 
         $DB->q('START TRANSACTION');
 
         $runid = $DB->q(
         'RETURNID INSERT INTO judging_run (judgingid, testcaseid, runresult,
-	                 runtime, endtime, output_run, output_diff, output_error, output_system)
-	                 VALUES (%i, %i, %s, %f, %s, %s, %s, %s, %s)',
+                     runtime, endtime, output_run, output_diff, output_error, output_system)
+                     VALUES (%i, %i, %s, %f, %s, %s, %s, %s, %s)',
                     $args['judgingid'],
         $args['testcaseid'],
                     $args['runresult'],
@@ -816,11 +815,11 @@ if (!isset($api)) {
         // we're done or if more testcases need to be judged.
 
         $probid = $DB->q('VALUE SELECT probid FROM testcase
-	                  WHERE testcaseid = %i', $args['testcaseid']);
+                          WHERE testcaseid = %i', $args['testcaseid']);
 
         $runresults = $DB->q('COLUMN SELECT runresult
-	                      FROM judging_run LEFT JOIN testcase USING(testcaseid)
-	                      WHERE judgingid = %i ORDER BY rank', $args['judgingid']);
+                              FROM judging_run LEFT JOIN testcase USING(testcaseid)
+                              WHERE judgingid = %i ORDER BY rank', $args['judgingid']);
         $numtestcases = $DB->q('VALUE SELECT count(*) FROM testcase WHERE probid = %i', $probid);
 
         $allresults = array_pad($runresults, $numtestcases, null);
@@ -831,10 +830,10 @@ if (!isset($api)) {
             // possible problem specific override.
             $lazy_eval = dbconfig_get('lazy_eval_results', true);
             $prob_lazy = $DB->q('MAYBEVALUE SELECT cp.lazy_eval_results
-		                     FROM judging j
-		                     LEFT JOIN submission s USING(submitid)
-		                     LEFT JOIN contestproblem cp ON (cp.cid=j.cid AND cp.probid=s.probid)
-		                     WHERE judgingid = %i', $args['judgingid']);
+                                 FROM judging j
+                                 LEFT JOIN submission s USING(submitid)
+                                 LEFT JOIN contestproblem cp ON (cp.cid=j.cid AND cp.probid=s.probid)
+                                 WHERE judgingid = %i', $args['judgingid']);
             if (isset($prob_lazy)) {
                 $lazy_eval = (bool)$prob_lazy;
             }
@@ -843,10 +842,10 @@ if (!isset($api)) {
                 // NOTE: setting endtime here determines in testcases_GET
                 // whether a next testcase will be handed out.
                 $DB->q('UPDATE judging SET result = %s, endtime = %s
-			        WHERE judgingid = %i', $result, now(), $args['judgingid']);
+                        WHERE judgingid = %i', $result, now(), $args['judgingid']);
             } else {
                 $DB->q('UPDATE judging SET result = %s
-			        WHERE judgingid = %i', $result, $args['judgingid']);
+                        WHERE judgingid = %i', $result, $args['judgingid']);
             }
 
             // Only update if the current result is different from what we
@@ -858,9 +857,9 @@ if (!isset($api)) {
                 }
 
                 $row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid
-			               FROM judging
-			               LEFT JOIN submission s USING(submitid)
-			               WHERE judgingid = %i', $args['judgingid']);
+                               FROM judging
+                               LEFT JOIN submission s USING(submitid)
+                               WHERE judgingid = %i', $args['judgingid']);
                 calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
 
                 // We call alert here before possible validation. Note
@@ -965,10 +964,10 @@ if (!isset($api)) {
         }
 
         $query = 'SELECT s.submitid, s.teamid, s.probid, s.langid, s.submittime, s.cid, s.entry_point
-	          FROM submission s
-	          LEFT JOIN team t USING (teamid)
-	          LEFT JOIN team_category c USING (categoryid)
-	          WHERE s.valid = 1 AND s.cid = %i';
+              FROM submission s
+              LEFT JOIN team t USING (teamid)
+              LEFT JOIN team_category c USING (categoryid)
+              WHERE s.valid = 1 AND s.cid = %i';
 
         // Don't expose too-late submissions except if queried for with a
         // specific ID. This doesn't cause a security risk and is a quick
@@ -1079,8 +1078,8 @@ if (!isset($api)) {
 
         $probid = $DB->q(
         'MAYBEVALUE SELECT probid FROM problem
-	                  INNER JOIN contestproblem USING (probid)
-	                  WHERE shortname = %s AND cid = %i AND allow_submit = 1',
+                      INNER JOIN contestproblem USING (probid)
+                      WHERE shortname = %s AND cid = %i AND allow_submit = 1',
                      $args['shortname'],
         $cid
     );
@@ -1099,8 +1098,8 @@ if (!isset($api)) {
         }
 
         $lang = $DB->q('MAYBETUPLE SELECT langid, name, require_entry_point, entry_point_description
-	                FROM language
-	                WHERE langid = %s AND allow_submit = 1', $args['langid']);
+                    FROM language
+                    WHERE langid = %s AND allow_submit = 1', $args['langid']);
 
         if (! isset($lang)) {
             error("Unable to find language '$args[langid]' or not submittable");
@@ -1150,7 +1149,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }
 
         $sources = $DB->q('SELECT submitfileid, submitid, filename, sourcecode FROM submission_file
-	                   WHERE submitid = %i ORDER BY rank', $args['submission_id']);
+                       WHERE submitid = %i ORDER BY rank', $args['submission_id']);
 
         if ($sources->count()==0) {
             $api->createError("Cannot find source files for submission '$args[id]'.");
@@ -1188,18 +1187,18 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         // endtime is set: judging is fully done; return empty
         $row = $DB->q('TUPLE SELECT endtime,probid
-	               FROM judging LEFT JOIN submission USING(submitid)
-	               WHERE judgingid = %i', $args['judgingid']);
+                   FROM judging LEFT JOIN submission USING(submitid)
+                   WHERE judgingid = %i', $args['judgingid']);
         if (!empty($row['endtime'])) {
             return '';
         }
 
         $judging_runs = $DB->q("COLUMN SELECT testcaseid FROM judging_run
-	                        WHERE judgingid = %i", $args['judgingid']);
+                            WHERE judgingid = %i", $args['judgingid']);
         $sqlextra = count($judging_runs) ? "AND testcaseid NOT IN (%Ai)" : "%_";
         $testcase = $DB->q(
         "MAYBETUPLE SELECT testcaseid, rank, probid, md5sum_input, md5sum_output
-	                    FROM testcase WHERE probid = %i $sqlextra ORDER BY rank LIMIT 1",
+                        FROM testcase WHERE probid = %i $sqlextra ORDER BY rank LIMIT 1",
                        $row['probid'],
         $judging_runs
     );
@@ -1244,7 +1243,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }
 
         $content = $DB->q("MAYBEVALUE SELECT SQL_NO_CACHE $inout FROM testcase
-	                   WHERE testcaseid = %i", $args['testcaseid']);
+                       WHERE testcaseid = %i", $args['testcaseid']);
 
         if (is_null($content)) {
             $api->createError("Cannot find testcase '$args[testcaseid]'.");
@@ -1271,7 +1270,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }
 
         $content = $DB->q("MAYBEVALUE SELECT SQL_NO_CACHE zipfile FROM executable
-	                   WHERE execid = %s", $args['execid']);
+                       WHERE execid = %s", $args['execid']);
 
         if (is_null($content)) {
             $api->createError("Cannot find executable '$args[execid]'.");
@@ -1319,13 +1318,13 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }
 
         $query = 'TABLE SELECT jr.runid, jr.judgingid, jr.runresult,
-	                       jr.endtime, jr.runtime, j.cid, t.rank
-	          FROM judging_run jr
-	          LEFT JOIN testcase t USING (testcaseid)
-	          LEFT JOIN judging j USING (judgingid)
-	          LEFT JOIN submission s USING (submitid)
-	          LEFT JOIN contest c ON c.cid = j.cid
-	          WHERE j.cid = %i';
+                           jr.endtime, jr.runtime, j.cid, t.rank
+              FROM judging_run jr
+              LEFT JOIN testcase t USING (testcaseid)
+              LEFT JOIN judging j USING (judgingid)
+              LEFT JOIN submission s USING (submitid)
+              LEFT JOIN contest c ON c.cid = j.cid
+              WHERE j.cid = %i';
 
         // Don't expose judging runs of too-late submissions except if
         // explicitly queried for with a specific ID. See comment in
@@ -1507,13 +1506,13 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         // Construct query
         $query = 'TABLE SELECT teamid AS id, t.name, t.members, t.externalid,
-	          t.categoryid, t.affilid, a.name AS affiliation, a.country AS nationality,
-	          ct.cid
-	          FROM team t
-	          LEFT JOIN team_affiliation a USING(affilid)
-	          LEFT JOIN team_category c USING (categoryid)
-	          LEFT JOIN contestteam ct USING (teamid)
-	          WHERE t.enabled = 1';
+              t.categoryid, t.affilid, a.name AS affiliation, a.country AS nationality,
+              ct.cid
+              FROM team t
+              LEFT JOIN team_affiliation a USING(affilid)
+              LEFT JOIN team_category c USING (categoryid)
+              LEFT JOIN contestteam ct USING (teamid)
+              WHERE t.enabled = 1';
 
         $public = $DB->q('MAYBEVALUE SELECT public FROM contest WHERE cid = %i', $cid);
         if (!isset($public)) {
@@ -1581,7 +1580,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         global $DB;
         $extra = ($args['public'] ? 'WHERE visible = 1' : '');
         $q = $DB->q('SELECT categoryid, name, color, visible, sortorder
-	             FROM team_category ' . $extra . ' ORDER BY sortorder');
+                 FROM team_category ' . $extra . ' ORDER BY sortorder');
         $res = array();
         while ($row = $q->next()) {
             $res[] = array(
@@ -1610,8 +1609,8 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }
 
         $query = 'SELECT categoryid, name, color, visible, sortorder
-	          FROM team_category
-	          WHERE TRUE';
+              FROM team_category
+              WHERE TRUE';
         if ($args['public']) {
             $query .= ' AND visible=1';
         }
@@ -1660,7 +1659,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }
 
         $query = 'SELECT langid, name, extensions, require_entry_point, entry_point_description, allow_judge, time_factor
-	          FROM language WHERE allow_submit = 1';
+              FROM language WHERE allow_submit = 1';
 
         $byLangIds = array_key_exists('langids', $args);
         $query .= ($byLangIds ? ' AND langid IN (%As)' : ' %_');
@@ -1723,8 +1722,8 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         // Find clarifications, maybe later also provide more info for jury
         $query = 'TABLE SELECT clarid, submittime, probid, body, cid, sender, recipient, respid
-	          FROM clarification
-	          WHERE cid = %i';
+              FROM clarification
+              WHERE cid = %i';
 
         $byProblem = array_key_exists('problem', $args);
         $query .= ($byProblem ? ' AND probid = %i' : ' %_');
@@ -1799,10 +1798,10 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         // If there are any unfinished judgings in the queue in my name,
         // they will not be finished. Give them back.
         $query = 'TABLE SELECT judgingid, submitid, cid
-	          FROM judging j
-	          LEFT JOIN rejudging r USING (rejudgingid)
-	          WHERE judgehost = %s AND j.endtime IS NULL
-	          AND (j.valid = 1 OR r.valid = 1)';
+              FROM judging j
+              LEFT JOIN rejudging r USING (rejudgingid)
+              WHERE judgehost = %s AND j.endtime IS NULL
+              AND (j.valid = 1 OR r.valid = 1)';
         $res = $DB->q($query, $args['hostname']);
         foreach ($res as $jud) {
             give_back_judging($jud['judgingid']);
@@ -1899,7 +1898,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         $scoreboard = genScoreBoard($cdatas[$cid], !$args['public'], $filter, $only_visible_teams);
 
         $prob2label = $DB->q('KEYVALUETABLE SELECT probid, shortname
-	                      FROM contestproblem WHERE cid = %i', $cid);
+                          FROM contestproblem WHERE cid = %i', $cid);
 
         $res = array();
         foreach ($scoreboard['scores'] as $teamid => $data) {
@@ -1970,7 +1969,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         // note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors
         $errorid = $DB->q(
         'MAYBEVALUE SELECT errorid FROM internal_error
-	                   WHERE description=%s AND disabled=%s AND status=%s' .
+                       WHERE description=%s AND disabled=%s AND status=%s' .
                       (isset($cid) ? ' AND cid=%i' : '%_'),
                       $args['description'],
         $args['disabled'],
@@ -1985,8 +1984,8 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         $errorid = $DB->q(
         'RETURNID INSERT INTO internal_error
-	                   (judgingid, cid, description, judgehostlog, time, disabled)
-	                   VALUES (%i, %i, %s, %s, %i, %s)',
+                       (judgingid, cid, description, judgehostlog, time, disabled)
+                       VALUES (%i, %i, %s, %s, %i, %s)',
                       $judgingid,
         $cid,
         $args['description'],

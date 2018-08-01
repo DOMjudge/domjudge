@@ -26,7 +26,7 @@ function genpw($users, $group, $format)
         if ($group == 'team') {
             if ($DB->q(
                 'VALUE SELECT COUNT(*) FROM userrole
-			             WHERE userid = %i AND (roleid = %i OR roleid = %i)',
+                         WHERE userid = %i AND (roleid = %i OR roleid = %i)',
                         $user['userid'],
                 $juryroleid,
                 $adminroleid
@@ -36,7 +36,7 @@ function genpw($users, $group, $format)
         } elseif ($group == 'judge') {
             if ($DB->q(
                 'VALUE SELECT COUNT(*) FROM userrole
-			             WHERE userid = %i AND roleid = %i',
+                         WHERE userid = %i AND roleid = %i',
                         $user['userid'],
                 $adminroleid
             ) > 0) {
@@ -94,8 +94,8 @@ if (isset($_POST['format'])) {
             case 'team':
             case 'teamwithoutpw':
                 $users = $DB->q('TABLE SELECT username,name,userid,teamid FROM user
-				                 LEFT JOIN userrole USING (userid)
-				                 WHERE teamid IS NOT NULL AND roleid = %i' .
+                                 LEFT JOIN userrole USING (userid)
+                                 WHERE teamid IS NOT NULL AND roleid = %i' .
                                 ($group == 'teamwithoutpw' ? ' AND password IS NULL' : '') .
                                 ' GROUP BY userid ORDER BY username', $teamroleid);
                 genpw($users, 'team', $format);
@@ -104,9 +104,9 @@ if (isset($_POST['format'])) {
             case 'admin':
                 $users = $DB->q(
                     'TABLE SELECT username,name,userid FROM user
-				                 LEFT JOIN userrole USING (userid)
-				                 WHERE roleid = %i
-				                 GROUP BY userid ORDER BY username',
+                                 LEFT JOIN userrole USING (userid)
+                                 WHERE roleid = %i
+                                 GROUP BY userid ORDER BY username',
                                 ($group == 'judge' ? $juryroleid : $adminroleid)
                 );
                 genpw($users, $group, $format);
