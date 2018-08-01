@@ -172,7 +172,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 
     // print the table with the submissions.
     // table header
-    //	echo "<table class=\"list sortable submissions\">\n<thead>\n<tr>" .
+    //echo "<table class=\"list sortable submissions\">\n<thead>\n<tr>" .
     echo "<table class=\"table table-striped table-hover table-sm list sortable\">\n<thead class=\"thead-light\">\n<tr>" .
 
         (IS_JURY ? "<th scope=\"col\" class=\"sorttable_numeric\">ID</th>" : '') .

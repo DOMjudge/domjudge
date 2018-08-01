@@ -115,7 +115,7 @@ class db
                 $type = 'select';
                 break;
             // transactions
-            case 'start':	// start transaction. Do not support BEGIN, it's deprecated
+            case 'start': // start transaction. Do not support BEGIN, it's deprecated
             case 'commit':
             case 'rollback':
                 $type = 'transaction';
@@ -314,24 +314,24 @@ class db
 
         // switch error message depending on errornr.
         switch (mysqli_errno($this->_connection)) {
-            case 1062:	// duplicate key
-            throw new UnexpectedValueException("Item with this key already"
-                . " exists.\n" . $callsite . mysqli_error($this->_connection));
+            case 1062: // duplicate key
+                throw new UnexpectedValueException("Item with this key already"
+                    . " exists.\n" . $callsite . mysqli_error($this->_connection));
             case 1217:  // foreign key constraint
-            throw new UnexpectedValueException("This operation would have"
-                . " brought the database in an inconsistent state,\n"
-                . $callsite . mysqli_error($this->_connection));
-            case 2006:	// MySQL server has gone away
-            throw new RuntimeException("MySQL server has gone away");
+                throw new UnexpectedValueException("This operation would have"
+                    . " brought the database in an inconsistent state,\n"
+                    . $callsite . mysqli_error($this->_connection));
+            case 2006: // MySQL server has gone away
+                throw new RuntimeException("MySQL server has gone away");
             case 1153:
-            $query_len = round(strlen($query)/(1024*1024));
-            throw new RuntimeException('MySQL error 1153: ' .
-                'Got a packet bigger than the configured "max_allowed_packet" ' .
-                '(current query was ~' . $query_len . 'MB).');
+                $query_len = round(strlen($query)/(1024*1024));
+                throw new RuntimeException('MySQL error 1153: ' .
+                    'Got a packet bigger than the configured "max_allowed_packet" ' .
+                    '(current query was ~' . $query_len . 'MB).');
             default:
-            throw new RuntimeException("SQL error, " . $callsite
-                . "Error#" . mysqli_errno($this->_connection) . ": "
-                . mysqli_error($this->_connection) . ", query: '$query'");
+                throw new RuntimeException("SQL error, " . $callsite
+                    . "Error#" . mysqli_errno($this->_connection) . ": "
+                    . mysqli_error($this->_connection) . ", query: '$query'");
         }
     }
 

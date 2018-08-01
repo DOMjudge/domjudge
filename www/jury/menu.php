@@ -3,17 +3,17 @@ global $updates;
 ?>
 <nav><div id="menutop">
 <a href="index.php" accesskey="h"><span class="octicon octicon-home"></span> home</a>
-<?php	if (checkrole('balloon')) {
+<?php if (checkrole('balloon')) {
     ?>
 <a href="balloons.php" accesskey="b"><span class="octicon octicon-location"></span> balloons</a>
 <?php
 } ?>
-<?php	if (checkrole('jury')) {
+<?php if (checkrole('jury')) {
         ?>
 <a href="problems.php" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
 <?php
     } ?>
-<?php	if (IS_ADMIN) {
+<?php if (IS_ADMIN) {
         $ndown = count($updates['judgehosts']);
         if ($ndown > 0) {
             ?>
@@ -31,7 +31,7 @@ global $updates;
 <?php
         }
     } ?>
-<?php	if (checkrole('jury')) {
+<?php if (checkrole('jury')) {
         ?>
 <a href="teams.php" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>
 <a href="users.php" accesskey="u"><span class="octicon octicon-person"></span> users</a>
@@ -60,12 +60,12 @@ global $updates;
         } ?>
 <?php
     } /* checkrole('jury') */ ?>
-<?php	if (have_printing()) {
+<?php if (have_printing()) {
         ?>
 <a href="print.php" accesskey="p"><span class="octicon octicon-file-text"></span> print</a>
 <?php
     } ?>
-<?php	if (checkrole('jury')) {
+<?php if (checkrole('jury')) {
         ?>
 <a href="scoreboard.php" accesskey="b"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
 <?php

@@ -1917,13 +1917,17 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
                 if ($prob['solved']) {
                     $prob['time'] = scoretime($pdata['time']);
                     // TODO: according the API specification this doesn't
-                // have to be added. Also, the current first_solved()
-                // implementation is incorrent when there are pending
-                // earlier submissions.
-//				$first = first_solved($pdata['time'],
-//				                      $scoreboard['summary']['problems'][$probid]
-//				                      ['best_time_sort'][$data['sortorder']]);
-//				$prob['first_to_solve'] = safe_bool($first);
+                    // have to be added. Also, the current first_solved()
+                    // implementation is incorrent when there are pending
+                    // earlier submissions.
+                    /*
+                    $first = first_solved(
+                        $pdata['time'],
+                        $scoreboard['summary']['problems'][$probid]
+                        ['best_time_sort'][$data['sortorder']]
+                    );
+                    $prob['first_to_solve'] = safe_bool($first);
+                    */
                 }
 
                 $row['problems'][] = $prob;

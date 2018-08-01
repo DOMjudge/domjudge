@@ -125,7 +125,7 @@ function addSelect($name, $values, $default = null, $usekeys = false, $multi = f
         if (! $usekeys) {
             $k = $v;
         }
-        $ret .= '<option value="' .	specialchars($k) . '"' .
+        $ret .= '<option value="' . specialchars($k) . '"' .
             (matchSelect($k, $default) ? ' selected="selected"' : '') . '>' .
             specialchars($v) ."</option>\n";
     }

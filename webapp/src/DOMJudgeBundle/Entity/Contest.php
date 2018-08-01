@@ -158,9 +158,9 @@ class Contest
     /**
      * @ORM\ManyToMany(targetEntity="Team", inversedBy="contests")
      * @ORM\JoinTable(name="contestteam",
-     *		joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid")},
-     *		inverseJoinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid")}
-     *		)
+     *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid")},
+     *                inverseJoinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid")}
+     *               )
      * @Groups({"teams"})
      */
     private $teams;

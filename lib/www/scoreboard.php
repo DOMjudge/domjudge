@@ -659,7 +659,7 @@ function renderScoreBoardTable(
                         jurylink(
                             'team_category.php?id=' . urlencode($cat['categoryid']),
                              specialchars($cat['name'])
-                        ) .	"</td></tr>\n";
+                        ) . "</td></tr>\n";
                 }
                 echo "</tbody>\n</table>\n&nbsp;\n";
             }

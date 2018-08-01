@@ -261,7 +261,7 @@ function tsv_export($fmt)
         case 'teams':      $data = tsv_teams_get();      $version = 1; break;
         case 'scoreboard': $data = tsv_scoreboard_get(); $version = 1; break;
         case 'results':    $data = tsv_results_get();    $version = 1; break;
-        //	case 'accounts':   $data = tsv_accounts_get();   $version = 1; break;
+        //case 'accounts':   $data = tsv_accounts_get();   $version = 1; break;
         default: error('Specified format not (yet) supported.');
     }
 
