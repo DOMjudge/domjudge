@@ -500,21 +500,11 @@ if (ALLOW_REMOVED_INTERVALS) {
         }
         if (IS_ADMIN) {
             echo "<tr><td>new&nbsp;</td>" .
-                 "<td>" . addInput(
-                     'starttime_string',
-                     null,
-                     30,
-                     64,
-                                   'required pattern="' . $pattern_datetime . '"'
-                 ) .
+                 "<td>" . addInput('starttime_string', null, 30, 64,
+                                   'required pattern="' . $pattern_datetime . '"') .
                  "</td><td>&nbsp;&rarr;&nbsp;</td>" .
-                 "<td>" . addInput(
-                     'endtime_string',
-                     null,
-                     30,
-                     64,
-                                   'required pattern="' . $pattern_datetime . '"'
-                 ) .
+                 "<td>" . addInput('endtime_string', null, 30, 64,
+                                   'required pattern="' . $pattern_datetime . '"') .
                  "</td><td></td><td>" . addSubmit('Add') . "</td></tr>\n";
         }
         echo "</tbody>\n</table>\n" .
@@ -575,8 +565,8 @@ if (count($res) == 0) {
                  delLinkMultiple(
                      'contestproblem',
                      array('cid','probid'),
-                                 array($id, $row['probid']),
-                                 'contest.php?id='.$id,
+                     array($id, $row['probid']),
+                     'contest.php?id='.$id,
                      $row['shortname']
                  ) ."</td>";
         }

@@ -93,32 +93,19 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
     // this goes well.
     $DB->q('START TRANSACTION');
 
-    $newid = $DB->q(
-        'RETURNID INSERT INTO clarification
+    $newid = $DB->q('RETURNID INSERT INTO clarification
                      (cid, respid, submittime, recipient, probid, category, queue, body,
                       answered, jury_member)
                      VALUES (%i, ' .
                     ($respid===null ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %s, %s, %i, ' .
                     (isset($jury_member) ? '%s)' : 'NULL %_)'),
-                    $cid,
-        $respid,
-        now(),
-        $sendto,
-        $probid,
-        $category,
-        $queue,
-                    $_POST['bodytext'],
-        1,
-        $jury_member
-    );
+                    $cid, $respid, now(), $sendto, $probid, $category,
+                    $queue, $_POST['bodytext'], 1, $jury_member);
 
     if (! $isgeneral) {
-        $DB->q(
-            'UPDATE clarification SET answered = 1, jury_member = ' .
+        $DB->q('UPDATE clarification SET answered = 1, jury_member = ' .
                (isset($jury_member) ? '%s' : 'NULL %_') . ' WHERE clarid = %i',
-               $jury_member,
-            $respid
-        );
+               $jury_member, $respid);
     }
 
     $DB->q('COMMIT');
@@ -150,13 +137,9 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
 // (un)set 'answered' (if posted)
 if (isset($_POST['answer']) && isset($_POST['answered'])) {
     $answered = (int)$_POST['answered'];
-    $DB->q(
-        'UPDATE clarification SET answered = %i, jury_member = ' .
+    $DB->q('UPDATE clarification SET answered = %i, jury_member = ' .
            ($answered ? '%s ' : 'NULL %_ ') . 'WHERE clarid = %i',
-           $answered,
-        $jury_member,
-        $respid
-    );
+           $answered, $jury_member, $respid);
 
     auditlog('clarification', $respid, 'marked ' . ($answered?'answered':'unanswered'));
 
@@ -173,7 +156,8 @@ if (isset($_POST['subject'])) {
         $probid = null;
     }
 
-    $DB->q('UPDATE clarification SET cid = %i, category = %s, probid = %i WHERE clarid = %i', $cid, $category, $probid, $id);
+    $DB->q('UPDATE clarification SET cid = %i, category = %s, probid = %i WHERE clarid = %i',
+           $cid, $category, $probid, $id);
 }
 
 if (isset($_POST['queue'])) {
@@ -206,8 +190,8 @@ if (! $isgeneral) {
 
     if (! empty($req['respid'])) {
         $orig = $DB->q('MAYBETUPLE SELECT q.*, t.name AS name FROM clarification q
-                    LEFT JOIN team t ON (t.teamid = q.sender)
-                    WHERE q.clarid = %i', $respid);
+                        LEFT JOIN team t ON (t.teamid = q.sender)
+                        WHERE q.clarid = %i', $respid);
         echo '<p>See the <a href="clarification.php?id=' . $respid .
         '">original clarification ' . $respid . '</a> by ' .
         ($orig['sender']==null ? 'Jury' :

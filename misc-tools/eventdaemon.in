@@ -183,14 +183,9 @@ function insert_event($cid, $endpoint, $data)
 {
     global $DB, $options;
 
-    $old = $DB->q(
-        'MAYBETUPLE SELECT eventid, action, content FROM event
+    $old = $DB->q('MAYBETUPLE SELECT eventid, action, content FROM event
                    WHERE cid = %i AND endpointtype = %s AND endpointid = %s
-                   ORDER BY eventid DESC LIMIT 1',
-                  $cid,
-        $endpoint,
-        $data['id']
-    );
+                   ORDER BY eventid DESC LIMIT 1', $cid, $endpoint, $data['id']);
 
     $json = dj_json_encode($data);
 

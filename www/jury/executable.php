@@ -26,11 +26,8 @@ if (isset($_GET['fetch'])) {
 
     $filename = $id . ".zip";
 
-    $size = $DB->q(
-        "MAYBEVALUE SELECT OCTET_LENGTH(zipfile)
-                    FROM executable WHERE execid = %s",
-                   $id
-    );
+    $size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH(zipfile)
+                    FROM executable WHERE execid = %s", $id);
 
     // sanity check before we start to output headers
     if ($size===null || !is_numeric($size)) {
@@ -74,36 +71,23 @@ if (isset($_POST['upload'])) {
             }
             $content = dj_file_get_contents($_FILES['executable_archive']['tmp_name'][$fileid]);
             if (!empty($id)) {
-                $DB->q(
-                    'UPDATE executable SET description=%s, md5sum=%s, zipfile=%s, type=%s
-                        WHERE execid=%s',
-                       $desc,
-                    md5($content),
-                    $content,
-                    $type,
-                    $id
-                );
+                $DB->q('UPDATE executable SET description=%s, md5sum=%s, zipfile=%s, type=%s
+                        WHERE execid=%s', $desc, md5($content), $content, $type, $id);
                 $newid = $id;
             } else {
                 if ($DB->q('MAYBEVALUE SELECT execid FROM executable WHERE execid = %s', $newid)) {
                     error('Executable with id "' . $newid . '" already exists.');
                 }
-                $DB->q(
-                    'INSERT INTO executable (execid, description, md5sum, zipfile, type)
+                $DB->q('INSERT INTO executable (execid, description, md5sum, zipfile, type)
                         VALUES (%s, %s, %s, %s, %s)',
-                       $newid,
-                    $desc,
-                    md5($content),
-                    $content,
-                    $type
-                );
+                       $newid, $desc, md5($content), $content, $type);
             }
             $zip->close();
             auditlog(
                 'executable',
                 $id,
                 'upload zip',
-                     $_FILES['executable_archive']['name'][$fileid]
+                $_FILES['executable_archive']['name'][$fileid]
             );
         }
         if (count($_FILES['executable_archive']['tmp_name']) == 1) {
@@ -193,14 +177,8 @@ if (! $data) {
 
 echo "<h1>Executable ".specialchars($id)."</h1>\n\n";
 if (IS_ADMIN) {
-    echo addForm(
-        $pagename . '?id=' . urlencode($id),
-             'post',
-        null,
-        'multipart/form-data'
-    ) . "<p>\n" .
-        addHidden('id', $id) .
-        "</p>\n";
+    echo addForm($pagename . '?id=' . urlencode($id), 'post', null, 'multipart/form-data') . "<p>\n" .
+        addHidden('id', $id) . "</p>\n";
 }
 ?>
 <table>

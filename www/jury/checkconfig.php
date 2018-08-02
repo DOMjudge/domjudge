@@ -293,29 +293,26 @@ if ($DB->q('VALUE SELECT count(*) FROM user
         'configuration',
         'Default admin password',
         'E',
-           'The "admin" user still has the default password. ' .
-           'You should change it immediately.'
+        'The "admin" user still has the default password. You should change it immediately.'
     );
 } else {
     result(
         'configuration',
         'Default admin password',
         'O',
-           'Password for "admin" has been changed from the default.'
+        'Password for "admin" has been changed from the default.'
     );
 }
 
 foreach (array('compare', 'run') as $type) {
-    if ($DB->q(
-        'VALUE SELECT count(*) FROM executable WHERE execid = %s',
-                dbconfig_get('default_' . $type)
-    ) == 0) {
+    if ($DB->q('VALUE SELECT count(*) FROM executable WHERE execid = %s',
+               dbconfig_get('default_' . $type)) == 0) {
         result(
             'configuration',
             'Default ' . $type .' script',
             'E',
-               'The default ' . $type . ' script "' .
-               dbconfig_get('default_' . $type) . '" does not exist.'
+            'The default ' . $type . ' script "' .
+            dbconfig_get('default_' . $type) . '" does not exist.'
         );
     }
 }
@@ -323,9 +320,9 @@ foreach (array('compare', 'run') as $type) {
 result(
     'configuration',
     'Compile file size vs. memory limit',
-       (dbconfig_get('script_filesize_limit')<dbconfig_get('memory_limit') ? 'W' : 'O'),
-       'If the script filesize limit is lower than the memory limit, then ' .
-       'compilation of sources that statically allocate memory may fail.'
+    (dbconfig_get('script_filesize_limit')<dbconfig_get('memory_limit') ? 'W' : 'O'),
+    'If the script filesize limit is lower than the memory limit, then ' .
+    'compilation of sources that statically allocate memory may fail.'
 );
 
 if (DEBUG == 0) {
@@ -335,27 +332,27 @@ if (DEBUG == 0) {
         'configuration',
         'Debugging',
         'W',
-           'Debug information enabled (level ' . DEBUG .").\n" .
-           'Should not be enabled on live systems.'
+        'Debug information enabled (level ' . DEBUG .").\n" .
+        'Should not be enabled on live systems.'
     );
 }
 
 if (!is_writable(TMPDIR)) {
     result(
-           'configuration',
-           'TMPDIR writable',
-           'W',
-              'TMPDIR (' . TMPDIR . ') is not writable by the webserver; ' .
-              'Showing diffs and editing of submissions may not work.'
-       );
+        'configuration',
+        'TMPDIR writable',
+        'W',
+        'TMPDIR (' . TMPDIR . ') is not writable by the webserver; ' .
+        'Showing diffs and editing of submissions may not work.'
+    );
 } else {
     result(
-           'configuration',
-           'TMPDIR writable',
-           'O',
-              'TMPDIR (' . TMPDIR . ') can be used to store temporary ' .
-              'files for submission diffs and edits.'
-       );
+        'configuration',
+        'TMPDIR writable',
+        'O',
+        'TMPDIR (' . TMPDIR . ') can be used to store temporary ' .
+        'files for submission diffs and edits.'
+    );
 }
 
 flushresults();
@@ -367,7 +364,7 @@ if (empty($cids)) {
         'contests',
         'Active contests',
         'E',
-           'No currently active contests found. System will not function.'
+        'No currently active contests found. System will not function.'
     );
 } else {
     $cidstring = implode(', ', array_map(function ($cid) {
@@ -377,7 +374,7 @@ if (empty($cids)) {
         'contests',
         'Active contests',
         'O',
-           'Currently active contests: ' . $cidstring
+        'Currently active contests: ' . $cidstring
     );
 }
 
@@ -441,8 +438,7 @@ foreach ($judgehosts as &$judgehost) {
     $judgehost['contests'] = array();
     $judgehost['problems'] = array();
     $judgehost['languages'] = array();
-    $restrictions = $DB->q(
-        'MAYBEVALUE SELECT restrictions FROM judgehost
+    $restrictions = $DB->q('MAYBEVALUE SELECT restrictions FROM judgehost
                             INNER JOIN judgehost_restriction USING (restrictionid)
                             WHERE hostname = %s ORDER BY restrictionid',
                            $judgehost['hostname']
@@ -492,9 +488,9 @@ foreach ($problems as $prob) {
             $details .= 'p'.$prob['probid']." in contest c" . $prob['cid'] .': ' . $chk_err."\n";
         }
     }
-    if (! $DB->q("MAYBEVALUE SELECT count(testcaseid) FROM testcase
-                   WHERE input IS NOT NULL AND output IS NOT NULL AND
-                   probid = %i", $prob['probid'])) {
+    if (! $DB->q('MAYBEVALUE SELECT count(testcaseid) FROM testcase
+                  WHERE input IS NOT NULL AND output IS NOT NULL AND
+                  probid = %i', $prob['probid'])) {
         $details .= 'p'.$prob['probid']." in contest c" . $prob['cid'] . ": missing in/output testcase.\n";
     }
 
@@ -505,18 +501,12 @@ foreach ($problems as $prob) {
             if ($language_ok) {
                 break;
             }
-            $found = $DB->q(
-                "MAYBEVALUE SELECT cp.probid
+            $found = $DB->q('MAYBEVALUE SELECT cp.probid
                              FROM contestproblem cp, language l
-                             WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s" .
+                             WHERE cp.probid = %i AND cp.cid = %i AND l.langid = %s' .
                             $judgehost['extra_where'],
-                            $prob['probid'],
-                $prob['cid'],
-                $langid,
-                $judgehost['contests'],
-                            $judgehost['problems'],
-                $judgehost['languages']
-            );
+                            $prob['probid'], $prob['cid'], $langid,
+                            $judgehost['contests'], $judgehost['problems'], $judgehost['languages']);
             if ($found) {
                 $language_ok = true;
             }
@@ -538,8 +528,7 @@ foreach ($problems as $prob) {
         }
     }
     $outputlimit = 1024*(isset($prob['outputlimit']) ? $prob['outputlimit'] : dbconfig_get('output_limit'));
-    $oversize = $DB->q(
-        "SELECT rank, OCTET_LENGTH(output) AS size
+    $oversize = $DB->q("SELECT rank, OCTET_LENGTH(output) AS size
                         FROM testcase
                         WHERE probid = %i AND OCTET_LENGTH(output) > %i
                         ORDER BY rank",
@@ -574,8 +563,8 @@ foreach ($probs as $probdata) {
 result(
     'problems, languages, teams',
     'Problems integrity',
-       ($details == '' && $details_html == '') ? 'O':($has_errors?'E':'W'),
-       $details,
+    ($details == '' && $details_html == '') ? 'O':($has_errors?'E':'W'),
+    $details,
     $details_html
 );
 
@@ -641,14 +630,14 @@ if (dbconfig_get('show_affiliations', 1)) {
     result(
         'problems, languages, teams',
         'Team affiliation icons',
-           ($details == '') ? 'O' : 'W',
+        ($details == '') ? 'O' : 'W',
         $details
     );
 } else {
     result(
         'problems, languages, teams',
         'Team affiliation icons',
-           'O',
+        'O',
         'Affiliation icons disabled in config.'
     );
 }
@@ -694,8 +683,7 @@ $res = $DB->q('SELECT s.submitid, s.probid, s.cid FROM submission s
 $details = '';
 while ($row = $res->next()) {
     $details .= 'Submission s' .  $row['submitid'] . ' is for problem p' .
-        $row['probid'] .
-        ' while this problem is not found (in c'. $row['cid'] . ")\n";
+        $row['probid'] . ' while this problem is not found (in c'. $row['cid'] . ")\n";
 }
 
 $res = $DB->q('SELECT * FROM submission ORDER BY submitid');
@@ -817,10 +805,8 @@ if ($_SERVER['QUERY_STRING'] == 'refint') {
                     continue;
                 }
                 $f = explode('.', $target);
-                if ($DB->q(
-                    "VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
-                            $row[$foreign_key]
-                ) < 1) {
+                if ($DB->q("VALUE SELECT count(*) FROM $f[0] WHERE $f[1] = %s",
+                           $row[$foreign_key]) < 1) {
                     $details .= "foreign key constraint fails for $table.$foreign_key = \"" .
                                 $row[$foreign_key] . "\" (not found in $target)\n";
                 }
@@ -833,7 +819,7 @@ if ($_SERVER['QUERY_STRING'] == 'refint') {
     result(
         'referential integrity',
         'Inter-table relationships',
-           ($details == '' ? 'O':'W'),
+        ($details == '' ? 'O':'W'),
         $details
     );
 } else {
@@ -841,7 +827,7 @@ if ($_SERVER['QUERY_STRING'] == 'refint') {
         'referential integrity',
         'Inter-table relationships',
         'R',
-           'Not checked.',
+        'Not checked.',
         '<a href="?refint">check now</a> (potentially slow operation)'
     );
 }

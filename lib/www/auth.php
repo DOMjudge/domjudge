@@ -71,13 +71,9 @@ function logged_in()
         // Is this the first visit? Record that in the team table.
         if (empty($teamdata['teampage_first_visited'])) {
             $hostname = empty($ip) ? 'PHPUNIT' : gethostbyaddr($ip);
-            $DB->q(
-                'UPDATE team SET teampage_first_visited = %s, hostname = %s
+            $DB->q('UPDATE team SET teampage_first_visited = %s, hostname = %s
                     WHERE teamid = %i',
-                   now(),
-                $hostname,
-                $teamid
-            );
+                   now(), $hostname, $teamid);
         }
     }
 

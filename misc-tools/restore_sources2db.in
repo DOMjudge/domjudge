@@ -134,28 +134,16 @@ foreach ($submissions as $s) {
 
     // Insert submissions into the database
     $DB->q('START TRANSACTION');
-    $DB->q(
-        'INSERT INTO submission
+    $DB->q('INSERT INTO submission
             (submitid,cid,teamid,probid,langid,submittime)
             VALUES (%i, %i, %s, %s, %s, %s)',
-        $s['sid'],
-        $s['cid'],
-           $s['teamid'],
-        $s['probid'],
-        $s['langid'],
-        $s['submittime']
-    );
+           $s['sid'], $s['cid'], $s['teamid'], $s['probid'], $s['langid'], $s['submittime']);
 
     $mainfile = null;
     foreach ($s['files'] as $rank => $file) {
-        $DB->q(
-            'INSERT INTO submission_file (submitid, filename, rank, sourcecode)
+        $DB->q('INSERT INTO submission_file (submitid, filename, rank, sourcecode)
                 VALUES (%i, %s, %i, %s)',
-            $s['sid'],
-            $file['name'],
-            $rank,
-               dj_file_get_contents($file['source'])
-        );
+               $s['sid'], $file['name'], $rank, dj_file_get_contents($file['source']));
         if (empty($mainfile)) {
             $mainfile = $file['name'];
         }

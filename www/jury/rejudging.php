@@ -40,8 +40,7 @@ if (! $id) {
     error("Missing or invalid rejudging id");
 }
 
-$rejdata = $DB->q('TUPLE SELECT * FROM rejudging
-                   WHERE rejudgingid=%i', $id);
+$rejdata = $DB->q('TUPLE SELECT * FROM rejudging WHERE rejudgingid=%i', $id);
 
 if (! $rejdata) {
     error("Missing rejudging data");
@@ -87,12 +86,9 @@ $done = $DB->q('VALUE SELECT COUNT(*) FROM judging
                 WHERE rejudgingid=%i AND endtime IS NOT NULL', $id);
 $todo -= $done;
 
-$userdata = $DB->q(
-    'KEYVALUETABLE SELECT userid, name FROM user
+$userdata = $DB->q('KEYVALUETABLE SELECT userid, name FROM user
                     WHERE userid=%i OR userid=%i',
-                   $rejdata['userid_start'],
-    @$rejdata['userid_finish']
-);
+                   $rejdata['userid_start'], @$rejdata['userid_finish']);
 
 echo '<br/><h1 style="display:inline;">Rejudging r' . $id .
     ($rejdata['valid'] ? '' : ' (canceled)') . "</h1>\n\n";
@@ -106,15 +102,15 @@ if (empty($rejdata['reason'])) {
 }
 echo "</td></tr>\n";
 foreach (array('userid_start' => 'Issued by',
-                'userid_finish' => ($rejdata['valid'] ? 'Accepted' : 'Canceled') . ' by')
+               'userid_finish' => ($rejdata['valid'] ? 'Accepted' : 'Canceled') . ' by')
           as $user => $msg) {
     $time = $user == 'userid_start' ? 'starttime' : 'endtime';
     if (isset($rejdata[$time])) {
         echo "<tr><td>$msg:</td><td>" .
             (isset($rejdata[$user]) ?
-              '<a href="user.php?id=' . urlencode($rejdata[$user]) . '">' .
-              specialchars($userdata[$rejdata[$user]]) . '</a>' :
-              '<span class="nodata">unknown</span>') .
+             '<a href="user.php?id=' . urlencode($rejdata[$user]) . '">' .
+             specialchars($userdata[$rejdata[$user]]) . '</a>' :
+             '<span class="nodata">unknown</span>') .
             "</td></tr>\n";
     }
 }
@@ -294,13 +290,13 @@ echo "old verdict: " .
     addSelect(
         'old_verdict',
         $verdicts,
-              (isset($_REQUEST['old_verdict']) ? $_REQUEST['old_verdict'] : 'all')
+        (isset($_REQUEST['old_verdict']) ? $_REQUEST['old_verdict'] : 'all')
     );
 echo ", new verdict: " .
     addSelect(
         'new_verdict',
         $verdicts,
-              (isset($_REQUEST['new_verdict']) ? $_REQUEST['new_verdict'] : 'all')
+        (isset($_REQUEST['new_verdict']) ? $_REQUEST['new_verdict'] : 'all')
     );
 echo addSubmit('filter') . addEndForm();
 
@@ -309,16 +305,11 @@ echo addForm($pagename, 'get') .
     addHidden("view[$view]", $viewtypes[$view]) .
     addSubmit('clear') . addEndForm() . "<br /><br />\n";
 
-$filtered = $DB->q(
-    'VALUE SELECT COUNT(s.submitid)
+$filtered = $DB->q('VALUE SELECT COUNT(s.submitid)
                     FROM submission s
                     LEFT JOIN judging j ON (s.submitid = j.submitid AND j.rejudgingid = %i)
                     WHERE s.cid NOT IN (%As) AND (s.rejudgingid = %i OR j.rejudgingid = %i)',
-                   $id,
-    $cids,
-    $id,
-    $id
-);
+                   $id, $cids, $id, $id);
 
 if ($filtered > 0) {
     echo "<p class=\"nodata\">$filtered submissions are not displayed " .

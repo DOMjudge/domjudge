@@ -19,9 +19,9 @@ if (!isset($api)) {
     function infreeze($cdata, $time)
     {
         if ((! empty($cdata['freezetime']) &&
-        difftime($time, $cdata['freezetime'])>=0) &&
-        (empty($cdata['unfreezetime']) ||
-        difftime($time, $cdata['unfreezetime'])<0)) {
+             difftime($time, $cdata['freezetime'])>=0) &&
+            (empty($cdata['unfreezetime']) ||
+             difftime($time, $cdata['unfreezetime'])<0)) {
             return true;
         }
         return false;
@@ -83,10 +83,7 @@ if (!isset($api)) {
                          FROM judging WHERE judgingid = %i', $judgingid);
 
         $DB->q('START TRANSACTION');
-        $DB->q(
-            'UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i',
-            $judgingid
-        );
+        $DB->q('UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i', $judgingid);
         $DB->q('UPDATE submission SET judgehost = NULL
                 WHERE submitid = %i', $jdata['submitid']);
         $DB->q('COMMIT');
@@ -102,8 +99,10 @@ if (!isset($api)) {
      */
     function info()
     {
-        return array('api_version' => DOMJUDGE_API_VERSION,
-                 'domjudge_version' => DOMJUDGE_VERSION);
+        return array(
+            'api_version' => DOMJUDGE_API_VERSION,
+            'domjudge_version' => DOMJUDGE_VERSION
+        );
     }
     $doc = "Get general API information.";
     $api->provideFunction('GET', 'info', $doc);
@@ -113,17 +112,17 @@ if (!isset($api)) {
     {
         // TODO: clarify formal_name, its use and origin
         return array(
-        'id'                         => safe_int($cdata['cid']),
-        'shortname'                  => $cdata['shortname'],
-        'name'                       => $cdata['name'],
-        'formal_name'                => $cdata['name'],
-        'start_time'                 => Utils::absTime($cdata['starttime']),
-        'end_time'                   => Utils::absTime($cdata['endtime']),
-        'duration'                   => Utils::relTime($cdata['endtime'] - $cdata['starttime']),
-        'scoreboard_freeze_duration' => Utils::relTime($cdata['endtime'] - $cdata['freezetime']),
-        'unfreeze'                   => Utils::absTime($cdata['unfreezetime']),
-        'penalty'                    => safe_int(dbconfig_get('penalty_time', 20)),
-    );
+            'id'                         => safe_int($cdata['cid']),
+            'shortname'                  => $cdata['shortname'],
+            'name'                       => $cdata['name'],
+            'formal_name'                => $cdata['name'],
+            'start_time'                 => Utils::absTime($cdata['starttime']),
+            'end_time'                   => Utils::absTime($cdata['endtime']),
+            'duration'                   => Utils::relTime($cdata['endtime'] - $cdata['starttime']),
+            'scoreboard_freeze_duration' => Utils::relTime($cdata['endtime'] - $cdata['freezetime']),
+            'unfreeze'                   => Utils::absTime($cdata['unfreezetime']),
+            'penalty'                    => safe_int(dbconfig_get('penalty_time', 20)),
+        );
     }
 
     function status()
@@ -225,15 +224,15 @@ if (!isset($api)) {
         global $userdata;
 
         $return = array(
-        'id'       => safe_int($userdata['userid']),
-        'teamid'   => safe_int($userdata['teamid']),
-        'email'    => $userdata['email'],
-        'ip'       => $userdata['ip_address'],
-        'lastip'   => $userdata['last_ip_address'],
-        'name'     => $userdata['name'],
-        'username' => $userdata['username'],
-        'roles'    => $userdata['roles'],
-    );
+            'id'       => safe_int($userdata['userid']),
+            'teamid'   => safe_int($userdata['teamid']),
+            'email'    => $userdata['email'],
+            'ip'       => $userdata['ip_address'],
+            'lastip'   => $userdata['last_ip_address'],
+            'name'     => $userdata['name'],
+            'username' => $userdata['username'],
+            'roles'    => $userdata['roles'],
+        );
         return $return;
     }
     $doc = "Get information about the currently logged in user. If no user is logged in, will return null for all values.";
@@ -316,12 +315,12 @@ if (!isset($api)) {
         $is_jury = checkrole('jury');
         return array_map(function ($pdata) use ($is_jury, $args) {
             $ret = array(
-            'id'         => safe_string(rest_extid('problems', $pdata['id'])),
-            'label'      => safe_string($pdata['label']),
-            'name'       => $pdata['name'],
-            'ordinal'    => safe_int($pdata['ordinal']),
-            'time_limit' => safe_float($pdata['timelimit'], 3),
-        );
+                'id'         => safe_string(rest_extid('problems', $pdata['id'])),
+                'label'      => safe_string($pdata['label']),
+                'name'       => $pdata['name'],
+                'ordinal'    => safe_int($pdata['ordinal']),
+                'time_limit' => safe_float($pdata['timelimit'], 3),
+            );
             if (!isset($args['strict'])) {
                 $ret['short_name'] = $pdata['shortname'];
             }
@@ -389,8 +388,7 @@ if (!isset($api)) {
         // explicitly queried for with a specific ID. See comment in
         // submissions endpoint. Same with unconfirmed rejudgings and
         // when verification is required.
-        if (!(checkrole('jury') || checkrole('judgehost')) ||
-         !isset($args['__primary_key'])) {
+        if (!(checkrole('jury') || checkrole('judgehost')) || !isset($args['__primary_key'])) {
             $query .= ' AND s.submittime < c.endtime';
             $query .= ' AND (j.rejudgingid IS NULL OR j.valid = 1)';
             if (dbconfig_get('verification_required', 0)) {
@@ -446,9 +444,9 @@ if (!isset($api)) {
     }
     $doc = 'Get all or selected judgings. This includes those post-freeze, so currently limited to jury, or as a team but then restricted your own submissions.';
     $args = array('cid' => 'Contest ID. If not provided, get judgings of current contest.',
-              'result' => 'Search only for judgings with a certain result',
-              'judging_id' => 'Search only for a certain ID',
-              'submission_id' => 'Search only for judgings associated to this submission ID');
+                  'result' => 'Search only for judgings with a certain result',
+                  'judging_id' => 'Search only for a certain ID',
+                  'submission_id' => 'Search only for judgings associated to this submission ID');
     $exArgs = array(array('cid' => 2), array('result' => 'correct'), array('first_id' => 800, 'limit' => 10));
     $roles = array('jury','team','judgehost');
     $api->provideFunction('GET', 'judgings', $doc, $args, $exArgs, $roles);
@@ -528,35 +526,26 @@ if (!isset($api)) {
 
 
         // Prioritize teams according to last judging time
-        $submitids = $DB->q(
-        'COLUMN SELECT s.submitid
-                         FROM submission s
-                         LEFT JOIN team t USING (teamid)
-                         LEFT JOIN language l USING (langid)
-                         LEFT JOIN contestproblem cp USING (probid, cid) ' .
-                        $extra_join .
-                        'WHERE s.judgehost IS NULL AND s.cid IN (%Ai)
-                         AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
-                        $extra_where .
-                        'ORDER BY judging_last_started ASC, submittime ASC, s.submitid ASC',
-                        $host,
-        $cids,
-        $contests,
-        $problems,
-        $languages
-    );
+        $submitids = $DB->q('COLUMN SELECT s.submitid
+                             FROM submission s
+                             LEFT JOIN team t USING (teamid)
+                             LEFT JOIN language l USING (langid)
+                             LEFT JOIN contestproblem cp USING (probid, cid) ' .
+                            $extra_join .
+                            'WHERE s.judgehost IS NULL AND s.cid IN (%Ai)
+                             AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
+                            $extra_where .
+                            'ORDER BY judging_last_started ASC, submittime ASC, s.submitid ASC',
+                            $host, $cids, $contests, $problems, $languages);
 
         foreach ($submitids as $submitid) {
             // update exactly one submission with our judgehost name
             // Note: this might still return 0 if another judgehost beat
             // us to it
-            $numupd = $DB->q(
-            'RETURNAFFECTED UPDATE submission
-                          SET judgehost = %s
-                          WHERE submitid = %i AND judgehost IS NULL',
-                          $host,
-            $submitid
-        );
+            $numupd = $DB->q('RETURNAFFECTED UPDATE submission
+                              SET judgehost = %s
+                              WHERE submitid = %i AND judgehost IS NULL',
+                             $host, $submitid);
 
             if ($numupd==1) {
                 break;
@@ -578,11 +567,8 @@ if (!isset($api)) {
                        LEFT JOIN language l USING (langid)
                        WHERE submitid = %i', $submitid);
 
-        $DB->q(
-            'UPDATE team SET judging_last_started = %s WHERE teamid = %i',
-            now(),
-            $row['teamid']
-        );
+        $DB->q('UPDATE team SET judging_last_started = %s WHERE teamid = %i',
+               now(), $row['teamid']);
 
         if (empty($row['memlimit'])) {
             $row['memlimit'] = dbconfig_get('memory_limit');
@@ -598,26 +584,23 @@ if (!isset($api)) {
         }
 
         $compare_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
-                              WHERE execid = %s', $row['compare']);
+                                  WHERE execid = %s', $row['compare']);
         $row['compare_md5sum'] = $compare_md5sum;
         $run_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
-                          WHERE execid = %s', $row['run']);
+                              WHERE execid = %s', $row['run']);
         $row['run_md5sum'] = $run_md5sum;
         if (!empty($row['compile_script'])) {
             $compile_script_md5sum = $DB->q('MAYBEVALUE SELECT md5sum FROM executable
-                                         WHERE execid = %s', $row['compile_script']);
+                                             WHERE execid = %s', $row['compile_script']);
             $row['compile_script_md5sum'] = $compile_script_md5sum;
         }
 
         $is_rejudge = isset($row['rejudgingid']);
         if ($is_rejudge) {
             // FIXME: what happens if there is no valid judging?
-            $prev_rejudgingid = $DB->q(
-                'MAYBEVALUE SELECT judgingid
-                 FROM judging
-                 WHERE submitid=%i AND valid=1',
-                $submitid
-        );
+            $prev_rejudgingid = $DB->q('MAYBEVALUE SELECT judgingid
+                                        FROM judging
+                                        WHERE submitid=%i AND valid=1', $submitid);
         }
         $is_editsubmit = isset($row['origsubmitid']);
         $jury_member = '';
@@ -635,23 +618,15 @@ if (!isset($api)) {
 
         $DB->q('START TRANSACTION');
 
-        $jid = $DB->q(
-            'RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' .
-            ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '') .
-            ($is_editsubmit ? ', jury_member' : '') .
-            ') VALUES(%i,%i,%s,%s' .
-            ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
-            ($is_editsubmit ? ',%s' : '%_') .
-            ')',
-            $submitid,
-            $row['cid'],
-            now(),
-            $host,
-            @$row['rejudgingid'],
-            @$prev_rejudgingid,
-            !$is_rejudge,
-            $jury_member
-        );
+        $jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' .
+                      ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '') .
+                      ($is_editsubmit ? ', jury_member' : '') .
+                      ') VALUES(%i,%i,%s,%s' .
+                      ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
+                      ($is_editsubmit ? ',%s' : '%_') .
+                      ')',
+                      $submitid, $row['cid'], now(), $host, @$row['rejudgingid'],
+                      @$prev_rejudgingid, !$is_rejudge, $jury_member);
 
         if (!$is_rejudge) {
             eventlog('judging', $jid, 'create', $row['cid']);
@@ -698,37 +673,23 @@ if (!isset($api)) {
 
         if (isset($args['output_compile'])) {
             if ($args['compile_success']) {
-                $DB->q(
-                'UPDATE judging SET output_compile = %s
-                    WHERE judgingid = %i AND judgehost = %s',
-                   base64_decode($args['output_compile']),
-                   $judgingid,
-                $args['judgehost']
-            );
+                $DB->q('UPDATE judging SET output_compile = %s
+                        WHERE judgingid = %i AND judgehost = %s',
+                       base64_decode($args['output_compile']), $judgingid, $args['judgehost']);
             } else {
                 $row = $DB->q('TUPLE SELECT s.cid, s.teamid, s.probid, s.langid, s.submitid, s.rejudgingid
-                           FROM judging
-                           LEFT JOIN submission s USING(submitid)
-                           WHERE judgingid = %i', $judgingid);
+                               FROM judging
+                               LEFT JOIN submission s USING(submitid)
+                               WHERE judgingid = %i', $judgingid);
 
                 $DB->q('START TRANSACTION');
-                $DB->q(
-                'UPDATE judging SET output_compile = %s,
-                    result = "compiler-error", endtime=%s
-                    WHERE judgingid = %i AND judgehost = %s',
-                   base64_decode($args['output_compile']),
-                now(),
-                   $judgingid,
-                $args['judgehost']
-            );
-                auditlog(
-                'judging',
-                $judgingid,
-                'judged',
-                'compiler-error',
-                     $args['judgehost'],
-                $row['cid']
-            );
+                $DB->q('UPDATE judging SET output_compile = %s,
+                        result = "compiler-error", endtime=%s
+                        WHERE judgingid = %i AND judgehost = %s',
+                       base64_decode($args['output_compile']),
+                       now(), $judgingid, $args['judgehost']);
+
+                auditlog('judging', $judgingid, 'judged', 'compiler-error', $args['judgehost'], $row['cid']);
 
                 // log to event table if no verification required
                 // (case of verification required is handled in www/jury/verify.php)
@@ -746,11 +707,8 @@ if (!isset($api)) {
             }
         }
 
-        $DB->q(
-        'UPDATE judgehost SET polltime = %s WHERE hostname = %s',
-           now(),
-        $args['judgehost']
-    );
+        $DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s',
+               now(), $args['judgehost']);
 
         return '';
     }
@@ -785,25 +743,20 @@ if (!isset($api)) {
         }
 
         $jud = $DB->q('TUPLE SELECT judgingid, cid, result, rejudgingid
-               FROM judging
-                   WHERE judgingid = %i', $args['judgingid']);
+                       FROM judging
+                       WHERE judgingid = %i', $args['judgingid']);
 
         $DB->q('START TRANSACTION');
 
-        $runid = $DB->q(
-        'RETURNID INSERT INTO judging_run (judgingid, testcaseid, runresult,
-                     runtime, endtime, output_run, output_diff, output_error, output_system)
-                     VALUES (%i, %i, %s, %f, %s, %s, %s, %s, %s)',
-                    $args['judgingid'],
-        $args['testcaseid'],
-                    $args['runresult'],
-        $args['runtime'],
-        now(),
-                    base64_decode($args['output_run']),
-                    base64_decode($args['output_diff']),
-                    base64_decode($args['output_error']),
-                    base64_decode($args['output_system'])
-    );
+        $runid = $DB->q('RETURNID INSERT INTO judging_run (judgingid, testcaseid, runresult,
+                         runtime, endtime, output_run, output_diff, output_error, output_system)
+                         VALUES (%i, %i, %s, %f, %s, %s, %s, %s, %s)',
+                        $args['judgingid'], $args['testcaseid'], $args['runresult'],
+                        $args['runtime'], now(),
+                        base64_decode($args['output_run']),
+                        base64_decode($args['output_diff']),
+                        base64_decode($args['output_error']),
+                        base64_decode($args['output_system']));
 
         if (!isset($jud['rejudgingid'])) {
             eventlog('judging_run', $runid, 'create', $jud['cid']);
@@ -866,9 +819,9 @@ if (!isset($api)) {
                 // that this means that these alert messages should be
                 // treated as confidential information.
                 alert(
-                ($result==='correct' ? 'accept' : 'reject'),
-                  "submission $row[submitid], judging $args[judgingid]: $result"
-            );
+                    ($result==='correct' ? 'accept' : 'reject'),
+                    "submission $row[submitid], judging $args[judgingid]: $result"
+                );
 
                 // log to event table if no verification required
                 // (case of verification required is handled in www/jury/verify.php)
@@ -887,28 +840,25 @@ if (!isset($api)) {
 
         // Send an event for an endtime update if not done yet.
         if (!isset($jud['rejudgingid']) &&
-         count($runresults) == $numtestcases && empty($just_finished)) {
+            count($runresults) == $numtestcases && empty($just_finished)) {
             eventlog('judging', $args['judgingid'], 'update', $jud['cid']);
         }
 
-        $DB->q(
-        'UPDATE judgehost SET polltime = %s WHERE hostname = %s',
-           now(),
-        $args['judgehost']
-    );
+        $DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s',
+               now(), $args['judgehost']);
 
         return '';
     }
     $doc = 'Add a new judging_run to the list of judging_runs. When relevant, finalize the judging.';
     $args = array('judgingid' => 'Judging_run corresponds to this specific judgingid.',
-    'testcaseid' => 'Judging_run corresponding to this specific testcaseid.',
-    'runresult' => 'Result of this run.',
-    'runtime' => 'Runtime of this run.',
-    'output_run' => 'Program output of this run (base64 encoded).',
-    'output_diff' => 'Program diff of this run (base64 encoded).',
-    'output_error' => 'Program error output of this run (base64 encoded).',
-    'output_system' => 'Judging system output of this run (base64 encoded).',
-    'judgehost' => 'Judgehost performing this judging');
+                  'testcaseid' => 'Judging_run corresponding to this specific testcaseid.',
+                  'runresult' => 'Result of this run.',
+                  'runtime' => 'Runtime of this run.',
+                  'output_run' => 'Program output of this run (base64 encoded).',
+                  'output_diff' => 'Program diff of this run (base64 encoded).',
+                  'output_error' => 'Program error output of this run (base64 encoded).',
+                  'output_system' => 'Judging system output of this run (base64 encoded).',
+                  'judgehost' => 'Judgehost performing this judging');
     $exArgs = array();
     $roles = array('judgehost');
     $api->provideFunction('POST', 'judging_runs', $doc, $args, $exArgs, $roles);
@@ -964,10 +914,10 @@ if (!isset($api)) {
         }
 
         $query = 'SELECT s.submitid, s.teamid, s.probid, s.langid, s.submittime, s.cid, s.entry_point
-              FROM submission s
-              LEFT JOIN team t USING (teamid)
-              LEFT JOIN team_category c USING (categoryid)
-              WHERE s.valid = 1 AND s.cid = %i';
+                  FROM submission s
+                  LEFT JOIN team t USING (teamid)
+                  LEFT JOIN team_category c USING (categoryid)
+                  WHERE s.valid = 1 AND s.cid = %i';
 
         // Don't expose too-late submissions except if queried for with a
         // specific ID. This doesn't cause a security risk and is a quick
@@ -1007,28 +957,21 @@ if (!isset($api)) {
 
         $query .= ' ORDER BY s.submitid';
 
-        $q = $DB->q(
-        $query,
-        $cid,
-        $cdatas[$cid]['endtime'],
-                $languageId,
-        $submitids,
-        $freezetime,
-        $teamid
-    );
+        $q = $DB->q($query, $cid, $cdatas[$cid]['endtime'],
+                    $languageId, $submitids, $freezetime, $teamid);
 
         $res = array();
         while ($row = $q->next()) {
             $extcid = safe_string(rest_extid('contests', $cid));
             $extid = safe_string(rest_extid('submissions', $row['submitid']));
             $ret = array(
-            'id'           => $extid,
-            'team_id'      => safe_string(rest_extid('teams', $row['teamid'])),
-            'problem_id'   => safe_string(rest_extid('problems', $row['probid'])),
-            'time'         => Utils::absTime($row['submittime']),
-            'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
-            'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")),
-        );
+                'id'           => $extid,
+                'team_id'      => safe_string(rest_extid('teams', $row['teamid'])),
+                'problem_id'   => safe_string(rest_extid('problems', $row['probid'])),
+                'time'         => Utils::absTime($row['submittime']),
+                'contest_time' => Utils::relTime($row['submittime'] - $cdatas[$row['cid']]['starttime']),
+                'files'        => array(array('href' => "contests/$extcid/submissions/$extid/files")),
+            );
             if (checkrole('jury')) {
                 $ret['entry_point'] = $row['entry_point'];
                 $ret['language_id'] = safe_string(rest_extid('languages', $row['langid']));
@@ -1038,8 +981,8 @@ if (!isset($api)) {
         return $res;
     }
     $args = array('cid' => 'Contest ID. If not provided, get submissions of current contest.',
-              'language_id' => 'Search only for submissions in a certain language.',
-              'id' => 'Search only a certain ID');
+                  'language_id' => 'Search only for submissions in a certain language.',
+                  'id' => 'Search only a certain ID');
     $doc = 'Get a list of all valid submissions.';
     $exArgs = array(array('id' => 42), array('language_id' => 'cpp'));
     $api->provideFunction('GET', 'submissions', $doc, $args, $exArgs);
@@ -1076,13 +1019,10 @@ if (!isset($api)) {
         }
         $cid = $contests[$contest_shortname]['cid'];
 
-        $probid = $DB->q(
-        'MAYBEVALUE SELECT probid FROM problem
-                      INNER JOIN contestproblem USING (probid)
-                      WHERE shortname = %s AND cid = %i AND allow_submit = 1',
-                     $args['shortname'],
-        $cid
-    );
+        $probid = $DB->q('MAYBEVALUE SELECT probid FROM problem
+                          INNER JOIN contestproblem USING (probid)
+                          WHERE shortname = %s AND cid = %i AND allow_submit = 1',
+                         $args['shortname'], $cid);
         if (empty($probid)) {
             error("Problem " . $args['shortname'] . " not found or or not submittable");
         }
@@ -1098,8 +1038,8 @@ if (!isset($api)) {
         }
 
         $lang = $DB->q('MAYBETUPLE SELECT langid, name, require_entry_point, entry_point_description
-                    FROM language
-                    WHERE langid = %s AND allow_submit = 1', $args['langid']);
+                        FROM language
+                        WHERE langid = %s AND allow_submit = 1', $args['langid']);
 
         if (! isset($lang)) {
             error("Unable to find language '$args[langid]' or not submittable");
@@ -1122,12 +1062,13 @@ if (!isset($api)) {
         return safe_int($sid);
     }
 
-    $args = array('code[]' => 'Array of source files to submit',
-              'shortname' => 'Problem shortname',
-              'langid' => 'Language ID',
-          'contest' => 'Contest short name. Required if more than one contest is active',
-          'entry_point' => 'Optional entry point, e.g. Java main class.',
-);
+    $args = array(
+        'code[]' => 'Array of source files to submit',
+        'shortname' => 'Problem shortname',
+        'langid' => 'Language ID',
+        'contest' => 'Contest short name. Required if more than one contest is active',
+        'entry_point' => 'Optional entry point, e.g. Java main class.',
+    );
     $doc = 'Post a new submission. You need to be authenticated with a team role. Returns the submission id. This is used by the submit client.
 
 A trivial command line submisson using the curl binary could look like this:
@@ -1149,7 +1090,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }
 
         $sources = $DB->q('SELECT submitfileid, submitid, filename, sourcecode FROM submission_file
-                       WHERE submitid = %i ORDER BY rank', $args['submission_id']);
+                           WHERE submitid = %i ORDER BY rank', $args['submission_id']);
 
         if ($sources->count()==0) {
             $api->createError("Cannot find source files for submission '$args[id]'.");
@@ -1159,11 +1100,11 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         $ret = array();
         while ($src = $sources->next()) {
             $ret[] = array(
-            'id'            => $src['submitfileid'],
-            'submission_id' => $src['submitid'],
-            'filename'      => $src['filename'],
-            'source'        => base64_encode($src['sourcecode']),
-        );
+                'id'            => $src['submitfileid'],
+                'submission_id' => $src['submitid'],
+                'filename'      => $src['filename'],
+                'source'        => base64_encode($src['sourcecode']),
+            );
         }
 
         return $ret;
@@ -1187,21 +1128,18 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         // endtime is set: judging is fully done; return empty
         $row = $DB->q('TUPLE SELECT endtime,probid
-                   FROM judging LEFT JOIN submission USING(submitid)
-                   WHERE judgingid = %i', $args['judgingid']);
+                       FROM judging LEFT JOIN submission USING(submitid)
+                       WHERE judgingid = %i', $args['judgingid']);
         if (!empty($row['endtime'])) {
             return '';
         }
 
         $judging_runs = $DB->q("COLUMN SELECT testcaseid FROM judging_run
-                            WHERE judgingid = %i", $args['judgingid']);
+                                WHERE judgingid = %i", $args['judgingid']);
         $sqlextra = count($judging_runs) ? "AND testcaseid NOT IN (%Ai)" : "%_";
-        $testcase = $DB->q(
-        "MAYBETUPLE SELECT testcaseid, rank, probid, md5sum_input, md5sum_output
-                        FROM testcase WHERE probid = %i $sqlextra ORDER BY rank LIMIT 1",
-                       $row['probid'],
-        $judging_runs
-    );
+        $testcase = $DB->q("MAYBETUPLE SELECT testcaseid, rank, probid, md5sum_input, md5sum_output
+                            FROM testcase WHERE probid = %i $sqlextra ORDER BY rank LIMIT 1",
+                           $row['probid'], $judging_runs);
 
         // would probably never be empty, because then endtime would also
         // have been set. we cope with it anyway for now.
@@ -1243,7 +1181,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }
 
         $content = $DB->q("MAYBEVALUE SELECT SQL_NO_CACHE $inout FROM testcase
-                       WHERE testcaseid = %i", $args['testcaseid']);
+                           WHERE testcaseid = %i", $args['testcaseid']);
 
         if (is_null($content)) {
             $api->createError("Cannot find testcase '$args[testcaseid]'.");
@@ -1253,8 +1191,8 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         return base64_encode($content);
     }
     $args = array('testcaseid' => 'Get only the corresponding testcase.',
-    'input' => 'Get the input file.',
-    'output' => 'Get the output file.');
+                  'input' => 'Get the input file.',
+                  'output' => 'Get the output file.');
     $doc = 'Get a testcase file, base64 encoded.';
     $exArgs = array(array('testcaseid' => '3', 'input' => true));
     $roles = array('jury','judgehost');
@@ -1270,7 +1208,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }
 
         $content = $DB->q("MAYBEVALUE SELECT SQL_NO_CACHE zipfile FROM executable
-                       WHERE execid = %s", $args['execid']);
+                           WHERE execid = %s", $args['execid']);
 
         if (is_null($content)) {
             $api->createError("Cannot find executable '$args[execid]'.");
@@ -1319,12 +1257,12 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         $query = 'TABLE SELECT jr.runid, jr.judgingid, jr.runresult,
                            jr.endtime, jr.runtime, j.cid, t.rank
-              FROM judging_run jr
-              LEFT JOIN testcase t USING (testcaseid)
-              LEFT JOIN judging j USING (judgingid)
-              LEFT JOIN submission s USING (submitid)
-              LEFT JOIN contest c ON c.cid = j.cid
-              WHERE j.cid = %i';
+                  FROM judging_run jr
+                  LEFT JOIN testcase t USING (testcaseid)
+                  LEFT JOIN judging j USING (judgingid)
+                  LEFT JOIN submission s USING (submitid)
+                  LEFT JOIN contest c ON c.cid = j.cid
+                  WHERE j.cid = %i';
 
         // Don't expose judging runs of too-late submissions except if
         // explicitly queried for with a specific ID. See comment in
@@ -1362,23 +1300,23 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         $runs = $DB->q($query, $cid, $firstId, $lastId, $judgingid, $runid, $limit);
         return array_map(function ($run) use ($VERDICTS, $cdatas) {
             return array(
-            'id'                => safe_string(rest_extid('runs', $run['runid'])),
-            'judgement_id'      => safe_string(rest_extid('judgements', $run['judgingid'])),
-            'ordinal'           => safe_int($run['rank']),
-            'judgement_type_id' => safe_string($VERDICTS[$run['runresult']]),
-            'time'              => Utils::absTime($run['endtime']),
-            'contest_time'      => Utils::relTime($run['endtime'] - $cdatas[$run['cid']]['starttime']),
-            'run_time'          => safe_float($run['runtime'], 3),
-        );
+                'id'                => safe_string(rest_extid('runs', $run['runid'])),
+                'judgement_id'      => safe_string(rest_extid('judgements', $run['judgingid'])),
+                'ordinal'           => safe_int($run['rank']),
+                'judgement_type_id' => safe_string($VERDICTS[$run['runresult']]),
+                'time'              => Utils::absTime($run['endtime']),
+                'contest_time'      => Utils::relTime($run['endtime'] - $cdatas[$run['cid']]['starttime']),
+                'run_time'          => safe_float($run['runtime'], 3),
+            );
         }, $runs);
     }
     $doc = 'Get all or selected runs.';
     $args = array('cid' => 'Contest ID. If not provided, get runs in current contest.',
-              'first_id' => 'Search from a certain ID',
-              'last_id' => 'Search up to a certain ID',
-              'run_id' => 'Search only for a certain ID',
-              'judging_id' => 'Search only for runs associated to this judging ID',
-              'limit' => 'Get only the first N runs');
+                  'first_id' => 'Search from a certain ID',
+                  'last_id' => 'Search up to a certain ID',
+                  'run_id' => 'Search only for a certain ID',
+                  'judging_id' => 'Search only for runs associated to this judging ID',
+                  'limit' => 'Get only the first N runs');
     $exArgs = array(array('first_id' => 800, 'limit' => 10));
     $roles = array('jury','judgehost');
     $api->provideFunction('GET', 'runs', $doc, $args, $exArgs, $roles);
@@ -1404,11 +1342,11 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         $adatas = $DB->q($query, $country);
         return array_map(function ($adata) {
             return array(
-            'affilid'   => safe_string(rest_extid('organizations', $adata['affilid'])),
-            'shortname' => $adata['shortname'],
-            'name'      => $adata['name'],
-            'country'   => $adata['country'],
-        );
+                'affilid'   => safe_string(rest_extid('organizations', $adata['affilid'])),
+                'shortname' => $adata['shortname'],
+                'name'      => $adata['name'],
+                'country'   => $adata['country'],
+            );
         }, $adatas);
     }
     $doc = 'Get a list of affiliations, with for each affiliation: affilid, shortname, name and country.';
@@ -1454,10 +1392,10 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         $adatas = $DB->q($query, $country, $affilid);
         return array_map(function ($adata) use ($args, $show_flags) {
             $ret = array(
-            'id'        => safe_string(rest_extid('organizations', $adata['affilid'])),
-            'icpc_id'   => safe_string($adata['affilid']),
-            'name'      => $adata['name']
-        );
+                'id'        => safe_string(rest_extid('organizations', $adata['affilid'])),
+                'icpc_id'   => safe_string($adata['affilid']),
+                'name'      => $adata['name']
+            );
             if ($show_flags) {
                 $ret['country'] = $adata['country'];
             }
@@ -1506,13 +1444,13 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         // Construct query
         $query = 'TABLE SELECT teamid AS id, t.name, t.members, t.externalid,
-              t.categoryid, t.affilid, a.name AS affiliation, a.country AS nationality,
-              ct.cid
-              FROM team t
-              LEFT JOIN team_affiliation a USING(affilid)
-              LEFT JOIN team_category c USING (categoryid)
-              LEFT JOIN contestteam ct USING (teamid)
-              WHERE t.enabled = 1';
+                  t.categoryid, t.affilid, a.name AS affiliation, a.country AS nationality,
+                  ct.cid
+                  FROM team t
+                  LEFT JOIN team_affiliation a USING(affilid)
+                  LEFT JOIN team_category c USING (categoryid)
+                  LEFT JOIN contestteam ct USING (teamid)
+                  WHERE t.enabled = 1';
 
         $public = $DB->q('MAYBEVALUE SELECT public FROM contest WHERE cid = %i', $cid);
         if (!isset($public)) {
@@ -1547,12 +1485,12 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
                 $group_ids[] = safe_string(rest_extid('groups', $tdata['categoryid']));
             }
             $ret = array(
-            'id'              => safe_string(rest_extid('teams', $tdata['id'])),
-            'name'            => $tdata['name'],
-            'group_ids'       => $group_ids,
-            'organization_id' => safe_string(rest_extid('organizations', $tdata['affilid'])),
-            'icpc_id'         => $tdata['externalid'],
-        );
+                'id'              => safe_string(rest_extid('teams', $tdata['id'])),
+                'name'            => $tdata['name'],
+                'group_ids'       => $group_ids,
+                'organization_id' => safe_string(rest_extid('organizations', $tdata['affilid'])),
+                'icpc_id'         => $tdata['externalid'],
+            );
             if (!isset($args['strict'])) {
                 $ret['members']     = $tdata['members'];
                 $ret['affiliation'] = $tdata['affiliation'];
@@ -1565,9 +1503,9 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }, $tdatas);
     }
     $args = array('cid' => 'ID of a contest that teams should be part of, defaults to current contest.',
-              'category' => 'ID of a single category/group to search for.',
-              'affiliation' => 'ID of an affiliation to search for.',
-              'teamid' => 'Search for a specific team.');
+                  'category' => 'ID of a single category/group to search for.',
+                  'affiliation' => 'ID of an affiliation to search for.',
+                  'teamid' => 'Search for a specific team.');
     $doc = 'Get a list of teams containing teamid, name, group and affiliation.';
     $exArgs = array(array('category' => 1, 'affiliation' => 'UU'));
     $api->provideFunction('GET', 'teams', $doc, $args, $exArgs, null, true);
@@ -1580,14 +1518,15 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         global $DB;
         $extra = ($args['public'] ? 'WHERE visible = 1' : '');
         $q = $DB->q('SELECT categoryid, name, color, visible, sortorder
-                 FROM team_category ' . $extra . ' ORDER BY sortorder');
+                     FROM team_category ' . $extra . ' ORDER BY sortorder');
         $res = array();
         while ($row = $q->next()) {
             $res[] = array(
-            'categoryid' => safe_int($row['categoryid']),
-            'name'       => $row['name'],
-            'color'      => $row['color'],
-            'sortorder'  => safe_int($row['sortorder']));
+                'categoryid' => safe_int($row['categoryid']),
+                'name'       => $row['name'],
+                'color'      => $row['color'],
+                'sortorder'  => safe_int($row['sortorder'])
+            );
         }
         return $res;
     }
@@ -1609,8 +1548,8 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         }
 
         $query = 'SELECT categoryid, name, color, visible, sortorder
-              FROM team_category
-              WHERE TRUE';
+                  FROM team_category
+                  WHERE TRUE';
         if ($args['public']) {
             $query .= ' AND visible=1';
         }
@@ -1621,10 +1560,10 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         $res = array();
         while ($row = $q->next()) {
             $ret = array(
-            'id'         => safe_string(rest_extid('groups', $row['categoryid'])),
-            'icpc_id'    => safe_string($row['categoryid']),
-            'name'       => safe_string($row['name']),
-        );
+                'id'         => safe_string(rest_extid('groups', $row['categoryid'])),
+                'icpc_id'    => safe_string($row['categoryid']),
+                'name'       => safe_string($row['name']),
+            );
             if (!$row['visible']) {
                 $ret['hidden'] = true;
             }
@@ -1670,8 +1609,8 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         $res = array();
         while ($row = $q->next()) {
             $ret = array(
-            'id'           => safe_string(rest_extid('languages', $row['langid'])),
-            'name'         => safe_string($row['name']),
+                'id'           => safe_string(rest_extid('languages', $row['langid'])),
+                'name'         => safe_string($row['name']),
             );
             if (!isset($args['strict'])) {
                 $ret['extensions']  = dj_json_decode($row['extensions']);
@@ -1722,8 +1661,8 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         // Find clarifications, maybe later also provide more info for jury
         $query = 'TABLE SELECT clarid, submittime, probid, body, cid, sender, recipient, respid
-              FROM clarification
-              WHERE cid = %i';
+                  FROM clarification
+                  WHERE cid = %i';
 
         $byProblem = array_key_exists('problem', $args);
         $query .= ($byProblem ? ' AND probid = %i' : ' %_');
@@ -1736,20 +1675,20 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         $clar_datas = $DB->q($query, $cid, $problem, $clarId);
         return array_map(function ($clar_data) use ($cdatas) {
             return array(
-            'id'           => safe_string(rest_extid('clarifications', $clar_data['clarid'])),
-            'time'         => Utils::absTime($clar_data['submittime']),
-            'contest_time' => Utils::relTime($clar_data['submittime'] - $cdatas[$clar_data['cid']]['starttime']),
-            'problem_id'   => safe_string(rest_extid('problems', $clar_data['probid'])),
-            'from_team_id' => safe_string(rest_extid('teams', $clar_data['sender'])),
-            'to_team_id'   => safe_string(rest_extid('teams', $clar_data['recipient'])),
-            'reply_to_id'  => safe_string(rest_extid('clarifications', $clar_data['respid'])),
-            'text'         => $clar_data['body'],
-        );
+                'id'           => safe_string(rest_extid('clarifications', $clar_data['clarid'])),
+                'time'         => Utils::absTime($clar_data['submittime']),
+                'contest_time' => Utils::relTime($clar_data['submittime'] - $cdatas[$clar_data['cid']]['starttime']),
+                'problem_id'   => safe_string(rest_extid('problems', $clar_data['probid'])),
+                'from_team_id' => safe_string(rest_extid('teams', $clar_data['sender'])),
+                'to_team_id'   => safe_string(rest_extid('teams', $clar_data['recipient'])),
+                'reply_to_id'  => safe_string(rest_extid('clarifications', $clar_data['respid'])),
+                'text'         => $clar_data['body'],
+            );
         }, $clar_datas);
     }
     $doc = 'Get a list of clarifications.';
     $args = array('cid' => 'Search clarifications for a specific contest, defaults to current contest.',
-              'problem' => 'Search for clarifications about a specific problem.');
+                  'problem' => 'Search for clarifications about a specific problem.');
     $exArgs = array(array('problem' => 'H'));
     $roles = array('jury');
     $api->provideFunction('GET', 'clarifications', $doc, $args, $exArgs, $roles);
@@ -1770,10 +1709,10 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         $jdatas = $DB->q($query, $hostname);
         return array_map(function ($jdata) {
             return array(
-            'hostname' => $jdata['hostname'],
-            'active'   => safe_bool($jdata['active']),
-            'polltime' => safe_float($jdata['polltime'], 3),
-        );
+                'hostname' => $jdata['hostname'],
+                'active'   => safe_bool($jdata['active']),
+                'polltime' => safe_float($jdata['polltime'], 3),
+            );
         }, $jdatas);
     }
     $doc = 'Get a list of judgehosts.';
@@ -1790,18 +1729,15 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
             return '';
         }
 
-        $DB->q(
-        'INSERT IGNORE INTO judgehost (hostname) VALUES(%s)',
-           $args['hostname']
-    );
+        $DB->q('INSERT IGNORE INTO judgehost (hostname) VALUES(%s)', $args['hostname']);
 
         // If there are any unfinished judgings in the queue in my name,
         // they will not be finished. Give them back.
         $query = 'TABLE SELECT judgingid, submitid, cid
-              FROM judging j
-              LEFT JOIN rejudging r USING (rejudgingid)
-              WHERE judgehost = %s AND j.endtime IS NULL
-              AND (j.valid = 1 OR r.valid = 1)';
+                  FROM judging j
+                  LEFT JOIN rejudging r USING (rejudgingid)
+                  WHERE judgehost = %s AND j.endtime IS NULL
+                  AND (j.valid = 1 OR r.valid = 1)';
         $res = $DB->q($query, $args['hostname']);
         foreach ($res as $jud) {
             give_back_judging($jud['judgingid']);
@@ -1809,10 +1745,10 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         return array_map(function ($jud) {
             return array(
-            'judgingid' => safe_int($jud['judgingid']),
-            'submitid'  => safe_int($jud['submitid']),
-            'cid'       => safe_int($jud['cid']),
-        );
+                'judgingid' => safe_int($jud['judgingid']),
+                'submitid'  => safe_int($jud['submitid']),
+                'cid'       => safe_int($jud['cid']),
+            );
         }, $res);
     }
     $doc = 'Add a new judgehost to the list of judgehosts. Also restarts (and returns) unfinished judgings.';
@@ -1898,7 +1834,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
         $scoreboard = genScoreBoard($cdatas[$cid], !$args['public'], $filter, $only_visible_teams);
 
         $prob2label = $DB->q('KEYVALUETABLE SELECT probid, shortname
-                          FROM contestproblem WHERE cid = %i', $cid);
+                              FROM contestproblem WHERE cid = %i', $cid);
 
         $res = array();
         foreach ($scoreboard['scores'] as $teamid => $data) {
@@ -1908,12 +1844,13 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
                               'total_time' => safe_int($data['total_time']));
             $row['problems'] = array();
             foreach ($scoreboard['matrix'][$teamid] as $probid => $pdata) {
-                $prob = array('label'       => $prob2label[$probid],
-                          'problem_id'  => safe_string(rest_extid('problems', $probid)),
-                          'num_judged'  => safe_int($pdata['num_submissions']),
-                          'num_pending' => safe_int($pdata['num_pending']),
-                          'solved'      => safe_bool($pdata['is_correct']));
-
+                $prob = array(
+                    'label'       => $prob2label[$probid],
+                    'problem_id'  => safe_string(rest_extid('problems', $probid)),
+                    'num_judged'  => safe_int($pdata['num_submissions']),
+                    'num_pending' => safe_int($pdata['num_pending']),
+                    'solved'      => safe_bool($pdata['is_correct'])
+                );
                 if ($prob['solved']) {
                     $prob['time'] = scoretime($pdata['time']);
                     // TODO: according the API specification this doesn't
@@ -1946,10 +1883,10 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     }
     $doc = 'Get the scoreboard. Returns scoreboard for jury members if authenticated as a jury member (and public is not 1).';
     $args = array('cid' => 'ID of the contest to get the scoreboard for.',
-              'category' => 'ID of a single category to search for.',
-              'affiliation' => 'ID of an affiliation to search for.',
-              'country' => 'ISO 3166-1 alpha-3 country code to search for.',
-              'allteams' => 'If set to true-ish and with jury permissions, also output invisible teams.');
+                  'category' => 'ID of a single category to search for.',
+                  'affiliation' => 'ID of an affiliation to search for.',
+                  'country' => 'ISO 3166-1 alpha-3 country code to search for.',
+                  'allteams' => 'If set to true-ish and with jury permissions, also output invisible teams.');
     $exArgs = array(array('cid' => 2, 'category' => 1, 'affiliation' => 'UU'),
                 array('cid' => 2, 'country' => 'NLD'));
     $api->provideFunction('GET', 'scoreboard', $doc, $args, $exArgs, null, true);
@@ -1971,32 +1908,21 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         // group together duplicate internal errors
         // note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors
-        $errorid = $DB->q(
-        'MAYBEVALUE SELECT errorid FROM internal_error
-                       WHERE description=%s AND disabled=%s AND status=%s' .
-                      (isset($cid) ? ' AND cid=%i' : '%_'),
-                      $args['description'],
-        $args['disabled'],
-        'open',
-        $cid
-    );
+        $errorid = $DB->q('MAYBEVALUE SELECT errorid FROM internal_error
+                           WHERE description=%s AND disabled=%s AND status=%s' .
+                          (isset($cid) ? ' AND cid=%i' : '%_'),
+                          $args['description'], $args['disabled'], 'open', $cid);
 
         if (isset($errorid)) {
             // FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog
             return $errorid;
         }
 
-        $errorid = $DB->q(
-        'RETURNID INSERT INTO internal_error
-                       (judgingid, cid, description, judgehostlog, time, disabled)
-                       VALUES (%i, %i, %s, %s, %i, %s)',
-                      $judgingid,
-        $cid,
-        $args['description'],
-                      $args['judgehostlog'],
-        now(),
-        $args['disabled']
-    );
+        $errorid = $DB->q('RETURNID INSERT INTO internal_error
+                           (judgingid, cid, description, judgehostlog, time, disabled)
+                           VALUES (%i, %i, %s, %s, %i, %s)',
+                          $judgingid, $cid, $args['description'],
+                          $args['judgehostlog'], now(), $args['disabled']);
 
         $disabled = dj_json_decode($args['disabled']);
         // disable what needs to be disabled
@@ -2010,10 +1936,10 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     }
     $doc = 'Report an internal error from the judgedaemon.';
     $args = array('judgingid' => 'ID of the corresponding judging (if exists).',
-              'cid' => 'Contest ID (if associated to one).',
-              'description' => 'short description',
-              'judgehostlog' => 'last N lines of judgehost log',
-              'disabled' => 'reason (JSON encoded)');
+                  'cid' => 'Contest ID (if associated to one).',
+                  'description' => 'short description',
+                  'judgehostlog' => 'last N lines of judgehost log',
+                  'disabled' => 'reason (JSON encoded)');
     $exArgs = array();
     $roles = array('judgehost');
     $api->provideFunction('POST', 'internal_error', $doc, $args, $exArgs, $roles, true);
@@ -2047,11 +1973,11 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
                 continue;
             }
             $res[] = array(
-            'id'      => safe_string($label),
-            'name'    => str_replace('-', ' ', $name),
-            'penalty' => safe_bool($penalty),
-            'solved'  => safe_bool($solved),
-        );
+                'id'      => safe_string($label),
+                'name'    => str_replace('-', ' ', $name),
+                'penalty' => safe_bool($penalty),
+                'solved'  => safe_bool($solved),
+            );
         }
 
         return $res;

@@ -35,14 +35,14 @@ if ($res->count() == 0) {
         $link = '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">';
         echo '<tr><td>' . $link . specialchars($row['affilid']) .
              '</a></td><td>' . $link . specialchars($row['shortname']) .
-              '</a></td><td>' . $link . specialchars($row['name']) .
-              '</a></td>';
+             '</a></td><td>' . $link . specialchars($row['name']) .
+             '</a></td>';
         if ($SHOW_FLAGS) {
             echo '<td class="tdcenter">' . $link .
                 specialchars($row['country']) .
                 (is_readable(WEBAPPDIR.'/web/'.$countryflag) ? ' <img src="../' . $countryflag .
-                  '" alt="' . specialchars($row['country']) . '" />' : '&nbsp;') .
-                  '</a></td>';
+                 '" alt="' . specialchars($row['country']) . '" />' : '&nbsp;') .
+                '</a></td>';
         }
         echo '<td class="tdright">' . $link .
              (int)$row['cnt'] .
@@ -50,12 +50,7 @@ if ($res->count() == 0) {
         if (IS_ADMIN) {
             echo "<td class=\"editdel\">" .
                 editLink('team_affiliation', $row['affilid']) . "&nbsp;" .
-                delLink(
-                    'team_affiliation',
-                    'affilid',
-                        $row['affilid'],
-                    $row['name']
-                ) . "</td>";
+                delLink('team_affiliation', 'affilid', $row['affilid'], $row['name']) . "</td>";
         }
         echo "</tr>\n";
     }

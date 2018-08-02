@@ -120,8 +120,7 @@ require_once(LIBDIR . '/use_db.php');
 
 setup_database_connection();
 
-$judgings = $DB->q(
-    'KEYTABLE SELECT j.judgingid AS ARRAYKEY,
+$judgings = $DB->q('KEYTABLE SELECT j.judgingid AS ARRAYKEY,
                     j.cid, j.submitid, j.judgehost, j.result, j.starttime,
                     s.langid, s.probid, s.teamid, s.submittime,
                     (j.endtime - j.starttime) AS duration,
@@ -135,15 +134,15 @@ $judgings = $DB->q(
                     WHERE j.endtime IS NOT NULL ' . $sql_where .
                    'GROUP BY j.judgingid ORDER BY j.judgingid ASC',
                    $restr['contest'],
-    $restr['host'],
-    $restr['language'],
+                   $restr['host'],
+                   $restr['language'],
                    $restr['problem'],
-    $restr['submission'],
-    $restr['team'],
+                   $restr['submission'],
+                   $restr['team'],
                    $restr['judging_start'][0],
-    $restr['judging_start'][1],
+                   $restr['judging_start'][1],
                    $restr['submission_start'][0],
-    $restr['submission_start'][1]
+                   $restr['submission_start'][1]
 );
 
 if (count($judgings)==0) {
@@ -234,25 +233,25 @@ if (in_array('problems', $reports)) {
 
         printf(
             "  timelimit = %ds, runtimes in ( %.3f , %.3f ) sec for %d judgings\n",
-               $problegend[$probid]['timelimit'],
-               $judgings[$minjid]['runtime_max'],
-               $judgings[$maxjid]['runtime_max'],
+            $problegend[$probid]['timelimit'],
+            $judgings[$minjid]['runtime_max'],
+            $judgings[$maxjid]['runtime_max'],
             $njud
         );
         printf(
             "  best  runtime: %.3fs for s%d (j%d), language %s, spread in runtime %.3fs\n",
-               $judgings[$minjid]['runtime_max'],
-               $judgings[$minjid]['submitid'],
+            $judgings[$minjid]['runtime_max'],
+            $judgings[$minjid]['submitid'],
             $minjid,
-               $judgings[$minjid]['langid'],
+            $judgings[$minjid]['langid'],
             $bestspread
         );
         printf(
             "  worst runtime: %.3fs for s%d (j%d), language %s, spread in runtime %.3fs\n",
-               $judgings[$maxjid]['runtime_max'],
-               $judgings[$maxjid]['submitid'],
+            $judgings[$maxjid]['runtime_max'],
+            $judgings[$maxjid]['submitid'],
             $maxjid,
-               $judgings[$maxjid]['langid'],
+            $judgings[$maxjid]['langid'],
             $worstspread
         );
     }
@@ -295,8 +294,7 @@ if (in_array('variations', $reports)) {
         }
 
         // Check for variations in runtimes across judgings:
-        $rows = $DB->q(
-            'SELECT r.testcaseid, t.rank,
+        $rows = $DB->q('SELECT r.testcaseid, t.rank,
                         MIN(r.runtime) AS runtime_min,
                         MAX(r.runtime) AS runtime_max,
                         AVG(r.runtime) AS runtime_avg,
@@ -305,9 +303,7 @@ if (in_array('variations', $reports)) {
                         FROM judging_run r
                         LEFT JOIN judging j USING (judgingid)
                         LEFT JOIN testcase t USING (testcaseid)
-                        WHERE j.submitid = %i GROUP BY r.testcaseid',
-                       $submitid
-        );
+                        WHERE j.submitid = %i GROUP BY r.testcaseid', $submitid);
 
         $runtime_spread[$submitid] = array(-1.0, $submitid, -1.0);
         while ($row = $rows->next()) {
@@ -323,10 +319,7 @@ if (in_array('variations', $reports)) {
     rsort($runtime_spread);
 
     if (count($results_differ)>0) {
-        printf(
-            "Found %d submissions which have different judging results:\n",
-               count($results_differ)
-        );
+        printf("Found %d submissions which have different judging results:\n", count($results_differ));
         foreach ($results_differ as $submitid) {
             $results = array();
             foreach ($submissions[$submitid] as $jid) {
@@ -342,10 +335,7 @@ if (in_array('variations', $reports)) {
     }
 
     if (count($judruns_differ)>0) {
-        printf(
-            "Found %d submissions which have different judging run results:\n",
-               count($judruns_differ)
-        );
+        printf("Found %d submissions which have different judging run results:\n", count($judruns_differ));
         foreach ($judruns_differ as $submitid) {
             echo " s$submitid";
         }
@@ -354,7 +344,7 @@ if (in_array('variations', $reports)) {
 
     printf(
         "Largest spread in testcase runtimes: %.3f sec, top %d:\n",
-           reset($runtime_spread)[0],
+        reset($runtime_spread)[0],
         min(MAX_LIST_LEN, count($runtime_spread))
     );
 
@@ -365,12 +355,12 @@ if (in_array('variations', $reports)) {
         list($spread, $submitid, $tcid) = $val;
         printf(
             " %5s/%s: %.3fs over %d judgings with result: %s\n",
-               "s$submitid",
+            "s$submitid",
             "tc$tcid",
             $spread,
             count($submissions[$submitid]),
-               (in_array($submitid, $results_differ) ? '*multiple*' :
-                $judgings[$submissions[$submitid][0]]['result'])
+            (in_array($submitid, $results_differ) ? '*multiple*' :
+             $judgings[$submissions[$submitid][0]]['result'])
         );
     }
     echo "\n";
@@ -397,7 +387,7 @@ if (in_array('variations', $reports)) {
         $variance = $sumsquare / $njudged - $avgrun*$avgrun;
         printf(
             " %-22.22s | %9d | %12.4f | %8.3f | %12.4f \n",
-               $judgehost,
+            $judgehost,
             $njudged,
             $avgrun,
             sqrt($variance),
@@ -425,7 +415,7 @@ if (in_array('misc', $reports)) {
     } else {
         printf(
             "Found %d submissions with judging delayed by 5+ seconds, top %d:\n",
-               $rows->count(),
+            $rows->count(),
             min(MAX_LIST_LEN, $rows->count())
         );
         for ($i=0; $i<MAX_LIST_LEN; $i++) {
@@ -434,9 +424,9 @@ if (in_array('misc', $reports)) {
             }
             printf(
                 " %5s: submitted %s, first judged %.2fs later\n",
-                   's'.$row['submitid'],
+                's'.$row['submitid'],
                 strftime('%F %T', $row['submittime']),
-                   $row['timediff']
+                $row['timediff']
             );
         }
         echo "\n";

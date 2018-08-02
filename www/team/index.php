@@ -132,8 +132,7 @@ $requests = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromna
                     WHERE c.cid = %i AND c.sender = %i
                     ORDER BY submittime DESC, clarid DESC', $cid, $teamid);
 
-$clarifications = $DB->q(
-    'SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname,
+$clarifications = $DB->q('SELECT c.*, cp.shortname, t.name AS toname, f.name AS fromname,
                           u.mesgid AS unread
                           FROM clarification c
                           LEFT JOIN problem p USING (probid)
@@ -144,10 +143,7 @@ $clarifications = $DB->q(
                           WHERE c.cid = %i AND c.sender IS NULL
                           AND ( c.recipient IS NULL OR c.recipient = %i )
                           ORDER BY c.submittime DESC, c.clarid DESC',
-                         $teamid,
-    $cid,
-    $teamid
-);
+                         $teamid, $cid, $teamid);
 
 echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 

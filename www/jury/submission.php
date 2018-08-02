@@ -246,8 +246,7 @@ if (! $submdata) {
     error("Missing submission data");
 }
 
-$jdata = $DB->q(
-    'KEYTABLE SELECT judgingid AS ARRAYKEY, result, j.valid, j.starttime,
+$jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, result, j.valid, j.starttime,
                  j.endtime, j.judgehost, j.verified, j.jury_member, j.verify_comment,
                  r.reason, r.rejudgingid,
                  MAX(jr.runtime) AS max_runtime,
@@ -259,9 +258,7 @@ $jdata = $DB->q(
                  WHERE cid = %i AND submitid = %i
                  GROUP BY (j.judgingid)
                  ORDER BY starttime ASC, judgingid ASC',
-                $submdata['cid'],
-    $id
-);
+                $submdata['cid'], $id);
 
 // When there's no judging selected through the request, we select the
 // valid one.
@@ -464,8 +461,7 @@ if (!isset($jid)) {
             $extra_where .= 'AND s.langid IN (%As) ';
         }
 
-        $submitid = $DB->q(
-            'MAYBEVALUE SELECT s.submitid
+        $submitid = $DB->q('MAYBEVALUE SELECT s.submitid
                             FROM submission s
                             LEFT JOIN language l USING (langid)
                             LEFT JOIN contestproblem cp USING (probid, cid) ' .
@@ -473,11 +469,7 @@ if (!isset($jid)) {
                            'WHERE s.submitid = %i AND s.judgehost IS NULL
                             AND l.allow_judge = 1 AND cp.allow_judge = 1 AND s.valid = 1 ' .
                            $extra_where . 'LIMIT 1',
-                           $id,
-            $contests,
-            $problems,
-            $languages
-        );
+                           $id, $contests, $problems, $languages);
 
         if (isset($submitid)) {
             $can_be_judged = true;
@@ -519,17 +511,11 @@ $jud = $DB->q('TUPLE SELECT j.*, r.valid AS rvalid
 
 // sanity check
 if ($jud['submitid'] != $id) {
-    error(sprintf(
-        "judingid j%d belongs to submitid s%d, not s%d",
-                  $jid,
-        $jud['submitid'],
-        $id
-    ));
+    error(sprintf("judingid j%d belongs to submitid s%d, not s%d", $jid, $jud['submitid'], $id));
 }
 
 // Display testcase runs
-$runs = $DB->q(
-    'TABLE SELECT r.runid, r.judgingid,
+$runs = $DB->q('TABLE SELECT r.runid, r.judgingid,
                 r.testcaseid, r.runresult, r.runtime, ' .
                 truncate_SQL_field('r.output_run')    . ' AS output_run, ' .
                 truncate_SQL_field('r.output_diff')   . ' AS output_diff, ' .
@@ -541,24 +527,18 @@ $runs = $DB->q(
                 LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
                                              r.judgingid = %i )
                 WHERE t.probid = %s ORDER BY rank',
-               $jid,
-    $submdata['probid']
-);
+               $jid, $submdata['probid']);
 
 // Use original submission as previous, or try to find a previous
 // submission/judging of the same team/problem.
 if (isset($submdata['origsubmitid'])) {
     $lastsubmitid = $submdata['origsubmitid'];
 } else {
-    $lastsubmitid = $DB->q(
-        'MAYBEVALUE SELECT submitid
+    $lastsubmitid = $DB->q('MAYBEVALUE SELECT submitid
                             FROM submission
                             WHERE teamid = %i AND probid = %i AND submittime < %s
                             ORDER BY submittime DESC LIMIT 1',
-                           $submdata['teamid'],
-        $submdata['probid'],
-                           $submdata['submittime']
-    );
+                           $submdata['teamid'], $submdata['probid'], $submdata['submittime']);
 }
 
 $lastjud = null;
@@ -568,15 +548,12 @@ if ($lastsubmitid !== null) {
                        WHERE submitid = %s AND valid = 1
                        ORDER BY judgingid DESC LIMIT 1', $lastsubmitid);
     if ($lastjud !== null) {
-        $lastruns = $DB->q(
-            'TABLE SELECT r.runtime, r.runresult, rank, description
+        $lastruns = $DB->q('TABLE SELECT r.runtime, r.runresult, rank, description
                             FROM testcase t
                             LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
                             r.judgingid = %i )
                             WHERE t.probid = %s ORDER BY rank',
-                           $lastjud['judgingid'],
-            $submdata['probid']
-        );
+                           $lastjud['judgingid'], $submdata['probid']);
     }
 }
 
@@ -728,13 +705,11 @@ if (!empty($jud['result'])) {
          && defined('EXT_CCS_URL')) {
         echo msgbox(
             'results differ',
-                    'This submission was judged as '
-                    . '<a href="' . EXT_CCS_URL
-                    . urlencode($submdata['externalid']) . '" target="extCCS">'
-                    . printresult($submdata['externalresult']) . '</a>'
-                    . ' by the external CCS, but as '
-                    . printresult($jud['result'])
-                    . ' by DOMjudge.'
+            'This submission was judged as ' .
+            '<a href="' . EXT_CCS_URL . urlencode($submdata['externalid']) . '" target="extCCS">'
+            printresult($submdata['externalresult']) . '</a>' .
+            ' by the external CCS, but as ' .
+            printresult($jud['result']) . ' by DOMjudge.'
         );
     }
 } else { // judging does not have a result yet

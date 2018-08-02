@@ -75,7 +75,7 @@ if (! $data) {
     error("Missing or invalid affiliation id");
 }
 
-$SHOW_FLAGS             = dbconfig_get('show_flags', 1);
+$SHOW_FLAGS = dbconfig_get('show_flags', 1);
 
 $affillogo = "images/affiliations/" . urlencode($data['affilid']) . ".png";
 $countryflag = "images/countries/" . urlencode($data['country']) . ".png";
@@ -116,12 +116,7 @@ echo "</table>\n\n";
 if (IS_ADMIN) {
     echo "<p>" .
         editLink('team_affiliation', $data['affilid']) . "\n" .
-        delLink(
-            'team_affiliation',
-            'affilid',
-                $data['affilid'],
-            $data['name']
-        ) . "</p>\n\n";
+        delLink('team_affiliation', 'affilid', $data['affilid'], $data['name']) . "</p>\n\n";
 }
 
 echo "<h2>Teams from " . specialchars($data['name']) . "</h2>\n\n";

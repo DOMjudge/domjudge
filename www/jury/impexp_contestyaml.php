@@ -168,22 +168,14 @@ if (isset($_POST['import'])) {
                 $probname  = first_defined(@$problem['name'], @$problem['short-name']);
                 $problabel = first_defined(@$problem['label'], @$problem['letter']);
 
-                $probid = $DB->q(
-                    'RETURNID INSERT INTO problem
+                $probid = $DB->q('RETURNID INSERT INTO problem
                                   SET name = %s, timelimit = %i',
-                                 $probname,
-                    10
-                );
+                                 $probname, 10);
                 // TODO: ask Fredrik about configuration of timelimit
 
-                $DB->q(
-                    'INSERT INTO contestproblem (cid, probid, shortname, color)
+                $DB->q('INSERT INTO contestproblem (cid, probid, shortname, color)
                         VALUES (%i, %i, %s, %s)',
-                       $cid,
-                    $probid,
-                    $problabel,
-                    $problem['rgb']
-                );
+                       $cid, $probid, $problabel, $problem['rgb']);
             }
         }
 
@@ -244,12 +236,9 @@ if (isset($_POST['import'])) {
     }
     $contest_data['problems'] = array();
     if (!empty($cid)) {
-        $q = $DB->q(
-            "SELECT * FROM problem
+        $q = $DB->q("SELECT * FROM problem
                      INNER JOIN contestproblem USING (probid)
-                     WHERE cid = %i",
-                    $cid
-        );
+                     WHERE cid = %i", $cid);
         while ($prob = $q->next()) {
             $problem = array();
             $problem['label'] = $prob['shortname'];

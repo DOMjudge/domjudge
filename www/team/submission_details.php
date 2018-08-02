@@ -78,14 +78,11 @@ if (($show_compile == 2) ||
 $show_sample = dbconfig_get('show_sample_output', 0);
 
 if ($show_sample && @$row['result']!='compiler-error') {
-    $runs = $DB->q(
-        'TABLE SELECT r.*, t.rank, t.description FROM testcase t
+    $runs = $DB->q('TABLE SELECT r.*, t.rank, t.description FROM testcase t
                     LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid AND
                                                  r.judgingid = %i )
                     WHERE t.probid = %i AND t.sample = 1 ORDER BY rank',
-                   $row['judgingid'],
-        $row['probid']
-    );
+                   $row['judgingid'], $row['probid']);
 
     echo "<hr />\n\n";
 

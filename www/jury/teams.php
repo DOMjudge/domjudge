@@ -93,14 +93,14 @@ if ($teams->count() == 0) {
             ($row['room'] ? specialchars($row['room']) : '&nbsp;') . "</a></td>";
         echo "<td class=\"";
         switch ($status) {
-        case 0: echo 'team-nocon" title="no connections made"';
-            break;
-        case 1: echo 'team-nosub" title="teampage viewed, no submissions"';
-            break;
-        case 2: echo 'team-nocor" title="submitted, none correct"';
-            break;
-        case 3: echo 'team-ok" title="correct submission(s)"';
-            break;
+            case 0: echo 'team-nocon" title="no connections made"';
+                break;
+            case 1: echo 'team-nosub" title="teampage viewed, no submissions"';
+                break;
+            case 2: echo 'team-nocor" title="submitted, none correct"';
+                break;
+            case 3: echo 'team-ok" title="correct submission(s)"';
+                break;
         }
         echo ">$link" . CIRCLE_SYM . "</a></td>";
         echo "<td class=\"teamstat\" title=\"$numcor correct / $numsub submitted\">$link$numcor / $numsub</a></td>";

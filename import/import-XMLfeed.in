@@ -200,12 +200,9 @@ logmsg(LOG_DEBUG, "moved *to* '$feedurl' from '$feedurl.mine.xml'");
 
 $problems = $xpath->query('/contest/problem');
 foreach ($problems as $prob) {
-    $id = $DB->q(
-        'MAYBEVALUE SELECT probid FROM contestproblem
+    $id = $DB->q('MAYBEVALUE SELECT probid FROM contestproblem
                   WHERE probid = %s AND cid = %i AND allow_submit = 1',
-                 remap('problem', val($prob, 'id')),
-        $cid
-    );
+                 remap('problem', val($prob, 'id')), $cid);
 
     if (empty($id)) {
         error("Problem ID '".val($prob, 'id')."' from external CCS not available locally.");
@@ -214,11 +211,9 @@ foreach ($problems as $prob) {
 
 $languages = $xpath->query('/contest/language');
 foreach ($languages as $lang) {
-    $id = $DB->q(
-        'MAYBEVALUE SELECT langid FROM language
+    $id = $DB->q('MAYBEVALUE SELECT langid FROM language
                   WHERE langid = %s AND allow_submit = 1',
-                 remap('language', val($lang, 'id'))
-    );
+                 remap('language', val($lang, 'id')));
 
     if (empty($id)) {
         error("Language ID '".val($lang, 'id')."' from external CCS not available locally.");
@@ -231,11 +226,9 @@ foreach ($languages as $lang) {
 
 $teams = $xpath->query('/contest/team');
 foreach ($teams as $team) {
-    $id = $DB->q(
-        'MAYBEVALUE SELECT teamid FROM team
+    $id = $DB->q('MAYBEVALUE SELECT teamid FROM team
                   WHERE teamid = %s AND enabled = 1',
-                 remap('team', val($team, 'id'))
-    );
+                 remap('team', val($team, 'id')));
 
     if (empty($id)) {
         error("Team ID '".val($team, 'id')."' from external CCS not available locally.");
@@ -319,13 +312,13 @@ while (true) {
 
             $id = submit_solution(
                 remap('team', val($run, 'team')),
-                                  remap('problem', val($run, 'problem')),
-                                  $cid,
-                                  remap('language', val($run, 'language')),
-                                  $files,
+                remap('problem', val($run, 'problem')),
+                $cid,
+                remap('language', val($run, 'language')),
+                $files,
                 $filenames,
                 null,
-                                  $id,
+                $id,
                 val($run, 'timestamp')
             );
 
@@ -339,13 +332,9 @@ while (true) {
         if (val($run, 'judged')==='True') {
             // We're inserting a new judging
 
-            $DB->q(
-                'UPDATE submission SET externalresult = %s
+            $DB->q('UPDATE submission SET externalresult = %s
                     WHERE cid = %i AND externalid = %i',
-                   remap('result', val($run, 'result')),
-                $cid,
-                $id
-            );
+                   remap('result', val($run, 'result')), $cid, $id);
 
             logmsg(LOG_INFO, "Updated external result for s".$id.
                    " to '".remap('result', val($run, 'result'))."'");

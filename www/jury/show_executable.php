@@ -72,8 +72,7 @@ if (isset($_POST['storeid'])) {
 }
 
 $id = getRequestID(false);
-$executable = $DB->q('MAYBETUPLE SELECT * FROM executable
-                      WHERE execid = %s', $id);
+$executable = $DB->q('MAYBETUPLE SELECT * FROM executable WHERE execid = %s', $id);
 if (empty($executable)) {
     error("Executable $id not found");
 }

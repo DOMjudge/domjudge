@@ -57,19 +57,13 @@ ob_implicit_flush();
 
 foreach ($contests as $contest) {
     // get the contest, teams and problems
-    $teams = $DB->q(
-        'TABLE SELECT t.teamid FROM team t
+    $teams = $DB->q('TABLE SELECT t.teamid FROM team t
                      INNER JOIN contest c ON c.cid = %i
                      LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = c.cid
-                     WHERE (c.public = 1 OR ct.teamid IS NOT NULL) ORDER BY teamid',
-                    $contest
-    );
-    $probs = $DB->q(
-        'TABLE SELECT probid, cid FROM problem
+                     WHERE (c.public = 1 OR ct.teamid IS NOT NULL) ORDER BY teamid', $contest);
+    $probs = $DB->q('TABLE SELECT probid, cid FROM problem
                      INNER JOIN contestproblem USING (probid)
-                     WHERE cid = %i ORDER BY shortname',
-                    $contest
-    );
+                     WHERE cid = %i ORDER BY shortname', $contest);
 
     echo "<p>Recalculating all values for the scoreboard cache for contest c$contest (" .
          count($teams) . " teams, " . count($probs) . " problems)...</p>\n\n<pre>\n";
@@ -111,13 +105,10 @@ foreach ($contests as $contest) {
     $probids = $DB->q('COLUMN SELECT probid FROM problem
                        INNER JOIN contestproblem USING (probid)
                        WHERE cid = %i ORDER BY shortname', $contest);
-    $teamids = $DB->q(
-        'COLUMN SELECT t.teamid FROM team t
+    $teamids = $DB->q('COLUMN SELECT t.teamid FROM team t
                        INNER JOIN contest c ON c.cid = %i
                        LEFT JOIN contestteam ct ON ct.teamid = t.teamid AND ct.cid = c.cid
-                       WHERE (c.public = 1 OR ct.teamid IS NOT NULL) ORDER BY teamid',
-                      $contest
-    );
+                       WHERE (c.public = 1 OR ct.teamid IS NOT NULL) ORDER BY teamid', $contest);
     // probid -1 will never happen, but otherwise the array is empty and that is not supported
     if (empty($probids)) {
         $probids = array(-1);
@@ -127,22 +118,13 @@ foreach ($contests as $contest) {
         $teamids = array(-1);
     }
     // drop all contests that are not current, teams and problems that do not exist
-    $DB->q(
-        'DELETE FROM scorecache   WHERE cid = %i AND probid NOT IN (%Ai)',
-           $contest,
-        $probids
-    );
-    $DB->q(
-        'DELETE FROM scorecache   WHERE cid = %i AND teamid NOT IN (%Ai)',
-           $contest,
-        $teamids
-    );
+    $DB->q('DELETE FROM scorecache   WHERE cid = %i AND probid NOT IN (%Ai)',
+           $contest, $probids);
+    $DB->q('DELETE FROM scorecache   WHERE cid = %i AND teamid NOT IN (%Ai)',
+           $contest, $teamids);
 
-    $DB->q(
-        'DELETE FROM rankcache    WHERE cid = %i AND teamid NOT IN (%Ai)',
-           $contest,
-        $teamids
-    );
+    $DB->q('DELETE FROM rankcache    WHERE cid = %i AND teamid NOT IN (%Ai)',
+           $contest, $teamids);
 }
 
 $time_end = microtime(true);

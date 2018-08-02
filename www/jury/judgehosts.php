@@ -24,10 +24,7 @@ echo "<h1>Judgehosts</h1>\n\n";
 if (isset($_POST['cmd-activate']) || isset($_POST['cmd-deactivate'])) {
     requireAdmin();
 
-    $DB->q(
-        'UPDATE judgehost SET active = %i',
-           (isset($_POST['cmd-activate']) ? 1:0)
-    );
+    $DB->q('UPDATE judgehost SET active = %i', (isset($_POST['cmd-activate']) ? 1:0));
     auditlog('judgehost', null, 'marked all ' . (isset($_POST['cmd-activate'])?'active':'inactive'));
 }
 if ($cmd == 'add' || $cmd == 'edit') {

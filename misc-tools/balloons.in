@@ -138,12 +138,9 @@ while (true) {
                                   " for contest c" . $cid);
 
                 if (defined('BALLOON_CMD') && BALLOON_CMD) {
-                    $probs_solved = $DB->q(
-                        'COLUMN SELECT probid FROM scorecache
+                    $probs_solved = $DB->q('COLUMN SELECT probid FROM scorecache
                                             WHERE cid = %i AND teamid = %i AND is_correct_restricted = 1',
-                                           $cid,
-                        $row['teamid']
-                    );
+                                           $cid, $row['teamid']);
                     $probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,shortname,name,color
                                           FROM problem WHERE cid = %i', $cid);
 
@@ -172,16 +169,15 @@ while (true) {
 
                     $handle = popen(BALLOON_CMD, 'w');
                     if (!$handle) {
-                        error("Could not run command '" .
-                                  BALLOON_CMD . "'");
+                        error("Could not run command '" . BALLOON_CMD . "'");
                     }
 
                     fwrite($handle, notification_text(
                         $team,
                         $row['probid'],
-                                                      $cdata,
+                        $cdata,
                         $probs_solved,
-                                                      $probs_data,
+                        $probs_data,
                         $comment
                     ));
                     if (($exitcode = pclose($handle)) != 0) {
@@ -189,10 +185,7 @@ while (true) {
                     }
                 }
 
-                $DB->q(
-                    'UPDATE balloon SET done=1 WHERE balloonid = %i',
-                       $row['balloonid']
-                );
+                $DB->q('UPDATE balloon SET done=1 WHERE balloonid = %i', $row['balloonid']);
             }
         } while ($res->count() != 0);
     }

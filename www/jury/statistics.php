@@ -62,8 +62,8 @@ WHERE
 
 // All problems
 $problems = $DB->q('SELECT p.probid,p.name FROM problem p
-            INNER JOIN contestproblem USING (probid)
-            WHERE cid = %i ORDER by shortname', $cid);
+                    INNER JOIN contestproblem USING (probid)
+                    WHERE cid = %i ORDER by shortname', $cid);
 
 function relativeUrl($params)
 {

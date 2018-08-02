@@ -20,8 +20,7 @@ if (! $id) {
     error("Missing or invalid internal error id");
 }
 
-$edata = $DB->q('TUPLE SELECT * FROM internal_error
-                 WHERE errorid=%i', $id);
+$edata = $DB->q('TUPLE SELECT * FROM internal_error WHERE errorid=%i', $id);
 
 if (! $edata) {
     error("Missing internal error data for e" . $id);
@@ -79,11 +78,8 @@ echo "<tr><td>Affected " . specialchars($kind) . ":</td><td>";
 switch ($kind) {
     case 'problem':
         $probid = $disabled['probid'];
-        $shortname = $DB->q(
-            'VALUE SELECT shortname FROM contestproblem WHERE probid=%i AND cid=%i',
-            $probid,
-            $edata['cid']
-        );
+        $shortname = $DB->q('VALUE SELECT shortname FROM contestproblem WHERE probid=%i AND cid=%i',
+                            $probid, $edata['cid']);
         $name = $DB->q('VALUE SELECT name FROM problem WHERE probid=%i', $probid);
         echo "<a href=\"problem.php?id=" . urlencode($probid) . "\">" . specialchars($shortname . " - " . $name) . "</a>";
         break;

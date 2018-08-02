@@ -17,11 +17,8 @@ if (isset($_REQUEST['cmd']) &&
     ($_REQUEST['cmd'] == 'activate' || $_REQUEST['cmd'] == 'deactivate')) {
     requireAdmin();
 
-    $DB->q(
-        'UPDATE judgehost SET active = %i WHERE hostname = %s',
-           ($_REQUEST['cmd'] == 'activate' ? 1 : 0),
-        $id
-    );
+    $DB->q('UPDATE judgehost SET active = %i WHERE hostname = %s',
+           ($_REQUEST['cmd'] == 'activate' ? 1 : 0), $id);
     auditlog('judgehost', $id, 'marked ' . ($_REQUEST['cmd']=='activate'?'active':'inactive'));
 
     // the request came from the overview page
@@ -40,8 +37,7 @@ $data = $DB->q('TUPLE SELECT judgehost.*, r.name AS restrictionname
 // select only specific fields to avoid retrieving large blobs
 $cids = getCurContests(false);
 if (!empty($cids)) {
-    $jdata = $DB->q(
-        'KEYTABLE SELECT judgingid AS ARRAYKEY, judgingid, submitid,
+    $jdata = $DB->q('KEYTABLE SELECT judgingid AS ARRAYKEY, judgingid, submitid,
                      j.starttime, j.endtime, judgehost, result, verified,
                      j.valid, j.rejudgingid, r.valid AS rejudgevalid,
                      (j.endtime IS NULL AND j.valid=0 AND
@@ -50,9 +46,7 @@ if (!empty($cids)) {
                      LEFT JOIN rejudging r USING(rejudgingid)
                      WHERE cid IN (%Ai) AND judgehost = %s
                      ORDER BY j.starttime DESC, judgingid DESC',
-                    $cids,
-        $data['hostname']
-    );
+                    $cids, $data['hostname']);
 }
 
 $reltime = floor(difftime(now(), $data['polltime']));

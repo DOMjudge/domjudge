@@ -29,15 +29,10 @@ $DB->q('START TRANSACTION');
 
 // Explicitly unset jury_member when unmarking verified: otherwise this
 // judging would be marked as "claimed".
-$cnt = $DB->q(
-    'RETURNAFFECTED UPDATE judging
+$cnt = $DB->q('RETURNAFFECTED UPDATE judging
                SET verified = %i, jury_member = ' . ($val ? '%s ' : 'NULL %_ ') .
               ', verify_comment = %s WHERE judgingid = %i',
-              $val,
-    $jury_member,
-    $comment,
-    $id
-);
+              $val, $jury_member, $comment, $id);
 auditlog('judging', $id, $val ? 'set verified' : 'set unverified');
 
 if ($cnt==1 && dbconfig_get('verification_required', 0)) {

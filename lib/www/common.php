@@ -135,8 +135,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
         echo "<p class=\"nodata\">No submissions</p>\n\n";
         return;
     }
-    $res = $DB->q(
-        'SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
+    $res = $DB->q('SELECT s.submitid, s.teamid, s.probid, s.langid, s.cid,
                    s.submittime, s.judgehost, s.valid, t.name AS teamname,
                    cp.shortname, p.name AS probname, l.name AS langname,
                    j.result, j.judgehost, j.verified, j.jury_member, j.seen, j.endtime, j.judgingid,
@@ -146,17 +145,17 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
                   $sqlbody .
                   'ORDER BY s.submittime DESC, s.submitid DESC ' .
                   ($limit > 0 ? 'LIMIT 0, %i' : '%_'),
-        @$restrictions['rejudgingid'],
-        $cids,
+                  @$restrictions['rejudgingid'],
+                  $cids,
                   @$restrictions['teamid'],
-        @$restrictions['categoryid'],
+                  @$restrictions['categoryid'],
                   @$restrictions['probid'],
-        @$restrictions['langid'],
+                  @$restrictions['langid'],
                   @$restrictions['judgehost'],
                   @$restrictions['rejudgingid'],
-        @$restrictions['rejudgingid'],
+                  @$restrictions['rejudgingid'],
                   @$restrictions['old_result'],
-        @$restrictions['result'],
+                  @$restrictions['result'],
                   $limit
     );
 
@@ -307,15 +306,12 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
             if ($testcases) {
                 $judgingid = $row['judgingid'];
                 $probid = $row['probid'];
-                $runinfo = $DB->q(
-                    'TABLE SELECT r.runresult, t.rank
-                        FROM testcase t
-                        LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid
-                            AND r.judgingid = %i )
-                        WHERE t.probid = %i ORDER BY rank',
-                        $judgingid,
-                    $probid
-                );
+                $runinfo = $DB->q('TABLE SELECT r.runresult, t.rank
+                                   FROM testcase t
+                                   LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid
+                                                                AND r.judgingid = %i )
+                                   WHERE t.probid = %i ORDER BY rank',
+                                  $judgingid, $probid);
 
                 $testcase_results = "";
                 $is_final = !empty($row['result']);
@@ -350,26 +346,27 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
         echo addEndForm();
 
         if ($limit > 0) {
-            $query_extras = array('subcnt' => '',
+            $query_extras = array(
+                'subcnt' => '',
                 'corcnt' => ' AND j.result LIKE \'correct\'',
                 'igncnt' => ' AND s.valid = 0',
                 'vercnt' => ' AND verified = 0 AND result IS NOT NULL',
-                'quecnt' => ' AND result IS NULL');
+                'quecnt' => ' AND result IS NULL'
+            );
 
             foreach ($query_extras as $cnt => $query_extra) {
-                $$cnt = $DB->q(
-                    'VALUE SELECT count(s.submitid) ' . $sqlbody . $query_extra,
+                $$cnt = $DB->q('VALUE SELECT count(s.submitid) ' . $sqlbody . $query_extra,
                                @$restrictions['rejudgingid'],
-                    $cids,
+                               $cids,
                                @$restrictions['teamid'],
-                    @$restrictions['categoryid'],
+                               @$restrictions['categoryid'],
                                @$restrictions['probid'],
-                    @$restrictions['langid'],
+                               @$restrictions['langid'],
                                @$restrictions['judgehost'],
                                @$restrictions['rejudgingid'],
-                    @$restrictions['rejudgingid'],
+                               @$restrictions['rejudgingid'],
                                @$restrictions['old_result'],
-                    @$restrictions['result']
+                               @$restrictions['result']
                 );
             }
         }
@@ -396,8 +393,8 @@ function putTeam($teamid)
 {
     global $DB;
 
-    $SHOW_FLAGS             = dbconfig_get('show_flags', 1);
-    $SHOW_AFFILIATIONS      = dbconfig_get('show_affiliations', 1);
+    $SHOW_FLAGS        = dbconfig_get('show_flags', 1);
+    $SHOW_AFFILIATIONS = dbconfig_get('show_affiliations', 1);
 
     $team = $DB->q('MAYBETUPLE SELECT t.*, c.name AS catname,
                     a.name AS affname, a.country FROM team t
@@ -628,12 +625,9 @@ function putProblemText($probid)
     global $DB, $cdata;
 
     if (IS_JURY) {
-        $prob = $DB->q(
-            "MAYBETUPLE SELECT problemtext, problemtext_type
+        $prob = $DB->q("MAYBETUPLE SELECT problemtext, problemtext_type
                         FROM problem p
-                        WHERE OCTET_LENGTH(problemtext) > 0 AND probid = %i",
-                       $probid
-        );
+                        WHERE OCTET_LENGTH(problemtext) > 0 AND probid = %i", $probid);
         $probname = $probid;
     } else {
         $prob = $DB->q("MAYBETUPLE SELECT shortname, problemtext, problemtext_type
@@ -648,17 +642,17 @@ function putProblemText($probid)
     }
 
     switch ($prob['problemtext_type']) {
-    case 'pdf':
-        $mimetype = 'application/pdf';
-        break;
-    case 'html':
-        $mimetype = 'text/html';
-        break;
-    case 'txt':
-        $mimetype = 'text/plain';
-        break;
-    default:
-        error("Problem p$probid text has unknown type");
+        case 'pdf':
+            $mimetype = 'application/pdf';
+            break;
+        case 'html':
+            $mimetype = 'text/html';
+            break;
+        case 'txt':
+            $mimetype = 'text/plain';
+            break;
+        default:
+            error("Problem p$probid text has unknown type");
     }
 
     $filename = "prob-$probname.$prob[problemtext_type]";
@@ -687,16 +681,12 @@ function putSampleTestcase($probid, $seq, $type)
 {
     global $DB, $cdata;
 
-    $sample = $DB->q(
-        'MAYBETUPLE SELECT shortname, ' . $type . 'put AS content
+    $sample = $DB->q('MAYBETUPLE SELECT shortname, ' . $type . 'put AS content
                       FROM problem INNER JOIN testcase USING (probid)
                       INNER JOIN contestproblem USING (probid)
                       WHERE probid = %i AND cid = %i AND allow_submit = 1
                       AND sample = 1 ORDER BY testcaseid ASC LIMIT %i,1',
-                      $probid,
-        $cdata['cid'],
-        $seq-1
-    );
+                     $probid, $cdata['cid'], $seq-1);
 
     if (empty($sample) || !problemVisible($probid)) {
         error("Problem p$probid not found or not available");
@@ -845,27 +835,27 @@ function getProblemTextList()
 function langidToAce($langid)
 {
     switch ($langid) {
-    case 'c':
-    case 'cpp':
-    case 'cxx':
-        return 'c_cpp';
-    case 'pas':
-        return 'pascal';
-    case 'hs':
-        return 'haskell';
-    case 'pl':
-        return 'perl';
-    case 'bash':
-        return 'sh';
-    case 'py2':
-    case 'py3':
-        return 'python';
-    case 'adb':
-        return 'ada';
-    case 'plg':
-        return 'prolog';
-    case 'rb':
-        return 'ruby';
+        case 'c':
+        case 'cpp':
+        case 'cxx':
+            return 'c_cpp';
+        case 'pas':
+            return 'pascal';
+        case 'hs':
+            return 'haskell';
+        case 'pl':
+            return 'perl';
+        case 'bash':
+            return 'sh';
+        case 'py2':
+        case 'py3':
+            return 'python';
+        case 'adb':
+            return 'ada';
+        case 'plg':
+            return 'prolog';
+        case 'rb':
+            return 'ruby';
     }
     return $langid;
 }

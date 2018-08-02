@@ -30,12 +30,9 @@ function download($probid, $rank, $file)
 {
     global $DB, $prob;
     if ($file=='image') {
-        $ext = $DB->q(
-            'MAYBEVALUE SELECT image_type
+        $ext = $DB->q('MAYBEVALUE SELECT image_type
                        FROM testcase WHERE probid = %i AND rank = %i',
-                      $probid,
-            $rank
-        );
+                      $probid, $rank);
         $type = 'image/' . $ext;
     } else {
         $ext = substr($file, 0, -3);
@@ -43,12 +40,9 @@ function download($probid, $rank, $file)
     }
     $filename = filebase($prob['probid'], $rank) . $ext;
 
-    $size = $DB->q(
-        "MAYBEVALUE SELECT OCTET_LENGTH($file)
+    $size = $DB->q("MAYBEVALUE SELECT OCTET_LENGTH($file)
                     FROM testcase WHERE probid = %i AND rank = %i",
-                   $probid,
-        $rank
-    );
+                   $probid, $rank);
 
     // sanity check before we start to output headers
     if ($size===null || !is_numeric($size)) {
@@ -111,12 +105,9 @@ function check_updated_file($probid, $rank, $fileid, $file)
         checkFileUpload($_FILES[$fileid]['error'][$rank]);
 
         $content = dj_file_get_contents($_FILES[$fileid]['tmp_name'][$rank]);
-        if ($DB->q(
-            "VALUE SELECT count(testcaseid)
-                     FROM testcase WHERE probid = %i AND rank = %i",
-                    $probid,
-            $rank
-        )==0) {
+        if ($DB->q("VALUE SELECT count(testcaseid)
+                    FROM testcase WHERE probid = %i AND rank = %i",
+                   $probid, $rank)==0) {
             error("cannot find testcase $rank for probid = $probid");
         }
 
@@ -132,24 +123,13 @@ function check_updated_file($probid, $rank, $fileid, $file)
                 warning("image: ".$errormsg);
             }
 
-            $DB->q(
-                'UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
+            $DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
                     WHERE probid = %i AND rank = %i',
-                   $content,
-                $thumb,
-                $type,
-                $probid,
-                $rank
-            );
+                   $content, $thumb, $type, $probid, $rank);
         } else {
-            $DB->q(
-                "UPDATE testcase SET md5sum_$file = %s, $file = %s
+            $DB->q("UPDATE testcase SET md5sum_$file = %s, $file = %s
                     WHERE probid = %i AND rank = %i",
-                   md5($content),
-                $content,
-                $probid,
-                $rank
-            );
+                   md5($content), $content, $probid, $rank);
         }
 
         auditlog('testcase', $probid, 'updated', "$file rank $rank");
@@ -179,8 +159,9 @@ function check_update($probid, $rank, $FILES)
     }
 
     // check for updated sample
-    $affected = $DB->q('RETURNAFFECTED UPDATE testcase SET sample = %i WHERE probid = %i
-        AND rank = %i', isset($_POST['sample'][$rank]), $probid, $rank);
+    $affected = $DB->q('RETURNAFFECTED UPDATE testcase SET sample = %i
+                        WHERE probid = %i AND rank = %i',
+                       isset($_POST['sample'][$rank]), $probid, $rank);
     if ($affected) {
         $result .= "<li>Set testcase $rank to be " .
                (isset($_POST['sample'][$rank]) ? "" : "not ") .
@@ -189,8 +170,9 @@ function check_update($probid, $rank, $FILES)
 
     // check for updated description
     if (isset($_POST['description'][$rank])) {
-        $DB->q('UPDATE testcase SET description = %s WHERE probid = %i
-                AND rank = %i', $_POST['description'][$rank], $probid, $rank);
+        $DB->q('UPDATE testcase SET description = %s
+                WHERE probid = %i AND rank = %i',
+               $_POST['description'][$rank], $probid, $rank);
         auditlog('testcase', $probid, 'updated description', "rank $rank");
 
         $result .= "<li>Updated description for testcase $rank</li>\n";
@@ -214,32 +196,19 @@ function check_add($probid, $rank, $FILES)
             }
         }
 
-        $DB->q(
-            "INSERT INTO testcase
+        $DB->q("INSERT INTO testcase
                 (probid,rank,md5sum_input,md5sum_output,input,output,description,sample)
                 VALUES (%i,%i,%s,%s,%s,%s,%s,%i)",
-               $probid,
-            $rank,
-            md5(@$content['input']),
-            md5(@$content['output']),
-               @$content['input'],
-            @$content['output'],
-            @$_POST['add_desc'],
-               isset($_POST['add_sample'])
-        );
+               $probid, $rank, md5(@$content['input']), md5(@$content['output']),
+               @$content['input'], @$content['output'], @$_POST['add_desc'],
+               isset($_POST['add_sample']));
 
         if (!empty($content['image'])) {
             list($thumb, $type) = get_image_thumb_and_type($content['image']);
 
-            $DB->q(
-                'UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
+            $DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
                     WHERE probid = %i AND rank = %i',
-                   @$content['image'],
-                $thumb,
-                $type,
-                $probid,
-                $rank
-            );
+                   @$content['image'], $thumb, $type, $probid, $rank);
         }
 
         auditlog('testcase', $probid, 'added', "rank $rank");

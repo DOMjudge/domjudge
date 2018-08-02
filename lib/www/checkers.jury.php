@@ -153,25 +153,17 @@ function check_problem($data, $keydata = null)
     }
 
     if (!empty($data['special_compare'])) {
-        if (! $DB->q(
-            'MAYBEVALUE SELECT execid FROM executable
+        if (! $DB->q('MAYBEVALUE SELECT execid FROM executable
                        WHERE execid = %s AND type = %s',
-                      $data['special_compare'],
-            'compare'
-        )) {
-            ch_error("Unknown special compare script (or wrong type): " .
-                     $data['special_compare']);
+                      $data['special_compare'], 'compare')) {
+            ch_error("Unknown special compare script (or wrong type): " . $data['special_compare']);
         }
     }
     if (!empty($data['special_run'])) {
-        if (! $DB->q(
-            'MAYBEVALUE SELECT execid FROM executable
-                       WHERE execid = %s AND type = %s',
-                      $data['special_run'],
-            'run'
-        )) {
-            ch_error("Unknown special run script (or wrong type): " .
-                     $data['special_run']);
+        if (! $DB->q('MAYBEVALUE SELECT execid FROM executable
+                      WHERE execid = %s AND type = %s',
+                     $data['special_run'], 'run')) {
+            ch_error("Unknown special run script (or wrong type): " . $data['special_run']);
         }
     }
 
@@ -202,14 +194,10 @@ function check_language($data, $keydata = null)
         ch_error("No compile script specified for language: " . $id);
     } else {
         global $DB;
-        if (! $DB->q(
-            'MAYBEVALUE SELECT execid FROM executable
-                       WHERE execid = %s AND type = %s',
-                      $data['compile_script'],
-            'compile'
-        )) {
-            ch_error("Unknown compile script (or wrong type): " .
-                     $data['compile_script']);
+        if (! $DB->q('MAYBEVALUE SELECT execid FROM executable
+                      WHERE execid = %s AND type = %s',
+                     $data['compile_script'], 'compile')) {
+            ch_error("Unknown compile script (or wrong type): " . $data['compile_script']);
         }
     }
     $exts = json_decode($data['extensions'], false, 2);
@@ -277,9 +265,9 @@ function check_relative_time($time, $basetime, $field, $removed_intervals = null
             $times[2] = '00';
         }
         if (count($times) == 3 &&
-             is_numeric($times[0]) &&
-             is_numeric($times[1]) && $times[1] < 60 &&
-             is_numeric($times[2]) && $times[2] < 60) {
+            is_numeric($times[0]) &&
+            is_numeric($times[1]) && $times[1] < 60 &&
+            is_numeric($times[2]) && $times[2] < 60) {
             $hours = $times[0];
             $minutes = $times[1];
             $seconds = $times[2];
@@ -340,7 +328,7 @@ function check_removed_intervals($contest, $intervals)
             $data[$f] = check_relative_time(
                 $data[$f],
                 $contest['starttime'],
-                                            'removed_interval '.$f,
+                'removed_interval '.$f,
                 $intervals
             );
         }
@@ -363,9 +351,9 @@ function check_removed_intervals($contest, $intervals)
                 continue;
             }
             if ((difftime($data['starttime'], $other['starttime']) >= 0 &&
-                  difftime($data['starttime'], $other['endtime']) <  0) ||
-                 (difftime($data['endtime'], $other['starttime']) >  0 &&
-                  difftime($data['endtime'], $other['endtime']) <= 0)) {
+                 difftime($data['starttime'], $other['endtime']) <  0) ||
+                (difftime($data['endtime'], $other['starttime']) >  0 &&
+                 difftime($data['endtime'], $other['endtime']) <= 0)) {
                 ch_error('Removed intervals ' .
                          (isset($data['intervalid'])  ? $data['intervalid']  : 'new') .
                          ' and ' .
@@ -402,8 +390,8 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
         $data[$f] = @$data[$f.'_string'];
         $data[$f] = check_relative_time(
             $data[$f],
-                                        ($f=='starttime' ? null : $data['starttime']),
-                                        $f,
+            ($f=='starttime' ? null : $data['starttime']),
+            $f,
             $removed_intervals
         );
     }
@@ -425,7 +413,7 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
     }
     if (!empty($data['freezetime'])) {
         if (difftime($data['freezetime'], $data['endtime']) > 0 ||
-             difftime($data['freezetime'], $data['starttime']) < 0) {
+            difftime($data['freezetime'], $data['starttime']) < 0) {
             ch_error('Freezetime is out of start/endtime range');
         }
     }
@@ -440,12 +428,12 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
             ch_error('Unfreezetime must be larger than endtime.');
         }
         if (!empty($data['deactivatetime']) &&
-             difftime($data['deactivatetime'], $data['unfreezetime']) < 0) {
+            difftime($data['deactivatetime'], $data['unfreezetime']) < 0) {
             ch_error('Deactivatetime must be larger than unfreezetime.');
         }
     } else {
         if (!empty($data['deactivatetime']) &&
-             difftime($data['deactivatetime'], $data['endtime']) < 0) {
+            difftime($data['deactivatetime'], $data['endtime']) < 0) {
             ch_error('Deactivatetime must be larger than endtime.');
         }
     }

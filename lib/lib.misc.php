@@ -138,13 +138,10 @@ function problemVisible($probid)
         return false;
     }
 
-    return $DB->q(
-        'MAYBETUPLE SELECT probid FROM problem
+    return $DB->q('MAYBETUPLE SELECT probid FROM problem
                    INNER JOIN contestproblem USING (probid)
                    WHERE cid = %i AND allow_submit = 1 AND probid = %i',
-                  $cdata['cid'],
-        $probid
-    ) !== null;
+                  $cdata['cid'], $probid) !== null;
 }
 
 /**
@@ -243,8 +240,7 @@ function calcScoreRow($cid, $team, $prob)
     // that these will not count as solved. Correct submissions with
     // submittime after contest end should never happen, unless one
     // resets the contest time after successful judging.
-    $result = $DB->q(
-        'SELECT result, verified, submittime,
+    $result = $DB->q('SELECT result, verified, submittime,
                       (c.freezetime IS NOT NULL && submittime >= c.freezetime) AS afterfreeze
                       FROM submission s
                       LEFT JOIN judging j ON(s.submitid=j.submitid AND j.valid=1)
@@ -254,10 +250,7 @@ function calcScoreRow($cid, $team, $prob)
                        "AND (j.result IS NULL OR j.result != 'compiler-error') ") .
                      'AND submittime < c.endtime
                       ORDER BY submittime',
-                     $team,
-        $prob,
-        $cid
-    );
+                     $team, $prob, $cid);
 
     // reset vars
     $submitted_j = $pending_j = $time_j = $correct_j = 0;
@@ -301,24 +294,14 @@ function calcScoreRow($cid, $team, $prob)
     }
 
     // insert or update the values in the public/team scores table
-    $DB->q(
-        'REPLACE INTO scorecache
+    $DB->q('REPLACE INTO scorecache
             (cid, teamid, probid,
              submissions_restricted, pending_restricted, solvetime_restricted, is_correct_restricted,
              submissions_public, pending_public, solvetime_public, is_correct_public)
             VALUES (%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i)',
-           $cid,
-        $team,
-        $prob,
-           $submitted_j,
-        $pending_j,
-        $time_j,
-        $correct_j,
-           $submitted_p,
-        $pending_p,
-        $time_p,
-        $correct_p
-    );
+           $cid, $team, $prob,
+           $submitted_j, $pending_j, $time_j, $correct_j,
+           $submitted_p, $pending_p, $time_p, $correct_p);
 
     if ($DB->q("VALUE SELECT RELEASE_LOCK('$lockstr')") != 1) {
         error("calcScoreRow failed to release lock '$lockstr'");
@@ -379,18 +362,13 @@ function updateRankCache($cid, $team)
     }
 
     // Update the rank cache table
-    $DB->q(
-        "REPLACE INTO rankcache (cid, teamid,
+    $DB->q("REPLACE INTO rankcache (cid, teamid,
             points_restricted, totaltime_restricted,
             points_public, totaltime_public)
             VALUES (%i,%i,%i,%i,%i,%i)",
-           $cid,
-        $team,
-           $num_points['restricted'],
-        $total_time['restricted'],
-           $num_points['public'],
-        $total_time['public']
-    );
+           $cid, $team,
+           $num_points['restricted'], $total_time['restricted'],
+           $num_points['public'],     $total_time['public']);
 
     // Release the lock
     if ($DB->q("VALUE SELECT RELEASE_LOCK('$lockstr')") != 1) {
@@ -422,23 +400,16 @@ function updateBalloons($submitid)
     }
 
     // prevent duplicate balloons in case of multiple correct submissions
-    $numcorrect = $DB->q(
-        'VALUE SELECT count(b.submitid)
+    $numcorrect = $DB->q('VALUE SELECT count(b.submitid)
                           FROM balloon b
                           LEFT JOIN submission s USING(submitid)
                           WHERE valid = 1 AND probid = %i
                           AND teamid = %i AND cid = %i',
-                         $subm['probid'],
-        $subm['teamid'],
-        $subm['cid']
-    );
+                         $subm['probid'], $subm['teamid'], $subm['cid']);
 
     if ($numcorrect == 0) {
-        $balloons_enabled = (bool)$DB->q(
-            'VALUE SELECT process_balloons
-                                          FROM contest WHERE cid = %i',
-                                         $subm['cid']
-        );
+        $balloons_enabled = (bool)$DB->q('VALUE SELECT process_balloons
+                                          FROM contest WHERE cid = %i', $subm['cid']);
         if ($balloons_enabled) {
             $DB->q('INSERT INTO balloon (submitid) VALUES (%i)', $submitid);
         }
@@ -707,12 +678,12 @@ function sig_handler($signal)
     logmsg(LOG_DEBUG, "Signal $signal received");
 
     switch ($signal) {
-    case SIGHUP:
-        $gracefulexitsignalled = true;
-        // no break
-    case SIGINT:   # Ctrl+C
-    case SIGTERM:
-        $exitsignalled = true;
+        case SIGHUP:
+            $gracefulexitsignalled = true;
+            // no break
+        case SIGINT:   # Ctrl+C
+        case SIGTERM:
+            $exitsignalled = true;
     }
 }
 
@@ -749,10 +720,9 @@ function initsignals()
 function daemonize($pidfile = null)
 {
     switch ($pid = pcntl_fork()) {
-    case -1: error("cannot fork daemon");
-    // no break
-    case  0: break; // child process: do nothing here.
-    default: exit;  // parent process: exit.
+        case -1: error("cannot fork daemon");
+        case  0: break; // child process: do nothing here.
+        default: exit;  // parent process: exit.
     }
 
     if (($pid = posix_getpid())===false) {
@@ -776,8 +746,8 @@ function daemonize($pidfile = null)
 
     // Close std{in,out,err} file descriptors
     if (!fclose(STDIN) || !($GLOBALS['STDIN']  = fopen('/dev/null', 'r')) ||
-         !fclose(STDOUT) || !($GLOBALS['STDOUT'] = fopen('/dev/null', 'w')) ||
-         !fclose(STDERR) || !($GLOBALS['STDERR'] = fopen('/dev/null', 'w'))) {
+        !fclose(STDOUT) || !($GLOBALS['STDOUT'] = fopen('/dev/null', 'w')) ||
+        !fclose(STDERR) || !($GLOBALS['STDERR'] = fopen('/dev/null', 'w'))) {
         error("cannot reopen stdio files to /dev/null");
     }
 
@@ -802,11 +772,11 @@ function submit_solution(
     $lang,
     $files,
     $filenames,
-                         $origsubmitid = null,
+    $origsubmitid = null,
     $entry_point = null,
     $extid = null,
     $submittime = null,
-                         $extresult = null
+    $extresult = null
 ) {
     global $DB;
 
@@ -858,7 +828,7 @@ function submit_solution(
 
     // Check 2: valid parameters?
     if (! $langdata = $DB->q('MAYBETUPLE SELECT langid, require_entry_point FROM language
-                            WHERE langid = %s AND allow_submit = 1', $lang)) {
+                              WHERE langid = %s AND allow_submit = 1', $lang)) {
         error("Language '$lang' not found in database or not submittable.");
     }
     $langid = $langdata['langid'];
@@ -870,13 +840,10 @@ function submit_solution(
                            (checkrole('jury') ? '' : ' AND enabled = 1'), $team)) {
         error("Team '$team' not found in database or not enabled.");
     }
-    $probdata = $DB->q(
-        'MAYBETUPLE SELECT probid, points FROM problem
+    $probdata = $DB->q('MAYBETUPLE SELECT probid, points FROM problem
                         INNER JOIN contestproblem USING (probid)
                         WHERE probid = %s AND cid = %i AND allow_submit = 1',
-                       $prob,
-        $contest
-    );
+                       $prob, $contest);
 
     if (empty($probdata)) {
         error("Problem p$prob not found in database or not submittable [c$contest].");
@@ -914,31 +881,17 @@ function submit_solution(
 
     // Insert submission into the database
     $DB->q('START TRANSACTION');
-    $id = $DB->q(
-        'RETURNID INSERT INTO submission
-              (cid, teamid, probid, langid, submittime, origsubmitid, entry_point,
+    $id = $DB->q('RETURNID INSERT INTO submission
+                  (cid, teamid, probid, langid, submittime, origsubmitid, entry_point,
                    externalid, externalresult)
                   VALUES (%i, %i, %i, %s, %s, %i, %s, %s, %s)',
-                 $contest,
-        $teamid,
-        $probid,
-        $langid,
-        $submittime,
-        $origsubmitid,
-        $entry_point,
-                 $extid,
-        $extresult
-    );
+                 $contest, $teamid, $probid, $langid, $submittime,
+                 $origsubmitid, $entry_point, $extid, $extresult);
 
     for ($rank=0; $rank<count($files); $rank++) {
-        $DB->q(
-            'INSERT INTO submission_file
+        $DB->q('INSERT INTO submission_file
                 (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
-               $id,
-            $filenames[$rank],
-            $rank,
-            dj_file_get_contents($files[$rank])
-        );
+               $id, $filenames[$rank], $rank, dj_file_get_contents($files[$rank]));
     }
 
     // Add expected results from source. We only do this for jury
@@ -959,13 +912,15 @@ function submit_solution(
     if (is_writable(SUBMITDIR)) {
         // Copy the submission to SUBMITDIR for safe-keeping
         for ($rank=0; $rank<count($files); $rank++) {
-            $fdata = array('cid' => $contest,
-                           'submitid' => $id,
-                           'teamid' => $teamid,
-                           'probid' => $probid,
-                           'langid' => $langid,
-                           'rank' => $rank,
-                           'filename' => $filenames[$rank]);
+            $fdata = array(
+                'cid' => $contest,
+                'submitid' => $id,
+                'teamid' => $teamid,
+                'probid' => $probid,
+                'langid' => $langid,
+                'rank' => $rank,
+                'filename' => $filenames[$rank]
+            );
             $tofile = SUBMITDIR . '/' . getSourceFilename($fdata);
             if (! @copy($files[$rank], $tofile)) {
                 warning("Could not copy '" . $files[$rank] . "' to '" . $tofile . "'");
@@ -1041,13 +996,9 @@ function rejudge($table, $id, $include_all, $full_rejudge, $reason = null, $user
     }
 
     if ($full_rejudge) {
-        $rejudgingid = $DB->q(
-            'RETURNID INSERT INTO rejudging
+        $rejudgingid = $DB->q('RETURNID INSERT INTO rejudging
                                (userid_start, starttime, reason) VALUES (%i, %s, %s)',
-                              $userid,
-            now(),
-            $reason
-        );
+                              $userid, now(), $reason);
     }
 
     while ($jud = $res->next()) {
@@ -1068,19 +1019,13 @@ function rejudge($table, $id, $include_all, $full_rejudge, $reason = null, $user
         $DB->q('START TRANSACTION');
 
         if (!$full_rejudge) {
-            $DB->q(
-                'UPDATE judging SET valid = 0 WHERE judgingid = %i',
-                   $jud['judgingid']
-            );
+            $DB->q('UPDATE judging SET valid = 0 WHERE judgingid = %i', $jud['judgingid']);
         }
 
-        $DB->q(
-            'UPDATE submission SET judgehost = NULL' .
+        $DB->q('UPDATE submission SET judgehost = NULL' .
                ($full_rejudge ? ', rejudgingid=%i ' : '%_ ') .
                'WHERE submitid = %i AND rejudgingid IS NULL',
-               @$rejudgingid,
-            $jud['submitid']
-        );
+               @$rejudgingid, $jud['submitid']);
 
         // Prioritize single submission rejudgings
         if ($table == 'submission') {
@@ -1178,15 +1123,10 @@ function rejudging_finish($rejudgingid, $request, $userid = null, $show_progress
         }
     }
 
-    $DB->q(
-        'UPDATE rejudging
+    $DB->q('UPDATE rejudging
             SET endtime=%s, userid_finish=%i, valid=%i
             WHERE rejudgingid=%i',
-           now(),
-        $userid,
-        ($request=='apply' ? 1 : 0),
-        $rejudgingid
-    );
+           now(), $userid, ($request=='apply' ? 1 : 0), $rejudgingid);
 
     auditlog('rejudging', $rejudgingid, $request.'ing rejudge', '(end)');
 }
@@ -1261,18 +1201,10 @@ function auditlog(
         $user = $username;
     }
 
-    $DB->q(
-        'INSERT INTO auditlog
+    $DB->q('INSERT INTO auditlog
             (logtime, cid, user, datatype, dataid, action, extrainfo)
             VALUES(%s, %i, %s, %s, %s, %s, %s)',
-           now(),
-        $cid,
-        $user,
-        $datatype,
-        $dataid,
-        $action,
-        $extrainfo
-    );
+           now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
 }
 
 /* Mapping from REST API endpoints to relevant information:
@@ -1403,12 +1335,9 @@ function rest_extid($endpoint, $intid)
 
     $extkey = explode(',', $ep['extid'])[0];
 
-    $extid = $DB->q(
-        'MAYBEVALUE SELECT `' . $extkey . '`
+    $extid = $DB->q('MAYBEVALUE SELECT `' . $extkey . '`
                      FROM `' . $ep['tables'][0] . '`
-                     WHERE `' . $KEYS[$ep['tables'][0]][0] . '` = %s',
-                    $intid
-    );
+                     WHERE `' . $KEYS[$ep['tables'][0]][0] . '` = %s', $intid);
 
     return $extid;
 }
@@ -1449,14 +1378,11 @@ function rest_intid($endpoint, $extid, $cid = null)
         error("argument 'cid' missing to map to internal ID for $endpoint");
     }
 
-    $intid = $DB->q(
-        'MAYBEVALUE SELECT `' . $KEYS[$ep['tables'][0]][0] . '`
+    $intid = $DB->q('MAYBEVALUE SELECT `' . $KEYS[$ep['tables'][0]][0] . '`
                      FROM `' . $ep['tables'][0] . '`
                      WHERE `' . $extkey . '` = %s' .
                     (isset($cidkey) ? ' AND cid = %i' : ' %_'),
-                    $extid,
-        $cid
-    );
+                    $extid, $cid);
 
     return $intid;
 }
@@ -1657,20 +1583,12 @@ function eventlog($type, $dataids, $action, $cid = null, $json = null, $ids = nu
             } else {
                 $jsonElement = dj_json_encode($json);
             }
-            $eventid = $DB->q(
-                'RETURNID INSERT INTO event
+            $eventid = $DB->q('RETURNID INSERT INTO event
                               (eventtime, cid, endpointtype, endpointid,
                                datatype, dataid, action, content)
                                VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
-            $now,
-                $cid,
-                $type,
-                $ids[$idx],
-            $table,
-                $dataid,
-                $action,
-                $jsonElement
-            );
+                              $now, $cid, $type, $ids[$idx], $table,
+                              $dataid, $action, $jsonElement);
             $eventids[] = $eventid;
         }
     }

@@ -17,10 +17,11 @@ requireAdmin();
 $queues = getClarQueues();
 $categs = getClarCategories();
 $clarifications = $DB->q('SELECT c.*, cp.shortname, p.name AS probname
-            FROM clarification c
-            LEFT JOIN problem p USING(probid)
-            LEFT JOIN contestproblem cp USING (probid, cid)
-            WHERE c.cid = %i ORDER BY category, probid, submittime, clarid', $cdata['cid']);
+                          FROM clarification c
+                          LEFT JOIN problem p USING(probid)
+                          LEFT JOIN contestproblem cp USING (probid, cid)
+                          WHERE c.cid = %i ORDER BY category, probid, submittime, clarid',
+                         $cdata['cid']);
 
 // Note: we're using affiliation names here for the WFs!
 $team_names = $DB->q('KEYVALUETABLE SELECT t.teamid, a.shortname

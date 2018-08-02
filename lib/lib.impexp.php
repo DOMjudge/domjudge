@@ -122,16 +122,12 @@ function tsv_teams_set($data)
         // it is legitimate that a team has no affiliation. Do not add it then.
         if (!empty($row['team_affiliation']['shortname'])) {
             // First look up if the affiliation already exists.
-            $affilid = $DB->q(
-                "MAYBEVALUE SELECT affilid FROM team_affiliation
+            $affilid = $DB->q("MAYBEVALUE SELECT affilid FROM team_affiliation
                                WHERE externalid = %s LIMIT 1",
-                              $row['team_affiliation']['externalid']
-            );
+                              $row['team_affiliation']['externalid']);
             if (empty($affilid)) {
-                $affilid = $DB->q(
-                    "RETURNID INSERT INTO team_affiliation SET %S",
-                                  $row['team_affiliation']
-                );
+                $affilid = $DB->q("RETURNID INSERT INTO team_affiliation SET %S",
+                                  $row['team_affiliation']);
 
                 eventlog('team_affiliation', $affilid, 'create');
                 auditlog('team_affiliation', $affilid, 'added', 'imported from tsv');
@@ -227,11 +223,8 @@ function tsv_accounts_set($data)
     $cnt = 0;
     foreach ($data as $row) {
         if (! empty($row['team'])) {
-            $teamid = $DB->q(
-                "MAYBEVALUE SELECT teamid FROM team WHERE name = %s AND categoryid = %i",
-                $row['team']['name'],
-                $row['team']['categoryid']
-            );
+            $teamid = $DB->q("MAYBEVALUE SELECT teamid FROM team WHERE name = %s AND categoryid = %i",
+                             $row['team']['name'], $row['team']['categoryid']);
             if (is_null($teamid)) {
                 $teamid = $DB->q("RETURNID INSERT INTO team SET %S", $row['team']);
             }

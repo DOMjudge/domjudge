@@ -58,23 +58,23 @@ while ($logline = $res->next()) {
         urlencode($logline['dataid']);
     $name = specialchars($logline['dataid']);
     switch ($logline['datatype']) {
-    case 'balloon':
-        $link = null;
-        $name = 'b'.$name;
-        break;
-    case 'contest':
-        $name = 'c'.$name;
-        break;
-    case 'judging':
-        $link = 'submission.php?jid=' . urlencode($logline['dataid']);
-        $name = 'j'.$name;
-        break;
-    case 'submission':
-        $name = 's'.$name;
-        break;
-    case 'testcase':
-        $link = 'testcase.php?probid=' . urlencode($logline['dataid']);
-        break;
+        case 'balloon':
+            $link = null;
+            $name = 'b'.$name;
+            break;
+        case 'contest':
+            $name = 'c'.$name;
+            break;
+        case 'judging':
+            $link = 'submission.php?jid=' . urlencode($logline['dataid']);
+            $name = 'j'.$name;
+            break;
+        case 'submission':
+            $name = 's'.$name;
+            break;
+        case 'testcase':
+            $link = 'testcase.php?probid=' . urlencode($logline['dataid']);
+            break;
     }
 
     if (!empty($logline['dataid'])) {

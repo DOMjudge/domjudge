@@ -196,8 +196,8 @@ if (isset($_GET['edited'])) {
 
 $users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %i', $id);
 
-$SHOW_FLAGS             = dbconfig_get('show_flags', 1);
-$SHOW_AFFILIATIONS      = dbconfig_get('show_affiliations', 1);
+$SHOW_FLAGS        = dbconfig_get('show_flags', 1);
+$SHOW_AFFILIATIONS = dbconfig_get('show_affiliations', 1);
 
 $affillogo   = "images/affiliations/" . urlencode($row['affilid']) . ".png";
 $countryflag = "images/countries/"    . urlencode($row['country']) . ".png";

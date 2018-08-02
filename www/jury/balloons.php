@@ -96,17 +96,14 @@ if ($cid !== null) {
 }
 
 // Filtering by affiliation or room
-$affils = $DB->q(
-    'TABLE SELECT affilid,
+$affils = $DB->q('TABLE SELECT affilid,
                   team_affiliation.name, room
                   FROM team t
                   LEFT JOIN team_affiliation USING (affilid)
                   INNER JOIN contest c ON (c.cid IN (%Ai))
                   LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
                   WHERE c.public = 1 OR ct.teamid IS NOT NULL
-                  GROUP BY affilid, room',
-                 $contestids
-);
+                  GROUP BY affilid, room', $contestids);
 
 // all possible filter values for the select field
 $affilids  = array();
@@ -189,8 +186,7 @@ if (empty($freezecond)) {
 // Order by done, so we have the unsent balloons at the top.
 $res = null;
 if (!empty($contestids)) {
-    $res = $DB->q(
-        "SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
+    $res = $DB->q("SELECT b.*, s.submittime, p.probid, cp.shortname AS probshortname,
                    t.teamid, t.name AS teamname, t.room, c.name AS catname,
                    s.cid, co.shortname
                    FROM balloon b
@@ -204,10 +200,7 @@ if (!empty($contestids)) {
                    (isset($filter['affilid']) ? ' AND t.affilid IN (%As) ' : ' %_') .
                    (isset($filter['room']) ? ' AND t.room IN (%As) ' : ' %_') .
                    " ORDER BY done ASC, (1-2*CAST(done AS SIGNED))*CAST(balloonid AS SIGNED) ASC",
-                  $contestids,
-        @$filter['affilid'],
-        @$filter['room']
-    );
+                  $contestids, @$filter['affilid'], @$filter['room']);
 }
 
 /* Loop over the result, store the total of balloons for a team

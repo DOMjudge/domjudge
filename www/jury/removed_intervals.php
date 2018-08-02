@@ -74,12 +74,9 @@ case 'add':
     break;
 
 case 'delete':
-    $removals = $DB->q(
-        'TABLE SELECT * FROM removed_interval
+    $removals = $DB->q('TABLE SELECT * FROM removed_interval
                         WHERE cid = %i AND intervalid != %i ORDER BY starttime',
-                       $mycid,
-        $_REQUEST['intervalid']
-    );
+                       $mycid, $_REQUEST['intervalid']);
 
     checkall($removals);
 

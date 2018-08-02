@@ -63,20 +63,13 @@ if (isset($_POST['donow'])) {
         foreach (array('endtime','freezetime','unfreezetime','activatetime','deactivatetime') as $f) {
             $docdata[$f] = check_relative_time($docdata[$f.'_string'], $docdata['starttime'], $f);
         }
-        $DB->q(
-            'UPDATE contest SET starttime = %f, starttime_string = %s, starttime_enabled = 1,
+        $DB->q('UPDATE contest SET starttime = %f, starttime_string = %s, starttime_enabled = 1,
                 endtime = %f, freezetime = %f, unfreezetime = %f,
                 activatetime = %f, deactivatetime = %f
                 WHERE cid = %i',
-            $docdata['starttime'],
-            $docdata['starttime_string'],
-               $docdata['endtime'],
-            $docdata['freezetime'],
-            $docdata['unfreezetime'],
-               $docdata['activatetime'],
-            $docdata['deactivatetime'],
-            $docid
-        );
+               $docdata['starttime'], $docdata['starttime_string'], $docdata['endtime'],
+               $docdata['freezetime'], $docdata['unfreezetime'], $docdata['activatetime'],
+               $docdata['deactivatetime'], $docid);
         header("Location: ./contests.php?edited=1");
     } else {
         $DB->q('UPDATE contest SET ' . $time . 'time = %f, ' . $time . 'time_string = %s
@@ -147,12 +140,7 @@ if (empty($curcids)) {
                    difftime($row['unfreezetime'], $now) <= 0;
         $isfinal = !empty($row['finalizetime']);
 
-        $contestname = specialchars(sprintf(
-            '%s (%s - c%d)',
-                            $row['name'],
-                            $row['shortname'],
-                            $row['cid']
-        ));
+        $contestname = specialchars(sprintf('%s (%s - c%d)', $row['name'], $row['shortname'], $row['cid']));
 
         echo "<form action=\"contests.php\" method=\"post\">\n";
         echo addHidden('cid', $row['cid']);

@@ -18,13 +18,9 @@ if (empty($id)) {
     error("No submission ID passed to mark as (in)valid.");
 }
 
-$cnt = $DB->q(
-    'RETURNAFFECTED UPDATE submission s
+$cnt = $DB->q('RETURNAFFECTED UPDATE submission s
                SET s.valid = %i WHERE s.submitid = %i AND s.valid != %i',
-              $val,
-    $id,
-    $val
-);
+              $val, $id, $val);
 
 if ($cnt == 0) {
     error("Submission s$id not found or not changed.");

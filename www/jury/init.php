@@ -73,12 +73,10 @@ $updates = array(
               FROM clarification
               WHERE sender IS NOT NULL AND cid = %i AND answered = 0', $cid)),
     'judgehosts' =>
-    $DB->q(
-        'TABLE SELECT hostname, polltime
+    $DB->q('TABLE SELECT hostname, polltime
             FROM judgehost
             WHERE active = 1 AND unix_timestamp()-polltime >= %i',
-           dbconfig_get('judgehost_critical', 120)
-    ),
+           dbconfig_get('judgehost_critical', 120)),
     'rejudgings' =>
     $DB->q('TABLE SELECT rejudgingid
             FROM rejudging

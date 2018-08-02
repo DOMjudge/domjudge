@@ -305,13 +305,10 @@ foreach ($submissions as &$subm) {
                           WHERE name = %s', $teamname);
 
         if (!isset($teamid)) {
-            $teamid = $DB->q(
-                'RETURNID INSERT INTO team
+            $teamid = $DB->q('RETURNID INSERT INTO team
                               (name, categoryid, comments)
                               VALUES (%s, %i, "fake simulation team")',
-                             $teamname,
-                $categ
-            );
+                             $teamname, $categ);
         }
         $teamids[$subm[$fteam]] = $teamid;
     }
@@ -341,28 +338,15 @@ while ($cdata['cid']==$cid && difftime(now(), $cdata['endtime'])<0) { // bug!
             // sure that no judgehost tries to pick it up.
             $DB->q('START TRANSACTION');
 
-            $submitid = $DB->q(
-                'RETURNID INSERT INTO submission
+            $submitid = $DB->q('RETURNID INSERT INTO submission
                                 (cid, teamid, probid, langid, submittime)
                                 VALUES (%i, %i, %i, %s, %s)',
-                               $cid,
-                $subm['teamid'],
-                $probid,
-                $def_lang,
-                $stime
-            );
+                               $cid, $subm['teamid'], $probid, $def_lang, $stime);
 
-            $judgingid = $DB->q(
-                'RETURNID INSERT INTO judging
+            $judgingid = $DB->q('RETURNID INSERT INTO judging
                                  (cid, submitid, starttime, endtime, result, verified)
                                  VALUES (%i, %i, %s, %s, %s, %i)',
-                                $cid,
-                $submitid,
-                $stime,
-                $stime,
-                $subm[$fresult],
-                (int)$verify
-            );
+                                $cid, $submitid, $stime, $stime, $subm[$fresult], (int)$verify);
 
             calcScoreRow($cid, $subm['teamid'], $probid);
 

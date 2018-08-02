@@ -15,12 +15,7 @@ require_once(LIBDIR . '/lib.misc.php');
 function setClarificationViewed($clar, $team)
 {
     global $DB;
-    $DB->q(
-        'DELETE FROM team_unread
-            WHERE mesgid = %i AND teamid = %i',
-           $clar,
-        $team
-    );
+    $DB->q('DELETE FROM team_unread WHERE mesgid = %i AND teamid = %i', $clar, $team);
 }
 
 /**
@@ -159,10 +154,10 @@ function putClar($clar)
                 $problem_options =
                     $DB->q('KEYVALUETABLE SELECT CONCAT(cid, "-", probid),
                                              CONCAT(shortname, ": ", name) as name
-                        FROM problem
-                        INNER JOIN contestproblem USING (probid)
-                        WHERE cid = %i AND allow_submit = 1
-                        ORDER BY shortname ASC', $cid);
+                            FROM problem
+                            INNER JOIN contestproblem USING (probid)
+                            WHERE cid = %i AND allow_submit = 1
+                            ORDER BY shortname ASC', $cid);
                 if (IS_JURY && count($cdatas) > 1) {
                     foreach ($problem_options as &$problem_option) {
                         $problem_option = $data['shortname'] . ' - ' . $problem_option;
@@ -234,8 +229,7 @@ function putClarification($id, $team = null)
 
     $clar = $DB->q('TUPLE SELECT * FROM clarification WHERE clarid = %i', $id);
 
-    $clars = $DB->q(
-        'SELECT c.*, cp.shortname, p.name AS probname,
+    $clars = $DB->q('SELECT c.*, cp.shortname, p.name AS probname,
                      t.name AS toname, f.name AS fromname,
                      co.shortname AS contestshortname
                      FROM clarification c
@@ -248,9 +242,7 @@ function putClarification($id, $team = null)
                                                      cp.allow_submit = 1)
                      WHERE c.respid = %i OR c.clarid = %i
                      ORDER BY c.submittime, c.clarid',
-                    $clar['clarid'],
-        $clar['clarid']
-    );
+                    $clar['clarid'], $clar['clarid']);
 
     while ($clar = $clars->next()) {
         // check permission to view this clarification
@@ -324,8 +316,8 @@ function putClarificationList($clars, $team = null)
             echo '<td>' . $link . $clar['clarid'] . '</a></td>';
         }
 
-        echo(IS_JURY && count($cids) > 1 ? ('<td>' . $link .
-                              $clar['contestshortname'] . '</a></td>') : '');
+        echo IS_JURY && count($cids) > 1 ?
+            ('<td>' . $link . $clar['contestshortname'] . '</a></td>') : '';
 
         echo '<td>' . $link . printtime($clar['submittime'], null, $clar['cid']) . '</a></td>';
 

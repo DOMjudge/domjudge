@@ -258,13 +258,11 @@ while ($row = $events->next()) {
 
     $submitid = $row['endpointtype']=='submissions' ? $eventdata['id'] : $eventdata['submission_id'];
 
-    $data = $DB->q(
-        'MAYBETUPLE SELECT submittime, teamid, probid, name AS langname, valid
+    $data = $DB->q('MAYBETUPLE SELECT submittime, teamid, probid, name AS langname, valid
                     FROM submission
                     LEFT JOIN language USING (langid)
                     WHERE valid = 1 AND submitid = %i',
-                   $submitid
-    );
+                   $submitid);
 
     if (empty($data) ||
          difftime($data['submittime'], $cdata['endtime'])>=0 ||
@@ -296,8 +294,7 @@ while ($row = $events->next()) {
         $ntestcases = $DB->q('VALUE SELECT count(*) FROM testcase
                               WHERE probid = %i', $data['probid']);
 
-        $jruns = $DB->q(
-            'SELECT rank, runresult, runtime
+        $jruns = $DB->q('SELECT rank, runresult, runtime
                          FROM judging_run
                          LEFT JOIN testcase USING (testcaseid)
                          WHERE runresult IS NOT NULL AND judgingid = %i',

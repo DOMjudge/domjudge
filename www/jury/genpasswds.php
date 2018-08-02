@@ -24,39 +24,32 @@ function genpw($users, $group, $format)
         // checks if user has a "higher" role
         // FIXME: integrate in users query
         if ($group == 'team') {
-            if ($DB->q(
-                'VALUE SELECT COUNT(*) FROM userrole
-                         WHERE userid = %i AND (roleid = %i OR roleid = %i)',
-                        $user['userid'],
-                $juryroleid,
-                $adminroleid
-            ) > 0) {
+            if ($DB->q('VALUE SELECT COUNT(*) FROM userrole
+                        WHERE userid = %i AND (roleid = %i OR roleid = %i)',
+                       $user['userid'], $juryroleid, $adminroleid) > 0) {
                 continue;
             }
         } elseif ($group == 'judge') {
-            if ($DB->q(
-                'VALUE SELECT COUNT(*) FROM userrole
-                         WHERE userid = %i AND roleid = %i',
-                        $user['userid'],
-                $adminroleid
-            ) > 0) {
+            if ($DB->q('VALUE SELECT COUNT(*) FROM userrole
+                        WHERE userid = %i AND roleid = %i',
+                       $user['userid'], $adminroleid) > 0) {
                 continue;
             }
         }
         $pass = genrandpasswd();
         // update the user table with a password
-        $DB->q(
-            'UPDATE user SET password = %s WHERE username = %s',
-               dj_password_hash($pass),
-            $user['username']
-        );
+        $DB->q('UPDATE user SET password = %s WHERE username = %s',
+               dj_password_hash($pass), $user['username']);
         auditlog('user', $user['username'], 'set password');
         $line = implode(
             "\t",
-            array($group, $group == 'team' ? $user['teamid'] : '',
+            array(
+                $group,
+                $group == 'team' ? $user['teamid'] : '',
                 str_replace("\t", " ", $user['name']),
                 str_replace("\t", " ", $user['username']),
-                $pass)
+                $pass
+            )
         ) . "\n";
         if ($format == "page") {
             echo specialchars($line);
@@ -102,13 +95,11 @@ if (isset($_POST['format'])) {
                 break;
             case 'judge':
             case 'admin':
-                $users = $DB->q(
-                    'TABLE SELECT username,name,userid FROM user
+                $users = $DB->q('TABLE SELECT username,name,userid FROM user
                                  LEFT JOIN userrole USING (userid)
                                  WHERE roleid = %i
                                  GROUP BY userid ORDER BY username',
-                                ($group == 'judge' ? $juryroleid : $adminroleid)
-                );
+                                ($group == 'judge' ? $juryroleid : $adminroleid));
                 genpw($users, $group, $format);
                 break;
             default: error('Unknown group: ' . $group);
