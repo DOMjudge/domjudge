@@ -2,36 +2,75 @@ DOMjudge Programming Contest Judging System
 
 Version 6.0.0 - DEV
 -------------------
+ - Restore access to event feed for non-jury users.
 
 Version 6.0.0RC1 - 28 July 2018
 -------------------------------
  - Minimum PHP version is now 7.0.
- - Migrate (parts of) the API and webpages to Symfony.
- - Update API to conform to ICPC Contest API specification.
- - Add eventdaemon to create some entries for event-feed API endpoint.
- - Allow installing DB default data and examples separately.
+ - New layout for team and public web interface including improved
+   scoreboard layout.
  - Add "entry point" field for submissions to override auto detected
    main class or file.
- - Port option to disable starttime (pause countdown) from ICPC-live.
+ - Add clarification queues and allow to send canned answers.
+ - Add eventdaemon to create some entries for event-feed API endpoint.
+ - Update API to conform to ICPC Contest API specification.
+ - Allow installing DB default data and examples separately.
+ - Add option to disable starttime (pause countdown).
+ - A contest can now be finalized (results declared final).
+ - Allow to disable affiliation logos if desired.
  - Reduce memory reserved for JVM overhead and make stack size
    configurable in Java compile script.
+ - Allow configuration variables to be publicly viewable or not.
+ - Judgedaemon will now report 'internal error' on more failure
+   conditions instead of just bailing out.
+ - Jury edited submissions will be automatically 'claimed' by that user.
+ - Include team location in header of documents printed.
+ - No longer pass ONLINE_JUDGE and DOMJUDGE directives to submissions.
  - Fix runguard bug when stdout/stderr are not redirected to file.
+ - Add helper script dj_run_chroot to perform chroot operations.
+ - Support integration with ICPC Analytics' iCAT.
+ - Migrate (parts of) the API and webpages to Symfony.
+ - Use d3 charts instead of float for statistics.
+ - Update ACE editor to version 1.3.3.
+ - Removed likely unused Dutch translation of team manual.
+ - Removed static_scoreboard script, use static=1 URL parameter via HTTP.
+ - Many small issues fixed and documentation improvements.
+
+Version 5.3.3 - 30 July 2018
+----------------------------
+ - Executables: allow edits only by admin.
+ - Allow build with PHP >= 7.2.
+
+Version 5.3.2 - 29 December 2017
+--------------------------------
+ - Fix runguard crash when deleting cgroups (#311).
+ - Parse team IDs more flexible in accounts.tsv import (#310).
+ - Add documentation on Apache KeepAlive settings.
+
+Version 5.3.1 - 2 November 2017
+-------------------------------
+ - Fix runguard reusing cpuacct cgroup potentially giving wrong runtimes.
+ - Increase length of auditlog.action DB column, fixing SQL error when
+   updating some configuration settings (#308).
+ - Fix testcase download filename.
+ - Various small documentation fixes.
+
+Version 5.3.0 - 21 October 2017
+-------------------------------
  - Add support for Kotlin by mounting /bin in chroot environment.
  - Add options to have second scoreboard resolution and to suppress
    problem information from the scoreboard. Thanks Marc Furon.
- - Allow configuration variables to be publicly viewable or not.
- - Add helper script dj_run_chroot to perform chroot operations.
- - Use d3 charts instead of float for statistics.
- - Update ACE editor to version 1.3.3.
- - [security] Fix team permission for viewing clarification categories.
- - [security] Ensure only users with admin role can update executables.
-   Thanks Niklas Hoehne for reporting!
- - New layout for team and public web interface using Bootstrap.
- - Add (optional) clarification queues.
- - Many small issues fixed and documentation improvements.
+ - Change judging feedback dir ownership after compare script ran.
+   Fixes a crash when output validators have stderr output.
+ - Fix display of user IP address on jury interface.
+ - Various fixes to compile scripts.
+ - Fix automatic setting of clarification category in jury interface.
+ - Allow jury to view problems before contest start.
+ - Various small fixes to test sources.
+ - Delete team scoreboard cache data when deleting a team.
 
-Version 5.2.0 - DEV
--------------------
+Version 5.2.0 - 3 October 2017
+------------------------------
  - [security] bind PHP session cookie to specific web URI to prevent
    sharing sessions between different websites on the same host.
  - [security] Add RUNGROUP configure setting to make sure that submissions
