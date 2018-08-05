@@ -706,7 +706,7 @@ if (!empty($jud['result'])) {
         echo msgbox(
             'results differ',
             'This submission was judged as ' .
-            '<a href="' . EXT_CCS_URL . urlencode($submdata['externalid']) . '" target="extCCS">'
+            '<a href="' . EXT_CCS_URL . urlencode($submdata['externalid']) . '" target="extCCS">' .
             printresult($submdata['externalresult']) . '</a>' .
             ' by the external CCS, but as ' .
             printresult($jud['result']) . ' by DOMjudge.'
