@@ -82,7 +82,7 @@ function genScoreBoard($cdata, $jury = false, $filter = null, $visible_only = fa
 
         // skip this row if the team or problem is not known by us
         if (! array_key_exists($srow['teamid'], $teams) ||
-             ! array_key_exists($srow['probid'], $probs)) {
+            ! array_key_exists($srow['probid'], $probs)) {
             continue;
         }
 
@@ -155,7 +155,7 @@ function genScoreBoard($cdata, $jury = false, $filter = null, $visible_only = fa
             if ($pdata['is_correct']) {
                 // store per sortorder the first solve time
                 if (!isset($psum['best_time_sort'][$totals['sortorder']]) ||
-                     $pdata['time']<$psum['best_time_sort'][$totals['sortorder']]) {
+                    $pdata['time']<$psum['best_time_sort'][$totals['sortorder']]) {
                     @$psum['best_time_sort'][$totals['sortorder']] = $pdata['time'];
                 }
             }

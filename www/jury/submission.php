@@ -288,8 +288,8 @@ if (isset($_REQUEST['claim']) || isset($_REQUEST['unclaim'])) {
         warning("Cannot claim this submission: no jury member specified.");
     } else {
         if (!empty($jdata[$jid]['jury_member']) && isset($_REQUEST['claim']) &&
-             $jury_member !== $jdata[$jid]['jury_member'] &&
-             !isset($_REQUEST['forceclaim'])) {
+            $jury_member !== $jdata[$jid]['jury_member'] &&
+            !isset($_REQUEST['forceclaim'])) {
 
             // Don't use warning() here since it implies that a
             // recoverable error has occurred. Also, it generates
@@ -701,8 +701,8 @@ if (!empty($jud['result'])) {
     }
 
     if (!empty($submdata['externalresult'])
-         && $jud['result'] !== $submdata['externalresult']
-         && defined('EXT_CCS_URL')) {
+        && $jud['result'] !== $submdata['externalresult']
+        && defined('EXT_CCS_URL')) {
         echo msgbox(
             'results differ',
             'This submission was judged as ' .

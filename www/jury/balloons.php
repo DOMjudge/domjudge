@@ -78,7 +78,7 @@ echo "<h1>Balloon Status</h1>\n\n";
 
 foreach ($cdatas as $cdata) {
     if (isset($cdata['freezetime']) &&
-         difftime($cdata['freezetime'], now()) <= 0
+        difftime($cdata['freezetime'], now()) <= 0
     ) {
         echo "<h4>Scoreboard of c${cdata['cid']} (${cdata['shortname']}) is now frozen.</h4>\n\n";
     }

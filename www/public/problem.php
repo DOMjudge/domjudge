@@ -18,7 +18,7 @@ if (!isset($_GET['testcase'])) {
     putProblemText($id);
 } else {
     if (is_numeric($_GET['testcase']) && isset($_GET['type']) &&
-       ($_GET['type'] === 'in' || $_GET['type'] === 'out')) {
+        ($_GET['type'] === 'in' || $_GET['type'] === 'out')) {
         $testcasetype = $_GET['type'];
         $testcaseseq = $_GET['testcase'];
         putSampleTestcase($id, $testcaseseq, $testcasetype);

@@ -190,8 +190,8 @@ function fetch_executable($workdirpath, $execid, $md5sum)
         return array(null, "unknown executable '" . $execid . "' specified");
     }
     if (!file_exists($execpath) || !file_exists($execmd5path) ||
-         !file_exists($execdeploypath) ||
-         dj_file_get_contents($execmd5path) !== $md5sum) {
+        !file_exists($execdeploypath) ||
+        dj_file_get_contents($execmd5path) !== $md5sum) {
         logmsg(LOG_INFO, "Fetching new executable '" . $execid . "'");
         system("rm -rf $execpath");
         system("mkdir -p '$execpath'", $retval);

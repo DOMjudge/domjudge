@@ -963,9 +963,9 @@ class Contest
         // We can compare $now and the dbfields stringwise.
         $now = Utils::now();
         $fdata['showfinal']  = ($this->getFreezetime()===null &&
-                                 Utils::difftime($this->getEndtime(), $now) <= 0) ||
+                                Utils::difftime($this->getEndtime(), $now) <= 0) ||
                                ($this->getUnfreezetime()!==null &&
-                                 Utils::difftime($this->getUnfreezetime(), $now) <= 0);
+                                Utils::difftime($this->getUnfreezetime(), $now) <= 0);
         // Freeze scoreboard if freeze time has been reached and
         // we're not showing the final score yet.
         $fdata['showfrozen'] = !$fdata['showfinal'] && $this->getFreezetime()!==null &&

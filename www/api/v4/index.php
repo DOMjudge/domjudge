@@ -275,7 +275,7 @@ if (!isset($api)) {
             $cdatas = getCurContests(true, $userdata['teamid']);
         }
         if (checkrole('jury') ||
-         (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0)) {
+            (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0)) {
 
         // We sort the problems by shortname, i.e in the same way we
             // sort them in the scoreboard, and return all. Then we assign

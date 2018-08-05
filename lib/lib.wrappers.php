@@ -144,7 +144,7 @@ function dj_password_needs_rehash($hash)
         $res = $DB->q('MAYBETUPLE SHOW COLUMNS FROM user WHERE Field = %s', 'password');
         $matches = array();
         if (!isset($res['Type']) ||
-             !preg_match('/^varchar\(([0-9]+)\)$/i', $res['Type'], $matches)) {
+            !preg_match('/^varchar\(([0-9]+)\)$/i', $res['Type'], $matches)) {
             error("Could not parse DB table 'user' information");
         }
         $len = (int)$matches[1];

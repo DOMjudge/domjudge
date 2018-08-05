@@ -160,8 +160,8 @@ while (true) {
 
     // Check for contest state changes:
     if (($fdata_old['running']    !== $fdata['running']) ||
-         ($fdata_old['showfrozen'] !== $fdata['showfrozen']) ||
-         ($fdata_old['showfinal']  !== $fdata['showfinal'])) {
+        ($fdata_old['showfrozen'] !== $fdata['showfrozen']) ||
+        ($fdata_old['showfinal']  !== $fdata['showfinal'])) {
         logmsg(LOG_INFO, "Inserting contest state update event.");
         eventlog('state', '', 'update', $cid, null, '');
     }

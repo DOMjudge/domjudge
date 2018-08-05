@@ -372,7 +372,7 @@ function check_contest($data, $keydata = null, $removed_intervals = null)
     // absolute contest times from relative ones. Use the ones
     // provides as argument or from the database if available.
     if (ALLOW_REMOVED_INTERVALS &&
-         !isset($removed_intervals) && isset($keydata['cid'])) {
+        !isset($removed_intervals) && isset($keydata['cid'])) {
         $removed_intervals = $DB->q('TABLE SELECT * FROM removed_interval
                                      WHERE cid = %i ORDER BY starttime', $keydata['cid']);
     }

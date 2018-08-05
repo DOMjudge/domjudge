@@ -47,8 +47,8 @@ function first_defined($arg1, $arg2 = null, $arg3 = null, $arg4 = null)
 
 if (isset($_POST['import'])) {
     if (isset($_FILES) && isset($_FILES['import_config']) &&
-         isset($_FILES['import_config']['name']) &&
-         isset($_FILES['import_config']['tmp_name'])) {
+        isset($_FILES['import_config']['name']) &&
+        isset($_FILES['import_config']['tmp_name'])) {
         $file = $_FILES['import_config']['name'];
 
         $contest_yaml_data = Spyc::YAMLLoad($_FILES['import_config']['tmp_name']);

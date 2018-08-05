@@ -58,8 +58,8 @@ class APIController extends FOSRestController
         } elseif ($args['id'] != $contest->getExternalid()) {
             $response = new Response('Invalid "id" in request.', 400);
         } elseif (!isset($args['force']) &&
-                    $contest->getStarttime() != null &&
-                    $contest->getStarttime() < $now + 30) {
+                  $contest->getStarttime() != null &&
+                  $contest->getStarttime() < $now + 30) {
             $response = new Response('Current contest already started or about to start.', 403);
         } elseif ($args['start_time'] === null) {
             $em = $this->getDoctrine()->getManager();
@@ -206,9 +206,9 @@ class APIController extends FOSRestController
             $result['finalized'] = $time_or_null($contest->getFinalizetime(), $result['ended']!==null);
             $result['end_of_updates'] = null;
             if ($result['finalized']!==null &&
-                 ($result['thawed']!==null || $result['frozen']===null)) {
+                ($result['thawed']!==null || $result['frozen']===null)) {
                 if ($result['thawed']!==null &&
-                     $contest->getFreezetime()>$contest->getFinalizetime()) {
+                    $contest->getFreezetime()>$contest->getFinalizetime()) {
                     $result['end_of_updates'] = $result['thawed'];
                 } else {
                     $result['end_of_updates'] = $result['finalized'];
@@ -278,7 +278,7 @@ class APIController extends FOSRestController
                 if (!$isJury) {
                     $restricted_types = ['judgements', 'runs', 'clarifications'];
                     if ($contest->getStarttime() === null ||
-                         Utils::now() < $contest->getStarttime()) {
+                        Utils::now() < $contest->getStarttime()) {
                         $restricted_types[] = 'problems';
                     }
                     $qb = $qb

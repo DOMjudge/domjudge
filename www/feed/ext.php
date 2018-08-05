@@ -179,8 +179,8 @@ foreach ($VERDICTS as $long_verdict => $acronym) {
     XMLaddnode($node, 'solved', $long_verdict==='correct' ? 'True' : 'False');
     $penalty = true;
     if ($long_verdict==='correct' ||
-         ($long_verdict==='compiler-error' &&
-          $compile_penalty==0)) {
+        ($long_verdict==='compiler-error' &&
+         $compile_penalty==0)) {
         $penalty = false;
     }
     XMLaddnode($node, 'penalty', $penalty ? 'True' : 'False');
@@ -265,9 +265,9 @@ while ($row = $events->next()) {
                    $submitid);
 
     if (empty($data) ||
-         difftime($data['submittime'], $cdata['endtime'])>=0 ||
-         !isset($prob_to_id[$data['probid']]) ||
-         !isset($team_to_id[$data['teamid']])) {
+        difftime($data['submittime'], $cdata['endtime'])>=0 ||
+        !isset($prob_to_id[$data['probid']]) ||
+        !isset($team_to_id[$data['teamid']])) {
         continue;
     }
 

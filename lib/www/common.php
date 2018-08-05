@@ -256,8 +256,8 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
                 echo " (" . printresult($row['result']) . ")";
             }
         } elseif (! $row['result'] ||
-                    (!IS_JURY && ! $row['verified'] &&
-                      dbconfig_get('verification_required', 0))) {
+                  (!IS_JURY && ! $row['verified'] &&
+                   dbconfig_get('verification_required', 0))) {
             echo printresult($row['judgehost'] || !IS_JURY ? '' : 'queued');
         } else {
             echo printresult($row['result']);

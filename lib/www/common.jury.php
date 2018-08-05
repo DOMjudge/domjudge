@@ -589,7 +589,7 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
             }
             $pathcomp = explode('/', $path);
             if (!((count($pathcomp)==3 && !empty($pathcomp[2])) ||
-                    (count($pathcomp)==4 &&  empty($pathcomp[3])))) {
+                  (count($pathcomp)==4 &&  empty($pathcomp[3])))) {
                 // Skipping files and directories at the wrong level.
                 // Note that multi-file submissions sit in a subdirectory.
                 continue;

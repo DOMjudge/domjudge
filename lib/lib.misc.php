@@ -173,7 +173,7 @@ function calcFreezeData($cdata, $isjury = false)
         $fdata['showfinal'] = $fdata['showfinal'] &&
             (!isset($cdata['freezetime']) ||
              (isset($cdata['unfreezetime']) &&
-               difftime($cdata['unfreezetime'], $now) <= 0));
+              difftime($cdata['unfreezetime'], $now) <= 0));
     }
     // freeze scoreboard if freeze time has been reached and
     // we're not showing the final score yet

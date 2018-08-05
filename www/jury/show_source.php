@@ -52,7 +52,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid)
             true
         );
     } elseif (!(bool) ini_get('safe_mode') ||
-               strtolower(ini_get('safe_mode'))=='off') {
+              strtolower(ini_get('safe_mode'))=='off') {
         // Only try executing diff when safe_mode is off, otherwise
         // the shell exec will fail.
 
@@ -76,7 +76,7 @@ function createDiff($source, $newfile, $id, $oldsource, $oldfile, $oldid)
                     $difftext = "DOMjudge: error opening temporary files for diff.";
                 } else {
                     if ((fwrite($oldhandle, $oldsource['sourcecode'])===false) ||
-                         (fwrite($newhandle, $source['sourcecode'])===false)) {
+                        (fwrite($newhandle, $source['sourcecode'])===false)) {
                         $difftext = "DOMjudge: error writing temporary files for diff.";
                     } else {
                         $difftext = systemDiff($oldfile, $newfile);

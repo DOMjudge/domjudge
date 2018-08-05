@@ -54,7 +54,7 @@ if (isset($_POST['donow'])) {
     // starttime is special because other, relative times depend on it.
     if ($time == 'start') {
         if ($docdata['starttime_enabled'] &&
-             difftime($docdata['starttime'], $now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE) {
+            difftime($docdata['starttime'], $now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE) {
             error("Cannot update starttime less than ".STARTTIME_UPDATE_MIN_SECONDS_BEFORE.
                   " seconds before contest start.");
         }

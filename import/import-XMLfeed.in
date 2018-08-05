@@ -164,7 +164,7 @@ function check_contest_times($update = false)
     }
 
     if (difftime(val($contest, 'starttime'), $cdata['starttime'])!=0 ||
-         $length!=difftime($cdata['endtime'], $cdata['starttime'])) {
+        $length!=difftime($cdata['endtime'], $cdata['starttime'])) {
         warning("Contest times do not match with external CCS data.");
 
         if ($update) {
@@ -276,10 +276,10 @@ while (true) {
 
         if (!empty($res)) {
             if ($res['teamid']!=remap('team', val($run, 'team')) ||
-                 $res['probid']!=remap('problem', val($run, 'problem')) ||
-                 $res['langid']!=remap('language', val($run, 'language')) ||
-                 (abs((float)$res['submittime']-(float)val($run, 'timestamp'))>0.1 &&
-                  strcasecmp(val($run, 'judged'), 'true')!=0)) {
+                $res['probid']!=remap('problem', val($run, 'problem')) ||
+                $res['langid']!=remap('language', val($run, 'language')) ||
+                (abs((float)$res['submittime']-(float)val($run, 'timestamp'))>0.1 &&
+                 strcasecmp(val($run, 'judged'), 'true')!=0)) {
                 error("External submission '".val($run, 'id')."' already exists as s".
                       $res['submitid']." with non-matching data: " .
                       $res['teamid']." ?= ".remap('team', val($run, 'team'))    .", ".

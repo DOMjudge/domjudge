@@ -138,7 +138,7 @@ function check_updated_file($probid, $rank, $fileid, $file)
             specialchars($_FILES[$fileid]['name'][$rank]) .
             " (" . printsize($_FILES[$fileid]['size'][$rank]) . ")";
         if ($file=='output' &&
-             $_FILES[$fileid]['size'][$rank]>dbconfig_get('output_limit')*1024) {
+            $_FILES[$fileid]['size'][$rank]>dbconfig_get('output_limit')*1024) {
             $result .= ".<br /><b>Warning: file size exceeds " .
                 "<code>output_limit</code> of " . dbconfig_get('output_limit') .
                 " kB. This will always result in wrong answers!</b>";
@@ -187,7 +187,7 @@ function check_add($probid, $rank, $FILES)
 
     $result = '';
     if (!empty($_FILES['add_input']['name']) ||
-         !empty($_FILES['add_output']['name'])) {
+        !empty($_FILES['add_output']['name'])) {
         $content = array();
         foreach ($FILES as $file) {
             if (!empty($_FILES['add_'.$file]['name'])) {

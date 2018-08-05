@@ -198,7 +198,7 @@ if (!isset($api)) {
             $cdatas = getCurContests(true, $userdata['teamid']);
         }
         if (checkrole('jury') ||
-         (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0)) {
+            (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0)) {
             $pdatas = $DB->q('TABLE SELECT probid AS id, shortname AS label, shortname, name, color
                               FROM problem
                               INNER JOIN contestproblem USING (probid)

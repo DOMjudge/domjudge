@@ -62,7 +62,7 @@ $DB->q("UPDATE judging j SET j.seen = 1 WHERE j.submitid = %i", $id);
 $show_compile = dbconfig_get('show_compile', 2);
 
 if (($show_compile == 2) ||
-     ($show_compile == 1 && $row['result'] == 'compiler-error')) {
+    ($show_compile == 1 && $row['result'] == 'compiler-error')) {
     echo "<hr />\n\n";
 
     echo "<h3>Compilation output</h3>\n\n";

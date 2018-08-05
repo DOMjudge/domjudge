@@ -208,7 +208,7 @@ if ($data['type'] == 'compare') {
 }
 $used = false;
 if (($data['type'] == 'compare' || $data['type'] == 'run') &&
-     dbconfig_get('default_'.$data['type']) == $data['execid']) {
+    dbconfig_get('default_'.$data['type']) == $data['execid']) {
     $used = true;
     echo '<em>default ' . $data['type'] . '</em> ';
 }

@@ -128,7 +128,7 @@ if (! isset($_POST['cancel'])) {
                     $dataid = $keydata[$i][$tablekey];
                 }
                 if ($t === 'contestproblem' ||
-                     $t === 'contestteam') {
+                    $t === 'contestteam') {
                     $datatype = substr($t, 7);
                     $dataid = $keydata[$i][$tablekey];
                 }

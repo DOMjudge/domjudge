@@ -200,11 +200,11 @@ if (in_array('problems', $reports)) {
                 continue;
             }
             if (is_null($minjid) ||
-                 $judgings[$jid]['runtime_max']<$judgings[$minjid]['runtime_max']) {
+                $judgings[$jid]['runtime_max']<$judgings[$minjid]['runtime_max']) {
                 $minjid = $jid;
             }
             if (is_null($maxjid) ||
-                 $judgings[$jid]['runtime_max']>$judgings[$maxjid]['runtime_max']) {
+                $judgings[$jid]['runtime_max']>$judgings[$maxjid]['runtime_max']) {
                 $maxjid = $jid;
             }
             $njud++;
