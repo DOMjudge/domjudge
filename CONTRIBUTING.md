@@ -6,14 +6,14 @@ requests. See below for the preferred ways to report these.
 
 ## Reporting bugs and feature requests
 
-We use the [github issue tracker](https://github.com/DOMjudge/domjudge/issues)
+We use the [Github issue tracker](https://github.com/DOMjudge/domjudge/issues)
 for bug reports, feature requests and anything in between. Try to provide a
 clear story, and fill in as much information as possible in our
-[github issue template](https://github.com/DOMjudge/domjudge/blob/master/ISSUE_TEMPLATE.md).
+[Github issue template](https://github.com/DOMjudge/domjudge/blob/master/ISSUE_TEMPLATE.md).
 Providing accurate and relevant details will typically speed up the
 triaging and debugging process.
 
-Note that github issues are not a good place to ask questions (see below).
+Note that Github issues are not a good place to ask questions (see below).
 
 ## Questions and problems
 
@@ -32,21 +32,15 @@ Note that response times may range from a few minutes to hours.
 Patches or pull requests for bug fixes or feature enhancements are very
 much welcomed!
 
-We have [coding guidelines](CODINGSTYLE); although we do not follow these
-strictly, please try to keep your patches in line with these guidelines and
-the respective code.
+Please try to follow our [coding style guidelines](CODINGSTYLE.md).
+
+If you find that the documentation is incorrect, unclear or missing
+something, then reports or, even better, pull requests are very welcome!
 
 Be aware that when accepting new features, we consider whether the
 implementation is general and how useful the feature may be to other users;
 we try balance this with how much a new feature increases code complexity.
 Also consider making your feature optional using a configuration setting.
-Although we are very interested to hear what modifications you made to a
-local installation of DOMjudge, these changes do not always make sense in a
-more general context.
-
-If you find that the documentation is incorrect, unclear or missing
-something, then reports or, even better, pull requests are very welcome!
-
 
 ## Starting to contribute
 
