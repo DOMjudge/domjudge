@@ -868,17 +868,19 @@ if (!isset($api)) {
      */
     function config($args)
     {
+        $onlypublic = !(IS_JURY || checkrole('jury') || checkrole('judgehost'));
+
         if (isset($args['name'])) {
-            return array($args['name'] => dbconfig_get($args['name'], null, false));
+            return array($args['name'] => dbconfig_get($args['name'], null, false, $onlyifpublic));
         }
 
-        return dbconfig_get(null, null, false);
+        return dbconfig_get(null, null, false, $onlypublic);
     }
     $doc = 'Get configuration variables.';
     $args = array('name' => 'Search only a single config variable.');
     $exArgs = array(array('name' => 'sourcesize_limit'));
     // Role based (partial) access to configuration variables is handled
-    // in lib/lib.dbconfig.php.
+    // inside the function.
     $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
 
     /**

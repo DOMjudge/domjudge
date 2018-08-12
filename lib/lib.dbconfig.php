@@ -15,9 +15,7 @@ function dbconfig_init()
     global $LIBDBCONFIG, $DB;
 
     $LIBDBCONFIG = array();
-    $res = $DB->q('SELECT * FROM configuration' .
-                  (IS_JURY || checkrole('jury') || checkrole('judgehost') ?
-                   '' : ' WHERE public = 1'));
+    $res = $DB->q('SELECT * FROM configuration');
 
     while ($row = $res->next()) {
         $key = $row['name'];
@@ -69,6 +67,7 @@ function dbconfig_init()
 
         $LIBDBCONFIG[$key] = array('value' => $val,
                                    'type' => $row['type'],
+                                   'public' => $row['public'],
                                    'desc' => $row['description']);
     }
 }
@@ -147,8 +146,11 @@ function dbconfig_store()
  * values can be used.
  *
  * When $name is null, then all variables will be returned.
+ *
+ * Set $onlyifpublic to true to only return a value when this is
+ * a variable marked 'public'.
  */
-function dbconfig_get($name, $default = null, $cacheok = true)
+function dbconfig_get($name, $default = null, $cacheok = true, $onlyifpublic = false)
 {
     global $LIBDBCONFIG;
 
@@ -159,12 +161,14 @@ function dbconfig_get($name, $default = null, $cacheok = true)
     if (is_null($name)) {
         $ret = array();
         foreach ($LIBDBCONFIG as $name => $config) {
-            $ret[$name] = $config['value'];
+            if ( !$onlyifpublic || $config['public'] ) {
+                $ret[$name] = $config['value'];
+            }
         }
         return $ret;
     }
 
-    if (isset($LIBDBCONFIG[$name])) {
+    if (isset($LIBDBCONFIG[$name]) && (!$onlyifpublic || $LIBDBCONFIG[$name]['public'])) {
         return $LIBDBCONFIG[$name]['value'];
     }
 

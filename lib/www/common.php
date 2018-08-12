@@ -749,13 +749,14 @@ function putProblemTextList()
     </h3>
     <h4 class="card-subtitle mb-2 text-muted">' . specialchars($row['name']) . '</h4>
 ';
-        if (dbconfig_get('show_limits_on_team_page', false)) {
+        if (dbconfig_get('show_limits_on_team_page')) {
             print '<h5 class="card-subtitle mb-2 text-muted">Limits: ';
             print $row['timelimit'] . ' second' . ($row['timelimit'] > 1 ? 's' : '');
             if ($timeFactorDiffers) {
                 print '<sup>*</sup>';
             }
             print ' / ';
+
             print printsize(($row['memlimit'] ?? dbconfig_get('memory_limit', 0)) * 1024, 1);
             print '</h5>';
         }
