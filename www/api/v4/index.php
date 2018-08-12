@@ -871,7 +871,7 @@ if (!isset($api)) {
         $onlypublic = !(IS_JURY || checkrole('jury') || checkrole('judgehost'));
 
         if (isset($args['name'])) {
-            return array($args['name'] => dbconfig_get($args['name'], null, false, $onlyifpublic));
+            return array($args['name'] => dbconfig_get($args['name'], null, false, $onlypublic));
         }
 
         return dbconfig_get(null, null, false, $onlypublic);
