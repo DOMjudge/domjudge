@@ -714,7 +714,10 @@ function putProblemTextList()
 {
     global $DB;
 
-    $timeFactorDiffers = ($DB->q('VALUE SELECT COUNT(*) FROM language WHERE allow_submit = 1 and time_factor <> 1') != 0);
+    $showLimits = dbconfig_get('show_limits_on_team_page');
+    if ($showLimits) {
+        $timeFactorDiffers = ($DB->q('VALUE SELECT COUNT(*) FROM language WHERE allow_submit = 1 and time_factor <> 1') != 0);
+    }
 
     $probs = getProblemTextList();
 
@@ -749,7 +752,7 @@ function putProblemTextList()
     </h3>
     <h4 class="card-subtitle mb-2 text-muted">' . specialchars($row['name']) . '</h4>
 ';
-        if (dbconfig_get('show_limits_on_team_page')) {
+        if ($showLimits) {
             print '<h5 class="card-subtitle mb-2 text-muted">Limits: ';
             print $row['timelimit'] . ' second' . ($row['timelimit'] > 1 ? 's' : '');
             if ($timeFactorDiffers) {
@@ -801,7 +804,7 @@ function putProblemTextList()
     print "    </div>";
     print "  </div>";
     print "</div>";
-    if ($timeFactorDiffers) {
+    if ($showLimits && $timeFactorDiffers) {
         print '
         <div class="row">
           <div class="col-md-12 my-sm-3">
