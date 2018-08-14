@@ -9,7 +9,7 @@
 /** Text symbol used in output to represent a circle */
 define('CIRCLE_SYM', '&#9679;');
 
-function parseRunDiff($difftext)
+function parseRunDiff(string $difftext) : string
 {
     $line = strtok($difftext, "\n"); //first line
     if (sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1) {
@@ -67,7 +67,7 @@ function parseRunDiff($difftext)
  *
  * FIXME: this has way too many IS_JURY branches, should be separated out.
  */
-function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $testcases = false)
+function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlight = null, bool $testcases = false) : void
 {
     global $DB, $username;
 
@@ -389,7 +389,7 @@ function putSubmissions($cdatas, $restrictions, $limit = 0, $highlight = null, $
 /**
  * Output team information (for team and public interface)
  */
-function putTeam($teamid)
+function putTeam(int $teamid) : void
 {
     global $DB;
 
@@ -452,7 +452,7 @@ function putTeam($teamid)
 /**
  * Output progress bar
  */
-function putProgressBar($margin = 0)
+function putProgressBar(int $margin = 0) : void
 {
     global $cdata;
 
@@ -475,7 +475,7 @@ function putProgressBar($margin = 0)
 /**
  * Output clock
  */
-function putClock()
+function putClock() : void
 {
     global $cdata, $username, $userdata, $cid, $cdatas;
 
@@ -562,7 +562,7 @@ function putClock()
 /**
  * Output a footer for pages containing the DOMjudge version and server host/port/time
  */
-function putDOMjudgeVersion()
+function putDOMjudgeVersion() : void
 {
     echo "<hr /><address>DOMjudge/" . DOMJUDGE_VERSION .
         " at ".$_SERVER['SERVER_NAME']." Port ".$_SERVER['SERVER_PORT'].", page generated <span id=\"timecur\">" . strftime('%a %d %b %Y %T %Z') . "</span></address>\n";
@@ -572,7 +572,7 @@ function putDOMjudgeVersion()
  * Check whether the logged in user has DOMjudge administrator level,
  * as defined in passwords.php. If not, error and stop further execution.
  */
-function requireAdmin()
+function requireAdmin() : void
 {
     if (!checkrole('admin')) {
         error("This function is only accessible to administrators.");
@@ -583,7 +583,7 @@ function requireAdmin()
  * Translate error codes from PHP's file upload function into
  * concrete error strings.
  */
-function checkFileUpload($errorcode)
+function checkFileUpload(int $errorcode) : void
 {
     switch ($errorcode) {
         case UPLOAD_ERR_OK: // everything ok!
@@ -620,7 +620,7 @@ function checkFileUpload($errorcode)
  * It is assumed that the headers have not been sent yet, and this
  * function terminates the PHP script execution.
  */
-function putProblemText($probid)
+function putProblemText(int $probid) : void
 {
     global $DB, $cdata;
 
@@ -677,7 +677,7 @@ function putProblemText($probid)
  *
  * $type is "in" or "out".
  */
-function putSampleTestcase($probid, $seq, $type)
+function putSampleTestcase(int $probid, int $seq, string $type) : void
 {
     global $DB, $cdata;
 
@@ -710,7 +710,7 @@ function putSampleTestcase($probid, $seq, $type)
  * with links to problem statement text and/or sample testcase(s)
  * when available.
  */
-function putProblemTextList()
+function putProblemTextList() : void
 {
     global $DB;
 
@@ -816,7 +816,7 @@ function putProblemTextList()
     }
 }
 
-function getProblemTextList()
+function getProblemTextList() : array
 {
     global $cid, $cdata, $DB;
     $fdata = calcFreezeData($cdata);
@@ -836,7 +836,7 @@ function getProblemTextList()
 /**
  * Maps domjudge language id to Ace language id
  */
-function langidToAce($langid)
+function langidToAce(string $langid) : string
 {
     switch ($langid) {
         case 'c':
@@ -871,7 +871,7 @@ function langidToAce($langid)
  * Also output a function that returns the entry point description for
  * a language if an entry point is required.
  */
-function putgetMainExtension($langdata)
+function putgetMainExtension(array $langdata) : void
 {
     echo "function getMainExtension(ext)\n{\n";
     echo "\tswitch(ext) {\n";
@@ -901,7 +901,7 @@ function putgetMainExtension($langdata)
  * Render page with help of twig.
  * Assumes rendering template in file with same base name and suffix .phtml
  */
-function renderPage($data, $header = true, $footer = true, $templateFile = null)
+function renderPage($data, bool $header = true, bool $footer = true, $templateFile = null) : void
 {
     if (empty($templateFile)) {
         $templateFile = $_SERVER['PHP_SELF'];
@@ -922,7 +922,7 @@ function renderPage($data, $header = true, $footer = true, $templateFile = null)
     }
 }
 
-function descriptionExpand($description)
+function descriptionExpand(string $description) : string
 {
     $descriptionLines = explode("\n", $description);
     if (count($descriptionLines) <= 3) {

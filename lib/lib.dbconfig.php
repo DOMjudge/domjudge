@@ -10,7 +10,7 @@
  * Read configuration variables from DB configuration table and store
  * in global variable for later use.
  */
-function dbconfig_init()
+function dbconfig_init() : void
 {
     global $LIBDBCONFIG, $DB;
 
@@ -75,7 +75,7 @@ function dbconfig_init()
 /**
  * Store configuration variables to the DB configuration table.
  */
-function dbconfig_store()
+function dbconfig_store() : void
 {
     global $LIBDBCONFIG, $DB;
 
@@ -150,7 +150,7 @@ function dbconfig_store()
  * Set $onlyifpublic to true to only return a value when this is
  * a variable marked 'public'.
  */
-function dbconfig_get($name, $default = null, $cacheok = true, $onlyifpublic = false)
+function dbconfig_get(string $name, $default = null, bool $cacheok = true, bool $onlyifpublic = false)
 {
     global $LIBDBCONFIG;
 

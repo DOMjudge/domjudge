@@ -10,7 +10,7 @@
  * Helper function to create form fields, not to be called directly,
  * only by other functions below.
  */
-function addInputField($type, $name = null, $value = null, $attributes = '')
+function addInputField(string $type, $name = null, $value = null, string $attributes = '') : string
 {
     if ($name !== null && $type != 'hidden') {
         $id = ' id="' . specialchars(strtr($name, '[]', '__'));
@@ -39,13 +39,13 @@ function addPwField($name , $value = null) {
 /**
  * Form checkbox
  */
-function addCheckBox($name, $checked = false, $value = null)
+function addCheckBox(string $name, bool $checked = false, $value = null) : string
 {
     return addInputField(
         'checkbox',
         $name,
         $value,
-                         ($checked ? ' checked="checked"' : '')
+        ($checked ? ' checked="checked"' : '')
     );
 }
 
@@ -53,20 +53,20 @@ function addCheckBox($name, $checked = false, $value = null)
 /**
  * Form radio button
  */
-function addRadioButton($name, $checked = false, $value = null)
+function addRadioButton(string $name, bool $checked = false, $value = null) : string
 {
     return addInputField(
         'radio',
         $name,
         $value,
-                         ($checked ? ' checked="checked"' : '')
+        ($checked ? ' checked="checked"' : '')
     );
 }
 
 /**
  * A hidden form field.
  */
-function addHidden($name, $value)
+function addHidden(string $name, string $value) : string
 {
     return addInputField('hidden', $name, $value);
 }
@@ -74,7 +74,7 @@ function addHidden($name, $value)
 /**
  * An input textbox.
  */
-function addInput($name, $value = '', $size = 0, $maxlength = 0, $extraattr = null)
+function addInput(string $name, $value = '', $size = 0, $maxlength = 0, $extraattr = null) : string
 {
     $attr = '';
     if ($size) {
@@ -93,7 +93,7 @@ function addInput($name, $value = '', $size = 0, $maxlength = 0, $extraattr = nu
 /**
  * Helper function for addSelect
  */
-function matchSelect($val, $default)
+function matchSelect($val, $default) : bool
 {
     if (is_array($default)) {
         return in_array($val, $default);
@@ -111,7 +111,7 @@ function matchSelect($val, $default)
  * usekeys: use the keys of the array as option value or not
  * multi: multiple values are selectable, set to integer to set vertical size
  */
-function addSelect($name, $values, $default = null, $usekeys = false, $multi = false)
+function addSelect(string $name, array $values, $default = null, bool $usekeys = false, bool $multi = false) : string
 {
     $size = 5;
     if (is_int($multi)) {
@@ -138,7 +138,7 @@ function addSelect($name, $values, $default = null, $usekeys = false, $multi = f
  * Form submission button
  * Note the switched value/name parameters!
  */
-function addSubmit($value, $name = null, $onclick = null, $enable = true, $extraattrs = "")
+function addSubmit(string $value, $name = null, $onclick = null, bool $enable = true, string $extraattrs = "") : string
 {
     return addInputField(
         'submit',
@@ -152,7 +152,7 @@ function addSubmit($value, $name = null, $onclick = null, $enable = true, $extra
 /**
  * Form reset button, $value = caption
  */
-function addReset($value)
+function addReset(string $value) : string
 {
     return addInputField('reset', null, $value);
 }
@@ -160,7 +160,7 @@ function addReset($value)
 /**
  * A normal non-submit button.
  */
-function addButton($name, $value, $onclick = null, $enable = true, $extraattrs = "")
+function addButton(string $name, string $value, $onclick = null, bool $enable = true, string $extraattrs = "") : string
 {
     return addInputField(
         'button',
@@ -175,7 +175,7 @@ function addButton($name, $value, $onclick = null, $enable = true, $extraattrs =
 /**
  * Textarea form element.
  */
-function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '')
+function addTextArea(string $name, string $text = '', int $cols = 40, int $rows = 10, string $attr = '') : string
 {
     return '<textarea name="'.specialchars($name).'" '.
         'rows="'.(int)$rows .'" cols="'.(int)$cols.'" '.
@@ -191,7 +191,7 @@ function addTextArea($name, $text = '', $cols = 40, $rows = 10, $attr = '')
  * value: Text to display in the button
  * name: Name (and ID) of the button or null if not needed
  */
-function addAddRowButton($templateid, $tableid, $value = 'Add row', $name = null)
+function addAddRowButton(string $templateid, string $tableid, string $value = 'Add row', $name = null) : string
 {
     $return = addInputField('button', $name, $value, 'onclick="addRow(\'' .
                                     specialchars($templateid) . '\', \'' .
@@ -207,7 +207,7 @@ function addAddRowButton($templateid, $tableid, $value = 'Add row', $name = null
 /**
  * Make a <form> start-tag.
  */
-function addForm($action, $method = 'post', $id = '', $enctype = '', $charset = '', $extra = '')
+function addForm(string $action, string $method = 'post', $id = '', string $enctype = '', string $charset = '', string $extra = '') : string
 {
     if ($id) {
         $id = ' id="'.$id.'"';
@@ -226,7 +226,7 @@ function addForm($action, $method = 'post', $id = '', $enctype = '', $charset = 
 /**
  * Make a </form> end-tag.
  */
-function addEndForm()
+function addEndForm() : string
 {
     return "</form>\n\n";
 }
@@ -234,7 +234,7 @@ function addEndForm()
 /**
  * File upload field
  */
-function addFileField($name, $dummy = null, $extraattr = "")
+function addFileField(string $name, $dummy = null, string $extraattr = "") : string
 {
     return addInputField('file', $name, null, $extraattr);
 }

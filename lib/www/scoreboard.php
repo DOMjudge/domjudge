@@ -37,7 +37,7 @@ require_once(LIBDIR . '/lib.misc.php');
  * summary(num_points, total_time, affils[affilid], countries[country], problems[probid]
  *    probid(num_submissions, num_pending, num_correct, best_time_sort[sortorder] )
  */
-function genScoreBoard($cdata, $jury = false, $filter = null, $visible_only = false)
+function genScoreBoard(array $cdata, bool $jury = false, $filter = null, bool $visible_only = false) : array
 {
     global $DB;
 
@@ -47,7 +47,7 @@ function genScoreBoard($cdata, $jury = false, $filter = null, $visible_only = fa
 
     // Don't leak information before start of contest
     if (! $fdata['started'] && ! $jury) {
-        return;
+        return [];
     }
 
     // get the teams, problems and categories
@@ -175,7 +175,7 @@ function genScoreBoard($cdata, $jury = false, $filter = null, $visible_only = fa
  *
  * Return the problems for a given contest.
  */
-function getProblems($cdata)
+function getProblems(array $cdata) : array
 {
     global $DB;
 
@@ -192,14 +192,14 @@ function getProblems($cdata)
  *
  * Return all teams of current contest, possibly filtered.
  */
-function getTeams($filter, $jury, $cdata)
+function getTeams($filter, bool $jury, array $cdata) : array
 {
     global $DB;
 
     return $DB->q('KEYTABLE SELECT team.teamid AS ARRAYKEY, team.teamid, team.externalid,
                    team.name, team.categoryid, team.affilid, penalty, sortorder,
                    country, color, team_affiliation.name AS affilname,
-               team_affiliation.externalid AS affilid_external
+                   team_affiliation.externalid AS affilid_external
                    FROM team
                    INNER JOIN contest ON (contest.cid = %i)
                    LEFT JOIN contestteam ct USING (teamid, cid)
@@ -220,7 +220,7 @@ function getTeams($filter, $jury, $cdata)
  *
  * Get all team categories.
  */
-function getCategories($jury)
+function getCategories(bool $jury) : array
 {
     global $DB;
 
@@ -236,7 +236,7 @@ function getCategories($jury)
  * Initialize SCORES table contains the totals for each team which are
  * used for determining the ranking.
  */
-function initScores($teams)
+function initScores(array $teams) : array
 {
     $SCORES = array();
     foreach ($teams as $teamid => $team) {
@@ -259,7 +259,7 @@ function initScores($teams)
  *
  * Initialize SUMMARY table.
  */
-function initSummary($probs)
+function initSummary(array $probs) : array
 {
     $SUMMARY = array(
         'num_points' => 0,
@@ -297,13 +297,13 @@ function initSummary($probs)
  * team's current rank but a question mark.
  */
 function renderScoreBoardTable(
-    $sdata,
+    array $sdata,
     $myteamid = null,
-    $static = false,
+    bool $static = false,
     $limitteams = null,
-    $displayrank = true,
-    $center = true,
-    $showlegends = true
+    bool $displayrank = true,
+    bool $center = true,
+    bool $showlegends = true
 ) {
     // 'unpack' the scoreboard data:
     $scores  = $sdata['scores'];
@@ -704,7 +704,7 @@ function renderScoreBoardTable(
  *              to array of values to filter on these.
  * $sdata       if not NULL, use this as scoreboard data instead of fetching it locally
  */
-function putScoreBoard($cdata, $myteamid = null, $static = false, $filter = false, $sdata = null)
+function putScoreBoard(array $cdata, $myteamid = null, bool $static = false, $filter = false, $sdata = null)
 {
     global $DB, $pagename;
 
@@ -906,7 +906,7 @@ collapse("filter");
  * filter settings. Also sets the cookie, so must be called before
  * headers are sent. Returns the scoreboard filter settings array.
  */
-function initScorefilter()
+function initScorefilter() : array
 {
     $scorefilter = array();
 
@@ -937,7 +937,7 @@ function initScorefilter()
  * Output a team row from the scoreboard based on the cached data in
  * table 'scoreboard'.
  */
-function putTeamRow($cdata, $teamids)
+function putTeamRow(array $cdata, array $teamids)
 {
     global $DB;
 
@@ -1071,7 +1071,7 @@ function putTeamRow($cdata, $teamids)
 /**
  * Calculate the rank for a single team based on the cache tables
  */
-function calcTeamRank($cdata, $teamid, $teamtotals, $jury = false)
+function calcTeamRank(array $cdata, int $teamid, $teamtotals, bool $jury = false)
 {
     global $DB;
 
@@ -1155,7 +1155,7 @@ function calcTeamRank($cdata, $teamid, $teamtotals, $jury = false)
 /**
  * Generate scoreboard links for jury only.
  */
-function jurylink($target, $content)
+function jurylink($target, string $content) : string
 {
     $res = "";
     if (IS_JURY) {
@@ -1172,7 +1172,7 @@ function jurylink($target, $content)
 /**
  * Print contest start time
  */
-function printContestStart($cdata)
+function printContestStart(array $cdata) : string
 {
     $res = "scheduled to start ";
     if (!$cdata['starttime_enabled']) {
@@ -1196,7 +1196,7 @@ function printContestStart($cdata)
  * - least amount of total time spent on these solutions;
  * - the tie-breaker function below
  */
-function cmpscore($a, $b)
+function cmpscore(array $a, array $b) : int
 {
     // more correctness points than someone else means higher rank
     if ($a['num_points'] != $b['num_points']) {
@@ -1215,7 +1215,7 @@ function cmpscore($a, $b)
  * above. Scores two arrays, $a and $b, based on the following criterion:
  * - fastest submission time for latest correct problem
  */
-function tiebreaker($a, $b)
+function tiebreaker(array $a, array $b) : int
 {
     $atimes = $a['solve_times'];
     $btimes = $b['solve_times'];
@@ -1239,7 +1239,7 @@ function tiebreaker($a, $b)
  *   based on number of problems solved and the time it took;
  * - If still equal, order on team name alphabetically.
  */
-function cmp($a, $b)
+function cmp(array $a, array $b) : int
 {
     // first order by our predefined sortorder based on category
     if ($a['sortorder'] != $b['sortorder']) {

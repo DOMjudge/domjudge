@@ -41,7 +41,7 @@ class DOMJudgeService
      *
      * When $name is null, then all variables will be returned.
      */
-    public function dbconfig_get($name, $default = null)
+    public function dbconfig_get(string $name, $default = null)
     {
         if (is_null($name)) {
             $all_configs = $this->em->getRepository('DOMJudgeBundle:Configuration')->findAll();
@@ -75,10 +75,10 @@ class DOMJudgeService
      * This is equivalent to $cdata in the old codebase.
      */
     public function getCurrentContests(
-        $fulldata = false,
+        bool $fulldata = false,
         $onlyofteam = null,
-                                       $alsofuture = false,
-        $key = 'cid'
+        bool $alsofuture = false,
+        string $key = 'cid'
     ) {
         $now = Utils::now();
         $qb = $this->em->createQueryBuilder();
@@ -117,7 +117,7 @@ class DOMJudgeService
         return $contests;
     }
 
-    public function checkrole($rolename, $check_superset = true)
+    public function checkrole(string $rolename, bool $check_superset = true) : bool
     {
         $token = $this->container->get('security.token_storage')->getToken();
         if ($token == null) {

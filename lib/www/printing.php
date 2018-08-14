@@ -10,12 +10,12 @@
  * Returns boolean indicating whether in-DOMjudge printing
  * has been enabled.
  */
-function have_printing()
+function have_printing() : bool
 {
     return dbconfig_get('enable_printing', 0);
 }
 
-function put_print_form()
+function put_print_form() : void
 {
     global $DB, $pagename;
 
@@ -77,7 +77,7 @@ function put_print_form()
 <?php
 }
 
-function handle_print_upload()
+function handle_print_upload() : void
 {
     global $DB;
 
@@ -130,7 +130,7 @@ function handle_print_upload()
  * easy identification. To prevent misuse the amount of pages per
  * job is limited to 10.
  */
-function send_print($filename, $origname = null, $language = null)
+function send_print(string $filename, $origname = null, $language = null) : array
 {
     global $DB, $username;
 

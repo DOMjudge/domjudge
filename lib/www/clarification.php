@@ -12,7 +12,7 @@ require_once(LIBDIR . '/lib.misc.php');
  * Marks a given clarification as viewed by a specific team,
  * so it doesn't show up as "unread" anymore in their interface.
  */
-function setClarificationViewed($clar, $team)
+function setClarificationViewed(int $clar, int $team) : void
 {
     global $DB;
     $DB->q('DELETE FROM team_unread WHERE mesgid = %i AND teamid = %i', $clar, $team);
@@ -21,7 +21,7 @@ function setClarificationViewed($clar, $team)
 /**
  * Returns wether a team is allowed to view a clarification.
  */
-function canViewClarification($team, $clar)
+function canViewClarification(int $team, array $clar) : bool
 {
     return (
            $clar['sender'] == $team
@@ -34,7 +34,7 @@ function canViewClarification($team, $clar)
  * Returns the list of clarification categories as a key,value array.
  * Keys should be non-numeric to distinguish them from problem IDs.
  */
-function getClarCategories()
+function getClarCategories() : array
 {
     $categs = dbconfig_get('clar_categories');
 
@@ -49,7 +49,7 @@ function getClarCategories()
 /**
  * Returns the list of clarification queues as a key,value array.
  */
-function getClarQueues()
+function getClarQueues() : array
 {
     $queues = dbconfig_get('clar_queues');
 
@@ -65,7 +65,7 @@ function getClarQueues()
  * Output a single clarification.
  * Helperfunction for putClarification, do _not_ use directly!
  */
-function putClar($clar)
+function putClar(array $clar)
 {
     global $cids;
 
@@ -219,7 +219,7 @@ function putClar($clar)
 /**
  * Output a clarification (and thread) for id $id.
  */
-function putClarification($id, $team = null)
+function putClarification(int $id, $team = null)
 {
     if ($team==null && ! IS_JURY) {
         error("access denied to clarifications: you seem to be team nor jury");
@@ -258,7 +258,7 @@ function putClarification($id, $team = null)
  * Summarize a clarification.
  * Helper function for putClarificationList.
  */
-function summarizeClarification($body)
+function summarizeClarification(string $body) : string
 {
     // when making a summary, try to ignore the quoted text, and
     // replace newlines by spaces.
@@ -411,7 +411,7 @@ function putClarificationList($clars, $team = null)
  * Set respid to a clarid, to make only responses to same
  * sender(s)/recipient(s) or ALL selectable.
  */
-function putClarificationForm($action, $respid = null, $onlycontest = null)
+function putClarificationForm(string $action, $respid = null, $onlycontest = null)
 {
     global $cdata, $teamdata, $DB;
 

@@ -12,13 +12,13 @@
  * - cookies are defined in a common path for all web interfaces
  */
 function dj_setcookie(
-    $name,
+    string $name,
     $value = null,
-    $expire = 0,
-                      $path = null,
+    int $expire = 0,
+    $path = null,
     $domain = null,
-    $secure = false,
-    $httponly = false
+    bool $secure = false,
+    bool $httponly = false
 ) {
     if (!isset($path)) {
         // KLUDGE: We want to find the DOMjudge base path, but this
@@ -45,7 +45,7 @@ function dj_setcookie(
 /**
  * Decode a JSON string and handle errors.
  */
-function dj_json_decode($str)
+function dj_json_decode(string $str)
 {
     $res = json_decode($str, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -57,7 +57,7 @@ function dj_json_decode($str)
 /**
  * Encode data to JSON and handle errors.
  */
-function dj_json_encode($data)
+function dj_json_encode($data) : string
 {
     $res = json_encode($data, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES);
     if (json_last_error() !== JSON_ERROR_NONE) {
@@ -72,7 +72,7 @@ function dj_json_encode($data)
  * to this many bytes, and when the truncating the file, attach a note
  * saying so.
  */
-function dj_file_get_contents($filename, $maxsize = -1)
+function dj_file_get_contents(string $filename, int $maxsize = -1) : string
 {
     if (! file_exists($filename)) {
         error("File does not exist: $filename");
@@ -109,7 +109,7 @@ function dj_file_get_contents($filename, $maxsize = -1)
  * Additionally, set the character set explicitly to the DOMjudge global
  * character set.
  */
-function specialchars($string)
+function specialchars($string) : string
 {
     return htmlspecialchars(
         $string,
@@ -124,7 +124,7 @@ function specialchars($string)
  * hash using our default settings. Note that dj_password_verify() has
  * an extra parameter $user relative to the PHP native function.
  */
-function dj_password_verify($password, $hash, $user = null)
+function dj_password_verify(string $password, string $hash, $user = null) : bool
 {
     // First check for old-style MD5 hashes:
     if (!empty($user) && strlen($hash)>0 && $hash[0]!=='$') {
@@ -134,7 +134,7 @@ function dj_password_verify($password, $hash, $user = null)
     return password_verify($password, $hash);
 }
 
-function dj_password_needs_rehash($hash)
+function dj_password_needs_rehash(string $hash) : bool
 {
     // First check for an old-style MD5 hash:
     if (strlen($hash)>0 && $hash[0]!=='$') {
@@ -157,15 +157,15 @@ function dj_password_needs_rehash($hash)
     return password_needs_rehash(
         $hash,
         PASSWORD_DEFAULT,
-                                 array('cost' => PASSWORD_HASH_COST)
+        array('cost' => PASSWORD_HASH_COST)
     );
 }
 
-function dj_password_hash($password)
+function dj_password_hash(string $password) : string
 {
     return password_hash(
         $password,
         PASSWORD_DEFAULT,
-                         array('cost' => PASSWORD_HASH_COST)
+        array('cost' => PASSWORD_HASH_COST)
     );
 }

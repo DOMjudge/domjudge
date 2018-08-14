@@ -12,7 +12,7 @@ define('ID_REGEX', '/^' . IDENTIFIER_CHARS . '+$/');
 /**
  * Store an error from the checker functions below.
  */
-function ch_error($string)
+function ch_error(string $string)
 {
     global $CHECKER_ERRORS;
     $CHECKER_ERRORS[] = $string;

@@ -37,7 +37,7 @@ $userdata = null;
 
 // Check if current user has given role, or has superset of this role's
 // privileges
-function checkrole($rolename, $check_superset = true)
+function checkrole(string $rolename, bool $check_superset = true) : bool
 {
     global $G_SYMFONY, $apiFromInternal;
     if (isset($apiFromInternal) && $apiFromInternal === true) {
@@ -47,7 +47,7 @@ function checkrole($rolename, $check_superset = true)
 }
 
 // Returns whether the connected user is logged in, sets $username, $teamdata
-function logged_in()
+function logged_in() : bool
 {
     global $DB, $ip, $username, $teamid, $teamdata, $userdata;
     if (!empty($username) && !empty($userdata) && !empty($teamdata)) {
@@ -81,13 +81,13 @@ function logged_in()
 }
 
 // Returns whether the active authentication method has logout functionality.
-function have_logout()
+function have_logout() : bool
 {
     // symfony always has logout
     return true;
 }
 
-function get_user_roles($userid)
+function get_user_roles(string $userid) : array
 {
     global $DB;
     return $DB->q('COLUMN SELECT role.role FROM userrole

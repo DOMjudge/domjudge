@@ -12,7 +12,7 @@ require_once(LIBVENDORDIR . '/autoload.php');
 /**
  * Return a link to add a new row to a specific table.
  */
-function addLink($table, $multi = false)
+function addLink(string $table, bool $multi = false) : string
 {
     return "<a href=\"" . specialchars($table) . ".php?cmd=add\">" .
         "<img src=\"../images/add" . ($multi?"-multi":"") .
@@ -27,7 +27,7 @@ function addLink($table, $multi = false)
  * Includes a referrer field, which notes the page on which this function
  * was called, so edit.php can return us back here.
  */
-function editLink($table, $value, $multi = false)
+function editLink(string $table, $value, bool $multi = false) : string
 {
     return "<a href=\"" . specialchars($table) . ".php?cmd=edit" .
         ($multi ? "" : "&amp;id=" . urlencode($value)) .
@@ -45,7 +45,7 @@ function editLink($table, $value, $multi = false)
  * Takes the table, the key field to match on and the value.
  * Optionally specify an extra description of the item to be deleted.
  */
-function delLink($table, $field, $value, $desc = null)
+function delLink(string $table, string $field, $value, $desc = null) : string
 {
     return delLinkMultiple($table, array($field), array($value), '', $desc);
 }
@@ -54,7 +54,7 @@ function delLink($table, $field, $value, $desc = null)
  * Return a link to delete a specific data element from a given table.
  * Takes the table, the key fields to match on and the values.
  */
-function delLinkMultiple($table, $fields, $values, $referrer = '', $desc = null)
+function delLinkMultiple(string $table, array $fields, array $values, string $referrer = '', $desc = null) : string
 {
     $arguments = '';
     foreach ($fields as $i => $field) {
@@ -72,7 +72,7 @@ function delLinkMultiple($table, $fields, $values, $referrer = '', $desc = null)
  * Returns a link to export a problem as zip-file.
  *
  */
-function exportProblemLink($probid)
+function exportProblemLink($probid) : string
 {
     return '<a href="export_problem.php?id=' . urlencode($probid) .
         '"><img src="../images/b_save.png" ' .
@@ -84,7 +84,7 @@ function exportProblemLink($probid)
  * pair. For example, to rejudge all for language 'java', call
  * as rejudgeForm('language', 'java').
  */
-function rejudgeForm($table, $id)
+function rejudgeForm(string $table, $id) : string
 {
     $ret = '<div id="rejudge" class="framed">' .
          addForm('rejudge.php') .
@@ -141,14 +141,14 @@ function rejudgeForm($table, $id)
 /**
  * Returns TRUE iff string $haystack starts with string $needle
  */
-function starts_with($haystack, $needle)
+function starts_with(string $haystack, string $needle) : string
 {
     return mb_substr($haystack, 0, mb_strlen($needle)) === $needle;
 }
 /**
  * Returns TRUE iff string $haystack ends with string $needle
  */
-function ends_with($haystack, $needle)
+function ends_with(string $haystack, string $needle) : string
 {
     return mb_substr($haystack, mb_strlen($haystack)-mb_strlen($needle)) === $needle;
 }
@@ -156,7 +156,7 @@ function ends_with($haystack, $needle)
 /**
  * tries to open corresponding zip archive
  */
-function openZipFile($filename)
+function openZipFile(string $filename) : ZipArchive
 {
     $zip = new ZipArchive;
     $res = $zip->open($filename, ZIPARCHIVE::CHECKCONS);
@@ -267,7 +267,7 @@ function get_image_thumb($image, &$error)
  * and update problem with it, or insert new problem when probid=NULL.
  * Returns probid on success, or generates error on failure.
  */
-function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
+function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, int $cid = -1)
 {
     global $DB, $teamid, $cdatas;
     $prop_file = 'domjudge-problem.ini';
@@ -693,7 +693,7 @@ function importZippedProblem($zip, $filename, $probid = null, $cid = -1)
 }
 
 // dis- or re-enable what caused an internal error
-function set_internal_error($disabled, $cid, $value)
+function set_internal_error(array $disabled, int $cid, int $value)
 {
     global $DB, $api;
     switch ($disabled['kind']) {

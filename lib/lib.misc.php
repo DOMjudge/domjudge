@@ -24,11 +24,11 @@ require_once('lib.wrappers.php');
  * The results will have the value of field $key in the database as key
  */
 function getCurContests(
-    $fulldata = false,
+    bool $fulldata = false,
     $onlyofteam = null,
-                        $alsofuture = false,
-    $key = 'cid'
-) {
+    bool $alsofuture = false,
+    string $key = 'cid'
+) : array {
     global $DB;
     if ($alsofuture) {
         $extra = '';
@@ -76,7 +76,7 @@ function getCurContests(
 /**
  * Returns data for a single contest.
  */
-function getContest($cid)
+function getContest(int $cid) : array
 {
     global $DB;
     $contest = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $cid);
@@ -97,7 +97,7 @@ function getContest($cid)
  *
  * Returns id as int or string, or NULL if none found.
  */
-function getRequestID($numeric = true)
+function getRequestID(bool $numeric = true)
 {
     if (empty($_REQUEST['id'])) {
         return null;
@@ -149,7 +149,7 @@ function problemVisible($probid)
  * has already started, stopped, andd if scoreboard is currently
  * frozen or final (unfrozen).
  */
-function calcFreezeData($cdata, $isjury = false)
+function calcFreezeData(array $cdata, bool $isjury = false) : array
 {
     $fdata = array();
 
@@ -193,7 +193,7 @@ function calcFreezeData($cdata, $isjury = false)
  * NOTE: It is assumed that removed intervals do not overlap and that
  * they all fall within the contest start and end times.
  */
-function calcContestTime($walltime, $cid)
+function calcContestTime(float $walltime, int $cid) : int
 {
     $cdata = getContest($cid);
 
@@ -222,7 +222,7 @@ function calcContestTime($walltime, $cid)
  * Due to current transactions usage, this function MUST NOT contain
  * any START TRANSACTION or COMMIT statements.
  */
-function calcScoreRow($cid, $team, $prob)
+function calcScoreRow(int $cid, int $team, int $prob)
 {
     global $DB;
 
@@ -324,7 +324,7 @@ function calcScoreRow($cid, $team, $prob)
  * Due to current transactions usage, this function MUST NOT contain
  * any START TRANSACTION or COMMIT statements.
  */
-function updateRankCache($cid, $team)
+function updateRankCache(int $cid, int $team)
 {
     global $DB;
 
@@ -382,7 +382,7 @@ function updateRankCache($cid, $team)
  * This function double checks that the judging is correct and
  * confirmed.
  */
-function updateBalloons($submitid)
+function updateBalloons(int $submitid)
 {
     global $DB;
 
@@ -420,7 +420,7 @@ function updateBalloons($submitid)
  * Time as used on the scoreboard (i.e. truncated minutes or seconds,
  * depending on the scoreboard resolution setting).
  */
-function scoretime($time)
+function scoretime(float $time)
 {
     if (dbconfig_get('score_in_seconds', 0)) {
         $result = (int) floor($time);
@@ -436,7 +436,7 @@ function scoretime($time)
  * test is unreliable. Also, $probtime may be NULL when called through
  * putTeamRow(), in which case we simply return FALSE.
  */
-function first_solved($teamtime, $probtime)
+function first_solved(float $teamtime, $probtime)
 {
     if (!isset($probtime)) {
         return false;
@@ -465,7 +465,7 @@ function first_solved($teamtime, $probtime)
  *   final, correct one.
  */
 
-function calcPenaltyTime($solved, $num_submissions)
+function calcPenaltyTime(bool $solved, int $num_submissions) : int
 {
     if (! $solved) {
         return 0;
@@ -493,7 +493,7 @@ $problem_result_remap = array('ACCEPTED' => 'CORRECT',
                               'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
                               'RUN_TIME_ERROR' => 'RUN-ERROR');
 
-function normalizeExpectedResult($result)
+function normalizeExpectedResult(string $result) : string
 {
     global $problem_result_remap;
 
@@ -509,7 +509,7 @@ function normalizeExpectedResult($result)
  * returns NULL if no such string exists
  * returns array of expected results otherwise
  */
-function getExpectedResults($source)
+function getExpectedResults(string $source)
 {
     global $problem_result_matchstrings;
     $pos = false;
@@ -542,7 +542,7 @@ function getExpectedResults($source)
  * determined yet; this may only occur when not all testcases have
  * been run yet.
  */
-function getFinalResult($runresults, $results_prio = null)
+function getFinalResult(array $runresults, $results_prio = null)
 {
     if (empty($results_prio)) {
         $results_prio  = dbconfig_get('results_prio');
@@ -591,7 +591,7 @@ function getFinalResult($runresults, $results_prio = null)
  * overshoot that can be specified as a sum,max,min of absolute and
  * relative times. Returns overshoot seconds as a float.
  */
-function overshoot_time($timelimit, $overshoot_cfg)
+function overshoot_time(float $timelimit, string $overshoot_cfg) : float
 {
     $tokens = preg_split('/([+&|])/', $overshoot_cfg, -1, PREG_SPLIT_DELIM_CAPTURE);
     if (count($tokens)!=1 && count($tokens)!=3) {
@@ -615,7 +615,7 @@ function overshoot_time($timelimit, $overshoot_cfg)
 /**
  * Helper function for overshoot_time(), returns overshoot for single token.
  */
-function overshoot_parse($timelimit, $token)
+function overshoot_parse(float $timelimit, string $token) : float
 {
     $res = sscanf($token, '%d%c%n');
     if (count($res)!=3) {
@@ -645,7 +645,7 @@ function overshoot_parse($timelimit, $token)
  * Simulate MySQL UNIX_TIMESTAMP() function to create insert queries
  * that do not change when replicated later.
  */
-function now()
+function now() : float
 {
     return microtime(true);
 }
@@ -654,7 +654,7 @@ function now()
  * Returns >0, =0, <0 when $time1 >, =, < $time2 respectively.
  * Returned value is time difference in seconds.
  */
-function difftime($time1, $time2)
+function difftime(float $time1, float $time2) : float
 {
     return $time1 - $time2;
 }
@@ -663,7 +663,7 @@ function difftime($time1, $time2)
  * Call alert plugin program to perform user configurable action on
  * important system events. See default alert script for more details.
  */
-function alert($msgtype, $description = '')
+function alert(string $msgtype, string $description = '')
 {
     system(LIBDIR . "/alert '$msgtype' '$description' &");
 }
@@ -671,7 +671,7 @@ function alert($msgtype, $description = '')
 /**
  * Functions to support graceful shutdown of daemons upon receiving a signal
  */
-function sig_handler($signal)
+function sig_handler(int $signal, $signinfo) : void
 {
     global $exitsignalled, $gracefulexitsignalled;
 
@@ -766,12 +766,12 @@ function daemonize($pidfile = null)
  * moves it to a backup storage.
  */
 function submit_solution(
-    $team,
-    $prob,
-    $contest,
-    $lang,
-    $files,
-    $filenames,
+    int $team,
+    int $prob,
+    int $contest,
+    string $lang,
+    array $files,
+    array $filenames,
     $origsubmitid = null,
     $entry_point = null,
     $extid = null,
@@ -950,7 +950,7 @@ function submit_solution(
  * $reason        Reason included in a full rejudging.
  * $userid        Who triggered the full rejudging.
  */
-function rejudge($table, $id, $include_all, $full_rejudge, $reason = null, $userid = null)
+function rejudge(string $table, $id, bool $include_all, bool $full_rejudge, $reason = null, $userid = null)
 {
     global $DB;
 
@@ -1051,7 +1051,7 @@ function rejudge($table, $id, $include_all, $full_rejudge, $reason = null, $user
  *
  * $request can be either 'apply' or 'cancel'.
  */
-function rejudging_finish($rejudgingid, $request, $userid = null, $show_progress = false)
+function rejudging_finish(int $rejudgingid, string $request, $userid = null, bool $show_progress = false)
 {
     global $DB;
 
@@ -1135,7 +1135,7 @@ function rejudging_finish($rejudgingid, $request, $userid = null, $show_progress
  * Compute the filename of a given submission. $fdata must be an array
  * that contains the data from submission and submission_file.
  */
-function getSourceFilename($fdata)
+function getSourceFilename(array $fdata) : string
 {
     return implode('.', array('c'.$fdata['cid'], 's'.$fdata['submitid'],
                               't'.$fdata['teamid'], 'p'.$fdata['probid'], $fdata['langid'],
@@ -1145,7 +1145,7 @@ function getSourceFilename($fdata)
 /**
  * Output generic version information and exit.
  */
-function version()
+function version() : string
 {
     echo SCRIPT_ID . " -- part of DOMjudge version " . DOMJUDGE_VERSION . "\n" .
         "Written by the DOMjudge developers\n\n" .
@@ -1158,7 +1158,7 @@ function version()
 /**
  * Word wrap only unquoted text.
  */
-function wrap_unquoted($text, $width = 75, $quote = '>')
+function wrap_unquoted(string $text, int $width = 75, string $quote = '>') : string
 {
     $lines = explode("\n", $text);
 
@@ -1186,11 +1186,11 @@ function wrap_unquoted($text, $width = 75, $quote = '>')
  * Log an action to the auditlog table.
  */
 function auditlog(
-    $datatype,
+    string $datatype,
     $dataid,
-    $action,
+    string $action,
     $extrainfo = null,
-                  $force_username = null,
+    $force_username = null,
     $cid = null
 ) {
     global $username, $DB;
@@ -1316,7 +1316,7 @@ foreach ($API_endpoints as $endpoint => $data) {
  *
  * TODO: add support for multiple $intid's, so we can use this in the eventlog() function and not have a loop there
  */
-function rest_extid($endpoint, $intid)
+function rest_extid(string $endpoint, $intid)
 {
     global $DB, $API_endpoints, $KEYS;
 
@@ -1347,7 +1347,7 @@ function rest_extid($endpoint, $intid)
  *
  * TODO: add support for multiple $extid's, so we can use this in the API and not have a loop there
  */
-function rest_intid($endpoint, $extid, $cid = null)
+function rest_intid(string $endpoint, $extid, $cid = null)
 {
     global $DB, $API_endpoints, $KEYS;
 
@@ -1405,7 +1405,7 @@ function rest_intid($endpoint, $extid, $cid = null)
  *            Can be null, one ID or an array of ID's.
  */
 // TODO: we should probably integrate this function with auditlog().
-function eventlog($type, $dataids, $action, $cid = null, $json = null, $ids = null)
+function eventlog(string $type, $dataids, string $action, $cid = null, $json = null, $ids = null)
 {
     global $DB, $API_endpoints;
 
@@ -1643,7 +1643,7 @@ function read_API_credentials()
  *
  * This function is duplicated from judge/judgedaemon.main.php.
  */
-function API_request($url, $verb = 'GET', $data = '', $failonerror = true)
+function API_request(string $url, string $verb = 'GET', string $data = '', bool $failonerror = true)
 {
     global $resturl, $restuser, $restpass, $lastrequest, $G_SYMFONY, $apiFromInternal;
     if (isset($G_SYMFONY)) {
@@ -1753,7 +1753,7 @@ function API_request($url, $verb = 'GET', $data = '', $failonerror = true)
  * Convert PHP ini values to bytes, as per
  * http://www.php.net/manual/en/function.ini-get.php
  */
-function phpini_to_bytes($size_str)
+function phpini_to_bytes(string $size_str)
 {
     switch (substr($size_str, -1)) {
         case 'M': case 'm': return (int)$size_str * 1048576;
@@ -1935,7 +1935,7 @@ $HTML_colors = array(
  * If $color is already in hex RGB format, it is returned unchanged.
  * Returns NULL if $color is not valid.
  */
-function color_to_hex($color)
+function color_to_hex(string $color)
 {
     global $HTML_colors;
 
@@ -1955,7 +1955,7 @@ function color_to_hex($color)
  * name. Returns NULL if $hex is not a valid 3 or 6 digit hex RGB
  * string starting with a '#'.
  */
-function hex_to_color($hex)
+function hex_to_color(string $hex)
 {
     global $HTML_colors;
 

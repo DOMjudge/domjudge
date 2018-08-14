@@ -274,7 +274,7 @@ class db
         return $res;
     }
 
-    private function execute($query)
+    private function execute(string $query)
     {
         $query = trim($query);
 
@@ -373,7 +373,7 @@ class db
     }
 
     // transform a php variable into one that can be put directly into a query
-    private function val2sql($val, $mode='.')
+    private function val2sql($val, string $mode='.')
     {
         if (isset($GLOBALS['MODE'])) {
             $mode = $GLOBALS['MODE'];

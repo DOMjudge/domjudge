@@ -36,7 +36,7 @@ $RELATIONS['clarification']['recipient'] = 'team.teamid&NOCONSTRAINT';
  *
  * Returns an array "table name => action" of matches found.
  */
-function fk_check($keyfield, $value)
+function fk_check(string $keyfield, $value) : array
 {
     global $RELATIONS, $DB;
 
@@ -64,7 +64,7 @@ function fk_check($keyfield, $value)
  *
  * Returns an array of table names.
  */
-function fk_dependent_tables($table)
+function fk_dependent_tables(string $table) : array
 {
     global $RELATIONS;
 
@@ -108,7 +108,7 @@ function fk_dependent_tables($table)
  * The results are ordered such that referential integrity is
  * preserved if they are deleted as given.
  */
-function fk_dependent_rows(&$results, $table, $column, $value, $depth = 0)
+function fk_dependent_rows(array &$results, string $table, string $column, $value, int $depth = 0)
 {
     global $RELATIONS, $KEYS, $DB;
 

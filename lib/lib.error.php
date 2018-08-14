@@ -45,7 +45,7 @@ if (defined('SYSLOG')) {
  * If this is the web interface: write to the screen with the right CSS class.
  * If this is the command line: write to Standard Error.
  */
-function logmsg($msglevel, $string)
+function logmsg(int $msglevel, string $string)
 {
     global $verbose, $loglevel;
 
@@ -103,7 +103,7 @@ function logmsg($msglevel, $string)
 /**
  * Log an error at level LOG_ERROR and exit with exitcode 1.
  */
-function error($string)
+function error(string $string)
 {
     logmsg(LOG_ERR, "error: $string");
     exit(1);
@@ -112,7 +112,7 @@ function error($string)
 /**
  * Log a warning at level LOG_WARNING.
  */
-function warning($string)
+function warning(string $string)
 {
     logmsg(LOG_WARNING, "warning: $string");
 }
@@ -138,7 +138,7 @@ function debug()
 /**
  * Handle exceptions by calling error().
  */
-function exception_handler($e)
+function exception_handler(Throwable $e) : void
 {
     error($e->getMessage());
 }

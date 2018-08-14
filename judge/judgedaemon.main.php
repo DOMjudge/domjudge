@@ -17,7 +17,7 @@ require(ETCDIR . '/judgehost-config.php');
 $resturl = $restuser = $restpass = null;
 $endpoints = array();
 
-function read_credentials()
+function read_credentials() : void
 {
     global $endpoints;
 
@@ -55,7 +55,7 @@ function read_credentials()
  * warning and null is returned.
  */
 $lastrequest = '';
-function request($url, $verb = 'GET', $data = '', $failonerror = true)
+function request(string $url, string $verb = 'GET', string $data = '', bool $failonerror = true)
 {
     global $resturl, $restuser, $restpass, $lastrequest;
 
@@ -121,7 +121,7 @@ function request($url, $verb = 'GET', $data = '', $failonerror = true)
 /**
  * Retrieve a value from the configuration through the REST API.
  */
-function dbconfig_get_rest($name)
+function dbconfig_get_rest(string $name)
 {
     $res = request('config', 'GET', 'name=' . urlencode($name));
     $res = dj_json_decode($res);
@@ -137,7 +137,7 @@ function dbconfig_get_rest($name)
  * - positive integer: limit to this many bytes
  * - FALSE or -1: no size limit imposed
  */
-function rest_encode_file($file, $sizelimit = true)
+function rest_encode_file(string $file, $sizelimit = true) : string
 {
     if ($sizelimit===true) {
         $maxsize = (int) dbconfig_get_rest('output_storage_limit', 50000);
@@ -156,7 +156,7 @@ $waittime = 5;
 define('SCRIPT_ID', 'judgedaemon');
 define('PIDFILE', RUNDIR.'/judgedaemon.pid');
 
-function usage()
+function usage() : void
 {
     echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
         "Start the judgedaemon.\n\n" .
@@ -168,7 +168,7 @@ function usage()
     exit;
 }
 
-function read_judgehostlog($n = 20)
+function read_judgehostlog(int $n = 20) : string
 {
     ob_start();
     passthru("tail -$n " . escapeshellarg(LOGFILE));
@@ -178,7 +178,7 @@ function read_judgehostlog($n = 20)
 // fetches new executable from database if necessary
 // runs build to compile executable
 // returns array with absolute path to run script and possibly error message
-function fetch_executable($workdirpath, $execid, $md5sum)
+function fetch_executable(string $workdirpath, int $execid, string $md5sum) : array
 {
     $execpath = "$workdirpath/executable/" . $execid;
     $execmd5path = $execpath . "/md5sum";
@@ -549,7 +549,7 @@ while (true) {
     // restart the judging loop
 }
 
-function disable($kind, $idcolumn, $id, $description, $judgingid, $cid, $extra_log = null)
+function disable(string $kind, string $idcolumn, $id, string $description, int $judgingid, int $cid, $extra_log = null)
 {
     $disabled = dj_json_encode(array(
         'kind' => $kind,
@@ -572,7 +572,7 @@ function disable($kind, $idcolumn, $id, $description, $judgingid, $cid, $extra_l
     );
 }
 
-function judge($row)
+function judge(array $row)
 {
     global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled;
 
