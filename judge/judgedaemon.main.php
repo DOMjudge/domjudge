@@ -178,7 +178,7 @@ function read_judgehostlog(int $n = 20) : string
 // fetches new executable from database if necessary
 // runs build to compile executable
 // returns array with absolute path to run script and possibly error message
-function fetch_executable(string $workdirpath, int $execid, string $md5sum) : array
+function fetch_executable(string $workdirpath, string $execid, string $md5sum) : array
 {
     $execpath = "$workdirpath/executable/" . $execid;
     $execmd5path = $execpath . "/md5sum";
@@ -649,7 +649,7 @@ function judge(array $row)
     list($execrunpath, $error) = fetch_executable(
         $workdirpath,
         $row['compile_script'],
-                              $row['compile_script_md5sum']
+        $row['compile_script_md5sum']
     );
     if (isset($error)) {
         logmsg(LOG_ERR, "fetching executable failed for compile script '" . $row['compile_script'] . "':" . $error);
