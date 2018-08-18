@@ -5,7 +5,7 @@ ALTER TABLE `event`
   ADD COLUMN `datatype` varchar(32) DEFAULT NULL COMMENT 'DB table associated to this entry' AFTER `endpointid`,
   ADD COLUMN `dataid` varchar(64) DEFAULT NULL COMMENT 'Identifier in reference DB table' AFTER `datatype`,
   ADD COLUMN `action` varchar(32) NOT NULL COMMENT 'Description of action performed' AFTER `dataid`,
-  ADD COLUMN `content` longblob NOT NULL COMMENT 'Cached JSON encoded content of the change, as provided in the event feed' AFTER `action`,
+  ADD COLUMN `content` longblob NOT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed' AFTER `action`,
   DROP PRIMARY KEY,
   ADD PRIMARY KEY (`eventid`),
   ADD KEY `eventtime` (`cid`,`eventtime`);
