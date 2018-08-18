@@ -56,7 +56,9 @@ ALTER TABLE `judging_run`
 ALTER TABLE `submission`
   ADD COLUMN `externalid` varchar(255) DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis' AFTER `expected_results`,
   ADD COLUMN `externalresult` varchar(32) DEFAULT NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis' AFTER `externalid`,
-  ADD COLUMN `entry_point` varchar(255) DEFAULT NULL COMMENT 'Optional entry point. Can be used e.g. for java main class.' AFTER `externalresult`;
+  ADD COLUMN `entry_point` varchar(255) DEFAULT NULL COMMENT 'Optional entry point. Can be used e.g. for java main class.' AFTER `externalresult`,
+  ADD UNIQUE KEY `externalid` (`cid`,`externalid`(190));
+
 
 source upgrade/convert_event_6.0.sql
 
