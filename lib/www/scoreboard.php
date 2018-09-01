@@ -764,8 +764,12 @@ function putScoreBoard($cdata, $myteamid = null, $static = false, $filter = fals
                          $cdata['cid'], $cdata['cid']);
 
         $lastCat = null;
+        $lastAffil = null;
         $numCats = 0;
         foreach ($affils as $affil) {
+            if ($lastAffil == $affil['taname']) {
+                continue;
+            }
             if ($affil['categoryid'] != $lastCat) {
                 if ($lastCat != null) {
                     echo '</ul>';
@@ -790,6 +794,7 @@ function putScoreBoard($cdata, $myteamid = null, $static = false, $filter = fals
                 $logoHTML = '<img src="../' . $affillogo . '" style="padding-right: 10px;" />';
             }
             print '<li class="list-group-item">' . $logoHTML . $affil['taname'] . '</li>';
+            $lastAffil = $affil['taname'];
         }
         echo '</ul>';
         echo '</div>';
