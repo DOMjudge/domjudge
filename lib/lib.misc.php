@@ -1242,7 +1242,7 @@ $API_endpoints = array(
     'organizations' => array(
         'type'   => 'configuration',
         'tables' => array('team_affiliation'),
-        'extid'  => 'externalid',
+        'extid'  => true,
     ),
     'teams' => array(
         'type'   => 'configuration',
