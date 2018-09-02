@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View/download a specific problem text or sample testcase.
  *

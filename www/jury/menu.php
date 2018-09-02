@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 global $updates;
 ?>
 <nav><div id="menutop">

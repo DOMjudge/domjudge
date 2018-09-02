@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Code to import and export HTML formats as specified by the ICPC
  * Contest Control System Standard.

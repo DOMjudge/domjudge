@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Simple functions to start a form, add a field to a form, end a form.
  *

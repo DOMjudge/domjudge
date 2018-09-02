@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View a row in a team_category
  *

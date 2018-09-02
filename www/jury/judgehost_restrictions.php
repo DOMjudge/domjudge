@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the restrictions that can be assigned to judgehosts
  *

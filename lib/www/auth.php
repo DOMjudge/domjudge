@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * This file provides all functionality for authenticating teams. The
  * authentication method used is configured with the AUTH_METHOD

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Code to import teams and upload standings from and to
  * https://icpc.baylor.edu/.

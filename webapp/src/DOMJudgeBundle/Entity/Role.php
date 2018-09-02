@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
 use Symfony\Component\Security\Core\Role\RoleInterface;

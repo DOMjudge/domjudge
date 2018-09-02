@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Upload form for documents to be sent to the printer.
  *

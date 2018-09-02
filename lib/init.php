@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 if (!defined('LIBDIR')) {
     die("LIBDIR not defined.");
 }

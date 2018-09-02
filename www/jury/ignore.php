@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Change the valid status of a given submission.
  *

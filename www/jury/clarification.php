@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Show clarification thread and reply box.
  * When no id is given, show general clarification box.

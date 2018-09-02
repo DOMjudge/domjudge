@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Add and delete removed contest time intervals.
  *

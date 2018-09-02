@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Common page header.
  * Before including this, one can set $title, $refresh,
