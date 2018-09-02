@@ -671,7 +671,7 @@ function alert(string $msgtype, string $description = '')
 /**
  * Functions to support graceful shutdown of daemons upon receiving a signal
  */
-function sig_handler(int $signal, $signinfo)
+function sig_handler(int $signal, $siginfo = null)
 {
     global $exitsignalled, $gracefulexitsignalled;
 
