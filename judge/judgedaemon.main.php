@@ -17,7 +17,7 @@ require(ETCDIR . '/judgehost-config.php');
 $resturl = $restuser = $restpass = null;
 $endpoints = array();
 
-function read_credentials() : void
+function read_credentials()
 {
     global $endpoints;
 
@@ -156,7 +156,7 @@ $waittime = 5;
 define('SCRIPT_ID', 'judgedaemon');
 define('PIDFILE', RUNDIR.'/judgedaemon.pid');
 
-function usage() : void
+function usage()
 {
     echo "Usage: " . SCRIPT_ID . " [OPTION]...\n" .
         "Start the judgedaemon.\n\n" .

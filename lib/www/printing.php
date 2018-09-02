@@ -15,7 +15,7 @@ function have_printing() : bool
     return dbconfig_get('enable_printing', 0);
 }
 
-function put_print_form() : void
+function put_print_form()
 {
     global $DB, $pagename;
 
@@ -77,7 +77,7 @@ function put_print_form() : void
 <?php
 }
 
-function handle_print_upload() : void
+function handle_print_upload()
 {
     global $DB;
 

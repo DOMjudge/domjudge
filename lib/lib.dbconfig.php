@@ -10,7 +10,7 @@
  * Read configuration variables from DB configuration table and store
  * in global variable for later use.
  */
-function dbconfig_init() : void
+function dbconfig_init()
 {
     global $LIBDBCONFIG, $DB;
 
@@ -75,7 +75,7 @@ function dbconfig_init() : void
 /**
  * Store configuration variables to the DB configuration table.
  */
-function dbconfig_store() : void
+function dbconfig_store()
 {
     global $LIBDBCONFIG, $DB;
 

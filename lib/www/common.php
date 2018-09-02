@@ -67,7 +67,7 @@ function parseRunDiff(string $difftext) : string
  *
  * FIXME: this has way too many IS_JURY branches, should be separated out.
  */
-function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlight = null, bool $testcases = false) : void
+function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlight = null, bool $testcases = false)
 {
     global $DB, $username;
 
@@ -389,7 +389,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
 /**
  * Output team information (for team and public interface)
  */
-function putTeam(int $teamid) : void
+function putTeam(int $teamid)
 {
     global $DB;
 
@@ -452,7 +452,7 @@ function putTeam(int $teamid) : void
 /**
  * Output progress bar
  */
-function putProgressBar(int $margin = 0) : void
+function putProgressBar(int $margin = 0)
 {
     global $cdata;
 
@@ -475,7 +475,7 @@ function putProgressBar(int $margin = 0) : void
 /**
  * Output clock
  */
-function putClock() : void
+function putClock()
 {
     global $cdata, $username, $userdata, $cid, $cdatas;
 
@@ -562,7 +562,7 @@ function putClock() : void
 /**
  * Output a footer for pages containing the DOMjudge version and server host/port/time
  */
-function putDOMjudgeVersion() : void
+function putDOMjudgeVersion()
 {
     echo "<hr /><address>DOMjudge/" . DOMJUDGE_VERSION .
         " at ".$_SERVER['SERVER_NAME']." Port ".$_SERVER['SERVER_PORT'].", page generated <span id=\"timecur\">" . strftime('%a %d %b %Y %T %Z') . "</span></address>\n";
@@ -572,7 +572,7 @@ function putDOMjudgeVersion() : void
  * Check whether the logged in user has DOMjudge administrator level,
  * as defined in passwords.php. If not, error and stop further execution.
  */
-function requireAdmin() : void
+function requireAdmin()
 {
     if (!checkrole('admin')) {
         error("This function is only accessible to administrators.");
@@ -583,7 +583,7 @@ function requireAdmin() : void
  * Translate error codes from PHP's file upload function into
  * concrete error strings.
  */
-function checkFileUpload(int $errorcode) : void
+function checkFileUpload(int $errorcode)
 {
     switch ($errorcode) {
         case UPLOAD_ERR_OK: // everything ok!
@@ -620,7 +620,7 @@ function checkFileUpload(int $errorcode) : void
  * It is assumed that the headers have not been sent yet, and this
  * function terminates the PHP script execution.
  */
-function putProblemText(int $probid) : void
+function putProblemText(int $probid)
 {
     global $DB, $cdata;
 
@@ -677,7 +677,7 @@ function putProblemText(int $probid) : void
  *
  * $type is "in" or "out".
  */
-function putSampleTestcase(int $probid, int $seq, string $type) : void
+function putSampleTestcase(int $probid, int $seq, string $type)
 {
     global $DB, $cdata;
 
@@ -710,7 +710,7 @@ function putSampleTestcase(int $probid, int $seq, string $type) : void
  * with links to problem statement text and/or sample testcase(s)
  * when available.
  */
-function putProblemTextList() : void
+function putProblemTextList()
 {
     global $DB;
 
@@ -871,7 +871,7 @@ function langidToAce(string $langid) : string
  * Also output a function that returns the entry point description for
  * a language if an entry point is required.
  */
-function putgetMainExtension(array $langdata) : void
+function putgetMainExtension(array $langdata)
 {
     echo "function getMainExtension(ext)\n{\n";
     echo "\tswitch(ext) {\n";
@@ -901,7 +901,7 @@ function putgetMainExtension(array $langdata) : void
  * Render page with help of twig.
  * Assumes rendering template in file with same base name and suffix .phtml
  */
-function renderPage($data, bool $header = true, bool $footer = true, $templateFile = null) : void
+function renderPage($data, bool $header = true, bool $footer = true, $templateFile = null)
 {
     if (empty($templateFile)) {
         $templateFile = $_SERVER['PHP_SELF'];

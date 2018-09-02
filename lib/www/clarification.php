@@ -12,7 +12,7 @@ require_once(LIBDIR . '/lib.misc.php');
  * Marks a given clarification as viewed by a specific team,
  * so it doesn't show up as "unread" anymore in their interface.
  */
-function setClarificationViewed(int $clar, int $team) : void
+function setClarificationViewed(int $clar, int $team)
 {
     global $DB;
     $DB->q('DELETE FROM team_unread WHERE mesgid = %i AND teamid = %i', $clar, $team);

@@ -138,7 +138,7 @@ function debug()
 /**
  * Handle exceptions by calling error().
  */
-function exception_handler(Throwable $e) : void
+function exception_handler(Throwable $e)
 {
     error($e->getMessage());
 }
