@@ -777,7 +777,10 @@ function putScoreBoard($cdata, $myteamid = null, $static = false, $filter = fals
                     echo '</div>';
                 }
                 if ($numCats % 3 == 0) {
-                    echo '</div>';
+                    // close previous deck, but not for the very first one
+                    if ( $numCats != 0 ) {
+                        echo '</div>';
+                    }
                     echo '<br /><br />';
                     echo '<div class="card-deck">';
                 }
