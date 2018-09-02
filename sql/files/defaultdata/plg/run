@@ -8,6 +8,11 @@ MEMLIMIT="$1" ; shift
 MAINSOURCE="${ENTRY_POINT:-$1}"
 COMPILESCRIPTDIR="$(dirname "$0")"
 
+# Report the entry point, so it can be saved, e.g. for later replay:
+if [ -z "$ENTRY_POINT" ]; then
+	echo "Detected entry_point: $MAINCLASS"
+fi
+
 exec swipl "$COMPILESCRIPTDIR/compile.plg" "$MAINSOURCE" "$DEST"
 
 exit 0

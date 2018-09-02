@@ -145,6 +145,10 @@ chmod -R go-w "$WORKDIR/compile"
 
 cd "$WORKDIR"
 
+# Check if the compile script auto-detected the entry point, and if
+# so, store it in the compile.meta for later reuse, e.g. in a replay.
+grep '^Detected entry_point: ' compile.tmp | sed 's/^Detected //' >>compile.meta
+
 logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep '^time-result: .*timelimit' compile.meta >/dev/null 2>&1 ; then
 	echo "Compiling aborted after $SCRIPTTIMELIMIT seconds, compiler output:" >compile.out

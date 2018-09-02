@@ -17,6 +17,11 @@ EXITCODE=$?
 
 MAINCLASS="${ENTRY_POINT:-$(basename "$MAINSOURCE" .scala)}"
 
+# Report the entry point, so it can be saved, e.g. for later replay:
+if [ -z "$ENTRY_POINT" ]; then
+	echo "Detected entry_point: $MAINCLASS"
+fi
+
 cat > "$DEST" <<EOF
 #!/bin/sh
 # Generated shell-script to execute scala interpreter on source.

@@ -15,6 +15,7 @@ DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
 MAINSOURCE="$1"
 MAINCLASS=""
+COMPILESCRIPTDIR="$(dirname "$0")"
 
 # Stack size in the JVM in KB. Note that this will be deducted from
 # the total memory made available for the heap.
@@ -42,9 +43,12 @@ if [ -z "$MAINCLASS" ]; then
 	# Look for class that has the 'main' function:
 	CLASSNAMES="$(find ./* -type f -regex '^.*\.class$' \
 	            | sed -e 's/\.class$//' -e 's/^\.\///' -e 's/\//./g')"
-	COMPILESCRIPTDIR="$(dirname "$0")"
 	MAINCLASS=$(java -cp "$COMPILESCRIPTDIR" DetectMain "$(pwd)" $CLASSNAMES)
 	EXITCODE=$?
+
+	# Report the entry point, so it can be saved, e.g. for later replay:
+	echo "Detected entry_point: $MAINCLASS"
+
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi
 

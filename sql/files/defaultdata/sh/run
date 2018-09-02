@@ -15,6 +15,11 @@ MAINSOURCE="${ENTRY_POINT:-$1}"
 
 RUNOPTIONS=""
 
+# Report the entry point, so it can be saved, e.g. for later replay:
+if [ -z "$ENTRY_POINT" ]; then
+	echo "Detected entry_point: $MAINCLASS"
+fi
+
 # Check syntax:
 for i in "$@" ; do
 	sh $RUNOPTIONS -n "$i"

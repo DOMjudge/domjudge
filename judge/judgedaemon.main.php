@@ -687,16 +687,14 @@ function judge(array $row)
     $compile_success =  ($EXITCODES[$retval]!='compiler-error');
 
     // pop the compilation result back into the judging table
-    request(
-        'judgings/' . urlencode($row['judgingid']),
-        'PUT',
-            'judgehost=' . urlencode($myhost)
-            . '&compile_success=' . $compile_success
-            . '&output_compile=' . rest_encode_file(
-                $workdir . '/compile.out',
-                                                    $output_storage_limit
-            )
-    );
+    $args = 'judgehost=' . urlencode($myhost) .
+        '&compile_success=' . $compile_success .
+        '&output_compile=' . rest_encode_file($workdir . '/compile.out', $output_storage_limit);
+    if (isset($metadata['entry_point'])) {
+        $args .= '&entry_point=' . urlencode($metadata['entry_point']);
+    }
+
+    request('judgings/' . urlencode($row['judgingid']), 'PUT', $args);
 
     // compile error: our job here is done
     if (! $compile_success) {

@@ -672,6 +672,21 @@ if (!isset($api)) {
         }
 
         if (isset($args['output_compile'])) {
+            if (isset($args['entry_point'])) {
+                // We're updating the entry_point after submission time. This
+                // probably does not work well when forwarding to another CCS.
+                $subm = $DB->q('TUPLE SELECT s.cid, s.submitid
+                                FROM judging j
+                                LEFT JOIN submission s USING(submitid)
+                                WHERE j.judgingid = %i', $judgingid);
+
+                $DB->q('START TRANSACTION');
+                $DB->q('UPDATE submission SET entry_point = %s
+                        WHERE submitid = %i', $args['entry_point'], $subm['submitid']);
+
+                eventlog('submission', $subm['submitid'], 'update', $subm['cid']);
+                $DB->q('COMMIT');
+            }
             if ($args['compile_success']) {
                 $DB->q('UPDATE judging SET output_compile = %s
                         WHERE judgingid = %i AND judgehost = %s',
@@ -716,7 +731,8 @@ if (!isset($api)) {
     $args = array('judgingid' => 'Judging corresponds to this specific judgingid.',
                   'judgehost' => 'Judging is judged by this specific judgehost.',
                   'compile_success' => 'Did the compilation succeed?',
-                  'output_compile' => 'Ouput of compilation phase (base64 encoded).');
+                  'output_compile' => 'Ouput of compilation phase (base64 encoded).',
+                  'entry_point' => 'Optional entry point auto-detected during compilation.');
     $exArgs = array();
     $roles = array('judgehost');
     $api->provideFunction('PUT', 'judgings', $doc, $args, $exArgs, $roles);
