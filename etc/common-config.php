@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /* These configuration settings are common to all parts of the
  * DOMjudge system and included by the specific configuration files.
  */

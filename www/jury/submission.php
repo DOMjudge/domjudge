@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the details of a specific submission
  *

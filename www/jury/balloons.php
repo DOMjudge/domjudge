@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Tool to coordinate the handing out of balloons to teams that solved
  * a problem. Similar to the balloons-daemon, but web-based.

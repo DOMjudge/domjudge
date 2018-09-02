@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Marks a set of submissions for rejudging, limited by key=value
  * key has to be a full quantifier, e.g. "submission.teamid"

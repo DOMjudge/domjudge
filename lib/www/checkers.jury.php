@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Functions that will check a given row of a given table
  * for problems, and if necessary, normalise it.

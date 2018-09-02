@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Do various sanity checks on the system regarding data constraints,
  * permissions and the like. At the moment this only contains some basic

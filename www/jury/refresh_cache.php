@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * Recalculate scoreboard cache data in DOMjudge.

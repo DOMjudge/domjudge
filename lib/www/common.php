@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Common functions shared between team/public/jury interface
  *

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View or add/edit a row in a judgehost_restriction
  *

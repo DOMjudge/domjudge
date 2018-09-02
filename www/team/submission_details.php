@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Gives a team the details of a judging of their submission: errors etc.
  *

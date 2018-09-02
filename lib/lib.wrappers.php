@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Miscellaneous wrappers for PHP functions, included from lib.misc.php.
  *

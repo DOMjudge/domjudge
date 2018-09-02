@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Produce a total score. Call with URL parameter 'static' for
  * output suitable for static HTML pages.

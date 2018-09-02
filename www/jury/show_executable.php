@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Show, edit and save files in an executable.
  *

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Import/export configration settings to and from contest.yaml.
  *

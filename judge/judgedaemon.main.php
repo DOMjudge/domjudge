@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Request a yet unjudged submission from the domserver, judge it, and pass
  * the results back to the domserver.
