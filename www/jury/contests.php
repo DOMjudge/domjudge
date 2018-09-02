@@ -155,13 +155,12 @@ if (empty($curcids)) {
 
         echo "<table>\n";
         foreach ($times as $time) {
-            $haspassed = difftime($row[$time . 'time'], $now) <= 0;
-
             echo "<tr><td>";
             // display checkmark when done or ellipsis when next up
             if (empty($row[$time . 'time'])) {
                 // don't display anything before an empty row
-            } elseif ($haspassed) {
+            } elseif (difftime($row[$time . 'time'], $now) <= 0) {
+                // this event has passed, mark as such
                 echo "<img src=\"../images/s_success.png\" alt=\"&#10003;\" class=\"picto\" />\n";
                 $prevchecked = true;
             } elseif ($prevchecked) {
