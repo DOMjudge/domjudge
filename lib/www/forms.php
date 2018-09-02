@@ -175,7 +175,7 @@ function addButton(string $name, string $value, $onclick = null, bool $enable = 
 /**
  * Textarea form element.
  */
-function addTextArea(string $name, string $text = '', int $cols = 40, int $rows = 10, string $attr = '') : string
+function addTextArea(string $name, $text = '', int $cols = 40, int $rows = 10, string $attr = '') : string
 {
     return '<textarea name="'.specialchars($name).'" '.
         'rows="'.(int)$rows .'" cols="'.(int)$cols.'" '.
