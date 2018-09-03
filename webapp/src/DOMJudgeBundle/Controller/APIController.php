@@ -43,7 +43,7 @@ class APIController extends FOSRestController
     }
 
     /**
-     * @Patch("/contests/{externalid}")
+     * @Patch("/contests/{cid}")
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function changeStartTimeAction(Request $request, Contest $contest)
@@ -55,7 +55,7 @@ class APIController extends FOSRestController
             $response = new Response('Missing "id" in request.', 400);
         } elseif (!array_key_exists('start_time', $args)) {
             $response = new Response('Missing "start_time" in request.', 400);
-        } elseif ($args['id'] != $contest->getExternalid()) {
+        } elseif ($args['id'] != $contest->getCid()) {
             $response = new Response('Invalid "id" in request.', 400);
         } elseif (!isset($args['force']) &&
                   $contest->getStarttime() != null &&
@@ -161,7 +161,7 @@ class APIController extends FOSRestController
     }
 
     /**
-     * @Get("/contests/{externalid}/contest-yaml")
+     * @Get("/contests/{cid}/contest-yaml")
      */
     public function getContestYaml(Contest $contest)
     {
