@@ -349,7 +349,7 @@ class db
         }
 
         $this->_connection = mysqli_init();
-        @mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, null, null, $this->flags);
+        @mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, 0, '', $this->flags ?? 0);
 
         if (mysqli_connect_error() || !$this->_connection) {
             throw new RuntimeException("Could not connect to database server "

@@ -958,6 +958,10 @@ class Contest
             'running' => false,
         );
 
+        if (!$this->getStarttimeEnabled()) {
+            return $fdata;
+        }
+
         // Show final scores if contest is over and unfreezetime has been
         // reached, or if contest is over and no freezetime had been set.
         // We can compare $now and the dbfields stringwise.
@@ -971,8 +975,8 @@ class Contest
         $fdata['showfrozen'] = !$fdata['showfinal'] && $this->getFreezetime()!==null &&
                                Utils::difftime($this->getFreezetime(), $now) <= 0;
         // contest is active but has not yet started
-        $fdata['started'] = Utils::difftime($this->getStarttime(), $now) <= 0;
-        $fdata['stopped'] = Utils::difftime($this->getEndtime(), $now) <= 0;
+        $fdata['started'] = Utils::difftime((float)$this->getStarttime(), $now) <= 0;
+        $fdata['stopped'] = Utils::difftime((float)$this->getEndtime(), $now) <= 0;
         $fdata['running'] = ($fdata['started'] && !$fdata['stopped']);
 
         return $fdata;
