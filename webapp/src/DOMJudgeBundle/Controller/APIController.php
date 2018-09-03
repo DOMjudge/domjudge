@@ -222,6 +222,7 @@ class APIController extends FOSRestController
 
     /**
      * @Get("/contests/{cid}/event-feed")
+     * @Security("has_role('ROLE_JURY')")
      */
     public function getEventFeed(Request $request, Contest $contest)
     {
