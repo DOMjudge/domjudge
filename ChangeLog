@@ -2,7 +2,9 @@ DOMjudge Programming Contest Judging System
 
 Version 6.0.0 - DEV
 -------------------
- - Restore access to event feed for non-jury users.
+ - Do not show affiliations more than once in pre-contest list.
+ - Fix display of timelimits in team problem overview.
+ - Improve SQL migration script.
 
 Version 6.0.0RC1 - 28 July 2018
 -------------------------------
