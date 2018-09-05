@@ -12,3 +12,5 @@ services:
         arguments:
             - "%kernel.root_dir%/../../www"
             - '@service_container'
+    domjudge.user_checker:
+        class: DOMJudgeBundle\Security\UserChecker
