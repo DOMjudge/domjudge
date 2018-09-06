@@ -15,9 +15,9 @@ if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
     $cdata = $cdatas[$cid];
     $current_cid = $cid;
 }
-$title = 'Problem p'.specialchars(@$id);
+$title = 'Problem' . (isset($id) ? specialchars(' p'.$id) : '');
 $title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
-                 'problem' . ($id ? ' p'.specialchars(@$id) : ''));
+                 'problem' . (isset($id) ? specialchars(' p'.$id) : ''));
 
 if (isset($_POST['cmd'])) {
     $pcmd = $_POST['cmd'];
@@ -26,11 +26,11 @@ if (isset($_POST['cmd'])) {
 } elseif (isset($id) && !isset($_POST['upload'])) {
     $extra = '';
     if ($current_cid !== null) {
-        $extra = '&cid=' . urlencode($current_cid);
+        $extra = '&cid=' . urlencode((string)$current_cid);
     }
     $refresh = array(
         'after' => 15,
-        'url' => $pagename.'?id='.urlencode($id).$extra,
+        'url' => $pagename.'?id='.urlencode((string)$id).$extra,
     );
 }
 
@@ -72,8 +72,8 @@ if (isset($_POST['upload'])) {
             $probname = $DB->q('VALUE SELECT name FROM problem
                                 WHERE probid = %i', $probid);
 
-            echo '<p><a href="' . $pagename.'?id='.urlencode($probid) .
-                '">Return to problem p' . specialchars($probid) .
+            echo '<p><a href="' . $pagename.'?id='.urlencode((string)$probid) .
+                '">Return to problem p' . specialchars((string)$probid) .
                 ': ' . specialchars($probname) . ".</a></p>\n";
         }
         echo "<p><a href=\"problems.php\">Return to problems overview.</a></p>\n";
@@ -116,7 +116,7 @@ if (!empty($cmd)):
     if (!empty($row['probid'])) {
         echo '<tr><td>Testcases:</td><td>' .
             $row['testcases'] . ' <a href="testcase.php?probid=' .
-            urlencode($row['probid']) . "\">details/edit</a></td></tr>\n";
+            urlencode((string)$row['probid']) . "\">details/edit</a></td></tr>\n";
     }
 ?>
 <tr><td><label for="data_0__timelimit_">Timelimit:</label></td>
@@ -233,16 +233,16 @@ if (!isset($data['special_compare'])) {
 echo "<h1>Problem ".specialchars($data['name'])."</h1>\n\n";
 
 echo addForm(
-    $pagename . '?id=' . urlencode($id),
+    $pagename . '?id=' . urlencode((string)$id),
              'post',
     null,
     'multipart/form-data'
 ) . "<p>\n" .
-    addHidden('id', $id) .
+    addHidden('id', (string)$id) .
     "</p>\n";
 ?>
 <table>
-<tr><td>ID:          </td><td>p<?php echo specialchars($data['probid'])?></td></tr>
+<tr><td>ID:          </td><td>p<?php echo specialchars((string)$data['probid'])?></td></tr>
 <tr><td>Name:        </td><td><?php echo specialchars($data['name'])?></td></tr>
 <tr><td>Testcases:   </td><td><?php
     if ($data['ntestcases']==0) {
@@ -250,7 +250,7 @@ echo addForm(
     } else {
         echo (int)$data['ntestcases'];
     }
-    echo ' <a href="testcase.php?probid='.urlencode($data['probid']).'">details/edit</a>';
+    echo ' <a href="testcase.php?probid='.urlencode((string)$data['probid']).'">details/edit</a>';
 ?></td></tr>
 <tr><td>Timelimit:   </td><td><?php echo (float)$data['timelimit']?> sec</td></tr>
 <tr><td>Memory limit:</td><td><?php echo (int)$data['memlimit'].' kB'.(@$defaultmemlimit ? ' (default)' : '')?></td></tr>
@@ -264,7 +264,7 @@ if (!empty($data['color'])) {
 }
 if (!empty($data['problemtext_type'])) {
     echo '<tr><td>Problem text:</td><td class="nobreak"><a href="problem.php?id=' .
-        urlencode($id) . '&amp;cmd=viewtext"><img src="../images/' .
+        urlencode((string)$id) . '&amp;cmd=viewtext"><img src="../images/' .
         urlencode($data['problemtext_type']) . '.png" alt="problem text" ' .
         'title="view problem description" /></a> ' . "</td></tr>\n";
 }
@@ -320,7 +320,7 @@ if ($current_cid === null) {
 
         $iseven = false;
         foreach ($res as $row) {
-            $link = '<a href="contest.php?id=' . urlencode($row['cid']) . '">';
+            $link = '<a href="contest.php?id=' . urlencode((string)$row['cid']) . '">';
 
             echo '<tr class="' .
                  ($iseven ? 'roweven' : 'rowodd') .
@@ -330,8 +330,8 @@ if ($current_cid === null) {
             echo "<td>" . $link . specialchars($row['shortname']) . "</a></td>\n";
             echo "<td>" . $link . specialchars($row['name']) . "</a></td>\n";
             echo "<td>" . $link . specialchars($row['problemshortname']) . "</a></td>\n";
-            echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_submit']) . "</a></td>\n";
-            echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_judge']) . "</a></td>\n";
+            echo "<td class=\"tdcenter\">" . $link . printyn((bool)$row['allow_submit']) . "</a></td>\n";
+            echo "<td class=\"tdcenter\">" . $link . printyn((bool)$row['allow_judge']) . "</a></td>\n";
             echo(!empty($row['color'])
                 ? '<td title="' . specialchars($row['color']) .
                   '">' . $link . '<div class="circle" style="background-color: ' .

@@ -66,7 +66,7 @@ if (isset($_REQUEST['viewall'])) {
     $viewall = $_REQUEST['viewall'];
 }
 
-dj_setcookie('domjudge_balloonviewall', $viewall);
+dj_setcookie('domjudge_balloonviewall', (string)$viewall);
 
 $refresh = array(
     'after' => 15,
@@ -78,14 +78,14 @@ echo "<h1>Balloon Status</h1>\n\n";
 
 foreach ($cdatas as $cdata) {
     if (isset($cdata['freezetime']) &&
-        difftime($cdata['freezetime'], now()) <= 0
+        difftime((float)$cdata['freezetime'], now()) <= 0
     ) {
         echo "<h4>Scoreboard of c${cdata['cid']} (${cdata['shortname']}) is now frozen.</h4>\n\n";
     }
 }
 
 echo addForm($pagename, 'get') . "<p>\n" .
-    addHidden('viewall', ($viewall ? 0 : 1)) .
+    addHidden('viewall', ($viewall ? '0' : '1')) .
     addSubmit($viewall ? 'view unsent only' : 'view all') . "</p>\n" .
     addEndForm();
 
@@ -250,13 +250,13 @@ if (!empty($BALLOONS)) {
         // the balloon earned
         echo '<td class="probid">' .
             '<div class="circle" style="background-color: ' .
-            specialchars($probs_data[$row['probid']]['color']) .
+            specialchars($probs_data[$row['probid']]['color'] ?? '') .
             ';"></div> ' . specialchars($row['probshortname']) . '</td>';
 
         // team name, location (room) and category
         echo '<td>t' . specialchars($row['teamid']) . '</td><td>' .
             specialchars($row['teamname']) . '</td><td>' .
-            specialchars($row['room']) . '</td><td>' .
+            specialchars((string)$row['room']) . '</td><td>' .
             specialchars($row['catname']) . '</td><td>';
 
         // list of balloons for this team
@@ -265,7 +265,7 @@ if (!empty($BALLOONS)) {
         foreach ($TOTAL_BALLOONS[$row['teamid']] as $prob_solved) {
             echo '<div title="' . specialchars($prob_solved) .
                 '" class="circle" style="background-color: ' .
-                specialchars($probs_data[$prob_solved]['color']) .
+                specialchars($probs_data[$prob_solved]['color'] ?? '') .
                 ';"></div> ';
         }
         echo '</td><td>';

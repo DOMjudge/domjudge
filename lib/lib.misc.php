@@ -168,20 +168,20 @@ function calcFreezeData(array $cdata = null, bool $isjury = false) : array
     // We can compare $now and the dbfields stringwise.
     $now = now();
     $fdata['showfinal']  = isset($cdata['finalizetime']) &&
-            difftime($cdata['finalizetime'], $now) <= 0;
+            difftime((float)$cdata['finalizetime'], $now) <= 0;
     if (!$isjury) {
         $fdata['showfinal'] = $fdata['showfinal'] &&
             (!isset($cdata['freezetime']) ||
              (isset($cdata['unfreezetime']) &&
-              difftime($cdata['unfreezetime'], $now) <= 0));
+              difftime((float)$cdata['unfreezetime'], $now) <= 0));
     }
     // freeze scoreboard if freeze time has been reached and
     // we're not showing the final score yet
     $fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
-                  difftime($cdata['freezetime'], $now) <= 0;
+                  difftime((float)$cdata['freezetime'], $now) <= 0;
     // contest is active but has not yet started
-    $fdata['started'] = difftime($cdata['starttime'], $now) <= 0;
-    $fdata['stopped'] = difftime($cdata['endtime'], $now) <= 0;
+    $fdata['started'] = difftime((float)$cdata['starttime'], $now) <= 0;
+    $fdata['stopped'] = difftime((float)$cdata['endtime'], $now) <= 0;
     $fdata['running'] = ($fdata['started'] && !$fdata['stopped']);
 
     return $fdata;
@@ -197,14 +197,14 @@ function calcContestTime(float $walltime, int $cid) : float
 {
     $cdata = getContest($cid);
 
-    $contesttime = difftime($walltime, $cdata['starttime']);
+    $contesttime = difftime($walltime, (float)$cdata['starttime']);
 
     if (ALLOW_REMOVED_INTERVALS) {
         foreach ($cdata['removed_intervals'] as $intv) {
             if (difftime($intv['starttime'], $walltime)<0) {
                 $contesttime -= min(
-                    difftime($walltime, $intv['starttime']),
-                    difftime($intv['endtime'], $intv['starttime'])
+                    difftime($walltime, (float)$intv['starttime']),
+                    difftime((float)$intv['endtime'], (float)$intv['starttime'])
                 );
             }
         }
@@ -260,7 +260,7 @@ function calcScoreRow(int $cid, int $team, int $prob)
     while ($row = $result->next()) {
 
         // Contest submit time
-        $submittime = calcContestTime($row['submittime'], $cid);
+        $submittime = calcContestTime((float)$row['submittime'], $cid);
 
         // Check if this submission has a publicly visible judging result:
         if ((dbconfig_get('verification_required', 0) && ! $row['verified']) ||
@@ -352,11 +352,11 @@ function updateRankCache(int $cid, int $team)
         foreach (array('public', 'restricted') as $variant) {
             if ($srow['is_correct_'.$variant]) {
                 $penalty = calcPenaltyTime(
-                    $srow['is_correct_'.$variant],
-                                $srow['submissions_'.$variant]
+                    (bool)$srow['is_correct_'.$variant],
+                    (int)$srow['submissions_'.$variant]
                 );
                 $num_points[$variant] += $srow['points'];
-                $total_time[$variant] += scoretime($srow['solvetime_'.$variant]) + $penalty;
+                $total_time[$variant] += scoretime((float)$srow['solvetime_'.$variant]) + $penalty;
             }
         }
     }
@@ -844,6 +844,7 @@ function submit_solution(
                            (checkrole('jury') ? '' : ' AND enabled = 1'), $team)) {
         error("Team '$team' not found in database or not enabled.");
     }
+    $teamid = (int)$teamid;
     $probdata = $DB->q('MAYBETUPLE SELECT probid, points FROM problem
                         INNER JOIN contestproblem USING (probid)
                         WHERE probid = %i AND cid = %i AND allow_submit = 1',
@@ -852,8 +853,8 @@ function submit_solution(
     if (empty($probdata)) {
         error("Problem p$prob not found in database or not submittable [c$contest].");
     } else {
-        $points = $probdata['points'];
-        $probid = $probdata['probid'];
+        $points = (int)$probdata['points'];
+        $probid = (int)$probdata['probid'];
     }
 
     // Reindex arrays numerically to allow simultaneously iterating
@@ -895,7 +896,7 @@ function submit_solution(
     for ($rank=0; $rank<count($files); $rank++) {
         $DB->q('INSERT INTO submission_file
                 (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
-               $id, $filenames[$rank], $rank, dj_file_get_contents($files[$rank]));
+               (int)$id, $filenames[$rank], (int)$rank, dj_file_get_contents($files[$rank]));
     }
 
     // Add expected results from source. We only do this for jury
@@ -934,7 +935,7 @@ function submit_solution(
         logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
     }
 
-    if (difftime($contestdata['endtime'], $submittime) <= 0) {
+    if (difftime((float)$contestdata['endtime'], $submittime) <= 0) {
         logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$contest]");
     }
 
@@ -1038,7 +1039,7 @@ function rejudge(string $table, $id, bool $include_all, bool $full_rejudge, $rea
         }
 
         if (!$full_rejudge) {
-            calcScoreRow($jud['cid'], $jud['teamid'], $jud['probid']);
+            calcScoreRow((int)$jud['cid'], (int)$jud['teamid'], (int)$jud['probid']);
         }
         $DB->q('COMMIT');
 
@@ -1591,8 +1592,8 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
                               (eventtime, cid, endpointtype, endpointid,
                                datatype, dataid, action, content)
                                VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
-                              $now, $cid, $type, $ids[$idx], $table,
-                              $dataid, $action, $jsonElement);
+                              $now, $cid, $type, (string)$ids[$idx], $table,
+                              (string)$dataid, $action, $jsonElement);
             $eventids[] = $eventid;
         }
     }

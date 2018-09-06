@@ -105,7 +105,7 @@ function dj_file_get_contents(string $filename, int $maxsize = -1) : string
  * Additionally, set the character set explicitly to the DOMjudge global
  * character set.
  */
-function specialchars($string) : string
+function specialchars(string $string) : string
 {
     return htmlspecialchars(
         $string,

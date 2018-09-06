@@ -12,7 +12,7 @@
  */
 function have_printing() : bool
 {
-    return dbconfig_get('enable_printing', 0);
+    return (bool) dbconfig_get('enable_printing', 0);
 }
 
 function put_print_form()

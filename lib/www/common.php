@@ -250,7 +250,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
         echo '<td class="langid" title="' . specialchars($row['langname']) . '">' .
             "<a$link>" . specialchars($row['langid']) . '</a></td>';
         echo "<td class=\"result\"><a$link>";
-        if (difftime($row['submittime'], $cdatas[$row['cid']]['endtime']) >= 0) {
+        if (difftime((float)$row['submittime'], (float)$cdatas[$row['cid']]['endtime']) >= 0) {
             echo printresult('too-late');
             if (IS_JURY && $row['result']) {
                 echo " (" . printresult($row['result']) . ")";
@@ -272,7 +272,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
                 $verified = '&nbsp;';
                 $jury_member = '&nbsp;';
             } else {
-                $verified = printyn($row['verified']);
+                $verified = printyn((bool)$row['verified']);
                 if (empty($row['jury_member'])) {
                     $jury_member = '&nbsp;';
                 } else {
@@ -412,7 +412,7 @@ function putTeam(int $teamid)
     }
 
     $countryflag = "images/countries/" . urlencode($team['country']) . ".png";
-    $teamimage = "images/teams/" . urlencode($team['teamid']) . ".jpg";
+    $teamimage = "images/teams/" . urlencode((string)$team['teamid']) . ".jpg";
 
     echo "<h1>Team ".specialchars($team['name'])."</h1>\n\n";
 
@@ -465,12 +465,12 @@ function putProgressBar(int $margin = 0)
     if ($cdata === null) {
         return;
     }
-    $left = difftime($cdata['endtime'], now());
+    $left = difftime((float)$cdata['endtime'], now());
     if (!$fdata['started'] || $left < 0) {
         return;
     }
-    $passed = difftime($cdata['starttime'], now());
-    $duration = difftime($cdata['starttime'], $cdata['endtime']);
+    $passed = difftime((float)$cdata['starttime'], now());
+    $duration = difftime((float)$cdata['starttime'], (float)$cdata['endtime']);
     $percent = (int)($passed*100./$duration);
     print '
 <div class="progress" style="margin-top: ' . $margin . 'px; height: 10px;">
@@ -523,12 +523,12 @@ function putClock()
     } else {
         // timediff to end of contest
         $fdata = calcFreezeData($cdata);
-        if ($fdata['started'] && difftime(now(), $cdata['endtime']) < 0) {
+        if ($fdata['started'] && difftime(now(), (float)$cdata['endtime']) < 0) {
             $left = printtimediff(now(), $cdata['endtime']);
         // time to start of contest
-        } elseif (!$fdata['started'] && difftime(now(), $cdata['activatetime']) >= 0) {
+        } elseif (!$fdata['started'] && difftime(now(), (float)$cdata['activatetime']) >= 0) {
             if ($cdata['starttime_enabled']) {
-                $left = "- " . printtimediff(now(), $cdata['starttime']);
+                $left = "- " . printtimediff(now(), (float)$cdata['starttime']);
             } else {
                 $left = "start delayed";
             }
@@ -773,7 +773,7 @@ function putProblemTextList()
         }
 
         if (isset($row['problemtext_type'])) {
-            print '<div class="text-center"><a class="btn btn-secondary" role="button" href="problem.php?id=' . urlencode($row['probid']) . '">' .
+            print '<div class="text-center"><a class="btn btn-secondary" role="button" href="problem.php?id=' . urlencode((string)$row['probid']) . '">' .
                   '<img src="../images/' . urlencode($row['problemtext_type']) .
                               '.png" alt="' . specialchars($row['problemtext_type']) .
                   '" /> problem text</a></div>';
@@ -787,10 +787,10 @@ function putProblemTextList()
                     $input .= ' #' . $i;
                     $output .= ' #' . $i;
                 }
-                print '<li class="list-group-item"><a class="btn btn-outline-secondary" role="button" href="problem.php?id=' . urlencode($row['probid']) .
-                      '&amp;testcase=' . urlencode($i) . '&amp;type=in">' . $input . '</a> ';
-                print '<a class="btn btn-outline-secondary" href="problem.php?id=' . urlencode($row['probid']) .
-                      '&amp;testcase=' . urlencode($i) . '&amp;type=out">' . $output . '</a>';
+                print '<li class="list-group-item"><a class="btn btn-outline-secondary" role="button" href="problem.php?id=' . urlencode((string)$row['probid']) .
+                      '&amp;testcase=' . urlencode((string)$i) . '&amp;type=in">' . $input . '</a> ';
+                print '<a class="btn btn-outline-secondary" href="problem.php?id=' . urlencode((string)$row['probid']) .
+                      '&amp;testcase=' . urlencode((string)$i) . '&amp;type=out">' . $output . '</a>';
                 print "</li>";
             }
             print "</ol>";

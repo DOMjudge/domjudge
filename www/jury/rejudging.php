@@ -25,7 +25,7 @@ if (isset($_REQUEST['view'])) {
 if (!isset($_REQUEST['apply'])) {
     $refresh = array(
         'after' => 15,
-        'url' => 'rejudging.php?id=' . urlencode($id) . '&' .
+        'url' => 'rejudging.php?id=' . urlencode((string)$id) . '&' .
             urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]) .
             (isset($_REQUEST['old_verdict']) ? '&old_verdict=' . urlencode($_REQUEST['old_verdict']) : '') .
             (isset($_REQUEST['new_verdict']) ? '&new_verdict=' . urlencode($_REQUEST['new_verdict']) : ''),
@@ -72,7 +72,7 @@ if (isset($_REQUEST['apply']) || isset($_REQUEST['cancel'])) {
 
     $time_end = microtime(true);
 
-    echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) .
+    echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode((string)$id) .
         "\">r$id</a> ".($request=='apply' ? 'applied' : 'canceled').
         " in ".sprintf('%.2f', $time_end - $time_start)." seconds.</p>\n\n";
 
@@ -130,12 +130,12 @@ if ($todo > 0) {
 echo "</table>\n\n";
 
 if (!isset($rejdata['endtime'])) {
-    echo addForm($pagename . '?id=' . urlencode($id))
+    echo addForm($pagename . '?id=' . urlencode((string)$id))
         . addSubmit('cancel rejudging', 'cancel')
         . addEndForm();
 
     if ($todo == 0) {
-        echo addForm($pagename . '?id=' . urlencode($id))
+        echo addForm($pagename . '?id=' . urlencode((string)$id))
             . addSubmit('apply rejudging', 'apply')
             . addEndForm();
     }
@@ -237,7 +237,7 @@ foreach ($table as $orig_verdict => $changed_verdicts) {
         } else {
             // this case is the interesting one
             $class = "changed";
-            $link = '<a href="rejudging.php?id=' . urlencode($id) .
+            $link = '<a href="rejudging.php?id=' . urlencode((string)$id) .
                 '&amp;' . urlencode('view[4]=all') .
                 '&amp;old_verdict=' . urlencode($orig_verdict) .
                 '&amp;new_verdict=' . urlencode($new_verdict) . '">';

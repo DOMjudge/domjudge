@@ -13,7 +13,7 @@ if (empty($id)) {
     error("Missing or invalid team id");
 }
 
-$title = 'Team t'.specialchars($id);
+$title = 'Team t'.specialchars((string)$id);
 require(LIBWWWDIR . '/header.php');
 
 putTeam($id);

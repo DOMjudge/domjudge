@@ -19,9 +19,9 @@ if (!isset($api)) {
     function infreeze($cdata, $time)
     {
         if ((! empty($cdata['freezetime']) &&
-             difftime($time, $cdata['freezetime'])>=0) &&
+             difftime($time, (float)$cdata['freezetime'])>=0) &&
             (empty($cdata['unfreezetime']) ||
-             difftime($time, $cdata['unfreezetime'])<0)) {
+             difftime($time, (float)$cdata['unfreezetime'])<0)) {
             return true;
         }
         return false;
@@ -275,7 +275,7 @@ if (!isset($api)) {
             $cdatas = getCurContests(true, $userdata['teamid']);
         }
         if (checkrole('jury') ||
-            (isset($cdatas[$cid]) && difftime(now(), $cdatas[$cid]['starttime'])>=0)) {
+            (isset($cdatas[$cid]) && difftime(now(), (float)$cdatas[$cid]['starttime'])>=0)) {
 
         // We sort the problems by shortname, i.e in the same way we
             // sort them in the scoreboard, and return all. Then we assign
@@ -713,7 +713,7 @@ if (!isset($api)) {
                 }
                 $DB->q('COMMIT');
 
-                calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
+                calcScoreRow((int)$row['cid'], (int)$row['teamid'], (int)$row['probid']);
 
                 // We call alert here for the failed submission. Note that
                 // this means that these alert messages should be treated
@@ -791,7 +791,7 @@ if (!isset($api)) {
                               WHERE judgingid = %i ORDER BY rank', $args['judgingid']);
         $numtestcases = $DB->q('VALUE SELECT count(*) FROM testcase WHERE probid = %i', $probid);
 
-        $allresults = array_pad($runresults, $numtestcases, null);
+        $allresults = array_pad($runresults, (int)$numtestcases, null);
 
         if (($result = getFinalResult($allresults, $results_prio))!==null) {
 
@@ -829,7 +829,7 @@ if (!isset($api)) {
                                FROM judging
                                LEFT JOIN submission s USING(submitid)
                                WHERE judgingid = %i', $args['judgingid']);
-                calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
+                calcScoreRow((int)$row['cid'], (int)$row['teamid'], (int)$row['probid']);
 
                 // We call alert here before possible validation. Note
                 // that this means that these alert messages should be
@@ -843,12 +843,12 @@ if (!isset($api)) {
                 // (case of verification required is handled in www/jury/verify.php)
                 if (! dbconfig_get('verification_required', 0)) {
                     if (!isset($jud['rejudgingid'])) {
-                        eventlog('judging', $args['judgingid'], 'update', $row['cid']);
-                        updateBalloons($row['submitid']);
+                        eventlog('judging', (int)$args['judgingid'], 'update', (int)$row['cid']);
+                        updateBalloons((int)$row['submitid']);
                     }
                 }
 
-                auditlog('judging', $args['judgingid'], 'judged', $result, $args['judgehost']);
+                auditlog('judging', (int)$args['judgingid'], 'judged', $result, $args['judgehost']);
 
                 $just_finished = true;
             }
@@ -1073,7 +1073,7 @@ if (!isset($api)) {
             $entry_point = $args['entry_point'];
         }
 
-        $sid = submit_solution($userdata['teamid'], $probid, $cid, $langid, $FILEPATHS, $FILENAMES, null, $entry_point);
+        $sid = submit_solution((int)$userdata['teamid'], (int)$probid, (int)$cid, $langid, $FILEPATHS, $FILENAMES, null, $entry_point);
 
         auditlog('submission', $sid, 'added', 'via api', null, $cid);
 
@@ -1870,7 +1870,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
                     'solved'      => safe_bool($pdata['is_correct'])
                 );
                 if ($prob['solved']) {
-                    $prob['time'] = scoretime($pdata['time']);
+                    $prob['time'] = scoretime((float)$pdata['time']);
                     // TODO: according the API specification this doesn't
                     // have to be added. Also, the current first_solved()
                     // implementation is incorrent when there are pending

@@ -42,7 +42,7 @@ if ($res->count() == 0) {
         $done = $DB->q('VALUE SELECT COUNT(*) FROM judging
                         WHERE rejudgingid=%i AND endtime IS NOT NULL', $row['rejudgingid']);
         $todo -= $done;
-        $link = '<a href="rejudging.php?id=' . urlencode($row['rejudgingid']) . '">';
+        $link = '<a href="rejudging.php?id=' . urlencode((string)$row['rejudgingid']) . '">';
         $class = '';
         if (isset($row['endtime'])) {
             $class = 'class="disabled"';

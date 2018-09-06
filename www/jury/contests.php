@@ -34,7 +34,7 @@ if (isset($_POST['donow'])) {
         return;
     }
 
-    $now = floor($now);
+    $now = (int)floor($now);
     $nowstring = strftime('%Y-%m-%d %H:%M:%S ', $now) . date_default_timezone_get();
     auditlog('contest', $docid, $time. ' now', $nowstring);
 
@@ -132,12 +132,12 @@ if (empty($curcids)) {
 
     foreach ($rows as $row) {
         $prevchecked = false;
-        $hasstarted = difftime($row['starttime'], $now) <= 0;
-        $hasended = difftime($row['endtime'], $now) <= 0;
+        $hasstarted = difftime((float)$row['starttime'], $now) <= 0;
+        $hasended = difftime((float)$row['endtime'], $now) <= 0;
         $hasfrozen = !empty($row['freezetime']) &&
-                 difftime($row['freezetime'], $now) <= 0;
+                 difftime((float)$row['freezetime'], $now) <= 0;
         $hasunfrozen = !empty($row['unfreezetime']) &&
-                   difftime($row['unfreezetime'], $now) <= 0;
+                   difftime((float)$row['unfreezetime'], $now) <= 0;
         $isfinal = !empty($row['finalizetime']);
 
         $contestname = specialchars(sprintf('%s (%s - c%d)', $row['name'], $row['shortname'], $row['cid']));
@@ -159,7 +159,7 @@ if (empty($curcids)) {
             // display checkmark when done or ellipsis when next up
             if (empty($row[$time . 'time'])) {
                 // don't display anything before an empty row
-            } elseif (difftime($row[$time . 'time'], $now) <= 0) {
+            } elseif (difftime((float)$row[$time . 'time'], $now) <= 0) {
                 // this event has passed, mark as such
                 echo "<img src=\"../images/s_success.png\" alt=\"&#10003;\" class=\"picto\" />\n";
                 $prevchecked = true;
@@ -204,7 +204,7 @@ if (empty($curcids)) {
                 }
             }
 
-            $close_to_start = difftime($row['starttime'], $now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
+            $close_to_start = difftime((float)$row['starttime'], $now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
             if ($time=='start' && !$close_to_start) {
                 $type = $row['starttime_enabled'] ? 'delay' : 'resume';
                 echo addSubmit($type.' start', "donow[$row[cid]][${type}_start]");

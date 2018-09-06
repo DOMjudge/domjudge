@@ -86,7 +86,7 @@ function genScoreBoard(array $cdata, bool $jury = false, $filter = null, bool $v
             continue;
         }
 
-        $penalty = calcPenaltyTime($srow['is_correct'], $srow['submissions']);
+        $penalty = calcPenaltyTime((bool)$srow['is_correct'], (int)$srow['submissions']);
 
         // fill our matrix with the scores from the database
         $MATRIX[$srow['teamid']][$srow['probid']] = array(
@@ -99,8 +99,8 @@ function genScoreBoard(array $cdata, bool $jury = false, $filter = null, bool $v
         // calculate totals for this team
         if ($srow['is_correct']) {
             $SCORES[$srow['teamid']]['num_points'] += $srow['points'];
-            $SCORES[$srow['teamid']]['solve_times'][] = scoretime($srow['solvetime']);
-            $SCORES[$srow['teamid']]['total_time'] += scoretime($srow['solvetime']) + $penalty;
+            $SCORES[$srow['teamid']]['solve_times'][] = scoretime((float)$srow['solvetime']);
+            $SCORES[$srow['teamid']]['total_time'] += scoretime((float)$srow['solvetime']) + $penalty;
         }
     }
 
@@ -184,7 +184,7 @@ function getProblems(array $cdata) : array
                    FROM problem
                    INNER JOIN contestproblem USING (probid)
                    WHERE cid = %i AND allow_submit = 1
-                   ORDER BY shortname', $cdata['cid']);
+                   ORDER BY shortname', (int)$cdata['cid']);
 }
 
 /**
@@ -211,7 +211,7 @@ function getTeams($filter, bool $jury, array $cdata) : array
                   (isset($filter['country']) ? ' AND country IN (%As) ' : ' %_') .
                   (isset($filter['categoryid']) ? ' AND team.categoryid IN (%Ai) ' : ' %_') .
                   (isset($filter['teams']) ? ' AND team.teamid IN (%Ai) ' : ' %_'),
-                  $cdata['cid'], @$filter['affilid'], @$filter['country'],
+                  (int)$cdata['cid'], @$filter['affilid'], @$filter['country'],
                   @$filter['categoryid'], @$filter['teams']);
 }
 
@@ -367,7 +367,7 @@ function renderScoreBoardTable(
                    specialchars($pr['color']) . ';"></div>' : '') ;
 
             if (!$static && (IS_JURY || $pr['hastext']>0)) {
-                echo '<a href="problem.php?id=' . urlencode($pr['probid']) .
+                echo '<a href="problem.php?id=' . urlencode((string)$pr['probid']) .
                      '">' . $str . '</a>';
             } else {
                 echo '<a>' . $str . '</a>';
@@ -437,7 +437,7 @@ function renderScoreBoardTable(
         if (! $displayrank) {
             echo jurylink(null, '?');
         } elseif (!isset($prevteam) || $scores[$prevteam]['rank']!=$totals['rank']) {
-            echo jurylink(null, $totals['rank']);
+            echo jurylink(null, (string)$totals['rank']);
         } else {
             echo jurylink(null, '');
         }
@@ -448,7 +448,7 @@ function renderScoreBoardTable(
             if (isset($teams[$team]['affilid'])) {
                 if (IS_JURY) {
                     echo '<a href="team_affiliation.php?id=' .
-                        urlencode($teams[$team]['affilid']) . '">';
+                        urlencode((string)$teams[$team]['affilid']) . '">';
                 }
                 if (isset($teams[$team]['country'])) {
                     $countryflag = 'images/countries/' .
@@ -478,16 +478,16 @@ function renderScoreBoardTable(
                 }
                 if (IS_JURY) {
                     echo '<a href="team_affiliation.php?id=' .
-                        urlencode($teams[$team]['affilid']) . '">';
+                        urlencode((string)$teams[$team]['affilid']) . '">';
                 }
-                $affillogo = 'images/affiliations/' .  urlencode($affilid) . '.png';
+                $affillogo = 'images/affiliations/' .  urlencode((string)$affilid) . '.png';
                 echo ' ';
                 if (is_readable(WEBAPPDIR.'/web/'.$affillogo)) {
                     echo '<img src="../' . $affillogo . '"' .
                         ' alt="'   . specialchars($teams[$team]['affilname']) . '"' .
                         ' title="' . specialchars($teams[$team]['affilname']) . '" />';
                 } else {
-                    echo specialchars($affilid);
+                    echo specialchars((string)$affilid);
                 }
                 if (IS_JURY) {
                     echo '</a>';
@@ -502,8 +502,8 @@ function renderScoreBoardTable(
         echo
             '<td class="scoretn"' .
             (!empty($color) ? ' style="background: ' . $color . ';"' : '') .
-            (IS_JURY ? ' title="' . specialchars($team) . '"' : '') . '>' .
-            ($static ? '' : '<a href="team.php?id=' . urlencode($team) . '">') .
+            (IS_JURY ? ' title="' . specialchars((string)$team) . '"' : '') . '>' .
+            ($static ? '' : '<a href="team.php?id=' . urlencode((string)$team) . '">') .
             $region_leader .
             specialchars($teams[$team]['name']) .
             ($SHOW_AFFILIATIONS ? '<br /><span class="univ">' . $affilname .
@@ -515,8 +515,8 @@ function renderScoreBoardTable(
             $totalTime = printtimerel($totalTime);
         }
         echo
-            '<td class="scorenc">' . jurylink(null, $totals['num_points']) . '</td>' .
-            '<td class="scorett">' . jurylink(null, $totalTime) . '</td>';
+            '<td class="scorenc">' . jurylink(null, (string)$totals['num_points']) . '</td>' .
+            '<td class="scorett">' . jurylink(null, (string)$totalTime) . '</td>';
 
         // For each problem, display specific information if the
         // display is for the jury or if the per-problem information
@@ -529,7 +529,7 @@ function renderScoreBoardTable(
                 if ($matrix[$team][$prob]['is_correct']) {
                     $score_css_class = 'score_correct';
                     if (first_solved(
-                        $matrix[$team][$prob]['time'],
+                        (float)$matrix[$team][$prob]['time'],
                         @$summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]
                     )) {
                         $score_css_class .= ' score_first';
@@ -553,13 +553,13 @@ function renderScoreBoardTable(
                 $time = '&nbsp;';
                 if ($matrix[$team][$prob]['is_correct']) {
                     if (dbconfig_get('score_in_seconds', 0)) {
-                        $time = printtimerel(scoretime($matrix[$team][$prob]['time']));
+                        $time = printtimerel(scoretime((float)$matrix[$team][$prob]['time']));
                         // Display penalty time.
                         if ($matrix[$team][$prob]['num_submissions'] > 1) {
                             $time .= ' + ' . printtimerel(calcPenaltyTime(true, $matrix[$team][$prob]['num_submissions']));
                         }
                     } else {
-                        $time = scoretime($matrix[$team][$prob]['time']);
+                        $time = scoretime((float)$matrix[$team][$prob]['time']);
                     }
                 }
 
@@ -569,7 +569,8 @@ function renderScoreBoardTable(
                     $tries = $number_of_subs . ($number_of_subs == "1" ? " try" : " tries");
                     $div = '<div class="' . $score_css_class . '">' . $time
                         . '<span>' . $tries . '</span>' . '</div>';
-                    $url = 'team.php?id=' . urlencode($team) . '&amp;restrict=probid:' . urlencode($prob);
+                    $url = 'team.php?id=' . urlencode((string)$team)
+                        . '&amp;restrict=probid:' . urlencode((string)$prob);
                     echo jurylink($url, $div);
                 }
                 echo '</td>';
@@ -584,7 +585,7 @@ function renderScoreBoardTable(
         // perproblem points as it's actually total points and not useful
         if (!$showpoints) {
             $totalCell = '<td title="total solved" class="scorenc">' .
-                         jurylink(null, $summary['num_points'])  . '</td>';
+                jurylink(null, (string)$summary['num_points'])  . '</td>';
         } else {
             $totalCell = '<td class="scorenc" title=" "></td>';  // Empty
         }
@@ -620,7 +621,7 @@ function renderScoreBoardTable(
                     $numPending . '<br />' .
                     $best;
                 echo '<td style="text-align: left;">' .
-                    jurylink('problem.php?id=' . urlencode($prob), $str) .
+                    jurylink('problem.php?id=' . urlencode((string)$prob), $str) .
                     '</td>';
             }
             echo "</tr>\n</tbody>\n";
@@ -654,7 +655,7 @@ function renderScoreBoardTable(
                               $cat['color'] . ';"' : '') . '>' .
                         '<td>' .
                         jurylink(
-                            'team_category.php?id=' . urlencode($cat['categoryid']),
+                            'team_category.php?id=' . urlencode((string)$cat['categoryid']),
                              specialchars($cat['name'])
                         ) . "</td></tr>\n";
                 }
@@ -791,7 +792,7 @@ function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = fal
                 echo '<div class="card-body">';
                 echo '<ul class="list-group list-group-flush">';
             }
-            $affillogo = 'images/affiliations/' .  urlencode($affil['externalid']) . '.png';
+            $affillogo = 'images/affiliations/' .  urlencode((string)$affil['externalid']) . '.png';
             $logoHTML = '';
             if (is_readable(WEBAPPDIR.'/web/'.$affillogo)) {
                 $logoHTML = '<img src="../' . $affillogo . '" style="padding-right: 10px;" />';
@@ -844,7 +845,7 @@ function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = fal
                               WHERE categoryid IN (%Ai) AND c.cid = %i AND
                               (c.public = 1 OR ct.teamid IS NOT NULL)
                               GROUP BY affilid',
-                             $cdata['cid'], array_keys($categids), $cdata['cid']);
+                             (int)$cdata['cid'], array_keys($categids), (int)$cdata['cid']);
         }
 
         $affilids  = array();
@@ -1011,7 +1012,7 @@ function putTeamRow(array $cdata, array $teamids)
                 continue;
             }
 
-            $penalty = calcPenaltyTime($srow['is_correct'], $srow['submissions']);
+            $penalty = calcPenaltyTime((bool)$srow['is_correct'], (int)$srow['submissions']);
 
             // fill our matrix with the scores from the database
             $MATRIX[$srow['teamid']][$srow['probid']] = array(
@@ -1142,7 +1143,7 @@ function calcTeamRank(array $cdata, int $teamid, $teamtotals, bool $jury = false
                                  AND allow_submit = 1 AND teamid IN (%Ai)",
                                 $cid, $tied);
             while ($srow = $scoredata->next()) {
-                $teamdata[$srow['teamid']]['solve_times'][] = scoretime($srow['solvetime']);
+                $teamdata[$srow['teamid']]['solve_times'][] = scoretime((float)$srow['solvetime']);
             }
 
             // Now check for each team if it is ranked higher than $teamid

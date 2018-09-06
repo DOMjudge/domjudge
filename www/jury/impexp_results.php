@@ -95,7 +95,7 @@ foreach ($probs as $probData) {
                 'problem' => $probData['shortname'],
                 'problem_name' => $probData['name'],
                 'team' => $team_names[$teamData['externalid']],
-                'time' => scoretime($matrix[$teamData['teamid']][$probData['probid']]['time']),
+                'time' => scoretime((float)$matrix[$teamData['teamid']][$probData['probid']]['time']),
             ];
         }
     }

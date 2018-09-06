@@ -55,8 +55,8 @@ while ($logline = $res->next()) {
 
     // First define defaults, allow to override afterwards:
     $link = urlencode($logline['datatype']) . '.php?id=' .
-        urlencode($logline['dataid']);
-    $name = specialchars($logline['dataid']);
+        urlencode((string)$logline['dataid']);
+    $name = specialchars((string)$logline['dataid']);
     switch ($logline['datatype']) {
         case 'balloon':
             $link = null;
@@ -66,14 +66,14 @@ while ($logline = $res->next()) {
             $name = 'c'.$name;
             break;
         case 'judging':
-            $link = 'submission.php?jid=' . urlencode($logline['dataid']);
+            $link = 'submission.php?jid=' . urlencode((string)$logline['dataid']);
             $name = 'j'.$name;
             break;
         case 'submission':
             $name = 's'.$name;
             break;
         case 'testcase':
-            $link = 'testcase.php?probid=' . urlencode($logline['dataid']);
+            $link = 'testcase.php?probid=' . urlencode((string)$logline['dataid']);
             break;
     }
 

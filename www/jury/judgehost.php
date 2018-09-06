@@ -49,7 +49,7 @@ if (!empty($cids)) {
                     $cids, $data['hostname']);
 }
 
-$reltime = floor(difftime(now(), $data['polltime']));
+$reltime = floor(difftime(now(), (float)$data['polltime']));
 $status = 'Undefined';
 if ($reltime < dbconfig_get('judgehost_warning', 30)) {
     $status = "OK";
@@ -69,7 +69,7 @@ renderPage(array(
     'title' => 'Judgehost '.specialchars($data['hostname']),
     'refresh' => array(
         'after' => 15,
-        'url' => 'judgehost.php?id='.urlencode($id),
+        'url' => 'judgehost.php?id='.urlencode((string)$id),
     ),
     'judgehost' => $data,
     'judgingdata' => $jdata,
