@@ -63,7 +63,7 @@ class FallbackController extends Controller
         } else {
             $_SERVER['PHP_SELF'] = basename($path);
             $_SERVER['SCRIPT_NAME'] = basename($path);// This is used in a few scripts to set refererrer
-            if (is_dir($thefile)) {
+            if ($thefile!==false && is_dir($thefile)) {
                 $thefile = realpath($thefile . "/index.php");
                 $_SERVER['PHP_SELF'] = "index.php";
 
@@ -76,7 +76,7 @@ class FallbackController extends Controller
                 }
             }
         }
-        if (!file_exists($thefile)) {
+        if ($thefile===false || !file_exists($thefile)) {
             return Response::create('Not found.', 404);
         }
         chdir(dirname($thefile));
