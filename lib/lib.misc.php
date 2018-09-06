@@ -149,7 +149,7 @@ function problemVisible($probid)
  * has already started, stopped, andd if scoreboard is currently
  * frozen or final (unfrozen).
  */
-function calcFreezeData(array $cdata, bool $isjury = false) : array
+function calcFreezeData(array $cdata = null, bool $isjury = false) : array
 {
     $fdata = array();
 

@@ -704,7 +704,7 @@ function renderScoreBoardTable(
  *              to array of values to filter on these.
  * $sdata       if not NULL, use this as scoreboard data instead of fetching it locally
  */
-function putScoreBoard(array $cdata, $myteamid = null, bool $static = false, $filter = false, $sdata = null)
+function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = false, $filter = false, $sdata = null)
 {
     global $DB, $pagename;
 

@@ -457,6 +457,9 @@ function putProgressBar(int $margin = 0)
     global $cdata;
 
     $fdata = calcFreezeData($cdata);
+    if ($cdata === null) {
+        return;
+    }
     $left = difftime($cdata['endtime'], now());
     if (!$fdata['started'] || $left < 0) {
         return;
