@@ -18,31 +18,11 @@ $langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions, requir
                     FROM language WHERE allow_submit = 1');
 
 echo "<script type=\"text/javascript\">\n<!--\n";
-
-if ($fdata['started'] || checkrole('jury')) {
-    $probdata = $DB->q('TABLE SELECT probid, shortname, name FROM problem
-                        INNER JOIN contestproblem USING (probid)
-                        WHERE cid = %i AND allow_submit = 1
-                        ORDER BY shortname', $cid);
-
-    putgetMainExtension($langdata);
-
-    echo "function getProbDescription(probid)\n{\n";
-    echo "\tswitch(probid) {\n";
-    foreach ($probdata as $probinfo) {
-        echo "\t\tcase '" . specialchars($probinfo['shortname']) .
-            "': return '" . specialchars($probinfo['name']) . "';\n";
-    }
-    echo "\t\tdefault: return '';\n\t}\n}\n\n";
-}
-
 echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
 putTeamRow($cdata, array($teamid));
-
-//echo "<div id=\"submitlist\">\n";
 
 if ($submitted):
 ?>
@@ -53,63 +33,11 @@ if ($submitted):
   </a>
   <strong>Submission done!</strong> Watch for the verdict in the list below.
 </div>
+
 <?php
 endif;
-
-/* submitform moved away
-if ( ($fdata['started'] || checkrole('jury') )) {
-    echo <<<HTML
-<script type="text/javascript">
-$(function() {
-    var matches = location.hash.match(/submitted=(\d+)/);
-    if (matches) {
-        var \$p = \$('<p class="submissiondone" />').html('submission done <a href="#">x</a>');
-        \$('#submitlist > .teamoverview').after(\$p);
-        \$('table.submissions tr[data-submission-id=' + matches[1] + ']').addClass('highlight');
-
-        \$('.submissiondone a').on('click', function() {
-            \$(this).parent().remove();
-            \$('table.submissions tr.highlight').removeClass('highlight');
-            reloadLocation = 'index.php';
-        });
-    }
-});
-</script>
-HTML;
-    $maxfiles = dbconfig_get('sourcefiles_limit',100);
-
-    echo addForm('upload.php','post',null,'multipart/form-data', null,
-             ' onreset="resetUploadForm('.$refreshtime .', '.$maxfiles.');"') .
-        "<p id=\"submitform\">\n\n";
-
-    echo "<input type=\"file\" name=\"code[]\" id=\"maincode\" required";
-    if ( $maxfiles > 1 ) {
-        echo " multiple";
-    }
-    echo " />\n";
-
-
-    echo addSelect('langid', $langs, '', true);
-
-    echo addSubmit('submit', 'submit',
-               "return checkUploadForm();");
-
-    echo addReset('cancel');
-
-    if ( $maxfiles > 1 ) {
-        echo "<br /><span id=\"auxfiles\"></span>\n" .
-            "<input type=\"button\" name=\"addfile\" id=\"addfile\" " .
-            "value=\"Add another file\" onclick=\"addFileUpload();\" " .
-            "disabled=\"disabled\" />\n";
-    }
-    echo "<script type=\"text/javascript\">initFileUploads($maxfiles);</script>\n\n";
-
-    echo "</p>\n</form>\n\n";
-}
-// call putSubmissions function from common.php for this team.
-*/
-
 ?>
+
 <div class="row">
 <div class="col">
 <h3 class="teamoverview">Submissions</h3>

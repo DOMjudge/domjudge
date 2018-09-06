@@ -72,13 +72,6 @@ function logged_in() : bool
     return $username!==null;
 }
 
-// Returns whether the active authentication method has logout functionality.
-function have_logout() : bool
-{
-    // symfony always has logout
-    return true;
-}
-
 function get_user_roles(string $userid) : array
 {
     global $DB;

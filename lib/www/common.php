@@ -533,13 +533,13 @@ function putClock()
 
     if (IS_JURY && logged_in()) {
         // Show pretty name if possible
-        $displayname = $username;
+        $displayname = specialchars($username);
         if ($userdata['name']) {
-            $displayname = "<abbr title=\"$username\">" . $userdata['name'] . "</abbr>";
+            $displayname = "<abbr title=\"" . specialchars($username) . "\">" . specialchars($userdata['name']) . "</abbr>";
         }
         echo "<div id=\"username\">logged in as " . $displayname
-            . (have_logout() ? ' <a href="../auth/logout.php">' .
-                '<span class="octicon octicon-sign-out"></span></a>' : "")
+            . ' <a href="../auth/logout.php">' .
+                '<span class="octicon octicon-sign-out"></span></a>'
             . "</div>";
     }
 

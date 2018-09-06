@@ -42,9 +42,7 @@ if (!logged_in()) {
     echo '<div id="logoutbut"><a class="nav-link justify-content-center" href="../logout"><button type="button" class="btn btn-outline-info btn-sm"><span class="octicon octicon-sign-out"></span> Logout</button></a></div>';
 }
 
-if (! $isstatic) {
-    putClock();
-}
+putClock();
 ?>
     </nav>
 <?php putProgressBar(26); ?>

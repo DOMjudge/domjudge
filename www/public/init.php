@@ -26,8 +26,6 @@ require_once(LIBWWWDIR . '/forms.php');
 $cdatas = getCurContests(true, -1);
 $cids = array_keys($cdatas);
 
-$isstatic = @$_SERVER['argv'][1] == 'static' || isset($_REQUEST['static']);
-
 // If the cookie has a existing contest, use it
 if (isset($_COOKIE['domjudge_cid']) && isset($cdatas[$_COOKIE['domjudge_cid']])) {
     $cid = $_COOKIE['domjudge_cid'];
