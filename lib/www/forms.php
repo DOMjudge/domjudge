@@ -111,7 +111,7 @@ function matchSelect($val, $default) : bool
  * usekeys: use the keys of the array as option value or not
  * multi: multiple values are selectable, set to integer to set vertical size
  */
-function addSelect(string $name, array $values, $default = null, bool $usekeys = false, bool $multi = false) : string
+function addSelect(string $name, array $values, $default = null, bool $usekeys = false, $multi = false) : string
 {
     $size = 5;
     if (is_int($multi)) {
