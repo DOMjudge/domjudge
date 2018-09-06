@@ -11,6 +11,8 @@ services:
     ports:
       - 13306:3306
     command: --max-connections=1000
+    volumes:
+      - /var/lib/mysql
   domjudge:
     image: domjudge/domjudge-contributor
     volumes:
