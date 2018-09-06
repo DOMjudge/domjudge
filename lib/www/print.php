@@ -96,7 +96,7 @@ function printtime($datetime, $format = null, $cid = null) : string
             return sprintf("%d:%02d", $h, $m);
         }
     } else {
-        return specialchars(strftime($format, floor($datetime)));
+        return specialchars(strftime($format, (int)floor($datetime)));
     }
 }
 

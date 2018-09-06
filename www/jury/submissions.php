@@ -34,7 +34,7 @@ $refresh = array(
 $title = 'Submissions';
 
 // Set cookie of submission view type, expiry defaults to end of session.
-dj_setcookie('domjudge_submissionview', $view);
+dj_setcookie('domjudge_submissionview', (string)$view);
 
 $jury_member = $username;
 

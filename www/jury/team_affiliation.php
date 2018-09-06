@@ -11,7 +11,7 @@ require(LIBWWWDIR . '/scoreboard.php');
 
 $id = getRequestID();
 $title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
-                 'affiliation' . ($id ? ' '.specialchars(@$id) : ''));
+                 'affiliation' . (isset($id) ? specialchars(' '.$id) : ''));
 
 require(LIBWWWDIR . '/header.php');
 
@@ -28,7 +28,7 @@ if (!empty($_GET['cmd'])):
     echo "<table>\n";
 
     if ($cmd == 'edit') {
-        $row = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
+        $row = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %i', $id);
         if (!$row) {
             error("Missing or invalid affiliation id");
         }
@@ -52,7 +52,7 @@ href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Current_codes"><img
 src="../images/b_help.png" class="smallpicto" alt="?" /></a></td></tr>
 
 <tr><td><label for="data_0__comments_">Comments:</label></td>
-<td><?php echo addTextArea('data[0][comments]', @$row['comments'])?></td></tr>
+<td><?php echo addTextArea('data[0][comments]', $row['comments'] ?? '')?></td></tr>
 
 </table>
 
@@ -70,20 +70,20 @@ return;
 endif;
 
 
-$data = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
+$data = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %i', $id);
 if (! $data) {
     error("Missing or invalid affiliation id");
 }
 
 $SHOW_FLAGS = dbconfig_get('show_flags', 1);
 
-$affillogo = "images/affiliations/" . urlencode($data['affilid']) . ".png";
+$affillogo = "images/affiliations/" . urlencode((string)$data['affilid']) . ".png";
 $countryflag = "images/countries/" . urlencode($data['country']) . ".png";
 
 echo "<h1>Affiliation: ".specialchars($data['name'])."</h1>\n\n";
 
 echo "<table>\n";
-echo '<tr><td>ID:</td><td>' . specialchars($data['affilid']) . "</td></tr>\n";
+echo '<tr><td>ID:</td><td>' . specialchars((string)$data['affilid']) . "</td></tr>\n";
 echo '<tr><td>Shortname:</td><td>' . specialchars($data['shortname']) . "</td></tr>\n";
 echo '<tr><td>Name:</td><td>' . specialchars($data['name']) . "</td></tr>\n";
 
@@ -122,7 +122,7 @@ if (IS_ADMIN) {
 echo "<h2>Teams from " . specialchars($data['name']) . "</h2>\n\n";
 
 $listteams = array();
-$teams = $DB->q('SELECT teamid,name FROM team WHERE affilid = %s', $id);
+$teams = $DB->q('SELECT teamid,name FROM team WHERE affilid = %i', $id);
 if ($teams->count() == 0) {
     echo "<p class=\"nodata\">no teams</p>\n\n";
 } else {
@@ -131,9 +131,9 @@ if ($teams->count() == 0) {
         "</thead>\n<tbody>\n";
     while ($team = $teams->next()) {
         $listteams[] = $team['teamid'];
-        $link = '<a href="team.php?id=' . urlencode($team['teamid']) . '">';
+        $link = '<a href="team.php?id=' . urlencode((string)$team['teamid']) . '">';
         echo "<tr><td>" .
-        $link . "t" .specialchars($team['teamid']) . "</a></td><td>" .
+        $link . "t" .specialchars((string)$team['teamid']) . "</a></td><td>" .
         $link . specialchars($team['name']) . "</a></td></tr>\n";
     }
     echo "</tbody>\n</table>\n\n";

@@ -198,7 +198,7 @@ function fetch_executable(string $workdirpath, string $execid, string $md5sum) :
         if ($retval!=0) {
             error("Could not create directory '$execpath'");
         }
-        $content = request('executable', 'GET', 'execid=' . urlencode($execid));
+        $content = request('executable', 'GET', 'execid=' . urlencode((string)$execid));
         $content = base64_decode(dj_json_decode($content));
         if (file_put_contents($execzippath, $content) === false) {
             error("Could not create executable zip file in $execpath");
@@ -564,8 +564,8 @@ function disable(string $kind, string $idcolumn, $id, string $description, int $
     $error_id = request(
         'internal_error',
         'POST',
-        'judgingid=' . urlencode($judgingid) .
-        '&cid=' . urlencode($cid) .
+        'judgingid=' . urlencode((string)$judgingid) .
+        '&cid=' . urlencode((string)$cid) .
         '&description=' . urlencode($description) .
         '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
         '&disabled=' . urlencode($disabled)
@@ -628,7 +628,7 @@ function judge(array $row)
     }
 
     // Get the source code from the DB and store in local file(s)
-    $sources = request('submission_files', 'GET', 'submission_id=' . urlencode($row['submitid']));
+    $sources = request('submission_files', 'GET', 'submission_id=' . urlencode((string)$row['submitid']));
     $sources = dj_json_decode($sources);
     $files = array();
     foreach ($sources as $source) {
@@ -694,7 +694,7 @@ function judge(array $row)
         $args .= '&entry_point=' . urlencode($metadata['entry_point']);
     }
 
-    request('judgings/' . urlencode($row['judgingid']), 'PUT', $args);
+    request('judgings/' . urlencode((string)$row['judgingid']), 'PUT', $args);
 
     // compile error: our job here is done
     if (! $compile_success) {
@@ -738,7 +738,7 @@ function judge(array $row)
         }
 
         // get the next testcase
-        $testcase = request('testcases', 'GET', 'judgingid=' . urlencode($row['judgingid']));
+        $testcase = request('testcases', 'GET', 'judgingid=' . urlencode((string)$row['judgingid']));
         $tc = dj_json_decode($testcase);
         if ($tc === null) {
             $disabled = dj_json_encode(array(
@@ -748,8 +748,8 @@ function judge(array $row)
             $error_id = request(
                 'internal_error',
                 'POST',
-                'judgingid=' . urlencode($row['judgingid']) .
-                '&cid=' . urlencode($row['cid']) .
+                'judgingid=' . urlencode((string)$row['judgingid']) .
+                '&cid=' . urlencode((string)$row['cid']) .
                 '&description=' . urlencode("no test cases found") .
                 '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
                 '&disabled=' . urlencode($disabled)
@@ -776,7 +776,7 @@ function judge(array $row)
 
             if (!file_exists($tcfile[$inout])) {
                 $content = request('testcase_files', 'GET', 'testcaseid='
-                        . urlencode($tc['testcaseid'])
+                        . urlencode((string)$tc['testcaseid'])
                         . '&' . $inout);
                 $content = base64_decode(dj_json_decode($content));
                 if (file_put_contents($tcfile[$inout] . ".new", $content) === false) {
@@ -864,10 +864,10 @@ function judge(array $row)
         request(
             'judging_runs',
             'POST',
-            'judgingid=' . urlencode($row['judgingid'])
-            . '&testcaseid=' . urlencode($tc['testcaseid'])
+            'judgingid=' . urlencode((string)$row['judgingid'])
+            . '&testcaseid=' . urlencode((string)$tc['testcaseid'])
             . '&runresult=' . urlencode($result)
-            . '&runtime=' . urlencode($runtime)
+            . '&runtime=' . urlencode((string)$runtime)
             . '&judgehost=' . urlencode($myhost)
             . '&output_run='   . rest_encode_file($testcasedir . '/program.out', false)
             . '&output_error=' . rest_encode_file($testcasedir . '/program.err', $output_storage_limit)

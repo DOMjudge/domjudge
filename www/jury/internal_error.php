@@ -11,7 +11,7 @@ $id = getRequestID();
 
 $refresh = array(
     'after' => 15,
-    'url' => 'internal_error.php?id=' . urlencode($id),
+    'url' => 'internal_error.php?id=' . urlencode((string)$id),
 );
 
 $title = 'Internal Error e'.@$id;
@@ -37,10 +37,10 @@ if (isset($_REQUEST['ignore']) || isset($_REQUEST['resolve'])) {
     }
     $DB->q('UPDATE internal_error SET status=%s WHERE errorid=%i', $status, $id);
     if ($status == 'resolved') {
-        set_internal_error($disabled, $edata['cid'], 1);
+        set_internal_error($disabled, (int)$edata['cid'], 1);
     }
-    auditlog('internal_error', $id, 'internal error: ' + $status, '');
-    header('Location: internal_error.php?id='.urlencode($id));
+    auditlog('internal_error', $id, 'internal error: ' . $status, '');
+    header('Location: internal_error.php?id='.urlencode((string)$id));
 }
 
 require(LIBWWWDIR . '/header.php');
@@ -61,14 +61,14 @@ echo "<tr><td>Time:</td><td>"
     . "</td></tr>\n";
 if (isset($edata['judgingid'])) {
     echo "<tr><td>Related Judging:</td><td>"
-        . "<a href=\"submission.php?jid=" . urlencode($edata['judgingid']) . "\">j"
-        . specialchars($edata['judgingid']) . "</a>"
+        . "<a href=\"submission.php?jid=" . urlencode((string)$edata['judgingid']) . "\">j"
+        . specialchars((string)$edata['judgingid']) . "</a>"
         . "</td></tr>\n";
 }
 if (isset($edata['cid'])) {
     echo "<tr><td>Related Contest:</td><td>"
-        . "<a href=\"contest.php?id=" . urlencode($edata['cid']) . "\">c"
-        . specialchars($edata['cid']) . "</a>"
+        . "<a href=\"contest.php?id=" . urlencode((string)$edata['cid']) . "\">c"
+        . specialchars((string)$edata['cid']) . "</a>"
         . "</td></tr>\n";
 }
 
@@ -103,11 +103,11 @@ echo "</pre></td></tr>\n</table>\n\n";
 
 
 if ($edata['status'] == 'open') {
-    echo addForm($pagename . '?id=' . urlencode($id))
+    echo addForm($pagename . '?id=' . urlencode((string)$id))
         . addSubmit('ignore error', 'ignore')
         . addEndForm();
 
-    echo addForm($pagename . '?id=' . urlencode($id))
+    echo addForm($pagename . '?id=' . urlencode((string)$id))
         . addSubmit('mark as resolved and re-enable ' . specialchars($disabled['kind']), 'resolve')
         . addEndForm();
 }

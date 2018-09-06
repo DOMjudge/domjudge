@@ -10,14 +10,14 @@ require('init.php');
 
 $id = getRequestID();
 $title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
-                 'user' . ($id ? ' '.specialchars(@$id) : ''));
+                 'user' . (isset($id) ? specialchars(' '.$id) : ''));
 
 if (isset($_GET['cmd'])) {
     $cmd = $_GET['cmd'];
 } else {
     $refresh = array(
         'after' => 15,
-        'url' => $pagename . '?id=' . urlencode($id) .
+        'url' => $pagename . '?id=' . urlencode((string)$id) .
             (isset($_GET['restrict']) ? '&restrict=' . urlencode($_GET['restrict']) : ''),
     );
 }
@@ -176,7 +176,7 @@ if (!empty($row['ip_address'])) {
 <tr><td>Team:</td><?php
 if ($row['teamid']) {
         echo "<td class=\"teamid\"><a href=\"team.php?id=" .
-         urlencode($row['teamid']) . "\">" .
+         urlencode((string)$row['teamid']) . "\">" .
          specialchars($row['teamname'] . " (t" .$row['teamid'].")") . "</a></td>";
     } else {
         echo "<td>-</td>";

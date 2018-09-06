@@ -191,7 +191,7 @@ if ($judgehosts->count() == 0) {
              "><td>"
              . $link . specialchars($judgehost['hostname']) .
              "</a></td><td>" .
-             $link . printyn($judgehost['active']) .
+             $link . printyn((bool)$judgehost['active']) .
              "</a></td></tr>\n";
     }
     echo "</tbody>\n</table>\n\n";

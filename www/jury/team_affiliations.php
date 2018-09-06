@@ -32,7 +32,7 @@ if ($res->count() == 0) {
 
     while ($row = $res->next()) {
         $countryflag = "images/countries/" . urlencode($row['country']) . ".png";
-        $link = '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">';
+        $link = '<a href="team_affiliation.php?id=' . urlencode((string)$row['affilid']) . '">';
         echo '<tr><td>' . $link . specialchars($row['affilid']) .
              '</a></td><td>' . $link . specialchars($row['shortname']) .
              '</a></td><td>' . $link . specialchars($row['name']) .

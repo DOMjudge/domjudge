@@ -130,7 +130,7 @@ function putClar(array $clar)
     } else {
         if (IS_JURY) {
             $currentSelectedCategory = $clar['cid'] . '-' . $clar['probid'];
-            echo '<a href="problem.php?id=' . urlencode($clar['probid']) .
+            echo '<a href="problem.php?id=' . urlencode((string)$clar['probid']) .
                  '">' . $prefix . 'Problem ' . specialchars($clar['shortname'] . ": " .
                  $clar['probname']) . '</a>';
         } else {
@@ -248,7 +248,7 @@ function putClarification(int $id, $team = null)
         // check permission to view this clarification
         if (IS_JURY || canViewClarification($team, $clar)) {
             if ($team !== null) {
-                setClarificationViewed($clar['clarid'], $team);
+                setClarificationViewed((int)$clar['clarid'], $team);
             }
             putClar($clar);
             echo "<br />\n\n";
@@ -277,7 +277,7 @@ function summarizeClarification(string $body) : string
 /**
  * Print a list of clarifications in a table with links to the clarifications.
  */
-function putClarificationList($clars, $team = null)
+function putClarificationList($clars, int $team = null)
 {
     global $username, $cids;
 
@@ -306,7 +306,7 @@ function putClarificationList($clars, $team = null)
         }
 
         $clar['clarid'] = (int)$clar['clarid'];
-        $link = '<a href="clarification.php?id=' . urlencode($clar['clarid'])  . '">';
+        $link = '<a href="clarification.php?id=' . urlencode((string)$clar['clarid'])  . '">';
 
         if (isset($clar['unread'])) {
             echo '<tr class="unread">';
@@ -375,7 +375,7 @@ function putClarificationList($clars, $team = null)
         if (IS_JURY) {
             unset($answered, $jury_member);
             $claim = false;
-            $answered = printyn($clar['answered']);
+            $answered = printyn((bool)$clar['answered']);
             if (empty($clar['jury_member'])) {
                 $jury_member = '&nbsp;';
             } else {
@@ -532,7 +532,7 @@ function confirmClar() {
 <form action="<?=specialchars($action)?>" method="post" id="sendclar" onsubmit="return confirmClar();">
 
 <?php if (IS_JURY && !empty($respid)): ?>
-<input type="hidden" name="id" value="<?=specialchars($respid); ?>" />
+<input type="hidden" name="id" value="<?=specialchars((string)$respid); ?>" />
 <?php endif; ?>
 
 <div class="form-group">

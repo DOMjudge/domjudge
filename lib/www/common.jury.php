@@ -30,9 +30,9 @@ function addLink(string $table, bool $multi = false) : string
 function editLink(string $table, $value, bool $multi = false) : string
 {
     return "<a href=\"" . specialchars($table) . ".php?cmd=edit" .
-        ($multi ? "" : "&amp;id=" . urlencode($value)) .
+        ($multi ? "" : "&amp;id=" . urlencode((string)$value)) .
         "&amp;referrer=" . urlencode(basename($_SERVER['SCRIPT_NAME']) .
-        (empty($_REQUEST['id']) ? '' : '?id=' . urlencode($_REQUEST['id']))) .
+        (empty($_REQUEST['id']) ? '' : '?id=' . urlencode((string)$_REQUEST['id']))) .
         "\">" .
         "<img src=\"../images/edit" . ($multi?"-multi":"") .
         ".png\" alt=\"edit" . ($multi?" multiple":"") .
@@ -58,7 +58,7 @@ function delLinkMultiple(string $table, array $fields, array $values, string $re
 {
     $arguments = '';
     foreach ($fields as $i => $field) {
-        $arguments .= '&amp;' . $field . '=' . urlencode($values[$i]);
+        $arguments .= '&amp;' . $field . '=' . urlencode((string)$values[$i]);
     }
     return "<a href=\"delete.php?table=" . urlencode($table) . $arguments .
            "&amp;referrer=" . urlencode($referrer) .
@@ -74,7 +74,7 @@ function delLinkMultiple(string $table, array $fields, array $values, string $re
  */
 function exportProblemLink($probid) : string
 {
-    return '<a href="export_problem.php?id=' . urlencode($probid) .
+    return '<a href="export_problem.php?id=' . urlencode((string)$probid) .
         '"><img src="../images/b_save.png" ' .
         ' title="export problem as zip-file" alt="export" /></a>';
 }
@@ -89,7 +89,7 @@ function rejudgeForm(string $table, $id) : string
     $ret = '<div id="rejudge" class="framed">' .
          addForm('rejudge.php') .
          addHidden('table', $table) .
-         addHidden('id', $id);
+         addHidden('id', (string)$id);
 
     $button = 'REJUDGE this submission';
     $question = "Rejudge submission s$id?";

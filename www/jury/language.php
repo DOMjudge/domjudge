@@ -118,23 +118,23 @@ if (! $data) {
 
 echo "<h1>Language ".specialchars($data['name'])."</h1>\n\n";
 
-echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
+echo addForm($pagename . '?id=' . urlencode((string)$id)) . "<p>\n" .
     addHidden('id', $id) .
-    addHidden('val[toggle_judge]', !$data['allow_judge']) .
-    addHidden('val[toggle_submit]', !$data['allow_submit']).
+    addHidden('val[toggle_judge]', (string)!$data['allow_judge']) .
+    addHidden('val[toggle_submit]', (string)!$data['allow_submit']).
     "</p>\n";
 
 ?>
 <table>
-<tr><td>ID/extension:</td><td><?php echo specialchars($data['langid'])?></td></tr>
+<tr><td>ID/extension:</td><td><?php echo specialchars((string)$data['langid'])?></td></tr>
 <tr><td>Name:        </td><td><?php echo specialchars($data['name'])?></td></tr>
 
-<tr><td>Entry point: </td><td><?php echo printyn($data['require_entry_point']) .
+<tr><td>Entry point: </td><td><?php echo printyn((bool)$data['require_entry_point']) .
     ($data['require_entry_point'] && !empty($data['entry_point_description']) ?
     ' (' . specialchars($data['entry_point_description']) . ')' : '') ?>
 </td></tr>
 
-<tr><td>Allow submit:</td><td><?php echo printyn($data['allow_submit']) . ' '.
+<tr><td>Allow submit:</td><td><?php echo printyn((bool)$data['allow_submit']) . ' '.
     addSubmit(
         'toggle',
         'cmd[toggle_submit]',
@@ -142,7 +142,7 @@ echo addForm($pagename . '?id=' . urlencode($id)) . "<p>\n" .
         " submissions for this language?')"
     ); ?>
 </td></tr>
-<tr><td>Allow judge: </td><td><?php echo printyn($data['allow_judge']) . ' ' .
+<tr><td>Allow judge: </td><td><?php echo printyn((bool)$data['allow_judge']) . ' ' .
     addSubmit(
         'toggle',
         'cmd[toggle_judge]',

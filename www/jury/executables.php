@@ -29,16 +29,16 @@ if ($res->count() == 0) {
     $lastcid = -1;
 
     while ($row = $res->next()) {
-        $link = '<a href="executable.php?id=' . urlencode($row['execid']) . '">';
+        $link = '<a href="executable.php?id=' . urlencode((string)$row['execid']) . '">';
 
         echo "<tr><td class=\"execid\">" . $link .
-                specialchars($row['execid'])."</a>".
+            specialchars((string)$row['execid'])."</a>".
             "</td><td>" . $link . specialchars($row['type'])."</a>".
             "</td><td>" . $link . specialchars(str_cut($row['description'], 40))."</a>".
             "</td><td class=\"size\">" . $link .
-                printsize($row['size'])."</a>".
+            printsize((int)$row['size'])."</a>".
             "</td><td class=\"md5\">" . $link .
-                specialchars($row['md5sum'])."</a>".
+            specialchars($row['md5sum'])."</a>".
             "</td>";
         if (IS_ADMIN) {
             echo '<td title="export executable as zip-file"><a href="executable.php?fetch&amp;id=' . urlencode($row['execid']) .

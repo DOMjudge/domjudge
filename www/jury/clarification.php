@@ -174,7 +174,7 @@ if (! $isgeneral) {
     echo "<h1>Clarification $id</h1>\n\n";
 
     if (!$req['answered']) {
-        echo addForm($pagename . '?id=' . urlencode($id));
+        echo addForm($pagename . '?id=' . urlencode((string)$id));
 
         echo "<p>Claimed: " .
         "<strong>" . printyn(!empty($req['jury_member'])) . "</strong>";

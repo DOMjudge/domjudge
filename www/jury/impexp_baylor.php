@@ -84,7 +84,7 @@ if (isset($_REQUEST['upload'])) {
         if ($lastProblem === null) {
             $lastProblem = 0;
         } else {
-            $lastProblem = scoretime($lastProblem);
+            $lastProblem = scoretime((float)$lastProblem);
         }
 
         //  If the scoreboard times have been kept in seconds,

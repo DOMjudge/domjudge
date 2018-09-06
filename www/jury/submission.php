@@ -80,7 +80,7 @@ function display_runinfo($runinfo, $is_final)
             $short = substr($run['runresult'], 0, 1);
             $class = "tc_incorrect";
         }
-        $tclist .= "<a title=\"#" . ($key + 1) . ", desc: " . specialchars($run['description']) .
+        $tclist .= "<a title=\"#" . ($key + 1) . ", desc: " . specialchars($run['description'] ?? '') .
             ($run['runresult'] !== null ?  ", runtime: " . $run['runtime'] . "s, result: " . $run['runresult'] : '') .
             "\" href=\"$link\"" .
             ($run['runresult'] == 'correct' ? ' onclick="display_correctruns(true);" ' : '') .
@@ -319,7 +319,7 @@ if (!isset($jid)) {
     // Automatically refresh page while we wait for judging data.
     $refresh = array(
         'after' => 15,
-        'url' => 'submission.php?id=' . urlencode($id)
+        'url' => 'submission.php?id=' . urlencode((string)$id)
     );
 }
 
@@ -328,15 +328,15 @@ require_once(LIBWWWDIR . '/header.php');
 
 echo "<br/><h1 style=\"display:inline;\">Submission s" . $id .
     (isset($submdata['origsubmitid']) ?
-      ' (resubmit of <a href="submission.php?id='. urlencode($submdata['origsubmitid']) .
-      '">s' . specialchars($submdata['origsubmitid']) . '</a>)' : '') .
+      ' (resubmit of <a href="submission.php?id='. urlencode((string)$submdata['origsubmitid']) .
+      '">s' . specialchars((string)$submdata['origsubmitid']) . '</a>)' : '') .
     ($submdata['valid'] ? '' : ' (ignored)') . "</h1>\n\n";
 if (IS_ADMIN) {
     $val = ! $submdata['valid'];
     $unornot = $val ? 'un' : '';
     echo "&nbsp;\n" . addForm('ignore.php') .
-        addHidden('id', $id) .
-        addHidden('val', $val) .
+        addHidden('id', (string)$id) .
+        addHidden('val', (string)$val) .
             '<input type="submit" value="' . $unornot .
             'IGNORE this submission" onclick="return confirm(\'Really ' . $unornot .
             "ignore submission s$id?');\" /></form>\n";
@@ -401,10 +401,10 @@ if (count($jdata) > 1 || (count($jdata)==1 && !isset($jid))) {
 
         echo '<td>' . $link . 'j' . $judgingid . '</a></td>' .
             '<td>' . $link . printtime($jud['starttime'], null, $submdata['cid']) . '</a></td>' .
-            '<td>' . $link . specialchars($jud['max_runtime']) .
+            '<td>' . $link . specialchars((string)$jud['max_runtime']) .
                              (isset($jud['max_runtime']) ? ' s' : '') . '</a></td>' .
-            '<td>' . $link . printhost(@$jud['judgehost']) . '</a></td>' .
-            '<td>' . $link . printresult(@$jud['result'], $jud['valid']) .
+            '<td>' . $link . printhost($jud['judgehost'] ?? '') . '</a></td>' .
+            '<td>' . $link . printresult($jud['result'] ?? '', (bool)$jud['valid']) .
                              printjudgingbusy($jud) . '</a></td>' .
             '<td>' . $link . specialchars($rinfo) . '</a></td>' .
             "</tr>\n";
@@ -572,8 +572,8 @@ $state = '';
 if (isset($jud['rejudgingid'])) {
     $reason = $DB->q('VALUE SELECT reason FROM rejudging WHERE rejudgingid=%i', $jud['rejudgingid']);
     $state = ' (rejudging <a href="rejudging.php?id=' .
-         urlencode($jud['rejudgingid']) . '">r' .
-         specialchars($jud['rejudgingid']) .
+         urlencode((string)$jud['rejudgingid']) . '">r' .
+         specialchars((string)$jud['rejudgingid']) .
          '</a>, reason: ' .
          specialchars($reason) . ')';
 } elseif ($jud['valid'] != 1) {
@@ -585,7 +585,7 @@ echo rejudgeForm('submission', $id) . "<br /><br />\n\n";
 echo "<h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .  $state .
     "</h2>\n\n&nbsp;";
 if (!$jud['verified']) {
-    echo addForm($pagename . '?id=' . urlencode($id) . '&amp;jid=' . urlencode($jid));
+    echo addForm($pagename . '?id=' . urlencode((string)$id) . '&amp;jid=' . urlencode((string)$jid));
 
     if (!empty($jud['jury_member'])) {
         echo ' (claimed by ' . specialchars($jud['jury_member']) . ') ';
@@ -600,7 +600,7 @@ if (!$jud['verified']) {
 }
 echo "<br /><br />\n\n";
 
-echo 'Result: ' . printresult($jud['result'], $jud['valid']) . ($lastjud === null ? '' :
+echo 'Result: ' . printresult($jud['result'], (bool)$jud['valid']) . ($lastjud === null ? '' :
     '<span class="lastresult"> (<a href="submission.php?id=' . $lastsubmitid . '">s' . $lastsubmitid. '</a>: '
     . @$lastjud['result'] . ')</span>') . ', ' .
     'Judgehost: <a href="judgehost.php?id=' . urlencode($jud['judgehost']) . '">' .
@@ -611,9 +611,9 @@ echo "<span class=\"judgetime\">Judging started: " . printtime($jud['starttime']
 
 if ($judging_ended) {
     echo ', finished in '.
-            printtimediff($jud['starttime'], $jud['endtime']) . ' s';
+        printtimediff((float)$jud['starttime'], $jud['endtime']) . ' s';
 } elseif ($jud['valid'] || isset($jud['rejudgingid'])) {
-    echo ' [still judging - busy ' . printtimediff($jud['starttime']) . ']';
+    echo ' [still judging - busy ' . printtimediff((float)$jud['starttime']) . ']';
 } else {
     echo ' [aborted]';
 }
@@ -659,13 +659,13 @@ if (!empty($jud['result'])) {
         $val = ! $jud['verified'];
 
         echo addForm('verify.php') .
-            addHidden('id', $jud['judgingid']) .
-            addHidden('val', $val) .
+            addHidden('id', (string)$jud['judgingid']) .
+            addHidden('val', (string)$val) .
             addHidden('redirect', @$_SERVER['HTTP_REFERER']);
     }
 
     // Display verification data: verified, by whom, and comment.
-    echo "<p>Verified: <strong>" . printyn($jud['verified']) . "</strong>";
+    echo "<p>Verified: <strong>" . printyn((bool)$jud['verified']) . "</strong>";
     if ($jud['verified'] && ! empty($jud['jury_member'])) {
         echo ", by " . specialchars($jud['jury_member']);
         if (!empty($jud['verify_comment'])) {
@@ -706,7 +706,7 @@ if (!empty($jud['result'])) {
         echo msgbox(
             'results differ',
             'This submission was judged as ' .
-            '<a href="' . EXT_CCS_URL . urlencode($submdata['externalid']) . '" target="extCCS">' .
+            '<a href="' . EXT_CCS_URL . urlencode((string)$submdata['externalid']) . '" target="extCCS">' .
             printresult($submdata['externalresult']) . '</a>' .
             ' by the external CCS, but as ' .
             printresult($jud['result']) . ' by DOMjudge.'
@@ -758,9 +758,9 @@ foreach ($runs as $run) {
         "<tr><td>Description:</td><td>" .
         descriptionExpand($run['description']) . "</td></tr>" .
         "<tr><td>Download: </td><td>" .
-        "<a href=\"testcase.php?probid=" . specialchars($submdata['probid']) .
+        "<a href=\"testcase.php?probid=" . specialchars((string)$submdata['probid']) .
         "&amp;rank=" . $run['rank'] . "&amp;fetch=input\">Input</a> / " .
-        "<a href=\"testcase.php?probid=" . specialchars($submdata['probid']) .
+        "<a href=\"testcase.php?probid=" . specialchars((string)$submdata['probid']) .
         "&amp;rank=" . $run['rank'] . "&amp;fetch=output\">Reference Output</a> / " .
         "<a href=\"team_output.php?runid=" . $run['runid'] . "&amp;cid=" .
         $submdata['cid'] . "\">Team Output</a></td></tr>" .
@@ -771,7 +771,7 @@ foreach ($runs as $run) {
         "</table>\n\n";
     echo "</td><td>";
     if (isset($run['image_thumb'])) {
-        $imgurl = "./testcase.php?probid=" .  urlencode($submdata['probid']) .
+        $imgurl = "./testcase.php?probid=" .  urlencode((string)$submdata['probid']) .
             "&amp;rank=" . $run['rank'] . "&amp;fetch=image";
         echo "<a href=\"$imgurl\">";
         echo '<img src="data:image/' . $run['image_type'] . ';base64,' .

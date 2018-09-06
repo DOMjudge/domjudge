@@ -93,7 +93,7 @@ echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 if ($clarifications->count() == 0) {
     echo "<p class=\"nodata\">No clarifications.</p>\n\n";
 } else {
-    putClarificationList($clarifications, $teamid);
+    putClarificationList($clarifications, (int)$teamid);
 }
 
 echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
@@ -101,7 +101,7 @@ echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
 if ($requests->count() == 0) {
     echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
 } else {
-    putClarificationList($requests, $teamid);
+    putClarificationList($requests, (int)$teamid);
 }
 
 ?>
