@@ -9,21 +9,31 @@
 JUDGEHOSTUSER=@DOMJUDGE_USER@
 CGROUPBASE=@judgehost_cgroupdir@
 
-if ! grep -Eq 'cgroup_enable.+memory' /proc/cmdline || ! grep -Eq 'swapaccount.+1' /proc/cmdline; then
-        echo "Error: cgroup support missing from running kernel. Unable to continue.
-
-        To fix this, please make the following changes:
-        1. In /etc/default/grub, add 'cgroup_enable=memory swapaccount=1' to GRUB_CMDLINE_LINUX_DEFAULT
-        2. Run update-grub
-        3. Reboot" >&2
-        exit 1
-fi
-
 for i in cpuset memory; do
-	mkdir -p $CGROUPBASE/$i
-	mount -t cgroup -o$i $i $CGROUPBASE/$i/
-	mkdir -p $CGROUPBASE/$i/domjudge
+    mkdir -p $CGROUPBASE/$i
+    if [ ! -d $CGROUPBASE/$i/ ]; then
+        if ! mount -t cgroup -o$i $i $CGROUPBASE/$i/; then
+            echo "Error: Can not mount $i cgroup. Probably cgroup support is missing from running kernel. Unable to continue.
+
+            To fix this, please make the following changes:
+            1. In /etc/default/grub, add 'cgroup_enable=memory swapaccount=1' to GRUB_CMDLINE_LINUX_DEFAULT
+            2. Run update-grub
+            3. Reboot" >&2
+            exit 1
+        fi
+    fi
+    mkdir -p $CGROUPBASE/$i/domjudge
 done
+
+if [ ! -f $CGROUPBASE/memory/memory.limit_in_bytes ] || [ ! -f $CGROUPBASE/memory/memory.memsw.limit_in_bytes ]; then
+    echo "Error: cgroup support missing memory features in running kernel. Unable to continue.
+
+    To fix this, please make the following changes:
+    1. In /etc/default/grub, add 'cgroup_enable=memory swapaccount=1' to GRUB_CMDLINE_LINUX_DEFAULT
+    2. Run update-grub
+    3. Reboot" >&2
+    exit 1
+fi
 
 chown -R $JUDGEHOSTUSER $CGROUPBASE/*/domjudge
 
