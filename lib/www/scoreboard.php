@@ -207,9 +207,9 @@ function getTeams($filter, bool $jury, array $cdata) : array
                    LEFT JOIN team_affiliation USING (affilid)
                    WHERE team.enabled = 1 AND (ct.teamid IS NOT NULL OR contest.public = 1)' .
                   ($jury ? '' : ' AND visible = 1') .
-                  (isset($filter['affilid']) ? ' AND team.affilid IN (%As) ' : ' %_') .
+                  (isset($filter['affilid']) ? ' AND team.affilid IN (%Ai) ' : ' %_') .
                   (isset($filter['country']) ? ' AND country IN (%As) ' : ' %_') .
-                  (isset($filter['categoryid']) ? ' AND team.categoryid IN (%As) ' : ' %_') .
+                  (isset($filter['categoryid']) ? ' AND team.categoryid IN (%Ai) ' : ' %_') .
                   (isset($filter['teams']) ? ' AND team.teamid IN (%Ai) ' : ' %_'),
                   $cdata['cid'], @$filter['affilid'], @$filter['country'],
                   @$filter['categoryid'], @$filter['teams']);
@@ -841,7 +841,7 @@ function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = fal
                               LEFT JOIN team t USING (affilid)
                               INNER JOIN contest c ON (c.cid = %i)
                               LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
-                              WHERE categoryid IN (%As) AND c.cid = %i AND
+                              WHERE categoryid IN (%Ai) AND c.cid = %i AND
                               (c.public = 1 OR ct.teamid IS NOT NULL)
                               GROUP BY affilid',
                              $cdata['cid'], array_keys($categids), $cdata['cid']);

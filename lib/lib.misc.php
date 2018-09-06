@@ -842,7 +842,7 @@ function submit_solution(
     }
     $probdata = $DB->q('MAYBETUPLE SELECT probid, points FROM problem
                         INNER JOIN contestproblem USING (probid)
-                        WHERE probid = %s AND cid = %i AND allow_submit = 1',
+                        WHERE probid = %i AND cid = %i AND allow_submit = 1',
                        $prob, $contest);
 
     if (empty($probdata)) {
@@ -884,8 +884,8 @@ function submit_solution(
     $id = $DB->q('RETURNID INSERT INTO submission
                   (cid, teamid, probid, langid, submittime, origsubmitid, entry_point,
                    externalid, externalresult)
-                  VALUES (%i, %i, %i, %s, %s, %i, %s, %s, %s)',
-                 $contest, $teamid, $probid, $langid, $submittime,
+                  VALUES (%i, %i, %i, %s, %f, %i, %s, %s, %s)',
+                 $contest, (int)$teamid, (int)$probid, $langid, $submittime,
                  $origsubmitid, $entry_point, $extid, $extresult);
 
     for ($rank=0; $rank<count($files); $rank++) {
@@ -1203,8 +1203,8 @@ function auditlog(
 
     $DB->q('INSERT INTO auditlog
             (logtime, cid, user, datatype, dataid, action, extrainfo)
-            VALUES(%s, %i, %s, %s, %s, %s, %s)',
-           now(), $cid, $user, $datatype, $dataid, $action, $extrainfo);
+            VALUES(%f, %i, %s, %s, %s, %s, %s)',
+           now(), $cid, $user, $datatype, (string)$dataid, $action, $extrainfo);
 }
 
 /* Mapping from REST API endpoints to relevant information:

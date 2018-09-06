@@ -24,7 +24,7 @@ $res = $DB->q('SELECT p.probid,p.name,p.timelimit,p.memlimit,p.outputlimit,
 if (count($cids)!=0) {
     $activecontests = $DB->q("KEYVALUETABLE SELECT probid, count(cid)
                               FROM contestproblem
-                              WHERE cid IN (%As) GROUP BY probid", $cids);
+                              WHERE cid IN (%Ai) GROUP BY probid", $cids);
 } else {
     $activecontests = array();
 }
