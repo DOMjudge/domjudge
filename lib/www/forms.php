@@ -66,7 +66,7 @@ function addRadioButton(string $name, bool $checked = false, $value = null) : st
 /**
  * A hidden form field.
  */
-function addHidden(string $name, string $value) : string
+function addHidden(string $name, string $value = null) : string
 {
     return addInputField('hidden', $name, $value);
 }
