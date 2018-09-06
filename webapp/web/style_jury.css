@@ -1,3 +1,16 @@
+body {
+    padding-top: .5rem;
+}
+main {
+    padding: 0;
+}
+h1,h2,h3,h4,h5,h6 {
+    text-align: left;
+}
+h1 {
+    font-size: 2em;
+    padding-top: .5rem;
+}
 .balloons td {
 	padding-right: 2ex;
 	padding-bottom: 2ex;

@@ -40,37 +40,6 @@ if (!isset($menu)) {
 <?php if (! IS_JURY): ?>
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link rel="stylesheet" href="../css/bootstrap.min.css?v=<?=ASSET_TAG?>" type="text/css" />
-<style>
-body {
-  padding-top: 2rem;
-}
-main {
-  padding: 1rem 3rem;
-}
-.nav-item {
-  padding-left: 1em;
-}
-h1,h2,h3,h4,h5,h6 {
-  text-align: center;
-}
-h1 { font-size: 2em;
-  padding-top: 3rem;
-}
-h2 { font-size: 1.5em; }
-h3 { font-size: 1.17em; }
-h4 { font-size: 1.12em; }
-h5 { font-size: .83em; }
-h6 { font-size: .75em; }
-.submitform {
-  max-width: 450px;
-}
-.clarificationform {
-  max-width: 800px;
-}
-#submitbut {
-  margin-right: 2rem;
-}
-</style>
 <?php endif; ?>
 <link rel="stylesheet" href="../style.css?v=<?=ASSET_TAG?>" type="text/css" />
 <link rel="stylesheet" href="../css/octicons/octicons.css?v=<?=ASSET_TAG?>" />

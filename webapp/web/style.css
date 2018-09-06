@@ -2,6 +2,7 @@ body {
 	color: black;
 	background-color: white;
 	font-family: sans-serif;
+	padding-top: 2rem;
 }
 
 img {	border: 0; }
@@ -361,6 +362,9 @@ h3.teamoverview {
 #submitform, .submissiondone {
 	text-align: center;
 }
+.submitform {
+  max-width: 450px;
+}
 .submissiondone a {
 	color: red;
 }
@@ -519,4 +523,30 @@ table.rejudgetable td.identical {
 }
 table.rejudgetable td.zero {
 	background-color: #F0F8FF;
+}
+
+main {
+    padding: 1rem 3rem;
+}
+.nav-item {
+    padding-left: 1em;
+}
+#submitbut {
+    margin-right: 2rem;
+}
+h1,h2,h3,h4,h5,h6 {
+    text-align: center;
+}
+h1 {
+    font-size: 2em;
+    padding-top: 3rem;
+}
+h2 { font-size: 1.5em; }
+h3 { font-size: 1.17em; }
+h4 { font-size: 1.12em; }
+h5 { font-size: .83em; }
+h6 { font-size: .75em; }
+
+.clarificationform {
+    max-width: 800px;
 }
