@@ -1,6 +1,7 @@
 <?php
 namespace DOMJudgeBundle\Controller;
 
+use DOMJudgeBundle\Service\DOMJudgeService;
 use FOS\RestBundle\Controller\FOSRestController;
 
 use FOS\RestBundle\Controller\Annotations\View;
@@ -28,6 +29,16 @@ use DOMJudgeBundle\Utils\Utils;
 class APIController extends FOSRestController
 {
     public $apiVersion = 4;
+
+    /**
+     * @var DOMJudgeService
+     */
+    private $DOMJudgeService;
+
+    public function __construct(DOMJudgeService $DOMJudgeService)
+    {
+        $this->DOMJudgeService = $DOMJudgeService;
+    }
 
     /**
      * @Get("/")
@@ -128,7 +139,7 @@ class APIController extends FOSRestController
                 'public' => true,
             )
         );
-        $penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
+        $penalty_time = $this->DOMJudgeService->dbconfig_get('penalty_time', 20);
 
         $result = [];
         foreach ($data as $contest) {
@@ -153,7 +164,7 @@ class APIController extends FOSRestController
         $isJury = $this->isGranted('ROLE_JURY');
         if (($isJury && $contest->getEnabled())
             || (!$isJury && $contest->isActive())) {
-            $penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
+            $penalty_time = $this->DOMJudgeService->dbconfig_get('penalty_time', 20);
             return $contest->serializeForAPI($penalty_time, $strict);
         } else {
             return null;
@@ -165,7 +176,7 @@ class APIController extends FOSRestController
      */
     public function getContestYaml(Contest $contest)
     {
-        $penalty_time = $this->get('domjudge.domjudge')->dbconfig_get('penalty_time', 20);
+        $penalty_time = $this->DOMJudgeService->dbconfig_get('penalty_time', 20);
         $response = new StreamedResponse();
         $response->setCallback(function () use ($contest, $penalty_time) {
             echo "name:                     " . $contest->getName() . "\n";

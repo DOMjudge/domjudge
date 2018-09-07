@@ -1,9 +1,10 @@
 <?php
 namespace DOMJudgeBundle\Controller;
 
+use DOMJudgeBundle\Service\DOMJudgeService;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 use DOMJudgeBundle\Utils\Utils;
@@ -13,6 +14,16 @@ use DOMJudgeBundle\Entity\Team;
 
 class SecurityController extends Controller
 {
+    /**
+     * @var DOMJudgeService
+     */
+    private $DOMJudgeService;
+
+    public function __construct(DOMJudgeService $DOMJudgeService)
+    {
+        $this->DOMJudgeService = $DOMJudgeService;
+    }
+
     /**
      * @Route("/login", name="login")
      */
@@ -38,7 +49,7 @@ class SecurityController extends Controller
         return $this->render('DOMJudgeBundle:security:login.html.twig', array(
             'last_username' => $lastUsername,
             'error'         => $error,
-                'allow_registration' => $this->get('domjudge.domjudge')->dbconfig_get('allow_registration', false)
+            'allow_registration' => $this->DOMJudgeService->dbconfig_get('allow_registration', false)
         ));
     }
 
@@ -51,7 +62,7 @@ class SecurityController extends Controller
         if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirect($this->generateUrl('legacy.index'));
         }
-        if (!$this->get('domjudge.domjudge')->dbconfig_get('allow_registration', false)) {
+        if (!$this->DOMJudgeService->dbconfig_get('allow_registration', false)) {
             throw new \Symfony\Component\HttpKernel\Exception\HttpException(400, "Registration not enabled");
         }
 

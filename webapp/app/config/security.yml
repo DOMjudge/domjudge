@@ -1,5 +1,5 @@
 # To get started with security, check out the documentation:
-# http://symfony.com/doc/current/security.html
+# https://symfony.com/doc/current/security.html
 security:
     role_hierarchy:
         ROLE_JURY: [ROLE_BALLOON, ROLE_API]
@@ -29,7 +29,7 @@ security:
             provider: domjudge_db_provider
             http_basic: ~
             stateless: true
-            user_checker: domjudge.user_checker
+            user_checker: DOMJudgeBundle\Security\UserChecker
             anonymous: ~
 
         # api only does http_basic auth
@@ -37,7 +37,7 @@ security:
             pattern: ^/feed
             provider: domjudge_db_provider
             http_basic: ~
-            user_checker: domjudge.user_checker
+            user_checker: DOMJudgeBundle\Security\UserChecker
             stateless: true
             anonymous: ~
 
@@ -45,7 +45,8 @@ security:
         main:
             pattern: ^/
             provider: domjudge_db_provider
-            user_checker: domjudge.user_checker
+            user_checker: DOMJudgeBundle\Security\UserChecker
+            logout_on_user_change: true
 
             anonymous: ~
             form_login:
