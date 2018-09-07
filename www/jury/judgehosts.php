@@ -106,7 +106,7 @@ $work10min   = $DB->q($query, $now, $from, $from);
 $from = $cdata['starttime'];
 $workcontest = $DB->q($query, $now, $from, $from);
 
-$clen = difftime($now, $cdata['starttime']);
+$clen = $cdata === null ? null : difftime($now, $cdata['starttime']);
 
 if ($res->count() == 0) {
     echo "<p class=\"nodata\">No judgehosts defined</p>\n\n";
@@ -147,7 +147,7 @@ if ($res->count() == 0) {
                 '%.2f&nbsp;%.2f&nbsp;%.2f',
                     @$work2min[   $row['hostname']] / (2*60),
                     @$work10min[  $row['hostname']] / (10*60),
-                    @$workcontest[$row['hostname']] / $clen
+                    @$workcontest[$row['hostname']] / ($clen ?? 1)
             ) . "</a></td>";
         if (IS_ADMIN) {
             if ($row['active']) {

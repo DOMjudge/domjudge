@@ -95,15 +95,19 @@ if ($cid !== null) {
     $contestids = array($cid);
 }
 
+if (empty($contestids)) {
+    $affils = [];
+} else {
 // Filtering by affiliation or room
-$affils = $DB->q('TABLE SELECT affilid,
-                  team_affiliation.name, room
-                  FROM team t
-                  LEFT JOIN team_affiliation USING (affilid)
-                  INNER JOIN contest c ON (c.cid IN (%Ai))
-                  LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
-                  WHERE c.public = 1 OR ct.teamid IS NOT NULL
-                  GROUP BY affilid, room', $contestids);
+    $affils = $DB->q('TABLE SELECT affilid,
+                      team_affiliation.name, room
+                      FROM team t
+                      LEFT JOIN team_affiliation USING (affilid)
+                      INNER JOIN contest c ON (c.cid IN (%Ai))
+                      LEFT JOIN contestteam ct ON (ct.teamid = t.teamid AND ct.cid = c.cid)
+                      WHERE c.public = 1 OR ct.teamid IS NOT NULL
+                      GROUP BY affilid, room', $contestids);
+}
 
 // all possible filter values for the select field
 $affilids  = array();
