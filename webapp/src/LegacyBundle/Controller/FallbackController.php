@@ -2,7 +2,7 @@
 
 namespace LegacyBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use DOMJudgeBundle\Service\DOMJudgeService;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,16 +10,19 @@ use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 
 use DOMJudgeBundle\Utils\Utils;
 
-/**
- * @Route(service="legacy.controller.fallback")
- */
 class FallbackController extends Controller
 {
     private $webDir;
 
-    public function __construct($webDir, Container $container)
+    /**
+     * @var DOMJudgeService
+     */
+    private $DOMJudgeService;
+
+    public function __construct($webDir, Container $container, DOMJudgeService $DOMJudgeService)
     {
         $this->webDir = $webDir;
+        $this->DOMJudgeService = $DOMJudgeService;
         $this->setContainer($container);
     }
 
@@ -82,7 +85,7 @@ class FallbackController extends Controller
         chdir(dirname($thefile));
         ob_start();
         global $G_SYMFONY;
-        $G_SYMFONY = $this->container->get('domjudge.domjudge');
+        $G_SYMFONY = $this->DOMJudgeService;
         require($thefile);
 
         $http_response_code = http_response_code();

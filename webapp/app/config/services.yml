@@ -1,16 +1,37 @@
 # Learn more about services, parameters and containers at
 # http://symfony.com/doc/current/service_container.html
 parameters:
-    #parameter_name: value
 
 services:
-    #service_name:
-    #    class: DOMJudgeBundle\Directory\ClassName
-    #    arguments: ['@another_service_name', 'plain_value', '%parameter_name%']
-    legacy.controller.fallback:
-        class: LegacyBundle\Controller\FallbackController
+    # default configuration for services in *this* file
+    _defaults:
+        # automatically injects dependencies in your services
+        autowire: true
+        # automatically registers your services as commands, event subscribers, etc.
+        autoconfigure: true
+        # this means you cannot fetch services directly from the container via $container->get()
+        # if you need to do this, you can override this setting on individual services
+        public: false
+
+    LegacyBundle\Controller\:
+        resource: '../../src/LegacyBundle/Controller'
+        public: true
+        tags: ['controller.service_arguments']
+
+    DOMJudgeBundle\:
+        resource: '../../src/DOMJudgeBundle/*'
+        exclude: '../../src/DOMJudgeBundle/{Entity,Repository,Tests}'
+
+    LegacyBundle\Controller\FallbackController:
         arguments:
-            - "%kernel.root_dir%/../../www"
-            - '@service_container'
-    domjudge.user_checker:
-        class: DOMJudgeBundle\Security\UserChecker
+            $webDir: "%kernel.project_dir%/www"
+
+    DOMJudgeBundle\Validator\Constraints\UserRegistrationValidator:
+        tags:
+        -   name: validator.constraint_validator
+
+    DOMJudgeBundle\EventListener\ApiHeadersListener:
+        tags:
+        -   name: kernel.event_listener
+            event: kernel.response
+            method: onKernelResponse

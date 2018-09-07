@@ -1,7 +1,7 @@
 <?php
 namespace DOMJudgeBundle\Service;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 
@@ -12,7 +12,7 @@ class DOMJudgeService
     protected $em;
     protected $request;
     protected $container;
-    public function __construct(EntityManager $em, RequestStack $requestStack, Container $container)
+    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, Container $container)
     {
         $this->em = $em;
         $this->request = $requestStack->getCurrentRequest();

@@ -17,7 +17,7 @@ overriden_routes:
 
 fallback:
     path: /{path}
-    defaults: { _controller: "legacy.controller.fallback:fallback" }
+    defaults: { _controller: "LegacyBundle\\Controller\\FallbackController:fallback" }
     requirements:
         path: .*
 
