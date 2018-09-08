@@ -24,7 +24,7 @@ services:
 
     LegacyBundle\Controller\FallbackController:
         arguments:
-            $webDir: "%kernel.project_dir%/www"
+            $webDir: "%kernel.root_dir%/../../www"
 
     DOMJudgeBundle\Validator\Constraints\UserRegistrationValidator:
         tags:
