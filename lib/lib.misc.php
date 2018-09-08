@@ -193,7 +193,7 @@ function calcFreezeData(array $cdata = null, bool $isjury = false) : array
  * NOTE: It is assumed that removed intervals do not overlap and that
  * they all fall within the contest start and end times.
  */
-function calcContestTime(float $walltime, int $cid) : int
+function calcContestTime(float $walltime, int $cid) : float
 {
     $cdata = getContest($cid);
 
@@ -773,9 +773,9 @@ function submit_solution(
     array $files,
     array $filenames,
     $origsubmitid = null,
-    $entry_point = null,
+    string $entry_point = null,
     $extid = null,
-    $submittime = null,
+    float $submittime = null,
     $extresult = null
 ) {
     global $DB;
