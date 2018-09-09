@@ -28,7 +28,7 @@ if (!empty($_GET['cmd'])):
     echo "<table>\n";
 
     if ($cmd == 'edit') {
-        $row = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
+        $row = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %i', $id);
         if (!$row) {
             error("Missing or invalid affiliation id");
         }
@@ -70,7 +70,7 @@ return;
 endif;
 
 
-$data = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %s', $id);
+$data = $DB->q('MAYBETUPLE SELECT * FROM team_affiliation WHERE affilid = %i', $id);
 if (! $data) {
     error("Missing or invalid affiliation id");
 }
@@ -122,7 +122,7 @@ if (IS_ADMIN) {
 echo "<h2>Teams from " . specialchars($data['name']) . "</h2>\n\n";
 
 $listteams = array();
-$teams = $DB->q('SELECT teamid,name FROM team WHERE affilid = %s', $id);
+$teams = $DB->q('SELECT teamid,name FROM team WHERE affilid = %i', $id);
 if ($teams->count() == 0) {
     echo "<p class=\"nodata\">no teams</p>\n\n";
 } else {

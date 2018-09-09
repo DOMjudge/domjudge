@@ -97,7 +97,7 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
                      (cid, respid, submittime, recipient, probid, category, queue, body,
                       answered, jury_member)
                      VALUES (%i, ' .
-                    ($respid===null ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %s, %s, %i, ' .
+                    ($respid===null ? 'NULL %_' : '%i') . ', %f, %s, %i, %s, %s, %s, %i, ' .
                     (isset($jury_member) ? '%s)' : 'NULL %_)'),
                     $cid, $respid, now(), $sendto, $probid, $category,
                     $queue, $_POST['bodytext'], 1, $jury_member);
