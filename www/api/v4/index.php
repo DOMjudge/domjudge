@@ -466,7 +466,7 @@ if (!isset($api)) {
         }
 
         $host = $args['judgehost'];
-        $DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s', now(), $host);
+        $DB->q('UPDATE judgehost SET polltime = %f WHERE hostname = %s', now(), $host);
 
         // If this judgehost is not active, there's nothing to do
         $active = $DB->q('MAYBEVALUE SELECT active FROM judgehost WHERE hostname = %s', $host);
@@ -567,7 +567,7 @@ if (!isset($api)) {
                        LEFT JOIN language l USING (langid)
                        WHERE submitid = %i', $submitid);
 
-        $DB->q('UPDATE team SET judging_last_started = %s WHERE teamid = %i',
+        $DB->q('UPDATE team SET judging_last_started = %f WHERE teamid = %i',
                now(), $row['teamid']);
 
         if (empty($row['memlimit'])) {
@@ -621,7 +621,7 @@ if (!isset($api)) {
         $jid = $DB->q('RETURNID INSERT INTO judging (submitid,cid,starttime,judgehost' .
                       ($is_rejudge ? ', rejudgingid, prevjudgingid, valid' : '') .
                       ($is_editsubmit ? ', jury_member' : '') .
-                      ') VALUES(%i,%i,%s,%s' .
+                      ') VALUES(%i,%i,%f,%s' .
                       ($is_rejudge ? ',%i,%i,%i' : '%_ %_ %_') .
                       ($is_editsubmit ? ',%s' : '%_') .
                       ')',
@@ -699,7 +699,7 @@ if (!isset($api)) {
 
                 $DB->q('START TRANSACTION');
                 $DB->q('UPDATE judging SET output_compile = %s,
-                        result = "compiler-error", endtime=%s
+                        result = "compiler-error", endtime = %f
                         WHERE judgingid = %i AND judgehost = %s',
                        base64_decode($args['output_compile']),
                        now(), $judgingid, $args['judgehost']);
@@ -722,7 +722,7 @@ if (!isset($api)) {
             }
         }
 
-        $DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s',
+        $DB->q('UPDATE judgehost SET polltime = %f WHERE hostname = %s',
                now(), $args['judgehost']);
 
         return '';
@@ -766,7 +766,7 @@ if (!isset($api)) {
 
         $runid = $DB->q('RETURNID INSERT INTO judging_run (judgingid, testcaseid, runresult,
                          runtime, endtime, output_run, output_diff, output_error, output_system)
-                         VALUES (%i, %i, %s, %f, %s, %s, %s, %s, %s)',
+                         VALUES (%i, %i, %s, %f, %f, %s, %s, %s, %s)',
                         $args['judgingid'], $args['testcaseid'], $args['runresult'],
                         $args['runtime'], now(),
                         base64_decode($args['output_run']),
@@ -810,7 +810,7 @@ if (!isset($api)) {
             if (count($runresults) == $numtestcases || $lazy_eval) {
                 // NOTE: setting endtime here determines in testcases_GET
                 // whether a next testcase will be handed out.
-                $DB->q('UPDATE judging SET result = %s, endtime = %s
+                $DB->q('UPDATE judging SET result = %s, endtime = %f
                         WHERE judgingid = %i', $result, now(), $args['judgingid']);
             } else {
                 $DB->q('UPDATE judging SET result = %s
@@ -860,7 +860,7 @@ if (!isset($api)) {
             eventlog('judging', $args['judgingid'], 'update', $jud['cid']);
         }
 
-        $DB->q('UPDATE judgehost SET polltime = %s WHERE hostname = %s',
+        $DB->q('UPDATE judgehost SET polltime = %f WHERE hostname = %s',
                now(), $args['judgehost']);
 
         return '';
@@ -1938,7 +1938,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
 
         $errorid = $DB->q('RETURNID INSERT INTO internal_error
                            (judgingid, cid, description, judgehostlog, time, disabled)
-                           VALUES (%i, %i, %s, %s, %i, %s)',
+                           VALUES (%i, %i, %s, %s, %f, %s)',
                           $judgingid, $cid, $args['description'],
                           $args['judgehostlog'], now(), $args['disabled']);
 
