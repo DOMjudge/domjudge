@@ -160,7 +160,7 @@ collapse("filter");
         <?php
 
 // Problem metadata: colours and names.
-if (empty($cids)) {
+if (empty($contestids)) {
     $probs_data = array();
 } else {
     $probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,name,color,cid
