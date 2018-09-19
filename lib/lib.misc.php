@@ -1495,7 +1495,7 @@ function eventlog($type, $dataids, $action, $cid = null, $json = null, $ids = nu
         if ($type==='problems') {
             $expectedEvents = 0;
             foreach ($dataids as $dataid) {
-                $cidsForId = $DB->q('COLUMN SELECT DISTINCT cid FROM contestproblem WHERE probid = %Ai', $dataid);
+                $cidsForId = $DB->q('COLUMN SELECT DISTINCT cid FROM contestproblem WHERE probid = %i', $dataid);
                 $expectedEvents += count($cidsForId);
                 $cids = array_unique(array_merge($cids, $cidsForId));
             }
