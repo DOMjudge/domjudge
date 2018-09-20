@@ -40,7 +40,7 @@ if (count($subms) > 0) {
     $blockers[] = 'Unjudged submissions found: s' . implode(', s', $subms);
 }
 
-$clars = $DB->q('COLUMN SELECT clarid FROM clarification WHERE cid = %i AND answered = 1', $id);
+$clars = $DB->q('COLUMN SELECT clarid FROM clarification WHERE cid = %i AND answered = 0', $id);
 if (count($clars) > 0) {
     $blockers[] = 'Unanswered clarifications found: ' . implode(', ', $clars);
 }
