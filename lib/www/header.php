@@ -42,7 +42,7 @@ if (!isset($menu)) {
 <link rel="stylesheet" href="../css/bootstrap.min.css?v=<?=ASSET_TAG?>" type="text/css" />
 <style>
 body {
-  padding-top: 2rem;
+  padding-top: 4.5rem;
 }
 main {
   padding: 1rem 3rem;

@@ -47,4 +47,4 @@ if (! $isstatic) {
 }
 ?>
     </nav>
-<?php putProgressBar(26); ?>
+<?php putProgressBar(-9); ?>
