@@ -112,7 +112,7 @@ if ( is_array($row['restrictions'][$type]) ) {
 	$rejudge_own = !isset($row['restrictions']['rejudge_own']) ||
 	  (bool)$row['restrictions']['rejudge_own'];
 
-	echo '<tr><td>Rejudge on same judgehost:</td><td>' .
+	echo '<tr><td>Allow rejudge on same judgehost:</td><td>' .
 	    addRadioButton('data[0][restrictions][rejudge_own]', $rejudge_own, 1) .
 	    '<label for="data_0__restrictions__rejudge_own_1">yes</label>' .
 	    addRadioButton('data[0][restrictions][rejudge_own]', !$rejudge_own, 0) .
