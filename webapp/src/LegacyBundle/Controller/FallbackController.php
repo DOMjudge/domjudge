@@ -89,8 +89,9 @@ class FallbackController extends Controller
         }
         chdir(dirname($thefile));
         ob_start();
-        global $G_SYMFONY;
+        global $G_SYMFONY, $G_SYMFONY_RENDER;
         $G_SYMFONY = $this->DOMJudgeService;
+        $G_SYMFONY_RENDER = array($this, 'renderView');
         require($thefile);
 
         $http_response_code = http_response_code();
