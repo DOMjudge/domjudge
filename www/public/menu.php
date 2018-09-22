@@ -45,4 +45,4 @@ if (!logged_in()) {
 putClock();
 ?>
     </nav>
-<?php putProgressBar(26); ?>
+<?php putProgressBar(-9); ?>
