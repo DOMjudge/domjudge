@@ -10,7 +10,7 @@ function parseSourceDiff($difftext)
 {
     $line = strtok($difftext, "\n"); //first line
     $return = '';
-    while (strlen($line) != 0) {
+    while ($line !== false && strlen($line) != 0) {
         // Strip any additional DOS/MAC newline characters:
         $line = trim($line, "\r\n");
         switch (substr($line, 0, 1)) {
