@@ -13,7 +13,6 @@ $refresh = array(
     'url' => 'scoreboard.php',
 );
 $title = 'Scoreboard';
-$printercss = true;
 
 require(LIBWWWDIR . '/scoreboard.php');
 

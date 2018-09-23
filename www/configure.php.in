@@ -162,7 +162,6 @@ global $pattern_timezone;		// lib/www/checkers.jury.php
 global $postmaxvars;		// www/jury/checkconfig.php
 global $precision;		// lib/init.php
 global $prepopulate;		// www/jury/contest.php, www/jury/judgehost_restriction.php
-global $printercss;		// www/jury/scoreboard.php
 global $private_contests;		// www/jury/team.php
 global $probid;		// www/jury/testcase.php, www/team/upload.php
 global $problem_name_mapping;		// www/jury/contest.php

@@ -51,9 +51,6 @@ if (!isset($menu)) {
 <?php
 if (IS_JURY) {
     echo "<link rel=\"stylesheet\" href=\"../style_jury.css?v=" . ASSET_TAG . "\" type=\"text/css\" />\n";
-    if (isset($printercss)) {
-        echo "<link rel=\"stylesheet\" href=\"../style_printer.css?v=" . ASSET_TAG . "\" type=\"text/css\" media=\"print\" />\n";
-    }
     echo "<script type=\"text/javascript\" src=\"../js/jury.js?v=" . ASSET_TAG . "\"></script>\n";
     echo "<script type=\"text/javascript\" src=\"../js/js.cookie.min.js?v=" . ASSET_TAG . "\"></script>\n";
     if (isset($jscolor)) {
