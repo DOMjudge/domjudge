@@ -25,12 +25,12 @@ class LanguageController extends FOSRestController
     /**
      * @Rest\Get("")
      */
-    public function getLanguagessAction()
+    public function getLanguagesAction()
     {
         return $this->entityManager->createQueryBuilder()
-            ->from('DOMJudgeBundle:Language', 'l')
-            ->select('l')
-            ->where('l.allow_submit = 1')
+            ->from('DOMJudgeBundle:Language', 'lang')
+            ->select('lang')
+            ->where('lang.allow_submit = 1')
             ->getQuery()
             ->getResult();
     }
