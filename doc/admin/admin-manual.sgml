@@ -221,11 +221,10 @@ Software required for building DOMjudge:
 <sect1>Requirements for team workstations
 <p>
 
-In the most basic setup the team workstations only need (next to the tools needed
-for program development) a web browser. The web interface fully works with any
-known browser, but a HTML5-capable browser adds more convenience functions. With
-JavaScript disabled, all basic functionality remains working, with the notable
-exception of multiple file uploads on non-HTML5-ready browsers (IE9 and lower).
+In the most basic setup the team workstations only need (next to the tools
+needed for program development) a modern web browser. We support all
+versions of Firefox, Chrome and Edge. For Internet Explorer, the minimum
+required version is 10.
 
 <chapt>Installation and configuration <label id="install_config">
 <p>
