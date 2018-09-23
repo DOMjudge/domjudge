@@ -1,30 +1,14 @@
 <?php declare(strict_types=1);
 /**
- * This file provides all functionality for authenticating teams. The
- * authentication method used is configured with the AUTH_METHOD
- * variable. When a team is succesfully authenticated, $username is set
- * to the team ID and $teamdata contains the corresponding row from
- * the database. $ip is set to the remote IP address used.
- *
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
  */
 
 require_once(LIBVENDORDIR . '/autoload.php');
 
-// In ICPC-live branch the IP need not be set when included from
+// The IP need not be set when included from
 // import-{REST,XML}feed scripts, so suppress empty value.
 $ip = @$_SERVER['REMOTE_ADDR'];
-
-session_name('domjudge_session');
-
-session_set_cookie_params(
-    0,
-    preg_replace('/\/(api|jury|public|team)\/?$/', '/', dirname($_SERVER['PHP_SELF'])),
-    '.',
-    false,
-    true
-);
 
 $teamid = null;
 $username = null;

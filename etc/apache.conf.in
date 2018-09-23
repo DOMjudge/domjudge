@@ -54,7 +54,7 @@ Require all granted
 Options -MultiViews
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
-# On the line below change "app.php" to "app_dev.pph" to run Symfony in debug mode.
+# On the line below change "app.php" to "app_dev.php" to run Symfony in debug mode.
 RewriteRule ^(.*)$ app.php [QSA,L]
 
 RewriteRule .svn/ - [F]
