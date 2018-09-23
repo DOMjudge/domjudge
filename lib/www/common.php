@@ -246,7 +246,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
                 "<a$link>" . specialchars(str_cut($row['teamname'], 30)) . '</a></td>';
         }
         echo '<td class="probid" title="' . specialchars($row['probname']) . '">' .
-            "<a$link>" . specialchars($row['shortname']) . '</a></td>';
+            "<a$link>" . specialchars($row['shortname'] ?? '') . '</a></td>';
         echo '<td class="langid" title="' . specialchars($row['langname']) . '">' .
             "<a$link>" . specialchars($row['langid']) . '</a></td>';
         echo "<td class=\"result\"><a$link>";

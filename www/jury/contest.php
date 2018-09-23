@@ -37,8 +37,8 @@ if (!empty($_GET['cmd'])):
         }
 
         echo "<tr><td>Contest ID:</td><td>" .
-            addHidden('keydata[0][cid]', $row['cid']) .
-            'c' . specialchars($row['cid']) .
+            addHidden('keydata[0][cid]', (string)$row['cid']) .
+            specialchars('c' . $row['cid']) .
             "</td></tr>\n";
     }
 ?>
@@ -363,7 +363,7 @@ if (isset($_GET['edited'])) {
         "If the contest start time was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
         addSubmit('recalculate caches now', 'refresh')
         ) .
-        addHidden('cid', $id) .
+        addHidden('cid', (string)$id) .
         addEndForm();
 }
 
@@ -480,7 +480,7 @@ if (ALLOW_REMOVED_INTERVALS) {
     } else {
         if (IS_ADMIN) {
             echo addForm('removed_intervals.php') .
-                addHidden('cmd', 'add') . addHidden('cid', $id);
+                addHidden('cmd', 'add') . addHidden('cid', (string)$id);
         }
         echo "<table class=\"list\">\n<thead><tr>" .
              "<th>id</th><th>from</th><th></th><th>to</th><th>duration</th><th></th>" .

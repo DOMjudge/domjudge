@@ -11,7 +11,7 @@ requireAdmin();
 $t = @$_REQUEST['table'];
 $referrer = @$_REQUEST['referrer'];
 $desc = @$_REQUEST['desc'];
-if (! preg_match('/^[._a-zA-Z0-9?&=-]*$/', $referrer)) {
+if (! preg_match('/^[._a-zA-Z0-9?&=-]*$/', $referrer ?? '')) {
     error("Invalid characters in referrer.");
 }
 
