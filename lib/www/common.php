@@ -506,12 +506,6 @@ function putClock()
         }
         echo 'contest: ' . addSelect('cid', $values, $cid, true);
         echo addEndForm();
-        echo "<script type=\"text/javascript\">
-              document.getElementById('cid').addEventListener('change', function() {
-              document.getElementById('selectcontestform').submit();
-    });
-</script>
-";
         echo "</div>\n";
     }
     echo '</div><div class="navbar-text">';

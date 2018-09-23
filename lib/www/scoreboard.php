@@ -889,10 +889,8 @@ function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = fal
             addEndForm(); ?>
 </div></td></tr>
 </table>
-<script type="text/javascript">
-<!--
+<script>
 collapse("filter");
-// -->
 </script>
         <?php
     } else {

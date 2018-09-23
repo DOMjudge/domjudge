@@ -68,10 +68,8 @@ echo "<div id='detailsubmissions-filter' class='submissions-filter'>\n";
 
 if (empty($submissions_filter)) {
     echo <<<HTML
-<script type="text/javascript">
-<!--
+<script>
 collapse("submissions-filter");
-// -->
 </script>
 HTML;
 }

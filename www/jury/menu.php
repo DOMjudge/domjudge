@@ -104,13 +104,6 @@ echo '<div id="notify" style="display: none">' .
     addEndForm() . "</div>";
 
 ?>
-<script type="text/javascript">
-<!--
-    if ( 'Notification' in window ) {
-        document.getElementById('notify').style.display = 'block';
-    }
-// -->
-</script>
 
 </div>
 </div></nav>

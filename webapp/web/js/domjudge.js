@@ -809,3 +809,36 @@ function addFirstRow(templateid, tableid) {
         addRow(templateid, tableid);
     }
 }
+
+var refreshHandler = null;
+var refreshEnabled = false;
+function enableRefresh($url, $after) {
+    if (refreshEnabled) {
+        return;
+    }
+    refreshHandler = setTimeout(function () {
+        window.location = $url;
+    }, $after*1000);
+    refreshEnabled = true;
+    setCookie('domjudge_refresh', 1);
+}
+
+function disableRefresh() {
+    if (!refreshEnabled) {
+        return;
+    }
+    clearTimeout(refreshHandler);
+    refreshEnabled = false;
+    setCookie('domjudge_refresh', 0);
+}
+
+function toggleRefresh($url, $after) {
+    if ( refreshEnabled ) {
+        disableRefresh();
+    } else {
+        enableRefresh($url, $after);
+    }
+
+    var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';
+    $('#refresh-toggle').val(text);
+}
