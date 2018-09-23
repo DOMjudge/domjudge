@@ -26,8 +26,9 @@
 		"friendsofsymfony/rest-bundle": "^2.4",
 		"jms/serializer-bundle": "^2.4",
 		"twbs/bootstrap": "^4.0.0",
+		"components/jquery": "^3.3",
 		"mbostock/d3": "^3.5",
-		"components/jquery": "^3.3"
+		"novus/nvd3": "^1.8"
 	},
 	"require-dev": {
 		"sensio/generator-bundle": "^3.0",
