@@ -306,7 +306,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
             if ($testcases) {
                 $judgingid = $row['judgingid'];
                 $probid = $row['probid'];
-                $runinfo = $DB->q('TABLE SELECT r.runresult, t.rank
+                $runinfo = $DB->q('TABLE SELECT r.runresult, t.rank, t.description
                                    FROM testcase t
                                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid
                                                                 AND r.judgingid = %i )
@@ -329,7 +329,12 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
                             $text = substr($run['runresult'], 0, 1);
                             $class = "tc_incorrect";
                     }
-                    $testcase_results .= "<span class=\"$class tc_box_small\">" . $text . "</span>";
+                    if (!empty($run['description'])) {
+                        $title = sprintf('Run %d: %s', $key + 1, htmlentities($run['description']));
+                    } else {
+                        $title = sprintf('Run %d', $key + 1);
+                    }
+                    $testcase_results .= sprintf('<span class="%s tc_box_small" title="%s">%s</span>', $class, $title, $text);
                 }
                 echo "<td class=\"tc_list_small\">" . $testcase_results . "</td>";
             }
