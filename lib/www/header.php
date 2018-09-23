@@ -31,22 +31,23 @@ if (!isset($menu)) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en" xml:lang="en">
+<html lang="en">
 <head>
     <!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
-<meta charset="<?php echo DJ_CHARACTER_SET?>"/>
-<title><?php echo $title?></title>
-<link rel="icon" href="../images/favicon.png" type="image/png" />
+    <meta charset="<?php echo DJ_CHARACTER_SET?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title><?php echo $title?></title>
+
+    <link rel="icon" href="../images/favicon.png">
 <?php if (! IS_JURY): ?>
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link rel="stylesheet" href="../css/bootstrap.min.css?v=<?=ASSET_TAG?>" type="text/css" />
+    <link rel="stylesheet" href="../css/bootstrap.min.css?v=<?=ASSET_TAG?>">
 <?php endif; ?>
-<link rel="stylesheet" href="../style.css?v=<?=ASSET_TAG?>" type="text/css" />
-<link rel="stylesheet" href="../css/octicons/octicons.css?v=<?=ASSET_TAG?>" />
-<script type="text/javascript" src="../js/jquery.min.js?v=<?=ASSET_TAG?>"></script>
-<?php if (! IS_JURY): ?>
-<script type="text/javascript" src="../js/bootstrap.min.js?v<?=ASSET_TAG?>"></script>
-<?php endif; ?>
+    <link rel="stylesheet" href="../style.css?v=<?=ASSET_TAG?>">
+    <link rel="stylesheet" href="../css/octicons/octicons.css?v=<?=ASSET_TAG?>">
+
+    <script src="../js/jquery.slim.min.js?v=<?=ASSET_TAG?>"></script>
+    <script src="../js/bootstrap.min.js?v=<?=ASSET_TAG?>"></script>
 <?php
 if (IS_JURY) {
     echo "<link rel=\"stylesheet\" href=\"../style_jury.css?v=" . ASSET_TAG . "\" type=\"text/css\" />\n";
@@ -66,8 +67,9 @@ if (IS_JURY) {
     echo "<script type=\"text/javascript\" src=\"" .
         "../js/sorttable.js?v=" . ASSET_TAG . "\"></script>\n";
 }
-echo "<script type=\"text/javascript\" src=\"../js/domjudge.js?v=" . ASSET_TAG . "\"></script>\n";
-
+?>
+<script src="../js/domjudge.js?v=<?=ASSET_TAG?>"></script>
+<?php
 if (! empty($extrahead)) {
     echo $extrahead;
 }
