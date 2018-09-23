@@ -94,7 +94,7 @@ if ($lang['require_entry_point']) {
     $entry_point = $_POST['entry_point'];
 }
 
-$sid = submit_solution($teamid, $probid, $cid, $langid, $FILEPATHS, $FILENAMES, null, $entry_point);
+$sid = submit_solution($teamid, (int)$probid, $cid, $langid, $FILEPATHS, $FILENAMES, null, $entry_point);
 
 auditlog('submission', $sid, 'added', 'via teampage', null, $cid);
 
