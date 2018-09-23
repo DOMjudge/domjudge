@@ -270,9 +270,9 @@ result(
     'MySQL maximum packet size',
     $max_allowed_packet_status,
     'MySQL\'s max_allowed_packet is set to ' .
-    printsize($mysqldata['max_allowed_packet']) . '. You may ' .
+    printsize((int)$mysqldata['max_allowed_packet']) . '. You may ' .
     'want to raise this to about twice the maximum test case size (currently ' .
-    printsize($max_inout) . ').'
+    printsize((int)$max_inout) . ').'
 );
 
 result(
@@ -280,7 +280,7 @@ result(
     'MySQL innodb logfile size',
     $mysqldata['innodb_log_file_size'] < 128*1024*1024 ? 'W':'O',
     'MySQL\'s innodb_log_file_size is set to ' .
-    printsize($mysqldata['innodb_log_file_size']) . '. You may ' .
+    printsize((int)$mysqldata['innodb_log_file_size']) . '. You may ' .
     'want to raise this to 10x the maximum test case size.'
 );
 
