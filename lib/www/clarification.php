@@ -392,11 +392,11 @@ function putClarificationList($clars, int $team = null)
             echo "<td>$link $answered</a></td><td>";
             if ($claim && isset($clar['sender'])) {
                 echo "<a class=\"button\" href=\"clarification.php?claim=1&amp;id=" .
-                    specialchars($clar['clarid']) . "\">claim</a>";
+                    urlencode((string)$clar['clarid']) . "\">claim</a>";
             } else {
                 if (!$clar['answered'] && $jury_member==$username) {
                     echo "<a class=\"button\" href=\"clarification.php?unclaim=1&amp;id=" .
-                        specialchars($clar['clarid']) . "\">unclaim</a>";
+                        urlencode((string)$clar['clarid']) . "\">unclaim</a>";
                 } else {
                     echo "$link $jury_member</a>";
                 }
