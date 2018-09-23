@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Programming languages in which teams can submit solutions
@@ -15,8 +16,17 @@ class Language
      * @var string
      * @ORM\Id
      * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $langid;
+
+    /**
+     * @var string
+     * @ORM\Id
+     * @ORM\Column(type="string", name="externalid", length=255, nullable=true)
+     * @Serializer\SerializedName("id")
+     */
+    private $externalid;
 
     /**
      * @var string
@@ -25,14 +35,15 @@ class Language
     private $name;
 
     /**
-     * @var string
-     * @ORM\Column(type="text", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
+     * @var string[]
+     * @ORM\Column(type="json_array", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
      */
     private $extensions;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_submit", options={"comment"="Are submissions accepted in this language?"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $allow_submit = true;
 
@@ -45,23 +56,39 @@ class Language
     /**
      * @var double
      * @ORM\Column(type="float", name="time_factor", options={"comment"="Language-specific factor multiplied by problem run times"}, nullable=false)
+     * @Serializer\Type("double")
      */
     private $time_factor = 1;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="compile_script", length=32, options={"comment"="Script to compile source code for this language"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $compile_script;
 
     /**
+     * @var bool
+     * @ORM\Column(type="boolean", name="require_entry_point", options={"comment"="Whether submissions require a code entry point to be specified."}, nullable=false)
+     */
+    private $require_entry_point = false;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="entry_point_description", options={"comment"="The description used in the UI for the entry point field."}, nullable=true)
+     */
+    private $entry_point_description;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="languages")
      * @ORM\JoinColumn(name="compile_script", referencedColumnName="execid")
+     * @Serializer\Exclude()
      */
     private $compile_executable;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="language")
+     * @Serializer\Exclude()
      */
     private $submissions;
 
@@ -87,6 +114,30 @@ class Language
     public function getLangid()
     {
         return $this->langid;
+    }
+
+    /**
+     * Set externalid
+     *
+     * @param string externalid
+     *
+     * @return Language
+     */
+    public function setExternalid(string $externalid)
+    {
+        $this->externalid = $externalid;
+
+        return $this;
+    }
+
+    /**
+     * Get externalid
+     *
+     * @return string
+     */
+    public function getExternalid(): string
+    {
+        return $this->externalid;
     }
 
     /**
@@ -116,11 +167,11 @@ class Language
     /**
      * Set extensions
      *
-     * @param string $extensions
+     * @param string[] $extensions
      *
      * @return Language
      */
-    public function setExtensions($extensions)
+    public function setExtensions(array $extensions)
     {
         $this->extensions = $extensions;
 
@@ -130,7 +181,7 @@ class Language
     /**
      * Get extensions
      *
-     * @return string
+     * @return string[]
      */
     public function getExtensions()
     {
@@ -231,6 +282,54 @@ class Language
     public function getCompileScript()
     {
         return $this->compile_script;
+    }
+
+    /**
+     * Set requireEntryPoint
+     *
+     * @param boolean $requireEntryPoint
+     *
+     * @return Language
+     */
+    public function setRequireEntryPoint($requireEntryPoint)
+    {
+        $this->require_entry_point = $requireEntryPoint;
+
+        return $this;
+    }
+
+    /**
+     * Get requireEntryPoint
+     *
+     * @return boolean
+     */
+    public function getRequireEntryPoint()
+    {
+        return $this->require_entry_point;
+    }
+
+    /**
+     * Set entryPointDescription
+     *
+     * @param string $entryPointDescription
+     *
+     * @return Language
+     */
+    public function setEntryPointDescription($entryPointDescription)
+    {
+        $this->entry_point_description = $entryPointDescription;
+
+        return $this;
+    }
+
+    /**
+     * Get entryPointDescription
+     *
+     * @return string
+     */
+    public function getEntryPointDescription()
+    {
+        return $this->entry_point_description;
     }
 
     /**
