@@ -12,6 +12,7 @@ Version 6.0.1 - DEV
  - API now also returns non-public contests for jury users,
    and non-public contests for users that are in them.
  - Fix DOMjudge logo display on Jury home.
+ - Fix styling of navbar for non-started contest.
 
 Version 6.0.0 - 4 September 2018
 --------------------------------
