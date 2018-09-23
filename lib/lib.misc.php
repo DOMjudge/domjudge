@@ -835,6 +835,10 @@ function submit_solution(
     if ($langdata['require_entry_point'] && empty($entry_point)) {
         error("Entry point required for '$langid' but none given.");
     }
+    if (checkrole('jury') && $entry_point == '__auto__') {
+	    // Fall back to auto detection when we're importing jury submissions.
+	    $entry_point = NULL;
+    }
     if (! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team
                             WHERE teamid = %i' .
                            (checkrole('jury') ? '' : ' AND enabled = 1'), $team)) {
