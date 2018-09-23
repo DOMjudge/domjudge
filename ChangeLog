@@ -1,11 +1,13 @@
 DOMjudge Programming Contest Judging System
 
-Version 6.0.1 - DEV
--------------------
+Version 6.0.1 - 23 September 2018
+---------------------------------
  - Security: disallow login for disabled user accounts.
+   Thanks Henk van der Laan for reporting.
  - Fix eventlog for problems type.
  - dj_make_chroot: also install pypy for Ubuntu variant.
  - Finalise contest: fix all clarifications answered check.
+   Thanks Thomas Verwoerd for reporting.
  - Clarify label for same-judgehost judgehost restriction.
  - Allow to import jury submissions without entry points.
  - Fix change contest dropdown when using Nginx.
