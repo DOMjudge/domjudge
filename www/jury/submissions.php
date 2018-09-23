@@ -160,7 +160,7 @@ $(function() {
             submissions_filter[filters[i].field] = filters[i].values;
         }
 
-        Cookies.set('submissions-filter', submissions_filter);
+        setCookie('submissions-filter', JSON.stringify(submissions_filter));
 
         var $trs = $('table > tbody tr');
 
