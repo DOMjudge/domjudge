@@ -211,14 +211,14 @@ if (isset($_POST['import'])) {
     $contest_data = array();
     $contest_data['name'] = $contest_row['name'];
     $contest_data['short-name'] = $contest_row['name'];
-    $contest_data['start-time'] = date('c', $contest_row['starttime']);
+    $contest_data['start-time'] = date('c', (int)$contest_row['starttime']);
     $contest_data['duration'] =
-        printtimerel(calcContestTime($contest_row['endtime'], $contest_row['cid']));
+        printtimerel(calcContestTime((float)$contest_row['endtime'], (int)$contest_row['cid']));
 
     if (! is_null($contest_row['freezetime'])) {
         $contest_data['scoreboard-freeze-duration'] = printtimerel(
-            calcContestTime($contest_row['endtime'], $contest_row['cid']) -
-            calcContestTime($contest_row['freezetime'], $contest_row['cid'])
+            calcContestTime((float)$contest_row['endtime'], (int)$contest_row['cid']) -
+            calcContestTime((float)$contest_row['freezetime'], (int)$contest_row['cid'])
         );
     }
 
