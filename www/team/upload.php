@@ -17,14 +17,14 @@ if (is_null($cid)) {
     require(LIBWWWDIR . '/header.php');
     echo "<p class=\"nodata\">No active contest</p>\n";
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 $fdata = calcFreezeData($cdata);
 if (!checkrole('jury') && !$fdata['started']) {
     require(LIBWWWDIR . '/header.php');
     echo "<p class=\"nodata\">Contest has not yet started.</p>\n";
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 
@@ -43,7 +43,7 @@ function err($string)
     echo '</div>';
 
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 // rebuild array of filenames, paths to get rid of empty upload fields

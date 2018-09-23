@@ -17,7 +17,7 @@ $fdata = calcFreezeData($cdata);
 if (! $fdata['started'] && ! checkrole('jury')) {
     echo '<div class="container submitform"><div class="alert alert-danger" role="alert">Contest has not yet started - cannot submit.</div></div>';
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 $langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions, require_entry_point, entry_point_description

@@ -14,4 +14,4 @@ if (@$_POST['cmd']=='register') {
 logged_in();
 
 header("Location: ./");
-exit;
+return;

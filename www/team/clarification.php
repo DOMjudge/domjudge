@@ -56,7 +56,7 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
 
     // redirect back to the original location
     header('Location: ./');
-    exit;
+    return;
 }
 
 $title = 'Clarifications';

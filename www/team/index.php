@@ -27,7 +27,7 @@ if ($cdata == NULL) {
         specialchars($teamdata['name']) . "</span>!</h1>\n\n" .
         "<h2 id=\"contestnotstarted\">There's no active contest for you (yet).</h2>\n\n";
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 } else {
     putTeamRow($cdata, array($teamid));
 }
@@ -35,7 +35,7 @@ if ($cdata == NULL) {
 if (!checkrole('jury') && !$fdata['started']) {
     // No need to display anything else for non-jury teams at this point.
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 if ($submitted):
