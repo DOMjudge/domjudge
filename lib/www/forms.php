@@ -180,7 +180,7 @@ function addTextArea(string $name, $text = '', int $cols = 40, int $rows = 10, s
     return '<textarea name="'.specialchars($name).'" '.
         'rows="'.(int)$rows .'" cols="'.(int)$cols.'" '.
         'id="' . specialchars(strtr($name, '[]', '__')).'" ' .
-        $attr . '>'.specialchars($text) ."</textarea>\n";
+        $attr . '>'.specialchars((string)$text) ."</textarea>\n";
 }
 
 /**
