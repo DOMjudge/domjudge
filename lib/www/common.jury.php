@@ -664,9 +664,9 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
                         $cid,
                         $langid,
                         $tmpfiles,
-			$files,
-			/* origsubmitid= */ null,
-			/* entry_point= */ '__auto__'
+                        $files,
+                        /* origsubmitid= */ null,
+                        /* entry_point= */ '__auto__'
                     );
                     $DB->q('UPDATE submission SET expected_results=%s WHERE submitid=%i',
                            dj_json_encode($results), $sid);
