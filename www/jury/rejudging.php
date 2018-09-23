@@ -269,7 +269,7 @@ if (isset($_REQUEST['new_verdict']) && $_REQUEST['new_verdict'] != 'all') {
 
 echo "<p>Show submissions:</p>\n" .
     addForm($pagename, 'get') .
-    addHidden('id', $id);
+    addHidden('id', (string)$id);
 for ($i=0; $i<count($viewtypes); ++$i) {
     echo addSubmit($viewtypes[$i], 'view['.$i.']', null, ($view != $i));
 }
@@ -282,7 +282,7 @@ if (isset($_REQUEST['new_verdict'])) {
 echo addEndForm() . "<br />\n";
 
 echo addForm($pagename, 'get') .
-    addHidden('id', $id) .
+    addHidden('id', (string)$id) .
     addHidden("view[$view]", $viewtypes[$view]);
 $verdicts = array_keys($verdicts);
 array_unshift($verdicts, 'all');
@@ -301,14 +301,14 @@ echo ", new verdict: " .
 echo addSubmit('filter') . addEndForm();
 
 echo addForm($pagename, 'get') .
-    addHidden('id', $id) .
+    addHidden('id', (string)$id) .
     addHidden("view[$view]", $viewtypes[$view]) .
     addSubmit('clear') . addEndForm() . "<br /><br />\n";
 
 $filtered = $DB->q('VALUE SELECT COUNT(s.submitid)
                     FROM submission s
                     LEFT JOIN judging j ON (s.submitid = j.submitid AND j.rejudgingid = %i)
-                    WHERE s.cid NOT IN (%As) AND (s.rejudgingid = %i OR j.rejudgingid = %i)',
+                    WHERE s.cid NOT IN (%Ai) AND (s.rejudgingid = %i OR j.rejudgingid = %i)',
                    $id, $cids, $id, $id);
 
 if ($filtered > 0) {
