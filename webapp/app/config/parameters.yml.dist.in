@@ -28,10 +28,9 @@ parameters:
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt
 
-    domjudge.authmethods:
-        - xheaders
-        # Uncomment to enable ip address based authentication
-        #- ipaddress
+    # Additional auth methods can be enabled here. This is an array.
+    # Supported values are 'ipaddress', and 'xheaders' currently.
+    domjudge.authmethods: []
 
     # The parameters below are inserted at configure time.
     domjudge.version: @DOMJUDGE_VERSION@
