@@ -49,7 +49,7 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
     $newid = $DB->q('RETURNID INSERT INTO clarification
                      (cid, submittime, sender, probid, category, queue, body)
                      VALUES (%i, %s, %i, %i, %s, %s, %s)',
-                    $cid, now(), $teamid, $probid, $category, $queue, $_POST['bodytext']);
+		    $cid, (string)now(), $teamid, $probid, $category, $queue, $_POST['bodytext']);
 
     eventlog('clarification', $newid, 'create', $cid);
     auditlog('clarification', $newid, 'added', null, null, $cid);
