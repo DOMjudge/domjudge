@@ -117,3 +117,11 @@ function specialchars($string) : string
         DJ_CHARACTER_SET
     );
 }
+function dj_password_hash(string $password) : string
+{
+    return password_hash(
+        $password,
+        PASSWORD_DEFAULT,
+        array('cost' => PASSWORD_HASH_COST)
+    );
+}
