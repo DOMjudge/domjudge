@@ -63,7 +63,7 @@ function logged_in() : bool
         $userdata['roles'] = get_user_roles($userdata['userid']);
     }
     if (!empty($teamdata)) {
-        $teamid = $teamdata['teamid'];
+        $teamid = (int)$teamdata['teamid'];
         // Is this the first visit? Record that in the team table.
         if (empty($teamdata['teampage_first_visited'])) {
             $hostname = empty($ip) ? 'PHPUNIT' : gethostbyaddr($ip);
