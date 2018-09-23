@@ -207,8 +207,8 @@ if (! $isgeneral) {
     // Not relevant for 'general clarifications', ie those with sender=null
     if (!empty($req['sender'])) {
         echo addForm($pagename) .
-        addHidden('id', $id) .
-        addHidden('answered', !$req['answered']) .
+        addHidden('id', (string)$id) .
+        addHidden('answered', (string)!$req['answered']) .
         addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered'), 'answer') .
         addEndForm();
     }
