@@ -59,6 +59,11 @@ class FallbackController extends Controller
                 break;
             }
         }
+
+	if ($request->server->has('REQUEST_URI')) {
+	    $_SERVER['REQUEST_URI'] = $request->server->get('REQUEST_URI');
+	}
+
         if ($apiMatch) {
             if (!$exactApiMatch) {
                 $request->setRequestFormat('json');
