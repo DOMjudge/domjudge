@@ -10,7 +10,7 @@ services:
       - MYSQL_DATABASE=domjudge
     ports:
       - 13306:3306
-    command: --max-connections=1000
+    command: --max-connections=1000 --max-allowed-packet=512M
     volumes:
       - /var/lib/mysql
   domjudge:
