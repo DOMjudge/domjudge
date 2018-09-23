@@ -411,7 +411,7 @@ function putTeam(int $teamid)
         error("No team found by this id.");
     }
 
-    $countryflag = "images/countries/" . urlencode($team['country']) . ".png";
+    $countryflag = "images/countries/" . urlencode((string)$team['country']) . ".png";
     $teamimage = "images/teams/" . urlencode((string)$team['teamid']) . ".jpg";
 
     echo "<h1>Team ".specialchars($team['name'])."</h1>\n\n";
