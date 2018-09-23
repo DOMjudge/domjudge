@@ -114,7 +114,7 @@ echo addSelect('probid', $probs, $submission['probid'], true);
 echo addSelect('langid', $langs, $submission['langid'], true);
 
 echo addHidden('teamid', $submission['teamid']);
-echo addHidden('origsubmitid', $submission['origsubmitid'] === null ? $id : $submission['origsubmitid']);
+echo addHidden('origsubmitid', (string)($submission['origsubmitid'] === null ? $id : $submission['origsubmitid']));
 echo addSubmit('submit') . "<br />";
 echo 'Optional entry point: ' . addInput('entry_point', $submission['entry_point'], 15);
 
