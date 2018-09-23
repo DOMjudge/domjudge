@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 6.0.2 - DEV
+-------------------
+
 Version 6.0.1 - 23 September 2018
 ---------------------------------
  - Security: disallow login for disabled user accounts.
