@@ -57,7 +57,7 @@ if (isset($_REQUEST['apply']) || isset($_REQUEST['cancel'])) {
     while (ob_get_level()) {
         ob_end_flush();
     }
-    ob_implicit_flush(true);
+    ob_implicit_flush(1);
 
     // clear GET array because otherwise the eventlog subrequest will still include the rejudging id
     $_GET = array();

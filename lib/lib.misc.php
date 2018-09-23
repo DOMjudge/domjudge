@@ -1002,7 +1002,7 @@ function rejudge(string $table, $id, bool $include_all, bool $full_rejudge, $rea
 
     if ($full_rejudge) {
         $rejudgingid = $DB->q('RETURNID INSERT INTO rejudging
-                               (userid_start, starttime, reason) VALUES (%i, %s, %s)',
+                               (userid_start, starttime, reason) VALUES (%i, %f, %s)',
                               $userid, now(), $reason);
     }
 
@@ -1116,9 +1116,9 @@ function rejudging_finish(int $rejudgingid, string $request, $userid = null, boo
                 eventlog('judging_run', $run_ids, 'create', $row['cid']);
             }
             // last update cache
-            calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
+            calcScoreRow((int)$row['cid'], (int)$row['teamid'], (int)$row['probid']);
             $DB->q('COMMIT');
-            updateBalloons($row['submitid']);
+            updateBalloons((int)$row['submitid']);
         } else {
             // restore old judgehost association
             $valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging
@@ -1129,7 +1129,7 @@ function rejudging_finish(int $rejudgingid, string $request, $userid = null, boo
     }
 
     $DB->q('UPDATE rejudging
-            SET endtime=%s, userid_finish=%i, valid=%i
+            SET endtime=%f, userid_finish=%i, valid=%i
             WHERE rejudgingid=%i',
            now(), $userid, ($request=='apply' ? 1 : 0), $rejudgingid);
 

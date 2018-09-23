@@ -16,7 +16,7 @@ $table        = @$_POST['table'];
 $id           = @$_POST['id'];
 $reason       = @$_POST['reason'];
 $include_all  = !empty($_POST['include_all']);
-$full_rejudge = @$_POST['full_rejudge'];
+$full_rejudge = (bool)@$_POST['full_rejudge'];
 if (!isset($full_rejudge)) {
     $full_rejudge = false;
 }
