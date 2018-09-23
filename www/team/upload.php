@@ -68,6 +68,7 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
 
 if (! isset($prob)) {
     err("Unable to find problem p$probid");
+    return;
 }
 $probid = $prob['probid'];
 
@@ -79,6 +80,7 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name, require_entry_point, entry_point
 
 if (! isset($lang)) {
     err("Unable to find language '$langid'");
+    return;
 }
 $langid = $lang['langid'];
 
@@ -87,6 +89,7 @@ if ($lang['require_entry_point']) {
     if (empty($_POST['entry_point'])) {
         $ep_desc = ($lang['entry_point_description'] ? : 'Entry point');
         err("$ep_desc required, but not specified.");
+        return;
     }
     $entry_point = $_POST['entry_point'];
 }

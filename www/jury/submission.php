@@ -310,7 +310,7 @@ if (isset($_REQUEST['claim']) || isset($_REQUEST['unclaim'])) {
         } else {
             header('Location: submission.php?id=' . $id);
         }
-	return;
+        return;
     }
 }
 claimdone:
