@@ -29,7 +29,7 @@ rm -f -- *.pyc
 
 # Check if entry point is valid
 if [ ! -r "$MAINSOURCE" ]; then
-    >&2 echo "error: main source file '$MAINSOURCE' is not readable"
+    echo "Error: main source file '$MAINSOURCE' is not readable" >&2
     exit 1
 fi
 

@@ -27,7 +27,7 @@ MEMRESERVED=$((MEMSTACK + MEMJVM))
 
 # Java needs filename to match main class:
 if [ -z "$ENTRY_POINT" ]; then
-	echo "Info: no ENTRY_POINT provided, assuming 'Main'."
+	[ -n "$DEBUG" ] && echo "Info: no ENTRY_POINT provided, assuming 'Main'."
 	MAINCLASS="Main"
 
 	# Report the entry point, so it can be saved, e.g. for later replay:

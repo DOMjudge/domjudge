@@ -22,10 +22,10 @@ else
 	if [ $NUMSOURCES = 1 ]; then
 		true # Skip this case.
 	elif [ -n "$FOUND" ]; then
-		echo "Using '$FOUND' as main program file."
+		[ -n "$DEBUG" ] && echo "Debug: using '$FOUND' as main program file."
 		MAINSOURCE="$FOUND"
 	else
-		echo "Warning: could not detect main program file, using '$MAINSOURCE'."
+		echo "Warning: could not determine main program file, using '$MAINSOURCE'."
 	fi
 
 	# Report the entry point, so it can be saved, e.g. for later replay:

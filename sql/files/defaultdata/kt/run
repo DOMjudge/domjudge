@@ -29,8 +29,10 @@ MEMJVM=65536
 MEMRESERVED=$((MEMSTACK + MEMJVM))
 
 # Allow overriding Kotlin main class (should not be necessary):
-if [ -n "$ENTRY_POINT" ]; then
-	echo "Info: using main class provided by ENTRY_POINT='$ENTRY_POINT'."
+if [ -z "$ENTRY_POINT" ]; then
+	[ -n "$DEBUG" ] && echo "Debug: no ENTRY_POINT provided, trying to detect main class."
+else
+	[ -n "$DEBUG" ] && echo "Debug: using main class provided by ENTRY_POINT='$ENTRY_POINT'."
 	MAINCLASS="$ENTRY_POINT"
 fi
 
