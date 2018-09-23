@@ -38,7 +38,7 @@ echo "</p>";
 if ($res->count() == 0) {
     echo '<p class="nodata">No entries</p>';
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 echo "<table class=\"list sortable\">\n" .

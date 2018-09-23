@@ -31,7 +31,7 @@ if (isset($_POST['donow'])) {
 
     if ($time === 'finalize') {
         header('Location: finalize.php?id=' . (int)$docid);
-        exit;
+	return;
     }
 
     $now = floor($now);
@@ -48,7 +48,7 @@ if (isset($_POST['donow'])) {
         $DB->q('UPDATE contest SET starttime_enabled = %i
                 WHERE cid = %i', $enabled, $docid);
         header("Location: ./contests.php?edited=1");
-        exit;
+	return;
     }
 
     // starttime is special because other, relative times depend on it.
@@ -76,7 +76,7 @@ if (isset($_POST['donow'])) {
                 WHERE cid = %i', $now, $nowstring, $docid);
         header("Location: ./contests.php");
     }
-    exit;
+    return;
 }
 
 $title = 'Contests';

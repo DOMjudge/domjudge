@@ -56,7 +56,7 @@ if (isset($_POST['import'])) {
         if (empty($contest_yaml_data)) {
             echo "<p>Error parsing YAML file.</p>\n";
             require(LIBWWWDIR . '/footer.php');
-            exit;
+	    return;
         }
 
         require(LIBWWWDIR . '/checkers.jury.php');
@@ -112,7 +112,7 @@ if (isset($_POST['import'])) {
             }
             echo "</ul>\n";
             require(LIBWWWDIR . '/footer.php');
-            exit;
+	    return;
         }
 
         dbconfig_init();
@@ -183,11 +183,11 @@ if (isset($_POST['import'])) {
 
         // Redirect to the original page to prevent accidental redo's
         header('Location: impexp_contestyaml.php?import-ok&file='.$file);
-        exit;
+	return;
     } else {
         echo "<p>Error uploading file.</p>\n";
         require(LIBWWWDIR . '/footer.php');
-        exit;
+	return;
     }
 } elseif (isset($_POST['export'])) {
 
@@ -199,7 +199,7 @@ if (isset($_POST['import'])) {
     if (! $contest_row) {
         echo "<p>Contest not found.</p>\n";
         require(LIBWWWDIR . '/footer.php');
-        exit;
+	return;
     }
     if (ALLOW_REMOVED_INTERVALS) {
         $res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
@@ -258,7 +258,7 @@ if (isset($_POST['import'])) {
     echo $yaml;
     header('Content-type: text/x-yaml');
     header('Content-Disposition: attachment; filename="contest.yaml"');
-    exit;
+    return;
 }
 
 $title = "Import / export configuration";

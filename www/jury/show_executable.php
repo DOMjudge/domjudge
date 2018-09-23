@@ -68,7 +68,7 @@ if (isset($_POST['storeid'])) {
     system("rm -rf '$tmpexecdir'");
 
     header('Location: executable.php?id=' . $id);
-    exit;
+    return;
 }
 
 $id = getRequestID(false);

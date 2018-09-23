@@ -106,7 +106,7 @@ echo addHidden('cmd', $cmd) .
     addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
-exit;
+return;
 
 endif;
 

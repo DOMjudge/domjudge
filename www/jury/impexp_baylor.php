@@ -121,7 +121,7 @@ curl_close($ch);
 if (isset($_REQUEST['upload'])) {
     echo "Uploaded standings to icpc.baylor.edu (Response was: $response).<br/>";
     echo "Do not forget to certify the standings there - it maybe necessary to logout/login there to see the standings.";
-    exit;
+    return;
 }
 
 $json = dj_json_decode($response);

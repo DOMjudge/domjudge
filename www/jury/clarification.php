@@ -131,7 +131,7 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
     } else {
         header('Location: clarification.php?id=' . $id);
     }
-    exit;
+    return;
 }
 
 // (un)set 'answered' (if posted)
@@ -145,7 +145,7 @@ if (isset($_POST['answer']) && isset($_POST['answered'])) {
 
     // redirect back to the original location
     header('Location: clarification.php?id=' . $id);
-    exit;
+    return;
 }
 
 if (isset($_POST['subject'])) {

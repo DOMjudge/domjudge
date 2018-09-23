@@ -310,7 +310,7 @@ if (isset($_REQUEST['claim']) || isset($_REQUEST['unclaim'])) {
         } else {
             header('Location: submission.php?id=' . $id);
         }
-        exit;
+	return;
     }
 }
 claimdone:
@@ -498,7 +498,7 @@ if (!isset($jid)) {
 
     // nothing more to display
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 

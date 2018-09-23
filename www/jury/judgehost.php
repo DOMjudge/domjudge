@@ -24,7 +24,7 @@ if (isset($_REQUEST['cmd']) &&
     // the request came from the overview page
     if (isset($_GET['cmd'])) {
         header("Location: judgehosts.php");
-        exit;
+	return;
     }
 }
 

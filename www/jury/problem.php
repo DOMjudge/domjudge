@@ -197,7 +197,7 @@ if (class_exists("ZipArchive")) {
 }
 
 require(LIBWWWDIR . '/footer.php');
-exit;
+return;
 
 endif;
 

@@ -82,7 +82,7 @@ if ($cmd == 'add' || $cmd == 'edit') {
         addEndForm();
 
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 $res = $DB->q('SELECT judgehost.*, judgehost_restriction.name

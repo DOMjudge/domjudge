@@ -127,7 +127,7 @@ $prepopulate = array();
          addEndForm();
 
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 $data = $DB->q('TUPLE SELECT * FROM judgehost_restriction WHERE restrictionid = %i', $id);

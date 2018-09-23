@@ -50,7 +50,7 @@ if (isset($_POST['origsubmitid'])) {
     }
 
     header('Location: submission.php?id=' . $newid);
-    exit;
+    return;
 }
 
 $id = getRequestID();

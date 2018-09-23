@@ -37,7 +37,7 @@ if (isset($_POST['cancel'])) {
         header('Location: '.$t.'.php?id=' .
             urlencode(array_shift($k)));
     }
-    exit;
+    return;
 }
 
 // Send headers here, because we need to be able to redirect above this point.

@@ -230,7 +230,7 @@ if (isset($_GET['fetch'])) {
     header("Content-Length: " . strlen($row['sourcecode']));
 
     echo $row['sourcecode'];
-    exit;
+    return;
 }
 
 $title = "Source: s$id";

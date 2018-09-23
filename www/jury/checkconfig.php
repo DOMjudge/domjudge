@@ -34,7 +34,7 @@ if ($_SERVER['QUERY_STRING'] == 'phpinfo') {
     phpinfo();
     echo $ret;
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 require_once(LIBWWWDIR . '/checkers.jury.php');

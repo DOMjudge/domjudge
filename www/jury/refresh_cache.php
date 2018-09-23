@@ -44,7 +44,7 @@ if (! isset($_REQUEST['refresh'])) {
     echo addEndForm();
 
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 $time_start = microtime(true);
