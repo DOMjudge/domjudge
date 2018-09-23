@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
-use Symfony\Component\Security\Core\Role\RoleInterface;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\Role\Role as BaseRole;
 
 /**
  * Possible user roles
  * @ORM\Entity()
  * @ORM\Table(name="role", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class Role implements RoleInterface
+class Role extends BaseRole
 {
     /**
      * @var int
