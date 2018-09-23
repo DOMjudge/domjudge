@@ -695,7 +695,7 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
 }
 
 // dis- or re-enable what caused an internal error
-function set_internal_error(array $disabled, int $cid, int $value)
+function set_internal_error(array $disabled, /* int/null */ $cid, /* int/null */ $value)
 {
     global $DB, $api;
     switch ($disabled['kind']) {

@@ -756,7 +756,7 @@ foreach ($runs as $run) {
     echo "<table>\n<tr><td>";
     echo "<table>\n" .
         "<tr><td>Description:</td><td>" .
-        descriptionExpand($run['description']) . "</td></tr>" .
+        descriptionExpand($run['description'] ?? '') . "</td></tr>" .
         "<tr><td>Download: </td><td>" .
         "<a href=\"testcase.php?probid=" . specialchars((string)$submdata['probid']) .
         "&amp;rank=" . $run['rank'] . "&amp;fetch=input\">Input</a> / " .
