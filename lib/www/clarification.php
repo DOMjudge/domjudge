@@ -247,7 +247,9 @@ function putClarification(int $id, $team = null)
     while ($clar = $clars->next()) {
         // check permission to view this clarification
         if (IS_JURY || canViewClarification($team, $clar)) {
-            setClarificationViewed($clar['clarid'], $team);
+            if ($team !== null) {
+                setClarificationViewed($clar['clarid'], $team);
+            }
             putClar($clar);
             echo "<br />\n\n";
         }
