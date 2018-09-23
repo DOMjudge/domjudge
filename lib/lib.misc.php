@@ -1511,6 +1511,14 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
                 $expectedEvents += count($cidsForId);
                 $cids = array_unique(array_merge($cids, $cidsForId));
             }
+        } elseif ($type==='contests') {
+            $cids = $dataids;
+            $expectedEvents = count($dataids);
+            if (count($cids)>1) {
+                logmsg(LOG_WARNING, "eventlog: cannot handle multiple contests in single request");
+                return;
+            }
+            $cid = $cids[0];
         } else {
             $cids = getCurContests();
             $expectedEvents = count($dataids) * count($cids);
