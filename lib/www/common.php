@@ -330,7 +330,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
                             $class = "tc_incorrect";
                     }
                     if (!empty($run['description'])) {
-                        $title = sprintf('Run %d: %s', $key + 1, htmlentities($run['description']));
+                        $title = sprintf('Run %d: %s', $key + 1, specialchars($run['description']));
                     } else {
                         $title = sprintf('Run %d', $key + 1);
                     }

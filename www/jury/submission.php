@@ -80,7 +80,7 @@ function display_runinfo($runinfo, $is_final)
             $short = substr($run['runresult'], 0, 1);
             $class = "tc_incorrect";
         }
-        $tclist .= "<a title=\"desc: " . specialchars($run['description']) .
+        $tclist .= "<a title=\"#" . ($key + 1) . ", desc: " . specialchars($run['description']) .
             ($run['runresult'] !== null ?  ", runtime: " . $run['runtime'] . "s, result: " . $run['runresult'] : '') .
             "\" href=\"$link\"" .
             ($run['runresult'] == 'correct' ? ' onclick="display_correctruns(true);" ' : '') .
