@@ -24,7 +24,15 @@ require_once(LIBWWWDIR . '/scoreboard.php');
 require_once(LIBWWWDIR . '/auth.php');
 require_once(LIBWWWDIR . '/restapi.php');
 
-$cdatas = getCurContests(true, -1);
-$cids = array_keys($cdatas);
-
 logged_in();
+
+// For jury roles, also get the non-public contests. Otherwise, also get the contests the user belongs to
+if (checkrole('jury')) {
+    $teamid = null;
+} elseif (isset($userdata['teamid'])) {
+    $teamid = $userdata['teamid'];
+} else {
+    $teamid = -1;
+}
+$cdatas = getCurContests(true, $teamid);
+$cids = array_keys($cdatas);
