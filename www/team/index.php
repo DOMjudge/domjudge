@@ -22,7 +22,21 @@ echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
-putTeamRow($cdata, array($teamid));
+if ($cdata == NULL) {
+    echo "<h1 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
+        specialchars($teamdata['name']) . "</span>!</h1>\n\n" .
+        "<h2 id=\"contestnotstarted\">There's no active contest for you (yet).</h2>\n\n";
+    require(LIBWWWDIR . '/footer.php');
+    exit;
+} else {
+    putTeamRow($cdata, array($teamid));
+}
+
+if (!checkrole('jury') && !$fdata['started']) {
+    // No need to display anything else for non-jury teams at this point.
+    require(LIBWWWDIR . '/footer.php');
+    exit;
+}
 
 if ($submitted):
 ?>
