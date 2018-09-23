@@ -25,7 +25,7 @@ RUNOPTIONS=""
 
 # Report the entry point, so it can be saved, e.g. for later replay:
 if [ -z "$ENTRY_POINT" ]; then
-	echo "Detected entry_point: $MAINCLASS"
+	echo "Info: detected entry_point: $MAINCLASS"
 fi
 
 # Check syntax:

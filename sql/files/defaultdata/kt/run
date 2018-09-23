@@ -47,7 +47,7 @@ if [ -z "$MAINCLASS" ]; then
 	EXITCODE=$?
 
 	# Report the entry point, so it can be saved, e.g. for later replay:
-	echo "Detected entry_point: $MAINCLASS"
+	echo "Info: detected entry_point: $MAINCLASS"
 
 	[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 fi

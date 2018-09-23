@@ -29,7 +29,7 @@ else
 	fi
 
 	# Report the entry point, so it can be saved, e.g. for later replay:
-	echo "Detected entry_point: $MAINCLASS"
+	echo "Info: detected entry_point: $MAINCLASS"
 fi
 
 # Add -dONLINE_JUDGE -dDOMJUDGE below if you want it make easier for teams to
