@@ -259,10 +259,10 @@ result(
 $recommended_max_allowed_packet = 16*1024*1024;
 $max_inout = $DB->q('VALUE SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) FROM testcase');
 $max_allowed_packet_status = 'O';
-if ($max_allowed_packet < $recommended_max_allowed_packet) {
+if ($mysqldata['max_allowed_packet'] < $recommended_max_allowed_packet) {
     $max_allowed_packet_status = 'W';
 }
-if ($max_allowed_packet < 2*$max_inout) {
+if ($mysqldata['max_allowed_packet'] < 2*$max_inout) {
     $max_allowed_packet_status = 'E';
 }
 result(
