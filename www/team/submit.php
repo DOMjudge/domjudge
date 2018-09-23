@@ -65,7 +65,7 @@ foreach ($langdata as $langid => $langdata) {
     <select class="custom-select" name="probid" id="probid" required>
 <?php
     foreach ($probs as $probid => $probname) {
-        print '      <option value="' .specialchars($probid). '">' . specialchars($probname) . "</option>\n";
+        print '      <option value="' .specialchars((string)$probid). '">' . specialchars($probname) . "</option>\n";
     }
 ?>
     </select>
