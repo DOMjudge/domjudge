@@ -106,6 +106,7 @@ PROGNAME="$(basename "$0")"
 
 # Check for judge backend debugging:
 if [ "$DEBUG" ]; then
+	export DEBUG
 	export VERBOSE=$LOG_DEBUG
 	logmsg $LOG_NOTICE "debugging enabled, DEBUG='$DEBUG'"
 else
@@ -201,7 +202,7 @@ logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 # To suppress false positive of FILELIMIT misspelling of TIMELIMIT:
 # shellcheck disable=SC2153
 runcheck ./run testdata.in program.out \
-	$GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT \
+	$GAINROOT "$RUNGUARD" ${DEBUG:+-v -V "DEBUG=$DEBUG"} $CPUSET_OPT \
 	${USE_CHROOT:+-r "$PWD/.."} \
 	--nproc=$PROCLIMIT \
 	--no-core --streamsize=$FILELIMIT \

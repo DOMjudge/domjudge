@@ -78,6 +78,7 @@ PROGNAME="$(basename "$0")"
 
 # Check for judge backend debugging:
 if [ "$DEBUG" ]; then
+	export DEBUG
 	export VERBOSE=$LOG_DEBUG
 	logmsg $LOG_NOTICE "debugging enabled, DEBUG='$DEBUG'"
 else
@@ -125,6 +126,9 @@ logmsg $LOG_INFO "starting compile"
 
 if [ ! -z "$ENTRY_POINT" ]; then
 	ENVIRONMENT_VARS="-V ENTRY_POINT=$ENTRY_POINT"
+fi
+if [ -n "$DEBUG" ]; then
+	ENVIRONMENT_VARS="$ENVIRONMENT_VARS -V DEBUG=$DEBUG"
 fi
 
 # First compile to 'source' then rename to 'program' to avoid problems with
