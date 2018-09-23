@@ -51,7 +51,6 @@ if (!isset($menu)) {
 <?php
 if (IS_JURY) {
     echo "<link rel=\"stylesheet\" href=\"../style_jury.css?v=" . ASSET_TAG . "\" type=\"text/css\" />\n";
-    echo "<script type=\"text/javascript\" src=\"../js/jury.js?v=" . ASSET_TAG . "\"></script>\n";
     if (isset($jscolor)) {
         echo "<script type=\"text/javascript\" src=\"" .
         "../js/jscolor.js?v=" . ASSET_TAG . "\"></script>\n";
