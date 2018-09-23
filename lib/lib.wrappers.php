@@ -27,7 +27,7 @@ function dj_setcookie(
         $path = preg_replace(
             '/\/(api|jury|public|team)\/?$/',
             '/',
-                             dirname($_SERVER['PHP_SELF'])
+			     dirname($_SERVER['REQUEST_URI'])
         );
     }
 
