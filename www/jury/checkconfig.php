@@ -256,13 +256,23 @@ result(
     'prevent connection refusal during the contest.'
 );
 
+$recommended_max_allowed_packet = 16*1024*1024;
+$max_inout = $DB->q('VALUE SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) FROM testcase');
+$max_allowed_packet_status = 'O';
+if ($max_allowed_packet < $recommended_max_allowed_packet) {
+    $max_allowed_packet_status = 'W';
+}
+if ($max_allowed_packet < 2*$max_inout) {
+    $max_allowed_packet_status = 'E';
+}
 result(
     'software',
     'MySQL maximum packet size',
-    $mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O',
+    $max_allowed_packet_status,
     'MySQL\'s max_allowed_packet is set to ' .
     printsize($mysqldata['max_allowed_packet']) . '. You may ' .
-    'want to raise this to about twice the maximum test case size.'
+    'want to raise this to about twice the maximum test case size (currently ' .
+    printsize($max_inout) . ').'
 );
 
 result(
