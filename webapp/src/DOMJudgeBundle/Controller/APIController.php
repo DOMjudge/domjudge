@@ -344,7 +344,7 @@ class APIController extends FOSRestController
                         $lastUpdate = $now;
                     }
                     # Sleep for little while before checking for new events.
-                    usleep(50000);
+                    usleep(500*1000);
                 }
             }
         });
