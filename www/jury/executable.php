@@ -63,7 +63,10 @@ if (isset($_POST['upload'])) {
                 $desc = $DB->q('VALUE SELECT description FROM executable WHERE execid=%s', $id);
                 $type = $DB->q('VALUE SELECT type FROM executable WHERE execid=%s', $id);
             }
-            $ini_array = parse_ini_string($zip->getFromName($prop_file));
+            $prop_data = $zip->getFromName($prop_file);
+            if ($prop_data!==FALSE) {
+                $ini_array = parse_ini_string($prop_data);
+            }
             if (!empty($ini_array)) {
                 $newid = $ini_array['execid'];
                 $desc = $ini_array['description'];

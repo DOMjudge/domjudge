@@ -41,7 +41,7 @@ if (isset($_POST['donow'])) {
     // Special case delay/resume start (only sets/unsets starttime_undefined).
     if (in_array($time, $start_actions, true)) {
         $enabled = $time==='delay_start' ? 0 : 1;
-        if (difftime($docdata['starttime'], $now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE) {
+        if (difftime((float)$docdata['starttime'], $now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE) {
             error("Cannot $time less than ".STARTTIME_UPDATE_MIN_SECONDS_BEFORE.
                   " seconds before contest start.");
         }
@@ -54,7 +54,7 @@ if (isset($_POST['donow'])) {
     // starttime is special because other, relative times depend on it.
     if ($time == 'start') {
         if ($docdata['starttime_enabled'] &&
-            difftime($docdata['starttime'], $now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE) {
+            difftime((float)$docdata['starttime'], $now) <= STARTTIME_UPDATE_MIN_SECONDS_BEFORE) {
             error("Cannot update starttime less than ".STARTTIME_UPDATE_MIN_SECONDS_BEFORE.
                   " seconds before contest start.");
         }
