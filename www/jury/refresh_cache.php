@@ -84,12 +84,12 @@ foreach ($contests as $contest) {
         // for each problem fetch the result
         foreach ($probs as $pr) {
             echo " p" . specialchars($pr['probid']);
-            calcScoreRow($pr['cid'], $team['teamid'], $pr['probid']);
+            calcScoreRow((int)$pr['cid'], (int)$team['teamid'], (int)$pr['probid']);
         }
 
         // Now recompute the rank
         echo " rankcache";
-        updateRankCache($contest, $team['teamid']);
+        updateRankCache((int)$contest, (int)$team['teamid']);
 
         echo "\n";
         ob_flush();
