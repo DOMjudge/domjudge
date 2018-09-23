@@ -87,7 +87,7 @@ while ($logline = $res->next()) {
 
     echo "</td><td>" .
     specialchars($logline['action']) . "</td><td>" .
-    specialchars($logline['extrainfo']) . "</td></tr>\n";
+    specialchars((string)$logline['extrainfo']) . "</td></tr>\n";
 }
 echo "</tbody></table>\n\n";
 
