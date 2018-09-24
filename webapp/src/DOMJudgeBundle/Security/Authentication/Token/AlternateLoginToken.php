@@ -20,9 +20,9 @@ class AlternateLoginToken extends AbstractToken
     }
 
     public function getIpAddress() {
-      return $this->ipaddress;
+        return $this->ipaddress;
     }
     public function setIpAddress(string $ipaddress) {
-      $this->ipaddress = $ipaddress;
+        $this->ipaddress = $ipaddress;
     }
 }
