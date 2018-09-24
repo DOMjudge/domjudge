@@ -82,7 +82,7 @@ $(function(){
           {
             "label" : "{{ run["rank"] }}",
             "value" : {{ run["runtime"]|default(0) }},
-            "color" : "{{ colors[run["runresult"]] }}",
+            "color" : "{{ colors[run["runresult"]]|default('grey') }}",
             "description" : "{{ run["description"]|default(run["rank"]) }}",
           },
         {% endfor %}
