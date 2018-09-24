@@ -65,7 +65,7 @@ abstract class AbstractRestController extends FOSRestController
     {
         $ids = $request->request->get('ids', []);
         if (!is_array($ids) || empty($ids)) {
-            throw new BadRequestHttpException('Please provider a field \'ids\' in the body with an array of ID\'s to fetch');
+            throw new BadRequestHttpException('Please provide a field \'ids\' in the body with an array of ID\'s to fetch');
         }
 
         $queryBuilder = $this->getQueryBuilder($request);
