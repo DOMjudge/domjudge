@@ -19,10 +19,13 @@ class FallbackController extends Controller
      */
     private $DOMJudgeService;
 
-    public function __construct($webDir, Container $container, DOMJudgeService $DOMJudgeService)
+    private $twig;
+
+    public function __construct($webDir, Container $container, DOMJudgeService $DOMJudgeService, \Twig_Environment $twig)
     {
         $this->webDir = $webDir;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->twig = $twig;
         $this->setContainer($container);
     }
 
@@ -91,7 +94,7 @@ class FallbackController extends Controller
         ob_start();
         global $G_SYMFONY, $G_SYMFONY_RENDER;
         $G_SYMFONY = $this->DOMJudgeService;
-        $G_SYMFONY_RENDER = array($this, 'renderView');
+        $G_SYMFONY_TWIG = $this->twig;
         require($thefile);
 
         $http_response_code = http_response_code();
