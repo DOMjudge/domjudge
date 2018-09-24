@@ -137,9 +137,9 @@ class DOMJudgeService
 
     /**
      * Get the logged in user
-     * @return User
+     * @return User|null
      */
-    public function getUser(): User
+    public function getUser()
     {
         $token = $this->container->get('security.token_storage')->getToken();
         if ($token == null) {
