@@ -40,8 +40,8 @@ require('../lib/www/print.php');
 
 t('printyn1', printyn(true), 'yes');
 t('printyn2', printyn(false), 'no');
-t('printyn3', printyn(1), 'yes');
-t('printyn4', printyn(0), 'no');
+t('printyn3', printyn((bool)1), 'yes');
+t('printyn4', printyn((bool)0), 'no');
 
 // Fake loaded configuration settings from DB
 require('../lib/lib.dbconfig.php');
