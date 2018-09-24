@@ -131,6 +131,16 @@ class Submission
      */
     private $balloons;
 
+
+    public function getResult() {
+      foreach ($this->judgings as $j) {
+        if ($j->getValid()) {
+          return $j->getResult();
+        }
+      }
+      return null;
+    }
+
     /**
      * Get submitid
      *
