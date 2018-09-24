@@ -50,7 +50,7 @@ class Submission
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="langid", options={"comment"="Language ID"}, nullable=false)
+     * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Language ID"}, nullable=false)
      */
     private $langid;
 
@@ -240,7 +240,7 @@ class Submission
     /**
      * Set langid
      *
-     * @param integer $langid
+     * @param string $langid
      *
      * @return Submission
      */
@@ -254,7 +254,7 @@ class Submission
     /**
      * Get langid
      *
-     * @return integer
+     * @return string
      */
     public function getLangid()
     {
