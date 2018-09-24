@@ -1,48 +1,33 @@
 <?php
+
 namespace DOMJudgeBundle\Controller\API;
 
-use Doctrine\ORM\EntityManagerInterface;
-use DOMJudgeBundle\Entity\Language;
+use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\Controller\FOSRestController;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Rest\Route("/api/v5/contests/{cid}/languages", defaults={ "_format" = "json" })
  */
-class LanguageController extends FOSRestController
+class LanguageController extends AbstractRestController
 {
     /**
-     * @var EntityManagerInterface
+     * @inheritdoc
      */
-    private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
-    }
-
-    /**
-     * @Rest\Get("")
-     */
-    public function getLanguagesAction()
+    protected function getQueryBuilder(Request $request): QueryBuilder
     {
         return $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Language', 'lang')
             ->select('lang')
-            ->where('lang.allow_submit = 1')
-            ->getQuery()
-            ->getResult();
+            ->where('lang.allow_submit = 1');
     }
 
     /**
-     * @Rest\Get("/{externalid}")
+     * Return the field used as ID in requests
+     * @return string
      */
-    public function getLanguageAction(Language $language)
+    protected function getIdField(): string
     {
-        if (!$language->getAllowSubmit()) {
-            throw new NotFoundHttpException();
-        }
-        return $language;
+        return 'lang.externalid';
     }
 }

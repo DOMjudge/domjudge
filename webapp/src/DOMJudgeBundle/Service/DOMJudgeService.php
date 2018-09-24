@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\User;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 
@@ -119,15 +120,8 @@ class DOMJudgeService
 
     public function checkrole(string $rolename, bool $check_superset = true) : bool
     {
-        $token = $this->container->get('security.token_storage')->getToken();
-        if ($token == null) {
-            return false;
-        }
-        $user =$token->getUser();
-
-        // Ignore user objects if they aren't a DOMJudgeBundle user
-        // Covers cases where users are not logged in
-        if (!is_a($user, 'DOMJudgeBundle\Entity\User')) {
+        $user = $this->getUser();
+        if ($user === null) {
             return false;
         }
 
@@ -139,6 +133,28 @@ class DOMJudgeService
             }
         }
         return $authchecker->isGranted('ROLE_'.strtoupper($rolename));
+    }
+
+    /**
+     * Get the logged in user
+     * @return User
+     */
+    public function getUser(): User
+    {
+        $token = $this->container->get('security.token_storage')->getToken();
+        if ($token == null) {
+            return null;
+        }
+
+        $user = $token->getUser();
+
+        // Ignore user objects if they aren't a DOMJudgeBundle user
+        // Covers cases where users are not logged in
+        if (!is_a($user, 'DOMJudgeBundle\Entity\User')) {
+            return null;
+        }
+
+        return $user;
     }
 
     public function getHttpKernel()
