@@ -586,7 +586,7 @@ if (isset($jud['rejudgingid'])) {
 
 
 // Graph of testcase runtimes
-echo $G_SYMFONY_RENDER('@DOMJudge/jury/partials/submission_graph.html.twig', [
+echo $G_SYMFONY_TWIG->render('@DOMJudge/jury/partials/submission_graph.html.twig', [
   'runs' => $runs,
   'jdata' => $jdata,
   'timelimit' => $submdata['maxruntime']
