@@ -61,7 +61,7 @@ class SecurityController extends Controller
             'error'         => $error,
             'allow_registration'    => $this->DOMJudgeService->dbconfig_get('allow_registration', false),
             'allowed_authmethods'   => $authmethods,
-            'auth_xheaders_present' => $request->headers->get('X-DOMjudge-Autologin'),
+            'auth_xheaders_present' => $request->headers->get('X-DOMjudge-Login'),
             'auth_ipaddress_users'  => $auth_ipaddress_users,
         ));
     }

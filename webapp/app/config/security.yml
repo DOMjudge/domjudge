@@ -27,10 +27,14 @@ security:
         api:
             pattern: ^/api
             provider: domjudge_db_provider
-            http_basic: ~
             stateless: true
             user_checker: DOMJudgeBundle\Security\UserChecker
             anonymous: ~
+            guard:
+              authenticators:
+                - DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
+                - DOMJudgeBundle\Security\DOMJudgeBasicAuthenticator
+              entry_point: DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
 
         # api only does http_basic auth
         feed:
@@ -48,9 +52,14 @@ security:
             user_checker: DOMJudgeBundle\Security\UserChecker
             logout_on_user_change: true
 
+            guard:
+              authenticators:
+                - DOMJudgeBundle\Security\DOMJudgeXHeadersAuthenticator
+                - DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
+              entry_point: DOMJudgeBundle\Security\DOMJudgeXHeadersAuthenticator
+
             anonymous: ~
-            simple_form:
-              authenticator: DOMJudgeBundle\Security\DOMJudgeFormAuthenticator
+            form_login:
               login_path: login
               check_path: login
               csrf_token_generator: security.csrf.token_manager
