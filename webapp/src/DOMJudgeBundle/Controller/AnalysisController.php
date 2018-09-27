@@ -42,7 +42,13 @@ class AnalysisController extends Controller
         $contest = $this->DOMJudgeService->getCurrentContest();
 
         // First collect information about problems in this contest
-        $problems = $contest->getProblems(); // TODO: this gets ContestProblem, but we need Problem as well
+        $problems = $em->createQueryBuilder()
+          ->select('cp', 'p')
+          ->from('DOMJudgeBundle:ContestProblem', 'cp')
+          ->join('cp.problem', 'p')
+          ->where('cp.contest = :contest')
+          ->setParameter('contest', $contest)
+          ->getQuery()->getResult();
 
         // Need to query directly the count, otherwise symfony memory explodes
         // I think because it tries to load the testdata if you do this the naive way.
@@ -66,9 +72,10 @@ class AnalysisController extends Controller
         $teams = [];
         if ($contest->getPublic()) {
           $teams = $em->createQueryBuilder()
-            ->select('t', 'ts', 'j', 'lang')
+            ->select('t', 'ts', 'j', 'lang', 'a')
             ->from('DOMJudgeBundle:Team', 't')
             ->join('t.category', 'tc')
+            ->join('t.affiliation', 'a')
             ->join('t.submissions', 'ts')
             ->join('ts.judgings', 'j')
             ->join('ts.language', 'lang')
@@ -77,9 +84,10 @@ class AnalysisController extends Controller
           ;
         } else {
           $teams = $em->createQueryBuilder()
-            ->select('t', 'c', 'ts', 'j', 'lang')
+            ->select('t', 'c', 'ts', 'j', 'lang', 'a')
             ->from('DOMJudgeBundle:Team', 't')
             ->join('t.contests', 'c')
+            ->join('t.affiliation', 'a')
             ->join('t.category', 'tc')
             ->join('t.submissions', 'ts')
             ->join('ts.judgings', 'j')
@@ -218,15 +226,15 @@ class AnalysisController extends Controller
 
         // Get a whole bunch of judgings(and related objects)
         // Where:
-        //   - The judging is valid
+        //   - The judging is valid(NOT - for team pages it might be neat to see rejudgings/etc)
         //   - The judging submission is part of the selected contest
         //   - The judging submission matches the problem we're analyzing
         //   - The submission was made by a team in a visible category
         $judgings = $em->createQueryBuilder()
-          ->select('j, jr','s','team')
+          ->select('j, jr','s','team', 'partial p.{timelimit,name,probid}')
           ->from('DOMJudgeBundle:Judging', 'j')
-          ->leftjoin('j.submission', 's')
-          ->leftjoin('s.problem', 'p')
+          ->join('j.submission', 's')
+          ->join('s.problem', 'p')
           ->join('j.runs', 'jr')
           ->join('s.team', 'team')
           ->join('team.category', 'tc')
@@ -316,10 +324,11 @@ class AnalysisController extends Controller
         //   - The judging submission matches the problem we're analyzing
         //   - The submission was made by a team in a visible category
         $judgings = $em->createQueryBuilder()
-          ->select('j, jr','s','team')
+          ->select('j, jr','s','team', 'sj')
           ->from('DOMJudgeBundle:Judging', 'j')
-          ->leftjoin('j.submission', 's')
-          ->leftjoin('s.problem', 'p')
+          ->join('j.submission', 's')
+          ->join('s.problem', 'p')
+          ->join('s.judgings', 'sj')
           ->join('j.runs', 'jr')
           ->join('s.team', 'team')
           ->join('team.category', 'tc')
