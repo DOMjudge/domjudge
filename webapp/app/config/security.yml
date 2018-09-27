@@ -40,10 +40,14 @@ security:
         feed:
             pattern: ^/feed
             provider: domjudge_db_provider
-            http_basic: ~
             user_checker: DOMJudgeBundle\Security\UserChecker
             stateless: true
             anonymous: ~
+            guard:
+              authenticators:
+                - DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
+                - DOMJudgeBundle\Security\DOMJudgeBasicAuthenticator
+              entry_point: DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
 
         # rest of app does form_login
         main:
