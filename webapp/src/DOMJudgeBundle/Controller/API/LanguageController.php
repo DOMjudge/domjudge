@@ -7,7 +7,9 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * @Rest\Route("/api/v5/contests/{cid}/languages", defaults={ "_format" = "json" })
+ * @Rest\Route("/api/contests/{cid}/languages", defaults={ "_format" = "json" })
+ * @Rest\Prefix("/languages")
+ * @Rest\NamePrefix("_language_")
  */
 class LanguageController extends AbstractRestController
 {

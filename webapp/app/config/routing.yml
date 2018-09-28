@@ -3,11 +3,9 @@ domjudge:
     type: annotation
     prefix: /
 
-domjudge_api_v4:
+api:
     type: rest
-    resource: '@DOMJudgeBundle/Controller/APIController.php'
-    prefix: /api/v4
-    defaults: { _format: "json" }
+    resource: '@DOMJudgeBundle/Resources/config/routing_api.yml'
 
 logout:
     path: /logout

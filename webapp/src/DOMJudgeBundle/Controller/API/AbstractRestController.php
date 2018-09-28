@@ -52,7 +52,7 @@ abstract class AbstractRestController extends FOSRestController
             ->getQuery()
             ->getResult();
 
-        return $this->renderData($objects);
+        return $this->renderData($request, $objects);
     }
 
     /**
@@ -79,7 +79,7 @@ abstract class AbstractRestController extends FOSRestController
             throw new NotFoundHttpException('One or more objects not found');
         }
 
-        return $this->renderData($objects);
+        return $this->renderData($request, $objects);
     }
 
     /**
@@ -105,21 +105,27 @@ abstract class AbstractRestController extends FOSRestController
             throw new NotFoundHttpException('Object not found');
         }
 
-        return $this->renderData($object);
+        return $this->renderData($request, $object);
     }
 
     /**
      * Render the given data using the correct groups
+     * @param Request $request
      * @param mixed $data
      * @return Response
      */
-    protected function renderData($data): Response
+    protected function renderData(Request $request, $data): Response
     {
         $view = $this->view($data);
 
         // Set the user on the context, so it can be used to determine access to certain attributes
         $view->getContext()->setAttribute('user', $this->DOMJudgeService->getUser());
-        // TODO: set groups based on externalid/internalid mode
+
+        $groups = ['Default'];
+        if (!$request->query->has('strict')) {
+            $groups[] = 'Nonstrict';
+        }
+        $view->getContext()->setGroups($groups);
 
         return $this->handleView($view);
     }

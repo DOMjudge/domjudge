@@ -25,18 +25,21 @@ class Language
      * @ORM\Id
      * @ORM\Column(type="string", name="externalid", length=255, nullable=true)
      * @Serializer\SerializedName("id")
+     * @Serializer\Groups({"Default", "Nonstrict"})
      */
     private $externalid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive language name"}, nullable=false)
+     * @Serializer\Groups({"Default", "Nonstrict"})
      */
     private $name;
 
     /**
      * @var string[]
      * @ORM\Column(type="json_array", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $extensions;
 
@@ -50,6 +53,7 @@ class Language
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_judge", options={"comment"="Are submissions in this language judged?"}, nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $allow_judge = true;
 
@@ -57,6 +61,7 @@ class Language
      * @var double
      * @ORM\Column(type="float", name="time_factor", options={"comment"="Language-specific factor multiplied by problem run times"}, nullable=false)
      * @Serializer\Type("double")
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $time_factor = 1;
 
@@ -70,12 +75,14 @@ class Language
     /**
      * @var bool
      * @ORM\Column(type="boolean", name="require_entry_point", options={"comment"="Whether submissions require a code entry point to be specified."}, nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $require_entry_point = false;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="entry_point_description", options={"comment"="The description used in the UI for the entry point field."}, nullable=true)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $entry_point_description;
 
