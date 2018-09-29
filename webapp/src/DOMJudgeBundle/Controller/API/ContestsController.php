@@ -3,33 +3,33 @@
 namespace DOMJudgeBundle\Controller\API;
 
 use Doctrine\ORM\QueryBuilder;
-use DOMJudgeBundle\Entity\Language;
+use DOMJudgeBundle\Utils\Utils;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
+use DOMJudgeBundle\Entity\Contest;
 
 /**
- * @Rest\Route("/api/v4/contests/{cid}/languages", defaults={ "_format" = "json" })
- * @Rest\Prefix("/languages")
- * @SWG\Tag(name="Languages")
- * @SWG\Parameter(ref="#/parameters/cid")
+ * @Rest\Route("/api/v4/contests", defaults={ "_format" = "json" })
+ * @Rest\Prefix("/contests")
+ * @SWG\Tag(name="Contests")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")
  * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
  */
-class LanguageController extends AbstractRestController
+class ContestsController extends AbstractRestController
 {
     /**
-     * Get all the languages for this contest
+     * Get all the active contests
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
      * @SWG\Response(
      *     response="200",
-     *     description="Returns all the languages for this contest",
+     *     description="Returns all the active contests",
      *     @SWG\Schema(
      *         type="array",
-     *         @SWG\Items(ref=@Model(type=Language::class))
+     *         @SWG\Items(ref=@Model(type=Contest::class))
      *     )
      * )
      */
@@ -39,16 +39,16 @@ class LanguageController extends AbstractRestController
     }
 
     /**
-     * Get the languages for this contest with the given ID's
+     * Get the contests with the given ID's
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Post("")
      * @SWG\Response(
      *     response="200",
-     *     description="Returns the languages for this contest with the given ID's",
+     *     description="Returns the contests with the given ID's",
      *     @SWG\Schema(
      *         type="array",
-     *         @SWG\Items(ref=@Model(type=Language::class))
+     *         @SWG\Items(ref=@Model(type=Contest::class))
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
@@ -59,7 +59,7 @@ class LanguageController extends AbstractRestController
     }
 
     /**
-     * Get the given language for this contest
+     * Get the given contest
      * @param Request $request
      * @param string $id
      * @return \Symfony\Component\HttpFoundation\Response
@@ -67,8 +67,8 @@ class LanguageController extends AbstractRestController
      * @Rest\Get("/{id}")
      * @SWG\Response(
      *     response="200",
-     *     description="Returns the given language for this contest",
-     *     @Model(type=Language::class)
+     *     description="Returns the given contest",
+     *     @Model(type=Contest::class)
      * )
      * @SWG\Parameter(ref="#/parameters/id")
      */
@@ -82,10 +82,30 @@ class LanguageController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        return $this->entityManager->createQueryBuilder()
-            ->from('DOMJudgeBundle:Language', 'lang')
-            ->select('lang')
-            ->where('lang.allow_submit = 1');
+        $now = Utils::now();
+        $qb  = $this->entityManager->createQueryBuilder();
+        $qb
+            ->from('DOMJudgeBundle:Contest', 'c')
+            ->select('c')
+            ->andWhere('c.enabled = 1')
+            ->andWhere($qb->expr()->orX(
+                'c.deactivatetime is null',
+                $qb->expr()->gt('c.deactivatetime', $now)
+            ))
+            ->orderBy('c.activatetime');
+
+        // Filter on contests this user has access to
+        if (!$this->DOMJudgeService->checkrole('jury')) {
+            if ($this->DOMJudgeService->checkrole('team') && $this->DOMJudgeService->getUser()->getTeamid()) {
+                $qb->join('c.teams', 'ct')
+                    ->andWhere('ct.teamid = :teamid')
+                    ->setParameter(':teamid', $this->DOMJudgeService->getUser()->getTeamid());
+            } else {
+                $qb->andWhere('c.public = 1');
+            }
+        }
+
+        return $qb;
     }
 
     /**
@@ -93,6 +113,6 @@ class LanguageController extends AbstractRestController
      */
     protected function getIdField(): string
     {
-        return 'lang.externalid';
+        return 'c.cid';
     }
 }

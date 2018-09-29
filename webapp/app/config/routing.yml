@@ -3,9 +3,21 @@ domjudge:
     type: annotation
     prefix: /
 
-api:
+domjudge_api_v4:
     type: rest
-    resource: '@DOMJudgeBundle/Resources/config/routing_api.yml'
+    resource: '@DOMJudgeBundle/Controller/APIController.php'
+    prefix: /api/v4
+    defaults: { _format: "json" }
+
+app.swagger_ui:
+    path: /api/doc
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger_ui }
+
+app.swagger:
+    path: /api/doc.json
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger }
 
 logout:
     path: /logout
