@@ -51,7 +51,7 @@ class Contest
     /**
      * @var string
      * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Short name for this contest"}, nullable=false)
-     * @Serializer\Groups({"Default"})
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $shortname;
 
