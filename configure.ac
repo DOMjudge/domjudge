@@ -215,6 +215,7 @@ AX_WITH_COMMENT(7,[      ])
 
 # }}}
 
+AC_MSG_CHECKING([baseurl])
 AC_ARG_WITH([baseurl], [AS_HELP_STRING([--with-baseurl=URL],
 [Base URL of the DOMjudge web interfaces. Example default:
  "https://example.com/domjudge/".])], [], [])
