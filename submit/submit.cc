@@ -262,8 +262,23 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ( !readlanguages() ) warning(0,"could not obtain language data");
 	if ( !readcontests() ) warning(0,"could not obtain active contests");
+
+	if ( contest.empty() ) {
+		if ( contests.size()==0 ) {
+			warnuser("no active contests found (and no contest specified)");
+		}
+		if ( contests.size()==1 ) {
+			contest = contests[0][0];
+		}
+		if ( contests.size()>1 ) {
+			warnuser("multiple active contests found, please specify one");
+		}
+	}
+
+	if ( contest.empty()  ) usage2(0,"no contest specified");
+
+	if ( !readlanguages() ) warning(0,"could not obtain language data");
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
@@ -333,19 +348,6 @@ int main(int argc, char **argv)
 		language = extension;
 	}
 
-	if ( contest.empty() ) {
-		if ( contests.size()==0 ) {
-			warnuser("no active contests found (and no contest specified)");
-		}
-		if ( contests.size()==1 ) {
-			contest = contests[0][0];
-		}
-		if ( contests.size()>1 ) {
-			warnuser("multiple active contests found, please specify one");
-		}
-	}
-
-	if ( contest.empty()  ) usage2(0,"no contest specified");
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( baseurl.empty()  ) usage2(0,"no url specified");
@@ -685,7 +687,8 @@ bool readlanguages()
 {
 	Json::Value langs, exts;
 
-	langs = doAPIrequest("languages", 0);
+	string endpoint = "contests/" + contest + "/languages";
+	langs = doAPIrequest(endpoint.c_str(), 0);
 
 	if ( langs.isNull() ) return false;
 
