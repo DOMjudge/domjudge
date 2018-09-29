@@ -13,6 +13,13 @@
   <form class="form-signin" action="{{ path('login') }}" method="post">
     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
     <img class="mb-4" src="images/DOMjudgelogo.png" alt="DOMjudge" width="72">
+
+  {% for message in app.session.flashBag.get('notice') %}
+      <div class="alert alert-success" role="alert">
+      {{ message }}
+      </div>
+  {% endfor %}
+
       <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
 
   {% if error %}
