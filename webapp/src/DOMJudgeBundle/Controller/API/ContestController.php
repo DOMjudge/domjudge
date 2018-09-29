@@ -12,12 +12,13 @@ use DOMJudgeBundle\Entity\Contest;
 
 /**
  * @Rest\Route("/api/v4/contests", defaults={ "_format" = "json" })
- * @Rest\Prefix("/contests")
+ * @Rest\Prefix("/api/contests")
+ * @Rest\NamePrefix("contest_")
  * @SWG\Tag(name="Contests")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")
  * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
  */
-class ContestsController extends AbstractRestController
+class ContestController extends AbstractRestController
 {
     /**
      * Get all the active contests

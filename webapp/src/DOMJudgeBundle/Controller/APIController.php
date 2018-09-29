@@ -123,55 +123,6 @@ class APIController extends FOSRestController
     }
 
     /**
-     * @Get("/contests")
-     */
-    public function getContestsAction()
-    {
-        $request = Request::createFromGlobals();
-        $strict = false;
-        if ($request->query->has('strict')) {
-            $strict = $request->query->getBoolean('strict');
-        }
-        $em = $this->getDoctrine()->getManager();
-        $data = $em->getRepository(Contest::class)->findBy(
-            array(
-                'enabled' => true,
-                'public' => true,
-            )
-        );
-        $penalty_time = $this->DOMJudgeService->dbconfig_get('penalty_time', 20);
-
-        $result = [];
-        foreach ($data as $contest) {
-            if ($contest->isActive()) {
-                $result[] = $contest->serializeForAPI($penalty_time, $strict);
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * @Get("/contests/{cid}")
-     */
-    public function getSingleContestAction(Contest $contest)
-    {
-        $request = Request::createFromGlobals();
-        $strict = false;
-        if ($request->query->has('strict')) {
-            $strict = $request->query->getBoolean('strict');
-        }
-        $isJury = $this->isGranted('ROLE_JURY');
-        if (($isJury && $contest->getEnabled())
-            || (!$isJury && $contest->isActive())) {
-            $penalty_time = $this->DOMJudgeService->dbconfig_get('penalty_time', 20);
-            return $contest->serializeForAPI($penalty_time, $strict);
-        } else {
-            return null;
-        }
-    }
-
-    /**
      * @Get("/contests/{cid}/contest-yaml")
      */
     public function getContestYaml(Contest $contest)

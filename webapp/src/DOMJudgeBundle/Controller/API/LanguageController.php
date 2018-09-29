@@ -11,7 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Rest\Route("/api/v4/contests/{cid}/languages", defaults={ "_format" = "json" })
- * @Rest\Prefix("/languages")
+ * @Rest\Prefix("/api/contests/{cid}/languages")
+ * @Rest\NamePrefix("language_")
  * @SWG\Tag(name="Languages")
  * @SWG\Parameter(ref="#/parameters/cid")
  * @SWG\Response(response="404", ref="#/definitions/NotFound")
