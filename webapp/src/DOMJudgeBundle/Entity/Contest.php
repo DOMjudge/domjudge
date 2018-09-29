@@ -355,7 +355,7 @@ class Contest
      * @return \DateTime|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("start_time")
-     * @Serializer\Type("datetime")
+     * @Serializer\Type("DateTime")
      */
     public function getStartTimeObject()
     {
@@ -412,7 +412,7 @@ class Contest
      * @return \DateTime|null
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("end_time")
-     * @Serializer\Type("datetime")
+     * @Serializer\Type("DateTime")
      * @Serializer\Groups({"Nonstrict"})
      */
     public function getEndTimeObject()
