@@ -1597,55 +1597,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $api->provideFunction('GET', 'groups', $doc, array(), array(), null, true);
 
     /**
-     * Language information
-     */
-    function languages($args)
-    {
-        global $DB, $api;
-
-        if (isset($args['__primary_key'])) {
-            if (isset($args['langid'])) {
-                $api->createError("You cannot specify a primary ID both via /{id} and ?langid={id}");
-                return '';
-            }
-            $args['langids'] = array_map(function ($langId) {
-                return rest_intid('languages', $langId);
-            }, $args['__primary_key']);
-        } elseif (isset($args['langid'])) {
-            $args['langids'] = [$args['langid']];
-        }
-
-        $query = 'SELECT langid, name, extensions, require_entry_point, entry_point_description, allow_judge, time_factor
-              FROM language WHERE allow_submit = 1';
-
-        $byLangIds = array_key_exists('langids', $args);
-        $query .= ($byLangIds ? ' AND langid IN (%As)' : ' %_');
-        $langid = ($byLangIds ? $args['langids'] : []);
-
-        $q = $DB->q($query, $langid);
-
-        $res = array();
-        while ($row = $q->next()) {
-            $ret = array(
-                'id'           => safe_string(rest_extid('languages', $row['langid'])),
-                'name'         => safe_string($row['name']),
-            );
-            if (!isset($args['strict'])) {
-                $ret['extensions']  = dj_json_decode($row['extensions']);
-                $ret['require_entry_point'] = safe_bool($row['require_entry_point']);
-                $ret['entry_point_description'] = safe_string($row['entry_point_description']);
-                $ret['allow_judge'] = safe_bool($row['allow_judge']);
-                $ret['time_factor'] = safe_float($row['time_factor']);
-            }
-            $res[] = $ret;
-        }
-        return $res;
-    }
-    $doc = 'Get a list of all suported programming languages.';
-    $args = array('langid' => 'Search for a specific language.');
-    $api->provideFunction('GET', 'languages', $doc, $args);
-
-    /**
      * Clarification information
      */
     function clarifications($args)
