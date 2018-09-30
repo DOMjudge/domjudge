@@ -3,8 +3,8 @@
 namespace DOMJudgeBundle\Controller\API;
 
 use Doctrine\ORM\QueryBuilder;
+use DOMJudgeBundle\Entity\FullSubmissionFile;
 use DOMJudgeBundle\Entity\Submission;
-use DOMJudgeBundle\Entity\SubmissionFile;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
@@ -46,6 +46,9 @@ class SubmissionController extends AbstractRestController
     public function getSubmissionFilesAction(Request $request, string $id)
     {
         $queryBuilder = $this->getQueryBuilder($request)
+            ->resetDQLPart('join')
+            ->join('s.full_files', 'ff')
+            ->select('s, ff')
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter(':id', $id)
             ->setMaxResults(1);
@@ -57,8 +60,8 @@ class SubmissionController extends AbstractRestController
             throw new NotFoundHttpException(sprintf('Submission with ID \'%s\' not found', $id));
         }
 
-        /** @var SubmissionFile[] $files */
-        $files = $submission->getFiles();
+        /** @var FullSubmissionFile[] $files */
+        $files = $submission->getFullFiles();
         $zip   = new \ZipArchive;
         if (!($tmpfname = tempnam($this->getParameter('domjudge.tmpdir'), "submission_file-"))) {
             return new Response("Could not create temporary file.", Response::HTTP_INTERNAL_SERVER_ERROR);

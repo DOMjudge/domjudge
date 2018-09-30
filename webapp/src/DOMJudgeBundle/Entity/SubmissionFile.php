@@ -27,12 +27,6 @@ class SubmissionFile
     private $submitid;
 
     /**
-     * @var resource
-     * @ORM\Column(type="blob", name="sourcecode", options={"comment"="Full source code"}, nullable=false)
-     */
-    private $sourcecode;
-
-    /**
      * @var string
      * @ORM\Column(type="string", name="filename", length=255, options={"comment"="Filename as submitted"}, nullable=false)
      */
@@ -82,30 +76,6 @@ class SubmissionFile
     public function getSubmitid()
     {
         return $this->submitid;
-    }
-
-    /**
-     * Set sourcecode
-     *
-     * @param resource|string $sourcecode
-     *
-     * @return SubmissionFile
-     */
-    public function setSourcecode($sourcecode)
-    {
-        $this->sourcecode = $sourcecode;
-
-        return $this;
-    }
-
-    /**
-     * Get sourcecode
-     *
-     * @return resource
-     */
-    public function getSourcecode()
-    {
-        return $this->sourcecode;
     }
 
     /**
@@ -159,11 +129,11 @@ class SubmissionFile
     /**
      * Set submission
      *
-     * @param \DOMJudgeBundle\Entity\Submission $submission
+     * @param Submission $submission
      *
      * @return SubmissionFile
      */
-    public function setSubmission(\DOMJudgeBundle\Entity\Submission $submission = null)
+    public function setSubmission(Submission $submission = null)
     {
         $this->submission = $submission;
 
@@ -173,7 +143,7 @@ class SubmissionFile
     /**
      * Get submission
      *
-     * @return \DOMJudgeBundle\Entity\Submission
+     * @return Submission
      */
     public function getSubmission()
     {
