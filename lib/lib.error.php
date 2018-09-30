@@ -140,7 +140,7 @@ function debug()
  */
 function exception_handler(Throwable $e)
 {
-    error($e->getMessage());
+    error($e->getMessage() . ( DEBUG ? " in " . $e->getFile() . " line " . $e->getLine() : ''));
 }
 
 set_exception_handler('exception_handler');
