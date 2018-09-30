@@ -36,7 +36,7 @@ if (empty($data)) {
     error("No data.");
 }
 // ensure referrer only contains a single filename, not complete URLs
-if (! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer)) {
+if (!empty($referrer) && ! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer)) {
     error("Invalid characters in referrer.");
 }
 
