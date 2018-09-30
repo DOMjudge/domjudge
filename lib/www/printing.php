@@ -81,8 +81,6 @@ function handle_print_upload()
 {
     global $DB;
 
-    ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
-
     checkFileUpload($_FILES['code']['error']);
 
     $filename = $_FILES['code']['name'];
