@@ -37,7 +37,7 @@ $started = checkrole('jury') || $fdata['started'];
 logged_in(); // fill userdata
 
 if (!logged_in()) {
-    echo '<div id="loginbut"><a class="nav-link justify-content-center" href="login.php"><button type="button" class="btn btn-info btn-sm"><span class="octicon octicon-sign-in"></span> Login</button></a></div>';
+    echo '<div id="loginbut"><a class="nav-link justify-content-center" href="../login"><button type="button" class="btn btn-info btn-sm"><span class="octicon octicon-sign-in"></span> Login</button></a></div>';
 } else {
     echo '<div id="logoutbut"><a class="nav-link justify-content-center" href="../logout"><button type="button" class="btn btn-outline-info btn-sm"><span class="octicon octicon-sign-out"></span> Logout</button></a></div>';
 }
