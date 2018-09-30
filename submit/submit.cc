@@ -154,7 +154,7 @@ std::string decode_HTML_entities(std::string str)
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, baseurl, contest, entry_point;
+string problem, language, extension, baseurl, contest, contestname, entry_point;
 vector<string> filenames;
 char *submitdir;
 
@@ -270,13 +270,20 @@ int main(int argc, char **argv)
 		}
 		if ( contests.size()==1 ) {
 			contest = contests[0][0];
+			contestname = contests[0][1];
 		}
 		if ( contests.size()>1 ) {
 			warnuser("multiple active contests found, please specify one");
 		}
+	} else {
+		for ( i=0; i < contests.size(); i++ ) {
+			if (contests[i][0] == contest) {
+				contestname = contests[i][1];
+			}
+		}
 	}
 
-	if ( contest.empty()  ) usage2(0,"no contest specified");
+	if ( contest.empty() || contestname.empty() ) usage2(0,"no (valid) contest specified");
 
 	if ( !readlanguages() ) warning(0,"could not obtain language data");
 
@@ -370,7 +377,7 @@ int main(int argc, char **argv)
 		error(0, "Entry point required but not specified nor detected.");
 	}
 
-	logmsg(LOG_DEBUG,"contest is `%s'",contest.c_str());
+	logmsg(LOG_DEBUG,"contest is `%s'",contestname.c_str());
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
 	logmsg(LOG_DEBUG,"entry_point is `%s'",entry_point.c_str());
@@ -388,7 +395,7 @@ int main(int argc, char **argv)
 			}
 			printf("\n");
 		}
-		printf("  contest:     %s\n",contest.c_str());
+		printf("  contest:     %s\n",contestname.c_str());
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
 		if ( !entry_point.empty() ) {
@@ -723,8 +730,8 @@ bool readcontests()
 	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		vector<string> contest;
 
+		contest.push_back(res[i]["id"].asString());
 		contest.push_back(res[i]["shortname"].asString());
-		contest.push_back(res[i]["name"].asString());
 		if ( contest[0]=="" || contest[1]=="" ) {
 			warning(0,"REST API returned unexpected JSON data for contests");
 			return false;
