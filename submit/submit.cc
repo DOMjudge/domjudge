@@ -154,7 +154,7 @@ std::string decode_HTML_entities(std::string str)
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, baseurl, contest, contestname, entry_point;
+string problem, language, extension, baseurl, contestid, contestshortname, entry_point;
 vector<string> filenames;
 char *submitdir;
 
@@ -222,9 +222,10 @@ int main(int argc, char **argv)
 
 	/* Read default for baseurl and contest from environment */
 	baseurl = string(BASEURL);
-	contest = "";
+	contestid = "";
+	contestshortname = "";
 	if ( getenv("SUBMITBASEURL")!=NULL ) baseurl = string(getenv("SUBMITBASEURL"));
-	if ( getenv("SUBMITCONTEST")!=NULL ) contest = string(getenv("SUBMITCONTEST"));
+	if ( getenv("SUBMITCONTEST")!=NULL ) contestid = string(getenv("SUBMITCONTEST"));
 
 	quiet =	show_help = show_version = 0;
 	opterr = 0;
@@ -236,7 +237,7 @@ int main(int argc, char **argv)
 		case 'p': problem     = string(optarg); break;
 		case 'l': extension   = string(optarg); break;
 		case 'u': baseurl     = string(optarg); break;
-		case 'c': contest     = string(optarg); break;
+		case 'c': contestid   = string(optarg); break;
 		case 'e': entry_point = string(optarg); break;
 
 		case 'v': /* verbose option */
@@ -264,27 +265,27 @@ int main(int argc, char **argv)
 
 	if ( !readcontests() ) warning(0,"could not obtain active contests");
 
-	if ( contest.empty() ) {
+	if ( contestid.empty() ) {
 		if ( contests.size()==0 ) {
 			warnuser("no active contests found (and no contest specified)");
 		}
 		if ( contests.size()==1 ) {
-			contest = contests[0][0];
-			contestname = contests[0][1];
+			contestid = contests[0][0];
+			contestshortname = contests[0][1];
 		}
 		if ( contests.size()>1 ) {
 			warnuser("multiple active contests found, please specify one");
 		}
 	} else {
 		for ( i=0; i < contests.size(); i++ ) {
-			if (contests[i][0] == contest || contests[i][1] == contest) {
-				contest = contests[i][0];
-				contestname = contests[i][1];
+			if (contests[i][0] == contestid || contests[i][1] == contestid) {
+				contestid = contests[i][0];
+				contestshortname = contests[i][1];
 			}
 		}
 	}
 
-	if ( contest.empty() || contestname.empty() ) usage2(0,"no (valid) contest specified");
+	if ( contestid.empty() || contestshortname.empty() ) usage2(0,"no (valid) contest specified");
 
 	if ( !readlanguages() ) warning(0,"could not obtain language data");
 
@@ -378,7 +379,7 @@ int main(int argc, char **argv)
 		error(0, "Entry point required but not specified nor detected.");
 	}
 
-	logmsg(LOG_DEBUG,"contest is `%s'",contestname.c_str());
+	logmsg(LOG_DEBUG,"contest is `%s'",contestshortname.c_str());
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
 	logmsg(LOG_DEBUG,"entry_point is `%s'",entry_point.c_str());
@@ -396,7 +397,7 @@ int main(int argc, char **argv)
 			}
 			printf("\n");
 		}
-		printf("  contest:     %s\n",contestname.c_str());
+		printf("  contest:     %s\n",contestshortname.c_str());
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
 		if ( !entry_point.empty() ) {
@@ -695,7 +696,7 @@ bool readlanguages()
 {
 	Json::Value langs, exts;
 
-	string endpoint = "contests/" + contest + "/languages";
+	string endpoint = "contests/" + contestid + "/languages";
 	langs = doAPIrequest(endpoint.c_str(), 0);
 
 	if ( langs.isNull() ) return false;
@@ -791,8 +792,8 @@ bool websubmit()
 	}
 	curlformadd(COPYNAME,"shortname", COPYCONTENTS,problem.c_str());
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
-	if ( !contest.empty() ) {
-		curlformadd(COPYNAME,"contest", COPYCONTENTS,contest.c_str());
+	if ( !contestshortname.empty() ) {
+		curlformadd(COPYNAME,"contest", COPYCONTENTS,contestshortname.c_str());
 	}
 	if ( !entry_point.empty() ) {
 		curlformadd(COPYNAME,"entry_point", COPYCONTENTS,entry_point.c_str());
