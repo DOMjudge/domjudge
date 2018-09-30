@@ -3,8 +3,11 @@
 namespace DOMJudgeBundle\Controller\API;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
+use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Utils\Utils;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -90,15 +93,14 @@ abstract class AbstractRestController extends FOSRestController
     {
         $queryBuilder = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
-            ->setMaxResults(1);
+            ->setParameter(':id', $id);
 
         $object = $queryBuilder
             ->getQuery()
             ->getOneOrNullResult();
 
         if ($object === null) {
-            throw new NotFoundHttpException('Object not found');
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
         }
 
         return $this->renderData($request, $object);
@@ -127,9 +129,68 @@ abstract class AbstractRestController extends FOSRestController
     }
 
     /**
+     * Get the query builder used for getting contests
+     * @return QueryBuilder
+     */
+    protected function getContestQueryBuilder(): QueryBuilder
+    {
+        $now = Utils::now();
+        $qb  = $this->entityManager->createQueryBuilder();
+        $qb
+            ->from('DOMJudgeBundle:Contest', 'c')
+            ->select('c')
+            ->andWhere('c.enabled = 1')
+            ->andWhere($qb->expr()->orX(
+                'c.deactivatetime is null',
+                $qb->expr()->gt('c.deactivatetime', $now)
+            ))
+            ->orderBy('c.activatetime');
+
+        // Filter on contests this user has access to
+        if (!$this->DOMJudgeService->checkrole('jury')) {
+            if ($this->DOMJudgeService->checkrole('team') && $this->DOMJudgeService->getUser()->getTeamid()) {
+                $qb->join('c.teams', 'ct')
+                    ->andWhere('ct.teamid = :teamid')
+                    ->setParameter(':teamid', $this->DOMJudgeService->getUser()->getTeamid());
+            } else {
+                $qb->andWhere('c.public = 1');
+            }
+        }
+
+        return $qb;
+    }
+
+    /**
+     * @param Request $request
+     * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    protected function getContestId(Request $request): int
+    {
+        if (!$request->attributes->has('cid')) {
+            throw new BadRequestHttpException('cid parameter missing');
+        }
+
+        $qb = $this->getContestQueryBuilder();
+        $qb
+            ->andWhere('c.cid = :cid')
+            ->setParameter(':cid', $request->attributes->get('cid'));
+
+        /** @var Contest $contest */
+        $contest = $qb->getQuery()->getOneOrNullResult();
+
+        if ($contest === null) {
+            throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' not found', $request->attributes->get('cid')));
+        }
+
+        return $contest->getCid();
+    }
+
+    /**
      * Get the query builder to use for request for this REST endpoint
      * @param Request $request
      * @return QueryBuilder
+     * @throws NonUniqueResultException
      */
     abstract protected function getQueryBuilder(Request $request): QueryBuilder;
 

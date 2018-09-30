@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Rest\Route("/api/v4/contests", defaults={ "_format" = "json" })
@@ -439,30 +440,7 @@ class ContestController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        $now = Utils::now();
-        $qb  = $this->entityManager->createQueryBuilder();
-        $qb
-            ->from('DOMJudgeBundle:Contest', 'c')
-            ->select('c')
-            ->andWhere('c.enabled = 1')
-            ->andWhere($qb->expr()->orX(
-                'c.deactivatetime is null',
-                $qb->expr()->gt('c.deactivatetime', $now)
-            ))
-            ->orderBy('c.activatetime');
-
-        // Filter on contests this user has access to
-        if (!$this->DOMJudgeService->checkrole('jury')) {
-            if ($this->DOMJudgeService->checkrole('team') && $this->DOMJudgeService->getUser()->getTeamid()) {
-                $qb->join('c.teams', 'ct')
-                    ->andWhere('ct.teamid = :teamid')
-                    ->setParameter(':teamid', $this->DOMJudgeService->getUser()->getTeamid());
-            } else {
-                $qb->andWhere('c.public = 1');
-            }
-        }
-
-        return $qb;
+        return $this->getContestQueryBuilder();
     }
 
     /**
@@ -484,9 +462,14 @@ class ContestController extends AbstractRestController
     {
         $queryBuilder = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
-            ->setMaxResults(1);
+            ->setParameter(':id', $id);
 
-        return $queryBuilder->getQuery()->getOneOrNullResult();
+        $contest = $queryBuilder->getQuery()->getOneOrNullResult();
+
+        if ($contest === null) {
+            throw new NotFoundHttpException(sprintf('Contest with ID \'%s\' not found', $id));
+        }
+
+        return $contest;
     }
 }
