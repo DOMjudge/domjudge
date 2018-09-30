@@ -3,12 +3,6 @@ domjudge:
     type: annotation
     prefix: /
 
-domjudge_api_v4:
-    type: rest
-    resource: '@DOMJudgeBundle/Controller/APIController.php'
-    prefix: /api/v4
-    defaults: { _format: "json" }
-
 # Add the new API controllers here as well, to load them without the /v4/ prefix
 domjudge_api_new:
     type: rest
