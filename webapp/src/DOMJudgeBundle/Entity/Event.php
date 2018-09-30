@@ -66,7 +66,7 @@ class Event
     /**
      * @var resource
      *
-     * @ORM\Column(name="content", type="blob", nullable=true)
+     * @ORM\Column(name="content", type="json_array", nullable=true)
      */
     private $content;
 
@@ -275,7 +275,7 @@ class Event
     /**
      * Set content
      *
-     * @param resource|string $content
+     * @param mixed $content
      *
      * @return Event
      */
@@ -289,7 +289,7 @@ class Event
     /**
      * Get content
      *
-     * @return resource
+     * @return mixed
      */
     public function getContent()
     {

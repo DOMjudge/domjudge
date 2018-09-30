@@ -386,8 +386,7 @@ class ContestController extends AbstractRestController
                 $events = $q->getResult();
                 /** @var Event $event */
                 foreach ($events as $event) {
-                    // FIXME: use the dj_* wrapper as in lib/lib.wrapper.php.
-                    $data = json_decode(stream_get_contents($event->getContent()), true);
+                    $data = $event->getContent();
                     // Filter fields with specific access restrictions.
                     if (!$isJury) {
                         if ($event->getEndpointtype() == 'submissions') {
