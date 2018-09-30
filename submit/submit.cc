@@ -277,7 +277,8 @@ int main(int argc, char **argv)
 		}
 	} else {
 		for ( i=0; i < contests.size(); i++ ) {
-			if (contests[i][0] == contest) {
+			if (contests[i][0] == contest || contests[i][1] == contest) {
+				contest = contests[i][0];
 				contestname = contests[i][1];
 			}
 		}
@@ -448,7 +449,7 @@ void usage()
 "in the webinterface.");
 		if ( contests.size()==1 ) {
 			printf(" Currently this defaults to the only active contest '%s'.",
-			       contests[0][0].c_str());
+			       contests[0][1].c_str());
 		}
 		printf("\n\n");
 	}
@@ -456,7 +457,7 @@ void usage()
 		printf(
 "For CONTEST use one of the following:\n");
 		for(i=0; i<contests.size(); i++) {
-			printf("   %-15s  %s\n",contests[i][0].c_str(),contests[i][1].c_str());
+			printf("   %-3s  %s\n",contests[i][0].c_str(),contests[i][1].c_str());
 		}
 		printf("\n");
 	}
