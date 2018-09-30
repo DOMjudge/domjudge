@@ -173,50 +173,6 @@ if (!isset($api)) {
     $api->provideFunction('GET', 'status', 'Undocumented for now.', array(), array(), array('jury'));
 
     /**
-     * Contest information
-     */
-    function contest()
-    {
-        global $cids, $cdatas, $userdata;
-
-        if (checkrole('jury')) {
-            $cdatas = getCurContests(true);
-        } elseif (isset($userdata['teamid'])) {
-            $cdatas = getCurContests(true, $userdata['teamid']);
-        }
-
-        if (empty($cdatas)) {
-            return null;
-        }
-
-        $cid = $cids[0];
-        $cdata = $cdatas[$cid];
-        return cdataHelper($cdata);
-    }
-    $doc = "Get information about the current contest: id, shortname, name, start_time, end_time, duration, scoreboard_freeze_duration, unfreeze, and penalty. ";
-    $doc .= "If more than one contest is active, return information about the first one.";
-    $api->provideFunction('GET', 'contest', $doc);
-
-
-    /**
-     * Contests information
-     */
-    function contests()
-    {
-        global $cdatas, $userdata;
-
-        if (checkrole('jury')) {
-            $cdatas = getCurContests(true);
-        } elseif (isset($userdata['teamid'])) {
-            $cdatas = getCurContests(true, $userdata['teamid']);
-        }
-
-        return array_map("cdataHelper", array_values($cdatas));
-    }
-    $doc = "Get information about all current contests: id, shortname, name, start_time, end_time, duration, scoreboard_freeze_duration, unfreeze, and penalty. ";
-    $api->provideFunction('GET', 'contests', $doc);
-
-    /**
      * Get information about the current user
      */
     function user()
