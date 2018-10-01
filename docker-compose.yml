@@ -15,6 +15,7 @@ services:
       - /var/lib/mysql
   domjudge:
     image: domjudge/domjudge-contributor
+    hostname: domjudge-contributor
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - .:/domjudge:cached
