@@ -38,6 +38,12 @@ class Configuration
     private $type;
 
     /**
+     * @var bool
+     * @ORM\Column(type="boolean", name="public", options={"comment"="Is this variable publicly visible?"}, nullable=false)
+     */
+    private $public = false;
+
+    /**
      * @var string
      * @ORM\Column(type="string", name="description", length=255, options={"comment"="Description of this executable"}, nullable=true)
      */
@@ -123,6 +129,30 @@ class Configuration
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * Set public
+     *
+     * @param bool $public
+     *
+     * @return Configuration
+     */
+    public function setPublic(bool $public)
+    {
+        $this->public = $public;
+
+        return $this;
+    }
+
+    /**
+     * Get public
+     *
+     * @return bool
+     */
+    public function getPublic()
+    {
+        return $this->public;
     }
 
     /**

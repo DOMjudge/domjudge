@@ -11,7 +11,9 @@ use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use DOMJudgeBundle\Entity\Configuration;
 
 /**
  * @Rest\Route("/api/v4", defaults={ "_format" = "json" })
@@ -170,5 +172,38 @@ class GeneralInfoController extends FOSRestController
         }
 
         return $user;
+    }
+
+    /**
+     * Get configuration variables
+     * @Rest\Get("/config")
+     * @SWG\Response(
+     *     response="200",
+     *     description="The configuration variables",
+     *     @SWG\Schema(type="object")
+     * )
+     * @SWG\Parameter(
+     *     name="name",
+     *     in="query",
+     *     type="string",
+     *     description="Get only this configuration variable",
+     *     required=false
+     * )
+     * @param Request $request
+     * @return \DOMJudgeBundle\Entity\Configuration[]|mixed
+     * @throws \Exception
+     */
+    public function getDatabaseConfigurationAction(Request $request)
+    {
+        $onlypublic = !($this->DOMJudgeService->checkrole('jury') || $this->DOMJudgeService->checkrole('judgehost'));
+        $name = $request->query->get('name');
+
+        $result = $this->DOMJudgeService->dbconfig_get($name, null, $onlypublic);
+
+        if ($name !== null) {
+            return [$name => $result];
+        }
+
+        return $result;
     }
 }

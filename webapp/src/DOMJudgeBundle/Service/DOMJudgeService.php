@@ -2,11 +2,11 @@
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\Configuration;
 use DOMJudgeBundle\Entity\User;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\DependencyInjection\ContainerInterface as Container;
-
 use DOMJudgeBundle\Utils\Utils;
+use Symfony\Component\DependencyInjection\ContainerInterface as Container;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class DOMJudgeService
 {
@@ -41,24 +41,33 @@ class DOMJudgeService
      * values can be used.
      *
      * When $name is null, then all variables will be returned.
+     * @param string|null $name
+     * @param mixed $default
+     * @param bool $onlyifpublic
+     * @return Configuration[]|mixed
+     * @throws \Exception
      */
-    public function dbconfig_get(string $name, $default = null)
+    public function dbconfig_get($name, $default = null, bool $onlyifpublic = false)
     {
         if (is_null($name)) {
             $all_configs = $this->em->getRepository('DOMJudgeBundle:Configuration')->findAll();
-            $ret = array();
+            $ret         = array();
+            /** @var Configuration $config */
             foreach ($all_configs as $config) {
-                $ret[$config->getName()] = $config->getValue();
+                if (!$onlyifpublic || $config->getPublic()) {
+                    $ret[$config->getName()] = $config->getValue();
+                }
             }
             return $ret;
         }
 
+        /** @var Configuration $config */
         $config = $this->em->getRepository('DOMJudgeBundle:Configuration')->findOneByName($name);
-        if (!empty($config)) {
+        if (!empty($config) && (!$onlyifpublic || $config->getPublic())) {
             return $config->getValue();
         }
 
-        if ($default===null) {
+        if ($default === null) {
             throw new \Exception("Configuration variable '$name' not found.");
         }
         return $default;

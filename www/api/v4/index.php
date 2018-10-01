@@ -754,26 +754,6 @@ if (!isset($api)) {
     $api->provideFunction('POST', 'judging_runs', $doc, $args, $exArgs, $roles);
 
     /**
-     * DB configuration
-     */
-    function config($args)
-    {
-        $onlypublic = !(IS_JURY || checkrole('jury') || checkrole('judgehost'));
-
-        if (isset($args['name'])) {
-            return array($args['name'] => dbconfig_get($args['name'], null, false, $onlypublic));
-        }
-
-        return dbconfig_get(null, null, false, $onlypublic);
-    }
-    $doc = 'Get configuration variables.';
-    $args = array('name' => 'Search only a single config variable.');
-    $exArgs = array(array('name' => 'sourcesize_limit'));
-    // Role based (partial) access to configuration variables is handled
-    // inside the function.
-    $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
-
-    /**
      * Submissions information
      */
     function submissions($args)
