@@ -40,30 +40,12 @@ class ContestController extends AbstractRestController
      *         @SWG\Items(ref=@Model(type=Contest::class))
      *     )
      * )
+     * @SWG\Parameter(ref="#/parameters/idlist")
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function listAction(Request $request)
     {
         return parent::performListAction($request);
-    }
-
-    /**
-     * Get the contests with the given ID's
-     * @param Request $request
-     * @return Response
-     * @Rest\Post("")
-     * @SWG\Response(
-     *     response="200",
-     *     description="Returns the contests with the given ID's",
-     *     @SWG\Schema(
-     *         type="array",
-     *         @SWG\Items(ref=@Model(type=Contest::class))
-     *     )
-     * )
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     */
-    public function getMultipleAction(Request $request)
-    {
-        return parent::performGetMultipleAction($request);
     }
 
     /**
@@ -80,9 +62,9 @@ class ContestController extends AbstractRestController
      * )
      * @SWG\Parameter(ref="#/parameters/id")
      */
-    public function getSingleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $id)
     {
-        return parent::performGetSingleAction($request, $id);
+        return parent::performSingleAction($request, $id);
     }
 
     /**

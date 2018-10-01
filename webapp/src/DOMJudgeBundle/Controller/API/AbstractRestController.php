@@ -45,37 +45,30 @@ abstract class AbstractRestController extends FOSRestController
      * Get all objects for this endpoint
      * @param Request $request
      * @return Response
+     * @throws NonUniqueResultException
      */
     protected function performListAction(Request $request)
     {
         $queryBuilder = $this->getQueryBuilder($request);
-        $objects      = $queryBuilder
-            ->getQuery()
-            ->getResult();
 
-        return $this->renderData($request, $objects);
-    }
+        if ($request->query->has('ids')) {
+            $ids = $request->query->get('ids', []);
+            if (!is_array($ids)) {
+                throw new BadRequestHttpException('\'ids\' should be an array of ID\'s to fetch');
+            }
 
-    /**
-     * Get multiple objects for this endpoint using ID's provided in the body of the request
-     * @param Request $request
-     * @return Response
-     */
-    protected function performGetMultipleAction(Request $request)
-    {
-        $ids = $request->request->get('ids', []);
-        if (!is_array($ids) || empty($ids)) {
-            throw new BadRequestHttpException('Please provide a field \'ids\' in the body with an array of ID\'s to fetch');
+            $ids = array_unique($ids);
+
+            $queryBuilder
+                ->andWhere(sprintf('%s IN (:ids)', $this->getIdField()))
+                ->setParameter(':ids', $ids);
         }
 
-        $queryBuilder = $this->getQueryBuilder($request);
         $objects      = $queryBuilder
-            ->where(sprintf('%s IN (:ids)', $this->getIdField()))
-            ->setParameter(':ids', $ids)
             ->getQuery()
             ->getResult();
 
-        if (count($objects) !== count($ids)) {
+        if (isset($ids) && count($objects) !== count($ids)) {
             throw new NotFoundHttpException('One or more objects not found');
         }
 
@@ -89,7 +82,7 @@ abstract class AbstractRestController extends FOSRestController
      * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    protected function performGetSingleAction(Request $request, string $id)
+    protected function performSingleAction(Request $request, string $id)
     {
         $queryBuilder = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))

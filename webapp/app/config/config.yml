@@ -129,9 +129,9 @@ nelmio_api_doc:
                 required: true
             idlist:
                 name: ids[]
-                in: formData
+                in: query
                 type: array
-                description: The list of ID's of objects to get
+                description: Filter the objects to get on this list of ID's
                 collectionFormat: multi
                 items:
                     type: string
