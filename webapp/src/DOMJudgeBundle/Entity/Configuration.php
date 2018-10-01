@@ -27,7 +27,7 @@ class Configuration
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="value", options={"comment"="Content of the configuration variable (JSON encoded)"}, nullable=true)
+     * @ORM\Column(type="json_array", length=4294967295, name="value", options={"comment"="Content of the configuration variable (JSON encoded)"}, nullable=true)
      */
     private $value;
 
@@ -86,7 +86,7 @@ class Configuration
     /**
      * Set value
      *
-     * @param string $value
+     * @param mixed $value
      *
      * @return Configuration
      */
@@ -100,7 +100,7 @@ class Configuration
     /**
      * Get value
      *
-     * @return string
+     * @return mixed
      */
     public function getValue()
     {
