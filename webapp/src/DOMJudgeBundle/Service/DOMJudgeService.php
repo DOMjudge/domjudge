@@ -96,7 +96,7 @@ class DOMJudgeService
             //                           deactivatetime > UNIX_TIMESTAMP() )
             //                     ORDER BY activatetime", $onlyofteam);
         } elseif ($onlyofteam === -1) {
-            $qb->addWhere('c.public = 1');
+            $qb->andWhere('c.public = 1');
             // $contests = $DB->q("SELECT * FROM contest
             //                     WHERE enabled = 1 AND public = 1 ${extra}
             //                     AND ( deactivatetime IS NULL OR

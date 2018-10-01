@@ -94,19 +94,6 @@ if (!isset($api)) {
 
     $api = new RestApi();
 
-    /**
-     * API information
-     */
-    function info()
-    {
-        return array(
-            'api_version' => DOMJUDGE_API_VERSION,
-            'domjudge_version' => DOMJUDGE_VERSION
-        );
-    }
-    $doc = "Get general API information.";
-    $api->provideFunction('GET', 'info', $doc);
-
     // helper function to convert the data in the cdata object to the specified values
     function cdataHelper($cdata)
     {
@@ -124,75 +111,6 @@ if (!isset($api)) {
             'penalty'                    => safe_int(dbconfig_get('penalty_time', 20)),
         );
     }
-
-    function status()
-    {
-        global $DB, $api, $cdatas, $userdata, $cids, $requestedCid;
-
-        if (isset($args['cid'])) {
-            $cid = safe_int($args['cid']);
-        } elseif (isset($requestedCid)) {
-            $cid = $requestedCid;
-        } else {
-            if (count($cids)>=1) {
-                $cid = reset($cids);
-            } else {
-                $api->createError("No active contest found.", NOT_FOUND);
-                return '';
-            }
-        }
-
-        $ret = array();
-        $ret['num_submissions'] = $DB->q(
-            'VALUE SELECT COUNT(s.submitid)
-             FROM submission s
-             WHERE s.cid=%s',
-            $cid
-        );
-        $ret['num_queued'] = $DB->q(
-            'VALUE SELECT COUNT(*)
-             FROM submission s
-             LEFT JOIN judging j ON (j.submitid = s.submitid AND j.valid != 0)
-             WHERE s.cid=%s
-             AND result IS NULL
-             AND s.valid = 1',
-            $cid
-        );
-        $ret['num_judging'] = $DB->q(
-            'VALUE SELECT COUNT(*)
-             FROM submission s
-             LEFT JOIN judging j USING (submitid)
-             WHERE s.cid=%s
-             AND result IS NULL
-             AND j.valid = 1
-             AND s.valid = 1',
-            $cid
-        );
-        return $ret;
-    }
-    $api->provideFunction('GET', 'status', 'Undocumented for now.', array(), array(), array('jury'));
-
-    /**
-     * Get information about the current user
-     */
-    function user()
-    {
-        global $userdata;
-
-        $return = array(
-            'id'       => safe_int($userdata['userid']),
-            'teamid'   => safe_int($userdata['teamid']),
-            'email'    => $userdata['email'],
-            'ip'       => $userdata['ip_address'],
-            'lastip'   => $userdata['last_ip_address'],
-            'name'     => $userdata['name'],
-            'username' => $userdata['username'],
-            'roles'    => $userdata['roles'],
-        );
-        return $return;
-    }
-    $doc = "Get information about the currently logged in user. If no user is logged in, will return null for all values.";
-    $api->provideFunction('GET', 'user', $doc);
 
     /**
      * Problems information
