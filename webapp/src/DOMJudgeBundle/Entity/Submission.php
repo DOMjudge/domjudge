@@ -129,12 +129,6 @@ class Submission
     private $files;
 
     /**
-     * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="FullSubmissionFile", mappedBy="submission_for_full")
-     */
-    private $full_files;
-
-    /**
      * @ORM\OneToMany(targetEntity="Balloon", mappedBy="submission")
      */
     private $balloons;
@@ -443,7 +437,6 @@ class Submission
     {
         $this->judgings = new ArrayCollection();
         $this->files = new ArrayCollection();
-        $this->full_files = new ArrayCollection();
     }
 
     /**
@@ -536,40 +529,6 @@ class Submission
     public function getFiles()
     {
         return $this->files;
-    }
-
-    /**
-     * Add full file
-     *
-     * @param FullSubmissionFile $file
-     *
-     * @return Submission
-     */
-    public function addFullFile(FullSubmissionFile $file)
-    {
-        $this->full_files->add($file);
-
-        return $this;
-    }
-
-    /**
-     * Remove full file
-     *
-     * @param FullSubmissionFile $file
-     */
-    public function removeFullFile(FullSubmissionFile $file)
-    {
-        $this->full_files->removeElement($file);
-    }
-
-    /**
-     * Get full files
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getFullFiles()
-    {
-        return $this->full_files;
     }
 
     /**

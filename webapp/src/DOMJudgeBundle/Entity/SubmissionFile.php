@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -43,6 +44,13 @@ class SubmissionFile
      * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
      */
     private $submission;
+
+    /**
+     * @var SubmissionFileSourceCode
+     * @ORM\OneToOne(targetEntity="DOMJudgeBundle\Entity\SubmissionFileSourceCode")
+     * @ORM\JoinColumn(name="submitfileid", referencedColumnName="submitfileid")
+     */
+    private $submission_file_source_code;
 
     /**
      * Get submitfileid
@@ -148,5 +156,29 @@ class SubmissionFile
     public function getSubmission()
     {
         return $this->submission;
+    }
+
+    /**
+     * Set submissionFileSourceCode
+     *
+     * @param SubmissionFileSourceCode $submissionFileSourceCode
+     *
+     * @return SubmissionFile
+     */
+    public function setSubmissionFileSourceCode(SubmissionFileSourceCode $submissionFileSourceCode = null)
+    {
+        $this->submission_file_source_code = $submissionFileSourceCode;
+
+        return $this;
+    }
+
+    /**
+     * Get submissionFileSourceCode
+     *
+     * @return SubmissionFileSourceCode
+     */
+    public function getSubmissionFileSourceCode()
+    {
+        return $this->submission_file_source_code;
     }
 }

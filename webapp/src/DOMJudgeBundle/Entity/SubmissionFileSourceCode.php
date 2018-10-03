@@ -5,12 +5,23 @@ namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Extends SubmissionFile to also contain submission contents
+ * Source code of submission files
+ *
+ * This is a seperate class with a OneToOne relationship with SubmissionFile so we can load it separately
  * @ORM\Entity()
  * @ORM\Table(name="submission_file", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class FullSubmissionFile extends SubmissionFile
+class SubmissionFileSourceCode
 {
+    /**
+     * @var int
+     *
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer", name="submitfileid", options={"comment"="Unique ID"}, nullable=false)
+     */
+    private $submitfileid;
+
     /**
      * @var resource
      * @ORM\Column(type="blob", name="sourcecode", options={"comment"="Full source code"}, nullable=false)
@@ -18,17 +29,21 @@ class FullSubmissionFile extends SubmissionFile
     private $sourcecode;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Submission", inversedBy="full_files")
-     * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
+     * Get submitfileid
+     *
+     * @return integer
      */
-    private $submission_for_full;
+    public function getSubmitfileid()
+    {
+        return $this->submitfileid;
+    }
 
     /**
      * Set sourcecode
      *
      * @param resource|string $sourcecode
      *
-     * @return SubmissionFile
+     * @return SubmissionFileSourceCode
      */
     public function setSourcecode($sourcecode)
     {
@@ -45,29 +60,5 @@ class FullSubmissionFile extends SubmissionFile
     public function getSourcecode()
     {
         return $this->sourcecode;
-    }
-
-    /**
-     * Set submission
-     *
-     * @param Submission $submission
-     *
-     * @return SubmissionFile
-     */
-    public function setSubmissionForFull(Submission $submission = null)
-    {
-        $this->submission_for_full = $submission;
-
-        return $this;
-    }
-
-    /**
-     * Get submission
-     *
-     * @return Submission
-     */
-    public function getSubmissionForFull()
-    {
-        return $this->submission_for_full;
     }
 }
