@@ -7,7 +7,7 @@ DOMjudge
 This is the Programming Contest Jury System "DOMjudge" version 5.3.3
 
 DOMjudge is a system for running a programming contest, like the
-ACM ICPC regional and world championship programming contests.
+ICPC regional and world championship programming contests.
 
 
 Documentation

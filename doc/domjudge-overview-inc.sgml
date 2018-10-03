@@ -1,7 +1,7 @@
 <chapt>DOMjudge overview <label id="overview">
 <p>
 
-DOMjudge is a system for running programming contests, like the ACM
+DOMjudge is a system for running programming contests, like the
 ICPC regional and world championship programming contests.
 
 This means that teams are on-site and have a fixed time period (mostly
