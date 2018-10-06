@@ -163,6 +163,7 @@ $(function() {
                 <th scope="col" style="max-width: 200px">name</th>
                 <th scope="col">#<br>submitted/correct</th>
                 <th scope="col"># problems<br>attempted/solved</th>
+                <th scope="col">Misery<br>Index</th>
               </tr>
             </thead>
             <tbody>
@@ -174,6 +175,7 @@ $(function() {
                 <td class="truncate" style="max-width: 200px">{{ t.name }}</td>
                 <td>{{ misc.team_stats[id].total_submitted }} / {{ misc.team_stats[id].total_accepted }}</td>
                 <td>{{ misc.team_stats[id].problems_submitted|length }} / {{ misc.team_stats[id].problems_accepted|length }}</td>
+                <td>{{ misc.team_stats[id].misery_index|number_format(0) }}</td>
               </tr>
             {% endfor %}
             </tbody>

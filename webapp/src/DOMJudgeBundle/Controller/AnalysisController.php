@@ -174,8 +174,6 @@ class AnalysisController extends Controller
             AnalysisController::set_or_increment($misc['language_stats']['total_submissions'], $s->getLangid());
             $misc['language_stats']['teams_attempted'][$s->getLangid()][$team->getTeamId()] = $team->getTeamId();
 
-
-
             if ($s->getResult() != 'correct') continue;
             $misc['total_accepted']++;
             $team_stats['total_accepted']++;
@@ -194,15 +192,19 @@ class AnalysisController extends Controller
           AnalysisController::set_or_increment($misc['team_attemped_n_problems'], count($team_stats['problems_submitted']));
           AnalysisController::set_or_increment($misc['teams_solved_n_problems'], $team_stats['total_accepted']);
 
-
           // Calculate how long it has been since their last submission
-          $misery_seconds = min(
-            $contest->getEndTime() - $s->getSubmitTime(),
-            $now - $s->getSubmitTime()
-          );
-          $misery_minutes = ($misery_seconds /60);
+          if ($lastSubmission != null) {
+            $misery_seconds = min(
+              $contest->getEndTime() - $lastSubmission->getSubmitTime(),
+              $now - $lastSubmission->getSubmitTime()
+            );
+          } else {
+            $misery_seconds = $contest->getEndTime() - $contest->getStartTime();
+          }
+          $misery_minutes = ($misery_seconds / 60) * 3;
 
-          $total_misery_minutes += 3*$misery_minutes;
+          $misc['team_stats'][$team->getTeamId()]['misery_index'] = $misery_minutes;
+          $total_misery_minutes += $misery_minutes;
         }
         $misc['misery_index'] = $total_misery_minutes/count($teams);
         usort($submissions, function($a, $b){
