@@ -165,7 +165,7 @@ if (! isset($_POST['cancel'])) {
                             continue;
                         }
                         $columns = array($fk[0], $fk[1]);
-                        $values = array($prikey[$fk[0]], $mapdest);
+                        $values = array((string)$prikey[$fk[0]], $mapdest);
                         if (isset($mapping['extra'][$key])) {
                             foreach ($mapping['extra'][$key] as $column => $value) {
                                 $columns[] = $column;
