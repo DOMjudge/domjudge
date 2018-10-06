@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -28,12 +29,6 @@ class SubmissionFile
 
     /**
      * @var string
-     * @ORM\Column(type="blob", name="sourcecode", options={"comment"="Full source code"}, nullable=false)
-     */
-    private $sourcecode;
-
-    /**
-     * @var string
      * @ORM\Column(type="string", name="filename", length=255, options={"comment"="Filename as submitted"}, nullable=false)
      */
     private $filename;
@@ -49,6 +44,13 @@ class SubmissionFile
      * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
      */
     private $submission;
+
+    /**
+     * @var SubmissionFileSourceCode
+     * @ORM\OneToOne(targetEntity="DOMJudgeBundle\Entity\SubmissionFileSourceCode")
+     * @ORM\JoinColumn(name="submitfileid", referencedColumnName="submitfileid")
+     */
+    private $submission_file_source_code;
 
     /**
      * Get submitfileid
@@ -82,30 +84,6 @@ class SubmissionFile
     public function getSubmitid()
     {
         return $this->submitid;
-    }
-
-    /**
-     * Set sourcecode
-     *
-     * @param string $sourcecode
-     *
-     * @return SubmissionFile
-     */
-    public function setSourcecode($sourcecode)
-    {
-        $this->sourcecode = $sourcecode;
-
-        return $this;
-    }
-
-    /**
-     * Get sourcecode
-     *
-     * @return string
-     */
-    public function getSourcecode()
-    {
-        return $this->sourcecode;
     }
 
     /**
@@ -159,11 +137,11 @@ class SubmissionFile
     /**
      * Set submission
      *
-     * @param \DOMJudgeBundle\Entity\Submission $submission
+     * @param Submission $submission
      *
      * @return SubmissionFile
      */
-    public function setSubmission(\DOMJudgeBundle\Entity\Submission $submission = null)
+    public function setSubmission(Submission $submission = null)
     {
         $this->submission = $submission;
 
@@ -173,10 +151,34 @@ class SubmissionFile
     /**
      * Get submission
      *
-     * @return \DOMJudgeBundle\Entity\Submission
+     * @return Submission
      */
     public function getSubmission()
     {
         return $this->submission;
+    }
+
+    /**
+     * Set submissionFileSourceCode
+     *
+     * @param SubmissionFileSourceCode $submissionFileSourceCode
+     *
+     * @return SubmissionFile
+     */
+    public function setSubmissionFileSourceCode(SubmissionFileSourceCode $submissionFileSourceCode = null)
+    {
+        $this->submission_file_source_code = $submissionFileSourceCode;
+
+        return $this;
+    }
+
+    /**
+     * Get submissionFileSourceCode
+     *
+     * @return SubmissionFileSourceCode
+     */
+    public function getSubmissionFileSourceCode()
+    {
+        return $this->submission_file_source_code;
     }
 }

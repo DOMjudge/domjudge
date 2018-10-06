@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -122,6 +123,7 @@ class Submission
     private $judgings;
 
     /**
+     * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="SubmissionFile", mappedBy="submission")
      */
     private $files;
@@ -443,17 +445,18 @@ class Submission
      */
     public function __construct()
     {
-        $this->judgings = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->judgings = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     /**
      * Add judging
      *
-     * @param \DOMJudgeBundle\Entity\Judging $judging
+     * @param Judging $judging
      *
      * @return Submission
      */
-    public function addJudging(\DOMJudgeBundle\Entity\Judging $judging)
+    public function addJudging(Judging $judging)
     {
         $this->judgings[] = $judging;
 
@@ -463,9 +466,9 @@ class Submission
     /**
      * Remove judging
      *
-     * @param \DOMJudgeBundle\Entity\Judging $judging
+     * @param Judging $judging
      */
-    public function removeJudging(\DOMJudgeBundle\Entity\Judging $judging)
+    public function removeJudging(Judging $judging)
     {
         $this->judgings->removeElement($judging);
     }
@@ -483,11 +486,11 @@ class Submission
     /**
      * Set language
      *
-     * @param \DOMJudgeBundle\Entity\Language $language
+     * @param Language $language
      *
      * @return Submission
      */
-    public function setLanguage(\DOMJudgeBundle\Entity\Language $language = null)
+    public function setLanguage(Language $language = null)
     {
         $this->language = $language;
 
@@ -497,7 +500,7 @@ class Submission
     /**
      * Get language
      *
-     * @return \DOMJudgeBundle\Entity\Language
+     * @return Language
      */
     public function getLanguage()
     {
@@ -507,13 +510,13 @@ class Submission
     /**
      * Add file
      *
-     * @param \DOMJudgeBundle\Entity\SubmissionFile $file
+     * @param SubmissionFile $file
      *
      * @return Submission
      */
-    public function addFile(\DOMJudgeBundle\Entity\SubmissionFile $file)
+    public function addFile(SubmissionFile $file)
     {
-        $this->files[] = $file;
+        $this->files->add($file);
 
         return $this;
     }
@@ -521,9 +524,9 @@ class Submission
     /**
      * Remove file
      *
-     * @param \DOMJudgeBundle\Entity\SubmissionFile $file
+     * @param SubmissionFile $file
      */
-    public function removeFile(\DOMJudgeBundle\Entity\SubmissionFile $file)
+    public function removeFile(SubmissionFile $file)
     {
         $this->files->removeElement($file);
     }
@@ -541,11 +544,11 @@ class Submission
     /**
      * Add balloon
      *
-     * @param \DOMJudgeBundle\Entity\Balloon $balloon
+     * @param Balloon $balloon
      *
      * @return Submission
      */
-    public function addBalloon(\DOMJudgeBundle\Entity\Balloon $balloon)
+    public function addBalloon(Balloon $balloon)
     {
         $this->balloons[] = $balloon;
 
@@ -555,9 +558,9 @@ class Submission
     /**
      * Remove balloon
      *
-     * @param \DOMJudgeBundle\Entity\Balloon $balloon
+     * @param Balloon $balloon
      */
-    public function removeBalloon(\DOMJudgeBundle\Entity\Balloon $balloon)
+    public function removeBalloon(Balloon $balloon)
     {
         $this->balloons->removeElement($balloon);
     }
@@ -575,11 +578,11 @@ class Submission
     /**
      * Set contest
      *
-     * @param \DOMJudgeBundle\Entity\Contest $contest
+     * @param Contest $contest
      *
      * @return Submission
      */
-    public function setContest(\DOMJudgeBundle\Entity\Contest $contest = null)
+    public function setContest(Contest $contest = null)
     {
         $this->contest = $contest;
 
@@ -589,7 +592,7 @@ class Submission
     /**
      * Get contest
      *
-     * @return \DOMJudgeBundle\Entity\Contest
+     * @return Contest
      */
     public function getContest()
     {
@@ -599,11 +602,11 @@ class Submission
     /**
      * Set problem
      *
-     * @param \DOMJudgeBundle\Entity\Problem $problem
+     * @param Problem $problem
      *
      * @return Submission
      */
-    public function setProblem(\DOMJudgeBundle\Entity\Problem $problem = null)
+    public function setProblem(Problem $problem = null)
     {
         $this->problem = $problem;
 
@@ -613,7 +616,7 @@ class Submission
     /**
      * Get problem
      *
-     * @return \DOMJudgeBundle\Entity\Problem
+     * @return Problem
      */
     public function getProblem()
     {

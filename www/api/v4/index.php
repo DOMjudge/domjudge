@@ -94,19 +94,6 @@ if (!isset($api)) {
 
     $api = new RestApi();
 
-    /**
-     * API information
-     */
-    function info()
-    {
-        return array(
-            'api_version' => DOMJUDGE_API_VERSION,
-            'domjudge_version' => DOMJUDGE_VERSION
-        );
-    }
-    $doc = "Get general API information.";
-    $api->provideFunction('GET', 'info', $doc);
-
     // helper function to convert the data in the cdata object to the specified values
     function cdataHelper($cdata)
     {
@@ -124,119 +111,6 @@ if (!isset($api)) {
             'penalty'                    => safe_int(dbconfig_get('penalty_time', 20)),
         );
     }
-
-    function status()
-    {
-        global $DB, $api, $cdatas, $userdata, $cids, $requestedCid;
-
-        if (isset($args['cid'])) {
-            $cid = safe_int($args['cid']);
-        } elseif (isset($requestedCid)) {
-            $cid = $requestedCid;
-        } else {
-            if (count($cids)>=1) {
-                $cid = reset($cids);
-            } else {
-                $api->createError("No active contest found.", NOT_FOUND);
-                return '';
-            }
-        }
-
-        $ret = array();
-        $ret['num_submissions'] = $DB->q(
-            'VALUE SELECT COUNT(s.submitid)
-             FROM submission s
-             WHERE s.cid=%s',
-            $cid
-        );
-        $ret['num_queued'] = $DB->q(
-            'VALUE SELECT COUNT(*)
-             FROM submission s
-             LEFT JOIN judging j ON (j.submitid = s.submitid AND j.valid != 0)
-             WHERE s.cid=%s
-             AND result IS NULL
-             AND s.valid = 1',
-            $cid
-        );
-        $ret['num_judging'] = $DB->q(
-            'VALUE SELECT COUNT(*)
-             FROM submission s
-             LEFT JOIN judging j USING (submitid)
-             WHERE s.cid=%s
-             AND result IS NULL
-             AND j.valid = 1
-             AND s.valid = 1',
-            $cid
-        );
-        return $ret;
-    }
-    $api->provideFunction('GET', 'status', 'Undocumented for now.', array(), array(), array('jury'));
-
-    /**
-     * Contest information
-     */
-    function contest()
-    {
-        global $cids, $cdatas, $userdata;
-
-        if (checkrole('jury')) {
-            $cdatas = getCurContests(true);
-        } elseif (isset($userdata['teamid'])) {
-            $cdatas = getCurContests(true, $userdata['teamid']);
-        }
-
-        if (empty($cdatas)) {
-            return null;
-        }
-
-        $cid = $cids[0];
-        $cdata = $cdatas[$cid];
-        return cdataHelper($cdata);
-    }
-    $doc = "Get information about the current contest: id, shortname, name, start_time, end_time, duration, scoreboard_freeze_duration, unfreeze, and penalty. ";
-    $doc .= "If more than one contest is active, return information about the first one.";
-    $api->provideFunction('GET', 'contest', $doc);
-
-
-    /**
-     * Contests information
-     */
-    function contests()
-    {
-        global $cdatas, $userdata;
-
-        if (checkrole('jury')) {
-            $cdatas = getCurContests(true);
-        } elseif (isset($userdata['teamid'])) {
-            $cdatas = getCurContests(true, $userdata['teamid']);
-        }
-
-        return array_map("cdataHelper", array_values($cdatas));
-    }
-    $doc = "Get information about all current contests: id, shortname, name, start_time, end_time, duration, scoreboard_freeze_duration, unfreeze, and penalty. ";
-    $api->provideFunction('GET', 'contests', $doc);
-
-    /**
-     * Get information about the current user
-     */
-    function user()
-    {
-        global $userdata;
-
-        $return = array(
-            'id'       => safe_int($userdata['userid']),
-            'teamid'   => safe_int($userdata['teamid']),
-            'email'    => $userdata['email'],
-            'ip'       => $userdata['ip_address'],
-            'lastip'   => $userdata['last_ip_address'],
-            'name'     => $userdata['name'],
-            'username' => $userdata['username'],
-            'roles'    => $userdata['roles'],
-        );
-        return $return;
-    }
-    $doc = "Get information about the currently logged in user. If no user is logged in, will return null for all values.";
-    $api->provideFunction('GET', 'user', $doc);
 
     /**
      * Problems information
@@ -878,26 +752,6 @@ if (!isset($api)) {
     $exArgs = array();
     $roles = array('judgehost');
     $api->provideFunction('POST', 'judging_runs', $doc, $args, $exArgs, $roles);
-
-    /**
-     * DB configuration
-     */
-    function config($args)
-    {
-        $onlypublic = !(IS_JURY || checkrole('jury') || checkrole('judgehost'));
-
-        if (isset($args['name'])) {
-            return array($args['name'] => dbconfig_get($args['name'], null, false, $onlypublic));
-        }
-
-        return dbconfig_get(null, null, false, $onlypublic);
-    }
-    $doc = 'Get configuration variables.';
-    $args = array('name' => 'Search only a single config variable.');
-    $exArgs = array(array('name' => 'sourcesize_limit'));
-    // Role based (partial) access to configuration variables is handled
-    // inside the function.
-    $api->provideFunction('GET', 'config', $doc, $args, $exArgs);
 
     /**
      * Submissions information
@@ -1595,55 +1449,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     }
     $doc = 'Get a list of all groups.';
     $api->provideFunction('GET', 'groups', $doc, array(), array(), null, true);
-
-    /**
-     * Language information
-     */
-    function languages($args)
-    {
-        global $DB, $api;
-
-        if (isset($args['__primary_key'])) {
-            if (isset($args['langid'])) {
-                $api->createError("You cannot specify a primary ID both via /{id} and ?langid={id}");
-                return '';
-            }
-            $args['langids'] = array_map(function ($langId) {
-                return rest_intid('languages', $langId);
-            }, $args['__primary_key']);
-        } elseif (isset($args['langid'])) {
-            $args['langids'] = [$args['langid']];
-        }
-
-        $query = 'SELECT langid, name, extensions, require_entry_point, entry_point_description, allow_judge, time_factor
-              FROM language WHERE allow_submit = 1';
-
-        $byLangIds = array_key_exists('langids', $args);
-        $query .= ($byLangIds ? ' AND langid IN (%As)' : ' %_');
-        $langid = ($byLangIds ? $args['langids'] : []);
-
-        $q = $DB->q($query, $langid);
-
-        $res = array();
-        while ($row = $q->next()) {
-            $ret = array(
-                'id'           => safe_string(rest_extid('languages', $row['langid'])),
-                'name'         => safe_string($row['name']),
-            );
-            if (!isset($args['strict'])) {
-                $ret['extensions']  = dj_json_decode($row['extensions']);
-                $ret['require_entry_point'] = safe_bool($row['require_entry_point']);
-                $ret['entry_point_description'] = safe_string($row['entry_point_description']);
-                $ret['allow_judge'] = safe_bool($row['allow_judge']);
-                $ret['time_factor'] = safe_float($row['time_factor']);
-            }
-            $res[] = $ret;
-        }
-        return $res;
-    }
-    $doc = 'Get a list of all suported programming languages.';
-    $args = array('langid' => 'Search for a specific language.');
-    $api->provideFunction('GET', 'languages', $doc, $args);
 
     /**
      * Clarification information

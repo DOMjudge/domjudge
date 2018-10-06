@@ -44,7 +44,7 @@ if ($users->count() == 0) {
             "<td>" . $link . (isset($row['email']) ?
                 specialchars($row['email']) : '&nbsp;') . "</a></td>".
             "<td>" . $link .
-                specialchars($row['roles'])."</a></td>".
+                specialchars((string)$row['roles'])."</a></td>".
             "<td>" . $link . (isset($row['teamid']) ? "t" .
                 specialchars((string)$row['teamid']) : '&nbsp;') . "</a></td>";
         echo "<td sorttable_customkey=\"" . $status . "\" class=\"";
