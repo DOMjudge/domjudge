@@ -158,6 +158,9 @@ class AnalysisController extends Controller
           ];
           foreach ($team->getSubmissions() as $s) {
             if ($s->getContest() != $contest) continue;
+            if ($s->getSubmitTime() > $contest->getEndTime()) continue;
+            if ($s->getSubmitTime() < $contest->getStartTime()) continue;
+
             $submissions[] = $s;
             $misc['total_submissions']++;
             $team_stats['total_submitted']++;
