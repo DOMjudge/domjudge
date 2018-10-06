@@ -79,6 +79,7 @@ class AnalysisController extends Controller
             ->join('t.submissions', 'ts')
             ->join('ts.judgings', 'j')
             ->join('ts.language', 'lang')
+            ->orderBy('t.teamid')
             ->where('tc.visible = true')
             ->getQuery()->getResult();
           ;
@@ -94,6 +95,7 @@ class AnalysisController extends Controller
             ->join('ts.language', 'lang')
             ->where('c = :contest')
             ->andWhere('tc.visible = true')
+            ->orderBy('t.teamid')
             ->setParameter('contest', $contest)
             ->getQuery()->getResult();
           ;
