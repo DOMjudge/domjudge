@@ -162,7 +162,7 @@ class ProblemController extends AbstractRestController
             ->orderBy('cp.shortname');
 
         // For non-jury users, only expose the problems after the contest has started
-        if (!$this->DOMJudgeService->checkrole('jury') && $contest->getStartTimeObject()->getTimestamp() < time()) {
+        if (!$this->DOMJudgeService->checkrole('jury') && $contest->getStartTimeObject()->getTimestamp() > time()) {
             $queryBuilder->andWhere('1 = 0');
         }
 
