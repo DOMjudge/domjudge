@@ -135,7 +135,7 @@ while ( TRUE ) {
 					                        WHERE cid = %i AND teamid = %i AND is_correct_restricted = 1',
 					                       $cid, $row['teamid']);
 					$probs_data = $DB->q('KEYTABLE SELECT probid AS ARRAYKEY,shortname,name,color
-					                      FROM problem WHERE cid = %i', $cid);
+					                      FROM problem LEFT JOIN contestproblem USING(probid) WHERE cid = %i', $cid);
 
 					// current limitation is that this gets reset if the balloon daemon is restarted
 					$comment = '';
