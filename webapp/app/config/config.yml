@@ -110,10 +110,23 @@ nelmio_api_doc:
             - {}
             - BasicAuth: []
         definitions:
+            # General responses
             NotFound:
                 description: The specified resource was not found
             Unauthorized:
                 description: Unauthorized
+            # Models that can not be exposed using normal entities
+            ContestProblem: # ContestProblem can not be exposed normally, because it inlines the problem
+                properties:
+                    id: { type: string }
+                    label: { type: string }
+                    short_name: { type: string }
+                    name: { type: string }
+                    ordinal: { type: integer }
+                    rgb: { type: string }
+                    color: { type: string }
+                    time_limit: { type: float }
+                    test_data_count: { type: integer }
         parameters:
             cid:
                 name: cid

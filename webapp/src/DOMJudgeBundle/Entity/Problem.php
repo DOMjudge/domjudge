@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Groups;
 
 /**
@@ -18,35 +19,35 @@ class Problem
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="probid", options={"comment"="Unique ID"}, nullable=false)
-     * @Groups({"details"})
+     * @Serializer\Exclude()
      */
     private $probid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
-     * @Groups({"details"})
      */
     private $name;
 
     /**
      * @var double
      * @ORM\Column(type="float", name="timelimit", options={"comment"="Maximum run time (in seconds) for this problem"}, nullable=false)
-     * @Groups({"details"})
+     * @Serializer\SerializedName("time_limit")
+     * @Serializer\Type("float")
      */
     private $timelimit = 0;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="memlimit", options={"comment"="Maximum memory available (in kB) for this problem", "unsigned"=true}, nullable=true)
-     * @Groups({"details"})
+     * @Serializer\Exclude()
      */
     private $memlimit;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="outputlimit", options={"comment"="Maximum output size (in kB) for this problem", "unsigned"=true}, nullable=true)
-     * @Groups({"details"})
+     * @Serializer\Exclude()
      */
     private $outputlimit;
 
@@ -54,69 +55,79 @@ class Problem
     /**
      * @var string
      * @ORM\Column(type="string", name="special_run", length=32, options={"comment"="Script to run submissions for this problem"}, nullable=true)
-     * @Groups({"details"})
+     * @Serializer\Exclude()
      */
     private $special_run;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="special_compare", length=32, options={"comment"="Script to compare problem and jury output for this problem"}, nullable=true)
-     * @Groups({"details"})
+     * @Serializer\Exclude()
      */
     private $special_compare;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="special_compare_args", length=32, options={"comment"="Optional arguments to special_compare script"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $special_compare_args;
 
     /**
      * @var string
      * @ORM\Column(type="blob", name="problemtext", options={"comment"="Problem text in HTML/PDF/ASCII"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $problemtext;
 
     /**
      * @var string
      * @ORM\Column(type="blob", name="problemtext_type", options={"comment"="File type of problem text"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $problemtext_type;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="problem")
+     * @Serializer\Exclude()
      */
     private $submissions;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="problem")
+     * @Serializer\Exclude()
      */
     private $clarifications;
 
     /**
      * @ORM\OneToMany(targetEntity="ContestProblem", mappedBy="problem")
+     * @Serializer\Exclude()
      */
     private $contest_problems;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="problems_compare")
      * @ORM\JoinColumn(name="special_compare", referencedColumnName="execid")
+     * @Serializer\Exclude()
      */
     private $compare_executable;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="problems_run")
      * @ORM\JoinColumn(name="special_run", referencedColumnName="execid")
+     * @Serializer\Exclude()
      */
     private $run_executable;
 
     /**
-     * @ORM\OneToMany(targetEntity="Testcase", mappedBy="problem")
+     * @ORM\OneToMany(targetEntity="Testcase", mappedBy="problem", fetch="EXTRA_LAZY")
+     * @Serializer\Exclude()
      */
     private $testcases;
 
     /**
      * @ORM\OneToMany(targetEntity="ScoreCache", mappedBy="problem")
+     * @Serializer\Exclude()
      */
     private $scorecache;
 
@@ -433,6 +444,18 @@ class Problem
     public function getTestcases()
     {
         return $this->testcases;
+    }
+
+    /**
+     * @return int
+     * @Serializer\VirtualProperty()
+     * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
+     * @Serializer\SerializedName("test_data_count")
+     * @Serializer\Type("int")
+     */
+    public function getTestcaseCount()
+    {
+        return $this->testcases->count();
     }
 
     /**

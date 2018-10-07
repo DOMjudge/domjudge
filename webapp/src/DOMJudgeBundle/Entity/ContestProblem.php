@@ -2,12 +2,17 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Many-to-Many mapping of contests and problems
  * @ORM\Entity()
  * @ORM\Table(name="contestproblem", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @Serializer\VirtualProperty(
+ *     "short_name",
+ *     exp="object.getShortname()",
+ *     options={@Serializer\Groups("Nonstrict"), @Serializer\Type("string")}
+ * )
  */
 class ContestProblem
 {
@@ -16,6 +21,7 @@ class ContestProblem
      *
      * @ORM\Id
      * @ORM\Column(type="integer", name="cid", options={"comment"="Unique ID"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $cid;
 
@@ -24,12 +30,15 @@ class ContestProblem
      *
      * @ORM\Id
      * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID"}, nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $probid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Unique problem ID within contest (string)"}, nullable=false)
+     * @Serializer\SerializedName("label")
      */
     private $shortname;
 
@@ -37,46 +46,51 @@ class ContestProblem
      * @var int
      *
      * @ORM\Column(type="integer", name="points", options={"comment"="Number of points earened by solving this problem"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $points = 1;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_submit", options={"comment"="Are submissions accepted for this problem?"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $allow_submit = true;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_judge", options={"comment"="Are submissions for this problem judged?"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $allow_judge = true;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="color", length=32, options={"comment"="Balloon colour to display on the scoreboard"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $color;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="lazy_eval_results", options={"comment"="Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $lazy_eval_results = true;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems")
+     * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems", fetch="EAGER")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
-     * @Groups({"problems"})
+     * @Serializer\Inline()
      */
     private $problem;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="problems")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @Serializer\Exclude()
      */
     private $contest;
-
 
     /**
      * Set cid

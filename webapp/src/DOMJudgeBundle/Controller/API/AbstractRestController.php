@@ -109,8 +109,8 @@ abstract class AbstractRestController extends FOSRestController
     {
         $view = $this->view($data);
 
-        // Set the user on the context, so it can be used to determine access to certain attributes
-        $view->getContext()->setAttribute('user', $this->DOMJudgeService->getUser());
+        // Set the DOMjudge service on the context, so we can use it for permissions
+        $view->getContext()->setAttribute('domjudge_service', $this->DOMJudgeService);
 
         $groups = ['Default'];
         if (!$request->query->has('strict')) {
