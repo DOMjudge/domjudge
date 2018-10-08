@@ -127,6 +127,17 @@ nelmio_api_doc:
                     color: { type: string }
                     time_limit: { type: float }
                     test_data_count: { type: integer }
+            # Files and ArchiveList are used for defining the 'files' property of submissions
+            Files:
+                properties:
+                    files:
+                        $ref: "#/definitions/ArchiveList"
+            ArchiveList:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        href: { type: string }
         parameters:
             cid:
                 name: cid

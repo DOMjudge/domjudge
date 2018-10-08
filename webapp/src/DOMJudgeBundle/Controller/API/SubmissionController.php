@@ -3,10 +3,11 @@
 namespace DOMJudgeBundle\Controller\API;
 
 use Doctrine\ORM\QueryBuilder;
-use DOMJudgeBundle\Entity\SubmissionFile;
-use DOMJudgeBundle\Entity\SubmissionFileSourceCode;
+use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Submission;
+use DOMJudgeBundle\Entity\SubmissionFile;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,8 +27,64 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class SubmissionController extends AbstractRestController
 {
     /**
+     * Get all the submissions for this contest
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @Rest\Get("")
+     * @SWG\Response(
+     *     response="200",
+     *     description="Returns all the submissions for this contest",
+     *     @SWG\Schema(
+     *         type="array",
+     *         @SWG\Items(
+     *             allOf={
+     *                 @SWG\Schema(ref=@Model(type=Submission::class)),
+     *                 @SWG\Schema(ref="#/definitions/Files")
+     *             }
+     *         )
+     *     )
+     * )
+     * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(
+     *     name="language_id",
+     *     in="query",
+     *     type="string",
+     *     description="Only show submissions for the given language"
+     * )
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function listAction(Request $request)
+    {
+        return parent::performListAction($request);
+    }
+
+    /**
+     * Get the given submission for this contest
+     * @param Request $request
+     * @param string $id
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @Rest\Get("/{id}")
+     * @SWG\Response(
+     *     response="200",
+     *     description="Returns the given submission for this contest",
+     *     @SWG\Schema(
+     *         allOf={
+     *             @SWG\Schema(ref=@Model(type=Submission::class)),
+     *             @SWG\Schema(ref="#/definitions/Files")
+     *         }
+     *     )
+     * )
+     * @SWG\Parameter(ref="#/parameters/id")
+     */
+    public function singleAction(Request $request, string $id)
+    {
+        return parent::performSingleAction($request, $id);
+    }
+
+    /**
      * Get the files for the given submission as a ZIP archive
-     * @Rest\Get("/{id}/files")
+     * @Rest\Get("/{id}/files", name="submission_files")
      * @SWG\Get(produces={"application/zip"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
@@ -72,7 +129,8 @@ class SubmissionController extends AbstractRestController
             return new Response("Could not create temporary zip file.", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         foreach ($files as $file) {
-            $zip->addFromString($file->getFilename(), stream_get_contents($file->getSubmissionFileSourceCode()->getSourcecode()));
+            $zip->addFromString($file->getFilename(),
+                                stream_get_contents($file->getSubmissionFileSourceCode()->getSourcecode()));
         }
         $zip->close();
 
@@ -102,12 +160,35 @@ class SubmissionController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        return $this->entityManager->createQueryBuilder()
+        $cid          = $this->getContestId($request);
+        $contest      = $this->entityManager->getRepository(Contest::class)->find($cid);
+        $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->join('s.files', 'f')
-            ->select('s, f')
-            ->where('s.cid = :cid')
-            ->setParameter(':cid', $this->getContestId($request));
+            ->join('s.contest', 'c')
+            ->join('s.language', 'lang')
+            ->join('s.team', 'team')
+            ->select('s, f, team, lang')
+            ->andWhere('s.valid = 1')
+            ->andWhere('s.cid = :cid')
+            ->setParameter(':cid', $cid)
+            ->orderBy('s.submitid');
+
+        if ($request->query->has('language_id')) {
+            $queryBuilder
+                ->andWhere('s.langid = :langid')
+                ->setParameter(':langid', $request->query->get('language_id'));
+        }
+
+        // If an ID has not been given directly, only show submissions before contest end
+        // This allows us to use eventlog on too-late submissions while not exposing them in the API directly
+        if (!$request->attributes->has('id')) {
+            $queryBuilder
+                ->andWhere('s.submittime < :contestend')
+                ->setParameter(':contestend', $contest->getEndtime());
+        }
+
+        return $queryBuilder;
     }
 
     /**

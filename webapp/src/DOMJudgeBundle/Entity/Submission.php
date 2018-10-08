@@ -3,6 +3,8 @@ namespace DOMJudgeBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Utils\Utils;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * All incoming submissions
@@ -17,6 +19,8 @@ class Submission
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="submitid", options={"comment"="Unique ID"}, nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $submitid;
 
@@ -24,6 +28,7 @@ class Submission
      * @var int
      *
      * @ORM\Column(type="integer", name="origsubmitid", options={"comment"="If set, specifies original submission in case of edit/resubmit"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $origsubmitid;
 
@@ -31,6 +36,7 @@ class Submission
      * @var int
      *
      * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $cid;
 
@@ -38,6 +44,8 @@ class Submission
      * @var int
      *
      * @ORM\Column(type="integer", name="teamid", options={"comment"="Team ID"}, nullable=false)
+     * @Serializer\SerializedName("team_id")
+     * @Serializer\Type("string")
      */
     private $teamid;
 
@@ -45,19 +53,23 @@ class Submission
      * @var int
      *
      * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID"}, nullable=false)
+     * @Serializer\SerializedName("problem_id")
+     * @Serializer\Type("string")
      */
     private $probid;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="langid", options={"comment"="Language ID"}, nullable=false)
+     * @ORM\Column(type="string", name="langid", options={"comment"="Language ID"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $langid;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time submitted", "unsigned"=true}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $submittime;
 
@@ -65,12 +77,14 @@ class Submission
     /**
      * @var string
      * @ORM\Column(type="string", name="judgehost", length=50, options={"comment"="Current/last judgehost judging this submission", "collation"="utf8mb4_bin"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $judgehost;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="valid", options={"comment"="If false ignore this submission in all scoreboard calculations"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $valid = true;
 
@@ -78,58 +92,68 @@ class Submission
      * @var int
      *
      * @ORM\Column(type="integer", name="rejudgingid", options={"comment"="Rejudging ID (if rejudge)"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $rejudgingid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="expected_results", length=255, options={"comment"="JSON encoded list of expected results - used to validate jury submissions", "collation"="utf8mb4_bin"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $expected_results;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="entry_point", length=255, options={"comment"="Optional entry point. Can be used e.g. for java main class.", "collation"="utf8mb4_bin"}, nullable=true)
+     * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
      */
     private $entry_point;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="submissions")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @Serializer\Exclude()
      */
     private $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Language", inversedBy="submissions")
      * @ORM\JoinColumn(name="langid", referencedColumnName="langid")
+     * @Serializer\Exclude()
      */
     private $language;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="submissions")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
+     * @Serializer\Exclude()
      */
     private $team;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="submissions")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
+     * @Serializer\Exclude()
      */
     private $problem;
 
     /**
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="submission")
+     * @Serializer\Exclude()
      */
     private $judgings;
 
     /**
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="SubmissionFile", mappedBy="submission")
+     * @Serializer\Exclude()
      */
     private $files;
 
     /**
      * @ORM\OneToMany(targetEntity="Balloon", mappedBy="submission")
+     * @Serializer\Exclude()
      */
     private $balloons;
 
@@ -256,11 +280,23 @@ class Submission
     /**
      * Get langid
      *
-     * @return integer
+     * @return string
      */
     public function getLangid()
     {
         return $this->langid;
+    }
+
+    /**
+     * Get the language ID
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("language_id")
+     * @Serializer\Type("string")
+     */
+    public function getLanguageId()
+    {
+        return $this->getLanguage()->getExternalid();
     }
 
     /**
@@ -285,6 +321,32 @@ class Submission
     public function getSubmittime()
     {
         return $this->submittime;
+    }
+
+    /**
+     * Get the absolute submit time for this submission
+     *
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("time")
+     * @Serializer\Type("string")
+     */
+    public function getAbsoluteSubmitTime()
+    {
+        return Utils::absTime($this->getSubmittime());
+    }
+
+    /**
+     * Get the relative submit time for this submission
+     *
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("contest_time")
+     * @Serializer\Type("string")
+     */
+    public function getRelativeSubmitTime()
+    {
+        return Utils::relTime($this->getSubmittime() - $this->getContest()->getStarttime());
     }
 
     /**
