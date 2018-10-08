@@ -114,7 +114,8 @@ cd ${DIR}/tests
 make check-syntax check test-stress
 
 # wait for and check results
-NUMSUBS=$(curl http://admin:admin@localhost/domjudge/api/submissions | python -mjson.tool | grep -c '"id":')
+CONTESTID=$(curl http://admin:admin@localhost/domjudge/api/contests | python -mjson.tool | grep -c '"id":')
+NUMSUBS=$(curl http://admin:admin@localhost/domjudge/api/contests/${CONTESTID}/submissions | python -mjson.tool | grep -c '"id":')
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
 export CURLOPTS="-sq -m 30 -b $COOKIEJAR"
