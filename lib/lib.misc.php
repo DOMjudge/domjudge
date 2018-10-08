@@ -906,8 +906,9 @@ function submit_solution(
         $DB->q('UPDATE submission SET expected_results=%s
                 WHERE submitid=%i', dj_json_encode($results), $id);
     }
-    eventlog('submission', $id, 'create', $contest);
     $DB->q('COMMIT');
+    // Only log the submission after commiting the transaction, as the submission API uses Doctrine, so it doesn't share the same transaction
+    eventlog('submission', $id, 'create', $contest);
 
     // Recalculate scoreboard cache for pending submissions
     calcScoreRow($contest, $teamid, $probid);
@@ -1559,7 +1560,7 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
             $url = '/contests/' . rest_extid('contests', $cid) . $url;
         }
 
-        $json = API_request($url, 'GET', '', false);
+        $json = API_request($url, 'GET', '', false, true);
         if (empty($json) || $json==='null' || ($multiple && $json === '[]')) {
             logmsg(LOG_WARNING, "eventlog: got no JSON data from '$url'");
             // If we didn't get data from the API, then that is
@@ -1653,13 +1654,15 @@ function read_API_credentials()
  * $data is the urlencoded data passed as GET or POST parameters.
  * When $failonerror is set to false, any error will be turned into a
  * warning and null is returned.
+ * When $asadmin is true and we are doing an internal request (i.e. $G_SYMFONY is defined) perform all requests as an admin
  *
  * This function is duplicated from judge/judgedaemon.main.php.
  */
-function API_request(string $url, string $verb = 'GET', string $data = '', bool $failonerror = true)
+function API_request(string $url, string $verb = 'GET', string $data = '', bool $failonerror = true, bool $asadmin = false)
 {
     global $resturl, $restuser, $restpass, $lastrequest, $G_SYMFONY, $apiFromInternal;
     if (isset($G_SYMFONY)) {
+        /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
         // Perform an internal Symfony request to the API
         logmsg(LOG_DEBUG, "API internal request $verb $url");
 
@@ -1682,8 +1685,10 @@ function API_request(string $url, string $verb = 'GET', string $data = '', bool 
         }
         $_SERVER['REQUEST_METHOD'] = $verb;
 
+        $G_SYMFONY->setHasAllRoles(true);
         $request = \Symfony\Component\HttpFoundation\Request::create($url, $verb, $parsedData);
         $response = $httpKernel->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
+        $G_SYMFONY->setHasAllRoles(false);
 
         // Set back the request method and superglobals, if other code still wants to use it
         $_SERVER['REQUEST_METHOD'] = $origMethod;

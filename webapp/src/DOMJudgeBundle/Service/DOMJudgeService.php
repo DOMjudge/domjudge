@@ -13,6 +13,8 @@ class DOMJudgeService
     protected $em;
     protected $request;
     protected $container;
+    protected $hasAllRoles = false;
+
     public function __construct(EntityManagerInterface $em, RequestStack $requestStack, Container $container)
     {
         $this->em = $em;
@@ -129,6 +131,10 @@ class DOMJudgeService
 
     public function checkrole(string $rolename, bool $check_superset = true) : bool
     {
+        if ($this->hasAllRoles) {
+            return true;
+        }
+
         $user = $this->getUser();
         if ($user === null) {
             return false;
@@ -169,5 +175,21 @@ class DOMJudgeService
     public function getHttpKernel()
     {
         return $this->container->get('http_kernel');
+    }
+
+    /**
+     * @return bool
+     */
+    public function getHasAllRoles(): bool
+    {
+        return $this->hasAllRoles;
+    }
+
+    /**
+     * @param bool $hasAllRoles
+     */
+    public function setHasAllRoles(bool $hasAllRoles)
+    {
+        $this->hasAllRoles = $hasAllRoles;
     }
 }
