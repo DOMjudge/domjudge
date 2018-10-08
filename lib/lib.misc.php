@@ -908,6 +908,7 @@ function submit_solution(
     }
     $DB->q('COMMIT');
     // Only log the submission after commiting the transaction, as the submission API uses Doctrine, so it doesn't share the same transaction
+    // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
     eventlog('submission', $id, 'create', $contest);
 
     // Recalculate scoreboard cache for pending submissions
