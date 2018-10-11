@@ -142,8 +142,8 @@ abstract class AbstractRestController extends FOSRestController
         // Filter on contests this user has access to
         if (!$this->DOMJudgeService->checkrole('jury')) {
             if ($this->DOMJudgeService->checkrole('team') && $this->DOMJudgeService->getUser()->getTeamid()) {
-                $qb->join('c.teams', 'ct')
-                    ->andWhere('ct.teamid = :teamid')
+                $qb->leftJoin('c.teams', 'ct')
+                    ->andWhere('ct.teamid = :teamid OR c.public = 1')
                     ->setParameter(':teamid', $this->DOMJudgeService->getUser()->getTeamid());
             } else {
                 $qb->andWhere('c.public = 1');
