@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-ifneq ($(DOC_BUILD_ENABLED),no)
+ifeq $($(BUILD_DOCS),yes)
 docs distdocs: judge-manual.pdf judge-manual.html
 endif
 
