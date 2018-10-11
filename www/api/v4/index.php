@@ -1018,62 +1018,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $api->provideFunction('GET', 'affiliations', $doc, $optArgs, $exArgs);
 
     /**
-     * Organization information
-     */
-    function organizations($args)
-    {
-        global $DB, $api;
-
-        if (isset($args['__primary_key'])) {
-            if (isset($args['affilid'])) {
-                $api->createError("You cannot specify a primary ID both via /{id} and ?affilid={id}");
-                return '';
-            }
-            $args['affilids'] = array_map(function ($organizationId) {
-                return rest_intid('organizations', $organizationId);
-            }, $args['__primary_key']);
-        } elseif (isset($args['affilid'])) {
-            $args['affilids'] = [$args['affilid']];
-        }
-
-        // Construct query
-        $query = 'TABLE SELECT affilid, shortname, name, country FROM team_affiliation WHERE';
-
-        $byCountry = array_key_exists('country', $args);
-        $query .= ($byCountry ? ' country = %s' : ' TRUE %_');
-        $country = ($byCountry ? $args['country'] : '');
-
-        $byAffilIds = array_key_exists('affilids', $args);
-        $query .= ($byAffilIds ? ' AND affilid IN (%Ai)' : ' %_');
-        $affilid = ($byAffilIds ? $args['affilids'] : []);
-
-        $query .= ' ORDER BY name';
-
-        $show_flags = dbconfig_get('show_flags', true);
-
-        // Run query and return result
-        $adatas = $DB->q($query, $country, $affilid);
-        return array_map(function ($adata) use ($args, $show_flags) {
-            $ret = array(
-                'id'        => safe_string(rest_extid('organizations', $adata['affilid'])),
-                'icpc_id'   => safe_string($adata['affilid']),
-                'name'      => $adata['name']
-            );
-            if ($show_flags) {
-                $ret['country'] = $adata['country'];
-            }
-            if (!isset($args['strict'])) {
-                $ret['shortname'] = $adata['shortname'];
-            }
-            return $ret;
-        }, $adatas);
-    }
-    $doc = 'Get a list of affiliations, with for each affiliation: affilid, shortname, name and country.';
-    $optArgs = array('country' => 'ISO 3166-1 alpha-3 country code to search for.');
-    $exArgs = array(array('country' => 'NLD'));
-    $api->provideFunction('GET', 'organizations', $doc, $optArgs, $exArgs);
-
-    /**
      * Team information
      */
     function teams($args)
