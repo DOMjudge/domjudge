@@ -984,34 +984,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $roles = array('jury','judgehost');
     $api->provideFunction('GET', 'runs', $doc, $args, $exArgs, $roles);
 
-    /**
-     * Judgehosts
-     */
-    function judgehosts($args)
-    {
-        global $DB;
-
-        $query = 'TABLE SELECT hostname, active, polltime FROM judgehost';
-
-        $byHostname = array_key_exists('hostname', $args);
-        $query .= ($byHostname ? ' WHERE hostname = %s' : '%_');
-        $hostname = ($byHostname ? $args['hostname'] : null);
-
-        $jdatas = $DB->q($query, $hostname);
-        return array_map(function ($jdata) {
-            return array(
-                'hostname' => $jdata['hostname'],
-                'active'   => safe_bool($jdata['active']),
-                'polltime' => safe_float($jdata['polltime'], 3),
-            );
-        }, $jdatas);
-    }
-    $doc = 'Get a list of judgehosts.';
-    $args = array('hostname' => 'Search only for judgehosts with given hostname.');
-    $exArgs = array(array('hostname' => 'sparehost'));
-    $roles = array('jury');
-    $api->provideFunction('GET', 'judgehosts', $doc, $args, $exArgs, $roles);
-
     function judgehosts_POST($args)
     {
         global $DB, $api;
