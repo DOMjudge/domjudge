@@ -985,51 +985,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $api->provideFunction('GET', 'runs', $doc, $args, $exArgs, $roles);
 
     /**
-     * Groups information.
-     */
-    function groups($args)
-    {
-        global $DB, $api;
-
-        $categoryids = [];
-        if (isset($args['__primary_key'])) {
-            $categoryids = array_map(function ($groupId) {
-                return rest_intid('groups', $groupId);
-            }, $args['__primary_key']);
-        }
-
-        $query = 'SELECT categoryid, name, color, visible, sortorder
-                  FROM team_category
-                  WHERE TRUE';
-        if ($args['public']) {
-            $query .= ' AND visible=1';
-        }
-
-        $query .= (!empty($categoryids) ? ' AND categoryid IN (%Ai)' : ' %_');
-
-        $q = $DB->q($query . ' ORDER BY sortorder', $categoryids);
-        $res = array();
-        while ($row = $q->next()) {
-            $ret = array(
-                'id'         => safe_string(rest_extid('groups', $row['categoryid'])),
-                'icpc_id'    => safe_string($row['categoryid']),
-                'name'       => safe_string($row['name']),
-            );
-            if (!$row['visible']) {
-                $ret['hidden'] = true;
-            }
-            if (!isset($args['strict'])) {
-                $ret['color']     = $row['color'];
-                $ret['sortorder'] = safe_int($row['sortorder']);
-            }
-            $res[] = $ret;
-        }
-        return $res;
-    }
-    $doc = 'Get a list of all groups.';
-    $api->provideFunction('GET', 'groups', $doc, array(), array(), null, true);
-
-    /**
      * Clarification information
      */
     function clarifications($args)
