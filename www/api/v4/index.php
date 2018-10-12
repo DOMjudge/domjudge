@@ -984,62 +984,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $roles = array('jury','judgehost');
     $api->provideFunction('GET', 'runs', $doc, $args, $exArgs, $roles);
 
-
-    /**
-     * Affiliation information
-     */
-    function affiliations($args)
-    {
-        global $DB;
-
-        // Construct query
-        $query = 'TABLE SELECT affilid, shortname, name, country FROM team_affiliation WHERE';
-
-        $byCountry = array_key_exists('country', $args);
-        $query .= ($byCountry ? ' country = %s' : ' TRUE %_');
-        $country = ($byCountry ? $args['country'] : '');
-
-        $query .= ' ORDER BY name';
-
-        // Run query and return result
-        $adatas = $DB->q($query, $country);
-        return array_map(function ($adata) {
-            return array(
-                'affilid'   => safe_string(rest_extid('organizations', $adata['affilid'])),
-                'shortname' => $adata['shortname'],
-                'name'      => $adata['name'],
-                'country'   => $adata['country'],
-            );
-        }, $adatas);
-    }
-    $doc = 'Get a list of affiliations, with for each affiliation: affilid, shortname, name and country.';
-    $optArgs = array('country' => 'ISO 3166-1 alpha-3 country code to search for.');
-    $exArgs = array(array('country' => 'NLD'));
-    $api->provideFunction('GET', 'affiliations', $doc, $optArgs, $exArgs);
-
-    /**
-     * Category information
-     */
-    function categories($args)
-    {
-        global $DB;
-        $extra = ($args['public'] ? 'WHERE visible = 1' : '');
-        $q = $DB->q('SELECT categoryid, name, color, visible, sortorder
-                     FROM team_category ' . $extra . ' ORDER BY sortorder');
-        $res = array();
-        while ($row = $q->next()) {
-            $res[] = array(
-                'categoryid' => safe_int($row['categoryid']),
-                'name'       => $row['name'],
-                'color'      => $row['color'],
-                'sortorder'  => safe_int($row['sortorder'])
-            );
-        }
-        return $res;
-    }
-    $doc = 'Get a list of all categories.';
-    $api->provideFunction('GET', 'categories', $doc, array(), array(), null, true);
-
     /**
      * Groups information.
      */
