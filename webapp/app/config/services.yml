@@ -22,6 +22,10 @@ services:
         resource: '../../src/DOMJudgeBundle/*'
         exclude: '../../src/DOMJudgeBundle/{Entity,Repository,Tests}'
 
+    DOMJudgeBundle\Controller\API\JudgementTypeController:
+        arguments:
+            $rootDir: '%kernel.root_dir%'
+
     DOMJudgeBundle\Serializer\:
         resource: '../../src/DOMJudgeBundle/Serializer/*'
         tags:

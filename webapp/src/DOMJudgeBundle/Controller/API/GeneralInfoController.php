@@ -13,7 +13,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use DOMJudgeBundle\Entity\Configuration;
 
 /**
  * @Rest\Route("/api/v4", defaults={ "_format" = "json" })

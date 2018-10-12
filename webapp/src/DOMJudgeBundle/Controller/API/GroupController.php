@@ -71,6 +71,8 @@ class GroupController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
+        // Call getContestId to make sure we have an active contest
+        $this->getContestId($request);
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'c')
             ->select('c')

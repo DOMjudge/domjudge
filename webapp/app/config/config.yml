@@ -138,6 +138,14 @@ nelmio_api_doc:
                     type: object
                     properties:
                         href: { type: string }
+            # Judgement type does not have an entity
+            JudgementType:
+                type: object
+                properties:
+                    id: { type: string }
+                    name: { type: string }
+                    penalty: { type: boolean }
+                    solved: { type: boolean }
         parameters:
             cid:
                 name: cid

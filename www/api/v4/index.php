@@ -1206,49 +1206,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $exArgs = array();
     $roles = array('judgehost');
     $api->provideFunction('POST', 'internal_error', $doc, $args, $exArgs, $roles, true);
-
-    function judgement_types($args)
-    {
-        global $VERDICTS, $api;
-
-        if (isset($args['__primary_key'])) {
-            if (isset($args['verdict'])) {
-                $api->createError("You cannot specify a primary ID both via /{id} and ?verdict={id}");
-                return '';
-            }
-            $args['verdicts'] = $args['__primary_key'];
-        } elseif (isset($args['verdict'])) {
-            $args['verdicts'] = [$args['verdict']];
-        }
-
-        $res = array();
-        foreach ($VERDICTS as $name => $label) {
-            $penalty = true;
-            $solved = false;
-            if ($name == 'correct') {
-                $penalty = false;
-                $solved = true;
-            }
-            if ($name == 'compiler-error') {
-                $penalty = dbconfig_get('compile_penalty', false);
-            }
-            if (isset($args['verdicts']) && !in_array($label, $args['verdicts'])) {
-                continue;
-            }
-            $res[] = array(
-                'id'      => safe_string($label),
-                'name'    => str_replace('-', ' ', $name),
-                'penalty' => safe_bool($penalty),
-                'solved'  => safe_bool($solved),
-            );
-        }
-
-        return $res;
-    }
-    $doc = 'Lists all available judgement types.';
-    $args = array();
-    $exArgs = array();
-    $api->provideFunction('GET', 'judgement_types', $doc, $args, $exArgs, null, true);
 }
 
 // Now provide the api, which will handle the request
