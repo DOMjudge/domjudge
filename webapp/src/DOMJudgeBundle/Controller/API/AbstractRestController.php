@@ -49,6 +49,8 @@ abstract class AbstractRestController extends FOSRestController
      */
     protected function performListAction(Request $request)
     {
+        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
+        $this->entityManager->clear();
         $queryBuilder = $this->getQueryBuilder($request);
 
         if ($request->query->has('ids')) {
@@ -64,7 +66,7 @@ abstract class AbstractRestController extends FOSRestController
                 ->setParameter(':ids', $ids);
         }
 
-        $objects      = $queryBuilder
+        $objects = $queryBuilder
             ->getQuery()
             ->getResult();
 
@@ -88,6 +90,8 @@ abstract class AbstractRestController extends FOSRestController
      */
     protected function performSingleAction(Request $request, string $id)
     {
+        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
+        $this->entityManager->clear();
         $queryBuilder = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter(':id', $id);

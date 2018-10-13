@@ -42,6 +42,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      */
     public function listAction(Request $request)
     {
+        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
+        $this->entityManager->clear();
         // This method is overwritten, because we need to add ordinal values
         $queryBuilder = $this->getQueryBuilder($request);
 
@@ -104,6 +106,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      */
     public function singleAction(Request $request, string $id)
     {
+        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
+        $this->entityManager->clear();
         // This method is overwritten, because we need to add ordinal values
         $queryBuilder = $this->getQueryBuilder($request);
 
