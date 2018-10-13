@@ -283,11 +283,12 @@ if (!isset($api)) {
                       $submitid, $row['cid'], now(), $host, @$row['rejudgingid'],
                       @$prev_rejudgingid, !$is_rejudge, $jury_member);
 
+        $DB->q('COMMIT');
+
+        // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
         if (!$is_rejudge) {
             eventlog('judging', $jid, 'create', $row['cid']);
         }
-
-        $DB->q('COMMIT');
 
         $row['submitid']    = safe_int($row['submitid']);
         $row['cid']         = safe_int($row['cid']);
@@ -339,8 +340,9 @@ if (!isset($api)) {
                 $DB->q('UPDATE submission SET entry_point = %s
                         WHERE submitid = %i', $args['entry_point'], $subm['submitid']);
 
-                eventlog('submission', $subm['submitid'], 'update', $subm['cid']);
                 $DB->q('COMMIT');
+                // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
+                eventlog('submission', $subm['submitid'], 'update', $subm['cid']);
             }
             if ($args['compile_success']) {
                 $DB->q('UPDATE judging SET output_compile = %s
@@ -361,12 +363,14 @@ if (!isset($api)) {
 
                 auditlog('judging', $judgingid, 'judged', 'compiler-error', $args['judgehost'], $row['cid']);
 
+                $DB->q('COMMIT');
+
                 // log to event table if no verification required
                 // (case of verification required is handled in www/jury/verify.php)
+                // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
                 if (! dbconfig_get('verification_required', 0) && !isset($row['rejudgingid'])) {
                     eventlog('judging', $judgingid, 'update', $row['cid']);
                 }
-                $DB->q('COMMIT');
 
                 calcScoreRow((int)$row['cid'], (int)$row['teamid'], (int)$row['probid']);
 
@@ -429,11 +433,12 @@ if (!isset($api)) {
                         base64_decode($args['output_error']),
                         base64_decode($args['output_system']));
 
+        $DB->q('COMMIT');
+
+        // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
         if (!isset($jud['rejudgingid'])) {
             eventlog('judging_run', $runid, 'create', $jud['cid']);
         }
-
-        $DB->q('COMMIT');
 
         // result of this judging_run has been stored. now check whether
         // we're done or if more testcases need to be judged.
