@@ -120,7 +120,7 @@ class Problem
     private $run_executable;
 
     /**
-     * @ORM\OneToMany(targetEntity="Testcase", mappedBy="problem", fetch="EXTRA_LAZY")
+     * @ORM\OneToMany(targetEntity="Testcase", mappedBy="problem")
      * @Serializer\Exclude()
      */
     private $testcases;
@@ -444,18 +444,6 @@ class Problem
     public function getTestcases()
     {
         return $this->testcases;
-    }
-
-    /**
-     * @return int
-     * @Serializer\VirtualProperty()
-     * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
-     * @Serializer\SerializedName("test_data_count")
-     * @Serializer\Type("int")
-     */
-    public function getTestcaseCount()
-    {
-        return $this->testcases->count();
     }
 
     /**

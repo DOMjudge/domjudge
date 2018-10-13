@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
+use DOMJudgeBundle\Helpers\ContestProblemWrapper;
 use DOMJudgeBundle\Helpers\OrdinalArray;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Swagger\Annotations as SWG;
@@ -21,7 +22,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @SWG\Response(response="404", ref="#/definitions/NotFound")
  * @SWG\Response(response="401", ref="#/definitions/Unauthorized")
  */
-class ProblemController extends AbstractRestController
+class ProblemController extends AbstractRestController implements QueryObjectTransformer
 {
     /**
      * Get all the problems for this contest
@@ -55,6 +56,8 @@ class ProblemController extends AbstractRestController
         if (empty($objects)) {
             return $this->renderData($request, []);
         }
+
+        $objects = array_map([$this, 'transformObject'], $objects);
 
         $ordinalArray = new OrdinalArray($objects);
         $objects      = $ordinalArray->getItems();
@@ -124,6 +127,8 @@ class ProblemController extends AbstractRestController
             throw new NotFoundHttpException('One or more objects not found');
         }
 
+        $objects = array_map([$this, 'transformObject'], $objects);
+
         $ordinalArray = new OrdinalArray($objects);
 
         $object = null;
@@ -155,11 +160,13 @@ class ProblemController extends AbstractRestController
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:ContestProblem', 'cp')
             ->join('cp.problem', 'p')
-            ->select('cp, p')
+            ->leftJoin('p.testcases', 'tc')
+            ->select('cp, p, COUNT(tc.testcaseid) AS testdatacount')
             ->andWhere('cp.cid = :cid')
             ->andWhere('cp.allow_submit = 1')
             ->setParameter(':cid', $contestId)
-            ->orderBy('cp.shortname');
+            ->orderBy('cp.shortname')
+            ->groupBy('cp.probid');
 
         // For non-jury users, only expose the problems after the contest has started
         if (!$this->DOMJudgeService->checkrole('jury') && $contest->getStartTimeObject()->getTimestamp() > time()) {
@@ -175,5 +182,18 @@ class ProblemController extends AbstractRestController
     protected function getIdField(): string
     {
         return 'cp.probid';
+    }
+
+    /**
+     * Transform the given object before returning it from the API
+     * @param mixed $object
+     * @return mixed
+     */
+    public function transformObject($object)
+    {
+        /** @var ContestProblem $problem */
+        $problem       = $object[0];
+        $testDataCount = (int)$object['testdatacount'];
+        return new ContestProblemWrapper($problem, $testDataCount);
     }
 }
