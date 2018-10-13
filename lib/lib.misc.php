@@ -1110,16 +1110,17 @@ function rejudging_finish(int $rejudgingid, string $request, $userid = null, boo
             // remove relation from submission to rejudge
             $DB->q('UPDATE submission SET rejudgingid=NULL
                     WHERE submitid=%i', $row['submitid']);
+            // last update cache
+            calcScoreRow((int)$row['cid'], (int)$row['teamid'], (int)$row['probid']);
+            $DB->q('COMMIT');
             // update event log
+            // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
             eventlog('judging', $row['judgingid'], 'create', $row['cid']);
             $run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
                                WHERE judgingid=%i', $row['judgingid']);
             if (!empty($run_ids)) {
                 eventlog('judging_run', $run_ids, 'create', $row['cid']);
             }
-            // last update cache
-            calcScoreRow((int)$row['cid'], (int)$row['teamid'], (int)$row['probid']);
-            $DB->q('COMMIT');
             updateBalloons((int)$row['submitid']);
         } else {
             // restore old judgehost association
@@ -1431,14 +1432,12 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
     }
 
     // Make a combined string to keep track of the data ID's
-    // TODO: if some data ID's contain a comma, this breaks
-    $dataidsCombined = implode(',', $dataids);
-    // TODO: if some ID's contain a comma, this breaks
-    $idsCombined = $ids === null ? null : is_array($ids) ? implode(',', $ids) : $ids;
+    $dataidsCombined = json_encode($dataids);
+    $idsCombined = $ids === null ? null : is_array($ids) ? json_encode($ids) : $ids;
 
     logmsg(LOG_DEBUG, "eventlog arguments: '$type' '$dataidsCombined' '$action' '$cid' '$json' '$idsCombined'");
 
-    $actions = array('create', 'update', 'delete');
+    $actions = ['create', 'update', 'delete'];
 
     // Gracefully fail since we may call this from the generic
     // jury/edit.php page where we don't know which table gets updated.
@@ -1531,11 +1530,7 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
         return;
     }
 
-    // TODO: if some ID's contain a comma, this breaks
-    $idsCombined = implode(',', $ids);
-
-    // We should pass multiple ID's if instructed to do so
-    $multiple = count($dataids) > 1 || count($ids) > 1;
+    $query = http_build_query(['ids' => $ids]);
 
     // Generate JSON content if not set, for deletes this is only the ID.
     if ($action === 'delete') {
@@ -1543,26 +1538,23 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
             return ['id' => $id];
         }, $ids));
 
-        // If we do not have multiple ID's, the code assumes the JSON is only for one element
-        if (!$multiple) {
-            $json = $json[0];
-        }
-
         $json = dj_json_encode($json);
     } elseif ($json === null) {
-        if (in_array($type, array('contests','state'))) {
-            $url = $endpoint['url'];
-        } else {
-            $url = $endpoint['url'].'/'.$idsCombined;
-        }
+        $url = $endpoint['url'];
 
         // Temporary fix for single/multi contest API:
         if (isset($cid)) {
             $url = '/contests/' . rest_extid('contests', $cid) . $url;
         }
 
-        $json = API_request($url, 'GET', '', false, true);
-        if (empty($json) || $json==='null' || ($multiple && $json === '[]')) {
+        if (in_array($type, ['contests','state'])) {
+            $data = '';
+        } else {
+            $data = $query;
+        }
+
+        $json = API_request($url, 'GET', $data, false, true);
+        if (empty($json) || $json==='null' || $json === '[]') {
             logmsg(LOG_WARNING, "eventlog: got no JSON data from '$url'");
             // If we didn't get data from the API, then that is
             // probably because this particular data is not visible,
@@ -1593,10 +1585,11 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
     foreach ($cids as $cid) {
         $table = ($endpoint['tables'] ? $endpoint['tables'][0] : null);
         foreach ($dataids as $idx => $dataid) {
-            if ($multiple) {
-                $jsonElement = dj_json_encode($json[$idx]);
-            } else {
+            if (in_array($type, ['contests','state'])) {
+                // Contest and state endpoint are singular
                 $jsonElement = dj_json_encode($json);
+            } else {
+                $jsonElement = dj_json_encode($json[$idx]);
             }
             $eventid = $DB->q('RETURNID INSERT INTO event
                               (eventtime, cid, endpointtype, endpointid,

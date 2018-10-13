@@ -122,7 +122,7 @@ if (! isset($_POST['cancel'])) {
 
             $changed = $DB->q("RETURNAFFECTED UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
 
-            if ($changed) {
+            if ($changed || true) {
                 if (count($KEYS[$t])==1) {
                     $datatype = $t;
                     $dataid = $keydata[$i][$tablekey];
