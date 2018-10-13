@@ -151,6 +151,10 @@ nelmio_api_doc:
                 properties:
                     judgement_type_id: { type: string }
                     max_run_time: { type: number, format: float }
+            # Fields for runs that are added by the JudgingRunWrapper class
+            RunExtraFields:
+                properties:
+                    judgement_type_id: { type: string }
         parameters:
             cid:
                 name: cid

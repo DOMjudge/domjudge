@@ -105,6 +105,7 @@ class JudgementTypeController extends AbstractRestController
      */
     protected function getJudgementTypes(array $filteredOn = null)
     {
+        global $VERDICTS;
         $dir = realpath($this->rootDir . '/../../etc/');
         $commonConfig = $dir . '/common-config.php';
         require_once $commonConfig;
