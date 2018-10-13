@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Utils\Utils;
 use JMS\Serializer\Annotation as Serializer;
 use JMS\Serializer\Annotation\Groups;
 
@@ -32,8 +33,7 @@ class Problem
     /**
      * @var double
      * @ORM\Column(type="float", name="timelimit", options={"comment"="Maximum run time (in seconds) for this problem"}, nullable=false)
-     * @Serializer\SerializedName("time_limit")
-     * @Serializer\Type("float")
+     * @Serializer\Exclude()
      */
     private $timelimit = 0;
 
@@ -183,10 +183,13 @@ class Problem
      * Get timelimit
      *
      * @return float
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("time_limit")
+     * @Serializer\Type("float")
      */
     public function getTimelimit()
     {
-        return $this->timelimit;
+        return Utils::roundedFloat($this->timelimit);
     }
 
     /**

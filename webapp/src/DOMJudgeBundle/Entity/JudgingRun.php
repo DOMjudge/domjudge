@@ -49,7 +49,7 @@ class JudgingRun
     /**
      * @var double
      * @ORM\Column(type="float", name="runtime", options={"comment"="Submission running time on this testcase"}, nullable=true)
-     * @Serializer\SerializedName("run_time")
+     * @Serializer\Exclude()
      */
     private $runtime = 1;
 
@@ -183,10 +183,13 @@ class JudgingRun
      * Get runtime
      *
      * @return float
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("run_time")
+     * @Serializer\Type("float")
      */
     public function getRuntime()
     {
-        return $this->runtime;
+        return Utils::roundedFloat($this->runtime);
     }
 
     /**

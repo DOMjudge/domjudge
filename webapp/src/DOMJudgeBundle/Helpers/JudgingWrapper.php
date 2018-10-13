@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Helpers;
 
 use DOMJudgeBundle\Entity\Judging;
+use DOMJudgeBundle\Utils\Utils;
 use JMS\Serializer\Annotation as Serializer;
 
 class JudgingWrapper
@@ -15,7 +16,7 @@ class JudgingWrapper
 
     /**
      * @var float
-     * @Serializer\SerializedName("max_run_time")
+     * @Serializer\Exclude()
      */
     protected $maxRunTime;
 
@@ -37,4 +38,17 @@ class JudgingWrapper
         $this->maxRunTime      = $maxRunTime;
         $this->judgementTypeId = $judgementTypeId;
     }
+
+    /**
+     * @return float
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("max_run_time")
+     * @Serializer\Type("float")
+     */
+    public function getMaxRunTime()
+    {
+        return Utils::roundedFloat($this->maxRunTime);
+    }
+
+
 }

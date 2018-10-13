@@ -269,4 +269,26 @@ class Utils
 
         return $bestmatch;
     }
+
+    /**
+     * Return a rounded float
+     * @param float|null $value
+     * @param int $decimals
+     * @return float|null
+     */
+    public static function roundedFloat(float $value = null, int $decimals = 3)
+    {
+        if (is_null($value)) {
+            return null;
+        }
+
+        // Truncate the string version to a specified number of decimals,
+        // since PHP floats seem not very reliable in not giving e.g.
+        // 1.9999 instead of 2.0.
+        $decpos = strpos((string)$value, '.');
+        if ($decpos === false) {
+            return (float)$value;
+        }
+        return (float)substr((string)$value, 0, $decpos + $decimals + 1);
+    }
 }
