@@ -1431,6 +1431,8 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
         return;
     }
 
+    $jsonPassed = isset($json);
+
     // Make a combined string to keep track of the data ID's
     $dataidsCombined = json_encode($dataids);
     $idsCombined = $ids === null ? null : is_array($ids) ? json_encode($ids) : $ids;
@@ -1585,7 +1587,7 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
     foreach ($cids as $cid) {
         $table = ($endpoint['tables'] ? $endpoint['tables'][0] : null);
         foreach ($dataids as $idx => $dataid) {
-            if (in_array($type, ['contests','state'])) {
+            if (in_array($type, ['contests','state']) || $jsonPassed) {
                 // Contest and state endpoint are singular
                 $jsonElement = dj_json_encode($json);
             } else {

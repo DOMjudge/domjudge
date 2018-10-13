@@ -72,8 +72,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
             $objects = [];
             foreach ($ordinalArray->getItems() as $item) {
-                /** @var ContestProblem $contestProblem */
-                $contestProblem = $item->getItem();
+                /** @var ContestProblemWrapper $contestProblemWrapper */
+                $contestProblemWrapper = $item->getItem();
+                $contestProblem        = $contestProblemWrapper->getContestProblem();
                 if (in_array($contestProblem->getProbid(), $ids)) {
                     $objects[] = $item;
                 }
@@ -133,8 +134,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
         $object = null;
         foreach ($ordinalArray->getItems() as $item) {
-            /** @var ContestProblem $contestProblem */
-            $contestProblem = $item->getItem();
+            /** @var ContestProblemWrapper $contestProblemWrapper */
+            $contestProblemWrapper = $item->getItem();
+            $contestProblem        = $contestProblemWrapper->getContestProblem();
             if ($contestProblem->getProbid() == $id) {
                 $object = $item;
                 break;
