@@ -26,6 +26,10 @@ services:
         arguments:
             $rootDir: '%kernel.root_dir%'
 
+    DOMJudgeBundle\Controller\API\JudgementController:
+        arguments:
+            $rootDir: '%kernel.root_dir%'
+
     DOMJudgeBundle\Serializer\:
         resource: '../../src/DOMJudgeBundle/Serializer/*'
         tags:

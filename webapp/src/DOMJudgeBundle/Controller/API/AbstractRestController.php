@@ -72,6 +72,10 @@ abstract class AbstractRestController extends FOSRestController
             throw new NotFoundHttpException('One or more objects not found');
         }
 
+        if ($this instanceof QueryObjectTransformer) {
+            $objects = array_map([$this, 'transformObject'], $objects);
+        }
+
         return $this->renderData($request, $objects);
     }
 
@@ -94,6 +98,10 @@ abstract class AbstractRestController extends FOSRestController
 
         if ($object === null) {
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        if ($this instanceof QueryObjectTransformer) {
+            $object = $this->transformObject($object);
         }
 
         return $this->renderData($request, $object);

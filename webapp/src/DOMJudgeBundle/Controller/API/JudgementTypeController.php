@@ -24,11 +24,8 @@ class JudgementTypeController extends AbstractRestController
      */
     protected $rootDir;
 
-    public function __construct(
-        EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
-        string $rootDir
-    ) {
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, string $rootDir)
+    {
         parent::__construct($entityManager, $DOMJudgeService);
         $this->rootDir = $rootDir;
     }

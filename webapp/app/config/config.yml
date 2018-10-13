@@ -125,7 +125,7 @@ nelmio_api_doc:
                     ordinal: { type: integer }
                     rgb: { type: string }
                     color: { type: string }
-                    time_limit: { type: float }
+                    time_limit: { type: number, format: float }
                     test_data_count: { type: integer }
             # Files and ArchiveList are used for defining the 'files' property of submissions
             Files:
@@ -146,6 +146,11 @@ nelmio_api_doc:
                     name: { type: string }
                     penalty: { type: boolean }
                     solved: { type: boolean }
+            # Fields for judgements that are added by the JudgingWrapper class
+            JudgementExtraFields:
+                properties:
+                    judgement_type_id: { type: string }
+                    max_run_time: { type: number, format: float }
         parameters:
             cid:
                 name: cid
