@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-ifeq $($(BUILD_DOCS),yes)
+ifeq ($(BUILD_DOCS),yes)
 docs distdocs: judge-manual.pdf judge-manual.html
 endif
 
