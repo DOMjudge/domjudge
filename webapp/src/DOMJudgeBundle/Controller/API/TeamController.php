@@ -51,7 +51,7 @@ class TeamController extends AbstractRestController
      *     name="public",
      *     in="query",
      *     type="boolean",
-     *     description="Only show visible teams"
+     *     description="Only show visible teams, even for users with more permissions"
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -103,7 +103,7 @@ class TeamController extends AbstractRestController
                 ->setParameter(':affiliation', $request->query->get('affiliation'));
         }
 
-        if ($request->query->getBoolean('public')) {
+        if (!$this->DOMJudgeService->checkrole('jury') || $request->query->getBoolean('public')) {
             $queryBuilder->andWhere('tc.visible = 1');
         }
 

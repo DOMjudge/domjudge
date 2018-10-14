@@ -38,7 +38,7 @@ class GroupController extends AbstractRestController
      *     name="public",
      *     in="query",
      *     type="boolean",
-     *     description="Only show public groups"
+     *     description="Only show public groups, even for users with more permissions"
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -78,7 +78,7 @@ class GroupController extends AbstractRestController
             ->select('c')
             ->orderBy('c.sortorder');
 
-        if ($request->query->get('public')) {
+        if (!$this->DOMJudgeService->checkrole('jury') || $request->query->get('public')) {
             $queryBuilder
                 ->andWhere('c.visible = 1');
         }
