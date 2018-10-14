@@ -78,7 +78,7 @@ if (! $data) {
 $SHOW_FLAGS = dbconfig_get('show_flags', 1);
 
 $affillogo = "images/affiliations/" . urlencode((string)$data['affilid']) . ".png";
-$countryflag = "images/countries/" . urlencode($data['country']) . ".png";
+$countryflag = "images/countries/" . urlencode((string)$data['country']) . ".png";
 
 echo "<h1>Affiliation: ".specialchars($data['name'])."</h1>\n\n";
 
@@ -97,7 +97,7 @@ if (is_readable(WEBAPPDIR.'/web/'.$affillogo)) {
 }
 
 if ($SHOW_FLAGS) {
-    echo '<tr><td>Country:</td><td>' . specialchars($data['country']);
+    echo '<tr><td>Country:</td><td>' . specialchars((string)$data['country']);
 
     if (is_readable(WEBAPPDIR.'/web/'.$countryflag)) {
         echo ' <img src="../' . $countryflag . '" alt="' .
