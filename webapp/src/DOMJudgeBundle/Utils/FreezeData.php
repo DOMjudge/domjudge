@@ -46,7 +46,7 @@ class FreezeData
                 // Show final scores if contest is over and unfreezetime has been
                 // reached, or if contest is over and no freezetime had been set.
                 // We can compare $now and the dbfields stringwise.
-                $now                                    = now();
+                $now                                    = microtime(true);
                 $this->cache[self::KEY_SHOW_FINAL_JURY] = $this->contest->getFinalizetime() &&
                     Utils::difftime((float)$this->contest->getFinalizetime(), $now) <= 0;
                 $this->cache[self::KEY_SHOW_FINAL]      = $this->cache[self::KEY_SHOW_FINAL_JURY] &&
@@ -72,7 +72,7 @@ class FreezeData
                 $this->cache[self::KEY_SHOW_FROZEN] = false;
             } else {
                 // Freeze scoreboard if freeze time has been reached and we're not showing the final score yet
-                $now                                = now();
+                $now                                = microtime(true);
                 $this->cache[self::KEY_SHOW_FROZEN] = !$this->showFinal($jury) &&
                     $this->contest->getFreezetime() &&
                     Utils::difftime((float)$this->contest->getFreezetime(), $now) <= 0;
@@ -92,7 +92,7 @@ class FreezeData
             if (!$this->contest || !$this->contest->getStarttimeEnabled()) {
                 $this->cache[self::KEY_STARTED] = false;
             } else {
-                $now                            = now();
+                $now                            = microtime(true);
                 $this->cache[self::KEY_STARTED] = Utils::difftime((float)$this->contest->getStarttime(), $now) <= 0;
             }
         }
@@ -110,7 +110,7 @@ class FreezeData
             if (!$this->contest || !$this->contest->getStarttimeEnabled()) {
                 $this->cache[self::KEY_STOPPED] = false;
             } else {
-                $now                            = now();
+                $now                            = microtime(true);
                 $this->cache[self::KEY_STOPPED] = Utils::difftime((float)$this->contest->getEndtime(), $now) <= 0;
             }
         }

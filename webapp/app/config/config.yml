@@ -155,6 +155,29 @@ nelmio_api_doc:
             RunExtraFields:
                 properties:
                     judgement_type_id: { type: string }
+            Scoreboard:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        rank: { type: integer }
+                        team_id: { type: string }
+                        score:
+                            type: object
+                            properties:
+                                num_solved: { type: integer }
+                                total_time: { type: integer }
+                        problems:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    label: { type: string }
+                                    problem_id: { type: string }
+                                    num_judged: { type: integer }
+                                    num_pending: { type: integer }
+                                    solved: { type: boolean }
+                                    time: { type: integer }
         parameters:
             cid:
                 name: cid
