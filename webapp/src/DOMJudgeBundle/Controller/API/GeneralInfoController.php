@@ -66,6 +66,7 @@ class GeneralInfoController extends FOSRestController
     /**
      * Get information about the API and DOMjudge
      * @Rest\Get("/info")
+     * @Rest\Get("", name="api_root")
      * @SWG\Response(
      *     response="200",
      *     description="Information about the API and DOMjudge",

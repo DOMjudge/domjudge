@@ -61,11 +61,12 @@ class SubmissionVisitor implements EventSubscriberInterface
             /** @var JsonSerializationVisitor $visitor */
             $visitor = $event->getVisitor();
             /** @var Submission $submission */
-            $submission = $event->getObject();
-            $filesRoute = $this->router->generate('submission_files',
-                                                  ['cid' => $submission->getCid(), 'id' => $submission->getSubmitid()],
-                                                  RouterInterface::ABSOLUTE_URL);
-            $visitor->setData('files', [['href' => $filesRoute]]);
+            $submission         = $event->getObject();
+            $filesRoute         = $this->router->generate('submission_files',
+                                                          ['cid' => $submission->getCid(), 'id' => $submission->getSubmitid()]);
+            $apiRootRoute       = $this->router->generate('api_root');
+            $relativeFilesRoute = substr($filesRoute, strlen($apiRootRoute) + 1); // +1 because api_root does not contain final /
+            $visitor->setData('files', [['href' => $relativeFilesRoute]]);
         }
     }
 }
