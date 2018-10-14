@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -91,6 +92,13 @@ class ContestProblem
      * @Serializer\Exclude()
      */
     private $contest;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="ScoreCache", mappedBy="contest_problem")
+     * @Serializer\Exclude()
+     */
+    private $scorecache;
 
     /**
      * Set cid
@@ -330,5 +338,39 @@ class ContestProblem
     public function getContest()
     {
         return $this->contest;
+    }
+
+    /**
+     * Add scorecache
+     *
+     * @param \DOMJudgeBundle\Entity\ScoreCache $scorecache
+     *
+     * @return ContestProblem
+     */
+    public function addScorecache(\DOMJudgeBundle\Entity\ScoreCache $scorecache)
+    {
+        $this->scorecache->add($scorecache);
+
+        return $this;
+    }
+
+    /**
+     * Remove scorecache
+     *
+     * @param \DOMJudgeBundle\Entity\ScoreCache $scorecache
+     */
+    public function removeScorecache(\DOMJudgeBundle\Entity\ScoreCache $scorecache)
+    {
+        $this->scorecache->removeElement($scorecache);
+    }
+
+    /**
+     * Get scorecache
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getScorecache()
+    {
+        return $this->scorecache;
     }
 }

@@ -108,6 +108,15 @@ class ScoreCache
     private $problem;
 
     /**
+     * @ORM\ManyToOne(targetEntity="DOMJudgeBundle\Entity\ContestProblem", inversedBy="scorecache")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="probid", referencedColumnName="probid"),
+     *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * })
+     */
+    private $contest_problem;
+
+    /**
      * Set cid
      *
      * @param integer $cid
@@ -254,7 +263,7 @@ class ScoreCache
     /**
      * Set solvetimeRestricted
      *
-     * @param string $solvetimeRestricted
+     * @param double $solvetimeRestricted
      *
      * @return ScoreCache
      */
@@ -350,7 +359,7 @@ class ScoreCache
     /**
      * Set solvetimePublic
      *
-     * @param string $solvetimePublic
+     * @param double $solvetimePublic
      *
      * @return ScoreCache
      */
@@ -441,5 +450,69 @@ class ScoreCache
     public function getProblem()
     {
         return $this->problem;
+    }
+
+    /**
+     * Set contest problem
+     *
+     * @param \DOMJudgeBundle\Entity\ContestProblem $contestProblem
+     *
+     * @return ScoreCache
+     */
+    public function setContestProblem(\DOMJudgeBundle\Entity\ContestProblem $contestProblem = null)
+    {
+        $this->contest_problem = $contestProblem;
+
+        return $this;
+    }
+
+    /**
+     * Get contest problem
+     *
+     * @return \DOMJudgeBundle\Entity\ContestProblem
+     */
+    public function getContestProblem()
+    {
+        return $this->contest_problem;
+    }
+
+    /**
+     * Get the number of public or restricted submissions based on the parameter
+     * @param bool $restricted
+     * @return int
+     */
+    public function getSubmissions(bool $restricted): int
+    {
+        return $restricted ? $this->getSubmissionsRestricted() : $this->getSubmissionsPublic();
+    }
+
+    /**
+     * Get the number of public or restricted pending submissions based on the parameter
+     * @param bool $restricted
+     * @return int
+     */
+    public function getPending(bool $restricted): int
+    {
+        return $restricted ? $this->getPendingRestricted() : $this->getPendingPublic();
+    }
+
+    /**
+     * Get the public or restricted solve time based on the parameter
+     * @param bool $restricted
+     * @return float|string
+     */
+    public function getSolveTime(bool $restricted)
+    {
+        return $restricted ? $this->getSolvetimeRestricted() : $this->getSolvetimePublic();
+    }
+
+    /**
+     * Get whether the problem is publicly or restrictedly correct based on the parameter
+     * @param bool $restricted
+     * @return bool
+     */
+    public function getIsCorrect(bool $restricted): bool
+    {
+        return $restricted ? $this->getIsCorrectRestricted() : $this->getIsCorrectPublic();
     }
 }

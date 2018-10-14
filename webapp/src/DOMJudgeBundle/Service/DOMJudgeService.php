@@ -3,6 +3,8 @@ namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Configuration;
+use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
@@ -127,6 +129,26 @@ class DOMJudgeService
 
         $contests = $qb->getQuery()->getResult();
         return $contests;
+    }
+
+    /**
+     * Get the contest with the given contest ID
+     * @param int $cid
+     * @return Contest|null
+     */
+    public function getContest($cid)
+    {
+        return $this->em->getRepository(Contest::class)->find($cid);
+    }
+
+    /**
+     * Get the team with the given team ID
+     * @param int $teamid
+     * @return Team|null
+     */
+    public function getTeam($teamid)
+    {
+        return $this->em->getRepository(Team::class)->find($teamid);
     }
 
     public function checkrole(string $rolename, bool $check_superset = true) : bool

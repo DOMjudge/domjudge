@@ -291,4 +291,45 @@ class Utils
         }
         return (float)substr((string)$value, 0, $decpos + $decimals + 1);
     }
+
+    /**
+     * Calculate the penalty time.
+     *
+     * @param bool $solved Whether there was at least one correct submission by this team for this problem
+     * @param int $numSubmissions The total number of tries for this problem by this team
+     * @param int $penaltyTime The penalty time for every wrong submission
+     * @param bool $scoreIsInSecods Whether scoring is in seconds
+     * @return int
+     */
+    public static function calcPenaltyTime(bool $solved, int $numSubmissions, int $penaltyTime, bool $scoreIsInSecods)
+    {
+        if (!$solved) {
+            return 0;
+        }
+
+        $result = ($numSubmissions - 1) * $penaltyTime;
+        //  Convert the penalty time to seconds if the configuration
+        //  parameter to compute scores to the second is set.
+        if ($scoreIsInSecods) {
+            $result *= 60;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get the time as used on the scoreboard (i.e. truncated minutes or seconds, depending on the scoreboard resolution setting).
+     * @param float|string $time
+     * @param bool $scoreIsInSeconds
+     * @return int
+     */
+    public static function scoretime($time, bool $scoreIsInSeconds)
+    {
+        if ($scoreIsInSeconds) {
+            $result = (int)floor($time);
+        } else {
+            $result = (int)floor($time / 60);
+        }
+        return $result;
+    }
 }

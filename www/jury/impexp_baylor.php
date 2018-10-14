@@ -78,7 +78,12 @@ if (isset($_REQUEST['upload'])) {
         if ($totals === null) {
             $totals['points'] = $totals['totaltime'] = 0;
         }
-        $rank = calcTeamRank($cdata, $row['teamid'], $totals, true);
+        /** @var \DOMJudgeBundle\Service\ScoreboardService $G_SCOREBOARD_SERVICE */
+        /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
+        global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
+        $contest     = $G_SYMFONY->getContest($cdata['cid']);
+        $team        = $G_SYMFONY->getTeam($row['teamid']);
+        $rank        = $G_SCOREBOARD_SERVICE->calculateTeamRank($contest, $team, null, null, true);
         $lastProblem = $DB->q('MAYBEVALUE SELECT MAX(solvetime_restricted) FROM scorecache
                                WHERE teamid=%i AND cid=%i', $row['teamid'], $cid);
         if ($lastProblem === null) {

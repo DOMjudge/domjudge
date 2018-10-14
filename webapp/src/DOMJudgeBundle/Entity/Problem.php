@@ -74,7 +74,7 @@ class Problem
     private $special_compare_args;
 
     /**
-     * @var string
+     * @var resource
      * @ORM\Column(type="blob", name="problemtext", options={"comment"="Problem text in HTML/PDF/ASCII"}, nullable=true)
      * @Serializer\Exclude()
      */
@@ -315,7 +315,7 @@ class Problem
     /**
      * Set problemtext
      *
-     * @param string $problemtext
+     * @param resource|string $problemtext
      *
      * @return Problem
      */
@@ -329,11 +329,26 @@ class Problem
     /**
      * Get problemtext
      *
-     * @return string
+     * @return resource|string
      */
     public function getProblemtext()
     {
         return $this->problemtext;
+    }
+
+    /**
+     * Get whether this problem has a problem text
+     * @return bool
+     */
+    public function hasProblemtext()
+    {
+        if (is_string($this->problemtext)) {
+            return !empty($this->problemtext);
+        } elseif (is_resource($this->problemtext)) {
+            return fstat($this->problemtext)['size'] > 0;
+        } else {
+            return false;
+        }
     }
 
     /**
