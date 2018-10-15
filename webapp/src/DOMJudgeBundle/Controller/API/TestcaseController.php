@@ -124,7 +124,7 @@ class TestcaseController extends FOSRestController
      * )
      * @SWG\Response(
      *     response="200",
-     *     description="Information about the next testcase to run",
+     *     description="Information about the file of the given testcase",
      *     @SWG\Schema(type="string", description="Base64-encoded file contents")
      * )
      */
