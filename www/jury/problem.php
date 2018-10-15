@@ -45,7 +45,7 @@ if (isset($_POST['upload'])) {
     if (!empty($_FILES['problem_archive']['tmp_name'][0])) {
         foreach ($_FILES['problem_archive']['tmp_name'] as $fileid => $tmpname) {
             try {
-                $cid = $_POST['contest'];
+                $cid = (int)$_POST['contest'];
                 checkFileUpload($_FILES['problem_archive']['error'][$fileid]);
                 $zip = openZipFile($_FILES['problem_archive']['tmp_name'][$fileid]);
                 $newid = importZippedProblem(

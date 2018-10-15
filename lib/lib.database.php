@@ -384,7 +384,7 @@ class db
         switch ($mode) {
             case 'f': return (float)$val;
             case 'i': return (int)$val;
-            case 's': return '"'.mysqli_real_escape_string($this->_connection, $val).'"';
+            case 's': return '"'.mysqli_real_escape_string($this->_connection, (string)$val).'"';
             case 'c': return '"%'.mysqli_real_escape_string($this->_connection, $val).'%"';
             case 'l': return $val;
             case '.': break;

@@ -141,14 +141,14 @@ function rejudgeForm(string $table, $id) : string
 /**
  * Returns TRUE iff string $haystack starts with string $needle
  */
-function starts_with(string $haystack, string $needle) : string
+function starts_with(string $haystack, string $needle) : bool
 {
     return mb_substr($haystack, 0, mb_strlen($needle)) === $needle;
 }
 /**
  * Returns TRUE iff string $haystack ends with string $needle
  */
-function ends_with(string $haystack, string $needle) : string
+function ends_with(string $haystack, string $needle) : bool
 {
     return mb_substr($haystack, mb_strlen($haystack)-mb_strlen($needle)) === $needle;
 }
