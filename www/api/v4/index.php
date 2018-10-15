@@ -630,45 +630,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $roles = array('team');
     $api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
 
-    function testcase_files($args)
-    {
-        global $DB, $api;
-
-        if (!checkargs($args, array('testcaseid'))) {
-            return '';
-        }
-
-        if (!isset($args['input']) && !isset($args['output'])) {
-            $api->createError("either input or output is mandatory");
-            return '';
-        }
-        if (isset($args['input']) && isset($args['output'])) {
-            $api->createError("cannot select both input and output");
-            return '';
-        }
-        $inout = 'output';
-        if (isset($args['input'])) {
-            $inout = 'input';
-        }
-
-        $content = $DB->q("MAYBEVALUE SELECT SQL_NO_CACHE $inout FROM testcase
-                           WHERE testcaseid = %i", $args['testcaseid']);
-
-        if (is_null($content)) {
-            $api->createError("Cannot find testcase '$args[testcaseid]'.");
-            return '';
-        }
-
-        return base64_encode($content);
-    }
-    $args = array('testcaseid' => 'Get only the corresponding testcase.',
-                  'input' => 'Get the input file.',
-                  'output' => 'Get the output file.');
-    $doc = 'Get a testcase file, base64 encoded.';
-    $exArgs = array(array('testcaseid' => '3', 'input' => true));
-    $roles = array('jury','judgehost');
-    $api->provideFunction('GET', 'testcase_files', $doc, $args, $exArgs, $roles);
-
     // executable zip, e.g. for compare scripts
     function executable($args)
     {

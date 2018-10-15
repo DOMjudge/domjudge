@@ -775,9 +775,7 @@ function judge(array $row)
                 $tc['md5sum_'.$inout] . "." . substr($inout, 0, -3);
 
             if (!file_exists($tcfile[$inout])) {
-                $content = request('testcase_files', 'GET', 'testcaseid='
-                        . urlencode((string)$tc['testcaseid'])
-                        . '&' . $inout);
+                $content = request(sprintf('testcases/%s/file/%s', $tc['testcaseid'], $inout), 'GET', '');
                 $content = base64_decode(dj_json_decode($content));
                 if (file_put_contents($tcfile[$inout] . ".new", $content) === false) {
                     error("Could not create $tcfile[$inout].new");

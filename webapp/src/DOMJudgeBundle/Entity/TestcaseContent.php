@@ -59,7 +59,7 @@ class TestcaseContent
     /**
      * Set input
      *
-     * @param string $input
+     * @param resource|string $input
      *
      * @return TestcaseContent
      */
@@ -73,7 +73,7 @@ class TestcaseContent
     /**
      * Get input
      *
-     * @return string
+     * @return resource|string
      */
     public function getInput()
     {
@@ -83,7 +83,7 @@ class TestcaseContent
     /**
      * Set output
      *
-     * @param string $output
+     * @param resource|string $output
      *
      * @return TestcaseContent
      */
@@ -97,7 +97,7 @@ class TestcaseContent
     /**
      * Get output
      *
-     * @return string
+     * @return resource|string
      */
     public function getOutput()
     {
@@ -107,7 +107,7 @@ class TestcaseContent
     /**
      * Set image
      *
-     * @param string $image
+     * @param resource|string $image
      *
      * @return TestcaseContent
      */
@@ -121,7 +121,7 @@ class TestcaseContent
     /**
      * Get image
      *
-     * @return string
+     * @return resource|string
      */
     public function getImage()
     {
@@ -131,7 +131,7 @@ class TestcaseContent
     /**
      * Set imageThumb
      *
-     * @param string $imageThumb
+     * @param resource|string $imageThumb
      *
      * @return TestcaseContent
      */
@@ -145,7 +145,7 @@ class TestcaseContent
     /**
      * Get imageThumb
      *
-     * @return string
+     * @return resource|string
      */
     public function getImageThumb()
     {

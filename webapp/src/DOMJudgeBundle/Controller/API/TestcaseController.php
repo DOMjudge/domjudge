@@ -6,11 +6,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\JudgingRun;
 use DOMJudgeBundle\Entity\Testcase;
+use DOMJudgeBundle\Entity\TestcaseContent;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -101,5 +103,53 @@ class TestcaseController extends FOSRestController
         }
 
         return $testcase;
+    }
+
+    /**
+     * Get the input or output file for the given testcase
+     * @param string $id
+     * @param string $type
+     * @return string
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @Security("has_role('ROLE_JURY') or has_role('ROLE_JUDGEHOST')")
+     * @Rest\Get("/{id}/file/{type}")
+     * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(
+     *     name="type",
+     *     type="string",
+     *     in="path",
+     *     enum={"input", "output"},
+     *     description="Type of file to get",
+     *     required=true
+     * )
+     * @SWG\Response(
+     *     response="200",
+     *     description="Information about the next testcase to run",
+     *     @SWG\Schema(type="string", description="Base64-encoded file contents")
+     * )
+     */
+    public function getFile(string $id, string $type)
+    {
+        if (!in_array($type, ['input', 'output'])) {
+            throw new BadRequestHttpException('Only \'input\' or \'output\' file allowed');
+        }
+
+        /** @var TestcaseContent|null $testcaseContent */
+        $testcaseContent = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:TestcaseContent', 'tcc')
+            ->select('tcc')
+            ->where('tcc.testcaseid = :id')
+            ->setParameter(':id', $id)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($testcaseContent === null) {
+            throw new NotFoundHttpException(sprintf('Cannot find testcase \'%s\'', $id));
+        }
+
+        $contents = stream_get_contents($type === 'input' ? $testcaseContent->getInput() : $testcaseContent->getOutput());
+
+        return base64_encode($contents);
     }
 }
