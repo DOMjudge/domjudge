@@ -142,7 +142,7 @@ class Language
      *
      * @return string
      */
-    public function getExternalid(): ?string
+    public function getExternalid()
     {
         return $this->externalid;
     }
