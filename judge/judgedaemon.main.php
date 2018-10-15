@@ -738,7 +738,7 @@ function judge(array $row)
         }
 
         // get the next testcase
-        $testcase = request('testcases', 'GET', 'judgingid=' . urlencode((string)$row['judgingid']));
+        $testcase = request(sprintf('testcases/next-to-judge/%s', $row['judgingid']), 'GET', '');
         $tc = dj_json_decode($testcase);
         if ($tc === null) {
             $disabled = dj_json_encode(array(

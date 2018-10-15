@@ -1,0 +1,105 @@
+<?php declare(strict_types=1);
+
+namespace DOMJudgeBundle\Controller\API;
+
+use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\Judging;
+use DOMJudgeBundle\Entity\JudgingRun;
+use DOMJudgeBundle\Entity\Testcase;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\RestBundle\Controller\FOSRestController;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Swagger\Annotations as SWG;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+/**
+ * @Rest\Route("/api/v4/testcases", defaults={ "_format" = "json" })
+ * @Rest\Prefix("/api/testcases")
+ * @Rest\NamePrefix("testcase_")
+ * @SWG\Tag(name="Testcases")
+ */
+class TestcaseController extends FOSRestController
+{
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+
+    /**
+     * TestcaseController constructor.
+     * @param EntityManagerInterface $entityManager
+     */
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
+    /**
+     * Get the next to judge testcase for the given judging ID
+     * @param string $id
+     * @return array|string|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @Security("has_role('ROLE_JURY') or has_role('ROLE_JUDGEHOST')")
+     * @Rest\Get("/next-to-judge/{id}")
+     * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Response(
+     *     response="200",
+     *     description="Information about the next testcase to run",
+     *     @SWG\Schema(ref=@Model(type=Testcase::class))
+     * )
+     */
+    public function getNextToJudgeAction(string $id)
+    {
+        // First, check if the judging has an endtime, because then we are done
+        /** @var Judging $judging */
+        $judging = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Judging', 'j')
+            ->join('j.submission', 's')
+            ->leftJoin('j.runs', 'jr')
+            ->select('j, s')
+            ->where('j.judgingid = :judgingid')
+            ->setParameter(':judgingid', $id)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if (!$judging) {
+            throw new NotFoundHttpException(sprintf('Judging with ID \'%s\' not found', $id));
+        }
+
+        if ($judging->getEndtime()) {
+            return '';
+        }
+
+        $queryBuilder = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Testcase', 't')
+            ->select('t')
+            ->where('t.probid = :probid')
+            ->setParameter(':probid', $judging->getSubmission()->getProbid())
+            ->orderBy('t.rank')
+            ->setMaxResults(1);
+
+        if (!$judging->getRuns()->isEmpty()) {
+            $testcasesToSkip = [];
+            /** @var JudgingRun $run */
+            foreach ($judging->getRuns() as $run) {
+                $testcasesToSkip[] = $run->getTestcaseid();
+            }
+
+            $queryBuilder
+                ->andWhere('t.testcaseid NOT IN (:testcasesToSkip)')
+                ->setParameter(':testcasesToSkip', $testcasesToSkip);
+        }
+
+        /** @var Testcase $testcase */
+        $testcase = $queryBuilder->getQuery()->getOneOrNullResult();
+
+        // Would probably never be empty, because then endtime would also have been set. We cope with it anyway for now.
+        if (!$testcase) {
+            return null;
+        }
+
+        return $testcase;
+    }
+}

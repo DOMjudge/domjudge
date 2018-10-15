@@ -630,50 +630,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $roles = array('team');
     $api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
 
-    /**
-     * Testcases
-     */
-    function testcases($args)
-    {
-        global $DB, $api;
-
-        if (!checkargs($args, array('judgingid'))) {
-            return '';
-        }
-
-        // endtime is set: judging is fully done; return empty
-        $row = $DB->q('TUPLE SELECT endtime,probid
-                       FROM judging LEFT JOIN submission USING(submitid)
-                       WHERE judgingid = %i', $args['judgingid']);
-        if (!empty($row['endtime'])) {
-            return '';
-        }
-
-        $judging_runs = $DB->q("COLUMN SELECT testcaseid FROM judging_run
-                                WHERE judgingid = %i", $args['judgingid']);
-        $sqlextra = count($judging_runs) ? "AND testcaseid NOT IN (%Ai)" : "%_";
-        $testcase = $DB->q("MAYBETUPLE SELECT testcaseid, rank, probid, md5sum_input, md5sum_output
-                            FROM testcase WHERE probid = %i $sqlextra ORDER BY rank LIMIT 1",
-                           $row['probid'], $judging_runs);
-
-        // would probably never be empty, because then endtime would also
-        // have been set. we cope with it anyway for now.
-        if (is_null($testcase)) {
-            return null;
-        }
-
-        $testcase['testcaseid'] = safe_int($testcase['testcaseid']);
-        $testcase['rank'] = safe_int($testcase['rank']);
-        $testcase['probid'] = safe_int($testcase['probid']);
-
-        return $testcase;
-    }
-    $args = array('judgingid' => 'Get the next-to-judge testcase for this judging.');
-    $doc = 'Get a testcase.';
-    $exArgs = array();
-    $roles = array('jury','judgehost');
-    $api->provideFunction('GET', 'testcases', $doc, $args, $exArgs, $roles);
-
     function testcase_files($args)
     {
         global $DB, $api;

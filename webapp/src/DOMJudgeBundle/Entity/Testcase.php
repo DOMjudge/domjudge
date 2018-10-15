@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Stores testcases per problem
@@ -47,29 +48,34 @@ class Testcase
     /**
      * @var string
      * @ORM\Column(type="blob", name="description", options={"comment"="Description of this testcase"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $description;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="image_type", length=32, options={"comment"="File type of the image and thumbnail"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $image_type;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="sample", options={"comment"="Sample testcases that can be shared with teams"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $sample = false;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="testcase")
+     * @Serializer\Exclude()
      */
     private $judging_runs;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="testcases")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
+     * @Serializer\Exclude()
      */
     private $problem;
 
@@ -77,6 +83,7 @@ class Testcase
      * @var TestcaseContent
      * @ORM\OneToOne(targetEntity="DOMJudgeBundle\Entity\TestcaseContent")
      * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid")
+     * @Serializer\Exclude()
      */
     private $testcase_content;
 
