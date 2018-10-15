@@ -628,7 +628,7 @@ function judge(array $row)
     }
 
     // Get the source code from the DB and store in local file(s)
-    $sources = request('submission_files', 'GET', 'submission_id=' . urlencode((string)$row['submitid']));
+    $sources = request(sprintf('contests/%s/submissions/%s/source-code', $row['cid'], $row['submitid']), 'GET', '');
     $sources = dj_json_decode($sources);
     $files = array();
     foreach ($sources as $source) {

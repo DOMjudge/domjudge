@@ -3,7 +3,6 @@
 namespace DOMJudgeBundle\Controller\API;
 
 use Doctrine\ORM\QueryBuilder;
-use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\SubmissionFile;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -107,15 +106,16 @@ class SubmissionController extends AbstractRestController
             ->join('f.submission_file_source_code', 'sc')
             ->select('s, f, sc')
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
-            ->setParameter(':id', $id)
-            ->setMaxResults(1);
+            ->setParameter(':id', $id);
 
-        /** @var Submission $submission */
-        $submission = $queryBuilder->getQuery()->getOneOrNullResult();
+        /** @var Submission[] $submissions */
+        $submissions = $queryBuilder->getQuery()->getResult();
 
-        if ($submission === null) {
+        if (empty($submissions)) {
             throw new NotFoundHttpException(sprintf('Submission with ID \'%s\' not found', $id));
         }
+
+        $submission = reset($submissions);
 
         /** @var SubmissionFile[] $files */
         $files = $submission->getFiles();
@@ -153,6 +153,54 @@ class SubmissionController extends AbstractRestController
     }
 
     /**
+     * Get the source code of all the files for the given submission
+     * @Rest\Get("/{id}/source-code")
+     * @Security("has_role('ROLE_JUDGEHOST') or has_role('ROLE_JURY')")
+     * @param Request $request
+     * @param string $id
+     * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @SWG\Response(
+     *     response="200",
+     *     description="The files for the submission",
+     *     @SWG\Schema(ref="#/definitions/SourceCodeList")
+     * )
+     * @SWG\Parameter(ref="#/parameters/id")
+     */
+    public function getSubmissionSourceCodeAction(Request $request, string $id)
+    {
+        $queryBuilder = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:SubmissionFile', 'f')
+            ->join('f.submission_file_source_code', 'sc')
+            ->join('f.submission', 's')
+            ->select('f, sc, s')
+            ->andWhere('s.cid = :cid')
+            ->andWhere('s.submitid = :submitid')
+            ->setParameter(':cid', $this->getContestId($request))
+            ->setParameter(':submitid', $id)
+            ->orderBy('f.rank');
+
+        /** @var SubmissionFile[] $files */
+        $files = $queryBuilder->getQuery()->getResult();
+
+        if (empty($files)) {
+            throw new NotFoundHttpException(sprintf('Source code for submission with ID \'%s\' not found', $id));
+        }
+
+        $result = [];
+        foreach ($files as $file) {
+            $sourceCode = $file->getSubmissionFileSourceCode();
+            $result[]   = [
+                'id' => (string)$file->getSubmitfileid(),
+                'submission_id' => (string)$file->getSubmitid(),
+                'filename' => $file->getFilename(),
+                'source' => base64_encode(stream_get_contents($sourceCode->getSourcecode())),
+            ];
+        }
+        return $result;
+    }
+
+    /**
      * Get the query builder to use for request for this REST endpoint
      * @param Request $request
      * @return QueryBuilder
@@ -161,7 +209,6 @@ class SubmissionController extends AbstractRestController
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $cid          = $this->getContestId($request);
-        $contest      = $this->entityManager->getRepository(Contest::class)->find($cid);
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->join('s.files', 'f')

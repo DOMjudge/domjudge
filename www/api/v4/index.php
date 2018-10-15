@@ -631,43 +631,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
 
     /**
-     * Submission Files
-     */
-    function submission_files($args)
-    {
-        global $DB, $api;
-
-        if (!checkargs($args, array('submission_id'))) {
-            return '';
-        }
-
-        $sources = $DB->q('SELECT submitfileid, submitid, filename, sourcecode FROM submission_file
-                           WHERE submitid = %i ORDER BY rank', $args['submission_id']);
-
-        if ($sources->count()==0) {
-            $api->createError("Cannot find source files for submission '$args[id]'.");
-            return '';
-        }
-
-        $ret = array();
-        while ($src = $sources->next()) {
-            $ret[] = array(
-                'id'            => $src['submitfileid'],
-                'submission_id' => $src['submitid'],
-                'filename'      => $src['filename'],
-                'source'        => base64_encode($src['sourcecode']),
-            );
-        }
-
-        return $ret;
-    }
-    $args = array('submission_id' => 'Get only the corresponding submission files.');
-    $doc = 'Get a list of all submission files. The file contents will be base64 encoded.';
-    $exArgs = array(array('submission_id' => 3));
-    $roles = array('jury','judgehost');
-    $api->provideFunction('GET', 'submission_files', $doc, $args, $exArgs, $roles);
-
-    /**
      * Testcases
      */
     function testcases($args)

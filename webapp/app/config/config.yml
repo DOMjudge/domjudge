@@ -138,6 +138,15 @@ nelmio_api_doc:
                     type: object
                     properties:
                         href: { type: string }
+            SourceCodeList:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        id: { type: string }
+                        submission_id: { type: string }
+                        filename: { type: string, description: 'Original file name' }
+                        source: { type: string, description: 'Base64-encoded source code' }
             # Judgement type does not have an entity
             JudgementType:
                 type: object
