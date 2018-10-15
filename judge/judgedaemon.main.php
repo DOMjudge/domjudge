@@ -198,7 +198,7 @@ function fetch_executable(string $workdirpath, string $execid, string $md5sum) :
         if ($retval!=0) {
             error("Could not create directory '$execpath'");
         }
-        $content = request('executable', 'GET', 'execid=' . urlencode((string)$execid));
+        $content = request(sprintf('executables/%s', $execid), 'GET', '');
         $content = base64_decode(dj_json_decode($content));
         if (file_put_contents($execzippath, $content) === false) {
             error("Could not create executable zip file in $execpath");

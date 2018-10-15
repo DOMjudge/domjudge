@@ -630,31 +630,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $roles = array('team');
     $api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
 
-    // executable zip, e.g. for compare scripts
-    function executable($args)
-    {
-        global $DB, $api;
-
-        if (!checkargs($args, array('execid'))) {
-            return '';
-        }
-
-        $content = $DB->q("MAYBEVALUE SELECT SQL_NO_CACHE zipfile FROM executable
-                           WHERE execid = %s", $args['execid']);
-
-        if (is_null($content)) {
-            $api->createError("Cannot find executable '$args[execid]'.");
-            return '';
-        }
-
-        return base64_encode($content);
-    }
-    $args = array('execid' => 'Get only the corresponding executable.');
-    $doc = 'Get an executable zip file, base64 encoded.';
-    $exArgs = array(array('execid' => 'ignorews'));
-    $roles = array('jury','judgehost');
-    $api->provideFunction('GET', 'executable', $doc, $args, $exArgs, $roles);
-
     function judgehosts_POST($args)
     {
         global $DB, $api;
