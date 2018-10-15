@@ -24,7 +24,7 @@ install-docs:
 $(PDF): %.pdf: %.tex %.in %.out $(TOPDIR)/doc/logos/DOMjudgelogo.pdf
 # Ugly hack to prevent running pdflatex, but do create a PDF file,
 # since this is needed for DB installation.
-ifeq ($(BUILD_DOCS),yes)
+ifeq ($(BUILD_DOCS),no)
 	cp $(TOPDIR)/doc/logos/DOMjudgelogo.pdf $@
 else
 	pdflatex -interaction=nonstopmode $< > /dev/null
