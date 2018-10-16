@@ -27,6 +27,7 @@
 		"jms/serializer-bundle": "^2.4",
 		"twbs/bootstrap": "^4.0.0",
 		"mbostock/d3": "^3.5",
+		"novus/nvd3": "^1.8",
 		"components/jquery": "^3.3",
 		"nelmio/api-doc-bundle": "^3.3"
 	},

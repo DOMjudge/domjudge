@@ -2,15 +2,71 @@ legacy.index:
     path: /
 legacy.jury_team:
     path: /jury/team.php
+legacy.jury_balloons:
+  path: /jury/balloons.php
+legacy.jury_judgehosts:
+  path: /jury/judgehosts.php
+legacy.jury_internal_errors:
+  path: /jury/internal_errors.php
+legacy.jury_judgehost_restrictions:
+  path: /jury/judgehost_restrictions.php
+legacy.jury_teams:
+    path: /jury/teams.php
+legacy.jury_users:
+    path: /jury/users.php
+legacy.jury_clarifications:
+    path: /jury/clarifications.php
+legacy.jury_submissions:
+    path: /jury/submissions.php
+legacy.jury_languages:
+    path: /jury/languages.php
+legacy.jury_rejudgings:
+    path: /jury/rejudgings.php
+legacy.jury_print:
+    path: /jury/print.php
+legacy.jury_scoreboard:
+    path: /jury/scoreboard.php
+legacy.jury_problems:
+    path: /jury/problems.php
+legacy.team_index:
+    path: /team/
+legacy.jury_contests:
+  path: /jury/contests.php
+legacy.jury_executables:
+  path: /jury/executables.php
+
+
+legacy.jury_config:
+    path: /jury/config.php
+legacy.jury_checkconfig:
+    path: /jury/checkconfig.php
+legacy.jury_impexp:
+    path: /jury/impexp.php
+legacy.jury_genpasswds:
+    path: /jury/genpasswds.php
+legacy.jury_refresh_cache:
+    path: /jury/refresh_cache.php
+legacy.jury_check_judgings:
+    path: /jury/check_judgings.php
+legacy.jury_auditlog:
+    path: /jury/auditlog.php
+
+
 legacy.jury_delete:
     path: /jury/delete.php
-legacy.jury_contest:
-    path: /jury/contest.php
 legacy.jury_user:
     path: /jury/user.php
 legacy.jury_team_category:
     path: /jury/team_category.php
+legacy.jury_team_categories:
+    path: /jury/team_categories.php
 legacy.jury_team_affiliation:
     path: /jury/team_affiliation.php
+legacy.jury_team_affiliations:
+    path: /jury/team_affiliations.php
 legacy.jury_change_contest:
     path: /jury/change_contest.php
+legacy.jury_toggle_notify:
+    path: /jury/toggle_notify.php
+legacy.jury_submission:
+    path: /jury/submission.php

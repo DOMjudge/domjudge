@@ -1,0 +1,187 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <a class="navbar-brand hidden-sm-down" href="./">DOMjudge</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menuDefault" aria-controls="menuDefault" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <style>
+    #menuDefault ul li.nav-item {
+      white-space: nowrap;
+      padding-left: 0;
+    }
+  </style>
+  <div class="collapse navbar-collapse" id="menuDefault">
+    <ul class="navbar-nav mr-auto">
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ path('jury_index') }}" accesskey="h"><span class="octicon octicon-home"></span> home</a>
+      </li>
+
+      {% if is_granted('ROLE_BALLOON') %}
+      <li class="nav-item">
+        <a class="nav-link" href="{{ path('legacy.jury_balloons') }}" accesskey="b"><span class="octicon octicon-location"></span> balloons</a>
+      </li>
+      {% endif %}
+
+      {% if is_granted('ROLE_JURY') %}
+      <li class="nav-item">
+        <a class="nav-link" href="{{ path('legacy.jury_problems') }}" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
+      </li>
+      {% endif %}
+
+      {% if is_granted('ROLE_ADMIN') %}
+        <li class="nav-item">
+          {% if updates['judgehosts']|length > 0 %}
+            <a class="nav-link text-danger" href="{{ path('legacy.jury_judgehosts') }}" accesskey="j" id="menu_judgehosts">
+              <span class="octicon octicon-law"></span> judgehosts <span class="small">({{ updates['judgehosts']|length }} down)</span>
+            </a>
+          {% else %}
+            <a class="nav-link" href="{{ path('legacy.jury_judgehosts') }}" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts</a>
+          {% endif %}
+        </li>
+
+
+        {% if updates['internal_error']|length > 0 %}
+        <li class="nav-item">
+          <a class="nav-link text-danger" href="{{ path('legacy.jury_internal_errors') }}" accesskey="e" id="menu_internal_error"><span class="octicon octicon-zap"></span> internal error <span class="small">({{ updates['internal_error']|length }} new)</span></a>
+        </li>
+        {% endif %}
+      {% endif %}
+
+      {% if is_granted('ROLE_JURY') %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('legacy.jury_teams') }}" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('legacy.jury_users') }}" accesskey="u"><span class="octicon octicon-person"></span> users</a>
+        </li>
+
+        <li class="nav-item">
+          {% if updates['clarifications']|length > 0 %}
+            <a class="nav-link text-info" href="{{ path('legacy.jury_clarifications') }}" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications <span class="small">({{  updates['clarifications']|length }} new)</small></a>
+          {% else %}
+            <a class="nav-link" href="{{ path('legacy.jury_clarifications') }}" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications</a>
+          {% endif %}
+        </li>
+
+
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('legacy.jury_submissions') }}" accesskey="s"><span class="octicon octicon-file-code"></span> submissions</a>
+        </li>
+
+        <li class="nav-item">
+          {% if updates['rejudgings']|length > 0 %}
+            <a class="nav-link text-info" href="{{ path('legacy.jury_rejudgings') }}" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings <span class="small">({{ updates['rejudgings']|length }} active)</span></a>
+          {% else %}
+            <a class="nav-link" href="{{ path('legacy.jury_rejudgings') }}" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings</a>
+          {% endif %}
+        </li>
+      {% endif %}
+
+      {% if have_printing %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('legacy.jury_print') }}" accesskey="p"><span class="octicon octicon-file-text"></span> print</a>
+        </li>
+      {% endif %}
+      {% if is_granted('ROLE_JURY') %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('legacy.jury_scoreboard') }}" accesskey="b"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
+        </li>
+      {% endif %}
+      {% if is_granted('ROLE_TEAM') %}
+        <li class="nav-item">
+          <a class="nav-link" target="_top" href="{{ path('legacy.team_index') }}" accesskey="t"><span class="octicon octicon-arrow-right"></span> team</a>
+        </li>
+      {% endif %}
+    </ul>
+
+    <ul class="navbar-nav ml-auto">
+      {# Render user information + logout button #}
+      {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="octicon octicon-person"> {{ app.user.getUsername() }}
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            {% if app.user and app.user.getName() %}
+            <a class="dropdown-item disabled" href="#">{{ app.user.getName() }}</a>
+            {% endif %}
+
+            {% if notify_flag %}
+            <a class="dropdown-item d-none" href="{{ path('legacy.jury_toggle_notify', {'enable': 0}) }}" id="notify" onclick="return toggleNotifications(false, this)">
+              <span class="octicon octicon-bell"></span> Disable Notifications
+            </a>
+            {% else %}
+            <a class="dropdown-item d-none" href="{{ path('legacy.jury_toggle_notify', {'enable': 1}) }}" id="notify" onclick="return toggleNotifications(true, this)">
+              <span class="octicon octicon-bell"></span> Enable Notifications
+            </a>
+            {% endif %}
+
+            {% if refresh is defined and refresh %}
+              <a class="dropdown-item" href="#" id="refresh-navitem">
+                <span class="octicon octicon-sync"></span> <span id="refresh-toggle">
+                  {% if refresh_flag %}
+                    Disable Refresh
+                  {% else %}
+                    Enable Refresh
+                  {% endif %}
+                </span>
+                {% if refresh %}
+                <span class="small text-muted">({{ refresh.after }}s)</span>
+                {% endif %}
+              </a>
+            {% endif %}
+
+            <a class="dropdown-item" href="{{ path('logout') }}"><span class="octicon octicon-sign-out"></span>Logout </a>
+          </div>
+        </li>
+      {% else %}
+        <li class="nav-item">
+          <a class="nav-link" target="_top" href="{{ path('login') }}"><span class="octicon octicon-sign-in"></span> log in</a>
+        </li>
+      {% endif %}
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          {{ contest.shortname|default('no contest') }}
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item disabled" href="#">Change Contest</a>
+          {% if is_granted('ROLE_JURY') %}
+          <a class="dropdown-item" href="{{ path('legacy.jury_change_contest', {'cid': -1}) }}">No contest</a>
+          <div class="dropdown-divider"></div>
+          {% endif %}
+          {% for c in contests if c != contest%}
+          <a class="dropdown-item" href="{{ path('legacy.jury_change_contest', {'cid': c.cid}) }}">{{ c.shortname }}</a>
+          {% endfor %}
+        </div>
+      </li>
+    </ul>
+    <div class="navbar-text" style="white-space:nowrap;">
+      <span style="padding-left: 10px;" class="octicon octicon-clock"></span>
+      {% set now = 'now'|date('U') %}
+      <span id="timeleft">{%- if contest is null -%}
+          no contest
+        {%- elseif contest.getStartTime() < now and contest.getEndTime() >= now -%}
+          {{ now|timediff(contest.getEndTime()) }}
+        {%- elseif contest.getActivateTime() < now and contest.getStartTime() >= now -%}
+          time to start: {{ now|timediff(contest.getStartTime()) }}
+        {%- endif -%}</span>
+    </div>
+  </div>
+
+
+  <script type="text/javascript">
+      var initial = {{ now }};
+      var activatetime = {{ contest.activatetime|default(-1) }};
+      var starttime = {{ contest.starttime|default(-1) }};
+      var endtime = {{ contest.endtime|default(-1) }};
+      var offset = 0;
+      var date = new Date(initial*1000);
+      var timeleftelt = document.getElementById("timeleft");
+
+      setInterval(function(){updateClock();},1000);
+      updateClock();
+  </script>
+</nav>

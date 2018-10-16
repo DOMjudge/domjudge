@@ -162,6 +162,15 @@ class Judging
      */
     private $runs;
 
+
+    public function getMaxRuntime() {
+      $max = 0;
+      foreach ($this->runs as $run) {
+        $max = max($run->getRuntime(), $max);
+      }
+      return $max;
+    }
+
     /**
      * Get judgingid
      *
