@@ -41,6 +41,12 @@ class AnalysisController extends Controller
         $em = $this->getDoctrine()->getManager();
         $contest = $this->DOMJudgeService->getCurrentContest();
 
+        if ($contest == null) {
+          return $this->render('@DOMJudge/jury/error.html.twig', [
+              'error' => 'No contest selected',
+          ]);
+        }
+
         // First collect information about problems in this contest
         $problems = $em->createQueryBuilder()
           ->select('cp', 'p')
@@ -206,7 +212,7 @@ class AnalysisController extends Controller
           $misc['team_stats'][$team->getTeamId()]['misery_index'] = $misery_minutes;
           $total_misery_minutes += $misery_minutes;
         }
-        $misc['misery_index'] = $total_misery_minutes/count($teams);
+        $misc['misery_index'] = count($teams) > 0 ? $total_misery_minutes/count($teams) : 0;
         usort($submissions, function($a, $b){
           if ($a->getSubmitTime() == $b->getSubmitTime()) {
             return 0;
@@ -231,6 +237,12 @@ class AnalysisController extends Controller
         $em = $this->getDoctrine()->getManager();
         $contest = $this->DOMJudgeService->getCurrentContest();
 
+        if ($contest == null) {
+          return $this->render('@DOMJudge/jury/error.html.twig', [
+              'error' => 'No contest selected',
+          ]);
+        }
+
         // Get a whole bunch of judgings(and related objects)
         // Where:
         //   - The judging is valid(NOT - for team pages it might be neat to see rejudgings/etc)
@@ -248,7 +260,7 @@ class AnalysisController extends Controller
           // ->where('j.valid = true')
           ->andWhere('s.contest = :contest')
           ->andWhere('s.team = :team')
-          ->andWhere('tc.visible = true')
+          // ->andWhere('tc.visible = true')
           ->setParameter('team', $team)
           ->setParameter('contest', $contest)
           ->getQuery()->getResult();
