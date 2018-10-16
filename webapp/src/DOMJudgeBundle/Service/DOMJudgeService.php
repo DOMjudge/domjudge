@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\AuditLog;
 use DOMJudgeBundle\Entity\Configuration;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Team;
@@ -265,5 +266,37 @@ class DOMJudgeService
     public function setHasAllRoles(bool $hasAllRoles)
     {
         $this->hasAllRoles = $hasAllRoles;
+    }
+
+    /**
+     * Log an action to the auditlog table
+     *
+     * @param string $datatype
+     * @param mixed $dataid
+     * @param string $action
+     * @param mixed|null $extraInfo
+     * @param mixed|null $forceUsername
+     * @param int|null $cid
+     */
+    public function auditlog(string $datatype, $dataid, string $action, $extraInfo = null, $forceUsername = null, $cid = null)
+    {
+        if (!empty($forceUsername)) {
+            $user = $forceUsername;
+        } else {
+            $user = $this->getUser() ? $this->getUser()->getUsername() : null;
+        }
+
+        $auditLog = new AuditLog();
+        $auditLog
+            ->setLogtime(now())
+            ->setCid($cid)
+            ->setUser($user)
+            ->setDatatype($datatype)
+            ->setDataid($dataid)
+            ->setAction($action)
+            ->setExtrainfo($extraInfo);
+
+        $this->em->persist($auditLog);
+        $this->em->flush();
     }
 }
