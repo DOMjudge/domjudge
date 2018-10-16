@@ -43,7 +43,7 @@ $(function(){
       {
         key: "Max Runtime",
         values: [
-          {% for runid, run in jdata %}
+          {% for runid, run in jdata if run["result"] %}
             {
               "label" : "j{{ runid }}",
               "value" : {{ run["max_runtime"]|default(0) }},
