@@ -22,12 +22,6 @@ server {
 	# set max upload size. Make sure the PHP values also high enough
 	client_max_body_size 128M;
 
-	# Redirect API paths with trailing slash to non-trailing-slash version
-	set $stripped_request_uri $request_uri;
-	if ($stripped_request_uri ~ "(.*/api/.*)/$") {
-		set $stripped_request_uri $1;
-	}
-
 	# Uncomment to run it out of the root of your system
 	#location / {
 	#	root @domserver_webappdir@/web;
@@ -39,7 +33,6 @@ server {
 	#		include fastcgi_params;
 	#		fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
 	#		fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
-	#		fastcgi_param REQUEST_URI $stripped_request_uri;
 	#		# Prevents URIs that include the front controller. This will 404:
 	#		# http://domain.tld/app.php/some-path
 	#		internal;
@@ -59,7 +52,6 @@ server {
 			include fastcgi_params;
 			fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
 			fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
-			fastcgi_param REQUEST_URI $stripped_request_uri;
 			# Prevents URIs that include the front controller. This will 404:
 			# http://domain.tld/app.php/some-path
 			internal;
@@ -106,7 +98,6 @@ server {
 #			include fastcgi_params;
 #			fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
 #			fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
-#			fastcgi_param REQUEST_URI $stripped_request_uri;
 #			# Prevents URIs that include the front controller. This will 404:
 #			# http://domain.tld/app.php/some-path
 #			internal;
@@ -125,7 +116,6 @@ server {
 #			include fastcgi_params;
 #			fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
 #			fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
-#			fastcgi_param REQUEST_URI $stripped_request_uri;
 #			# Prevents URIs that include the front controller. This will 404:
 #			# http://domain.tld/app.php/some-path
 #			internal;

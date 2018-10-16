@@ -110,10 +110,83 @@ nelmio_api_doc:
             - {}
             - BasicAuth: []
         definitions:
+            # General responses
             NotFound:
                 description: The specified resource was not found
             Unauthorized:
                 description: Unauthorized
+            # Models that can not be exposed using normal entities
+            ContestProblem: # ContestProblem can not be exposed normally, because it inlines the problem
+                properties:
+                    id: { type: string }
+                    label: { type: string }
+                    short_name: { type: string }
+                    name: { type: string }
+                    ordinal: { type: integer }
+                    rgb: { type: string }
+                    color: { type: string }
+                    time_limit: { type: number, format: float }
+                    test_data_count: { type: integer }
+            # Files and ArchiveList are used for defining the 'files' property of submissions
+            Files:
+                properties:
+                    files:
+                        $ref: "#/definitions/ArchiveList"
+            ArchiveList:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        href: { type: string }
+            SourceCodeList:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        id: { type: string }
+                        submission_id: { type: string }
+                        filename: { type: string, description: 'Original file name' }
+                        source: { type: string, description: 'Base64-encoded source code' }
+            # Judgement type does not have an entity
+            JudgementType:
+                type: object
+                properties:
+                    id: { type: string }
+                    name: { type: string }
+                    penalty: { type: boolean }
+                    solved: { type: boolean }
+            # Fields for judgements that are added by the JudgingWrapper class
+            JudgementExtraFields:
+                properties:
+                    judgement_type_id: { type: string }
+                    max_run_time: { type: number, format: float }
+            # Fields for runs that are added by the JudgingRunWrapper class
+            RunExtraFields:
+                properties:
+                    judgement_type_id: { type: string }
+            Scoreboard:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        rank: { type: integer }
+                        team_id: { type: string }
+                        score:
+                            type: object
+                            properties:
+                                num_solved: { type: integer }
+                                total_time: { type: integer }
+                        problems:
+                            type: array
+                            items:
+                                type: object
+                                properties:
+                                    label: { type: string }
+                                    problem_id: { type: string }
+                                    num_judged: { type: integer }
+                                    num_pending: { type: integer }
+                                    solved: { type: boolean }
+                                    time: { type: integer }
         parameters:
             cid:
                 name: cid

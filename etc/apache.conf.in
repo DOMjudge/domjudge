@@ -54,8 +54,6 @@ Require all granted
 Options -MultiViews
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
-# Rewrite API requests with trailing slash
-RewriteRule "^/(.*/api/.*)/$" "/$1" [PT]
 # On the line below change "app.php" to "app_dev.php" to run Symfony in debug mode.
 RewriteRule ^(.*)$ app.php [QSA,L]
 

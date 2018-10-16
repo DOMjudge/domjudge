@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Stores testcases per problem
@@ -33,18 +34,6 @@ class Testcase
     private $md5sum_output;
 
     /**
-     * @var string
-     * @ORM\Column(type="blob", name="input", options={"comment"="Input data"}, nullable=false)
-     */
-    private $input;
-
-    /**
-     * @var string
-     * @ORM\Column(type="blob", name="output", options={"comment"="Output data"}, nullable=false)
-     */
-    private $output;
-
-    /**
      * @var int
      * @ORM\Column(type="integer", name="probid", options={"comment"="Corresponding problem ID", "unsigned"=true}, nullable=false)
      */
@@ -59,44 +48,44 @@ class Testcase
     /**
      * @var string
      * @ORM\Column(type="blob", name="description", options={"comment"="Description of this testcase"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $description;
-
-
-    /**
-     * @var string
-     * @ORM\Column(type="blob", name="image", options={"comment"="A graphical representation of this testcase"}, nullable=true)
-     */
-    private $image;
-
-    /**
-     * @var string
-     * @ORM\Column(type="blob", name="image_thumb", options={"comment"="Automatically created thumbnail of the image"}, nullable=true)
-     */
-    private $image_thumb;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="image_type", length=32, options={"comment"="File type of the image and thumbnail"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $image_type;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="sample", options={"comment"="Sample testcases that can be shared with teams"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $sample = false;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="testcase")
+     * @Serializer\Exclude()
      */
     private $judging_runs;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="testcases")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
+     * @Serializer\Exclude()
      */
     private $problem;
+
+    /**
+     * @var TestcaseContent
+     * @ORM\OneToOne(targetEntity="DOMJudgeBundle\Entity\TestcaseContent")
+     * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid")
+     * @Serializer\Exclude()
+     */
+    private $testcase_content;
 
     /**
      * Constructor
@@ -162,54 +151,6 @@ class Testcase
     public function getMd5sumOutput()
     {
         return $this->md5sum_output;
-    }
-
-    /**
-     * Set input
-     *
-     * @param string $input
-     *
-     * @return Testcase
-     */
-    public function setInput($input)
-    {
-        $this->input = $input;
-
-        return $this;
-    }
-
-    /**
-     * Get input
-     *
-     * @return string
-     */
-    public function getInput()
-    {
-        return $this->input;
-    }
-
-    /**
-     * Set output
-     *
-     * @param string $output
-     *
-     * @return Testcase
-     */
-    public function setOutput($output)
-    {
-        $this->output = $output;
-
-        return $this;
-    }
-
-    /**
-     * Get output
-     *
-     * @return string
-     */
-    public function getOutput()
-    {
-        return $this->output;
     }
 
     /**
@@ -282,54 +223,6 @@ class Testcase
     public function getDescription()
     {
         return $this->description;
-    }
-
-    /**
-     * Set image
-     *
-     * @param string $image
-     *
-     * @return Testcase
-     */
-    public function setImage($image)
-    {
-        $this->image = $image;
-
-        return $this;
-    }
-
-    /**
-     * Get image
-     *
-     * @return string
-     */
-    public function getImage()
-    {
-        return $this->image;
-    }
-
-    /**
-     * Set imageThumb
-     *
-     * @param string $imageThumb
-     *
-     * @return Testcase
-     */
-    public function setImageThumb($imageThumb)
-    {
-        $this->image_thumb = $imageThumb;
-
-        return $this;
-    }
-
-    /**
-     * Get imageThumb
-     *
-     * @return string
-     */
-    public function getImageThumb()
-    {
-        return $this->image_thumb;
     }
 
     /**
@@ -436,5 +329,28 @@ class Testcase
     public function getProblem()
     {
         return $this->problem;
+    }
+
+    /**
+     * Set testcaseContent
+     *
+     * @param TestcaseContent|null $testcaseContent
+     * @return Testcase
+     */
+    public function setTestcaseContent(TestcaseContent $testcaseContent = null)
+    {
+        $this->testcase_content = $testcaseContent;
+
+        return $this;
+    }
+
+    /**
+     * Get testcaseContent
+     *
+     * @return TestcaseContent
+     */
+    public function getTestcaseContent()
+    {
+        return $this->testcase_content;
     }
 }

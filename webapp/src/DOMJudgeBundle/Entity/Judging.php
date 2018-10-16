@@ -2,6 +2,8 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Utils\Utils;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Result of judging a submission
@@ -16,6 +18,8 @@ class Judging
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="judgingid", options={"comment"="Unique ID"}, nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $judgingid;
 
@@ -23,6 +27,7 @@ class Judging
      * @var int
      *
      * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $cid;
 
@@ -30,60 +35,71 @@ class Judging
      * @var int
      *
      * @ORM\Column(type="integer", name="submitid", options={"comment"="Submission ID being judged"}, nullable=false)
+     * @Serializer\SerializedName("submission_id")
+     * @Serializer\Type("string")
      */
     private $submitid;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time judging started", "unsigned"=true}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $starttime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time judging ended, null = stil busy", "unsigned"=true}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $endtime;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="result", length=32, options={"comment"="Result string as defined in config.php"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $result;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="verified", options={"comment"="Result verified by jury member?"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $verified = false;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="jury_member", length=255, options={"comment"="Name of jury member who verified this"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $jury_member;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="verify_comment", length=255, options={"comment"="Optional additional information provided by the verifier"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $verify_comment;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="valid", options={"comment"="Old judging is marked as invalid when rejudging"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $valid = true;
 
     /**
      * @var string
      * @ORM\Column(type="blob", name="output_compile", options={"comment"="Output of the compiling the program"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $output_compile;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="seen", options={"comment"="Whether the team has seen this judging"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $seen = false;
 
@@ -91,6 +107,7 @@ class Judging
      * @var int
      *
      * @ORM\Column(type="integer", name="rejudgingid", options={"comment"="Rejudging ID (if rejudge)"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $rejudgingid;
 
@@ -98,24 +115,28 @@ class Judging
      * @var int
      *
      * @ORM\Column(type="integer", name="prevjudgingid", options={"comment"="Previous valid judging ID (if rejudge)"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $prevjudgingid;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @Serializer\Exclude()
      */
     private $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="judgings")
      * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
+     * @Serializer\Exclude()
      */
     private $submission;
 
     /**
      * @ORM\ManyToOne(targetEntity="Judgehost", inversedBy="judgings")
      * @ORM\JoinColumn(name="judgehost", referencedColumnName="hostname")
+     * @Serializer\Exclude()
      */
     private $judgehost;
 
@@ -123,6 +144,7 @@ class Judging
      * rejudgings have one parent judging
      * @ORM\ManyToOne(targetEntity="Rejudging", inversedBy="judgings")
      * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid")
+     * @Serializer\Exclude()
      */
     private $rejudging;
 
@@ -130,11 +152,13 @@ class Judging
      * rejudgings have one parent judging
      * @ORM\ManyToOne(targetEntity="Judging")
      * @ORM\JoinColumn(name="prevjudgingid", referencedColumnName="judgingid")
+     * @Serializer\Exclude()
      */
     private $original_judging;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="judging")
+     * @Serializer\Exclude()
      */
     private $runs;
 
@@ -230,6 +254,32 @@ class Judging
     }
 
     /**
+     * Get the absolute start time for this judging
+     *
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("start_time")
+     * @Serializer\Type("string")
+     */
+    public function getAbsoluteStartTime()
+    {
+        return Utils::absTime($this->getStarttime());
+    }
+
+    /**
+     * Get the relative start time for this judging
+     *
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("start_contest_time")
+     * @Serializer\Type("string")
+     */
+    public function getRelativeStartTime()
+    {
+        return Utils::relTime($this->getStarttime() - $this->getContest()->getStarttime());
+    }
+
+    /**
      * Set endtime
      *
      * @param string $endtime
@@ -251,6 +301,32 @@ class Judging
     public function getEndtime()
     {
         return $this->endtime;
+    }
+
+    /**
+     * Get the absolute end time for this judging
+     *
+     * @return string|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("end_time")
+     * @Serializer\Type("string")
+     */
+    public function getAbsoluteEndTime()
+    {
+        return $this->getEndtime() ? Utils::absTime($this->getEndtime()) : null;
+    }
+
+    /**
+     * Get the relative end time for this judging
+     *
+     * @return string|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("end_contest_time")
+     * @Serializer\Type("string")
+     */
+    public function getRelativeEndTime()
+    {
+        return $this->getEndtime() ? Utils::relTime($this->getEndtime() - $this->getContest()->getStarttime()) : null;
     }
 
     /**

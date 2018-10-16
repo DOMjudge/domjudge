@@ -227,7 +227,7 @@ int main(int argc, char **argv)
 	if ( getenv("SUBMITBASEURL")!=NULL ) baseurl = string(getenv("SUBMITBASEURL"));
 	if ( getenv("SUBMITCONTEST")!=NULL ) contestid = string(getenv("SUBMITCONTEST"));
 
-	quiet =	show_help = show_version = 0;
+	quiet = show_help = show_version = 0;
 	opterr = 0;
 	while ( (c = getopt_long(argc,argv,"p:l:u:c:e:v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
@@ -263,7 +263,13 @@ int main(int argc, char **argv)
 		}
 	}
 
+	/* Make sure that baseurl terminates with a '/' for later concatenation. */
+	if ( !baseurl.empty() && baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
+
 	if ( !readcontests() ) warning(0,"could not obtain active contests");
+
+	if ( show_help ) usage();
+	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( contestid.empty() ) {
 		if ( contests.size()==0 ) {
@@ -288,9 +294,6 @@ int main(int argc, char **argv)
 	if ( contestid.empty() || contestshortname.empty() ) usage2(0,"no (valid) contest specified");
 
 	if ( !readlanguages() ) warning(0,"could not obtain language data");
-
-	if ( show_help ) usage();
-	if ( show_version ) version(PROGRAM,VERSION);
 
 	if ( argc<=optind ) usage2(0,"no file(s) specified");
 
@@ -360,9 +363,6 @@ int main(int argc, char **argv)
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( baseurl.empty()  ) usage2(0,"no url specified");
-
-	/* Make sure that baseurl terminates with a '/' for later concatenation. */
-	if ( baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
 
 	/* Guess entry point if not already specified. */
 	if ( entry_point.empty() && require_entry_point == "true" ) {
@@ -487,7 +487,7 @@ void usage()
 "\n"
 "Set URL to the base address of the webinterface without the 'api/' suffix.\n");
 	if ( !baseurl.empty() ) {
-		printf("The pre-configured URL is '%s'.\n",baseurl.c_str());
+		printf("The (pre)configured URL is '%s'.\n",baseurl.c_str());
     }
 	printf(
 "\n"

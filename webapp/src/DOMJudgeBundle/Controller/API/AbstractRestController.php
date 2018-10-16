@@ -49,6 +49,8 @@ abstract class AbstractRestController extends FOSRestController
      */
     protected function performListAction(Request $request)
     {
+        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
+        $this->entityManager->clear();
         $queryBuilder = $this->getQueryBuilder($request);
 
         if ($request->query->has('ids')) {
@@ -64,12 +66,16 @@ abstract class AbstractRestController extends FOSRestController
                 ->setParameter(':ids', $ids);
         }
 
-        $objects      = $queryBuilder
+        $objects = $queryBuilder
             ->getQuery()
             ->getResult();
 
         if (isset($ids) && count($objects) !== count($ids)) {
             throw new NotFoundHttpException('One or more objects not found');
+        }
+
+        if ($this instanceof QueryObjectTransformer) {
+            $objects = array_map([$this, 'transformObject'], $objects);
         }
 
         return $this->renderData($request, $objects);
@@ -84,6 +90,8 @@ abstract class AbstractRestController extends FOSRestController
      */
     protected function performSingleAction(Request $request, string $id)
     {
+        // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
+        $this->entityManager->clear();
         $queryBuilder = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter(':id', $id);
@@ -94,6 +102,10 @@ abstract class AbstractRestController extends FOSRestController
 
         if ($object === null) {
             throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        if ($this instanceof QueryObjectTransformer) {
+            $object = $this->transformObject($object);
         }
 
         return $this->renderData($request, $object);
@@ -109,8 +121,8 @@ abstract class AbstractRestController extends FOSRestController
     {
         $view = $this->view($data);
 
-        // Set the user on the context, so it can be used to determine access to certain attributes
-        $view->getContext()->setAttribute('user', $this->DOMJudgeService->getUser());
+        // Set the DOMjudge service on the context, so we can use it for permissions
+        $view->getContext()->setAttribute('domjudge_service', $this->DOMJudgeService);
 
         $groups = ['Default'];
         if (!$request->query->has('strict')) {
@@ -142,8 +154,8 @@ abstract class AbstractRestController extends FOSRestController
         // Filter on contests this user has access to
         if (!$this->DOMJudgeService->checkrole('jury')) {
             if ($this->DOMJudgeService->checkrole('team') && $this->DOMJudgeService->getUser()->getTeamid()) {
-                $qb->join('c.teams', 'ct')
-                    ->andWhere('ct.teamid = :teamid')
+                $qb->leftJoin('c.teams', 'ct')
+                    ->andWhere('ct.teamid = :teamid OR c.public = 1')
                     ->setParameter(':teamid', $this->DOMJudgeService->getUser()->getTeamid());
             } else {
                 $qb->andWhere('c.public = 1');

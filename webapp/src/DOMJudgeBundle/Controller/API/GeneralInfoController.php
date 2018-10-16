@@ -13,7 +13,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use DOMJudgeBundle\Entity\Configuration;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @Rest\Route("/api/v4", defaults={ "_format" = "json" })
@@ -34,16 +34,22 @@ class GeneralInfoController extends FOSRestController
      * @var DOMJudgeService
      */
     protected $DOMJudgeService;
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
 
     /**
      * GeneralInfoController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService $DOMJudgeService
+     * @param RouterInterface $router
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, RouterInterface $router)
     {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->router          = $router;
     }
 
     /**
@@ -67,13 +73,15 @@ class GeneralInfoController extends FOSRestController
     /**
      * Get information about the API and DOMjudge
      * @Rest\Get("/info")
+     * @Rest\Get("", name="api_root")
      * @SWG\Response(
      *     response="200",
      *     description="Information about the API and DOMjudge",
      *     @SWG\Schema(
      *         type="object",
      *         @SWG\Property(property="api_version", type="integer"),
-     *         @SWG\Property(property="domjudge_version", type="string")
+     *         @SWG\Property(property="domjudge_version", type="string"),
+     *         @SWG\Property(property="doc_url", type="string")
      *     )
      * )
      */
@@ -82,6 +90,7 @@ class GeneralInfoController extends FOSRestController
         $data = [
             'api_version' => $this->apiVersion,
             'domjudge_version' => $this->getParameter('domjudge.version'),
+            'doc_url' => $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL),
         ];
         return $data;
     }
@@ -196,7 +205,7 @@ class GeneralInfoController extends FOSRestController
     public function getDatabaseConfigurationAction(Request $request)
     {
         $onlypublic = !($this->DOMJudgeService->checkrole('jury') || $this->DOMJudgeService->checkrole('judgehost'));
-        $name = $request->query->get('name');
+        $name       = $request->query->get('name');
 
         $result = $this->DOMJudgeService->dbconfig_get($name, null, $onlypublic);
 

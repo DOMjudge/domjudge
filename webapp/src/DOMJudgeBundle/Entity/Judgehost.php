@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Hostnames of the autojudgers
@@ -33,18 +34,21 @@ class Judgehost
     /**
      * @var int
      * @ORM\Column(type="integer", name="restrictionid", options={"comment"="Optional set of restrictions for this judgehost"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $restrictionid;
 
     /**
      * @ORM\ManyToOne(targetEntity="JudgehostRestriction", inversedBy="judgehosts")
      * @ORM\JoinColumn(name="restrictionid", referencedColumnName="restrictionid")
+     * @Serializer\Exclude()
      */
     private $restriction;
 
 
     /**
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="judgehost")
+     * @Serializer\Exclude()
      */
     private $judgings;
 
