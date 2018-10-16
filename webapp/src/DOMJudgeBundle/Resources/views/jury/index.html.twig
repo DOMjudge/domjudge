@@ -1,0 +1,86 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+
+{% block title %}{{ parent() }} - Jury Interface{% endblock %}
+
+{% block extrahead %}
+{{ parent() }}
+{% endblock %}
+
+{% block content %}
+<h1>DOMjudge Jury interface</h1>
+<p>
+  <a href="https://www.domjudge.org/">
+    <img src="../images/DOMjudgelogo.png" id="djlogo" alt="DOMjudge logo" title="The DOMjudge logo: free as in beer!" />
+  </a>
+</p>
+
+<div class="row equal mt-3">
+  <div class="col-lg-4 col-sm-6 mt-3">
+    <div class="card">
+      <div class="card-header">
+        Overviews:
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><a href="{{ path('legacy.jury_balloons') }}">Balloon Status</a></li>
+          {% if is_granted('ROLE_JURY') %}
+            <li><a href="{{ path('legacy.jury_clarifications') }}">Clarifications</a></li>
+            <li><a href="{{ path('legacy.jury_contests') }}">Contests</a></li>
+            <li><a href="{{ path('legacy.jury_executables') }}">Executables</a></li>
+            <li><a href="{{ path('legacy.jury_internal_errors') }}">Internal Errors</a></li>
+            <li><a href="{{ path('legacy.jury_judgehosts') }}">Judgehosts</a></li>
+            <li><a href="{{ path('legacy.jury_judgehost_restrictions') }}">Judgehost Restrictions</a></li>
+            <li><a href="{{ path('legacy.jury_languages') }}">Languages</a></li>
+            <li><a href="{{ path('legacy.jury_problems') }}">Problems</a></li>
+            <li><a href="{{ path('legacy.jury_scoreboard') }}">Scoreboard</a></li>
+            <li><a href="{{ path('analysis_index') }}">Statistics/Analysis</a></li>
+            <li><a href="{{ path('legacy.jury_submissions') }}">Submissions</a></li>
+            <li><a href="{{ path('legacy.jury_users') }}">Users</a></li>
+            <li><a href="{{ path('legacy.jury_teams') }}">Teams</a></li>
+            <li><a href="{{ path('legacy.jury_team_categories') }}">Team Categories</a></li>
+            <li><a href="{{ path('legacy.jury_team_affiliations') }}">Team Affiliations</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="col-lg-3 col-sm-6 mt-3">
+  {% if is_granted('ROLE_ADMIN') %}
+    <div class="card">
+      <div class="card-header">
+        Administrator:
+      </div>
+      <div class="card-body">
+        <ul>
+          <li><a href="{{ path('legacy.jury_config') }}">Configuration settings</a></li>
+          <li><a href="{{ path('legacy.jury_checkconfig') }}">Config checker</a></li>
+          <li><a href="{{ path('legacy.jury_impexp') }}">Import / export</a></li>
+          <li><a href="{{ path('legacy.jury_genpasswds') }}">Manage team passwords</a></li>
+          <li><a href="{{ path('legacy.jury_refresh_cache') }}">Refresh scoreboard cache</a></li>
+          <li><a href="{{ path('legacy.jury_check_judgings') }}">Judging verifier</a></li>
+          <li><a href="{{ path('legacy.jury_auditlog') }}">Activity log</a></li>
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+    <div class="card mt-3">
+      <div class="card-header">
+        Documentation:
+      </div>
+      <div class="card-body">
+        <ul>
+        <li><a href="doc/judge/judge-manual.html">Judge manual</a>
+            (also <a href="doc/judge/judge-manual.pdf">PDF</a>)</li>
+        <li><a href="doc/admin/admin-manual.html">Administrator manual</a>
+            (also <a href="doc/admin/admin-manual.pdf">PDF</a>)</li>
+        <li><a href="doc/team/team-manual.pdf">Team manual</a>
+            (PDF only)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
