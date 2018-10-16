@@ -100,9 +100,13 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 // If the browser supports desktop notifications, toggle whether these
 // are enabled. This requires user permission.
 // Returns whether setting it was successful.
-function toggleNotifications(enable)
+function toggleNotifications(enable, elem)
 {
 	'use strict';
+	var linkhref = 'toggle_notify.php?enable=1';
+	if (elem) {
+		linkhref = elem.href;
+	}
 	if ( enable ) {
 		if ( !('Notification' in window) ) {
 			alert('Your browser does not support desktop notifications.');
@@ -131,7 +135,7 @@ function toggleNotifications(enable)
 					} else {
 						sendNotification('DOMjudge notifications enabled.',
 						                 {'timeout': 5});
-						window.location.href = 'toggle_notify.php?enable=1';
+						window.location.href = linkhref;
 						return false;
 					}
 				});
@@ -160,7 +164,7 @@ function toggleNotifications(enable)
 function sendNotification(title, options)
 {
 	'use strict';
-	if ( getCookie('domjudge_notify')!==1 ) return;
+	if ( getCookie('domjudge_notify')!=1 ) return;
 
 //	if ( typeof options.tag === 'undefined' ) options.tag = null;
 
@@ -841,4 +845,5 @@ function toggleRefresh($url, $after) {
 
     var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';
     $('#refresh-toggle').val(text);
+    $('#refresh-toggle').text(text);
 }
