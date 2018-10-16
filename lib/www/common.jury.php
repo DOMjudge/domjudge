@@ -697,28 +697,7 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
 // dis- or re-enable what caused an internal error
 function set_internal_error(array $disabled, /* int/null */ $cid, /* int/null */ $value)
 {
-    global $DB, $api;
-    switch ($disabled['kind']) {
-        case 'problem':
-            $DB->q('RETURNAFFECTED UPDATE contestproblem
-                    SET allow_judge=%i
-                    WHERE cid=%i AND probid=%i',
-                   $value, $cid, $disabled['probid']);
-            break;
-        case 'judgehost':
-            $DB->q('RETURNAFFECTED UPDATE judgehost
-                    SET active=%i
-                    WHERE hostname=%s',
-                   $value, $disabled['hostname']
-            );
-            break;
-        case 'language':
-            $DB->q('RETURNAFFECTED UPDATE language
-                    SET allow_judge=%i
-                    WHERE langid=%s',
-                   $value, $disabled['langid']);
-            break;
-        default:
-            $api->createError("unknown internal error kind '" . $disabled['kind'] . "'");
-    }
+    /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
+    global $G_SYMFONY;
+    $G_SYMFONY->setInternalError($disabled, $cid, $value);
 }

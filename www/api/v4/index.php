@@ -693,59 +693,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $exArgs = array();
     $roles = array('judgehost');
     $api->provideFunction('PUT', 'judgehosts', $doc, $args, $exArgs, $roles);
-
-    /**
-     * Internal error reporting (back from judgehost)
-     */
-    function internal_error_POST($args)
-    {
-        global $DB, $cdatas, $api;
-
-        if (!checkargs($args, array('description', 'judgehostlog', 'disabled'))) {
-            return '';
-        }
-
-        // Both cid and judgingid are allowed to be NULL.
-        $cid = @$args['cid'];
-        $judgingid = @$args['judgingid'];
-
-        // group together duplicate internal errors
-        // note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors
-        $errorid = $DB->q('MAYBEVALUE SELECT errorid FROM internal_error
-                           WHERE description=%s AND disabled=%s AND status=%s' .
-                          (isset($cid) ? ' AND cid=%i' : '%_'),
-                          $args['description'], $args['disabled'], 'open', $cid);
-
-        if (isset($errorid)) {
-            // FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog
-            return $errorid;
-        }
-
-        $errorid = $DB->q('RETURNID INSERT INTO internal_error
-                           (judgingid, cid, description, judgehostlog, time, disabled)
-                           VALUES (%i, %i, %s, %s, %f, %s)',
-                          $judgingid, $cid, $args['description'],
-                          $args['judgehostlog'], now(), $args['disabled']);
-
-        $disabled = dj_json_decode($args['disabled']);
-        // disable what needs to be disabled
-        set_internal_error($disabled, $cid, 0);
-        if (in_array($disabled['kind'], array('problem', 'language', 'judgehost'))  && isset($args['judgingid'])) {
-            // give back judging if we have to
-            give_back_judging($args['judgingid']);
-        }
-
-        return $errorid;
-    }
-    $doc = 'Report an internal error from the judgedaemon.';
-    $args = array('judgingid' => 'ID of the corresponding judging (if exists).',
-                  'cid' => 'Contest ID (if associated to one).',
-                  'description' => 'short description',
-                  'judgehostlog' => 'last N lines of judgehost log',
-                  'disabled' => 'reason (JSON encoded)');
-    $exArgs = array();
-    $roles = array('judgehost');
-    $api->provideFunction('POST', 'internal_error', $doc, $args, $exArgs, $roles, true);
 }
 
 // Now provide the api, which will handle the request

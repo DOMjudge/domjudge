@@ -10,6 +10,7 @@ use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class DOMJudgeService
 {
@@ -298,5 +299,65 @@ class DOMJudgeService
 
         $this->em->persist($auditLog);
         $this->em->flush();
+    }
+
+    /**
+     * Decode a JSON string and handle errors
+     * @param string $str
+     * @return mixed
+     */
+    public function jsonDecode(string $str)
+    {
+        $res = json_decode($str, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new HttpException(500, sprintf("Error decoding JSON data '%s': %s", $str, json_last_error_msg()));
+        }
+        return $res;
+    }
+
+    /**
+     * Dis- or re-enable what caused an internal error
+     * @param array $disabled
+     * @param int|null $cid
+     * @param bool|null $enabled
+     */
+    public function setInternalError($disabled, $cid, $enabled)
+    {
+        switch ($disabled['kind']) {
+            case 'problem':
+                $this->em->createQueryBuilder()
+                    ->update('DOMJudgeBundle:ContestProblem', 'p')
+                    ->set('p.allow_judge', ':enabled')
+                    ->where('p.cid = :cid')
+                    ->andWhere('p.probid = :probid')
+                    ->setParameter(':enabled', $enabled)
+                    ->setParameter(':cid', $cid)
+                    ->setParameter(':probid', $disabled['probid'])
+                    ->getQuery()
+                    ->execute();
+                break;
+            case 'judgehost':
+                $this->em->createQueryBuilder()
+                    ->update('DOMJudgeBundle:Judgehost', 'j')
+                    ->set('j.active', ':active')
+                    ->where('j.hostname = :hostname')
+                    ->setParameter(':active', $enabled)
+                    ->setParameter(':hostname', $disabled['hostname'])
+                    ->getQuery()
+                    ->execute();
+                break;
+            case 'language':
+                $this->em->createQueryBuilder()
+                    ->update('DOMJudgeBundle:Language', 'lang')
+                    ->set('lang.allow_judge', ':enabled')
+                    ->where('lang.langid = :langid')
+                    ->setParameter(':enabled', $enabled)
+                    ->setParameter(':langid', $disabled['langid'])
+                    ->getQuery()
+                    ->execute();
+                break;
+            default:
+                throw new HttpException(500, sprintf("unknown internal error kind '%s'", $disabled['kind']));
+        }
     }
 }
