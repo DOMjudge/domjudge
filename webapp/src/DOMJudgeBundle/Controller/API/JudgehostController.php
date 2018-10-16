@@ -14,6 +14,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @Rest\Route("/api/v4/judgehosts", defaults={ "_format" = "json" })
@@ -128,13 +129,15 @@ class JudgehostController extends FOSRestController
      */
     public function internalErrorAction(Request $request)
     {
+        $required = ['description', 'judgehostlog', 'disabled'];
+        foreach ($required as $argument) {
+            if (!$request->request->has($argument)) {
+                throw new BadRequestHttpException(sprintf('Argument \'%s\' is mandatory', $argument));
+            }
+        }
         $description  = $request->request->get('description');
         $judgehostlog = $request->request->get('judgehostlog');
         $disabled     = $request->request->get('disabled');
-        if (!$description || !$description || !$disabled) {
-            // Missing parameters
-            return '';
-        }
 
         // Both cid and judgingid are allowed to be NULL.
         $cid       = $request->request->get('cid');
