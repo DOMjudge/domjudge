@@ -288,7 +288,7 @@ class DOMJudgeService
 
         $auditLog = new AuditLog();
         $auditLog
-            ->setLogtime(now())
+            ->setLogtime(Utils::now())
             ->setCid($cid)
             ->setUser($user)
             ->setDatatype($datatype)

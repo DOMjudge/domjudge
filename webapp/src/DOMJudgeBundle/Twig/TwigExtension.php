@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Twig;
 
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Utils\Utils;
 
 class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
 {
@@ -48,7 +49,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
     public function timediff($start, $end = null)
     {
         if (is_null($end)) {
-            $end = microtime(true);
+            $end = Utils::now();
         }
         $ret = '';
         $diff = floor($end - $start);
