@@ -16,17 +16,6 @@ use DOMJudgeBundle\Utils\Utils;
 
 global $api;
 if (!isset($api)) {
-    function infreeze($cdata, $time)
-    {
-        if ((! empty($cdata['freezetime']) &&
-             difftime($time, (float)$cdata['freezetime'])>=0) &&
-            (empty($cdata['unfreezetime']) ||
-             difftime($time, (float)$cdata['unfreezetime'])<0)) {
-            return true;
-        }
-        return false;
-    }
-
     function checkargs($args, $mandatory)
     {
         global $api;
@@ -76,24 +65,6 @@ if (!isset($api)) {
     }
 
     $api = new RestApi();
-
-    // helper function to convert the data in the cdata object to the specified values
-    function cdataHelper($cdata)
-    {
-        // TODO: clarify formal_name, its use and origin
-        return array(
-            'id'                         => safe_int($cdata['cid']),
-            'shortname'                  => $cdata['shortname'],
-            'name'                       => $cdata['name'],
-            'formal_name'                => $cdata['name'],
-            'start_time'                 => Utils::absTime($cdata['starttime']),
-            'end_time'                   => Utils::absTime($cdata['endtime']),
-            'duration'                   => Utils::relTime($cdata['endtime'] - $cdata['starttime']),
-            'scoreboard_freeze_duration' => Utils::relTime($cdata['endtime'] - $cdata['freezetime']),
-            'unfreeze'                   => Utils::absTime($cdata['unfreezetime']),
-            'penalty'                    => safe_int(dbconfig_get('penalty_time', 20)),
-        );
-    }
 
     function judgings_POST($args)
     {
