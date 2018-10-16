@@ -23,6 +23,8 @@ class DOMJudgeService
     public function getCurrentContest()
     {
         $selected_cid = $this->request->cookies->get('domjudge_cid');
+        if ($selected_cid == -1) return null;
+
         $contests = $this->getCurrentContests();
         foreach ($contests as $contest) {
             if ($contest->getCid() == $selected_cid) {
@@ -164,6 +166,56 @@ class DOMJudgeService
         }
 
         return $user;
+    }
+
+    public function getCookie(string $cookieName) {
+      if (!$this->request->cookies) {
+        return null;
+      }
+      return $this->request->cookies->get($cookieName);
+    }
+
+    public function getUpdates() {
+      $contest = $this->getCurrentContest();
+
+      $clarifications = array();
+      if ($contest) {
+        $clarifications = $this->em->createQueryBuilder()
+          ->select('clar')
+          ->from('DOMJudgeBundle:Clarification', 'clar')
+          ->where('clar.contest = :contest')
+          ->andWhere('clar.sender is not null')
+          ->andWhere('clar.answered = 0')
+          ->setParameter('contest', $contest)
+          ->getQuery()->getResult();
+      }
+      $judgehosts = $this->em->createQueryBuilder()
+        ->select('j')
+        ->from('DOMJudgeBundle:Judgehost', 'j')
+        ->where('j.active = 1')
+        ->andWhere('j.polltime < :i')
+        ->setParameter('i', time() - $this->dbconfig_get('judgehost_critical', 120))
+        ->getQuery()->getResult();
+
+      $rejudgings = $this->em->createQueryBuilder()
+        ->select('r')
+        ->from('DOMJudgeBundle:Rejudging', 'r')
+        ->where('r.endtime is null')
+        ->getQuery()->getResult();
+
+      $internal_error = $this->em->createQueryBuilder()
+        ->select('ie')
+        ->from('DOMJudgeBundle:InternalError', 'ie')
+        ->where('ie.status = :status')
+        ->setParameter('status', 'open')
+        ->getQuery()->getResult();
+
+      return array(
+        'clarifications' => $clarifications,
+        'judgehosts' => $judgehosts,
+        'rejudgings' => $rejudgings,
+        'internal_error' => $internal_error,
+      );
     }
 
     public function getHttpKernel()

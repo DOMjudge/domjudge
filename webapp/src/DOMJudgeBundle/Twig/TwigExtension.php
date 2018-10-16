@@ -13,10 +13,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
 
     public function getFunctions()
     {
-        return array(
-            new \Twig_Function('putClock', array($this, 'putClock')),
-            new \Twig_Function('checkrole', array($this, 'checkrole')),
-        );
+        return array();
     }
     public function getFilters()
     {
@@ -26,19 +23,25 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
     }
     public function getGlobals()
     {
-        // TODO: populate these values properly
-        // They're used by the header template
+        $notify_flag = (bool)($this->domjudge->getCookie("domjudge_notify"));
+        $refresh_cookie = $this->domjudge->getCookie("domjudge_refresh");
+        $refresh_flag = ($refresh_cookie == null || (bool)$refresh_cookie);
+
+        // This is for various notifications
+        // e.g. judgehost down, rejudging active, clarifications, internal errors
+        // TODO: we should only bother doing this if jury
+        $updates = $this->domjudge->getUpdates();
+
+        // These variables mostly exist for the header template
         return array(
-            // TODO: this should take into account what contest the user selected
             'contest' => $this->domjudge->getCurrentContest(),
             'contests' => $this->domjudge->getCurrentContests(),
-            'have_printing' => false,
-            'updates' => array(
-                'judgehosts' => array(),
-                'internal_error' => array(),
-                'clarifications' => array(),
-                'rejudgings' => array(),
-            ),
+            'have_printing' => $this->domjudge->dbconfig_get('enable_printing', 0),
+            'notify_flag' => $notify_flag,
+            'refresh_flag' => $refresh_flag,
+
+            // Jury Specific
+            'updates' => $updates,
         );
     }
 
