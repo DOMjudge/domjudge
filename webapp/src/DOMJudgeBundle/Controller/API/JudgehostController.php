@@ -79,6 +79,81 @@ class JudgehostController extends FOSRestController
     }
 
     /**
+     * Add a new judgehost to the list of judgehosts. Also restarts (and returns) unfinished judgings.
+     * @Rest\Post("")
+     * @Security("has_role('ROLE_JUDGEHOST')")
+     * @SWG\Response(
+     *     response="200",
+     *     description="The returned unfinished judgings",
+     *     @SWG\Schema(
+     *         type="array",
+     *         @SWG\Items(
+     *             type="object",
+     *             properties={
+     *                 @SWG\Property(property="judgingid", type="integer"),
+     *                 @SWG\Property(property="submitid", type="integer"),
+     *                 @SWG\Property(property="cid", type="integer")
+     *             }
+     *         )
+     *     )
+     * )
+     * @param Request $request
+     * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function createJudgehostAction(Request $request)
+    {
+        if (!$request->request->has('hostname')) {
+            throw new BadRequestHttpException('Argument \'hostname\' is mandatory');
+        }
+
+        $hostname = $request->request->get('hostname');
+
+        /** @var Judgehost|null $judgehost */
+        $judgehost = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Judgehost', 'j')
+            ->select('j')
+            ->where('j.hostname = :hostname')
+            ->setParameter(':hostname', $hostname)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if (!$judgehost) {
+            $judgehost = new Judgehost();
+            $judgehost->setHostname($hostname);
+            $this->entityManager->persist($judgehost);
+            $this->entityManager->flush();
+        }
+
+        // If there are any unfinished judgings in the queue in my name, they will not be finished. Give them back.
+        /** @var Judging[] $judgings */
+        $judgings = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Judging', 'j')
+            ->innerJoin('j.judgehost', 'jh')
+            ->leftJoin('j.rejudging', 'r')
+            ->select('j')
+            ->where('jh.hostname = :hostname')
+            ->andWhere('j.endtime IS NULL')
+            ->andWhere('j.valid = 1 OR r.valid = 1')
+            ->setParameter(':hostname', $hostname)
+            ->getQuery()
+            ->getResult();
+
+        foreach ($judgings as $judging) {
+            $this->giveBackJudging($judging->getJudgingid());
+        }
+
+        return array_map(function (Judging $judging) {
+            return [
+                'judgingid' => $judging->getJudgingid(),
+                'submitid' => $judging->getSubmitid(),
+                'cid' => $judging->getCid(),
+            ];
+        }, $judgings);
+    }
+
+    /**
      * Internal error reporting (back from judgehost)
      *
      * @Rest\Post("/internal-error")

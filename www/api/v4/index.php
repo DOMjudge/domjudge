@@ -75,23 +75,6 @@ if (!isset($api)) {
         return is_null($value) ? null : (string)$value;
     }
 
-    function give_back_judging($judgingid)
-    {
-        global $DB;
-
-        $jdata = $DB->q('TUPLE SELECT judgingid, cid, submitid, judgehost, result
-                         FROM judging WHERE judgingid = %i', $judgingid);
-
-        $DB->q('START TRANSACTION');
-        $DB->q('UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i', $judgingid);
-        $DB->q('UPDATE submission SET judgehost = NULL
-                WHERE submitid = %i', $jdata['submitid']);
-        $DB->q('COMMIT');
-
-        auditlog('judging', $judgingid, 'given back', null, $jdata['judgehost'], $jdata['cid']);
-        // TODO: consider judging deleted from API viewpoint?
-    }
-
     $api = new RestApi();
 
     // helper function to convert the data in the cdata object to the specified values
@@ -629,42 +612,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $exArgs = array();
     $roles = array('team');
     $api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
-
-    function judgehosts_POST($args)
-    {
-        global $DB, $api;
-
-        if (!checkargs($args, array('hostname'))) {
-            return '';
-        }
-
-        $DB->q('INSERT IGNORE INTO judgehost (hostname) VALUES(%s)', $args['hostname']);
-
-        // If there are any unfinished judgings in the queue in my name,
-        // they will not be finished. Give them back.
-        $query = 'TABLE SELECT judgingid, submitid, cid
-                  FROM judging j
-                  LEFT JOIN rejudging r USING (rejudgingid)
-                  WHERE judgehost = %s AND j.endtime IS NULL
-                  AND (j.valid = 1 OR r.valid = 1)';
-        $res = $DB->q($query, $args['hostname']);
-        foreach ($res as $jud) {
-            give_back_judging($jud['judgingid']);
-        }
-
-        return array_map(function ($jud) {
-            return array(
-                'judgingid' => safe_int($jud['judgingid']),
-                'submitid'  => safe_int($jud['submitid']),
-                'cid'       => safe_int($jud['cid']),
-            );
-        }, $res);
-    }
-    $doc = 'Add a new judgehost to the list of judgehosts. Also restarts (and returns) unfinished judgings.';
-    $args = array('hostname' => 'Add this specific judgehost and activate it.');
-    $exArgs = array(array('hostname' => 'judge007'));
-    $roles = array('judgehost');
-    $api->provideFunction('POST', 'judgehosts', $doc, $args, $exArgs, $roles);
 
     function judgehosts_PUT($args)
     {
