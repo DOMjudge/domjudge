@@ -145,7 +145,13 @@ class JudgementController extends AbstractRestController implements QueryObjectT
         }
 
         // If one or more ID's are not given directly or we do not have the correct permissions, only show judgements before contest end
-        if (!($this->DOMJudgeService->checkrole('jury') || $this->DOMJudgeService->checkrole('judgehost')) || !($request->attributes->has('id') || $request->query->has('ids'))) {
+        $allowAllJudgings = true;
+        if (!$this->DOMJudgeService->checkrole('jury') && !$this->DOMJudgeService->checkrole('judgehost')) {
+            $allowAllJudgings = false;
+        } elseif (!$request->attributes->has('id') && !$request->query->has('ids')) {
+            $allowAllJudgings = false;
+        }
+        if (!$allowAllJudgings) {
             $queryBuilder
                 ->andWhere('s.submittime < c.endtime')
                 ->andWhere('j.rejudgingid IS NULL OR j.valid = 1');

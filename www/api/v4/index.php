@@ -16,17 +16,6 @@ use DOMJudgeBundle\Utils\Utils;
 
 global $api;
 if (!isset($api)) {
-    function infreeze($cdata, $time)
-    {
-        if ((! empty($cdata['freezetime']) &&
-             difftime($time, (float)$cdata['freezetime'])>=0) &&
-            (empty($cdata['unfreezetime']) ||
-             difftime($time, (float)$cdata['unfreezetime'])<0)) {
-            return true;
-        }
-        return false;
-    }
-
     function checkargs($args, $mandatory)
     {
         global $api;
@@ -75,42 +64,7 @@ if (!isset($api)) {
         return is_null($value) ? null : (string)$value;
     }
 
-    function give_back_judging($judgingid)
-    {
-        global $DB;
-
-        $jdata = $DB->q('TUPLE SELECT judgingid, cid, submitid, judgehost, result
-                         FROM judging WHERE judgingid = %i', $judgingid);
-
-        $DB->q('START TRANSACTION');
-        $DB->q('UPDATE judging SET valid = 0, rejudgingid = NULL WHERE judgingid = %i', $judgingid);
-        $DB->q('UPDATE submission SET judgehost = NULL
-                WHERE submitid = %i', $jdata['submitid']);
-        $DB->q('COMMIT');
-
-        auditlog('judging', $judgingid, 'given back', null, $jdata['judgehost'], $jdata['cid']);
-        // TODO: consider judging deleted from API viewpoint?
-    }
-
     $api = new RestApi();
-
-    // helper function to convert the data in the cdata object to the specified values
-    function cdataHelper($cdata)
-    {
-        // TODO: clarify formal_name, its use and origin
-        return array(
-            'id'                         => safe_int($cdata['cid']),
-            'shortname'                  => $cdata['shortname'],
-            'name'                       => $cdata['name'],
-            'formal_name'                => $cdata['name'],
-            'start_time'                 => Utils::absTime($cdata['starttime']),
-            'end_time'                   => Utils::absTime($cdata['endtime']),
-            'duration'                   => Utils::relTime($cdata['endtime'] - $cdata['starttime']),
-            'scoreboard_freeze_duration' => Utils::relTime($cdata['endtime'] - $cdata['freezetime']),
-            'unfreeze'                   => Utils::absTime($cdata['unfreezetime']),
-            'penalty'                    => safe_int(dbconfig_get('penalty_time', 20)),
-        );
-    }
 
     function judgings_POST($args)
     {
@@ -630,42 +584,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $roles = array('team');
     $api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
 
-    function judgehosts_POST($args)
-    {
-        global $DB, $api;
-
-        if (!checkargs($args, array('hostname'))) {
-            return '';
-        }
-
-        $DB->q('INSERT IGNORE INTO judgehost (hostname) VALUES(%s)', $args['hostname']);
-
-        // If there are any unfinished judgings in the queue in my name,
-        // they will not be finished. Give them back.
-        $query = 'TABLE SELECT judgingid, submitid, cid
-                  FROM judging j
-                  LEFT JOIN rejudging r USING (rejudgingid)
-                  WHERE judgehost = %s AND j.endtime IS NULL
-                  AND (j.valid = 1 OR r.valid = 1)';
-        $res = $DB->q($query, $args['hostname']);
-        foreach ($res as $jud) {
-            give_back_judging($jud['judgingid']);
-        }
-
-        return array_map(function ($jud) {
-            return array(
-                'judgingid' => safe_int($jud['judgingid']),
-                'submitid'  => safe_int($jud['submitid']),
-                'cid'       => safe_int($jud['cid']),
-            );
-        }, $res);
-    }
-    $doc = 'Add a new judgehost to the list of judgehosts. Also restarts (and returns) unfinished judgings.';
-    $args = array('hostname' => 'Add this specific judgehost and activate it.');
-    $exArgs = array(array('hostname' => 'judge007'));
-    $roles = array('judgehost');
-    $api->provideFunction('POST', 'judgehosts', $doc, $args, $exArgs, $roles);
-
     function judgehosts_PUT($args)
     {
         global $DB, $api;
@@ -693,59 +611,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $exArgs = array();
     $roles = array('judgehost');
     $api->provideFunction('PUT', 'judgehosts', $doc, $args, $exArgs, $roles);
-
-    /**
-     * Internal error reporting (back from judgehost)
-     */
-    function internal_error_POST($args)
-    {
-        global $DB, $cdatas, $api;
-
-        if (!checkargs($args, array('description', 'judgehostlog', 'disabled'))) {
-            return '';
-        }
-
-        // Both cid and judgingid are allowed to be NULL.
-        $cid = @$args['cid'];
-        $judgingid = @$args['judgingid'];
-
-        // group together duplicate internal errors
-        // note that it may be good to be able to ignore fields here, e.g. judgingid with compile errors
-        $errorid = $DB->q('MAYBEVALUE SELECT errorid FROM internal_error
-                           WHERE description=%s AND disabled=%s AND status=%s' .
-                          (isset($cid) ? ' AND cid=%i' : '%_'),
-                          $args['description'], $args['disabled'], 'open', $cid);
-
-        if (isset($errorid)) {
-            // FIXME: in some cases it makes sense to extend the known information, e.g. the judgehostlog
-            return $errorid;
-        }
-
-        $errorid = $DB->q('RETURNID INSERT INTO internal_error
-                           (judgingid, cid, description, judgehostlog, time, disabled)
-                           VALUES (%i, %i, %s, %s, %f, %s)',
-                          $judgingid, $cid, $args['description'],
-                          $args['judgehostlog'], now(), $args['disabled']);
-
-        $disabled = dj_json_decode($args['disabled']);
-        // disable what needs to be disabled
-        set_internal_error($disabled, $cid, 0);
-        if (in_array($disabled['kind'], array('problem', 'language', 'judgehost'))  && isset($args['judgingid'])) {
-            // give back judging if we have to
-            give_back_judging($args['judgingid']);
-        }
-
-        return $errorid;
-    }
-    $doc = 'Report an internal error from the judgedaemon.';
-    $args = array('judgingid' => 'ID of the corresponding judging (if exists).',
-                  'cid' => 'Contest ID (if associated to one).',
-                  'description' => 'short description',
-                  'judgehostlog' => 'last N lines of judgehost log',
-                  'disabled' => 'reason (JSON encoded)');
-    $exArgs = array();
-    $roles = array('judgehost');
-    $api->provideFunction('POST', 'internal_error', $doc, $args, $exArgs, $roles, true);
 }
 
 // Now provide the api, which will handle the request

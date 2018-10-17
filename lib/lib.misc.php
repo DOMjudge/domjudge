@@ -1201,6 +1201,16 @@ function auditlog(
     $force_username = null,
     $cid = null
 ) {
+    /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
+    global $G_SYMFONY;
+
+    if (isset($G_SYMFONY)) {
+        $G_SYMFONY->auditlog($datatype, $dataid, $action, $extrainfo, $force_username, $cid);
+        return;
+    }
+
+    // When this function is called outside of Symfony (i.e. from a commandline tool), do it the old way
+    exit;
     global $username, $DB;
 
     if (!empty($force_username)) {

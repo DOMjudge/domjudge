@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\AuditLog;
 use DOMJudgeBundle\Entity\Configuration;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Team;
@@ -9,6 +10,7 @@ use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class DOMJudgeService
 {
@@ -27,6 +29,8 @@ class DOMJudgeService
     public function getCurrentContest()
     {
         $selected_cid = $this->request->cookies->get('domjudge_cid');
+        if ($selected_cid == -1) return null;
+
         $contests = $this->getCurrentContests();
         foreach ($contests as $contest) {
             if ($contest->getCid() == $selected_cid) {
@@ -198,6 +202,56 @@ class DOMJudgeService
         return $user;
     }
 
+    public function getCookie(string $cookieName) {
+      if (!$this->request->cookies) {
+        return null;
+      }
+      return $this->request->cookies->get($cookieName);
+    }
+
+    public function getUpdates() {
+      $contest = $this->getCurrentContest();
+
+      $clarifications = array();
+      if ($contest) {
+        $clarifications = $this->em->createQueryBuilder()
+          ->select('clar')
+          ->from('DOMJudgeBundle:Clarification', 'clar')
+          ->where('clar.contest = :contest')
+          ->andWhere('clar.sender is not null')
+          ->andWhere('clar.answered = 0')
+          ->setParameter('contest', $contest)
+          ->getQuery()->getResult();
+      }
+      $judgehosts = $this->em->createQueryBuilder()
+        ->select('j')
+        ->from('DOMJudgeBundle:Judgehost', 'j')
+        ->where('j.active = 1')
+        ->andWhere('j.polltime < :i')
+        ->setParameter('i', time() - $this->dbconfig_get('judgehost_critical', 120))
+        ->getQuery()->getResult();
+
+      $rejudgings = $this->em->createQueryBuilder()
+        ->select('r')
+        ->from('DOMJudgeBundle:Rejudging', 'r')
+        ->where('r.endtime is null')
+        ->getQuery()->getResult();
+
+      $internal_error = $this->em->createQueryBuilder()
+        ->select('ie')
+        ->from('DOMJudgeBundle:InternalError', 'ie')
+        ->where('ie.status = :status')
+        ->setParameter('status', 'open')
+        ->getQuery()->getResult();
+
+      return array(
+        'clarifications' => $clarifications,
+        'judgehosts' => $judgehosts,
+        'rejudgings' => $rejudgings,
+        'internal_error' => $internal_error,
+      );
+    }
+
     public function getHttpKernel()
     {
         return $this->container->get('http_kernel');
@@ -217,5 +271,97 @@ class DOMJudgeService
     public function setHasAllRoles(bool $hasAllRoles)
     {
         $this->hasAllRoles = $hasAllRoles;
+    }
+
+    /**
+     * Log an action to the auditlog table
+     *
+     * @param string $datatype
+     * @param mixed $dataid
+     * @param string $action
+     * @param mixed|null $extraInfo
+     * @param mixed|null $forceUsername
+     * @param int|null $cid
+     */
+    public function auditlog(string $datatype, $dataid, string $action, $extraInfo = null, $forceUsername = null, $cid = null)
+    {
+        if (!empty($forceUsername)) {
+            $user = $forceUsername;
+        } else {
+            $user = $this->getUser() ? $this->getUser()->getUsername() : null;
+        }
+
+        $auditLog = new AuditLog();
+        $auditLog
+            ->setLogtime(Utils::now())
+            ->setCid($cid)
+            ->setUser($user)
+            ->setDatatype($datatype)
+            ->setDataid($dataid)
+            ->setAction($action)
+            ->setExtrainfo($extraInfo);
+
+        $this->em->persist($auditLog);
+        $this->em->flush();
+    }
+
+    /**
+     * Decode a JSON string and handle errors
+     * @param string $str
+     * @return mixed
+     */
+    public function jsonDecode(string $str)
+    {
+        $res = json_decode($str, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new HttpException(500, sprintf("Error decoding JSON data '%s': %s", $str, json_last_error_msg()));
+        }
+        return $res;
+    }
+
+    /**
+     * Dis- or re-enable what caused an internal error
+     * @param array $disabled
+     * @param int|null $cid
+     * @param bool|null $enabled
+     */
+    public function setInternalError($disabled, $cid, $enabled)
+    {
+        switch ($disabled['kind']) {
+            case 'problem':
+                $this->em->createQueryBuilder()
+                    ->update('DOMJudgeBundle:ContestProblem', 'p')
+                    ->set('p.allow_judge', ':enabled')
+                    ->where('p.cid = :cid')
+                    ->andWhere('p.probid = :probid')
+                    ->setParameter(':enabled', $enabled)
+                    ->setParameter(':cid', $cid)
+                    ->setParameter(':probid', $disabled['probid'])
+                    ->getQuery()
+                    ->execute();
+                break;
+            case 'judgehost':
+                $this->em->createQueryBuilder()
+                    ->update('DOMJudgeBundle:Judgehost', 'j')
+                    ->set('j.active', ':active')
+                    ->where('j.hostname = :hostname')
+                    ->setParameter(':active', $enabled)
+                    ->setParameter(':hostname', $disabled['hostname'])
+                    ->getQuery()
+                    ->execute();
+                break;
+            case 'language':
+                $this->em->createQueryBuilder()
+                    ->update('DOMJudgeBundle:Language', 'lang')
+                    ->set('lang.allow_judge', ':enabled')
+                    ->where('lang.langid = :langid')
+                    ->setParameter(':enabled', $enabled)
+                    ->setParameter(':langid', $disabled['langid'])
+                    ->getQuery()
+                    ->execute();
+                break;
+            default:
+                throw new HttpException(500, sprintf("unknown internal error kind '%s'", $disabled['kind']));
+        }
     }
 }

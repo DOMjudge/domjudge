@@ -170,6 +170,10 @@ function compute_lcsdiff($line1, $line2)
 }
 
 require('init.php');
+$extrahead  = '';
+$extrahead .= '<link href="../css/nv.d3.min.css" rel="stylesheet" type="text/css">';
+$extrahead .= '<script language="javascript" type="text/javascript" src="../js/d3.min.js"></script>';
+$extrahead .= '<script language="javascript" type="text/javascript" src="../js/nv.d3.min.js"></script>';
 
 $id = getRequestID();
 
@@ -580,6 +584,13 @@ if (isset($jud['rejudgingid'])) {
     $state = ' (INVALID)';
 }
 
+
+// Graph of testcase runtimes
+echo $G_SYMFONY_TWIG->render('@DOMJudge/jury/partials/submission_graph.html.twig', [
+  'runs' => $runs,
+  'jdata' => $jdata,
+  'timelimit' => $submdata['maxruntime']
+]);
 echo rejudgeForm('submission', $id) . "<br /><br />\n\n";
 
 echo "<h2 style=\"display:inline;\">Judging j" . (int)$jud['judgingid'] .  $state .

@@ -128,7 +128,7 @@ class TestcaseController extends FOSRestController
      *     @SWG\Schema(type="string", description="Base64-encoded file contents")
      * )
      */
-    public function getFile(string $id, string $type)
+    public function getFileAction(string $id, string $type)
     {
         if (!in_array($type, ['input', 'output'])) {
             throw new BadRequestHttpException('Only \'input\' or \'output\' file allowed');

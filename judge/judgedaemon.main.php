@@ -505,7 +505,7 @@ while (true) {
                 'hostname' => $myhost));
             $judgehostlog = read_judgehostlog();
             $error_id = request(
-                'internal_error',
+                'judgehosts/internal-error',
                 'POST',
                 'description=' . urlencode("low on disk space on $myhost") .
                 '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
@@ -562,7 +562,7 @@ function disable(string $kind, string $idcolumn, $id, string $description, int $
             . $extra_log;
     }
     $error_id = request(
-        'internal_error',
+        'judgehosts/internal-error',
         'POST',
         'judgingid=' . urlencode((string)$judgingid) .
         '&cid=' . urlencode((string)$cid) .
@@ -746,7 +746,7 @@ function judge(array $row)
                 'probid' => $row['probid']));
             $judgehostlog = read_judgehostlog();
             $error_id = request(
-                'internal_error',
+                'judgehosts/internal-error',
                 'POST',
                 'judgingid=' . urlencode((string)$row['judgingid']) .
                 '&cid=' . urlencode((string)$row['cid']) .

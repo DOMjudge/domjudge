@@ -25,11 +25,17 @@ class FallbackController extends Controller
      */
     protected $scoreboardService;
 
-    public function __construct($webDir, Container $container, DOMJudgeService $DOMJudgeService, ScoreboardService $scoreboardService)
+    /**
+     * @var Twig_Environment
+     */
+    protected $twig;
+
+    public function __construct($webDir, Container $container, DOMJudgeService $DOMJudgeService, ScoreboardService $scoreboardService, \Twig_Environment $twig)
     {
         $this->webDir = $webDir;
         $this->DOMJudgeService = $DOMJudgeService;
         $this->scoreboardService = $scoreboardService;
+        $this->twig = $twig;
         $this->setContainer($container);
     }
 
@@ -96,9 +102,10 @@ class FallbackController extends Controller
         }
         chdir(dirname($thefile));
         ob_start();
-        global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
+        global $G_SYMFONY, $G_SCOREBOARD_SERVICE, $G_SYMFONY_TWIG;
         $G_SYMFONY = $this->DOMJudgeService;
         $G_SCOREBOARD_SERVICE = $this->scoreboardService;
+        $G_SYMFONY_TWIG = $this->twig;
         require($thefile);
 
         $http_response_code = http_response_code();

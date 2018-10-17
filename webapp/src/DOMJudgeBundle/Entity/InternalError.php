@@ -10,10 +10,15 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class InternalError
 {
+    const STATUS_OPEN = 'open';
+    const STATUS_RESOLVED = 'resolved';
+    const STATUS_IGNROED = 'ignored';
+
     /**
      * @var int
      * @ORM\Id
      * @ORM\Column(type="integer", name="errorid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $errorid;
 
@@ -57,7 +62,7 @@ class InternalError
      * @var string
      * @ORM\Column(type="text", length=128, name="status", options={"comment"="Status of internal error"}, nullable=false)
      */
-    private $status;
+    private $status = self::STATUS_OPEN;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="internal_errors")
