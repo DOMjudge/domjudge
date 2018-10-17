@@ -36,10 +36,10 @@ if (isset($_POST['origsubmitid'])) {
 
     $newid = submit_solution(
         $teamid,
-        $_POST['probid'],
-        $cid,
+        (int)$_POST['probid'],
+        (int)$cid,
         $_POST['langid'],
-                             $files,
+        $files,
         $filenames,
         $_POST['origsubmitid'],
         $_POST['entry_point']
