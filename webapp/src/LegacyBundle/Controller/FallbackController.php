@@ -3,6 +3,7 @@
 namespace LegacyBundle\Controller;
 
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ScoreboardService;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,19 +22,25 @@ class FallbackController extends Controller
     private $DOMJudgeService;
 
     /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
+    /**
      * @var ScoreboardService
      */
     protected $scoreboardService;
 
     /**
-     * @var Twig_Environment
+     * @var \Twig_Environment
      */
     protected $twig;
 
-    public function __construct($webDir, Container $container, DOMJudgeService $DOMJudgeService, ScoreboardService $scoreboardService, \Twig_Environment $twig)
+    public function __construct($webDir, Container $container, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService, ScoreboardService $scoreboardService, \Twig_Environment $twig)
     {
         $this->webDir = $webDir;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->eventLogService = $eventLogService;
         $this->scoreboardService = $scoreboardService;
         $this->twig = $twig;
         $this->setContainer($container);
@@ -102,8 +109,9 @@ class FallbackController extends Controller
         }
         chdir(dirname($thefile));
         ob_start();
-        global $G_SYMFONY, $G_SCOREBOARD_SERVICE, $G_SYMFONY_TWIG;
+        global $G_SYMFONY, $G_EVENT_LOG, $G_SCOREBOARD_SERVICE, $G_SYMFONY_TWIG;
         $G_SYMFONY = $this->DOMJudgeService;
+        $G_EVENT_LOG = $this->eventLogService;
         $G_SCOREBOARD_SERVICE = $this->scoreboardService;
         $G_SYMFONY_TWIG = $this->twig;
         require($thefile);

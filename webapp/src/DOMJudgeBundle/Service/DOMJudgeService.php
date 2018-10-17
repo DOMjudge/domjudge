@@ -102,9 +102,9 @@ class DOMJudgeService
         $qb = $this->em->createQueryBuilder();
         $qb->select('c')->from('DOMJudgeBundle:Contest', 'c');
         if ($onlyofteam !== null && $onlyofteam > 0) {
-            $qb->leftJoin('DOMJudgeBundle:ContestTeam', 'ct')
-               ->where('ct.teamid = :teamid')
-               ->setParameter('teamid', $onlyofteam);
+            $qb->leftJoin('c.teams', 'ct')
+                ->andWhere('ct.teamid = :teamid OR c.public = 1')
+               ->setParameter(':teamid', $onlyofteam);
         // $contests = $DB->q("SELECT * FROM contest
             //                     LEFT JOIN contestteam USING (cid)
             //                     WHERE (contestteam.teamid = %i OR contest.public = 1)
@@ -311,6 +311,20 @@ class DOMJudgeService
         $res = json_decode($str, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new HttpException(500, sprintf("Error decoding JSON data '%s': %s", $str, json_last_error_msg()));
+        }
+        return $res;
+    }
+
+    /**
+     * Decode a JSON string and handle errors
+     * @param $data
+     * @return string
+     */
+    public function jsonEncode($data) : string
+    {
+        $res = json_encode($data);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new HttpException(500, sprintf("Error encoding data to JSON: %s", json_last_error_msg()));
         }
         return $res;
     }

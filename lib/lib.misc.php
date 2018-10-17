@@ -1361,51 +1361,6 @@ function rest_extid(string $endpoint, $intid)
 }
 
 /**
- * Map an external/REST endpoint ID back to an internal/DB ID.
- *
- * TODO: add support for multiple $extid's, so we can use this in the API and not have a loop there
- */
-function rest_intid(string $endpoint, $extid, $cid = null)
-{
-    global $DB, $API_endpoints, $KEYS;
-
-    if ($extid===null) {
-        return null;
-    }
-
-    $ep = @$API_endpoints[$endpoint];
-    if (!isset($ep['extid'])) {
-        error("no int/ext ID mapping defined for $endpoint");
-    }
-
-    if ($ep['extid']===true) {
-        return $extid;
-    }
-
-    if (!$ep['tables']) {
-        error("no database table known for $endpoint");
-    }
-
-    $keys = explode(',', $ep['extid']);
-    $extkey = $keys[0];
-    if (count($keys)>1) {
-        $cidkey = $keys[1];
-    }
-
-    if (isset($cidkey) && $cid===null) {
-        error("argument 'cid' missing to map to internal ID for $endpoint");
-    }
-
-    $intid = $DB->q('MAYBEVALUE SELECT `' . $KEYS[$ep['tables'][0]][0] . '`
-                     FROM `' . $ep['tables'][0] . '`
-                     WHERE `' . $extkey . '` = %s' .
-                    (isset($cidkey) ? ' AND cid = %i' : ' %_'),
-                    $extid, $cid);
-
-    return $intid;
-}
-
-/**
  * Log an event.
  *
  * Arguments:
@@ -1425,6 +1380,15 @@ function rest_intid(string $endpoint, $extid, $cid = null)
 // TODO: we should probably integrate this function with auditlog().
 function eventlog(string $type, $dataids, string $action, $cid = null, $json = null, $ids = null)
 {
+    /** @var \DOMJudgeBundle\Service\EventLogService $G_EVENT_LOG */
+    global $G_EVENT_LOG;
+
+    if (isset($G_EVENT_LOG)) {
+        $G_EVENT_LOG->log($type, $dataids, $action, $cid, $json, $ids);
+        return;
+    }
+    // Fallback to non-Symfony code if we are not in a Symfony context (i.e. in the eventdaemon, restore_sources2db and simulate_contest)
+
     global $DB, $API_endpoints;
 
     if (!is_array($dataids)) {

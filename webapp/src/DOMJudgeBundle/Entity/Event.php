@@ -71,12 +71,9 @@ class Event
     private $content;
 
     /**
-     * @var Contest
+     * @var integer
      *
-     * @ORM\ManyToOne(targetEntity="Contest")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
-     * })
+     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
      */
     private $cid;
 
