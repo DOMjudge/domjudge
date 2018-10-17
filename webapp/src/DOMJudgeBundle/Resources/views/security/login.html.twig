@@ -10,48 +10,62 @@
 
 {% block body %}
 <div class="form-signin">
-  <form action="{{ path('login') }}" method="post">
-    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-    <img class="mb-4" src="images/DOMjudgelogo.png" alt="DOMjudge" width="72">
-      <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-
-      {% if error %}
-      <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-      {% endif %}
-
-      <label for="username" class="sr-only">Username</label>
-      <input type="text" id="username" name="_username" class="form-control" placeholder="Username" required autofocus>
-      <label for="inputPassword" class="sr-only">Password</label>
-      <input type="password" id="inputPassword" name="_password" class="form-control" placeholder="Password" required>
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-      {% if allow_registration %}
-      <div>Don't have an account? <a href="{{url('register', {}, true)}}">Register now</a>.</div>
-      {% endif %}
-      <p class="mt-5 mb-3 small text-muted">DOMjudge {{DOMJUDGE_VERSION}}</p>
-  </form>
-  {% if "xheaders" in allowed_authmethods and auth_xheaders_present %}
-  <form action="{{ path('login') }}" method="post">
+  <img class="mb-4" src="images/DOMjudgelogo.png" alt="DOMjudge" width="72">
+  <br style="clear:both">
+  <div class="main-login mr-2">
+    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+    <form action="{{ path('login') }}" method="post">
       <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-      <input type="hidden" name="_username" value="__INVALID__">
-      <hr>
-      <p>You can log in using credentials that have been configured by your administrator.</p>
-      <button class="btn btn-success btn-block" type="submit" name="loginmethod" value="xheaders">Log in using computer credentials</button>
-  </form>
-  {% endif %}
+        <div class="login-content">
+          {% if error %}
+          <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+          {% endif %}
 
-  {% if "ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0 %}
-  <form action="{{ path('login') }}" method="post">
-      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-      <input type="hidden" name="loginmethod" value="ipaddress">
-      <hr>
-      <p>You can log in automatically to an account based on your IP Address.</p>
-      {% for u in auth_ipaddress_users %}
-      <button class="btn btn-success btn-block" type="submit" name="_username" value="{{ u.username }}">Log in as {{ u.username }}</button>
-      {% else %}
-      <span class="warning">No teams found for your ip address</span>
-      {% endfor %}
-  </form>
+          <label for="username" class="sr-only">Username</label>
+          <input type="text" id="username" name="_username" class="form-control" placeholder="Username" required autofocus>
+          <label for="inputPassword" class="sr-only">Password</label>
+          <input type="password" id="inputPassword" name="_password" class="form-control" placeholder="Password" required>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        {% if allow_registration %}
+        <div>Don't have an account? <a href="{{url('register', {}, true)}}">Register now</a>.</div>
+        {% endif %}
+    </form>
+  </div>
+  {% if ("xheaders" in allowed_authmethods and auth_xheaders_present) or
+        ("ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0)
+  %}
+  <div class="vertical-line"></div>
+  <div class="additional-logins ml-2">
+    {% if "xheaders" in allowed_authmethods and auth_xheaders_present %}
+    <h1 class="h3 mb-3 font-weight-normal">Preconfigured Sign In</h1>
+    <form action="{{ path('login') }}" method="post">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <input type="hidden" name="_username" value="__INVALID__">
+        <div class="login-content">
+          <p>You can log in using credentials that have been configured by your administrator.</p>
+        </div>
+        <button class="mt-auto btn btn-lg btn-success btn-block" type="submit" name="loginmethod" value="xheaders">Log in using computer credentials</button>
+    </form>
+    {% endif %}
+
+    {% if "ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0 %}
+    <h1 class="h3 mb-3 font-weight-normal">Sign in with IP</h1>
+    <form action="{{ path('login') }}" method="post">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <input type="hidden" name="loginmethod" value="ipaddress">
+        <div class="login-content">
+          <p>You can log in automatically to an account based on your IP Address. The accounts associated with your IP are shown below.</p>
+        </div>
+
+        {% for u in auth_ipaddress_users %}
+        <button class="btn btn-lg btn-success btn-block" type="submit" name="_username" value="{{ u.username }}">Log in as {{ u.username }}</button>
+        {% endfor %}
+    </form>
+    {% endif %}
+  </div>
   {% endif %}
+  <p class="mt-5 mb-3 small text-muted">DOMjudge {{DOMJUDGE_VERSION}}</p>
 </div>
 
   {% include '::footer.html.twig' %}
