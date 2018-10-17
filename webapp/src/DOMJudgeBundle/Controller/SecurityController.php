@@ -29,11 +29,11 @@ class SecurityController extends Controller
      */
     public function loginAction(Request $request)
     {
-        $clientIP = $this->container->get('request_stack')->getMasterRequest()->getClientIp();
+        $clientIP = $this->DOMJudgeService->getClientIp();
         if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             $user = $this->get('security.token_storage')->getToken()->getUser();
             $user->setLastLogin(Utils::now());
-            $user->setLastIpAddress($this->DOMJudgeService->getClientIp());
+            $user->setLastIpAddress($clientIP);
             $this->getDoctrine()->getManager()->flush();
             return $this->redirect($this->generateUrl('legacy.index'));
         }
