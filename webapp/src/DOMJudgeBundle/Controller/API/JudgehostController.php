@@ -52,7 +52,7 @@ class JudgehostController extends FOSRestController
      * @SWG\Response(
      *     response="200",
      *     description="The judgehosts",
-     *     @Model(type=Judgehost::class)
+     *     @SWG\Schema(type="array", @SWG\Items(ref=@Model(type=Judgehost::class)))
      * )
      * @SWG\Parameter(
      *     name="hostname",
@@ -151,6 +151,46 @@ class JudgehostController extends FOSRestController
                 'cid' => $judging->getCid(),
             ];
         }, $judgings);
+    }
+
+    /**
+     * Update the configuration of the given judgehost
+     * @Rest\Put("/{hostname}")
+     * @Security("has_role('ROLE_JUDGEHOST')")
+     * @SWG\Response(
+     *     response="200",
+     *     description="The modified judgehost",
+     *     @SWG\Schema(type="array", @SWG\Items(ref=@Model(type=Judgehost::class)))
+     * )
+     * @SWG\Parameter(
+     *     name="hostname",
+     *     in="path",
+     *     type="string",
+     *     description="The hostname of the judgehost to update"
+     * )
+     * @SWG\Parameter(
+     *     name="active",
+     *     in="formData",
+     *     type="boolean",
+     *     description="The new active state of the judgehost"
+     * )
+     * @param Request $request
+     * @param string $hostname
+     * @return array
+     */
+    public function updateJudgeHostAction(Request $request, string $hostname)
+    {
+        if (!$request->request->has('active')) {
+            throw new BadRequestHttpException('Argument \'active\' is mandatory');
+        }
+
+        $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
+        if ($judgehost) {
+            $judgehost->setActive($request->request->getBoolean('active'));
+            $this->entityManager->flush();
+        }
+
+        return [$judgehost];
     }
 
     /**

@@ -583,34 +583,6 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
     $exArgs = array();
     $roles = array('team');
     $api->provideFunction('POST', 'submissions', $doc, $args, $exArgs, $roles);
-
-    function judgehosts_PUT($args)
-    {
-        global $DB, $api;
-
-        if (!isset($args['__primary_key'])) {
-            $api->createError("hostname is mandatory");
-            return '';
-        }
-        if (count($args['__primary_key']) > 1) {
-            $api->createError("only one hostname allowed");
-            return '';
-        }
-        $hostname = reset($args['__primary_key']);
-        if (!isset($args['active'])) {
-            $api->createError("active is mandatory");
-            return '';
-        }
-        $active = $args['active'];
-        $DB->q('UPDATE judgehost SET active=%i WHERE hostname=%s', $active, $hostname);
-
-        return judgehosts(array('hostname' => $hostname));
-    }
-    $doc = 'Update the configuration of a judgehost.';
-    $args = array('active' => 'Activate judgehost?');
-    $exArgs = array();
-    $roles = array('judgehost');
-    $api->provideFunction('PUT', 'judgehosts', $doc, $args, $exArgs, $roles);
 }
 
 // Now provide the api, which will handle the request
