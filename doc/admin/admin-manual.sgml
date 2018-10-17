@@ -872,6 +872,50 @@ Besides these settings, there are a few other places where changes can
 be made to the system, see <ref id="install_config:configurablescripts"
 name="other configurable scripts">.
 
+<sect>Authentication Methods<label id="install_config:authmethods">
+<p>
+Out of the box users are able to authenticate using basic username and password.
+There is also a configuration option to allow teams to self-register with the system.
+<p>Two other authentication methods are available:
+
+<itemize>
+<item>IP Address - authenticates users based on the IP address they are accessing
+the system from
+<item>X-Headers - authenticates users based on some http X-HEADER's
+</itemize>
+
+<sect1>IP Address
+<p>To enable the IP Address authentication method, you will need to edit
+<tt>webapp/app/config/parameters.yml</tt> and adjust the value of
+the <tt>domjudge.authmethods</tt> array to include <tt>ipaddress</tt>.
+<p>Once this is done, when a user first logs in their IP Address will be
+associated with their account, and subsequent logins will allow them to log
+in without authenticating.
+<p>If desired, you can edit the IP Address associated with an account from the
+Users page in the jury interface.
+
+<sect1>X-Headers
+<p><p>To enable the IP Address authentication method, you will need to edit
+<tt>webapp/app/config/parameters.yml</tt> and adjust the value of
+the <tt>domjudge.authmethods</tt> array to include <tt>xheaders</tt>.
+
+<p>To use this method, the following headers need to be sent to the
+<tt>/login</tt> URL. This can be done using the squid proxy for example, to
+prevent teams from needing to know their own log in information but in an
+environment where IP address based auth is not feasible(multi site over the
+internet contest).
+<itemize>
+<item><tt>X-DOMjudge-Login</tt> - Contains the username
+<item><tt>X-DOMjudge-Pass</tt>  - Contains the user's password, base64 encoded
+</itemize>
+
+Squid configuration for this might look like:
+<code>
+acl autologin url_regex ^http://localhost/domjudge/login
+request_header_add X-DOMjudge-Login "$USERNAME" autologin
+request_header_add X-DOMjudge-Pass "$BASE64_PASSWORD" autologin
+</code>
+
 <sect>OpenID Connect<label id="install_config:openid">
 <p>
 
