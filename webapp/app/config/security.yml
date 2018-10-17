@@ -73,7 +73,7 @@ security:
               check_path: login
               csrf_token_generator: security.csrf.token_manager
               use_referer: true
-              default_target_path: legacy.index
+              default_target_path: login
               always_use_default_target_path: true
 
             logout:

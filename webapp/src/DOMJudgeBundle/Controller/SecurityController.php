@@ -29,11 +29,27 @@ class SecurityController extends Controller
      */
     public function loginAction(Request $request)
     {
+        $allowIPAuth = false;
+        $authmethods = [];
+        if ($this->container->hasParameter('domjudge.authmethods')) {
+          $authmethods = $this->container->getParameter('domjudge.authmethods');
+        }
+        if (in_array('ipaddress', $authmethods)) {
+          $allowIPAuth = true;
+        }
+
         $clientIP = $this->DOMJudgeService->getClientIp();
         if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             $user = $this->get('security.token_storage')->getToken()->getUser();
             $user->setLastLogin(Utils::now());
             $user->setLastIpAddress($clientIP);
+
+            // Associate the IP they're logging in from as their IP address
+            // to use for future logins(using the ipaddress auth method).
+            // Only do this if it's the first time they're logging in.
+            if ($allowIPAuth && empty($user->getIpAddress())) {
+              $user->setIpAddress($clientIP);
+            }
             $this->getDoctrine()->getManager()->flush();
             return $this->redirect($this->generateUrl('legacy.index'));
         }
@@ -47,11 +63,7 @@ class SecurityController extends Controller
         $lastUsername = $authUtils->getLastUsername();
 
         $auth_ipaddress_users = [];
-        $authmethods = [];
-        if ($this->container->hasParameter('domjudge.authmethods')) {
-          $authmethods = $this->container->getParameter('domjudge.authmethods');
-        }
-        if (in_array('ipaddress', $authmethods)) {
+        if ($allowIPAuth) {
           $em = $this->getDoctrine()->getManager();
           $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipaddress' => $clientIP]);
         }
