@@ -1,7 +1,6 @@
 <?php
 namespace DOMJudgeBundle\Security;
 
-use DOMJudgeBundle\Security\Authentication\Token\AlternateLoginToken;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 
@@ -39,8 +38,6 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     public function supports(Request $request)
     {
         // Make sure ipaddress auth is enabled?
-        // TODO: maybe just remove this and expect people to enable
-        // TODO: the right guard methods to configure this
         $authmethods = $this->container->getParameter('domjudge.authmethods');
         $auth_allow_ipaddress = in_array('ipaddress', $authmethods);
         if (!$auth_allow_ipaddress) {
@@ -54,8 +51,12 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         }
 
         // If it's stateless, we provide auth support every time
-        $fwmap = $this->container->get('security.firewall.map');
-        if ($fwmap->getFirewallConfig($request)->isStateless()) {
+        $stateless_fw_contexts = [
+          'security.firewall.map.context.api',
+          'security.firewall.map.context.feed',
+        ];
+        $fwcontext = $request->attributes->get('_firewall_context', '');
+        if (in_array($fwcontext, $stateless_fw_contexts)) {
           return true;
         }
 
@@ -75,9 +76,6 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
      */
     public function getCredentials(Request $request)
     {
-        // TODO: might need this: https://stackoverflow.com/a/34728682/841300
-
-
         // Check if we're coming from the auth form
         $form_present = false;
         if ( $request->attributes->get('_route') === 'login' && $request->isMethod('POST')) {
@@ -139,12 +137,8 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
+        // We never fail the authentication request, something else might handle it
         return null;
-        $data = array(
-            'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
-        );
-
-        return new JsonResponse($data, Response::HTTP_FORBIDDEN);
     }
 
     /**
@@ -152,11 +146,11 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
-        $data = array(
-            'message' => 'Authentication Required'
-        );
-
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        // If this is the guard that fails/is configured to allow access as the entry_point
+        // send the user a basic auth dialog, as that's probably what they're expecting
+        $resp = new Response('', Response::HTTP_UNAUTHORIZED);
+        $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
+        return $resp;
     }
 
     public function supportsRememberMe()

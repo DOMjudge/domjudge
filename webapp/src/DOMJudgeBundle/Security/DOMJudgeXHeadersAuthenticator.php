@@ -1,8 +1,6 @@
 <?php
 namespace DOMJudgeBundle\Security;
 
-use DOMJudgeBundle\Security\Authentication\Token\AlternateLoginToken;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -15,19 +13,14 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 
 class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
 {
-    private $csrfTokenManager;
     private $security;
     private $encoder;
     private $container;
 
-    public function __construct(CsrfTokenManagerInterface $csrfTokenManager, Container $container, Security $security, UserPasswordEncoderInterface $encoder) {
-        $this->csrfTokenManager = $csrfTokenManager;
+    public function __construct(Container $container, Security $security, UserPasswordEncoderInterface $encoder) {
         $this->container = $container;
         $this->security = $security;
         $this->encoder = $encoder;
@@ -39,6 +32,12 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
+        $authmethods = $this->container->getParameter('domjudge.authmethods');
+        $auth_allow_xheaders = in_array('xheaders', $authmethods);
+        if (!$auth_allow_xheaders) {
+          return false;
+        }
+
         // if there is already an authenticated user (likely due to the session)
         // then return null and skip authentication: there is no need.
         if ($this->security->getUser()) {

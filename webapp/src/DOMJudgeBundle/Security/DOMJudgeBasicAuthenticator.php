@@ -1,7 +1,6 @@
 <?php
 namespace DOMJudgeBundle\Security;
 
-use DOMJudgeBundle\Security\Authentication\Token\AlternateLoginToken;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 
@@ -18,6 +17,9 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
+
+use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 
 class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
 {
@@ -45,11 +47,21 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
             return false;
         }
 
-        // This authenticator only supports stateless security endpoints
-        $fwmap = $this->container->get('security.firewall.map');
-        if ($fwmap->getFirewallConfig($request)->isStateless()) {
+        // No credentials provided, so we can't try to auth anything
+        if ($request->headers->get('php-auth-user', null) == null) {
+          return false;
+        }
+
+        // If it's stateless, we provide auth support every time
+        $stateless_fw_contexts = [
+          'security.firewall.map.context.api',
+          'security.firewall.map.context.feed',
+        ];
+        $fwcontext = $request->attributes->get('_firewall_context', '');
+        if (in_array($fwcontext, $stateless_fw_contexts)) {
           return true;
         }
+
         return false;
     }
 
@@ -59,6 +71,7 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
      */
     public function getCredentials(Request $request)
     {
+
         return [
             'username'  => $request->headers->get('php-auth-user'),
             'password'  => $request->headers->get('php-auth-pw'),
@@ -86,7 +99,16 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        return null;
+      # We only throw an error if the credentials provided were wrong or the user doesn't exist
+      # Otherwise we pass along to the next authenticator
+      if ($exception instanceof BadCredentialsException || $exception instanceof UsernameNotFoundException) {
+        $resp = new Response('', Response::HTTP_UNAUTHORIZED);
+        $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
+        return $resp;
+      }
+
+      // Let another guard authenticator handle it
+      return null;
     }
 
     /**
@@ -94,11 +116,9 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
-        $data = array(
-            'message' => 'Authentication Required'
-        );
-
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+      $resp = new Response('', Response::HTTP_UNAUTHORIZED);
+      $resp->headers->set('WWW-Authenticate', sprintf('Basic realm="%s"', 'Secured Area'));
+      return $resp;
     }
 
     public function supportsRememberMe()
