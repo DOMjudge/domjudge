@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Code to import teams and upload standings from and to
  * https://icpc.baylor.edu/.
@@ -78,13 +78,18 @@ if (isset($_REQUEST['upload'])) {
         if ($totals === null) {
             $totals['points'] = $totals['totaltime'] = 0;
         }
-        $rank = calcTeamRank($cdata, $row['teamid'], $totals, true);
+        /** @var \DOMJudgeBundle\Service\ScoreboardService $G_SCOREBOARD_SERVICE */
+        /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
+        global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
+        $contest     = $G_SYMFONY->getContest($cdata['cid']);
+        $team        = $G_SYMFONY->getTeam($row['teamid']);
+        $rank        = $G_SCOREBOARD_SERVICE->calculateTeamRank($contest, $team, null, null, true);
         $lastProblem = $DB->q('MAYBEVALUE SELECT MAX(solvetime_restricted) FROM scorecache
                                WHERE teamid=%i AND cid=%i', $row['teamid'], $cid);
         if ($lastProblem === null) {
             $lastProblem = 0;
         } else {
-            $lastProblem = scoretime($lastProblem);
+            $lastProblem = scoretime((float)$lastProblem);
         }
 
         //  If the scoreboard times have been kept in seconds,
@@ -121,7 +126,7 @@ curl_close($ch);
 if (isset($_REQUEST['upload'])) {
     echo "Uploaded standings to icpc.baylor.edu (Response was: $response).<br/>";
     echo "Do not forget to certify the standings there - it maybe necessary to logout/login there to see the standings.";
-    exit;
+    return;
 }
 
 $json = dj_json_decode($response);

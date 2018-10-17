@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the languages
  *
@@ -27,19 +27,19 @@ if ($res->count() == 0) {
         "</tr>\n</thead>\n<tbody>\n";
 
     while ($row = $res->next()) {
-        $link = '<a href="language.php?id=' . urlencode($row['langid']) . '">';
+        $link = '<a href="language.php?id=' . urlencode((string)$row['langid']) . '">';
         echo "<tr".
             ($row['allow_submit'] ? '': ' class="disabled"').
-            "><td>" . $link . specialchars($row['langid'])."</a>".
+            "><td>" . $link . specialchars((string)$row['langid'])."</a>".
             "</td><td>" . $link . specialchars($row['name'])."</a>".
             "</td><td " . ($row['require_entry_point'] && !empty($row['entry_point_description']) ?
                 ' class="has_tooltip" title="' . specialchars($row['entry_point_description']) . '"' :
                 '') . ">" . $link .
-                printyn($row['require_entry_point']) . "</a>" .
+                printyn((bool)$row['require_entry_point']) . "</a>" .
             "</td><td>" . $link .
-                printyn($row['allow_submit']) . "</a>" .
+                printyn((bool)$row['allow_submit']) . "</a>" .
             "</td><td>" . $link .
-                printyn($row['allow_judge']) . "</a>" .
+                printyn((bool)$row['allow_judge']) . "</a>" .
             "</td><td>" . $link . specialchars($row['time_factor']) . "</a>" .
             "</td><td>" . $link .
             specialchars(implode(', ', dj_json_decode($row['extensions']))) . "</a>";

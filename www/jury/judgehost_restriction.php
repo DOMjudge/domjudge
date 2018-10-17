@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View or add/edit a row in a judgehost_restriction
  *
@@ -127,7 +127,7 @@ $prepopulate = array();
          addEndForm();
 
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 $data = $DB->q('TUPLE SELECT * FROM judgehost_restriction WHERE restrictionid = %i', $id);
@@ -191,7 +191,7 @@ if ($judgehosts->count() == 0) {
              "><td>"
              . $link . specialchars($judgehost['hostname']) .
              "</a></td><td>" .
-             $link . printyn($judgehost['active']) .
+             $link . printyn((bool)$judgehost['active']) .
              "</a></td></tr>\n";
     }
     echo "</tbody>\n</table>\n\n";

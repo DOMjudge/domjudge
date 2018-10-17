@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View/edit testcases
  *
@@ -256,11 +256,11 @@ $data = read_testdata($probid);
 if (isset($_GET['move'])) {
     reorder_case($_GET['rank'], $_GET['move'], $data, $probid);
     // Redirect to the original page to prevent accidental redo's
-    header('Location: testcase.php?probid=' . urlencode($probid));
+    header('Location: testcase.php?probid=' . urlencode((string)$probid));
     return;
 }
 
-$title = 'Testcases for problem p'.specialchars(@$probid).' - '.specialchars($prob['name']);
+$title = 'Testcases for problem p'.specialchars(@$probid.' - '.$prob['name']);
 
 $result = '';
 if (isset($_POST['probid']) && IS_ADMIN) {

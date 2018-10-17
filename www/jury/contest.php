@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View of one contest.
  *
@@ -11,7 +11,7 @@ require(LIBWWWDIR . '/checkers.jury.php');
 
 $id = getRequestID();
 $title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
-                 'contest' . ($id ? ' c'.specialchars(@$id) : ''));
+                 'contest' . (isset($id) ? ' c'.specialchars((string)$id) : ''));
 
 $jscolor=true;
 $jqtokeninput = true;
@@ -37,8 +37,8 @@ if (!empty($_GET['cmd'])):
         }
 
         echo "<tr><td>Contest ID:</td><td>" .
-            addHidden('keydata[0][cid]', $row['cid']) .
-            'c' . specialchars($row['cid']) .
+            addHidden('keydata[0][cid]', (string)$row['cid']) .
+            specialchars('c' . $row['cid']) .
             "</td></tr>\n";
     }
 ?>
@@ -348,7 +348,7 @@ echo addHidden('cmd', $cmd) .
     addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
-exit;
+return;
 
 endif;
 
@@ -363,7 +363,7 @@ if (isset($_GET['edited'])) {
         "If the contest start time was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
         addSubmit('recalculate caches now', 'refresh')
         ) .
-        addHidden('cid', $id) .
+        addHidden('cid', (string)$id) .
         addEndForm();
 }
 
@@ -400,7 +400,7 @@ echo '<tr><td>Name:</td><td>' .
     specialchars($data['name']) .
     "</td></tr>\n";
 echo '<tr><td>Activate time:</td><td>' .
-    specialchars(@$data['activatetime_string']) .
+    specialchars($data['activatetime_string'] ?? '') .
     "</td></tr>\n";
 echo '<tr><td>Start time:</td><td>' .
     ($data['starttime_enabled'] ? '' : '<span class="ignore">') .
@@ -408,16 +408,16 @@ echo '<tr><td>Start time:</td><td>' .
     ($data['starttime_enabled'] ? '' : '</span> <em>delayed</em>') .
     "</td></tr>\n";
 echo '<tr><td>Scoreboard freeze:</td><td>' .
-    (empty($data['freezetime_string']) ? "-" : specialchars(@$data['freezetime_string'])) .
+    (empty($data['freezetime_string']) ? "-" : specialchars($data['freezetime_string'] ?? '')) .
     "</td></tr>\n";
 echo '<tr><td>End time:</td><td>' .
     specialchars($data['endtime_string']) .
     "</td></tr>\n";;
 echo '<tr><td>Scoreboard unfreeze:</td><td>' .
-    (empty($data['unfreezetime_string']) ? "-" : specialchars(@$data['unfreezetime_string'])) .
+    (empty($data['unfreezetime_string']) ? "-" : specialchars($data['unfreezetime_string'] ?? '')) .
     "</td></tr>\n";
 echo '<tr><td>Dectivate time:</td><td>' .
-     specialchars(@$data['deactivatetime_string']) .
+     specialchars($data['deactivatetime_string'] ?? '') .
      "</td></tr>\n";
 echo '<tr><td>Process balloons:</td><td>' .
      ($data['process_balloons'] ? 'yes' : 'no') .
@@ -480,7 +480,7 @@ if (ALLOW_REMOVED_INTERVALS) {
     } else {
         if (IS_ADMIN) {
             echo addForm('removed_intervals.php') .
-                addHidden('cmd', 'add') . addHidden('cid', $id);
+                addHidden('cmd', 'add') . addHidden('cid', (string)$id);
         }
         echo "<table class=\"list\">\n<thead><tr>" .
              "<th>id</th><th>from</th><th></th><th>to</th><th>duration</th><th></th>" .
@@ -550,8 +550,8 @@ if (count($res) == 0) {
         echo "<td>" . $link . specialchars($row['name']) . "</a></td>\n";
         echo "<td>" . $link . specialchars($row['shortname']) . "</a></td>\n";
         echo "<td>" . $link . specialchars($row['points']) . "</a></td>\n";
-        echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_submit']) . "</a></td>\n";
-        echo "<td class=\"tdcenter\">" . $link . printyn($row['allow_judge']) . "</a></td>\n";
+        echo "<td class=\"tdcenter\">" . $link . printyn((bool)$row['allow_submit']) . "</a></td>\n";
+        echo "<td class=\"tdcenter\">" . $link . printyn((bool)$row['allow_judge']) . "</a></td>\n";
         echo(!empty($row['color'])
             ? '<td title="' . specialchars($row['color']) .
               '">' . $link . '<div class="circle" style="background-color: ' .
@@ -559,7 +559,7 @@ if (count($res) == 0) {
               ';"></div></a></td>'
             : '<td>'. $link . '&nbsp;</a></td>');
         echo "<td>" . $link . (isset($row['lazy_eval_results']) ?
-                                printyn($row['lazy_eval_results']) : '-') . "</a></td>\n";
+                                printyn((bool)$row['lazy_eval_results']) : '-') . "</a></td>\n";
         if (IS_ADMIN) {
             echo "<td>" .
                  delLinkMultiple(

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Simple functions to start a form, add a field to a form, end a form.
  *
@@ -15,7 +15,7 @@ function addInputField(string $type, $name = null, $value = null, string $attrib
     if ($name !== null && $type != 'hidden') {
         $id = ' id="' . specialchars(strtr($name, '[]', '__'));
         if ($type == 'radio') {
-            $id .= specialchars($value);
+            $id .= specialchars((string)($value ?? ''));
         }
         $id .= '"';
     } else {
@@ -24,7 +24,7 @@ function addInputField(string $type, $name = null, $value = null, string $attrib
 
     return '<input type="'.$type.'"'.
         ($name  !== null ? ' name="'.specialchars($name).'"' : '') . $id .
-        ($value !== null ? ' value="'.specialchars($value).'"' : '') .
+        ($value !== null ? ' value="'.specialchars((string)$value).'"' : '') .
         ' ' . $attributes . " />\n";
 }
 
@@ -125,7 +125,7 @@ function addSelect(string $name, array $values, $default = null, bool $usekeys =
         if (! $usekeys) {
             $k = $v;
         }
-        $ret .= '<option value="' . specialchars($k) . '"' .
+        $ret .= '<option value="' . specialchars((string) $k) . '"' .
             (matchSelect($k, $default) ? ' selected="selected"' : '') . '>' .
             specialchars($v) ."</option>\n";
     }
@@ -180,7 +180,7 @@ function addTextArea(string $name, $text = '', int $cols = 40, int $rows = 10, s
     return '<textarea name="'.specialchars($name).'" '.
         'rows="'.(int)$rows .'" cols="'.(int)$cols.'" '.
         'id="' . specialchars(strtr($name, '[]', '__')).'" ' .
-        $attr . '>'.specialchars($text) ."</textarea>\n";
+        $attr . '>'.specialchars((string)$text) ."</textarea>\n";
 }
 
 /**

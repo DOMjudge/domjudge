@@ -78,6 +78,7 @@ PROGNAME="$(basename "$0")"
 
 # Check for judge backend debugging:
 if [ "$DEBUG" ]; then
+	export DEBUG
 	export VERBOSE=$LOG_DEBUG
 	logmsg $LOG_NOTICE "debugging enabled, DEBUG='$DEBUG'"
 else
@@ -126,6 +127,9 @@ logmsg $LOG_INFO "starting compile"
 if [ ! -z "$ENTRY_POINT" ]; then
 	ENVIRONMENT_VARS="-V ENTRY_POINT=$ENTRY_POINT"
 fi
+if [ -n "$DEBUG" ]; then
+	ENVIRONMENT_VARS="$ENVIRONMENT_VARS -V DEBUG=$DEBUG"
+fi
 
 # First compile to 'source' then rename to 'program' to avoid problems with
 # the compiler writing to different filenames and deleting intermediate files.
@@ -147,7 +151,7 @@ cd "$WORKDIR"
 
 # Check if the compile script auto-detected the entry point, and if
 # so, store it in the compile.meta for later reuse, e.g. in a replay.
-grep '^Detected entry_point: ' compile.tmp | sed 's/^Detected //' >>compile.meta
+grep '[Dd]etected entry_point: ' compile.tmp | sed 's/^.*etected //' >>compile.meta
 
 logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep '^time-result: .*timelimit' compile.meta >/dev/null 2>&1 ; then

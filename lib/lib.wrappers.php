@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Miscellaneous wrappers for PHP functions, included from lib.misc.php.
  *
@@ -13,10 +13,10 @@
  */
 function dj_setcookie(
     string $name,
-    $value = null,
+    string $value = '',
     int $expire = 0,
-    $path = null,
-    $domain = null,
+    string $path = '',
+    string $domain = '',
     bool $secure = false,
     bool $httponly = false
 ) {
@@ -24,11 +24,7 @@ function dj_setcookie(
         // KLUDGE: We want to find the DOMjudge base path, but this
         // information is not directly available as configuration, so
         // we extract it from the executed PHP script.
-        $path = preg_replace(
-            '/\/(api|jury|public|team)\/?$/',
-            '/',
-			     dirname($_SERVER['REQUEST_URI'])
-        );
+        $path = preg_replace('/\/(api|jury|public|team)\/?$/', '/', dirname($_SERVER['REQUEST_URI']));
     }
 
     $ret = setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
@@ -109,7 +105,7 @@ function dj_file_get_contents(string $filename, int $maxsize = -1) : string
  * Additionally, set the character set explicitly to the DOMjudge global
  * character set.
  */
-function specialchars($string) : string
+function specialchars(string $string) : string
 {
     return htmlspecialchars(
         $string,

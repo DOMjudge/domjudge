@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
@@ -17,10 +17,14 @@ class UserRegistrationType extends AbstractType
     {
         $builder
         ->add('username', TextType::class, [
-          'constraints' => new Constraints\UserRegistration()
+            'error_bubbling' => true,
+            'label' => 'Username',
+            'constraints' => new Constraints\UserRegistration()
         ])
         ->add('plainPassword', RepeatedType::class, array(
             'type' => PasswordType::class,
+            'error_bubbling' => true,
+            'invalid_message' => 'The password fields must match.',
             'first_options'  => array('label' => 'Password'),
             'second_options' => array('label' => 'Repeat Password'),
             'mapped' => false,

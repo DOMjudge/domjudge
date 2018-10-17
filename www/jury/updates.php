@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Supply information for AJAX RPC calls (e.g. to update the number
  * of new clarifications and judgehost problems in the jury menu line

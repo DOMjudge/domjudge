@@ -22,6 +22,28 @@ services:
         resource: '../../src/DOMJudgeBundle/*'
         exclude: '../../src/DOMJudgeBundle/{Entity,Repository,Tests}'
 
+    DOMJudgeBundle\Controller\API\JudgementTypeController:
+        arguments:
+            $rootDir: '%kernel.root_dir%'
+
+    DOMJudgeBundle\Controller\API\JudgementController:
+        arguments:
+            $rootDir: '%kernel.root_dir%'
+
+    DOMJudgeBundle\Controller\API\RunController:
+        arguments:
+            $rootDir: '%kernel.root_dir%'
+
+    DOMJudgeBundle\Serializer\:
+        resource: '../../src/DOMJudgeBundle/Serializer/*'
+        tags:
+        -   name: jms_serializer.event_subscriber
+
+    DOMJudgeBundle\ApiDescriber\ParameterRefMergeDescriber:
+        tags:
+        -   name: nelmio_api_doc.describer
+            priority: -999
+
     LegacyBundle\Controller\FallbackController:
         arguments:
             $webDir: "%kernel.root_dir%/../../www"

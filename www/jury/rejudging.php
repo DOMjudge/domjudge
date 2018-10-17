@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the details of a specific rejudging
  *
@@ -25,7 +25,7 @@ if (isset($_REQUEST['view'])) {
 if (!isset($_REQUEST['apply'])) {
     $refresh = array(
         'after' => 15,
-        'url' => 'rejudging.php?id=' . urlencode($id) . '&' .
+        'url' => 'rejudging.php?id=' . urlencode((string)$id) . '&' .
             urlencode('view[' . $view . ']') . '=' . urlencode($viewtypes[$view]) .
             (isset($_REQUEST['old_verdict']) ? '&old_verdict=' . urlencode($_REQUEST['old_verdict']) : '') .
             (isset($_REQUEST['new_verdict']) ? '&new_verdict=' . urlencode($_REQUEST['new_verdict']) : ''),
@@ -57,7 +57,7 @@ if (isset($_REQUEST['apply']) || isset($_REQUEST['cancel'])) {
     while (ob_get_level()) {
         ob_end_flush();
     }
-    ob_implicit_flush(true);
+    ob_implicit_flush(1);
 
     // clear GET array because otherwise the eventlog subrequest will still include the rejudging id
     $_GET = array();
@@ -72,7 +72,7 @@ if (isset($_REQUEST['apply']) || isset($_REQUEST['cancel'])) {
 
     $time_end = microtime(true);
 
-    echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode($id) .
+    echo "<p>Rejudging <a href=\"rejudging.php?id=" . urlencode((string)$id) .
         "\">r$id</a> ".($request=='apply' ? 'applied' : 'canceled').
         " in ".sprintf('%.2f', $time_end - $time_start)." seconds.</p>\n\n";
 
@@ -130,12 +130,12 @@ if ($todo > 0) {
 echo "</table>\n\n";
 
 if (!isset($rejdata['endtime'])) {
-    echo addForm($pagename . '?id=' . urlencode($id))
+    echo addForm($pagename . '?id=' . urlencode((string)$id))
         . addSubmit('cancel rejudging', 'cancel')
         . addEndForm();
 
     if ($todo == 0) {
-        echo addForm($pagename . '?id=' . urlencode($id))
+        echo addForm($pagename . '?id=' . urlencode((string)$id))
             . addSubmit('apply rejudging', 'apply')
             . addEndForm();
     }
@@ -237,7 +237,7 @@ foreach ($table as $orig_verdict => $changed_verdicts) {
         } else {
             // this case is the interesting one
             $class = "changed";
-            $link = '<a href="rejudging.php?id=' . urlencode($id) .
+            $link = '<a href="rejudging.php?id=' . urlencode((string)$id) .
                 '&amp;' . urlencode('view[4]=all') .
                 '&amp;old_verdict=' . urlencode($orig_verdict) .
                 '&amp;new_verdict=' . urlencode($new_verdict) . '">';
@@ -269,7 +269,7 @@ if (isset($_REQUEST['new_verdict']) && $_REQUEST['new_verdict'] != 'all') {
 
 echo "<p>Show submissions:</p>\n" .
     addForm($pagename, 'get') .
-    addHidden('id', $id);
+    addHidden('id', (string)$id);
 for ($i=0; $i<count($viewtypes); ++$i) {
     echo addSubmit($viewtypes[$i], 'view['.$i.']', null, ($view != $i));
 }
@@ -282,7 +282,7 @@ if (isset($_REQUEST['new_verdict'])) {
 echo addEndForm() . "<br />\n";
 
 echo addForm($pagename, 'get') .
-    addHidden('id', $id) .
+    addHidden('id', (string)$id) .
     addHidden("view[$view]", $viewtypes[$view]);
 $verdicts = array_keys($verdicts);
 array_unshift($verdicts, 'all');
@@ -301,14 +301,14 @@ echo ", new verdict: " .
 echo addSubmit('filter') . addEndForm();
 
 echo addForm($pagename, 'get') .
-    addHidden('id', $id) .
+    addHidden('id', (string)$id) .
     addHidden("view[$view]", $viewtypes[$view]) .
     addSubmit('clear') . addEndForm() . "<br /><br />\n";
 
 $filtered = $DB->q('VALUE SELECT COUNT(s.submitid)
                     FROM submission s
                     LEFT JOIN judging j ON (s.submitid = j.submitid AND j.rejudgingid = %i)
-                    WHERE s.cid NOT IN (%As) AND (s.rejudgingid = %i OR j.rejudgingid = %i)',
+                    WHERE s.cid NOT IN (%Ai) AND (s.rejudgingid = %i OR j.rejudgingid = %i)',
                    $id, $cids, $id, $id);
 
 if ($filtered > 0) {

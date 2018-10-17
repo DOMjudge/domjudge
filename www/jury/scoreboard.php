@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /**
  * Scoreboard
@@ -13,7 +13,6 @@ $refresh = array(
     'url' => 'scoreboard.php',
 );
 $title = 'Scoreboard';
-$printercss = true;
 
 require(LIBWWWDIR . '/scoreboard.php');
 

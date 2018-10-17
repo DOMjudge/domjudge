@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Functionality to edit data from this interface.
  *
@@ -36,7 +36,7 @@ if (empty($data)) {
     error("No data.");
 }
 // ensure referrer only contains a single filename, not complete URLs
-if (! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer)) {
+if (!empty($referrer) && ! preg_match('/^[.a-zA-Z0-9?&=_-]*$/', $referrer)) {
     error("Invalid characters in referrer.");
 }
 
@@ -122,7 +122,7 @@ if (! isset($_POST['cancel'])) {
 
             $changed = $DB->q("RETURNAFFECTED UPDATE $t SET %S WHERE %S", $itemdata, $prikey);
 
-            if ($changed) {
+            if ($changed || true) {
                 if (count($KEYS[$t])==1) {
                     $datatype = $t;
                     $dataid = $keydata[$i][$tablekey];
@@ -165,7 +165,7 @@ if (! isset($_POST['cancel'])) {
                             continue;
                         }
                         $columns = array($fk[0], $fk[1]);
-                        $values = array($prikey[$fk[0]], $mapdest);
+                        $values = array((string)$prikey[$fk[0]], $mapdest);
                         if (isset($mapping['extra'][$key])) {
                             foreach ($mapping['extra'][$key] as $column => $value) {
                                 $columns[] = $column;

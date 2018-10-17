@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View team details
  *
@@ -16,18 +16,18 @@ if (isset($_GET['cid']) && is_numeric($_GET['cid'])) {
     $current_cid = $cid;
 }
 $title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
-                 'team' . ($id ? ' t'.specialchars(@$id) : ''));
+                 'team' . (isset($id) ? specialchars(' t'.$id) : ''));
 
 if (isset($_GET['cmd'])) {
     $cmd = $_GET['cmd'];
 } else {
     $extra = '';
     if ($current_cid !== null) {
-        $extra = '&cid=' . urlencode($current_cid);
+        $extra = '&cid=' . urlencode((string)$current_cid);
     }
     $refresh = array(
         'after' => 15,
-        'url' => $pagename.'?id='.urlencode($id).$extra.
+        'url' => $pagename.'?id='.urlencode((string)$id).$extra.
             (isset($_GET['restrict'])?'&restrict='.urlencode($_GET['restrict']):''),
     );
 }
@@ -162,7 +162,7 @@ echo addHidden('cmd', $cmd) .
      addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
-exit;
+return;
 
 endif;
 
@@ -199,9 +199,9 @@ $users = $DB->q('TABLE SELECT userid,username FROM user WHERE teamid = %i', $id)
 $SHOW_FLAGS        = dbconfig_get('show_flags', 1);
 $SHOW_AFFILIATIONS = dbconfig_get('show_affiliations', 1);
 
-$affillogo   = "images/affiliations/" . urlencode($row['affilid']) . ".png";
-$countryflag = "images/countries/"    . urlencode($row['country']) . ".png";
-$teamimage   = "images/teams/"        . urlencode($row['teamid'])  . ".jpg";
+$affillogo   = "images/affiliations/" . urlencode((string)$row['affilid']) . ".png";
+$countryflag = "images/countries/"    . urlencode($row['country'] ?? '') . ".png";
+$teamimage   = "images/teams/"        . urlencode((string)$row['teamid'])  . ".jpg";
 
 echo "<h1>Team ".specialchars($row['name'])."</h1>\n\n";
 
@@ -224,10 +224,12 @@ if ($row['enabled'] != 1) {
 <tr><td>User:</td><td><?php
 if (count($users)) {
     foreach ($users as $user) {
-        echo "<a href=\"user.php?id=" . urlencode($user['userid']) . "\">" . specialchars($user['username']) . "</a> ";
+        echo "<a href=\"user.php?id=" . urlencode((string)$user['userid']) . "\">" .
+            specialchars($user['username']) . "</a> ";
     }
 } else {
-    echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode($row['teamid']) . "\"><small>(add)</small></a>";
+    echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode((string)$row['teamid']) .
+        "\"><small>(add)</small></a>";
 }
 ?></td></tr>
 <?php
@@ -258,7 +260,7 @@ if (!empty($private_contests)) {
 <?php
 
 echo '<tr><td>Category:</td><td><a href="team_category.php?id=' .
-    urlencode($row['categoryid']) . '">' .
+    urlencode((string)$row['categoryid']) . '">' .
     specialchars($row['catname']) . "</a></td></tr>\n";
 
 if ($SHOW_AFFILIATIONS && !empty($row['affilid'])) {
@@ -267,7 +269,7 @@ if ($SHOW_AFFILIATIONS && !empty($row['affilid'])) {
         echo '<img src="../' . $affillogo . '" alt="' .
             specialchars($row['affshortname']) . '" /> ';
     }
-    echo '<a href="team_affiliation.php?id=' . urlencode($row['affilid']) . '">' .
+    echo '<a href="team_affiliation.php?id=' . urlencode((string)$row['affilid']) . '">' .
         specialchars($row['affname']) . "</a></td></tr>\n";
 }
 if ($SHOW_FLAGS && !empty($row['country'])) {

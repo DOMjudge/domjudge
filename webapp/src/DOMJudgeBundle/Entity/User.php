@@ -1,7 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -17,6 +18,7 @@ class User implements UserInterface, \Serializable
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="userid", options={"comment"="Unique ID"}, nullable=false)
+     * @Serializer\SerializedName("id")
      */
     private $userid;
 
@@ -41,30 +43,35 @@ class User implements UserInterface, \Serializable
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="last_login", options={"comment"="Time of last successful login", "unsigned"=true}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $last_login;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="last_ip_address", length=255, options={"comment"="Last IP address of successful login"}, nullable=true)
+     * @Serializer\SerializedName("lastip")
      */
     private $last_ip_address;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="password", length=255, options={"comment"="Password hash"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $password;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="ip_address", length=255, options={"comment"="IP Address used to autologin"}, nullable=true)
+     * @Serializer\SerializedName("ip")
      */
     private $ipaddress;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="enabled", options={"comment"="Whether the team is visible and operational"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $enabled = true;
 
@@ -78,16 +85,18 @@ class User implements UserInterface, \Serializable
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="users")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
+     * @Serializer\Exclude()
      */
     private $team;
 
     /**
-      * @ORM\ManyToMany(targetEntity="Role", inversedBy="users")
-      * @ORM\JoinTable(name="userrole",
-      *                joinColumns={@ORM\JoinColumn(name="userid", referencedColumnName="userid")},
-      *                inverseJoinColumns={@ORM\JoinColumn(name="roleid", referencedColumnName="roleid")}
-      *               )
-      */
+     * @ORM\ManyToMany(targetEntity="Role", inversedBy="users")
+     * @ORM\JoinTable(name="userrole",
+     *                joinColumns={@ORM\JoinColumn(name="userid", referencedColumnName="userid")},
+     *                inverseJoinColumns={@ORM\JoinColumn(name="roleid", referencedColumnName="roleid")}
+     *               )
+     * @Serializer\Exclude()
+     */
     private $roles;
 
 
@@ -404,5 +413,23 @@ class User implements UserInterface, \Serializable
     public function getRoles()
     {
         return $this->roles->toArray();
+    }
+
+    /**
+     * Get the roles of this user as an array of strings
+     * @return string[]
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("roles")
+     * @Serializer\Type("array<string>")
+     */
+    public function getRoleList(): array
+    {
+        $result = [];
+        /** @var Role $role */
+        foreach ($this->getRoles() as $role) {
+            $result[] = $role->getDjRole();
+        }
+
+        return $result;
     }
 }

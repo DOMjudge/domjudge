@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 require('init.php');
 
@@ -33,7 +33,7 @@ if (empty($cid)) {
     echo "<p class=\"nodata\">No active contest available</p>\n\n";
 
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 $res = $DB->q('

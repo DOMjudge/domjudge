@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -24,7 +24,7 @@ class Executable
     private $md5sum;
 
     /**
-     * @var string
+     * @var resource|string
      * @ORM\Column(type="blob", name="zipfile", options={"comment"="Zip file"}, nullable=false)
      */
     private $zipfile;
@@ -115,7 +115,7 @@ class Executable
     /**
      * Set zipfile
      *
-     * @param string $zipfile
+     * @param resource|string $zipfile
      *
      * @return Executable
      */
@@ -129,7 +129,7 @@ class Executable
     /**
      * Get zipfile
      *
-     * @return string
+     * @return resource|string
      */
     public function getZipfile()
     {

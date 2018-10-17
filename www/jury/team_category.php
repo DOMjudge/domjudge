@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View a row in a team_category
  *
@@ -11,7 +11,7 @@ require(LIBWWWDIR . '/scoreboard.php');
 
 $id = getRequestID();
 $title = ucfirst((empty($_GET['cmd']) ? '' : specialchars($_GET['cmd']) . ' ') .
-                 'category' . ($id ? ' '.specialchars(@$id) : ''));
+                 'category' . (isset($id) ? specialchars(' '.$id) : ''));
 
 $jscolor = true;
 require(LIBWWWDIR . '/header.php');
@@ -78,7 +78,7 @@ echo addHidden('cmd', $cmd) .
     addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
-exit;
+return;
 
 endif;
 
@@ -110,7 +110,7 @@ if (isset($data['color'])) {
         specialchars($data['color']) .
         ';">' . specialchars($data['color']) . "</td></tr>\n";
 }
-echo '<tr><td>Visible:</td><td>' . printyn($data['visible']) . "</td></tr>\n";
+echo '<tr><td>Visible:</td><td>' . printyn((bool)$data['visible']) . "</td></tr>\n";
 
 
 echo "</table>\n\n";
@@ -138,9 +138,9 @@ if ($teams->count() == 0) {
         "</thead>\n<tbody>\n";
     while ($team = $teams->next()) {
         $listteams[] = $team['teamid'];
-        $link = '<a href="team.php?id=' . urlencode($team['teamid']) . '">';
+        $link = '<a href="team.php?id=' . urlencode((string)$team['teamid']) . '">';
         echo "<tr><td>" .
-        $link . "t" . specialchars($team['teamid']) . "</a></td><td>" .
+        $link . "t" . specialchars((string)$team['teamid']) . "</a></td><td>" .
         $link . specialchars($team['name']) . "</a></td></tr>\n";
     }
     echo "</tbody>\n</table>\n\n";

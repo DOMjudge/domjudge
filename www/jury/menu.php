@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 global $updates;
 ?>
 <nav><div id="menutop">
@@ -95,7 +95,7 @@ if (isset($refresh)) {
 // notifications are available:
 echo '<div id="notify" style="display: none">' .
     addForm('toggle_notify.php', 'get') .
-    addHidden('enable', ($notify_flag ? 0 : 1)) .
+    addHidden('enable', ($notify_flag ? '0' : '1')) .
     addSubmit(
         ($notify_flag ? 'Dis' : 'En') . 'able notifications',
         'toggle_notify',
@@ -104,13 +104,6 @@ echo '<div id="notify" style="display: none">' .
     addEndForm() . "</div>";
 
 ?>
-<script type="text/javascript">
-<!--
-    if ( 'Notification' in window ) {
-        document.getElementById('notify').style.display = 'block';
-    }
-// -->
-</script>
 
 </div>
 </div></nav>

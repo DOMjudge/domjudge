@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Do various sanity checks on the system regarding data constraints,
  * permissions and the like. At the moment this only contains some basic
@@ -34,7 +34,7 @@ if ($_SERVER['QUERY_STRING'] == 'phpinfo') {
     phpinfo();
     echo $ret;
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 require_once(LIBWWWDIR . '/checkers.jury.php');
@@ -256,13 +256,23 @@ result(
     'prevent connection refusal during the contest.'
 );
 
+$recommended_max_allowed_packet = 16*1024*1024;
+$max_inout = $DB->q('VALUE SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) FROM testcase');
+$max_allowed_packet_status = 'O';
+if ($mysqldata['max_allowed_packet'] < $recommended_max_allowed_packet) {
+    $max_allowed_packet_status = 'W';
+}
+if ($mysqldata['max_allowed_packet'] < 2*$max_inout) {
+    $max_allowed_packet_status = 'E';
+}
 result(
     'software',
     'MySQL maximum packet size',
-    $mysqldata['max_allowed_packet'] < 16*1024*1024 ? 'W':'O',
+    $max_allowed_packet_status,
     'MySQL\'s max_allowed_packet is set to ' .
-    printsize($mysqldata['max_allowed_packet']) . '. You may ' .
-    'want to raise this to about twice the maximum test case size.'
+    printsize((int)$mysqldata['max_allowed_packet']) . '. You may ' .
+    'want to raise this to about twice the maximum test case size (currently ' .
+    printsize((int)$max_inout) . ').'
 );
 
 result(
@@ -270,7 +280,7 @@ result(
     'MySQL innodb logfile size',
     $mysqldata['innodb_log_file_size'] < 128*1024*1024 ? 'W':'O',
     'MySQL\'s innodb_log_file_size is set to ' .
-    printsize($mysqldata['innodb_log_file_size']) . '. You may ' .
+    printsize((int)$mysqldata['innodb_log_file_size']) . '. You may ' .
     'want to raise this to 10x the maximum test case size.'
 );
 

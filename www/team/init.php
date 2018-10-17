@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Include required files.
  *
@@ -42,7 +42,7 @@ $cids = array_keys($cdatas);
 
 // If the cookie has a existing contest, use it
 if (isset($_COOKIE['domjudge_cid']) && isset($cdatas[$_COOKIE['domjudge_cid']])) {
-    $cid = $_COOKIE['domjudge_cid'];
+    $cid = (int)$_COOKIE['domjudge_cid'];
     $cdata = $cdatas[$cid];
 } elseif (count($cids) >= 1) {
     // Otherwise, select the first contest

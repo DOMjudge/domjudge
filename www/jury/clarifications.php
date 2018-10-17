@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Clarifications overview
  *
@@ -20,7 +20,7 @@ echo "<h1>Clarifications</h1>\n\n";
 if (empty($cids)) {
     warning('No active contest(s)');
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 $contestids = $cids;

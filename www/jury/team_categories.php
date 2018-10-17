@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the categories
  *
@@ -46,7 +46,7 @@ if ($res->count() == 0) {
             '</a></td><td>' . $link . (int)$row['sortorder'] .
             '</a></td><td>' . $link . specialchars($row['name']) .
             '</a></td><td class="tdright">' . $link . (int)$row['numteams'] .
-            '</a></td><td class="tdcenter">' . $link . printyn($row['visible']) .
+            '</a></td><td class="tdcenter">' . $link . printyn((bool)$row['visible']) .
             '</a></td>';
         if (IS_ADMIN) {
             echo "<td class=\"editdel\">" .

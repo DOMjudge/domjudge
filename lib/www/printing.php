@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Functionality for making printouts from DOMjudge.
  *
@@ -12,7 +12,7 @@
  */
 function have_printing() : bool
 {
-    return dbconfig_get('enable_printing', 0);
+    return (bool) dbconfig_get('enable_printing', 0);
 }
 
 function put_print_form()
@@ -80,8 +80,6 @@ function put_print_form()
 function handle_print_upload()
 {
     global $DB;
-
-    ini_set("upload_max_filesize", dbconfig_get('sourcesize_limit') * 1024);
 
     checkFileUpload($_FILES['code']['error']);
 

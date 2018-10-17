@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Functionality to delete data from this interface.
  *
@@ -11,7 +11,7 @@ requireAdmin();
 $t = @$_REQUEST['table'];
 $referrer = @$_REQUEST['referrer'];
 $desc = @$_REQUEST['desc'];
-if (! preg_match('/^[._a-zA-Z0-9?&=-]*$/', $referrer)) {
+if (! preg_match('/^[._a-zA-Z0-9?&=-]*$/', $referrer ?? '')) {
     error("Invalid characters in referrer.");
 }
 
@@ -37,7 +37,7 @@ if (isset($_POST['cancel'])) {
         header('Location: '.$t.'.php?id=' .
             urlencode(array_shift($k)));
     }
-    exit;
+    return;
 }
 
 // Send headers here, because we need to be able to redirect above this point.

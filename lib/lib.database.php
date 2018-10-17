@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Database abstraction functions.
  *
@@ -349,7 +349,7 @@ class db
         }
 
         $this->_connection = mysqli_init();
-        @mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, null, null, $this->flags);
+        @mysqli_real_connect($this->_connection, $pers.$this->host, $this->user, $this->password, $this->database, 0, '', $this->flags ?? 0);
 
         if (mysqli_connect_error() || !$this->_connection) {
             throw new RuntimeException("Could not connect to database server "
@@ -384,7 +384,7 @@ class db
         switch ($mode) {
             case 'f': return (float)$val;
             case 'i': return (int)$val;
-            case 's': return '"'.mysqli_real_escape_string($this->_connection, $val).'"';
+            case 's': return '"'.mysqli_real_escape_string($this->_connection, (string)$val).'"';
             case 'c': return '"%'.mysqli_real_escape_string($this->_connection, $val).'%"';
             case 'l': return $val;
             case '.': break;

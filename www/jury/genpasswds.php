@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Manage passwords for all users.
  *
@@ -106,7 +106,7 @@ if (isset($_POST['format'])) {
         }
     }
 
-    exit;
+    return;
 }
 
 require(LIBWWWDIR . '/header.php');
@@ -140,7 +140,7 @@ case 'EXTERNAL':
 This scheme does not support resetting passwords (within DOMjudge).</p>
 <?php
 require(LIBWWWDIR . '/footer.php');
-exit;
+return;
 break;
 default:
 ?>

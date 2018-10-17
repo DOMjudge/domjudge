@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Common functions shared between team/public/jury interface
  *
@@ -246,11 +246,11 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
                 "<a$link>" . specialchars(str_cut($row['teamname'], 30)) . '</a></td>';
         }
         echo '<td class="probid" title="' . specialchars($row['probname']) . '">' .
-            "<a$link>" . specialchars($row['shortname']) . '</a></td>';
+            "<a$link>" . specialchars($row['shortname'] ?? '') . '</a></td>';
         echo '<td class="langid" title="' . specialchars($row['langname']) . '">' .
             "<a$link>" . specialchars($row['langid']) . '</a></td>';
         echo "<td class=\"result\"><a$link>";
-        if (difftime($row['submittime'], $cdatas[$row['cid']]['endtime']) >= 0) {
+        if (difftime((float)$row['submittime'], (float)$cdatas[$row['cid']]['endtime']) >= 0) {
             echo printresult('too-late');
             if (IS_JURY && $row['result']) {
                 echo " (" . printresult($row['result']) . ")";
@@ -272,7 +272,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
                 $verified = '&nbsp;';
                 $jury_member = '&nbsp;';
             } else {
-                $verified = printyn($row['verified']);
+                $verified = printyn((bool)$row['verified']);
                 if (empty($row['jury_member'])) {
                     $jury_member = '&nbsp;';
                 } else {
@@ -306,7 +306,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
             if ($testcases) {
                 $judgingid = $row['judgingid'];
                 $probid = $row['probid'];
-                $runinfo = $DB->q('TABLE SELECT r.runresult, t.rank
+                $runinfo = $DB->q('TABLE SELECT r.runresult, t.rank, t.description
                                    FROM testcase t
                                    LEFT JOIN judging_run r ON ( r.testcaseid = t.testcaseid
                                                                 AND r.judgingid = %i )
@@ -329,7 +329,12 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
                             $text = substr($run['runresult'], 0, 1);
                             $class = "tc_incorrect";
                     }
-                    $testcase_results .= "<span class=\"$class tc_box_small\">" . $text . "</span>";
+                    if (!empty($run['description'])) {
+                        $title = sprintf('Run %d: %s', $key + 1, specialchars($run['description']));
+                    } else {
+                        $title = sprintf('Run %d', $key + 1);
+                    }
+                    $testcase_results .= sprintf('<span class="%s tc_box_small" title="%s">%s</span>', $class, $title, $text);
                 }
                 echo "<td class=\"tc_list_small\">" . $testcase_results . "</td>";
             }
@@ -406,8 +411,8 @@ function putTeam(int $teamid)
         error("No team found by this id.");
     }
 
-    $countryflag = "images/countries/" . urlencode($team['country']) . ".png";
-    $teamimage = "images/teams/" . urlencode($team['teamid']) . ".jpg";
+    $countryflag = "images/countries/" . urlencode((string)$team['country']) . ".png";
+    $teamimage = "images/teams/" . urlencode((string)$team['teamid']) . ".jpg";
 
     echo "<h1>Team ".specialchars($team['name'])."</h1>\n\n";
 
@@ -460,12 +465,12 @@ function putProgressBar(int $margin = 0)
     if ($cdata === null) {
         return;
     }
-    $left = difftime($cdata['endtime'], now());
+    $left = difftime((float)$cdata['endtime'], now());
     if (!$fdata['started'] || $left < 0) {
         return;
     }
-    $passed = difftime($cdata['starttime'], now());
-    $duration = difftime($cdata['starttime'], $cdata['endtime']);
+    $passed = difftime((float)$cdata['starttime'], now());
+    $duration = difftime((float)$cdata['starttime'], (float)$cdata['endtime']);
     $percent = (int)($passed*100./$duration);
     print '
 <div class="progress" style="margin-top: ' . $margin . 'px; height: 10px;">
@@ -501,12 +506,6 @@ function putClock()
         }
         echo 'contest: ' . addSelect('cid', $values, $cid, true);
         echo addEndForm();
-        echo "<script type=\"text/javascript\">
-              document.getElementById('cid').addEventListener('change', function() {
-              document.getElementById('selectcontestform').submit();
-    });
-</script>
-";
         echo "</div>\n";
     }
     echo '</div><div class="navbar-text">';
@@ -518,12 +517,12 @@ function putClock()
     } else {
         // timediff to end of contest
         $fdata = calcFreezeData($cdata);
-        if ($fdata['started'] && difftime(now(), $cdata['endtime']) < 0) {
+        if ($fdata['started'] && difftime(now(), (float)$cdata['endtime']) < 0) {
             $left = printtimediff(now(), $cdata['endtime']);
         // time to start of contest
-        } elseif (!$fdata['started'] && difftime(now(), $cdata['activatetime']) >= 0) {
+        } elseif (!$fdata['started'] && difftime(now(), (float)$cdata['activatetime']) >= 0) {
             if ($cdata['starttime_enabled']) {
-                $left = "- " . printtimediff(now(), $cdata['starttime']);
+                $left = "- " . printtimediff(now(), (float)$cdata['starttime']);
             } else {
                 $left = "start delayed";
             }
@@ -541,7 +540,7 @@ function putClock()
             $displayname = "<abbr title=\"" . specialchars($username) . "\">" . specialchars($userdata['name']) . "</abbr>";
         }
         echo "<div id=\"username\">logged in as " . $displayname
-            . ' <a href="../auth/logout.php">' .
+            . ' <a href="../logout">' .
                 '<span class="octicon octicon-sign-out"></span></a>'
             . "</div>";
     }
@@ -768,7 +767,7 @@ function putProblemTextList()
         }
 
         if (isset($row['problemtext_type'])) {
-            print '<div class="text-center"><a class="btn btn-secondary" role="button" href="problem.php?id=' . urlencode($row['probid']) . '">' .
+            print '<div class="text-center"><a class="btn btn-secondary" role="button" href="problem.php?id=' . urlencode((string)$row['probid']) . '">' .
                   '<img src="../images/' . urlencode($row['problemtext_type']) .
                               '.png" alt="' . specialchars($row['problemtext_type']) .
                   '" /> problem text</a></div>';
@@ -782,10 +781,10 @@ function putProblemTextList()
                     $input .= ' #' . $i;
                     $output .= ' #' . $i;
                 }
-                print '<li class="list-group-item"><a class="btn btn-outline-secondary" role="button" href="problem.php?id=' . urlencode($row['probid']) .
-                      '&amp;testcase=' . urlencode($i) . '&amp;type=in">' . $input . '</a> ';
-                print '<a class="btn btn-outline-secondary" href="problem.php?id=' . urlencode($row['probid']) .
-                      '&amp;testcase=' . urlencode($i) . '&amp;type=out">' . $output . '</a>';
+                print '<li class="list-group-item"><a class="btn btn-outline-secondary" role="button" href="problem.php?id=' . urlencode((string)$row['probid']) .
+                      '&amp;testcase=' . urlencode((string)$i) . '&amp;type=in">' . $input . '</a> ';
+                print '<a class="btn btn-outline-secondary" href="problem.php?id=' . urlencode((string)$row['probid']) .
+                      '&amp;testcase=' . urlencode((string)$i) . '&amp;type=out">' . $output . '</a>';
                 print "</li>";
             }
             print "</ol>";

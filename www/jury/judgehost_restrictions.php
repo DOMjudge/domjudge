@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the restrictions that can be assigned to judgehosts
  *
@@ -30,7 +30,7 @@ if ($cmd == 'add' || $cmd == 'edit') {
     }
     $_POST['data'][0]['restrictions'] = json_encode($_POST['data'][0]['restrictions']);
     require_once('edit.php');
-    exit;
+    return;
 }
 
 require('init.php');

@@ -1,7 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Utils\Utils;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Result of a testcase run.
@@ -17,74 +19,68 @@ class JudgingRun
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="runid", options={"comment"="Unique ID"}, nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $runid;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="judgingid", options={"comment"="Judging ID"}, nullable=false)
+     * @Serializer\SerializedName("judgement_id")
+     * @Serializer\Type("string")
      */
     private $judgingid;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="testcaseid", options={"comment"="Testcase ID"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $testcaseid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="runresult", length=32, options={"comment"="Result of this run, NULL if not finished yet"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $runresult;
 
     /**
      * @var double
      * @ORM\Column(type="float", name="runtime", options={"comment"="Submission running time on this testcase"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $runtime = 1;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time run judging finished", "unsigned"=true}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $endtime;
 
     /**
-     * @var string
-     * @ORM\Column(type="blob", name="output_run", options={"comment"="Output of running the program"}, nullable=true)
-     */
-    private $output_run;
-
-    /**
-     * @var string
-     * @ORM\Column(type="blob", name="output_diff", options={"comment"="Diffing the program output and testcase output"}, nullable=true)
-     */
-    private $output_diff;
-
-    /**
-     * @var string
-     * @ORM\Column(type="blob", name="output_error", options={"comment"="Standard error output of the program"}, nullable=true)
-     */
-    private $output_error;
-
-    /**
-     * @var string
-     * @ORM\Column(type="blob", name="output_system", options={"comment"="Judging system output"}, nullable=true)
-     */
-    private $output_system;
-
-    /**
      * @ORM\ManyToOne(targetEntity="Judging", inversedBy="runs")
      * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid")
+     * @Serializer\Exclude()
      */
     private $judging;
 
     /**
      * @ORM\ManyToOne(targetEntity="Testcase", inversedBy="judging_runs")
      * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid")
+     * @Serializer\Exclude()
      */
     private $testcase;
+
+    /**
+     * @var JudgingRunOutput
+     * @ORM\OneToOne(targetEntity="DOMJudgeBundle\Entity\JudgingRunOutput")
+     * @ORM\JoinColumn(name="runid", referencedColumnName="runid")
+     * @Serializer\Exclude()
+     */
+    private $judging_run_output;
 
 
     /**
@@ -187,106 +183,63 @@ class JudgingRun
      * Get runtime
      *
      * @return float
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("run_time")
+     * @Serializer\Type("float")
      */
     public function getRuntime()
     {
-        return $this->runtime;
+        return Utils::roundedFloat($this->runtime);
     }
 
     /**
-     * Set outputRun
+     * Set endtime
      *
-     * @param string $outputRun
+     * @param float $endtime
      *
      * @return JudgingRun
      */
-    public function setOutputRun($outputRun)
+    public function setEndtime($endtime)
     {
-        $this->output_run = $outputRun;
+        $this->endtime = $endtime;
 
         return $this;
     }
 
     /**
-     * Get outputRun
+     * Get endtime
+     *
+     * @return float
+     */
+    public function getEndtime()
+    {
+        return $this->endtime;
+    }
+
+    /**
+     * Get the absolute end time for this run
      *
      * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("time")
+     * @Serializer\Type("string")
      */
-    public function getOutputRun()
+    public function getAbsoluteEndTime()
     {
-        return $this->output_run;
+        return Utils::absTime($this->getEndtime());
     }
 
     /**
-     * Set outputDiff
-     *
-     * @param string $outputDiff
-     *
-     * @return JudgingRun
-     */
-    public function setOutputDiff($outputDiff)
-    {
-        $this->output_diff = $outputDiff;
-
-        return $this;
-    }
-
-    /**
-     * Get outputDiff
+     * Get the relative end time for this run
      *
      * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("contest_time")
+     * @Serializer\Type("string")
      */
-    public function getOutputDiff()
+    public function getRelativeEndTime()
     {
-        return $this->output_diff;
-    }
-
-    /**
-     * Set outputError
-     *
-     * @param string $outputError
-     *
-     * @return JudgingRun
-     */
-    public function setOutputError($outputError)
-    {
-        $this->output_error = $outputError;
-
-        return $this;
-    }
-
-    /**
-     * Get outputError
-     *
-     * @return string
-     */
-    public function getOutputError()
-    {
-        return $this->output_error;
-    }
-
-    /**
-     * Set outputSystem
-     *
-     * @param string $outputSystem
-     *
-     * @return JudgingRun
-     */
-    public function setOutputSystem($outputSystem)
-    {
-        $this->output_system = $outputSystem;
-
-        return $this;
-    }
-
-    /**
-     * Get outputSystem
-     *
-     * @return string
-     */
-    public function getOutputSystem()
-    {
-        return $this->output_system;
+        return Utils::relTime($this->getEndtime() - $this->getJudging()->getContest()->getStarttime());
     }
 
     /**
@@ -335,5 +288,41 @@ class JudgingRun
     public function getTestcase()
     {
         return $this->testcase;
+    }
+
+    /**
+     * Get testcase rank
+     * @return int
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("ordinal")
+     * @Serializer\Type("int")
+     */
+    public function getTestcaseRank()
+    {
+        return $this->getTestcase()->getRank();
+    }
+
+    /**
+     * Set judgingRunOutput
+     *
+     * @param JudgingRunOutput $judgingRunOutput
+     *
+     * @return JudgingRun
+     */
+    public function setJudgingRunOutput(JudgingRunOutput $judgingRunOutput)
+    {
+        $this->judging_run_output = $judgingRunOutput;
+
+        return $this;
+    }
+
+    /**
+     * Get judgingRunOutput
+     *
+     * @return JudgingRunOutput
+     */
+    public function getJudgingRunOutput()
+    {
+        return $this->judging_run_output;
     }
 }

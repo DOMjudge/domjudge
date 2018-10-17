@@ -1,7 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Utils\Utils;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * All incoming submissions
@@ -16,6 +19,8 @@ class Submission
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="submitid", options={"comment"="Unique ID"}, nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $submitid;
 
@@ -23,6 +28,7 @@ class Submission
      * @var int
      *
      * @ORM\Column(type="integer", name="origsubmitid", options={"comment"="If set, specifies original submission in case of edit/resubmit"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $origsubmitid;
 
@@ -30,6 +36,7 @@ class Submission
      * @var int
      *
      * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $cid;
 
@@ -37,6 +44,8 @@ class Submission
      * @var int
      *
      * @ORM\Column(type="integer", name="teamid", options={"comment"="Team ID"}, nullable=false)
+     * @Serializer\SerializedName("team_id")
+     * @Serializer\Type("string")
      */
     private $teamid;
 
@@ -44,19 +53,23 @@ class Submission
      * @var int
      *
      * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID"}, nullable=false)
+     * @Serializer\SerializedName("problem_id")
+     * @Serializer\Type("string")
      */
     private $probid;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="langid", options={"comment"="Language ID"}, nullable=false)
+     * @ORM\Column(type="string", name="langid", options={"comment"="Language ID"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $langid;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time submitted", "unsigned"=true}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $submittime;
 
@@ -64,12 +77,14 @@ class Submission
     /**
      * @var string
      * @ORM\Column(type="string", name="judgehost", length=50, options={"comment"="Current/last judgehost judging this submission", "collation"="utf8mb4_bin"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $judgehost;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="valid", options={"comment"="If false ignore this submission in all scoreboard calculations"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $valid = true;
 
@@ -77,57 +92,68 @@ class Submission
      * @var int
      *
      * @ORM\Column(type="integer", name="rejudgingid", options={"comment"="Rejudging ID (if rejudge)"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $rejudgingid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="expected_results", length=255, options={"comment"="JSON encoded list of expected results - used to validate jury submissions", "collation"="utf8mb4_bin"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $expected_results;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="entry_point", length=255, options={"comment"="Optional entry point. Can be used e.g. for java main class.", "collation"="utf8mb4_bin"}, nullable=true)
+     * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
      */
     private $entry_point;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="submissions")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @Serializer\Exclude()
      */
     private $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Language", inversedBy="submissions")
      * @ORM\JoinColumn(name="langid", referencedColumnName="langid")
+     * @Serializer\Exclude()
      */
     private $language;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="submissions")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
+     * @Serializer\Exclude()
      */
     private $team;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="submissions")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
+     * @Serializer\Exclude()
      */
     private $problem;
 
     /**
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="submission")
+     * @Serializer\Exclude()
      */
     private $judgings;
 
     /**
+     * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="SubmissionFile", mappedBy="submission")
+     * @Serializer\Exclude()
      */
     private $files;
 
     /**
      * @ORM\OneToMany(targetEntity="Balloon", mappedBy="submission")
+     * @Serializer\Exclude()
      */
     private $balloons;
 
@@ -254,11 +280,23 @@ class Submission
     /**
      * Get langid
      *
-     * @return integer
+     * @return string
      */
     public function getLangid()
     {
         return $this->langid;
+    }
+
+    /**
+     * Get the language ID
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("language_id")
+     * @Serializer\Type("string")
+     */
+    public function getLanguageId()
+    {
+        return $this->getLanguage()->getExternalid();
     }
 
     /**
@@ -283,6 +321,32 @@ class Submission
     public function getSubmittime()
     {
         return $this->submittime;
+    }
+
+    /**
+     * Get the absolute submit time for this submission
+     *
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("time")
+     * @Serializer\Type("string")
+     */
+    public function getAbsoluteSubmitTime()
+    {
+        return Utils::absTime($this->getSubmittime());
+    }
+
+    /**
+     * Get the relative submit time for this submission
+     *
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("contest_time")
+     * @Serializer\Type("string")
+     */
+    public function getRelativeSubmitTime()
+    {
+        return Utils::relTime($this->getSubmittime() - $this->getContest()->getStarttime());
     }
 
     /**
@@ -433,17 +497,18 @@ class Submission
      */
     public function __construct()
     {
-        $this->judgings = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->judgings = new ArrayCollection();
+        $this->files = new ArrayCollection();
     }
 
     /**
      * Add judging
      *
-     * @param \DOMJudgeBundle\Entity\Judging $judging
+     * @param Judging $judging
      *
      * @return Submission
      */
-    public function addJudging(\DOMJudgeBundle\Entity\Judging $judging)
+    public function addJudging(Judging $judging)
     {
         $this->judgings[] = $judging;
 
@@ -453,9 +518,9 @@ class Submission
     /**
      * Remove judging
      *
-     * @param \DOMJudgeBundle\Entity\Judging $judging
+     * @param Judging $judging
      */
-    public function removeJudging(\DOMJudgeBundle\Entity\Judging $judging)
+    public function removeJudging(Judging $judging)
     {
         $this->judgings->removeElement($judging);
     }
@@ -473,11 +538,11 @@ class Submission
     /**
      * Set language
      *
-     * @param \DOMJudgeBundle\Entity\Language $language
+     * @param Language $language
      *
      * @return Submission
      */
-    public function setLanguage(\DOMJudgeBundle\Entity\Language $language = null)
+    public function setLanguage(Language $language = null)
     {
         $this->language = $language;
 
@@ -487,7 +552,7 @@ class Submission
     /**
      * Get language
      *
-     * @return \DOMJudgeBundle\Entity\Language
+     * @return Language
      */
     public function getLanguage()
     {
@@ -497,13 +562,13 @@ class Submission
     /**
      * Add file
      *
-     * @param \DOMJudgeBundle\Entity\SubmissionFile $file
+     * @param SubmissionFile $file
      *
      * @return Submission
      */
-    public function addFile(\DOMJudgeBundle\Entity\SubmissionFile $file)
+    public function addFile(SubmissionFile $file)
     {
-        $this->files[] = $file;
+        $this->files->add($file);
 
         return $this;
     }
@@ -511,9 +576,9 @@ class Submission
     /**
      * Remove file
      *
-     * @param \DOMJudgeBundle\Entity\SubmissionFile $file
+     * @param SubmissionFile $file
      */
-    public function removeFile(\DOMJudgeBundle\Entity\SubmissionFile $file)
+    public function removeFile(SubmissionFile $file)
     {
         $this->files->removeElement($file);
     }
@@ -531,11 +596,11 @@ class Submission
     /**
      * Add balloon
      *
-     * @param \DOMJudgeBundle\Entity\Balloon $balloon
+     * @param Balloon $balloon
      *
      * @return Submission
      */
-    public function addBalloon(\DOMJudgeBundle\Entity\Balloon $balloon)
+    public function addBalloon(Balloon $balloon)
     {
         $this->balloons[] = $balloon;
 
@@ -545,9 +610,9 @@ class Submission
     /**
      * Remove balloon
      *
-     * @param \DOMJudgeBundle\Entity\Balloon $balloon
+     * @param Balloon $balloon
      */
-    public function removeBalloon(\DOMJudgeBundle\Entity\Balloon $balloon)
+    public function removeBalloon(Balloon $balloon)
     {
         $this->balloons->removeElement($balloon);
     }
@@ -565,11 +630,11 @@ class Submission
     /**
      * Set contest
      *
-     * @param \DOMJudgeBundle\Entity\Contest $contest
+     * @param Contest $contest
      *
      * @return Submission
      */
-    public function setContest(\DOMJudgeBundle\Entity\Contest $contest = null)
+    public function setContest(Contest $contest = null)
     {
         $this->contest = $contest;
 
@@ -579,7 +644,7 @@ class Submission
     /**
      * Get contest
      *
-     * @return \DOMJudgeBundle\Entity\Contest
+     * @return Contest
      */
     public function getContest()
     {
@@ -589,11 +654,11 @@ class Submission
     /**
      * Set problem
      *
-     * @param \DOMJudgeBundle\Entity\Problem $problem
+     * @param Problem $problem
      *
      * @return Submission
      */
-    public function setProblem(\DOMJudgeBundle\Entity\Problem $problem = null)
+    public function setProblem(Problem $problem = null)
     {
         $this->problem = $problem;
 
@@ -603,7 +668,7 @@ class Submission
     /**
      * Get problem
      *
-     * @return \DOMJudgeBundle\Entity\Problem
+     * @return Problem
      */
     public function getProblem()
     {

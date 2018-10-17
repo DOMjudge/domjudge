@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View/download problem texts and sample testcases
  *
@@ -17,7 +17,7 @@ $fdata = calcFreezeData($cdata);
 if (! $fdata['started'] && ! checkrole('jury')) {
     echo '<div class="container submitform"><div class="alert alert-danger" role="alert">Contest has not yet started - cannot submit.</div></div>';
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 $langdata = $DB->q('KEYTABLE SELECT langid AS ARRAYKEY, name, extensions, require_entry_point, entry_point_description
@@ -65,7 +65,7 @@ foreach ($langdata as $langid => $langdata) {
     <select class="custom-select" name="probid" id="probid" required>
 <?php
     foreach ($probs as $probid => $probname) {
-        print '      <option value="' .specialchars($probid). '">' . specialchars($probname) . "</option>\n";
+        print '      <option value="' .specialchars((string)$probid). '">' . specialchars($probname) . "</option>\n";
     }
 ?>
     </select>

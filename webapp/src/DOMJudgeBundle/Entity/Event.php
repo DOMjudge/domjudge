@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace DOMJudgeBundle\Entity;
 
@@ -64,14 +64,14 @@ class Event
     private $action;
 
     /**
-     * @var string
+     * @var resource
      *
-     * @ORM\Column(name="content", type="blob", nullable=true)
+     * @ORM\Column(name="content", type="json_array", nullable=true)
      */
     private $content;
 
     /**
-     * @var \Contest
+     * @var Contest
      *
      * @ORM\ManyToOne(targetEntity="Contest")
      * @ORM\JoinColumns({
@@ -275,7 +275,7 @@ class Event
     /**
      * Set content
      *
-     * @param string $content
+     * @param mixed $content
      *
      * @return Event
      */
@@ -289,7 +289,7 @@ class Event
     /**
      * Get content
      *
-     * @return string
+     * @return mixed
      */
     public function getContent()
     {

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Produce a total score. Call with URL parameter 'static' for
  * output suitable for static HTML pages.
@@ -57,6 +57,6 @@ if ($isstatic && isset($_REQUEST['contest'])) {
 // call the general putScoreBoard function from scoreboard.php
 putScoreBoard($cdata, null, $isstatic, $filter);
 
-echo "<script type=\"text/javascript\">initFavouriteTeams();</script>";
+echo "<script>initFavouriteTeams();</script>";
 
 require(LIBWWWDIR . '/footer.php');

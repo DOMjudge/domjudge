@@ -1,37 +1,32 @@
 {% extends "::base.html.twig" %}
+{% form_theme registration_form 'bootstrap_4_layout.html.twig' %}
 
 {% block title %}Register Account{% endblock %}
 
-{% block body %}
-<h1>Register Account</h1>
+{% block extrahead %}
+<link rel="stylesheet" href="{{asset('style_login.css')}}">
+{% endblock %}
 
-<p>Enter the following information to register your account.</p>
-  {{form_start(registration_form)}}
+{% block body %}
+<div class="additional-logins">
+
+  {{form_start(registration_form, { 'attr': {'class': 'form-signin'} })}}
     {{ form_widget(registration_form._token) }}
+
+    <h1 class="h3 mb-3 font-weight-normal">Register Account</h1>
+    <div class="mb-2">Enter the following information to register your account with DOMjudge.</div>
+
     <div>
       {{form_errors(registration_form)}}
-      {{form_errors(registration_form.username)}}
-      {{form_errors(registration_form.plainPassword)}}
     </div>
-    <table>
-      <tr>
-        <td>{{form_label(registration_form.username)}}:</td>
-        <td>{{form_widget(registration_form.username)}}</td>
-      </tr>
-      <tr>
-        <td>{{form_label(registration_form.plainPassword.first)}}:</td>
-        <td>{{form_widget(registration_form.plainPassword.first)}}</td>
-      </tr>
-      <tr>
-        <td>{{form_label(registration_form.plainPassword.second)}}:</td>
-        <td>{{form_widget(registration_form.plainPassword.second)}}</td>
-      </tr>
-      <tr>
-        <td></td>
-        <td><button type="submit">register</button></td>
-      </tr>
-    </table>
+        {{form_label(registration_form.username, null, { 'label_attr': {'class': 'sr-only'} })}}
+        {{form_widget(registration_form.username, { 'attr': {'placeholder': registration_form.username.vars.label, 'autofocus': true } })}}
+        {{form_label(registration_form.plainPassword.first, null, { 'label_attr': {'class': 'sr-only'} })}}
+        {{form_widget(registration_form.plainPassword.first, { 'attr': {'placeholder': registration_form.plainPassword.first.vars.label} })}}
+        {{form_label(registration_form.plainPassword.second, null, { 'label_attr': {'class': 'sr-only'} })}}
+        {{form_widget(registration_form.plainPassword.second, { 'attr': {'placeholder': registration_form.plainPassword.second.vars.label} })}}
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
   {{form_end(registration_form)}}
-
+</div>
   {% include '::footer.html.twig' %}
 {% endblock %}

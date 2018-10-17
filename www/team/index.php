@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
@@ -22,7 +22,21 @@ echo "initReload(" . $refreshtime . ");\n";
 echo "// -->\n</script>\n";
 
 // Put overview of team submissions (like scoreboard)
-putTeamRow($cdata, array($teamid));
+if ($cdata == NULL) {
+    echo "<h1 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
+        specialchars($teamdata['name']) . "</span>!</h1>\n\n" .
+        "<h2 id=\"contestnotstarted\">There's no active contest for you (yet).</h2>\n\n";
+    require(LIBWWWDIR . '/footer.php');
+    return;
+} else {
+    putTeamRow($cdata, array($teamid));
+}
+
+if (!checkrole('jury') && !$fdata['started']) {
+    // No need to display anything else for non-jury teams at this point.
+    require(LIBWWWDIR . '/footer.php');
+    return;
+}
 
 if ($submitted):
 ?>
@@ -79,7 +93,7 @@ echo "<h3 class=\"teamoverview\">Clarifications</h3>\n";
 if ($clarifications->count() == 0) {
     echo "<p class=\"nodata\">No clarifications.</p>\n\n";
 } else {
-    putClarificationList($clarifications, $teamid);
+    putClarificationList($clarifications, (int)$teamid);
 }
 
 echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
@@ -87,7 +101,7 @@ echo "<h3 class=\"teamoverview\">Clarification Requests</h3>\n";
 if ($requests->count() == 0) {
     echo "<p class=\"nodata\">No clarification requests.</p>\n\n";
 } else {
-    putClarificationList($requests, $teamid);
+    putClarificationList($requests, (int)$teamid);
 }
 
 ?>

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Show source code from the database.
  *
@@ -10,7 +10,7 @@ function parseSourceDiff($difftext)
 {
     $line = strtok($difftext, "\n"); //first line
     $return = '';
-    while (strlen($line) != 0) {
+    while ($line !== false && strlen($line) != 0) {
         // Strip any additional DOS/MAC newline characters:
         $line = trim($line, "\r\n");
         switch (substr($line, 0, 1)) {
@@ -110,26 +110,26 @@ function presentSource($sourcedata, $langid)
         '<h2 class="filename"><a id="source' . specialchars($sourcedata['rank']) .
         '"></a>' .
         specialchars($sourcedata['filename']) . "</h2> <a " .
-        "href=\"show_source.php?id=" . urlencode($sourcedata['submitid']) .
-        "&amp;fetch=" . urlencode($sourcedata['rank']) .
+        "href=\"show_source.php?id=" . urlencode((string)$sourcedata['submitid']) .
+        "&amp;fetch=" . urlencode((string)$sourcedata['rank']) .
         "\"><img class=\"picto\" src=\"../images/b_save.png\" " .
         "alt=\"download\" title=\"download\" /></a> " .
-        "<a href=\"edit_source.php?id=" . urlencode($sourcedata['submitid']) .
-        "&amp;rank=" . urlencode($sourcedata['rank']) . "\">" .
+        "<a href=\"edit_source.php?id=" . urlencode((string)$sourcedata['submitid']) .
+        "&amp;rank=" . urlencode((string)$sourcedata['rank']) . "\">" .
         "<img class=\"picto\" src=\"../images/edit.png\" alt=\"edit\" title=\"edit\" />" .
         "</a>\n\n";
 
     $langid = langidToAce($langid);
 
-    $ace = '<div class="editor" id="editor' . specialchars($sourcedata['rank']) . '">'
+    $ace = '<div class="editor" id="editor' . specialchars((string)$sourcedata['rank']) . '">'
         . specialchars($sourcedata['sourcecode']) . '</div>' .
         '<script>' .
-        'var editor = ace.edit("editor' . specialchars($sourcedata['rank']) . '");' .
+        'var editor = ace.edit("editor' . specialchars((string)$sourcedata['rank']) . '");' .
         'editor.setTheme("ace/theme/eclipse");' .
         'editor.setOptions({ maxLines: Infinity });' .
         'editor.setReadOnly(true);' .
         'editor.getSession().setMode("ace/mode/' . $langid . '");' .
-        'document.getElementById("editor' . specialchars($sourcedata['rank']) . '").editor = editor;' .
+        'document.getElementById("editor' . specialchars((string)$sourcedata['rank']) . '").editor = editor;' .
         '</script>';
 
     return $head . $ace . '</div>';
@@ -230,7 +230,7 @@ if (isset($_GET['fetch'])) {
     header("Content-Length: " . strlen($row['sourcecode']));
 
     echo $row['sourcecode'];
-    exit;
+    return;
 }
 
 $title = "Source: s$id";
@@ -297,10 +297,10 @@ if (!empty($origsources)) {
 }
 
 echo "<h2>Source code for submission <a href=\"submission.php?id=" .
-    urlencode($id) . "\">s" .specialchars($id) . "</a>";
+    urlencode((string)$id) . "\">s" .specialchars((string)$id) . "</a>";
 if (!empty($submission['origsubmitid'])) {
     $origid = $submission['origsubmitid'];
-    echo  " (resubmit of <a href=\"submission.php?id=" . urlencode($origid) . "\">s$origid</a>)";
+    echo  " (resubmit of <a href=\"submission.php?id=" . urlencode((string)$origid) . "\">s$origid</a>)";
 }
 echo "</h2>\n\n";
 if ((string)$submission['entry_point']!=='') {

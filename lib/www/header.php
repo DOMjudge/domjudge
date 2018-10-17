@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Common page header.
  * Before including this, one can set $title, $refresh,
@@ -31,102 +31,40 @@ if (!isset($menu)) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en" xml:lang="en">
+<html lang="en">
 <head>
     <!-- DOMjudge version <?php echo DOMJUDGE_VERSION?> -->
-<meta charset="<?php echo DJ_CHARACTER_SET?>"/>
-<title><?php echo $title?></title>
-<link rel="icon" href="../images/favicon.png" type="image/png" />
+    <meta charset="<?php echo DJ_CHARACTER_SET?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title><?php echo $title?></title>
+
+    <link rel="icon" href="../images/favicon.png">
 <?php if (! IS_JURY): ?>
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link rel="stylesheet" href="../css/bootstrap.min.css?v=<?=ASSET_TAG?>" type="text/css" />
+    <link rel="stylesheet" href="../css/bootstrap.min.css?v=<?=ASSET_TAG?>">
 <?php endif; ?>
-<link rel="stylesheet" href="../style.css?v=<?=ASSET_TAG?>" type="text/css" />
-<link rel="stylesheet" href="../css/octicons/octicons.css?v=<?=ASSET_TAG?>" />
-<script type="text/javascript" src="../js/jquery.min.js?v=<?=ASSET_TAG?>"></script>
-<?php if (! IS_JURY): ?>
-<script type="text/javascript" src="../js/bootstrap.min.js?v<?=ASSET_TAG?>"></script>
-<?php endif; ?>
+    <link rel="stylesheet" href="../style.css?v=<?=ASSET_TAG?>">
+    <link rel="stylesheet" href="../css/octicons/octicons.css?v=<?=ASSET_TAG?>">
+
+    <script src="../js/jquery.min.js?v=<?=ASSET_TAG?>"></script>
+    <script src="../js/bootstrap.min.js?v=<?=ASSET_TAG?>"></script>
 <?php
 if (IS_JURY) {
-    echo "<link rel=\"stylesheet\" href=\"../style_jury.css?v=" . ASSET_TAG . "\" type=\"text/css\" />\n";
-    if (isset($printercss)) {
-        echo "<link rel=\"stylesheet\" href=\"../style_printer.css?v=" . ASSET_TAG . "\" type=\"text/css\" media=\"print\" />\n";
-    }
-    echo "<script type=\"text/javascript\" src=\"../js/jury.js?v=" . ASSET_TAG . "\"></script>\n";
-    echo "<script type=\"text/javascript\" src=\"../js/js.cookie.min.js?v=" . ASSET_TAG . "\"></script>\n";
+    echo "    <link rel=\"stylesheet\" href=\"../style_jury.css?v=" . ASSET_TAG . "\">\n";
     if (isset($jscolor)) {
-        echo "<script type=\"text/javascript\" src=\"" .
-        "../js/jscolor.js?v=" . ASSET_TAG . "\"></script>\n";
+        echo "    <script src=\"../js/jscolor.js?v=" . ASSET_TAG . "\"></script>\n";
     }
     if (isset($jqtokeninput)) {
-        echo "<link rel=\"stylesheet\" href=\"../token-input.css?v=" . ASSET_TAG . "\" type=\"text/css\" />";
-        echo "<script type=\"text/javascript\" src=\"../js/jquery.tokeninput.min.js?v=" . ASSET_TAG . "\"></script>\n";
+        echo "    <link rel=\"stylesheet\" href=\"../token-input.css?v=" . ASSET_TAG . "\">\n";
+        echo "    <script src=\"../js/jquery.tokeninput.min.js?v=" . ASSET_TAG . "\"></script>\n";
     }
-    echo "<script type=\"text/javascript\" src=\"" .
-        "../js/sorttable.js?v=" . ASSET_TAG . "\"></script>\n";
-}
-echo "<script type=\"text/javascript\" src=\"../js/domjudge.js?v=" . ASSET_TAG . "\"></script>\n";
-
-if (! empty($extrahead)) {
-    echo $extrahead;
+    echo "    <script src=\"../js/sorttable.js?v=" . ASSET_TAG . "\"></script>\n";
 }
 ?>
+    <script src="../js/domjudge.js?v=<?=ASSET_TAG?>"></script>
 <?php
-if (isset($refresh)) {
-    ?>
-<script type="text/javascript">
-var refreshHandler = null;
-var refreshEnabled = false;
-function enableRefresh() {
-    if (refreshEnabled) {
-        return;
-    }
-    refreshHandler = setTimeout(function () {
-        window.location = '<?php echo $refresh['url']; ?>';
-    }, <?php echo $refresh['after'] * 1000; ?>);
-    refreshEnabled = true;
-    window.Cookies && Cookies.set('domjudge_refresh', 1);
-}
-
-function disableRefresh() {
-    if (!refreshEnabled) {
-        return;
-    }
-    clearTimeout(refreshHandler);
-    refreshEnabled = false;
-    window.Cookies && Cookies.set('domjudge_refresh', 0);
-}
-
-function toggleRefresh() {
-    if ( refreshEnabled ) {
-        disableRefresh();
-    } else {
-        enableRefresh();
-    }
-
-    var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';
-    $('#refresh-toggle').val(text);
-}
-
-<?php
-if (IS_JURY) {
-        ?>
-$(function () {
-    $('#refresh-toggle').on('click', function () {
-        toggleRefresh();
-    });
-});
-
-<?php
-    }
-    if ($refresh_cookie) {
-        ?>
-enableRefresh();
-<?php
-    } ?>
-</script>
-<?php
+if (! empty($extrahead)) {
+    echo $extrahead;
 }
 ?>
 </head>

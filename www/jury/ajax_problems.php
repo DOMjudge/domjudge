@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 require('init.php');
 header('content-type: application/json');

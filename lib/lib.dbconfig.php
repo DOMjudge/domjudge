@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Functions for handling database stored configuration.
  *
@@ -87,7 +87,7 @@ function dbconfig_store()
         switch ($type = @$row['type']) {
         case 'bool':
         case 'int':
-            if (!preg_match('/^\s*(-){0,1}[0-9]+\s*$/', $row['value'])) {
+            if (!preg_match('/^\s*(-){0,1}[0-9]+\s*$/', (string)$row['value'])) {
                 error("invalid type '$type' for config variable '$key'");
             }
             break;

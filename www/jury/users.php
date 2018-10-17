@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the users
  *
@@ -35,7 +35,7 @@ if ($users->count() == 0) {
             $status = 1;
         }
 
-        $link = '<a href="user.php?id='.urlencode($row['userid']) . '">';
+        $link = '<a href="user.php?id='.urlencode((string)$row['userid']) . '">';
         echo "<tr class=\"" . ($row['enabled'] == 1 ? '' : 'ignore') .  "\">".
             "<td class=\"username\">" . $link .
                 specialchars($row['username'])."</a></td>".
@@ -44,9 +44,9 @@ if ($users->count() == 0) {
             "<td>" . $link . (isset($row['email']) ?
                 specialchars($row['email']) : '&nbsp;') . "</a></td>".
             "<td>" . $link .
-                specialchars($row['roles'])."</a></td>".
+                specialchars((string)$row['roles'])."</a></td>".
             "<td>" . $link . (isset($row['teamid']) ? "t" .
-                specialchars($row['teamid']) : '&nbsp;') . "</a></td>";
+                specialchars((string)$row['teamid']) : '&nbsp;') . "</a></td>";
         echo "<td sorttable_customkey=\"" . $status . "\" class=\"";
         if ($status == 1) {
             echo 'team-ok" title="logged in: ' . printtime($row['last_login']) . '"';

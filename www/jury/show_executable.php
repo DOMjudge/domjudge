@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Show, edit and save files in an executable.
  *
@@ -68,7 +68,7 @@ if (isset($_POST['storeid'])) {
     system("rm -rf '$tmpexecdir'");
 
     header('Location: executable.php?id=' . $id);
-    exit;
+    return;
 }
 
 $id = getRequestID(false);
@@ -119,7 +119,7 @@ for ($j = 0; $j < $zip->numFiles; $j++) {
     if (!mb_check_encoding($content, 'ASCII')) {
         $skippedBinary[] = $filename;
         if ($edit_mode) {
-            echo addHidden("skipped[$j]", 1);
+            echo addHidden("skipped[$j]", '1');
         }
         continue; // skip binary files
     }
@@ -131,9 +131,9 @@ for ($j = 0; $j < $zip->numFiles; $j++) {
     if ($edit_mode) {
         $html .= addTextArea('texta'. $j, $content, 120, 40) . "<br/>\n";
     } elseif (IS_ADMIN) {
-        $html .= "<a href=\"show_executable.php?id=" . urlencode($id) . "&amp;fetch=" . $j . "\">" .
+        $html .= "<a href=\"show_executable.php?id=" . urlencode((string)$id) . "&amp;fetch=" . $j . "\">" .
             "<img class=\"picto\" src=\"../images/b_save.png\" alt=\"download\" title=\"download\" /></a> " .
-            "<a href=\"show_executable.php?edit_source=1&id=" . urlencode($id) . "&amp;rank=" . $j . "\">" .
+            "<a href=\"show_executable.php?edit_source=1&id=" . urlencode((string)$id) . "&amp;rank=" . $j . "\">" .
             "<img class=\"picto\" src=\"../images/edit.png\" alt=\"edit\" title=\"edit\" />" .
             "</a>\n\n";
     }

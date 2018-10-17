@@ -1,8 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace LegacyBundle\Controller;
 
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\ScoreboardService;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,10 +20,16 @@ class FallbackController extends Controller
      */
     private $DOMJudgeService;
 
-    public function __construct($webDir, Container $container, DOMJudgeService $DOMJudgeService)
+    /**
+     * @var ScoreboardService
+     */
+    protected $scoreboardService;
+
+    public function __construct($webDir, Container $container, DOMJudgeService $DOMJudgeService, ScoreboardService $scoreboardService)
     {
         $this->webDir = $webDir;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->scoreboardService = $scoreboardService;
         $this->setContainer($container);
     }
 
@@ -59,6 +66,11 @@ class FallbackController extends Controller
                 break;
             }
         }
+
+        if ($request->server->has('REQUEST_URI')) {
+            $_SERVER['REQUEST_URI'] = $request->server->get('REQUEST_URI');
+        }
+
         if ($apiMatch) {
             if (!$exactApiMatch) {
                 $request->setRequestFormat('json');
@@ -84,8 +96,9 @@ class FallbackController extends Controller
         }
         chdir(dirname($thefile));
         ob_start();
-        global $G_SYMFONY;
+        global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
         $G_SYMFONY = $this->DOMJudgeService;
+        $G_SCOREBOARD_SERVICE = $this->scoreboardService;
         require($thefile);
 
         $http_response_code = http_response_code();

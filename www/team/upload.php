@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Handle web submissions
  *
@@ -17,14 +17,14 @@ if (is_null($cid)) {
     require(LIBWWWDIR . '/header.php');
     echo "<p class=\"nodata\">No active contest</p>\n";
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 $fdata = calcFreezeData($cdata);
 if (!checkrole('jury') && !$fdata['started']) {
     require(LIBWWWDIR . '/header.php');
     echo "<p class=\"nodata\">Contest has not yet started.</p>\n";
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 
@@ -43,7 +43,7 @@ function err($string)
     echo '</div>';
 
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 // rebuild array of filenames, paths to get rid of empty upload fields
@@ -68,6 +68,7 @@ $prob = $DB->q('MAYBETUPLE SELECT probid, name FROM problem
 
 if (! isset($prob)) {
     err("Unable to find problem p$probid");
+    return;
 }
 $probid = $prob['probid'];
 
@@ -79,6 +80,7 @@ $lang = $DB->q('MAYBETUPLE SELECT langid, name, require_entry_point, entry_point
 
 if (! isset($lang)) {
     err("Unable to find language '$langid'");
+    return;
 }
 $langid = $lang['langid'];
 
@@ -87,12 +89,13 @@ if ($lang['require_entry_point']) {
     if (empty($_POST['entry_point'])) {
         $ep_desc = ($lang['entry_point_description'] ? : 'Entry point');
         err("$ep_desc required, but not specified.");
+        return;
     }
     $entry_point = $_POST['entry_point'];
 }
 
-$sid = submit_solution($teamid, $probid, $cid, $langid, $FILEPATHS, $FILENAMES, null, $entry_point);
+$sid = submit_solution($teamid, (int)$probid, $cid, $langid, $FILEPATHS, $FILENAMES, null, $entry_point);
 
 auditlog('submission', $sid, 'added', 'via teampage', null, $cid);
 
-header('Location: index.php?submitted=' . urlencode($sid));
+header('Location: index.php?submitted=' . urlencode((string)$sid));

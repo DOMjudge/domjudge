@@ -1,14 +1,24 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation\Groups;
 use DOMJudgeBundle\Utils\Utils;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Contests that will be run with this install
  * @ORM\Entity()
  * @ORM\Table(name="contest", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @Serializer\VirtualProperty(
+ *     "formalName",
+ *     exp="object.getName()",
+ *     options={@Serializer\Type("string")}
+ * )
+ * @Serializer\VirtualProperty(
+ *     "penaltyTime",
+ *     options={@Serializer\Type("int")}
+ * )
  */
 class Contest
 {
@@ -18,140 +28,149 @@ class Contest
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="cid", options={"comment"="Unique ID"}, nullable=false)
-     * @Groups({"details", "public"})
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $cid;
 
     /**
      * @var string
-     * TODO: ORM\Unique on first 190 characters
      * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Contest ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     * @Serializer\Groups({"Nonstrict"})
+     * @Serializer\SerializedName("external_id")
+     * TODO: ORM\Unique on first 190 characters
      */
     private $externalid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
-     * @Groups({"details", "public"})
      */
     private $name;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Short name for this contest"}, nullable=false)
-     * @Groups({"details", "public"})
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $shortname;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="activatetime", options={"comment"="Time contest becomes visible in team/public views", "unsigned"=true}, nullable=false)
-     * @Groups({"details", "public"})
+     * @Serializer\Exclude()
      */
     private $activatetime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time contest starts, submissions accepted", "unsigned"=true}, nullable=false)
-     * @Groups({"details", "public"})
+     * @Serializer\Exclude()
      */
     private $starttime;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="starttime_enabled", options={"comment"="If disabled, starttime is not used, e.g. to delay contest start"}, nullable=false)
-     * @Groups({"details"})
+     * @Serializer\Exclude()
      */
     private $starttime_enabled;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="freezetime", options={"comment"="Time scoreboard is frozen", "unsigned"=true}, nullable=true)
-     * @Groups({"details", "public"})
+     * @Serializer\Exclude()
      */
     private $freezetime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time after which no more submissions are accepted", "unsigned"=true}, nullable=false)
-     * @Groups({"details", "public"})
+     * @Serializer\Exclude()
      */
     private $endtime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="unfreezetime", options={"comment"="Unfreeze a frozen scoreboard at this time", "unsigned"=true}, nullable=true)
-     * @Groups({"details", "public"})
+     * @Serializer\Exclude()
      */
     private $unfreezetime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="finalizetime", options={"comment"="Time when contest was finalized, null if not yet", "unsigned"=true}, nullable=true)
-     * @Groups({"details", "public"})
+     * @Serializer\Exclude()
      */
     private $finalizetime;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime", options={"comment"="Time contest becomes invisible in team/public views", "unsigned"=true}, nullable=true)
-     * @Groups({"details", "public"})
+     * @Serializer\Exclude()
      */
     private $deactivatetime;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="activatetime_string", options={"comment"="Authoritative absolute or relative string representation of activatetime"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $activatetime_string;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="starttime_string", options={"comment"="Authoritative absolute (only!) string representation of starttime"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $starttime_string;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="freezetime_string", options={"comment"="Authoritative absolute or relative string representation of freezetime"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $freezetime_string;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="endtime_string", options={"comment"="Authoritative absolute or relative string representation of endtime"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $endtime_string;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="unfreezetime_string", options={"comment"="Authoritative absolute or relative string representation of unfreezetime"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $unfreezetime_string;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="deactivatetime_string", options={"comment"="Authoritative absolute or relative string representation of deactivatetime"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $deactivatetime_string;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="enabled", options={"comment"="Whether this contest can be active"}, nullable=false)
-     * @Groups({"details"})
+     * @Serializer\Exclude()
      */
     private $enabled = true;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="process_balloons", options={"comment"="Will balloons be processed for this contest?"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $process_balloons = true;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="public", options={"comment"="Is this contest visible for the public and non-associated teams?"}, nullable=false)
-     * @Groups({"details"})
+     * @Serializer\Exclude()
      */
     private $public = true;
 
@@ -161,38 +180,43 @@ class Contest
      *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid")},
      *                inverseJoinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid")}
      *               )
-     * @Groups({"teams"})
+     * @Serializer\Exclude()
      */
     private $teams;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="contest")
+     * @Serializer\Exclude()
      */
     private $clarifications;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="contest")
+     * @Serializer\Exclude()
      */
     private $submissions;
 
     /**
      * @ORM\OneToMany(targetEntity="ContestProblem", mappedBy="contest")
-     * @Groups({"problems"})
+     * @Serializer\Exclude()
      */
     private $problems;
 
     /**
      * @ORM\OneToMany(targetEntity="InternalError", mappedBy="contest")
+     * @Serializer\Exclude()
      */
     private $internal_errors;
 
     /**
      * @ORM\OneToMany(targetEntity="ScoreCache", mappedBy="contest")
+     * @Serializer\Exclude()
      */
     private $scorecache;
 
     /**
      * @ORM\OneToMany(targetEntity="RankCache", mappedBy="contest")
+     * @Serializer\Exclude()
      */
     private $rankcache;
 
@@ -326,6 +350,19 @@ class Contest
     }
 
     /**
+     * Get the start time for this contest
+     *
+     * @return \DateTime|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("start_time")
+     * @Serializer\Type("DateTime")
+     */
+    public function getStartTimeObject()
+    {
+        return $this->getStarttimeString() ? new \DateTime($this->getStarttimeString()) : null;
+    }
+
+    /**
      * Set starttime_enabled
      *
      * @param boolean $starttime_enabled
@@ -367,6 +404,20 @@ class Contest
     public function getEndtime()
     {
         return $this->endtime;
+    }
+
+    /**
+     * Get the end time for this contest
+     *
+     * @return \DateTime|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("end_time")
+     * @Serializer\Type("DateTime")
+     * @Serializer\Groups({"Nonstrict"})
+     */
+    public function getEndTimeObject()
+    {
+        return $this->getEndtimeString() ? new \DateTime($this->getEndtimeString()) : null;
     }
 
     /**
@@ -421,7 +472,7 @@ class Contest
     public function setActivatetimeString($activatetimeString)
     {
         $this->activatetime_string = $activatetimeString;
-        $this->activatetime = $this->getAbsoluteTime($activatetimeString);
+        $this->activatetime        = $this->getAbsoluteTime($activatetimeString);
 
         return $this;
     }
@@ -476,7 +527,7 @@ class Contest
     public function setFreezetimeString($freezetimeString)
     {
         $this->freezetime_string = $freezetimeString;
-        $this->freezetime = $this->getAbsoluteTime($freezetimeString);
+        $this->freezetime        = $this->getAbsoluteTime($freezetimeString);
 
         return $this;
     }
@@ -501,7 +552,7 @@ class Contest
     public function setEndtimeString($endtimeString)
     {
         $this->endtime_string = $endtimeString;
-        $this->endtime = $this->getAbsoluteTime($endtimeString);
+        $this->endtime        = $this->getAbsoluteTime($endtimeString);
 
         return $this;
     }
@@ -526,7 +577,7 @@ class Contest
     public function setUnfreezetimeString($unfreezetimeString)
     {
         $this->unfreezetime_string = $unfreezetimeString;
-        $this->unfreezetime = $this->getAbsoluteTime($unfreezetimeString);
+        $this->unfreezetime        = $this->getAbsoluteTime($unfreezetimeString);
 
         return $this;
     }
@@ -551,7 +602,7 @@ class Contest
     public function setDeactivatetimeString($deactivatetimeString)
     {
         $this->deactivatetime_string = $deactivatetimeString;
-        $this->deactivatetime = $this->getAbsoluteTime($deactivatetimeString);
+        $this->deactivatetime        = $this->getAbsoluteTime($deactivatetimeString);
 
         return $this;
     }
@@ -911,6 +962,30 @@ class Contest
     }
 
     /**
+     * Get duration for this contest
+     *
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\Type("string")
+     */
+    public function getDuration()
+    {
+        return Utils::relTime($this->getEndtime() - $this->starttime);
+    }
+
+    /**
+     * Get scoreboard freeze duration for this contest
+     *
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\Type("string")
+     */
+    public function getScoreboardFreezeDuration()
+    {
+        return Utils::relTime($this->getEndtime() - $this->getFreezetime());
+    }
+
+    /**
      * Helper function to serialize this for the REST API
      *
      * @return array
@@ -918,18 +993,18 @@ class Contest
     public function serializeForAPI($penalty_time, $strict = false)
     {
         $res = [
-            'id'                         => (string)$this->getCid(),
-            'name'                       => $this->getName(),
-            'formal_name'                => $this->getName(),
-            'start_time'                 => Utils::absTime($this->getStarttime()),
-            'duration'                   => Utils::relTime($this->getEndtime() - $this->starttime),
-            'scoreboard_freeze_duration' => Utils::relTime($this->getEndtime() - $this->getFreezetime()),
-            'penalty_time'               => (int)$penalty_time,
+            'id' => (string)$this->getCid(),
+            'name' => $this->getName(),
+            'formal_name' => $this->getName(),
+            'start_time' => Utils::absTime($this->getStarttime()),
+            'duration' => $this->getDuration(),
+            'scoreboard_freeze_duration' => $this->getScoreboardFreezeDuration(),
+            'penalty_time' => (int)$penalty_time,
         ];
         if (!$strict) {
             $res['external_id'] = $this->getExternalId();
-            $res['shortname'] = $this->getShortname();
-            $res['end_time'] = Utils::absTime($this->getEndtime());
+            $res['shortname']   = $this->getShortname();
+            $res['end_time']    = Utils::absTime($this->getEndtime());
         }
         return $res;
     }
@@ -958,21 +1033,25 @@ class Contest
             'running' => false,
         );
 
+        if (!$this->getStarttimeEnabled()) {
+            return $fdata;
+        }
+
         // Show final scores if contest is over and unfreezetime has been
         // reached, or if contest is over and no freezetime had been set.
         // We can compare $now and the dbfields stringwise.
-        $now = Utils::now();
-        $fdata['showfinal']  = ($this->getFreezetime()===null &&
-                                Utils::difftime($this->getEndtime(), $now) <= 0) ||
-                               ($this->getUnfreezetime()!==null &&
-                                Utils::difftime($this->getUnfreezetime(), $now) <= 0);
+        $now                = Utils::now();
+        $fdata['showfinal'] = ($this->getFreezetime() === null &&
+                Utils::difftime($this->getEndtime(), $now) <= 0) ||
+            ($this->getUnfreezetime() !== null &&
+                Utils::difftime($this->getUnfreezetime(), $now) <= 0);
         // Freeze scoreboard if freeze time has been reached and
         // we're not showing the final score yet.
-        $fdata['showfrozen'] = !$fdata['showfinal'] && $this->getFreezetime()!==null &&
-                               Utils::difftime($this->getFreezetime(), $now) <= 0;
+        $fdata['showfrozen'] = !$fdata['showfinal'] && $this->getFreezetime() !== null &&
+            Utils::difftime($this->getFreezetime(), $now) <= 0;
         // contest is active but has not yet started
-        $fdata['started'] = Utils::difftime($this->getStarttime(), $now) <= 0;
-        $fdata['stopped'] = Utils::difftime($this->getEndtime(), $now) <= 0;
+        $fdata['started'] = Utils::difftime((float)$this->getStarttime(), $now) <= 0;
+        $fdata['stopped'] = Utils::difftime((float)$this->getEndtime(), $now) <= 0;
         $fdata['running'] = ($fdata['started'] && !$fdata['stopped']);
 
         return $fdata;
@@ -984,13 +1063,13 @@ class Contest
             return null;
         } elseif (preg_match('/^[+-][0-9]+:[0-9]{2}(:[0-9]{2}(\.[0-9]{0,6})?)?$/', $time_string)) {
             // FIXME: dedup code with non symfony code
-            $sign = ($time_string[0] == '-' ? -1 : +1);
+            $sign           = ($time_string[0] == '-' ? -1 : +1);
             $time_string[0] = 0;
-            $times = explode(':', $time_string, 3);
+            $times          = explode(':', $time_string, 3);
             if (count($times) == 2) {
                 $times[2] = '00';
             }
-            $hours = $times[0];
+            $hours   = $times[0];
             $minutes = $times[1];
             $seconds = $times[2];
             $seconds = $seconds + 60 * ($minutes + 60 * $hours);

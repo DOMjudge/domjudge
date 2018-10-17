@@ -31,8 +31,9 @@ MEMRESERVED=$((MEMSTACK + MEMJVM))
 
 # Java needs filename to match main class:
 if [ -z "$ENTRY_POINT" ]; then
-	echo "Info: no ENTRY_POINT provided, trying to detect main class."
+	[ -n "$DEBUG" ] && echo "Debug: no ENTRY_POINT provided, trying to detect main class."
 else
+	[ -n "$DEBUG" ] && echo "Debug: using main class provided by ENTRY_POINT='$ENTRY_POINT'."
 	MAINCLASS="$ENTRY_POINT"
 fi
 
@@ -68,7 +69,7 @@ if [ -z "$MAINCLASS" ]; then
 	EXITCODE=$?
 
 	# Report the entry point, so it can be saved, e.g. for later replay:
-	echo "Detected entry_point: $MAINCLASS"
+	echo "Info: detected entry_point: $MAINCLASS"
 else
 	cat $TMPFILE
 	rm -f $TMPFILE

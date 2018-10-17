@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the problems
  *
@@ -50,14 +50,14 @@ if ($res->count() == 0) {
         if (!isset($activecontests[$row['probid']])) {
             $classes[] = 'disabled';
         }
-        $link = '<a href="problem.php?id=' . urlencode($row['probid']) . '">';
+        $link = '<a href="problem.php?id=' . urlencode((string)$row['probid']) . '">';
 
         echo "<tr class=\"" . implode(' ', $classes) .
             "\"><td>" . $link . "p" .
-                specialchars($row['probid'])."</a>".
+                specialchars((string)$row['probid'])."</a>".
             "</td><td>" . $link . specialchars($row['name'])."</a>".
             "</td><td>".
-            $link . specialchars(isset($activecontests[$row['probid']])?$activecontests[$row['probid']]:0) . "</a>" .
+            $link . specialchars((string)($activecontests[$row['probid']] ?? 0)) . "</a>" .
             "</td><td>" . $link . (float)$row['timelimit'] . "</a>" .
             "</td><td>" . $link . (isset($row['memlimit']) ? (int)$row['memlimit'] : 'default') . "</a>" .
             "</td><td>" . $link . (isset($row['outputlimit']) ? (int)$row['outputlimit'] : 'default') . "</a>" .
@@ -65,7 +65,7 @@ if ($res->count() == 0) {
             "\">" . $row['testcases'] . "</a></td>";
         if (!empty($row['problemtext_type'])) {
             echo '<td title="view problem description">' .
-                 '<a href="problem.php?id=' . urlencode($row['probid']) .
+                 '<a href="problem.php?id=' . urlencode((string)$row['probid']) .
                  '&amp;cmd=viewtext"><img src="../images/' . urlencode($row['problemtext_type']) .
                  '.png" alt="problem text" /></a></td>';
         } else {

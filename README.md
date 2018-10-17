@@ -4,10 +4,10 @@ DOMjudge
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
 [![Code Climate](https://codeclimate.com/github/DOMjudge/domjudge/badges/gpa.svg)](https://codeclimate.com/github/DOMjudge/domjudge)
 
-This is the Programming Contest Jury System "DOMjudge" version 6.0.0DEV
+This is the Programming Contest Jury System "DOMjudge" version 6.1.0DEV
 
 DOMjudge is a system for running a programming contest, like the
-ACM ICPC regional and world championship programming contests.
+ICPC regional and world championship programming contests.
 
 
 Documentation
@@ -69,7 +69,6 @@ Various JavaScript libraries/snippets are included under www/js/:
 - Ace editor: licenced under the BSD licence, see COPYING.BSD.
 - jQuery: licenced under the MIT licence, see COPYING.MIT.
 - jQuery TokenInput: dual licensed under GPL and MIT licences, see COPYING and COPYING.MIT.
-- JavaScript Cookie: licenced under the MIT licence, see COPYING.MIT.
 
 The Spyc PHP YAML parser is included, licenced under the MIT licence,
 see COPYING.MIT.

@@ -1,12 +1,18 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Affilitations for teams (e.g.: university, company)
  * @ORM\Entity()
  * @ORM\Table(name="team_affiliation", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @Serializer\VirtualProperty(
+ *     "icpcId",
+ *     exp="object.getAffilid()",
+ *     options={@Serializer\Type("string")}
+ * )
  */
 class TeamAffiliation
 {
@@ -15,6 +21,8 @@ class TeamAffiliation
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="affilid", options={"comment"="Unique ID"}, nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $affilid;
 
@@ -22,12 +30,14 @@ class TeamAffiliation
      * @var string
      * TODO: ORM\Unique on first 190 characters
      * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Team affiliation ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $externalid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="shortname", length=32, options={"comment"="Short descriptive name"}, nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $shortname;
 
@@ -40,17 +50,20 @@ class TeamAffiliation
     /**
      * @var string
      * @ORM\Column(type="string", length=3, name="country", options={"comment"="ISO 3166-1 alpha-3 country code"}, nullable=true)
+     * @Serializer\Expose(if="context.getAttribute('domjudge_service').dbconfig_get('show_flags', true)")
      */
     private $country;
 
     /**
      * @var string
      * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $comments;
 
     /**
      * @ORM\OneToMany(targetEntity="Team", mappedBy="affiliation")
+     * @Serializer\Exclude()
      */
     private $teams;
 

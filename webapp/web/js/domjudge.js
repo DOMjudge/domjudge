@@ -778,3 +778,67 @@ function clarificationAppendAnswer(replace = false) {
 function confirmLogout() {
 	return confirm("Really log out?");
 }
+
+function addRow(templateid, tableid) {
+    var $template = $('#' + templateid);
+    var $table = $('#' + tableid);
+    var maxId = $table.data('max-id');
+
+    if ( maxId === undefined ) {
+        // If not set on the table yet, we start at 0
+        maxId = 0;
+    } else {
+        // Oterwise we should add 1 to the old value
+        maxId++;
+    }
+
+    // Set it back on the table
+    $table.data('max-id', maxId);
+
+    var templateContents = $template.text().replace(/\{id\}/g, maxId);
+
+    $('tbody', $table).append(templateContents);
+}
+
+// Add the first row of a table if none exist yet
+function addFirstRow(templateid, tableid) {
+    var $table = $('#' + tableid);
+    var maxId = $table.data('max-id');
+
+    if ( maxId === undefined || maxId === 0 ) {
+        addRow(templateid, tableid);
+    }
+}
+
+var refreshHandler = null;
+var refreshEnabled = false;
+function enableRefresh($url, $after) {
+    if (refreshEnabled) {
+        return;
+    }
+    refreshHandler = setTimeout(function () {
+        window.location = $url;
+    }, $after*1000);
+    refreshEnabled = true;
+    setCookie('domjudge_refresh', 1);
+}
+
+function disableRefresh() {
+    if (!refreshEnabled) {
+        return;
+    }
+    clearTimeout(refreshHandler);
+    refreshEnabled = false;
+    setCookie('domjudge_refresh', 0);
+}
+
+function toggleRefresh($url, $after) {
+    if ( refreshEnabled ) {
+        disableRefresh();
+    } else {
+        enableRefresh($url, $after);
+    }
+
+    var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';
+    $('#refresh-toggle').val(text);
+}

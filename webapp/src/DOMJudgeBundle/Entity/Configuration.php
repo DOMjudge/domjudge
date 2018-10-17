@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -27,7 +27,7 @@ class Configuration
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="value", options={"comment"="Content of the configuration variable (JSON encoded)"}, nullable=true)
+     * @ORM\Column(type="json_array", length=4294967295, name="value", options={"comment"="Content of the configuration variable (JSON encoded)"}, nullable=true)
      */
     private $value;
 
@@ -36,6 +36,12 @@ class Configuration
      * @ORM\Column(type="string", name="type", length=32, options={"comment"="Type of the value (metatype for use in the webinterface)"}, nullable=true)
      */
     private $type;
+
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", name="public", options={"comment"="Is this variable publicly visible?"}, nullable=false)
+     */
+    private $public = false;
 
     /**
      * @var string
@@ -80,7 +86,7 @@ class Configuration
     /**
      * Set value
      *
-     * @param string $value
+     * @param mixed $value
      *
      * @return Configuration
      */
@@ -94,7 +100,7 @@ class Configuration
     /**
      * Get value
      *
-     * @return string
+     * @return mixed
      */
     public function getValue()
     {
@@ -123,6 +129,30 @@ class Configuration
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * Set public
+     *
+     * @param bool $public
+     *
+     * @return Configuration
+     */
+    public function setPublic(bool $public)
+    {
+        $this->public = $public;
+
+        return $this;
+    }
+
+    /**
+     * Get public
+     *
+     * @return bool
+     */
+    public function getPublic()
+    {
+        return $this->public;
     }
 
     /**

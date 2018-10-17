@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Marks a set of submissions for rejudging, limited by key=value
  * key has to be a full quantifier, e.g. "submission.teamid"
@@ -16,7 +16,7 @@ $table        = @$_POST['table'];
 $id           = @$_POST['id'];
 $reason       = @$_POST['reason'];
 $include_all  = !empty($_POST['include_all']);
-$full_rejudge = @$_POST['full_rejudge'];
+$full_rejudge = (bool)@$_POST['full_rejudge'];
 if (!isset($full_rejudge)) {
     $full_rejudge = false;
 }
@@ -49,7 +49,7 @@ $rejudgingid = rejudge(
 
 /** redirect back. */
 if ($full_rejudge) {
-    header('Location: rejudging.php?id='.urlencode($rejudgingid));
+    header('Location: rejudging.php?id='.urlencode((string)$rejudgingid));
 } else {
-    header('Location: '.$table.'.php?id='.urlencode($id));
+    header('Location: '.$table.'.php?id='.urlencode((string)$id));
 }

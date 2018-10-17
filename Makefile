@@ -43,7 +43,7 @@ ifeq ($(SUBMITCLIENT_ENABLED),yes)
 build: submitclient
 endif
 
-ifneq ($(DOC_BUILD_ENABLED),no)
+ifeq ($(BUILD_DOCS),yes)
 all: docs
 dist: distdocs
 endif
@@ -209,6 +209,8 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 # Make tmpdir, submitdir writable for webserver, because
 # judgehost-create-dirs sets wrong permissions:
 	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
+# Run Symfony in DEV mode under Apache:
+	sed -i 's/^\(RewriteRule .*\) app\.php /\1 app_dev.php /' $(CURDIR)/etc/apache.conf
 # Make sure we're running from a clean state:
 	$(MAKE) -C webapp clear-cache
 	@echo ""

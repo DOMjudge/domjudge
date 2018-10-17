@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Error handling functions
  *
@@ -140,7 +140,7 @@ function debug()
  */
 function exception_handler(Throwable $e)
 {
-    error($e->getMessage());
+    error($e->getMessage() . ( (defined('DEBUG') && DEBUG) ? " in " . $e->getFile() . " line " . $e->getLine() : ''));
 }
 
 set_exception_handler('exception_handler');

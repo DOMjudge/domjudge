@@ -1,17 +1,22 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\DependencyInjection\ContainerInterface as Container;
-
+use DOMJudgeBundle\Entity\Configuration;
+use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
+use Symfony\Component\DependencyInjection\ContainerInterface as Container;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class DOMJudgeService
 {
     protected $em;
     protected $request;
     protected $container;
+    protected $hasAllRoles = false;
+
     public function __construct(EntityManagerInterface $em, RequestStack $requestStack, Container $container)
     {
         $this->em = $em;
@@ -40,24 +45,33 @@ class DOMJudgeService
      * values can be used.
      *
      * When $name is null, then all variables will be returned.
+     * @param string|null $name
+     * @param mixed $default
+     * @param bool $onlyifpublic
+     * @return Configuration[]|mixed
+     * @throws \Exception
      */
-    public function dbconfig_get(string $name, $default = null)
+    public function dbconfig_get($name, $default = null, bool $onlyifpublic = false)
     {
         if (is_null($name)) {
             $all_configs = $this->em->getRepository('DOMJudgeBundle:Configuration')->findAll();
-            $ret = array();
+            $ret         = array();
+            /** @var Configuration $config */
             foreach ($all_configs as $config) {
-                $ret[$config->getName()] = $config->getValue();
+                if (!$onlyifpublic || $config->getPublic()) {
+                    $ret[$config->getName()] = $config->getValue();
+                }
             }
             return $ret;
         }
 
+        /** @var Configuration $config */
         $config = $this->em->getRepository('DOMJudgeBundle:Configuration')->findOneByName($name);
-        if (!empty($config)) {
+        if (!empty($config) && (!$onlyifpublic || $config->getPublic())) {
             return $config->getValue();
         }
 
-        if ($default===null) {
+        if ($default === null) {
             throw new \Exception("Configuration variable '$name' not found.");
         }
         return $default;
@@ -95,7 +109,7 @@ class DOMJudgeService
             //                           deactivatetime > UNIX_TIMESTAMP() )
             //                     ORDER BY activatetime", $onlyofteam);
         } elseif ($onlyofteam === -1) {
-            $qb->addWhere('c.public = 1');
+            $qb->andWhere('c.public = 1');
             // $contests = $DB->q("SELECT * FROM contest
             //                     WHERE enabled = 1 AND public = 1 ${extra}
             //                     AND ( deactivatetime IS NULL OR
@@ -117,17 +131,34 @@ class DOMJudgeService
         return $contests;
     }
 
+    /**
+     * Get the contest with the given contest ID
+     * @param int $cid
+     * @return Contest|null
+     */
+    public function getContest($cid)
+    {
+        return $this->em->getRepository(Contest::class)->find($cid);
+    }
+
+    /**
+     * Get the team with the given team ID
+     * @param int $teamid
+     * @return Team|null
+     */
+    public function getTeam($teamid)
+    {
+        return $this->em->getRepository(Team::class)->find($teamid);
+    }
+
     public function checkrole(string $rolename, bool $check_superset = true) : bool
     {
-        $token = $this->container->get('security.token_storage')->getToken();
-        if ($token == null) {
-            return false;
+        if ($this->hasAllRoles) {
+            return true;
         }
-        $user =$token->getUser();
 
-        // Ignore user objects if they aren't a DOMJudgeBundle user
-        // Covers cases where users are not logged in
-        if (!is_a($user, 'DOMJudgeBundle\Entity\User')) {
+        $user = $this->getUser();
+        if ($user === null) {
             return false;
         }
 
@@ -145,8 +176,46 @@ class DOMJudgeService
       return $clientIP;
     }
 
+    /**
+     * Get the logged in user
+     * @return User|null
+     */
+    public function getUser()
+    {
+        $token = $this->container->get('security.token_storage')->getToken();
+        if ($token == null) {
+            return null;
+        }
+
+        $user = $token->getUser();
+
+        // Ignore user objects if they aren't a DOMJudgeBundle user
+        // Covers cases where users are not logged in
+        if (!is_a($user, 'DOMJudgeBundle\Entity\User')) {
+            return null;
+        }
+
+        return $user;
+    }
+
     public function getHttpKernel()
     {
         return $this->container->get('http_kernel');
+    }
+
+    /**
+     * @return bool
+     */
+    public function getHasAllRoles(): bool
+    {
+        return $this->hasAllRoles;
+    }
+
+    /**
+     * @param bool $hasAllRoles
+     */
+    public function setHasAllRoles(bool $hasAllRoles)
+    {
+        $this->hasAllRoles = $hasAllRoles;
     }
 }

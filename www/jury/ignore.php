@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Change the valid status of a given submission.
  *
@@ -34,11 +34,10 @@ $sdata = $DB->q('TUPLE SELECT submitid, cid, teamid, probid
 
 // KLUDGE: We can't log an "undelete", so we re-"create".
 // FIXME: We should also delete/recreate any dependent judging(runs).
-eventlog('submission', $id, ($val ? 'create' : 'delete'), $cid);
+eventlog('submission', $id, ($val ? 'create' : 'delete'), $sdata['cid']);
 auditlog('submission', $id, 'marked ' . ($val?'valid':'invalid'));
 
-calcScoreRow($sdata['cid'], $sdata['teamid'], $sdata['probid']);
+calcScoreRow((int)$sdata['cid'], (int)$sdata['teamid'], (int)$sdata['probid']);
 
 /* redirect back. */
-header('Location: submission.php?id=' .
-    urlencode($sdata['submitid']));
+header('Location: submission.php?id=' . urlencode((string)$sdata['submitid']));

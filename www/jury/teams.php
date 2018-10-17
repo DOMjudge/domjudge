@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the teams
  *
@@ -70,16 +70,16 @@ if ($teams->count() == 0) {
             $status = 3;
             $numcor = (int)$ncorrect[$row['teamid']]['cnt'];
         }
-        $link = '<a href="team.php?id='.urlencode($row['teamid']) . '">';
+        $link = '<a href="team.php?id='.urlencode((string)$row['teamid']) . '">';
         echo "<tr class=\"category" . (int)$row['categoryid']  .
             ($row['enabled'] == 1 ? '' : ' ignore') .  "\">".
             "<td>" . $link . "t" .
-                specialchars($row['teamid'])."</a></td>".
+                specialchars((string)$row['teamid'])."</a></td>".
             "<td>" . $link .
                 specialchars($row['name'])."</a></td>".
             "<td>" . $link .
                 specialchars($row['catname'])."</a></td>".
-            "<td title=\"".specialchars($row['affname'])."\">" . $link .
+            "<td title=\"".specialchars($row['affname'] ?? '')."\">" . $link .
                 ($row['affshortname'] ? specialchars($row['affshortname']) : '&nbsp;') .
             "</a></td><td>" . $link . $row['numcontests']."</a></td><td title=\"";
 

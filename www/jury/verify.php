@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Change the verification status of a given judging.
  *
@@ -64,5 +64,5 @@ if ($val) {
     header('Location: '.$redirect);
 } else {
     header('Location: submission.php?id=' .
-           urlencode($jdata['submitid']) . '&jid=' . urlencode($id));
+           urlencode((string)$jdata['submitid']) . '&jid=' . urlencode($id));
 }

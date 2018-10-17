@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Part of the DOMjudge Programming Contest Jury System and licenced
  * under the GNU GPL. See README and COPYING for details.
@@ -12,11 +12,9 @@ require(LIBWWWDIR . '/header.php');
 
 echo "<h1>DOMjudge Jury interface</h1>\n\n";
 
-if (is_readable('../images/DOMjudgelogo.png')) {
-    echo "<p><a href=\"https://www.domjudge.org/\">" .
-        "<img src=\"../images/DOMjudgelogo.png\" id=\"djlogo\" " .
-        "alt=\"DOMjudge logo\" title=\"The DOMjudge logo: free as in beer!\" /></a></p>\n\n";
-}
+echo "<p><a href=\"https://www.domjudge.org/\">" .
+    "<img src=\"../images/DOMjudgelogo.png\" id=\"djlogo\" " .
+    "alt=\"DOMjudge logo\" title=\"The DOMjudge logo: free as in beer!\" /></a></p>\n\n";
 
 ?>
 

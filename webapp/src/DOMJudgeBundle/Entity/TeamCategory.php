@@ -1,12 +1,23 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Categories for teams (e.g.: participants, observers, ...)
  * @ORM\Entity()
  * @ORM\Table(name="team_category", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @Serializer\VirtualProperty(
+ *     "hidden",
+ *     exp="!object.getVisible()",
+ *     options={@Serializer\Type("boolean")}
+ * )
+ * @Serializer\VirtualProperty(
+ *     "icpc_id",
+ *     exp="object.getCategoryid()",
+ *     options={@Serializer\Type("string")}
+ * )
  */
 class TeamCategory
 {
@@ -15,6 +26,8 @@ class TeamCategory
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="categoryid", options={"comment"="Unique ID"}, nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $categoryid;
 
@@ -27,23 +40,27 @@ class TeamCategory
     /**
      * @var int
      * @ORM\Column(type="smallint", name="sortorder", options={"comment"="Where to sort this category on the scoreboard"}, nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $sortorder = 0;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=32, name="color", options={"comment"="Background colour on the scoreboard"}, nullable=true)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $color;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="visible", options={"comment"="Are teams in this category visible?"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $visible = true;
 
     /**
      * @ORM\OneToMany(targetEntity="Team", mappedBy="category")
+     * @Serializer\Exclude()
      */
     private $teams;
 

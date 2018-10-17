@@ -3,11 +3,21 @@ domjudge:
     type: annotation
     prefix: /
 
-domjudge_api_v4:
+# Add the new API controllers here as well, to load them without the /v4/ prefix
+domjudge_api_new:
     type: rest
-    resource: '@DOMJudgeBundle/Controller/APIController.php'
-    prefix: /api/v4
+    resource: '@DOMJudgeBundle/Controller/API/'
     defaults: { _format: "json" }
+
+app.swagger_ui:
+    path: /api/doc
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger_ui }
+
+app.swagger:
+    path: /api/doc.json
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger }
 
 logout:
     path: /logout

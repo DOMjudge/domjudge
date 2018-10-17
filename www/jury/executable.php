@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View an executable
  *
@@ -17,7 +17,7 @@ if (isset($_GET['cmd'])) {
 } else {
     $refresh = array(
         'after' => 15,
-        'url' => $pagename.'?id='.urlencode($id),
+        'url' => $pagename.'?id='.urlencode((string)$id),
     );
 }
 
@@ -63,7 +63,10 @@ if (isset($_POST['upload'])) {
                 $desc = $DB->q('VALUE SELECT description FROM executable WHERE execid=%s', $id);
                 $type = $DB->q('VALUE SELECT type FROM executable WHERE execid=%s', $id);
             }
-            $ini_array = parse_ini_string($zip->getFromName($prop_file));
+            $prop_data = $zip->getFromName($prop_file);
+            if ($prop_data!==FALSE) {
+                $ini_array = parse_ini_string($prop_data);
+            }
             if (!empty($ini_array)) {
                 $newid = $ini_array['execid'];
                 $desc = $ini_array['description'];
@@ -91,7 +94,7 @@ if (isset($_POST['upload'])) {
             );
         }
         if (count($_FILES['executable_archive']['tmp_name']) == 1) {
-            header('Location: '.$pagename.'?id='.urlencode((empty($newid)?$id:$newid)));
+            header('Location: '.$pagename.'?id='.urlencode((string)(empty($newid)?$id:$newid)));
         } else {
             header('Location: executables.php');
         }
@@ -163,7 +166,7 @@ if (class_exists("ZipArchive")) {
 }
 
 require(LIBWWWDIR . '/footer.php');
-exit;
+return;
 
 endif;
 
@@ -177,12 +180,12 @@ if (! $data) {
 
 echo "<h1>Executable ".specialchars($id)."</h1>\n\n";
 if (IS_ADMIN) {
-    echo addForm($pagename . '?id=' . urlencode($id), 'post', null, 'multipart/form-data') . "<p>\n" .
-        addHidden('id', $id) . "</p>\n";
+    echo addForm($pagename . '?id=' . urlencode((string)$id), 'post', null, 'multipart/form-data') . "<p>\n" .
+        addHidden('id', (string)$id) . "</p>\n";
 }
 ?>
 <table>
-<tr><td>ID:          </td><td class="execid"><?php echo specialchars($data['execid'])?></td></tr>
+<tr><td>ID:          </td><td class="execid"><?php echo specialchars((string)$data['execid'])?></td></tr>
 <tr><td>Name:        </td><td><?php echo specialchars($data['description'])?></td></tr>
 <tr><td>md5sum:      </td><td><?php echo specialchars($data['md5sum'])?></td></tr>
 <tr><td>type:        </td><td><?php echo specialchars($data['type'])?></td></tr>
@@ -238,7 +241,7 @@ if (IS_ADMIN) {
     echo addEndForm();
 
     echo "<p>" .
-        '<a href="executable.php?fetch&amp;id=' . urlencode($id) .
+        '<a href="executable.php?fetch&amp;id=' . urlencode((string)$id) .
         '"><img src="../images/b_save.png" ' .
         ' title="export executable as zip-file" alt="export" /></a>' .
         editLink('executable', $id) . "\n" .

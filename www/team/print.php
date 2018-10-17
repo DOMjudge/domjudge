@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Upload form for documents to be sent to the printer.
  *
@@ -23,7 +23,7 @@ $fdata = calcFreezeData($cdata);
 if (!checkrole('jury') && !$fdata['started']) {
     echo "<div class=\"alert alert-secondary\">Contest has not yet started.</div>\n";
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 if (isset($_POST['langid'])) {

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Code to import and export HTML formats as specified by the ICPC
  * Contest Control System Standard.
@@ -81,7 +81,7 @@ require(LIBWWWDIR . '/impexp_header.php');
         <?php foreach ($clarifications as $clarification): ?>
             <?php
             if (!empty($clarification['sender'])) {
-                $from = specialchars($team_names[$clarification['sender']]);
+                $from = specialchars((string)$team_names[$clarification['sender']]);
             } else {
                 $from = 'Jury' . ' (' . specialchars($clarification['jury_member']) . ')';
             }

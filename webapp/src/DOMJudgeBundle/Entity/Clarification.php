@@ -1,7 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Utils\Utils;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Clarification requests by teams and responses by the jury
@@ -14,42 +16,53 @@ class Clarification
      * @var int
      * @ORM\Id
      * @ORM\Column(type="integer", name="clarid", options={"comment"="Unique ID"}, nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $clarid;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $cid;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="respid", options={"comment"="In reply to clarification ID"}, nullable=true)
+     * @Serializer\SerializedName("reply_to_id")
+     * @Serializer\Type("string")
      */
     private $respid;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time sent", "unsigned"=true}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $submittime;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="sender", options={"comment"="Team ID, null means jury"}, nullable=true)
+     * @Serializer\SerializedName("from_team_id")
+     * @Serializer\Type("string")
      */
     private $sender_id;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="recipient", options={"comment"="Team ID, null means to jury or to all"}, nullable=true)
+     * @Serializer\SerializedName("to_team_id")
+     * @Serializer\Type("string")
      */
     private $recipient_id;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="jury_member", length=255, options={"comment"="Name of jury member who answered this"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $jury_member;
 
@@ -57,59 +70,70 @@ class Clarification
      * @var int
      *
      * @ORM\Column(type="integer", name="probid", options={"comment"="Problem associated to this clarification"}, nullable=true)
+     * @Serializer\SerializedName("problem_id")
+     * @Serializer\Type("string")
      */
     private $probid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="category", length=255, options={"comment"="Category associated to this clarification; only set for non-problem clars"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $category;
 
     /**
      * @var string
      * @ORM\Column(type="text", length=4294967295, name="body", options={"comment"="Team member names (freeform)"}, nullable=true)
+     * @Serializer\SerializedName("text")
      */
     private $body;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="answered", options={"comment"="Has been answered by jury?"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $answered = false;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="clarifications")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
+     * @Serializer\Exclude()
      */
     private $problem;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="clarifications")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @Serializer\Exclude()
      */
     private $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Clarification", inversedBy="replies")
      * @ORM\JoinColumn(name="respid", referencedColumnName="clarid")
+     * @Serializer\Exclude()
      */
     private $in_reply_to;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="in_reply_to")
+     * @Serializer\Exclude()
      */
     private $replies;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="sent_clarifications")
      * @ORM\JoinColumn(name="sender", referencedColumnName="teamid")
+     * @Serializer\Exclude()
      */
     private $sender;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="received_clarifications")
      * @ORM\JoinColumn(name="recipient", referencedColumnName="teamid")
+     * @Serializer\Exclude()
      */
     private $recipient;
 
@@ -216,6 +240,32 @@ class Clarification
     public function getSubmittime()
     {
         return $this->submittime;
+    }
+
+    /**
+     * Get the absolute submit time for this clarification
+     *
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("time")
+     * @Serializer\Type("string")
+     */
+    public function getAbsoluteSubmitTime()
+    {
+        return Utils::absTime($this->getSubmittime());
+    }
+
+    /**
+     * Get the relative submit time for this clarification
+     *
+     * @return string
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("contest_time")
+     * @Serializer\Type("string")
+     */
+    public function getRelativeSubmitTime()
+    {
+        return Utils::relTime($this->getSubmittime() - $this->getContest()->getStarttime());
     }
 
     /**

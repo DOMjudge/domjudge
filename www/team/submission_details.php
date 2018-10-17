@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Gives a team the details of a judging of their submission: errors etc.
  *
@@ -27,7 +27,7 @@ if (!$row || $row['submittime'] >= $cdata['endtime'] ||
     (dbconfig_get('verification_required', 0) && !$row['verified'])) {
     echo "<div class=\"alert alert-danger\">Submission not found for this team or not judged yet.</div>\n";
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 // update seen status when viewing submission

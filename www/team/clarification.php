@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Show clarification thread and reply box.
  * When no id is given, show clarification request box.
@@ -48,7 +48,7 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
 
     $newid = $DB->q('RETURNID INSERT INTO clarification
                      (cid, submittime, sender, probid, category, queue, body)
-                     VALUES (%i, %s, %i, %i, %s, %s, %s)',
+                     VALUES (%i, %f, %i, %i, %s, %s, %s)',
                     $cid, now(), $teamid, $probid, $category, $queue, $_POST['bodytext']);
 
     eventlog('clarification', $newid, 'create', $cid);
@@ -56,7 +56,7 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
 
     // redirect back to the original location
     header('Location: ./');
-    exit;
+    return;
 }
 
 $title = 'Clarifications';

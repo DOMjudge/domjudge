@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the judgehosts
  *
@@ -82,7 +82,7 @@ if ($cmd == 'add' || $cmd == 'edit') {
         addEndForm();
 
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 $res = $DB->q('SELECT judgehost.*, judgehost_restriction.name
@@ -106,7 +106,7 @@ $work10min   = $DB->q($query, $now, $from, $from);
 $from = $cdata['starttime'];
 $workcontest = $DB->q($query, $now, $from, $from);
 
-$clen = $cdata === null ? null : difftime($now, $cdata['starttime']);
+$clen = ($cdata === null ? null : difftime($now, (float)$cdata['starttime']));
 
 if ($res->count() == 0) {
     echo "<p class=\"nodata\">No judgehosts defined</p>\n\n";
@@ -123,14 +123,14 @@ if ($res->count() == 0) {
         $link = '<a href="judgehost.php?id=' . urlencode($row['hostname']) . '">';
         echo "<tr".($row['active'] ? '': ' class="disabled"').
             "><td>" . $link . printhost($row['hostname']) . '</a>' .
-            "</td><td class=\"tdcenter\">" . $link . printyn($row['active']) .
+            "</td><td class=\"tdcenter\">" . $link . printyn((bool)$row['active']) .
             "</a></td>";
         echo "<td class=\"tdcenter ";
         if (empty($row['polltime'])) {
             echo "judgehost-nocon";
             echo "\" title =\"never checked in\">";
         } else {
-            $reltime = floor(difftime($now, $row['polltime']));
+            $reltime = floor(difftime($now, (float)$row['polltime']));
             if ($reltime < dbconfig_get('judgehost_warning', 30)) {
                 echo "judgehost-ok";
             } elseif ($reltime < dbconfig_get('judgehost_critical', 120)) {
@@ -138,7 +138,7 @@ if ($res->count() == 0) {
             } else {
                 echo "judgehost-crit";
             }
-            echo "\" title =\"last checked in ".printtimediff($row['polltime'])."s ago\">";
+            echo "\" title =\"last checked in ".printtimediff((float)$row['polltime'])."s ago\">";
         }
         echo $link . CIRCLE_SYM . "</a></td>";
         echo "<td>" . $link . (is_null($row['name']) ? '<i>none</i>' : $row['name']) . '</a></td>';

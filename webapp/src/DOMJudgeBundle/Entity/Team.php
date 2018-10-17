@@ -1,12 +1,19 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
+use phpDocumentor\Reflection\Types\Nullable;
 
 /**
  * All teams participating in the contest
  * @ORM\Entity()
  * @ORM\Table(name="team", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @Serializer\VirtualProperty(
+ *     "externalid_nonstrict",
+ *     exp="object.getExternalId()",
+ *     options={@Serializer\SerializedName("externalid"), @Serializer\Type("string"), @Serializer\Groups({"Nonstrict"})}
+ * )
  */
 class Team
 {
@@ -16,6 +23,8 @@ class Team
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="teamid", options={"comment"="Unique ID"}, nullable=false)
+     * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $teamid;
 
@@ -23,6 +32,7 @@ class Team
      * @var string
      * TODO: ORM\Unique on first 190 characters
      * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Team ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     * @Serializer\SerializedName("icpc_id")
      */
     private $externalid;
 
@@ -35,97 +45,115 @@ class Team
     /**
      * @var int
      * @ORM\Column(type="integer", name="categoryid", options={"comment"="Team category ID"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $categoryid = 0;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="affilid", options={"comment"="Team affiliation ID"}, nullable=true)
+     * @Serializer\SerializedName("organization_id")
+     * @Serializer\Type("string")
      */
     private $affilid;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="enabled", options={"comment"="Whether the team is visible and operational"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $enabled = true;
 
     /**
      * @var string
      * @ORM\Column(type="text", length=4294967295, name="members", options={"comment"="Team member names (freeform)"}, nullable=true)
+     * @Serializer\Groups({"Nonstrict"})
      */
     private $members;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $room;
 
     /**
      * @var string
      * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $comments;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started", options={"comment"="Start time of last judging for priorization", "unsigned"=true}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $judging_last_started;
 
     /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="teampage_first_visited", options={"comment"="Time of first teampage view", "unsigned"=true}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $teampage_first_visited;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=255, name="hostname", options={"comment"="Teampage first visited from this address"}, nullable=true)
+     * @Serializer\Exclude()
      */
     private $hostname;
 
     /**
      * @var int
      * @ORM\Column(type="integer", name="penalty", options={"comment"="Additional penalty time in minutes"}, nullable=false)
+     * @Serializer\Exclude()
      */
     private $penalty = 0;
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamAffiliation", inversedBy="teams")
      * @ORM\JoinColumn(name="affilid", referencedColumnName="affilid")
+     * @Serializer\Exclude()
      */
     private $affiliation;
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamCategory", inversedBy="teams")
      * @ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid")
+     * @Serializer\Exclude()
      */
     private $category;
 
     /**
      * @ORM\ManyToMany(targetEntity="Contest", mappedBy="teams")
+     * @Serializer\Exclude()
      */
     private $contests;
 
     /**
      * @ORM\OneToMany(targetEntity="User", mappedBy="team")
+     * @Serializer\Exclude()
      */
     private $users;
 
     /**
      * @ORM\OneToMany(targetEntity="Submission", mappedBy="team")
+     * @Serializer\Exclude()
      */
     private $submissions;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="sender")
+     * @Serializer\Exclude()
      */
     private $sent_clarifications;
 
     /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="recipient")
+     * @Serializer\Exclude()
      */
     private $received_clarifications;
 
@@ -135,16 +163,19 @@ class Team
      *                joinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid")},
      *                inverseJoinColumns={@ORM\JoinColumn(name="mesgid", referencedColumnName="clarid")}
      * )
+     * @Serializer\Exclude()
      */
     private $unread_clarifications;
 
     /**
      * @ORM\OneToMany(targetEntity="ScoreCache", mappedBy="team")
+     * @Serializer\Exclude()
      */
     private $scorecache;
 
     /**
      * @ORM\OneToMany(targetEntity="RankCache", mappedBy="team")
+     * @Serializer\Exclude()
      */
     private $rankcache;
 
@@ -772,5 +803,42 @@ class Team
     public function getRankcache()
     {
         return $this->rankcache;
+    }
+
+    /**
+     * Get the group ID's for this team
+     * @return string[]
+     * @Serializer\VirtualProperty()
+     * @Serializer\Type("array<string>")
+     */
+    public function getGroupIds(): array
+    {
+        return $this->getCategoryid() ? [$this->getCategoryid()] : [];
+    }
+
+    /**
+     * Get the affiliation name of this team
+     * @return string|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("affiliation")
+     * @Serializer\Type("string")
+     * @Serializer\Groups({"Nonstrict"})
+     */
+    public function getAffiliationName()
+    {
+        return $this->getAffiliation() ? $this->getAffiliation()->getName() : null;
+    }
+
+    /**
+     * Get the nationality of this team
+     * @return string|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\Type("string")
+     * @Serializer\Groups({"Nonstrict"})
+     * @Serializer\Expose(if="context.getAttribute('domjudge_service').dbconfig_get('show_flags', true)")
+     */
+    public function getNationality()
+    {
+        return $this->getAffiliation() ? $this->getAffiliation()->getCountry() : null;
     }
 }

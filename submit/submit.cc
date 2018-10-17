@@ -154,7 +154,7 @@ std::string decode_HTML_entities(std::string str)
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, baseurl, contest, entry_point;
+string problem, language, extension, baseurl, contestid, contestshortname, entry_point;
 vector<string> filenames;
 char *submitdir;
 
@@ -222,11 +222,12 @@ int main(int argc, char **argv)
 
 	/* Read default for baseurl and contest from environment */
 	baseurl = string(BASEURL);
-	contest = "";
+	contestid = "";
+	contestshortname = "";
 	if ( getenv("SUBMITBASEURL")!=NULL ) baseurl = string(getenv("SUBMITBASEURL"));
-	if ( getenv("SUBMITCONTEST")!=NULL ) contest = string(getenv("SUBMITCONTEST"));
+	if ( getenv("SUBMITCONTEST")!=NULL ) contestid = string(getenv("SUBMITCONTEST"));
 
-	quiet =	show_help = show_version = 0;
+	quiet = show_help = show_version = 0;
 	opterr = 0;
 	while ( (c = getopt_long(argc,argv,"p:l:u:c:e:v::q",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
@@ -236,7 +237,7 @@ int main(int argc, char **argv)
 		case 'p': problem     = string(optarg); break;
 		case 'l': extension   = string(optarg); break;
 		case 'u': baseurl     = string(optarg); break;
-		case 'c': contest     = string(optarg); break;
+		case 'c': contestid   = string(optarg); break;
 		case 'e': entry_point = string(optarg); break;
 
 		case 'v': /* verbose option */
@@ -262,11 +263,37 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if ( !readlanguages() ) warning(0,"could not obtain language data");
+	/* Make sure that baseurl terminates with a '/' for later concatenation. */
+	if ( !baseurl.empty() && baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
+
 	if ( !readcontests() ) warning(0,"could not obtain active contests");
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
+
+	if ( contestid.empty() ) {
+		if ( contests.size()==0 ) {
+			warnuser("no active contests found (and no contest specified)");
+		}
+		if ( contests.size()==1 ) {
+			contestid = contests[0][0];
+			contestshortname = contests[0][1];
+		}
+		if ( contests.size()>1 ) {
+			warnuser("multiple active contests found, please specify one");
+		}
+	} else {
+		for ( i=0; i < contests.size(); i++ ) {
+			if (contests[i][0] == contestid || contests[i][1] == contestid) {
+				contestid = contests[i][0];
+				contestshortname = contests[i][1];
+			}
+		}
+	}
+
+	if ( contestid.empty() || contestshortname.empty() ) usage2(0,"no (valid) contest specified");
+
+	if ( !readlanguages() ) warning(0,"could not obtain language data");
 
 	if ( argc<=optind ) usage2(0,"no file(s) specified");
 
@@ -333,25 +360,9 @@ int main(int argc, char **argv)
 		language = extension;
 	}
 
-	if ( contest.empty() ) {
-		if ( contests.size()==0 ) {
-			warnuser("no active contests found (and no contest specified)");
-		}
-		if ( contests.size()==1 ) {
-			contest = contests[0][0];
-		}
-		if ( contests.size()>1 ) {
-			warnuser("multiple active contests found, please specify one");
-		}
-	}
-
-	if ( contest.empty()  ) usage2(0,"no contest specified");
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
 	if ( baseurl.empty()  ) usage2(0,"no url specified");
-
-	/* Make sure that baseurl terminates with a '/' for later concatenation. */
-	if ( baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
 
 	/* Guess entry point if not already specified. */
 	if ( entry_point.empty() && require_entry_point == "true" ) {
@@ -368,7 +379,7 @@ int main(int argc, char **argv)
 		error(0, "Entry point required but not specified nor detected.");
 	}
 
-	logmsg(LOG_DEBUG,"contest is `%s'",contest.c_str());
+	logmsg(LOG_DEBUG,"contest is `%s'",contestshortname.c_str());
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
 	logmsg(LOG_DEBUG,"entry_point is `%s'",entry_point.c_str());
@@ -386,7 +397,7 @@ int main(int argc, char **argv)
 			}
 			printf("\n");
 		}
-		printf("  contest:     %s\n",contest.c_str());
+		printf("  contest:     %s\n",contestshortname.c_str());
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
 		if ( !entry_point.empty() ) {
@@ -439,7 +450,7 @@ void usage()
 "in the webinterface.");
 		if ( contests.size()==1 ) {
 			printf(" Currently this defaults to the only active contest '%s'.",
-			       contests[0][0].c_str());
+			       contests[0][1].c_str());
 		}
 		printf("\n\n");
 	}
@@ -447,7 +458,7 @@ void usage()
 		printf(
 "For CONTEST use one of the following:\n");
 		for(i=0; i<contests.size(); i++) {
-			printf("   %-15s  %s\n",contests[i][0].c_str(),contests[i][1].c_str());
+			printf("   %-3s  %s\n",contests[i][0].c_str(),contests[i][1].c_str());
 		}
 		printf("\n");
 	}
@@ -476,7 +487,7 @@ void usage()
 "\n"
 "Set URL to the base address of the webinterface without the 'api/' suffix.\n");
 	if ( !baseurl.empty() ) {
-		printf("The pre-configured URL is '%s'.\n",baseurl.c_str());
+		printf("The (pre)configured URL is '%s'.\n",baseurl.c_str());
     }
 	printf(
 "\n"
@@ -685,7 +696,8 @@ bool readlanguages()
 {
 	Json::Value langs, exts;
 
-	langs = doAPIrequest("languages", 0);
+	string endpoint = "contests/" + contestid + "/languages";
+	langs = doAPIrequest(endpoint.c_str(), 0);
 
 	if ( langs.isNull() ) return false;
 
@@ -720,8 +732,8 @@ bool readcontests()
 	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		vector<string> contest;
 
+		contest.push_back(res[i]["id"].asString());
 		contest.push_back(res[i]["shortname"].asString());
-		contest.push_back(res[i]["name"].asString());
 		if ( contest[0]=="" || contest[1]=="" ) {
 			warning(0,"REST API returned unexpected JSON data for contests");
 			return false;
@@ -780,8 +792,8 @@ bool websubmit()
 	}
 	curlformadd(COPYNAME,"shortname", COPYCONTENTS,problem.c_str());
 	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
-	if ( !contest.empty() ) {
-		curlformadd(COPYNAME,"contest", COPYCONTENTS,contest.c_str());
+	if ( !contestshortname.empty() ) {
+		curlformadd(COPYNAME,"contest", COPYCONTENTS,contestshortname.c_str());
 	}
 	if ( !entry_point.empty() ) {
 		curlformadd(COPYNAME,"entry_point", COPYCONTENTS,entry_point.c_str());

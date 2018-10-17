@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the rejudgings
  *
@@ -42,7 +42,7 @@ if ($res->count() == 0) {
         $done = $DB->q('VALUE SELECT COUNT(*) FROM judging
                         WHERE rejudgingid=%i AND endtime IS NOT NULL', $row['rejudgingid']);
         $todo -= $done;
-        $link = '<a href="rejudging.php?id=' . urlencode($row['rejudgingid']) . '">';
+        $link = '<a href="rejudging.php?id=' . urlencode((string)$row['rejudgingid']) . '">';
         $class = '';
         if (isset($row['endtime'])) {
             $class = 'class="disabled"';
@@ -53,7 +53,7 @@ if ($res->count() == 0) {
             "<td>" . $link . ($row['rejudgingid']) . '</a></td>' .
             "<td>" . $link . specialchars($row['reason']) . '</a></td>' .
             "<td>" . $link . specialchars($row['startuser']) .  "</a></td>" .
-            "<td>" . $link . specialchars($row['finishuser']) .  "</a></td>" .
+            "<td>" . $link . specialchars((string)$row['finishuser']) .  "</a></td>" .
             "<td>" . $link . printtime($row['starttime']) .  "</a></td>" .
             "<td>" . $link . printtime($row['endtime']) .  "</a></td>" .
             "<td>" . $link;

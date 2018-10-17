@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Import/export configration settings to and from contest.yaml.
  *
@@ -56,7 +56,7 @@ if (isset($_POST['import'])) {
         if (empty($contest_yaml_data)) {
             echo "<p>Error parsing YAML file.</p>\n";
             require(LIBWWWDIR . '/footer.php');
-            exit;
+	    return;
         }
 
         require(LIBWWWDIR . '/checkers.jury.php');
@@ -112,7 +112,7 @@ if (isset($_POST['import'])) {
             }
             echo "</ul>\n";
             require(LIBWWWDIR . '/footer.php');
-            exit;
+	    return;
         }
 
         dbconfig_init();
@@ -183,11 +183,11 @@ if (isset($_POST['import'])) {
 
         // Redirect to the original page to prevent accidental redo's
         header('Location: impexp_contestyaml.php?import-ok&file='.$file);
-        exit;
+	return;
     } else {
         echo "<p>Error uploading file.</p>\n";
         require(LIBWWWDIR . '/footer.php');
-        exit;
+	return;
     }
 } elseif (isset($_POST['export'])) {
 
@@ -199,7 +199,7 @@ if (isset($_POST['import'])) {
     if (! $contest_row) {
         echo "<p>Contest not found.</p>\n";
         require(LIBWWWDIR . '/footer.php');
-        exit;
+	return;
     }
     if (ALLOW_REMOVED_INTERVALS) {
         $res = $DB->q('KEYTABLE SELECT *, intervalid AS ARRAYKEY
@@ -211,14 +211,14 @@ if (isset($_POST['import'])) {
     $contest_data = array();
     $contest_data['name'] = $contest_row['name'];
     $contest_data['short-name'] = $contest_row['name'];
-    $contest_data['start-time'] = date('c', $contest_row['starttime']);
+    $contest_data['start-time'] = date('c', (int)$contest_row['starttime']);
     $contest_data['duration'] =
-        printtimerel(calcContestTime($contest_row['endtime'], $contest_row['cid']));
+        printtimerel(calcContestTime((float)$contest_row['endtime'], (int)$contest_row['cid']));
 
     if (! is_null($contest_row['freezetime'])) {
         $contest_data['scoreboard-freeze-duration'] = printtimerel(
-            calcContestTime($contest_row['endtime'], $contest_row['cid']) -
-            calcContestTime($contest_row['freezetime'], $contest_row['cid'])
+            calcContestTime((float)$contest_row['endtime'], (int)$contest_row['cid']) -
+            calcContestTime((float)$contest_row['freezetime'], (int)$contest_row['cid'])
         );
     }
 
@@ -258,7 +258,7 @@ if (isset($_POST['import'])) {
     echo $yaml;
     header('Content-type: text/x-yaml');
     header('Content-Disposition: attachment; filename="contest.yaml"');
-    exit;
+    return;
 }
 
 $title = "Import / export configuration";

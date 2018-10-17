@@ -712,6 +712,7 @@ void setrestrictions()
 	if (environment_variables != NULL) {
 		char *token = strtok(environment_variables, ";");
 		while (token != NULL) {
+			verbose("setting environment variable: %s", token);
 			putenv(token);
 			token = strtok(NULL, ";");
 		}

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Finalize the contest.
  *
@@ -19,7 +19,7 @@ requireAdmin();
 
 if (isset($_POST['cancel'])) {
     header('Location: contest.php?id=' . $id);
-    exit;
+    return;
 }
 
 $row = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
@@ -53,7 +53,7 @@ if (count($blockers) > 0) {
     echo "</ul>\n\n";
 
     require(LIBWWWDIR . '/footer.php');
-    exit;
+    return;
 }
 
 // OK, contest can be finalized
@@ -66,7 +66,7 @@ if (isset($_POST['cmd']) && $_POST['cmd'] == 'finalize') {
 
     header('Location: contest.php?id=' . $id);
 
-    exit;
+    return;
 }
 
 echo addForm('');

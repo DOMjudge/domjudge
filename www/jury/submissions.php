@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the submissionqueue
  *
@@ -34,7 +34,7 @@ $refresh = array(
 $title = 'Submissions';
 
 // Set cookie of submission view type, expiry defaults to end of session.
-dj_setcookie('domjudge_submissionview', $view);
+dj_setcookie('domjudge_submissionview', (string)$view);
 
 $jury_member = $username;
 
@@ -68,10 +68,8 @@ echo "<div id='detailsubmissions-filter' class='submissions-filter'>\n";
 
 if (empty($submissions_filter)) {
     echo <<<HTML
-<script type="text/javascript">
-<!--
+<script>
 collapse("submissions-filter");
-// -->
 </script>
 HTML;
 }
@@ -160,7 +158,7 @@ $(function() {
             submissions_filter[filters[i].field] = filters[i].values;
         }
 
-        Cookies.set('submissions-filter', submissions_filter);
+        setCookie('submissions-filter', JSON.stringify(submissions_filter));
 
         var $trs = $('table > tbody tr');
 

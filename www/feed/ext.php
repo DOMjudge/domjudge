@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Output scoreboard in XML format for ICPC scoreboard
  *

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Miscellaneous helper functions
  *
@@ -168,20 +168,20 @@ function calcFreezeData(array $cdata = null, bool $isjury = false) : array
     // We can compare $now and the dbfields stringwise.
     $now = now();
     $fdata['showfinal']  = isset($cdata['finalizetime']) &&
-            difftime($cdata['finalizetime'], $now) <= 0;
+            difftime((float)$cdata['finalizetime'], $now) <= 0;
     if (!$isjury) {
         $fdata['showfinal'] = $fdata['showfinal'] &&
             (!isset($cdata['freezetime']) ||
              (isset($cdata['unfreezetime']) &&
-              difftime($cdata['unfreezetime'], $now) <= 0));
+              difftime((float)$cdata['unfreezetime'], $now) <= 0));
     }
     // freeze scoreboard if freeze time has been reached and
     // we're not showing the final score yet
     $fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
-                  difftime($cdata['freezetime'], $now) <= 0;
+                  difftime((float)$cdata['freezetime'], $now) <= 0;
     // contest is active but has not yet started
-    $fdata['started'] = difftime($cdata['starttime'], $now) <= 0;
-    $fdata['stopped'] = difftime($cdata['endtime'], $now) <= 0;
+    $fdata['started'] = difftime((float)$cdata['starttime'], $now) <= 0;
+    $fdata['stopped'] = difftime((float)$cdata['endtime'], $now) <= 0;
     $fdata['running'] = ($fdata['started'] && !$fdata['stopped']);
 
     return $fdata;
@@ -193,18 +193,18 @@ function calcFreezeData(array $cdata = null, bool $isjury = false) : array
  * NOTE: It is assumed that removed intervals do not overlap and that
  * they all fall within the contest start and end times.
  */
-function calcContestTime(float $walltime, int $cid) : int
+function calcContestTime(float $walltime, int $cid) : float
 {
     $cdata = getContest($cid);
 
-    $contesttime = difftime($walltime, $cdata['starttime']);
+    $contesttime = difftime($walltime, (float)$cdata['starttime']);
 
     if (ALLOW_REMOVED_INTERVALS) {
         foreach ($cdata['removed_intervals'] as $intv) {
             if (difftime($intv['starttime'], $walltime)<0) {
                 $contesttime -= min(
-                    difftime($walltime, $intv['starttime']),
-                    difftime($intv['endtime'], $intv['starttime'])
+                    difftime($walltime, (float)$intv['starttime']),
+                    difftime((float)$intv['endtime'], (float)$intv['starttime'])
                 );
             }
         }
@@ -260,7 +260,7 @@ function calcScoreRow(int $cid, int $team, int $prob)
     while ($row = $result->next()) {
 
         // Contest submit time
-        $submittime = calcContestTime($row['submittime'], $cid);
+        $submittime = calcContestTime((float)$row['submittime'], $cid);
 
         // Check if this submission has a publicly visible judging result:
         if ((dbconfig_get('verification_required', 0) && ! $row['verified']) ||
@@ -352,11 +352,11 @@ function updateRankCache(int $cid, int $team)
         foreach (array('public', 'restricted') as $variant) {
             if ($srow['is_correct_'.$variant]) {
                 $penalty = calcPenaltyTime(
-                    $srow['is_correct_'.$variant],
-                                $srow['submissions_'.$variant]
+                    (bool)$srow['is_correct_'.$variant],
+                    (int)$srow['submissions_'.$variant]
                 );
                 $num_points[$variant] += $srow['points'];
-                $total_time[$variant] += scoretime($srow['solvetime_'.$variant]) + $penalty;
+                $total_time[$variant] += scoretime((float)$srow['solvetime_'.$variant]) + $penalty;
             }
         }
     }
@@ -773,9 +773,9 @@ function submit_solution(
     array $files,
     array $filenames,
     $origsubmitid = null,
-    $entry_point = null,
+    string $entry_point = null,
     $extid = null,
-    $submittime = null,
+    float $submittime = null,
     $extresult = null
 ) {
     global $DB;
@@ -836,14 +836,15 @@ function submit_solution(
         error("Entry point required for '$langid' but none given.");
     }
     if (checkrole('jury') && $entry_point == '__auto__') {
-	    // Fall back to auto detection when we're importing jury submissions.
-	    $entry_point = NULL;
+        // Fall back to auto detection when we're importing jury submissions.
+        $entry_point = NULL;
     }
     if (! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team
                             WHERE teamid = %i' .
                            (checkrole('jury') ? '' : ' AND enabled = 1'), $team)) {
         error("Team '$team' not found in database or not enabled.");
     }
+    $teamid = (int)$teamid;
     $probdata = $DB->q('MAYBETUPLE SELECT probid, points FROM problem
                         INNER JOIN contestproblem USING (probid)
                         WHERE probid = %i AND cid = %i AND allow_submit = 1',
@@ -852,8 +853,8 @@ function submit_solution(
     if (empty($probdata)) {
         error("Problem p$prob not found in database or not submittable [c$contest].");
     } else {
-        $points = $probdata['points'];
-        $probid = $probdata['probid'];
+        $points = (int)$probdata['points'];
+        $probid = (int)$probdata['probid'];
     }
 
     // Reindex arrays numerically to allow simultaneously iterating
@@ -895,7 +896,7 @@ function submit_solution(
     for ($rank=0; $rank<count($files); $rank++) {
         $DB->q('INSERT INTO submission_file
                 (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
-               $id, $filenames[$rank], $rank, dj_file_get_contents($files[$rank]));
+               (int)$id, $filenames[$rank], (int)$rank, dj_file_get_contents($files[$rank]));
     }
 
     // Add expected results from source. We only do this for jury
@@ -905,8 +906,10 @@ function submit_solution(
         $DB->q('UPDATE submission SET expected_results=%s
                 WHERE submitid=%i', dj_json_encode($results), $id);
     }
-    eventlog('submission', $id, 'create', $contest);
     $DB->q('COMMIT');
+    // Only log the submission after commiting the transaction, as the submission API uses Doctrine, so it doesn't share the same transaction
+    // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
+    eventlog('submission', $id, 'create', $contest);
 
     // Recalculate scoreboard cache for pending submissions
     calcScoreRow($contest, $teamid, $probid);
@@ -934,7 +937,7 @@ function submit_solution(
         logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
     }
 
-    if (difftime($contestdata['endtime'], $submittime) <= 0) {
+    if (difftime((float)$contestdata['endtime'], $submittime) <= 0) {
         logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$contest]");
     }
 
@@ -1001,7 +1004,7 @@ function rejudge(string $table, $id, bool $include_all, bool $full_rejudge, $rea
 
     if ($full_rejudge) {
         $rejudgingid = $DB->q('RETURNID INSERT INTO rejudging
-                               (userid_start, starttime, reason) VALUES (%i, %s, %s)',
+                               (userid_start, starttime, reason) VALUES (%i, %f, %s)',
                               $userid, now(), $reason);
     }
 
@@ -1038,7 +1041,7 @@ function rejudge(string $table, $id, bool $include_all, bool $full_rejudge, $rea
         }
 
         if (!$full_rejudge) {
-            calcScoreRow($jud['cid'], $jud['teamid'], $jud['probid']);
+            calcScoreRow((int)$jud['cid'], (int)$jud['teamid'], (int)$jud['probid']);
         }
         $DB->q('COMMIT');
 
@@ -1107,17 +1110,18 @@ function rejudging_finish(int $rejudgingid, string $request, $userid = null, boo
             // remove relation from submission to rejudge
             $DB->q('UPDATE submission SET rejudgingid=NULL
                     WHERE submitid=%i', $row['submitid']);
+            // last update cache
+            calcScoreRow((int)$row['cid'], (int)$row['teamid'], (int)$row['probid']);
+            $DB->q('COMMIT');
             // update event log
+            // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
             eventlog('judging', $row['judgingid'], 'create', $row['cid']);
             $run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
                                WHERE judgingid=%i', $row['judgingid']);
             if (!empty($run_ids)) {
                 eventlog('judging_run', $run_ids, 'create', $row['cid']);
             }
-            // last update cache
-            calcScoreRow($row['cid'], $row['teamid'], $row['probid']);
-            $DB->q('COMMIT');
-            updateBalloons($row['submitid']);
+            updateBalloons((int)$row['submitid']);
         } else {
             // restore old judgehost association
             $valid_judgehost = $DB->q('VALUE SELECT judgehost FROM judging
@@ -1128,7 +1132,7 @@ function rejudging_finish(int $rejudgingid, string $request, $userid = null, boo
     }
 
     $DB->q('UPDATE rejudging
-            SET endtime=%s, userid_finish=%i, valid=%i
+            SET endtime=%f, userid_finish=%i, valid=%i
             WHERE rejudgingid=%i',
            now(), $userid, ($request=='apply' ? 1 : 0), $rejudgingid);
 
@@ -1427,15 +1431,15 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
         return;
     }
 
+    $jsonPassed = isset($json);
+
     // Make a combined string to keep track of the data ID's
-    // TODO: if some data ID's contain a comma, this breaks
-    $dataidsCombined = implode(',', $dataids);
-    // TODO: if some ID's contain a comma, this breaks
-    $idsCombined = $ids === null ? null : is_array($ids) ? implode(',', $ids) : $ids;
+    $dataidsCombined = json_encode($dataids);
+    $idsCombined = $ids === null ? null : is_array($ids) ? json_encode($ids) : $ids;
 
     logmsg(LOG_DEBUG, "eventlog arguments: '$type' '$dataidsCombined' '$action' '$cid' '$json' '$idsCombined'");
 
-    $actions = array('create', 'update', 'delete');
+    $actions = ['create', 'update', 'delete'];
 
     // Gracefully fail since we may call this from the generic
     // jury/edit.php page where we don't know which table gets updated.
@@ -1510,6 +1514,14 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
                 $expectedEvents += count($cidsForId);
                 $cids = array_unique(array_merge($cids, $cidsForId));
             }
+        } elseif ($type==='contests') {
+            $cids = $dataids;
+            $expectedEvents = count($dataids);
+            if (count($cids)>1) {
+                logmsg(LOG_WARNING, "eventlog: cannot handle multiple contests in single request");
+                return;
+            }
+            $cid = $cids[0];
         } else {
             $cids = getCurContests();
             $expectedEvents = count($dataids) * count($cids);
@@ -1520,11 +1532,7 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
         return;
     }
 
-    // TODO: if some ID's contain a comma, this breaks
-    $idsCombined = implode(',', $ids);
-
-    // We should pass multiple ID's if instructed to do so
-    $multiple = count($dataids) > 1 || count($ids) > 1;
+    $query = http_build_query(['ids' => $ids]);
 
     // Generate JSON content if not set, for deletes this is only the ID.
     if ($action === 'delete') {
@@ -1532,26 +1540,23 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
             return ['id' => $id];
         }, $ids));
 
-        // If we do not have multiple ID's, the code assumes the JSON is only for one element
-        if (!$multiple) {
-            $json = $json[0];
-        }
-
         $json = dj_json_encode($json);
     } elseif ($json === null) {
-        if (in_array($type, array('contests','state'))) {
-            $url = $endpoint['url'];
-        } else {
-            $url = $endpoint['url'].'/'.$idsCombined;
-        }
+        $url = $endpoint['url'];
 
         // Temporary fix for single/multi contest API:
         if (isset($cid)) {
             $url = '/contests/' . rest_extid('contests', $cid) . $url;
         }
 
-        $json = API_request($url, 'GET', '', false);
-        if (empty($json) || $json==='null' || ($multiple && $json === '[]')) {
+        if (in_array($type, ['contests','state'])) {
+            $data = '';
+        } else {
+            $data = $query;
+        }
+
+        $json = API_request($url, 'GET', $data, false, true);
+        if (empty($json) || $json==='null' || $json === '[]') {
             logmsg(LOG_WARNING, "eventlog: got no JSON data from '$url'");
             // If we didn't get data from the API, then that is
             // probably because this particular data is not visible,
@@ -1582,17 +1587,18 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
     foreach ($cids as $cid) {
         $table = ($endpoint['tables'] ? $endpoint['tables'][0] : null);
         foreach ($dataids as $idx => $dataid) {
-            if ($multiple) {
-                $jsonElement = dj_json_encode($json[$idx]);
-            } else {
+            if (in_array($type, ['contests','state']) || $jsonPassed) {
+                // Contest and state endpoint are singular
                 $jsonElement = dj_json_encode($json);
+            } else {
+                $jsonElement = dj_json_encode($json[$idx]);
             }
             $eventid = $DB->q('RETURNID INSERT INTO event
                               (eventtime, cid, endpointtype, endpointid,
                                datatype, dataid, action, content)
                                VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
-                              $now, $cid, $type, $ids[$idx], $table,
-                              $dataid, $action, $jsonElement);
+                              $now, $cid, $type, (string)$ids[$idx], $table,
+                              (string)$dataid, $action, $jsonElement);
             $eventids[] = $eventid;
         }
     }
@@ -1644,13 +1650,15 @@ function read_API_credentials()
  * $data is the urlencoded data passed as GET or POST parameters.
  * When $failonerror is set to false, any error will be turned into a
  * warning and null is returned.
+ * When $asadmin is true and we are doing an internal request (i.e. $G_SYMFONY is defined) perform all requests as an admin
  *
  * This function is duplicated from judge/judgedaemon.main.php.
  */
-function API_request(string $url, string $verb = 'GET', string $data = '', bool $failonerror = true)
+function API_request(string $url, string $verb = 'GET', string $data = '', bool $failonerror = true, bool $asadmin = false)
 {
     global $resturl, $restuser, $restpass, $lastrequest, $G_SYMFONY, $apiFromInternal;
     if (isset($G_SYMFONY)) {
+        /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
         // Perform an internal Symfony request to the API
         logmsg(LOG_DEBUG, "API internal request $verb $url");
 
@@ -1673,8 +1681,10 @@ function API_request(string $url, string $verb = 'GET', string $data = '', bool 
         }
         $_SERVER['REQUEST_METHOD'] = $verb;
 
+        $G_SYMFONY->setHasAllRoles(true);
         $request = \Symfony\Component\HttpFoundation\Request::create($url, $verb, $parsedData);
         $response = $httpKernel->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
+        $G_SYMFONY->setHasAllRoles(false);
 
         // Set back the request method and superglobals, if other code still wants to use it
         $_SERVER['REQUEST_METHOD'] = $origMethod;

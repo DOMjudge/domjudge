@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Show clarification thread and reply box.
  * When no id is given, show general clarification box.
@@ -97,7 +97,7 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
                      (cid, respid, submittime, recipient, probid, category, queue, body,
                       answered, jury_member)
                      VALUES (%i, ' .
-                    ($respid===null ? 'NULL %_' : '%i') . ', %s, %s, %i, %s, %s, %s, %i, ' .
+                    ($respid===null ? 'NULL %_' : '%i') . ', %f, %s, %i, %s, %s, %s, %i, ' .
                     (isset($jury_member) ? '%s)' : 'NULL %_)'),
                     $cid, $respid, now(), $sendto, $probid, $category,
                     $queue, $_POST['bodytext'], 1, $jury_member);
@@ -131,7 +131,7 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
     } else {
         header('Location: clarification.php?id=' . $id);
     }
-    exit;
+    return;
 }
 
 // (un)set 'answered' (if posted)
@@ -145,7 +145,7 @@ if (isset($_POST['answer']) && isset($_POST['answered'])) {
 
     // redirect back to the original location
     header('Location: clarification.php?id=' . $id);
-    exit;
+    return;
 }
 
 if (isset($_POST['subject'])) {
@@ -174,7 +174,7 @@ if (! $isgeneral) {
     echo "<h1>Clarification $id</h1>\n\n";
 
     if (!$req['answered']) {
-        echo addForm($pagename . '?id=' . urlencode($id));
+        echo addForm($pagename . '?id=' . urlencode((string)$id));
 
         echo "<p>Claimed: " .
         "<strong>" . printyn(!empty($req['jury_member'])) . "</strong>";
@@ -207,8 +207,8 @@ if (! $isgeneral) {
     // Not relevant for 'general clarifications', ie those with sender=null
     if (!empty($req['sender'])) {
         echo addForm($pagename) .
-        addHidden('id', $id) .
-        addHidden('answered', !$req['answered']) .
+        addHidden('id', (string)$id) .
+        addHidden('answered', (string)!$req['answered']) .
         addSubmit('Set ' . ($req['answered'] ? 'unanswered' : 'answered'), 'answer') .
         addEndForm();
     }

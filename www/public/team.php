@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View team details
  *
@@ -13,7 +13,7 @@ if (empty($id)) {
     error("Missing or invalid team id");
 }
 
-$title = 'Team t'.specialchars($id);
+$title = 'Team t'.specialchars((string)$id);
 $menu = false;
 require(LIBWWWDIR . '/header.php');
 

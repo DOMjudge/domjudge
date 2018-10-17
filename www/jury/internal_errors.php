@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * View the internal errors
  *
@@ -32,7 +32,7 @@ if ($res->count() == 0) {
          "<th scope=\"col\">status</th></tr>\n" .
          "</thead>\n<tbody>\n";
     while ($row = $res->next()) {
-        $link = '<a href="internal_error.php?id=' . urlencode($row['errorid']) . '">';
+        $link = '<a href="internal_error.php?id=' . urlencode((string)$row['errorid']) . '">';
         $class = '';
         if ($row['status'] != 'open') {
             $class = 'class="disabled"';
