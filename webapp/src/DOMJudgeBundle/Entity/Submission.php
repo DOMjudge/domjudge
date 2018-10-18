@@ -139,6 +139,15 @@ class Submission
     private $problem;
 
     /**
+     * @ORM\ManyToOne(targetEntity="DOMJudgeBundle\Entity\ContestProblem", inversedBy="submissions")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="probid", referencedColumnName="probid"),
+     *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * })
+     */
+    private $contest_problem;
+
+    /**
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="submission")
      * @Serializer\Exclude()
      */
@@ -156,6 +165,14 @@ class Submission
      * @Serializer\Exclude()
      */
     private $balloons;
+
+    /**
+     * rejudgings have one parent judging
+     * @ORM\ManyToOne(targetEntity="Rejudging", inversedBy="submissions")
+     * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid")
+     * @Serializer\Exclude()
+     */
+    private $rejudging;
 
 
     public function getResult() {
@@ -683,5 +700,53 @@ class Submission
     public function getProblem()
     {
         return $this->problem;
+    }
+
+    /**
+     * Set contest problem
+     *
+     * @param ContestProblem $contestProblem
+     *
+     * @return Submission
+     */
+    public function setContestProblem(ContestProblem $contestProblem = null)
+    {
+        $this->contest_problem = $contestProblem;
+
+        return $this;
+    }
+
+    /**
+     * Get contest problem
+     *
+     * @return ContestProblem
+     */
+    public function getContestProblem()
+    {
+        return $this->contest_problem;
+    }
+
+    /**
+     * Set rejudging
+     *
+     * @param Rejudging $rejudging
+     *
+     * @return Submission
+     */
+    public function setRejudging(Rejudging $rejudging = null)
+    {
+        $this->rejudging = $rejudging;
+
+        return $this;
+    }
+
+    /**
+     * Get rejudging
+     *
+     * @return Rejudging
+     */
+    public function getRejudging()
+    {
+        return $this->rejudging;
     }
 }

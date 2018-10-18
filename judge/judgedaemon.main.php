@@ -60,7 +60,7 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
     global $resturl, $restuser, $restpass, $lastrequest;
 
     // Don't flood the log with requests for new judgings every few seconds.
-    if ($url==='judgings' && $verb==='POST') {
+    if (strpos($url, 'judgehosts/next-judging') === 0 && $verb==='POST') {
         if ($lastrequest!==$url) {
             logmsg(LOG_DEBUG, "API request $verb $url");
             $lastrequest = $url;
@@ -517,7 +517,7 @@ while (true) {
 
     // Request open submissions to judge. Any errors will be treated as
     // non-fatal: we will just keep on retrying in this loop.
-    $judging = request('judgings', 'POST', 'judgehost=' . urlencode($myhost), false);
+    $judging = request(sprintf('judgehosts/next-judging/%s', urlencode($myhost)), 'POST', '', false);
     // If $judging is null, an error occurred; don't try to decode.
     if (!is_null($judging)) {
         $row = dj_json_decode($judging);

@@ -25,8 +25,8 @@ class JudgehostRestriction
     private $name;
 
     /**
-     * @var string
-     * @ORM\Column(type="text", length=4294967295, name="restrictions", options={"comment"="JSON-encoded restrictions"}, nullable=false)
+     * @var array
+     * @ORM\Column(type="json_array", length=4294967295, name="restrictions", options={"comment"="JSON-encoded restrictions"}, nullable=false)
      */
     private $restrictions;
 
@@ -80,7 +80,7 @@ class JudgehostRestriction
     /**
      * Set restrictions
      *
-     * @param string $restrictions
+     * @param array $restrictions
      *
      * @return JudgehostRestriction
      */
@@ -94,7 +94,7 @@ class JudgehostRestriction
     /**
      * Get restrictions
      *
-     * @return string
+     * @return array
      */
     public function getRestrictions()
     {

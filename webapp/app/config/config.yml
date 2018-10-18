@@ -187,6 +187,28 @@ nelmio_api_doc:
                                     num_pending: { type: integer }
                                     solved: { type: boolean }
                                     time: { type: integer }
+            NextJudging:
+                type: object
+                properties:
+                    judgingid: { type: integer }
+                    submitid: { type: integer }
+                    cid: { type: integer }
+                    teamid: { type: integer }
+                    probid: { type: integer }
+                    langid: { type: string }
+                    rejudgingid: { type: integer }
+                    entry_point: { type: string }
+                    origsubmitid: { type: integer }
+                    maxruntime: { type: number, format: float }
+                    memlimit: { type: integer }
+                    outputlimit: { type: integer }
+                    run: { type: string }
+                    compare: { type: string }
+                    compare_args: { type: string }
+                    compile_script: { type: string }
+                    compare_md5sum: { type: string }
+                    run_md5sum: { type: string }
+                    compile_script_md5sum: { type: string }
         parameters:
             cid:
                 name: cid

@@ -101,6 +101,13 @@ class ContestProblem
     private $scorecache;
 
     /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="DOMJudgeBundle\Entity\Submission", mappedBy="contest_problem")
+     * @Serializer\Exclude()
+     */
+    private $submissions;
+
+    /**
      * Set cid
      *
      * @param integer $cid
@@ -372,5 +379,39 @@ class ContestProblem
     public function getScorecache()
     {
         return $this->scorecache;
+    }
+
+    /**
+     * Add submission
+     *
+     * @param Submission $submission
+     *
+     * @return ContestProblem
+     */
+    public function addSubmission(Submission $submission)
+    {
+        $this->submissions->add($submission);
+
+        return $this;
+    }
+
+    /**
+     * Remove submission
+     *
+     * @param Submission $submission
+     */
+    public function removeSubmission(Submission $submission)
+    {
+        $this->submissions->removeElement($submission);
+    }
+
+    /**
+     * Get submissions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSubmissions()
+    {
+        return $this->submissions;
     }
 }

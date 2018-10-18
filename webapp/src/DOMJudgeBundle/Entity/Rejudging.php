@@ -73,16 +73,24 @@ class Rejudging
     private $finish_user;
 
     /**
-     * One judging has many rejudgings
+     * One rejudging has many judgings
      * @ORM\OneToMany(targetEntity="Judging", mappedBy="rejudging")
      */
     private $judgings;
+
+    /**
+     * One rejudging has many submissions
+     * @ORM\OneToMany(targetEntity="DOMJudgeBundle\Entity\Submission", mappedBy="rejudging")
+     */
+    private $submissions;
+
     /**
      * Constructor
      */
     public function __construct()
     {
         $this->judgings = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->submissions = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -319,5 +327,39 @@ class Rejudging
     public function getJudgings()
     {
         return $this->judgings;
+    }
+
+    /**
+     * Add submission
+     *
+     * @param Submission $submission
+     *
+     * @return Rejudging
+     */
+    public function addSubmission(Submission $submission)
+    {
+        $this->submissions[] = $submission;
+
+        return $this;
+    }
+
+    /**
+     * Remove submission
+     *
+     * @param Submission $submission
+     */
+    public function removeSubmission(Submission $submission)
+    {
+        $this->submissions->removeElement($submission);
+    }
+
+    /**
+     * Get submissions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSubmissions()
+    {
+        return $this->submissions;
     }
 }
