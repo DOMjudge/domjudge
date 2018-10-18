@@ -144,6 +144,7 @@ class Submission
      *   @ORM\JoinColumn(name="probid", referencedColumnName="probid"),
      *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
      * })
+     * @Serializer\Exclude()
      */
     private $contest_problem;
 
