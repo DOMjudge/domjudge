@@ -15,7 +15,7 @@ class TeamTest extends WebTestCase
         $this->assertEquals('http://localhost/login', $response->getTargetUrl(), $message);
     }
 
-    private function loginHelper($username, $password, $redirectPage)
+    private function loginHelper($username, $password, $redirectPage, $responseCode)
     {
         $client = self::createClient();
         $crawler = $client->request('GET', '/login');
@@ -25,19 +25,24 @@ class TeamTest extends WebTestCase
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
+        $csrf_token = $client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
+
         # submit form
         $button = $crawler->selectButton('Sign in');
         $form = $button->form(array(
-        '_username' => $username,
-        '_password' => $password,
-    ));
+            '_username' => $username,
+            '_password' => $password,
+            '_csrf_token' => $csrf_token,
+        ));
+        $client->followRedirects();
         $crawler = $client->submit($form);
-
-        # check redirect to /
         $response = $client->getResponse();
+        $client->followRedirects(false);
+
+        # check redirected to $redirectPage
         $message = var_export($response, true);
-        $this->assertEquals(302, $response->getStatusCode(), $message);
-        $this->assertEquals($redirectPage, $response->getTargetUrl(), $message);
+        $this->assertEquals($responseCode, $response->getStatusCode(), $message);
+        $this->assertEquals($redirectPage, $client->getRequest()->getUri(), $message);
 
         return $client;
     }
@@ -45,13 +50,14 @@ class TeamTest extends WebTestCase
     public function testLogin()
     {
         # test incorrect and correct password
-        $this->loginHelper('dummy', 'foo', 'http://localhost/login');
-        $this->loginHelper('dummy', 'dummy', 'http://localhost/');
+        $this->loginHelper('dummy', 'foo', 'http://localhost/login', 200);
+        $this->loginHelper('dummy', 'dummy', 'http://localhost/', 302);
     }
 
     public function testTeamOverviewPage()
     {
-        $client = $this->loginHelper('dummy', 'dummy', 'http://localhost/');
+        $client = $this->loginHelper('dummy', 'dummy', 'http://localhost/', 302);
+        global $DB; $DB=null; // Need to reset the DB connection, since the global variable is kept between requests...
         $crawler = $client->request('GET', '/team/');
 
         $response = $client->getResponse();
@@ -68,7 +74,8 @@ class TeamTest extends WebTestCase
 
     public function testClarificationRequest()
     {
-        $client = $this->loginHelper('dummy', 'dummy', 'http://localhost/');
+        $client = $this->loginHelper('dummy', 'dummy', 'http://localhost/', 302);
+        global $DB; $DB=null; // Need to reset the DB connection, since the global variable is kept between requests...
         $crawler = $client->request('GET', '/team/');
 
         $response = $client->getResponse();
