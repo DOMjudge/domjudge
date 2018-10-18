@@ -46,7 +46,7 @@ class ExecutableController extends FOSRestController
      *     @SWG\Schema(type="string", description="Base64-encoded executable contents")
      * )
      */
-    public function getNextToJudgeAction(string $id)
+    public function singleAction(string $id)
     {
         /** @var Executable|null $executable */
         $executable = $this->entityManager->createQueryBuilder()
