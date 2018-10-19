@@ -1,6 +1,8 @@
 <?php
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 class TeamTest extends WebTestCase
 {
@@ -54,10 +56,30 @@ class TeamTest extends WebTestCase
         $this->loginHelper('dummy', 'dummy', 'http://localhost/', 302);
     }
 
+    // This just injects a user object into the session so symfony will think we're logged in
+    // It gets around the problem for now of trying to navigate to two legacy pages in a single
+    // test(login index + anything else)
+    private function logIn($client)
+    {
+        $session = $client->getContainer()->get('session');
+
+        $firewallName = 'main';
+        $firewallContext = 'main';
+
+        $em = $client->getContainer()->get('doctrine.orm.entity_manager');
+        $user = $em->getRepository('DOMJudgeBundle:User')->findOneBy(['username' => 'dummy']);
+        $token = new UsernamePasswordToken($user, null, $firewallName, array('ROLE_TEAM'));
+        $session->set('_security_'.$firewallContext, serialize($token));
+        $session->save();
+
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $client->getCookieJar()->set($cookie);
+    }
+
     public function testTeamOverviewPage()
     {
-        $client = $this->loginHelper('dummy', 'dummy', 'http://localhost/', 302);
-        global $DB; $DB=null; // Need to reset the DB connection, since the global variable is kept between requests...
+        $client = self::createClient();
+        $this->logIn($client);
         $crawler = $client->request('GET', '/team/');
 
         $response = $client->getResponse();
@@ -74,8 +96,8 @@ class TeamTest extends WebTestCase
 
     public function testClarificationRequest()
     {
-        $client = $this->loginHelper('dummy', 'dummy', 'http://localhost/', 302);
-        global $DB; $DB=null; // Need to reset the DB connection, since the global variable is kept between requests...
+        $client = self::createClient();
+        $this->logIn($client);
         $crawler = $client->request('GET', '/team/');
 
         $response = $client->getResponse();
