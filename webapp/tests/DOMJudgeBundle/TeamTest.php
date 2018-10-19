@@ -1,6 +1,8 @@
 <?php
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\BrowserKit\Cookie;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 class TeamTest extends WebTestCase
 {
@@ -15,7 +17,7 @@ class TeamTest extends WebTestCase
         $this->assertEquals('http://localhost/login', $response->getTargetUrl(), $message);
     }
 
-    private function loginHelper($username, $password, $redirectPage)
+    private function loginHelper($username, $password, $redirectPage, $responseCode)
     {
         $client = self::createClient();
         $crawler = $client->request('GET', '/login');
@@ -25,19 +27,24 @@ class TeamTest extends WebTestCase
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
+        $csrf_token = $client->getContainer()->get('security.csrf.token_manager')->getToken('authenticate');
+
         # submit form
         $button = $crawler->selectButton('Sign in');
         $form = $button->form(array(
-        '_username' => $username,
-        '_password' => $password,
-    ));
+            '_username' => $username,
+            '_password' => $password,
+            '_csrf_token' => $csrf_token,
+        ));
+        $client->followRedirects();
         $crawler = $client->submit($form);
-
-        # check redirect to /
         $response = $client->getResponse();
+        $client->followRedirects(false);
+
+        # check redirected to $redirectPage
         $message = var_export($response, true);
-        $this->assertEquals(302, $response->getStatusCode(), $message);
-        $this->assertEquals($redirectPage, $response->getTargetUrl(), $message);
+        $this->assertEquals($responseCode, $response->getStatusCode(), $message);
+        $this->assertEquals($redirectPage, $client->getRequest()->getUri(), $message);
 
         return $client;
     }
@@ -45,13 +52,34 @@ class TeamTest extends WebTestCase
     public function testLogin()
     {
         # test incorrect and correct password
-        $this->loginHelper('dummy', 'foo', 'http://localhost/login');
-        $this->loginHelper('dummy', 'dummy', 'http://localhost/');
+        $this->loginHelper('dummy', 'foo', 'http://localhost/login', 200);
+        $this->loginHelper('dummy', 'dummy', 'http://localhost/', 302);
+    }
+
+    // This just injects a user object into the session so symfony will think we're logged in
+    // It gets around the problem for now of trying to navigate to two legacy pages in a single
+    // test(login index + anything else)
+    private function logIn($client)
+    {
+        $session = $client->getContainer()->get('session');
+
+        $firewallName = 'main';
+        $firewallContext = 'main';
+
+        $em = $client->getContainer()->get('doctrine.orm.entity_manager');
+        $user = $em->getRepository('DOMJudgeBundle:User')->findOneBy(['username' => 'dummy']);
+        $token = new UsernamePasswordToken($user, null, $firewallName, array('ROLE_TEAM'));
+        $session->set('_security_'.$firewallContext, serialize($token));
+        $session->save();
+
+        $cookie = new Cookie($session->getName(), $session->getId());
+        $client->getCookieJar()->set($cookie);
     }
 
     public function testTeamOverviewPage()
     {
-        $client = $this->loginHelper('dummy', 'dummy', 'http://localhost/');
+        $client = self::createClient();
+        $this->logIn($client);
         $crawler = $client->request('GET', '/team/');
 
         $response = $client->getResponse();
@@ -68,7 +96,8 @@ class TeamTest extends WebTestCase
 
     public function testClarificationRequest()
     {
-        $client = $this->loginHelper('dummy', 'dummy', 'http://localhost/');
+        $client = self::createClient();
+        $this->logIn($client);
         $crawler = $client->request('GET', '/team/');
 
         $response = $client->getResponse();

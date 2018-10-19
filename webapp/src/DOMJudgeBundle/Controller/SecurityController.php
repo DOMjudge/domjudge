@@ -29,12 +29,28 @@ class SecurityController extends Controller
      */
     public function loginAction(Request $request)
     {
+        $allowIPAuth = false;
+        $authmethods = [];
+        if ($this->container->hasParameter('domjudge.authmethods')) {
+          $authmethods = $this->container->getParameter('domjudge.authmethods');
+        }
+        if (in_array('ipaddress', $authmethods)) {
+          $allowIPAuth = true;
+        }
+
+        $clientIP = $this->DOMJudgeService->getClientIp();
         if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             $user = $this->get('security.token_storage')->getToken()->getUser();
             $user->setLastLogin(Utils::now());
-            $user->setLastIpAddress(@$_SERVER['REMOTE_ADDR']);
-            $this->getDoctrine()->getManager()->flush();
+            $user->setLastIpAddress($clientIP);
 
+            // Associate the IP they're logging in from as their IP address
+            // to use for future logins(using the ipaddress auth method).
+            // Only do this if it's the first time they're logging in.
+            if ($allowIPAuth && empty($user->getIpAddress())) {
+              $user->setIpAddress($clientIP);
+            }
+            $this->getDoctrine()->getManager()->flush();
             return $this->redirect($this->generateUrl('legacy.index'));
         }
 
@@ -46,10 +62,19 @@ class SecurityController extends Controller
         // last username entered by the user
         $lastUsername = $authUtils->getLastUsername();
 
+        $auth_ipaddress_users = [];
+        if ($allowIPAuth) {
+          $em = $this->getDoctrine()->getManager();
+          $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipaddress' => $clientIP]);
+        }
+
         return $this->render('DOMJudgeBundle:security:login.html.twig', array(
             'last_username' => $lastUsername,
             'error'         => $error,
-            'allow_registration' => $this->DOMJudgeService->dbconfig_get('allow_registration', false)
+            'allow_registration'    => $this->DOMJudgeService->dbconfig_get('allow_registration', false),
+            'allowed_authmethods'   => $authmethods,
+            'auth_xheaders_present' => $request->headers->get('X-DOMjudge-Login'),
+            'auth_ipaddress_users'  => $auth_ipaddress_users,
         ));
     }
 
@@ -87,7 +112,7 @@ class SecurityController extends Controller
             $team->addUser($user);
             $team->setName($user->getUsername());
             $team->setCategory($self_registered_category);
-            $team->setComments('Registered by ' . @$_SERVER['REMOTE_ADDR'] . ' on ' . date('r'));
+            $team->setComments('Registered by ' . $this->DOMJudgeService->getClientIp() . ' on ' . date('r'));
 
             $em->persist($user);
             $em->persist($team);

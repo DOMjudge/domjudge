@@ -20,7 +20,8 @@ body {
 
 .form-signin {
   width: 100%;
-  max-width: 330px;
+  max-width: 800px;
+  text-align: center;
   padding: 15px;
   margin: 0 auto;
 }
@@ -41,4 +42,33 @@ body {
 }
 .form-signin button[type="submit"] {
   margin-top: 11px;
+}
+
+/* These classes are to make our additional login methods fit side by side with
+   the main login method. */
+.main-login, .additional-logins {
+  display: inline-block;
+  text-align: left;
+  vertical-align: top;
+  min-height: 220px;
+}
+.main-login {
+  width:280px;
+}
+
+.additional-logins {
+  width: 330px;
+}
+.login-content {
+  min-height: 105px;
+  /* This was added as it seems to make the buttons from the main
+     login and additional login forms line up. I don't know why.
+  */
+  border-bottom: 2px solid rgba(0,0,0,0);
+}
+div.vertical-line{
+  width: 1px;
+  background-color: #cecece;
+  height: 230px;
+  display: inline-block;
 }

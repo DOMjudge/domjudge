@@ -285,7 +285,7 @@ class User implements UserInterface, \Serializable
      *
      * @return User
      */
-    public function setIpaddress($ipaddress)
+    public function setIpAddress($ipaddress)
     {
         $this->ipaddress = $ipaddress;
 
@@ -297,7 +297,7 @@ class User implements UserInterface, \Serializable
      *
      * @return string
      */
-    public function getIpaddress()
+    public function getIpAddress()
     {
         return $this->ipaddress;
     }

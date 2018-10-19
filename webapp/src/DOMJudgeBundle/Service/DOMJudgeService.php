@@ -175,6 +175,10 @@ class DOMJudgeService
         }
         return $authchecker->isGranted('ROLE_'.strtoupper($rolename));
     }
+    public function getClientIp() {
+      $clientIP = $this->container->get('request_stack')->getMasterRequest()->getClientIp();
+      return $clientIP;
+    }
 
     /**
      * Get the logged in user

@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block body %}
+<div class="additional-logins">
 
   {{form_start(registration_form, { 'attr': {'class': 'form-signin'} })}}
     {{ form_widget(registration_form._token) }}
@@ -26,6 +27,6 @@
         {{form_widget(registration_form.plainPassword.second, { 'attr': {'placeholder': registration_form.plainPassword.second.vars.label} })}}
         <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
   {{form_end(registration_form)}}
-
+</div>
   {% include '::footer.html.twig' %}
 {% endblock %}

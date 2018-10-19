@@ -18,28 +18,43 @@ security:
 
 
     firewalls:
+        # NOTE: If you change anything in this section, or move the guard authenticators around
+        # NOTE: make sure to update the $stateless_fw_contexts variables in each guard authenticator
+        # NOTE: Otherwise they may not be enabled.
+
         # disables authentication for assets and the profiler, adapt it according to your needs
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        # api only does http_basic auth
+        # SEE NOTE ABOVE IF CHANGING ANYTHING IN THIS SECTION
+        # API does Basic Auth and IP address auth
         api:
             pattern: ^/api
             provider: domjudge_db_provider
-            http_basic: ~
             stateless: true
             user_checker: DOMJudgeBundle\Security\UserChecker
             anonymous: ~
+            guard:
+              # SEE NOTE ABOVE IF CHANGING ANYTHING HERE
+              authenticators:
+                - DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
+                - DOMJudgeBundle\Security\DOMJudgeBasicAuthenticator
+              entry_point: DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
 
-        # api only does http_basic auth
+        # SEE NOTE ABOVE IF CHANGING ANYTHING IN THIS SECTION
+        # Feed does the same auth methods as api
         feed:
             pattern: ^/feed
             provider: domjudge_db_provider
-            http_basic: ~
             user_checker: DOMJudgeBundle\Security\UserChecker
             stateless: true
             anonymous: ~
+            guard:
+              authenticators:
+                - DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
+                - DOMJudgeBundle\Security\DOMJudgeBasicAuthenticator
+              entry_point: DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
 
         # rest of app does form_login
         main:
@@ -47,14 +62,18 @@ security:
             provider: domjudge_db_provider
             user_checker: DOMJudgeBundle\Security\UserChecker
             logout_on_user_change: true
-
+            guard:
+              authenticators:
+                - DOMJudgeBundle\Security\DOMJudgeXHeadersAuthenticator
+                - DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
+              entry_point: DOMJudgeBundle\Security\DOMJudgeXHeadersAuthenticator
             anonymous: ~
             form_login:
               login_path: login
               check_path: login
               csrf_token_generator: security.csrf.token_manager
               use_referer: true
-              default_target_path: legacy.index
+              default_target_path: login
               always_use_default_target_path: true
 
             logout:
