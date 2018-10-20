@@ -79,7 +79,7 @@ sudo bin/create_cgroups
 
 # build chroot(randomly pick which script to use)
 cd ${DIR}/misc-tools
-FLIP=$(($(($RANDOM%10))%2))
+FLIP=$((RANDOM % 2))
 if [ $FLIP -eq 1 ]; then
   time sudo ./dj_make_chroot -a amd64
 else
