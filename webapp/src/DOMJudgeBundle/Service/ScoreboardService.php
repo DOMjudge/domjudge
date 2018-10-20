@@ -94,6 +94,9 @@ class ScoreboardService
         }
 
         $teams      = $this->getTeams($contest, true, new Filter([], [], [], [$teamId]));
+        if (empty($teams)) {
+            return null;
+        }
         $team       = reset($teams);
         $problems   = $this->getProblems($contest);
         $rankCache  = $this->getRankcache($contest, $team);
