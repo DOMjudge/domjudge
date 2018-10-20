@@ -1,6 +1,6 @@
 <?php
 
-namespace DOMJudgeBundle\Controller;
+namespace DOMJudgeBundle\Controller\Jury;
 
 use DOMJudgeBundle\Service\DOMJudgeService;
 use Symfony\Component\Routing\Annotation\Route;

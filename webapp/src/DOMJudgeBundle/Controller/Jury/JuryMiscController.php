@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace DOMJudgeBundle\Controller;
+namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Service\DOMJudgeService;
