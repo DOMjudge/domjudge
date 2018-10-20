@@ -245,9 +245,9 @@ if (isset($_POST['import'])) {
             $problem['name'] = $prob['name'];
             // Our color field can be both a HTML color name and an RGB value.
             // If it is in RGB, we try to find the closest HTML color name.
-            $color = hex_to_color($prob['color']);
+            $color = is_null($prob['color']) ? null : hex_to_color($prob['color']);
             $problem['color'] = is_null($color) ? $prob['color'] : $color;
-            $problem['rgb'] = color_to_hex($prob['color']);
+            $problem['rgb'] = is_null($prob['color']) ? null : color_to_hex($prob['color']);
             $contest_data['problems'][] = $problem;
         }
     }
