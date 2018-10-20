@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -8,13 +9,17 @@ use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class DOMJudgeService
 {
     protected $em;
+    protected $logger;
     protected $request;
     protected $container;
     protected $hasAllRoles = false;
@@ -28,9 +33,10 @@ class DOMJudgeService
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
     const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
 
-    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, Container $container)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, RequestStack $requestStack, Container $container)
     {
         $this->em = $em;
+        $this->logger = $logger;
         $this->request = $requestStack->getCurrentRequest();
         $this->container = $container;
     }
@@ -104,6 +110,8 @@ class DOMJudgeService
      * The results will have the value of field $key in the database as key.
      *
      * This is equivalent to $cdata in the old codebase.
+     *
+     * @return Contest[]
      */
     public function getCurrentContests(
         bool $fulldata = false,
@@ -113,7 +121,7 @@ class DOMJudgeService
     ) {
         $now = Utils::now();
         $qb = $this->em->createQueryBuilder();
-        $qb->select('c')->from('DOMJudgeBundle:Contest', 'c');
+        $qb->select('c')->from('DOMJudgeBundle:Contest', 'c', 'c.cid');
         if ($onlyofteam !== null && $onlyofteam > 0) {
             $qb->leftJoin('c.teams', 'ct')
                 ->andWhere('ct.teamid = :teamid OR c.public = 1')
@@ -395,5 +403,29 @@ class DOMJudgeService
             default:
                 throw new HttpException(500, sprintf("unknown internal error kind '%s'", $disabled['kind']));
         }
+    }
+
+    /**
+     * Perform an internal API request to the given URL with the given data
+     *
+     * @param string $url
+     * @param string $method
+     * @param array $queryData
+     * @return mixed|null
+     * @throws \Exception
+     */
+    public function internalApiRequest(string $url, string $method = Request::METHOD_GET, array $queryData = [])
+    {
+        $request  = Request::create('/api' . $url, $method, $queryData);
+        $response = $this->getHttpKernel()->handle($request, HttpKernelInterface::SUB_REQUEST);
+
+        $status = $response->getStatusCode();
+        if ($status < 200 || $status >= 300) {
+            $this->logger->warning(sprintf("executing internal %s request to url %s: http status code: %d, response: %s",
+                                           $method, $url, $status, $response));
+            return null;
+        }
+
+        return $this->jsonDecode($response->getContent());
     }
 }

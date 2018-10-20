@@ -342,7 +342,9 @@ class EventLogService implements ContainerAwareInterface
                 $query = ['ids' => $ids];
             }
 
-            $json = $this->internalApiRequest($url, $query);
+            $this->DOMJudgeService->setHasAllRoles(true);
+            $json = $this->DOMJudgeService->internalApiRequest($url, Request::METHOD_GET, $query);
+            $this->DOMJudgeService->setHasAllRoles(false);
 
             if ($json === null) {
                 $this->logger->warning(sprintf('EventLogService::log got no JSON data from \'%s\'', $url));
@@ -501,31 +503,5 @@ class EventLogService implements ContainerAwareInterface
         } else {
             return null;
         }
-    }
-
-    /**
-     * Perform an internal API GET request to the given URL with the given query data
-     *
-     * TODO: if we need this in more places, move it to DOMJudgeService and make it public
-     * @param string $url
-     * @param array $queryData
-     * @return mixed|null
-     * @throws \Exception
-     */
-    protected function internalApiRequest(string $url, array $queryData)
-    {
-        $request = Request::create('/api' . $url, 'GET', $queryData);
-        $this->DOMJudgeService->setHasAllRoles(true);
-        $response = $this->DOMJudgeService->getHttpKernel()->handle($request, HttpKernelInterface::SUB_REQUEST);
-        $this->DOMJudgeService->setHasAllRoles(false);
-
-        $status = $response->getStatusCode();
-        if ($status < 200 || $status >= 300) {
-            $this->logger->warning(sprintf("executing internal GET request to url %s: http status code: %d, response: %s",
-                                           $url, $status, $response));
-            return null;
-        }
-
-        return $this->DOMJudgeService->jsonDecode($response->getContent());
     }
 }
