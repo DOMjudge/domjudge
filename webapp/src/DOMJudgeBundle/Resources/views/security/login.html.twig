@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="form-signin">
+<div class="form-signin" id="loginform">
   <img class="mb-4" src="images/DOMjudgelogo.png" alt="DOMjudge" width="72">
   {% for message in app.flashes('notice') %}
   <div class="alert alert-success" role="alert">
@@ -31,7 +31,7 @@
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
         {% if allow_registration %}
-        <div>Don't have an account? <a href="{{url('register', {}, true)}}">Register now</a>.</div>
+        <div>Don't have an account?<br /><a href="{{url('register', {}, true)}}">Register now</a>.</div>
         {% endif %}
     </form>
   </div>

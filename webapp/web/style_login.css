@@ -21,9 +21,11 @@ body {
 .form-signin {
   width: 100%;
   max-width: 800px;
-  text-align: center;
   padding: 15px;
   margin: 0 auto;
+}
+#loginform {
+  text-align: center;
 }
 .form-signin .form-control {
   position: relative;
