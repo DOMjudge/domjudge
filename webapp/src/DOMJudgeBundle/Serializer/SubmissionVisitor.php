@@ -72,7 +72,7 @@ class SubmissionVisitor implements EventSubscriberInterface
             /** @var Submission $submission */
             $submission         = $event->getObject();
             $submissionIdField  = $this->eventLogService->externalIdFieldForEntity(Submission::class) ?? 'submitid';
-            $contestIdField     = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cit';
+            $contestIdField     = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
             $submissionIdGetter = sprintf('get%s', ucfirst($submissionIdField));
             $contestIdGetter    = sprintf('get%s', ucfirst($contestIdField));
             $filesRoute         = $this->router->generate('submission_files',
