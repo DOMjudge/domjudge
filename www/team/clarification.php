@@ -22,7 +22,7 @@ if (isset($id)) {
     }
     $myrequest = ($req['sender'] == $teamid);
 
-    $respid = empty($req['respid']) ? $id : $req['respid'];
+    $respid = empty($req['respid']) ? $id : (int)$req['respid'];
 }
 
 // insert a request (if posted)
@@ -62,7 +62,7 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
 $title = 'Clarifications';
 require(LIBWWWDIR . '/header.php');
 
-if (isset($id)) {
+if (isset($respid)) {
     // display clarification thread
     if ($myrequest) {
         echo "<h1>Clarification Request</h1>\n\n";
