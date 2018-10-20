@@ -294,6 +294,7 @@ if (IS_ADMIN) {
     echo "<p class=\"nomorecol\">" .
         editLink('team', $id). "\n" .
         delLink('team', 'teamid', $id, $row['name']) .
+	"<a href=\"clarification.php?teamto=$id\"><span class=\"octicon octicon-mail\"></span></a>" .
         "</p>\n\n";
 }
 

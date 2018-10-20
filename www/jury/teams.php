@@ -104,11 +104,13 @@ if ($teams->count() == 0) {
         }
         echo ">$link" . CIRCLE_SYM . "</a></td>";
         echo "<td class=\"teamstat\" title=\"$numcor correct / $numsub submitted\">$link$numcor / $numsub</a></td>";
+        echo "<td class=\"editdel\">";
         if (IS_ADMIN) {
-            echo "<td class=\"editdel\">" .
-                editLink('team', $row['teamid']) . "&nbsp;" .
-                delLink('team', 'teamid', $row['teamid'], $row['name']) . "</td>";
+                echo editLink('team', $row['teamid']) . "&nbsp;" .
+                    delLink('team', 'teamid', $row['teamid'], $row['name']);
+                echo "<a href=\"clarification.php?teamto=" . urlencode($row['teamid']) . "\"><span class=\"octicon octicon-mail\"></span>";
         }
+        echo "</td>\n";
         echo "</tr>\n";
     }
     echo "</tbody>\n</table>\n\n";

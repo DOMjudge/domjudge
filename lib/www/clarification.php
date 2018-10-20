@@ -413,7 +413,7 @@ function putClarificationList($clars, int $team = null)
  * Set respid to a clarid, to make only responses to same
  * sender(s)/recipient(s) or ALL selectable.
  */
-function putClarificationForm(string $action, $respid = null, $onlycontest = null)
+function putClarificationForm(string $action, $respid = null, $onlycontest = null, $teamto = null)
 {
     global $cdata, $teamdata, $DB;
 
@@ -439,9 +439,9 @@ function putClarificationForm(string $action, $respid = null, $onlycontest = nul
     if (IS_JURY) { // list all possible recipients in the "sendto" box
         $sendto_options = array('domjudge-must-select' => '(select...)', '' => 'ALL');
         if (! $respid) {
-            $teams = $DB->q('KEYVALUETABLE SELECT teamid, name
+            $teams = $DB->q('KEYVALUETABLE SELECT teamid, CONCAT(name, " (t", teamid, ")") AS name
                              FROM team
-                             ORDER BY categoryid ASC, team.name
+                             ORDER BY team.name
                              COLLATE '. DJ_MYSQL_COLLATION . ' ASC');
             $sendto_options += $teams;
         } else {
@@ -540,9 +540,11 @@ function confirmClar() {
 <?php if (IS_JURY) {
         echo "<select name=\"sendto\" class=\"custom-select\" id=\"sendto\">\n";
         foreach ($sendto_options as $value => $desc) {
-            echo "<option value=\"" . specialchars((string)$value) . "\"" .
-            (($value === 'domjudge-must-select') ? ' selected': '') .
-            ">" . specialchars($desc) . "</option>\n";
+            echo "<option value=\"" . specialchars((string)$value) . "\"";
+            if (($teamto && $value == $teamto) || $value === 'domjudge-must-select') {
+                echo ' selected';
+            }
+            echo ">" . specialchars($desc) . "</option>\n";
         }
         echo "</select>\n";
     } else {

@@ -29,6 +29,7 @@ if (isset($id)) {
     $isgeneral = false;
 } else {
     $respid = null;
+    $teamto = (isset($_GET['teamto'])?$_GET['teamto']:null);
     $isgeneral = true;
 }
 
@@ -218,7 +219,7 @@ if (! $isgeneral) {
 // display a clarification send box
 if ($isgeneral) {
     echo "<h1>Send Clarification</h1>\n\n";
-    putClarificationForm("clarification.php");
+    putClarificationForm("clarification.php", null, null, $teamto);
 } else {
     echo "<h1>Send Response</h1>\n\n";
     putClarificationForm("clarification.php", $respid);
