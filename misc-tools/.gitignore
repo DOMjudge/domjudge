@@ -8,5 +8,6 @@
 /judging_statistics
 /multi_rejudge
 /dj_make_chroot
+/dj_make_chroot_docker
 /dj_run_chroot
 /eventdaemon
