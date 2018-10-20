@@ -541,8 +541,8 @@ class JudgehostController extends FOSRestController
 
         $error = new InternalError();
         $error
-            ->setJudgingid($judgingId)
-            ->setCid($cid)
+            ->setJudging($judgingId ? $this->entityManager->getReference(Judging::class, $judgingId) : null)
+            ->setContest($cid ? $this->entityManager->getReference(Contest::class, $cid) : null)
             ->setDescription($description)
             ->setJudgehostlog($judgehostlog)
             ->setTime(Utils::now())
