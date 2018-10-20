@@ -2,6 +2,7 @@
 
 namespace DOMJudgeBundle\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -12,12 +13,23 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class JuryMiscController extends Controller
 {
     /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+
+    /**
      * @var DOMJudgeService
      */
-    private $DOMJudgeService;
+    protected $DOMJudgeService;
 
-    public function __construct(DOMJudgeService $DOMJudgeService)
+    /**
+     * GeneralInfoController constructor.
+     * @param EntityManagerInterface $entityManager
+     * @param DOMJudgeService $DOMJudgeService
+     */
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
     {
+        $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
     }
 
@@ -27,7 +39,19 @@ class JuryMiscController extends Controller
      */
     public function indexAction(Request $request)
     {
-        return $this->render('DOMJudgeBundle:jury:index.html.twig', []);
+        $errors = array();
+        if ( $this->DOMJudgeService->checkrole('admin') ) {
+            $result = $this->entityManager
+                ->createQuery('SELECT u.username, u.password FROM DOMJudgeBundle:User u')
+                ->getResult();
+            foreach ($result as $row) {
+                if ( $row['password'] && password_verify($row['username'], $row['password']) ) {
+                    $errors[] = "Security alert: the password of the user '"
+                        . $row['username'] . "' matches their username. You should change it immediately!";
+                }
+            }
+        }
+        return $this->render('DOMJudgeBundle:jury:index.html.twig', ['errors' => $errors]);
     }
 
     /**

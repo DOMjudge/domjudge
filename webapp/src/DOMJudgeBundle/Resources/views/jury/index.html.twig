@@ -14,6 +14,10 @@
   <img src="../images/DOMjudgelogo.png" id="djlogo" alt="DOMjudge logo" class="float-right d-none d-lg-block" title="The DOMjudge logo: free as in beer!" />
 </a>
 
+{% for error in errors %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
+{% endfor %}
+
 <div class="row equal mt-3">
   <div class="col-lg-4 col-sm-6 mt-3">
     <div class="card">
