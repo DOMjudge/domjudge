@@ -18,6 +18,8 @@ class DOMJudgeService
     protected $request;
     protected $container;
     protected $hasAllRoles = false;
+    /** @var Configuration[] */
+    protected $configCache = [];
 
     public function __construct(EntityManagerInterface $em, RequestStack $requestStack, Container $container)
     {
@@ -51,28 +53,32 @@ class DOMJudgeService
      * When $name is null, then all variables will be returned.
      * @param string|null $name
      * @param mixed $default
-     * @param bool $onlyifpublic
+     * @param bool $onlyIfPublic
      * @return Configuration[]|mixed
      * @throws \Exception
      */
-    public function dbconfig_get($name, $default = null, bool $onlyifpublic = false)
+    public function dbconfig_get($name, $default = null, bool $onlyIfPublic = false)
     {
+        if (empty($this->configCache)) {
+            $configs = $this->em->getRepository('DOMJudgeBundle:Configuration')->findAll();
+            $this->configCache = [];
+            foreach ($configs as $config) {
+                $this->configCache[$config->getName()] = $config;
+            }
+        }
+
         if (is_null($name)) {
-            $all_configs = $this->em->getRepository('DOMJudgeBundle:Configuration')->findAll();
-            $ret         = array();
-            /** @var Configuration $config */
-            foreach ($all_configs as $config) {
-                if (!$onlyifpublic || $config->getPublic()) {
+            $ret = [];
+            foreach ($this->configCache as $config) {
+                if (!$onlyIfPublic || $config->getPublic()) {
                     $ret[$config->getName()] = $config->getValue();
                 }
             }
             return $ret;
         }
 
-        /** @var Configuration $config */
-        $config = $this->em->getRepository('DOMJudgeBundle:Configuration')->findOneByName($name);
-        if (!empty($config) && (!$onlyifpublic || $config->getPublic())) {
-            return $config->getValue();
+        if (!empty($this->configCache[$name]) && (!$onlyIfPublic || $this->configCache[$name]->getPublic())) {
+            return $this->configCache[$name]->getValue();
         }
 
         if ($default === null) {
