@@ -63,12 +63,11 @@ class AnalysisController extends Controller
           ->from('DOMJudgeBundle:Contest', 'c')
           ->join('c.problems', 'cp')
           ->join('cp.problem', 'p')
-          ->join('p.testcases', 'tc')
+          ->leftJoin('p.testcases', 'tc')
           ->where('c = :contest')
           ->groupBy('p.probid')
           ->setParameter('contest', $contest)
           ->getQuery()->getResult();
-        ;
         $num_testcases = [];
         foreach($results as $r) {
           $num_testcases[$r['probid']] = $r['num_testcases'];
