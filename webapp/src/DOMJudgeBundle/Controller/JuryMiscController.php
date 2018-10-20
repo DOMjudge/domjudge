@@ -2,6 +2,7 @@
 
 namespace DOMJudgeBundle\Controller;
 
+use DOMJudgeBundle\Service\DOMJudgeService;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -10,6 +11,16 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 class JuryMiscController extends Controller
 {
+    /**
+     * @var DOMJudgeService
+     */
+    private $DOMJudgeService;
+
+    public function __construct(DOMJudgeService $DOMJudgeService)
+    {
+        $this->DOMJudgeService = $DOMJudgeService;
+    }
+
     /**
      * @Route("/jury/", name="jury_index")
      * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
@@ -41,5 +52,14 @@ class JuryMiscController extends Controller
         }
         asort($langlist);
         return $this->render('DOMJudgeBundle:jury:print.html.twig', ['langlist' => $langlist]);
+    }
+
+    /**
+     * @Route("/jury/updates", methods={"GET"}, name="jury_ajax_updates")
+     * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
+     */
+    public function updatesAction(Request $request)
+    {
+	return $this->json($this->DOMJudgeService->getUpdates());
     }
 }

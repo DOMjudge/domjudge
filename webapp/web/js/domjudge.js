@@ -93,7 +93,7 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 			}
 		}
 	};
-	handle.open("GET", "updates.php", true);
+	handle.open("GET", "updates", true);
 	handle.send(null);
 }
 

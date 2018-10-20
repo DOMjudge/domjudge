@@ -232,7 +232,7 @@ class DOMJudgeService
         $clarifications = [];
         if ($contest) {
            $clarifications = $this->em->createQueryBuilder()
-               ->select('clar')
+               ->select('clar.clarid', 'clar.body')
                ->from('DOMJudgeBundle:Clarification', 'clar')
                ->where('clar.contest = :contest')
                ->andWhere('clar.sender is not null')
@@ -242,7 +242,7 @@ class DOMJudgeService
         }
 
 	$judgehosts = $this->em->createQueryBuilder()
-            ->select('j')
+            ->select('j.hostname', 'j.polltime')
             ->from('DOMJudgeBundle:Judgehost', 'j')
             ->where('j.active = 1')
             ->andWhere('j.polltime < :i')
