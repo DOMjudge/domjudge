@@ -33,7 +33,7 @@
       {% set default_sort = 0 %}
       {% for key,column in fields %}
       {% if column.default_sort|default(false) %}{% set default_sort = loop.index0 %}{% endif %}
-      <th scope="col" class="{% if column.sort %}sortable{% endif %} {% if column.search|default(true) %}searchable{% endif %}">
+      <th scope="col" class="{% if column.sort %}sortable{% endif %} {% if (column.search is not defined) or column.search %}searchable{% endif %}">
         {{ column.title }}
       </th>
       {% endfor %}
