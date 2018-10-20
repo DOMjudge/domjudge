@@ -5,6 +5,8 @@ export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 DIR=$(pwd)
 lsb_release -a
 
+GITSHA=$(git rev-parse HEAD || true)
+
 # FIXME: This chicken-egg problem is annoying but let us bootstrap for now.
 echo "CREATE DATABASE IF NOT EXISTS \`domjudge\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" | mysql
 echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`domjudge\`.* TO 'domjudge'@'localhost' IDENTIFIED BY 'domjudge';" | mysql
@@ -79,7 +81,6 @@ sudo bin/create_cgroups
 
 # build chroot (randomly pick which script to use, try to use commit
 # hash for reproducibility)
-GITSHA=$(git rev-parse HEAD)
 if [ -n "$GITSHA" ]; then
 	FLIP=$(( $(printf '%d' "0x${GITSHA:0:2}") % 2 ))
 else
