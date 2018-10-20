@@ -1,7 +1,7 @@
 body {
 	color: black;
 	background-color: white;
-	font-family: sans-serif;
+	font-family: Roboto, sans-serif;
 	padding-top: 4.5rem;
 }
 
@@ -189,7 +189,7 @@ legend {
 	text-align: center;
 }
 .scoreboard td div {
-	width: 3.5em;
+	width: 4em;
 	font-size: 120%;
 	display: inline-block;
 }
