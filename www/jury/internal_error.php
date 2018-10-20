@@ -20,7 +20,7 @@ if (! $id) {
     error("Missing or invalid internal error id");
 }
 
-$edata = $DB->q('TUPLE SELECT * FROM internal_error WHERE errorid=%i', $id);
+$edata = $DB->q('MAYBETUPLE SELECT * FROM internal_error WHERE errorid=%i', $id);
 
 if (! $edata) {
     error("Missing internal error data for e" . $id);
