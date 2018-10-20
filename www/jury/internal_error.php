@@ -81,7 +81,7 @@ switch ($kind) {
         $shortname = $DB->q('VALUE SELECT shortname FROM contestproblem WHERE probid=%i AND cid=%i',
                             $probid, $edata['cid']);
         $name = $DB->q('VALUE SELECT name FROM problem WHERE probid=%i', $probid);
-        echo "<a href=\"problem.php?id=" . urlencode($probid) . "\">" . specialchars($shortname . " - " . $name) . "</a>";
+        echo "<a href=\"problem.php?id=" . $probid . "\">" . specialchars($shortname . " - " . $name) . "</a>";
         break;
     case 'judgehost':
         $judgehost = $disabled['hostname'];
