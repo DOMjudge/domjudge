@@ -9,11 +9,10 @@
 
 {% block content %}
 <h1>DOMjudge Jury interface</h1>
-<p>
-  <a href="https://www.domjudge.org/">
-    <img src="../images/DOMjudgelogo.png" id="djlogo" alt="DOMjudge logo" title="The DOMjudge logo: free as in beer!" />
-  </a>
-</p>
+
+<a href="https://www.domjudge.org/">
+  <img src="../images/DOMjudgelogo.png" id="djlogo" alt="DOMjudge logo" class="float-right d-none d-lg-block" title="The DOMjudge logo: free as in beer!" />
+</a>
 
 <div class="row equal mt-3">
   <div class="col-lg-4 col-sm-6 mt-3">
@@ -33,6 +32,11 @@
             <li><a href="{{ path('legacy.jury_judgehost_restrictions') }}">Judgehost Restrictions</a></li>
             <li><a href="{{ path('legacy.jury_languages') }}">Languages</a></li>
             <li><a href="{{ path('legacy.jury_problems') }}">Problems</a></li>
+          {% endif %}
+          {% if have_printing %}
+            <li><a href="{{ path('legacy.jury_print') }}">Print</a></li>
+          {% endif %}
+          {% if is_granted('ROLE_JURY') %}
             <li><a href="{{ path('legacy.jury_scoreboard') }}">Scoreboard</a></li>
             <li><a href="{{ path('analysis_index') }}">Statistics/Analysis</a></li>
             <li><a href="{{ path('legacy.jury_submissions') }}">Submissions</a></li>
@@ -49,7 +53,7 @@
 
   <div class="col-lg-3 col-sm-6 mt-3">
   {% if is_granted('ROLE_ADMIN') %}
-    <div class="card">
+    <div class="card mb-3">
       <div class="card-header">
         Administrator:
       </div>
@@ -66,7 +70,7 @@
       </div>
     </div>
   {% endif %}
-    <div class="card mt-3">
+    <div class="card">
       <div class="card-header">
         Documentation:
       </div>

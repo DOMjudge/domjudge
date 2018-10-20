@@ -1,0 +1,9 @@
+/* menu */
+#menuDefault ul li.nav-item {
+    white-space: nowrap;
+}
+
+
+#djlogo {
+    width: 93px; height: 196px;
+}

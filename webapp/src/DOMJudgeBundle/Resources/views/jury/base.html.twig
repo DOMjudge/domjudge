@@ -4,22 +4,19 @@
 {% block title %}{{ title|default('DOMjudge') }}{% endblock %}
 
 {% block extrahead %}
-<!-- Should be either this or bootstrap, not both... -->
-<link rel="stylesheet" href="{{asset('style.css')}}" type="text/css" />
-<link rel="stylesheet" href="{{asset('style_jury.css')}}" type="text/css" />
+<link rel="stylesheet" href="{{asset('style_domjudge.css')}}">
 
 {% if jscolor is defined %}
-<script type="text/javascript" src="{{asset('js/jscolor.js')}}"></script>
+<script src="{{asset('js/jscolor.js')}}"></script>
 {% endif %}
 
 {% if jqtokeninput is defined %}
-  <link rel="stylesheet" href="{{asset('token-input.css')}}" type="text/css" />
-  <script type="text/javascript" src="{{asset('js/jquery.tokeninput.min.js')}}"></script>
+  <link rel="stylesheet" href="{{asset('token-input.css')}}">
+  <script src="{{asset('js/jquery.tokeninput.min.js')}}"></script>
 {% endif %}
 
-<script type="text/javascript" src="{{asset('js/sorttable.js')}}"></script>
-<!-- <script type="text/javascript" src="{{asset('js/jury.js')}}"></script> -->
-<!-- <script type="text/javascript" src="{{asset('js/js.cookie.min.js')}}"></script> -->
+<script src="{{asset('js/sorttable.js')}}"></script>
+{# <script src="{{asset('js/jury.js')}}"></script> #}
 
 {{ extrahead|default('') }}
 {% endblock %}

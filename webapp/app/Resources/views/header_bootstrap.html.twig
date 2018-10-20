@@ -4,94 +4,74 @@
     <span class="navbar-toggler-icon"></span>
   </button>
 
-  <style>
-    #menuDefault ul li.nav-item {
-      white-space: nowrap;
-      padding-left: 0;
-    }
-  </style>
   <div class="collapse navbar-collapse" id="menuDefault">
     <ul class="navbar-nav mr-auto">
 
+      {% if is_granted('ROLE_BALLOON') and not is_granted('ROLE_JURY') and not is_granted('ROLE_ADMIN') %}
       <li class="nav-item">
-        <a class="nav-link" href="{{ path('jury_index') }}" accesskey="h"><span class="octicon octicon-home"></span> home</a>
-      </li>
-
-      {% if is_granted('ROLE_BALLOON') %}
-      <li class="nav-item">
-        <a class="nav-link" href="{{ path('legacy.jury_balloons') }}" accesskey="b"><span class="octicon octicon-location"></span> balloons</a>
-      </li>
-      {% endif %}
-
-      {% if is_granted('ROLE_JURY') %}
-      <li class="nav-item">
-        <a class="nav-link" href="{{ path('legacy.jury_problems') }}" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
+        <a class="nav-link" href="{{ path('legacy.jury_balloons') }}"><span class="octicon octicon-location"></span> balloons</a>
       </li>
       {% endif %}
 
       {% if is_granted('ROLE_ADMIN') %}
-        <li class="nav-item">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <span class="octicon octicon-law"></span> judgehosts
           {% if updates['judgehosts']|length > 0 %}
-            <a class="nav-link text-danger" href="{{ path('legacy.jury_judgehosts') }}" accesskey="j" id="menu_judgehosts">
-              <span class="octicon octicon-law"></span> judgehosts <span class="small">({{ updates['judgehosts']|length }} down)</span>
+          <span class="badge badge-warning">{{ updates['judgehosts']|length }}</span>
+          {% endif %}
+          {% if updates['internal_error']|length > 0 %}
+          <span class="badge badge-danger">{{ updates['internal_error']|length }}</span>
+          {% endif %}
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          {% if updates['judgehosts']|length > 0 %}
+            <a class="dropdown-item text-danger" href="{{ path('legacy.jury_judgehosts') }}" id="menu_judgehosts">
+              <span class="octicon octicon-server"></span> judgehosts <span class="badge badge-warning">{{ updates['judgehosts']|length }} down</span>
             </a>
           {% else %}
-            <a class="nav-link" href="{{ path('legacy.jury_judgehosts') }}" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts</a>
+            <a class="dropdown-item" href="{{ path('legacy.jury_judgehosts') }}" id="menu_judgehosts"><span class="octicon octicon-server"></span> judgehosts</a>
           {% endif %}
-        </li>
-
-
         {% if updates['internal_error']|length > 0 %}
-        <li class="nav-item">
-          <a class="nav-link text-danger" href="{{ path('legacy.jury_internal_errors') }}" accesskey="e" id="menu_internal_error"><span class="octicon octicon-zap"></span> internal error <span class="small">({{ updates['internal_error']|length }} new)</span></a>
-        </li>
+            <a class="dropdown-item text-danger" href="{{ path('legacy.jury_internal_errors') }}" id="menu_internal_error"><span class="octicon octicon-zap"></span> internal error <span class="badge badge-danger">{{ updates['internal_error']|length }} new</span></a>
+        {% else %}
+            <a class="dropdown-item-disabled" href="{{ path('legacy.jury_internal_errors') }}" id="menu_internal_error"><span class="octicon octicon-zap"></span> internal error</a>
         {% endif %}
+        </div>
+      </li>
       {% endif %}
 
       {% if is_granted('ROLE_JURY') %}
         <li class="nav-item">
-          <a class="nav-link" href="{{ path('legacy.jury_teams') }}" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="{{ path('legacy.jury_users') }}" accesskey="u"><span class="octicon octicon-person"></span> users</a>
-        </li>
-
-        <li class="nav-item">
           {% if updates['clarifications']|length > 0 %}
-            <a class="nav-link text-info" href="{{ path('legacy.jury_clarifications') }}" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications <span class="small">({{  updates['clarifications']|length }} new)</small></a>
+            <a class="nav-link text-info" href="{{ path('legacy.jury_clarifications') }}" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications <span class="badge badge-info">{{ updates['clarifications']|length }}</small></a>
           {% else %}
-            <a class="nav-link" href="{{ path('legacy.jury_clarifications') }}" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications</a>
+            <a class="nav-link" href="{{ path('legacy.jury_clarifications') }}" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications</a>
           {% endif %}
         </li>
 
 
         <li class="nav-item">
-          <a class="nav-link" href="{{ path('legacy.jury_submissions') }}" accesskey="s"><span class="octicon octicon-file-code"></span> submissions</a>
+          <a class="nav-link" href="{{ path('legacy.jury_submissions') }}"><span class="octicon octicon-file-code"></span> submissions</a>
         </li>
 
         <li class="nav-item">
           {% if updates['rejudgings']|length > 0 %}
-            <a class="nav-link text-info" href="{{ path('legacy.jury_rejudgings') }}" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings <span class="small">({{ updates['rejudgings']|length }} active)</span></a>
+            <a class="nav-link text-info" href="{{ path('legacy.jury_rejudgings') }}" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings <span class="badge badge-info">{{ updates['rejudgings']|length }}</span></a>
           {% else %}
-            <a class="nav-link" href="{{ path('legacy.jury_rejudgings') }}" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings</a>
+            <a class="nav-link" href="{{ path('legacy.jury_rejudgings') }}" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings</a>
           {% endif %}
         </li>
       {% endif %}
 
-      {% if have_printing %}
-        <li class="nav-item">
-          <a class="nav-link" href="{{ path('legacy.jury_print') }}" accesskey="p"><span class="octicon octicon-file-text"></span> print</a>
-        </li>
-      {% endif %}
       {% if is_granted('ROLE_JURY') %}
         <li class="nav-item">
-          <a class="nav-link" href="{{ path('legacy.jury_scoreboard') }}" accesskey="b"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
+          <a class="nav-link" href="{{ path('legacy.jury_scoreboard') }}"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
         </li>
       {% endif %}
       {% if is_granted('ROLE_TEAM') %}
         <li class="nav-item">
-          <a class="nav-link" target="_top" href="{{ path('legacy.team_index') }}" accesskey="t"><span class="octicon octicon-arrow-right"></span> team</a>
+          <a class="nav-link" target="_top" href="{{ path('legacy.team_index') }}"><span class="octicon octicon-arrow-right"></span> team</a>
         </li>
       {% endif %}
     </ul>
@@ -101,7 +81,7 @@
       {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span class="octicon octicon-person"> {{ app.user.getUsername() }}
+            <span class="octicon octicon-person"></span> {{ app.user.getUsername() }}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             {% if app.user and app.user.getName() %}
