@@ -77,10 +77,14 @@ sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/
 sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
 sudo bin/create_cgroups
 
-# build chroot
+# build chroot(randomly pick which script to use)
 cd ${DIR}/misc-tools
-# sudo ./dj_make_chroot -a amd64
-time sudo ./dj_make_chroot_docker -i ubergeek42/domjudge-chroot:latest
+FLIP=$(($(($RANDOM%10))%2))
+if [ $FLIP -eq 1 ]; then
+  time sudo ./dj_make_chroot -a amd64
+else
+  time sudo ./dj_make_chroot_docker -i domjudge/default-judgehost-chroot:latest
+fi
 
 # download domjudge-scripts for API check
 cd $HOME
