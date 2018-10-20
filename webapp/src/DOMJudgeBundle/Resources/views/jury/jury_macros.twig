@@ -1,0 +1,76 @@
+{% macro table_extrahead() %}
+<link rel="stylesheet" href="{{asset('css/dataTables.bootstrap4.min.css')}}" type="text/css" />
+<script type="text/javascript" src="{{asset('js/jquery.dataTables.min.js')}}"></script>
+<script type="text/javascript" src="{{asset('js/dataTables.bootstrap4.min.js')}}"></script>
+<style>
+.data-table td a, .data-table td a:hover {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.data-table th {
+  white-space: nowrap;
+}
+.data-table td {
+  white-space: nowrap;
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+.dataTables_filter {
+  text-align: inherit;
+}
+.table-wrapper {
+  display: inline-block;
+}
+</style>
+{% endmacro %}
+
+{% macro table(data, fields, options) %}
+<div class="table-wrapper">
+<table class="data-table table table-sm table-condensed table-striped" style="width:auto">
+  <thead class="">
+    <tr>
+      {% for key,column in fields %}
+      <th scope="col" class="{% if column.sort %}sortable{% endif %} {% if column.search|default(true) %}searchable{% endif %}">
+        {{ column.title }}
+      </th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in data %}
+      <tr class="{{ row.cssclass|default('') }}">
+        {% for key,column in fields %}
+        {% set item = attribute(row.data, key) %}
+        <td class="{{ item.cssclass|default(' ') }}">
+          <a href="{{ item.link|default(row.link) }}" title="{{ item.linktitle|default('')}}">
+            {{ (item.value|default(item.default|default('')))|raw }}
+          </a>
+        </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<script>
+$().ready(function(){
+  $('.data-table').DataTable( {
+    "paging":   false,
+    "ordering": true,
+    "info":     false,
+    "autoWidth":     true,
+    "language": {
+      "searchPlaceholder": "filter table",
+      "search": "_INPUT_",
+    },
+    'aoColumnDefs': [
+      {aTargets: ['sortable'], bSortable: true},
+      {aTargets: ['searchable'], bSearchable: true},
+      {aTargets: ['_all'], bSortable: false, bSearchable: false}
+    ],
+  } );
+});
+</script>
+
+{% endmacro %}

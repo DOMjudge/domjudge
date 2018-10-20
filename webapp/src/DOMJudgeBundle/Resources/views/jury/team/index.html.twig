@@ -1,0 +1,19 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block title %}Teams - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+{{ parent() }}
+{{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+<h1>Teams</h1>
+
+{{ macros.table(teams, table_fields) }}
+
+<p><a href="{{path('legacy.jury_team', {cmd: 'add'})}}"><img src="{{asset('images/add.png')}}" alt="add" title="add new team" class="picto"></a></p>
+{% endblock %}

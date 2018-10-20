@@ -119,10 +119,10 @@ a.collapse { color: black; text-decoration: none; }
 .configcheck th { text-align: left; padding-top: 1ex; }
 
 /* team connect status/judgehost poll status */
-.team-nocon a, .judgehost-nocon a { color: #AAA; }
-.team-nosub a, .judgehost-crit  a { color: red; }
-.team-nocor a, .judgehost-warn  a { color: yellow; }
-.team-ok a,    .judgehost-ok    a { color: green; }
+.team-nocon a, .judgehost-nocon a { color: #AAA !important; }
+.team-nosub a, .judgehost-crit  a { color: red !important; }
+.team-nocor a, .judgehost-warn  a { color: yellow !important; }
+.team-ok a,    .judgehost-ok    a { color: green !important; }
 
 /* diff colors for source contents and filenames */
 .diff-add     { color: green; }
