@@ -212,10 +212,11 @@ class SubmissionController extends AbstractRestController
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->join('s.files', 'f')
+            ->join('s.problem', 'p')
             ->join('s.contest', 'c')
             ->join('s.language', 'lang')
             ->join('s.team', 'team')
-            ->select('s, f, team, lang')
+            ->select('s, f, team, lang, p')
             ->andWhere('s.valid = 1')
             ->andWhere('s.cid = :cid')
             ->setParameter(':cid', $cid)
@@ -237,11 +238,11 @@ class SubmissionController extends AbstractRestController
     }
 
     /**
-     * Return the field used as ID in requests
-     * @return string
+     * @inheritdoc
+     * @throws \Exception
      */
     protected function getIdField(): string
     {
-        return 's.submitid';
+        return sprintf('s.%s', $this->eventLogService->externalIdFieldForEntity(Submission::class) ?? 'submitid');
     }
 }

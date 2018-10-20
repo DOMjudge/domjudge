@@ -7,6 +7,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,14 +32,20 @@ abstract class AbstractRestController extends FOSRestController
     protected $DOMJudgeService;
 
     /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
+    /**
      * AbstractRestController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService $DOMJudgeService
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService)
     {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->eventLogService = $eventLogService;
     }
 
     /**
@@ -178,7 +185,7 @@ abstract class AbstractRestController extends FOSRestController
 
         $qb = $this->getContestQueryBuilder();
         $qb
-            ->andWhere('c.cid = :cid')
+            ->andWhere(sprintf('c.%s = :cid', $this->getContestIdField()))
             ->setParameter(':cid', $request->attributes->get('cid'));
 
         /** @var Contest $contest */
@@ -189,6 +196,19 @@ abstract class AbstractRestController extends FOSRestController
         }
 
         return $contest->getCid();
+    }
+
+    /**
+     * Get the field to use for getting contests by ID
+     * @return string
+     */
+    protected function getContestIdField(): string
+    {
+        try {
+            return $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
+        } catch (\Exception $e) {
+            return 'cid';
+        }
     }
 
     /**

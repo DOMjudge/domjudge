@@ -223,6 +223,7 @@ class JudgehostController extends FOSRestController
      * @param string $hostname
      * @return array|string
      * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
      */
     public function getNextJudgingAction(string $hostname)
     {
@@ -330,10 +331,13 @@ class JudgehostController extends FOSRestController
         $submission->getTeam()->setJudgingLastStarted(Utils::now());
         $this->entityManager->flush();
 
+        $contestIdField  = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
+        $contestIdGetter = sprintf('get%s', ucfirst($contestIdField));
+
         // Build up result
         $result = [
             'submitid' => $submission->getSubmitid(),
-            'cid' => $submission->getCid(),
+            'cid' => $submission->getContest()->{$contestIdGetter}(),
             'teamid' => $submission->getTeamid(),
             'probid' => $submission->getProbid(),
             'langid' => $submission->getLangid(),

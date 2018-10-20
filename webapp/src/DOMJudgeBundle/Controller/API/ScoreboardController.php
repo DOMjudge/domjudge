@@ -5,7 +5,10 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\Problem;
+use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ScoreboardService;
 use DOMJudgeBundle\Utils\Scoreboard\Filter;
 use DOMJudgeBundle\Utils\Scoreboard\ScoreboardMatrixItem;
@@ -34,14 +37,16 @@ class ScoreboardController extends AbstractRestController
      * ScoreboardController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService $DOMJudgeService
+     * @param EventLogService $eventLogService
      * @param ScoreboardService $scoreboardService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
         ScoreboardService $scoreboardService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService);
+        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
         $this->scoreboardService = $scoreboardService;
     }
 
@@ -115,9 +120,11 @@ class ScoreboardController extends AbstractRestController
         $scoreIsInSecods = (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
 
         foreach ($scorebard->getScores() as $teamScore) {
-            $row = [
+            $teamIdField  = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
+            $teamIdGetter = sprintf('get%s', ucfirst($teamIdField));
+            $row          = [
                 'rank' => $teamScore->getRank(),
-                'team_id' => (string)$teamScore->getTeam()->getTeamid(),
+                'team_id' => (string)$teamScore->getTeam()->{$teamIdGetter}(),
                 'score' => [
                     'num_solved' => $teamScore->getNumberOfPoints(),
                     'total_time' => $teamScore->getTotalTime(),
@@ -127,10 +134,12 @@ class ScoreboardController extends AbstractRestController
 
             /** @var ScoreboardMatrixItem $matrixItem */
             foreach ($scorebard->getMatrix()[$teamScore->getTeam()->getTeamid()] as $problemId => $matrixItem) {
-                $contestProblem = $scorebard->getProblems()[$problemId];
-                $problem        = [
+                $contestProblem  = $scorebard->getProblems()[$problemId];
+                $problemIdField  = $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid';
+                $problemIdGetter = sprintf('get%s', ucfirst($problemIdField));
+                $problem         = [
                     'label' => $contestProblem->getShortname(),
-                    'problem_id' => (string)$contestProblem->getProbid(),
+                    'problem_id' => (string)$contestProblem->{$problemIdGetter}(),
                     'num_judged' => $matrixItem->getNumberOfSubmissions(),
                     'num_pending' => $matrixItem->getNumberOfPendingSubmissions(),
                     'solved' => $matrixItem->isCorrect(),

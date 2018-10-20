@@ -74,7 +74,11 @@ class ClarificationController extends AbstractRestController
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Clarification', 'clar')
             ->join('clar.contest', 'c')
-            ->select('clar, c')
+            ->leftJoin('clar.in_reply_to', 'reply')
+            ->leftJoin('clar.sender', 's')
+            ->leftJoin('clar.recipient', 'r')
+            ->leftJoin('clar.problem', 'p')
+            ->select('clar, c, r, reply, p')
             ->andWhere('clar.cid = :cid')
             ->setParameter(':cid', $this->getContestId($request));
 
@@ -89,9 +93,10 @@ class ClarificationController extends AbstractRestController
 
     /**
      * @inheritdoc
+     * @throws \Exception
      */
     protected function getIdField(): string
     {
-        return 'clar.clarid';
+        return sprintf('clar.%s', $this->eventLogService->externalIdFieldForEntity(Clarification::class) ?? 'clarid');
     }
 }

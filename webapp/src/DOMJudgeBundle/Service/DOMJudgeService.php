@@ -21,6 +21,13 @@ class DOMJudgeService
     /** @var Configuration[] */
     protected $configCache = [];
 
+    // Constants for database configuration names and values
+    const CONFIGURATION_DATA_SOURCE ='data_source';
+
+    const DATA_SOURCE_LOCAL = 0;
+    const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
+    const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
+
     public function __construct(EntityManagerInterface $em, RequestStack $requestStack, Container $container)
     {
         $this->em = $em;

@@ -7,6 +7,7 @@ use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\JudgingRun;
 use DOMJudgeBundle\Helpers\JudgingRunWrapper;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -29,9 +30,9 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      */
     protected $verdicts;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, string $rootDir)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService, string $rootDir)
     {
-        parent::__construct($entityManager, $DOMJudgeService);
+        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
 
         global $VERDICTS;
         $dir          = realpath($rootDir . '/../../etc/');

@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,9 +25,13 @@ class JudgementTypeController extends AbstractRestController
      */
     protected $rootDir;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, string $rootDir)
-    {
-        parent::__construct($entityManager, $DOMJudgeService);
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
+        string $rootDir
+    ) {
+        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
         $this->rootDir = $rootDir;
     }
 

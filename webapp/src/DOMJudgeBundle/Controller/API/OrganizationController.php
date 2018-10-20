@@ -89,9 +89,10 @@ class OrganizationController extends AbstractRestController
 
     /**
      * @inheritdoc
+     * @throws \Exception
      */
     protected function getIdField(): string
     {
-        return 'ta.affilid';
+        return sprintf('ta.%s', $this->eventLogService->externalIdFieldForEntity(TeamAffiliation::class) ?? 'affilid');
     }
 }

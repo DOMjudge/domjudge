@@ -119,9 +119,10 @@ class TeamController extends AbstractRestController
 
     /**
      * @inheritdoc
+     * @throws \Exception
      */
     protected function getIdField(): string
     {
-        return 't.teamid';
+        return sprintf('t.%s', $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid');
     }
 }

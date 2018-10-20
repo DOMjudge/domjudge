@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
+use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Helpers\ContestProblemWrapper;
 use DOMJudgeBundle\Helpers\OrdinalArray;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -39,6 +40,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Exception
      */
     public function listAction(Request $request)
     {
@@ -77,7 +79,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
                 /** @var ContestProblemWrapper $contestProblemWrapper */
                 $contestProblemWrapper = $item->getItem();
                 $contestProblem        = $contestProblemWrapper->getContestProblem();
-                if (in_array($contestProblem->getProbid(), $ids)) {
+                $probid                = $this->getIdField() === 'p.probid' ? $contestProblem->getProbid() : $contestProblem->getExternalId();
+                if (in_array($probid, $ids)) {
                     $objects[] = $item;
                 }
             }
@@ -96,6 +99,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @param string $id
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Exception
      * @Rest\Get("/{id}")
      * @SWG\Response(
      *     response="200",
@@ -141,7 +145,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             /** @var ContestProblemWrapper $contestProblemWrapper */
             $contestProblemWrapper = $item->getItem();
             $contestProblem        = $contestProblemWrapper->getContestProblem();
-            if ($contestProblem->getProbid() == $id) {
+            $probid                = $this->getIdField() === 'p.probid' ? $contestProblem->getProbid() : $contestProblem->getExternalId();
+            if ($probid == $id) {
                 $object = $item;
                 break;
             }
@@ -184,10 +189,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
 
     /**
      * @inheritdoc
+     * @throws \Exception
      */
     protected function getIdField(): string
     {
-        return 'cp.probid';
+        return sprintf('p.%s', $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid');
     }
 
     /**

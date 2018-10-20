@@ -6,6 +6,7 @@ use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\Event;
 use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\JudgingRun;
@@ -30,6 +31,7 @@ class EventLogService implements ContainerAwareInterface
     const KEY_ENTITY = 'entity';
     const KEY_TABLES = 'tables';
     const KEY_EXTERNAL_ID = 'extid';
+    const KEY_ALWAYS_USE_EXTERNAL_ID = 'always-use-external-id';
 
     // Types of endpoints
     const TYPE_CONFIGURATION = 'configuration';
@@ -42,10 +44,11 @@ class EventLogService implements ContainerAwareInterface
     const ACTION_DELETE = 'delete';
 
     // TODO: add a way to specify when to use external ID using some (DB) config instead of hardcoding it here. Also relates to AbstractRestController::getIdField
-    public static $API_ENDPOINTS = [
+    public $apiEndpoints = [
         'contests' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_URL => '',
+            self::KEY_EXTERNAL_ID => 'externalid',
         ],
         'judgement-types' => [ // hardcoded in $VERDICTS and the API
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
@@ -55,10 +58,12 @@ class EventLogService implements ContainerAwareInterface
         'languages' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_EXTERNAL_ID => 'externalid',
+            self::KEY_ALWAYS_USE_EXTERNAL_ID => true,
         ],
         'problems' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_TABLES => ['problem', 'contestproblem'],
+            self::KEY_EXTERNAL_ID => 'externalid',
         ],
         'groups' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
@@ -69,10 +74,12 @@ class EventLogService implements ContainerAwareInterface
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_ENTITY => TeamAffiliation::class,
             self::KEY_TABLES => ['team_affiliation'],
+            self::KEY_EXTERNAL_ID => 'externalid',
         ],
         'teams' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_TABLES => ['team', 'contestteam'],
+            self::KEY_EXTERNAL_ID => 'externalid',
         ],
         'state' => [
             self::KEY_TYPE => self::TYPE_AGGREGATE,
@@ -81,6 +88,7 @@ class EventLogService implements ContainerAwareInterface
         ],
         'submissions' => [
             self::KEY_TYPE => self::TYPE_LIVE,
+            self::KEY_EXTERNAL_ID => 'externalid',
         ],
         'judgements' => [
             self::KEY_TYPE => self::TYPE_LIVE,
@@ -94,6 +102,7 @@ class EventLogService implements ContainerAwareInterface
         ],
         'clarifications' => [
             self::KEY_TYPE => self::TYPE_LIVE,
+            self::KEY_EXTERNAL_ID => 'externalid',
         ],
         'awards' => [
             self::KEY_TYPE => self::TYPE_AGGREGATE,
@@ -110,6 +119,11 @@ class EventLogService implements ContainerAwareInterface
             self::KEY_ENTITY => null,
             self::KEY_TABLES => ['event'],
         ],
+    ];
+
+    // Entities to endpoints. Will be filled automatically except for special cases
+    protected $entityToEndpoint = [
+        ContestProblem::class => 'problems', // Special case for contest problems, as they should map to problems
     ];
 
     /**
@@ -129,22 +143,27 @@ class EventLogService implements ContainerAwareInterface
 
     public function __construct(DOMJudgeService $DOMJudgeService, EntityManagerInterface $entityManager, LoggerInterface $logger)
     {
-        foreach (self::$API_ENDPOINTS as $endpoint => $data) {
+        foreach ($this->apiEndpoints as $endpoint => $data) {
             if (!array_key_exists(self::KEY_URL, $data)) {
-                self::$API_ENDPOINTS[$endpoint][self::KEY_URL] = '/' . $endpoint;
+                $this->apiEndpoints[$endpoint][self::KEY_URL] = '/' . $endpoint;
             }
             if (!array_key_exists(self::KEY_ENTITY, $data)) {
                 // Determine default controller
                 $singular  = Inflector::singularize($endpoint);
                 $entity    = Inflector::classify($singular);
-                $fullClass = sprintf('\DOMJudgeBundle\Entity\%s', $entity);
+                $fullClass = sprintf('DOMJudgeBundle\Entity\%s', $entity);
                 if (!class_exists($fullClass)) {
                     throw new \BadMethodCallException(sprintf('Class \'%s\' does not exist', $fullClass));
                 }
-                self::$API_ENDPOINTS[$endpoint][self::KEY_ENTITY] = $fullClass;
+                $this->apiEndpoints[$endpoint][self::KEY_ENTITY] = $fullClass;
             }
             if (!array_key_exists(self::KEY_TABLES, $data)) {
-                self::$API_ENDPOINTS[$endpoint][self::KEY_TABLES] = [preg_replace('/s$/', '', $endpoint)];
+                $this->apiEndpoints[$endpoint][self::KEY_TABLES] = [preg_replace('/s$/', '', $endpoint)];
+            }
+
+            // Make sure we have a fast way to look up endpoints for entities
+            if (isset($this->apiEndpoints[$endpoint][self::KEY_ENTITY])) {
+                $this->entityToEndpoint[$this->apiEndpoints[$endpoint][self::KEY_ENTITY]] = $endpoint;
             }
         }
 
@@ -197,10 +216,10 @@ class EventLogService implements ContainerAwareInterface
 
 
         // Gracefully fail since we may call this from the generic jury/edit.php page where we don't know which table gets updated.
-        if (array_key_exists($type, self::$API_ENDPOINTS)) {
-            $endpoint = self::$API_ENDPOINTS[$type];
+        if (array_key_exists($type, $this->apiEndpoints)) {
+            $endpoint = $this->apiEndpoints[$type];
         } else {
-            foreach (self::$API_ENDPOINTS as $key => $ep) {
+            foreach ($this->apiEndpoints as $key => $ep) {
                 if (in_array($type, $ep[self::KEY_TABLES], true)) {
                     $type     = $key;
                     $endpoint = $ep;
@@ -391,6 +410,7 @@ class EventLogService implements ContainerAwareInterface
      * @param string $type
      * @param array $ids
      * @return array
+     * @throws \Exception
      */
     protected function getExternalIds(string $type, array $ids): array
     {
@@ -398,7 +418,7 @@ class EventLogService implements ContainerAwareInterface
             return [];
         }
 
-        $endpointData = self::$API_ENDPOINTS[$type];
+        $endpointData = $this->apiEndpoints[$type];
         if (!isset($endpointData[self::KEY_EXTERNAL_ID])) {
             return $ids;
         }
@@ -406,6 +426,10 @@ class EventLogService implements ContainerAwareInterface
         $entity = $endpointData[self::KEY_ENTITY];
         if (!$entity) {
             throw new \BadMethodCallException(sprintf('No entity defined for type \'%s\'', $type));
+        }
+
+        if (!$this->externalIdFieldForEntity($entity)) {
+            return $ids;
         }
 
         $metadata = $this->entityManager->getClassMetadata($entity);
@@ -424,6 +448,59 @@ class EventLogService implements ContainerAwareInterface
                ->setParameter(':ids', $ids)
                ->getQuery()
                ->getScalarResult());
+    }
+
+    /**
+     * Get the external ID field for a given entity type. Will return null if no external ID field should be used
+     * @param string $entity
+     * @return string|null
+     * @throws \Exception
+     */
+    public function externalIdFieldForEntity($entity)
+    {
+        // Special case: strip of Doctrine proxies
+        if (strpos($entity, 'Proxies\\__CG__\\') === 0) {
+            $entity = substr($entity, strlen('Proxies\\__CG__\\'));
+        }
+
+        if (!isset($this->entityToEndpoint[$entity])) {
+            throw new \BadMethodCallException(sprintf('Entity \'%s\' does not have a corresponding endpoint', $entity));
+        }
+
+        $endpointData = $this->apiEndpoints[$this->entityToEndpoint[$entity]];
+
+        if (!isset($endpointData[self::KEY_EXTERNAL_ID])) {
+            return null;
+        }
+
+        $lookupExternalid = false;
+        if ($endpointData[self::KEY_ALWAYS_USE_EXTERNAL_ID] ?? false) {
+            $lookupExternalid = true;
+        } else {
+            $dataSource = $this->DOMJudgeService->dbconfig_get(
+                DOMJudgeService::CONFIGURATION_DATA_SOURCE,
+                DOMJudgeService::DATA_SOURCE_LOCAL
+            );
+
+            if ($dataSource !== DOMJudgeService::DATA_SOURCE_LOCAL) {
+                $endpointType = $endpointData[self::KEY_TYPE];
+                if ($endpointType === self::TYPE_CONFIGURATION &&
+                    in_array($dataSource, [
+                        DOMJudgeService::DATA_SOURCE_CONFIGURATION_EXTERNAL,
+                        DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
+                    ])) {
+                    $lookupExternalid = true;
+                } elseif ($endpointType === self::TYPE_LIVE && $dataSource === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
+                    $lookupExternalid = true;
+                }
+            }
+        }
+
+        if ($lookupExternalid) {
+            return $endpointData[self::KEY_EXTERNAL_ID];
+        } else {
+            return null;
+        }
     }
 
     /**

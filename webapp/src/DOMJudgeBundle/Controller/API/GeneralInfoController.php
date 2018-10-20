@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -34,6 +35,12 @@ class GeneralInfoController extends FOSRestController
      * @var DOMJudgeService
      */
     protected $DOMJudgeService;
+
+    /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
     /**
      * @var RouterInterface
      */
@@ -45,10 +52,11 @@ class GeneralInfoController extends FOSRestController
      * @param DOMJudgeService $DOMJudgeService
      * @param RouterInterface $router
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, RouterInterface $router)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService, RouterInterface $router)
     {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->eventLogService = $eventLogService;
         $this->router          = $router;
     }
 
@@ -214,5 +222,18 @@ class GeneralInfoController extends FOSRestController
         }
 
         return $result;
+    }
+
+    /**
+     * Get the field to use for getting contests by ID
+     * @return string
+     */
+    protected function getContestIdField(): string
+    {
+        try {
+            return $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
+        } catch (\Exception $e) {
+            return 'cid';
+        }
     }
 }

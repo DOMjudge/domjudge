@@ -414,4 +414,14 @@ class ContestProblem
     {
         return $this->submissions;
     }
+
+    /**
+     * Get externalid
+     *
+     * @return string
+     */
+    public function getExternalId()
+    {
+        return $this->getProblem()->getExternalid();
+    }
 }

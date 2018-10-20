@@ -76,9 +76,10 @@ class LanguageController extends AbstractRestController
 
     /**
      * @inheritdoc
+     * @throws \Exception
      */
     protected function getIdField(): string
     {
-        return 'lang.externalid';
+        return sprintf('lang.%s', $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid');
     }
 }

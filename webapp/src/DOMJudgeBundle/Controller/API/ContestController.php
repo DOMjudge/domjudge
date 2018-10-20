@@ -426,10 +426,11 @@ class ContestController extends AbstractRestController
 
     /**
      * @inheritdoc
+     * @throws \Exception
      */
     protected function getIdField(): string
     {
-        return 'c.cid';
+        return sprintf('c.%s', $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid');
     }
 
     /**

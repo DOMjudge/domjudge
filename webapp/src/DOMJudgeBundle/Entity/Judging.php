@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(name="judging", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class Judging
+class Judging implements ExternalRelationshipEntityInterface
 {
     /**
      * @var int
@@ -704,5 +704,17 @@ class Judging
     public function getRuns()
     {
         return $this->runs;
+    }
+
+    /**
+     * Get the entities to check for external ID's while serializing.
+     *
+     * This method should return an array with as keys the JSON field names and as values the actual entity
+     * objects that the SetExternalIdVisitor should check for applicable external ID's
+     * @return array
+     */
+    public function getExternalRelationships(): array
+    {
+        return ['submission_id' => $this->getSubmission()];
     }
 }

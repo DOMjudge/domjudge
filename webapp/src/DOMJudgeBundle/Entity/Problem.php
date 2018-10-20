@@ -26,6 +26,12 @@ class Problem
 
     /**
      * @var string
+     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="External ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     */
+    private $externalid;
+
+    /**
+     * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
      */
     private $name;
@@ -139,6 +145,30 @@ class Problem
     public function getProbid()
     {
         return $this->probid;
+    }
+
+    /**
+     * Set externalid
+     *
+     * @param string $externalid
+     *
+     * @return Problem
+     */
+    public function setExternalid($externalid)
+    {
+        $this->externalid = $externalid;
+
+        return $this;
+    }
+
+    /**
+     * Get externalid
+     *
+     * @return string
+     */
+    public function getExternalid()
+    {
+        return $this->externalid;
     }
 
     /**

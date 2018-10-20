@@ -3,7 +3,6 @@ namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
-use phpDocumentor\Reflection\Types\Nullable;
 
 /**
  * All teams participating in the contest
@@ -15,7 +14,7 @@ use phpDocumentor\Reflection\Types\Nullable;
  *     options={@Serializer\SerializedName("externalid"), @Serializer\Type("string"), @Serializer\Groups({"Nonstrict"})}
  * )
  */
-class Team
+class Team implements ExternalRelationshipEntityInterface
 {
     /**
      * @var int
@@ -840,5 +839,13 @@ class Team
     public function getNationality()
     {
         return $this->getAffiliation() ? $this->getAffiliation()->getCountry() : null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getExternalRelationships(): array
+    {
+        return ['organization_id' => $this->getAffiliation()];
     }
 }

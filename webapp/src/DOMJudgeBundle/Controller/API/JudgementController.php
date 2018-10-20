@@ -7,6 +7,7 @@ use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Helpers\JudgingWrapper;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -29,9 +30,13 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      */
     protected $verdicts;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, string $rootDir)
-    {
-        parent::__construct($entityManager, $DOMJudgeService);
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
+        string $rootDir
+    ) {
+        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
 
         global $VERDICTS;
         $dir          = realpath($rootDir . '/../../etc/');
@@ -114,7 +119,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     {
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
-            ->select('j, c, MAX(jr.runtime) AS maxruntime')
+            ->select('j, c, s, MAX(jr.runtime) AS maxruntime')
             ->leftJoin('j.contest', 'c')
             ->leftJoin('j.submission', 's')
             ->leftJoin('j.rejudging', 'r')

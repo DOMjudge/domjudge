@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(name="clarification", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class Clarification
+class Clarification implements ExternalRelationshipEntityInterface
 {
     /**
      * @var int
@@ -20,6 +20,12 @@ class Clarification
      * @Serializer\Type("string")
      */
     private $clarid;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Clarification ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     */
+    private $externalid;
 
     /**
      * @var int
@@ -168,6 +174,30 @@ class Clarification
     public function getClarid()
     {
         return $this->clarid;
+    }
+
+    /**
+     * Set externalid
+     *
+     * @param string $externalid
+     *
+     * @return Clarification
+     */
+    public function setExternalid($externalid)
+    {
+        $this->externalid = $externalid;
+
+        return $this;
+    }
+
+    /**
+     * Get externalid
+     *
+     * @return string
+     */
+    public function getExternalid()
+    {
+        return $this->externalid;
     }
 
     /**
@@ -588,5 +618,22 @@ class Clarification
     public function getRecipient()
     {
         return $this->recipient;
+    }
+
+    /**
+     * Get the entities to check for external ID's while serializing.
+     *
+     * This method should return an array with as keys the JSON field names and as values the actual entity
+     * objects that the SetExternalIdVisitor should check for applicable external ID's
+     * @return array
+     */
+    public function getExternalRelationships(): array
+    {
+        return [
+            'from_team_id' => $this->getSender(),
+            'to_team_id' => $this->getRecipient(),
+            'problem_id' => $this->getProblem(),
+            'reply_to_id' => $this->getInReplyTo()
+        ];
     }
 }

@@ -11,7 +11,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(name="submission", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class Submission
+class Submission implements ExternalRelationshipEntityInterface
 {
     /**
      * @var int
@@ -23,6 +23,12 @@ class Submission
      * @Serializer\Type("string")
      */
     private $submitid;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Submission ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     */
+    private $externalid;
 
     /**
      * @var int
@@ -193,6 +199,30 @@ class Submission
     public function getSubmitid()
     {
         return $this->submitid;
+    }
+
+    /**
+     * Set externalid
+     *
+     * @param string $externalid
+     *
+     * @return Submission
+     */
+    public function setExternalid($externalid)
+    {
+        $this->externalid = $externalid;
+
+        return $this;
+    }
+
+    /**
+     * Get externalid
+     *
+     * @return string
+     */
+    public function getExternalid()
+    {
+        return $this->externalid;
     }
 
     /**
@@ -749,5 +779,21 @@ class Submission
     public function getRejudging()
     {
         return $this->rejudging;
+    }
+
+    /**
+     * Get the entities to check for external ID's while serializing.
+     *
+     * This method should return an array with as keys the JSON field names and as values the actual entity
+     * objects that the SetExternalIdVisitor should check for applicable external ID's
+     * @return array
+     */
+    public function getExternalRelationships(): array
+    {
+        return [
+            'language_id' => $this->getLanguage(),
+            'problem_id' => $this->getProblem(),
+            'team_id' => $this->getTeam(),
+        ];
     }
 }
