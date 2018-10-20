@@ -118,6 +118,9 @@ $DOCKER export "$container" | tar -C $CHROOTDIR -xf -
 echo "Shutting down docker daemon"
 kill -9 "$(cat $WORKDIR/docker.pid)"
 
+# Wait a bit to make sure all files are closed and we can umount
+sleep 1
+
 # Unmount anything mounted there(docker leaves some things behind)
 awk "\$2 ~ \"^$WORKDIR\" { print \$2 }" /proc/mounts | while read -r mountpoint; do
     umount $mountpoint
