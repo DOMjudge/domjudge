@@ -83,11 +83,27 @@ class JuryMiscController extends Controller
     }
 
     /**
+     * @Route("/jury/print.php", name="jury_print_php_redirect")
+     */
+    public function printRedirectAction(Request $request)
+    {
+        return $this->redirectToRoute('jury_print');
+    }
+
+    /**
      * @Route("/jury/updates", methods={"GET"}, name="jury_ajax_updates")
      * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
      */
     public function updatesAction(Request $request)
     {
         return $this->json($this->DOMJudgeService->getUpdates());
+    }
+
+    /**
+     * @Route("/jury/updates.php", name="jury_updates_php_redirect")
+     */
+    public function updatesRedirectAction(Request $request)
+    {
+        return $this->redirectToRoute('jury_updates');
     }
 }

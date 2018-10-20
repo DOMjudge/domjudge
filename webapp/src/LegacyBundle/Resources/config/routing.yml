@@ -20,8 +20,6 @@ legacy.jury_languages:
     path: /jury/languages.php
 legacy.jury_rejudgings:
     path: /jury/rejudgings.php
-legacy.jury_print:
-    path: /jury/print.php
 legacy.jury_scoreboard:
     path: /jury/scoreboard.php
 legacy.jury_problems:
@@ -30,9 +28,6 @@ legacy.team_index:
     path: /team/
 legacy.jury_contests:
   path: /jury/contests.php
-legacy.jury_executables:
-  path: /jury/executables.php
-
 legacy.jury_executable:
     path: /jury/executable.php
 

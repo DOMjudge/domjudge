@@ -188,4 +188,12 @@ class TeamController extends Controller
             'table_fields' => $table_fields,
         ]);
     }
+
+    /**
+     * @Route("/teams.php", name="jury_teams_php_redirect")
+     */
+    public function teamsRedirectAction(Request $request)
+    {
+        return $this->redirectToRoute('jury_teams');
+    }
 }

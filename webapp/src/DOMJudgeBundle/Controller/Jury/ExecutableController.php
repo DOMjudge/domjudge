@@ -115,4 +115,12 @@ class ExecutableController extends Controller
           'table_fields' => $table_fields,
         ]);
     }
+
+    /**
+     * @Route("/jury/executables.php", name="jury_executables_php_redirect")
+     */
+    public function executablesRedirectAction(Request $request)
+    {
+        return $this->redirectToRoute('jury_executables');
+    }
 }
