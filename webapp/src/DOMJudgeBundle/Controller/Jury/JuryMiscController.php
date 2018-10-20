@@ -41,9 +41,13 @@ class JuryMiscController extends Controller
     {
         $errors = array();
         if ( $this->DOMJudgeService->checkrole('admin') ) {
-            $result = $this->entityManager
-                ->createQuery('SELECT u.username, u.password FROM DOMJudgeBundle:User u')
-                ->getResult();
+            $result = $this->entityManager->createQueryBuilder()
+                ->select('u.username, u.password')
+                ->from('DOMJudgeBundle:User', 'u')
+                ->join('u.roles', 'r')
+                ->where('r.dj_role = :role')
+                ->setParameter('role', 'admin')
+                ->getQuery()->getResult();
             foreach ($result as $row) {
                 if ( $row['password'] && password_verify($row['username'], $row['password']) ) {
                     $errors[] = "Security alert: the password of the user '"
@@ -84,6 +88,6 @@ class JuryMiscController extends Controller
      */
     public function updatesAction(Request $request)
     {
-	return $this->json($this->DOMJudgeService->getUpdates());
+        return $this->json($this->DOMJudgeService->getUpdates());
     }
 }
