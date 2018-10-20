@@ -30,7 +30,9 @@
 <table class="data-table table table-sm table-condensed table-striped" style="width:auto">
   <thead class="">
     <tr>
+      {% set default_sort = 0 %}
       {% for key,column in fields %}
+      {% if column.default_sort|default(false) %}{% set default_sort = loop.index0 %}{% endif %}
       <th scope="col" class="{% if column.sort %}sortable{% endif %} {% if column.search|default(true) %}searchable{% endif %}">
         {{ column.title }}
       </th>
@@ -58,6 +60,7 @@ $().ready(function(){
   $('.data-table').DataTable( {
     "paging":   false,
     "ordering": true,
+    "order": [[ {{ default_sort }}, 'asc' ]],
     "info":     false,
     "autoWidth":     true,
     "language": {

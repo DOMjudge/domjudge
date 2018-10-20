@@ -78,7 +78,7 @@ class TeamController extends Controller
 
         $table_fields = [
           'teamid'       => [ 'title' => 'ID',                   'sort' => true,  ],
-          'name'         => [ 'title' => 'teamname',             'sort' => true,  ],
+          'name'         => [ 'title' => 'teamname',             'sort' => true, 'default_sort' => true ],
           'category'     => [ 'title' => 'category',             'sort' => true,  ],
           'affiliation'  => [ 'title' => 'affiliation',          'sort' => true,  ],
           'num_contests' => [ 'title' => '# contests',           'sort' => true,  ],
