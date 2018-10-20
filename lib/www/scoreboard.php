@@ -851,6 +851,9 @@ function putTeamRow(array $cdata, array $teamids)
         global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
         $contest    = $G_SYMFONY->getContest($cdata['cid']);
         $scoreboard = $G_SCOREBOARD_SERVICE->getTeamScoreboard($contest, reset($teamids), IS_JURY);
+        if ($scoreboard === null) {
+            return;
+        }
         $sdata      = convertScoreboard($scoreboard);
     } else {
         // Otherwise, calculate scoreboard as jury to display non-visible teams
