@@ -56,7 +56,7 @@ function put_print_form()
 <form action="<?=specialchars($pagename)?>" method="post" enctype="multipart/form-data">
 
   <div class="form-group">
-    <label for="maincode">Source file:</label>
+    <label for="code">Source file:</label>
     <input type="file" class="form-control-file" name="code" id="code" required onchange='detectLanguage(document.getElementById("code").value);' />
   </div>
   <div class="form-group">

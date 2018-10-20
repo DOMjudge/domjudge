@@ -5,7 +5,7 @@ namespace DOMJudgeBundle\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Entity\Language;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 class JuryMiscController extends Controller
@@ -16,7 +16,6 @@ class JuryMiscController extends Controller
      */
     public function indexAction(Request $request)
     {
-        // TODO: make sure both jury and balloon user can access this
         return $this->render('DOMJudgeBundle:jury:index.html.twig', []);
     }
 
@@ -26,5 +25,21 @@ class JuryMiscController extends Controller
     public function indexRedirectAction(Request $request)
     {
         return $this->redirectToRoute('jury_index');
+    }
+
+    /**
+     * @Route("/jury/print", methods={"GET"}, name="jury_print")
+     * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
+     */
+    public function printShowAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $langs = $em->getRepository('DOMJudgeBundle:Language')->findAll();
+        $langlist = [];
+        foreach ($langs as $lang) {
+            $langlist[$lang->getLangid()] = $lang->getName();
+        }
+        asort($langlist);
+        return $this->render('DOMJudgeBundle:jury:print.html.twig', ['langlist' => $langlist]);
     }
 }

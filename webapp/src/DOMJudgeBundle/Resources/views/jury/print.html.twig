@@ -1,0 +1,35 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+
+{% block title %}{{ parent() }} - Print{% endblock %}
+
+{% block extrahead %}
+{{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+<main role="main" class="pl-4 pt-5">
+<h1 class="text-center">Print source</h1>
+<div class="container submitform">
+<form action="./print.php" method="post" enctype="multipart/form-data">
+
+  <div class="form-group">
+    <label for="code">Source file:</label>
+    <input type="file" class="form-control-file" name="code" id="code" required onchange='detectLanguage(document.getElementById("code").value);' />
+  </div>
+  <div class="form-group">
+    <label for="langid">Language:</label>
+    <select class="custom-select" name="langid" id="langid">
+    <option value="">Plain text</option>
+    {% for id, lang in langlist %}
+    <option value="{{ id }}">{{ lang }}</option>
+    {% endfor %}
+    </select>
+  </div>
+  <input type="submit" name="submit" value="Print code" class="btn btn-primary" />
+</form>
+</div>
+</main>
+
+{% endblock %}
