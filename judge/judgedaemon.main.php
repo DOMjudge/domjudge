@@ -676,7 +676,12 @@ function judge(array $row)
         $metadata = spyc_load_file($workdir . '/compile.meta');
         if (isset($metadata['internal-error'])) {
             alert('error');
-            $description = "Running compile.sh caused a runguard error/crash: '" . reset($metadata['internal-error']) . "'";
+            if (is_array($metadata['internal-error'])) {
+                $internalError = reset($metadata['internal-error']);
+            } else {
+                $internalError = $metadata['internal-error'];
+            }
+            $description = "Running compile.sh caused a runguard error/crash: '" . $internalError . "'";
             logmsg(LOG_ERR, $description);
             disable('judgehost', 'hostname', $myhost, $description, $row['judgingid'], $row['cid'], dj_file_get_contents($workdir . '/compile.out', 50000));
             // revoke readablity for domjudge-run user to this workdir
