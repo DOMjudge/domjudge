@@ -140,6 +140,10 @@ class TeamController extends Controller
             'referrer' => '',
             'desc' => $t->getName(),
           ]);
+          $sendvalue = '<span class="octicon octicon-mail"></span>';
+          $sendlink = $this->generateUrl('legacy.jury_clarification', [
+            'teamto'=>$t->getTeamId(),
+          ]);
           // Add the rest of our row data for the table
 
           // Fix affiliation rendering
@@ -165,6 +169,7 @@ class TeamController extends Controller
             'teamid' => ['value' => 't' . $t->getTeamId()],
             'edit' => [ 'value' => $editvalue, 'link' => $editlink, ],
             'delete' => [ 'value' => $deletevalue, 'link' => $deletelink, ],
+            'send' => [ 'value' => $sendvalue, 'link' => $sendlink, ],
             'bubble' => [
               'value' => "\u{25CF}",
               'cssclass' => $statusclass,
