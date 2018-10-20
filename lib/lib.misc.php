@@ -835,6 +835,9 @@ function submit_solution(
     if ($langdata['require_entry_point'] && empty($entry_point)) {
         error("Entry point required for '$langid' but none given.");
     }
+    if (!empty($entry_point) && !preg_match(FILENAME_REGEX, $entry_point)) {
+        error("Entry point '$entry_point' contains illegal characters.");
+    }
     if (checkrole('jury') && $entry_point == '__auto__') {
         // Fall back to auto detection when we're importing jury submissions.
         $entry_point = NULL;
