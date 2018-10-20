@@ -87,11 +87,13 @@ class TeamController extends Controller
           'bubble'       => [ 'title' => '',                     'sort' => false, ],
           'status'       => [ 'title' => 'status',               'sort' => true,  ],
         ];
-        // if isadmin
-        $table_fields = array_merge($table_fields, [
-          'edit'         => [ 'title' => '',                     'sort' => false, ],
-          'delete'       => [ 'title' => '',                     'sort' => false, ],
-        ]);
+        if ($this->isGranted('ROLE_ADMIN')) {
+          $table_fields = array_merge($table_fields, [
+            'edit'         => [ 'title' => '',                     'sort' => false, ],
+            'delete'       => [ 'title' => '',                     'sort' => false, ],
+          ]);
+        }
+        $table_fields['send'] = [ 'title' => '', 'sort' => false, ];
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $teams_table = [];
@@ -181,7 +183,7 @@ class TeamController extends Controller
             'cssclass' => "category" . $t->getCategory()->getCategoryId()
           ];
         }
-        return $this->render('@DOMJudge/jury/team/index.html.twig', [
+        return $this->render('@DOMJudge/jury/teams.html.twig', [
             'teams' => $teams_table,
             'table_fields' => $table_fields,
         ]);
