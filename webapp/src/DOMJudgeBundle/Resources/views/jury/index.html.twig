@@ -37,6 +37,7 @@
             <li><a href="{{ path('legacy.jury_print') }}">Print</a></li>
           {% endif %}
           {% if is_granted('ROLE_JURY') %}
+            <li><a href="{{ path('legacy.jury_rejudgings') }}">Rejudgings</a></li>
             <li><a href="{{ path('legacy.jury_scoreboard') }}">Scoreboard</a></li>
             <li><a href="{{ path('analysis_index') }}">Statistics/Analysis</a></li>
             <li><a href="{{ path('legacy.jury_submissions') }}">Submissions</a></li>
@@ -82,6 +83,7 @@
             (also <a href="doc/admin/admin-manual.pdf">PDF</a>)</li>
         <li><a href="doc/team/team-manual.pdf">Team manual</a>
             (PDF only)</li>
+        <li><a href="../api/doc">API documentation</a></li>
         </ul>
       </div>
     </div>
