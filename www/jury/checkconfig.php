@@ -297,8 +297,8 @@ flushresults();
 
 // CONFIGURATION
 
-if ($DB->q('VALUE SELECT count(*) FROM user
-             WHERE username = "admin" AND password=MD5("admin#admin")') != 0) {
+$adminpass =$DB->q('MAYBEVALUE SELECT password FROM user WHERE username = "admin"');
+if ($adminpass && password_verify("admin", $adminpass)) {
     result(
         'configuration',
         'Default admin password',
