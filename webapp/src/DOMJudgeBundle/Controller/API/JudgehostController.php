@@ -265,7 +265,7 @@ class JudgehostController extends FOSRestController
             ->where('s.judgehost IS NULL')
             ->andWhere('s.cid IN (:contestIds)')
             ->setParameter(':contestIds', $contestIds)
-            ->andWhere('l.allow_submit = 1')
+            ->andWhere('l.allow_judge = 1')
             ->andWhere('cp.allow_judge = 1')
             ->andWhere('s.valid = 1')
             ->orderBy('t.judging_last_started', 'ASC')
