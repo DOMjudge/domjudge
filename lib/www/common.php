@@ -562,15 +562,6 @@ function putClock()
 }
 
 /**
- * Output a footer for pages containing the DOMjudge version and server host/port/time
- */
-function putDOMjudgeVersion()
-{
-    echo "<hr /><address>DOMjudge/" . DOMJUDGE_VERSION .
-        " at ".$_SERVER['SERVER_NAME']." Port ".$_SERVER['SERVER_PORT'].", page generated <span id=\"timecur\">" . strftime('%a %d %b %Y %T %Z') . "</span></address>\n";
-}
-
-/**
  * Check whether the logged in user has DOMjudge administrator level,
  * as defined in passwords.php. If not, error and stop further execution.
  */
