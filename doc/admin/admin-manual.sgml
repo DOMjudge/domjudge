@@ -2349,6 +2349,21 @@ actual timelimit has been surpassed. The submitted program gets
 killed when either the hard wall clock or CPU time has passed.
 
 
+<chapt>API <label id="api">
+<p>
+
+DOMjudge comes with a fully featured REST API. It is based on the
+<htmlurl name="CCS Contest API specification"
+         url="https://clics.ecs.baylor.edu/index.php?title=Contest_API">,
+to which some DOMjudge-specific API endpoints have been added. Full documentation
+on the available API endpoints can be found at
+<tt>http(s)://yourhost.example.edu/domjudge/api/doc</tt>. DOMjudge also offers an
+<htmlurl name="OpenAPI Specification ver. 2"
+         url="https://swagger.io/docs/specification/2-0/basic-structure/">
+compatible JSON file, which can be found at
+<tt>http(s)://yourhost.example.edu/domjudge/api/doc.json</tt>.
+
+
 <chapt>Multi-site contests <label id="multisite">
 <p>
 
