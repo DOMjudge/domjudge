@@ -33,6 +33,8 @@ legacy.jury_contests:
 legacy.jury_executables:
   path: /jury/executables.php
 
+legacy.jury_executable:
+    path: /jury/executable.php
 
 legacy.jury_config:
     path: /jury/config.php
