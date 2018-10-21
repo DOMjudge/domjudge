@@ -47,6 +47,9 @@ sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle
 # delete apport if exists
 sudo apt-get remove -y apport
 
+# Install setfacl
+sudo apt-get install acl
+
 # configure, make and install (but skip documentation)
 make configure
 ./configure --disable-doc-build --with-baseurl='http://localhost/domjudge/'
