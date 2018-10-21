@@ -114,7 +114,7 @@ EOF
 
 # start eventdaemon
 cd /opt/domjudge/domserver/
-bin/eventdaemon &
+sudo -u www-data bin/eventdaemon &
 sleep 5
 
 # start judgedaemon
