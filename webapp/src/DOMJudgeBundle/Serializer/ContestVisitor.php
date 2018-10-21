@@ -51,7 +51,6 @@ class ContestVisitor implements EventSubscriberInterface
     {
         /** @var JsonSerializationVisitor $visitor */
         $visitor = $event->getVisitor();
-        $visitor->setData('penalty_time', (int)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_PENALTY_TIME,
-                                                                                    DOMJudgeService::CONFIGURATION_DEFAULT_PENALTY_TIME));
+        $visitor->setData('penalty_time', (int)$this->DOMJudgeService->dbconfig_get('penalty_time',20));
     }
 }

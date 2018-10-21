@@ -117,7 +117,7 @@ class ScoreboardController extends AbstractRestController
         // Build up scoreboard result
         $results = [];
 
-        $scoreIsInSecods = (bool)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_SCORE_IS_IN_SECONDS, false);
+        $scoreIsInSecods = (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
 
         foreach ($scorebard->getScores() as $teamScore) {
             $teamIdField  = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';

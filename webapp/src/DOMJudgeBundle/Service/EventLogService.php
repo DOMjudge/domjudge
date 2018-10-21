@@ -483,10 +483,7 @@ class EventLogService implements ContainerAwareInterface
         if ($endpointData[self::KEY_ALWAYS_USE_EXTERNAL_ID] ?? false) {
             $lookupExternalid = true;
         } else {
-            $dataSource = $this->DOMJudgeService->dbconfig_get(
-                DOMJudgeService::CONFIGURATION_DATA_SOURCE,
-                DOMJudgeService::DATA_SOURCE_LOCAL
-            );
+            $dataSource = $this->DOMJudgeService->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL);
 
             if ($dataSource !== DOMJudgeService::DATA_SOURCE_LOCAL) {
                 $endpointType = $endpointData[self::KEY_TYPE];

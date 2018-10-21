@@ -555,7 +555,7 @@ class JudgehostController extends FOSRestController
                     $contestId = $judging->getSubmission()->getCid();
                     $this->DOMJudgeService->auditlog('judging', $judgingId, 'judged', 'compiler-error', $hostname, $contestId);
 
-                    if (!$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_VERIFICATION_REQUIRED, false) &&
+                    if (!$this->DOMJudgeService->dbconfig_get('verification_required', false) &&
                         $judging->getRejudgingid() === null) {
                         $this->eventLogService->log('judging', $judgingId, EventLogService::ACTION_UPDATE, $contestId);
                     }

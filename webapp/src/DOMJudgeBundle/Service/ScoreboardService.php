@@ -82,9 +82,8 @@ class ScoreboardService
         $scoreCache = $this->getScorecache($contest);
 
         return new Scoreboard($teams, $categories, $problems, $scoreCache, $freezeData, $jury,
-                              (int)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_PENALTY_TIME,
-                                                                        DOMJudgeService::CONFIGURATION_DEFAULT_PENALTY_TIME),
-                              (bool)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_SCORE_IS_IN_SECONDS, false));
+                              (int)$this->DOMJudgeService->dbconfig_get('penalty_time',20),
+                              (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false));
     }
 
     /**
@@ -120,10 +119,8 @@ class ScoreboardService
         }
 
         return new SingleTeamScoreboard($team, $teamRank, $problems, $rankCache, $scoreCache, $freezeData, $jury,
-                                        (int)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_PENALTY_TIME,
-                                                                                  DOMJudgeService::CONFIGURATION_DEFAULT_PENALTY_TIME),
-                                        (bool)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_SCORE_IS_IN_SECONDS,
-                                                                                   false));
+                                        (int)$this->DOMJudgeService->dbconfig_get('penalty_time', 20),
+                                        (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false));
     }
 
     /**
@@ -227,7 +224,7 @@ class ScoreboardService
                 foreach ($tiedScores as $tiedScore) {
                     $teamScores[$tiedScore->getTeam()->getTeamid()]->addSolveTime(Utils::scoretime(
                         $tiedScore->getSolveTime($restricted),
-                        (bool)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_SCORE_IS_IN_SECONDS, false)
+                        (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false)
                     ));
                 }
 
@@ -290,7 +287,7 @@ class ScoreboardService
             ->setParameter(':cid', $contest->getCid())
             ->orderBy('s.submittime');
 
-        if (!$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_COMPILE_PENALTY, true)) {
+        if (!$this->DOMJudgeService->dbconfig_get('compile_penalty', true)) {
             $queryBuilder
                 ->andWhere('j.result IS NULL or j.result != :compileError')
                 ->setParameter(':compileError', Judging::RESULT_COMPILER_ERROR);
@@ -299,7 +296,7 @@ class ScoreboardService
         /** @var Submission[] $submissions */
         $submissions = $queryBuilder->getQuery()->getResult();
 
-        $verificationRequired = $this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_VERIFICATION_REQUIRED, false);
+        $verificationRequired = $this->DOMJudgeService->dbconfig_get('verification_required', false);
 
         // Initialize variables
         $submissionsJury = $pendingJury = $timeJury = 0;
@@ -412,9 +409,8 @@ class ScoreboardService
             $totalTime[$variant] = $team->getPenalty();
         }
 
-        $penaltyTime      = (int)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_PENALTY_TIME,
-                                                                      DOMJudgeService::CONFIGURATION_DEFAULT_PENALTY_TIME);
-        $scoreIsInSeconds = (bool)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_SCORE_IS_IN_SECONDS, false);
+        $penaltyTime      = (int)$this->DOMJudgeService->dbconfig_get('penalty_time', 20);
+        $scoreIsInSeconds = (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
 
         // Now fetch the ScoreCache entries
         /** @var ScoreCache[] $scoreCacheRows */

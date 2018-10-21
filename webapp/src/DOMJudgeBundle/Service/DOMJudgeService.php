@@ -28,15 +28,6 @@ class DOMJudgeService
     /** @var Configuration[] */
     protected $configCache = [];
 
-    // Constants for database configuration names and values
-    const CONFIGURATION_DATA_SOURCE = 'data_source';
-    const CONFIGURATION_COMPILE_PENALTY = 'compile_penalty';
-    const CONFIGURATION_VERIFICATION_REQUIRED = 'verification_required';
-    const CONFIGURATION_PENALTY_TIME = 'penalty_time';
-    const CONFIGURATION_SCORE_IS_IN_SECONDS = 'score_in_seconds';
-    const CONFIGURATION_RESULTS_REMAP = 'results_remap';
-    const CONFIGURATION_RESULTS_PRIORITY = 'results_prio';
-
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
     const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
