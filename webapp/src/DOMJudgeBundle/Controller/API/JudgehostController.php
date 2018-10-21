@@ -506,8 +506,7 @@ class JudgehostController extends FOSRestController
             return;
         }
 
-        /** @var Judging $judging */
-        $judging = $this->entityManager->createQueryBuilder()
+        $query = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
             ->join('j.submission', 's')
             ->join('j.judgehost', 'jh')
@@ -518,21 +517,26 @@ class JudgehostController extends FOSRestController
             ->where('j.judgingid = :judgingId')
             ->setParameter(':judgingId', $judgingId)
             ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
+            ->getQuery();
+
+        /** @var Judging $judging */
+        $judging = $query->getOneOrNullResult();
         if (!$judging) {
             return;
         }
 
         if ($request->request->has('output_compile')) {
             if ($request->request->has('entry_point')) {
-                $this->entityManager->transactional(function () use ($request, $judging) {
+                $this->entityManager->transactional(function () use ($query, $request, &$judging) {
                     $submission = $judging->getSubmission();
                     $submission->setEntryPoint($request->request->get('entry_point'));
                     $this->entityManager->flush();
                     $submissionId = $submission->getSubmitid();
                     $contestId    = $submission->getCid();
                     $this->eventLogService->log('submission', $submissionId, EventLogService::ACTION_UPDATE, $contestId);
+
+                    // As EventLogService::log() will clear the entity manager, so the judging has now become detached. We will have to reload it
+                    $judging = $query->getOneOrNullResult();
                 });
             }
 
