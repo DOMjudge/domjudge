@@ -53,7 +53,7 @@ class DOMJudgeService
             }
         }
         if (count($contests) > 0) {
-            return $contests[0];
+            return reset($contests);
         }
         return null;
     }
