@@ -23,21 +23,37 @@ set colors = {
   'frozen':         'blue',
 }
 %}
-function create_chart(data) {
+function create_chart(data, maxY) {
+  var tickStep = 1;
+  if (maxY <= 2) {
+    tickStep = 0.2;
+  } else if (maxY <= 5) {
+    tickStep = 0.5;
+  }
+  maxY += tickStep;
   var chart = nv.models.multiBarChart()
       .x(function(d) { return d.label })
       .y(function(d) { return d.value })
       .showControls(false)
       .reduceXTicks(true)
-      .forceY([0,{{ timelimit*1.20 }}])
+      .forceY([0,maxY])
       .duration(250)
+      .showLegend(false)
       ;
+  var tickValues = [];
+  for (i = 0; i <= maxY; i += tickStep) {
+      tickValues.push(i);
+  }
   chart.yAxis
-    .tickFormat(d3.format('.3f'))
+    .tickValues(tickValues)
     .axisLabel('Runtime(in s)');
   return chart;
 }
 $(function(){
+  var maxY = {{ timelimit }};
+  {% for runid, run in jdata %}
+    maxY = Math.max(maxY, {{ run["max_runtime"]|default(0) }});
+  {% endfor %}
   {% if jdata|length > 1%}
     var run_max_times = [
       {
@@ -54,7 +70,7 @@ $(function(){
       }
     ];
     nv.addGraph(function() {
-        var chart  = create_chart(run_max_times);
+        var chart  = create_chart(run_max_times, maxY);
         chart.xAxis.axisLabel("Judging");
         d3.select('#maxruntime svg')
             .datum(run_max_times)
@@ -63,9 +79,9 @@ $(function(){
             .append('line')
             .attr({
               x1: 60,
-              y1: 15 + chart.yAxis.scale()({{timelimit}}),
+              y1: 30 + chart.yAxis.scale()({{timelimit}}),
               x2: 490,
-              y2: 15 + chart.yAxis.scale()({{timelimit}}),
+              y2: 30 + chart.yAxis.scale()({{timelimit}}),
             })
             .style("stroke", "#F00");
         nv.utils.windowResize(chart.update);
@@ -78,7 +94,6 @@ $(function(){
       key: "Runtime",
       values: [
         {% for run in runs %}
-
           {
             "label" : "{{ run["rank"] }}",
             "value" : {{ run["runtime"]|default(0) }},
@@ -90,7 +105,7 @@ $(function(){
     }
   ];
   nv.addGraph(function() {
-      var chart  = create_chart(testcase_times);
+      var chart  = create_chart(testcase_times, maxY);
       chart.tooltip.contentGenerator(function (obj) {
         var format = d3.format(".3f");
         return "<b>Testcase " + obj.data.description + "</b><br><b>Runtime:</b> " + format(obj.data.value) + "s";
@@ -104,9 +119,9 @@ $(function(){
           .append('line')
           .attr({
             x1: 60,
-            y1: 15 + chart.yAxis.scale()({{timelimit}}),
+            y1: 30 + chart.yAxis.scale()({{timelimit}}),
             x2: 490,
-            y2: 15 + chart.yAxis.scale()({{timelimit}}),
+            y2: 30 + chart.yAxis.scale()({{timelimit}}),
           })
           .style("stroke", "#F00");
       nv.utils.windowResize(chart.update);
