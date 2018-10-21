@@ -309,12 +309,11 @@ class ScoreboardService
 
         foreach ($submissions as $submission) {
             /** @var Judging|null $judging */
-            $judging = $submission->getJudgings()->first();
-            // Contest submit time
+            $judging    = $submission->getJudgings()->first() ?: null;
             $submitTime = $contest->getContestTime((float)$submission->getSubmittime());
 
             // Check if this submission has a publicly visible judging result:
-            if (($verificationRequired && !$judging->getVerified()) || empty($judging->getResult())) {
+            if ($judging === null || ($verificationRequired && !$judging->getVerified()) || empty($judging->getResult())) {
                 $pendingJury++;
                 $pendingPubl++;
                 // Don't do any more counting for this submission.
