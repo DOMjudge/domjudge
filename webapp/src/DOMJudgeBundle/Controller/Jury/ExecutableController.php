@@ -51,7 +51,6 @@ class ExecutableController extends Controller
           ->getQuery()->getResult();
         $executable_sizes = array_column($executables, 'size', 'execid');
         $executables = array_column($executables, 'executable', 'execid');
-        dump($executables);
         $table_fields = [
           'execid'      => [ 'title' => 'ID',          'sort' => true, ],
           'type'        => [ 'title' => 'type',        'sort' => true, ],
