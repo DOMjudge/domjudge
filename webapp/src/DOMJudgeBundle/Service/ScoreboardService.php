@@ -113,6 +113,126 @@ class ScoreboardService
     }
 
     /**
+     * Calculate the rank for a single team based on the cache tables
+     *
+     * @param Contest $contest
+     * @param Team $team
+     * @param RankCache|null $rankCache
+     * @param FreezeData|null $freezeData
+     * @param bool $jury
+     * @return int
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function calculateTeamRank(
+        Contest $contest,
+        Team $team,
+        RankCache $rankCache = null,
+        FreezeData $freezeData = null,
+        bool $jury = false
+    ) {
+        if ($freezeData === null) {
+            $freezeData = new FreezeData($contest);
+        }
+        if ($rankCache === null) {
+            $rankCache = $this->getRankcache($contest, $team);
+        }
+        $restricted = ($jury || $freezeData->showFinal(false));
+        $variant    = $restricted ? 'restricted' : 'public';
+        $points     = $rankCache ? $rankCache->getPointsRestricted() : 0;
+        $totalTime  = $rankCache ? $rankCache->getTotaltimeRestricted() : 0;
+        $sortOrder  = $team->getCategory()->getSortorder();
+
+        // Number of teams that definitely ranked higher
+        $better = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:RankCache', 'r')
+            ->join('r.team', 't')
+            ->join('t.category', 'tc')
+            ->select('COUNT(t.teamid)')
+            ->andWhere('r.cid = :cid')
+            ->andWhere('tc.sortorder = :sortorder')
+            ->andWhere('t.enabled = 1')
+            ->andWhere(sprintf('r.points_%s > :points OR (r.points_%s = :points AND r.totaltime_%s < :totaltime)', $variant, $variant,
+                               $variant))
+            ->setParameter(':cid', $contest->getCid())
+            ->setParameter(':sortorder', $sortOrder)
+            ->setParameter(':points', $points)
+            ->setParameter(':totaltime', $totalTime)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $rank = $better + 1;
+
+        // Resolve ties based on latest correctness points, only necessary when we actually
+        // solved at least one problem, so this list should usually be short
+        if ($points > 0) {
+            /** @var RankCache[] $tied */
+            $tied = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:RankCache', 'r')
+                ->join('r.team', 't')
+                ->join('t.category', 'tc')
+                ->select('r, t')
+                ->andWhere('r.cid = :cid')
+                ->andWhere('tc.sortorder = :sortorder')
+                ->andWhere('t.enabled = 1')
+                ->andWhere(sprintf('r.points_%s = :points AND r.totaltime_%s = :totaltime', $variant, $variant))
+                ->setParameter(':cid', $contest->getCid())
+                ->setParameter(':sortorder', $sortOrder)
+                ->setParameter(':points', $points)
+                ->setParameter(':totaltime', $totalTime)
+                ->getQuery()
+                ->getResult();
+
+            // All teams that are tied for this position, in most cases this will only be the team we are finding the rank for,
+            // only retrieve rest of the data when there are actual ties
+            if (count($tied) > 1) {
+                // Initialize team scores for each team
+                /** @var TeamScore[] $teamScores */
+                $teamScores = [];
+                $teamIds    = [];
+                foreach ($tied as $rankCache) {
+                    $teamScores[$rankCache->getTeamid()] = new TeamScore($rankCache->getTeam());
+                    $teamIds[]                           = $rankCache->getTeamid();
+                }
+
+                // Get submission times for each of the teams
+                /** @var ScoreCache[] $tiedScores */
+                $tiedScores = $this->entityManager->createQueryBuilder()
+                    ->from('DOMJudgeBundle:ScoreCache', 's')
+                    ->join('s.contest_problem', 'cp')
+                    ->select('s')
+                    ->andWhere('s.cid = :cid')
+                    ->andWhere(sprintf('s.is_correct_%s = 1', $variant))
+                    ->andWhere('cp.allow_submit = 1')
+                    ->andWhere('s.teamid IN (:teamids)')
+                    ->setParameter(':cid', $contest->getCid())
+                    ->setParameter(':teamids', $teamIds)
+                    ->getQuery()
+                    ->getResult();
+
+                foreach ($tiedScores as $tiedScore) {
+                    $teamScores[$tiedScore->getTeamid()]->addSolveTime(Utils::scoretime(
+                        $tiedScore->getSolveTime($restricted),
+                        (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false)
+                    ));
+                }
+
+                // Now check for each team if it is ranked higher than $teamid
+                foreach ($tied as $rankCache) {
+                    if ($rankCache->getTeamid() == $team->getTeamid()) {
+                        continue;
+                    }
+                    if (Scoreboard::scoreTiebreaker($teamScores[$rankCache->getTeamid()], $teamScores[$team->getTeamid()]) < 0) {
+                        $rank++;
+                    }
+                }
+            }
+        }
+
+        return $rank;
+    }
+
+    /**
      * Get the teams to display on the scoreboard
      * @param Contest $contest
      * @param bool $jury
@@ -237,6 +357,7 @@ class ScoreboardService
      * @param Contest $contest
      * @param Team $team
      * @return RankCache|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     protected function getRankcache(Contest $contest, Team $team)
     {
@@ -249,123 +370,5 @@ class ScoreboardService
             ->setParameter(':teamid', $team->getTeamid());
 
         return $queryBuilder->getQuery()->getOneOrNullResult();
-    }
-
-    /**
-     * Calculate the rank for a single team based on the cache tables
-     *
-     * @param Contest $contest
-     * @param Team $team
-     * @param RankCache|null $rankCache
-     * @param FreezeData|null $freezeData
-     * @param bool $jury
-     * @return int
-     */
-    public function calculateTeamRank(
-        Contest $contest,
-        Team $team,
-        RankCache $rankCache = null,
-        FreezeData $freezeData = null,
-        bool $jury = false
-    ) {
-        if ($freezeData === null) {
-            $freezeData = new FreezeData($contest);
-        }
-        if ($rankCache === null) {
-            $rankCache = $this->getRankcache($contest, $team);
-        }
-        $restricted = ($jury || $freezeData->showFinal(false));
-        $variant    = $restricted ? 'restricted' : 'public';
-        $points     = $rankCache ? $rankCache->getPointsRestricted() : 0;
-        $totalTime  = $rankCache ? $rankCache->getTotaltimeRestricted() : 0;
-        $sortOrder  = $team->getCategory()->getSortorder();
-
-        // Number of teams that definitely ranked higher
-        $better = $this->entityManager->createQueryBuilder()
-            ->from('DOMJudgeBundle:RankCache', 'r')
-            ->join('r.team', 't')
-            ->join('t.category', 'tc')
-            ->select('COUNT(t.teamid)')
-            ->andWhere('r.cid = :cid')
-            ->andWhere('tc.sortorder = :sortorder')
-            ->andWhere('t.enabled = 1')
-            ->andWhere(sprintf('r.points_%s > :points OR (r.points_%s = :points AND r.totaltime_%s < :totaltime)', $variant, $variant,
-                               $variant))
-            ->setParameter(':cid', $contest->getCid())
-            ->setParameter(':sortorder', $sortOrder)
-            ->setParameter(':points', $points)
-            ->setParameter(':totaltime', $totalTime)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $rank = $better + 1;
-
-        // Resolve ties based on latest correctness points, only necessary when we actually
-        // solved at least one problem, so this list should usually be short
-        if ($points > 0) {
-            /** @var RankCache[] $tied */
-            $tied = $this->entityManager->createQueryBuilder()
-                ->from('DOMJudgeBundle:RankCache', 'r')
-                ->join('r.team', 't')
-                ->join('t.category', 'tc')
-                ->select('r, t')
-                ->andWhere('r.cid = :cid')
-                ->andWhere('tc.sortorder = :sortorder')
-                ->andWhere('t.enabled = 1')
-                ->andWhere(sprintf('r.points_%s = :points AND r.totaltime_%s = :totaltime', $variant, $variant))
-                ->setParameter(':cid', $contest->getCid())
-                ->setParameter(':sortorder', $sortOrder)
-                ->setParameter(':points', $points)
-                ->setParameter(':totaltime', $totalTime)
-                ->getQuery()
-                ->getResult();
-
-            // All teams that are tied for this position, in most cases this will only be the team we are finding the rank for,
-            // only retrieve rest of the data when there are actual ties
-            if (count($tied) > 1) {
-                // Initialize team scores for each team
-                /** @var TeamScore[] $teamScores */
-                $teamScores = [];
-                $teamIds    = [];
-                foreach ($tied as $rankCache) {
-                    $teamScores[$rankCache->getTeamid()] = new TeamScore($rankCache->getTeam());
-                    $teamIds[]                           = $rankCache->getTeamid();
-                }
-
-                // Get submission times for each of the teams
-                /** @var ScoreCache[] $tiedScores */
-                $tiedScores = $this->entityManager->createQueryBuilder()
-                    ->from('DOMJudgeBundle:ScoreCache', 's')
-                    ->join('s.contest_problem', 'cp')
-                    ->select('s')
-                    ->andWhere('s.cid = :cid')
-                    ->andWhere(sprintf('s.is_correct_%s = 1', $variant))
-                    ->andWhere('cp.allow_submit = 1')
-                    ->andWhere('s.teamid IN (:teamids)')
-                    ->setParameter(':cid', $contest->getCid())
-                    ->setParameter(':teamids', $teamIds)
-                    ->getQuery()
-                    ->getResult();
-
-                foreach ($tiedScores as $tiedScore) {
-                    $teamScores[$tiedScore->getTeamid()]->addSolveTime(Utils::scoretime(
-                        $tiedScore->getSolveTime($restricted),
-                        (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false)
-                    ));
-                }
-
-                // Now check for each team if it is ranked higher than $teamid
-                foreach ($tied as $rankCache) {
-                    if ($rankCache->getTeamid() == $team->getTeamid()) {
-                        continue;
-                    }
-                    if (Scoreboard::scoreTiebreaker($teamScores[$rankCache->getTeamid()], $teamScores[$team->getTeamid()]) < 0) {
-                        $rank++;
-                    }
-                }
-            }
-        }
-
-        return $rank;
     }
 }
