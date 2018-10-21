@@ -395,11 +395,13 @@ class ScoreboardService
         // Fetch contest problems. We can not add it as a relation on ScoreCache as Doctrine doesn't seem to like that its keys
         // are part of the primary key
         /** @var ContestProblem[] $contestProblems */
-        $contestProblems = [];
-        /** @var ContestProblem $contestProblem */
-        foreach ($contest->getProblems() as $contestProblem) {
-            $contestProblems[$contestProblem->getProbid()] = $contestProblem;
-        }
+        $contestProblems = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:ContestProblem', 'cp', 'cp.probid')
+            ->select('cp')
+            ->where('cp.contest = :contest')
+            ->setParameter(':contest', $contest)
+            ->getQuery()
+            ->getResult();
 
         // Intialize our data
         $variants  = ['public' => false, 'restricted' => true];

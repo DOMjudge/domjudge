@@ -13,10 +13,12 @@ use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
+use DOMJudgeBundle\Service\ScoreboardService;
 use DOMJudgeBundle\Utils\Utils;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\Model;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,15 +48,35 @@ class JudgehostController extends FOSRestController
     protected $eventLogService;
 
     /**
+     * @var ScoreboardService
+     */
+    protected $scoreboardService;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * JudgehostController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService $DOMJudgeService
+     * @param EventLogService $eventLogService
+     * @param ScoreboardService $scoreboardService
+     * @param LoggerInterface $logger
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService)
-    {
-        $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->eventLogService = $eventLogService;
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
+        ScoreboardService $scoreboardService,
+        LoggerInterface $logger
+    ) {
+        $this->entityManager     = $entityManager;
+        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->eventLogService   = $eventLogService;
+        $this->scoreboardService = $scoreboardService;
+        $this->logger            = $logger;
     }
 
     /**
@@ -449,6 +471,109 @@ class JudgehostController extends FOSRestController
         });
 
         return $result;
+    }
+
+    /**
+     * Update the given judging for the given judgehost
+     * @Rest\Put("/update-judging/{hostname}/{judgingId}")
+     * @Security("has_role('ROLE_JUDGEHOST')")
+     * @SWG\Response(
+     *     response="200",
+     *     description="When the judging has been updated"
+     * )
+     * @SWG\Parameter(
+     *     name="hostname",
+     *     in="path",
+     *     type="string",
+     *     description="The hostname of the judgehost that wants to update the judging"
+     * )
+     * @SWG\Parameter(
+     *     name="judgingId",
+     *     in="path",
+     *     type="integer",
+     *     description="The ID of the judging to update"
+     * )
+     * @param Request $request
+     * @param string $hostname
+     * @param int $judgingId
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function updateJudgingAction(Request $request, string $hostname, int $judgingId)
+    {
+        /** @var Judgehost $judgehost */
+        $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
+        if (!$judgehost) {
+            return;
+        }
+
+        /** @var Judging $judging */
+        $judging = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Judging', 'j')
+            ->join('j.submission', 's')
+            ->join('j.judgehost', 'jh')
+            ->join('s.contest', 'c')
+            ->join('s.team', 't')
+            ->join('s.problem', 'p')
+            ->select('j, s, jh, c, t, p')
+            ->where('j.judgingid = :judgingId')
+            ->setParameter(':judgingId', $judgingId)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+        if (!$judging) {
+            return;
+        }
+
+        if ($request->request->has('output_compile')) {
+            if ($request->request->has('entry_point')) {
+                $this->entityManager->transactional(function () use ($request, $judging) {
+                    $submission = $judging->getSubmission();
+                    $submission->setEntryPoint($request->request->get('entry_point'));
+                    $this->entityManager->flush();
+                    $submissionId = $submission->getSubmitid();
+                    $contestId    = $submission->getCid();
+                    $this->eventLogService->log('submission', $submissionId, EventLogService::ACTION_UPDATE, $contestId);
+                });
+            }
+
+            if ($request->request->getBoolean('compile_success')) {
+                if ($judging->getJudgehost()->getHostname() === $hostname) {
+                    $judging->setOutputCompile(base64_decode($request->request->get('output_compile')));
+                    $this->entityManager->flush();
+                }
+            } else {
+                $this->entityManager->transactional(function () use ($request, $hostname, $judging) {
+                    if ($judging->getJudgehost()->getHostname() === $hostname) {
+                        $judging
+                            ->setOutputCompile(base64_decode($request->request->get('output_compile')))
+                            ->setResult(Judging::RESULT_COMPILER_ERROR)
+                            ->setEndtime(Utils::now());
+                        $this->entityManager->flush();
+                    }
+
+                    $judgingId = $judging->getJudgingid();
+                    $contestId = $judging->getSubmission()->getCid();
+                    $this->DOMJudgeService->auditlog('judging', $judgingId, 'judged', 'compiler-error', $hostname, $contestId);
+
+                    if (!$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_VERIFICATION_REQUIRED, false) &&
+                        $judging->getRejudgingid() === null) {
+                        $this->eventLogService->log('judging', $judgingId, EventLogService::ACTION_UPDATE, $contestId);
+                    }
+
+                    $submission = $judging->getSubmission();
+                    $contest    = $submission->getContest();
+                    $team       = $submission->getTeam();
+                    $problem    = $submission->getProblem();
+                    $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+
+                    $message = sprintf("submission %i, judging %i: compiler-error", $submission->getSubmitid(), $judging->getJudgingid());
+                    $this->DOMJudgeService->alert('reject', $message);
+                });
+            }
+        }
+
+        $judgehost->setPolltime(Utils::now());
+        $this->entityManager->flush();
     }
 
     /**

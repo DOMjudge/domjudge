@@ -23,6 +23,7 @@ class DOMJudgeService
     protected $logger;
     protected $request;
     protected $container;
+    protected $rootDir;
     protected $hasAllRoles = false;
     /** @var Configuration[] */
     protected $configCache = [];
@@ -33,6 +34,8 @@ class DOMJudgeService
     const CONFIGURATION_VERIFICATION_REQUIRED = 'verification_required';
     const CONFIGURATION_PENALTY_TIME = 'penalty_time';
     const CONFIGURATION_SCORE_IS_IN_SECONDS = 'score_in_seconds';
+    const CONFIGURATION_RESULTS_REMAP = 'results_remap';
+    const CONFIGURATION_RESULTS_PRIORITY = 'results_prio';
 
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
@@ -40,11 +43,17 @@ class DOMJudgeService
 
     const CONFIGURATION_DEFAULT_PENALTY_TIME = 20;
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, RequestStack $requestStack, Container $container)
-    {
-        $this->em = $em;
-        $this->logger = $logger;
-        $this->request = $requestStack->getCurrentRequest();
+    public function __construct(
+        EntityManagerInterface $em,
+        LoggerInterface $logger,
+        RequestStack $requestStack,
+        string $rootDir,
+        Container $container
+    ) {
+        $this->em        = $em;
+        $this->logger    = $logger;
+        $this->request   = $requestStack->getCurrentRequest();
+        $this->rootDir   = $rootDir;
         $this->container = $container;
     }
 
@@ -346,6 +355,21 @@ class DOMJudgeService
 
         $this->em->persist($auditLog);
         $this->em->flush();
+    }
+
+    /**
+     * Call alert plugin program to perform user configurable action on
+     * important system events. See default alert script for more details.
+     *
+     * @param string $messageType
+     * @param string $description
+     */
+    public function alert(string $messageType, string $description = '')
+    {
+        // TODO: use LIBDIR when we have access to legacy constants
+        $dir   = realpath($this->rootDir . '/../../lib/');
+        $alert = $dir . '/alert';
+        system(sprintf('%s %s %s &', $alert, escapeshellarg($messageType), escapeshellarg($description)));
     }
 
     /**

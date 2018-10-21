@@ -692,14 +692,14 @@ function judge(array $row)
     $compile_success =  ($EXITCODES[$retval]!='compiler-error');
 
     // pop the compilation result back into the judging table
-    $args = 'judgehost=' . urlencode($myhost) .
-        '&compile_success=' . $compile_success .
+    $args = 'compile_success=' . $compile_success .
         '&output_compile=' . rest_encode_file($workdir . '/compile.out', $output_storage_limit);
     if (isset($metadata['entry_point'])) {
         $args .= '&entry_point=' . urlencode($metadata['entry_point']);
     }
 
-    request('judgings/' . urlencode((string)$row['judgingid']), 'PUT', $args);
+    $url = sprintf('judgehosts/update-judging/%s/%s', urlencode($myhost), urlencode((string)$row['judgingid']));
+    request($url, 'PUT', $args);
 
     // compile error: our job here is done
     if (! $compile_success) {

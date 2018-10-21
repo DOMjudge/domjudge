@@ -22,6 +22,10 @@ services:
         resource: '../../src/DOMJudgeBundle/*'
         exclude: '../../src/DOMJudgeBundle/{Entity,Repository,Tests}'
 
+    DOMJudgeBundle\Service\DOMJudgeService:
+        arguments:
+            $rootDir: '%kernel.root_dir%'
+
     DOMJudgeBundle\Controller\API\JudgementTypeController:
         arguments:
             $rootDir: '%kernel.root_dir%'
