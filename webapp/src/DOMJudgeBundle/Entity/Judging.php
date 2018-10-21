@@ -12,6 +12,10 @@ use JMS\Serializer\Annotation as Serializer;
  */
 class Judging implements ExternalRelationshipEntityInterface
 {
+    // constants for results
+    const RESULT_CORRECT = 'correct';
+    const RESULT_COMPILER_ERROR = 'compiler-error';
+
     /**
      * @var int
      *

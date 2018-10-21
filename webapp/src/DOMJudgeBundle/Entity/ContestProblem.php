@@ -95,7 +95,7 @@ class ContestProblem
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="ScoreCache", mappedBy="contest_problem")
+     * @ORM\OneToMany(targetEntity="ScoreCache", mappedBy="problem")
      * @Serializer\Exclude()
      */
     private $scorecache;

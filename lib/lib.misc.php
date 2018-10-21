@@ -222,8 +222,24 @@ function calcContestTime(float $walltime, int $cid) : float
  * Due to current transactions usage, this function MUST NOT contain
  * any START TRANSACTION or COMMIT statements.
  */
-function calcScoreRow(int $cid, int $team, int $prob)
+function calcScoreRow(int $cid, int $team, int $prob, bool $updateRankCache = true)
 {
+    /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
+    /** @var \DOMJudgeBundle\Service\ScoreboardService $G_SCOREBOARD_SERVICE */
+    global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
+
+    if (isset($G_SCOREBOARD_SERVICE)) {
+        $contest = $G_SYMFONY->getContest($cid);
+        $team    = $G_SYMFONY->getTeam($team);
+        $problem = $G_SYMFONY->getProblem($prob);
+        if (!$contest || !$team || !$problem) {
+            return;
+        }
+        $G_SCOREBOARD_SERVICE->calculateScoreRow($contest, $team, $problem, $updateRankCache);
+        return;
+    }
+    // Fallback to non-Symfony code if we are not in a Symfony context (i.e. in external tools)
+
     global $DB;
 
     logmsg(LOG_DEBUG, "calcScoreRow '$cid' '$team' '$prob'");
@@ -308,7 +324,7 @@ function calcScoreRow(int $cid, int $team, int $prob)
     }
 
     // If we found a new correct result, update the rank cache too
-    if ($correct_j > 0 || $correct_p > 0) {
+    if ($updateRankCache && ($correct_j > 0 || $correct_p > 0)) {
         updateRankCache($cid, $team);
     }
 
@@ -326,6 +342,21 @@ function calcScoreRow(int $cid, int $team, int $prob)
  */
 function updateRankCache(int $cid, int $team)
 {
+    /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
+    /** @var \DOMJudgeBundle\Service\ScoreboardService $G_SCOREBOARD_SERVICE */
+    global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
+
+    if (isset($G_SCOREBOARD_SERVICE)) {
+        $contest = $G_SYMFONY->getContest($cid);
+        $team    = $G_SYMFONY->getTeam($team);
+        if (!$contest || !$team) {
+            return;
+        }
+        $G_SCOREBOARD_SERVICE->updateRankCache($contest, $team);
+        return;
+    }
+    // Fallback to non-Symfony code if we are not in a Symfony context (i.e. in external tools)
+
     global $DB;
 
     logmsg(LOG_DEBUG, "updateRankCache '$cid' '$team'");

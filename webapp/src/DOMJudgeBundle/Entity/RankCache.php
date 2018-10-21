@@ -10,22 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class RankCache
 {
-
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
-     */
-    private $cid;
-
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="teamid", options={"comment"="Team ID"}, nullable=false)
-     */
-    private $teamid;
-
-
     /**
      * @var int
      *
@@ -56,64 +40,18 @@ class RankCache
 
 
     /**
+     * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="rankcache")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
      */
     private $contest;
 
     /**
+     * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="rankcache")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
      */
     private $team;
-
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return RankCache
-     */
-    public function setCid($cid)
-    {
-        $this->cid = $cid;
-
-        return $this;
-    }
-
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
-    {
-        return $this->cid;
-    }
-
-    /**
-     * Set teamid
-     *
-     * @param integer $teamid
-     *
-     * @return RankCache
-     */
-    public function setTeamid($teamid)
-    {
-        $this->teamid = $teamid;
-
-        return $this;
-    }
-
-    /**
-     * Get teamid
-     *
-     * @return integer
-     */
-    public function getTeamid()
-    {
-        return $this->teamid;
-    }
 
     /**
      * Set pointsRestricted
@@ -214,11 +152,11 @@ class RankCache
     /**
      * Set contest
      *
-     * @param \DOMJudgeBundle\Entity\Contest $contest
+     * @param Contest $contest
      *
      * @return RankCache
      */
-    public function setContest(\DOMJudgeBundle\Entity\Contest $contest = null)
+    public function setContest(Contest $contest = null)
     {
         $this->contest = $contest;
 
@@ -228,7 +166,7 @@ class RankCache
     /**
      * Get contest
      *
-     * @return \DOMJudgeBundle\Entity\Contest
+     * @return Contest
      */
     public function getContest()
     {
@@ -238,11 +176,11 @@ class RankCache
     /**
      * Set team
      *
-     * @param \DOMJudgeBundle\Entity\Team $team
+     * @param Team $team
      *
      * @return RankCache
      */
-    public function setTeam(\DOMJudgeBundle\Entity\Team $team = null)
+    public function setTeam(Team $team = null)
     {
         $this->team = $team;
 
@@ -252,7 +190,7 @@ class RankCache
     /**
      * Get team
      *
-     * @return \DOMJudgeBundle\Entity\Team
+     * @return Team
      */
     public function getTeam()
     {

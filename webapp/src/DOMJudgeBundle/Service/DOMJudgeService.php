@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\AuditLog;
 use DOMJudgeBundle\Entity\Configuration;
 use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
@@ -27,11 +28,17 @@ class DOMJudgeService
     protected $configCache = [];
 
     // Constants for database configuration names and values
-    const CONFIGURATION_DATA_SOURCE ='data_source';
+    const CONFIGURATION_DATA_SOURCE = 'data_source';
+    const CONFIGURATION_COMPILE_PENALTY = 'compile_penalty';
+    const CONFIGURATION_VERIFICATION_REQUIRED = 'verification_required';
+    const CONFIGURATION_PENALTY_TIME = 'penalty_time';
+    const CONFIGURATION_SCORE_IS_IN_SECONDS = 'score_in_seconds';
 
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
     const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
+
+    const CONFIGURATION_DEFAULT_PENALTY_TIME = 20;
 
     public function __construct(EntityManagerInterface $em, LoggerInterface $logger, RequestStack $requestStack, Container $container)
     {
@@ -174,6 +181,16 @@ class DOMJudgeService
     public function getTeam($teamid)
     {
         return $this->em->getRepository(Team::class)->find($teamid);
+    }
+
+    /**
+     * Get the problem with the given team ID
+     * @param int $probid
+     * @return Problem|null
+     */
+    public function getProblem($probid)
+    {
+        return $this->em->getRepository(Problem::class)->find($probid);
     }
 
     public function checkrole(string $rolename, bool $check_superset = true) : bool

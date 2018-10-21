@@ -10,28 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ScoreCache
 {
-
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
-     */
-    private $cid;
-
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="teamid", options={"comment"="Team ID"}, nullable=false)
-     */
-    private $teamid;
-
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID"}, nullable=false)
-     */
-    private $probid;
-
     /**
      * @var int
      *
@@ -90,103 +68,25 @@ class ScoreCache
 
 
     /**
+     * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="scorecache")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
      */
     private $contest;
 
     /**
+     * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="scorecache")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
      */
     private $team;
 
     /**
+     * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="scorecache")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
      */
     private $problem;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="DOMJudgeBundle\Entity\ContestProblem", inversedBy="scorecache")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="probid", referencedColumnName="probid"),
-     *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
-     * })
-     */
-    private $contest_problem;
-
-    /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return ScoreCache
-     */
-    public function setCid($cid)
-    {
-        $this->cid = $cid;
-
-        return $this;
-    }
-
-    /**
-     * Get cid
-     *
-     * @return integer
-     */
-    public function getCid()
-    {
-        return $this->cid;
-    }
-
-    /**
-     * Set teamid
-     *
-     * @param integer $teamid
-     *
-     * @return ScoreCache
-     */
-    public function setTeamid($teamid)
-    {
-        $this->teamid = $teamid;
-
-        return $this;
-    }
-
-    /**
-     * Get teamid
-     *
-     * @return integer
-     */
-    public function getTeamid()
-    {
-        return $this->teamid;
-    }
-
-    /**
-     * Set probid
-     *
-     * @param integer $probid
-     *
-     * @return ScoreCache
-     */
-    public function setProbid($probid)
-    {
-        $this->probid = $probid;
-
-        return $this;
-    }
-
-    /**
-     * Get probid
-     *
-     * @return integer
-     */
-    public function getProbid()
-    {
-        return $this->probid;
-    }
 
     /**
      * Set submissionsRestricted
@@ -450,30 +350,6 @@ class ScoreCache
     public function getProblem()
     {
         return $this->problem;
-    }
-
-    /**
-     * Set contest problem
-     *
-     * @param \DOMJudgeBundle\Entity\ContestProblem $contestProblem
-     *
-     * @return ScoreCache
-     */
-    public function setContestProblem(\DOMJudgeBundle\Entity\ContestProblem $contestProblem = null)
-    {
-        $this->contest_problem = $contestProblem;
-
-        return $this;
-    }
-
-    /**
-     * Get contest problem
-     *
-     * @return \DOMJudgeBundle\Entity\ContestProblem
-     */
-    public function getContestProblem()
-    {
-        return $this->contest_problem;
     }
 
     /**

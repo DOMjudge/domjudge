@@ -796,4 +796,13 @@ class Submission implements ExternalRelationshipEntityInterface
             'team_id' => $this->getTeam(),
         ];
     }
+
+    /**
+     * Return whether this submission is after the freeze
+     * @return bool
+     */
+    public function isAfterFreeze(): bool
+    {
+        return $this->getContest()->getFreezetime() !== null && (float)$this->getSubmittime() >= (float)$this->getContest()->getFreezetime();
+    }
 }

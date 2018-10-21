@@ -2,6 +2,7 @@
 
 namespace DOMJudgeBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use DOMJudgeBundle\Utils\Utils;
 use JMS\Serializer\Annotation as Serializer;
@@ -220,13 +221,21 @@ class Contest
      */
     private $rankcache;
 
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="DOMJudgeBundle\Entity\RemovedInterval", mappedBy="contest")
+     * @Serializer\Exclude()
+     */
+    private $removed_intervals;
+
 
     /**
      * Constructor
      */
     public function __construct()
     {
-        $this->teams = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->teams = new ArrayCollection();
+        $this->removed_intervals = new ArrayCollection();
     }
 
     /**
@@ -618,6 +627,76 @@ class Contest
     }
 
     /**
+     * Set activatetime
+     *
+     * @param string $activatetime
+     *
+     * @return Contest
+     */
+    public function setActivatetime($activatetime)
+    {
+        $this->activatetime = $activatetime;
+
+        return $this;
+    }
+
+    /**
+     * Set freezetime
+     *
+     * @param string $freezetime
+     *
+     * @return Contest
+     */
+    public function setFreezetime($freezetime)
+    {
+        $this->freezetime = $freezetime;
+
+        return $this;
+    }
+
+    /**
+     * Set endtime
+     *
+     * @param string $endtime
+     *
+     * @return Contest
+     */
+    public function setEndtime($endtime)
+    {
+        $this->endtime = $endtime;
+
+        return $this;
+    }
+
+    /**
+     * Set unfreezetime
+     *
+     * @param string $unfreezetime
+     *
+     * @return Contest
+     */
+    public function setUnfreezetime($unfreezetime)
+    {
+        $this->unfreezetime = $unfreezetime;
+
+        return $this;
+    }
+
+    /**
+     * Set deactivatetime
+     *
+     * @param string $deactivatetime
+     *
+     * @return Contest
+     */
+    public function setDeactivatetime($deactivatetime)
+    {
+        $this->deactivatetime = $deactivatetime;
+
+        return $this;
+    }
+
+    /**
      * Set enabled
      *
      * @param boolean $enabled
@@ -721,40 +800,6 @@ class Contest
     public function getTeams()
     {
         return $this->teams;
-    }
-
-    /**
-     * Add contestProblem
-     *
-     * @param \DOMJudgeBundle\Entity\ContestProblem $contestProblem
-     *
-     * @return Contest
-     */
-    public function addContestProblem(\DOMJudgeBundle\Entity\ContestProblem $contestProblem)
-    {
-        $this->contest_problems[] = $contestProblem;
-
-        return $this;
-    }
-
-    /**
-     * Remove contestProblem
-     *
-     * @param \DOMJudgeBundle\Entity\ContestProblem $contestProblem
-     */
-    public function removeContestProblem(\DOMJudgeBundle\Entity\ContestProblem $contestProblem)
-    {
-        $this->contest_problems->removeElement($contestProblem);
-    }
-
-    /**
-     * Get contestProblems
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getContestProblems()
-    {
-        return $this->contest_problems;
     }
 
     /**
@@ -1079,5 +1124,62 @@ class Contest
             $date = new \DateTime($time_string);
             return $date->format('U.v');
         }
+    }
+
+    /**
+     * Add removedInterval
+     *
+     * @param RemovedInterval $removedInterval
+     *
+     * @return Contest
+     */
+    public function addRemovedInterval(RemovedInterval $removedInterval)
+    {
+        $this->removed_intervals->add($removedInterval);
+
+        return $this;
+    }
+
+    /**
+     * Remove removedInterval
+     *
+     * @param RemovedInterval $removedInterval
+     */
+    public function removeRemovedInterval(RemovedInterval $removedInterval)
+    {
+        $this->removed_intervals->removeElement($removedInterval);
+    }
+
+    /**
+     * Get removedIntervals
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRemovedIntervals()
+    {
+        return $this->removed_intervals;
+    }
+
+    /**
+     * Get the contest time for a given wall time
+     * @param float $wallTime
+     * @return float
+     */
+    public function getContestTime(float $wallTime): float
+    {
+        $contestTime = Utils::difftime($wallTime, (float)$this->getStarttime());
+        if (false/*ALLOW_REMOVED_INTERVALS*/) { // TODO: use constant when we have access to it in Symfony
+            /** @var RemovedInterval $removedInterval */
+            foreach ($this->getRemovedIntervals() as $removedInterval) {
+                if (Utils::difftime((float)$removedInterval->getStarttime(), $wallTime) < 0) {
+                    $contestTime -= min(
+                        Utils::difftime($wallTime, (float)$removedInterval->getStarttime()),
+                        Utils::difftime((float)$removedInterval->getEndtime(), (float)$removedInterval->getStarttime())
+                    );
+                }
+            }
+        }
+
+        return $contestTime;
     }
 }

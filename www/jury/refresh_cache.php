@@ -84,7 +84,7 @@ foreach ($contests as $contest) {
         // for each problem fetch the result
         foreach ($probs as $pr) {
             echo " p" . specialchars($pr['probid']);
-            calcScoreRow((int)$pr['cid'], (int)$team['teamid'], (int)$pr['probid']);
+            calcScoreRow((int)$pr['cid'], (int)$team['teamid'], (int)$pr['probid'], false);
         }
 
         // Now recompute the rank

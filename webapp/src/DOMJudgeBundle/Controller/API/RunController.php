@@ -162,7 +162,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
             $queryBuilder
                 ->andWhere('s.submittime < c.endtime')
                 ->andWhere('j.rejudgingid IS NULL OR j.valid = 1');
-            if ($this->DOMJudgeService->dbconfig_get('verification_required', false)) {
+            if ($this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_VERIFICATION_REQUIRED, false)) {
                 $queryBuilder->andWhere('j.verified = 1');
             }
         }

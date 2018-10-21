@@ -85,7 +85,7 @@ class SingleTeamScoreboard extends Scoreboard
         $this->matrix = [];
         foreach ($this->scoreCache as $scoreRow) {
             // Skip this row if the problem is not known by us
-            if (!array_key_exists($scoreRow->getProbid(), $this->problems)) {
+            if (!array_key_exists($scoreRow->getProblem()->getProbid(), $this->problems)) {
                 continue;
             }
 
@@ -94,7 +94,7 @@ class SingleTeamScoreboard extends Scoreboard
                 $this->penaltyTime, $this->scoreIsInSecods
             );
 
-            $this->matrix[$scoreRow->getTeamid()][$scoreRow->getProbid()] = new ScoreboardMatrixItem(
+            $this->matrix[$scoreRow->getTeam()->getTeamid()][$scoreRow->getProblem()->getProbid()] = new ScoreboardMatrixItem(
                 $scoreRow->getIsCorrect($this->restricted),
                 $scoreRow->getSubmissions($this->restricted),
                 $scoreRow->getPending($this->restricted),

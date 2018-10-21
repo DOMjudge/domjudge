@@ -3,7 +3,11 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\Problem;
+use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\ScoreboardService;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;

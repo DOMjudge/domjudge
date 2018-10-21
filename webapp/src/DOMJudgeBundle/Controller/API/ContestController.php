@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Event;
+use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Utils\Utils;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -173,7 +174,7 @@ class ContestController extends AbstractRestController
     public function getContestYamlAction(Request $request, string $id)
     {
         $contest      = $this->getContestWithId($request, $id);
-        $penalty_time = $this->DOMJudgeService->dbconfig_get('penalty_time', 20);
+        $penalty_time = $this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_PENALTY_TIME, DOMJudgeService::CONFIGURATION_DEFAULT_PENALTY_TIME);
         $response     = new StreamedResponse();
         $response->setCallback(function () use ($contest, $penalty_time) {
             echo "name:                     " . $contest->getName() . "\n";

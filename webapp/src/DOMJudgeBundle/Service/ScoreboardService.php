@@ -3,10 +3,14 @@
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
+use DOMJudgeBundle\Entity\Judging;
+use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\RankCache;
 use DOMJudgeBundle\Entity\ScoreCache;
+use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TeamCategory;
 use DOMJudgeBundle\Utils\FreezeData;
@@ -15,6 +19,7 @@ use DOMJudgeBundle\Utils\Scoreboard\Scoreboard;
 use DOMJudgeBundle\Utils\Scoreboard\SingleTeamScoreboard;
 use DOMJudgeBundle\Utils\Scoreboard\TeamScore;
 use DOMJudgeBundle\Utils\Utils;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class ScoreboardService
@@ -36,14 +41,20 @@ class ScoreboardService
     protected $DOMJudgeService;
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * ScoreboardService constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService $DOMJudgeService
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, LoggerInterface $logger)
     {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->logger          = $logger;
     }
 
     /**
@@ -71,8 +82,9 @@ class ScoreboardService
         $scoreCache = $this->getScorecache($contest);
 
         return new Scoreboard($teams, $categories, $problems, $scoreCache, $freezeData, $jury,
-                              (int)$this->DOMJudgeService->dbconfig_get('penalty_time', 20),
-                              (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false));
+                              (int)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_PENALTY_TIME,
+                                                                        DOMJudgeService::CONFIGURATION_DEFAULT_PENALTY_TIME),
+                              (bool)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_SCORE_IS_IN_SECONDS, false));
     }
 
     /**
@@ -93,7 +105,7 @@ class ScoreboardService
             return null;
         }
 
-        $teams      = $this->getTeams($contest, true, new Filter([], [], [], [$teamId]));
+        $teams = $this->getTeams($contest, true, new Filter([], [], [], [$teamId]));
         if (empty($teams)) {
             return null;
         }
@@ -108,8 +120,10 @@ class ScoreboardService
         }
 
         return new SingleTeamScoreboard($team, $teamRank, $problems, $rankCache, $scoreCache, $freezeData, $jury,
-                                        (int)$this->DOMJudgeService->dbconfig_get('penalty_time', 20),
-                                        (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false));
+                                        (int)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_PENALTY_TIME,
+                                                                                  DOMJudgeService::CONFIGURATION_DEFAULT_PENALTY_TIME),
+                                        (bool)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_SCORE_IS_IN_SECONDS,
+                                                                                   false));
     }
 
     /**
@@ -149,12 +163,12 @@ class ScoreboardService
             ->join('r.team', 't')
             ->join('t.category', 'tc')
             ->select('COUNT(t.teamid)')
-            ->andWhere('r.cid = :cid')
+            ->andWhere('r.contest = :contest')
             ->andWhere('tc.sortorder = :sortorder')
             ->andWhere('t.enabled = 1')
             ->andWhere(sprintf('r.points_%s > :points OR (r.points_%s = :points AND r.totaltime_%s < :totaltime)', $variant, $variant,
                                $variant))
-            ->setParameter(':cid', $contest->getCid())
+            ->setParameter(':contest', $contest)
             ->setParameter(':sortorder', $sortOrder)
             ->setParameter(':points', $points)
             ->setParameter(':totaltime', $totalTime)
@@ -172,11 +186,11 @@ class ScoreboardService
                 ->join('r.team', 't')
                 ->join('t.category', 'tc')
                 ->select('r, t')
-                ->andWhere('r.cid = :cid')
+                ->andWhere('r.contest = :contest')
                 ->andWhere('tc.sortorder = :sortorder')
                 ->andWhere('t.enabled = 1')
                 ->andWhere(sprintf('r.points_%s = :points AND r.totaltime_%s = :totaltime', $variant, $variant))
-                ->setParameter(':cid', $contest->getCid())
+                ->setParameter(':contest', $contest)
                 ->setParameter(':sortorder', $sortOrder)
                 ->setParameter(':points', $points)
                 ->setParameter(':totaltime', $totalTime)
@@ -189,10 +203,10 @@ class ScoreboardService
                 // Initialize team scores for each team
                 /** @var TeamScore[] $teamScores */
                 $teamScores = [];
-                $teamIds    = [];
+                $teams      = [];
                 foreach ($tied as $rankCache) {
-                    $teamScores[$rankCache->getTeamid()] = new TeamScore($rankCache->getTeam());
-                    $teamIds[]                           = $rankCache->getTeamid();
+                    $teamScores[$rankCache->getTeam()->getTeamid()] = new TeamScore($rankCache->getTeam());
+                    $teams[]                                        = $rankCache->getTeam();
                 }
 
                 // Get submission times for each of the teams
@@ -201,28 +215,28 @@ class ScoreboardService
                     ->from('DOMJudgeBundle:ScoreCache', 's')
                     ->join('s.contest_problem', 'cp')
                     ->select('s')
-                    ->andWhere('s.cid = :cid')
+                    ->andWhere('s.contest = :contest')
                     ->andWhere(sprintf('s.is_correct_%s = 1', $variant))
                     ->andWhere('cp.allow_submit = 1')
-                    ->andWhere('s.teamid IN (:teamids)')
-                    ->setParameter(':cid', $contest->getCid())
-                    ->setParameter(':teamids', $teamIds)
+                    ->andWhere('s.team IN (:teams)')
+                    ->setParameter(':contest', $contest)
+                    ->setParameter(':teamids', $teams)
                     ->getQuery()
                     ->getResult();
 
                 foreach ($tiedScores as $tiedScore) {
-                    $teamScores[$tiedScore->getTeamid()]->addSolveTime(Utils::scoretime(
+                    $teamScores[$tiedScore->getTeam()->getTeamid()]->addSolveTime(Utils::scoretime(
                         $tiedScore->getSolveTime($restricted),
-                        (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false)
+                        (bool)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_SCORE_IS_IN_SECONDS, false)
                     ));
                 }
 
                 // Now check for each team if it is ranked higher than $teamid
                 foreach ($tied as $rankCache) {
-                    if ($rankCache->getTeamid() == $team->getTeamid()) {
+                    if ($rankCache->getTeam()->getTeamid() == $team->getTeamid()) {
                         continue;
                     }
-                    if (Scoreboard::scoreTiebreaker($teamScores[$rankCache->getTeamid()], $teamScores[$team->getTeamid()]) < 0) {
+                    if (Scoreboard::scoreTiebreaker($teamScores[$rankCache->getTeam()->getTeamid()], $teamScores[$team->getTeamid()]) < 0) {
                         $rank++;
                     }
                 }
@@ -230,6 +244,219 @@ class ScoreboardService
         }
 
         return $rank;
+    }
+
+    /**
+     * Scoreboard calculation
+     *
+     * Given a contest, team and a problem (re)calculate the values for one row in the scoreboard.
+     *
+     * Due to current transactions usage, this function MUST NOT do anything inside a transaction
+     * @param Contest $contest
+     * @param Team $team
+     * @param Problem $problem
+     * @param bool $updateRankCache If set to false, do not update the rankcache
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
+     */
+    public function calculateScoreRow(Contest $contest, Team $team, Problem $problem, bool $updateRankCache = true)
+    {
+        $this->logger->debug(sprintf('ScoreboardService::calculateScoreRow \'%d\' \'%d\' \'%d\'', $contest->getCid(), $team->getTeamid(),
+                                     $problem->getProbid()));
+
+        // First acquire an advisory lock to prevent other calls to this method from interfering with our update.
+        $lockString = sprintf('domjudge.%d.%d.%d', $contest->getCid(), $team->getTeamid(), $problem->getProbid());
+        if ($this->entityManager->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)', [':lock' => $lockString]) != 1) {
+            throw new \Exception(sprintf('ScoreboardService::calculateScoreRow failed to obtain lock \'%s\'', $lockString));
+        }
+
+        // Note the clause 's.submittime < c.endtime': this is used to
+        // filter out TOO-LATE submissions from pending, but it also means
+        // that these will not count as solved. Correct submissions with
+        // submittime after contest end should never happen, unless one
+        // resets the contest time after successful judging.
+        $queryBuilder = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Submission', 's')
+            ->select('s, j, c')
+            ->leftJoin('s.contest', 'c')
+            ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1')
+            ->where('s.teamid = :teamid')
+            ->andWhere('s.probid = :probid')
+            ->andWhere('s.cid = :cid')
+            ->andWhere('s.valid = 1')
+            ->andWhere('s.submittime < c.endtime')
+            ->setParameter(':teamid', $team->getTeamid())
+            ->setParameter(':probid', $problem->getProbid())
+            ->setParameter(':cid', $contest->getCid())
+            ->orderBy('s.submittime');
+
+        if (!$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_COMPILE_PENALTY, true)) {
+            $queryBuilder
+                ->andWhere('j.result IS NULL or j.result != :compileError')
+                ->setParameter(':compileError', Judging::RESULT_COMPILER_ERROR);
+        }
+
+        /** @var Submission[] $submissions */
+        $submissions = $queryBuilder->getQuery()->getResult();
+
+        $verificationRequired = $this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_VERIFICATION_REQUIRED, false);
+
+        // Initialize variables
+        $submissionsJury = $pendingJury = $timeJury = 0;
+        $submissionsPubl = $pendingPubl = $timePubl = 0;
+        $correctJury     = false;
+        $correctPubl     = false;
+
+        foreach ($submissions as $submission) {
+            /** @var Judging|null $judging */
+            $judging = $submission->getJudgings()->first();
+            // Contest submit time
+            $submitTime = $contest->getContestTime((float)$submission->getSubmittime());
+
+            // Check if this submission has a publicly visible judging result:
+            if (($verificationRequired && !$judging->getVerified()) || empty($judging->getResult())) {
+                $pendingJury++;
+                $pendingPubl++;
+                // Don't do any more counting for this submission.
+                continue;
+            }
+
+            $submissionsJury++;
+            if ($submission->isAfterFreeze()) {
+                // Show submissions after freeze as pending to the public (if SHOW_PENDING is enabled):
+                $pendingPubl++;
+            } else {
+                $submissionsPubl++;
+            }
+
+            // if correct, don't look at any more submissions after this one
+            if ($judging->getResult() == Judging::RESULT_CORRECT) {
+                $correctJury = true;
+                $timeJury    = $submitTime;
+                if (!$submission->isAfterFreeze()) {
+                    $correctPubl = true;
+                    $timePubl    = $submitTime;
+                }
+                // stop counting after a first correct submission
+                break;
+            }
+        }
+
+        // Use a direct REPLACE INTO query to drastically speed this up
+        $params = [
+            ':cid' => $contest->getCid(),
+            ':teamid' => $team->getTeamid(),
+            ':probid' => $problem->getProbid(),
+            ':submissionsRestricted' => $submissionsJury,
+            ':pendingRestricted' => $pendingJury,
+            ':solvetimeRestricted' => (int)$timeJury,
+            ':isCorrectRestricted' => (int)$correctJury,
+            ':submissionsPublic' => $submissionsPubl,
+            ':pendingPublic' => $pendingPubl,
+            ':solvetimePublic' => (int)$timePubl,
+            ':isCorrectPublic' => (int)$correctPubl,
+        ];
+        $this->entityManager->getConnection()->executeQuery('REPLACE INTO scorecache
+            (cid, teamid, probid,
+             submissions_restricted, pending_restricted, solvetime_restricted, is_correct_restricted,
+             submissions_public, pending_public, solvetime_public, is_correct_public)
+            VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :isCorrectRestricted,
+            :submissionsPublic, :pendingPublic, :solvetimePublic, :isCorrectPublic)', $params);
+
+        if ($this->entityManager->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)', [':lock' => $lockString]) != 1) {
+            throw new \Exception('ScoreboardService::calculateScoreRow failed to release lock');
+        }
+
+        // If we found a new correct result, update the rank cache too
+        if ($updateRankCache && ($correctJury || $correctPubl)) {
+            $this->updateRankCache($contest, $team);
+        }
+    }
+
+    /**
+     * Update tables used for efficiently computing team ranks
+     *
+     * Given a contest and team (re)calculate the time and solved problems for a team.
+     *
+     * Due to current transactions usage, this function MUST NOT do anything inside a transaction
+     * @param Contest $contest
+     * @param Team $team
+     * @throws \Exception
+     */
+    public function updateRankCache(Contest $contest, Team $team)
+    {
+        $this->logger->debug(sprintf('ScoreboardService::updateRankCache \'%d\' \'%d\'', $contest->getCid(), $team->getTeamid()));
+
+        // First acquire an advisory lock to prevent other calls to this method from interfering with our update.
+        $lockString = sprintf('domjudge.%d.%d', $contest->getCid(), $team->getTeamid());
+        if ($this->entityManager->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)', [':lock' => $lockString]) != 1) {
+            throw new \Exception(sprintf('ScoreboardService::updateRankCache failed to obtain lock \'%s\'', $lockString));
+        }
+
+        // Fetch contest problems. We can not add it as a relation on ScoreCache as Doctrine doesn't seem to like that its keys
+        // are part of the primary key
+        /** @var ContestProblem[] $contestProblems */
+        $contestProblems = [];
+        /** @var ContestProblem $contestProblem */
+        foreach ($contest->getProblems() as $contestProblem) {
+            $contestProblems[$contestProblem->getProbid()] = $contestProblem;
+        }
+
+        // Intialize our data
+        $variants  = ['public' => false, 'restricted' => true];
+        $numPoints = [];
+        $totalTime = [];
+        foreach ($variants as $variant => $isRestricted) {
+            $numPoints[$variant] = 0;
+            $totalTime[$variant] = $team->getPenalty();
+        }
+
+        $penaltyTime      = (int)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_PENALTY_TIME,
+                                                                      DOMJudgeService::CONFIGURATION_DEFAULT_PENALTY_TIME);
+        $scoreIsInSeconds = (bool)$this->DOMJudgeService->dbconfig_get(DOMJudgeService::CONFIGURATION_SCORE_IS_IN_SECONDS, false);
+
+        // Now fetch the ScoreCache entries
+        /** @var ScoreCache[] $scoreCacheRows */
+        $scoreCacheRows = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:ScoreCache', 's')
+            ->select('s')
+            ->where('s.contest = :contest')
+            ->andWhere('s.team = :team')
+            ->setParameter(':contest', $contest)
+            ->setParameter(':team', $team)
+            ->getQuery()
+            ->getResult();
+
+        // Process all score cache rows
+        foreach ($scoreCacheRows as $scoreCache) {
+            foreach ($variants as $variant => $isRestricted) {
+                if ($scoreCache->getIsCorrect($isRestricted)) {
+                    $penalty = Utils::calcPenaltyTime($scoreCache->getIsCorrect($isRestricted), $scoreCache->getSubmissions($isRestricted),
+                                                      $penaltyTime, $scoreIsInSeconds);
+
+                    $numPoints[$variant] += $contestProblems[$scoreCache->getProblem()->getProbid()]->getPoints();
+                    $totalTime[$variant] += Utils::scoretime((float)$scoreCache->getSolveTime($isRestricted), $scoreIsInSeconds) + $penalty;
+                }
+            }
+        }
+
+        // Use a direct REPLACE INTO query to drastically speed this up
+        $params = [
+            ':cid' => $contest->getCid(),
+            ':teamid' => $team->getTeamid(),
+            ':pointsRestricted' => $numPoints['restricted'],
+            ':totalTimeRestricted' => $totalTime['restricted'],
+            ':pointsPublic' => $numPoints['public'],
+            ':totalTimePublic' => $totalTime['public'],
+        ];
+        $this->entityManager->getConnection()->executeQuery('REPLACE INTO rankcache (cid, teamid,
+            points_restricted, totaltime_restricted,
+            points_public, totaltime_public)
+            VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :pointsPublic, :totalTimePublic)', $params);
+
+        if ($this->entityManager->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)', [':lock' => $lockString]) != 1) {
+            throw new \Exception('ScoreboardService::updateRankCache failed to release lock');
+        }
     }
 
     /**
@@ -338,15 +565,16 @@ class ScoreboardService
     {
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:ScoreCache', 's')
-            ->join('s.contest_problem', 'cp')
-            ->select('s, cp')
-            ->where('s.cid = :cid')
-            ->setParameter(':cid', $contest->getCid());
+            ->join('s.problem', 'p')
+            ->join('s.contest', 'c')
+            ->select('s, c, p')
+            ->where('s.contest = :contest')
+            ->setParameter(':contest', $contest);
 
         if ($team) {
             $queryBuilder
-                ->andWhere('s.teamid = :teamid')
-                ->setParameter(':teamid', $team->getTeamid());
+                ->andWhere('s.team = :team')
+                ->setParameter(':team', $team);
         }
 
         return $queryBuilder->getQuery()->getResult();
@@ -364,10 +592,10 @@ class ScoreboardService
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:RankCache', 'r')
             ->select('r')
-            ->where('r.cid = :cid')
-            ->andWhere('r.teamid = :teamid')
-            ->setParameter(':cid', $contest->getCid())
-            ->setParameter(':teamid', $team->getTeamid());
+            ->where('r.contest = :contest')
+            ->andWhere('r.team = :team')
+            ->setParameter(':contest', $contest)
+            ->setParameter(':team', $team);
 
         return $queryBuilder->getQuery()->getOneOrNullResult();
     }

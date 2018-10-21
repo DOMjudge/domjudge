@@ -179,7 +179,8 @@ class Scoreboard
         $this->matrix = [];
         foreach ($this->scoreCache as $scoreRow) {
             // Skip this row if the team or problem is not known by us
-            if (!array_key_exists($scoreRow->getTeamid(), $this->teams) || !array_key_exists($scoreRow->getProbid(), $this->problems)) {
+            if (!array_key_exists($scoreRow->getTeam()->getTeamid(),
+                                  $this->teams) || !array_key_exists($scoreRow->getProblem()->getProbid(), $this->problems)) {
                 continue;
             }
 
@@ -188,7 +189,7 @@ class Scoreboard
                 $this->penaltyTime, $this->scoreIsInSecods
             );
 
-            $this->matrix[$scoreRow->getTeamid()][$scoreRow->getProbid()] = new ScoreboardMatrixItem(
+            $this->matrix[$scoreRow->getTeam()->getTeamid()][$scoreRow->getProblem()->getProbid()] = new ScoreboardMatrixItem(
                 $scoreRow->getIsCorrect($this->restricted),
                 $scoreRow->getSubmissions($this->restricted),
                 $scoreRow->getPending($this->restricted),
@@ -197,10 +198,11 @@ class Scoreboard
             );
 
             if ($scoreRow->getIsCorrect($this->restricted)) {
-                $solveTime = Utils::scoretime($scoreRow->getSolveTime($this->restricted), $this->scoreIsInSecods);
-                $this->scores[$scoreRow->getTeamid()]->addNumberOfPoints($scoreRow->getContestProblem()->getPoints());
-                $this->scores[$scoreRow->getTeamid()]->addSolveTime($solveTime);
-                $this->scores[$scoreRow->getTeamid()]->addTotalTime($solveTime + $penalty);
+                $solveTime      = Utils::scoretime($scoreRow->getSolveTime($this->restricted), $this->scoreIsInSecods);
+                $contestProblem = $this->problems[$scoreRow->getProblem()->getProbid()];
+                $this->scores[$scoreRow->getTeam()->getTeamid()]->addNumberOfPoints($contestProblem->getPoints());
+                $this->scores[$scoreRow->getTeam()->getTeamid()]->addSolveTime($solveTime);
+                $this->scores[$scoreRow->getTeam()->getTeamid()]->addTotalTime($solveTime + $penalty);
             }
         }
 
