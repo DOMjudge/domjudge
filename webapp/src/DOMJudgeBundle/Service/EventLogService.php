@@ -365,6 +365,10 @@ class EventLogService implements ContainerAwareInterface
         // representation issues.
         $now = sprintf('%.3f', microtime(true));
 
+        if ($jsonPassed) {
+            $json = $this->DOMJudgeService->jsonDecode($json);
+        }
+
         // TODO: can this be wrapped into a single query?
         $events = [];
         foreach ($contestIds as $contestId) {
