@@ -114,7 +114,7 @@ EOF
 
 # start eventdaemon
 cd /opt/domjudge/domserver/
-sudo -u www-data bin/eventdaemon &
+sudo -u www-data "$HOME/.phpenv/versions/$(phpenv version-name)/bin/php" bin/eventdaemon &
 sleep 5
 
 # start judgedaemon
