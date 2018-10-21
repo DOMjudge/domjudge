@@ -97,13 +97,15 @@ class DOMJudgeService
             return $ret;
         }
 
-        if (!empty($this->configCache[$name]) && (!$onlyIfPublic || $this->configCache[$name]->getPublic())) {
+        if (!empty($this->configCache[$name]) &&
+            (!$onlyIfPublic || $this->configCache[$name]->getPublic())) {
             return $this->configCache[$name]->getValue();
         }
 
         if ($default === null) {
             throw new \Exception("Configuration variable '$name' not found.");
         }
+        $this->logger->warning("Configuration variable '$name' not found, using default.");
         return $default;
     }
 
