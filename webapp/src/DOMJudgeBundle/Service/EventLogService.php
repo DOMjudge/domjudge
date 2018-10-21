@@ -43,7 +43,9 @@ class EventLogService implements ContainerAwareInterface
     const ACTION_UPDATE = 'update';
     const ACTION_DELETE = 'delete';
 
-    // TODO: add a way to specify when to use external ID using some (DB) config instead of hardcoding it here. Also relates to AbstractRestController::getIdField
+    // TODO: add a way to specify when to use external ID using some (DB)
+    // config instead of hardcoding it here. Also relates to
+    // AbstractRestController::getIdField
     public $apiEndpoints = [
         'contests' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
@@ -123,7 +125,8 @@ class EventLogService implements ContainerAwareInterface
 
     // Entities to endpoints. Will be filled automatically except for special cases
     protected $entityToEndpoint = [
-        ContestProblem::class => 'problems', // Special case for contest problems, as they should map to problems
+        // Special case for contest problems, as they should map to problems
+        ContestProblem::class => 'problems',
     ];
 
     /**
@@ -141,8 +144,15 @@ class EventLogService implements ContainerAwareInterface
      */
     protected $logger;
 
-    public function __construct(DOMJudgeService $DOMJudgeService, EntityManagerInterface $entityManager, LoggerInterface $logger)
-    {
+    public function __construct(
+        DOMJudgeService $DOMJudgeService,
+        EntityManagerInterface $entityManager,
+        LoggerInterface $logger
+    ) {
+        $this->DOMJudgeService = $DOMJudgeService;
+        $this->entityManager   = $entityManager;
+        $this->logger          = $logger;
+
         foreach ($this->apiEndpoints as $endpoint => $data) {
             if (!array_key_exists(self::KEY_URL, $data)) {
                 $this->apiEndpoints[$endpoint][self::KEY_URL] = '/' . $endpoint;
@@ -166,19 +176,17 @@ class EventLogService implements ContainerAwareInterface
                 $this->entityToEndpoint[$this->apiEndpoints[$endpoint][self::KEY_ENTITY]] = $endpoint;
             }
         }
-
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->entityManager   = $entityManager;
-        $this->logger          = $logger;
     }
 
     /**
      * Log an event
      *
      * @param string $type Either an API endpoint or a DB table
-     * @param mixed $dataIds Identifier(s) of the row in the associated DB table as either one ID or an array of ID's.
+     * @param mixed $dataIds Identifier(s) of the row in the associated
+                             DB table as either one ID or an array of ID's.
      * @param string $action One of the self::ACTION_* constants
-     * @param int|null $contestId Contest ID to log this event for. If null, log it for all currently active contests.
+     * @param int|null $contestId Contest ID to log this event for. If null,
+                                  log it for all currently active contests.
      * @param string|null $json JSON content after the change. Generated if null.
      * @param mixed|null $ids Identifier(s) as shown in the REST API. If null it is
      *                        inferred from the content in the database or $json
@@ -195,12 +203,14 @@ class EventLogService implements ContainerAwareInterface
         }
 
         if (count($dataIds) > 1 && isset($ids)) {
-            $this->logger->warning('EventLogService::log: passing multiple dataid\'s while also passing one or more ID\'s not allowed yet');
+            $this->logger->warning('EventLogService::log: passing multiple dataid\'s '.
+                                   'while also passing one or more ID\'s not allowed yet');
             return;
         }
 
         if (count($dataIds) > 1 && isset($json)) {
-            $this->logger->warning('EventLogService::log: passing multiple dataid\'s while also passing a JSON object not allowed yet');
+            $this->logger->warning('EventLogService::log: passing multiple dataid\'s '.
+                                   'while also passing a JSON object not allowed yet');
             return;
         }
 
@@ -215,7 +225,8 @@ class EventLogService implements ContainerAwareInterface
                                      $type, $dataidsCombined, $action, $contestId, $json, $idsCombined));
 
 
-        // Gracefully fail since we may call this from the generic jury/edit.php page where we don't know which table gets updated.
+        // Gracefully fail since we may call this from the generic
+        // jury/edit.php page where we don't know which table gets updated.
         if (array_key_exists($type, $this->apiEndpoints)) {
             $endpoint = $this->apiEndpoints[$type];
         } else {
@@ -348,9 +359,11 @@ class EventLogService implements ContainerAwareInterface
 
             if ($json === null) {
                 $this->logger->warning(sprintf('EventLogService::log got no JSON data from \'%s\'', $url));
-                // If we didn't get data from the API, then that is probably because this particular data is not visible,
-                // for example because it belongs to an invisible jury team. If we don't have data, there's also no point in
-                // trying to insert anything in the eventlog table.
+                // If we didn't get data from the API, then that is probably
+                // because this particular data is not visible, for example
+                // because it belongs to an invisible jury team. If we don't
+                // have data, there's also no point in trying to insert
+                // anything in the eventlog table.
                 return;
             }
         }
@@ -407,8 +420,8 @@ class EventLogService implements ContainerAwareInterface
                                          $action, $type, $idsCombined, count($events), $expectedEvents));
         }
 
-        $this->logger->debug(sprintf('EventLogService::log %sd %s with ID\'s %s for %d contest(s)', $action, $type, $idsCombined,
-                                     count($contestIds)));
+        $this->logger->debug(sprintf('EventLogService::log %sd %s with ID\'s %s for %d contest(s)',
+                                     $action, $type, $idsCombined, count($contestIds)));
     }
 
     /**
@@ -457,7 +470,8 @@ class EventLogService implements ContainerAwareInterface
     }
 
     /**
-     * Get the external ID field for a given entity type. Will return null if no external ID field should be used
+     * Get the external ID field for a given entity type. Will return null if
+     * no external ID field should be used
      * @param string $entity
      * @return string|null
      * @throws \Exception
@@ -493,7 +507,8 @@ class EventLogService implements ContainerAwareInterface
                         DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL
                     ])) {
                     $lookupExternalid = true;
-                } elseif ($endpointType === self::TYPE_LIVE && $dataSource === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
+                } elseif ($endpointType === self::TYPE_LIVE &&
+                          $dataSource === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
                     $lookupExternalid = true;
                 }
             }
