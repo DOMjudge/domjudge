@@ -562,9 +562,7 @@ class ScoreboardService
     {
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:ScoreCache', 's')
-            ->join('s.problem', 'p')
-            ->join('s.contest', 'c')
-            ->select('s, c, p')
+            ->select('s')
             ->where('s.contest = :contest')
             ->setParameter(':contest', $contest);
 
