@@ -42,7 +42,7 @@ export SYMFONY_ENV="prod"
 composer install
 
 # downgrade java version outside of chroot since this didn't work
-sudo apt-get remove -y openjdk-8-jdk openjdk-8-jre openjdk-8-jre-headless oracle-java8-installer oracle-java9-installer
+sudo apt-get remove -y oracle-java9-installer
 
 # delete apport if exists
 sudo apt-get remove -y apport
@@ -105,10 +105,14 @@ PATH=${PATH}:${HOME}/vendor/bin
 git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
 CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 
+# 8hours as a helper so we can adjust contest start/endtime
+TIMEHELP=$((8*60*60))
 # Database changes to make the REST API and event feed match better.
 cat <<EOF | sudo mysql domjudge
 DELETE FROM clarification;
+UPDATE contest SET starttime = UNIX_TIMESTAMP()-$TIMEHELP WHERE cid = 2;
 UPDATE contest SET freezetime = UNIX_TIMESTAMP()+15 WHERE cid = 2;
+UPDATE contest SET endtime = UNIX_TIMESTAMP()+$TIMEHELP WHERE cid = 2;
 UPDATE team_category SET visible = 1;
 EOF
 
@@ -182,3 +186,8 @@ fi
 
 # Check the Contest API:
 $CHECK_API -n -C -a 'strict=1' http://admin:admin@localhost/domjudge/api
+
+# Validate the eventfeed against the api(currently ignore failures)
+cd ${DIR}/misc-tools
+./compare-cds.sh http://localhost/domjudge 2 || true
+cat icpctools/cds.log
