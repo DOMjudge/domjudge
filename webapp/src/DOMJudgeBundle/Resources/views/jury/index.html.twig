@@ -10,13 +10,13 @@
 {% block content %}
 <h1>DOMjudge Jury interface</h1>
 
-<a href="https://www.domjudge.org/">
-  <img src="../images/DOMjudgelogo.png" id="djlogo" alt="DOMjudge logo" class="float-right d-none d-lg-block" title="The DOMjudge logo: free as in beer!" />
-</a>
-
 {% for error in errors %}
 <div class="alert alert-danger" role="alert">{{ error }}</div>
 {% endfor %}
+
+<a href="https://www.domjudge.org/">
+  <img src="../images/DOMjudgelogo.png" id="djlogo" alt="DOMjudge logo" class="float-right d-none d-lg-block" title="The DOMjudge logo: free as in beer!" />
+</a>
 
 <div class="row equal mt-3">
   <div class="col-lg-4 col-sm-6 mt-3">
