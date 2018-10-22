@@ -343,7 +343,7 @@ class ContestController extends AbstractRestController
                 $qb = $this->entityManager->createQueryBuilder()
                     ->from('DOMJudgeBundle:Event', 'e')
                     ->select('e')
-                    ->where('e.eventid > :lastIdSent')
+                    ->andWhere('e.eventid > :lastIdSent')
                     ->setParameter('lastIdSent', $lastIdSent)
                     ->andWhere('e.cid = :cid')
                     ->setParameter('cid', $contest->getCid())

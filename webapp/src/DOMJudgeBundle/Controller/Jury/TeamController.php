@@ -49,14 +49,14 @@ class TeamController extends Controller
         $num_public_contests = $em->createQueryBuilder()
           ->select('count(c.cid) as num_contests')
           ->from('DOMJudgeBundle:Contest', 'c')
-          ->where('c.public = 1')
+          ->andWhere('c.public = 1')
           ->getQuery()->getSingleResult()['num_contests'];
         $teams_that_submitted = $em->createQueryBuilder()
           ->select('t.teamid as teamid, count(t.teamid) as num_submitted')
           ->from('DOMJudgeBundle:Team', 't')
           ->join('t.submissions', 's')
           ->groupBy('s.team')
-          ->where('s.contest in (:contests)')
+          ->andWhere('s.contest in (:contests)')
           ->setParameter('contests', $contests)
           ->getQuery()->getResult();
         $teams_that_submitted = array_column($teams_that_submitted, 'num_submitted', 'teamid');
@@ -67,7 +67,7 @@ class TeamController extends Controller
           ->join('t.submissions', 's')
           ->join('s.judgings', 'j')
           ->groupBy('s.team')
-          ->where('s.contest in (:contests)')
+          ->andWhere('s.contest in (:contests)')
           ->andWhere('j.valid = 1')
           ->andWhere('j.result = :result')
           ->setParameter('contests', $contests)

@@ -49,7 +49,7 @@ class JuryMiscController extends Controller
                 ->select('u.username, u.password')
                 ->from('DOMJudgeBundle:User', 'u')
                 ->join('u.roles', 'r')
-                ->where('r.dj_role = :role')
+                ->andWhere('r.dj_role = :role')
                 ->setParameter('role', 'admin')
                 ->getQuery()->getResult();
             foreach ($result as $row) {

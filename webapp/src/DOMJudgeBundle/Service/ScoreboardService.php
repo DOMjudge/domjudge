@@ -277,7 +277,7 @@ class ScoreboardService
             ->select('s, j, c')
             ->leftJoin('s.contest', 'c')
             ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1')
-            ->where('s.teamid = :teamid')
+            ->andWhere('s.teamid = :teamid')
             ->andWhere('s.probid = :probid')
             ->andWhere('s.cid = :cid')
             ->andWhere('s.valid = 1')
@@ -395,7 +395,7 @@ class ScoreboardService
         $contestProblems = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:ContestProblem', 'cp', 'cp.probid')
             ->select('cp')
-            ->where('cp.contest = :contest')
+            ->andWhere('cp.contest = :contest')
             ->setParameter(':contest', $contest)
             ->getQuery()
             ->getResult();
@@ -417,7 +417,7 @@ class ScoreboardService
         $scoreCacheRows = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:ScoreCache', 's')
             ->select('s')
-            ->where('s.contest = :contest')
+            ->andWhere('s.contest = :contest')
             ->andWhere('s.team = :team')
             ->setParameter(':contest', $contest)
             ->setParameter(':team', $team)
@@ -563,7 +563,7 @@ class ScoreboardService
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:ScoreCache', 's')
             ->select('s')
-            ->where('s.contest = :contest')
+            ->andWhere('s.contest = :contest')
             ->setParameter(':contest', $contest);
 
         if ($team) {
@@ -587,7 +587,7 @@ class ScoreboardService
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:RankCache', 'r')
             ->select('r')
-            ->where('r.contest = :contest')
+            ->andWhere('r.contest = :contest')
             ->andWhere('r.team = :team')
             ->setParameter(':contest', $contest)
             ->setParameter(':team', $team);

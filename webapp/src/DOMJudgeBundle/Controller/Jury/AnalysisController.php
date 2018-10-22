@@ -52,7 +52,7 @@ class AnalysisController extends Controller
           ->select('cp', 'p')
           ->from('DOMJudgeBundle:ContestProblem', 'cp')
           ->join('cp.problem', 'p')
-          ->where('cp.contest = :contest')
+          ->andWhere('cp.contest = :contest')
           ->setParameter('contest', $contest)
           ->getQuery()->getResult();
 
@@ -64,7 +64,7 @@ class AnalysisController extends Controller
           ->join('c.problems', 'cp')
           ->join('cp.problem', 'p')
           ->leftJoin('p.testcases', 'tc')
-          ->where('c = :contest')
+          ->andWhere('c = :contest')
           ->groupBy('p.probid')
           ->setParameter('contest', $contest)
           ->getQuery()->getResult();
@@ -85,7 +85,7 @@ class AnalysisController extends Controller
             ->join('ts.judgings', 'j')
             ->join('ts.language', 'lang')
             ->orderBy('t.teamid')
-            ->where('tc.visible = true')
+            ->andWhere('tc.visible = true')
             ->getQuery()->getResult();
           ;
         } else {
@@ -98,7 +98,7 @@ class AnalysisController extends Controller
             ->join('t.submissions', 'ts')
             ->join('ts.judgings', 'j')
             ->join('ts.language', 'lang')
-            ->where('c = :contest')
+            ->andWhere('c = :contest')
             ->andWhere('tc.visible = true')
             ->orderBy('t.teamid')
             ->setParameter('contest', $contest)
@@ -112,7 +112,7 @@ class AnalysisController extends Controller
           ->from('DOMJudgeBundle:Submission', 's')
           ->join('s.team', 't')
           ->join('t.category', 'tc')
-          ->where('s.contest = :contest')
+          ->andWhere('s.contest = :contest')
           ->andWhere('tc.visible = true')
           ->groupBy('s.teamid')
           ->setParameter('contest', $contest)
@@ -256,7 +256,7 @@ class AnalysisController extends Controller
           ->join('j.runs', 'jr')
           ->join('s.team', 'team')
           ->join('team.category', 'tc')
-          // ->where('j.valid = true')
+          // ->andWhere('j.valid = true')
           ->andWhere('s.contest = :contest')
           ->andWhere('s.team = :team')
           // ->andWhere('tc.visible = true')
@@ -350,7 +350,7 @@ class AnalysisController extends Controller
           ->join('j.runs', 'jr')
           ->join('s.team', 'team')
           ->join('team.category', 'tc')
-          ->where('j.valid = true')
+          ->andWhere('j.valid = true')
           ->andWhere('s.contest = :contest')
           ->andWhere('s.problem = :problem')
           ->andWhere('tc.visible = true')

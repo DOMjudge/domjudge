@@ -65,7 +65,7 @@ class BalloonService
             ->from('DOMJudgeBundle:Balloon', 'b')
             ->select('COUNT(b.submitid) AS numBallons')
             ->join('b.submission', 's')
-            ->where('s.valid = 1')
+            ->andWhere('s.valid = 1')
             ->andWhere('s.probid = :probid')
             ->andWhere('s.teamid = :teamid')
             ->andWhere('s.cid = :cid')

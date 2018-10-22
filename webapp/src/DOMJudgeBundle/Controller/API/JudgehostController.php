@@ -105,7 +105,7 @@ class JudgehostController extends FOSRestController
 
         if ($request->query->has('hostname')) {
             $queryBuilder
-                ->where('j.hostname = :hostname')
+                ->andWhere('j.hostname = :hostname')
                 ->setParameter(':hostname', $request->query->get('hostname'));
         }
 
@@ -147,7 +147,7 @@ class JudgehostController extends FOSRestController
         $judgehost = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Judgehost', 'j')
             ->select('j')
-            ->where('j.hostname = :hostname')
+            ->andWhere('j.hostname = :hostname')
             ->setParameter(':hostname', $hostname)
             ->setMaxResults(1)
             ->getQuery()
@@ -167,7 +167,7 @@ class JudgehostController extends FOSRestController
             ->innerJoin('j.judgehost', 'jh')
             ->leftJoin('j.rejudging', 'r')
             ->select('j')
-            ->where('jh.hostname = :hostname')
+            ->andWhere('jh.hostname = :hostname')
             ->andWhere('j.endtime IS NULL')
             ->andWhere('j.valid = 1 OR r.valid = 1')
             ->setParameter(':hostname', $hostname)
@@ -285,7 +285,7 @@ class JudgehostController extends FOSRestController
             ->join('s.contest', 'c')
             ->leftJoin('s.rejudging', 'r')
             ->select('s, t, l, cp, p, r')
-            ->where('s.judgehost IS NULL')
+            ->andWhere('s.judgehost IS NULL')
             ->andWhere('s.cid IN (:contestIds)')
             ->setParameter(':contestIds', $contestIds)
             ->andWhere('l.allow_judge = 1')
@@ -422,7 +422,7 @@ class JudgehostController extends FOSRestController
                 ->select('u')
                 ->join('u.team', 't')
                 ->join('t.submissions', 's')
-                ->where('s.submitid = :submitid')
+                ->andWhere('s.submitid = :submitid')
                 ->setParameter(':submitid', $submission->getSubmitid())
                 ->getQuery()
                 ->getResult();
@@ -514,7 +514,7 @@ class JudgehostController extends FOSRestController
             ->join('s.team', 't')
             ->join('s.problem', 'p')
             ->select('j, s, jh, c, t, p')
-            ->where('j.judgingid = :judgingId')
+            ->andWhere('j.judgingid = :judgingId')
             ->setParameter(':judgingId', $judgingId)
             ->setMaxResults(1)
             ->getQuery();
@@ -650,7 +650,7 @@ class JudgehostController extends FOSRestController
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:InternalError', 'e')
             ->select('e')
-            ->where('e.description = :description')
+            ->andWhere('e.description = :description')
             ->andWhere('e.disabled = :disabled')
             ->andWhere('e.status = :status')
             ->setParameter(':description', $description)

@@ -71,7 +71,7 @@ class LanguageController extends AbstractRestController
         return $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Language', 'lang')
             ->select('lang')
-            ->where('lang.allow_submit = 1');
+            ->andWhere('lang.allow_submit = 1');
     }
 
     /**

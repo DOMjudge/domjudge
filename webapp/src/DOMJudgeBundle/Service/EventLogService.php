@@ -291,7 +291,7 @@ class EventLogService implements ContainerAwareInterface
                     $contestIdData   = $this->entityManager->createQueryBuilder()
                         ->from('DOMJudgeBundle:ContestProblem', 'cp')
                         ->select('DISTINCT(cp.cid) AS contestId')
-                        ->where('cp.probid = :probid')
+                        ->andWhere('cp.probid = :probid')
                         ->setParameter(':probid', $dataId)
                         ->getQuery()
                         ->getScalarResult();
@@ -463,7 +463,7 @@ class EventLogService implements ContainerAwareInterface
         }, $this->entityManager->createQueryBuilder()
                ->from($entity, 'e')
                ->select(sprintf('e.%s', $endpointData[self::KEY_EXTERNAL_ID]))
-               ->where(sprintf('e.%s IN (:ids)', $primaryKeyField))
+               ->andWhere(sprintf('e.%s IN (:ids)', $primaryKeyField))
                ->setParameter(':ids', $ids)
                ->getQuery()
                ->getScalarResult());

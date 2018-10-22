@@ -52,7 +52,7 @@ class ExecutableController extends FOSRestController
         $executable = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Executable', 'e')
             ->select('e')
-            ->where('e.execid = :id')
+            ->andWhere('e.execid = :id')
             ->setParameter(':id', $id)
             ->setMaxResults(1)
             ->getQuery()
