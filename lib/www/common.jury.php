@@ -220,8 +220,8 @@ function get_image_thumb($image, &$error)
     $thumbmaxsize = dbconfig_get('thumbnail_size', 128);
 
     $rescale = $thumbmaxsize / max($info[0], $info[1]);
-    $thumbsize = array(round($info[0]*$rescale),
-                       round($info[1]*$rescale));
+    $thumbsize = array((int)round($info[0]*$rescale),
+                       (int)round($info[1]*$rescale));
 
     $orig = imagecreatefromstring($image);
     $thumb = imagecreatetruecolor($thumbsize[0], $thumbsize[1]);
