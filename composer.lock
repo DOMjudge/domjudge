@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "7aa2e177f31492b89dcc07c1e6cd417d",
+    "content-hash": "ee05df0561e50e9ca5e08902411d0375",
     "packages": [
         {
             "name": "components/jquery",
@@ -4875,6 +4875,7 @@
         "ext-mbstring": "*",
         "ext-mysqli": "*",
         "ext-zip": "*",
+        "ext-pcntl": "*",
         "php": ">= 7.0"
     },
     "platform-dev": []
