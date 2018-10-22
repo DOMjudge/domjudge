@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 6.0.3 - DEV
+-------------------
+
 Version 6.0.2 - 22 October 2018
 -------------------------------
  - Fix config check for default admin password.
