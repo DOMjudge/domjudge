@@ -2,15 +2,15 @@
 
 namespace LegacyBundle\Controller;
 
+use DOMJudgeBundle\Service\BalloonService;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ScoreboardService;
+use DOMJudgeBundle\Utils\Utils;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\DependencyInjection\ContainerInterface as Container;
-
-use DOMJudgeBundle\Utils\Utils;
 
 class FallbackController extends Controller
 {
@@ -32,17 +32,30 @@ class FallbackController extends Controller
     protected $scoreboardService;
 
     /**
+     * @var BalloonService
+     */
+    protected $balloonService;
+
+    /**
      * @var \Twig_Environment
      */
     protected $twig;
 
-    public function __construct($webDir, Container $container, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService, ScoreboardService $scoreboardService, \Twig_Environment $twig)
-    {
-        $this->webDir = $webDir;
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->eventLogService = $eventLogService;
+    public function __construct(
+        $webDir,
+        Container $container,
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
+        ScoreboardService $scoreboardService,
+        BalloonService $balloonService,
+        \Twig_Environment $twig
+    ) {
+        $this->webDir            = $webDir;
+        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
-        $this->twig = $twig;
+        $this->balloonService    = $balloonService;
+        $this->twig              = $twig;
         $this->setContainer($container);
     }
 
@@ -109,10 +122,11 @@ class FallbackController extends Controller
         }
         chdir(dirname($thefile));
         ob_start();
-        global $G_SYMFONY, $G_EVENT_LOG, $G_SCOREBOARD_SERVICE, $G_SYMFONY_TWIG;
+        global $G_SYMFONY, $G_EVENT_LOG, $G_SCOREBOARD_SERVICE, $G_BALLOON_SERVICE, $G_SYMFONY_TWIG;
         $G_SYMFONY = $this->DOMJudgeService;
         $G_EVENT_LOG = $this->eventLogService;
         $G_SCOREBOARD_SERVICE = $this->scoreboardService;
+        $G_BALLOON_SERVICE = $this->balloonService;
         $G_SYMFONY_TWIG = $this->twig;
         require($thefile);
 

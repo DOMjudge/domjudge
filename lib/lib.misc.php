@@ -415,36 +415,20 @@ function updateRankCache(int $cid, int $team)
  */
 function updateBalloons(int $submitid)
 {
-    global $DB;
+    /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
+    /** @var \DOMJudgeBundle\Service\BalloonService $G_BALLOON_SERVICE */
+    global $DB, $G_SYMFONY, $G_BALLOON_SERVICE;
 
-    $subm = $DB->q('TUPLE SELECT s.submitid, s.cid, s.probid, s.teamid, j.result, j.verified
+    $subm = $DB->q('TUPLE SELECT s.cid, j.judgingid
                     FROM submission s
                     LEFT JOIN judging j ON (j.submitid=s.submitid AND j.valid=1)
                     WHERE s.submitid = %i', $submitid);
 
-    if (@$subm['result'] !== 'correct') {
-        return;
-    }
-
-    if (!$subm['verified'] && dbconfig_get('verification_required', 0)) {
-        return;
-    }
-
-    // prevent duplicate balloons in case of multiple correct submissions
-    $numcorrect = $DB->q('VALUE SELECT count(b.submitid)
-                          FROM balloon b
-                          LEFT JOIN submission s USING(submitid)
-                          WHERE valid = 1 AND probid = %i
-                          AND teamid = %i AND cid = %i',
-                         $subm['probid'], $subm['teamid'], $subm['cid']);
-
-    if ($numcorrect == 0) {
-        $balloons_enabled = (bool)$DB->q('VALUE SELECT process_balloons
-                                          FROM contest WHERE cid = %i', $subm['cid']);
-        if ($balloons_enabled) {
-            $DB->q('INSERT INTO balloon (submitid) VALUES (%i)', $submitid);
-        }
-    }
+    $entityManager = $G_SYMFONY->getEntityManager();
+    $contest       = $entityManager->getRepository(\DOMJudgeBundle\Entity\Contest::class)->find($subm['cid']);
+    $submission    = $entityManager->getRepository(\DOMJudgeBundle\Entity\Submission::class)->find($submitid);
+    $judging       = $entityManager->getRepository(\DOMJudgeBundle\Entity\Judging::class)->find($subm['judgingid']);
+    $G_BALLOON_SERVICE->updateBalloons($contest, $submission, $judging);
 }
 
 /**

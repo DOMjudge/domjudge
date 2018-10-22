@@ -48,6 +48,14 @@ class DOMJudgeService
         $this->container = $container;
     }
 
+    /**
+     * @return EntityManagerInterface
+     */
+    public function getEntityManager()
+    {
+        return $this->em;
+    }
+
     public function getCurrentContest()
     {
         $selected_cid = $this->request->cookies->get('domjudge_cid');
