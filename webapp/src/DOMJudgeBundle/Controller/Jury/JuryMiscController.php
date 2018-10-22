@@ -87,7 +87,7 @@ class JuryMiscController extends Controller
     }
 
     /**
-     * @Route("/jury/print.php", name="jury_print_php_redirect")
+     * @Route("/jury/print.php", methods={"GET"}, name="jury_print_php_redirect")
      */
     public function printRedirectAction(Request $request)
     {
