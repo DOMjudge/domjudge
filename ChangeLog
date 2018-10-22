@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 6.0.2 - DEV
--------------------
+Version 6.0.2 - 22 October 2018
+-------------------------------
  - Fix config check for default admin password.
  - Fix balloon daemon for changed database structure.
  - Fix flash message on login page used after self-registration.
