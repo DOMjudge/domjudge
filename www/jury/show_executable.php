@@ -111,7 +111,7 @@ for ($j = 0; $j < $zip->numFiles; $j++) {
     $filename = basename($zip->getNameIndex($j));
     if ($filename[strlen($filename)-1] == "/") {
         if ($edit_mode) {
-            echo addHidden("skipped[$j]", 1);
+            echo addHidden("skipped[$j]", '1');
         }
         continue; // skip directory entries
     }
