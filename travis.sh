@@ -93,7 +93,7 @@ else
 fi
 cd ${DIR}/misc-tools
 if [ $FLIP -eq 1 ]; then
-  time sudo ./dj_make_chroot -a amd64
+  time sudo ./dj_make_chroot -a amd64 -D Ubuntu -R xenial
 else
   time sudo ./dj_make_chroot_docker -i domjudge/default-judgehost-chroot:latest
 fi
