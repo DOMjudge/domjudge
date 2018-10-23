@@ -92,6 +92,7 @@ else
 	FLIP=$((RANDOM % 2))
 fi
 cd ${DIR}/misc-tools
+FLIP=1
 if [ $FLIP -eq 1 ]; then
   time sudo ./dj_make_chroot -a amd64 -D Ubuntu -R xenial
 else
