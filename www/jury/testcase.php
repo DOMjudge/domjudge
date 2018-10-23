@@ -204,11 +204,22 @@ function check_add($probid, $rank, $FILES)
                isset($_POST['add_sample']));
 
         if (!empty($content['image'])) {
-            list($thumb, $type) = get_image_thumb_and_type($content['image']);
+            $thumb = get_image_thumb($content['image'], $errormsg);
+            if ($thumb===false) {
+                $thumb = null;
+                warning("image: ".$errormsg);
+            }
+            $type = get_image_type($content['image'], $errormsg);
+            if ($type===false) {
+                $type = null;
+                warning("image: ".$errormsg);
+            }
 
-            $DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
-                    WHERE probid = %i AND rank = %i',
-                   @$content['image'], $thumb, $type, $probid, $rank);
+            if ($thumb != null && $type != null) {
+                $DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
+                        WHERE probid = %i AND rank = %i',
+                        @$content['image'], $thumb, $type, $probid, $rank);
+            }
         }
 
         auditlog('testcase', $probid, 'added', "rank $rank");
