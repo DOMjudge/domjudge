@@ -784,7 +784,13 @@ function judge($row)
             if (!file_exists($tcfile[$inout])) {
                 $content = request('testcase_files', 'GET', 'testcaseid='
                         . urlencode($tc['testcaseid'])
-                        . '&' . $inout);
+                        . '&' . $inout, FALSE);
+                if ($content === NULL) {
+                    $error = 'Download of ' . $inout . ' failed for case ' . $tc['testcaseid'] . ', check your problem integrity.';
+                    logmsg(LOG_ERR, $error);
+                    disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
+                    return;
+                }
                 $content = base64_decode(dj_json_decode($content));
                 if (file_put_contents($tcfile[$inout] . ".new", $content) === false) {
                     error("Could not create $tcfile[$inout].new");

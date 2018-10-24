@@ -1186,7 +1186,7 @@ curl -n -F "shortname=hello" -F "langid=c" -F "cid=2" -F "code[]=@test1.c" -F "c
                            WHERE testcaseid = %i", $args['testcaseid']);
 
         if (is_null($content)) {
-            $api->createError("Cannot find testcase '$args[testcaseid]'.");
+            $api->createError("Cannot find $inout for testcase '$args[testcaseid]'.");
             return '';
         }
 
