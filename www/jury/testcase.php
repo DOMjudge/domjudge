@@ -186,59 +186,66 @@ function check_add($probid, $rank, $FILES)
     global $DB;
 
     $result = '';
-    if (!empty($_FILES['add_input']['name']) ||
-        !empty($_FILES['add_output']['name'])) {
-        $content = array();
-        foreach ($FILES as $file) {
-            if (!empty($_FILES['add_'.$file]['name'])) {
-                checkFileUpload($_FILES['add_'.$file]['error']);
-                $content[$file] = dj_file_get_contents($_FILES['add_'.$file]['tmp_name']);
-            }
+
+    foreach (array('input', 'output') as $type) {
+        if (empty($_FILES['add_' . $type]['name'])) {
+            $result .= '<li><b>Error: ' . $type . ' file was not selected</b></li>';
         }
-
-        $DB->q("INSERT INTO testcase
-                (probid,rank,md5sum_input,md5sum_output,input,output,description,sample)
-                VALUES (%i,%i,%s,%s,%s,%s,%s,%i)",
-               $probid, $rank, md5(@$content['input']), md5(@$content['output']),
-               @$content['input'], @$content['output'], @$_POST['add_desc'],
-               isset($_POST['add_sample']));
-
-        if (!empty($content['image'])) {
-            $thumb = get_image_thumb($content['image'], $errormsg);
-            if ($thumb===false) {
-                $thumb = null;
-                warning("image: ".$errormsg);
-            }
-            $type = get_image_type($content['image'], $errormsg);
-            if ($type===false) {
-                $type = null;
-                warning("image: ".$errormsg);
-            }
-
-            if ($thumb != null && $type != null) {
-                $DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
-                        WHERE probid = %i AND rank = %i',
-                        @$content['image'], $thumb, $type, $probid, $rank);
-            }
-        }
-
-        auditlog('testcase', $probid, 'added', "rank $rank");
-
-        $result .= "<li>Added new testcase $rank from files " .
-            specialchars($_FILES['add_input']['name']) .
-            " (" . printsize($_FILES['add_input']['size']) . ") and " .
-            specialchars($_FILES['add_output']['name']) .
-            " (" . printsize($_FILES['add_output']['size']) . ").";
-        if ($_FILES['add_output']['size']>dbconfig_get('output_limit')*1024) {
-            $result .= "<br /><b>Warning: output file size exceeds " .
-                "<code>output_limit</code> of " . dbconfig_get('output_limit') .
-                " kB. This will always result in wrong answers!</b>";
-        }
-        if (empty($content['input']) || empty($content['output'])) {
-            $result .= "<br /><b>Warning: empty testcase file(s)!</b>";
-        }
-        $result .= "</li>\n";
     }
+    if (!empty($result)) {
+        return $result;
+    }
+
+    $content = array();
+    foreach ($FILES as $file) {
+        if (!empty($_FILES['add_'.$file]['name'])) {
+            checkFileUpload($_FILES['add_'.$file]['error']);
+            $content[$file] = dj_file_get_contents($_FILES['add_'.$file]['tmp_name']);
+        }
+    }
+
+    $DB->q("INSERT INTO testcase
+            (probid,rank,md5sum_input,md5sum_output,input,output,description,sample)
+            VALUES (%i,%i,%s,%s,%s,%s,%s,%i)",
+           $probid, $rank, md5(@$content['input']), md5(@$content['output']),
+           @$content['input'], @$content['output'], @$_POST['add_desc'],
+           isset($_POST['add_sample']));
+
+    if (!empty($content['image'])) {
+        $thumb = get_image_thumb($content['image'], $errormsg);
+        if ($thumb===false) {
+            $thumb = null;
+            warning("image: ".$errormsg);
+        }
+        $type = get_image_type($content['image'], $errormsg);
+        if ($type===false) {
+            $type = null;
+            warning("image: ".$errormsg);
+        }
+
+        if ($thumb != null && $type != null) {
+            $DB->q('UPDATE testcase SET image = %s, image_thumb = %s, image_type = %s
+                    WHERE probid = %i AND rank = %i',
+                    @$content['image'], $thumb, $type, $probid, $rank);
+        }
+    }
+
+    auditlog('testcase', $probid, 'added', "rank $rank");
+
+    $result .= "<li>Added new testcase $rank from files " .
+        specialchars($_FILES['add_input']['name']) .
+        " (" . printsize($_FILES['add_input']['size']) . ") and " .
+        specialchars($_FILES['add_output']['name']) .
+        " (" . printsize($_FILES['add_output']['size']) . ").";
+    if ($_FILES['add_output']['size']>dbconfig_get('output_limit')*1024) {
+        $result .= "<br /><b>Warning: output file size exceeds " .
+            "<code>output_limit</code> of " . dbconfig_get('output_limit') .
+            " kB. This will always result in wrong answers!</b>";
+    }
+    if (empty($content['input']) || empty($content['output'])) {
+        $result .= "<br /><b>Warning: empty testcase file(s)!</b>";
+    }
+    $result .= "</li>\n";
 
     return $result;
 }
