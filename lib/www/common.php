@@ -917,6 +917,9 @@ function renderPage($data, bool $header = true, bool $footer = true, $templateFi
 
 function descriptionExpand(string $description = null) : string
 {
+    if ($description == null) {
+        return '';
+    }
     $descriptionLines = explode("\n", $description);
     if (count($descriptionLines) <= 3) {
         return implode('<br />', $descriptionLines);
