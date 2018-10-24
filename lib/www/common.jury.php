@@ -280,7 +280,8 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
     $def_timelimit = 10;
 
     // Read problem properties
-    $ini_array = parse_ini_string($zip->getFromName($prop_file));
+    $prop_file_string = $zip->getFromName($prop_file);
+    $ini_array = $prop_file_string===FALSE ? array() : parse_ini_string($prop_file_string);
 
     // Only preserve valid keys:
     $ini_array_problem = array_intersect_key($ini_array, array_flip($ini_keys_problem));
