@@ -258,6 +258,9 @@ class ScoreboardService
      */
     public function calculateScoreRow(Contest $contest, Team $team, Problem $problem, bool $updateRankCache = true)
     {
+        // Make sure to clear the entity manager cache to get fresh results
+        $this->entityManager->clear();
+
         $this->logger->debug(sprintf('ScoreboardService::calculateScoreRow \'%d\' \'%d\' \'%d\'', $contest->getCid(), $team->getTeamid(),
                                      $problem->getProbid()));
 
@@ -381,6 +384,9 @@ class ScoreboardService
      */
     public function updateRankCache(Contest $contest, Team $team)
     {
+        // Make sure to clear the entity manager cache to get fresh results
+        $this->entityManager->clear();
+        
         $this->logger->debug(sprintf('ScoreboardService::updateRankCache \'%d\' \'%d\'', $contest->getCid(), $team->getTeamid()));
 
         // First acquire an advisory lock to prevent other calls to this method from interfering with our update.
