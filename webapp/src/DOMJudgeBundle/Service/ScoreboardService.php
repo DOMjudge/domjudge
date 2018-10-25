@@ -261,13 +261,13 @@ class ScoreboardService
         // Make sure to clear the entity manager cache to get fresh results
         $this->entityManager->clear();
 
-        $this->logger->debug(sprintf('ScoreboardService::calculateScoreRow \'%d\' \'%d\' \'%d\'', $contest->getCid(), $team->getTeamid(),
+        $this->logger->debug(sprintf("ScoreboardService::calculateScoreRow '%d' '%d' '%d'", $contest->getCid(), $team->getTeamid(),
                                      $problem->getProbid()));
 
         // First acquire an advisory lock to prevent other calls to this method from interfering with our update.
         $lockString = sprintf('domjudge.%d.%d.%d', $contest->getCid(), $team->getTeamid(), $problem->getProbid());
         if ($this->entityManager->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)', [':lock' => $lockString]) != 1) {
-            throw new \Exception(sprintf('ScoreboardService::calculateScoreRow failed to obtain lock \'%s\'', $lockString));
+            throw new \Exception(sprintf("ScoreboardService::calculateScoreRow failed to obtain lock '%s'", $lockString));
         }
 
         // Note the clause 's.submittime < c.endtime': this is used to
@@ -386,13 +386,13 @@ class ScoreboardService
     {
         // Make sure to clear the entity manager cache to get fresh results
         $this->entityManager->clear();
-        
-        $this->logger->debug(sprintf('ScoreboardService::updateRankCache \'%d\' \'%d\'', $contest->getCid(), $team->getTeamid()));
+
+        $this->logger->debug(sprintf("ScoreboardService::updateRankCache '%d' '%d'", $contest->getCid(), $team->getTeamid()));
 
         // First acquire an advisory lock to prevent other calls to this method from interfering with our update.
         $lockString = sprintf('domjudge.%d.%d', $contest->getCid(), $team->getTeamid());
         if ($this->entityManager->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)', [':lock' => $lockString]) != 1) {
-            throw new \Exception(sprintf('ScoreboardService::updateRankCache failed to obtain lock \'%s\'', $lockString));
+            throw new \Exception(sprintf("ScoreboardService::updateRankCache failed to obtain lock '%s'", $lockString));
         }
 
         // Fetch contest problems. We can not add it as a relation on ScoreCache as Doctrine doesn't seem to like that its keys
