@@ -6,6 +6,7 @@ use DOMJudgeBundle\Service\BalloonService;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ScoreboardService;
+use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
@@ -37,6 +38,11 @@ class FallbackController extends Controller
     protected $balloonService;
 
     /**
+     * @var SubmissionService
+     */
+    protected $submissionService;
+
+    /**
      * @var \Twig_Environment
      */
     protected $twig;
@@ -48,6 +54,7 @@ class FallbackController extends Controller
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
         BalloonService $balloonService,
+        SubmissionService $submissionService,
         \Twig_Environment $twig
     ) {
         $this->webDir            = $webDir;
@@ -55,6 +62,7 @@ class FallbackController extends Controller
         $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
         $this->balloonService    = $balloonService;
+        $this->submissionService = $submissionService;
         $this->twig              = $twig;
         $this->setContainer($container);
     }
@@ -122,11 +130,13 @@ class FallbackController extends Controller
         }
         chdir(dirname($thefile));
         ob_start();
-        global $G_SYMFONY, $G_EVENT_LOG, $G_SCOREBOARD_SERVICE, $G_BALLOON_SERVICE, $G_SYMFONY_TWIG;
+        global $G_SYMFONY, $G_EVENT_LOG, $G_SCOREBOARD_SERVICE, $G_BALLOON_SERVICE, $G_SYMFONY_TWIG,
+               $G_SUBMISSION_SERVICE;
         $G_SYMFONY = $this->DOMJudgeService;
         $G_EVENT_LOG = $this->eventLogService;
         $G_SCOREBOARD_SERVICE = $this->scoreboardService;
         $G_BALLOON_SERVICE = $this->balloonService;
+        $G_SUBMISSION_SERVICE = $this->submissionService;
         $G_SYMFONY_TWIG = $this->twig;
         require($thefile);
 

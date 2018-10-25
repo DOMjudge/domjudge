@@ -551,57 +551,6 @@ function getExpectedResults(string $source)
 }
 
 /**
- * Determines final result for a judging given an ordered array of
- * testcase results. Testcase results can have value NULL if not run
- * yet. A return value of NULL means that a final result cannot be
- * determined yet; this may only occur when not all testcases have
- * been run yet.
- */
-function getFinalResult(array $runresults, $results_prio = null)
-{
-    if (empty($results_prio)) {
-        $results_prio  = dbconfig_get('results_prio');
-    }
-
-    // Whether we have NULL results
-    $havenull = false;
-
-    // This stores the current result and priority to be returned:
-    $bestres  = null;
-    $bestprio = -1;
-
-    // Find first highest priority result:
-    foreach ($runresults as $tc => $res) {
-        if ($res===null) {
-            $havenull = true;
-        } else {
-            $prio = $results_prio[$res];
-            if (empty($prio)) {
-                error("Unknown result '$res' found.");
-            }
-            if ($prio>$bestprio) {
-                $bestres  = $res;
-                $bestprio = $prio;
-            }
-        }
-    }
-
-    // If we have NULL results, check whether the highest priority
-    // result has maximal priority. Use a local copy of the
-    // 'results_prio' array, keeping the original untouched.
-    $tmp = $results_prio;
-    rsort($tmp);
-    $maxprio = reset($tmp);
-
-    // No highest priority result found: no final answer yet.
-    if ($havenull && $bestprio<$maxprio) {
-        return null;
-    }
-
-    return $bestres;
-}
-
-/**
  * Calculate timelimit overshoot from actual timelimit and configured
  * overshoot that can be specified as a sum,max,min of absolute and
  * relative times. Returns overshoot seconds as a float.

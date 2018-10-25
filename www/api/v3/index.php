@@ -581,18 +581,33 @@ if (!isset($api)) {
         $probid = $DB->q('VALUE SELECT probid FROM testcase
                           WHERE testcaseid = %i', $args['testcaseid']);
 
-        $runresults = $DB->q('COLUMN SELECT runresult
-                              FROM judging_run LEFT JOIN testcase USING(testcaseid)
-                              WHERE judgingid = %i ORDER BY rank', $args['judgingid']);
-        $numtestcases = $DB->q('VALUE SELECT count(*) FROM testcase WHERE probid = %i', $probid);
+        /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
+        /** @var \DOMJudgeBundle\Service\SubmissionService $G_SUBMISSION_SERVICE */
+        global $G_SYMFONY, $G_SUBMISSION_SERVICE;
 
-        $allresults = array_pad($runresults, $numtestcases, null);
+        // Clear the entity manager to make sure we have fresh results
+        $G_SYMFONY->getEntityManager()->clear();
+
+        /** @var \DOMJudgeBundle\Entity\JudgingRun[] $runs */
+        $runs = $G_SYMFONY->getEntityManager()->createQueryBuilder()
+            ->from('DOMJudgeBundle:JudgingRun', 'r')
+            ->join('r.testcase', 't')
+            ->select('r')
+            ->andWhere('r.judgingid = :judgingid')
+            ->orderBy('t.rank')
+            ->setParameter(':judgingid', $args['judgingid'])
+            ->getQuery()
+            ->getResult();
+
+        $numTestCases = $DB->q('VALUE SELECT count(*) FROM testcase WHERE probid = %i', $probid);
+
+        $allRuns = array_pad($runs, (int)$numTestCases, null);
 
         $before = $DB->q('VALUE SELECT result FROM judging WHERE judgingid = %i', $args['judgingid']);
 
-        if (($result = getFinalResult($allresults, $results_prio))!==null) {
+        if (($result = $G_SUBMISSION_SERVICE->getFinalResult($allRuns, $results_prio)) !== null) {
 
-        // Lookup global lazy evaluation of results setting and
+            // Lookup global lazy evaluation of results setting and
             // possible problem specific override.
             $lazy_eval = dbconfig_get('lazy_eval_results', true);
             $prob_lazy = $DB->q('MAYBEVALUE SELECT cp.lazy_eval_results
@@ -604,7 +619,7 @@ if (!isset($api)) {
                 $lazy_eval = (bool)$prob_lazy;
             }
 
-            if (count($runresults) == $numtestcases || $lazy_eval) {
+            if (count($runs) == $numTestCases || $lazy_eval) {
                 // NOTE: setting endtime here determines in testcases_GET
                 // whether a next testcase will be handed out.
                 $DB->q('UPDATE judging SET result = %s, endtime = %s
