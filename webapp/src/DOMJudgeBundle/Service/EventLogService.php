@@ -203,14 +203,14 @@ class EventLogService implements ContainerAwareInterface
         }
 
         if (count($dataIds) > 1 && isset($ids)) {
-            $this->logger->warning('EventLogService::log: passing multiple dataid\'s '.
-                                   'while also passing one or more ID\'s not allowed yet');
+            $this->logger->warning("EventLogService::log: passing multiple dataid's ".
+                                   "while also passing one or more ID's not allowed yet");
             return;
         }
 
         if (count($dataIds) > 1 && isset($json)) {
-            $this->logger->warning('EventLogService::log: passing multiple dataid\'s '.
-                                   'while also passing a JSON object not allowed yet');
+            $this->logger->warning("EventLogService::log: passing multiple dataid's ".
+                                   "while also passing a JSON object not allowed yet");
             return;
         }
 
@@ -221,7 +221,7 @@ class EventLogService implements ContainerAwareInterface
         $dataidsCombined = json_encode($dataIds);
         $idsCombined     = $ids === null ? null : is_array($ids) ? json_encode($ids) : $ids;
 
-        $this->logger->debug(sprintf('EventLogService::log arguments: \'%s\' \'%s\' \'%s\' \'%s\' \'%s\' \'%s\'',
+        $this->logger->debug(sprintf("EventLogService::log arguments: '%s' '%s' '%s' '%s' '%s' '%s'",
                                      $type, $dataidsCombined, $action, $contestId, $json, $idsCombined));
 
 
@@ -240,15 +240,15 @@ class EventLogService implements ContainerAwareInterface
         }
 
         if (!isset($endpoint)) {
-            $this->logger->warning(sprintf('EventLogService::log: invalid endpoint \'%s\' specified', $type));
+            $this->logger->warning(sprintf("EventLogService::log: invalid endpoint '%s' specified", $type));
             return;
         }
         if (!in_array($action, [self::ACTION_CREATE, self::ACTION_UPDATE, self::ACTION_DELETE])) {
-            $this->logger->warning(sprintf('EventLogService::log: invalid action \'%s\' specified', $action));
+            $this->logger->warning(sprintf("EventLogService::log: invalid action '%s' specified", $action));
             return;
         }
         if ($endpoint[self::KEY_URL] === null) {
-            $this->logger->warning(sprintf('EventLogService::log: no endpoint for \'%s\', ignoring', $type));
+            $this->logger->warning(sprintf("EventLogService::log: no endpoint for '%s', ignoring", $type));
             return;
         }
 
@@ -358,7 +358,7 @@ class EventLogService implements ContainerAwareInterface
             $this->DOMJudgeService->setHasAllRoles(false);
 
             if ($json === null) {
-                $this->logger->warning(sprintf('EventLogService::log got no JSON data from \'%s\'', $url));
+                $this->logger->warning(sprintf("EventLogService::log got no JSON data from '%s'", $url));
                 // If we didn't get data from the API, then that is probably
                 // because this particular data is not visible, for example
                 // because it belongs to an invisible jury team. If we don't
@@ -370,7 +370,7 @@ class EventLogService implements ContainerAwareInterface
 
         // First acquire an advisory lock to prevent other event logging,
         // so that we can obtain a unique timestamp.
-        if ($this->entityManager->getConnection()->fetchColumn('SELECT GET_LOCK(\'domjudge.eventlog\',1)') != 1) {
+        if ($this->entityManager->getConnection()->fetchColumn("SELECT GET_LOCK('domjudge.eventlog',1)") != 1) {
             throw new \Exception('EventLogService::log failed to obtain lock');
         }
 
@@ -411,16 +411,16 @@ class EventLogService implements ContainerAwareInterface
         // Now flush the entity manager, inserting all events
         $this->entityManager->flush();
 
-        if ($this->entityManager->getConnection()->fetchColumn('SELECT RELEASE_LOCK(\'domjudge.eventlog\')') != 1) {
+        if ($this->entityManager->getConnection()->fetchColumn("SELECT RELEASE_LOCK('domjudge.eventlog')") != 1) {
             throw new \Exception('EventLogService::log failed to release lock');
         }
 
         if (count($events) !== $expectedEvents) {
-            throw new \Exception(sprintf('EventLogService::log failed to %s %s with ID\'s %s (%d/%d events done)',
+            throw new \Exception(sprintf("EventLogService::log failed to %s %s with ID's %s (%d/%d events done)",
                                          $action, $type, $idsCombined, count($events), $expectedEvents));
         }
 
-        $this->logger->debug(sprintf('EventLogService::log %sd %s with ID\'s %s for %d contest(s)',
+        $this->logger->debug(sprintf("EventLogService::log %sd %s with ID's %s for %d contest(s)",
                                      $action, $type, $idsCombined, count($contestIds)));
     }
 
