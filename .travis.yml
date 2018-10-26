@@ -1,13 +1,28 @@
 sudo: required
+language: generic
 services:
+  - docker
   - mysql
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" acl make zip unzip apache2-utils bsdmainutils libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev autoconf automake sudo debootstrap procps gcc g++ openjdk-8-jre-headless openjdk-8-jdk ghc fp-compiler libcgroup-dev devscripts shellcheck nginx
-  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
 
-language: php
-php:
-  - '7.1'
-script: ./travis.sh
-dist: trusty
+before_install:
+# Takes about 1.5minutes to pull
+- time docker pull ubergeek42/domjudge-travisci:0.1
+# These get copied into the container since we mount /etc/{passwd,shadow,group}
+# for some reason doing this inside the container fails with "failure while writing changes to /etc/passwd"
+- sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-0
+- sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-1
+- sudo groupadd domjudge-run
+
+script:
+- |
+  docker run --privileged \
+    -v $HOME:$HOME \
+    -v /sys:/sys \
+    -v /etc/passwd:/etc/passwd \
+    -v /etc/group:/etc/group \
+    -v /etc/shadow:/etc/shadow \
+    -v /var/run/mysqld:/var/run/mysqld \
+    --net=host \
+    -u $(id -u):$(id -g) \
+    -it -e "TERM=xterm-256color" -e "HOME=$HOME" -e "USER=$USER"\
+    ubergeek42/domjudge-travisci:0.1 /bin/bash -eo pipefail -c "umask 0002; cd $TRAVIS_BUILD_DIR; script --return -qfc \"./travis.sh\" /dev/null | ts \"[%F %T]\" "

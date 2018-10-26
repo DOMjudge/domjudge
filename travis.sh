@@ -11,7 +11,6 @@ GITSHA=$(git rev-parse HEAD || true)
 echo "CREATE DATABASE IF NOT EXISTS \`domjudge\` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" | mysql
 echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`domjudge\`.* TO 'domjudge'@'localhost' IDENTIFIED BY 'domjudge';" | mysql
 
-
 # Generate a parameters yml file for symfony
 cat > webapp/app/config/parameters.yml <<EOF
 parameters:
@@ -41,42 +40,37 @@ EOF
 export SYMFONY_ENV="prod"
 composer install
 
-# downgrade java version outside of chroot since this didn't work
-sudo apt-get remove -y oracle-java9-installer
-
-# delete apport if exists
-sudo apt-get remove -y apport
-
 # configure, make and install (but skip documentation)
 make configure
 ./configure --disable-doc-build --with-baseurl='http://localhost/domjudge/'
-make domserver judgehost
+make build-scripts domserver judgehost
 sudo make install-domserver install-judgehost
 
 # setup database and add special user
 cd /opt/domjudge/domserver
 sudo bin/dj_setup_database install
-echo "INSERT INTO user (userid, username, name, password, teamid) VALUES (3, 'dummy', 'dummy user for example team', '\$2y\$10\$0d0sPmeAYTJ/Ya7rvA.kk.zvHu758ScyuHAjps0A6n9nm3eFmxW2K', 2)" | sudo mysql domjudge
-echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | sudo mysql domjudge
-echo "INSERT INTO userrole (userid, roleid) VALUES (3, 3);" | sudo mysql domjudge
+echo "INSERT INTO user (userid, username, name, password, teamid) VALUES (3, 'dummy', 'dummy user for example team', '\$2y\$10\$0d0sPmeAYTJ/Ya7rvA.kk.zvHu758ScyuHAjps0A6n9nm3eFmxW2K', 2)" | mysql domjudge
+echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | mysql domjudge
+echo "INSERT INTO userrole (userid, roleid) VALUES (3, 3);" | mysql domjudge
 echo "machine localhost login dummy password dummy" > ~/.netrc
 
 # configure and restart nginx
 sudo rm -f /etc/nginx/sites-enabled/*
 sudo cp /opt/domjudge/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
-sudo service nginx restart
+sudo /usr/sbin/nginx
 
 # run phpunit tests
 lib/vendor/bin/phpunit --stderr -c webapp/phpunit.xml.dist
 
 # configure and restart php-fpm
-sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "$HOME/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/"
-sudo "$HOME/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm"
+sudo cp /opt/domjudge/domserver/etc/domjudge-fpm.conf "/etc/php/7.2/fpm/pool.d/domjudge-fpm.conf"
+sudo /usr/sbin/php-fpm7.2
+
 
 # add users/group for judgedaemons (FIXME: make them configurable)
-sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-0
-sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-1
-sudo groupadd domjudge-run
+# sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-0
+# sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-1
+# sudo groupadd domjudge-run
 
 # configure judgehost
 cd /opt/domjudge/judgehost/
@@ -108,7 +102,7 @@ CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 # 8hours as a helper so we can adjust contest start/endtime
 TIMEHELP=$((8*60*60))
 # Database changes to make the REST API and event feed match better.
-cat <<EOF | sudo mysql domjudge
+cat <<EOF | mysql domjudge
 DELETE FROM clarification;
 UPDATE contest SET starttime = UNIX_TIMESTAMP()-$TIMEHELP WHERE cid = 2;
 UPDATE contest SET freezetime = UNIX_TIMESTAMP()+15 WHERE cid = 2;
@@ -129,6 +123,10 @@ sleep 5
 # write out current log to learn why it might be broken
 cat /var/log/nginx/domjudge.log
 
+# Print the symfony log if it exists
+if sudo test -f /opt/domjudge/domserver/webapp/var/logs/prod.log; then
+  sudo cat /opt/domjudge/domserver/webapp/var/logs/prod.log
+fi
 
 # submit test programs
 cd ${DIR}/tests
