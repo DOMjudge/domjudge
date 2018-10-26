@@ -75,8 +75,8 @@ class JudgingRun
     private $testcase;
 
     /**
-     * @var JudgingRunOutput
-     * @ORM\OneToOne(targetEntity="DOMJudgeBundle\Entity\JudgingRunOutput")
+     * @var JudgingRunWithOutput
+     * @ORM\OneToOne(targetEntity="JudgingRunWithOutput")
      * @ORM\JoinColumn(name="runid", referencedColumnName="runid")
      * @Serializer\Exclude()
      */
@@ -305,11 +305,11 @@ class JudgingRun
     /**
      * Set judgingRunOutput
      *
-     * @param JudgingRunOutput $judgingRunOutput
+     * @param JudgingRunWithOutput $judgingRunOutput
      *
      * @return JudgingRun
      */
-    public function setJudgingRunOutput(JudgingRunOutput $judgingRunOutput)
+    public function setJudgingRunOutput(JudgingRunWithOutput $judgingRunOutput)
     {
         $this->judging_run_output = $judgingRunOutput;
 
@@ -319,7 +319,7 @@ class JudgingRun
     /**
      * Get judgingRunOutput
      *
-     * @return JudgingRunOutput
+     * @return JudgingRunWithOutput
      */
     public function getJudgingRunOutput()
     {

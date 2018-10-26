@@ -871,13 +871,12 @@ function judge(array $row)
         }
 
         request(
-            'judging_runs',
+            sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
+                    urlencode((string)$row['judgingid'])),
             'POST',
-            'judgingid=' . urlencode((string)$row['judgingid'])
-            . '&testcaseid=' . urlencode((string)$tc['testcaseid'])
+            'testcaseid=' . urlencode((string)$tc['testcaseid'])
             . '&runresult=' . urlencode($result)
             . '&runtime=' . urlencode((string)$runtime)
-            . '&judgehost=' . urlencode($myhost)
             . '&output_run='   . rest_encode_file($testcasedir . '/program.out', false)
             . '&output_error=' . rest_encode_file($testcasedir . '/program.err', $output_storage_limit)
             . '&output_system=' . rest_encode_file($testcasedir . '/system.out', $output_storage_limit)

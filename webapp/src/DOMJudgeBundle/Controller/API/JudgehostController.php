@@ -9,11 +9,16 @@ use DOMJudgeBundle\Entity\Executable;
 use DOMJudgeBundle\Entity\InternalError;
 use DOMJudgeBundle\Entity\Judgehost;
 use DOMJudgeBundle\Entity\Judging;
+use DOMJudgeBundle\Entity\JudgingRun;
+use DOMJudgeBundle\Entity\JudgingRunWithOutput;
 use DOMJudgeBundle\Entity\Submission;
+use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Entity\User;
+use DOMJudgeBundle\Service\BalloonService;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ScoreboardService;
+use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
@@ -53,6 +58,16 @@ class JudgehostController extends FOSRestController
     protected $scoreboardService;
 
     /**
+     * @var SubmissionService
+     */
+    protected $submissionService;
+
+    /**
+     * @var BalloonService
+     */
+    protected $balloonService;
+
+    /**
      * @var LoggerInterface
      */
     protected $logger;
@@ -60,22 +75,28 @@ class JudgehostController extends FOSRestController
     /**
      * JudgehostController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService $DOMJudgeService
-     * @param EventLogService $eventLogService
-     * @param ScoreboardService $scoreboardService
-     * @param LoggerInterface $logger
+     * @param DOMJudgeService        $DOMJudgeService
+     * @param EventLogService        $eventLogService
+     * @param ScoreboardService      $scoreboardService
+     * @param SubmissionService      $submissionService
+     * @param BalloonService         $balloonService
+     * @param LoggerInterface        $logger
      */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
+        SubmissionService $submissionService,
+        BalloonService $balloonService,
         LoggerInterface $logger
     ) {
         $this->entityManager     = $entityManager;
         $this->DOMJudgeService   = $DOMJudgeService;
         $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
+        $this->submissionService = $submissionService;
+        $this->balloonService    = $balloonService;
         $this->logger            = $logger;
     }
 
@@ -574,6 +595,264 @@ class JudgehostController extends FOSRestController
                     $this->DOMJudgeService->alert('reject', $message);
                 });
             }
+        }
+
+        $judgehost->setPolltime(Utils::now());
+        $this->entityManager->flush();
+    }
+
+    /**
+     * Add a new JudgingRun. When relevant, finalize the judging.
+     * @Rest\Post("/add-judging-run/{hostname}/{judgingId}")
+     * @Security("has_role('ROLE_JUDGEHOST')")
+     * @SWG\Response(
+     *     response="200",
+     *     description="When the judging run has been added"
+     * )
+     * @SWG\Parameter(
+     *     name="hostname",
+     *     in="path",
+     *     type="string",
+     *     description="The hostname of the judgehost that wants to add the judging run"
+     * )
+     * @SWG\Parameter(
+     *     name="judgingId",
+     *     in="path",
+     *     type="integer",
+     *     description="The ID of the judging to add a run to"
+     * )
+     * @SWG\Parameter(
+     *     name="testcaseid",
+     *     in="formData",
+     *     type="integer",
+     *     description="The ID of the testcase of the run to add"
+     * )
+     * @SWG\Parameter(
+     *     name="runresult",
+     *     in="formData",
+     *     type="string",
+     *     description="The result of the run"
+     * )
+     * @SWG\Parameter(
+     *     name="runtime",
+     *     in="formData",
+     *     type="number",
+     *     format="float",
+     *     description="The runtime of the run"
+     * )
+     * @SWG\Parameter(
+     *     name="output_run",
+     *     in="formData",
+     *     type="string",
+     *     description="The (base64-encoded) output of the run"
+     * )
+     * @SWG\Parameter(
+     *     name="output_diff",
+     *     in="formData",
+     *     type="string",
+     *     description="The (base64-encoded) output diff of the run"
+     * )
+     * @SWG\Parameter(
+     *     name="output_error",
+     *     in="formData",
+     *     type="string",
+     *     description="The (base64-encoded) error output of the run"
+     * )
+     * @SWG\Parameter(
+     *     name="output_system",
+     *     in="formData",
+     *     type="string",
+     *     description="The (base64-encoded) system output of the run"
+     * )
+     * @param Request $request
+     * @param string  $hostname
+     * @param int     $judgingId
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function addJudgingRunAction(
+        Request $request,
+        string $hostname,
+        int $judgingId
+    ) {
+        $required = [
+            'testcaseid',
+            'runresult',
+            'runtime',
+            'output_run',
+            'output_diff',
+            'output_error',
+            'output_system'
+        ];
+
+        foreach ($required as $argument) {
+            if (!$request->request->has($argument)) {
+                throw new BadRequestHttpException(
+                    sprintf("Argument '%s' is mandatory", $argument));
+            }
+        }
+
+        $testCaseId   = $request->request->get('testcaseid');
+        $runResult    = $request->request->get('runresult');
+        $runTime      = $request->request->get('runtime');
+        $outputRun    = $request->request->get('output_run');
+        $outputDiff   = $request->request->get('output_diff');
+        $outputError  = $request->request->get('output_error');
+        $outputSystem = $request->request->get('output_system');
+
+        /** @var Judgehost $judgehost */
+        $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
+        if (!$judgehost) {
+            return;
+        }
+
+        /** @var Judging $judging */
+        $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
+        /** @var Testcase $testCase */
+        $testCase = $this->entityManager->getRepository(Testcase::class)->find($testCaseId);
+
+        $resultsRemap = $this->DOMJudgeService->dbconfig_get('results_remap');
+        $resultsPrio  = $this->DOMJudgeService->dbconfig_get('results_prio');
+
+        if (array_key_exists($runResult, $resultsRemap)) {
+            $this->logger->info(sprintf('Testcase %d remapping result %s -> %s',
+                                        $testCaseId, $runResult, $resultsRemap[$runResult]));
+            $runResult = $resultsRemap[$runResult];
+        }
+
+        $this->entityManager->transactional(function () use (
+            $runTime,
+            $runResult,
+            $testCase,
+            $judging,
+            $outputSystem,
+            $outputError,
+            $outputDiff,
+            $outputRun
+        ) {
+            $judgingRun = new JudgingRunWithOutput();
+            $judgingRun
+                ->setJudging($judging)
+                ->setTestcase($testCase)
+                ->setRunresult($runResult)
+                ->setRuntime($runTime)
+                ->setEndtime(Utils::now())
+                ->setOutputRun(base64_decode($outputRun))
+                ->setOutputDiff(base64_decode($outputDiff))
+                ->setOutputError(base64_decode($outputError))
+                ->setOutputSystem(base64_decode($outputSystem));
+
+            $this->entityManager->persist($judgingRun);
+            $this->entityManager->flush();
+
+            if ($judging->getRejudgingid() === null) {
+                $this->eventLogService->log('judging_run', $judgingRun->getRunid(),
+                                            EventLogService::ACTION_CREATE, $judging->getCid());
+            }
+        });
+
+        // Reload the testcase and judging, as EventLogService::log will clear the entity manager.
+        // For the judging, also load in the submission and some of it's relations
+        $testCase = $this->entityManager->getRepository(Testcase::class)->find($testCaseId);
+        $judging  = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Judging', 'j')
+            ->join('j.submission', 's')
+            ->join('s.problem', 'p')
+            ->join('s.team', 't')
+            ->join('s.contest', 'c')
+            ->join('s.contest_problem', 'cp')
+            ->select('j, s, p, t, c')
+            ->where('j.judgingid = :judgingid')
+            ->setParameter(':judgingid', $judgingId)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        // result of this judging_run has been stored. now check whether
+        // we're done or if more testcases need to be judged.
+
+        /** @var JudgingRun[] $runs */
+        $runs = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:JudgingRun', 'r')
+            ->join('r.testcase', 't')
+            ->select('r')
+            ->andWhere('r.judgingid = :judgingid')
+            ->orderBy('t.rank')
+            ->setParameter(':judgingid', $judgingId)
+            ->getQuery()
+            ->getResult();
+
+        $numTestCases = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Testcase', 't')
+            ->select('COUNT(t.testcaseid)')
+            ->where('t.probid = :probid')
+            ->setParameter(':probid', $testCase->getProbid())
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $allRuns = array_pad($runs, (int)$numTestCases, null);
+
+        $oldResult = $judging->getResult();
+
+        if (($result = $this->submissionService->getFinalResult($allRuns, $resultsPrio)) !== null) {
+            // Lookup global lazy evaluation of results setting and possible problem specific override.
+            $lazyEval    = $this->DOMJudgeService->dbconfig_get('lazy_eval_results', true);
+            $problemLazy = $judging->getSubmission()->getContestProblem()->getLazyEvalResults();
+            if (isset($problemLazy)) {
+                $lazyEval = $problemLazy;
+            }
+
+            $judging->setResult($result);
+            if (count($runs) == $numTestCases || $lazyEval) {
+                // NOTE: setting endtime here determines in testcases_GET
+                // whether a next testcase will be handed out.
+                $judging->setEndtime(Utils::now());
+            }
+            $this->entityManager->flush();
+
+            // Only update if the current result is different from what we had before.
+            // This should only happen when the old result was NULL.
+            if ($oldResult !== $result) {
+                if ($oldResult !== null) {
+                    throw new \BadMethodCallException('internal bug: the evaluated result changed during judging');
+                }
+
+                $submission = $judging->getSubmission();
+                $contest    = $submission->getContest();
+                $team       = $submission->getTeam();
+                $problem    = $submission->getProblem();
+                $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+
+                // We call alert here before possible validation. Note that this means that these
+                // alert messages should be treated as confidential information.
+                $this->DOMJudgeService->alert($result === 'correct' ? 'accept' : 'reject',
+                                              sprintf("submission %s, judging %s: %s",
+                                                      $submission->getSubmitid(),
+                                                      $judging->getJudgingid(), $result));
+
+                // Log to event table if no verification required
+                // (case of verification required is handled in www/jury/verify.php)
+                if (!$this->DOMJudgeService->dbconfig_get('verification_required', false)) {
+                    if ($judging->getRejudgingid() === null) {
+                        $this->eventLogService->log('judging', $judging->getJudgingid(),
+                                                    EventLogService::ACTION_UPDATE,
+                                                    $judging->getCid());
+                        $this->balloonService->updateBalloons($contest, $submission, $judging);
+                    }
+                }
+
+                $this->DOMJudgeService->auditlog('judging', $judgingId, 'judged', $result,
+                                                 $hostname);
+
+                $justFinished = true;
+            }
+        }
+
+        // Send an event for an endtime update if not done yet.
+        if ($judging->getRejudgingid() === null && count($runs) == $numTestCases && empty($justFinished)) {
+            $this->eventLogService->log('judging', $judging->getJudgingid(),
+                                        EventLogService::ACTION_UPDATE,
+                                        $judging->getCid());
         }
 
         $judgehost->setPolltime(Utils::now());
