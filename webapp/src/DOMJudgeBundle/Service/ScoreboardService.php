@@ -258,6 +258,8 @@ class ScoreboardService
      */
     public function calculateScoreRow(Contest $contest, Team $team, Problem $problem, bool $updateRankCache = true)
     {
+        $contestId = $contest->getCid();
+        
         // Make sure to clear the entity manager cache to get fresh results
         $this->entityManager->clear();
 
@@ -343,7 +345,7 @@ class ScoreboardService
 
         // Use a direct REPLACE INTO query to drastically speed this up
         $params = [
-            ':cid' => $contest->getCid(),
+            ':cid' => $contestId,
             ':teamid' => $team->getTeamid(),
             ':probid' => $problem->getProbid(),
             ':submissionsRestricted' => $submissionsJury,
