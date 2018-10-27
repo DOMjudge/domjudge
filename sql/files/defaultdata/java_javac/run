@@ -25,6 +25,14 @@ MEMJVM=65536
 
 MEMRESERVED=$((MEMSTACK + MEMJVM))
 
+# Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
+MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
+
+if [ $MEMLIMITJAVA -le 0 ]; then
+	echo "Error: total memory $MEMLIMIT KiB <= $MEMJVM + $MEMSTACK = $MEMRESERVED KiB reserved for JVM and stack leaves none for heap."
+	exit 1
+fi
+
 # Java needs filename to match main class:
 if [ -z "$ENTRY_POINT" ]; then
 	[ -n "$DEBUG" ] && echo "Info: no ENTRY_POINT provided, assuming 'Main'."
@@ -45,9 +53,6 @@ EXITCODE=$?
 javap "$MAINCLASS" > /dev/null
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
-
-# Calculate Java program memlimit as MEMLIMIT - max. JVM memory usage:
-MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 
 # Write executing script:
 # Executes java byte-code interpreter with following options
