@@ -474,14 +474,17 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
         }
     }
 
-    // Add problem statement
-    foreach (array('pdf', 'html', 'txt') as $type) {
-        $text = $zip->getFromName('problem.' . $type);
-        if ($text!==false) {
-            $DB->q('UPDATE problem SET problemtext = %s, problemtext_type = %s
-                    WHERE probid = %i', $text, $type, $probid);
-            echo "<p>Added problem statement from: <tt>problem.$type</tt></p>\n";
-            break;
+    // Add problem statement, also look in obsolete location
+    foreach (array('problem_statement/', '') as $dir) {
+        foreach (array('pdf', 'html', 'txt') as $type) {
+            $filename = $dir.'problem.'.$type;
+            $text = $zip->getFromName($filename);
+            if ($text!==false) {
+                $DB->q('UPDATE problem SET problemtext = %s, problemtext_type = %s
+                        WHERE probid = %i', $text, $type, $probid);
+                echo "<p>Added problem statement from: <tt>$filename</tt></p>\n";
+                break;
+            }
         }
     }
 
