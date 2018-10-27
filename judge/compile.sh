@@ -158,6 +158,20 @@ chmod -R go-w "$WORKDIR/compile"
 
 cd "$WORKDIR"
 
+if [ $exitcode -ne 0 -a ! -s compile.meta ]; then
+	echo "internal-error: runguard crashed" > compile.meta
+	echo "Runguard exited with code $exitcode and 'compile.meta' is empty, it likely crashed." >compile.out
+	echo "Compilation output:" >>compile.out
+	cat compile.tmp >>compile.out
+	cleanexit ${E_INTERNAL_ERROR:-1}
+fi
+if grep '^Error: ' compile.tmp >/dev/null 2>&1 ; then
+	grep '^Error: ' compile.tmp | sed 's/^Error: /internal-error: compile script: /' >>compile.meta
+	echo "The compile script threw an internal error. Compilation output:" >compile.out
+	cat compile.tmp >>compile.out
+	cleanexit ${E_INTERNAL_ERROR:-1}
+fi
+
 # Check if the compile script auto-detected the entry point, and if
 # so, store it in the compile.meta for later reuse, e.g. in a replay.
 grep '[Dd]etected entry_point: ' compile.tmp | sed 's/^.*etected //' >>compile.meta
@@ -171,11 +185,6 @@ fi
 if [ $exitcode -ne 0 ]; then
 	echo "Compiling failed with exitcode $exitcode, compiler output:" >compile.out
 	cat compile.tmp >>compile.out
-	if [ ! -s compile.meta ]; then
-		printf "\n--------------------------------------------------------------------------------\n\n" >> compile.out
-		echo "Since the file 'compile.meta' is empty, above error is most likely caused by a crash in runguard." >> compile.out
-		echo "internal-error: runguard crash" > compile.meta
-	fi
 	cleanexit ${E_COMPILER_ERROR:-1}
 fi
 if [ ! -f compile/program ] || [ ! -x compile/program ]; then

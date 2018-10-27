@@ -572,6 +572,16 @@ function disable(string $kind, string $idcolumn, $id, string $description, int $
     );
 }
 
+function read_metadata(string $filename)
+{
+    if (!is_readable($filename)) return null;
+
+    // Don't quite treat it as YAML, but simply key/value pairs.
+    $contents = preg_replace('/: (.*)$/', ': "$1"', dj_file_get_contents($filename));
+
+    return spyc_load($contents);
+}
+
 function judge(array $row)
 {
     global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled;
@@ -661,35 +671,52 @@ function judge(array $row)
     system(LIBJUDGEDIR . "/compile.sh $cpuset_opt '$execrunpath' '$workdir' " .
            implode(' ', $files), $retval);
 
-    // what does the exitcode mean?
-    if (! isset($EXITCODES[$retval])) {
+    if (is_readable($workdir . '/compile.out')) {
+        $compile_output = dj_file_get_contents($workdir . '/compile.out', 50000);
+    }
+    if (empty($compile_output) && is_readable($workdir . '/compile.tmp')) {
+        $compile_output = dj_file_get_contents($workdir . '/compile.tmp', 50000);
+    }
+
+    // Try to read metadata from file
+    $metadata = read_metadata($workdir . '/compile.meta');
+    if (isset($metadata['internal-error'])) {
         alert('error');
-        logmsg(LOG_ERR, "Unknown exitcode from compile.sh for s$row[submitid]: $retval");
-        $description = "compile script '" . $row['compile_script'] . "' returned exit code " . $retval;
-        disable('language', 'langid', $row['langid'], $description, $row['judgingid'], $row['cid']);
+        if (is_array($metadata['internal-error'])) {
+            $internalError = reset($metadata['internal-error']);
+            $internalErrors = implode("\n", $metadata['internal-error']);
+        } else {
+            $internalError = $metadata['internal-error'];
+            $internalErrors = $metadata['internal-error'];
+        }
+        $compile_output .= "\n--------------------------------------------------------------------------------\n\n".
+            "Internal errors reported:\n".$internalErrors;
+
+        if (preg_match('/^compile script: /', $internalError)) {
+            $internalError = preg_replace('/^compile script: /', '', $internalError);
+            $description = "The compile script returned an error: $internalError";
+            disable('language', 'langid', $row['langid'], $description, $row['judgingid'], $row['cid'], $compile_output);
+        } else {
+            $description = "Running compile.sh caused an error/crash: $internalError";
+            disable('judgehost', 'hostname', $myhost, $description, $row['judgingid'], $row['cid'], $compile_output);
+        }
+        logmsg(LOG_ERR, $description);
         // revoke readablity for domjudge-run user to this workdir
         chmod($workdir, 0700);
         return;
     }
-    // Try to read metadata from file
-    if (is_readable($workdir . '/compile.meta')) {
-        $metadata = spyc_load_file($workdir . '/compile.meta');
-        if (isset($metadata['internal-error'])) {
-            alert('error');
-            if (is_array($metadata['internal-error'])) {
-                $internalError = reset($metadata['internal-error']);
-            } else {
-                $internalError = $metadata['internal-error'];
-            }
-            $description = "Running compile.sh caused a runguard error/crash: '" . $internalError . "'";
-            logmsg(LOG_ERR, $description);
-            disable('judgehost', 'hostname', $myhost, $description, $row['judgingid'], $row['cid'], dj_file_get_contents($workdir . '/compile.out', 50000));
-            // revoke readablity for domjudge-run user to this workdir
-            chmod($workdir, 0700);
-            return;
-        }
+
+    // What does the exitcode mean?
+    if (! isset($EXITCODES[$retval])) {
+        alert('error');
+        logmsg(LOG_ERR, "Unknown exitcode from compile.sh for s$row[submitid]: $retval");
+        $description = "compile script '" . $row['compile_script'] . "' returned exit code " . $retval;
+        disable('language', 'langid', $row['langid'], $description, $row['judgingid'], $row['cid'], $compile_output);
+        // revoke readablity for domjudge-run user to this workdir
+        chmod($workdir, 0700);
+        return;
     }
-    $compile_success =  ($EXITCODES[$retval]!='compiler-error');
+    $compile_success = ($EXITCODES[$retval]==='correct');
 
     // pop the compilation result back into the judging table
     $args = 'compile_success=' . $compile_success .
@@ -856,12 +883,10 @@ function judge(array $row)
 
         // Try to read metadata from file
         $runtime = null;
-        if (is_readable($testcasedir . '/program.meta')) {
-            $metadata = spyc_load_file($testcasedir . '/program.meta');
+        $metadata = read_metadata($testcasedir . '/program.meta');
 
-            if (isset($metadata['time-used'])) {
-                $runtime = @$metadata[$metadata['time-used']];
-            }
+        if (isset($metadata['time-used'])) {
+            $runtime = @$metadata[$metadata['time-used']];
         }
 
         if ($result === 'compare-error') {
