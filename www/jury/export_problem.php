@@ -137,7 +137,8 @@ while ($sol = $solutions->next()) {
 
 $zip->close();
 
-$filename = 'p' . $id . '-' . $problem['shortname'] . '.zip';
+$filename = 'p' . $id .
+    (empty($problem['shortname']) ? '' : '-' . $problem['shortname']) . '.zip';
 
 header("Content-Description: File Transfer");
 header("Content-Disposition: attachment; filename=\"$filename\"");
