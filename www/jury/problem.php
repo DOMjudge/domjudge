@@ -51,7 +51,7 @@ if (isset($_POST['upload'])) {
                 $newid = importZippedProblem(
                     $zip,
                     $_FILES['problem_archive']['name'][$fileid],
-                                 empty($id) ? null : $id,
+                    empty($id) ? null : $id,
                     $cid
                 );
                 eventlog('problem', $newid, empty($id) ? 'create' : 'update', $cid);
@@ -59,7 +59,7 @@ if (isset($_POST['upload'])) {
                     'problem',
                     $newid,
                     'upload zip',
-                     $_FILES['problem_archive']['name'][$fileid]
+                    $_FILES['problem_archive']['name'][$fileid]
                 );
             } catch (RuntimeException $e) {
                 error($e->getMessage());
