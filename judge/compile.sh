@@ -13,6 +13,10 @@
 #                   the first file should conventionally be interpreted as the
 #                   "main" file.
 #
+# Returns with exit status 0 on success, or 'compiler-error' (see
+# EXITCODES in etc/judgehost-static.php), or 'internal-error' if
+# defined, else 1.
+#
 # This script supports languages by calling separate compile scripts.
 # These compile scripts should compile the source(s) to a statically linked,
 # standalone executable, or you should turn off USE_CHROOT, or create a chroot
@@ -29,6 +33,11 @@
 # The <memlimit> (in kB, obtained from the environment) is passed to
 # the compile script to let interpreted languages (read: Oracle (Sun)
 # javac/java) be able to set the internal maximum memory size.
+#
+# The result is considered a compilation failure if <dest> was not
+# created or is not executable or if the script returned a nonzero
+# exitcode. If any output line starts with "Error: ", this is seen as
+# an internal error in the compile script instead.
 
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
@@ -157,7 +166,7 @@ logmsg $LOG_DEBUG "checking compilation exit-status"
 if grep '^time-result: .*timelimit' compile.meta >/dev/null 2>&1 ; then
 	echo "Compiling aborted after $SCRIPTTIMELIMIT seconds, compiler output:" >compile.out
 	cat compile.tmp >>compile.out
-	cleanexit ${E_COMPILER_ERROR:--1}
+	cleanexit ${E_COMPILER_ERROR:-1}
 fi
 if [ $exitcode -ne 0 ]; then
 	echo "Compiling failed with exitcode $exitcode, compiler output:" >compile.out
@@ -167,12 +176,12 @@ if [ $exitcode -ne 0 ]; then
 		echo "Since the file 'compile.meta' is empty, above error is most likely caused by a crash in runguard." >> compile.out
 		echo "internal-error: runguard crash" > compile.meta
 	fi
-	cleanexit ${E_COMPILER_ERROR:--1}
+	cleanexit ${E_COMPILER_ERROR:-1}
 fi
 if [ ! -f compile/program ] || [ ! -x compile/program ]; then
 	echo "Compiling failed: no executable was created; compiler output:" >compile.out
 	cat compile.tmp >>compile.out
-	cleanexit ${E_COMPILER_ERROR:--1}
+	cleanexit ${E_COMPILER_ERROR:-1}
 fi
 cat compile.tmp >>compile.out
 
