@@ -36,8 +36,8 @@
 #
 # The result is considered a compilation failure if <dest> was not
 # created or is not executable or if the script returned a nonzero
-# exitcode. If any output line starts with "Error: ", this is seen as
-# an internal error in the compile script instead.
+# exitcode. If any output line starts with "internal-error: ", this is
+# seen as an internal error in the compile script instead.
 
 # Exit automatically, whenever a simple command fails and trap it:
 set -e
@@ -165,8 +165,8 @@ if [ $exitcode -ne 0 ] && [ ! -s compile.meta ]; then
 	cat compile.tmp >>compile.out
 	cleanexit ${E_INTERNAL_ERROR:-1}
 fi
-if grep '^Error: ' compile.tmp >/dev/null 2>&1 ; then
-	grep '^Error: ' compile.tmp | sed 's/^Error: /internal-error: compile script: /' >>compile.meta
+if grep -i '^internal-error: ' compile.tmp >/dev/null 2>&1 ; then
+	grep -i '^internal-error: ' compile.tmp | sed 's/^internal-error:/\1 compile script:/i' >>compile.meta
 	echo "The compile script threw an internal error. Compilation output:" >compile.out
 	cat compile.tmp >>compile.out
 	cleanexit ${E_INTERNAL_ERROR:-1}

@@ -32,7 +32,7 @@ MEMRESERVED=$((MEMSTACK + MEMJVM))
 MEMLIMITJAVA=$((MEMLIMIT - MEMRESERVED))
 
 if [ $MEMLIMITJAVA -le 0 ]; then
-	echo "Error: total memory $MEMLIMIT KiB <= $MEMJVM + $MEMSTACK = $MEMRESERVED KiB reserved for JVM and stack leaves none for heap."
+	echo "internal-error: total memory $MEMLIMIT KiB <= $MEMJVM + $MEMSTACK = $MEMRESERVED KiB reserved for JVM and stack leaves none for heap."
 	exit 1
 fi
 
