@@ -103,6 +103,7 @@ class SubmissionController extends AbstractRestController
     public function getSubmissionFilesAction(Request $request, string $id)
     {
         $queryBuilder = $this->getQueryBuilder($request)
+            ->join('s.files', 'f')
             ->join('f.submission_file_source_code', 'sc')
             ->select('s, f, sc')
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
