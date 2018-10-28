@@ -43,8 +43,8 @@ if (!isset($menu)) {
 <?php if (! IS_JURY): ?>
     <link rel="stylesheet" href="../css/bootstrap.min.css?v=<?=ASSET_TAG?>">
 <?php endif; ?>
+    <link rel="stylesheet" href="../css/fontawesome-all.min.css?v=<?=ASSET_TAG?>">
     <link rel="stylesheet" href="../style.css?v=<?=ASSET_TAG?>">
-    <link rel="stylesheet" href="../css/octicons/octicons.css?v=<?=ASSET_TAG?>">
 
     <script src="../js/jquery.min.js?v=<?=ASSET_TAG?>"></script>
     <script src="../js/bootstrap.min.js?v=<?=ASSET_TAG?>"></script>

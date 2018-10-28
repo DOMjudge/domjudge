@@ -9,14 +9,14 @@
 
       {% if is_granted('ROLE_BALLOON') and not is_granted('ROLE_JURY') and not is_granted('ROLE_ADMIN') %}
       <li class="nav-item">
-        <a class="nav-link" href="{{ path('legacy.jury_balloons') }}"><span class="octicon octicon-location"></span> balloons</a>
+        <a class="nav-link" href="{{ path('legacy.jury_balloons') }}"><i class="fas fa-map-marker-alt"></i> balloons</a>
       </li>
       {% endif %}
 
       {% if is_granted('ROLE_ADMIN') %}
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <span class="octicon octicon-law"></span> judgehosts
+          <i class="fas fa-gavel"></i> judgehosts
           {% if updates['judgehosts']|length > 0 %}
           <span class="badge badge-warning">{{ updates['judgehosts']|length }}</span>
           {% endif %}
@@ -27,15 +27,15 @@
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           {% if updates['judgehosts']|length > 0 %}
             <a class="dropdown-item text-danger" href="{{ path('legacy.jury_judgehosts') }}" id="menu_judgehosts">
-              <span class="octicon octicon-server"></span> judgehosts <span class="badge badge-warning">{{ updates['judgehosts']|length }} down</span>
+              <i class="fas fa-server fa-fw"></i> judgehosts <span class="badge badge-warning">{{ updates['judgehosts']|length }} down</span>
             </a>
           {% else %}
-            <a class="dropdown-item" href="{{ path('legacy.jury_judgehosts') }}" id="menu_judgehosts"><span class="octicon octicon-server"></span> judgehosts</a>
+            <a class="dropdown-item" href="{{ path('legacy.jury_judgehosts') }}" id="menu_judgehosts"><i class="fas fa-server fa-fw"></i> judgehosts</a>
           {% endif %}
         {% if updates['internal_error']|length > 0 %}
-            <a class="dropdown-item text-danger" href="{{ path('legacy.jury_internal_errors') }}" id="menu_internal_error"><span class="octicon octicon-zap"></span> internal error <span class="badge badge-danger">{{ updates['internal_error']|length }} new</span></a>
+            <a class="dropdown-item text-danger" href="{{ path('legacy.jury_internal_errors') }}" id="menu_internal_error"><i class="fas fa-bolt fa-fw"></i> internal error <span class="badge badge-danger">{{ updates['internal_error']|length }} new</span></a>
         {% else %}
-            <a class="dropdown-item disabled" href="{{ path('legacy.jury_internal_errors') }}" id="menu_internal_error"><span class="octicon octicon-zap"></span> internal error</a>
+            <a class="dropdown-item disabled" href="{{ path('legacy.jury_internal_errors') }}" id="menu_internal_error"><i class="fas fa-bolt fa-fw"></i> internal error</a>
         {% endif %}
         </div>
       </li>
@@ -44,34 +44,34 @@
       {% if is_granted('ROLE_JURY') %}
         <li class="nav-item">
           {% if updates['clarifications']|length > 0 %}
-            <a class="nav-link text-info" href="{{ path('legacy.jury_clarifications') }}" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications <span class="badge badge-info">{{ updates['clarifications']|length }}</small></a>
+            <a class="nav-link text-info" href="{{ path('legacy.jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge badge-info">{{ updates['clarifications']|length }}</span></a>
           {% else %}
-            <a class="nav-link" href="{{ path('legacy.jury_clarifications') }}" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications</a>
+            <a class="nav-link" href="{{ path('legacy.jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications</a>
           {% endif %}
         </li>
 
 
         <li class="nav-item">
-          <a class="nav-link" href="{{ path('legacy.jury_submissions') }}"><span class="octicon octicon-file-code"></span> submissions</a>
+          <a class="nav-link" href="{{ path('legacy.jury_submissions') }}"><i class="fas fa-file-code"></i> submissions</a>
         </li>
 
         <li class="nav-item">
           {% if updates['rejudgings']|length > 0 %}
-            <a class="nav-link text-info" href="{{ path('legacy.jury_rejudgings') }}" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings <span class="badge badge-info">{{ updates['rejudgings']|length }}</span></a>
+            <a class="nav-link text-info" href="{{ path('legacy.jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings <span class="badge badge-info">{{ updates['rejudgings']|length }}</span></a>
           {% else %}
-            <a class="nav-link" href="{{ path('legacy.jury_rejudgings') }}" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings</a>
+            <a class="nav-link" href="{{ path('legacy.jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings</a>
           {% endif %}
         </li>
       {% endif %}
 
       {% if is_granted('ROLE_JURY') %}
         <li class="nav-item">
-          <a class="nav-link" href="{{ path('legacy.jury_scoreboard') }}"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
+          <a class="nav-link" href="{{ path('legacy.jury_scoreboard') }}"><i class="fas fa-list-ol"></i> scoreboard</a>
         </li>
       {% endif %}
       {% if is_granted('ROLE_TEAM') %}
         <li class="nav-item">
-          <a class="nav-link" target="_top" href="{{ path('legacy.team_index') }}"><span class="octicon octicon-arrow-right"></span> team</a>
+          <a class="nav-link" target="_top" href="{{ path('legacy.team_index') }}"><i class="fas fa-arrow-right"></i> team</a>
         </li>
       {% endif %}
     </ul>
@@ -81,7 +81,7 @@
       {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <span class="octicon octicon-person"></span> {{ app.user.getUsername() }}
+            <i class="fas fa-user"></i> {{ app.user.getUsername() }}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             {% if app.user and app.user.getName() %}
@@ -90,17 +90,17 @@
 
             {% if notify_flag %}
             <a class="dropdown-item d-none" href="{{ path('legacy.jury_toggle_notify', {'enable': 0}) }}" id="notify" onclick="return toggleNotifications(false, this)">
-              <span class="octicon octicon-bell"></span> Disable Notifications
+              <i class="fas fa-bell fa-fw"></i> Disable Notifications
             </a>
             {% else %}
             <a class="dropdown-item d-none" href="{{ path('legacy.jury_toggle_notify', {'enable': 1}) }}" id="notify" onclick="return toggleNotifications(true, this)">
-              <span class="octicon octicon-bell"></span> Enable Notifications
+              <i class="fas fa-bell fa-fw"></i> Enable Notifications
             </a>
             {% endif %}
 
             {% if refresh is defined and refresh %}
               <a class="dropdown-item" href="#" id="refresh-navitem">
-                <span class="octicon octicon-sync"></span> <span id="refresh-toggle">
+                <i class="fas fa-sync-alt fa-fw"></i> <span id="refresh-toggle">
                   {% if refresh_flag %}
                     Disable Refresh
                   {% else %}
@@ -113,18 +113,18 @@
               </a>
             {% endif %}
 
-            <a class="dropdown-item" href="{{ path('logout') }}"><span class="octicon octicon-sign-out"></span>Logout </a>
+            <a class="dropdown-item" href="{{ path('logout') }}"><i class="fas fa-sign-out-alt fa-fw"></i>Logout </a>
           </div>
         </li>
       {% else %}
         <li class="nav-item">
-          <a class="nav-link" target="_top" href="{{ path('login') }}"><span class="octicon octicon-sign-in"></span> log in</a>
+          <a class="nav-link" target="_top" href="{{ path('login') }}"><i class="fas fa-sign-in-alt fa-fw"></i> log in</a>
         </li>
       {% endif %}
 
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          {{ contest.shortname|default('no contest') }}
+          <i class="fas fa-trophy"></i> {{ contest.shortname|default('no contest') }}
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item disabled" href="#">Change Contest</a>
@@ -139,7 +139,7 @@
       </li>
     </ul>
     <div class="navbar-text" style="white-space:nowrap;">
-      <span style="padding-left: 10px;" class="octicon octicon-clock"></span>
+      <i style="padding-left: 10px;" class="fas fa-clock"></i>
       {% set now = 'now'|date('U') %}
       <span id="timeleft">{%- if contest is null -%}
           no contest

@@ -470,21 +470,21 @@ function renderScoreBoardTable(
                  $totalCell . '<td title=" "></td>';
 
             foreach (array_keys($probs) as $prob) {
-                $numAccepted = '<span class="octicon octicon-thumbsup"> </span>' .
+                $numAccepted = '<i class="fas fa-thumbs-up fa-fw"> </i>' .
                     '<span style="font-size:90%;" title="number of accepted submissions"> ' .
                     $summary['problems'][$prob]['num_correct'] .
                     '</span>';
-                $numRejected = '<span class="octicon octicon-thumbsdown"> </span>' .
+                $numRejected = '<i class="fas fa-thumbs-down fa-fw"> </i>' .
                     '<span style="font-size:90%;" title="number of rejected submissions"> ' .
                     ($summary['problems'][$prob]['num_submissions'] - $summary['problems'][$prob]['num_correct']) .
                     '</span>';
-                $numPending = '<span class="octicon octicon-question"> </span>' .
+                $numPending = '<i class="fas fa-question-circle fa-fw"> </i>' .
                     '<span style="font-size:90%;" title="number of pending submissions"> ' .
                     $summary['problems'][$prob]['num_pending'] .
                     '</span>';
                 $best = @$summary['problems'][$prob]['best_time_sort'][0];
                 $best = empty($best) ? 'n/a' : ((int)($best/60)) . 'min';
-                $best = '<span class="octicon octicon-clock"> </span>' .
+                $best = '<i class="fas fa-clock fa-fw"> </i>' .
                     '<span style="font-size:90%;" title="first solved"> ' . $best . '</span>';
 
                 $str =

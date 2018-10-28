@@ -73,9 +73,10 @@ Various JavaScript libraries/snippets are included under www/js/:
 The Spyc PHP YAML parser is included, licenced under the MIT licence,
 see COPYING.MIT.
 
-GitHub Octicons are copyright 2012-2016 Github.
+Font Awesome is copyright FortAwesome.
+Icons License: CC BY 4.0 License
 Font License: SIL OFL 1.1 (http://scripts.sil.org/OFL)
-Code License: the MIT licence, see COPYING.MIT.
+Code License: the MIT licence, see COPYING.MIT
 
 The default validator from the Kattis problemtools package is
 included, licenced under the MIT licence, see COPYING.MIT.

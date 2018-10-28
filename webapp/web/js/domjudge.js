@@ -40,8 +40,8 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 					newstr = ' ('+nclars+' new)';
 					elem.className = 'new';
 				}
-				if ( elem.innerHTML !== '<span class="octicon octicon-comment-discussion"></span> clarifications' + newstr ) {
-					elem.innerHTML = '<span class="octicon octicon-comment-discussion"></span> clarifications' + newstr;
+				if ( elem.innerHTML !== '<i class="fas fa-comments"></i> clarifications' + newstr ) {
+					elem.innerHTML = '<i class="fas fa-comments"></i> clarifications' + newstr;
 					if(doreload_clarifications) {
 						location.reload();
 					}
@@ -56,8 +56,8 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 					newstr = ' ('+nhosts+' down)';
 					elem.className = 'new';
 				}
-				if ( elem.innerHTML !== '<span class="octicon octicon-law"></span> judgehosts' + newstr ) {
-					elem.innerHTML = '<span class="octicon octicon-law"></span> judgehosts' + newstr;
+				if ( elem.innerHTML !== '<i class="fas fa-server fa-fw"></i> judgehosts' + newstr ) {
+					elem.innerHTML = '<i class="fas fa-server fa-fw"></i> judgehosts' + newstr;
 					if(doreload_judgehosts) {
 						location.reload();
 					}
@@ -72,8 +72,8 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 					newstr = ' ('+nrejuds+' active)';
 					elem.className = 'new';
 				}
-				if ( elem.innerHTML !== '<span class="octicon octicon-sync"></span> rejudgings' + newstr ) {
-					elem.innerHTML = '<span class="octicon octicon-sync"></span> rejudgings' + newstr;
+				if ( elem.innerHTML !== '<i class="fas fa-sync"></i> rejudgings' + newstr ) {
+					elem.innerHTML = '<i class="fas fa-sync"></i> rejudgings' + newstr;
 					if(doreload_judgehosts) {
 						location.reload();
 					}

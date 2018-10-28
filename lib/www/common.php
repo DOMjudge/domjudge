@@ -487,9 +487,9 @@ function putClock()
 {
     global $cdata, $username, $userdata, $cid, $cdatas;
 
-    echo '<div class="navbar-text">';
+    echo '<div class="navbar-nav">';
     // Show a contest selection form, if there are contests
-    if (IS_JURY || count($cdatas) > 1) {
+    if (IS_JURY) {
         echo "<div id=\"selectcontest\">\n";
         echo addForm('change_contest.php', 'get', 'selectcontestform');
         $contests = array_map(function ($c) {
@@ -506,6 +506,20 @@ function putClock()
         }
         echo 'contest: ' . addSelect('cid', $values, $cid, true);
         echo addEndForm();
+        echo "</div>\n";
+    } elseif (count($cdatas) > 1) {
+        echo "<div class=\"nav-item dropdown\">\n";
+        echo "\t<a class=\"nav-link dropdown-toggle\" href=\"#\" id=\"navbarDropdown\" role=\"button\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n";
+        echo sprintf("\t\t<i class=\"fas fa-trophy\"></i> %s\n", $cdatas[$cid]['shortname']);
+        echo "\t</a>\n";
+        echo "\t<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">\n";
+        echo "\t\t<a class=\"dropdown-item disabled\" href=\"#\">Change Contest</a>\n";
+        foreach ($cdatas as $contest) {
+            if ($contest['cid'] != $cid) {
+                echo sprintf("<a class=\"dropdown-item\" href=\"change_contest.php?cid=%s\">%s</a>", $contest['cid'], $contest['shortname']);
+            }
+        }
+        echo "\t</div>\n";
         echo "</div>\n";
     }
     echo '</div><div class="navbar-text">';
@@ -531,7 +545,7 @@ function putClock()
         }
     }
 
-    echo "<span style=\"padding-left: 10px;\" class=\"octicon octicon-clock\"></span> <span id=\"timeleft\">$left</span>\n";
+    echo "<span style=\"padding-left: 10px;\" class=\"fas fa-clock\"></span> <span id=\"timeleft\">$left</span>\n";
 
     if (IS_JURY && logged_in()) {
         // Show pretty name if possible
@@ -541,7 +555,7 @@ function putClock()
         }
         echo "<div id=\"username\">logged in as " . $displayname
             . ' <a href="../logout">' .
-                '<span class="octicon octicon-sign-out"></span></a>'
+                '<i class="fas fa-sign-out-alt"></i></a>'
             . "</div>";
     }
 
@@ -759,9 +773,7 @@ function putProblemTextList()
 
         if (isset($row['problemtext_type'])) {
             print '<div class="text-center"><a class="btn btn-secondary" role="button" href="problem.php?id=' . urlencode((string)$row['probid']) . '">' .
-                  '<img src="../images/' . urlencode($row['problemtext_type']) .
-                              '.png" alt="' . specialchars($row['problemtext_type']) .
-                  '" /> problem text</a></div>';
+                  '<i class="fas fa-file-' . $row['problemtext_type'] . '"></i> problem text</a></div>';
         }
         if (!empty($row['numsamples'])) {
             print '<div><br /></div><h4 class="card-subtitle mb-2">Samples</h4><ol class="text-center list-group list-group-flush">';

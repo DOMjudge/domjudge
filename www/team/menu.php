@@ -11,38 +11,38 @@ $started = checkrole('jury') || $fdata['started'];
       <div class="collapse navbar-collapse" id="menuDefault">
         <ul class="navbar-nav mr-auto">
       <li class="nav-item<?=($pagename === 'index.php'?' active':'')?>">
-            <a class="nav-link" href="./"><span class="octicon octicon-home"></span> Home</a>
+            <a class="nav-link" href="./"><i class="fas fa-home"></i> Home</a>
           </li>
       <li class="nav-item<?=($pagename === 'problems.php'?' active':'')?>">
 <?php if ($started): ?>
-            <a class="nav-link" href="problems.php"><span class="octicon octicon-book"></span> Problemset</a>
+            <a class="nav-link" href="problems.php"><i class="fas fa-book-open"></i> Problemset</a>
 <?php else: ?>
-            <a class="nav-link disabled"><span class="octicon octicon-book"></span> Problemset</a>
+            <a class="nav-link disabled"><i class="fas fa-book-open"></i> Problemset</a>
 <?php endif; ?>
           </li>
 <?php if (have_printing()): ?>
       <li class="nav-item<?=($pagename === 'print.php'?' active':'')?>">
-            <a class="nav-link" href="print.php"><span class="octicon octicon-file-text"></span> Print</a>
+            <a class="nav-link" href="print.php"><i class="fas fa-file-alt"></i> Print</a>
       </li>
 <?php endif; ?>
       <li class="nav-item<?=($pagename === 'scoreboard.php'?' active':'')?>">
-            <a class="nav-link" href="scoreboard.php"><span class="octicon octicon-list-ordered"></span> Scoreboard</a>
+            <a class="nav-link" href="scoreboard.php"><i class="fas fa-list-ol"></i> Scoreboard</a>
           </li>
 <?php if (checkrole('jury') || checkrole('balloon')): ?>
           <li class="nav-item">
-            <a class="nav-link" href="../jury"><span class="octicon octicon-arrow-right"></span> Jury</a>
+            <a class="nav-link" href="../jury"><i class="fas fa-arrow-right"></i> Jury</a>
       </li>
 <?php endif; ?>
          </ul>
       </div>
 
 <?php if ($started): ?>
-      <div id="submitbut"><a class="nav-link justify-content-center" href="submit.php"><button type="button" class="btn btn-success btn-sm"><span class="octicon octicon-cloud-upload"></span> Submit</button></a></div>
+      <div id="submitbut"><a class="nav-link justify-content-center" href="submit.php"><button type="button" class="btn btn-success btn-sm"><i class="fas fa-cloud-upload-alt"></i> Submit</button></a></div>
 <?php else: ?>
-      <div id="submitbut"><a class="nav-link justify-content-center"><button type="button" class="btn btn-success btn-sm disabled"><span class="octicon octicon-cloud-upload"></span> Submit</button></a></div>
+      <div id="submitbut"><a class="nav-link justify-content-center"><button type="button" class="btn btn-success btn-sm disabled"><i class="fas fa-cloud-upload-alt"></i> Submit</button></a></div>
 <?php endif; ?>
 
-<div id="logoutbut"><a class="nav-link justify-content-center" href="../logout"><button type="button" class="btn btn-outline-info btn-sm" onclick="return confirmLogout();"><span class="octicon octicon-sign-out"></span> Logout</button></a></div>
+<div id="logoutbut"><a class="nav-link justify-content-center" href="../logout"><button type="button" class="btn btn-outline-info btn-sm" onclick="return confirmLogout();"><i class="fas fa-sign-out-alt"></i> Logout</button></a></div>
 
 <?php putClock(); ?>
     </nav>

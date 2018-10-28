@@ -2,77 +2,77 @@
 global $updates;
 ?>
 <nav><div id="menutop">
-<a href="index.php" accesskey="h"><span class="octicon octicon-home"></span> home</a>
+<a href="index.php" accesskey="h"><i class="fas fa-home"></i> home</a>
 <?php if (checkrole('balloon')) {
     ?>
-<a href="balloons.php" accesskey="b"><span class="octicon octicon-location"></span> balloons</a>
+<a href="balloons.php" accesskey="b"><i class="fas fa-map-marker-alt"></i> balloons</a>
 <?php
 } ?>
 <?php if (checkrole('jury')) {
         ?>
-<a href="problems.php" accesskey="p"><span class="octicon octicon-book"></span> problems</a>
+<a href="problems.php" accesskey="p"><i class="fas fa-book-open"></i> problems</a>
 <?php
     } ?>
 <?php if (IS_ADMIN) {
         $ndown = count($updates['judgehosts']);
         if ($ndown > 0) {
             ?>
-<a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts (<?php echo $ndown ?> down)</a>
+<a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts"><i class="fas fa-server"></i> judgehosts (<?php echo $ndown ?> down)</a>
 <?php
         } else {
             ?>
-<a href="judgehosts.php" accesskey="j" id="menu_judgehosts"><span class="octicon octicon-law"></span> judgehosts</a>
+<a href="judgehosts.php" accesskey="j" id="menu_judgehosts"><i class="fas fa-server"></i> judgehosts</a>
 <?php
         }
         $nerr = count($updates['internal_error']);
         if ($nerr > 0) {
             ?>
-<a class="new" href="internal_errors.php" accesskey="e" id="menu_internal_error"><span class="octicon octicon-zap"></span> internal error (<?php echo $nerr ?> new)</a>
+<a class="new" href="internal_errors.php" accesskey="e" id="menu_internal_error"><i class="fas fa-bolt"></i> internal error (<?php echo $nerr ?> new)</a>
 <?php
         }
     } ?>
 <?php if (checkrole('jury')) {
         ?>
-<a href="teams.php" accesskey="t"><span class="octicon octicon-organization"></span> teams</a>
-<a href="users.php" accesskey="u"><span class="octicon octicon-person"></span> users</a>
+<a href="teams.php" accesskey="t"><i class="fas fa-users"></i> teams</a>
+<a href="users.php" accesskey="u"><i class="fas fa-user"></i> users</a>
 <?php
     $nunread = count($updates['clarifications']);
         if ($nunread > 0) {
             ?>
-<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications (<?php echo $nunread ?> new)</a>
+<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications (<?php echo $nunread ?> new)</a>
 <?php
         } else {
             ?>
-<a href="clarifications.php" accesskey="c" id="menu_clarifications"><span class="octicon octicon-comment-discussion"></span> clarifications</a>
+<a href="clarifications.php" accesskey="c" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications</a>
 <?php
         } ?>
-<a href="submissions.php" accesskey="s"><span class="octicon octicon-file-code"></span> submissions</a>
+<a href="submissions.php" accesskey="s"><i class="fas fa-file-code"></i> submissions</a>
 <?php
     $nrejudgings = count($updates['rejudgings']);
         if ($nrejudgings > 0) {
             ?>
-<a class="new" href="rejudgings.php" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings (<?php echo $nrejudgings ?> active)</a>
+<a class="new" href="rejudgings.php" accesskey="r" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings (<?php echo $nrejudgings ?> active)</a>
 <?php
         } else {
             ?>
-<a href="rejudgings.php" accesskey="r" id="menu_rejudgings"><span class="octicon octicon-sync"></span> rejudgings</a>
+<a href="rejudgings.php" accesskey="r" id="menu_rejudgings"><i class="fa fa-sync"></i> rejudgings</a>
 <?php
         } ?>
 <?php
     } /* checkrole('jury') */ ?>
 <?php if (have_printing()) {
         ?>
-<a href="print.php" accesskey="p"><span class="octicon octicon-file-text"></span> print</a>
+<a href="print.php" accesskey="p"><i class="fas fa-file-alt"></i> print</a>
 <?php
     } ?>
 <?php if (checkrole('jury')) {
         ?>
-<a href="scoreboard.php" accesskey="b"><span class="octicon octicon-list-ordered"></span> scoreboard</a>
+<a href="scoreboard.php" accesskey="b"><i class="fas fa-list-ol"></i> scoreboard</a>
 <?php
     } ?>
 <?php
 if (checkrole('team')) {
-        echo "<a target=\"_top\" href=\"../team/\" accesskey=\"t\"><span class=\"octicon octicon-arrow-right\"></span> team</a>\n";
+        echo "<a target=\"_top\" href=\"../team/\" accesskey=\"t\"><i class=\"fas fa-arrow-right\"></i> team</a>\n";
     }
 ?>
 </div>
