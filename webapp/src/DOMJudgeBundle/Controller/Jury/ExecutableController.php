@@ -60,8 +60,8 @@ class ExecutableController extends Controller
         ];
         if ($this->isGranted('ROLE_ADMIN')) {
           $table_fields = array_merge($table_fields, [
-            'save'        => [ 'title' => '',            'sort' => false,  ],
-            'edit'        => [ 'title' => '',            'sort' => false,  ],
+            'save'        => [ 'title' => '',            'sort' => false, ],
+            'edit'        => [ 'title' => '',            'sort' => false, ],
             'delete'      => [ 'title' => '',            'sort' => false, ],
           ]);
         }
@@ -78,20 +78,20 @@ class ExecutableController extends Controller
           }
 
 
-          $editvalue = '<img src="' . $assetPackage->getUrl('images/edit.png') . '" alt="edit" title="edit this executable" class="picto">';
+          $editvalue = '<i class="fas fa-edit" title="edit this executable"></i>';
           $editlink = $this->generateUrl('legacy.jury_executable', [
             'cmd'=>'edit',
             'id'=>$e->getExecid(),
             'referrer' => 'executables/'
           ]);
-          $deletevalue = '<img src="' . $assetPackage->getUrl('images/delete.png') . '" alt="delete" title="delete this executable" class="picto">';
+          $deletevalue = '<i class="fas fa-trash-alt" title="delete this executable"></i>';
           $deletelink = $this->generateUrl('legacy.jury_delete', [
             'table'=>'executable',
             'execid'=>$e->getExecid(),
             'referrer' => '',
             'desc' => $e->getDescription(),
           ]);
-          $savevalue = '<img src="' . $assetPackage->getUrl('images/b_save.png') . '" alt="edit" title="edit this executable" class="picto">';
+          $savevalue = '<i class="fas fa-file-download" title="download this executable"></i>';
           $savelink = $this->generateUrl('legacy.jury_executable', [
             'fetch'=>'',
             'id'=>$e->getExecid(),

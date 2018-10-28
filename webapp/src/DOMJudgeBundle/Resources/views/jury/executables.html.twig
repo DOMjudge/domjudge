@@ -15,7 +15,7 @@
 
 {{ macros.table(executables, table_fields) }}
 
-<p><a href="{{ path('legacy.jury_executable', {'cmd': 'add'}) }}"><img src="{{ asset('images/add.png') }}" alt="add" title="add new executable" class="picto"></a></p>
+<p><a href="{{ path('legacy.jury_executable', {'cmd': 'add'}) }}"><i class="fas fa-plus-square" title="add new executable"></i></a></p>
 <form style="display:inline;" action="{{ path('legacy.jury_executable') }}" method="post" enctype="multipart/form-data">
 Executable archive(s): <select name="type" id="type">
 <option value="compare">compare</option>
