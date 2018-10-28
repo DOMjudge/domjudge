@@ -5,13 +5,14 @@ namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Files associated to a submission
+ * Source code of submission files
+ *
+ * This is a seperate class with a OneToOne relationship with SubmissionFile so we can load it separately
  * @ORM\Entity()
  * @ORM\Table(name="submission_file", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class SubmissionFile
+class SubmissionFileWithSourceCode
 {
-
     /**
      * @var int
      *
@@ -40,17 +41,16 @@ class SubmissionFile
     private $rank;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Submission", inversedBy="files")
+     * @ORM\ManyToOne(targetEntity="Submission", inversedBy="files_with_source_code")
      * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
      */
     private $submission;
 
     /**
-     * @var SubmissionFileWithSourceCode
-     * @ORM\OneToOne(targetEntity="SubmissionFileWithSourceCode")
-     * @ORM\JoinColumn(name="submitfileid", referencedColumnName="submitfileid")
+     * @var resource
+     * @ORM\Column(type="blob", name="sourcecode", options={"comment"="Full source code"}, nullable=false)
      */
-    private $submission_file_source_code;
+    private $sourcecode;
 
     /**
      * Get submitfileid
@@ -67,7 +67,7 @@ class SubmissionFile
      *
      * @param integer $submitid
      *
-     * @return SubmissionFile
+     * @return SubmissionFileWithSourceCode
      */
     public function setSubmitid($submitid)
     {
@@ -91,7 +91,7 @@ class SubmissionFile
      *
      * @param string $filename
      *
-     * @return SubmissionFile
+     * @return SubmissionFileWithSourceCode
      */
     public function setFilename($filename)
     {
@@ -115,7 +115,7 @@ class SubmissionFile
      *
      * @param integer $rank
      *
-     * @return SubmissionFile
+     * @return SubmissionFileWithSourceCode
      */
     public function setRank($rank)
     {
@@ -139,7 +139,7 @@ class SubmissionFile
      *
      * @param Submission $submission
      *
-     * @return SubmissionFile
+     * @return SubmissionFileWithSourceCode
      */
     public function setSubmission(Submission $submission = null)
     {
@@ -159,26 +159,26 @@ class SubmissionFile
     }
 
     /**
-     * Set submissionFileSourceCode
+     * Set sourcecode
      *
-     * @param SubmissionFileWithSourceCode $submissionFileSourceCode
+     * @param resource|string $sourcecode
      *
-     * @return SubmissionFile
+     * @return SubmissionFileWithSourceCode
      */
-    public function setSubmissionFileSourceCode(SubmissionFileWithSourceCode $submissionFileSourceCode = null)
+    public function setSourcecode($sourcecode)
     {
-        $this->submission_file_source_code = $submissionFileSourceCode;
+        $this->sourcecode = $sourcecode;
 
         return $this;
     }
 
     /**
-     * Get submissionFileSourceCode
+     * Get sourcecode
      *
-     * @return SubmissionFileWithSourceCode
+     * @return resource
      */
-    public function getSubmissionFileSourceCode()
+    public function getSourcecode()
     {
-        return $this->submission_file_source_code;
+        return $this->sourcecode;
     }
 }

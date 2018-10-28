@@ -742,6 +742,25 @@ function submit_solution(
     float $submittime = null,
     $extresult = null
 ) {
+    /** @var \DOMJudgeBundle\Service\SubmissionService $G_SUBMISSION_SERVICE */
+    global $G_SUBMISSION_SERVICE;
+    if (isset($G_SUBMISSION_SERVICE)) {
+        $uploadedFiles = [];
+        // Reindex arrays numerically to allow simultaneously iterating
+        // over both $files and $filenames.
+        $files     = array_values($files);
+        $filenames = array_values($filenames);
+
+        foreach ($files as $index => $file) {
+            $uploadedFiles[] = new \Symfony\Component\HttpFoundation\File\UploadedFile($file, $filenames[$index]);
+        }
+
+        $submission = $G_SUBMISSION_SERVICE->submitSolution($team, $prob, $contest, $lang, $uploadedFiles, $origsubmitid, $entry_point, $extid, $submittime, $extresult);
+        return $submission->getSubmitid();
+    }
+
+    // Fallback to non-Symfony code if Symfony is not available (i.e. in CLI tools)
+
     global $DB;
 
     if (empty($team)) {

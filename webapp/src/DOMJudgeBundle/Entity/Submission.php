@@ -31,6 +31,13 @@ class Submission implements ExternalRelationshipEntityInterface
     private $externalid;
 
     /**
+     * @var string
+     * @ORM\Column(type="string", name="externalresult", length=255, options={"comment"="Result string as returned from external CCS, e.g. Kattis"}, nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $externalresult;
+
+    /**
      * @var int
      *
      * @ORM\Column(type="integer", name="origsubmitid", options={"comment"="If set, specifies original submission in case of edit/resubmit"}, nullable=true)
@@ -103,8 +110,8 @@ class Submission implements ExternalRelationshipEntityInterface
     private $rejudgingid;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", name="expected_results", length=255, options={"comment"="JSON encoded list of expected results - used to validate jury submissions", "collation"="utf8mb4_bin"}, nullable=true)
+     * @var array
+     * @ORM\Column(type="json_array", name="expected_results", length=255, options={"comment"="JSON encoded list of expected results - used to validate jury submissions", "collation"="utf8mb4_bin"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $expected_results;
@@ -168,6 +175,13 @@ class Submission implements ExternalRelationshipEntityInterface
     private $files;
 
     /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="DOMJudgeBundle\Entity\SubmissionFileWithSourceCode", mappedBy="submission")
+     * @Serializer\Exclude()
+     */
+    private $files_with_source_code;
+
+    /**
      * @ORM\OneToMany(targetEntity="Balloon", mappedBy="submission")
      * @Serializer\Exclude()
      */
@@ -223,6 +237,30 @@ class Submission implements ExternalRelationshipEntityInterface
     public function getExternalid()
     {
         return $this->externalid;
+    }
+
+    /**
+     * Set externalresult
+     *
+     * @param string $externalresult
+     *
+     * @return Submission
+     */
+    public function setExternalresult($externalresult)
+    {
+        $this->externalresult = $externalresult;
+
+        return $this;
+    }
+
+    /**
+     * Get externalresult
+     *
+     * @return string
+     */
+    public function getExternalresult()
+    {
+        return $this->externalresult;
     }
 
     /**
@@ -482,7 +520,7 @@ class Submission implements ExternalRelationshipEntityInterface
     /**
      * Set expectedResults
      *
-     * @param string $expectedResults
+     * @param array $expectedResults
      *
      * @return Submission
      */
@@ -496,7 +534,7 @@ class Submission implements ExternalRelationshipEntityInterface
     /**
      * Get expectedResults
      *
-     * @return string
+     * @return array
      */
     public function getExpectedResults()
     {
@@ -557,6 +595,7 @@ class Submission implements ExternalRelationshipEntityInterface
     {
         $this->judgings = new ArrayCollection();
         $this->files = new ArrayCollection();
+        $this->files_with_source_code = new ArrayCollection();
     }
 
     /**
@@ -649,6 +688,40 @@ class Submission implements ExternalRelationshipEntityInterface
     public function getFiles()
     {
         return $this->files;
+    }
+
+    /**
+     * Add file with source code
+     *
+     * @param SubmissionFileWithSourceCode $file
+     *
+     * @return Submission
+     */
+    public function addFileWithSourceCode(SubmissionFileWithSourceCode $file)
+    {
+        $this->files_with_source_code->add($file);
+
+        return $this;
+    }
+
+    /**
+     * Remove file with source code
+     *
+     * @param SubmissionFileWithSourceCode $file
+     */
+    public function removeFileWithSourceCode(SubmissionFileWithSourceCode $file)
+    {
+        $this->files_with_source_code->removeElement($file);
+    }
+
+    /**
+     * Get files with source code
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFilesWithSourceCode()
+    {
+        return $this->files_with_source_code;
     }
 
     /**
