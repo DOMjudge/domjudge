@@ -31,7 +31,7 @@ $row = $DB->q('TUPLE SELECT * FROM contest WHERE cid = %i', $id);
 // - There are unanswered clarifications.
 
 $blockers = array();
-if (difftime($row['endtime'], now()) > 0) {
+if (difftime((float)$row['endtime'], now()) > 0) {
     $blockers[] = 'Contest not ended yet (will end at ' . printtime($row['endtime'], '%Y-%m-%d %H:%M:%S (%Z)') . ')';
 }
 $subms = $DB->q('COLUMN SELECT s.submitid FROM submission s LEFT JOIN judging j ON (s.submitid = j.submitid AND j.valid=1)
@@ -72,7 +72,7 @@ if (isset($_POST['cmd']) && $_POST['cmd'] == 'finalize') {
 echo addForm('');
 echo "<table>\n";
 echo "<tr><td>Contest ID:</td><td>";
-echo addHidden('id', $id) . 'c' . $id . "</td></tr>\n";
+echo addHidden('id', (string)$id) . 'c' . $id . "</td></tr>\n";
 echo "<tr><td>Contest name:</td><td>";
 echo specialchars($row['name']) . "</td></tr>\n";
 
