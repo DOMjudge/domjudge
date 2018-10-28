@@ -43,6 +43,7 @@ class BalloonService
      * @param Judging|null $judging
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function updateBalloons(
         Contest $contest,
@@ -75,12 +76,11 @@ class BalloonService
             ->getQuery()
             ->getSingleScalarResult();
 
-        dump($numCorrect);
-
         if ($numCorrect == 0) {
             if ($contest->getProcessBalloons()) {
                 $balloon = new Balloon();
-                $balloon->setSubmission($submission);
+                $balloon->setSubmission(
+                    $this->entityManager->getReference(Submission::class, $submission->getSubmitid()));
                 $this->entityManager->persist($balloon);
                 $this->entityManager->flush();
             }
