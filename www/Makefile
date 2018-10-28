@@ -12,7 +12,7 @@ install-domserver:
 	for d in public team jury auth feed ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/$$d $$d/*.php ; \
 	done
-	for version in v3 v4; do \
+	for version in v3; do \
 		$(INSTALL_DATA) -m 0755 -d $(DESTDIR)$(domserver_wwwdir)/api/$$version ; \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/api/$$version api/$$version/*.php ; \
 	done
