@@ -66,7 +66,7 @@ $zip->addFromString('domjudge-problem.ini', $inistring);
 $zip->addFromString('problem.yaml', $yamlstring);
 
 if (!empty($problem['problemtext'])) {
-    $zip->addFromString('problem_statement/problem.'.$problem['problemtext_type'], $problem['problemtext']);
+    $zip->addFromString('problem.'.$problem['problemtext_type'], $problem['problemtext']);
     unset($problem['problemtext']);
 }
 

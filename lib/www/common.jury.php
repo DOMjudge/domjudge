@@ -475,7 +475,7 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
     }
 
     // Add problem statement, also look in obsolete location
-    foreach (array('problem_statement/', '') as $dir) {
+    foreach (array('', 'problem_statement/') as $dir) {
         foreach (array('pdf', 'html', 'txt') as $type) {
             $filename = $dir.'problem.'.$type;
             $text = $zip->getFromName($filename);
