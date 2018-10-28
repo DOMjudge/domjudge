@@ -227,6 +227,8 @@ void error(int errnum, const char *format, ...)
 	va_list ap;
 	va_start(ap,format);
 	sigset_t sigs;
+	char *errstr;
+	int errlen, errpos;
 
 	/*
 	 * Make sure the signal handler for these (terminate()) does not
@@ -236,32 +238,42 @@ void error(int errnum, const char *format, ...)
 	sigaddset(&sigs, SIGTERM);
 	sigprocmask(SIG_BLOCK, &sigs, NULL);
 
-	fprintf(stderr,"%s",progname);
+	/* First print to string to be able to reuse the message. */
+	errlen = strlen(progname)+strlen(format)+255;
+	errstr = (char *)malloc(errlen);
+	if ( errstr==NULL ) abort();
+
+	sprintf(errstr,"%s",progname);
+	errpos = strlen(errstr);
 
 	if ( format!=NULL ) {
-		fprintf(stderr,": ");
-		vfprintf(stderr,format,ap);
+		snprintf(errstr+errpos,errlen-errpos,": ");
+		errpos += 2;
+		vsnprintf(errstr+errpos,errlen-errpos,format,ap);
+		errpos += strlen(errstr+errpos);
 	}
 	if ( errnum!=0 ) {
 		/* Special case libcgroup error codes. */
 		if ( errnum==ECGOTHER ) {
-			fprintf(stderr,": libcgroup");
+			snprintf(errstr+errpos,errlen-errpos,": libcgroup");
+			errpos += strlen(errstr+errpos);
 			errnum = errno;
 		}
 		if ( errnum>=ECGROUPNOTCOMPILED && errnum<=ECGROUPNOTCOMPILED ) {
-			fprintf(stderr,": %s",cgroup_strerror(errnum));
+			snprintf(errstr+errpos,errlen-errpos,": %s",cgroup_strerror(errnum));
 		} else {
-			fprintf(stderr,": %s",strerror(errnum));
+			snprintf(errstr+errpos,errlen-errpos,": %s",strerror(errnum));
 		}
+		errpos += strlen(errstr+errpos);
 	}
 	if ( format==NULL && errnum==0 ) {
-		fprintf(stderr,": unknown error");
+		snprintf(errstr+errpos,errlen-errpos,": unknown error");
 	}
 
-	fprintf(stderr,"\nTry `%s --help' for more information.\n",progname);
+	fprintf(stderr,"%s\nTry `%s --help' for more information.\n",errstr,progname);
 	va_end(ap);
 
-	write_meta("internal-error","%s: %d - %s","runguard error", errnum, format);
+	write_meta("internal-error","%s",errstr);
 	if ( outputmeta && metafile != NULL && fclose(metafile)!=0 ) {
 		fprintf(stderr,"\nError writing to metafile '%s'.\n",metafilename);
 	}
