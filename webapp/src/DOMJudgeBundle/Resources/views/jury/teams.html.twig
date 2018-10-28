@@ -15,5 +15,7 @@
 
 {{ macros.table(teams, table_fields) }}
 
-<p><a href="{{path('legacy.jury_team', {cmd: 'add'})}}"><i class="fas fa-plus-square" title="add new team"></i></a></p>
+<p>
+    {{ button(path('legacy.jury_team', {cmd: 'add'}), 'Add new team', 'primary', 'plus') }}
+</p>
 {% endblock %}

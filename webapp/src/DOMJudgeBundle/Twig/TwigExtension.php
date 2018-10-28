@@ -1,12 +1,15 @@
 <?php declare(strict_types=1);
+
 namespace DOMJudgeBundle\Twig;
 
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Utils\Utils;
+use Twig\TwigFunction;
 
 class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
 {
     protected $domjudge;
+
     public function __construct(DOMJudgeService $domjudge)
     {
         $this->domjudge = $domjudge;
@@ -14,19 +17,23 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
 
     public function getFunctions()
     {
-        return array();
+        return [
+            new TwigFunction('button', [$this, 'button'], ['is_safe' => ['html']]),
+        ];
     }
+
     public function getFilters()
     {
-        return array(
-            new \Twig_SimpleFilter('timediff', array($this, 'timediff')),
-        );
+        return [
+            new \Twig_SimpleFilter('timediff', [$this, 'timediff']),
+        ];
     }
+
     public function getGlobals()
     {
-        $notify_flag = (bool)($this->domjudge->getCookie("domjudge_notify"));
+        $notify_flag    = (bool)($this->domjudge->getCookie("domjudge_notify"));
         $refresh_cookie = $this->domjudge->getCookie("domjudge_refresh");
-        $refresh_flag = ($refresh_cookie == null || (bool)$refresh_cookie);
+        $refresh_flag   = ($refresh_cookie == null || (bool)$refresh_cookie);
 
         // This is for various notifications
         // e.g. judgehost down, rejudging active, clarifications, internal errors
@@ -34,7 +41,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         $updates = $this->domjudge->getUpdates();
 
         // These variables mostly exist for the header template
-        return array(
+        return [
             'contest' => $this->domjudge->getCurrentContest(),
             'contests' => $this->domjudge->getCurrentContests(),
             'have_printing' => $this->domjudge->dbconfig_get('enable_printing', 0),
@@ -43,7 +50,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
 
             // Jury Specific
             'updates' => $updates,
-        );
+        ];
     }
 
     public function timediff($start, $end = null)
@@ -51,24 +58,41 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         if (is_null($end)) {
             $end = Utils::now();
         }
-        $ret = '';
+        $ret  = '';
         $diff = floor($end - $start);
 
-        if ($diff >= 24*60*60) {
-            $d = floor($diff/(24*60*60));
-            $ret .= $d . "d ";
-            $diff -= $d * 24*60*60;
+        if ($diff >= 24 * 60 * 60) {
+            $d    = floor($diff / (24 * 60 * 60));
+            $ret  .= $d . "d ";
+            $diff -= $d * 24 * 60 * 60;
         }
-        if ($diff >= 60*60 || isset($d)) {
-            $h = floor($diff/(60*60));
-            $ret .= $h . ":";
-            $diff -= $h * 60*60;
+        if ($diff >= 60 * 60 || isset($d)) {
+            $h    = floor($diff / (60 * 60));
+            $ret  .= $h . ":";
+            $diff -= $h * 60 * 60;
         }
-        $m = floor($diff/60);
-        $ret .= sprintf('%02d:', $m);
+        $m    = floor($diff / 60);
+        $ret  .= sprintf('%02d:', $m);
         $diff -= $m * 60;
-        $ret .= sprintf('%02d', $diff);
+        $ret  .= sprintf('%02d', $diff);
 
         return $ret;
+    }
+
+    /**
+     * render a button
+     * @param string      $url
+     * @param string      $text
+     * @param string      $type
+     * @param string|null $icon
+     * @return string
+     */
+    public function button(string $url, string $text, string $type = 'primary', string $icon = null)
+    {
+        if ($icon) {
+            $icon = sprintf('<i class="fas fa-%s"></i>&nbsp;', $icon);
+        }
+
+        return sprintf('<a href="%s" class="btn btn-%s" title="%s">%s%s</a>', $url, $type, $text, $icon, $text);
     }
 }
