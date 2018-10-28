@@ -158,7 +158,7 @@ chmod -R go-w "$WORKDIR/compile"
 
 cd "$WORKDIR"
 
-if [ $exitcode -ne 0 -a ! -s compile.meta ]; then
+if [ $exitcode -ne 0 ] && [ ! -s compile.meta ]; then
 	echo "internal-error: runguard crashed" > compile.meta
 	echo "Runguard exited with code $exitcode and 'compile.meta' is empty, it likely crashed." >compile.out
 	echo "Compilation output:" >>compile.out
