@@ -60,7 +60,7 @@ class SubmissionController extends AbstractRestController
     /**
      * Get the given submission for this contest
      * @param Request $request
-     * @param string $id
+     * @param string  $id
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
@@ -87,7 +87,7 @@ class SubmissionController extends AbstractRestController
      * @SWG\Get(produces={"application/zip"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
-     * @param string $id
+     * @param string  $id
      * @return Response|StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @SWG\Response(
@@ -157,7 +157,7 @@ class SubmissionController extends AbstractRestController
      * @Rest\Get("/{id}/source-code")
      * @Security("has_role('ROLE_JUDGEHOST') or has_role('ROLE_JURY')")
      * @param Request $request
-     * @param string $id
+     * @param string  $id
      * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @SWG\Response(
@@ -211,12 +211,8 @@ class SubmissionController extends AbstractRestController
         $cid          = $this->getContestId($request);
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
-            ->join('s.files', 'f')
-            ->join('s.problem', 'p')
             ->join('s.contest', 'c')
-            ->join('s.language', 'lang')
-            ->join('s.team', 'team')
-            ->select('s, f, team, lang, p')
+            ->select('s')
             ->andWhere('s.valid = 1')
             ->andWhere('s.cid = :cid')
             ->setParameter(':cid', $cid)
