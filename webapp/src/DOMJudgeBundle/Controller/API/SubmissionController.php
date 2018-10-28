@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\SubmissionFile;
+use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -103,9 +104,8 @@ class SubmissionController extends AbstractRestController
     public function getSubmissionFilesAction(Request $request, string $id)
     {
         $queryBuilder = $this->getQueryBuilder($request)
-            ->join('s.files', 'f')
-            ->join('f.submission_file_source_code', 'sc')
-            ->select('s, f, sc')
+            ->join('s.files_with_source_code', 'f')
+            ->select('s, f')
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter(':id', $id);
 
@@ -118,8 +118,8 @@ class SubmissionController extends AbstractRestController
 
         $submission = reset($submissions);
 
-        /** @var SubmissionFile[] $files */
-        $files = $submission->getFiles();
+        /** @var SubmissionFileWithSourceCode[] $files */
+        $files = $submission->getFilesWithSourceCode();
         $zip   = new \ZipArchive;
         if (!($tmpfname = tempnam($this->getParameter('domjudge.tmpdir'), "submission_file-"))) {
             return new Response("Could not create temporary file.", Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -130,8 +130,7 @@ class SubmissionController extends AbstractRestController
             return new Response("Could not create temporary zip file.", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         foreach ($files as $file) {
-            $zip->addFromString($file->getFilename(),
-                                stream_get_contents($file->getSubmissionFileSourceCode()->getSourcecode()));
+            $zip->addFromString($file->getFilename(), stream_get_contents($file->getSourcecode()));
         }
         $zip->close();
 
