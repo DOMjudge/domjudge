@@ -1060,9 +1060,10 @@ int main(int argc, char **argv)
 		/* check if input is only a single integer */
 		if ( *ptr == '\0' ) {
 			/* check if we have enough cores available */
-			if ( ret < 0 || ret >= get_nprocs() ) {
-				error(0, "processor ID %d given as cpuset, but only %d cores available",
-				      ret, get_nprocs());
+			int nprocs = get_nprocs_conf();
+			if ( ret < 0 || ret >= nprocs ) {
+				error(0, "processor ID %d given as cpuset, but only %d cores configured",
+				      ret, nprocs);
 			}
 		}
 	}
