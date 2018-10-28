@@ -3,6 +3,20 @@
 	"description": "DOMjudge Programming Contest Control System",
 	"homepage": "https://www.domjudge.org",
 	"license": "GPL-2.0+",
+	"repositories": [
+		{
+			"type": "package",
+			"package": {
+				"name": "fortawesome/font-awesome",
+				"version": "5.4.2",
+				"source": {
+					"url": "https://github.com/FortAwesome/Font-Awesome.git",
+					"type": "git",
+					"reference": "5.4.2"
+				}
+			}
+		}
+	],
 	"require": {
 		"ext-curl": "*",
 		"ext-json": "*",
@@ -31,7 +45,8 @@
 		"novus/nvd3": "^1.8",
 		"components/jquery": "^3.3",
 		"nelmio/api-doc-bundle": "^3.3",
-		"datatables/datatables": "^1.10"
+		"datatables/datatables": "^1.10",
+		"fortawesome/font-awesome": "5.*"
 	},
 	"require-dev": {
 		"sensio/generator-bundle": "^3.0",

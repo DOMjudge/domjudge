@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee05df0561e50e9ca5e08902411d0375",
+    "content-hash": "9e84085a42bb56764af1cb9231dd4897",
     "packages": [
         {
             "name": "components/jquery",
@@ -992,6 +992,16 @@
                 "rest"
             ],
             "time": "2016-10-17T18:31:11+00:00"
+        },
+        {
+            "name": "fortawesome/font-awesome",
+            "version": "5.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/FortAwesome/Font-Awesome.git",
+                "reference": "5.4.2"
+            },
+            "type": "library"
         },
         {
             "name": "friendsofsymfony/rest-bundle",

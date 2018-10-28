@@ -127,20 +127,20 @@ class TeamController extends Controller
           }
 
           // Create action links
-          $editvalue = '<img src="' . $assetPackage->getUrl('images/edit.png') . '" alt="edit" title="edit this team" class="picto">';
+          $editvalue = '<i class="fas fa-edit" title="edit this team"></i>';
           $editlink = $this->generateUrl('legacy.jury_team', [
             'cmd'=>'edit',
             'id'=>$t->getTeamId(),
             'referrer' => 'teams/'
           ]);
-          $deletevalue = '<img src="' . $assetPackage->getUrl('images/delete.png') . '" alt="delete" title="delete this team" class="picto">';
+          $deletevalue = '<i class="fas fa-trash-alt" title="delete this team"></i>';
           $deletelink = $this->generateUrl('legacy.jury_delete', [
             'table'=>'team',
             'teamid'=>$t->getTeamId(),
             'referrer' => '',
             'desc' => $t->getName(),
           ]);
-          $sendvalue = '<span class="octicon octicon-mail"></span>';
+          $sendvalue = '<i class="fas fa-envelope" title="send clarification to this team"></i>';
           $sendlink = $this->generateUrl('legacy.jury_clarification', [
             'teamto'=>$t->getTeamId(),
           ]);
