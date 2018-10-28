@@ -103,6 +103,7 @@ bool websubmit();
 
 Json::Value doAPIrequest(const char *, int);
 bool readlanguages();
+bool readproblems();
 bool readcontests();
 
 /* Helper function for using libcurl in websubmit() and doAPIrequest() */
@@ -154,15 +155,18 @@ std::string decode_HTML_entities(std::string str)
 int nwarnings;
 
 /* Submission information */
-string problem, language, extension, baseurl, contestid, contestshortname, entry_point;
+string baseurl, entry_point, langid, language, extension, contestid, contest, probid, problem;
 vector<string> filenames;
 char *submitdir;
 
-/* Language extensions */
+/* Language extensions: langid, name, require_entry_point, list of extensions */
 vector<vector<string> > languages;
 
-/* Active contests: shortname,name */
+/* Active contests: contestid, shortname, name */
 vector<vector<string> > contests;
+
+/* Problems: probid, label, name */
+vector<vector<string> > problems;
 
 string kotlin_base_entry_point(string filebase)
 {
@@ -223,7 +227,6 @@ int main(int argc, char **argv)
 	/* Read default for baseurl and contest from environment */
 	baseurl = string(BASEURL);
 	contestid = "";
-	contestshortname = "";
 	if ( getenv("SUBMITBASEURL")!=NULL ) baseurl = string(getenv("SUBMITBASEURL"));
 	if ( getenv("SUBMITCONTEST")!=NULL ) contestid = string(getenv("SUBMITCONTEST"));
 
@@ -234,8 +237,8 @@ int main(int argc, char **argv)
 		case 0:   /* long-only option */
 			break;
 
-		case 'p': problem     = string(optarg); break;
-		case 'l': extension   = string(optarg); break;
+		case 'p': probid      = string(optarg); break;
+		case 'l': langid      = string(optarg); break;
 		case 'u': baseurl     = string(optarg); break;
 		case 'c': contestid   = string(optarg); break;
 		case 'e': entry_point = string(optarg); break;
@@ -268,32 +271,41 @@ int main(int argc, char **argv)
 
 	if ( !readcontests() ) warning(0,"could not obtain active contests");
 
+    if ( contestid.empty() ) {
+        if ( contests.size()==0 ) {
+            warnuser("no active contests found (and no contest specified)");
+        }
+        if ( contests.size()==1 ) {
+            contestid = contests[0][0];
+            contest = contests[0][2];
+        }
+        if ( contests.size()>1 ) {
+            warnuser("multiple active contests found, please specify one");
+        }
+    } else {
+        for ( i=0; i < contests.size(); i++ ) {
+            if (contests[i][0] == contestid || contests[i][1] == contestid) {
+                contestid = contests[i][0];
+                contest = contests[i][2];
+            }
+        }
+    }
+
+    bool languagesRead = false;
+    bool problemsRead  = false;
+    if ( !contestid.empty() ) {
+        languagesRead = readlanguages();
+        problemsRead = readproblems();
+    }
+
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
 
-	if ( contestid.empty() ) {
-		if ( contests.size()==0 ) {
-			warnuser("no active contests found (and no contest specified)");
-		}
-		if ( contests.size()==1 ) {
-			contestid = contests[0][0];
-			contestshortname = contests[0][1];
-		}
-		if ( contests.size()>1 ) {
-			warnuser("multiple active contests found, please specify one");
-		}
-	} else {
-		for ( i=0; i < contests.size(); i++ ) {
-			if (contests[i][0] == contestid || contests[i][1] == contestid) {
-				contestid = contests[i][0];
-				contestshortname = contests[i][1];
-			}
-		}
-	}
+	if ( contestid.empty() || contest.empty() ) usage2(0,"no (valid) contest specified");
 
-	if ( contestid.empty() || contestshortname.empty() ) usage2(0,"no (valid) contest specified");
+	if ( !languagesRead ) warning(0,"could not obtain language data");
 
-	if ( !readlanguages() ) warning(0,"could not obtain language data");
+	if ( !problemsRead ) warning(0,"could not obtain problem data");
 
 	if ( argc<=optind ) usage2(0,"no file(s) specified");
 
@@ -339,26 +351,44 @@ int main(int argc, char **argv)
 		fileext = filebase.substr(filebase.rfind('.')+1);
 		filebase.erase(filebase.find('.'));
 
-		if ( problem.empty()   ) problem   = filebase;
-		if ( extension.empty() ) extension = fileext;
+		if ( probid.empty() ) probid    = filebase;
+		if ( langid.empty() ) extension = fileext;
 	}
 
-	/* Check for languages matching file extension */
-	extension = stringtolower(extension);
-	for(i=0; i<languages.size(); i++) {
-		for(j=2; j<languages[i].size(); j++) {
-			if ( languages[i][j]==extension ) {
-				language  = languages[i][0];
-				require_entry_point = languages[i][1];
-				extension = languages[i][2];
-			}
-		}
+	if ( !extension.empty() ) {
+        /* Check for languages matching file extension */
+        extension = stringtolower(extension);
+        for (i = 0; i < languages.size(); i++) {
+            for (j = 3; j < languages[i].size(); j++) {
+                if (languages[i][j] == extension) {
+                    langid = languages[i][0];
+                    language = languages[i][1];
+                    require_entry_point = languages[i][2];
+                    extension = languages[i][j];
+                }
+            }
+        }
+    } else {
+        for ( i=0; i < languages.size(); i++ ) {
+            if (languages[i][0] == langid) {
+                langid = languages[i][0];
+                language = languages[i][1];
+            }
+        }
 	}
 
-	if ( language.empty() ) {
-		warnuser("language `%s' not recognised",extension.c_str());
+	if ( langid.empty() ) {
+		warnuser("no language for for extension `%s' and no language supplied",extension.c_str());
+		langid = extension;
 		language = extension;
 	}
+
+    for ( i=0; i < problems.size(); i++ ) {
+        if (problems[i][0] == probid || problems[i][1] == probid) {
+            probid = problems[i][0];
+            problem = problems[i][2];
+        }
+    }
 
 	if ( problem.empty()  ) usage2(0,"no problem specified");
 	if ( language.empty() ) usage2(0,"no language specified");
@@ -379,7 +409,7 @@ int main(int argc, char **argv)
 		error(0, "Entry point required but not specified nor detected.");
 	}
 
-	logmsg(LOG_DEBUG,"contest is `%s'",contestshortname.c_str());
+	logmsg(LOG_DEBUG,"contest is `%s'",contest.c_str());
 	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
 	logmsg(LOG_DEBUG,"entry_point is `%s'",entry_point.c_str());
@@ -397,7 +427,7 @@ int main(int argc, char **argv)
 			}
 			printf("\n");
 		}
-		printf("  contest:     %s\n",contestshortname.c_str());
+		printf("  contest:     %s\n",contest.c_str());
 		printf("  problem:     %s\n",problem.c_str());
 		printf("  language:    %s\n",language.c_str());
 		if ( !entry_point.empty() ) {
@@ -424,12 +454,12 @@ void usage()
 "Submit a solution for a problem.\n"
 "\n"
 "Options (see below for more information)\n"
-"  -c  --contest=CONTEST          submit for contest with identifier name CONTEST.\n"
+"  -c  --contest=CONTEST          submit for contest with ID or short name CONTEST.\n"
 "                                     Defaults to the value of the\n"
 "                                     environment variable 'SUBMITCONTEST'.\n"
 "                                     Mandatory when more than one contest is active.\n"
-"  -p, --problem=PROBLEM          submit for problem PROBLEM\n"
-"  -l, --language=LANGUAGE        submit in language LANGUAGE\n"
+"  -p, --problem=PROBLEM          submit for problem with ID or label PROBLEM\n"
+"  -l, --language=LANGUAGE        submit in language with ID LANGUAGE\n"
 "  -e, --entry_point=ENTRY_POINT  set an explicit entry_point, e.g. the java main class\n"
 "  -v, --verbose[=LEVEL]          increase verbosity or set to LEVEL, where LEVEL\n"
 "                                     must be numerically specified as in 'syslog.h'\n"
@@ -446,11 +476,11 @@ void usage()
 "\n");
 	if ( contests.size()<=1 ) {
 		printf(
-"For CONTEST use the short name as shown in the top-right contest selection box\n"
+"For CONTEST use the ID or short name as shown in the top-right contest selection box\n"
 "in the webinterface.");
 		if ( contests.size()==1 ) {
 			printf(" Currently this defaults to the only active contest '%s'.",
-			       contests[0][1].c_str());
+			       contests[0][0].c_str());
 		}
 		printf("\n\n");
 	}
@@ -458,28 +488,31 @@ void usage()
 		printf(
 "For CONTEST use one of the following:\n");
 		for(i=0; i<contests.size(); i++) {
-			printf("   %-3s  %s\n",contests[i][0].c_str(),contests[i][1].c_str());
+            printf("   %-25s  %s\n", (contests[i][0] + " (" + contests[i][1] + "):").c_str(), contests[i][2].c_str());
 		}
 		printf("\n");
 	}
 	printf(
-"For PROBLEM use the ID of the problem (letter, number or short name)\n"
+"For PROBLEM use the ID or label of the problem\n"
 "in lower- or uppercase. When not specified, PROBLEM defaults to the\n"
 "first FILENAME excluding the extension. For example, 'B.java' will\n"
-"indicate problem 'B'.\n"
-"\n");
+"indicate problem 'B'. The following are the current problems:\n");
+    for(i=0; i<problems.size(); i++) {
+        printf("   %-25s  %s\n", (problems[i][0] + " (" + problems[i][1] + "):").c_str(), problems[i][2].c_str());
+    }
+    printf("\n");
 	if ( languages.size()==0 ) {
 		printf(
-"For LANGUAGE use the ID of the language (typically the main language\n"
-"extension) in lower- or uppercase.\n");
+"For LANGUAGE use the ID of the language in lower- or uppercase.\n");
 	} else {
 		printf(
-"For LANGUAGE use one of the following extensions in lower- or uppercase:\n");
+"For LANGUAGE use one of the following ID's in lower- or uppercase:\n");
 		for(i=0; i<languages.size(); i++) {
-			printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][2].c_str());
+			printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
 			for(j=3; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
 			printf("\n");
 		}
+        printf("\n");
 	}
 	printf(
 "The default for LANGUAGE is the extension of FILENAME. For example,\n"
@@ -704,6 +737,7 @@ bool readlanguages()
 	for(Json::ArrayIndex i=0; i<langs.size(); i++) {
 		vector<string> lang;
 
+		lang.push_back(langs[i]["id"].asString());
 		lang.push_back(langs[i]["name"].asString());
 		lang.push_back(langs[i]["require_entry_point"].asString());
 		if ( lang[0]=="" ||
@@ -721,6 +755,32 @@ bool readlanguages()
 	return true;
 }
 
+bool readproblems()
+{
+    Json::Value res;
+
+    string endpoint = "contests/" + contestid + "/problems";
+    res = doAPIrequest(endpoint.c_str(), 0);
+
+    if ( res.isNull() || !res.isArray() ) return false;
+
+    for(Json::ArrayIndex i=0; i<res.size(); i++) {
+        vector<string> problem;
+
+        problem.push_back(res[i]["id"].asString());
+        problem.push_back(res[i]["label"].asString());
+        problem.push_back(res[i]["name"].asString());
+        if ( problem[0]=="" || problem[1]=="" ) {
+            warning(0,"REST API returned unexpected JSON data for problems");
+            return false;
+        }
+
+        problems.push_back(problem);
+    }
+
+    return true;
+}
+
 bool readcontests()
 {
 	Json::Value res;
@@ -734,6 +794,7 @@ bool readcontests()
 
 		contest.push_back(res[i]["id"].asString());
 		contest.push_back(res[i]["shortname"].asString());
+		contest.push_back(res[i]["name"].asString());
 		if ( contest[0]=="" || contest[1]=="" ) {
 			warning(0,"REST API returned unexpected JSON data for contests");
 			return false;
@@ -759,7 +820,7 @@ bool websubmit()
 	Json::Reader reader;
 	Json::Value root;
 
-	url = strdup((baseurl+"api/"+API_VERSION+"submissions").c_str());
+    url = strdup((baseurl + "api/" + API_VERSION + "contests/" + contestid + "/submissions").c_str());
 
 	curlerrormsg[0] = 0;
 
@@ -790,11 +851,8 @@ bool websubmit()
 	for(size_t i=0; i<filenames.size(); i++) {
 		curlformadd(COPYNAME,"code[]", FILE, filenames[i].c_str());
 	}
-	curlformadd(COPYNAME,"shortname", COPYCONTENTS,problem.c_str());
-	curlformadd(COPYNAME,"langid", COPYCONTENTS,extension.c_str());
-	if ( !contestshortname.empty() ) {
-		curlformadd(COPYNAME,"contest", COPYCONTENTS,contestshortname.c_str());
-	}
+	curlformadd(COPYNAME,"problem", COPYCONTENTS,probid.c_str());
+	curlformadd(COPYNAME,"language", COPYCONTENTS,langid.c_str());
 	if ( !entry_point.empty() ) {
 		curlformadd(COPYNAME,"entry_point", COPYCONTENTS,entry_point.c_str());
 	}
