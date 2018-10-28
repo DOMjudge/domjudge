@@ -2,10 +2,17 @@
 
 namespace DOMJudgeBundle\Controller\API;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use DOMJudgeBundle\Entity\ContestProblem;
+use DOMJudgeBundle\Entity\Language;
+use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\SubmissionFile;
 use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
+use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
+use DOMJudgeBundle\Service\SubmissionService;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -13,6 +20,7 @@ use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -26,6 +34,21 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class SubmissionController extends AbstractRestController
 {
+    /**
+     * @var SubmissionService
+     */
+    protected $submissionService;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
+        SubmissionService $submissionService
+    ) {
+        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
+        $this->submissionService = $submissionService;
+    }
+
     /**
      * Get all the submissions for this contest
      * @param Request $request
@@ -80,6 +103,127 @@ class SubmissionController extends AbstractRestController
     public function singleAction(Request $request, string $id)
     {
         return parent::performSingleAction($request, $id);
+    }
+
+    /**
+     * Add a submission to this contest
+     * @param Request $request
+     * @return int
+     * @Rest\Post("")
+     * @SWG\Post(consumes={"multipart/form-data"})
+     * @Security("has_role('ROLE_TEAM')")
+     * @SWG\Parameter(
+     *     name="problem",
+     *     in="formData",
+     *     type="string",
+     *     required=true,
+     *     description="The problem to submit a solution for"
+     * )
+     * @SWG\Parameter(
+     *     name="language",
+     *     in="formData",
+     *     type="string",
+     *     required=true,
+     *     description="The language to submit a solution in"
+     * )
+     * Uploading an array of files in swagger is not supported, see
+     * https://github.com/OAI/OpenAPI-Specification/issues/254
+     * @SWG\Parameter(
+     *     name="code[]",
+     *     in="formData",
+     *     type="file",
+     *     required=true,
+     *     description="The file to submit"
+     * )
+     * @SWG\Parameter(
+     *     name="entry_point",
+     *     in="formData",
+     *     type="string",
+     *     description="The entry point for the submission. Required for languages requiring an entry point"
+     * )
+     * @SWG\Response(
+     *     response="200",
+     *     description="When submitting was successful",
+     *     @SWG\Schema(type="integer", description="The ID of the submitted solution")
+     * )
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Exception
+     */
+    public function addSubmissionAction(Request $request)
+    {
+        $required = [
+            'problem',
+            'language'
+        ];
+
+        foreach ($required as $argument) {
+            if (!$request->request->has($argument)) {
+                throw new BadRequestHttpException(
+                    sprintf("Argument '%s' is mandatory", $argument));
+            }
+        }
+
+        if (!$this->DOMJudgeService->getUser()->getTeam()) {
+            throw new BadRequestHttpException(sprintf('User does not belong to a team'));
+        }
+
+        // Load the problem
+        /** @var ContestProblem $problem */
+        $problem = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:ContestProblem', 'cp')
+            ->join('cp.problem', 'p')
+            ->join('cp.contest', 'c')
+            ->select('cp, c')
+            ->andWhere(sprintf('p.%s = :problem',
+                               $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
+            ->andWhere('cp.cid = :cid')
+            ->andWhere('cp.allow_submit = 1')
+            ->setParameter(':problem', $request->request->get('problem'))
+            ->setParameter(':cid', $this->getContestId($request))
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($problem === null) {
+            throw new BadRequestHttpException(
+                sprintf("Problem %s not found or or not submittable", $request->request->get('problem')));
+        }
+
+        // Load the language
+        /** @var Language $language */
+        $language = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Language', 'lang')
+            ->select('lang')
+            ->andWhere(sprintf('lang.%s = :language',
+                               $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid'))
+            ->andWhere('lang.allow_submit = 1')
+            ->setParameter(':language', $request->request->get('language'))
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($language === null) {
+            throw new BadRequestHttpException(
+                sprintf("Language %s not found or or not submittable", $request->request->get('language')));
+        }
+
+        // Determine the entry pooint
+        $entryPoint = null;
+        if ($language->getRequireEntryPoint()) {
+            if (!$request->request->get('entry_point')) {
+                $entryPointDescription = $language->getEntryPointDescription() ?: 'Entry point';
+                throw new BadRequestHttpException(sprintf('%s required, but not specified.', $entryPointDescription));
+            }
+            $entryPoint = $request->request->get('entry_point');
+        }
+
+        // Get the files we want to submit
+        $files = $request->files->get('code') ?: [];
+
+        // Now submit the solution
+        $team       = $this->DOMJudgeService->getUser()->getTeam();
+        $submission = $this->submissionService->submitSolution($team, $problem, $problem->getContest(), $language,
+                                                               $files, null, $entryPoint);
+
+        return $submission->getSubmitid();
     }
 
     /**
