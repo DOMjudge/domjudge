@@ -47,6 +47,7 @@ if (isset($_POST['donow'])) {
         }
         $DB->q('UPDATE contest SET starttime_enabled = %i
                 WHERE cid = %i', $enabled, $docid);
+        eventlog('contest', $docid, 'update', $docid);
         header("Location: ./contests.php?edited=1");
         return;
     }
@@ -74,6 +75,7 @@ if (isset($_POST['donow'])) {
     } else {
         $DB->q('UPDATE contest SET ' . $time . 'time = %f, ' . $time . 'time_string = %s
                 WHERE cid = %i', $now, $nowstring, $docid);
+        eventlog('contest', $docid, 'update', $docid);
         header("Location: ./contests.php");
     }
     return;
