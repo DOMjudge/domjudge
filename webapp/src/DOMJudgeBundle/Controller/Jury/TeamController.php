@@ -4,6 +4,7 @@ namespace DOMJudgeBundle\Controller\Jury;
 
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -20,13 +21,19 @@ use Symfony\Component\Routing\Annotation\Route;
 class TeamController extends Controller
 {
     /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
+    /**
      * @var DOMJudgeService
      */
     private $DOMJudgeService;
 
-    public function __construct(DOMJudgeService $DOMJudgeService)
+    public function __construct(DOMJudgeService $DOMJudgeService, EventLogService $eventLogService)
     {
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->eventLogService = $eventLogService;
     }
 
     /**
@@ -88,6 +95,13 @@ class TeamController extends Controller
             'bubble' => ['title' => '', 'sort' => false,],
             'status' => ['title' => 'status', 'sort' => true,],
         ];
+
+        // Insert external ID field when configured to use it
+        if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Team::class)) {
+            $table_fields = array_slice($table_fields, 0, 1, true) +
+                [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
+                array_slice($table_fields, 1, null, true);
+        }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $teams_table      = [];
