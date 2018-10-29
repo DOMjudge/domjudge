@@ -13,7 +13,7 @@
 
 <h1>Executables</h1>
 
-{{ macros.table(executables, table_fields) }}
+{{ macros.table(executables, table_fields, num_actions) }}
 
 <p>
     {{ button(path('legacy.jury_executable', {'cmd': 'add'}), 'Add new executable', 'primary', 'plus') }}

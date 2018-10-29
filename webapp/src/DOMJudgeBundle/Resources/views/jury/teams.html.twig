@@ -13,7 +13,7 @@
 
 <h1>Teams</h1>
 
-{{ macros.table(teams, table_fields) }}
+{{ macros.table(teams, table_fields, num_actions) }}
 
 <p>
     {{ button(path('legacy.jury_team', {cmd: 'add'}), 'Add new team', 'primary', 'plus') }}

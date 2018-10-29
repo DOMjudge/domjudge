@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\Executable;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -43,7 +44,8 @@ class ExecutableController extends Controller
     {
         // $res = $DB->q('SELECT execid, description, md5sum, type, OCTET_LENGTH(zipfile) AS size
         //                FROM executable ORDER BY execid');
-        $em               = $this->entityManager;
+        $em = $this->entityManager;
+        /** @var Executable[] $executables */
         $executables      = $em->createQueryBuilder()
             ->select('e as executable, e.execid as execid, length(e.zipfile) as size')
             ->from('DOMJudgeBundle:Executable', 'e')
@@ -58,18 +60,12 @@ class ExecutableController extends Controller
             'size' => ['title' => 'size', 'sort' => true,],
             'md5sum' => ['title' => 'md5', 'sort' => true, 'search' => false],
         ];
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $table_fields = array_merge($table_fields, [
-                'save' => ['title' => '', 'sort' => false,],
-                'edit' => ['title' => '', 'sort' => false,],
-                'delete' => ['title' => '', 'sort' => false,],
-            ]);
-        }
 
         $propertyAccessor  = PropertyAccess::createPropertyAccessor();
         $executables_table = [];
         foreach ($executables as $e) {
-            $execdata = [];
+            $execdata    = [];
+            $execactions = [];
             // Get whatever fields we can from the team object itself
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($e, $k)) {
@@ -77,41 +73,50 @@ class ExecutableController extends Controller
                 }
             }
 
-
-            $editvalue   = '<i class="fas fa-edit" title="edit this executable"></i>';
-            $editlink    = $this->generateUrl('legacy.jury_executable', [
-                'cmd' => 'edit',
-                'id' => $e->getExecid(),
-                'referrer' => 'executables/'
-            ]);
-            $deletevalue = '<i class="fas fa-trash-alt" title="delete this executable"></i>';
-            $deletelink  = $this->generateUrl('legacy.jury_delete', [
-                'table' => 'executable',
-                'execid' => $e->getExecid(),
-                'referrer' => '',
-                'desc' => $e->getDescription(),
-            ]);
-            $savevalue   = '<i class="fas fa-file-download" title="download this executable"></i>';
-            $savelink    = $this->generateUrl('legacy.jury_executable', [
-                'fetch' => '',
-                'id' => $e->getExecid(),
-            ]);
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $execactions[] = [
+                    'icon' => 'edit',
+                    'title' => 'edit this executable',
+                    'link' => $this->generateUrl('legacy.jury_executable', [
+                        'cmd' => 'edit',
+                        'id' => $e->getExecid(),
+                        'referrer' => 'executables/'
+                    ])
+                ];
+                $execactions[] = [
+                    'icon' => 'trash-alt',
+                    'title' => 'delete this executable',
+                    'link' => $this->generateUrl('legacy.jury_delete', [
+                        'table' => 'executable',
+                        'execid' => $e->getExecid(),
+                        'referrer' => '',
+                        'desc' => $e->getDescription(),
+                    ])
+                ];
+                $execactions[] = [
+                    'icon' => 'file-download',
+                    'title' => 'download this executable',
+                    'link' => $this->generateUrl('legacy.jury_executable', [
+                        'fetch' => '',
+                        'id' => $e->getExecid(),
+                    ])
+                ];
+            }
 
             $execdata['md5sum']['cssclass'] = 'text-monospace small';
             $execdata                       = array_merge($execdata, [
                 'size' => ['value' => Utils::printsize((int)$executable_sizes[$e->getExecid()])],
-                'save' => ['value' => $savevalue, 'link' => $savelink],
-                'edit' => ['value' => $editvalue, 'link' => $editlink],
-                'delete' => ['value' => $deletevalue, 'link' => $deletelink],
             ]);
             $executables_table[]            = [
                 'data' => $execdata,
+                'actions' => $execactions,
                 'link' => $this->generateUrl('legacy.jury_executable', ['id' => $e->getExecid()]),
             ];
         }
         return $this->render('@DOMJudge/jury/executables.html.twig', [
             'executables' => $executables_table,
             'table_fields' => $table_fields,
+            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 0,
         ]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace DOMJudgeBundle\Controller\Jury;
 
+use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -33,7 +34,8 @@ class TeamController extends Controller
      */
     public function indexAction(Request $request, Packages $assetPackage)
     {
-        $em    = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getManager();
+        /** @var Team[] $teams */
         $teams = $em->createQueryBuilder()
             ->select('t', 'c', 'a', 'cat')
             ->from('DOMJudgeBundle:Team', 't')
@@ -86,18 +88,12 @@ class TeamController extends Controller
             'bubble' => ['title' => '', 'sort' => false,],
             'status' => ['title' => 'status', 'sort' => true,],
         ];
-        if ($this->isGranted('ROLE_ADMIN')) {
-            $table_fields = array_merge($table_fields, [
-                'edit' => ['title' => '', 'sort' => false,],
-                'delete' => ['title' => '', 'sort' => false,],
-            ]);
-        }
-        $table_fields['send'] = ['title' => '', 'sort' => false,];
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $teams_table      = [];
         foreach ($teams as $t) {
-            $teamdata = [];
+            $teamdata    = [];
+            $teamactions = [];
             // Get whatever fields we can from the team object itself
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($t, $k)) {
@@ -126,23 +122,35 @@ class TeamController extends Controller
             }
 
             // Create action links
-            $editvalue   = '<i class="fas fa-edit" title="edit this team"></i>';
-            $editlink    = $this->generateUrl('legacy.jury_team', [
-                'cmd' => 'edit',
-                'id' => $t->getTeamId(),
-                'referrer' => 'teams/'
-            ]);
-            $deletevalue = '<i class="fas fa-trash-alt" title="delete this team"></i>';
-            $deletelink  = $this->generateUrl('legacy.jury_delete', [
-                'table' => 'team',
-                'teamid' => $t->getTeamId(),
-                'referrer' => '',
-                'desc' => $t->getName(),
-            ]);
-            $sendvalue   = '<i class="fas fa-envelope" title="send clarification to this team"></i>';
-            $sendlink    = $this->generateUrl('legacy.jury_clarification', [
-                'teamto' => $t->getTeamId(),
-            ]);
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $teamactions[] = [
+                    'icon' => 'edit',
+                    'title' => 'edit this team',
+                    'link' => $this->generateUrl('legacy.jury_team', [
+                        'cmd' => 'edit',
+                        'id' => $t->getTeamId(),
+                        'referrer' => 'teams/'
+                    ])
+                ];
+                $teamactions[] = [
+                    'icon' => 'trash-alt',
+                    'title' => 'delete this team',
+                    'link' => $this->generateUrl('legacy.jury_delete', [
+                        'table' => 'team',
+                        'teamid' => $t->getTeamId(),
+                        'referrer' => '',
+                        'desc' => $t->getName(),
+                    ])
+                ];
+            }
+            $teamactions[] = [
+                'icon' => 'envelope',
+                'title' => 'send clarification to this team',
+                'link' => $this->generateUrl('legacy.jury_clarification', [
+                    'teamto' => $t->getTeamId(),
+                ])
+            ];
+
             // Add the rest of our row data for the table
 
             // Fix affiliation rendering
@@ -166,9 +174,6 @@ class TeamController extends Controller
             $teamdata = array_merge($teamdata, [
                 'num_contests' => ['value' => (int)($t->getContests()->count()) + $num_public_contests],
                 'teamid' => ['value' => 't' . $t->getTeamId()],
-                'edit' => ['value' => $editvalue, 'link' => $editlink,],
-                'delete' => ['value' => $deletevalue, 'link' => $deletelink,],
-                'send' => ['value' => $sendvalue, 'link' => $sendlink,],
                 'bubble' => [
                     'value' => "\u{25CF}",
                     'cssclass' => $statusclass,
@@ -183,6 +188,7 @@ class TeamController extends Controller
             // Save this to our list of rows
             $teams_table[] = [
                 'data' => $teamdata,
+                'actions' => $teamactions,
                 'link' => $this->generateUrl('legacy.jury_team', ['id' => $t->getTeamId()]),
                 'cssclass' => "category" . $t->getCategory()->getCategoryId()
             ];
@@ -190,6 +196,7 @@ class TeamController extends Controller
         return $this->render('@DOMJudge/jury/teams.html.twig', [
             'teams' => $teams_table,
             'table_fields' => $table_fields,
+            'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 1,
         ]);
     }
 
