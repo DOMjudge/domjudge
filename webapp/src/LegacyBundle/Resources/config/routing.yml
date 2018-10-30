@@ -10,8 +10,6 @@ legacy.jury_internal_errors:
   path: /jury/internal_errors.php
 legacy.jury_judgehost_restrictions:
   path: /jury/judgehost_restrictions.php
-legacy.jury_users:
-    path: /jury/users.php
 legacy.jury_clarification:
   path: /jury/clarification.php
 legacy.jury_clarifications:

@@ -408,7 +408,7 @@ class User implements UserInterface, \Serializable
     /**
      * Get roles
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return array
      */
     public function getRoles()
     {

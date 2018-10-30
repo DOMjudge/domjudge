@@ -119,12 +119,4 @@ class ExecutableController extends Controller
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 0,
         ]);
     }
-
-    /**
-     * @Route("/jury/executables.php", name="jury_executables_php_redirect")
-     */
-    public function executablesRedirectAction(Request $request)
-    {
-        return $this->redirectToRoute('jury_executables');
-    }
 }

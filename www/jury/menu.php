@@ -33,8 +33,8 @@ global $updates;
     } ?>
 <?php if (checkrole('jury')) {
         ?>
-<a href="teams.php" accesskey="t"><i class="fas fa-users"></i> teams</a>
-<a href="users.php" accesskey="u"><i class="fas fa-user"></i> users</a>
+<a href="teams" accesskey="t"><i class="fas fa-users"></i> teams</a>
+<a href="users" accesskey="u"><i class="fas fa-user"></i> users</a>
 <?php
     $nunread = count($updates['clarifications']);
         if ($nunread > 0) {

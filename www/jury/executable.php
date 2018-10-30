@@ -96,7 +96,7 @@ if (isset($_POST['upload'])) {
         if (count($_FILES['executable_archive']['tmp_name']) == 1) {
             header('Location: '.$pagename.'?id='.urlencode((string)(empty($newid)?$id:$newid)));
         } else {
-            header('Location: executables.php');
+            header('Location: executables');
         }
     } else {
         error("Missing filename for executable upload");

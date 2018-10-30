@@ -372,4 +372,40 @@ class Utils
         }
         return sprintf("%.${decimals}lf&nbsp;%s", round($display, $decimals), $units[$i]);
     }
+
+    /**
+     * Print a time formatted as specified. The format is according to strftime().
+     * @param string|float $datetime
+     * @param string       $format
+     * @return string
+     */
+    public static function printtime($datetime, string $format): string
+    {
+        if (empty($datetime)) {
+            return '';
+        }
+        return Utils::specialchars(strftime($format, (int)floor($datetime)));
+    }
+
+    /**
+     * Wrapper around PHP's htmlspecialchars() to set desired options globally:
+     *
+     * - ENT_QUOTES: Also convert single quotes, in case string is contained
+     *   in a single quoted context.
+     * - ENT_HTML5: Display those single quotes as the HTML5 entity &apos;.
+     * - ENT_SUBSTITUTE: Replace any invalid Unicode characters with the
+     *   Unicode replacement character.
+     *
+     * Additionally, set the character set explicitly to the DOMjudge global
+     * character set.
+     * @param string $string
+     * @return string
+     */
+    public static function specialchars(string $string) : string
+    {
+        return htmlspecialchars(
+            $string,
+            ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE
+        );
+    }
 }

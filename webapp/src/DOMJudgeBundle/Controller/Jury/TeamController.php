@@ -2,6 +2,7 @@
 
 namespace DOMJudgeBundle\Controller\Jury;
 
+use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
@@ -21,17 +22,26 @@ use Symfony\Component\Routing\Annotation\Route;
 class TeamController extends Controller
 {
     /**
-     * @var EventLogService
+     * @var EntityManagerInterface
      */
-    protected $eventLogService;
+    protected $entityManager;
 
     /**
      * @var DOMJudgeService
      */
     private $DOMJudgeService;
 
-    public function __construct(DOMJudgeService $DOMJudgeService, EventLogService $eventLogService)
-    {
+    /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService
+    ) {
+        $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
         $this->eventLogService = $eventLogService;
     }
@@ -41,9 +51,8 @@ class TeamController extends Controller
      */
     public function indexAction(Request $request, Packages $assetPackage)
     {
-        $em = $this->getDoctrine()->getManager();
         /** @var Team[] $teams */
-        $teams = $em->createQueryBuilder()
+        $teams = $this->entityManager->createQueryBuilder()
             ->select('t', 'c', 'a', 'cat')
             ->from('DOMJudgeBundle:Team', 't')
             ->leftJoin('t.contests', 'c')
@@ -54,12 +63,12 @@ class TeamController extends Controller
             ->getQuery()->getResult();
 
         $contests             = $this->DOMJudgeService->getCurrentContests();
-        $num_public_contests  = $em->createQueryBuilder()
+        $num_public_contests  = $this->entityManager->createQueryBuilder()
             ->select('count(c.cid) as num_contests')
             ->from('DOMJudgeBundle:Contest', 'c')
             ->andWhere('c.public = 1')
             ->getQuery()->getSingleResult()['num_contests'];
-        $teams_that_submitted = $em->createQueryBuilder()
+        $teams_that_submitted = $this->entityManager->createQueryBuilder()
             ->select('t.teamid as teamid, count(t.teamid) as num_submitted')
             ->from('DOMJudgeBundle:Team', 't')
             ->join('t.submissions', 's')
@@ -69,7 +78,7 @@ class TeamController extends Controller
             ->getQuery()->getResult();
         $teams_that_submitted = array_column($teams_that_submitted, 'num_submitted', 'teamid');
 
-        $teams_that_solved = $em->createQueryBuilder()
+        $teams_that_solved = $this->entityManager->createQueryBuilder()
             ->select('t.teamid as teamid, count(t.teamid) as num_correct')
             ->from('DOMJudgeBundle:Team', 't')
             ->join('t.submissions', 's')
@@ -212,13 +221,5 @@ class TeamController extends Controller
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 1,
         ]);
-    }
-
-    /**
-     * @Route("/teams.php", name="jury_teams_php_redirect")
-     */
-    public function teamsRedirectAction(Request $request)
-    {
-        return $this->redirectToRoute('jury_teams');
     }
 }
