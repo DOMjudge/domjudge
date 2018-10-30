@@ -348,9 +348,11 @@ while ($cdata['cid']==$cid && difftime(now(), $cdata['endtime'])<0) { // bug!
                                  VALUES (%i, %i, %s, %s, %s, %i)',
                                 $cid, $submitid, $stime, $stime, $subm[$fresult], (int)$verify);
 
-            calcScoreRow($cid, $subm['teamid'], $probid);
 
             $DB->q('COMMIT');
+
+            // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
+            calcScoreRow((int)$cid, $subm['teamid'], $probid);
 
             eventlog('submission', $submitid, 'create', $cid);
             eventlog('judging', $judgingid, 'create', $cid);

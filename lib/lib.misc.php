@@ -1026,10 +1026,11 @@ function rejudge(string $table, $id, bool $include_all, bool $full_rejudge, $rea
                     WHERE teamid = %i', $jud['teamid']);
         }
 
+        $DB->q('COMMIT');
+        // TODO: move this back to inside the commit once this is in Symfony code
         if (!$full_rejudge) {
             calcScoreRow((int)$jud['cid'], (int)$jud['teamid'], (int)$jud['probid']);
         }
-        $DB->q('COMMIT');
 
         if (!$full_rejudge) {
             auditlog('judging', $jud['judgingid'], 'mark invalid', '(rejudge)');
@@ -1097,10 +1098,10 @@ function rejudging_finish(int $rejudgingid, string $request, $userid = null, boo
             $DB->q('UPDATE submission SET rejudgingid=NULL
                     WHERE submitid=%i', $row['submitid']);
             // last update cache
-            calcScoreRow((int)$row['cid'], (int)$row['teamid'], (int)$row['probid']);
             $DB->q('COMMIT');
             // update event log
-            // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
+            // TODO: move these back to before the DB commit once it is moved to Symfony and uses Doctrine
+            calcScoreRow((int)$row['cid'], (int)$row['teamid'], (int)$row['probid']);
             eventlog('judging', $row['judgingid'], 'create', $row['cid']);
             $run_ids = $DB->q('COLUMN SELECT runid FROM judging_run
                                WHERE judgingid=%i', $row['judgingid']);
