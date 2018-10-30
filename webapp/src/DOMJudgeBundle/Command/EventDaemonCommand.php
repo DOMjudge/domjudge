@@ -125,7 +125,8 @@ class EventDaemonCommand extends ContainerAwareCommand
             }
 
             if ($selectedContest === null) {
-                $this->logger->error(sprintf('No contest found with ID or shortname \'%s\'', $input->getOption('contest')));
+                $this->logger->error(sprintf('No contest found with ID or shortname \'%s\'',
+                                             $input->getOption('contest')));
                 return 1;
             }
         } elseif ($selectedContest === null) {
@@ -174,7 +175,8 @@ class EventDaemonCommand extends ContainerAwareCommand
             $contests = $this->DOMJudgeService->getCurrentContests();
 
             if (!array_key_exists($selectedContest->getCid(), $contests)) {
-                $this->logger->error(sprintf('Contest ID \'%s\' not found (anymore) in active contests.', $selectedContest->getCid()));
+                $this->logger->error(sprintf('Contest ID \'%s\' not found (anymore) in active contests.',
+                                             $selectedContest->getCid()));
                 return 1;
             }
 
@@ -185,7 +187,10 @@ class EventDaemonCommand extends ContainerAwareCommand
                 $contestIdGetter = sprintf('get%s', ucfirst($contestIdField));
                 $contestId       = $selectedContest->{$contestIdGetter}();
                 $url             = sprintf('/contests/%s', $contestId);
-                $this->insertEvent($selectedContest, 'contests', $this->DOMJudgeService->internalApiRequest($url, Request::METHOD_GET));
+                $this->DOMJudgeService->withAllRoles(function () use ($url, $selectedContest) {
+                    $this->insertEvent($selectedContest, 'contests',
+                                       $this->DOMJudgeService->internalApiRequest($url, Request::METHOD_GET));
+                });
                 $contestStartOld        = $contestStart;
                 $contestStartEnabledOld = $contestStartEnabled;
             }
@@ -208,7 +213,8 @@ class EventDaemonCommand extends ContainerAwareCommand
                 $freezeDataOld->showFrozen(true) !== $freezeData->showFrozen(true) ||
                 $freezeDataOld->showFinal(true) !== $freezeData->showFinal(true)) {
                 $this->logger->notice('Inserting contest state update event.');
-                $this->eventLogService->log('state', '', EventLogService::ACTION_UPDATE, $selectedContest->getCid(), null, '');
+                $this->eventLogService->log('state', '', EventLogService::ACTION_UPDATE, $selectedContest->getCid(),
+                                            null, '');
             }
 
             // FIXME: generate contest state change events, ideally triggered by an alarm.
@@ -225,8 +231,8 @@ class EventDaemonCommand extends ContainerAwareCommand
 
     /**
      * @param Contest $contest
-     * @param string $endpoint
-     * @param $data
+     * @param string  $endpoint
+     * @param         $data
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     protected function insertEvent(Contest $contest, string $endpoint, $data)
@@ -251,7 +257,8 @@ class EventDaemonCommand extends ContainerAwareCommand
         // Check if there's already an old event and create/update
         // depending on previous state.
         if (!$event || $event->getAction() === EventLogService::ACTION_DELETE) {
-            $this->eventLogService->log($endpoint, null, EventLogService::ACTION_CREATE, $contest->getCid(), $json, $data['id']);
+            $this->eventLogService->log($endpoint, null, EventLogService::ACTION_CREATE, $contest->getCid(), $json,
+                                        $data['id']);
         } else {
             if (empty($event->getContent()) || $this->DOMJudgeService->jsonEncode($event->getContent()) !== $json) {
                 $this->eventLogService->log($endpoint, null, 'update', $contest->getCid(), $json, $data['id']);
@@ -278,8 +285,10 @@ class EventDaemonCommand extends ContainerAwareCommand
                 $contestIdGetter = sprintf('get%s', ucfirst($contestIdField));
                 $contestId       = $contest->{$contestIdGetter}();
 
-                $url  = sprintf('/contests/%s%s', $contestId, $endpointData[EventLogService::KEY_URL]);
-                $data = $this->DOMJudgeService->internalApiRequest($url);
+                $url = sprintf('/contests/%s%s', $contestId, $endpointData[EventLogService::KEY_URL]);
+                $this->DOMJudgeService->withAllRoles(function () use ($url, &$data) {
+                    $data = $this->DOMJudgeService->internalApiRequest($url);
+                });
 
                 if ($data === null) {
                     $this->logger->error(sprintf('No response data for endpoint \'%s\'.' . $endpoint));

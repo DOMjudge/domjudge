@@ -319,11 +319,17 @@ class DOMJudgeService
     }
 
     /**
-     * @param bool $hasAllRoles
+     * Run the given callable with all roles.
+     *
+     * This will result in all calls to checkrole() to return true.
+     *
+     * @param callable $callable
      */
-    public function setHasAllRoles(bool $hasAllRoles)
+    public function withAllRoles(callable $callable)
     {
-        $this->hasAllRoles = $hasAllRoles;
+        $this->hasAllRoles = true;
+        $callable();
+        $this->hasAllRoles = false;
     }
 
     /**

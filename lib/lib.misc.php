@@ -1642,10 +1642,10 @@ function API_request(string $url, string $verb = 'GET', string $data = '', bool 
         }
         $_SERVER['REQUEST_METHOD'] = $verb;
 
-        $G_SYMFONY->setHasAllRoles(true);
-        $request = \Symfony\Component\HttpFoundation\Request::create($url, $verb, $parsedData);
-        $response = $httpKernel->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
-        $G_SYMFONY->setHasAllRoles(false);
+        $G_SYMFONY->withAllRoles(function() use ($httpKernel, $parsedData, $verb, $url, &$response) {
+            $request  = \Symfony\Component\HttpFoundation\Request::create($url, $verb, $parsedData);
+            $response = $httpKernel->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
+        });
 
         // Set back the request method and superglobals, if other code still wants to use it
         $_SERVER['REQUEST_METHOD'] = $origMethod;
