@@ -20,16 +20,26 @@
             {{ button(path('legacy.jury_executable', {'cmd': 'add'}), 'Add new executable', 'primary', 'plus') }}
         </p>
 
-        <form style="display:inline;" action="{{ path('legacy.jury_executable') }}" method="post"
+        <form action="{{ path('legacy.jury_executable') }}" method="post"
               enctype="multipart/form-data">
-            Executable archive(s): <select name="type" id="type">
-                <option value="compare">compare</option>
-                <option value="compile">compile</option>
-                <option value="run">run</option>
-            </select>
-            <input type="file" name="executable_archive[]" id="executable_archive__" required="" multiple=""
-                   accept="application/zip">
-            <input type="submit" name="upload" id="upload" value="Upload">
+            <div class="form-row">
+                <div class="form-group col-sm-4">
+                    <label for="type">Executable type:</label>
+                    <select name="type" id="type" class="custom-select">
+                        <option value="compare">compare</option>
+                        <option value="compile">compile</option>
+                        <option value="run">run</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-sm-4">
+                    <label for="executable_archive__">Executable archive(s):</label>
+                    <input type="file" name="executable_archive[]" id="executable_archive__" required="" multiple=""
+                           accept="application/zip" class="form-control-file">
+                </div>
+            </div>
+            <input type="submit" name="upload" class="btn btn-primary" id="upload" value="Upload">
         </form>
     {% endif %}
 
