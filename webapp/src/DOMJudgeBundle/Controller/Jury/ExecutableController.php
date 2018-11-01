@@ -13,6 +13,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @Route("/jury")
+ * @Security("has_role('ROLE_JURY')")
+ */
 class ExecutableController extends Controller
 {
     /**
@@ -37,8 +41,7 @@ class ExecutableController extends Controller
     }
 
     /**
-     * @Route("/jury/executables/", name="jury_executables")
-     * @Security("has_role('ROLE_JURY')")
+     * @Route("/executables/", name="jury_executables")
      */
     public function indexAction(Request $request, Packages $assetPackage)
     {

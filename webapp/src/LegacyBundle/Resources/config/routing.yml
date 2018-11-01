@@ -20,8 +20,8 @@ legacy.jury_clarifications:
     path: /jury/clarifications.php
 legacy.jury_submissions:
     path: /jury/submissions.php
-legacy.jury_languages:
-    path: /jury/languages.php
+legacy.jury_language:
+    path: /jury/language.php
 legacy.jury_rejudgings:
     path: /jury/rejudgings.php
 legacy.jury_scoreboard:

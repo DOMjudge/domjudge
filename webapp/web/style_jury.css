@@ -169,3 +169,6 @@ div.submissions-filter ul.token-input-list {
 .has_tooltip {
 	text-decoration: dotted underline;
 }
+.data-table tr.disabled td a {
+	color: silver
+}
