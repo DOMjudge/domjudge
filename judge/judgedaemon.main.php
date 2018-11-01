@@ -582,6 +582,15 @@ function read_metadata(string $filename)
     return spyc_load($contents);
 }
 
+function send_unsent_judging_runs($unsent_judging_runs, $myhost, $judgingid) {
+    request(
+        sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
+            urlencode((string)$judgingid)),
+        'POST',
+        'batch=' . json_encode($unsent_judging_runs)
+    );
+}
+
 function judge(array $row)
 {
     global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled;
@@ -750,6 +759,7 @@ function judge(array $row)
 
     $totalcases = 0;
     $lastcase_correct = true;
+    $unsent_judging_runs = array();
     foreach ($row['testcases'] as $tc) {
         // Check whether we have received an exit signal(but not a graceful exit signal)
         if (function_exists('pcntl_signal_dispatch')) {
@@ -866,20 +876,25 @@ function judge(array $row)
 
         $lastcase_correct = $result === 'correct';
 
-        request(
-            sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
-                    urlencode((string)$row['judgingid'])),
-            'POST',
-            'testcaseid=' . urlencode((string)$tc['testcaseid'])
-            . '&runresult=' . urlencode($result)
-            . '&runtime=' . urlencode((string)$runtime)
-            . '&output_run='   . rest_encode_file($testcasedir . '/program.out', false)
-            . '&output_error=' . rest_encode_file($testcasedir . '/program.err', $output_storage_limit)
-            . '&output_system=' . rest_encode_file($testcasedir . '/system.out', $output_storage_limit)
-            . '&output_diff='  . rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit)
+        $unsent_judging_runs[] = array(
+            'testcaseid' => urlencode((string)$tc['testcaseid']),
+            'runresult' => urlencode($result),
+            'runtime' => urlencode((string)$runtime),
+            'output_run'   => rest_encode_file($testcasedir . '/program.out', false),
+            'output_error' => rest_encode_file($testcasedir . '/program.err', $output_storage_limit),
+            'output_system' => rest_encode_file($testcasedir . '/system.out', $output_storage_limit),
+            'output_diff'  => rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit)
         );
+
+        if (!$lastcase_correct) {
+           send_unsent_judging_runs($unsent_judging_runs, $myhost, $row['judgingid']);
+           $unsent_judging_runs = array();
+        }
         logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
     } // end: for each testcase
+    if (!empty($unsent_judging_runs)) {
+        send_unsent_judging_runs($unsent_judging_runs, $myhost, $row['judgingid']);
+    }
 
     // revoke readablity for domjudge-run user to this workdir
     chmod($workdir, 0700);
