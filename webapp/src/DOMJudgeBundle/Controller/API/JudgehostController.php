@@ -627,7 +627,7 @@ class JudgehostController extends FOSRestController
     }
 
     /**
-     * Add a new JudgingRun. When relevant, finalize the judging.
+     * Add an array of JudgingRuns. When relevant, finalize the judging.
      * @Rest\Post("/add-judging-run/{hostname}/{judgingId}")
      * @Security("has_role('ROLE_JUDGEHOST')")
      * @SWG\Response(
@@ -701,41 +701,91 @@ class JudgehostController extends FOSRestController
         string $hostname,
         int $judgingId
     ) {
-        $required = [
-            'testcaseid',
-            'runresult',
-            'runtime',
-            'output_run',
-            'output_diff',
-            'output_error',
-            'output_system'
-        ];
+        if ($request->request->has('batch')) {
+            $this->addMultipleJudgingRuns($request, $hostname, $judgingId);
+        } else {
+            $required = [
+                'testcaseid',
+                'runresult',
+                'runtime',
+                'output_run',
+                'output_diff',
+                'output_error',
+                'output_system'
+            ];
 
-        foreach ($required as $argument) {
-            if (!$request->request->has($argument)) {
-                throw new BadRequestHttpException(
-                    sprintf("Argument '%s' is mandatory", $argument));
+            foreach ($required as $argument) {
+                if (!$request->request->has($argument)) {
+                    throw new BadRequestHttpException(
+                        sprintf("Argument '%s' is mandatory", $argument));
+                }
             }
+
+            $testCaseId = $request->request->get('testcaseid');
+            $runResult = $request->request->get('runresult');
+            $runTime = $request->request->get('runtime');
+            $outputRun = $request->request->get('output_run');
+            $outputDiff = $request->request->get('output_diff');
+            $outputError = $request->request->get('output_error');
+            $outputSystem = $request->request->get('output_system');
+
+            /** @var Judgehost $judgehost */
+            $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
+            if (!$judgehost) {
+                return;
+            }
+
+            /** @var Judging $judging */
+            $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
+            $this->addSingleJudgingRun($hostname, $judgingId, $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun);
+            $judgehost->setPolltime(Utils::now());
+            $this->entityManager->flush();
         }
+    }
 
-        $testCaseId   = $request->request->get('testcaseid');
-        $runResult    = $request->request->get('runresult');
-        $runTime      = $request->request->get('runtime');
-        $outputRun    = $request->request->get('output_run');
-        $outputDiff   = $request->request->get('output_diff');
-        $outputError  = $request->request->get('output_error');
-        $outputSystem = $request->request->get('output_system');
-
-        /** @var Judgehost $judgehost */
+    private function addMultipleJudgingRuns(Request $request, string $hostname, int $judgingId) {
+        $judgingRuns = json_decode($request->request->get('batch'), TRUE);
+        if (!is_array($judgingRuns)) {
+            throw new BadRequestHttpException(
+                sprintf("Argument 'batch' is not an array"));
+        }
+        /** @var Judgehost $judgehost */ // <--- FIXME: do this in the other commit
         $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
         if (!$judgehost) {
+            // FIXME: silent return??? also at the original place
             return;
         }
-
         /** @var Judging $judging */
         $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
-        $this->addSingleJudging($hostname, $judgingId, $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun);
+        // FIXME: why don't we do a similar check as three lines above?
+        foreach ($judgingRuns as $judgingRun) {
+            $required = [
+                'testcaseid',
+                'runresult',
+                'runtime',
+                'output_run',
+                'output_diff',
+                'output_error',
+                'output_system'
+            ];
 
+            // FIXME: this check seems to be broken...
+            foreach ($required as $argument) {
+                if (!isset($judgingRun[$argument])) {
+                    throw new BadRequestHttpException(
+                        sprintf("Argument '%s' is mandatory, got '%s'.", $argument, var_export($judgingRun, TRUE)));
+                }
+            }
+
+            $testCaseId = $judgingRun['testcaseid'];
+            $runResult = $judgingRun['runresult'];
+            $runTime = $judgingRun['runtime'];
+            $outputRun = $judgingRun['output_run'];
+            $outputDiff = $judgingRun['output_diff'];
+            $outputError = $judgingRun['output_error'];
+            $outputSystem = $judgingRun['output_system'];
+            $this->addSingleJudgingRun($hostname, $judgingId, $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun);
+        }
         $judgehost->setPolltime(Utils::now());
         $this->entityManager->flush();
     }
@@ -897,7 +947,7 @@ class JudgehostController extends FOSRestController
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\ORMException
      */
-    public function addSingleJudging(string $hostname, int $judgingId, $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun)
+    private function addSingleJudgingRun(string $hostname, int $judgingId, $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun)
     {
         /** @var Testcase $testCase */
         $testCase = $this->entityManager->getRepository(Testcase::class)->find($testCaseId);
