@@ -295,7 +295,7 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
 
     // Take problem:externalid from zip filename, and use as backup for
     // problem:name and contestproblem:shortname if these are not specified.
-    $extid = preg_replace('[^a-zA-Z0-9-_]', '', basename($filename, '.zip'));
+    $extid = preg_replace('/[^a-zA-Z0-9-_]/', '', basename($filename, '.zip'));
     if ((string)$extid==='') {
         error("Could not extract an identifier from '" . basename($filename) . "'.");
     }
