@@ -495,6 +495,17 @@ class JudgehostController extends FOSRestController
             $result['judgingid'] = $judging->getJudgingid();
         });
 
+        $testcases = $submission->getProblem()->getTestcases();
+        $testcase_md5s = array();
+        foreach ($testcases as $testcase) {
+            $testcase_md5s[$testcase->getRank()] = array(
+                'md5sum_input' => $testcase->getMd5sumInput(),
+                'md5sum_output' => $testcase->getMd5sumOutput(),
+                'testcaseid' => $testcase->getTestcaseid()
+            );
+        }
+        $result['testcases'] = $testcase_md5s;
+
         return $result;
     }
 
