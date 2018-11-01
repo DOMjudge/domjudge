@@ -30,7 +30,7 @@ class ExecutableController extends Controller
     protected $DOMJudgeService;
 
     /**
-     * GeneralInfoController constructor.
+     * ExecutableController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
      */

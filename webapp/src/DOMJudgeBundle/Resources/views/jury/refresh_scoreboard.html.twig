@@ -1,0 +1,9 @@
+<div class="alert alert-warning">
+    <strong>Warning:</strong> Refresh scoreboard cache
+    <hr>
+    <p>{{ message }}</p>
+    <form action="{{ path('legacy.jury_refresh_cache') }}" method="POST">
+        <input type="hidden" name="cid" value="{{ contest.cid }}"/>
+        <input type="submit" name="refresh" value="Recalculate caches now" class="btn btn-primary"/>
+    </form>
+</div>

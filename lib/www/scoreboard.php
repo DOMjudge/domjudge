@@ -517,7 +517,7 @@ function renderScoreBoardTable(
                 echo "<table id=\"categ_legend\" class=\"scoreboard scorelegend" .
                     (IS_JURY ? ' scoreboard_jury' : '') . "\">\n" .
                     "<thead><tr><th scope=\"col\">" .
-                    jurylink('team_categories.php', 'Categories') .
+                    jurylink('categories', 'Categories') .
                     "</th></tr></thead>\n<tbody>\n";
                 foreach ($categs as $cat) {
                     if (!isset($usedCategories[$cat['categoryid']])) {

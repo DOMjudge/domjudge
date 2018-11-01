@@ -1,0 +1,28 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block title %}Categories - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    {% if edited and contest %}
+        {% include '@DOMJudge/jury/refresh_scoreboard.html.twig' with {contest: contest, message: 'If the category sort order was changed, it may be necessary to recalculate any cached scoreboards.'} %}
+    {% endif %}
+
+    <h1>Categories</h1>
+
+    {{ macros.table(team_categories, table_fields, num_actions) }}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <p>
+            {{ button(path('legacy.jury_team_category', {'cmd': 'add'}), 'Add new category', 'primary', 'plus') }}
+        </p>
+    {% endif %}
+
+{% endblock %}

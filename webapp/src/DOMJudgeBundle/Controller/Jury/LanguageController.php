@@ -35,7 +35,7 @@ class LanguageController extends Controller
     protected $eventLogService;
 
     /**
-     * GeneralInfoController constructor.
+     * LanguageController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
      * @param EventLogService        $eventLogService
