@@ -80,49 +80,23 @@ class FallbackController extends Controller
 
 
         $thefile = realpath($this->webDir . $request->getPathInfo());
-        // API is handled separately, current default is v4.
-        $apiPaths = array(
-            'api/v3/' => '/api/v3/index.php',
-            'api/v4/' => '/api/v4/index.php',
-            'api/'    => '/api/v4/index.php',
-        );
-        $apiMatch = false;
-        $exactApiMatch = false;
-        foreach ($apiPaths as $apiPath => $apiRedirect) {
-            if ($apiPath === $path) {
-                $exactApiMatch = true;
-            }
-            if (substr($path, 0, strlen($apiPath)) == $apiPath) {
-                $_SERVER['PHP_SELF'] = 'index.php';
-                $thefile = realpath($this->webDir . $apiRedirect);
-                $_SERVER['PATH_INFO'] = substr($path, strlen($apiPath));
-                $apiMatch = true;
-                break;
-            }
-        }
 
         if ($request->server->has('REQUEST_URI')) {
             $_SERVER['REQUEST_URI'] = $request->server->get('REQUEST_URI');
         }
 
-        if ($apiMatch) {
-            if (!$exactApiMatch) {
-                $request->setRequestFormat('json');
-            }
-        } else {
-            $_SERVER['PHP_SELF'] = basename($path);
-            $_SERVER['SCRIPT_NAME'] = basename($path);// This is used in a few scripts to set refererrer
-            if ($thefile!==false && is_dir($thefile)) {
-                $thefile = realpath($thefile . "/index.php");
-                $_SERVER['PHP_SELF'] = "index.php";
+        $_SERVER['PHP_SELF'] = basename($path);
+        $_SERVER['SCRIPT_NAME'] = basename($path);// This is used in a few scripts to set refererrer
+        if ($thefile!==false && is_dir($thefile)) {
+            $thefile = realpath($thefile . "/index.php");
+            $_SERVER['PHP_SELF'] = "index.php";
 
-                // Make sure it ends with a trailing slash, otherwise redirect
-                $pathInfo = $request->getPathInfo();
-                $requestUri = $request->getRequestUri();
-                if (rtrim($pathInfo, ' /') == $pathInfo) {
-                    $url = str_replace($pathInfo, $pathInfo . '/', $requestUri);
-                    return $this->redirect($url, 301);
-                }
+            // Make sure it ends with a trailing slash, otherwise redirect
+            $pathInfo = $request->getPathInfo();
+            $requestUri = $request->getRequestUri();
+            if (rtrim($pathInfo, ' /') == $pathInfo) {
+                $url = str_replace($pathInfo, $pathInfo . '/', $requestUri);
+                return $this->redirect($url, 301);
             }
         }
         if ($thefile===false || !file_exists($thefile)) {
