@@ -767,7 +767,8 @@ function judge(array $row)
     $overshoot = dbconfig_get_rest('timelimit_overshoot');
 
     $totalcases = 0;
-    while (true) {
+    $lastcase_correct = true;
+    foreach ($row['testcases'] as $tc) {
         // Check whether we have received an exit signal(but not a graceful exit signal)
         if (function_exists('pcntl_signal_dispatch')) {
             pcntl_signal_dispatch();
@@ -787,30 +788,32 @@ function judge(array $row)
             break;
         }
 
-        // get the next testcase
-        $testcase = request(sprintf('testcases/next-to-judge/%s', $row['judgingid']), 'GET', '');
-        $tc = dj_json_decode($testcase);
-        if ($tc === null) {
-            $disabled = dj_json_encode(array(
-                'kind' => 'problem',
-                'probid' => $row['probid']));
-            $judgehostlog = read_judgehostlog();
-            $error_id = request(
-                'judgehosts/internal-error',
-                'POST',
-                'judgingid=' . urlencode((string)$row['judgingid']) .
-                '&cid=' . urlencode((string)$row['cid']) .
-                '&description=' . urlencode("no test cases found") .
-                '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
-                '&disabled=' . urlencode($disabled)
-            );
-            logmsg(LOG_ERR, "No testcases found for p$row[probid] => internal error " . $error_id);
-            break;
-        }
+        if (!$lastcase_correct) {
+            // get the next testcase
+            $testcase = request(sprintf('testcases/next-to-judge/%s', $row['judgingid']), 'GET', '');
+            $tc = dj_json_decode($testcase);
+            if ($tc === null) {
+                $disabled = dj_json_encode(array(
+                    'kind' => 'problem',
+                    'probid' => $row['probid']));
+                $judgehostlog = read_judgehostlog();
+                $error_id = request(
+                    'judgehosts/internal-error',
+                    'POST',
+                    'judgingid=' . urlencode((string)$row['judgingid']) .
+                    '&cid=' . urlencode((string)$row['cid']) .
+                    '&description=' . urlencode("no test cases found") .
+                    '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
+                    '&disabled=' . urlencode($disabled)
+                );
+                logmsg(LOG_ERR, "No testcases found for p$row[probid] => internal error " . $error_id);
+                break;
+            }
 
-        // empty means: no more testcases for this judging.
-        if (empty($tc)) {
-            break;
+            // empty means: no more testcases for this judging.
+            if (empty($tc)) {
+                break;
+            }
         }
 
         $totalcases++;
@@ -878,6 +881,8 @@ function judge(array $row)
             disable('problem', 'probid', $row['probid'], "compare script '" . $row['compare'] . "' crashed", $row['judgingid'], $row['cid']);
             return;
         }
+
+        $lastcase_correct = $result === 'correct';
 
         request(
             sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
