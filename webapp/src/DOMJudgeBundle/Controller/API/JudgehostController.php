@@ -755,9 +755,6 @@ class JudgehostController extends FOSRestController
             // FIXME: silent return??? also at the original place
             return;
         }
-        /** @var Judging $judging */
-        $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
-        // FIXME: why don't we do a similar check as three lines above?
         foreach ($judgingRuns as $judgingRun) {
             $required = [
                 'testcaseid',
@@ -784,6 +781,9 @@ class JudgehostController extends FOSRestController
             $outputDiff = $judgingRun['output_diff'];
             $outputError = $judgingRun['output_error'];
             $outputSystem = $judgingRun['output_system'];
+            /** @var Judging $judging */
+            $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
+            // FIXME: why don't we do a similar check as some lines above?
             $this->addSingleJudgingRun($hostname, $judgingId, $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun);
         }
         $judgehost->setPolltime(Utils::now());
