@@ -62,9 +62,11 @@
                     {% endfor %}
                     {% for action in row.actions %}
                         <td>
-                            <a href="{{ action.link }}" title="{{ action.title }}">
-                                <i class="fas fa-{{ action.icon }}"></i>
-                            </a>
+                            {% if action %}
+                                <a href="{{ action.link }}" title="{{ action.title }}">
+                                    <i class="fas fa-{{ action.icon }}"></i>
+                                </a>
+                            {% endif %}
                         </td>
                     {% endfor %}
                 </tr>

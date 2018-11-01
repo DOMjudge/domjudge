@@ -105,7 +105,7 @@ class UserController extends Controller
                     'link' => $this->generateUrl('legacy.jury_user', [
                         'cmd' => 'edit',
                         'id' => $u->getUserid(),
-                        'referrer' => 'users/'
+                        'referrer' => 'users'
                     ])
                 ];
                 $useractions[] = [

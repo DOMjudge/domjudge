@@ -439,7 +439,7 @@ disabling this also makes the problem invisible to teams and public
 
 <p>
 The <tt>probid</tt> key is required when importing a new problem from
-the <tt>jury/problems.php</tt> overview page, while it is ignored when
+the <tt>jury/problems</tt> overview page, while it is ignored when
 uploading into an existing problem. All other keys are optional. If
 they are present, the respective value will be overwritten; if not
 present, then the value will not be changed or a default chosen when

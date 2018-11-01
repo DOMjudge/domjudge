@@ -152,7 +152,7 @@ class TeamController extends Controller
                     'link' => $this->generateUrl('legacy.jury_team', [
                         'cmd' => 'edit',
                         'id' => $t->getTeamId(),
-                        'referrer' => 'teams/'
+                        'referrer' => 'teams'
                     ])
                 ];
                 $teamactions[] = [

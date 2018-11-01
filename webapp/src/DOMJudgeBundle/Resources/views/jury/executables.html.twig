@@ -20,11 +20,10 @@
             {{ button(path('legacy.jury_executable', {'cmd': 'add'}), 'Add new executable', 'primary', 'plus') }}
         </p>
 
-        <form action="{{ path('legacy.jury_executable') }}" method="post"
-              enctype="multipart/form-data">
+        <form action="{{ path('legacy.jury_executable') }}" method="post" enctype="multipart/form-data">
             <div class="form-row">
                 <div class="form-group col-sm-4">
-                    <label for="type">Executable type:</label>
+                    <label for="type">Executable type</label>
                     <select name="type" id="type" class="custom-select">
                         <option value="compare">compare</option>
                         <option value="compile">compile</option>
@@ -34,7 +33,7 @@
             </div>
             <div class="form-row">
                 <div class="form-group col-sm-4">
-                    <label for="executable_archive__">Executable archive(s):</label>
+                    <label for="executable_archive__">Executable archive(s)</label>
                     <input type="file" name="executable_archive[]" id="executable_archive__" required="" multiple=""
                            accept="application/zip" class="form-control-file">
                 </div>

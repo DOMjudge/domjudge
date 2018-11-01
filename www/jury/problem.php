@@ -76,7 +76,7 @@ if (isset($_POST['upload'])) {
                 '">Return to problem p' . specialchars((string)$probid) .
                 ': ' . specialchars($probname) . ".</a></p>\n";
         }
-        echo "<p><a href=\"problems.php\">Return to problems overview.</a></p>\n";
+        echo "<p><a href=\"problems\">Return to problems overview.</a></p>\n";
     } else {
         error("Missing filename for problem upload. Maybe you have to increase upload_max_filesize, see config checker.");
     }

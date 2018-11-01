@@ -88,7 +88,7 @@ class Problem
 
     /**
      * @var string
-     * @ORM\Column(type="blob", name="problemtext_type", options={"comment"="File type of problem text"}, nullable=true)
+     * @ORM\Column(type="string", name="problemtext_type", options={"comment"="File type of problem text"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $problemtext_type;

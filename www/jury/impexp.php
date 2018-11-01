@@ -18,7 +18,7 @@ requireAdmin();
 
 <ul>
 <li><a href="impexp_contestyaml.php">Contest data (contest.yaml)</a></li>
-<li><a href="problems.php">Problem archive</a></li>
+<li><a href="problems">Problem archive</a></li>
 <li>Tab separated, export:
     <a href="impexp_tsv.php?act=ex&amp;fmt=groups">groups.tsv</a>,
     <a href="impexp_tsv.php?act=ex&amp;fmt=teams">teams.tsv</a>,

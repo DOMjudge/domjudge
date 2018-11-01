@@ -2,6 +2,10 @@ legacy.index:
     path: /
 legacy.jury_team:
     path: /jury/team.php
+legacy.jury_problem:
+    path: /jury/problem.php
+legacy.jury_export_problem:
+    path: /jury/export_problem.php
 legacy.jury_balloons:
   path: /jury/balloons.php
 legacy.jury_judgehosts:
@@ -22,8 +26,6 @@ legacy.jury_rejudgings:
     path: /jury/rejudgings.php
 legacy.jury_scoreboard:
     path: /jury/scoreboard.php
-legacy.jury_problems:
-    path: /jury/problems.php
 legacy.team_index:
     path: /team/
 legacy.jury_contests:

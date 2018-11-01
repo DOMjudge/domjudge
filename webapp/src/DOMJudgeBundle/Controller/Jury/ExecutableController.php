@@ -80,7 +80,7 @@ class ExecutableController extends Controller
                     'link' => $this->generateUrl('legacy.jury_executable', [
                         'cmd' => 'edit',
                         'id' => $e->getExecid(),
-                        'referrer' => 'executables/'
+                        'referrer' => 'executables'
                     ])
                 ];
                 $execactions[] = [

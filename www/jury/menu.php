@@ -10,7 +10,7 @@ global $updates;
 } ?>
 <?php if (checkrole('jury')) {
         ?>
-<a href="problems.php" accesskey="p"><i class="fas fa-book-open"></i> problems</a>
+<a href="problems" accesskey="p"><i class="fas fa-book-open"></i> problems</a>
 <?php
     } ?>
 <?php if (IS_ADMIN) {

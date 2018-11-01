@@ -7,7 +7,7 @@
     {% endif %}
 
     {% if is_granted('ROLE_JURY') %}
-      <a href="problems.php" accesskey="p"><i class="fas fa-book-open"></i> problems</a>
+      <a href="{{ path('jury_problems') }}" accesskey="p"><i class="fas fa-book-open"></i> problems</a>
     {% endif %}
 
     {% if is_granted('ROLE_ADMIN') %}
@@ -23,8 +23,8 @@
     {% endif %}
 
     {% if is_granted('ROLE_JURY') %}
-      <a href="teams" accesskey="t"><i class="fas fa-users"></i> teams</a>
-      <a href="users" accesskey="u"><i class="fas fa-users"></i> users</a>
+      <a href="{{ path('jury_teams') }}" accesskey="t"><i class="fas fa-users"></i> teams</a>
+      <a href="{{ path('jury_users') }}" accesskey="u"><i class="fas fa-users"></i> users</a>
       {% if updates['clarifications']|length > 0 %}
         <a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications ({{  updates['clarifications']|length }} new)</a>
       {% else %}
