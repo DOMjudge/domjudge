@@ -2,6 +2,9 @@ DOMjudge Programming Contest Judging System
 
 Version 6.0.3 - DEV
 -------------------
+ - Fix problem name sanitizing in zip upload.
+ - Improve error detection while uploading test cases.
+ - Don't break judgedaemon if in/output are missing for a testcase.
 
 Version 6.0.2 - 22 October 2018
 -------------------------------
