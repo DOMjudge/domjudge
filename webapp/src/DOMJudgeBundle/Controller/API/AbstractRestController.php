@@ -159,7 +159,7 @@ abstract class AbstractRestController extends FOSRestController
             ->orderBy('c.activatetime');
 
         // Filter on contests this user has access to
-        if (!$this->DOMJudgeService->checkrole('jury')) {
+        if (!$this->DOMJudgeService->checkrole('jury') && !$this->DOMJudgeService->checkrole('judgehost')) {
             if ($this->DOMJudgeService->checkrole('team') && $this->DOMJudgeService->getUser()->getTeamid()) {
                 $qb->leftJoin('c.teams', 'ct')
                     ->andWhere('ct.teamid = :teamid OR c.public = 1')
