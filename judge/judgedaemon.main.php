@@ -14,8 +14,7 @@ require(LIBVENDORDIR . '/autoload.php');
 
 require(ETCDIR . '/judgehost-config.php');
 
-$resturl = $restuser = $restpass = null;
-$endpoints = array();
+$endpoints = [];
 
 function read_credentials()
 {
@@ -34,15 +33,37 @@ function read_credentials()
         if (array_key_exists($endpointID, $endpoints)) {
             error("Error parsing REST API credentials. Duplicate endpoint ID.");
         }
-        $endpoints[$endpointID] = array(
+        $endpoints[$endpointID] = [
             "url" => $resturl,
             "user" => $restuser,
             "pass" => $restpass,
             "waiting" => false
-        );
+            ];
     }
     if (count($endpoints) <= 0) {
         error("Error parsing REST API credentials.");
+    }
+}
+
+
+function setup_curl_handle(string $restuser, string $restpass)
+{
+    $curl_handle = curl_init();
+    curl_setopt($curl_handle, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
+    curl_setopt($curl_handle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_setopt($curl_handle, CURLOPT_USERPWD, $restuser . ":" . $restpass);
+    curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, true);
+    return $curl_handle;
+}
+
+function close_curl_handles()
+{
+    global $endpoints;
+    foreach($endpoints as $id => $endpoint) {
+        if ( ! empty($endpoint['curl']) ) {
+            curl_close($endpoint['curl']);
+            unset($endpoints[$id]['curl']);
+        }
     }
 }
 
@@ -57,7 +78,7 @@ function read_credentials()
 $lastrequest = '';
 function request(string $url, string $verb = 'GET', string $data = '', bool $failonerror = true)
 {
-    global $resturl, $restuser, $restpass, $lastrequest;
+    global $endpoints, $endpointID, $lastrequest;
 
     // Don't flood the log with requests for new judgings every few seconds.
     if (strpos($url, 'judgehosts/next-judging') === 0 && $verb==='POST') {
@@ -70,31 +91,33 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
         $lastrequest = $url;
     }
 
-    $url = $resturl . "/" . $url;
+    $url = $endpoints[$endpointID]['url'] . "/" . $url;
+    $curl_handle = $endpoints[$endpointID]['ch'];
     if ($verb == 'GET') {
         $url .= '?' . $data;
     }
 
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_USERPWD, $restuser . ":" . $restpass);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl_handle, CURLOPT_URL, $url);
+
+    curl_setopt($curl_handle, CURLOPT_CUSTOMREQUEST, $verb);
+    curl_setopt($curl_handle, CURLOPT_HTTPHEADER, []);
     if ($verb == 'POST') {
-        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($curl_handle, CURLOPT_POST, true);
         if (is_array($data)) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: multipart/form-data'));
+            curl_setopt($curl_handle, CURLOPT_HTTPHEADER, ['Content-Type: multipart/form-data']);
         }
-    } elseif ($verb == 'PUT' || $verb == 'DELETE') {
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $verb);
+    } else {
+        curl_setopt($curl_handle, CURLOPT_POST, false);
     }
     if ($verb == 'POST' || $verb == 'PUT') {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $data);
+    } else {
+        curl_setopt($curl_handle, CURLOPT_POSTFIELDS, null);
     }
 
-    $response = curl_exec($ch);
+    $response = curl_exec($curl_handle);
     if ($response === false) {
-        $errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($ch);
+        $errstr = "Error while executing curl $verb to url " . $url . ": " . curl_error($curl_handle);
         if ($failonerror) {
             error($errstr);
         } else {
@@ -102,7 +125,7 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
             return null;
         }
     }
-    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $status = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
     if ($status < 200 || $status >= 300) {
         $errstr = "Error while executing curl $verb to url " . $url .
             ": http status code: " . $status . ", response: " . $response;
@@ -114,7 +137,6 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
         }
     }
 
-    curl_close($ch);
     return $response;
 }
 
@@ -423,15 +445,12 @@ if (! USE_CHROOT) {
 
 
 // Perform setup work for each endpoint we are communicating with
-foreach ($endpoints as $id=>$endpoint) {
-    $resturl  = $endpoint['url'];
-    $restuser = $endpoint['user'];
-    $restpass = $endpoint['pass'];
-
-    logmsg(LOG_NOTICE, "Registering judgehost on endpoint $resturl");
+foreach ($endpoints as $endpointID => $endpoint) {
+    logmsg(LOG_NOTICE, "Registering judgehost on endpoint " . $endpoint['url']);
+    $endpoints[$endpointID]['ch'] = setup_curl_handle($endpoint['user'], $endpoint['pass']);
 
     // Create directory where to test submissions
-    $workdirpath = JUDGEDIR . "/$myhost/endpoint-$id";
+    $workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
     system("mkdir -p $workdirpath/testcase", $retval);
     if ($retval != 0) {
         error("Could not create $workdirpath");
@@ -477,9 +496,6 @@ while (true) {
     // Increment our currentEndpoint pointer
     $currentEndpoint = ($currentEndpoint + 1) % count($endpoints);
     $endpointID = $endpointIDs[$currentEndpoint];
-    $resturl  = $endpoints[$endpointID]["url"];
-    $restuser = $endpoints[$endpointID]["user"];
-    $restpass = $endpoints[$endpointID]["pass"];
     $workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
 
     // Check whether we have received an exit signal
@@ -488,6 +504,7 @@ while (true) {
     }
     if ($exitsignalled) {
         logmsg(LOG_NOTICE, "Received signal, exiting.");
+        close_curl_handles();
         exit;
     }
 
@@ -543,6 +560,7 @@ while (true) {
     // Check if we were interrupted while judging, if so, exit(to avoid sleeping)
     if ($exitsignalled) {
         logmsg(LOG_NOTICE, "Received signal, exiting.");
+        close_curl_handles();
         exit;
     }
 
