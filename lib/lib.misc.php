@@ -740,7 +740,8 @@ function submit_solution(
     string $entry_point = null,
     $extid = null,
     float $submittime = null,
-    $extresult = null
+    $extresult = null,
+    bool $allowLocalFiles = false
 ) {
     /** @var \DOMJudgeBundle\Service\SubmissionService $G_SUBMISSION_SERVICE */
     global $G_SUBMISSION_SERVICE;
@@ -752,7 +753,7 @@ function submit_solution(
         $filenames = array_values($filenames);
 
         foreach ($files as $index => $file) {
-            $uploadedFiles[] = new \Symfony\Component\HttpFoundation\File\UploadedFile($file, $filenames[$index]);
+            $uploadedFiles[] = new \Symfony\Component\HttpFoundation\File\UploadedFile($file, $filenames[$index], null, null, null, $allowLocalFiles);
         }
 
         $submission = $G_SUBMISSION_SERVICE->submitSolution($team, $prob, $contest, $lang, $uploadedFiles, $origsubmitid, $entry_point, $extid, $submittime, $extresult);

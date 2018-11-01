@@ -318,8 +318,11 @@ while (true) {
                 $files,
                 $filenames,
                 null,
+                null,
                 $id,
-                val($run, 'timestamp')
+                val($run, 'timestamp'),
+                null,
+                true
             );
 
             logmsg(LOG_INFO, "Imported submission '".val($run, 'id')."' as s$id");

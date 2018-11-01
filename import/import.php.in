@@ -78,10 +78,12 @@ submit_solution(
     $langext,
     $files,
     $filenames,
-                null,
+    null,
+    null,
     $extid,
     $submittime,
-    $extresult
+    $extresult,
+    true
 );
 
 exit;

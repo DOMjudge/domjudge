@@ -232,14 +232,17 @@ while (true) {
 
         $id = submit_solution(
             $teamid,
-                              remap('problem', $subm['problem']),
-                              $cid,
-                              remap('language', $subm['language']),
-                              $files,
+            remap('problem', $subm['problem']),
+            $cid,
+            remap('language', $subm['language']),
+            $files,
             $filenames,
             null,
-                              $subm['id'],
-            $subm['time']
+            null,
+            $subm['id'],
+            $subm['time'],
+            null,
+            true
         );
 
         logmsg(LOG_INFO, "Imported submission '".$subm['id']."' as s$id");

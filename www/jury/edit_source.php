@@ -42,7 +42,11 @@ if (isset($_POST['origsubmitid'])) {
         $files,
         $filenames,
         $_POST['origsubmitid'],
-        $_POST['entry_point']
+        $_POST['entry_point'],
+        null,
+        null,
+        null,
+        true
     );
 
     foreach ($files as $file) {
