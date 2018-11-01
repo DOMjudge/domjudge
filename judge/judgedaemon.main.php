@@ -816,44 +816,10 @@ function judge(array $row)
         $totalcases++;
         logmsg(LOG_DEBUG, "Running testcase $tc[rank]...");
         $testcasedir = $workdir . "/testcase" . sprintf('%03d', $tc['rank']);
-
-        // Get both in- and output files, only if we didn't have them already.
-        $tcfile = array();
-        $fetched = array();
-        foreach (array('input','output') as $inout) {
-            $tcfile[$inout] = "$workdirpath/testcase/testcase.$tc[probid].$tc[rank]." .
-                $tc['md5sum_'.$inout] . "." . substr($inout, 0, -3);
-
-            if (!file_exists($tcfile[$inout])) {
-                $content = request(sprintf('testcases/%s/file/%s', $tc['testcaseid'], $inout), 'GET', '', FALSE);
-                if ($content === NULL) {
-                    $error = 'Download of ' . $inout . ' failed for case ' . $tc['testcaseid'] . ', check your problem integrity.';
-                    logmsg(LOG_ERR, $error);
-                    disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
-                    return;
-                }
-                $content = base64_decode(dj_json_decode($content));
-                if (file_put_contents($tcfile[$inout] . ".new", $content) === false) {
-                    error("Could not create $tcfile[$inout].new");
-                }
-                unset($content);
-                if (md5_file("$tcfile[$inout].new") === $tc['md5sum_'.$inout]) {
-                    rename("$tcfile[$inout].new", $tcfile[$inout]);
-                } else {
-                    error("File corrupted during download.");
-                }
-                $fetched[] = $inout;
-            }
-            // sanity check (NOTE: performance impact is negligible with 5
-            // testcases and total 3.3 MB of data)
-            if (md5_file($tcfile[$inout]) !== $tc['md5sum_' . $inout]) {
-                error("File corrupted: md5sum mismatch: " . $tcfile[$inout]);
-            }
-        }
-        // Only log downloading input and/or output testdata once.
-        if (count($fetched)>0) {
-            logmsg(LOG_INFO, "Fetched new " . implode($fetched, ',') .
-                   " testcase $tc[rank] for problem p$tc[probid]");
+        $tcfile = fetchTestcase($row, $workdirpath, $tc['rank']);
+        if ($tcfile === NULL) {
+            // error while fetching testcase
+            return;
         }
 
         // Copy program with all possible additional files to testcase
@@ -953,4 +919,50 @@ function judge(array $row)
 
     // done!
     logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid] finished");
+}
+
+/**
+ */
+function fetchTestcase(array $row, $workdirpath, $rank): array
+{
+    // Get both in- and output files, only if we didn't have them already.
+    $tcfile = array();
+    $fetched = array();
+    $tc = $row['testcases'][$rank];
+    foreach (array('input', 'output') as $inout) {
+        $tcfile[$inout] = "$workdirpath/testcase/testcase.$row[probid].$rank." .
+            $tc['md5sum_' . $inout] . "." . substr($inout, 0, -3);
+
+        if (!file_exists($tcfile[$inout])) {
+            $content = request(sprintf('testcases/%s/file/%s', $tc['testcaseid'], $inout), 'GET', '', FALSE);
+            if ($content === NULL) {
+                $error = 'Download of ' . $inout . ' failed for case ' . $tc['testcaseid'] . ', check your problem integrity.';
+                logmsg(LOG_ERR, $error);
+                disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
+                return NULL;
+            }
+            $content = base64_decode(dj_json_decode($content));
+            if (file_put_contents($tcfile[$inout] . ".new", $content) === false) {
+                error("Could not create $tcfile[$inout].new");
+            }
+            unset($content);
+            if (md5_file("$tcfile[$inout].new") === $tc['md5sum_' . $inout]) {
+                rename("$tcfile[$inout].new", $tcfile[$inout]);
+            } else {
+                error("File corrupted during download.");
+            }
+            $fetched[] = $inout;
+        }
+        // sanity check (NOTE: performance impact is negligible with 5
+        // testcases and total 3.3 MB of data)
+        if (md5_file($tcfile[$inout]) !== $tc['md5sum_' . $inout]) {
+            error("File corrupted: md5sum mismatch: " . $tcfile[$inout]);
+        }
+    }
+    // Only log downloading input and/or output testdata once.
+    if (count($fetched) > 0) {
+        logmsg(LOG_INFO, "Fetched new " . implode($fetched, ',') .
+            " testcase $rank for problem p$row[probid]");
+    }
+    return $tcfile;
 }
