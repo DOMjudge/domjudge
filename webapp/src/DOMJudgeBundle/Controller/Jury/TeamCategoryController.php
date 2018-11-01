@@ -86,7 +86,7 @@ class TeamCategoryController extends Controller
             $teamCategory    = $teamCategoryData[0];
             $categorydata    = [];
             $categoryactions = [];
-            // Get whatever fields we can from the language object itself
+            // Get whatever fields we can from the category object itself
             foreach ($table_fields as $k => $v) {
                 if ($propertyAccessor->isReadable($teamCategory, $k)) {
                     $categorydata[$k] = ['value' => $propertyAccessor->getValue($teamCategory, $k)];
