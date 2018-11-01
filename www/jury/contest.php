@@ -491,7 +491,7 @@ if (ALLOW_REMOVED_INTERVALS) {
                  "<td>" . $row['intervalid'] . "</td>" .
                  "<td>" . $row['starttime_string'] . "</td><td>&nbsp;&rarr;&nbsp;</td>" .
                  "<td>" . $row['endtime_string'] . "</td><td class=\"tdright\">&nbsp;" .
-                 printtimediff($row['starttime'], $row['endtime']) . "</td>" .
+                 printtimediff((float)$row['starttime'], (float)$row['endtime']) . "</td>" .
                  "<td><a href=\"removed_intervals.php?cmd=delete&amp;cid=$id&amp;intervalid=" .
                  (int)$row['intervalid'] . "\" onclick=\"return confirm('Really delete interval?');\">" .
                  "<img src=\"../images/delete.png\" alt=\"delete\" class=\"picto\" /></a></td>" .
