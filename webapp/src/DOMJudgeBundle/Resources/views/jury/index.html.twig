@@ -19,32 +19,46 @@
 </a>
 
 <div class="row equal mt-3">
-  <div class="col-lg-4 col-sm-6 mt-3">
+    <div class="col-lg-3 col-sm-6 mt-3">
+        <div class="card">
+            <div class="card-header">
+                During contest:
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li><a href="{{ path('legacy.jury_balloons') }}">Balloon Status</a></li>
+                    {% if is_granted('ROLE_JURY') %}
+                        <li><a href="{{ path('legacy.jury_clarifications') }}">Clarifications</a></li>
+                        <li><a href="{{ path('legacy.jury_internal_errors') }}">Internal Errors</a></li>
+                    {% endif %}
+                    {% if have_printing %}
+                        <li><a href="{{ path('jury_print') }}">Print</a></li>
+                    {% endif %}
+                    {% if is_granted('ROLE_JURY') %}
+                        <li><a href="{{ path('legacy.jury_rejudgings') }}">Rejudgings</a></li>
+                        <li><a href="{{ path('legacy.jury_scoreboard') }}">Scoreboard</a></li>
+                        <li><a href="{{ path('analysis_index') }}">Statistics/Analysis</a></li>
+                        <li><a href="{{ path('legacy.jury_submissions') }}">Submissions</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+  <div class="col-lg-3 col-sm-6 mt-3">
     <div class="card">
       <div class="card-header">
-        Overviews:
+        Before contest:
       </div>
       <div class="card-body">
         <ul>
-          <li><a href="{{ path('legacy.jury_balloons') }}">Balloon Status</a></li>
           {% if is_granted('ROLE_JURY') %}
-            <li><a href="{{ path('legacy.jury_clarifications') }}">Clarifications</a></li>
             <li><a href="{{ path('jury_contests') }}">Contests</a></li>
             <li><a href="{{ path('jury_executables') }}">Executables</a></li>
-            <li><a href="{{ path('legacy.jury_internal_errors') }}">Internal Errors</a></li>
             <li><a href="{{ path('legacy.jury_judgehosts') }}">Judgehosts</a></li>
             <li><a href="{{ path('legacy.jury_judgehost_restrictions') }}">Judgehost Restrictions</a></li>
             <li><a href="{{ path('jury_languages') }}">Languages</a></li>
             <li><a href="{{ path('jury_problems') }}">Problems</a></li>
-          {% endif %}
-          {% if have_printing %}
-            <li><a href="{{ path('jury_print') }}">Print</a></li>
-          {% endif %}
-          {% if is_granted('ROLE_JURY') %}
-            <li><a href="{{ path('legacy.jury_rejudgings') }}">Rejudgings</a></li>
-            <li><a href="{{ path('legacy.jury_scoreboard') }}">Scoreboard</a></li>
-            <li><a href="{{ path('analysis_index') }}">Statistics/Analysis</a></li>
-            <li><a href="{{ path('legacy.jury_submissions') }}">Submissions</a></li>
             <li><a href="{{ path('jury_users') }}">Users</a></li>
             <li><a href="{{ path('jury_teams') }}">Teams</a></li>
             <li><a href="{{ path('jury_team_categories') }}">Team Categories</a></li>
@@ -56,8 +70,8 @@
   </div>
 
 
-  <div class="col-lg-3 col-sm-6 mt-3">
   {% if is_granted('ROLE_ADMIN') %}
+  <div class="col-lg-3 col-sm-6 mt-3">
     <div class="card mb-3">
       <div class="card-header">
         Administrator:
@@ -74,7 +88,10 @@
         </ul>
       </div>
     </div>
+  </div>
   {% endif %}
+
+  <div class="col-lg-3 col-sm-6 mt-3">
     <div class="card">
       <div class="card-header">
         Documentation:
