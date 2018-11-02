@@ -778,6 +778,9 @@ function judge(array $row)
     $totalcases = 0;
     $lastcase_correct = true;
     $unsent_judging_runs = array();
+    $last_sent = now();
+    $outstanding_data = 0;
+    $update_every_X_seconds = dbconfig_get_rest('update_judging_seconds');
     foreach ($row['testcases'] as $tc) {
         // Check whether we have received an exit signal(but not a graceful exit signal)
         if (function_exists('pcntl_signal_dispatch')) {
@@ -894,7 +897,7 @@ function judge(array $row)
 
         $lastcase_correct = $result === 'correct';
 
-        $unsent_judging_runs[] = array(
+        $new_judging_run = array(
             'testcaseid' => urlencode((string)$tc['testcaseid']),
             'runresult' => urlencode($result),
             'runtime' => urlencode((string)$runtime),
@@ -903,10 +906,17 @@ function judge(array $row)
             'output_system' => rest_encode_file($testcasedir . '/system.out', $output_storage_limit),
             'output_diff'  => rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit)
         );
+        $unsent_judging_runs[] = $new_judging_run;
+        $outstanding_data += strlen(var_export($new_judging_run, TRUE));
 
-        if (!$lastcase_correct) {
+        $now = now();
+        if (!$lastcase_correct
+            || ($now - $last_sent) >= $update_every_X_seconds
+            || $outstanding_data > $row['outputlimit']) {
            send_unsent_judging_runs($unsent_judging_runs, $myhost, $row['judgingid']);
            $unsent_judging_runs = array();
+           $last_sent = $now;
+           $outstanding_data = 0;
         }
         logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
     } // end: for each testcase
