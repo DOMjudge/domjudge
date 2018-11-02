@@ -74,11 +74,13 @@ function tsv_groups_prepare($content)
 
 function tsv_groups_set($data)
 {
-    global $DB;
+    global $DB, $cdata;
     $cnt = 0;
     foreach ($data as $row) {
         $replacecnt = $DB->q("RETURNAFFECTED REPLACE INTO team_category SET %S", $row);
-        eventlog('team_category', $row['categoryid'], $replacecnt == 1 ? 'create' : 'update');
+        if (isset($cdata['cid'])) {
+            eventlog('team_category', $row['categoryid'], $replacecnt == 1 ? 'create' : 'update', $cdata['cid']);
+        }
         auditlog('team_category', $row['categoryid'], 'replaced', 'imported from tsv');
         $cnt++;
     }
@@ -87,8 +89,8 @@ function tsv_groups_set($data)
 
 function tsv_teams_prepare($content)
 {
-    $data = array();
-    $l = 1;
+    $data = [];
+    $l    = 1;
     foreach ($content as $line) {
         $l++;
         $line = explode("\t", trim($line));
@@ -97,17 +99,40 @@ function tsv_teams_prepare($content)
         // hence return data for both tables.
 
         // we may do more integrity/format checking of the data here.
-        $data[] = array(
-            'team' => array(
-                'teamid' => @$line[0],
-                'externalid' => @$line[1],
+
+        // Set external ID's to null if they are not given
+        $teamExternalId = @$line[1];
+        if (empty($teamExternalId)) {
+            $teamExternalId = null;
+        }
+        $affiliationExternalid = preg_replace('/^INST-/', '', @$line[7]);
+        if (empty($affiliationExternalid)) {
+            // TODO: note that when we set this external ID to NULL, we *will* add team affiliations
+            // multiple times, as the $affilid query in tsv_teams_set will not find an affiliation.
+            // We might want to change that to also search on shortname and/or name?
+            $affiliationExternalid = null;
+        }
+
+        // Set team ID to external ID if it has the litteral value 'null' and the external ID is numeric
+        $teamId = @$line[0];
+        if ($teamId === 'null' && is_numeric($teamExternalId)) {
+            $teamId = (int)$teamExternalId;
+        }
+
+        $data[] = [
+            'team' => [
+                'teamid' => $teamId,
+                'externalid' => $teamExternalId,
                 'categoryid' => @$line[2],
-                'name' => @$line[3]),
-            'team_affiliation' => array(
-                'shortname' => !empty(@$line[5]) ? @$line[5] : @$line[7],
+                'name' => @$line[3],
+            ],
+            'team_affiliation' => [
+                'shortname' => !empty(@$line[5]) ? @$line[5] : $affiliationExternalid,
                 'name' => @$line[4],
                 'country' => @$line[6],
-                'externalid' => preg_replace('/^INST-/', '', @$line[7])) );
+                'externalid' => $affiliationExternalid,
+            ]
+        ];
     }
 
     return $data;
@@ -116,8 +141,11 @@ function tsv_teams_prepare($content)
 
 function tsv_teams_set($data)
 {
-    global $DB;
+    global $DB, $cdata;
     $cnt = 0;
+    $createdAffiliations = [];
+    $createdTeams = [];
+    $updatedTeams = [];
     foreach ($data as $row) {
         // it is legitimate that a team has no affiliation. Do not add it then.
         if (!empty($row['team_affiliation']['shortname'])) {
@@ -129,17 +157,34 @@ function tsv_teams_set($data)
                 $affilid = $DB->q("RETURNID INSERT INTO team_affiliation SET %S",
                                   $row['team_affiliation']);
 
-                eventlog('team_affiliation', $affilid, 'create');
+                $createdAffiliations[] = $affilid;
                 auditlog('team_affiliation', $affilid, 'added', 'imported from tsv');
             }
             $row['team']['affilid'] = $affilid;
         }
         $replacecnt = $DB->q("RETURNAFFECTED REPLACE INTO team SET %S", $row['team']);
 
-        eventlog('team', $row['team']['teamid'], $replacecnt == 1 ? 'create' : 'update');
+        if ($replacecnt == 1) {
+            $createdTeams[] = $row['team']['teamid'];
+        } else {
+            $updatedTeams[] = $row['team']['teamid'];
+        }
         auditlog('team', $row['team']['teamid'], 'replaced', 'imported from tsv');
         $cnt++;
     }
+
+    if (isset($cdata['cid'])) {
+        if (!empty($createdAffiliations)) {
+            eventlog('team_affiliation', $createdAffiliations, 'create', $cdata['cid']);
+        }
+        if (!empty($createdTeams)) {
+            eventlog('team', $createdTeams, 'create', $cdata['cid']);
+        }
+        if (!empty($updatedTeams)) {
+            eventlog('team', $updatedTeams, 'update', $cdata['cid']);
+        }
+    }
+
     return $cnt;
 }
 
@@ -280,7 +325,7 @@ function tsv_groups_get()
 function tsv_teams_get()
 {
     global $DB;
-    return $DB->q('TABLE SELECT teamid, t.externalid, categoryid, t.name, a.name as affilname, a.shortname, a.country
+    return $DB->q('TABLE SELECT teamid, t.externalid, categoryid, t.name, a.name as affilname, a.shortname, a.country, a.externalid as affilexternalid
                    FROM team t LEFT JOIN team_affiliation a USING(affilid)
                    WHERE enabled = 1');
 }
