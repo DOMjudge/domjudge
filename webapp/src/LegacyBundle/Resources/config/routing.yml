@@ -28,10 +28,12 @@ legacy.jury_scoreboard:
     path: /jury/scoreboard.php
 legacy.team_index:
     path: /team/
-legacy.jury_contests:
-  path: /jury/contests.php
+legacy.jury_contest:
+  path: /jury/contest.php
 legacy.jury_executable:
     path: /jury/executable.php
+legacy.jury_finalize:
+    path: /jury/finalize.php
 
 legacy.jury_config:
     path: /jury/config.php

@@ -23,6 +23,8 @@ use JMS\Serializer\Annotation as Serializer;
  */
 class Contest
 {
+    const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
+
     /**
      * @var int
      *
@@ -347,11 +349,12 @@ class Contest
     /**
      * Get starttime, or NULL if disabled
      *
+     * @param bool $nullWhenDisabled If true, return null if the start time is disabled
      * @return double
      */
-    public function getStarttime()
+    public function getStarttime(bool $nullWhenDisabled = true)
     {
-        if (!$this->getStarttimeEnabled()) {
+        if ($nullWhenDisabled && !$this->getStarttimeEnabled()) {
             return null;
         }
 
@@ -1181,5 +1184,92 @@ class Contest
         }
 
         return $contestTime;
+    }
+
+    /**
+     * Get the data to display in the jury interface for the given contest
+     * @return array
+     */
+    public function getJuryTimeData(): array
+    {
+        $now         = Utils::now();
+        $times       = ['activate', 'start', 'freeze', 'end', 'unfreeze', 'finalize', 'deactivate'];
+        $prevchecked = false;
+        $hasstarted  = Utils::difftime((float)$this->getStarttime(), $now) <= 0;
+        $hasended    = Utils::difftime((float)$this->getEndtime(), $now) <= 0;
+        $hasfrozen   = !empty($this->getFreezetime()) &&
+            Utils::difftime((float)$this->getFreezetime(), $now) <= 0;
+        $hasunfrozen = !empty($this->getUnfreezetime()) &&
+            Utils::difftime((float)$this->getUnfreezetime(), $now) <= 0;
+        $isfinal     = !empty($this->getFinalizetime());
+
+        if (!$this->getStarttimeEnabled()) {
+            $hasstarted = $hasended = $hasfrozen = $hasunfrozen = false;
+        }
+
+        $result = [];
+        foreach ($times as $time) {
+            $resultItem = [];
+            $method     = sprintf('get%stime', ucfirst($time));
+            $timeValue  = $this->{$method}();
+            if ($time === 'start' && !$this->getStarttimeEnabled()) {
+                $resultItem['icon'] = 'ellipsis-h';
+                $timeValue          = $this->getStarttime(false);
+                $prevchecked        = false;
+            } elseif (empty($timeValue)) {
+                $resultItem['icon'] = null;
+            } elseif (Utils::difftime((float)$timeValue, $now) <= 0) {
+                // this event has passed, mark as such
+                $resultItem['icon'] = 'check';
+                $prevchecked        = true;
+            } elseif ($prevchecked) {
+                $resultItem['icon'] = 'ellipsis-h';
+                $prevchecked        = false;
+            }
+
+            $resultItem['label'] = sprintf('%s time', ucfirst($time));
+            $resultItem['time']  = Utils::printtime($timeValue, '%Y-%m-%d %H:%M (%Z)');
+            if ($time === 'start' && !$this->getStarttimeEnabled()) {
+                $resultItem['class'] = 'ignore';
+            }
+
+            $showButton = true;
+            switch ($time) {
+                case 'start':
+                    $showButton = !$hasstarted;
+                    break;
+                case 'end':
+                    $showButton = $hasstarted && !$hasended && (empty($this->getFreezetime()) || $hasfrozen);
+                    break;
+                case 'deactivate':
+                    $showButton = $hasended && (empty($this->getUnfreezetime()) || $hasunfrozen);
+                    break;
+                case 'freeze':
+                    $showButton = $hasstarted && !$hasended && !$hasfrozen;
+                    break;
+                case 'unfreeze':
+                    $showButton = $hasfrozen && !$hasunfrozen && $hasended;
+                    break;
+                case 'finalize':
+                    $showButton = $hasended && !$isfinal;
+                    break;
+            }
+
+            $resultItem['show_button'] = $showButton;
+
+            $closeToStart = Utils::difftime((float)$this->starttime,
+                                            $now) <= self::STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
+            if ($time === 'start' && !$closeToStart) {
+                $type                       = $this->getStarttimeEnabled() ? 'delay' : 'resume';
+                $resultItem['extra_button'] = [
+                    'type' => $type . '_start',
+                    'label' => $type . ' start',
+                ];
+            }
+
+            $result[$time] = $resultItem;
+        }
+
+        return $result;
     }
 }

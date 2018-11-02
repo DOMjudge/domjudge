@@ -26,8 +26,8 @@ h1 {
 
 .highlight { background-color: yellow !important; }
 
-.highlight.roweven { background-color: yellow !important; }
-.highlight.rowodd { background-color: #ffffaa !important; }
+.highlight.roweven, .highlight.even { background-color: yellow !important; }
+.highlight.rowodd, .highlight.odd { background-color: #ffffaa !important; }
 
 .msgbox {
 	background-color: #fffff0;
@@ -171,4 +171,8 @@ div.submissions-filter ul.token-input-list {
 }
 .data-table tr.disabled td a {
 	color: silver
+}
+
+td.ignore {
+	text-decoration: line-through;
 }

@@ -512,7 +512,7 @@ function updateClock()
 		var what = "";
 	} else if (curtime >= activatetime && curtime < starttime ) {
 		var left = starttime - curtime;
-		var what = "- ";
+		var what = "time to start: ";
 	} else {
 		var left = 0;
 		var what = "contest over";

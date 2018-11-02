@@ -130,7 +130,6 @@ class TeamCategoryController extends Controller
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
             'edited' => $request->query->getBoolean('edited'),
-            'contest' => $this->DOMJudgeService->getCurrentContest(),
         ]);
     }
 }

@@ -35,11 +35,17 @@
             <thead class="">
             <tr>
                 {% set default_sort = 0 %}
+                {% set default_sort_order = 'asc' %}
                 {% for key,column in fields %}
-                    {% if column.default_sort|default(false) %}{% set default_sort = loop.index0 %}{% endif %}
+                    {% if column.default_sort|default(false) %}
+                        {% set default_sort = loop.index0 %}
+                        {% if column.default_sort_order is defined %}
+                            {% set default_sort_order = column.default_sort_order %}
+                        {% endif %}
+                    {% endif %}
                     <th scope="col"
                         class="{% if column.sort %}sortable{% endif %} {% if (column.search is not defined) or column.search %}searchable{% endif %}">
-                        {{ column.title }}
+                        {{ column.title | raw }}
                     </th>
                 {% endfor %}
                 {% if num_actions > 0 %}
@@ -54,7 +60,7 @@
                 <tr class="{{ row.cssclass|default('') }}" {% if row.style is defined %}style="{{ row.style }}"{% endif %}>
                     {% for key,column in fields %}
                         {% set item = attribute(row.data, key) %}
-                        <td class="{{ item.cssclass|default(' ') }}">
+                        <td class="{{ item.cssclass|default(' ') }}" title="{{ item.title|default('') }}">
                             <a href="{{ item.link|default(row.link) }}" title="{{ item.linktitle|default('') }}">
                                 {{ (item.value|default(item.default|default('')))|raw }}
                             </a>
@@ -79,7 +85,7 @@
             $('.data-table').DataTable({
                 "paging": false,
                 "ordering": true,
-                "order": [[ {{ default_sort }}, 'asc']],
+                "order": [[ {{ default_sort }}, '{{ default_sort_order }}']],
                 "info": false,
                 "autoWidth": true,
                 "language": {

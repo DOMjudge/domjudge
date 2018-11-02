@@ -143,10 +143,14 @@
       {% set now = 'now'|date('U') %}
       <span id="timeleft">{%- if contest is null -%}
           no contest
-        {%- elseif contest.getStartTime() < now and contest.getEndTime() >= now -%}
+        {%- elseif contest.starttime(false) < now and contest.endtime >= now -%}
           {{ now|timediff(contest.getEndTime()) }}
-        {%- elseif contest.getActivateTime() < now and contest.getStartTime() >= now -%}
-          time to start: {{ now|timediff(contest.getStartTime()) }}
+        {%- elseif contest.activatetime < now and contest.starttime(false) >= now -%}
+            {%- if contest.starttimeEnabled -%}
+              time to start: {{ now|timediff(contest.starttime) }}
+            {%- else -%}
+              start delayed
+            {%- endif -%}
         {%- endif -%}</span>
     </div>
   </div>

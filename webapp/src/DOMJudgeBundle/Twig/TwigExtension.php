@@ -26,6 +26,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
     {
         return [
             new \Twig_SimpleFilter('timediff', [$this, 'timediff']),
+            new \Twig_SimpleFilter('printtime', [$this, 'printtime']),
         ];
     }
 
@@ -77,6 +78,17 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         $ret  .= sprintf('%02d', $diff);
 
         return $ret;
+    }
+
+    /**
+     * Print a time formatted as specified. The format is according to strftime().
+     * @param string|float $datetime
+     * @param string       $format
+     * @return string
+     */
+    public function printtime($datetime, string $format): string
+    {
+        return Utils::printtime($datetime, $format);
     }
 
     /**

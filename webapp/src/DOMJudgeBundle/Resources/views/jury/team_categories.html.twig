@@ -11,8 +11,8 @@
 
 {% block content %}
 
-    {% if edited and contest %}
-        {% include '@DOMJudge/jury/refresh_scoreboard.html.twig' with {contest: contest, message: 'If the category sort order was changed, it may be necessary to recalculate any cached scoreboards.'} %}
+    {% if edited %}
+        {% include '@DOMJudge/jury/refresh_scoreboard.html.twig' with {message: 'If the category sort order was changed, it may be necessary to recalculate any cached scoreboards.'} %}
     {% endif %}
 
     <h1>Categories</h1>
