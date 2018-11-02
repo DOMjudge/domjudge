@@ -737,7 +737,7 @@ class JudgehostController extends FOSRestController
 
             /** @var Judging $judging */
             $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
-            $this->addSingleJudgingRun($hostname, $judgingId, $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun);
+            $this->addSingleJudgingRun($hostname, $judgingId, (int)$testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun);
             $judgehost->setPolltime(Utils::now());
             $this->entityManager->flush();
         }
@@ -752,8 +752,8 @@ class JudgehostController extends FOSRestController
         /** @var Judgehost $judgehost */ // <--- FIXME: do this in the other commit
         $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
         if (!$judgehost) {
-            // FIXME: silent return??? also at the original place
-            return;
+            throw new BadRequestHttpException(
+                sprintf("Judgehost unknown, please register yourself first!"));
         }
         foreach ($judgingRuns as $judgingRun) {
             $required = [
@@ -766,7 +766,6 @@ class JudgehostController extends FOSRestController
                 'output_system'
             ];
 
-            // FIXME: this check seems to be broken...
             foreach ($required as $argument) {
                 if (!isset($judgingRun[$argument])) {
                     throw new BadRequestHttpException(
@@ -783,8 +782,11 @@ class JudgehostController extends FOSRestController
             $outputSystem = $judgingRun['output_system'];
             /** @var Judging $judging */
             $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
-            // FIXME: why don't we do a similar check as some lines above?
-            $this->addSingleJudgingRun($hostname, $judgingId, $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun);
+            if (!$judging) {
+                throw new BadRequestHttpException(
+                    sprintf("Unknown judging, don't send us any imaginary data!"));
+            }
+            $this->addSingleJudgingRun($hostname, $judgingId, (int) $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun);
         }
         $judgehost->setPolltime(Utils::now());
         $this->entityManager->flush();
@@ -934,20 +936,20 @@ class JudgehostController extends FOSRestController
     /**
      * @param string $hostname
      * @param int $judgingId
-     * @param $testCaseId
-     * @param $runResult
-     * @param $runTime
-     * @param $judging
-     * @param $outputSystem
-     * @param $outputError
-     * @param $outputDiff
-     * @param $outputRun
+     * @param int $testCaseId
+     * @param string $runResult
+     * @param string $runTime
+     * @param Judging $judging
+     * @param string $outputSystem
+     * @param string $outputError
+     * @param string $outputDiff
+     * @param string $outputRun
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\ORMException
      */
-    private function addSingleJudgingRun(string $hostname, int $judgingId, $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun)
+    private function addSingleJudgingRun(string $hostname, int $judgingId, int $testCaseId, string $runResult, string $runTime, Judging $judging, string $outputSystem, string $outputError, string $outputDiff, string $outputRun)
     {
         /** @var Testcase $testCase */
         $testCase = $this->entityManager->getRepository(Testcase::class)->find($testCaseId);
