@@ -17,7 +17,7 @@
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>
-            {{ button(path('legacy.jury_problem', {cmd: 'add'}), 'Add new problem', 'primary', 'plus') }}
+            {{ button(path('legacy.jury_problem', {cmd: 'add', referrer: 'problems'}), 'Add new problem', 'primary', 'plus') }}
         </p>
 
         <form action="{{ path('legacy.jury_problem') }}" method="post" enctype="multipart/form-data">

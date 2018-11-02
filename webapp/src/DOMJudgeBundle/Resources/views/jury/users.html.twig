@@ -17,7 +17,7 @@
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>
-            {{ button(path('legacy.jury_user', {cmd: 'add'}), 'Add new user', 'primary', 'plus') }}
+            {{ button(path('legacy.jury_user', {cmd: 'add', referrer: 'users'}), 'Add new user', 'primary', 'plus') }}
         </p>
     {% endif %}
 {% endblock %}

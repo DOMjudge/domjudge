@@ -21,7 +21,7 @@
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>
-            {{ button(path('legacy.jury_team_category', {'cmd': 'add'}), 'Add new category', 'primary', 'plus') }}
+            {{ button(path('legacy.jury_team_category', {cmd: 'add', referrer: 'categories'}), 'Add new category', 'primary', 'plus') }}
         </p>
     {% endif %}
 

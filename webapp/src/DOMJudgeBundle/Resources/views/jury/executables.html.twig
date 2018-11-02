@@ -17,7 +17,7 @@
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>
-            {{ button(path('legacy.jury_executable', {'cmd': 'add'}), 'Add new executable', 'primary', 'plus') }}
+            {{ button(path('legacy.jury_executable', {cmd: 'add', referrer: 'executables'}), 'Add new executable', 'primary', 'plus') }}
         </p>
 
         <form action="{{ path('legacy.jury_executable') }}" method="post" enctype="multipart/form-data">
