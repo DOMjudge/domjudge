@@ -109,7 +109,7 @@ class TeamCategoryController extends Controller
                     'link' => $this->generateUrl('legacy.jury_delete', [
                         'table' => 'team_category',
                         'categoryid' => $teamCategory->getCategoryid(),
-                        'referrer' => '',
+                        'referrer' => 'categories',
                         'desc' => $teamCategory->getName(),
                     ])
                 ];

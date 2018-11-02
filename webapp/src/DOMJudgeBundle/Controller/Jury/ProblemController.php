@@ -128,7 +128,7 @@ class ProblemController extends Controller
                     'link' => $this->generateUrl('legacy.jury_delete', [
                         'table' => 'problem',
                         'probid' => $p->getProbid(),
-                        'referrer' => '',
+                        'referrer' => 'problems',
                         'desc' => $p->getName(),
                     ])
                 ];

@@ -222,7 +222,7 @@ class ContestController extends Controller
                     'link' => $this->generateUrl('legacy.jury_delete', [
                         'table' => 'contest',
                         'cid' => $contest->getCid(),
-                        'referrer' => '',
+                        'referrer' => 'contests',
                         'desc' => $contest->getName(),
                     ])
                 ];

@@ -114,7 +114,7 @@ class UserController extends Controller
                     'link' => $this->generateUrl('legacy.jury_delete', [
                         'table' => 'user',
                         'userid' => $u->getUserid(),
-                        'referrer' => '',
+                        'referrer' => 'users',
                         'desc' => $u->getName(),
                     ])
                 ];

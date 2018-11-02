@@ -92,7 +92,7 @@ class ExecutableController extends Controller
                     'link' => $this->generateUrl('legacy.jury_delete', [
                         'table' => 'executable',
                         'execid' => $e->getExecid(),
-                        'referrer' => '',
+                        'referrer' => 'executables',
                         'desc' => $e->getDescription(),
                     ])
                 ];

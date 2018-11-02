@@ -118,7 +118,7 @@ class TeamAffiliationController extends Controller
                     'link' => $this->generateUrl('legacy.jury_delete', [
                         'table' => 'team_affiliation',
                         'affilid' => $teamAffiliation->getAffilid(),
-                        'referrer' => '',
+                        'referrer' => 'affiliations',
                         'desc' => $teamAffiliation->getName(),
                     ])
                 ];

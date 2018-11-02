@@ -161,7 +161,7 @@ class TeamController extends Controller
                     'link' => $this->generateUrl('legacy.jury_delete', [
                         'table' => 'team',
                         'teamid' => $t->getTeamId(),
-                        'referrer' => '',
+                        'referrer' => 'teams',
                         'desc' => $t->getName(),
                     ])
                 ];

@@ -107,7 +107,7 @@ class LanguageController extends Controller
                     'link' => $this->generateUrl('legacy.jury_delete', [
                         'table' => 'language',
                         'langid' => $lang->getLangid(),
-                        'referrer' => '',
+                        'referrer' => 'languages',
                         'desc' => $lang->getName(),
                     ])
                 ];
