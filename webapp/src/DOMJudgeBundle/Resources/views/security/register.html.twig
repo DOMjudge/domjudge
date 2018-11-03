@@ -1,4 +1,4 @@
-{% extends "::base.html.twig" %}
+{% extends "::base_bootstrap.html.twig" %}
 {% form_theme registration_form 'bootstrap_4_layout.html.twig' %}
 
 {% block title %}Register Account{% endblock %}
@@ -28,5 +28,4 @@
         <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
   {{form_end(registration_form)}}
 </div>
-  {% include '::footer.html.twig' %}
 {% endblock %}
