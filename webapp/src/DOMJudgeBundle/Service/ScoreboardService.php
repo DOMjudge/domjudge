@@ -210,14 +210,15 @@ class ScoreboardService
                 /** @var ScoreCache[] $tiedScores */
                 $tiedScores = $this->entityManager->createQueryBuilder()
                     ->from('DOMJudgeBundle:ScoreCache', 's')
-                    ->join('s.contest_problem', 'cp')
+                    ->join('s.problem', 'p')
+                    ->join('p.contest_problems', 'cp',  Join::WITH, 'cp.contest = :contest')
                     ->select('s')
                     ->andWhere('s.contest = :contest')
                     ->andWhere(sprintf('s.is_correct_%s = 1', $variant))
                     ->andWhere('cp.allow_submit = 1')
                     ->andWhere('s.team IN (:teams)')
                     ->setParameter(':contest', $contest)
-                    ->setParameter(':teamids', $teams)
+                    ->setParameter(':teams', $teams)
                     ->getQuery()
                     ->getResult();
 
