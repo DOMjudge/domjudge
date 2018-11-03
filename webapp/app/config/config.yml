@@ -213,6 +213,15 @@ nelmio_api_doc:
                     compare_md5sum: { type: string }
                     run_md5sum: { type: string }
                     compile_script_md5sum: { type: string }
+                    testcases:
+                        type: array
+                        items:
+                            type: object
+                            properties:
+                                md5sum_input: { type: string }
+                                md5sum_output: { type: string }
+                                testcaseid: { type: integer}
+                                rank: { type: integer }
         parameters:
             cid:
                 name: cid
