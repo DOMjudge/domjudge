@@ -4,7 +4,7 @@
     <span class="navbar-toggler-icon"></span>
   </button>
 
-  <div class="collapse navbar-collapse" id="menuDefault">
+  <div class="collapse navbar-collapse" id="menuDefault" data-update-url="{{ path('jury_ajax_updates') }}">
     <ul class="navbar-nav mr-auto">
 
       {% if is_granted('ROLE_BALLOON') and not is_granted('ROLE_JURY') and not is_granted('ROLE_ADMIN') %}
@@ -15,39 +15,25 @@
 
       {% if is_granted('ROLE_ADMIN') %}
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownJudgehosts" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-gavel"></i> judgehosts
-          {% if updates['judgehosts']|length > 0 %}
-          <span class="badge badge-warning">{{ updates['judgehosts']|length }}</span>
-          {% endif %}
-          {% if updates['internal_error']|length > 0 %}
-          <span class="badge badge-danger">{{ updates['internal_error']|length }}</span>
-          {% endif %}
+          <span class="badge badge-warning" id="num-alerts-judgehosts"></span>
+          <span class="badge badge-danger" id="num-alerts-internalerrors"></span>
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          {% if updates['judgehosts']|length > 0 %}
-            <a class="dropdown-item text-danger" href="{{ path('legacy.jury_judgehosts') }}" id="menu_judgehosts">
-              <i class="fas fa-server fa-fw"></i> judgehosts <span class="badge badge-warning">{{ updates['judgehosts']|length }} down</span>
+            <a class="dropdown-item" href="{{ path('legacy.jury_judgehosts') }}" id="menu_judgehosts">
+              <i class="fas fa-server fa-fw"></i> judgehosts <span class="badge badge-warning" id="num-alerts-judgehosts-sub"></span>
             </a>
-          {% else %}
-            <a class="dropdown-item" href="{{ path('legacy.jury_judgehosts') }}" id="menu_judgehosts"><i class="fas fa-server fa-fw"></i> judgehosts</a>
-          {% endif %}
-        {% if updates['internal_error']|length > 0 %}
-            <a class="dropdown-item text-danger" href="{{ path('legacy.jury_internal_errors') }}" id="menu_internal_error"><i class="fas fa-bolt fa-fw"></i> internal error <span class="badge badge-danger">{{ updates['internal_error']|length }} new</span></a>
-        {% else %}
-            <a class="dropdown-item disabled" href="{{ path('legacy.jury_internal_errors') }}" id="menu_internal_error"><i class="fas fa-bolt fa-fw"></i> internal error</a>
-        {% endif %}
+            <a class="dropdown-item disabled" href="{{ path('legacy.jury_internal_errors') }}" id="menu_internal_error">
+                <i class="fas fa-bolt fa-fw"></i> internal error <span class="badge badge-danger" id="num-alerts-internalerrors-sub"></span>
+            </a>
         </div>
       </li>
       {% endif %}
 
       {% if is_granted('ROLE_JURY') %}
         <li class="nav-item">
-          {% if updates['clarifications']|length > 0 %}
-            <a class="nav-link text-info" href="{{ path('legacy.jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge badge-info">{{ updates['clarifications']|length }}</span></a>
-          {% else %}
-            <a class="nav-link" href="{{ path('legacy.jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications</a>
-          {% endif %}
+          <a class="nav-link" href="{{ path('legacy.jury_clarifications') }}" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications <span class="badge badge-info" id="num-alerts-clarifications"></span></a>
         </li>
 
 
@@ -56,11 +42,7 @@
         </li>
 
         <li class="nav-item">
-          {% if updates['rejudgings']|length > 0 %}
-            <a class="nav-link text-info" href="{{ path('legacy.jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings <span class="badge badge-info">{{ updates['rejudgings']|length }}</span></a>
-          {% else %}
-            <a class="nav-link" href="{{ path('legacy.jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings</a>
-          {% endif %}
+          <a class="nav-link" href="{{ path('legacy.jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings <span class="badge badge-info" id="num-alerts-rejudgings"></span></a>
         </li>
       {% endif %}
 
@@ -123,7 +105,7 @@
       {% endif %}
 
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownContests" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-trophy"></i> {{ contest.shortname|default('no contest') }}
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">

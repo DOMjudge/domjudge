@@ -51,11 +51,6 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         $refresh_cookie = $this->domjudge->getCookie("domjudge_refresh");
         $refresh_flag   = ($refresh_cookie == null || (bool)$refresh_cookie);
 
-        // This is for various notifications
-        // e.g. judgehost down, rejudging active, clarifications, internal errors
-        // TODO: we should only bother doing this if jury
-        $updates = $this->domjudge->getUpdates();
-
         // These variables mostly exist for the header template
         return [
             'contest' => $this->domjudge->getCurrentContest(),
@@ -63,9 +58,6 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             'have_printing' => $this->domjudge->dbconfig_get('enable_printing', 0),
             'notify_flag' => $notify_flag,
             'refresh_flag' => $refresh_flag,
-
-            // Jury Specific
-            'updates' => $updates,
         ];
     }
 

@@ -1,3 +1,4 @@
+// Legacy interface
 function XMLHttpHandle()
 {
 	'use strict';
@@ -14,6 +15,7 @@ function XMLHttpHandle()
 	return ajaxRequest;
 }
 
+// Legacy interface
 function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejudgings)
 {
 	'use strict';
@@ -414,12 +416,14 @@ function maybeShowEntryPoint(langid, filename = null)
 
 function entryPointDetectJava(filename)
 {
+	'use strict';
 	var filebase = filename.replace(/\.[^\.]*$/, '');
 	return filebase;
 }
 
 function entryPointDetectKt(filename)
 {
+	'use strict';
 	var filebase = filename.replace(/\.[^\.]*$/, '');
 	if ( filebase === '' ) return '_Kt';
 
@@ -727,6 +731,7 @@ function initFavouriteTeams()
 // Note that team,prob,submission IDs are as expected by iCAT.
 function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
 {
+	'use strict';
 	var form = document.createElement("form");
 	form.setAttribute("method", "post");
 	form.setAttribute("action", url);
@@ -780,6 +785,7 @@ function clarificationAppendAnswer(replace = false) {
 }
 
 function confirmLogout() {
+	'use strict';
 	return confirm("Really log out?");
 }
 
@@ -846,4 +852,71 @@ function toggleRefresh($url, $after) {
     var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';
     $('#refresh-toggle').val(text);
     $('#refresh-toggle').text(text);
+}
+
+function updateMenuAlerts()
+{
+    'use strict';
+    $.getJSON( $('#menuDefault').data('update-url'), function( json ) {
+      updateMenuClarifications(json.clarifications.length);
+      updateMenuRejudgings(json.rejudgings.length);
+      updateMenuJudgehosts(json.judgehosts.length);
+      updateMenuInternalErrors(json.internal_error.length);
+    });
+}
+
+function updateMenuClarifications(num)
+{
+    'use strict';
+    if ( num == 0 ) {
+        $("#num-alerts-clarifications").hide();
+        $("#menu_clarifications").removeClass("text-info");
+    } else {
+        $("#num-alerts-clarifications").html(num);
+        $("#num-alerts-clarifications").show();
+        $("#menu_clarifications").addClass("text-info");
+    }
+}
+
+function updateMenuRejudgings(num)
+{
+    'use strict';
+    if ( num == 0 ) {
+        $("#num-alerts-rejudgings").hide();
+        $("#menu_rejudgings").removeClass("text-info");
+    } else {
+        $("#num-alerts-rejudgings").html(num);
+        $("#num-alerts-rejudgings").show();
+        $("#menu_rejudgings").addClass("text-info");
+    }
+}
+
+function updateMenuJudgehosts(num)
+{
+    'use strict';
+    if ( num == 0 ) {
+        $("#num-alerts-judgehosts").hide();
+        $("#num-alerts-judgehosts-sub").html("");
+        $("#menu_judgehosts").removeClass("text-danger");
+    } else {
+        $("#num-alerts-judgehosts").html(num);
+        $("#num-alerts-judgehosts").show();
+        $("#num-alerts-judgehosts-sub").html(num + " down");
+        $("#menu_judgehosts").addClass("text-danger");
+    }
+}
+
+function updateMenuInternalErrors(num)
+{
+    'use strict';
+    if ( num == 0 ) {
+        $("#num-alerts-internalerrors").hide();
+        $("#num-alerts-internalerrors-sub").html("");
+        $("#menu_internal_error").removeClass("text-danger").addClass("disabled");
+    } else {
+        $("#num-alerts-internalerrors").html(num);
+        $("#num-alerts-internalerrors").show();
+        $("#num-alerts-internalerrors-sub").html(num + " new");
+        $("#menu_internal_error").addClass("text-danger").removeClass("disabled");
+    }
 }

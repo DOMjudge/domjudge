@@ -35,6 +35,9 @@
           {% if refresh is defined and refresh and refresh_flag %}
             enableRefresh('{{ refresh.url }}', {{ refresh.after }});
           {% endif %}
+
+          updateMenuAlerts();
+          setInterval(updateMenuAlerts, 20000);
       });
   </script>
 </body>
