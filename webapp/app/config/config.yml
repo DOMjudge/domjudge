@@ -169,28 +169,35 @@ nelmio_api_doc:
                 properties:
                     judgement_type_id: { type: string }
             Scoreboard:
-                type: array
-                items:
-                    type: object
-                    properties:
-                        rank: { type: integer }
-                        team_id: { type: string }
-                        score:
+                type: object
+                properties:
+                    event_id: { type: string }
+                    time: { type: string }
+                    contest_time: { type: string }
+                    state: { $ref: "#/definitions/ContestState" }
+                    rows:
+                        type: array
+                        items:
                             type: object
                             properties:
-                                num_solved: { type: integer }
-                                total_time: { type: integer }
-                        problems:
-                            type: array
-                            items:
-                                type: object
-                                properties:
-                                    label: { type: string }
-                                    problem_id: { type: string }
-                                    num_judged: { type: integer }
-                                    num_pending: { type: integer }
-                                    solved: { type: boolean }
-                                    time: { type: integer }
+                                rank: { type: integer }
+                                team_id: { type: string }
+                                score:
+                                    type: object
+                                    properties:
+                                        num_solved: { type: integer }
+                                        total_time: { type: integer }
+                                problems:
+                                    type: array
+                                    items:
+                                        type: object
+                                        properties:
+                                            label: { type: string }
+                                            problem_id: { type: string }
+                                            num_judged: { type: integer }
+                                            num_pending: { type: integer }
+                                            solved: { type: boolean }
+                                            time: { type: integer }
             NextJudging:
                 type: object
                 properties:
@@ -222,6 +229,15 @@ nelmio_api_doc:
                                 md5sum_output: { type: string }
                                 testcaseid: { type: integer}
                                 rank: { type: integer }
+            ContestState:
+                type: object
+                properties:
+                    started: { type: string, format: date-time }
+                    ended: { type: string, format: date-time }
+                    frozen: { type: string, format: date-time }
+                    thawed: { type: string, format: date-time }
+                    finalized: { type: string, format: date-time }
+                    end_of_updates: { type: string, format: date-time }
         parameters:
             cid:
                 name: cid

@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\Event;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
@@ -16,6 +17,7 @@ use DOMJudgeBundle\Utils\Utils;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * @Rest\Route("/api/v4/contests/{cid}/scoreboard", defaults={ "_format" = "json" })
@@ -36,9 +38,9 @@ class ScoreboardController extends AbstractRestController
     /**
      * ScoreboardController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService $DOMJudgeService
-     * @param EventLogService $eventLogService
-     * @param ScoreboardService $scoreboardService
+     * @param DOMJudgeService        $DOMJudgeService
+     * @param EventLogService        $eventLogService
+     * @param ScoreboardService      $scoreboardService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -111,11 +113,34 @@ class ScoreboardController extends AbstractRestController
             $public = $request->query->getBoolean('public');
         }
 
-        $contest   = $this->entityManager->getRepository(Contest::class)->find($this->getContestId($request));
+        $contest       = $this->entityManager->getRepository(Contest::class)->find($this->getContestId($request));
+        $isJury        = $this->isGranted('ROLE_JURY');
+        $accessAllowed = ($isJury && $contest->getEnabled()) || (!$isJury && $contest->isActive());
+        if (!$accessAllowed) {
+            throw new AccessDeniedHttpException();
+        }
+
+        // Get the event for this scoreboard
+        // TODO: add support for after_event_id
+        /** @var Event $event */
+        $event = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Event', 'e')
+            ->select('e')
+            ->orderBy('e.eventid', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
         $scorebard = $this->scoreboardService->getScoreboard($contest, !$public, $filter, !$allTeams);
 
-        // Build up scoreboard result
-        $results = [];
+        // Build up scoreboard results
+        $results = [
+            'event_id' => (string)$event->getEventid(),
+            'time' => Utils::absTime($event->getEventtime()),
+            'contest_time' => Utils::relTime($event->getEventtime() - $contest->getStarttime()),
+            'state' => $contest->getState(),
+            'rows' => [],
+        ];
 
         $scoreIsInSecods = (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
 
@@ -162,7 +187,7 @@ class ScoreboardController extends AbstractRestController
                 }
             }
 
-            $results[] = $row;
+            $results['rows'][] = $row;
         }
 
         return $results;

@@ -206,15 +206,7 @@ class ContestController extends AbstractRestController
      * @SWG\Response(
      *     response="200",
      *     description="The contest state",
-     *     @SWG\Schema(
-     *         type="object",
-     *         @SWG\Property(property="started", type="string", format="date-time"),
-     *         @SWG\Property(property="ended", type="string", format="date-time"),
-     *         @SWG\Property(property="frozen", type="string", format="date-time"),
-     *         @SWG\Property(property="thawed", type="string", format="date-time"),
-     *         @SWG\Property(property="finalized", type="string", format="date-time"),
-     *         @SWG\Property(property="end_of_updates", type="string", format="date-time")
-     *     )
+     *     @SWG\Schema(ref="#/definitions/ContestState")
      * )
      */
     public function getContestStateAction(Request $request, string $id)
@@ -222,29 +214,7 @@ class ContestController extends AbstractRestController
         $contest = $this->getContestWithId($request, $id);
         $isJury  = $this->isGranted('ROLE_JURY');
         if (($isJury && $contest->getEnabled()) || (!$isJury && $contest->isActive())) {
-            $time_or_null             = function ($time, $extra_cond = true) {
-                if (!$extra_cond || $time === null || Utils::now() < $time) {
-                    return null;
-                }
-                return Utils::absTime($time);
-            };
-            $result                   = [];
-            $result['started']        = $time_or_null($contest->getStarttime());
-            $result['ended']          = $time_or_null($contest->getEndtime(), $result['started'] !== null);
-            $result['frozen']         = $time_or_null($contest->getFreezetime(), $result['started'] !== null);
-            $result['thawed']         = $time_or_null($contest->getUnfreezetime(), $result['frozen'] !== null);
-            $result['finalized']      = $time_or_null($contest->getFinalizetime(), $result['ended'] !== null);
-            $result['end_of_updates'] = null;
-            if ($result['finalized'] !== null &&
-                ($result['thawed'] !== null || $result['frozen'] === null)) {
-                if ($result['thawed'] !== null &&
-                    $contest->getFreezetime() > $contest->getFinalizetime()) {
-                    $result['end_of_updates'] = $result['thawed'];
-                } else {
-                    $result['end_of_updates'] = $result['finalized'];
-                }
-            }
-            return $result;
+            return $contest->getState();
         } else {
             throw new AccessDeniedHttpException();
         }

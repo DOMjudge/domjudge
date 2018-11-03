@@ -1272,4 +1272,35 @@ class Contest
 
         return $result;
     }
+
+    /**
+     * Get the state for this contest
+     * @return array
+     */
+    public function getState()
+    {
+        $time_or_null             = function ($time, $extra_cond = true) {
+            if (!$extra_cond || $time === null || Utils::now() < $time) {
+                return null;
+            }
+            return Utils::absTime($time);
+        };
+        $result                   = [];
+        $result['started']        = $time_or_null($this->getStarttime());
+        $result['ended']          = $time_or_null($this->getEndtime(), $result['started'] !== null);
+        $result['frozen']         = $time_or_null($this->getFreezetime(), $result['started'] !== null);
+        $result['thawed']         = $time_or_null($this->getUnfreezetime(), $result['frozen'] !== null);
+        $result['finalized']      = $time_or_null($this->getFinalizetime(), $result['ended'] !== null);
+        $result['end_of_updates'] = null;
+        if ($result['finalized'] !== null &&
+            ($result['thawed'] !== null || $result['frozen'] === null)) {
+            if ($result['thawed'] !== null &&
+                $this->getFreezetime() > $this->getFinalizetime()) {
+                $result['end_of_updates'] = $result['thawed'];
+            } else {
+                $result['end_of_updates'] = $result['finalized'];
+            }
+        }
+        return $result;
+    }
 }
