@@ -203,7 +203,7 @@ $CONTESTUTIL_DIR/eventFeed.sh --compare cds-events.json dj-events.json
 EVENTFEED_CHECK=$?
 set -e
 
-echo "Comparing the eventfeeds"
+echo "Comparing the scoreboards"
 set +e
 $CONTESTUTIL_DIR/scoreboardUtil.sh cds-scoreboard.json dj-scoreboard.json
 SCOREBOARD_CHECK=$?

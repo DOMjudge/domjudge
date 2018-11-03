@@ -188,4 +188,3 @@ $CHECK_API -n -C -a 'strict=1' http://admin:admin@localhost/domjudge/api
 # Validate the eventfeed against the api(currently ignore failures)
 cd ${DIR}/misc-tools
 ./compare-cds.sh http://localhost/domjudge 2 || true
-cat icpctools/cds.log
