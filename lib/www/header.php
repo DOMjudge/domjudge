@@ -47,7 +47,7 @@ if (!isset($menu)) {
     <link rel="stylesheet" href="../style.css?v=<?=ASSET_TAG?>">
 
     <script src="../js/jquery.min.js?v=<?=ASSET_TAG?>"></script>
-    <script src="../js/bootstrap.min.js?v=<?=ASSET_TAG?>"></script>
+    <script src="../js/bootstrap.bundle.min.js?v=<?=ASSET_TAG?>"></script>
 <?php
 if (IS_JURY) {
     echo "    <link rel=\"stylesheet\" href=\"../style_jury.css?v=" . ASSET_TAG . "\">\n";
