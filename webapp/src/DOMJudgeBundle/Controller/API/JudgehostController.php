@@ -495,7 +495,8 @@ class JudgehostController extends FOSRestController
             $result['judgingid'] = $judging->getJudgingid();
         });
 
-        $testcases = $submission->getProblem()->getTestcases();
+        /** @var Testcase[] $testcases */
+        $testcases     = $submission->getProblem()->getTestcases();
         $testcase_md5s = array();
         foreach ($testcases as $testcase) {
             $testcase_md5s[$testcase->getRank()] = array(
@@ -695,6 +696,7 @@ class JudgehostController extends FOSRestController
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function addJudgingRunAction(
         Request $request,
@@ -721,12 +723,12 @@ class JudgehostController extends FOSRestController
                 }
             }
 
-            $testCaseId = $request->request->get('testcaseid');
-            $runResult = $request->request->get('runresult');
-            $runTime = $request->request->get('runtime');
-            $outputRun = $request->request->get('output_run');
-            $outputDiff = $request->request->get('output_diff');
-            $outputError = $request->request->get('output_error');
+            $testCaseId   = $request->request->get('testcaseid');
+            $runResult    = $request->request->get('runresult');
+            $runTime      = $request->request->get('runtime');
+            $outputRun    = $request->request->get('output_run');
+            $outputDiff   = $request->request->get('output_diff');
+            $outputError  = $request->request->get('output_error');
             $outputSystem = $request->request->get('output_system');
 
             /** @var Judgehost $judgehost */
@@ -737,14 +739,26 @@ class JudgehostController extends FOSRestController
 
             /** @var Judging $judging */
             $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
-            $this->addSingleJudgingRun($hostname, $judgingId, (int)$testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun);
+            $this->addSingleJudgingRun($hostname, $judgingId, (int)$testCaseId, $runResult, $runTime, $judging,
+                                       $outputSystem, $outputError, $outputDiff, $outputRun);
             $judgehost->setPolltime(Utils::now());
             $this->entityManager->flush();
         }
     }
 
-    private function addMultipleJudgingRuns(Request $request, string $hostname, int $judgingId) {
-        $judgingRuns = json_decode($request->request->get('batch'), TRUE);
+    /**
+     * Add multiple judgings runs to a given judging
+     * @param Request $request
+     * @param string  $hostname
+     * @param int     $judgingId
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
+     */
+    private function addMultipleJudgingRuns(Request $request, string $hostname, int $judgingId)
+    {
+        $judgingRuns = json_decode($request->request->get('batch'), true);
         if (!is_array($judgingRuns)) {
             throw new BadRequestHttpException(
                 sprintf("Argument 'batch' is not an array"));
@@ -769,16 +783,16 @@ class JudgehostController extends FOSRestController
             foreach ($required as $argument) {
                 if (!isset($judgingRun[$argument])) {
                     throw new BadRequestHttpException(
-                        sprintf("Argument '%s' is mandatory, got '%s'.", $argument, var_export($judgingRun, TRUE)));
+                        sprintf("Argument '%s' is mandatory, got '%s'.", $argument, var_export($judgingRun, true)));
                 }
             }
 
-            $testCaseId = $judgingRun['testcaseid'];
-            $runResult = $judgingRun['runresult'];
-            $runTime = $judgingRun['runtime'];
-            $outputRun = $judgingRun['output_run'];
-            $outputDiff = $judgingRun['output_diff'];
-            $outputError = $judgingRun['output_error'];
+            $testCaseId   = $judgingRun['testcaseid'];
+            $runResult    = $judgingRun['runresult'];
+            $runTime      = $judgingRun['runtime'];
+            $outputRun    = $judgingRun['output_run'];
+            $outputDiff   = $judgingRun['output_diff'];
+            $outputError  = $judgingRun['output_error'];
             $outputSystem = $judgingRun['output_system'];
             /** @var Judging $judging */
             $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
@@ -786,7 +800,8 @@ class JudgehostController extends FOSRestController
                 throw new BadRequestHttpException(
                     sprintf("Unknown judging, don't send us any imaginary data!"));
             }
-            $this->addSingleJudgingRun($hostname, $judgingId, (int) $testCaseId, $runResult, $runTime, $judging, $outputSystem, $outputError, $outputDiff, $outputRun);
+            $this->addSingleJudgingRun($hostname, $judgingId, (int)$testCaseId, $runResult, $runTime, $judging,
+                                       $outputSystem, $outputError, $outputDiff, $outputRun);
         }
         $judgehost->setPolltime(Utils::now());
         $this->entityManager->flush();
@@ -928,38 +943,48 @@ class JudgehostController extends FOSRestController
             });
 
             $this->DOMJudgeService->auditlog('judging', $judgingId, 'given back', null,
-                                             $judging->getJudgehost()->getHostname(),
-                                             $judging->getCid());
+                                             $judging->getJudgehost()->getHostname(), $judging->getCid());
         }
     }
 
     /**
-     * @param string $hostname
-     * @param int $judgingId
-     * @param int $testCaseId
-     * @param string $runResult
-     * @param string $runTime
+     * Add a single judging to a given judging run
+     * @param string  $hostname
+     * @param int     $judgingId
+     * @param int     $testCaseId
+     * @param string  $runResult
+     * @param string  $runTime
      * @param Judging $judging
-     * @param string $outputSystem
-     * @param string $outputError
-     * @param string $outputDiff
-     * @param string $outputRun
+     * @param string  $outputSystem
+     * @param string  $outputError
+     * @param string  $outputDiff
+     * @param string  $outputRun
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\ORMException
      */
-    private function addSingleJudgingRun(string $hostname, int $judgingId, int $testCaseId, string $runResult, string $runTime, Judging $judging, string $outputSystem, string $outputError, string $outputDiff, string $outputRun)
-    {
+    private function addSingleJudgingRun(
+        string $hostname,
+        int $judgingId,
+        int $testCaseId,
+        string $runResult,
+        string $runTime,
+        Judging $judging,
+        string $outputSystem,
+        string $outputError,
+        string $outputDiff,
+        string $outputRun
+    ) {
         /** @var Testcase $testCase */
         $testCase = $this->entityManager->getRepository(Testcase::class)->find($testCaseId);
 
         $resultsRemap = $this->DOMJudgeService->dbconfig_get('results_remap');
-        $resultsPrio = $this->DOMJudgeService->dbconfig_get('results_prio');
+        $resultsPrio  = $this->DOMJudgeService->dbconfig_get('results_prio');
 
         if (array_key_exists($runResult, $resultsRemap)) {
             $this->logger->info(sprintf('Testcase %d remapping result %s -> %s',
-                $testCaseId, $runResult, $resultsRemap[$runResult]));
+                                        $testCaseId, $runResult, $resultsRemap[$runResult]));
             $runResult = $resultsRemap[$runResult];
         }
 
@@ -990,14 +1015,14 @@ class JudgehostController extends FOSRestController
 
             if ($judging->getRejudgingid() === null) {
                 $this->eventLogService->log('judging_run', $judgingRun->getRunid(),
-                    EventLogService::ACTION_CREATE, $judging->getCid());
+                                            EventLogService::ACTION_CREATE, $judging->getCid());
             }
         });
 
         // Reload the testcase and judging, as EventLogService::log will clear the entity manager.
         // For the judging, also load in the submission and some of it's relations
         $testCase = $this->entityManager->getRepository(Testcase::class)->find($testCaseId);
-        $judging = $this->entityManager->createQueryBuilder()
+        $judging  = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
             ->join('j.submission', 's')
             ->join('s.problem', 'p')
@@ -1038,7 +1063,7 @@ class JudgehostController extends FOSRestController
 
         if (($result = $this->submissionService->getFinalResult($allRuns, $resultsPrio)) !== null) {
             // Lookup global lazy evaluation of results setting and possible problem specific override.
-            $lazyEval = $this->DOMJudgeService->dbconfig_get('lazy_eval_results', true);
+            $lazyEval    = $this->DOMJudgeService->dbconfig_get('lazy_eval_results', true);
             $problemLazy = $judging->getSubmission()->getContestProblem()->getLazyEvalResults();
             if (isset($problemLazy)) {
                 $lazyEval = $problemLazy;
@@ -1059,32 +1084,33 @@ class JudgehostController extends FOSRestController
                     throw new \BadMethodCallException('internal bug: the evaluated result changed during judging');
                 }
 
+                /** @var Submission $submission */
                 $submission = $judging->getSubmission();
-                $contest = $submission->getContest();
-                $team = $submission->getTeam();
-                $problem = $submission->getProblem();
+                $contest    = $submission->getContest();
+                $team       = $submission->getTeam();
+                $problem    = $submission->getProblem();
                 $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
                 // We call alert here before possible validation. Note that this means that these
                 // alert messages should be treated as confidential information.
                 $this->DOMJudgeService->alert($result === 'correct' ? 'accept' : 'reject',
-                    sprintf("submission %s, judging %s: %s",
-                        $submission->getSubmitid(),
-                        $judging->getJudgingid(), $result));
+                                              sprintf("submission %s, judging %s: %s",
+                                                      $submission->getSubmitid(),
+                                                      $judging->getJudgingid(), $result));
 
                 // Log to event table if no verification required
                 // (case of verification required is handled in www/jury/verify.php)
                 if (!$this->DOMJudgeService->dbconfig_get('verification_required', false)) {
                     if ($judging->getRejudgingid() === null) {
                         $this->eventLogService->log('judging', $judging->getJudgingid(),
-                            EventLogService::ACTION_UPDATE,
-                            $judging->getCid());
+                                                    EventLogService::ACTION_UPDATE,
+                                                    $judging->getCid());
                         $this->balloonService->updateBalloons($contest, $submission, $judging);
                     }
                 }
 
                 $this->DOMJudgeService->auditlog('judging', $judgingId, 'judged', $result,
-                    $hostname);
+                                                 $hostname);
 
                 $justFinished = true;
             }
@@ -1093,8 +1119,7 @@ class JudgehostController extends FOSRestController
         // Send an event for an endtime update if not done yet.
         if ($judging->getRejudgingid() === null && count($runs) == $numTestCases && empty($justFinished)) {
             $this->eventLogService->log('judging', $judging->getJudgingid(),
-                EventLogService::ACTION_UPDATE,
-                $judging->getCid());
+                                        EventLogService::ACTION_UPDATE, $judging->getCid());
         }
     }
 }
