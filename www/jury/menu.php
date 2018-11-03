@@ -46,7 +46,7 @@ global $updates;
 <a href="clarifications.php" accesskey="c" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications</a>
 <?php
         } ?>
-<a href="submissions.php" accesskey="s"><i class="fas fa-file-code"></i> submissions</a>
+<a href="submissions" accesskey="s"><i class="fas fa-file-code"></i> submissions</a>
 <?php
     $nrejudgings = count($updates['rejudgings']);
         if ($nrejudgings > 0) {

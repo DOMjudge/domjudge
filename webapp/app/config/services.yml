@@ -13,6 +13,10 @@ services:
         # if you need to do this, you can override this setting on individual services
         public: false
 
+    Twig\Extensions\TextExtension:
+        tags:
+            - { name: twig.extension }
+
     LegacyBundle\Controller\:
         resource: '../../src/LegacyBundle/Controller'
         public: true

@@ -12,8 +12,10 @@ use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
@@ -252,12 +254,80 @@ class DOMJudgeService
         return $user;
     }
 
+    /**
+     * Get the value of the cookie with the given name
+     * @param string $cookieName
+     * @return mixed|null
+     */
     public function getCookie(string $cookieName)
     {
         if (!$this->request->cookies) {
             return null;
         }
         return $this->request->cookies->get($cookieName);
+    }
+
+    /**
+     * Set the given cookie on the response, returning the response again to allow chaining
+     * @param string        $cookieName
+     * @param string        $value
+     * @param int           $expire
+     * @param string|null   $path
+     * @param string        $domain
+     * @param bool          $secure
+     * @param bool          $httponly
+     * @param Response|null $response
+     * @return Response
+     */
+    public function setCookie(
+        string $cookieName,
+        string $value = '',
+        int $expire = 0,
+        string $path = null,
+        string $domain = '',
+        bool $secure = false,
+        bool $httponly = false,
+        Response $response = null
+    ) {
+        if ($response === null) {
+            $response = new Response();
+        }
+        if ($path === null) {
+            $path = $this->request->getBasePath();
+        }
+
+        $response->headers->setCookie(new Cookie($cookieName, $value, $expire, $path, $domain, $secure, $httponly));
+
+        return $response;
+    }
+
+    /**
+     * Clear the given cookie on the response, returning the response again to allow chaining
+     * @param string        $cookieName
+     * @param string|null   $path
+     * @param string        $domain
+     * @param bool          $secure
+     * @param bool          $httponly
+     * @param Response|null $response
+     * @return Response
+     */
+    public function clearCookie(
+        string $cookieName,
+        string $path = null,
+        string $domain = '',
+        bool $secure = false,
+        bool $httponly = false,
+        Response $response = null
+    ) {
+        if ($response === null) {
+            $response = new Response();
+        }
+        if ($path === null) {
+            $path = $this->request->getBasePath();
+        }
+
+        $response->headers->clearCookie($cookieName, $path, $domain, $secure, $httponly);
+        return $response;
     }
 
     public function getUpdates() : array

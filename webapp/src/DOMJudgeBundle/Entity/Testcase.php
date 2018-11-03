@@ -46,7 +46,7 @@ class Testcase
     private $rank;
 
     /**
-     * @var string
+     * @var resource
      * @ORM\Column(type="blob", name="description", options={"comment"="Description of this testcase"}, nullable=true)
      * @Serializer\Exclude()
      */
@@ -204,7 +204,7 @@ class Testcase
     /**
      * Set description
      *
-     * @param string $description
+     * @param resource|string $description
      *
      * @return Testcase
      */
@@ -218,7 +218,7 @@ class Testcase
     /**
      * Get description
      *
-     * @return string
+     * @return resource
      */
     public function getDescription()
     {

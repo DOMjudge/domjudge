@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\JudgingRun;
@@ -73,6 +74,161 @@ class SubmissionService
         $dir          = realpath($rootDir . '/../../etc/');
         $staticConfig = $dir . '/domserver-static.php';
         require_once $staticConfig;
+    }
+
+    /**
+     * Get a list of submissions that can be displayed in the interface using the submission_list partial
+     *
+     * Restrictions can contain the following keys;
+     * - rejudgingid: ID of a rejudging to filter on
+     * - verified: if true, only return verified submissions. If false, only return unverified or unjudged submissions
+     * - judged: if true, only return judged submissions. If false, only return unjudged submissions
+     * - rejudgingdiff: if true, only return judgings that differ from their original result. If false, only return
+     *                  judgings that do not differ from their original result
+     * - teamid: ID of a team to filter on
+     * - categoryid: ID of a team category to filter on
+     * - probid: ID of a problem to filter on
+     * - langid: ID of a language to filter on
+     * - judgehost: hostname of a judgehost to filter on
+     * - old_result: result of old judging to filter on
+     * - result: result of current judging to filter on
+     *
+     * @param array $contests
+     * @param array $restrictions
+     * @param int   $limit
+     * @return array An array with two elements: the first one is the list of submissions and the second one is an
+     *              array with counts
+     */
+    public function getSubmissionList(array $contests, array $restrictions, int $limit = 0)
+    {
+        if (empty($contests)) {
+            return [[], []];
+        }
+
+        $queryBuilder = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Submission', 's')
+            ->select('s', 'j')
+            ->join('s.team', 't')
+            ->andWhere('s.cid IN (:contests)')
+            ->setParameter(':contests', array_keys($contests))
+            ->orderBy('s.submittime', 'DESC')
+            ->addOrderBy('s.submitid', 'DESC');
+
+        if ($limit > 0) {
+            $queryBuilder->setMaxResults($limit);
+        }
+
+        if (isset($restrictions['rejudgingid'])) {
+            $queryBuilder
+                ->leftJoin('s.judgings', 'j', Join::WITH, 'j.rejudgingid = :rejudgingid')
+                ->leftJoin('DOMJudgeBundle:Judging', 'jold', Join::WITH,
+                           'j.prevjudgingid IS NULL AND s.submitid = jold.submitid AND jold.valid = 1 OR j.prevjudgingid = jold.judgingid')
+                ->addSelect('jold.result AS oldresult')
+                ->andWhere('s.rejudgingid = :rejudgingid OR j.rejudgingid = :rejudgingid')
+                ->setParameter(':rejudgingid', $restrictions['rejudgingid']);
+
+            if (isset($restrictions['rejudgingdiff'])) {
+                if ($restrictions['rejudgingdiff']) {
+                    $queryBuilder->andWhere('j.result != jold.result');
+                } else {
+                    $queryBuilder->andWhere('j.result = jold.result');
+                }
+            }
+
+            if (isset($restrictions['old_result'])) {
+                $queryBuilder
+                    ->andWhere('jold.result = :oldresult')
+                    ->setParameter(':oldresult', $restrictions['old_result']);
+            }
+        } else {
+            $queryBuilder->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1');
+        }
+
+        $queryBuilder->leftJoin('j.rejudging', 'r');
+
+        if (isset($restrictions['verified'])) {
+            if ($restrictions['verified']) {
+                $queryBuilder->andWhere('j.verified = 1');
+            } else {
+                $queryBuilder->andWhere('j.verified = 0 OR (j.verified IS NULL AND s.judgehost IS NULL)');
+            }
+        }
+
+        if (isset($restrictions['judged'])) {
+            if ($restrictions['judged']) {
+                $queryBuilder->andWhere('j.result IS NOT NULL');
+            } else {
+                $queryBuilder->andWhere('j.result IS NULL');
+            }
+        }
+
+        if (isset($restrictions['teamid'])) {
+            $queryBuilder
+                ->andWhere('s.teamid = :teamid')
+                ->setParameter(':teamid', $restrictions['teamid']);
+        }
+
+        if (isset($restrictions['categoryid'])) {
+            $queryBuilder
+                ->andWhere('t.categoryid = :categoryid')
+                ->setParameter(':categoryid', $restrictions['categoryid']);
+        }
+
+        if (isset($restrictions['probid'])) {
+            $queryBuilder
+                ->andWhere('s.probid = :probid')
+                ->setParameter(':probid', $restrictions['probid']);
+        }
+
+        if (isset($restrictions['langid'])) {
+            $queryBuilder
+                ->andWhere('s.langid = :langid')
+                ->setParameter(':langid', $restrictions['langid']);
+        }
+
+        if (isset($restrictions['judgehost'])) {
+            $queryBuilder
+                ->andWhere('s.judgehost = :judgehost')
+                ->setParameter(':judgehost', $restrictions['judgehost']);
+        }
+
+        if (isset($restrictions['result'])) {
+            $queryBuilder
+                ->andWhere('j.result = :result')
+                ->setParameter(':result', $restrictions['result']);
+        }
+
+        $submissions = $queryBuilder->getQuery()->getResult();
+        if (isset($restrictions['rejudgingid'])) {
+            // Doctrine will return an array for each item. At index '0' will be the submission and at
+            // index 'oldresult' will be the old result. Remap this
+            $submissions = array_map(function ($submissionData) {
+                /** @var Submission $submission */
+                $submission = $submissionData[0];
+                $submission->setOldResult($submissionData['oldresult']);
+                return $submission;
+            }, $submissions);
+        }
+
+        $counts           = [];
+        $countQueryExtras = [
+            'total' => '',
+            'correct' => 'j.result LIKE \'correct\'',
+            'ignored' => 's.valid = 0',
+            'unverified' => 'j.verified = 0 AND j.result IS NOT NULL',
+            'queued' => 'j.result IS NULL'
+        ];
+        foreach ($countQueryExtras as $count => $countQueryExtra) {
+            $countQueryBuilder = (clone $queryBuilder)->select('COUNT(s.submitid) AS cnt');
+            if (!empty($countQueryExtra)) {
+                $countQueryBuilder->andWhere($countQueryExtra);
+            }
+            $counts[$count] = (int)$countQueryBuilder
+                ->getQuery()
+                ->getSingleScalarResult();
+        }
+
+        return [$submissions, $counts];
     }
 
     /**

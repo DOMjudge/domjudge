@@ -310,7 +310,7 @@ if (isset($_REQUEST['claim']) || isset($_REQUEST['unclaim'])) {
         auditlog('judging', $jid, $unornot . 'claimed');
 
         if ($unornot==='un') {
-            header('Location: submissions.php');
+            header('Location: submissions');
         } else {
             header('Location: submission.php?id=' . $id);
         }

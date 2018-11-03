@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -81,7 +82,8 @@ class Submission implements ExternalRelationshipEntityInterface
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time submitted", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="submittime", options={"comment"="Time submitted",
+     *                             "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
     private $submittime;
@@ -195,14 +197,19 @@ class Submission implements ExternalRelationshipEntityInterface
      */
     private $rejudging;
 
+    /**
+     * @var string Holds the old result in the case this submission is displayed in a rejudging table
+     */
+    private $old_result;
 
-    public function getResult() {
-      foreach ($this->judgings as $j) {
-        if ($j->getValid()) {
-          return $j->getResult();
+    public function getResult()
+    {
+        foreach ($this->judgings as $j) {
+            if ($j->getValid()) {
+                return $j->getResult();
+            }
         }
-      }
-      return null;
+        return null;
     }
 
     /**
@@ -588,13 +595,14 @@ class Submission implements ExternalRelationshipEntityInterface
     {
         return $this->team;
     }
+
     /**
      * Constructor
      */
     public function __construct()
     {
-        $this->judgings = new ArrayCollection();
-        $this->files = new ArrayCollection();
+        $this->judgings               = new ArrayCollection();
+        $this->files                  = new ArrayCollection();
         $this->files_with_source_code = new ArrayCollection();
     }
 
@@ -877,5 +885,56 @@ class Submission implements ExternalRelationshipEntityInterface
     public function isAfterFreeze(): bool
     {
         return $this->getContest()->getFreezetime() !== null && (float)$this->getSubmittime() >= (float)$this->getContest()->getFreezetime();
+    }
+
+    /**
+     * @return string
+     */
+    public function getOldResult(): string
+    {
+        return $this->old_result;
+    }
+
+    /**
+     * @param string $old_result
+     * @return Submission
+     */
+    public function setOldResult(string $old_result): Submission
+    {
+        $this->old_result = $old_result;
+        return $this;
+    }
+
+    /**
+     * Check whether this submission is for an aborted judging
+     * @return bool
+     */
+    public function isAborted()
+    {
+        // This logic has been copied from putSubmissions()
+        /** @var Judging|null $judging */
+        $judging = $this->getJudgings()->first();
+        if (!$judging) {
+            return false;
+        }
+
+        return $judging->getEndtime() === null && !$judging->getValid() &&
+            (!$judging->getRejudging() || !$judging->getRejudging()->getValid());
+    }
+
+    /**
+     * Check whether this submission is still busy while the final result is already known,
+     * e.g. with non-lazy evaluation.
+     * @return bool
+     */
+    public function isStillBusy()
+    {
+        /** @var Judging|null $judging */
+        $judging = $this->getJudgings()->first();
+        if (!$judging) {
+            return false;
+        }
+
+        return !empty($judging->getResult()) && empty($judging->getEndtime()) && !$this->isAborted();
     }
 }

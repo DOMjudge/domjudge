@@ -59,7 +59,7 @@ if (dbconfig_get('verification_required', 0)) {
 if ($val) {
     $redirect = @$_POST['redirect'];
     if (empty($redirect)) {
-        $redirect = 'submissions.php';
+        $redirect = 'submissions';
     }
     header('Location: '.$redirect);
 } else {

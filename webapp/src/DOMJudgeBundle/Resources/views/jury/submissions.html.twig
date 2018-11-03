@@ -1,0 +1,38 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block title %}Submissions - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Submissions</h1>
+
+    Show submissions:
+    <div class="btn-group btn-group-toggle btn-group-sm" data-toggle="buttons">
+        {% for idx, type in viewTypes %}
+            <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
+                <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
+                       {% if idx == view %}checked{% endif %}> {{ type }}
+            </label>
+        {% endfor %}
+    </div>
+
+    {% include '@DOMJudge/jury/partials/submission_list.html.twig' with {show_testcases: true} %}
+
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function () {
+            $('input[name=viewtype]').on('change', function () {
+                window.location = '{{ path('jury_submissions', {'view': 'REPLACE_ME'}) }}'.replace('REPLACE_ME', $(this).val());
+            });
+        });
+    </script>
+{% endblock %}

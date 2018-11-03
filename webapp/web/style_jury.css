@@ -166,13 +166,12 @@ div.submissions-filter ul.token-input-list {
 .tc_list_small {
 	max-width:500px;
 }
-.has_tooltip {
-	text-decoration: dotted underline;
-}
-.data-table tr.disabled td a {
-	color: silver
+
+.data-table  td.testcase-results {
+	white-space: normal;
+	word-wrap: break-word;
 }
 
-td.ignore {
-	text-decoration: line-through;
+.has_tooltip {
+	text-decoration: dotted underline;
 }

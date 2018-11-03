@@ -11,3 +11,27 @@
 .submitform {
     max-width: 450px;
 }
+
+.data-table tr.disabled td a {
+    color: silver
+}
+
+.data-table td.ignore {
+    text-decoration: line-through;
+}
+
+.probid, .langid { font-variant: small-caps; }
+
+.badge-testcase {
+    width: 20px;
+    margin-right: 1px;
+}
+
+.sol {
+    font-weight: 500;
+    font-variant: small-caps;
+}
+
+.sol_correct      { color: green;  }
+.sol_incorrect    { color: red;    }
+.sol_queued       { color: gray;   }
