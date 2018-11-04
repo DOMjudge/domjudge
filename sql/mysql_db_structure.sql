@@ -71,6 +71,7 @@ CREATE TABLE `configuration` (
   `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)',
   `type` varchar(32) DEFAULT NULL COMMENT 'Type of the value (metatype for use in the webinterface)',
   `public` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Is this variable publicly visible?',
+  `category` varchar(32) NOT NULL COMMENT 'Option category of the configuration variable',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description for in the webinterface',
   PRIMARY KEY (`configid`),
   UNIQUE KEY `name` (`name`),
