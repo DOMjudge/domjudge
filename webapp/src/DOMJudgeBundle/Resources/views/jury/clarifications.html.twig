@@ -1,0 +1,46 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block title %}Clarifications - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Clarifications</h1>
+
+    {% if contests is empty %}
+        <div class="alert alert-danger">No active contest(s)</div>
+    {% else %}
+        <p><a href="{{ path('legacy.jury_clarification') }}">Send Clarification</a></p>
+        <p><a href="#newrequests">View New Clarification Requests</a></p>
+        <p><a href="#oldrequests">View Old Clarification Requests</a></p>
+        <p><a href="#clarifications">View General Clarifications</a></p>
+
+        <h3 id="newrequests">New requests:</h3>
+        {% if newClarifications | length == 0 %}
+            <p class="nodata">No new clarification requests.</p>
+        {% else %}
+            {% include '@DOMJudge/jury/partials/clarification_list.html.twig' with {clarifications: newClarifications} %}
+        {% endif %}
+
+        <h3 id="oldrequests">Old requests:</h3>
+        {% if oldClarifications | length == 0 %}
+            <p class="nodata">No old clarification requests.</p>
+        {% else %}
+            {% include '@DOMJudge/jury/partials/clarification_list.html.twig' with {clarifications: oldClarifications} %}
+        {% endif %}
+
+        <h3 id="clarifications">General requests:</h3>
+        {% if generalClarifications | length == 0 %}
+            <p class="nodata">No general clarification requests.</p>
+        {% else %}
+            {% include '@DOMJudge/jury/partials/clarification_list.html.twig' with {clarifications: generalClarifications} %}
+        {% endif %}
+    {% endif %}
+
+{% endblock %}

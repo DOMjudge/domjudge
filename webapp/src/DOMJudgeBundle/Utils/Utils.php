@@ -412,6 +412,23 @@ class Utils
     }
 
     /**
+     * Cut a string at $size chars and append ..., only if neccessary.
+     * @param string $str
+     * @param int    $size
+     * @return string
+     */
+    public static function cutString(string $str, int $size) : string
+    {
+        // is the string already short enough?
+        // we count '…' for 1 extra chars.
+        if (mb_strlen($str) <= $size+1) {
+            return $str;
+        }
+
+        return mb_substr($str, 0, $size) . '…';
+    }
+
+    /**
      * Compute the LCS diff of two lines
      * @param string $line1
      * @param string $line2

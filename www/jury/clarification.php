@@ -57,7 +57,7 @@ if (isset($_REQUEST['claim']) || isset($_REQUEST['unclaim'])) {
                'WHERE clarid = %i', $jury_member, $id);
 
         if (isset($_REQUEST['unclaim'])) {
-            header('Location: clarifications.php');
+            header('Location: clarifications');
         }
     }
 }
@@ -128,7 +128,7 @@ if (isset($_POST['submit']) && !empty($_POST['bodytext'])) {
 
     // redirect back to the original location
     if ($isgeneral) {
-        header('Location: clarifications.php');
+        header('Location: clarifications');
     } else {
         header('Location: clarification.php?id=' . $id);
     }

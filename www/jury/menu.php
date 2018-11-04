@@ -39,11 +39,11 @@ global $updates;
     $nunread = count($updates['clarifications']);
         if ($nunread > 0) {
             ?>
-<a class="new" href="clarifications.php" accesskey="c" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications (<?php echo $nunread ?> new)</a>
+<a class="new" href="clarifications" accesskey="c" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications (<?php echo $nunread ?> new)</a>
 <?php
         } else {
             ?>
-<a href="clarifications.php" accesskey="c" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications</a>
+<a href="clarifications" accesskey="c" id="menu_clarifications"><i class="fas fa-comments"></i> clarifications</a>
 <?php
         } ?>
 <a href="submissions" accesskey="s"><i class="fas fa-file-code"></i> submissions</a>

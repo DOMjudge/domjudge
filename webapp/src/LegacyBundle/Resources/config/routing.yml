@@ -18,8 +18,6 @@ legacy.jury_judgehost_restrictions:
   path: /jury/judgehost_restrictions.php
 legacy.jury_clarification:
   path: /jury/clarification.php
-legacy.jury_clarifications:
-    path: /jury/clarifications.php
 legacy.jury_language:
     path: /jury/language.php
 legacy.jury_rejudge:

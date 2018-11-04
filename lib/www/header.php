@@ -73,7 +73,7 @@ if (! empty($extrahead)) {
 if (IS_JURY) {
     global $pagename;
     echo "<body onload=\"setInterval('updateMenu(" .
-        (int)($pagename=='clarifications.php' && $refresh_cookie) . ", " .
+        (int)($pagename=='clarifications'     && $refresh_cookie) . ", " .
         (int)($pagename=='judgehosts.php'     && $refresh_cookie) . ", " .
         (int)($pagename=='rejudgings.php'     && $refresh_cookie) . ")', 20000); " .
         "updateMenu(0,0,0)\">\n";

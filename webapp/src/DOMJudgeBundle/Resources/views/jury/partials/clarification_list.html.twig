@@ -1,0 +1,96 @@
+<table class="data-table table table-striped table-hover table-sm">
+    <thead>
+    <tr>
+        <th scope="col">ID</th>
+        {% if contests | length > 1 %}
+            <th scope="col">contest</th>
+        {% endif %}
+        <th scope="col">time</th>
+        <th scope="col">from</th>
+        <th scope="col">to</th>
+        <th scope="col">subject</th>
+        {% if queues | length > 1 %}
+            <th scope="col">queue</th>
+        {% endif %}
+        <th scope="col">text</th>
+        <th scope="col">answered</th>
+        <th scope="col">by</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for clarification in clarifications %}
+        {% set link = path('legacy.jury_clarification', {id: clarification.clarid}) %}
+        <tr>
+            <td><a href="{{ link }}">{{ clarification.clarid }}</a></td>
+            {% if contests | length > 1 %}
+                <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
+            {% endif %}
+            <td><a href="{{ link }}">{{ clarification.submittime | printtime(null, clarification.contest) }}</a></td>
+            {% if clarification.sender is null %}
+                {% set sender = 'Jury' %}
+                {% if clarification.recipient is null %}
+                    {% set recipient = 'All' %}
+                {% else %}
+                    {% set recipient = clarification.recipient.name %}
+                {% endif %}
+            {% else %}
+                {% set recipient = 'Jury' %}
+                {% set sender = clarification.sender.name %}
+            {% endif %}
+            <td><a href="{{ link }}" title="{{ sender }}">{{ sender | truncate(30) }}</a></td>
+            <td><a href="{{ link }}" title="{{ recipient }}">{{ recipient | truncate(30) }}</a></td>
+            <td>
+                <a href="{{ link }}">
+                    {% if clarification.problem %}
+                        problem {{ clarification.problem.contestProblems.first.shortname }}
+                    {% elseif clarification.category %}
+                        {{ categories[clarification.category]|default('general') }}
+                    {% else %}
+                        general
+                    {% endif %}
+                </a>
+            </td>
+            {% if queues | length > 1 %}
+                <td>
+                    <a href="{{ link }}">
+                        {{ queues[clarification.queue]|default('') }}
+                    </a>
+                </td>
+            {% endif %}
+            <td><a href="{{ link }}">{{ clarification.summary }}</a></td>
+            {% set claim = false %}
+            {% if clarification.answered %}
+                {% set answered = 'yes' %}
+            {% else %}
+                {% set answered = 'no' %}
+                {% if clarification.juryMember is empty %}
+                    {% set claim = 'yes' %}
+                {% else %}
+                    {% set answered = 'claimed' %}
+                {% endif %}
+            {% endif %}
+            {% if clarification.juryMember is empty %}
+                {% set juryMember = '&nbsp;' %}
+            {% else %}
+                {% set juryMember = clarification.juryMember %}
+            {% endif %}
+            <td><a href="{{ link }}">{{ answered }}</a></td>
+            <td>
+                {% if claim and clarification.sender %}
+                    <a href="{{ path('legacy.jury_clarification', {id: clarification.clarid, claim: 1}) }}"
+                       class="btn btn-outline-secondary btn-sm">
+                        Claim
+                    </a>
+                {% elseif not clarification.answered and app.user.username == juryMember %}
+                    <a href="{{ path('legacy.jury_clarification', {id: clarification.clarid, unclaim: 1}) }}"
+                       class="btn btn-outline-secondary btn-sm">
+                        Unclaim
+                    </a>
+                {% else %}
+                    <a href="{{ link }}">{{ juryMember }}</a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

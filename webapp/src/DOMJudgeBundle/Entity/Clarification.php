@@ -636,4 +636,21 @@ class Clarification implements ExternalRelationshipEntityInterface
             'reply_to_id' => $this->getInReplyTo()
         ];
     }
+
+    /**
+     * Get the summary for this clarification
+     * @return string
+     */
+    public function getSummary(): string
+    {
+        // when making a summary, try to ignore the quoted text, and replace newlines by spaces.
+        $split = explode("\n", $this->getBody());
+        $newBody = '';
+        foreach ($split as $line) {
+            if (strlen($line) > 0 && $line{0} != '>') {
+                $newBody .= $line . ' ';
+            }
+        }
+        return Utils::specialchars(Utils::cutString((empty($newBody) ? $this->getBody() : $newBody), 80));
+    }
 }

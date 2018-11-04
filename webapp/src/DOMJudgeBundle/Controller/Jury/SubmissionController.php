@@ -51,7 +51,7 @@ class SubmissionController extends Controller
     protected $submissionService;
 
     /**
-     * TeamCategoryController constructor.
+     * SubmissionController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
      * @param SubmissionService      $submissionService
