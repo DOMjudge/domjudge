@@ -37,8 +37,6 @@ legacy.jury_executable:
 legacy.jury_finalize:
     path: /jury/finalize.php
 
-legacy.jury_config:
-    path: /jury/config.php
 legacy.jury_checkconfig:
     path: /jury/checkconfig.php
 legacy.jury_impexp:
