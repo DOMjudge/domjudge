@@ -49,11 +49,15 @@ class GeneralInfoController extends FOSRestController
     /**
      * GeneralInfoController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService $DOMJudgeService
-     * @param RouterInterface $router
+     * @param DOMJudgeService        $DOMJudgeService
+     * @param RouterInterface        $router
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService, RouterInterface $router)
-    {
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
+        RouterInterface $router
+    ) {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
         $this->eventLogService = $eventLogService;
@@ -109,12 +113,16 @@ class GeneralInfoController extends FOSRestController
      * @Security("has_role('ROLE_JURY')")
      * @SWG\Response(
      *     response="200",
-     *     description="General status information for the currently active contest",
+     *     description="General status information for the currently active contests",
      *     @SWG\Schema(
-     *         type="object",
-     *         @SWG\Property(property="num_submissions", type="integer"),
-     *         @SWG\Property(property="num_queued", type="integer"),
-     *         @SWG\Property(property="num_judging", type="integer")
+     *         type="array",
+     *         @SWG\Items(
+     *             type="object",
+     *             @SWG\Property(property="cid", type="integer"),
+     *             @SWG\Property(property="num_submissions", type="integer"),
+     *             @SWG\Property(property="num_queued", type="integer"),
+     *             @SWG\Property(property="num_judging", type="integer")
+     *         )
      *     )
      * )
      * @return array
@@ -135,38 +143,39 @@ class GeneralInfoController extends FOSRestController
             throw new BadRequestHttpException('No active contest');
         }
 
-        /** @var Contest $contest */
-        $contest = reset($contests);
-
-        $result                    = [];
-        $result['num_submissions'] = (int)$this->entityManager
-            ->createQuery(
-                'SELECT COUNT(s)
+        $result = [];
+        foreach ($contests as $contest) {
+            $resultItem                    = ['cid' => $contest->getCid()];
+            $resultItem['num_submissions'] = (int)$this->entityManager
+                ->createQuery(
+                    'SELECT COUNT(s)
                 FROM DOMJudgeBundle:Submission s
                 WHERE s.cid = :cid')
-            ->setParameter(':cid', $contest->getCid())
-            ->getSingleScalarResult();
-        $result['num_queued']      = (int)$this->entityManager
-            ->createQuery(
-                'SELECT COUNT(s)
+                ->setParameter(':cid', $contest->getCid())
+                ->getSingleScalarResult();
+            $resultItem['num_queued']      = (int)$this->entityManager
+                ->createQuery(
+                    'SELECT COUNT(s)
                 FROM DOMJudgeBundle:Submission s
                 LEFT JOIN DOMJudgeBundle:Judging j WITH (j.submitid = s.submitid AND j.valid != 0)
                 WHERE s.cid = :cid
                 AND j.result IS NULL
                 AND s.valid = 1')
-            ->setParameter(':cid', $contest->getCid())
-            ->getSingleScalarResult();
-        $result['num_judging']     = (int)$this->entityManager
-            ->createQuery(
-                'SELECT COUNT(s)
+                ->setParameter(':cid', $contest->getCid())
+                ->getSingleScalarResult();
+            $resultItem['num_judging']     = (int)$this->entityManager
+                ->createQuery(
+                    'SELECT COUNT(s)
                 FROM DOMJudgeBundle:Submission s
                 LEFT JOIN DOMJudgeBundle:Judging j WITH (j.submitid = s.submitid)
                 WHERE s.cid = :cid
                 AND j.result IS NULL
                 AND j.valid = 1
                 AND s.valid = 1')
-            ->setParameter(':cid', $contest->getCid())
-            ->getSingleScalarResult();
+                ->setParameter(':cid', $contest->getCid())
+                ->getSingleScalarResult();
+            $result[]                      = $resultItem;
+        }
 
         return $result;
     }
