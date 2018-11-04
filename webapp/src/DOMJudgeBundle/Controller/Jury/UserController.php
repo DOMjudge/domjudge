@@ -58,7 +58,7 @@ class UserController extends Controller
             'email' => ['title' => 'email', 'sort' => true],
             'roles' => ['title' => 'roles', 'sort' => true],
             'team' => ['title' => 'team', 'sort' => true],
-            'bubble' => ['title' => '', 'sort' => false],
+            'bubble' => ['title' => '', 'sort' => true],
         ];
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -84,6 +84,7 @@ class UserController extends Controller
             if ($u->getTeam()) {
                 $userdata['team'] = [
                     'value' => 't' . $u->getTeamid(),
+                    'sortvalue' => $u->getTeamid(),
                     'link' => $this->generateUrl('legacy.jury_team', [
                         'id' => $u->getTeamid(),
                     ]),
@@ -124,6 +125,7 @@ class UserController extends Controller
             $userdata = array_merge($userdata, [
                 'bubble' => [
                     'value' => "\u{25CF}",
+                    'sortvalue' => $statusclass,
                     'cssclass' => $statusclass,
                     'linktitle' => $statustitle,
                 ],

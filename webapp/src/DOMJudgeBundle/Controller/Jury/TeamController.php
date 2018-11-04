@@ -196,7 +196,7 @@ class TeamController extends Controller
             // merge in the rest of the data
             $teamdata = array_merge($teamdata, [
                 'num_contests' => ['value' => (int)($t->getContests()->count()) + $num_public_contests],
-                'teamid' => ['value' => 't' . $t->getTeamId()],
+                'teamid' => ['value' => 't' . $t->getTeamId(), 'sortvalue' => $t->getTeamId()],
                 'bubble' => [
                     'value' => "\u{25CF}",
                     'cssclass' => $statusclass,

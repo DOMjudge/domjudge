@@ -71,8 +71,8 @@
                 <tr class="{{ row.cssclass|default('') }}" {% if row.style is defined %}style="{{ row.style }}"{% endif %}>
                     {% for key,column in fields %}
                         {% set item = attribute(row.data, key) %}
-                        <td class="{{ item.cssclass|default(' ') }}" title="{{ item.title|default('') }}">
-                            <a href="{{ item.link|default(row.link) }}" title="{{ item.linktitle|default('') }}">
+                        <td class="{{ item.cssclass|default(' ') }}" {% if item.title is defined %}title="{{ item.title }}"{% endif %} {% if item.sortvalue is defined %}data-sort="{{ item.sortvalue }}"{% endif %}>
+                            <a href="{{ item.link|default(row.link) }}" {% if item.linktitle is defined %}title="{{ item.linktitle }}"{% endif %}>
                                 {{ (item.value|default(item.default|default('')))|raw }}
                             </a>
                         </td>

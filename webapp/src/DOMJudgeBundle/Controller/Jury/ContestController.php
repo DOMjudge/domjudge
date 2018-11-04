@@ -263,6 +263,7 @@ class ContestController extends Controller
                     $timeTitle = Utils::printtime($time, '%Y-%m-%d %H:%M:%S (%Z)');
                 }
                 $contestdata[$timeField . 'time']['value'] = $timeValue;
+                $contestdata[$timeField . 'time']['sortvalue'] = $time;
                 $contestdata[$timeField . 'time']['title'] = $timeTitle;
             }
 

@@ -145,7 +145,7 @@ class ProblemController extends Controller
             // merge in the rest of the data
             $problemdata = array_merge($problemdata, [
                 'num_contests' => ['value' => (int)($p->getContestProblems()->count())],
-                'probid' => ['value' => 'p' . $p->getProbid()],
+                'probid' => ['value' => 'p' . $p->getProbid(), 'sortvalue' => $p->getProbid()],
                 'num_testcases' => ['value' => $row['testdatacount']],
             ]);
 

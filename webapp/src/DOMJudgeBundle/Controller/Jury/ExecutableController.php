@@ -61,7 +61,7 @@ class ExecutableController extends Controller
             'type' => ['title' => 'type', 'sort' => true,],
             'description' => ['title' => 'description', 'sort' => true, 'default_sort' => true],
             'size' => ['title' => 'size', 'sort' => true,],
-            'md5sum' => ['title' => 'md5', 'sort' => true, 'search' => false],
+            'md5sum' => ['title' => 'md5', 'sort' => false, 'search' => true],
         ];
 
         $propertyAccessor  = PropertyAccess::createPropertyAccessor();
@@ -108,7 +108,9 @@ class ExecutableController extends Controller
 
             $execdata['md5sum']['cssclass'] = 'text-monospace small';
             $execdata                       = array_merge($execdata, [
-                'size' => ['value' => Utils::printsize((int)$executable_sizes[$e->getExecid()])],
+		    'size' => [
+                        'value' => Utils::printsize((int)$executable_sizes[$e->getExecid()]),
+                        'sortvalue' => (int)$executable_sizes[$e->getExecid()]],
             ]);
             $executables_table[]            = [
                 'data' => $execdata,
