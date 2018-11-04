@@ -68,6 +68,7 @@ function dbconfig_init()
         $LIBDBCONFIG[$key] = array('value' => $val,
                                    'type' => $row['type'],
                                    'public' => $row['public'],
+                                   'category' => $row['category'],
                                    'desc' => $row['description']);
     }
 }
