@@ -381,7 +381,7 @@ function updateRankCache(int $cid, int $team)
     while ($srow = $scoredata->next()) {
         // Only count solved problems
         foreach (array('public', 'restricted') as $variant) {
-            if ($srow['is_correct_'.$variant]) {
+            if ($srow['points'] !== null && $srow['is_correct_'.$variant]) {
                 $penalty = calcPenaltyTime(
                     (bool)$srow['is_correct_'.$variant],
                     (int)$srow['submissions_'.$variant]
