@@ -408,4 +408,87 @@ class Utils
             ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE
         );
     }
+
+    /**
+     * Compute the LCS diff of two lines
+     * @param string $line1
+     * @param string $line2
+     * @return array
+     */
+    public static function computeLcsDiff(string $line1, string $line2): array
+    {
+        $tokens1 = preg_split('/\s+/', $line1);
+        $tokens2 = preg_split('/\s+/', $line2);
+        $cutoff = 100; // a) LCS gets inperformant, b) the output is not longer readable
+
+        $n1 = min($cutoff, sizeof($tokens1));
+        $n2 = min($cutoff, sizeof($tokens2));
+
+        // compute longest common sequence length
+        $dp = array_fill(0, $n1+1, array_fill(0, $n2+1, 0));
+        for ($i = 1; $i < $n1 + 1; $i++) {
+            for ($j = 1; $j < $n2 + 1; $j++) {
+                if ($tokens1[$i-1] == $tokens2[$j-1]) {
+                    $dp[$i][$j] = $dp[$i-1][$j-1] + 1;
+                } else {
+                    $dp[$i][$j] = max($dp[$i-1][$j], $dp[$i][$j-1]);
+                }
+            }
+        }
+
+        if ($n1 == $n2 && $n1 == $dp[$n1][$n2]) {
+            return [false, Utils::specialchars($line1) . "\n"];
+        }
+
+        // reconstruct lcs
+        $i = $n1;
+        $j = $n2;
+        $lcs = [];
+        while ($i > 0 && $j > 0) {
+            if ($tokens1[$i-1] == $tokens2[$j-1]) {
+                $lcs[] = $tokens1[$i-1];
+                $i--;
+                $j--;
+            } elseif ($dp[$i-1][$j] > $dp[$i][$j-1]) {
+                $i--;
+            } else {
+                $j--;
+            }
+        }
+        $lcs = array_reverse($lcs);
+
+        // reconstruct diff
+        $diff = "";
+        $l = sizeof($lcs);
+        $i = 0;
+        $j = 0;
+        for ($k = 0; $k < $l ; $k++) {
+            while ($i < $n1 && $tokens1[$i] != $lcs[$k]) {
+                $diff .= "<del>" . Utils::specialchars($tokens1[$i]) . "</del> ";
+                $i++;
+            }
+            while ($j < $n2 && $tokens2[$j] != $lcs[$k]) {
+                $diff .= "<ins>" . Utils::specialchars($tokens2[$j]) . "</ins> ";
+                $j++;
+            }
+            $diff .= $lcs[$k] . " ";
+            $i++;
+            $j++;
+        }
+        while ($i < $n1 && ($k >= $l || $tokens1[$i] != $lcs[$k])) {
+            $diff .= "<del>" . Utils::specialchars($tokens1[$i]) . "</del> ";
+            $i++;
+        }
+        while ($j < $n2 && ($k >= $l || $tokens2[$j] != $lcs[$k])) {
+            $diff .= "<ins>" . Utils::specialchars($tokens2[$j]) . "</ins> ";
+            $j++;
+        }
+
+        if ($cutoff < sizeof($tokens1) || $cutoff < sizeof($tokens2)) {
+            $diff .= "[cut off rest of line...]";
+        }
+        $diff .= "\n";
+
+        return [true, $diff];
+    }
 }

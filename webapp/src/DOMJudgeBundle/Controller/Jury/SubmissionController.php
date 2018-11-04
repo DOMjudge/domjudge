@@ -3,15 +3,21 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
+use DOMJudgeBundle\Entity\Judgehost;
+use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -142,5 +148,314 @@ class SubmissionController extends Controller
             'filteredLanguages' => $filteredLanguages,
             'filteredTeams' => $filteredTeams,
         ], $response);
+    }
+
+    /**
+     * @Route("/submissions/{submitId}", name="jury_submission")
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Exception
+     */
+    public function viewAction(Request $request, int $submitId)
+    {
+        $judgingId   = $request->query->get('jid');
+        $rejudgingId = $request->query->get('rejudgingid');
+
+        if (isset($jid) && isset($rejudgingid)) {
+            throw new BadRequestHttpException("You cannot specify jid and rejudgingid at the same time.");
+        }
+
+        // If judging ID is not set but rejudging ID is, try to deduce the judging ID from the database.
+        if (!isset($jid) && isset($rejudgingid)) {
+            $judging = $this->entityManager->getRepository(Judging::class)
+                ->findOneBy([
+                                'submitid' => $submitId,
+                                'rejudgingid' => $rejudgingId
+                            ]);
+            if ($judging) {
+                $judgingId = $judging->getJudgingid();
+            }
+        }
+
+        /** @var Submission|null $submission */
+        $submission = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Submission', 's')
+            ->join('s.team', 't')
+            ->join('s.problem', 'p')
+            ->join('s.language', 'l')
+            ->join('s.contest', 'c')
+            ->join('s.contest_problem', 'cp')
+            ->select('s', 't', 'p', 'l', 'c', 'cp')
+            ->andWhere('s.submitid = :submitid')
+            ->setParameter(':submitid', $submitId)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if (!$submission) {
+            throw new NotFoundHttpException(sprintf('No submission found with ID %d', $submitId));
+        }
+
+        $judgingData = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Judging', 'j', 'j.judgingid')
+            ->leftJoin('j.runs', 'jr')
+            ->leftJoin('j.rejudging', 'r')
+            ->select('j', 'r', 'MAX(jr.runtime) AS max_runtime')
+            ->andWhere('j.contest = :contest')
+            ->andWhere('j.submission = :submission')
+            ->setParameter(':contest', $submission->getContest())
+            ->setParameter(':submission', $submission)
+            ->groupBy('j.judgingid')
+            ->orderBy('j.starttime')
+            ->addOrderBy('j.judgingid')
+            ->getQuery()
+            ->getResult();
+
+        /** @var Judging[] $judgings */
+        $judgings    = array_map(function ($data) {
+            return $data[0];
+        }, $judgingData);
+        $maxRunTimes = array_map(function ($data) {
+            return $data['max_runtime'];
+        }, $judgingData);
+
+        $selectedJudging = null;
+        // Find the selected judging
+        if ($judgingId !== null) {
+            $selectedJudging = $judgings[$judgingId] ?? null;
+        } else {
+            foreach ($judgings as $judging) {
+                if ($judging->getValid()) {
+                    $selectedJudging = $judging;
+                }
+            }
+        }
+
+        $claimWarning = null;
+
+        if ($request->get('claim') || $request->get('unclaim')) {
+            $user   = $this->DOMJudgeService->getUser();
+            $action = $request->get('claim') ? 'claim' : 'unclaim';
+
+            if ($selectedJudging === null) {
+                $claimWarning = sprintf('Cannot %s this submission: no valid judging found.', $action);
+            } elseif ($selectedJudging->getVerified()) {
+                $claimWarning = sprintf('Cannot %s this submission: judging already verified.', $action);
+            } elseif (!$user && $action === 'claim') {
+                $claimWarning = 'Cannot claim this submission: no jury member specified.';
+            } else {
+                if (!empty($selectedJudging->getJuryMember()) && $action === 'claim' &&
+                    $user->getUsername() !== $selectedJudging->getJuryMember() &&
+                    !$request->request->has('forceclaim')) {
+                    $claimWarning = sprintf('Submission has been claimed by %s. Claim again on this page to force an update.',
+                                            $selectedJudging->getJuryMember());
+                } else {
+                    $selectedJudging->setJuryMember($action === 'claim' ? $user->getUsername() : null);
+                    $this->entityManager->flush();
+                    $this->DOMJudgeService->auditlog('judging', $selectedJudging->getJudgingid(), $action . 'ed');
+
+                    if ($action === 'claim') {
+                        return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getSubmitid()]);
+                    } else {
+                        return $this->redirectToRoute('jury_submissions');
+                    }
+                }
+            }
+        }
+
+        $unjudgableReasons = [];
+        if ($selectedJudging === null) {
+            // Determine if this submission is unjudgable
+
+            // First, check if there is an active judgehost that can judge this submission.
+            /** @var Judgehost[] $judgehosts */
+            $judgehosts  = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Judgehost', 'j')
+                ->leftJoin('j.restriction', 'r')
+                ->select('j', 'r')
+                ->andWhere('j.active = 1')
+                ->getQuery()
+                ->getResult();
+            $canBeJudged = false;
+            foreach ($judgehosts as $judgehost) {
+                if (!$judgehost->getRestriction()) {
+                    $canBeJudged = true;
+                    break;
+                }
+
+                $queryBuilder = $this->entityManager->createQueryBuilder()
+                    ->from('DOMJudgeBundle:Submission', 's')
+                    ->select('s')
+                    ->join('s.language', 'lang')
+                    ->join('s.contest_problem', 'cp')
+                    ->andWhere('s.submitid = :submitid')
+                    ->andWhere('s.judgehost IS NULL')
+                    ->andWhere('lang.allow_judge = 1')
+                    ->andWhere('cp.allow_judge = 1')
+                    ->andWhere('s.valid = 1')
+                    ->setParameter(':submitid', $submission->getSubmitid())
+                    ->setMaxResults(1);
+
+                $restrictions = $judgehost->getRestriction()->getRestrictions();
+                if (isset($restrictions['contest'])) {
+                    $queryBuilder
+                        ->andWhere('s.cid IN (:contests)')
+                        ->setParameter(':contests', $restrictions['contest']);
+                }
+                if (isset($restrictions['problem'])) {
+                    $queryBuilder
+                        ->leftJoin('s.problem', 'p')
+                        ->andWhere('p.probid IN (:problems)')
+                        ->setParameter(':problems', $restrictions['problem']);
+                }
+                if (isset($restrictions['language'])) {
+                    $queryBuilder
+                        ->andWhere('s.langid IN (:languages)')
+                        ->setParameter(':languages', $restrictions['language']);
+                }
+
+                if ($queryBuilder->getQuery()->getOneOrNullResult()) {
+                    $canBeJudged = true;
+                }
+            }
+
+            if (!$canBeJudged) {
+                $unjudgableReasons[] = 'No active judgehost can judge this submission. Edit judgehost restrictions!';
+            }
+
+            if (!$submission->getLanguage()->getAllowJudge()) {
+                $unjudgableReasons[] = 'Submission language is currently not allowed to be judged!';
+            }
+
+            if (!$submission->getContestProblem()->getAllowJudge()) {
+                $unjudgableReasons[] = 'Problem is currently not allowed to be judged!';
+            }
+        }
+
+        $runs = [];
+        if ($selectedJudging) {
+            /** @var Testcase[] $runs */
+            $runs = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Testcase', 't')
+                ->join('t.testcase_content', 'tc')
+                ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
+                ->leftJoin('jr.judging_run_output', 'jro')
+                ->select('t', 'tc', 'jr', 'jro')
+                ->andWhere('t.problem = :problem')
+                ->setParameter(':judging', $selectedJudging)
+                ->setParameter(':problem', $submission->getProblem())
+                ->orderBy('t.rank')
+                ->getQuery()
+                ->getResult();
+        }
+
+        if ($submission->getOrigsubmitid()) {
+            $lastSubmission = $this->entityManager->getRepository(Submission::class)->find($submission->getOrigsubmitid());
+        } else {
+            /** @var Submission|null $lastSubmission */
+            $lastSubmission = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Submission', 's')
+                ->select('s')
+                ->andWhere('s.team = :team')
+                ->andWhere('s.problem = :problem')
+                ->andWhere('s.submittime < :submittime')
+                ->setParameter(':team', $submission->getTeam())
+                ->setParameter(':problem', $submission->getProblem())
+                ->setParameter(':submittime', $submission->getSubmittime())
+                ->orderBy('s.submittime', 'DESC')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+
+        /** @var Judging|null $lastJudging */
+        $lastJudging = null;
+        /** @var Testcase[] $lastRuns */
+        $lastRuns = [];
+        if ($lastSubmission !== null) {
+            $lastJudging = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Judging', 'j')
+                ->select('j')
+                ->andWhere('j.submission = :submission')
+                ->andWhere('j.valid = 1')
+                ->setParameter(':submission', $lastSubmission)
+                ->orderBy('j.judgingid', 'DESC')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            if ($lastJudging !== null) {
+                // Clear the testcases, otherwise Doctrine will use the previous data
+                $this->entityManager->clear(Testcase::class);
+                $lastRuns = $this->entityManager->createQueryBuilder()
+                    ->from('DOMJudgeBundle:Testcase', 't')
+                    ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
+                    ->leftJoin('jr.judging_run_output', 'jro')
+                    ->select('t', 'jr', 'jro')
+                    ->andWhere('t.problem = :problem')
+                    ->setParameter(':judging', $lastJudging)
+                    ->setParameter(':problem', $submission->getProblem())
+                    ->orderBy('t.rank')
+                    ->getQuery()
+                    ->getResult();
+            }
+        }
+
+        $twigData = [
+            'submission' => $submission,
+            'lastSubmission' => $lastSubmission,
+            'judgings' => $judgings,
+            'maxRunTimes' => $maxRunTimes,
+            'selectedJudging' => $selectedJudging,
+            'lastJudging' => $lastJudging,
+            'runs' => $runs,
+            'lastRuns' => $lastRuns,
+            'unjudgableReasons' => $unjudgableReasons,
+            'verificationRequired' => (bool)$this->DOMJudgeService->dbconfig_get('verification_required', false),
+            'claimWarning' => $claimWarning,
+        ];
+
+        if ($selectedJudging === null) {
+            // Automatically refresh page while we wait for judging data.
+            $twigData['refresh'] = [
+                'after' => 15,
+                'url' => $this->generateUrl('jury_submission', ['submitId' => $submission->getSubmitid()]),
+            ];
+        }
+
+        return $this->render('@DOMJudge/jury/submission.html.twig', $twigData);
+    }
+
+    /**
+     * @Route("/submissions/by-judging-id/{jid}", name="jury_submission_by_judging")
+     */
+    public function viewForJudgingAction(Judging $jid)
+    {
+        return $this->redirectToRoute('jury_submission', [
+            'submitId' => $jid->getSubmitid(),
+            'jid' => $jid->getJudgingid(),
+        ]);
+    }
+
+    /**
+     * @Route("/submissions/by-external-id/{extid}", name="jury_submission_by_external_id")
+     */
+    public function viewForExternalIdAction(string $externalId)
+    {
+        if (!$this->DOMJudgeService->getCurrentContest()) {
+            throw new BadRequestHttpException("Cannot determine submission from external ID without selecting a contest.");
+        }
+
+        $submission = $this->entityManager->getRepository(Submission::class)
+            ->findOneBy([
+                            'cid' => $this->DOMJudgeService->getCurrentContest()->getCid(),
+                            'externalid' => $externalId
+                        ]);
+
+        if (!$submission) {
+            throw new NotFoundHttpException(sprintf('No submission found with external ID %s', $externalId));
+        }
+
+        return $this->redirectToRoute('jury_submission', [
+            'submitId' => $submission->getSubmitid(),
+        ]);
     }
 }

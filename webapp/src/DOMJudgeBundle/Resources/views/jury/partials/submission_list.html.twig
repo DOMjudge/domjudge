@@ -28,9 +28,9 @@
         <tbody>
         {% for submission in submissions %}
             {% if rejudging is defined %}
-                {% set link = path('legacy.jury_submission', {id: submission.submitid, rejudgingid: rejudging.rejudgingid}) %}
+                {% set link = path('jury_submission', {submitId: submission.submitid, rejudgingid: rejudging.rejudgingid}) %}
             {% else %}
-                {% set link = path('legacy.jury_submission', {id: submission.submitid}) %}
+                {% set link = path('jury_submission', {submitId: submission.submitid}) %}
             {% endif %}
             <tr class="{% if not submission.valid %}ignore{% endif %}"
                 data-problem-id="{{ submission.probid }}"
@@ -95,9 +95,9 @@
                 <td><a href="{{ link }}">{{ verified }}</a></td>
                 <td>
                     {% if rejudging is defined %}
-                        {% set claimLink = path('legacy.jury_submission', claimArg | merge({id: submission.submitid, rejudgingid: rejudging.rejudgingid})) %}
+                        {% set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid, rejudgingid: rejudging.rejudgingid})) %}
                     {% else %}
-                        {% set claimLink = path('legacy.jury_submission', claimArg | merge({id: submission.submitid})) %}
+                        {% set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid})) %}
                     {% endif %}
                     {% if claim %}
                         <a class="btn btn-outline-secondary btn-sm" href="{{ claimLink }}">claim</a>
@@ -109,7 +109,7 @@
                 </td>
                 {% if rejudging is defined %}
                     <td>
-                        <a href="{{ path('legacy.jury_submission', {id: submission.submitid}) }}">
+                        <a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">
                             {{ submission.oldResult | printResult(true, true) }}
                         </a>
                     </td>

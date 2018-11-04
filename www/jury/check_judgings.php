@@ -81,7 +81,7 @@ while (!empty($cids) && $row = $res->next()) {
         $result = mb_strtoupper($row['result']);
 
         if (!in_array($result, $results)) {
-            $unexpected[] = "<a href=\"submission.php?id=" . $sid
+            $unexpected[] = "<a href=\"submissions/" . $sid
                 . "\">s$sid</a> has unexpected result '$result', "
                 . "should be one of: " . implode(', ', $results);
         } elseif (count($results)>1) {
@@ -89,12 +89,12 @@ while (!empty($cids) && $row = $res->next()) {
                 // Judging result is as expected, set judging to verified:
                 $DB->q('UPDATE judging SET verified = 1, jury_member = %s
                         WHERE judgingid = %i', $verifier, $row['judgingid']);
-                $multiple[] = "<a href=\"submission.php?id=" . $sid
+                $multiple[] = "<a href=\"submissions/" . $sid
                     . "\">s$sid</a> verified as $result, "
                     . "out of multiple possible outcomes ("
                     . implode(', ', $results) . ")";
             } else {
-                $multiple[] = "<a href=\"submission.php?id=" . $sid
+                $multiple[] = "<a href=\"submissions/" . $sid
                     . "\">s$sid</a> is judged as $result, "
                     . "but has multiple possible outcomes ("
                     . implode(', ', $results) . ")";
@@ -103,7 +103,7 @@ while (!empty($cids) && $row = $res->next()) {
             // Judging result is as expected, set judging to verified:
             $DB->q('UPDATE judging SET verified = 1, jury_member = %s
                     WHERE judgingid = %i', $verifier, $row['judgingid']);
-            $verified[] = "<a href=\"submission.php?id=" . $sid .
+            $verified[] = "<a href=\"submissions/" . $sid .
                 "\">s$sid</a> verified as '$result'";
         }
     } else {
@@ -111,10 +111,10 @@ while (!empty($cids) && $row = $res->next()) {
 
         if ($results===null) {
             $nomatch[] = "expected results unknown in " .
-                "<a href=\"submission.php?id=" . $sid .
+                "<a href=\"submissions/" . $sid .
                 "\">s$sid</a>, leaving submission unchecked";
         } else {
-            $earlier[] = "<a href=\"submission.php?id=" . $sid .
+            $earlier[] = "<a href=\"submissions/" . $sid .
                 "\">s$sid</a> already verified earlier";
         }
     }

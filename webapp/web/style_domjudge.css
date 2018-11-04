@@ -12,7 +12,7 @@
     max-width: 450px;
 }
 
-.data-table tr.disabled td a {
+.disabled {
     color: silver
 }
 
@@ -35,3 +35,56 @@
 .sol_correct      { color: green;  }
 .sol_incorrect    { color: red;    }
 .sol_queued       { color: gray;   }
+
+.judgetime      { font-size: smaller; font-style: italic; }
+.testcases_prev { font-size: xx-small; }
+.prevsubmit     { color: #696969; }
+
+.output_text {
+    border-top: 1px dotted #C0C0C0;
+    border-bottom: 1px dotted #C0C0C0;
+    background-color: #FAFAFA;
+    margin: 0;
+    padding: 5px;
+    font-family: monospace;
+    white-space: pre;
+}
+
+.nodata {
+    color: gray;
+    font-style: italic;
+}
+
+a.collapse-link { color: black; text-decoration: none; }
+
+table.lcsdiff {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+table.lcsdiff td.linenr {
+    background-color: darkgray;
+    text-align: right;
+    border-right: solid 1px black;
+    padding-right: 7px;
+}
+
+ins {
+    background: #dfd;
+    text-decoration: none;
+}
+del {
+    background: #fdd;
+    text-decoration: none;
+}
+
+
+.run h4 {
+    font-size: 1.25rem;
+    padding-top: 1rem;
+}
+
+.run h5 {
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding-top: 1.2rem;
+}

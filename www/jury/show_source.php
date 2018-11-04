@@ -283,7 +283,7 @@ if ($submission['origsubmitid']) {
 if ($olddata !== null) {
     $oldid = $olddata['submitid'];
     $html .= "<h2 id=\"diff\">Diff to submission " .
-             "<a href=\"submission.php?id=$oldid\">s$oldid</a></h2>\n";
+             "<a href=\"submissions/$oldid\">s$oldid</a></h2>\n";
 
     $html .= multifilediff($sources, $oldsources, $olddata);
 }
@@ -291,16 +291,16 @@ if ($olddata !== null) {
 if (!empty($origsources)) {
     $origid = $submission['origsubmitid'];
     $html .= "<h2 id=\"origdiff\">Diff to original submission " .
-             "<a href=\"submission.php?id=$origid\">s$origid</a></h2>\n\n";
+             "<a href=\"submissions/$origid\">s$origid</a></h2>\n\n";
 
     $html .= multifilediff($sources, $origsources, $origdata);
 }
 
-echo "<h2>Source code for submission <a href=\"submission.php?id=" .
+echo "<h2>Source code for submission <a href=\"submissions/" .
     urlencode((string)$id) . "\">s" .specialchars((string)$id) . "</a>";
 if (!empty($submission['origsubmitid'])) {
     $origid = $submission['origsubmitid'];
-    echo  " (resubmit of <a href=\"submission.php?id=" . urlencode((string)$origid) . "\">s$origid</a>)";
+    echo  " (resubmit of <a href=\"submissions/" . urlencode((string)$origid) . "\">s$origid</a>)";
 }
 echo "</h2>\n\n";
 if ((string)$submission['entry_point']!=='') {

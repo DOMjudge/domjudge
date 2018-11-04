@@ -36,13 +36,13 @@ class TestcaseContent
 
     /**
      * @var string
-     * @ORM\Column(type="blob", name="image", options={"comment"="A graphical representation of this testcase"}, nullable=true)
+     * @ORM\Column(type="string", name="image", options={"comment"="A graphical representation of this testcase"}, nullable=true)
      */
     private $image;
 
     /**
      * @var string
-     * @ORM\Column(type="blob", name="image_thumb", options={"comment"="Automatically created thumbnail of the image"}, nullable=true)
+     * @ORM\Column(type="string", name="image_thumb", options={"comment"="Automatically created thumbnail of the image"}, nullable=true)
      */
     private $image_thumb;
 
@@ -107,7 +107,7 @@ class TestcaseContent
     /**
      * Set image
      *
-     * @param resource|string $image
+     * @param string $image
      *
      * @return TestcaseContent
      */
@@ -121,7 +121,7 @@ class TestcaseContent
     /**
      * Get image
      *
-     * @return resource|string
+     * @return string
      */
     public function getImage()
     {
@@ -131,7 +131,7 @@ class TestcaseContent
     /**
      * Set imageThumb
      *
-     * @param resource|string $imageThumb
+     * @param string $imageThumb
      *
      * @return TestcaseContent
      */
@@ -145,7 +145,7 @@ class TestcaseContent
     /**
      * Get imageThumb
      *
-     * @return resource|string
+     * @return string
      */
     public function getImageThumb()
     {

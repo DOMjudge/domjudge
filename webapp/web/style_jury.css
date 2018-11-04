@@ -175,3 +175,7 @@ div.submissions-filter ul.token-input-list {
 .has_tooltip {
 	text-decoration: dotted underline;
 }
+
+div.submission-summary > span {
+	margin-right: 10px;
+}

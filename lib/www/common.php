@@ -197,7 +197,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
         // present and valid.
         if (IS_JURY) {
             // If rejudging list, link to the new rejudging:
-            $linkurl = 'submission.php?id=' . $sid .
+            $linkurl = 'submissions/' . $sid .
                 (isset($restrictions['rejudgingid']) ?
                  '&amp;rejudgingid=' . $restrictions['rejudgingid'] : '');
             $link = ' href="' . $linkurl . '"';
@@ -300,7 +300,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
             }
             echo "</td>";
             if (isset($restrictions['rejudgingid'])) {
-                echo "<td class=\"result\"><a href=\"submission.php?id=$sid\">" .
+                echo "<td class=\"result\"><a href=\"submissions/$sid\">" .
                     printresult($row['oldresult']) . "</a></td>";
             }
             if ($testcases) {

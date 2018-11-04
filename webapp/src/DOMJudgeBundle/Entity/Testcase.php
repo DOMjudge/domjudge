@@ -52,6 +52,8 @@ class Testcase
      */
     private $description;
 
+    private $description_as_string = null;
+
     /**
      * @var string
      * @ORM\Column(type="string", name="image_type", length=32, options={"comment"="File type of the image and thumbnail"}, nullable=true)
@@ -218,10 +220,16 @@ class Testcase
     /**
      * Get description
      *
-     * @return resource
+     * @return resource|string|null
      */
-    public function getDescription()
+    public function getDescription(bool $asString = false)
     {
+        if ($asString && $this->description !== null) {
+            if ($this->description_as_string === null) {
+                $this->description_as_string = stream_get_contents($this->description);
+            }
+            return $this->description_as_string;
+        }
         return $this->description;
     }
 
@@ -305,6 +313,18 @@ class Testcase
     public function getJudgingRuns()
     {
         return $this->judging_runs;
+    }
+
+    /**
+     * Gets the first judging run for this testcase.
+     *
+     * This is useful when this testcase is joined to a single run to get code completion in Twig templates
+     *
+     * @return JudgingRun|null
+     */
+    public function getFirstJudgingRun()
+    {
+        return $this->judging_runs->first() ?: null;
     }
 
     /**

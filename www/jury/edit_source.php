@@ -53,7 +53,7 @@ if (isset($_POST['origsubmitid'])) {
         unlink($file);
     }
 
-    header('Location: submission.php?id=' . $newid);
+    header('Location: submissions/' . $newid);
     return;
 }
 
@@ -70,7 +70,7 @@ require(LIBWWWDIR . '/header.php');
 
 
 echo '<h2><a id="source"></a>Edit submission ' .
-    "<a href=\"submission.php?id=$id\">s$id</a> source files</h2>\n\n";
+    "<a href=\"submissions/$id\">s$id</a> source files</h2>\n\n";
 
 echo addForm($pagename, 'post', null, 'multipart/form-data');
 

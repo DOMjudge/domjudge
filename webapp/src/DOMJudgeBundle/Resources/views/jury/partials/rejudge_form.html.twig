@@ -1,0 +1,74 @@
+{# Output a rejudge form #}
+
+{% set buttonText = 'REJUDGE ALL for ' ~ table ~ ' ' ~ id %}
+{% set questionText = 'Rejudge all submissions for this ' ~ table ~ '?' %}
+{% set buttonDisabled = false %}
+{% if is_granted('ROLE_ADMIN') %}
+    {% set includeAllButton = true %}
+{% else %}
+    {% set includeAllButton = false %}
+{% endif %}
+
+{% if table == 'submission' and submission is defined and judgings is defined %}
+    {% set buttonText = 'REJUDGE this submission' %}
+    {# Check if we have a valid result #}
+    {% set validResult = false %}
+    {% for judging in judgings %}
+        {% if judging.valid %}
+            {% set validResult = judging.result %}
+        {% endif %}
+    {% endfor %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        {% if not validResult %}
+            {% set questionText = 'Restart judging of PENDING submission s' ~ id ~ ', are you sure?' %}
+            {% set buttonText = 'RESTART judging' %}
+        {% elseif validResult == 'correct' %}
+            {% set questionText = 'Rejudge CORRECT submission s' ~ id ~ ', are you sure?' %}
+        {% endif %}
+    {% else %}
+        {% if not validResult or validResult == 'correct' %}
+            {% set buttonDisabled = true %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+<div class="card" style="max-width: 500px;">
+    <div class="card-body">
+        <form action="{{ path('legacy.jury_rejudge') }}" method="post">
+            <input type="hidden" name="table" value="{{ table }}"/>
+            <input type="hidden" name="id" value="{{ id }}"/>
+            <div class="form-group">
+                <input type="submit" value="{{ buttonText }}" class="btn btn-primary"
+                       onclick="return confirm('{{ questionText }}');">
+            </div>
+            {% if includeAllButton %}
+                <div class="custom-control custom-checkbox form-group">
+                    <input type="checkbox" class="custom-control-input" id="include_all" name="include_all">
+                    <label class="custom-control-label" for="include_all">Include pending/correct
+                        submissions</label>
+                </div>
+            {% endif %}
+            <div class="custom-control custom-checkbox form-group">
+                <input type="checkbox" class="custom-control-input" id="full_rejudge" name="full_rejudge">
+                <label class="custom-control-label" for="full_rejudge">Create rejudging</label>
+            </div>
+            <div id="rejudge-reason" class="form-group d-none">
+                <label for="reason">Reason</label>
+                <input type="text" class="form-control" name="reason" id="reason" maxlength="255"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#full_rejudge').on('change', function () {
+            if ($(this).is(':checked')) {
+                $('#rejudge-reason').removeClass('d-none');
+            } else {
+                $('#rejudge-reason').addClass('d-none');
+            }
+        });
+    });
+</script>

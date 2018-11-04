@@ -63,6 +63,6 @@ if ($val) {
     }
     header('Location: '.$redirect);
 } else {
-    header('Location: submission.php?id=' .
+    header('Location: submissions/' .
            urlencode((string)$jdata['submitid']) . '&jid=' . urlencode($id));
 }

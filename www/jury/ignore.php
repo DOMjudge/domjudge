@@ -40,4 +40,4 @@ auditlog('submission', $id, 'marked ' . ($val?'valid':'invalid'));
 calcScoreRow((int)$sdata['cid'], (int)$sdata['teamid'], (int)$sdata['probid']);
 
 /* redirect back. */
-header('Location: submission.php?id=' . urlencode((string)$sdata['submitid']));
+header('Location: submissions/' . urlencode((string)$sdata['submitid']));

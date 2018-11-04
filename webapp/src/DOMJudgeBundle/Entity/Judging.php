@@ -94,11 +94,13 @@ class Judging implements ExternalRelationshipEntityInterface
     private $valid = true;
 
     /**
-     * @var string
+     * @var resource
      * @ORM\Column(type="blob", name="output_compile", options={"comment"="Output of the compiling the program"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $output_compile;
+
+    private $output_compile_as_string = null;
 
     /**
      * @var boolean
@@ -167,12 +169,30 @@ class Judging implements ExternalRelationshipEntityInterface
     private $runs;
 
 
-    public function getMaxRuntime() {
-      $max = 0;
-      foreach ($this->runs as $run) {
-        $max = max($run->getRuntime(), $max);
-      }
-      return $max;
+    /**
+     * Get the max runtime for this judging
+     * @return float
+     */
+    public function getMaxRuntime()
+    {
+        $max = 0;
+        foreach ($this->runs as $run) {
+            $max = max($run->getRuntime(), $max);
+        }
+        return $max;
+    }
+
+    /**
+     * Get the sum runtime for this judging
+     * @return float
+     */
+    public function getSumRuntime()
+    {
+        $sum = 0;
+        foreach ($this->runs as $run) {
+            $sum += $run->getRuntime();
+        }
+        return $sum;
     }
 
     /**
@@ -456,7 +476,7 @@ class Judging implements ExternalRelationshipEntityInterface
     /**
      * Set outputCompile
      *
-     * @param string $outputCompile
+     * @param resource|string $outputCompile
      *
      * @return Judging
      */
@@ -470,10 +490,16 @@ class Judging implements ExternalRelationshipEntityInterface
     /**
      * Get outputCompile
      *
-     * @return string
+     * @return resource|string|null
      */
-    public function getOutputCompile()
+    public function getOutputCompile(bool $asString = false)
     {
+        if ($asString && $this->output_compile !== null) {
+            if ($this->output_compile_as_string === null) {
+                $this->output_compile_as_string = stream_get_contents($this->output_compile);
+            }
+            return $this->output_compile_as_string;
+        }
         return $this->output_compile;
     }
 
@@ -720,5 +746,26 @@ class Judging implements ExternalRelationshipEntityInterface
     public function getExternalRelationships(): array
     {
         return ['submission_id' => $this->getSubmission()];
+    }
+
+    /**
+     * Check whether this judging is for an aborted judging
+     * @return bool
+     */
+    public function isAborted()
+    {
+        // This logic has been copied from putSubmissions()
+        return $this->getEndtime() === null && !$this->getValid() &&
+            (!$this->getRejudging() || !$this->getRejudging()->getValid());
+    }
+
+    /**
+     * Check whether this judging is still busy while the final result is already known,
+     * e.g. with non-lazy evaluation.
+     * @return bool
+     */
+    public function isStillBusy()
+    {
+        return !empty($this->getResult()) && empty($this->getEndtime()) && !$this->isAborted();
     }
 }

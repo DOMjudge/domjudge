@@ -61,7 +61,7 @@ echo "<tr><td>Time:</td><td>"
     . "</td></tr>\n";
 if (isset($edata['judgingid'])) {
     echo "<tr><td>Related Judging:</td><td>"
-        . "<a href=\"submission.php?jid=" . urlencode((string)$edata['judgingid']) . "\">j"
+        . "<a href=\"submissions/by-judging-id/" . urlencode((string)$edata['judgingid']) . "\">j"
         . specialchars((string)$edata['judgingid']) . "</a>"
         . "</td></tr>\n";
 }

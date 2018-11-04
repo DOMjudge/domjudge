@@ -66,7 +66,7 @@ while ($logline = $res->next()) {
             $name = 'c'.$name;
             break;
         case 'judging':
-            $link = 'submission.php?jid=' . urlencode((string)$logline['dataid']);
+            $link = 'submissions/by-judging-id/' . urlencode((string)$logline['dataid']);
             $name = 'j'.$name;
             break;
         case 'submission':

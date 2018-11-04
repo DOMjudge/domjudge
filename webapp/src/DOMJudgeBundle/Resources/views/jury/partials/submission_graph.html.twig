@@ -1,5 +1,6 @@
+{% set timelimit = submission.problem.timelimit * submission.language.timeFactor %}
 <div>
-  {% if jdata|length > 1 %}
+  {% if judgings|length > 1 %}
   <div style="display: inline-block" id="maxruntime">
     <h3 id="graphs">Max Runtimes</h3>
     <svg style="width:500px; height:250px;"></svg>
@@ -51,19 +52,19 @@ function create_chart(data, maxY) {
 }
 $(function(){
   var maxY = {{ timelimit }};
-  {% for runid, run in jdata %}
-    maxY = Math.max(maxY, {{ run["max_runtime"]|default(0) }});
+  {% for judging in judgings %}
+    maxY = Math.max(maxY, {{ maxRunTimes[judging.judgingId]|default(0) }});
   {% endfor %}
-  {% if jdata|length > 1%}
+  {% if judgings|length > 1%}
     var run_max_times = [
       {
         key: "Max Runtime",
         values: [
-          {% for runid, run in jdata if run["result"] %}
+          {% for judging in judgings if judging.result %}
             {
-              "label" : "j{{ runid }}",
-              "value" : {{ run["max_runtime"]|default(0) }},
-              "color" : "{{ colors[run["result"]] }}",
+              "label" : "j{{ judging.judgingid }}",
+              "value" : {{ maxRunTimes[judging.judgingId]|default(0) }},
+              "color" : "{{ colors[judging.result] }}",
             },
           {% endfor %}
         ]
@@ -95,10 +96,10 @@ $(function(){
       values: [
         {% for run in runs %}
           {
-            "label" : "{{ run["rank"] }}",
-            "value" : {{ run["runtime"]|default(0) }},
-            "color" : "{{ colors[run["runresult"]]|default('grey') }}",
-            "description" : "{{ run["description"]|default(run["rank"]) }}",
+            "label" : "{{ run.rank }}",
+            "value" : {% if run.firstJudgingRun %}{{ run.firstJudgingRun.runtime|default(0) }}{% else %}0{% endif %},
+            "color" : "{% if run.firstJudgingRun %}{{ colors[run.firstJudgingRun.runresult]|default('grey') }}{% else %}grey{% endif %}",
+            "description" : "{{ run.description|default(run.rank) }}",
           },
         {% endfor %}
       ]

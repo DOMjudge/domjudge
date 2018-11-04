@@ -10,6 +10,8 @@ legacy.jury_balloons:
   path: /jury/balloons.php
 legacy.jury_judgehosts:
   path: /jury/judgehosts.php
+legacy.jury_judgehost:
+  path: /jury/judgehost.php
 legacy.jury_internal_errors:
   path: /jury/internal_errors.php
 legacy.jury_judgehost_restrictions:
@@ -20,8 +22,12 @@ legacy.jury_clarifications:
     path: /jury/clarifications.php
 legacy.jury_language:
     path: /jury/language.php
+legacy.jury_rejudge:
+    path: /jury/rejudge.php
 legacy.jury_rejudgings:
     path: /jury/rejudgings.php
+legacy.jury_rejudging:
+    path: /jury/rejudging.php
 legacy.jury_scoreboard:
     path: /jury/scoreboard.php
 legacy.team_index:
@@ -61,8 +67,16 @@ legacy.jury_change_contest:
     path: /jury/change_contest.php
 legacy.jury_toggle_notify:
     path: /jury/toggle_notify.php
-legacy.jury_submission:
-    path: /jury/submission.php
+legacy.jury_ignore_submission:
+    path: /jury/ignore.php
+legacy.jury_show_source:
+    path: /jury/show_source.php
+legacy.jury_verify:
+    path: /jury/verify.php
+legacy.jury_testcase:
+    path: /jury/testcase.php
+legacy.jury_team_output:
+    path: /jury/team_output.php
 
 legacy.jury_ajax_problems:
   path: /jury/ajax_problems.php

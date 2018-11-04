@@ -43,25 +43,25 @@ class JudgingRunWithOutput
 
     /**
      * @var string
-     * @ORM\Column(type="blob", name="output_run", options={"comment"="Output of running the program"}, nullable=true)
+     * @ORM\Column(type="string", name="output_run", options={"comment"="Output of running the program"}, nullable=true)
      */
     private $output_run;
 
     /**
      * @var string
-     * @ORM\Column(type="blob", name="output_diff", options={"comment"="Diffing the program output and testcase output"}, nullable=true)
+     * @ORM\Column(type="string", name="output_diff", options={"comment"="Diffing the program output and testcase output"}, nullable=true)
      */
     private $output_diff;
 
     /**
      * @var string
-     * @ORM\Column(type="blob", name="output_error", options={"comment"="Standard error output of the program"}, nullable=true)
+     * @ORM\Column(type="string", name="output_error", options={"comment"="Standard error output of the program"}, nullable=true)
      */
     private $output_error;
 
     /**
      * @var string
-     * @ORM\Column(type="blob", name="output_system", options={"comment"="Judging system output"}, nullable=true)
+     * @ORM\Column(type="string", name="output_system", options={"comment"="Judging system output"}, nullable=true)
      */
     private $output_system;
 
@@ -301,5 +301,13 @@ class JudgingRunWithOutput
     public function getTestcase()
     {
         return $this->testcase;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTerminated()
+    {
+        return (bool)preg_match('/timelimit exceeded.*hard (wall|cpu) time/', $this->getOutputSystem());
     }
 }
