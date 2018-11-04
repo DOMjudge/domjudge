@@ -8,11 +8,10 @@
 			"type": "package",
 			"package": {
 				"name": "fortawesome/font-awesome",
-				"version": "5.4.2",
-				"source": {
-					"url": "https://github.com/FortAwesome/Font-Awesome.git",
-					"type": "git",
-					"reference": "5.4.2"
+				"version": "5.5.0",
+				"dist": {
+					"url": "https://github.com/FortAwesome/Font-Awesome/releases/download/5.5.0/fontawesome-free-5.5.0-web.zip",
+					"type": "zip"
 				}
 			}
 		},
