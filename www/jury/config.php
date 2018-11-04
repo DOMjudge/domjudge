@@ -84,56 +84,69 @@ echo addForm($pagename) . "<table>\n<thead>\n" .
     "<tr class=\"thleft\"><th>Option</th><th>Value(s)</th><th>Description</th></tr>\n" .
     "</thead>\n<tbody>\n";
 
-$extra = ' class="config_input"';
+$categories = array();
 foreach ($LIBDBCONFIG as $key => $data) {
-    switch (@$data['type']) {
-    case 'bool':
-        $editfield =
-            addRadioButton('config_'.$key, (bool)$data['value']==true, 1) .
-            "<label for=\"config_${key}1\">yes</label>" .
-            addRadioButton('config_'.$key, (bool)$data['value']==false, 0) .
-            "<label for=\"config_${key}0\">no</label>";
-        break;
-    case 'int':
-        $editfield = addInputField('number', 'config_'.$key, $data['value'], $extra);
-        break;
-    case 'string':
-        $editfield = addInput('config_'.$key, $data['value'], 0, 0, $extra);
-        break;
-    case 'array_val':
-    case 'array_keyval':
-        $editfield = '';
-        $i = 0;
-        foreach ($data['value'] as $k => $v) {
-            if ($data['type']=='array_keyval') {
-                $editfield .= addInput("config_${key}[$i][key]", $k, 0, 0, $extra);
-                $editfield .= addInput("config_${key}[$i][val]", $v, 0, 0, $extra);
-            } else {
-                $editfield .= addInput("config_${key}[$i]", $v, 0, 0, $extra);
-            }
-            $editfield .= "<br />";
-            $i++;
-        }
-        if ($data['type']=='array_keyval') {
-            $editfield .= addInput("config_${key}[$i][key]", '', 0, 0, $extra);
-            $editfield .= addInput("config_${key}[$i][val]", '', 0, 0, $extra);
-        } else {
-            $editfield .= addInput("config_${key}[$i]", '', 0, 0, $extra);
-        }
-        break;
-    default:
-        $editfield = '';
-        break;
+    if (!in_array($data['category'], $categories)) {
+        $categories[] = $data['category'];
     }
-    // Ignore unknown datatypes
-    if (empty($editfield)) {
-        continue;
-    }
+}
 
-    echo "<tr><td>" . specialchars(ucfirst(strtr($key, '_', ' '))) .
-        "</td><td style=\"white-space: nowrap;\">" . $editfield .
-        "</td><td>" . specialchars($data['desc']) .
-        "</td></tr>\n";
+$extra = ' class="config_input"';
+foreach ($categories as $category) {
+    echo '<tr class="thleft"><th colspan="3">' . htmlspecialchars($category) . ' Options:</th></tr>';
+    foreach ($LIBDBCONFIG as $key => $data) {
+        if ($data['category'] !== $category) {
+            continue;
+        }
+        switch (@$data['type']) {
+        case 'bool':
+            $editfield =
+                addRadioButton('config_'.$key, (bool)$data['value']==true, 1) .
+                "<label for=\"config_${key}1\">yes</label>" .
+                addRadioButton('config_'.$key, (bool)$data['value']==false, 0) .
+                "<label for=\"config_${key}0\">no</label>";
+            break;
+        case 'int':
+            $editfield = addInputField('number', 'config_'.$key, $data['value'], $extra);
+            break;
+        case 'string':
+            $editfield = addInput('config_'.$key, $data['value'], 0, 0, $extra);
+            break;
+        case 'array_val':
+        case 'array_keyval':
+            $editfield = '';
+            $i = 0;
+            foreach ($data['value'] as $k => $v) {
+                if ($data['type']=='array_keyval') {
+                    $editfield .= addInput("config_${key}[$i][key]", $k, 0, 0, $extra);
+                    $editfield .= addInput("config_${key}[$i][val]", $v, 0, 0, $extra);
+                } else {
+                    $editfield .= addInput("config_${key}[$i]", $v, 0, 0, $extra);
+                }
+                $editfield .= "<br />";
+                $i++;
+            }
+            if ($data['type']=='array_keyval') {
+                $editfield .= addInput("config_${key}[$i][key]", '', 0, 0, $extra);
+                $editfield .= addInput("config_${key}[$i][val]", '', 0, 0, $extra);
+            } else {
+                $editfield .= addInput("config_${key}[$i]", '', 0, 0, $extra);
+            }
+            break;
+        default:
+            $editfield = '';
+            break;
+        }
+        // Ignore unknown datatypes
+        if (empty($editfield)) {
+            continue;
+        }
+
+        echo "<tr><td>" . specialchars(ucfirst(strtr($key, '_', ' '))) .
+            "</td><td style=\"white-space: nowrap;\">" . $editfield .
+            "</td><td>" . specialchars($data['desc']) .
+            "</td></tr>\n";
+    }
 }
 
 echo "</tbody>\n</table>\n<p>" .
