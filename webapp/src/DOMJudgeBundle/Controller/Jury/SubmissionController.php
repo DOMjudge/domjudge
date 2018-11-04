@@ -97,7 +97,7 @@ class SubmissionController extends Controller
                                                                                             $limit);
 
         // Load preselected filters
-        $filters          = $this->DOMJudgeService->jsonDecode((string)$this->DOMJudgeService->getCookie('domjudge_submissionsfilter') ?? []);
+        $filters          = $this->DOMJudgeService->jsonDecode((string)$this->DOMJudgeService->getCookie('domjudge_submissionsfilter') ?: '[]');
         $filteredProblems = $filteredLanguages = $filteredTeams = [];
         if (isset($filters['problem-id'])) {
             /** @var Problem[] $filteredProblems */
