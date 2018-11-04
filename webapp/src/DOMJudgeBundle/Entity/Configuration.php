@@ -45,6 +45,12 @@ class Configuration
 
     /**
      * @var string
+     * @ORM\Column(type="string", name="category", length=32, options={"comment"="Category of the option value"}, nullable=true)
+     */
+    private $category;
+
+    /**
+     * @var string
      * @ORM\Column(type="string", name="description", length=255, options={"comment"="Description of this executable"}, nullable=true)
      */
     private $description;
@@ -153,6 +159,30 @@ class Configuration
     public function getPublic()
     {
         return $this->public;
+    }
+
+    /**
+     * Set category
+     *
+     * @param string $category
+     *
+     * @return Configuration
+     */
+    public function setCategory($category)
+    {
+        $this->category = $category;
+
+        return $this;
+    }
+
+    /**
+     * Get category
+     *
+     * @return string
+     */
+    public function getCategory()
+    {
+        return $this->category;
     }
 
     /**
