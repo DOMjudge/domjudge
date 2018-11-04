@@ -1,0 +1,62 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block title %}Configuration - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+    <h1>Configuration</h1>
+    <div class="alert alert-danger" role="alert">View only page, edit values <a href="config.php">here</a></div>
+    <form>
+    {% for category in options %}
+        <div class="card">
+          <div class="card-header">
+            {{ category.name }} Options
+          </div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush">
+              {% for option in category.data %}
+   	       <li class="list-group-item" style="padding:0;padding-top:10px;">
+		  <div class="form-group">
+                  {{ option.name }}
+                   {% if option.type == 'bool' %}
+		     <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes" data-off="No"
+                       {% if option.value == 1 %} checked="checked"{% endif %}>
+		     <br/>
+                   {% elseif option.type == 'int' or option.type == 'string' %}
+                     <input class="form-control form-control-sm" style="width:10em;text-align:right;" type="text" value="{{option.value}}">
+                   {% elseif option.type == 'array_keyval' %}
+                     <br/>
+                     {% for key,val in option.value %}
+                       <input class="form-control form-control-sm" style="width:10em;text-align:right;display:inline-block;" type="text" value="{{key}}">
+                       <input class="form-control form-control-sm" style="width:10em;text-align:right;display:inline-block;" type="text" value="{{val}}">
+		       <br/>
+                     {% endfor %}
+                     <input class="form-control form-control-sm" style="width:10em;text-align:right;display:inline-block;" type="text">
+                     <input class="form-control form-control-sm" style="width:10em;text-align:right;display:inline-block;" type="text">
+		     <br/>
+                   {% elseif option.type == 'array_val' %}
+                     <br/>
+                     {% for val in option.value %}
+                       <input class="form-control form-control-sm" style="width:10em;text-align:right;display:inline-block;" type="text" value="{{val}}">
+		       <br/>
+                     {% endfor %}
+                     <input class="form-control form-control-sm" style="width:10em;text-align:right;display:inline-block;" type="text">
+		     <br/>
+   		   {% endif %}
+                   <small class="text-muted">{{ option.description }}</small>
+                </div>
+                </li>
+   	   {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <br/>
+    {% endfor %}
+    </form>
+{% endblock %}
