@@ -741,6 +741,7 @@ class JudgehostController extends FOSRestController
             $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
             $this->addSingleJudgingRun($hostname, $judgingId, (int)$testCaseId, $runResult, $runTime, $judging,
                                        $outputSystem, $outputError, $outputDiff, $outputRun);
+            $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
             $judgehost->setPolltime(Utils::now());
             $this->entityManager->flush();
         }
@@ -803,6 +804,7 @@ class JudgehostController extends FOSRestController
             $this->addSingleJudgingRun($hostname, $judgingId, (int)$testCaseId, $runResult, $runTime, $judging,
                                        $outputSystem, $outputError, $outputDiff, $outputRun);
         }
+        $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
         $judgehost->setPolltime(Utils::now());
         $this->entityManager->flush();
     }
