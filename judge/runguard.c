@@ -239,7 +239,9 @@ void error(int errnum, const char *format, ...)
 	sigprocmask(SIG_BLOCK, &sigs, NULL);
 
 	/* First print to string to be able to reuse the message. */
-	errlen = strlen(progname)+strlen(format)+255;
+	errlen = strlen(progname)+255;
+	if ( format!=NULL ) errlen += strlen(format);
+
 	errstr = (char *)malloc(errlen);
 	if ( errstr==NULL ) abort();
 
