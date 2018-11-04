@@ -112,7 +112,7 @@
         </span>
     </div>
 
-    {% if ext_ccs_url is defined and submission.externalid %}
+    {% if ext_ccs_url is not null and submission.externalid %}
         <div class="mb-2">
             External ID:
             <a href="{{ submission | externalCcsUrl }}" target="_blank">
@@ -329,7 +329,7 @@
                                    style="display: inline; width: auto;"/>
                         {% endif %}
 
-                        {% if icat_url is defined %}
+                        {% if icat_url is not null %}
                             <button class="btn btn-outline-secondary btn-sm" id="post-to-icat">
                                 post to iCAT
                             </button>
@@ -353,7 +353,7 @@
                 });
             </script>
 
-            {% if submission.externalresult is not empty and submission.externalresult != selectedJudging.result and ext_ccs_url is defined %}
+            {% if submission.externalresult is not empty and submission.externalresult != selectedJudging.result and ext_ccs_url is not null %}
                 <div class="alert alert-danger">
                     <strong>Results differ!</strong>
                     <hr>
