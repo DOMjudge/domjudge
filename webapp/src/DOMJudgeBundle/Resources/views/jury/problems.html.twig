@@ -23,8 +23,8 @@
         <form action="{{ path('legacy.jury_problem') }}" method="post" enctype="multipart/form-data">
             <div class="form-row">
                 <div class="form-group col-sm-4">
-                    <label for="type">Contest</label>
-                    <select name="type" id="type" class="custom-select">
+                    <label for="contest">Contest</label>
+                    <select name="contest" id="contest" class="custom-select">
                         <option value="-1">Do not link to a contest</option>
                         {% for contest in contests %}
                             <option value="{{ contest.cid }}" {% if current_contest and current_contest.cid == contest.cid %}selected="selected"{% endif %}>
