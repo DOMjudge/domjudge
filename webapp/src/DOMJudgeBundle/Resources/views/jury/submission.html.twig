@@ -54,6 +54,8 @@
                        onclick="return confirm('Really {{ action }} submissions {{ submission.submitid }}?');"/>
             </form>
         {% endif %}
+
+        {% include '@DOMJudge/jury/partials/rejudge_form.html.twig' with {table: 'submission', id: submission.submitid} %}
     </div>
 
     {% if not submission.valid %}
@@ -196,10 +198,6 @@
     {% else %}
 
         {% include '@DOMJudge/jury/partials/submission_graph.html.twig' %}
-
-        <div class="mb-3">
-            {% include '@DOMJudge/jury/partials/rejudge_form.html.twig' with {table: 'submission', id: submission.submitid} %}
-        </div>
 
         {# Show judging information #}
         <div class="mb-2">

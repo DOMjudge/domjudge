@@ -1,6 +1,6 @@
 {# Output a rejudge form #}
 
-{% set buttonText = 'REJUDGE ALL for ' ~ table ~ ' ' ~ id %}
+{% set buttonText = 'Rejudge all for ' ~ table ~ ' ' ~ id %}
 {% set questionText = 'Rejudge all submissions for this ' ~ table ~ '?' %}
 {% set buttonDisabled = false %}
 {% if is_granted('ROLE_ADMIN') %}
@@ -10,7 +10,9 @@
 {% endif %}
 
 {% if table == 'submission' and submission is defined and judgings is defined %}
-    {% set buttonText = 'REJUDGE this submission' %}
+    {% set buttonText = 'Rejudge this submission' %}
+    {% set questionText = 'Rejudge submission s' ~ id ~ '?' %}
+    {% set includeAllButton = false %}
     {# Check if we have a valid result #}
     {% set validResult = false %}
     {% for judging in judgings %}
@@ -22,7 +24,7 @@
     {% if is_granted('ROLE_ADMIN') %}
         {% if not validResult %}
             {% set questionText = 'Restart judging of PENDING submission s' ~ id ~ ', are you sure?' %}
-            {% set buttonText = 'RESTART judging' %}
+            {% set buttonText = 'Restart judging' %}
         {% elseif validResult == 'correct' %}
             {% set questionText = 'Rejudge CORRECT submission s' ~ id ~ ', are you sure?' %}
         {% endif %}
@@ -33,31 +35,47 @@
     {% endif %}
 {% endif %}
 
-<div class="card" style="max-width: 500px;">
-    <div class="card-body">
-        <form action="{{ path('legacy.jury_rejudge') }}" method="post">
-            <input type="hidden" name="table" value="{{ table }}"/>
-            <input type="hidden" name="id" value="{{ id }}"/>
-            <div class="form-group">
-                <input type="submit" value="{{ buttonText }}" class="btn btn-primary"
-                       onclick="return confirm('{{ questionText }}');">
+<button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#rejudge-modal">
+    Rejudge
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="rejudge-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ buttonText }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            {% if includeAllButton %}
-                <div class="custom-control custom-checkbox form-group">
-                    <input type="checkbox" class="custom-control-input" id="include_all" name="include_all">
-                    <label class="custom-control-label" for="include_all">Include pending/correct
-                        submissions</label>
+            <form action="{{ path('legacy.jury_rejudge') }}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="table" value="{{ table }}"/>
+                    <input type="hidden" name="id" value="{{ id }}"/>
+                    {% if includeAllButton %}
+                        <div class="custom-control custom-checkbox form-group">
+                            <input type="checkbox" class="custom-control-input" id="include_all" name="include_all">
+                            <label class="custom-control-label" for="include_all">Include pending/correct
+                                submissions</label>
+                        </div>
+                    {% endif %}
+                    <div class="custom-control custom-checkbox form-group">
+                        <input type="checkbox" class="custom-control-input" id="full_rejudge" name="full_rejudge">
+                        <label class="custom-control-label" for="full_rejudge">Create rejudging</label>
+                    </div>
+                    <div id="rejudge-reason" class="form-group d-none">
+                        <label for="reason">Reason</label>
+                        <input type="text" class="form-control" name="reason" id="reason" maxlength="255"/>
+                    </div>
                 </div>
-            {% endif %}
-            <div class="custom-control custom-checkbox form-group">
-                <input type="checkbox" class="custom-control-input" id="full_rejudge" name="full_rejudge">
-                <label class="custom-control-label" for="full_rejudge">Create rejudging</label>
-            </div>
-            <div id="rejudge-reason" class="form-group d-none">
-                <label for="reason">Reason</label>
-                <input type="text" class="form-control" name="reason" id="reason" maxlength="255"/>
-            </div>
-        </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <input type="submit" value="{{ buttonText }}" class="btn btn-primary"
+                           onclick="return confirm('{{ questionText }}');">
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
