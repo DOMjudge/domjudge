@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Entity\Judgehost;
 use DOMJudgeBundle\Entity\Judging;
@@ -15,11 +16,17 @@ use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -573,8 +580,112 @@ class SubmissionController extends Controller
             'oldFiles' => $oldFiles,
             'oldFileStats' => $oldFileStats,
             'originalSubmission' => $originalSubmission,
-            'originallFiles' => $originallFiles,
+            'originalFiles' => $originallFiles,
             'originalFileStats' => $originalFileStats,
+        ]);
+    }
+
+    /**
+     * @Route("/submissions/{submission}/edit-source", name="jury_submission_edit_source")
+     */
+    public function editSourceAction(Request $request, Submission $submission)
+    {
+        if (!$this->DOMJudgeService->getUser()->getTeam() || !$this->DOMJudgeService->checkrole('team')) {
+            throw new BadRequestHttpException('You cannot re-submit code without being a team.');
+        }
+
+        /** @var SubmissionFileWithSourceCode[] $files */
+        $files = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:SubmissionFileWithSourceCode', 'file')
+            ->select('file')
+            ->andWhere('file.submission = :submission')
+            ->setParameter(':submission', $submission)
+            ->orderBy('file.rank')
+            ->getQuery()
+            ->getResult();
+
+        $data = [
+            'problem' => $submission->getProblem(),
+            'language' => $submission->getLanguage(),
+            'entry_point' => $submission->getEntryPoint(),
+        ];
+
+        foreach ($files as $file) {
+            $data['source' . $file->getRank()] = $file->getSourcecode();
+        }
+
+        $formBuilder = $this->createFormBuilder($data)
+            ->add('problem', EntityType::class, [
+                'class' => 'DOMJudgeBundle\Entity\Problem',
+                'choice_label' => 'name',
+                'query_builder' => function (EntityRepository $er) use ($submission) {
+                    return $er->createQueryBuilder('p')
+                        ->join('p.contest_problems', 'cp')
+                        ->andWhere('cp.allow_submit = 1')
+                        ->andWhere('cp.contest = :contest')
+                        ->setParameter(':contest', $submission->getContest())
+                        ->orderBy('p.name');
+                },
+            ])
+            ->add('language', EntityType::class, [
+                'class' => 'DOMJudgeBundle\Entity\Language',
+                'choice_label' => 'name',
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('lang')
+                        ->andWhere('lang.allow_submit = 1')
+                        ->orderBy('lang.name');
+                }
+            ])
+            ->add('entry_point', TextType::class, [
+                'label' => 'Optional entry point',
+                'required' => false,
+            ])
+            ->add('submit', SubmitType::class);
+
+        foreach ($files as $file) {
+            $formBuilder->add('source' . $file->getRank(), TextareaType::class);
+        }
+
+        $form = $formBuilder->getForm();
+
+        // Handle the form if it is submitted
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $submittedData = $form->getData();
+
+            /** @var UploadedFile[] $filesToSubmit */
+            $filesToSubmit = [];
+            foreach ($files as $file) {
+                if (!($tmpfname = tempnam(TMPDIR, "edit_source-"))) {
+                    throw new ServiceUnavailableHttpException("Could not create temporary file.");
+                }
+                file_put_contents($tmpfname, $submittedData['source' . $file->getRank()]);
+                $filesToSubmit[] = new UploadedFile($tmpfname, $file->getFilename(), null, null, null, true);
+            }
+
+            $team                = $this->DOMJudgeService->getUser()->getTeam();
+            $submittedSubmission = $this->submissionService->submitSolution(
+                $team,
+                $submittedData['problem'],
+                $submission->getContest(),
+                $submittedData['language'],
+                $filesToSubmit,
+                $submission->getOrigsubmitid() ?? $submission->getSubmitid(),
+                $submittedData['entry_point']
+            );
+
+            foreach ($filesToSubmit as $file) {
+                unlink($file->getRealPath());
+            }
+
+            return $this->redirectToRoute('jury_submission', ['submitId' => $submittedSubmission->getSubmitid()]);
+        }
+
+        return $this->render('@DOMJudge/jury/submission_edit_source.html.twig', [
+            'submission' => $submission,
+            'files' => $files,
+            'form' => $form->createView(),
+            'selected' => $request->query->get('rank'),
         ]);
     }
 
@@ -602,7 +713,7 @@ class SubmissionController extends Controller
                     if ($oldFile->getSourcecode() === $newfile->getSourcecode()) {
                         $result['unchanged'][] = $newfile->getFilename();
                     } else {
-                        $result['changed'][] = $newfile->getFilename();
+                        $result['changed'][]      = $newfile->getFilename();
                         $result['changedfiles'][] = [$newfile, $oldFile];
                     }
                 }

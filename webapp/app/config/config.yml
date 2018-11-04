@@ -38,6 +38,7 @@ framework:
 twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
+    form_themes: ['form_theme.html.twig']
     globals:
       DOMJUDGE_VERSION: '%domjudge.version%'
       DJ_CHARACTER_SET: 'utf-8'

@@ -516,25 +516,44 @@ EOF;
      * Output a (readonly) code editor for the given submission file
      * @param SubmissionFileWithSourceCode $fileWithSourceCode
      * @param string                       $language
+     * @param bool                         $editable        Whether to allow editing
+     * @param string                       $elementToUpdate HTML element to update when input changes
      * @return string
      */
-    public function codeEditor(SubmissionFileWithSourceCode $fileWithSourceCode, string $language)
-    {
+    public function codeEditor(
+        SubmissionFileWithSourceCode $fileWithSourceCode,
+        string $language,
+        bool $editable = false,
+        string $elementToUpdate = ''
+    ) {
         $editor = <<<HTML
-<div class="editor" id="%s">%s</div>
+<div class="editor" id="__EDITOR__">%s</div>
 <script>
-var editor = ace.edit("%s");
-editor.setTheme("ace/theme/eclipse");
-editor.setOptions({ maxLines: Infinity });
-editor.setReadOnly(true);
-editor.getSession().setMode("ace/mode/%s");
-document.getElementById("%s").editor = editor;
+var __EDITOR__ = ace.edit("__EDITOR__");
+__EDITOR__.setTheme("ace/theme/eclipse");
+__EDITOR__.setOptions({ maxLines: Infinity });
+__EDITOR__.setReadOnly(%s);
+__EDITOR__.getSession().setMode("ace/mode/%s");
+document.getElementById("__EDITOR__").editor = __EDITOR__;
+%s
 </script>
 HTML;
         $rank   = Utils::specialchars((string)$fileWithSourceCode->getRank());
         $id     = sprintf('editor%s', $rank);
         $code   = Utils::specialchars($fileWithSourceCode->getSourcecode());
-        return sprintf($editor, $id, $code, $id, $language, $id);
+        if ($elementToUpdate) {
+            $extraForEdit = <<<JS
+__EDITOR__.getSession().on('change', function() {
+    var textarea = document.getElementById("$elementToUpdate");
+    textarea.value = __EDITOR__.getSession().getValue();
+});
+JS;
+
+        } else {
+            $extraForEdit = '';
+        }
+        return str_replace('__EDITOR__', $id,
+                           sprintf($editor, $code, $editable ? 'false' : 'true', $language, $extraForEdit));
     }
 
 

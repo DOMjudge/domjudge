@@ -75,8 +75,6 @@ legacy.jury_testcase:
     path: /jury/testcase.php
 legacy.jury_team_output:
     path: /jury/team_output.php
-legacy.jury_edit_source:
-    path: /jury/edit_source.php
 
 legacy.jury_ajax_problems:
   path: /jury/ajax_problems.php
