@@ -160,12 +160,12 @@ class SubmissionController extends Controller
         $judgingId   = $request->query->get('jid');
         $rejudgingId = $request->query->get('rejudgingid');
 
-        if (isset($jid) && isset($rejudgingid)) {
+        if (isset($judgingId) && isset($rejudgingId)) {
             throw new BadRequestHttpException("You cannot specify jid and rejudgingid at the same time.");
         }
 
         // If judging ID is not set but rejudging ID is, try to deduce the judging ID from the database.
-        if (!isset($jid) && isset($rejudgingid)) {
+        if (!isset($judgingId) && isset($rejudgingId)) {
             $judging = $this->entityManager->getRepository(Judging::class)
                 ->findOneBy([
                                 'submitid' => $submitId,

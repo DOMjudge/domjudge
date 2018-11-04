@@ -199,7 +199,7 @@ function putSubmissions(array $cdatas, array $restrictions, $limit = 0, $highlig
             // If rejudging list, link to the new rejudging:
             $linkurl = 'submissions/' . $sid .
                 (isset($restrictions['rejudgingid']) ?
-                 '&amp;rejudgingid=' . $restrictions['rejudgingid'] : '');
+                 '?rejudgingid=' . $restrictions['rejudgingid'] : '');
             $link = ' href="' . $linkurl . '"';
         } elseif ($row['submittime'] < $cdatas[$row['cid']]['endtime'] &&
                    $row['result'] && $row['valid'] &&
