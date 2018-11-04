@@ -208,17 +208,19 @@ function tsv_accounts_prepare($content)
         $l++;
         $line = explode("\t", trim($line));
 
-        $teamid = $juryteam = $roleid = null;
+        $teamid = $juryteam = null;
+        $roleids = array();
         switch ($line[0]) {
             case 'admin':
-                $roleid = $adminroleid;
+                $roleids[] = $adminroleid;
                 break;
             case 'judge':
-                $roleid = $juryroleid;
+                $roleids[] = $juryroleid;
+                $roleids[] = $teamroleid;
                 $juryteam = array('name' => $line[1], 'categoryid' => $jurycatid, 'members' => $line[1]);
                 break;
             case 'team':
-                $roleid = $teamroleid;
+                $roleids[] = $teamroleid;
                 // For now we assume we can find the teamid by parsing
                 // the username and taking the largest suffix number.
                 // Note that https://clics.ecs.baylor.edu/index.php/Contest_Control_System_Requirements#accounts.tsv
@@ -250,10 +252,7 @@ function tsv_accounts_prepare($content)
                 'password' => dj_password_hash($line[3]),
                 'teamid' => $teamid
             ),
-            'userrole' => array(
-                'userid' => -1, // need to get appropriate userid later
-                'roleid' => $roleid
-            ),
+            'userroles' => $roleids,
             'team' => $juryteam,
         );
     }
@@ -280,9 +279,14 @@ function tsv_accounts_set($data)
         $DB->q("REPLACE INTO user SET %S", $row['user']);
         $userid = $DB->q("VALUE SELECT userid FROM user WHERE username = %s", $row['user']['username']);
         auditlog('user', $userid, 'replaced', 'imported from tsv');
-        $row['userrole']['userid'] = $userid;
-        $DB->q("REPLACE INTO userrole SET %S", $row['userrole']);
-        auditlog('userrole', $userid, 'replaced', 'imported from tsv');
+        foreach ($row['userroles'] as $roleid) {
+            $userrole_data = array(
+                'userid' => $userid,
+                'roleid' => $roleid
+            );
+            $DB->q("INSERT INTO userrole SET %S", $userrole_data);
+            auditlog('userrole', $userid, 'insert', 'imported from tsv');
+        }
         $cnt++;
     }
     return $cnt;
