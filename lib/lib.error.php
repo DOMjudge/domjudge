@@ -62,27 +62,15 @@ function logmsg(int $msglevel, string $string)
         if (IS_WEB) {
             $msg = htmlspecialchars($string);
             // if this is the API, do not add HTML formatting and send HTTP status code
-            if (defined('DOMJUDGE_API_VERSION')) {
-                if ($msglevel == LOG_ERR && ! headers_sent()) {
-                    $protocol = (isset($_SERVER['SERVER_PROTOCOL']) ?
-                        $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
-                    header($protocol . " 500 Internal Server Error");
-                }
-                // Note: should we skip non-fatal messages in the API? A warning
-                // will probably mess up json output.
-                echo $msg . "\n";
-            // normal interactive web interface: output with markup
+            // string 'ERROR' parsed by submit client, don't modify!
+            if ($msglevel == LOG_ERR) {
+                echo "<fieldset class=\"error\"><legend>ERROR</legend> " .
+                     $msg . "</fieldset><!-- trigger HTML validator error: --><b>\n";
+            } elseif ($msglevel == LOG_WARNING) {
+                echo "<fieldset class=\"warning\"><legend>Warning</legend> " .
+                    $msg . "</fieldset><!-- trigger HTML validator error: --><b>\n";
             } else {
-                // string 'ERROR' parsed by submit client, don't modify!
-                if ($msglevel == LOG_ERR) {
-                    echo "<fieldset class=\"error\"><legend>ERROR</legend> " .
-                         $msg . "</fieldset><!-- trigger HTML validator error: --><b>\n";
-                } elseif ($msglevel == LOG_WARNING) {
-                    echo "<fieldset class=\"warning\"><legend>Warning</legend> " .
-                        $msg . "</fieldset><!-- trigger HTML validator error: --><b>\n";
-                } else {
-                    echo "<p>" . $msg . "</p>\n";
-                }
+                echo "<p>" . $msg . "</p>\n";
             }
         } else {
             fwrite(STDERR, $stamp . $string . "\n");
