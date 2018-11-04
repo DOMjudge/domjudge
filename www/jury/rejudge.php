@@ -49,7 +49,12 @@ $rejudgingid = rejudge(
 
 /** redirect back. */
 if ($full_rejudge) {
-    header('Location: rejudging.php?id='.urlencode((string)$rejudgingid));
+    header('Location: rejudging.php?id=' . urlencode((string)$rejudgingid));
 } else {
-    header('Location: '.$table.'.php?id='.urlencode((string)$id));
+    if (in_array($table, ['submission'])) {
+        $url = sprintf('%ss/%s', $table, urlencode((string)$id));
+    } else {
+        $url = sprintf('%s?id=%s', $table, urlencode((string)$id));
+    }
+    header('Location: ' . $url);
 }
