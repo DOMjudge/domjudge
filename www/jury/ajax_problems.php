@@ -19,4 +19,14 @@ if (isset($_GET['fromcontest'])) {
                        $_GET['q'], $_GET['q']);
 }
 
-echo dj_json_encode($problems);
+if ($_GET['select2'] ?? false) {
+    $problems = array_map(function (array $problem) {
+        return [
+            'id' => $problem['id'],
+            'text' => $problem['search'],
+        ];
+    }, $problems);
+    echo dj_json_encode(['results' => $problems]);
+} else {
+    echo dj_json_encode($problems);
+}

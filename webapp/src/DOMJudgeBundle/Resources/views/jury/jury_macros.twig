@@ -1,3 +1,14 @@
+{% macro select2_extrahead() %}
+    <link rel="stylesheet" href="{{ asset('css/select2.min.css') }}" type="text/css"/>
+    <link rel="stylesheet" href="{{ asset('css/select2-bootstrap.min.css') }}" type="text/css"/>
+    <script type="text/javascript" src="{{ asset('js/select2.min.js') }}"></script>
+    <script>
+        $(function() {
+            $.fn.select2.defaults.set("theme", "bootstrap");
+        });
+    </script>
+{% endmacro %}
+
 {% macro table_extrahead() %}
     <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap4.min.css') }}" type="text/css"/>
     <script type="text/javascript" src="{{ asset('js/jquery.dataTables.min.js') }}"></script>

@@ -15,6 +15,18 @@
 					"reference": "5.4.2"
 				}
 			}
+		},
+		{
+			"type": "package",
+			"package": {
+				"name": "angel-vladov/select2-bootstrap-theme",
+				"version": "0.2.0-beta.2",
+				"source": {
+					"url": "https://github.com/angel-vladov/select2-bootstrap-theme.git",
+					"type": "git",
+					"reference": "0.2.0-beta.2"
+				}
+			}
 		}
 	],
 	"require": {
@@ -47,6 +59,8 @@
 		"nelmio/api-doc-bundle": "^3.3",
 		"datatables/datatables": "^1.10",
 		"fortawesome/font-awesome": "5.*",
+		"select2/select2": "4.*",
+		"angel-vladov/select2-bootstrap-theme": "0.2.0-beta.2",
 		"twig/extensions": "^1.5"
 	},
 	"require-dev": {

@@ -3,11 +3,11 @@
 {% if submissions is empty %}
     <div class="alert alert-warning">No submissions</div>
 {% else %}
-    <table class="data-table table table table-hover table-striped table-sm">
+    <table class="data-table table table-hover table-striped table-sm submissions-table">
         <thead class="thead-light">
         <tr>
             <th scope="col">ID</th>
-            {% if show_contest %}
+            {% if showContest %}
                 <th scope="col">contest</th>
             {% endif %}
             <th scope="col">time</th>
@@ -20,7 +20,7 @@
             {% if rejudging is defined %}
                 <th scope="col">old result</th>
             {% endif %}
-            {% if show_testcases is defined and show_testcases %}
+            {% if showTestcases is defined and showTestcases %}
                 <th scope="col" class="not-sortable not-searchable">test results</th>
             {% endif %}
         </tr>
@@ -32,9 +32,13 @@
             {% else %}
                 {% set link = path('legacy.jury_submission', {id: submission.submitid}) %}
             {% endif %}
-            <tr class="{% if not submission.valid %}ignore{% endif %}">
+            <tr class="{% if not submission.valid %}ignore{% endif %}"
+                data-problem-id="{{ submission.probid }}"
+                data-team-id="{{ submission.teamid }}"
+                data-language-id="{{ submission.langid }}"
+                data-submission-id="{{ submission.submitid }}">
                 <td><a href="{{ link }}">s{{ submission.submitid }}</a></td>
-                {% if show_contest %}
+                {% if showContest %}
                     <td><a href="{{ link }}">c{{ submission.cid }}</a></td>
                 {% endif %}
                 <td><a href="{{ link }}">{{ submission.submittime | printtime(null, submission.contest) }}</a></td>
@@ -110,7 +114,7 @@
                         </a>
                     </td>
                 {% endif %}
-                {% if show_testcases is defined and show_testcases %}
+                {% if showTestcases is defined and showTestcases %}
                     <td class="testcase-results">
                         {{ submission | testcaseReults }}
                     </td>
@@ -132,25 +136,4 @@
             , judgement pending: {{ submissionCounts.queued }}
         {%- endif -%}
     </p>
-
-    <script>
-        $(function () {
-            $('.data-table').DataTable({
-                order: [],
-                paging: false,
-                ordering: true,
-                info: false,
-                autoWidth: true,
-                language: {
-                    searchPlaceholder: "filter table",
-                    search: "_INPUT_",
-                },
-                aoColumnDefs: [
-                    {aTargets: ['not-sortable'], bSortable: false},
-                    {aTargets: ['not-searchable'], bSortable: false},
-                    {aTargets: ['_all'], bSortable: true, bSearchable: true}
-                ]
-            });
-        });
-    </script>
 {% endif %}

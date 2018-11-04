@@ -63,3 +63,10 @@ legacy.jury_toggle_notify:
     path: /jury/toggle_notify.php
 legacy.jury_submission:
     path: /jury/submission.php
+
+legacy.jury_ajax_problems:
+  path: /jury/ajax_problems.php
+legacy.jury_ajax_teams:
+  path: /jury/ajax_teams.php
+legacy.jury_ajax_languages:
+  path: /jury/ajax_languages.php

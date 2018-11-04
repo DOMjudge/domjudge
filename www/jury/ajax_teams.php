@@ -10,4 +10,14 @@ $teams = $DB->q("TABLE SELECT teamid AS id, name,
                 (isset($_GET['enabled']) ? " AND enabled = 1" : ""),
                 $_GET['q'], $_GET['q']);
 
-echo dj_json_encode($teams);
+if ($_GET['select2'] ?? false) {
+    $teams = array_map(function (array $team) {
+        return [
+            'id' => $team['id'],
+            'text' => $team['search'],
+        ];
+    }, $teams);
+    echo dj_json_encode(['results' => $teams]);
+} else {
+    echo dj_json_encode($teams);
+}

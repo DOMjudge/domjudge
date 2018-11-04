@@ -3,7 +3,10 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\Language;
+use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
+use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -93,13 +96,51 @@ class SubmissionController extends Controller
         list($submissions, $submissionCounts) = $this->submissionService->getSubmissionList($contests, $restrictions,
                                                                                             $limit);
 
+        // Load preselected filters
+        $filters          = $this->DOMJudgeService->jsonDecode((string)$this->DOMJudgeService->getCookie('domjudge_submissionsfilter') ?? []);
+        $filteredProblems = $filteredLanguages = $filteredTeams = [];
+        if (isset($filters['problem-id'])) {
+            /** @var Problem[] $filteredProblems */
+            $filteredProblems = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Problem', 'p')
+                ->select('p')
+                ->where('p.probid IN (:problemIds)')
+                ->setParameter(':problemIds', $filters['problem-id'])
+                ->getQuery()
+                ->getResult();
+        }
+        if (isset($filters['language-id'])) {
+            /** @var Language[] $filteredLanguages */
+            $filteredLanguages = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Language', 'lang')
+                ->select('lang')
+                ->where('lang.langid IN (:langIds)')
+                ->setParameter(':langIds', $filters['language-id'])
+                ->getQuery()
+                ->getResult();
+        }
+        if (isset($filters['team-id'])) {
+            /** @var Team[] $filteredTeams */
+            $filteredTeams = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Team', 't')
+                ->select('t')
+                ->where('t.teamid IN (:teamIds)')
+                ->setParameter(':teamIds', $filters['team-id'])
+                ->getQuery()
+                ->getResult();
+        }
+
         return $this->render('@DOMJudge/jury/submissions.html.twig', [
             'refresh' => $refresh,
             'viewTypes' => $viewTypes,
             'view' => $view,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
-            'show_contest' => count($contests) > 1,
+            'showContest' => count($contests) > 1,
+            'hasFilters' => !empty($filters),
+            'filteredProblems' => $filteredProblems,
+            'filteredLanguages' => $filteredLanguages,
+            'filteredTeams' => $filteredTeams,
         ], $response);
     }
 }
