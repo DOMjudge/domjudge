@@ -428,11 +428,12 @@ class ScoreboardService
         // Process all score cache rows
         foreach ($scoreCacheRows as $scoreCache) {
             foreach ($variants as $variant => $isRestricted) {
-                if ($scoreCache->getIsCorrect($isRestricted)) {
+                $probId = $scoreCache->getProblem()->getProbid();
+                if (isset($contestProblems[$probId]) && $scoreCache->getIsCorrect($isRestricted)) {
                     $penalty = Utils::calcPenaltyTime($scoreCache->getIsCorrect($isRestricted), $scoreCache->getSubmissions($isRestricted),
                                                       $penaltyTime, $scoreIsInSeconds);
 
-                    $numPoints[$variant] += $contestProblems[$scoreCache->getProblem()->getProbid()]->getPoints();
+                    $numPoints[$variant] += $contestProblems[$probId]->getPoints();
                     $totalTime[$variant] += Utils::scoretime((float)$scoreCache->getSolveTime($isRestricted), $scoreIsInSeconds) + $penalty;
                 }
             }
