@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 namespace DOMJudgeBundle\Utils;
 
+use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
+
 /**
  * Generic utility class.
  */
@@ -490,5 +492,91 @@ class Utils
         $diff .= "\n";
 
         return [true, $diff];
+    }
+
+    /**
+     * Call `diff` on the two given files
+     *
+     * FIXME: this assumes GNU diff.
+     *
+     * @param $oldfile
+     * @param $newfile
+     * @return string
+     */
+    public static function systemDiff(string $oldfile, string $newfile): string
+    {
+        $oldname = basename($oldfile);
+        $newname = basename($newfile);
+        return `diff -Bdt --strip-trailing-cr -U2 \
+                 --label $oldname --label $newname $oldfile $newfile 2>&1`;
+    }
+
+    /**
+     * Create a diff for the given two sources
+     * @param SubmissionFileWithSourceCode $newSource
+     * @param string                       $newFile
+     * @param SubmissionFileWithSourceCode $oldSource
+     * @param string                       $oldFile
+     * @return string
+     */
+    public static function createDiff(
+        SubmissionFileWithSourceCode $newSource,
+        string $newFile,
+        SubmissionFileWithSourceCode $oldSource,
+        string $oldFile
+    ): string {
+        // Try different ways of diffing, in order of preference.
+        if (function_exists('xdiff_string_diff')) {
+            // The PECL xdiff PHP-extension.
+            $difftext = xdiff_string_diff($oldSource->getSourcecode(), $newSource->getSourcecode(), 2, true);
+        } elseif (!(bool)ini_get('safe_mode') ||
+            strtolower(ini_get('safe_mode')) == 'off') {
+            // Only try executing diff when safe_mode is off, otherwise
+            // the shell exec will fail.
+
+            if (is_readable($oldFile) && is_readable($newFile)) {
+                // A direct diff on the sources in the SUBMITDIR.
+                $difftext = Utils::systemDiff($oldFile, $newFile);
+            } else {
+                // Try generating temporary files for executing diff.
+                $oldFile = tempnam(TMPDIR, sprintf("source-old-s%s-", $oldSource->getSubmitid()));
+                $newFile = tempnam(TMPDIR, sprintf("source-new-s%s-", $newSource->getSubmitid()));
+
+                if (!$oldFile || !$newFile) {
+                    $difftext = "DOMjudge: error generating temporary files for diff.";
+                } else {
+                    $oldhandle = fopen($oldFile, 'w');
+                    $newhandle = fopen($newFile, 'w');
+
+                    if (!$oldhandle || !$newhandle) {
+                        $difftext = "DOMjudge: error opening temporary files for diff.";
+                    } else {
+                        if ((fwrite($oldhandle, $oldSource->getSourcecode()) === false) ||
+                            (fwrite($newhandle, $newSource->getSourcecode()) === false)) {
+                            $difftext = "DOMjudge: error writing temporary files for diff.";
+                        } else {
+                            $difftext = Utils::systemDiff($oldFile, $newFile);
+                        }
+                    }
+                    if ($oldhandle) {
+                        fclose($oldhandle);
+                    }
+                    if ($newhandle) {
+                        fclose($newhandle);
+                    }
+                }
+
+                if ($oldFile) {
+                    unlink($oldFile);
+                }
+                if ($newFile) {
+                    unlink($newFile);
+                }
+            }
+        } else {
+            $difftext = "DOMjudge: diff functionality not available in PHP or via shell exec.";
+        }
+
+        return $difftext;
     }
 }

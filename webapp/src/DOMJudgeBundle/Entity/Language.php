@@ -403,4 +403,36 @@ class Language
     {
         return $this->submissions;
     }
+
+    /**
+     * Get the language for the ACE editor for this langauge
+     * @return string
+     */
+    public function getAceLanguage()
+    {
+        switch ($this->getLangid()) {
+            case 'c':
+            case 'cpp':
+            case 'cxx':
+                return 'c_cpp';
+            case 'pas':
+                return 'pascal';
+            case 'hs':
+                return 'haskell';
+            case 'pl':
+                return 'perl';
+            case 'bash':
+                return 'sh';
+            case 'py2':
+            case 'py3':
+                return 'python';
+            case 'adb':
+                return 'ada';
+            case 'plg':
+                return 'prolog';
+            case 'rb':
+                return 'ruby';
+        }
+        return $this->getLangid();
+    }
 }

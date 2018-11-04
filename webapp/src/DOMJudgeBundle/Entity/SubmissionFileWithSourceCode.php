@@ -47,8 +47,8 @@ class SubmissionFileWithSourceCode
     private $submission;
 
     /**
-     * @var resource
-     * @ORM\Column(type="blob", name="sourcecode", options={"comment"="Full source code"}, nullable=false)
+     * @var string
+     * @ORM\Column(type="text", name="sourcecode", options={"comment"="Full source code"}, nullable=false)
      */
     private $sourcecode;
 
@@ -161,7 +161,7 @@ class SubmissionFileWithSourceCode
     /**
      * Set sourcecode
      *
-     * @param resource|string $sourcecode
+     * @param string $sourcecode
      *
      * @return SubmissionFileWithSourceCode
      */
@@ -175,7 +175,7 @@ class SubmissionFileWithSourceCode
     /**
      * Get sourcecode
      *
-     * @return resource
+     * @return string
      */
     public function getSourcecode()
     {

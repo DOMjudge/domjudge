@@ -7,8 +7,10 @@ use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\JudgingRunWithOutput;
 use DOMJudgeBundle\Entity\Submission;
+use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
 use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Twig\TwigFunction;
@@ -26,6 +28,11 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
     protected $entityManager;
 
     /**
+     * @var SubmissionService
+     */
+    protected $submissionService;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
@@ -33,11 +40,13 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
     public function __construct(
         DOMJudgeService $domjudge,
         EntityManagerInterface $entityManager,
+        SubmissionService $submissionService,
         KernelInterface $kernel
     ) {
-        $this->domjudge      = $domjudge;
-        $this->entityManager = $entityManager;
-        $this->kernel        = $kernel;
+        $this->domjudge          = $domjudge;
+        $this->entityManager     = $entityManager;
+        $this->submissionService = $submissionService;
+        $this->kernel            = $kernel;
     }
 
     public function getFunctions()
@@ -64,6 +73,8 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('truncateOutput', [$this, 'truncateOutput']),
             new \Twig_SimpleFilter('parseRunDiff', [$this, 'parseRunDiff'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('runDiff', [$this, 'runDiff'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFilter('codeEditor', [$this, 'codeEditor'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFilter('showDiff', [$this, 'showDiff'], ['is_safe' => ['html']]),
         ];
     }
 
@@ -499,5 +510,100 @@ EOF;
         $result .= "</table>\n";
 
         return $result;
+    }
+
+    /**
+     * Output a (readonly) code editor for the given submission file
+     * @param SubmissionFileWithSourceCode $fileWithSourceCode
+     * @param string                       $language
+     * @return string
+     */
+    public function codeEditor(SubmissionFileWithSourceCode $fileWithSourceCode, string $language)
+    {
+        $editor = <<<HTML
+<div class="editor" id="%s">%s</div>
+<script>
+var editor = ace.edit("%s");
+editor.setTheme("ace/theme/eclipse");
+editor.setOptions({ maxLines: Infinity });
+editor.setReadOnly(true);
+editor.getSession().setMode("ace/mode/%s");
+document.getElementById("%s").editor = editor;
+</script>
+HTML;
+        $rank   = Utils::specialchars((string)$fileWithSourceCode->getRank());
+        $id     = sprintf('editor%s', $rank);
+        $code   = Utils::specialchars($fileWithSourceCode->getSourcecode());
+        return sprintf($editor, $id, $code, $id, $language, $id);
+    }
+
+
+    /**
+     * Parse the given source diff
+     * @param $difftext
+     * @return string
+     */
+    protected function parseSourceDiff($difftext)
+    {
+        $line   = strtok((string)$difftext, "\n"); // first line
+        $return = '';
+        while ($line !== false && strlen($line) != 0) {
+            // Strip any additional DOS/MAC newline characters:
+            $line = trim($line, "\r\n");
+            switch (substr($line, 0, 1)) {
+                case '-':
+                    $formdiffline = "<span class='diff-del'>" . Utils::specialchars($line) . "</span>";
+                    break;
+                case '+':
+                    $formdiffline = "<span class='diff-add'>" . Utils::specialchars($line) . "</span>";
+                    break;
+                default:
+                    $formdiffline = Utils::specialchars($line);
+            }
+            $return .= $formdiffline . "\n";
+            $line   = strtok("\n");
+        }
+        return $return;
+    }
+
+    /**
+     * Show a diff between two files
+     * @param SubmissionFileWithSourceCode $newFile
+     * @param SubmissionFileWithSourceCode $oldFile
+     * @return string
+     */
+    public function showDiff(SubmissionFileWithSourceCode $newFile, SubmissionFileWithSourceCode $oldFile)
+    {
+        $newsourcefile = $this->submissionService->getSourceFilename([
+                                                                         'cid' => $newFile->getSubmission()->getCid(),
+                                                                         'submitid' => $newFile->getSubmitid(),
+                                                                         'teamid' => $newFile->getSubmission()->getTeamid(),
+                                                                         'probid' => $newFile->getSubmission()->getProbid(),
+                                                                         'langid' => $newFile->getSubmission()->getLangid(),
+                                                                         'rank' => $newFile->getRank(),
+                                                                         'filename' => $newFile->getFilename()
+                                                                     ]);
+        $oldsourcefile = $this->submissionService->getSourceFilename([
+                                                                         'cid' => $oldFile->getSubmission()->getCid(),
+                                                                         'submitid' => $oldFile->getSubmitid(),
+                                                                         'teamid' => $oldFile->getSubmission()->getTeamid(),
+                                                                         'probid' => $oldFile->getSubmission()->getProbid(),
+                                                                         'langid' => $oldFile->getSubmission()->getLangid(),
+                                                                         'rank' => $oldFile->getRank(),
+                                                                         'filename' => $oldFile->getFilename()
+                                                                     ]);
+
+        // TODO: remove this if we have access to domserver-static everywhere
+        $dir = realpath(sprintf('%s/../../etc', $this->kernel->getRootDir()));
+        require_once $dir . '/domserver-static.php';
+
+        $difftext = Utils::createDiff(
+            $newFile,
+            SUBMITDIR . '/' . $newsourcefile,
+            $oldFile,
+            SUBMITDIR . '/' . $oldsourcefile
+        );
+
+        return $this->parseSourceDiff($difftext);
     }
 }

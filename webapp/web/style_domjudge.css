@@ -88,3 +88,10 @@ del {
     font-weight: bold;
     padding-top: 1.2rem;
 }
+
+.source-tab {
+    border-bottom: 1px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+    border-left: 1px solid #dee2e6;
+    padding: 0.5rem;
+}

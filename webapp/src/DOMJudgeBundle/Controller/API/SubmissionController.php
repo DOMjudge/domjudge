@@ -274,7 +274,7 @@ class SubmissionController extends AbstractRestController
             return new Response("Could not create temporary zip file.", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         foreach ($files as $file) {
-            $zip->addFromString($file->getFilename(), stream_get_contents($file->getSourcecode()));
+            $zip->addFromString($file->getFilename(), $file->getSourcecode());
         }
         $zip->close();
 
@@ -338,7 +338,7 @@ class SubmissionController extends AbstractRestController
                 'id' => (string)$file->getSubmitfileid(),
                 'submission_id' => (string)$file->getSubmitid(),
                 'filename' => $file->getFilename(),
-                'source' => base64_encode(stream_get_contents($sourceCode->getSourcecode())),
+                'source' => base64_encode($sourceCode->getSourcecode()),
             ];
         }
         return $result;

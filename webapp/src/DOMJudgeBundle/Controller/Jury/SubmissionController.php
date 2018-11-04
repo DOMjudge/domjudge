@@ -9,6 +9,7 @@ use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
+use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Service\DOMJudgeService;
@@ -16,6 +17,7 @@ use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -457,5 +459,161 @@ class SubmissionController extends Controller
         return $this->redirectToRoute('jury_submission', [
             'submitId' => $submission->getSubmitid(),
         ]);
+    }
+
+    /**
+     * @Route("/submissions/{submission}/source", name="jury_submission_source")
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function sourceAction(Request $request, Submission $submission)
+    {
+        if ($request->query->has('fetch')) {
+            /** @var SubmissionFileWithSourceCode $file */
+            $file = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:SubmissionFileWithSourceCode', 'file')
+                ->select('file')
+                ->andWhere('file.rank = :rank')
+                ->andWhere('file.submission = :submission')
+                ->setParameter(':rank', $request->query->get('fetch'))
+                ->setParameter(':submission', $submission)
+                ->getQuery()
+                ->getOneOrNullResult();
+            if (!$file) {
+                throw new NotFoundHttpException(sprintf('No submission file found with rank %s',
+                                                        $request->query->get('fetch')));
+            }
+            // Download requested
+            $response = new Response();
+            $response->headers->set('Content-Type',
+                                    sprintf('text/plain; name="%s"; charset="utf-8"', $file->getFilename()));
+            $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $file->getFilename()));
+            $response->headers->set('Content-Length', (string)strlen($file->getSourcecode()));
+            $response->setContent($file->getSourcecode());
+
+            return $response;
+        }
+
+        /** @var SubmissionFileWithSourceCode[] $files */
+        $files = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:SubmissionFileWithSourceCode', 'file')
+            ->select('file')
+            ->andWhere('file.submission = :submission')
+            ->setParameter(':submission', $submission)
+            ->orderBy('file.rank')
+            ->getQuery()
+            ->getResult();
+
+        $originalSubmission = $originallFiles = null;
+
+        if ($submission->getOrigsubmitid()) {
+            /** @var Submission $originalSubmission */
+            $originalSubmission = $this->entityManager->getRepository(Submission::class)->find($submission->getOrigsubmitid());
+
+            /** @var SubmissionFileWithSourceCode[] $files */
+            $originallFiles = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:SubmissionFileWithSourceCode', 'file')
+                ->select('file')
+                ->andWhere('file.submission = :submission')
+                ->setParameter(':submission', $originalSubmission)
+                ->orderBy('file.rank')
+                ->getQuery()
+                ->getResult();
+
+            /** @var Submission $oldSubmission */
+            $oldSubmission = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Submission', 's')
+                ->select('s')
+                ->andWhere('s.probid = :probid')
+                ->andWhere('s.langid = :langid')
+                ->andWhere('s.submittime < :submittime')
+                ->andWhere('s.origsubmitid = :origsubmitid')
+                ->setParameter(':probid', $submission->getProbid())
+                ->setParameter(':langid', $submission->getLangid())
+                ->setParameter(':submittime', $submission->getSubmittime())
+                ->setParameter(':origsubmitid', $submission->getOrigsubmitid())
+                ->orderBy('s.submittime', 'DESC')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+        } else {
+            $oldSubmission = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Submission', 's')
+                ->select('s')
+                ->andWhere('s.teamid = :teamid')
+                ->andWhere('s.probid = :probid')
+                ->andWhere('s.langid = :langid')
+                ->andWhere('s.submittime < :submittime')
+                ->setParameter(':teamid', $submission->getTeamid())
+                ->setParameter(':probid', $submission->getProbid())
+                ->setParameter(':langid', $submission->getLangid())
+                ->setParameter(':submittime', $submission->getSubmittime())
+                ->orderBy('s.submittime', 'DESC')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+
+        /** @var SubmissionFileWithSourceCode[] $files */
+        $oldFiles = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:SubmissionFileWithSourceCode', 'file')
+            ->select('file')
+            ->andWhere('file.submission = :submission')
+            ->setParameter(':submission', $oldSubmission)
+            ->orderBy('file.rank')
+            ->getQuery()
+            ->getResult();
+
+        $oldFileStats      = $oldFiles !== null ? $this->determineFileChanged($files, $oldFiles) : [];
+        $originalFileStats = $originallFiles !== null ? $this->determineFileChanged($files, $originallFiles) : [];
+
+        return $this->render('@DOMJudge/jury/submission_source.html.twig', [
+            'submission' => $submission,
+            'files' => $files,
+            'oldSubmission' => $oldSubmission,
+            'oldFiles' => $oldFiles,
+            'oldFileStats' => $oldFileStats,
+            'originalSubmission' => $originalSubmission,
+            'originallFiles' => $originallFiles,
+            'originalFileStats' => $originalFileStats,
+        ]);
+    }
+
+    /**
+     * @param SubmissionFileWithSourceCode[] $files
+     * @param SubmissionFileWithSourceCode[] $oldFiles
+     * @return array
+     */
+    protected function determineFileChanged(array $files, array $oldFiles)
+    {
+        $result = [
+            'added' => [],
+            'removed' => [],
+            'changed' => [],
+            'changedfiles' => [], // These will be shown, so we will add pairs of files here
+            'unchanged' => [],
+        ];
+
+        $newFilenames = [];
+        $oldFilenames = [];
+        foreach ($files as $newfile) {
+            $oldFilenames = [];
+            foreach ($oldFiles as $oldFile) {
+                if ($newfile->getFilename() === $oldFile->getFilename()) {
+                    if ($oldFile->getSourcecode() === $newfile->getSourcecode()) {
+                        $result['unchanged'][] = $newfile->getFilename();
+                    } else {
+                        $result['changed'][] = $newfile->getFilename();
+                        $result['changedfiles'][] = [$newfile, $oldFile];
+                    }
+                }
+                $oldFilenames[] = $oldFile->getFilename();
+            }
+            $newFilenames[] = $newfile->getFilename();
+        }
+
+        $result['added']   = array_diff($newFilenames, $oldFilenames);
+        $result['removed'] = array_diff($oldFilenames, $newFilenames);
+
+        return $result;
     }
 }

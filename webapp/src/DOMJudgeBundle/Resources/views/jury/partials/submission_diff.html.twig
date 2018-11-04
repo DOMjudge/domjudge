@@ -1,0 +1,36 @@
+{% if files | length > 1 or oldFiles | length > 1 %}
+    <table class="table table-sm table-striped file-diff-table">
+        <tr>
+            <th class="diff-add">Files added</th>
+            <td class="filename">{{ oldFileStats.added | join(', ') }}</td>
+        </tr>
+        <tr>
+            <th class="diff-del">Files removed</th>
+            <td class="filename">{{ oldFileStats.removed | join(', ') }}</td>
+        </tr>
+        <tr>
+            <th class="diff-changed">Files changed</th>
+            <td class="filename">{{ oldFileStats.changed | join(', ') }}</td>
+        </tr>
+        <tr>
+            <th>Files unchanged</th>
+            <td class="filename">{{ oldFileStats.unchanged | join(', ') }}</td>
+        </tr>
+    </table>
+{% endif %}
+<ul class="nav nav-tabs source-tab-nav">
+    {% for filePair in oldFileStats.changedfiles %}
+        <li class="nav-item">
+            <a class="nav-link {% if loop.first %}active{% endif %}" data-toggle="tab"
+               href="#diff-{{ filePair.1.submitfileid }}" role="tab">{{ filePair.0.filename }}</a>
+        </li>
+    {% endfor %}
+</ul>
+<div class="tab-content source-tab">
+    {% for filePair in oldFileStats.changedfiles %}
+        <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="diff-{{ filePair.1.submitfileid }}"
+             role="tabpanel">
+            <pre class="output_text">{{ filePair.0 | showDiff(filePair.1) }}</pre>
+        </div>
+    {% endfor %}
+</div>
