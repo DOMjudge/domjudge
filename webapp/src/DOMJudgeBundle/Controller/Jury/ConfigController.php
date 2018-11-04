@@ -50,7 +50,42 @@ class ConfigController extends Controller
     {
         /** @var Configuration[] */
         $options = $this->entityManager->getRepository('DOMJudgeBundle:Configuration')->findAll();
-        dump($options);
+        if ($request->getMethod() == 'POST' && $request->request->has('save')) {
+            foreach ($options as $option) {
+                if ($option->getType() == 'bool') {
+                    $val = $request->request->has('config_' . $option->getName());
+                    $option->setValue($val);
+                    continue;
+                }
+                if (!$request->request->has('config_' . $option->getName())) {
+                    continue;
+                }
+                if ($option->getType() == 'int' || $option->getType() == 'string') {
+                    $option->setValue($request->request->get('config_' . $option->getName()));
+                } else if ($option->getType() == 'array_val') {
+                    $vals = $request->request->get('config_' . $option->getName());
+                    $result = array();
+                    foreach ($vals as $data) {
+                        if (!empty($data)) {
+                            $result[] = $data;
+                        }
+                    }
+                    $option->setValue($result);
+                } else if ($option->getType() == 'array_keyval') {
+                    $vals = $request->request->get('config_' . $option->getName());
+                    $result = array();
+                    foreach ($vals as $data) {
+                        if (!empty($data['key'])) {
+                            $result[$data['key']] = $data['val'];
+                        }
+                    }
+                    $option->setValue($result);
+                }
+            }
+        }
+        $this->entityManager->flush();
+        /** @var Configuration[] */
+        $options = $this->entityManager->getRepository('DOMJudgeBundle:Configuration')->findAll();
         $categories = array();
         foreach ($options as $option) {
             if (!in_array($option->getCategory(), $categories)) {
