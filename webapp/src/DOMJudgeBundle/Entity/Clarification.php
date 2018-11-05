@@ -651,6 +651,6 @@ class Clarification implements ExternalRelationshipEntityInterface
                 $newBody .= $line . ' ';
             }
         }
-        return Utils::specialchars(Utils::cutString((empty($newBody) ? $this->getBody() : $newBody), 80));
+        return Utils::cutString((empty($newBody) ? $this->getBody() : $newBody), 80);
     }
 }

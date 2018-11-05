@@ -57,7 +57,7 @@
                     </a>
                 </td>
             {% endif %}
-            <td><a href="{{ link }}">{{ clarification.summary | raw }}</a></td>
+            <td><a href="{{ link }}">{{ clarification.summary }}</a></td>
             {% set claim = false %}
             {% if clarification.answered %}
                 {% set answered = 'yes' %}
