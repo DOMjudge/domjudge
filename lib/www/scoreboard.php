@@ -855,6 +855,8 @@ function putTeamRow(array $cdata, array $teamids)
             return;
         }
         $sdata      = convertScoreboard($scoreboard);
+        // Workaround wrong rank for newly added teams.
+        $sdata['scores'][$teamids[0]]['rank'] = $scoreboard->getTeamRank();
     } else {
         // Otherwise, calculate scoreboard as jury to display non-visible teams
         $sdata = genScoreBoard($cdata, true);

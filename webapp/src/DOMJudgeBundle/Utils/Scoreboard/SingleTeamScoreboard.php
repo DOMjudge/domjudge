@@ -69,6 +69,10 @@ class SingleTeamScoreboard extends Scoreboard
         parent::__construct([$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, $jury, $penaltyTime, $scoreIsInSecods);
     }
 
+    public function getTeamRank() {
+        return $this->teamRank;
+    }
+
     /**
      * @inheritdoc
      */
