@@ -98,6 +98,17 @@ class Configuration
      */
     public function setValue($value)
     {
+        // Do not use 'True'/'False' but 1/0 since the former cannot be parsed by the old code.
+        if ($this->type == 'bool') {
+            if ($value === TRUE) {
+                $value = 1;
+            } elseif ($value === FALSE) {
+                $value = 0;
+            }
+        } elseif ($this->type == 'int') {
+            $value = (int) $value;
+        }
+
         $this->value = $value;
 
         return $this;
