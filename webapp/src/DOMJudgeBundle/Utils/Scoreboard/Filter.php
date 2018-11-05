@@ -31,8 +31,12 @@ class Filter
      * @param int[] $categories
      * @param int[] $teams
      */
-    public function __construct(array $affiliations = [], array $countries = [], array $categories = [], array $teams = [])
-    {
+    public function __construct(
+        array $affiliations = [],
+        array $countries = [],
+        array $categories = [],
+        array $teams = []
+    ) {
         $this->affiliations = $affiliations;
         $this->countries    = $countries;
         $this->categories   = $categories;
@@ -101,5 +105,32 @@ class Filter
     public function setTeams(array $teams)
     {
         $this->teams = $teams;
+    }
+
+    /**
+     * Get a string to display on what has been filtered
+     * @return string
+     */
+    public function getFilteredOn(): string
+    {
+        $filteredOn = [];
+        if ($this->affiliations) {
+            $filteredOn[] = 'affiliations';
+        }
+        if ($this->countries) {
+            $filteredOn[] = 'countries';
+        }
+        if ($this->categories) {
+            $filteredOn[] = 'categories';
+        }
+        if ($this->teams) {
+            $filteredOn[] = 'teams';
+        }
+
+        if (empty($filteredOn)) {
+            return '';
+        }
+
+        return implode(', ', $filteredOn);
     }
 }

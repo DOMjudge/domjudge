@@ -53,6 +53,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
     {
         return [
             new TwigFunction('button', [$this, 'button'], ['is_safe' => ['html']]),
+            new TwigFunction('calculatePenaltyTime', [$this, 'calculatePenaltyTime']),
         ];
     }
 
@@ -75,6 +76,10 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('runDiff', [$this, 'runDiff'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('codeEditor', [$this, 'codeEditor'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('showDiff', [$this, 'showDiff'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFilter('printContestStart', [$this, 'printContestStart']),
+            new \Twig_SimpleFilter('assetExists', [$this, 'assetExists']),
+            new \Twig_SimpleFilter('printTimeRelative', [$this, 'printTimeRelative']),
+            new \Twig_SimpleFilter('scoreTime', [$this, 'scoreTime']),
         ];
     }
 
@@ -136,6 +141,9 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
      */
     public function printtime($datetime, string $format = null, Contest $contest = null): string
     {
+        if ($datetime === null) {
+            $datetime = Utils::now();
+        }
         if ($contest !== null && $this->domjudge->dbconfig_get('show_relative_time', false)) {
             $relativeTime = $contest->getContestTime((float)$datetime);
             $sign         = ($relativeTime < 0 ? -1 : 1);
@@ -624,5 +632,98 @@ JS;
         );
 
         return $this->parseSourceDiff($difftext);
+    }
+
+    /**
+     * Print the start time of the given contest
+     * @param Contest $contest
+     * @return string
+     * @throws \Exception
+     */
+    public function printContestStart(Contest $contest): string
+    {
+        $res = "scheduled to start ";
+        if (!$contest->getStarttimeEnabled()) {
+            $res = "start delayed, was scheduled ";
+        }
+        if ($this->printtime(Utils::now(), '%Y%m%d') == $this->printtime($contest->getStarttime(), '%Y%m%d')) {
+            // Today
+            $res .= "at " . $this->printtime($contest->getStarttime());
+        } else {
+            // Print full date
+            $res .= "on " . $this->printtime($contest->getStarttime(), '%a %d %b %Y %T %Z');
+        }
+        return $res;
+    }
+
+    /**
+     * Determine whether the given asset exists
+     * @param string $asset
+     * @return bool
+     */
+    public function assetExists(string $asset): bool
+    {
+        $webDir = realpath(sprintf('%s/../web', $this->kernel->getRootDir()));
+        return is_readable($webDir . '/' . $asset);
+    }
+
+    /**
+     * Print the relative time in h:mm:ss[.uuuuuu] format.
+     * @param float $relativeTime
+     * @param bool  $useMicroseconds
+     * @return string
+     */
+    public function printTimeRelative(float $relativeTime, bool $useMicroseconds = false): string
+    {
+        $sign         = $relativeTime < 0 ? '-' : '';
+        $relativeTime = abs($relativeTime);
+        $fracString   = '';
+
+        if ($useMicroseconds) {
+            $fracString   = explode('.', sprintf('%.6f', $relativeTime))[1];
+            $relativeTime = (int)floor($relativeTime);
+        } else {
+            // For negative times we still want to floor, but we've
+            // already removed the sign, so take ceil() if negative.
+            $relativeTime = (int)($sign == '-' ? ceil($relativeTime) : floor($relativeTime));
+        }
+
+        $h            = (int)floor($relativeTime / 3600);
+        $relativeTime %= 3600;
+
+        $m            = (int)floor($relativeTime / 60);
+        $relativeTime %= 60;
+
+        $s = (int)$relativeTime;
+
+        if ($useMicroseconds) {
+            $s .= '.' . $fracString;
+        }
+
+        return sprintf($sign . '%01d:%02d:%02d' . $fracString, $h, $m, $s);
+    }
+
+    /**
+     * Display the scoretime for the given time
+     * @param string|float $time
+     * @return int
+     * @throws \Exception
+     */
+    public function scoreTime($time)
+    {
+        return Utils::scoretime($time, (bool)$this->domjudge->dbconfig_get('score_in_seconds', false));
+    }
+
+    /**
+     * Calculate the penalty time for the given data
+     * @param bool $solved
+     * @param int  $num_submissions
+     * @return int
+     * @throws \Exception
+     */
+    public function calculatePenaltyTime(bool $solved, int $num_submissions)
+    {
+        return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->domjudge->dbconfig_get('penalty_time', 20),
+                                      (bool)$this->domjudge->dbconfig_get('score_in_seconds', false));
     }
 }

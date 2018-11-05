@@ -48,7 +48,7 @@
 
       {% if is_granted('ROLE_JURY') %}
         <li class="nav-item">
-          <a class="nav-link" href="{{ path('legacy.jury_scoreboard') }}"><i class="fas fa-list-ol"></i> scoreboard</a>
+          <a class="nav-link" href="{{ path('jury_scoreboard') }}"><i class="fas fa-list-ol"></i> scoreboard</a>
         </li>
       {% endif %}
       {% if is_granted('ROLE_TEAM') %}

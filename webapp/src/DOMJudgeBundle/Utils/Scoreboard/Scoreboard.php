@@ -2,6 +2,7 @@
 
 namespace DOMJudgeBundle\Utils\Scoreboard;
 
+use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\ScoreCache;
 use DOMJudgeBundle\Entity\Team;
@@ -18,6 +19,11 @@ use DOMJudgeBundle\Utils\Utils;
  */
 class Scoreboard
 {
+    /**
+     * @var Contest
+     */
+    protected $contest;
+
     /**
      * @var Team[]
      */
@@ -74,17 +80,24 @@ class Scoreboard
     protected $scores = [];
 
     /**
+     * @var array
+     */
+    protected $bestInCategoryData = null;
+
+    /**
      * Scoreboard constructor.
-     * @param Team[] $teams
-     * @param TeamCategory[] $categories
+     * @param Contest          $contest
+     * @param Team[]           $teams
+     * @param TeamCategory[]   $categories
      * @param ContestProblem[] $problems
-     * @param ScoreCache[] $scoreCache
-     * @param FreezeData $freezeData
-     * @param bool $jury
-     * @param int $penaltyTime
-     * @param bool $scoreIsInSecods
+     * @param ScoreCache[]     $scoreCache
+     * @param FreezeData       $freezeData
+     * @param bool             $jury
+     * @param int              $penaltyTime
+     * @param bool             $scoreIsInSecods
      */
     public function __construct(
+        Contest $contest,
         array $teams,
         array $categories,
         array $problems,
@@ -94,6 +107,7 @@ class Scoreboard
         int $penaltyTime,
         bool $scoreIsInSecods
     ) {
+        $this->contest         = $contest;
         $this->teams           = $teams;
         $this->categories      = $categories;
         $this->problems        = $problems;
@@ -156,6 +170,34 @@ class Scoreboard
     }
 
     /**
+     * @return FreezeData
+     */
+    public function getFreezeData(): FreezeData
+    {
+        return $this->freezeData;
+    }
+
+    /**
+     * Get the progress of this scoreboard
+     * @return int
+     */
+    public function getProgress()
+    {
+        $now = Utils::now();
+        if (!$this->freezeData->started()) {
+            return -1;
+        }
+        $left = Utils::difftime((float)$this->contest->getEndtime(), $now);
+        if ($left <= 0) {
+            return 100;
+        }
+
+        $passed   = Utils::difftime((float)$this->contest->getStarttime(), $now);
+        $duration = Utils::difftime((float)$this->contest->getStarttime(), (float)$this->contest->getEndtime());
+        return (int)($passed * 100. / $duration);
+    }
+
+    /**
      * Initialize the scoreboard data
      */
     protected function initializeScoreboard()
@@ -180,7 +222,8 @@ class Scoreboard
         foreach ($this->scoreCache as $scoreRow) {
             // Skip this row if the team or problem is not known by us
             if (!array_key_exists($scoreRow->getTeam()->getTeamid(),
-                                  $this->teams) || !array_key_exists($scoreRow->getProblem()->getProbid(), $this->problems)) {
+                                  $this->teams) || !array_key_exists($scoreRow->getProblem()->getProbid(),
+                                                                     $this->problems)) {
                 continue;
             }
 
@@ -256,7 +299,8 @@ class Scoreboard
                 $problemSummary->addNumberOfPendingSubmissions($problemMatrixItem->getNumberOfPendingSubmissions());
                 $problemSummary->addNumberOfCorrectSubmissions($problemMatrixItem->isCorrect() ? 1 : 0);
                 if ($problemMatrixItem->isCorrect()) {
-                    $problemSummary->updateBestTime($teamScore->getTeam()->getCategory()->getSortorder(), $problemMatrixItem->getTime());
+                    $problemSummary->updateBestTime($teamScore->getTeam()->getCategory()->getSortorder(),
+                                                    $problemMatrixItem->getTime());
                 }
             }
         }
@@ -339,5 +383,111 @@ class Scoreboard
             }
         }
         return 0;
+    }
+
+    /**
+     * Return whether to show points for this scoreboard
+     * @return bool
+     */
+    public function showPoints(): bool
+    {
+        foreach ($this->problems as $problem) {
+            if ($problem->getPoints() != 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Return the used team categories for this scoreboard
+     * @param array|null $limitToTeamIds
+     * @return TeamCategory[]
+     */
+    public function getUsedCategories(array $limitToTeamIds = null)
+    {
+        $usedCategories = [];
+        foreach ($this->scores as $score) {
+            // skip if we have limitteams and the team is not listed
+            if (!empty($limitToTeamIds) && !in_array($score->getTeam()->getTeamid(), $limitToTeamIds)) {
+                continue;
+            }
+
+            if ($score->getTeam()->getCategory()) {
+                $category                                   = $score->getTeam()->getCategory();
+                $usedCategories[$category->getCategoryid()] = $category;
+            }
+        }
+
+        return $usedCategories;
+    }
+
+    /**
+     * Return whether this scoreboard has category colors
+     * @return bool
+     */
+    public function hasCategoryColors(): bool
+    {
+        foreach ($this->scores as $score) {
+            if ($score->getTeam()->getCategory() && $score->getTeam()->getCategory()->getColor()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine whether this team is the best in the given category
+     * @param Team       $team
+     * @param array|null $limitToTeamIds
+     * @return bool
+     */
+    public function isBestInCategory(Team $team, array $limitToTeamIds = null): bool
+    {
+        if ($this->bestInCategoryData === null) {
+            $this->bestInCategoryData = [];
+            foreach ($this->scores as $score) {
+                // skip if we have limitteams and the team is not listed
+                if (!empty($limitToTeamIds) && !in_array($score->getTeam()->getTeamid(), $limitToTeamIds)) {
+                    continue;
+                }
+
+                $categoryId = $score->getTeam()->getCategoryid();
+                if (!isset($this->bestInCategoryData[$categoryId])) {
+                    $this->bestInCategoryData[$categoryId] = $score->getTeam()->getTeamid();
+                }
+            }
+        }
+
+        $categoryId = $team->getCategoryid();
+        // Only check the scores when the team has points
+        if ($this->scores[$team->getTeamid()]->getNumberOfPoints()) {
+            // If the rank of this team is equal to the best team for this category, this team is best in that category
+            return $this->scores[$this->bestInCategoryData[$categoryId]]->getRank() ===
+                $this->scores[$team->getTeamid()]->getRank();
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine whether this team solved this problem first
+     * @param Team           $team
+     * @param ContestProblem $problem
+     * @return bool
+     */
+    public function solvedFirst(Team $team, ContestProblem $problem): bool
+    {
+        $teamTime       = $this->matrix[$team->getTeamid()][$problem->getProbid()]->getTime();
+        $sortOrder      = $team->getCategory()->getSortorder();
+        $problemSummary = $this->summary->getProblem($problem->getProbid());
+        if ($problemSummary === null) {
+            return false;
+        }
+        $problemTime = $this->summary->getProblem($problem->getProbid())->getBestTimes()[$sortOrder];
+        $eps         = 0.0000001;
+        return $teamTime - $eps <= $problemTime;
     }
 }

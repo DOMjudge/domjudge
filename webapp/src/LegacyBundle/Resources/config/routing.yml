@@ -1,5 +1,11 @@
 legacy.index:
     path: /
+legacy.public:
+    path: /public/
+legacy.public_problem:
+    path: /public/problem.php
+legacy.public_team:
+    path: /public/team.php
 legacy.jury_team:
     path: /jury/team.php
 legacy.jury_problem:
@@ -7,17 +13,17 @@ legacy.jury_problem:
 legacy.jury_export_problem:
     path: /jury/export_problem.php
 legacy.jury_balloons:
-  path: /jury/balloons.php
+    path: /jury/balloons.php
 legacy.jury_judgehosts:
-  path: /jury/judgehosts.php
+    path: /jury/judgehosts.php
 legacy.jury_judgehost:
-  path: /jury/judgehost.php
+    path: /jury/judgehost.php
 legacy.jury_internal_errors:
-  path: /jury/internal_errors.php
+    path: /jury/internal_errors.php
 legacy.jury_judgehost_restrictions:
-  path: /jury/judgehost_restrictions.php
+    path: /jury/judgehost_restrictions.php
 legacy.jury_clarification:
-  path: /jury/clarification.php
+    path: /jury/clarification.php
 legacy.jury_language:
     path: /jury/language.php
 legacy.jury_rejudge:
@@ -26,12 +32,14 @@ legacy.jury_rejudgings:
     path: /jury/rejudgings.php
 legacy.jury_rejudging:
     path: /jury/rejudging.php
-legacy.jury_scoreboard:
-    path: /jury/scoreboard.php
 legacy.team_index:
     path: /team/
+legacy.team_problem:
+    path: /team/problem.php
+legacy.team_team:
+    path: /team/team.php
 legacy.jury_contest:
-  path: /jury/contest.php
+    path: /jury/contest.php
 legacy.jury_executable:
     path: /jury/executable.php
 legacy.jury_finalize:
@@ -73,8 +81,8 @@ legacy.jury_team_output:
     path: /jury/team_output.php
 
 legacy.jury_ajax_problems:
-  path: /jury/ajax_problems.php
+    path: /jury/ajax_problems.php
 legacy.jury_ajax_teams:
-  path: /jury/ajax_teams.php
+    path: /jury/ajax_teams.php
 legacy.jury_ajax_languages:
-  path: /jury/ajax_languages.php
+    path: /jury/ajax_languages.php

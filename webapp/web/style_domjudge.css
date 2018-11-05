@@ -95,3 +95,134 @@ del {
     border-left: 1px solid #dee2e6;
     padding: 0.5rem;
 }
+
+#lastmod {
+    position: absolute; right: 1ex; margin-top: 1em;
+}
+#lastmod, #lastmod a {
+    font-size: x-small;
+    color: gray;
+    text-align: right;
+}
+
+.center { margin: 0px auto; }
+
+.scoreboard {
+    border-collapse: collapse;
+    clear: both;
+}
+.scoreboard td {
+    font-size: small;
+    vertical-align: middle;
+    text-align: center;
+}
+.scoreboard td div {
+    width: 4em;
+    font-size: 120%;
+    display: inline-block;
+}
+.scoreboard td div span {
+    font-weight: normal;
+    font-size: 70%;
+    display: block;
+}
+.scoreboard tr {
+    border-bottom: 1px solid black;
+    height: 42px;
+}
+.scoreboard td, .scoreboard th {
+    border-right: 1px solid silver;
+}
+.scoreboard td.score_cell {
+    min-width: 4.2em;
+    border-right: none;
+}
+.scoreboard a {
+    display: block;
+    padding: 2px 1px 2px 1px;
+    text-decoration: none;
+    color: black;
+}
+
+.scoreboard .scoretn {
+    padding: 0px 5px 0px;
+    text-align: right;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.scoreboard .scoreaf { white-space: nowrap; border: 0; text-align: center; }
+.scoreboard .scoreaf img { vertical-align: middle; }
+.univ {
+    font-size: 80%;
+    font-weight: normal;
+    color: dimgrey;
+}
+
+.scoreheader {
+    font-variant: small-caps;
+    border-bottom: 2px solid black;
+    white-space: nowrap;
+}
+.scoreheader th {
+    text-align: center;
+}
+
+.problempoints {
+    font-size: smaller;
+    font-weight: normal;
+    color: #303030;
+    padding-left: 3pt;
+    padding-right: 3pt;
+}
+
+.score_correct   { background: #60e760; }
+.score_first     { background: #1daa1d !important; }
+.score_pending   { background: #6666FF; }
+.score_incorrect { background: #e87272; }
+
+#scoresolv,#scoretotal { width: 2.5em; }
+.scorenc,.scorett,.scorepl { text-align: center; width: 2ex; }
+.scorenc { font-weight: bold; }
+td.scorenc { border-color: silver; border-right: 0; }
+
+.scoreprob { width: 3.0em; vertical-align: middle; }
+.scoreaffil { text-align: center; }
+
+#scoresummary {
+    border-top: 2px solid black;
+    border-bottom: none;
+    font-variant: small-caps;
+}
+.scorethisisme  {
+    background: #ffff99;
+}
+
+.scorelegend {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.scorelegend td, .scorelegend th {
+    text-align: center;
+    width: 25ex;
+}
+
+#teamscoresummary { margin-top: 2.5em; }
+
+/* between different sortorder-categories, print a thick line */
+.sortorderswitch { border-top: 2px solid black; }
+
+.circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: solid 1px black;
+    display: inline-block;
+}
+
+.heart {
+    padding: .3em;
+    cursor: pointer;
+}

@@ -81,7 +81,20 @@ class ProblemSummary
     }
 
     /**
+     * Get the best time in minutes for the given sortorder
      * @param int $sortorder
+     * @return int|null
+     */
+    public function getBestTimeInMinutes(int $sortorder)
+    {
+        if (isset($this->bestTimes[$sortorder])) {
+            return ((int)($this->bestTimes[$sortorder] / 60));
+        }
+        return null;
+    }
+
+    /**
+     * @param int   $sortorder
      * @param float $bestTime
      */
     public function updateBestTime(int $sortorder, $bestTime)

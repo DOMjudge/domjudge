@@ -12,6 +12,7 @@ use DOMJudgeBundle\Entity\RankCache;
 use DOMJudgeBundle\Entity\ScoreCache;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Entity\TeamAffiliation;
 use DOMJudgeBundle\Entity\TeamCategory;
 use DOMJudgeBundle\Utils\FreezeData;
 use DOMJudgeBundle\Utils\Scoreboard\Filter;
@@ -20,6 +21,8 @@ use DOMJudgeBundle\Utils\Scoreboard\SingleTeamScoreboard;
 use DOMJudgeBundle\Utils\Scoreboard\TeamScore;
 use DOMJudgeBundle\Utils\Utils;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class ScoreboardService
@@ -89,7 +92,7 @@ class ScoreboardService
         $categories = $this->getCategories($jury && !$visibleOnly);
         $scoreCache = $this->getScorecache($contest);
 
-        return new Scoreboard($teams, $categories, $problems, $scoreCache, $freezeData, $jury,
+        return new Scoreboard($contest, $teams, $categories, $problems, $scoreCache, $freezeData, $jury,
                               (int)$this->DOMJudgeService->dbconfig_get('penalty_time', 20),
                               (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false));
     }
@@ -127,7 +130,8 @@ class ScoreboardService
             $teamRank = 0;
         }
 
-        return new SingleTeamScoreboard($team, $teamRank, $problems, $rankCache, $scoreCache, $freezeData, $jury,
+        return new SingleTeamScoreboard($contest, $team, $teamRank, $problems, $rankCache, $scoreCache, $freezeData,
+                                        $jury,
                                         (int)$this->DOMJudgeService->dbconfig_get('penalty_time', 20),
                                         (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false));
     }
@@ -476,6 +480,144 @@ class ScoreboardService
                                                                [':lock' => $lockString]) != 1) {
             throw new \Exception('ScoreboardService::updateRankCache failed to release lock');
         }
+    }
+
+    /**
+     * Initialize the scoreboard filter for the given request
+     * @param Request       $request
+     * @param Response|null $response
+     * @return Filter
+     */
+    public function initializeScoreboardFilter(Request $request, Response $response)
+    {
+        $scoreFilter = [];
+        if ($this->DOMJudgeService->getCookie('domjudge_scorefilter')) {
+            $scoreFilter = $this->DOMJudgeService->jsonDecode((string)$this->DOMJudgeService->getCookie('domjudge_scorefilter'));
+        }
+
+        if ($request->query->has('clear')) {
+            $scoreFilter = [];
+        }
+
+        if ($request->query->has('filter')) {
+            $scoreFilter = [];
+            foreach (['affiliations', 'countries', 'categories'] as $type) {
+                if ($request->query->has($type)) {
+                    $scoreFilter[$type] = $request->query->get($type);
+                }
+            }
+        }
+
+        $this->DOMJudgeService->setCookie('domjudge_scorefilter',
+                                          $this->DOMJudgeService->jsonEncode($scoreFilter), 0, null, '', false,
+                                          false, $response);
+
+        return new Filter($scoreFilter['affiliations'] ?? [], $scoreFilter['countries'] ?? [],
+                          $scoreFilter['categories'] ?? [], $scoreFilter['teams'] ?? []);
+    }
+
+    /**
+     * Get a list of affiliation names grouped on category name
+     * @param Contest $contest
+     * @return array
+     */
+    public function getGroupedAffiliations(Contest $contest)
+    {
+        $queryBuilder = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:TeamCategory', 'cat')
+            ->select('cat', 't', 'affil')
+            ->leftJoin('cat.teams', 't')
+            ->leftJoin('t.affiliation', 'affil')
+            ->andWhere('cat.visible = 1')
+            ->orderBy('cat.name')
+            ->addOrderBy('affil.name');
+
+        if (!$contest->getPublic()) {
+            $queryBuilder
+                ->andWhere('t.contests IN (:contest)')
+                ->setParameter(':contest', $contest);
+        }
+
+        /** @var TeamCategory[] $categories */
+        $categories = $queryBuilder->getQuery()->getResult();
+
+        $groupedAffiliations = [];
+        foreach ($categories as $category) {
+            $affiliations = [];
+            /** @var Team $team */
+            foreach ($category->getTeams() as $team) {
+                $affiliations[$team->getAffiliation()->getName()] = $team->getAffiliation()->getName();
+            }
+
+            if (!empty($affiliations)) {
+                $groupedAffiliations[$category->getName()] = array_values($affiliations);
+            }
+        }
+
+        return array_chunk($groupedAffiliations, 3, true);
+    }
+
+    /**
+     * Get values to display in the scoreboard filter
+     * @param Contest $contest
+     * @param bool    $jury
+     * @return array
+     * @throws \Exception
+     */
+    public function getFilterValues(Contest $contest, bool $jury): array
+    {
+        $filters          = [
+            'affiliations' => [],
+            'countries' => [],
+            'categories' => [],
+        ];
+        $showFlags        = $this->DOMJudgeService->dbconfig_get('show_flags', true);
+        $showAffiliations = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
+
+        $queryBuilder = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:TeamCategory', 'c')
+            ->select('c');
+        if (!$jury) {
+            $queryBuilder->andWhere('c.visible = 1');
+        }
+
+        /** @var TeamCategory[] $categories */
+        $categories = $queryBuilder->getQuery()->getResult();
+        foreach ($categories as $category) {
+            $filters['categories'][$category->getCategoryid()] = $category->getName();
+        }
+
+        // show only affiliations / countries with visible teams
+        if (empty($categories) || !$showAffiliations) {
+            $filters['affiliations'] = [];
+        } else {
+            $queryBuilder = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:TeamAffiliation', 'a')
+                ->select('a')
+                ->join('a.teams', 't')
+                ->andWhere('t.category IN (:categories)')
+                ->setParameter(':categories', $categories);
+            if (!$contest->getPublic()) {
+                $queryBuilder
+                    ->andWhere('t.contests IN (:contest)')
+                    ->setParameter(':contest', $contest);
+            }
+
+            /** @var TeamAffiliation[] $affiliations */
+            $affiliations = $queryBuilder->getQuery()->getResult();
+            foreach ($affiliations as $affiliation) {
+                $filters['affiliations'][$affiliation->getAffilid()] = $affiliation->getName();
+                if ($showFlags && $affiliation->getCountry() !== null) {
+                    $filters['countries'][] = $affiliation->getCountry();
+                }
+            }
+        }
+
+        $filters['countries'] = array_unique($filters['countries']);
+        sort($filters['countries']);
+        asort($filters['affiliations'], SORT_FLAG_CASE);
+
+        return $filters;
     }
 
     /**

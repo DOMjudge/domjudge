@@ -36,7 +36,7 @@
                     {% endif %}
                     {% if is_granted('ROLE_JURY') %}
                         <li><a href="{{ path('legacy.jury_rejudgings') }}">Rejudgings</a></li>
-                        <li><a href="{{ path('legacy.jury_scoreboard') }}">Scoreboard</a></li>
+                        <li><a href="{{ path('jury_scoreboard') }}">Scoreboard</a></li>
                         <li><a href="{{ path('analysis_index') }}">Statistics/Analysis</a></li>
                         <li><a href="{{ path('jury_submissions') }}">Submissions</a></li>
                     {% endif %}

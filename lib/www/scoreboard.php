@@ -47,7 +47,7 @@ function genScoreBoard(array $cdata, bool $jury = false, $filter = null, bool $v
     global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
     $contest      = $G_SYMFONY->getContest($cdata['cid']);
     $filterObject = new \DOMJudgeBundle\Utils\Scoreboard\Filter(
-        $filter['country'] ?? [],
+        $filter['affilid'] ?? [],
         $filter['country'] ?? [],
         $filter['categoryid'] ?? [],
         $filter['teams'] ?? []

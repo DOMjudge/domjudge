@@ -2,6 +2,7 @@
 
 namespace DOMJudgeBundle\Utils\Scoreboard;
 
+use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\RankCache;
 use DOMJudgeBundle\Entity\ScoreCache;
@@ -12,8 +13,8 @@ use DOMJudgeBundle\Utils\Utils;
 /**
  * Class SingleTeamScoreboard
  *
- * This class represents the scoreboard for a single team. It exists because we can do some smart things to speed up calculating
- * data for a single team
+ * This class represents the scoreboard for a single team. It exists because we can do some smart things to speed up
+ * calculating data for a single team
  *
  * @package DOMJudgeBundle\Utils\Scoreboard
  */
@@ -41,17 +42,19 @@ class SingleTeamScoreboard extends Scoreboard
 
     /**
      * SingleTeamScoreboard constructor.
-     * @param Team $team
-     * @param int $teamRank
+     * @param Contest          $contest
+     * @param Team             $team
+     * @param int              $teamRank
      * @param ContestProblem[] $problems
-     * @param RankCache|null $rankCache
-     * @param ScoreCache[] $scoreCache
-     * @param FreezeData $freezeData
-     * @param bool $jury
-     * @param int $penaltyTime
-     * @param bool $scoreIsInSecods
+     * @param RankCache|null   $rankCache
+     * @param ScoreCache[]     $scoreCache
+     * @param FreezeData       $freezeData
+     * @param bool             $jury
+     * @param int              $penaltyTime
+     * @param bool             $scoreIsInSecods
      */
     public function __construct(
+        Contest $contest,
         Team $team,
         int $teamRank,
         array $problems,
@@ -66,7 +69,8 @@ class SingleTeamScoreboard extends Scoreboard
         $this->teamRank  = $teamRank;
         $this->rankCache = $rankCache;
         $this->jury      = $jury;
-        parent::__construct([$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, $jury, $penaltyTime, $scoreIsInSecods);
+        parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, $jury,
+                            $penaltyTime, $scoreIsInSecods);
     }
 
     public function getTeamRank() {

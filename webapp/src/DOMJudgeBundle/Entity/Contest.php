@@ -1303,4 +1303,13 @@ class Contest
         }
         return $result;
     }
+
+    /**
+     * Get the number of remaining minutes for this contest
+     * @return int
+     */
+    public function getMinutesRemaining(): int
+    {
+        return (int)floor(($this->getEndtime() - $this->getFreezetime()) / 60);
+    }
 }

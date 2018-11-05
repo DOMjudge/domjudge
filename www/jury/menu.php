@@ -67,7 +67,7 @@ global $updates;
     } ?>
 <?php if (checkrole('jury')) {
         ?>
-<a href="scoreboard.php" accesskey="b"><i class="fas fa-list-ol"></i> scoreboard</a>
+<a href="scoreboard" accesskey="b"><i class="fas fa-list-ol"></i> scoreboard</a>
 <?php
     } ?>
 <?php
