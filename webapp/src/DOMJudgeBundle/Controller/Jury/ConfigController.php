@@ -50,7 +50,9 @@ class ConfigController extends Controller
     {
         /** @var Configuration[] */
         $options = $this->entityManager->getRepository('DOMJudgeBundle:Configuration')->findAll();
+        $edited = FALSE;
         if ($request->getMethod() == 'POST' && $request->request->has('save')) {
+            $edited = TRUE;
             foreach ($options as $option) {
                 if ($option->getType() == 'bool') {
                     $val = $request->request->has('config_' . $option->getName());
@@ -113,6 +115,7 @@ class ConfigController extends Controller
         }
         return $this->render('@DOMJudge/jury/config.html.twig', [
             'options' => $all_data,
+            'edited' => $edited
         ]);
     }
 }
