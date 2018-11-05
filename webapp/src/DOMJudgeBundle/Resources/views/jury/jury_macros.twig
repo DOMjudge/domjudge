@@ -9,10 +9,13 @@
     </script>
 {% endmacro %}
 
-{% macro table_extrahead() %}
+{% macro toggle_extrahead() %}
     <link rel="stylesheet" href="{{ asset('css/bootstrap-toggle.min.css') }}" type="text/css"/>
-    <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap4.min.css') }}" type="text/css"/>
     <script type="text/javascript" src="{{ asset('js/bootstrap-toggle.min.js') }}"></script>
+{% endmacro %}
+
+{% macro table_extrahead() %}
+    <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap4.min.css') }}" type="text/css"/>
     <script type="text/javascript" src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/dataTables.bootstrap4.min.js') }}"></script>
     <style>
