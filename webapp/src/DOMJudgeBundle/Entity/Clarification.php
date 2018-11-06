@@ -90,6 +90,13 @@ class Clarification implements ExternalRelationshipEntityInterface
 
     /**
      * @var string
+     * @ORM\Column(type="string", name="queue", length=255, options={"comment"="Queue associated to this clarification"}, nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $queue;
+
+    /**
+     * @var string
      * @ORM\Column(type="text", length=4294967295, name="body", options={"comment"="Team member names (freeform)"}, nullable=true)
      * @Serializer\SerializedName("text")
      */
@@ -416,6 +423,30 @@ class Clarification implements ExternalRelationshipEntityInterface
     public function getCategory()
     {
         return $this->category;
+    }
+
+    /**
+     * Set queue
+     *
+     * @param string $queue
+     *
+     * @return Clarification
+     */
+    public function setQueue($queue)
+    {
+        $this->queue = $queue;
+
+        return $this;
+    }
+
+    /**
+     * Get queue
+     *
+     * @return string
+     */
+    public function getQueue()
+    {
+        return $this->queue;
     }
 
     /**
