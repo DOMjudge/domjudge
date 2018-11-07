@@ -850,7 +850,7 @@ function putTeamRow(array $cdata, array $teamids)
         /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
         global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
         $contest    = $G_SYMFONY->getContest($cdata['cid']);
-        $scoreboard = $G_SCOREBOARD_SERVICE->getTeamScoreboard($contest, (int)reset($teamids), IS_JURY);
+        $scoreboard = $G_SCOREBOARD_SERVICE->getTeamScoreboard($contest, (int)reset($teamids), true);
         if ($scoreboard === null) {
             return;
         }
