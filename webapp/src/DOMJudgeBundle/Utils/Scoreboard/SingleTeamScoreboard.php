@@ -73,21 +73,17 @@ class SingleTeamScoreboard extends Scoreboard
                             $penaltyTime, $scoreIsInSecods);
     }
 
-    public function getTeamRank() {
-        return $this->teamRank;
-    }
-
     /**
      * @inheritdoc
      */
     protected function calculateScoreboard()
     {
+        $teamScore = $this->scores[$this->team->getTeamid()];
         if ($this->rankCache !== null) {
-            $teamScore = $this->scores[$this->team->getTeamid()];
             $teamScore->addNumberOfPoints($this->rankCache->getPointsRestricted());
             $teamScore->addTotalTime($this->rankCache->getTotaltimeRestricted());
-            $teamScore->setRank($this->teamRank);
         }
+        $teamScore->setRank($this->teamRank);
 
         // Loop all info the scoreboard cache and put it in our own datastructure
         $this->matrix = [];
