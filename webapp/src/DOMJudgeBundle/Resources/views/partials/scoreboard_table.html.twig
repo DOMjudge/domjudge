@@ -253,7 +253,14 @@
         {% if showTeamSubmissions or jury %}
             <tbody>
             <tr style="border-top: 2px solid black;">
-                <td id="scoresummary" title="Summary" colspan=3>Summary</td>
+                {% set summaryColspan = 2 %}
+                {% if showFlags %}
+                    {% set summaryColspan = summaryColspan + 1 %}
+                {% endif %}
+                {% if showAffiliationLogos %}
+                    {% set summaryColspan = summaryColspan + 1 %}
+                {% endif %}
+                <td id="scoresummary" title="Summary" colspan="{{ summaryColspan }}">Summary</td>
                 {% if scoreboard.showPoints %}
                     <td class="scorenc"></td>
                 {% else %}

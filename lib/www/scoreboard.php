@@ -466,8 +466,15 @@ function renderScoreBoardTable(
         // is for the jury or the per-problem information is
         // being shown to contestants and the public.
         if (IS_JURY || dbconfig_get('show_teams_submissions', 1)) {
+            $summary_colspan = 2;
+            if ($SHOW_FLAGS) {
+                $summary_colspan++;
+            }
+            if ($SHOW_AFFILIATION_LOGOS) {
+                $summary_colspan++;
+            }
             echo '<tbody><tr style="border-top: 2px solid black;">' .
-                 '<td id="scoresummary" title="Summary" colspan=3>Summary</td>' .
+                 '<td id="scoresummary" title="Summary" colspan="' . $summary_colspan . '">Summary</td>' .
                  $totalCell . '<td title=" "></td>';
 
             foreach (array_keys($probs) as $prob) {
