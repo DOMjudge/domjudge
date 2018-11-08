@@ -725,6 +725,14 @@ class SubmissionController extends Controller
         $result['added']   = array_diff($newFilenames, $oldFilenames);
         $result['removed'] = array_diff($oldFilenames, $newFilenames);
 
+        // Special case: if we have exactly one file now and before but the filename is different, use that for diffing
+        if (count($result['added']) === 1 && count($result['removed']) === 1 && empty($result['changed'])) {
+            $result['added']        = [];
+            $result['removed']      = [];
+            $result['changed']      = [$files[0]->getFilename()];
+            $result['changedfiles'] = [[$files[0], $oldFiles[0]]];
+        }
+
         return $result;
     }
 }
