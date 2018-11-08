@@ -142,7 +142,7 @@
                             {% set affiliationImage = 'images/affiliations/' ~ affiliationId ~ '.png' %}
                             {% if affiliationImage | assetExists %}
                                 <img src="{{ asset(affiliationImage) }}" alt="{{ score.team.affiliation.name }}"
-                                     title="{{ score.team.affiliation.name }}"/>
+                                     title="{{ score.team.affiliation.name }}" style="width: 32px;" />
                             {% else %}
                                 {{ affiliationId }}
                             {% endif %}

@@ -357,6 +357,7 @@ function renderScoreBoardTable(
                 if (is_readable(WEBAPPDIR.'/web/'.$affillogo)) {
                     echo '<img src="../' . $affillogo . '"' .
                         ' alt="'   . specialchars($teams[$team]['affilname']) . '"' .
+                        ' style="width: 32px;"' .
                         ' title="' . specialchars($teams[$team]['affilname']) . '" />';
                 } else {
                     echo specialchars((string)$affilid);
