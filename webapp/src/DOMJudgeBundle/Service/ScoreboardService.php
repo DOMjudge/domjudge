@@ -534,7 +534,8 @@ class ScoreboardService
 
         if (!$contest->getPublic()) {
             $queryBuilder
-                ->andWhere('t.contests IN (:contest)')
+                ->join('t.contests', 'c')
+                ->andWhere('c = :contest')
                 ->setParameter(':contest', $contest);
         }
 
@@ -599,7 +600,8 @@ class ScoreboardService
                 ->setParameter(':categories', $categories);
             if (!$contest->getPublic()) {
                 $queryBuilder
-                    ->andWhere('t.contests IN (:contest)')
+                    ->join('t.contests', 'c')
+                    ->andWhere('c = :contest')
                     ->setParameter(':contest', $contest);
             }
 
