@@ -21,7 +21,7 @@ if (!isset($_GET['testcase'])) {
         ($_GET['type'] === 'in' || $_GET['type'] === 'out')) {
         $testcasetype = $_GET['type'];
         $testcaseseq = $_GET['testcase'];
-        putSampleTestcase($id, $testcaseseq, $testcasetype);
+        putSampleTestcase($id, (int)$testcaseseq, $testcasetype);
     } else {
         error("Invalid arguments for sample testcase.");
     }
