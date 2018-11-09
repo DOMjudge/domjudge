@@ -65,6 +65,9 @@ doctrine:
         auto_mapping: true
         mappings:
             DOMJudgeBundle: ~
+        dql:
+            string_functions:
+                truncate: DOMJudgeBundle\Doctrine\ORM\Query\AST\Functions\TruncateFunction
 
 # We need this to make our @View annotations work for FOSRest
 sensio_framework_extra:

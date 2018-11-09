@@ -71,7 +71,6 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('lineCount', [$this, 'lineCount']),
             new \Twig_SimpleFilter('autoExpand', [$this, 'autoExpand'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('base64', [$this, 'base64']),
-            new \Twig_SimpleFilter('truncateOutput', [$this, 'truncateOutput']),
             new \Twig_SimpleFilter('parseRunDiff', [$this, 'parseRunDiff'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('runDiff', [$this, 'runDiff'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('codeEditor', [$this, 'codeEditor'], ['is_safe' => ['html']]),
@@ -452,41 +451,18 @@ EOF;
     }
 
     /**
-     * Truncate the given output to the output display limit
-     * @param string $output
-     * @return string
-     * @throws \Exception
-     */
-    public function truncateOutput(string $output)
-    {
-        $size = (int)$this->domjudge->dbconfig_get('output_display_limit', 2000);
-        // $size == -1 means never perform truncation:
-        if ($size < 0) {
-            return $output;
-        }
-
-        if (strlen($output) > $size) {
-            $msg = sprintf("\n[output display truncated after %d B]\n", $size);
-            return substr($output, 0, $size) . $msg;
-        }
-        return $output;
-    }
-
-    /**
      * Output a run diff
-     * @param JudgingRunWithOutput $run
-     * @param Testcase             $testcase
+     * @param array $runOutput
      * @return string
      * @throws \Exception
      */
-    public function runDiff(JudgingRunWithOutput $run, Testcase $testcase)
+    public function runDiff(array $runOutput)
     {
         // TODO: can be improved using diffposition.txt
         // FIXME: only show when diffposition.txt is set?
         // FIXME: cut off after XXX lines
-        $testcaseOutput = stream_get_contents($testcase->getTestcaseContent()->getOutput());
-        $lines_team     = preg_split('/\n/', trim($this->truncateOutput($run->getOutputRun())));
-        $lines_ref      = preg_split('/\n/', trim($this->truncateOutput($testcaseOutput)));
+        $lines_team     = preg_split('/\n/', trim($runOutput['output_run']));
+        $lines_ref      = preg_split('/\n/', trim($runOutput['output_reference']));
 
         $diffs    = array();
         $firstErr = sizeof($lines_team) + 1;

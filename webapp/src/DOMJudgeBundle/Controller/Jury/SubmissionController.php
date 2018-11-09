@@ -339,21 +339,51 @@ class SubmissionController extends Controller
             }
         }
 
-        $runs = [];
+        $outputDisplayLimit    = (int)$this->DOMJudgeService->dbconfig_get('output_display_limit', 2000);
+        $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
+
+        $runs       = [];
+        $runsOutput = [];
         if ($selectedJudging) {
-            /** @var Testcase[] $runs */
-            $runs = $this->entityManager->createQueryBuilder()
+            $queryBuilder = $this->entityManager->createQueryBuilder()
                 ->from('DOMJudgeBundle:Testcase', 't')
                 ->join('t.testcase_content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                 ->leftJoin('jr.judging_run_output', 'jro')
-                ->select('t', 'tc', 'jr', 'jro')
+                ->select('t', 'jr', 'tc.image_thumb AS image_thumb')
                 ->andWhere('t.problem = :problem')
                 ->setParameter(':judging', $selectedJudging)
                 ->setParameter(':problem', $submission->getProblem())
-                ->orderBy('t.rank')
+                ->orderBy('t.rank');
+            if ($outputDisplayLimit < 0) {
+                $queryBuilder
+                    ->addSelect('tc.output AS output_testcase')
+                    ->addSelect('jro.output_run AS output_run')
+                    ->addSelect('jro.output_diff AS output_diff')
+                    ->addSelect('jro.output_error AS output_error')
+                    ->addSelect('jro.output_system AS output_system');
+            } else {
+                $queryBuilder
+                    ->addSelect('TRUNCATE(tc.output, :outputDisplayLimit, :outputTruncateMessage) AS output_reference')
+                    ->addSelect('TRUNCATE(jro.output_run, :outputDisplayLimit, :outputTruncateMessage) AS output_run')
+                    ->addSelect('TRUNCATE(jro.output_diff, :outputDisplayLimit, :outputTruncateMessage) AS output_diff')
+                    ->addSelect('TRUNCATE(jro.output_error, :outputDisplayLimit, :outputTruncateMessage) AS output_error')
+                    ->addSelect('TRUNCATE(jro.output_system, :outputDisplayLimit, :outputTruncateMessage) AS output_system')
+                    ->setParameter(':outputDisplayLimit', $outputDisplayLimit)
+                    ->setParameter(':outputTruncateMessage', $outputTruncateMessage);
+            }
+
+            $runResults = $queryBuilder
                 ->getQuery()
                 ->getResult();
+
+            foreach ($runResults as $runResult) {
+                $runs[] = $runResult[0];
+                unset($runResult[0]);
+                $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
+                                                      $runResult['output_system']);
+                $runsOutput[]            = $runResult;
+            }
         }
 
         if ($submission->getOrigsubmitid()) {
@@ -397,8 +427,7 @@ class SubmissionController extends Controller
                 $lastRuns = $this->entityManager->createQueryBuilder()
                     ->from('DOMJudgeBundle:Testcase', 't')
                     ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
-                    ->leftJoin('jr.judging_run_output', 'jro')
-                    ->select('t', 'jr', 'jro')
+                    ->select('t', 'jr')
                     ->andWhere('t.problem = :problem')
                     ->setParameter(':judging', $lastJudging)
                     ->setParameter(':problem', $submission->getProblem())
@@ -416,6 +445,7 @@ class SubmissionController extends Controller
             'selectedJudging' => $selectedJudging,
             'lastJudging' => $lastJudging,
             'runs' => $runs,
+            'runsOutput' => $runsOutput,
             'lastRuns' => $lastRuns,
             'unjudgableReasons' => $unjudgableReasons,
             'verificationRequired' => (bool)$this->DOMJudgeService->dbconfig_get('verification_required', false),

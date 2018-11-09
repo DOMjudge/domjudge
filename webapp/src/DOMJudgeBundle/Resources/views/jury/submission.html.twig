@@ -410,7 +410,7 @@
             </script>
 
             {# Show run info. Only when compilation was successful #}
-            {% for run in runs %}
+            {% for runIdx, run in runs %}
                 <div class="run {% if run.firstJudgingRun and run.firstJudgingRun.runresult == 'correct' %}run_correct{% endif %}">
                     <h4 id="run-{{ run.rank }}">Run {{ run.rank }}</h4>
 
@@ -452,7 +452,7 @@
                                             <td>
                                                 {{ run.firstJudgingRun.runtime }} sec
                                                 {% if run.firstJudgingRun.runresult == 'timelimit' %}
-                                                    {% if run.firstJudgingRun.judgingRunOutput.terminated %}
+                                                    {% if runsOutput[runIdx].terminated %}
                                                         <b>(terminated)</b>
                                                     {% else %}
                                                         <b>(finished late)</b>
@@ -471,10 +471,10 @@
                                     </table>
                                 </td>
                                 <td>
-                                    {% if run.testcaseContent.imageThumb %}
+                                    {% if runsOutput[runIdx].image_thumb %}
                                         {% set imgUrl = path('legacy.jury_testcase', {probid: submission.probid, rank: run.rank, fetch: 'image'}) %}
                                         <a href="{{ imgUrl }}">
-                                            <img src="data:image/{{ run.imageType }};base64,{{ run.testcaseContent.imageThumb | base64 }}"/>
+                                            <img src="data:image/{{ run.imageType }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
                                         </a>
                                     {% endif %}
                                 </td>
@@ -482,35 +482,35 @@
                         </table>
 
                         <h5>Diff output</h5>
-                        {% if run.firstJudgingRun.judgingRunOutput.outputDiff is empty %}
+                        {% if runsOutput[runIdx].output_diff is empty %}
                             <p class="nodata">There was no diff output.</p>
                         {% else %}
-                            <pre class="output_text">{{ run.firstJudgingRun.judgingRunOutput.outputDiff | truncateOutput | parseRunDiff }}</pre>
+                            <pre class="output_text">{{ runsOutput[runIdx].output_diff | parseRunDiff }}</pre>
                         {% endif %}
 
                         {% if run.firstJudgingRun.runresult != 'correct' %}
-                            {{ run.firstJudgingRun.judgingRunOutput | runDiff(run) }}
+                            {{ runsOutput[runIdx] | runDiff }}
                         {% endif %}
 
                         <h5>Program output</h5>
-                        {% if run.firstJudgingRun.judgingRunOutput.outputRun is empty %}
+                        {% if runsOutput[runIdx].output_run is empty %}
                             <p class="nodata">There was no program output.</p>
                         {% else %}
-                            <pre class="output_text">{{ run.firstJudgingRun.judgingRunOutput.outputRun | truncateOutput | parseRunDiff }}</pre>
+                            <pre class="output_text">{{ runsOutput[runIdx].output_run | parseRunDiff }}</pre>
                         {% endif %}
 
                         <h5>Program error output</h5>
-                        {% if run.firstJudgingRun.judgingRunOutput.outputError is empty %}
+                        {% if runsOutput[runIdx].output_error is empty %}
                             <p class="nodata">There was no stderr output.</p>
                         {% else %}
-                            <pre class="output_text">{{ run.firstJudgingRun.judgingRunOutput.outputError | truncateOutput | parseRunDiff }}</pre>
+                            <pre class="output_text">{{ runsOutput[runIdx].output_error | parseRunDiff }}</pre>
                         {% endif %}
 
                         <h5>Judging system output (info/debug/errors)</h5>
-                        {% if run.firstJudgingRun.judgingRunOutput.outputSystem is empty %}
+                        {% if runsOutput[runIdx].output_system is empty %}
                             <p class="nodata">There was no judging system output.</p>
                         {% else %}
-                            <pre class="output_text">{{ run.firstJudgingRun.judgingRunOutput.outputSystem | truncateOutput | parseRunDiff }}</pre>
+                            <pre class="output_text">{{ runsOutput[runIdx].output_system | parseRunDiff }}</pre>
                         {% endif %}
 
                     {% endif %} {# run.firstJudgingRun is null or run.firstJudgingRun.runresult is null #}

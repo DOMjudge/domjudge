@@ -302,12 +302,4 @@ class JudgingRunWithOutput
     {
         return $this->testcase;
     }
-
-    /**
-     * @return bool
-     */
-    public function isTerminated()
-    {
-        return (bool)preg_match('/timelimit exceeded.*hard (wall|cpu) time/', $this->getOutputSystem());
-    }
 }
