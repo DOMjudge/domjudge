@@ -104,6 +104,11 @@ class ContestController extends Controller
                 return $this->redirectToRoute('jury_contests', ['edited' => 1]);
             }
 
+            $juryTimeData = $contest->getJuryTimeData();
+            if (!$juryTimeData[$time]['show_button']) {
+                throw new BadRequestHttpException(sprintf('Cannot update %s time at this moment', $time));
+            }
+
             // starttime is special because other, relative times depend on it.
             if ($time == 'start') {
                 if ($contest->getStarttimeEnabled() && Utils::difftime((float)$contest->getStarttime(false),
@@ -262,9 +267,9 @@ class ContestController extends Controller
                     $timeValue = Utils::printtime($time, $timeFormat);
                     $timeTitle = Utils::printtime($time, '%Y-%m-%d %H:%M:%S (%Z)');
                 }
-                $contestdata[$timeField . 'time']['value'] = $timeValue;
+                $contestdata[$timeField . 'time']['value']     = $timeValue;
                 $contestdata[$timeField . 'time']['sortvalue'] = $time;
-                $contestdata[$timeField . 'time']['title'] = $timeTitle;
+                $contestdata[$timeField . 'time']['title']     = $timeTitle;
             }
 
             $styles = [];

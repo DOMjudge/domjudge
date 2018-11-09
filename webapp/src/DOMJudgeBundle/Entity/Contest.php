@@ -38,7 +38,8 @@ class Contest
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Contest ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Contest ID in an external system",
+     *                            "collation"="utf8mb4_bin"}, nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\SerializedName("external_id")
      * TODO: ORM\Unique on first 190 characters
@@ -53,126 +54,144 @@ class Contest
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Short name for this contest"}, nullable=false)
+     * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Short name for this contest"},
+     *                            nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      */
     private $shortname;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="activatetime", options={"comment"="Time contest becomes visible in team/public views", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="activatetime", options={"comment"="Time contest becomes
+     *                             visible in team/public views", "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
     private $activatetime;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time contest starts, submissions accepted", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time contest starts,
+     *                             submissions accepted", "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
     private $starttime;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="starttime_enabled", options={"comment"="If disabled, starttime is not used, e.g. to delay contest start"}, nullable=false)
+     * @ORM\Column(type="boolean", name="starttime_enabled", options={"comment"="If disabled, starttime is not used,
+     *                             e.g. to delay contest start"}, nullable=false)
      * @Serializer\Exclude()
      */
     private $starttime_enabled;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="freezetime", options={"comment"="Time scoreboard is frozen", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="freezetime", options={"comment"="Time scoreboard is
+     *                             frozen", "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
      */
     private $freezetime;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time after which no more submissions are accepted", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time after which no more
+     *                             submissions are accepted", "unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
     private $endtime;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="unfreezetime", options={"comment"="Unfreeze a frozen scoreboard at this time", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="unfreezetime", options={"comment"="Unfreeze a frozen
+     *                             scoreboard at this time", "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
      */
     private $unfreezetime;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="finalizetime", options={"comment"="Time when contest was finalized, null if not yet", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="finalizetime", options={"comment"="Time when contest
+     *                             was finalized, null if not yet", "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
      */
     private $finalizetime;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime", options={"comment"="Time contest becomes invisible in team/public views", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime", options={"comment"="Time contest
+     *                             becomes invisible in team/public views", "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
      */
     private $deactivatetime;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=64, name="activatetime_string", options={"comment"="Authoritative absolute or relative string representation of activatetime"}, nullable=false)
+     * @ORM\Column(type="string", length=64, name="activatetime_string", options={"comment"="Authoritative absolute or
+     *                            relative string representation of activatetime"}, nullable=false)
      * @Serializer\Exclude()
      */
     private $activatetime_string;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=64, name="starttime_string", options={"comment"="Authoritative absolute (only!) string representation of starttime"}, nullable=false)
+     * @ORM\Column(type="string", length=64, name="starttime_string", options={"comment"="Authoritative absolute
+     *                            (only!) string representation of starttime"}, nullable=false)
      * @Serializer\Exclude()
      */
     private $starttime_string;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=64, name="freezetime_string", options={"comment"="Authoritative absolute or relative string representation of freezetime"}, nullable=true)
+     * @ORM\Column(type="string", length=64, name="freezetime_string", options={"comment"="Authoritative absolute or
+     *                            relative string representation of freezetime"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $freezetime_string;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=64, name="endtime_string", options={"comment"="Authoritative absolute or relative string representation of endtime"}, nullable=false)
+     * @ORM\Column(type="string", length=64, name="endtime_string", options={"comment"="Authoritative absolute or
+     *                            relative string representation of endtime"}, nullable=false)
      * @Serializer\Exclude()
      */
     private $endtime_string;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=64, name="unfreezetime_string", options={"comment"="Authoritative absolute or relative string representation of unfreezetime"}, nullable=true)
+     * @ORM\Column(type="string", length=64, name="unfreezetime_string", options={"comment"="Authoritative absolute or
+     *                            relative string representation of unfreezetime"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $unfreezetime_string;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=64, name="deactivatetime_string", options={"comment"="Authoritative absolute or relative string representation of deactivatetime"}, nullable=true)
+     * @ORM\Column(type="string", length=64, name="deactivatetime_string", options={"comment"="Authoritative absolute
+     *                            or relative string representation of deactivatetime"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $deactivatetime_string;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="enabled", options={"comment"="Whether this contest can be active"}, nullable=false)
+     * @ORM\Column(type="boolean", name="enabled", options={"comment"="Whether this contest can be active"},
+     *                             nullable=false)
      * @Serializer\Exclude()
      */
     private $enabled = true;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="process_balloons", options={"comment"="Will balloons be processed for this contest?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="process_balloons", options={"comment"="Will balloons be processed for this
+     *                             contest?"}, nullable=false)
      * @Serializer\Exclude()
      */
     private $process_balloons = true;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="public", options={"comment"="Is this contest visible for the public and non-associated teams?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="public", options={"comment"="Is this contest visible for the public and
+     *                             non-associated teams?"}, nullable=false)
      * @Serializer\Exclude()
      */
     private $public = true;
@@ -236,7 +255,7 @@ class Contest
      */
     public function __construct()
     {
-        $this->teams = new ArrayCollection();
+        $this->teams             = new ArrayCollection();
         $this->removed_intervals = new ArrayCollection();
     }
 
@@ -1195,6 +1214,7 @@ class Contest
         $now         = Utils::now();
         $times       = ['activate', 'start', 'freeze', 'end', 'unfreeze', 'finalize', 'deactivate'];
         $prevchecked = false;
+        $isactivated = Utils::difftime((float)$this->getActivatetime(), $now) <= 0;
         $hasstarted  = Utils::difftime((float)$this->getStarttime(), $now) <= 0;
         $hasended    = Utils::difftime((float)$this->getEndtime(), $now) <= 0;
         $hasfrozen   = !empty($this->getFreezetime()) &&
@@ -1235,6 +1255,9 @@ class Contest
 
             $showButton = true;
             switch ($time) {
+                case 'activate':
+                    $showButton = !$isactivated;
+                    break;
                 case 'start':
                     $showButton = !$hasstarted;
                     break;
