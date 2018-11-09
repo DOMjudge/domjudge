@@ -43,4 +43,22 @@
         {% endif %}
     {% endif %}
 
+    <script>
+        $().ready(function () {
+            $('.data-table').DataTable({
+                "paging": false,
+                "ordering": true,
+                "info": false,
+                "autoWidth": true,
+                "language": {
+                    "searchPlaceholder": "filter table",
+                    "search": "_INPUT_",
+                },
+                'aoColumnDefs': [
+                    {aTargets: ['_all'], bSortable: true, bSearchable: true}
+                ],
+            });
+        });
+    </script>
+
 {% endblock %}
