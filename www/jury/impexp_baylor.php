@@ -9,8 +9,9 @@
 
 require('init.php');
 
-define('ICPCWSCLICS', 'https://icpc.baylor.edu/ws/clics/');
+define('ICPCWSCLICS', 'https://icpc.baylor.edu/cm5-contest-rest/rest/contest/export/CLICS/CONTEST/');
 define('ICPCWSSTANDINGS', 'https://icpc.baylor.edu/ws/standings/');
+define('ICPCWSTOKEN', 'https://icpc.baylor.edu/auth/realms/cm5/protocol/openid-connect/token');
 
 function updated($array, $table, $type = 'created')
 {
@@ -48,17 +49,49 @@ if (!function_exists('curl_init')) {
     error("PHP cURL extension required. Please install the php5-curl package.");
 }
 
+# request real token first
+$ch = curl_init(ICPCWSTOKEN);
+curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json"));
+$data = array(
+    'client_id' => 'cm5-token',
+    'username' => 'token:' . $token,
+    'password' => '',
+    'grant_type' => 'password'
+);
+curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+$result = curl_exec($ch);
+$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+if ($status >= 400 && $status < 500) {
+    error("Access forbidden, is your token valid? " . htmlspecialchars($result));
+}
+if ($status < 200 || $status >= 300) {
+    error("Unknown error while retrieving data from icpc.baylor.edu, status code: $status, $response");
+}
+
+$json = dj_json_decode($result);
+$access_token = $json['access_token'];
+
 if (isset($_REQUEST['fetch'])) {
     $ch = curl_init(ICPCWSCLICS . $contest);
 } else {
     $ch = curl_init(ICPCWSSTANDINGS . $contest);
 }
+
 curl_setopt($ch, CURLOPT_USERAGENT, "DOMjudge/" . DOMJUDGE_VERSION);
-curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-curl_setopt($ch, CURLOPT_USERPWD, "$token:");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept: application/json"));
+curl_setopt($ch, CURLOPT_HTTPHEADER,
+    array(
+        "Authorization: bearer $access_token",
+        "Accept: application/json",
+    )
+);
+
 if (isset($_REQUEST['upload'])) {
+    error("Sorry, standings upload is broken because of a format change.");
     if (difftime($cdata['endtime'], now()) >= 0) {
         error("Contest did not end yet. Refusing to upload standings before contest end.");
     }
@@ -106,12 +139,19 @@ if (isset($_REQUEST['upload'])) {
 }
 
 $response = curl_exec($ch);
+if ($status >= 400 && $status < 500) {
+    error("Access forbidden, is your token valid? Did you specify the correct contest ID? " . htmlspecialchars($result));
+}
+if ($status < 200 || $status >= 300) {
+    error("Unknown error while retrieving data from icpc.baylor.edu, status code: $status, $response");
+}
+
 if ($response === false) {
     error("Error while retrieving data from icpc.baylor.edu: " . curl_error($ch));
 }
 $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-if ($status == 401) {
-    error("Access forbidden, is your token valid?");
+if ($status >= 400 && $status < 500) {
+    error("Access forbidden, is your token valid? Did you specify the correct contest ID? " . htmlspecialchars($result));
 }
 if ($status < 200 || $status >= 300) {
     error("Unknown error while retrieving data from icpc.baylor.edu, status code: $status, $response");
@@ -135,21 +175,25 @@ $teamrole = $DB->q('VALUE SELECT roleid FROM role WHERE role=%s', 'team');
 $new_affils = array();
 $new_teams = array();
 $updated_teams = array();
-foreach ($json['contest']['group'] as $group) {
+foreach ($json['group'] as $group) {
     $siteName = $group['groupName'];
-    foreach ($group['team'] as $team) {
+    foreach ($group['teams'] as $team) {
+        $institutionName = $team['instName'];
         // Note: affiliations are not updated and not deleted even if all teams have canceled
         $affilid = $DB->q('MAYBEVALUE SELECT affilid FROM team_affiliation
-                           WHERE name=%s', $team['institutionName']);
+                           WHERE name=%s', $institutionName);
         if (empty($affilid)) {
+            $shortName = isset($team['instShortName']) ? $team['instShortName'] : $institutionName;
             $affilid = $DB->q('RETURNID INSERT INTO team_affiliation
                                (name, shortname, country) VALUES (%s, %s, %s)',
-                              $team['institutionName'],
-                              $team['institutionShortName'],
+                              $institutionName,
+                              $team['instShortName'],
                               $team['country']);
-            $new_affils[] = $team['institutionName'];
+            $new_affils[] = $institutionName;
         }
 
+        /*
+         * FIXME: team members are behind a different API call and not important for now
         // collect team members
         $members_a = $mails_a = array();
         $members_json = $team['teamMembers']['teamMember'];
@@ -160,6 +204,7 @@ foreach ($json['contest']['group'] as $group) {
         }
         $members = implode("\n", $members_a);
         $mails = implode(",", $mails_a);
+        */
 
         // Note: teams are not deleted but disabled depending on their status
         $id = $DB->q('MAYBEVALUE SELECT teamid FROM team
@@ -169,12 +214,12 @@ foreach ($json['contest']['group'] as $group) {
             $id = $DB->q('RETURNID INSERT INTO team
                           (name, categoryid, affilid, enabled, members, comments, externalid, room)
                           VALUES (%s, %i, %i, %i, %s, %s, %i, %s)',
-                         $team['teamName'], $participants, $affilid, $enabled, $members,
+                         $team['teamName'], $participants, $affilid, $enabled, '',
                          "Status: " . $team['status'], $team['teamId'], $siteName);
             $username = sprintf("team%04d", $id);
             $userid = $DB->q('RETURNID INSERT INTO user (username, name, teamid, email)
                               VALUES (%s,%s,%i,%s)',
-                             $username, $team['teamName'], $id, $mails);
+                             $username, $team['teamName'], $id, '');
             $DB->q('INSERT INTO userrole (userid, roleid) VALUES (%i,%i)', $userid, $teamrole);
             $new_teams[] = $team['teamName'];
         } else {
@@ -182,10 +227,10 @@ foreach ($json['contest']['group'] as $group) {
             $cnt = $DB->q('RETURNAFFECTED UPDATE team SET name=%s, categoryid=%i,
                            affilid=%i, enabled=%i, members=%s, comments=%s, room=%s
                            WHERE teamid=%i',
-                          $team['teamName'], $participants, $affilid, $enabled, $members,
+                          $team['teamName'], $participants, $affilid, $enabled, '',
                           "Status: " . $team['status'], $siteName, $id);
             $cnt += $DB->q('RETURNAFFECTED UPDATE user SET name=%s, email=%s
-                            WHERE username=%s', $team['teamName'], $mails, $username);
+                            WHERE username=%s', $team['teamName'], '', $username);
             if ($cnt > 0) {
                 $updated_teams[] = $team['teamName'];
             }
