@@ -381,7 +381,7 @@ class SubmissionController extends Controller
                 $runs[] = $runResult[0];
                 unset($runResult[0]);
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
-                                                      $runResult['output_system']);
+                                                      (string)$runResult['output_system']);
                 $runsOutput[]            = $runResult;
             }
         }
@@ -693,15 +693,21 @@ class SubmissionController extends Controller
                 $filesToSubmit[] = new UploadedFile($tmpfname, $file->getFilename(), null, null, null, true);
             }
 
-            $team                = $this->DOMJudgeService->getUser()->getTeam();
+            $team = $this->DOMJudgeService->getUser()->getTeam();
+            /** @var Language $language */
+            $language   = $submittedData['language'];
+            $entryPoint = $submittedData['entry_point'];
+            if ($language->getRequireEntryPoint() && $entryPoint === null) {
+                $entryPoint = '__auto__';
+            }
             $submittedSubmission = $this->submissionService->submitSolution(
                 $team,
                 $submittedData['problem'],
                 $submission->getContest(),
-                $submittedData['language'],
+                $language,
                 $filesToSubmit,
                 $submission->getOrigsubmitid() ?? $submission->getSubmitid(),
-                $submittedData['entry_point']
+                $entryPoint
             );
 
             foreach ($filesToSubmit as $file) {

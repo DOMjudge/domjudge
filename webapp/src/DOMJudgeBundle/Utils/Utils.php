@@ -524,7 +524,7 @@ class Utils
     {
         $oldname = basename($oldfile);
         $newname = basename($newfile);
-        return `diff -Bdt --strip-trailing-cr -U2 \
+        return (string)`diff -Bdt --strip-trailing-cr -U2 \
                  --label $oldname --label $newname $oldfile $newfile 2>&1`;
     }
 
