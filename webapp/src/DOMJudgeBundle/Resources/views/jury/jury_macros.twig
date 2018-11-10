@@ -87,7 +87,7 @@
                     {%- for key,column in fields %}
                         {%- set item = attribute(row.data, key) %}
 
-                        <td class="{{ item.cssclass|default(' ') }}"
+                        <td class="{{ item.cssclass|default('') }}"
                             {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
 			    {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
                             <a href="{{ item.link|default(row.link) }}"
