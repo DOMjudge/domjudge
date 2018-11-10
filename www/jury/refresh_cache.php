@@ -70,7 +70,7 @@ foreach ($contests as $contest) {
                      INNER JOIN contestproblem USING (probid)
                      WHERE cid = %i ORDER BY shortname', $contest);
 
-    echo "<p>Recalculating all values for the scoreboard cache for contest c$contest (" .
+    echo "<p>Recalculating all values for the scoreboard cache for contest $contest (" .
          count($teams) . " teams, " . count($probs) . " problems)...</p>\n\n<pre>\n";
 
     if (count($teams) == 0) {
@@ -84,7 +84,7 @@ foreach ($contests as $contest) {
 
     // for each team, fetch the status of each problem
     foreach ($teams as $team) {
-        echo "Team t" . specialchars($team['teamid']) . ":";
+        echo "Team " . specialchars($team['teamid']) . ":";
 
         // for each problem fetch the result
         foreach ($probs as $pr) {
