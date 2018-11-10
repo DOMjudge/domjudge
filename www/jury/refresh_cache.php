@@ -10,6 +10,12 @@
  */
 
 require('init.php');
+// no output buffering... we want to see what's going on real-time
+header('X-Accel-Buffering: no');
+while (ob_get_level()) {
+    ob_end_flush();
+}
+ob_implicit_flush(1);
 $title = 'Refresh Cache';
 require(LIBWWWDIR . '/header.php');
 require(LIBWWWDIR . '/scoreboard.php');
@@ -43,6 +49,9 @@ if (! isset($_REQUEST['refresh'])) {
     );
     echo addEndForm();
 
+    // Start output buffering again to not crash the FallbackController
+    ob_start();
+
     require(LIBWWWDIR . '/footer.php');
     return;
 }
@@ -50,10 +59,6 @@ if (! isset($_REQUEST['refresh'])) {
 $time_start = microtime(true);
 
 auditlog('scoreboard', null, 'refresh cache');
-
-// no output buffering... we want to see what's going on real-time
-ob_end_flush();
-ob_implicit_flush();
 
 foreach ($contests as $contest) {
     // get the contest, teams and problems
@@ -92,7 +97,6 @@ foreach ($contests as $contest) {
         updateRankCache((int)$contest, (int)$team['teamid']);
 
         echo "\n";
-        ob_flush();
     }
 
     echo "</pre>\n\n";
@@ -131,5 +135,8 @@ $time_end = microtime(true);
 
 echo "<p>Scoreboard cache refresh completed in " .
      sprintf('%.2lf', $time_end - $time_start) . " seconds.</p>\n\n";
+
+// Start output buffering again to not crash the FallbackController
+ob_start();
 
 require(LIBWWWDIR . '/footer.php');
