@@ -146,13 +146,10 @@ class ContestController extends Controller
         $table_fields = [
             'cid' => ['title' => 'CID', 'sort' => true],
             'shortname' => ['title' => 'shortname', 'sort' => true],
+            'name' => ['title' => 'name', 'sort' => true],
             'activatetime' => ['title' => 'activate', 'sort' => true],
             'starttime' => ['title' => 'start', 'sort' => true, 'default_sort' => true, 'default_sort_order' => 'desc'],
-            'freezetime' => ['title' => 'freeze', 'sort' => true],
             'endtime' => ['title' => 'end', 'sort' => true],
-            'unfreezetime' => ['title' => 'unfreeze', 'sort' => true],
-            'finalizetime' => ['title' => 'finalize', 'sort' => true],
-            'deactivatetime' => ['title' => 'deactivate', 'sort' => true],
         ];
 
         $currentContests = $this->DOMJudgeService->getCurrentContests();
@@ -184,10 +181,8 @@ class ContestController extends Controller
 
         $table_fields = array_merge($table_fields, [
             'process_balloons' => ['title' => 'process<br/>balloons?', 'sort' => true],
-            'public' => ['title' => 'public?', 'sort' => true],
             'num_teams' => ['title' => '# teams', 'sort' => true],
             'num_problems' => ['title' => '# problems', 'sort' => true],
-            'name' => ['title' => 'name', 'sort' => true],
         ]);
 
         // Insert external ID field when configured to use it
@@ -234,10 +229,10 @@ class ContestController extends Controller
             }
 
             $contestdata['process_balloons'] = ['value' => $contest->getProcessBalloons() ? 'yes' : 'no'];
-            $contestdata['public']           = ['value' => $contest->getPublic() ? 'yes' : 'no'];
-            $contestdata['num_teams']        = ['value' => $contestData['num_teams']];
             if ($contest->getPublic()) {
                 $contestdata['num_teams'] = ['value' => '<i>all</i>'];
+            } else {
+                $contestdata['num_teams'] = ['value' => $contestData['num_teams']];
             }
 
             if (ALLOW_REMOVED_INTERVALS) {
@@ -248,11 +243,7 @@ class ContestController extends Controller
             $timeFields = [
                 'activate',
                 'start',
-                'freeze',
                 'end',
-                'unfreeze',
-                'finalize',
-                'deactivate',
             ];
             foreach ($timeFields as $timeField) {
                 $time = $contestdata[$timeField . 'time']['value'];
