@@ -134,7 +134,8 @@ class TeamAffiliationController extends Controller
                 }
                 $affiliationdata['country'] = [
                     'value' => $countryFlag,
-                    'sortvalue' => $countryCode
+                    'sortvalue' => $countryCode,
+                    'title' => $countryCode,
                 ];
             }
 
