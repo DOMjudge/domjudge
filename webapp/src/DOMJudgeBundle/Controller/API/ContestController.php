@@ -359,6 +359,10 @@ class ContestController extends AbstractRestController
                     if (!$strict) {
                         $result['time'] = Utils::absTime($event->getEventtime());
                     }
+                    // NWERC 2018 'hack': do not expose company teams
+                    if ($result['type'] === 'groups' && $result['op'] !== 'delete' && $result['data']['name'] === 'Companies') {
+                        $result['data']['hidden'] = true;
+                    }
                     echo json_encode($result, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES) . "\n";
                     ob_flush();
                     flush();
