@@ -74,7 +74,8 @@
 			"files": [ "lib/vendor/symfony/symfony/src/Symfony/Component/VarDumper/Resources/functions/dump.php" ]
 	},
 	"config": {
-		"vendor-dir": "lib/vendor"
+		"vendor-dir": "lib/vendor",
+		"component-dir": "lib/vendor/components"
 	},
 	"scripts": {
 			"symfony-scripts": [
