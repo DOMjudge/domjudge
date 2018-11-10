@@ -7,6 +7,7 @@ use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
+use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Asset\Packages;
@@ -134,12 +135,20 @@ class ProblemController extends Controller
                 ];
             }
 
-            // Add the rest of our row data for the table
-            if (!$p->getMemlimit()) {
-                $problemdata['memlimit']['value'] = 'default';
-            }
-            if (!$p->getOutputlimit()) {
-                $problemdata['outputlimit']['value'] = 'default';
+            // Add formatted {mem,output}limit row data for the table
+            foreach (['memlimit', 'outputlimit'] as $col) {
+                $orig_value = @$problemdata[$col]['value'];
+                if (!isset($orig_value)) {
+                    $problemdata[$col] = [
+                        'value' => 'default',
+                        'cssclass' => 'disabled',
+                    ];
+                } else {
+                    $problemdata[$col] = [
+                        'value' => Utils::printsize(1024*$orig_value),
+                        'sortvalue' => $orig_value,
+                    ];
+                }
             }
 
             // merge in the rest of the data
