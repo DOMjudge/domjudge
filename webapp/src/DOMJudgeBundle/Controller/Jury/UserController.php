@@ -83,7 +83,7 @@ class UserController extends Controller
 
             if ($u->getTeam()) {
                 $userdata['team'] = [
-                    'value' => 't' . $u->getTeamid(),
+                    'value' => $u->getTeamid(),
                     'sortvalue' => $u->getTeamid(),
                     'link' => $this->generateUrl('legacy.jury_team', [
                         'id' => $u->getTeamid(),
@@ -135,6 +135,7 @@ class UserController extends Controller
                 'data' => $userdata,
                 'actions' => $useractions,
                 'link' => $this->generateUrl('legacy.jury_user', ['id' => $u->getUserid()]),
+                'cssclass' => $u->getEnabled() ? '' : 'disabled',
             ];
         }
 

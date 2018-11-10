@@ -213,7 +213,8 @@ class TeamController extends Controller
                 'data' => $teamdata,
                 'actions' => $teamactions,
                 'link' => $this->generateUrl('legacy.jury_team', ['id' => $t->getTeamId()]),
-                'cssclass' => "category" . $t->getCategory()->getCategoryId()
+                'cssclass' => "category" . $t->getCategory()->getCategoryId() .
+                              ($t->getEnabled() ? '' : ' disabled'),
             ];
         }
         return $this->render('@DOMJudge/jury/teams.html.twig', [
