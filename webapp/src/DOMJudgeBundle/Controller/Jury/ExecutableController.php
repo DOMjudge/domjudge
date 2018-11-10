@@ -61,7 +61,6 @@ class ExecutableController extends Controller
             'type' => ['title' => 'type', 'sort' => true,],
             'description' => ['title' => 'description', 'sort' => true, 'default_sort' => true],
             'size' => ['title' => 'size', 'sort' => true,],
-            'md5sum' => ['title' => 'md5', 'sort' => false, 'search' => true],
         ];
 
         $propertyAccessor  = PropertyAccess::createPropertyAccessor();

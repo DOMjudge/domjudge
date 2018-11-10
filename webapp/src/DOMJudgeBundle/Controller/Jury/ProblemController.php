@@ -66,7 +66,7 @@ class ProblemController extends Controller
             'timelimit' => ['title' => 'time limit', 'sort' => true],
             'memlimit' => ['title' => 'memory limit', 'sort' => true],
             'outputlimit' => ['title' => 'output limit', 'sort' => true],
-            'num_testcases' => ['title' => 'test cases', 'sort' => true],
+            'num_testcases' => ['title' => '# test cases', 'sort' => true],
         ];
 
         // Insert external ID field when configured to use it
