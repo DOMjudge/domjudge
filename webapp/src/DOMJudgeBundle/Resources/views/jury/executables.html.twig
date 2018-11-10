@@ -15,7 +15,8 @@
 
     {{ macros.table(executables, table_fields, num_actions) }}
 
-    {% if is_granted('ROLE_ADMIN') %}
+    {%- if is_granted('ROLE_ADMIN') %}
+
         <p>
             {{ button(path('legacy.jury_executable', {cmd: 'add', referrer: 'executables'}), 'Add new executable', 'primary', 'plus') }}
         </p>
@@ -40,6 +41,6 @@
             </div>
             <input type="submit" name="upload" class="btn btn-primary" id="upload" value="Upload">
         </form>
-    {% endif %}
+    {%- endif %}
 
 {% endblock %}

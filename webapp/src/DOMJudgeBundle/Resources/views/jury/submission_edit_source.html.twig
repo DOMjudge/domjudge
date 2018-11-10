@@ -19,15 +19,18 @@
     {{ form_start(form) }}
 
     <ul class="nav nav-tabs source-tab-nav">
-        {% for file in files %}
+        {%- for file in files %}
+
             <li class="nav-item">
                 <a class="nav-link {% if (selected is null and loop.first) or selected == file.rank %}active{% endif %}"
                    data-toggle="tab" href="#source-{{ file.rank }}" role="tab">{{ file.filename }}</a>
             </li>
-        {% endfor %}
+        {%- endfor %}
+
     </ul>
     <div class="tab-content source-tab">
-        {% for file in files %}
+        {%- for file in files %}
+
             <div class="tab-pane fade {% if (selected is null and loop.first) or selected == file.rank %}show active{% endif %}"
                  id="source-{{ file.rank }}" role="tabpanel">
                 {{ file | codeEditor(submission.language.aceLanguage, true, 'form_source' ~ file.rank) }}
@@ -37,7 +40,8 @@
                     });
                 </script>
             </div>
-        {% endfor %}
+        {%- endfor %}
+
     </div>
 
     <div class="row">

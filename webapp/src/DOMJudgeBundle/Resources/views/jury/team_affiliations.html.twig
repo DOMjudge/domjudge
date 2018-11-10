@@ -15,10 +15,11 @@
 
     {{ macros.table(team_affiliations, table_fields, num_actions) }}
 
-    {% if is_granted('ROLE_ADMIN') %}
+    {%- if is_granted('ROLE_ADMIN') %}
+
         <p>
             {{ button(path('legacy.jury_team_affiliation', {cmd: 'add', referrer: 'affiliations'}), 'Add new affiliation', 'primary', 'plus') }}
         </p>
-    {% endif %}
+    {%- endif %}
 
 {% endblock %}

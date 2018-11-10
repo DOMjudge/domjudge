@@ -1,5 +1,6 @@
 {# Output a rejudge form #}
 
+{% spaceless %}
 {% set buttonText = 'Rejudge all for ' ~ table ~ ' ' ~ id %}
 {% set questionText = 'Rejudge all submissions for this ' ~ table ~ '?' %}
 {% set buttonDisabled = false %}
@@ -34,6 +35,7 @@
         {% endif %}
     {% endif %}
 {% endif %}
+{% endspaceless %}
 
 <button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#rejudge-modal">
     Rejudge
@@ -53,13 +55,15 @@
                 <div class="modal-body">
                     <input type="hidden" name="table" value="{{ table }}"/>
                     <input type="hidden" name="id" value="{{ id }}"/>
-                    {% if includeAllButton %}
+                    {%- if includeAllButton %}
+
                         <div class="custom-control custom-checkbox form-group">
                             <input type="checkbox" class="custom-control-input" id="include_all" name="include_all">
                             <label class="custom-control-label" for="include_all">Include pending/correct
                                 submissions</label>
                         </div>
-                    {% endif %}
+                    {%- endif %}
+
                     <div class="custom-control custom-checkbox form-group">
                         <input type="checkbox" class="custom-control-input" id="full_rejudge" name="full_rejudge">
                         <label class="custom-control-label" for="full_rejudge">Create rejudging</label>

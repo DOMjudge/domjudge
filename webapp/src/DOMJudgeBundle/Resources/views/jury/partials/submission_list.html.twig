@@ -7,9 +7,11 @@
         <thead class="thead-light">
         <tr>
             <th scope="col">ID</th>
-            {% if showContest %}
+            {%- if showContest %}
+
                 <th scope="col">contest</th>
-            {% endif %}
+            {%- endif %}
+
             <th scope="col">time</th>
             <th scope="col">team</th>
             <th scope="col">problem</th>
@@ -17,30 +19,35 @@
             <th scope="col">result</th>
             <th scope="col">verified</th>
             <th scope="col">by</th>
-            {% if rejudging is defined %}
+            {%- if rejudging is defined %}
+
                 <th scope="col">old result</th>
-            {% endif %}
-            {% if showTestcases is defined and showTestcases %}
+            {%- endif %}
+            {%- if showTestcases is defined and showTestcases %}
+
                 <th scope="col" class="not-sortable not-searchable">test results</th>
-            {% endif %}
+            {%- endif %}
+
         </tr>
         </thead>
         <tbody>
-        {% for submission in submissions %}
-            {% if rejudging is defined %}
-                {% set link = path('jury_submission', {submitId: submission.submitid, rejudgingid: rejudging.rejudgingid}) %}
-            {% else %}
-                {% set link = path('jury_submission', {submitId: submission.submitid}) %}
-            {% endif %}
+        {%- for submission in submissions %}
+            {%- if rejudging is defined %}
+                {%- set link = path('jury_submission', {submitId: submission.submitid, rejudgingid: rejudging.rejudgingid}) %}
+            {%- else %}
+                {%- set link = path('jury_submission', {submitId: submission.submitid}) %}
+            {%- endif %}
+
             <tr class="{% if not submission.valid %}ignore{% endif %}"
                 data-problem-id="{{ submission.probid }}"
                 data-team-id="{{ submission.teamid }}"
                 data-language-id="{{ submission.langid }}"
                 data-submission-id="{{ submission.submitid }}">
                 <td><a href="{{ link }}">s{{ submission.submitid }}</a></td>
-                {% if showContest %}
+                {%- if showContest %}
                     <td><a href="{{ link }}">c{{ submission.cid }}</a></td>
-                {% endif %}
+                {%- endif %}
+
                 <td><a href="{{ link }}">{{ submission.submittime | printtime(null, submission.contest) }}</a></td>
                 <td><a href="{{ link }}" title="t{{ submission.teamid }}">{{ submission.team.name | truncate(30) }}</a>
                 </td>
@@ -49,78 +56,79 @@
                 </td>
                 <td class="langid"><a href="{{ link }}"
                                       title="{{ submission.language.name }}">{{ submission.langid }}</a></td>
-                <td>
-                    <a href="{{ link }}">
-                        {% if submission.submittime > submission.contest.endtime %}
+                <td><a href="{{ link }}">
+                        {%- if submission.submittime > submission.contest.endtime %}
                             {{ 'too-late' | printResult(true, true) }}
-                            {% if submission.judgings.first is not empty and submission.judgings.first.result is not empty %}
+                            {%- if submission.judgings.first is not empty and submission.judgings.first.result is not empty %}
                                 ({{ submission.judgings.first.result | printResult(true, true) }})
-                            {% endif %}
-                        {% elseif submission.judgings.first is empty or submission.judgings.first.result is empty %}
-                            {% if submission.judgehost %}
-                                {{ '' | printResult(true, true) }}
-                            {% else %}
-                                {{ 'queued' | printResult(true, true) }}
-                            {% endif %}
-                        {% else %}
-                            {{ submission.judgings.first.result | printResult(true, true) }}
-                        {% endif %}
-                        {% if submission.stillBusy %}
+                            {%- endif %}
+                        {%- elseif submission.judgings.first is empty or submission.judgings.first.result is empty %}
+                            {%- if submission.judgehost %}
+                                {{- '' | printResult(true, true) -}}
+                            {%- else %}
+                                {{- 'queued' | printResult(true, true) -}}
+                            {%- endif %}
+                        {%- else %}
+                            {{- submission.judgings.first.result | printResult(true, true) -}}
+                        {%- endif %}
+                        {%- if submission.stillBusy -%}
                             (&hellip;)
-                        {% endif %}
-                    </a>
-                </td>
-                {% set claim = false %}
+                        {%- endif -%}
+                </a></td>
+                {%- set claim = false %}
                 {%- if submission.judgings.first is empty or submission.judgings.first.result is empty -%}
-                    {% set verified = '' %}
-                    {% set juryMember = '' %}
-                {%- else -%}
-                    {% set juryMember = submission.judgings.first.juryMember %}
-                    {% if submission.judgings.first.verified %}
-                        {% set verified = 'yes' %}
-                    {% else %}
-                        {% set verified = 'no' %}
-                        {% if submission.judgings.first.juryMember is empty %}
-                            {% set claim = true %}
-                        {% else %}
-                            {% set verified = 'claimed' %}
-                        {% endif %}
-                    {% endif %}
-                {%- endif -%}
-                {%- if claim -%}
-                    {% set claimArg = {claim: 1} %}
-                {%- else -%}
-                    {% set claimArg = {unclaim: 1} %}
-                {%- endif -%}
+                    {%- set verified = '' %}
+                    {%- set juryMember = '' %}
+                {%- else %}
+                    {%- set juryMember = submission.judgings.first.juryMember %}
+                    {%- if submission.judgings.first.verified %}
+                        {%- set verified = 'yes' %}
+                    {%- else %}
+                        {%- set verified = 'no' %}
+                        {%- if submission.judgings.first.juryMember is empty %}
+                            {%- set claim = true %}
+                        {%- else %}
+                            {%- set verified = 'claimed' %}
+                        {%- endif %}
+                    {%- endif %}
+                {%- endif %}
+                {%- if claim %}
+                    {%- set claimArg = {claim: 1} %}
+                {%- else %}
+                    {%- set claimArg = {unclaim: 1} %}
+                {%- endif %}
+
                 <td><a href="{{ link }}">{{ verified }}</a></td>
                 <td>
-                    {% if rejudging is defined %}
-                        {% set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid, rejudgingid: rejudging.rejudgingid})) %}
-                    {% else %}
-                        {% set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid})) %}
-                    {% endif %}
-                    {% if claim %}
+                    {%- if rejudging is defined %}
+                        {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid, rejudgingid: rejudging.rejudgingid})) %}
+                    {%- else %}
+                        {%- set claimLink = path('jury_submission', claimArg | merge({submitId: submission.submitid})) %}
+                    {%- endif %}
+                    {%- if claim -%}
                         <a class="btn btn-outline-secondary btn-sm" href="{{ claimLink }}">claim</a>
-                    {% elseif (not submission.judgings.first or not submission.judgings.first.verified) and juryMember == app.user.username %}
+                    {%- elseif (not submission.judgings.first or not submission.judgings.first.verified) and juryMember == app.user.username -%}
                         <a class="btn btn-outline-secondary btn-sm" href="{{ claimLink }}">unclaim</a>
-                    {% else %}
+                    {%- else -%}
                         <a href="{{ link }}">{{ juryMember }}</a>
-                    {% endif %}
+                    {%- endif -%}
                 </td>
-                {% if rejudging is defined %}
-                    <td>
-                        <a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">
+                {%- if rejudging is defined %}
+
+                    <td><a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">
                             {{ submission.oldResult | printResult(true, true) }}
-                        </a>
-                    </td>
-                {% endif %}
-                {% if showTestcases is defined and showTestcases %}
+                    </a></td>
+                {%- endif %}
+                {%- if showTestcases is defined and showTestcases %}
+
                     <td class="testcase-results">
-                        {{ submission | testcaseReults }}
+                        {{- submission | testcaseReults -}}
                     </td>
-                {% endif %}
+                {%- endif %}
+
             </tr>
-        {% endfor %}
+        {%- endfor %}
+
         </tbody>
     </table>
 

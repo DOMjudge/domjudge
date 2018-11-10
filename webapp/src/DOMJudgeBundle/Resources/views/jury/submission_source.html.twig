@@ -13,34 +13,41 @@
     <h1>
         Source code for submission
         <a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">s{{ submission.submitid }}</a>
-        {% if submission.origsubmitid %}
+        {%- if submission.origsubmitid %}
             (resubmit of
             <a href="{{ path('jury_submission', {submitId: submission.origsubmitid}) }}">s{{ submission.origsubmitid }}</a>)
-        {% endif %}
+        {%- endif %}
+
     </h1>
 
-    {% if submission.entryPoint %}
+    {%- if submission.entryPoint %}
+
         <p><b>Entry point</b>: {{ submission.entryPoint }}</p>
-    {% endif %}
+    {%- endif %}
 
-    {% if oldSubmission is not null %}
+    {%- if oldSubmission is not null %}
+
         <p><a href="#diff">Go to diff to previous submission</a></p>
-    {% endif %}
+    {%- endif %}
 
-    {% if submission.origsubmitid %}
+    {%- if submission.origsubmitid %}
+
         <p><a href="#origdiff">Go to diff to original submission</a></p>
-    {% endif %}
+    {%- endif %}
 
     <ul class="nav nav-tabs source-tab-nav">
-        {% for file in files %}
+        {%- for file in files %}
+
             <li class="nav-item">
                 <a class="nav-link {% if loop.first %}active{% endif %}" data-toggle="tab"
                    href="#source-{{ file.rank }}" role="tab">{{ file.filename }}</a>
             </li>
-        {% endfor %}
+        {%- endfor %}
+
     </ul>
     <div class="tab-content source-tab">
-        {% for file in files %}
+        {%- for file in files %}
+
             <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="source-{{ file.rank }}"
                  role="tabpanel">
                 <div class="mb-1">
@@ -56,10 +63,12 @@
 
                 {{ file | codeEditor(submission.language.aceLanguage) }}
             </div>
-        {% endfor %}
+        {%- endfor %}
+
     </div>
 
-    {% if oldSubmission is not null %}
+    {%- if oldSubmission is not null %}
+
         <h2 id="diff" class="mt-3">
             Diff to submission
             <a href="{{ path('jury_submission', {submitId: oldSubmission.submitid}) }}">
@@ -67,10 +76,11 @@
             </a>
         </h2>
 
-        {% include '@DOMJudge/jury/partials/submission_diff.html.twig' with {oldSubmission: oldSubmission, oldFiles: oldFiles, oldFileStats: oldFileStats} %}
-    {% endif %}
+        {%- include '@DOMJudge/jury/partials/submission_diff.html.twig' with {oldSubmission: oldSubmission, oldFiles: oldFiles, oldFileStats: oldFileStats} %}
+    {%- endif %}
 
-    {% if originalSubmission is not null %}
+    {%- if originalSubmission is not null %}
+
         <h2 id="origdiff" class="mt-3">
             Diff to original submission
             <a href="{{ path('jury_submission', {submitId: originalSubmission.submitid}) }}">
@@ -78,7 +88,7 @@
             </a>
         </h2>
 
-        {% include '@DOMJudge/jury/partials/submission_diff.html.twig' with {oldSubmission: originalSubmission, oldFiles: originalFiles, oldFileStats: originalFileStats} %}
-    {% endif %}
+        {%- include '@DOMJudge/jury/partials/submission_diff.html.twig' with {oldSubmission: originalSubmission, oldFiles: originalFiles, oldFileStats: originalFileStats} %}
+    {%- endif %}
 
 {% endblock %}

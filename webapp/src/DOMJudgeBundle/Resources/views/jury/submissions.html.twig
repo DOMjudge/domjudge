@@ -16,12 +16,14 @@
 
     Show submissions:
     <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
-        {% for idx, type in viewTypes %}
+        {%- for idx, type in viewTypes %}
+
             <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
                 <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
                        {% if idx == view %}checked{% endif %}> {{ type }}
             </label>
-        {% endfor %}
+        {%- endfor %}
+
     </div>
 
     <div class="mb-3">
@@ -38,11 +40,13 @@
                         <label for="problems-filter">Filter on problem(s)</label>
                         <select class="select2 form-control" multiple data-filter-field="problem-id"
                                 data-ajax-url="{{ path('legacy.jury_ajax_problems', {select2: true}) }}">
-                            {% for problem in filteredProblems %}
+                            {%- for problem in filteredProblems %}
+
                                 <option value="{{ problem.probid }}" selected>
                                     {{ problem.name }} (p{{ problem.probid }})
                                 </option>
-                            {% endfor %}
+                            {%- endfor %}
+
                         </select>
                     </div>
                 </div>
@@ -52,11 +56,13 @@
                         <label for="problems-filter">Filter on language(s)</label>
                         <select class="select2 form-control" multiple data-filter-field="language-id"
                                 data-ajax-url="{{ path('legacy.jury_ajax_languages', {select2: true}) }}">
-                            {% for language in filteredLanguages %}
+                            {%- for language in filteredLanguages %}
+
                                 <option value="{{ language.langid }}" selected>
                                     {{ language.name }} ({{ language.langid }})
                                 </option>
-                            {% endfor %}
+                            {%- endfor %}
+
                         </select>
                     </div>
                 </div>
@@ -66,11 +72,13 @@
                         <label for="problems-filter">Filter on team(s)</label>
                         <select class="select2 form-control" multiple data-filter-field="team-id"
                                 data-ajax-url="{{ path('legacy.jury_ajax_teams', {select2: true}) }}">
-                            {% for team in filteredTeams %}
+                            {%- for team in filteredTeams %}
+
                                 <option value="{{ team.teamid }}" selected>
                                     {{ team.name }} (t{{ team.teamid }})
                                 </option>
-                            {% endfor %}
+                            {%- endfor %}
+
                         </select>
                     </div>
                 </div>
@@ -82,7 +90,7 @@
         </div>
     </div>
 
-    {% include '@DOMJudge/jury/partials/submission_list.html.twig' with {showTestcases: true} %}
+    {%- include '@DOMJudge/jury/partials/submission_list.html.twig' with {showTestcases: true} %}
 
 {% endblock %}
 
