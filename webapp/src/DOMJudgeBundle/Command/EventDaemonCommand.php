@@ -134,6 +134,7 @@ class EventDaemonCommand extends ContainerAwareCommand
             return 1;
         }
 
+        $selectedContestId      = $selectedContest->getCid();
         $initialEventsLoaded    = false;
         $contestStartOld        = 'TBC';
         $contestStartEnabledOld = 'TBC';
@@ -162,6 +163,9 @@ class EventDaemonCommand extends ContainerAwareCommand
         while (true) {
             // Make sure we clear the entity manager class, to make sure we have fresh objects
             $this->entityManager->clear();
+
+            // Reload the contest to get the new data
+            $selectedContest = $this->entityManager->getRepository(Contest::class)->find($selectedContestId);
 
             // Check whether we have received an exit signal
             if (function_exists('pcntl_signal_dispatch')) {
