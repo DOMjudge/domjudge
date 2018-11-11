@@ -5,7 +5,7 @@
         <th scope="col">ID</th>
         {%- if contests | length > 1 %}
 
-        <th scope="col">contest</th>
+            <th scope="col">contest</th>
         {%- endif %}
 
         <th scope="col">time</th>
@@ -14,7 +14,7 @@
         <th scope="col">subject</th>
         {%- if queues | length > 1 %}
 
-        <th scope="col">queue</th>
+            <th scope="col">queue</th>
         {%- endif %}
 
         <th scope="col">text</th>
@@ -30,7 +30,7 @@
             <td><a href="{{ link }}">{{ clarification.clarid }}</a></td>
             {%- if contests | length > 1 %}
 
-            <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
+		<td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
             {%- endif %}
 
             <td><a href="{{ link }}">{{ clarification.submittime | printtime(null, clarification.contest) }}</a></td>
@@ -59,9 +59,9 @@
             </a></td>
             {%- if queues | length > 1 %}
 
-            <td><a href="{{ link }}">
-                {{- queues[clarification.queue]|default('') -}}
-            </a></td>
+		<td><a href="{{ link }}">
+			{{- queues[clarification.queue]|default('') -}}
+		</a></td>
             {%- endif %}
 
             <td><a href="{{ link }}">{{ clarification.summary }}</a></td>
