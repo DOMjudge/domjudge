@@ -633,7 +633,7 @@ function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = fal
     // Stop here (do not leak problem number, descriptions etc).
     // Display list of teams by group. This is targeted for World Finals.
     if (! $fdata['started'] && ! IS_JURY) {
-        $affils = $DB->q('TABLE SELECT ta.externalid, ta.name AS taname, cat.name AS catname, categoryid
+        $affils = $DB->q('TABLE SELECT ta.externalid, ta.name AS taname, cat.name AS catname, categoryid, country, t.name AS teamname
                           FROM team_affiliation ta
                           LEFT JOIN team t USING (affilid)
                           INNER JOIN contest c ON (c.cid = %i)
@@ -641,23 +641,19 @@ function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = fal
                           LEFT JOIN team_category cat USING (categoryid)
                           WHERE c.cid = %i AND (c.public = 1 OR ct.teamid IS NOT NULL)
                           AND cat.visible = 1
-                          ORDER BY catname, taname',
+                          ORDER BY taname',
                          $cdata['cid'], $cdata['cid']);
 
-        $lastCat = null;
         $lastAffil = null;
         $numCats = 0;
         foreach ($affils as $affil) {
-            if ($lastAffil == $affil['taname']) {
-                continue;
-            }
-            if ($affil['categoryid'] != $lastCat) {
-                if ($lastCat != null) {
+            if ($affil['taname'] != $lastAffil) {
+                if ($lastAffil != null) {
                     echo '</ul>';
                     echo '</div>';
                     echo '</div>';
                 }
-                if ($numCats % 3 == 0) {
+                if ($numCats % 4 == 0) {
                     // close previous deck, but not for the very first one
                     if ( $numCats != 0 ) {
                         echo '</div>';
@@ -666,24 +662,31 @@ function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = fal
                     echo '<div class="card-deck">';
                 }
                 $numCats++;
-                $lastCat = $affil['categoryid'];
+                $lastAffil = $affil['taname'];
+                $affillogo = 'images/affiliations/' .  urlencode((string)$affil['externalid']) . '.png';
+                $logoHTML = '';
+                if (is_readable(WEBAPPDIR.'/web/'.$affillogo)) {
+                    $logoHTML = '<img src="../' . $affillogo . '" style="padding-right: 10px;width:32px;" />';
+                }
+                $countryHTML = '';
+                $countryflag = 'images/countries/' . urlencode($affil['country']) . '.png';
+                if (is_readable(WEBAPPDIR.'/web/'.$countryflag)) {
+                    $countryHTML = '<img src="../' . $countryflag . '"' .
+                        ' alt="'   . specialchars($affil['country']) . '"' .
+                        ' title="' . specialchars($affil['country']) . '" />';
+                }
                 echo '<div class="card" style="font-family: Roboto, sans-serif;">';
-                echo '<div class="card-header">' . $affil['catname'] . '</div>';
+                $affil['header'] = $affil['taname'] . '<br/>' . $logoHTML . $countryHTML;
+                echo '<div class="card-header" style="text-align:center;">' . $affil['header'] . '</div>';
                 echo '<div class="card-body">';
                 echo '<ul class="list-group list-group-flush">';
             }
-            $affillogo = 'images/affiliations/' .  urlencode((string)$affil['externalid']) . '.png';
-            $logoHTML = '';
-            if (is_readable(WEBAPPDIR.'/web/'.$affillogo)) {
-                $logoHTML = '<img src="../' . $affillogo . '" style="padding-right: 10px;" />';
-            }
-            print '<li class="list-group-item">' . $logoHTML . $affil['taname'] . '</li>';
-            $lastAffil = $affil['taname'];
+            print '<li class="list-group-item">' . $affil['teamname'] . '</li>';
         }
         echo '</ul>';
         echo '</div>';
         echo '</div>';
-        while ($numCats % 3 != 0) {
+        while ($numCats % 4 != 0) {
             $numCats++;
             echo '<div class="card" style="border: none;"></div>';
         }
