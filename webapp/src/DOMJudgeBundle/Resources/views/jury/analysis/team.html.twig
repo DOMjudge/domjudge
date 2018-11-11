@@ -138,7 +138,7 @@ $(function(){
             .call(chart);
         // Clicking on one of the bars takes you to the judgment
         chart.discretebar.dispatch.on('elementClick', function(e) {
-          window.location = "{{ path('jury_submission_by_judging', {'jid': '' }) }}" + e.data.id;
+          window.location = "{{ path('jury_submission_by_judging', {'jid': '_JUDGING_ID_' }) }}".replace('_JUDGING_ID_', e.data.id);
         });
         // More useful tooltip
         chart.tooltip.contentGenerator(function (obj) {
