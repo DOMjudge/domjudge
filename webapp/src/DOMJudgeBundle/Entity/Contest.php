@@ -390,6 +390,9 @@ class Contest
      */
     public function getStartTimeObject()
     {
+        if (!$this->getStarttimeEnabled()) {
+            return null;
+        }
         return $this->getStarttimeString() ? new \DateTime($this->getStarttimeString()) : null;
     }
 
