@@ -73,9 +73,10 @@ class ContestController extends AbstractRestController
      * @Rest\Patch("/{id}")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
-     * @param string $id
+     * @param string  $id
      * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Exception
      * @SWG\Parameter(
      *     name="id",
      *     in="path",
@@ -116,11 +117,13 @@ class ContestController extends AbstractRestController
         $contest  = $this->getContestWithId($request, $id);
         $response = null;
         $now      = Utils::now();
+        $idField  = $this->getIdField();
+        $idGetter = sprintf('get%s', ucfirst($idField));
         if (!$request->request->has('id')) {
             $response = new JsonResponse('Missing "id" in request.', Response::HTTP_BAD_REQUEST);
         } elseif (!$request->request->has('start_time')) {
             $response = new JsonResponse('Missing "start_time" in request.', Response::HTTP_BAD_REQUEST);
-        } elseif ($request->request->get('id') != $contest->getCid()) {
+        } elseif ($request->request->get('id') != $contest->{$idGetter}()) {
             $response = new JsonResponse('Invalid "id" in request.', Response::HTTP_BAD_REQUEST);
         } elseif (!$request->request->has('force') &&
             $contest->getStarttime() != null &&
