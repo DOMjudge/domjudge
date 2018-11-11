@@ -117,7 +117,7 @@ class ContestController extends AbstractRestController
         $contest  = $this->getContestWithId($request, $id);
         $response = null;
         $now      = Utils::now();
-        $idField  = $this->getIdField();
+        $idField  = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
         $idGetter = sprintf('get%s', ucfirst($idField));
         if (!$request->request->has('id')) {
             $response = new JsonResponse('Missing "id" in request.', Response::HTTP_BAD_REQUEST);
