@@ -30,7 +30,7 @@
             <td><a href="{{ link }}">{{ clarification.clarid }}</a></td>
             {%- if contests | length > 1 %}
 
-		<td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
+                <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
             {%- endif %}
 
             <td><a href="{{ link }}">{{ clarification.submittime | printtime(null, clarification.contest) }}</a></td>
@@ -59,9 +59,9 @@
             </a></td>
             {%- if queues | length > 1 %}
 
-		<td><a href="{{ link }}">
-			{{- queues[clarification.queue]|default('') -}}
-		</a></td>
+                <td><a href="{{ link }}">
+                    {{- queues[clarification.queue]|default('') -}}
+                </a></td>
             {%- endif %}
 
             <td><a href="{{ link }}">{{ clarification.summary }}</a></td>

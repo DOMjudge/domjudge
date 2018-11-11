@@ -73,7 +73,7 @@
                 {%- if num_actions > 0 %}
                     {%- for i in 1..num_actions %}
 
-			<th scope="col"></th>
+                        <th scope="col"></th>
                     {%- endfor %}
                 {%- endif %}
 
@@ -89,9 +89,9 @@
 
                         <td class="{{ item.cssclass|default('') }}"
                             {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
-			    {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
+                            {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
                             <a href="{{ item.link|default(row.link) }}"
-			       {%- if item.linktitle is defined %} title="{{ item.linktitle }}"{% endif %}>
+                               {%- if item.linktitle is defined %} title="{{ item.linktitle }}"{% endif %}>
                                 {{- (item.value|default(item.default|default('')))|raw -}}
                             </a>
                         </td>
