@@ -489,7 +489,7 @@ class JudgehostController extends FOSRestController
             // Log the judging create event, but only if we are not doing a rejudging
             if (!$isRejudge) {
                 $this->eventLogService->log('judging', $judging->getJudgingid(),
-                                            EventLogService::ACTION_CREATE, $result['cid']);
+                                            EventLogService::ACTION_CREATE, $judging->getContest()->getCid());
             }
 
             $result['judgingid'] = $judging->getJudgingid();
