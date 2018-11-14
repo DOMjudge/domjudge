@@ -375,8 +375,9 @@ class ContestController extends AbstractRestController
                     }
                     // No new events, check if it's time for a keep alive.
                     $now = Utils::now();
-                    if ($lastUpdate + 60 < $now) {
-                        # Send keep alive every 60s. Guarantee according to spec is 120s.
+                    if ($lastUpdate + 10 < $now) {
+                        # Send keep alive every 10s. Guarantee according to spec is 120s.
+			# However, nginx drops the connection if we don't update for 60s.
                         echo "\n";
                         ob_flush();
                         flush();
