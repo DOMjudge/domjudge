@@ -85,7 +85,7 @@ sudo ./dj_make_chroot -a amd64
 cd $HOME
 composer -n require justinrainbow/json-schema
 PATH=${PATH}:${HOME}/vendor/bin
-git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
+git clone -b pre-new-scoreboard-api-format --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
 CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
 
 # Database changes to make the REST API and event feed match better.
