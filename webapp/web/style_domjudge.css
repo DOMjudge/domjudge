@@ -16,7 +16,7 @@
     color: silver
 }
 
-.data-table td.ignore {
+.data-table .ignore {
     text-decoration: line-through;
 }
 

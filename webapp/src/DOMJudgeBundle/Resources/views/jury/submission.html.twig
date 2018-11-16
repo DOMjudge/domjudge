@@ -51,7 +51,7 @@
                 <input type="hidden" name="val" value="{% if submission.valid %}0{% else %}1{% endif %}"/>
                 <input type="submit" class="btn btn-outline-secondary btn-sm"
                        value="{{ action | upper }} this submission"
-                       onclick="return confirm('Really {{ action }} submissions {{ submission.submitid }}?');"/>
+                       onclick="return confirm('Really {{ action }} submission s{{ submission.submitid }}?');"/>
             </form>
         {% endif %}
 
