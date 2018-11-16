@@ -5,6 +5,10 @@ Version 6.0.3 - DEV
  - Fix problem name sanitizing in zip upload.
  - Improve error detection while uploading test cases.
  - Don't break judgedaemon if in/output are missing for a testcase.
+ - Fix scoreboard summary row when affiliation logo's are enabled.
+ - Do not try to set session params, fixes notices in newer PHP versions.
+ - Remove mention of obsolete AUTH_METHOD configuration variable.
+ - Fix problem import from Baylor after API change.
 
 Version 6.0.2 - 22 October 2018
 -------------------------------
