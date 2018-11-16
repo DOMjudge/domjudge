@@ -90,10 +90,10 @@
                         <td class="{{ item.cssclass|default('') }}"
                             {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
                             {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
-                            <a href="{{ item.link|default(row.link) }}"
-                               {%- if item.linktitle is defined %} title="{{ item.linktitle }}"{% endif %}>
+                            {%- if item.link is defined or row.link is defined %}<a href="{{ item.link|default(row.link) }}"
+                               {%- if item.linktitle is defined %} title="{{ item.linktitle }}"{% endif %}>{% endif %}
                                 {{- (item.value|default(item.default|default('')))|raw -}}
-                            </a>
+                            {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
                         </td>
                     {%- endfor %}
                     {%- for action in row.actions %}
