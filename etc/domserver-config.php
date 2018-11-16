@@ -2,38 +2,6 @@
 
 require_once("common-config.php");
 
-// Authentication scheme to be used for teams. The following methods
-// are supported:
-// IPADDRESS
-//   Use the computer's IP address to authenticate a team. This
-//   removes the hassle of logging in with user/pass, but requires
-//   that each team has a unique, fixed IP address, that cannot be
-//   spoofed, e.g. by logging in on another team's computer.
-// PHP_SESSIONS
-//   Use PHP sessions with user/password authentication. This allows
-//   teams to login from different machines and might be useful for
-//   online contests or programming courses.
-// LDAP
-//   Authenticate against one or more LDAP servers. Use PHP sessions
-//   after successful authentication. This option may be useful to
-//   integrate DOMjudge (e.g. as courseware) into a larger system.
-// EXTERNAL
-//   Use authentication information provided by Apache. This enables
-//   use of any authentication module available for Apache, and will
-//   get the username from the REMOTE_USER environment variable.
-// FIXED
-//   Use one fixed user that is automatically logged in. This
-//   can be useful e.g. for a demo or testing environment. Define
-//   FIXED_USER to the user to be used, e.g.:
-//   define('FIXED_USER', 'domjudge');
-define('AUTH_METHOD', 'PHP_SESSIONS');
-
-// List of LDAP servers (space separated) to query when using the LDAP
-// authentication method. Secondly, DN to search in, where '&' will be
-// replaced by the authtoken as set in the team's DOMjudge database entry.
-define('LDAP_SERVERS', 'ldaps://ldap1.example.com/ ldaps://ldap2.example.com/');
-define('LDAP_DNQUERY', 'CN=&,OU=users,DC=example,DC=com');
-
 // Cost for the password hashing function. Increase for more secure
 // hashes and decrease for speed.
 define('PASSWORD_HASH_COST', 10);

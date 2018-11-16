@@ -114,40 +114,10 @@ require(LIBWWWDIR . '/header.php');
 
 <h1>Manage user passwords</h1>
 
-<?php
-
-switch (AUTH_METHOD):
-
-case 'IPADDRESS':
-?>
-<p>You are using IP-address based authentication. Note that resetting the
-password of a user implies instantly revoking any current
-access that user may have to their userpage until they enter their newly
-generated password.</p>
-<?php
-break;
-case 'PHP_SESSIONS':
-?>
-<p>You are using PHP sessions based authentication. Generating a new password
+<p>Generating a new password
 for a user will not affect existing logged-in sessions.</p>
-<?php
-break;
-case 'FIXED':
-case 'LDAP':
-case 'EXTERNAL':
-?>
-<p>You are using the '<?php echo AUTH_METHOD; ?>' authentication scheme.
-This scheme does not support resetting passwords (within DOMjudge).</p>
-<?php
-require(LIBWWWDIR . '/footer.php');
-exit;
-break;
-default:
-?>
-<p>Unknown authentication scheme in use.</p>
-<?php
-endswitch;
 
+<?php
 echo addForm($pagename);
 ?>
 <p>Generate a random password for:<br/>
