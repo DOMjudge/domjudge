@@ -29,7 +29,7 @@ $started = checkrole('jury') || $fdata['started'];
             <a class="nav-link" href="scoreboard.php"><i class="fas fa-list-ol"></i> Scoreboard</a>
           </li>
       <li class="nav-item">
-          <a class="nav-link" href="http://docs" target="_blank"><i class="fas fa-book"></i> Docs</a>
+          <a class="nav-link" href="https://docs" target="_blank"><i class="fas fa-book"></i> Docs</a>
       </li>
 <?php if (checkrole('jury') || checkrole('balloon')): ?>
           <li class="nav-item">
