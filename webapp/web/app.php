@@ -7,6 +7,12 @@ if (PHP_VERSION_ID < 70000) {
     include_once __DIR__.'/../var/bootstrap.php.cache';
 }
 
+$dotenvFile = __DIR__ . '/../../.env';
+if (is_readable($dotenvFile)) {
+    $dotenv = new \Symfony\Component\Dotenv\Dotenv();
+    $dotenv->load($dotenvFile);
+}
+
 $kernel = new AppKernel('prod', false);
 if (PHP_VERSION_ID < 70000) {
     $kernel->loadClassCache();
@@ -18,7 +24,9 @@ if (PHP_VERSION_ID < 70000) {
 
 // Uncomment this if using proxies and you need the real client ip address
 // 10.0.0.0/8 should be set to the ip address of your trusted proxies
-// Request::setTrustedProxies(['10.0.0.0/8'], Request::HEADER_X_FORWARDED_ALL);
+if (getenv('TRUSTED_PROXY')) {
+    Request::setTrustedProxies([getenv('TRUSTED_PROXY')], Request::HEADER_X_FORWARDED_ALL);
+}
 $request = Request::createFromGlobals();
 $response = $kernel->handle($request);
 $response->send();

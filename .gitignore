@@ -13,3 +13,4 @@
 /cov-submit-data*.sh
 *.o
 /components
+/.env
