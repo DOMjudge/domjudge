@@ -28,6 +28,9 @@ $started = checkrole('jury') || $fdata['started'];
       <li class="nav-item<?=($pagename === 'scoreboard.php'?' active':'')?>">
             <a class="nav-link" href="scoreboard.php"><i class="fas fa-list-ol"></i> Scoreboard</a>
           </li>
+      <li class="nav-item">
+          <a class="nav-link" href="http://docs" target="_blank"><i class="fas fa-book"></i> Docs</a>
+      </li>
 <?php if (checkrole('jury') || checkrole('balloon')): ?>
           <li class="nav-item">
             <a class="nav-link" href="../jury"><i class="fas fa-arrow-right"></i> Jury</a>
