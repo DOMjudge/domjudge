@@ -1,0 +1,22 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block title %}Balloons - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Balloons</h1>
+
+    {% for cid,cname in frozen_contests %}
+        <div class="alert alert-info">Scoreboard of c{{ cid }} ({{ cname }}) is now frozen.</div>
+    {% endfor %}
+
+    {{ macros.table(balloons, table_fields, num_actions) }}
+
+{% endblock %}

@@ -26,7 +26,7 @@ if (logged_in()) {
     } elseif (checkrole('team', false)) {
         $target = 'team/';
     } elseif (checkrole('balloon')) {
-        $target = 'jury/balloons.php';
+        $target = 'jury/balloons';
     }
 }
 

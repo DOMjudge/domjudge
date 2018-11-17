@@ -13,7 +13,7 @@
 }
 
 .disabled {
-    color: silver
+    color: silver !important;
 }
 
 .data-table .ignore {

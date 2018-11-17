@@ -71,6 +71,15 @@ class JuryMiscController extends Controller
     }
 
     /**
+     * @Route("/jury/balloons.php", name="jury_balloons_php_redirect")
+     */
+    public function balloonsRedirectAction(Request $request)
+    {
+        return $this->redirectToRoute('jury_balloons');
+    }
+
+
+    /**
      * @Route("/jury/print", methods={"GET"}, name="jury_print")
      * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
      */

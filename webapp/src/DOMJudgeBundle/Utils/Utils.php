@@ -596,4 +596,9 @@ class Utils
 
         return $difftext;
     }
+
+    public static function balloonSym(string $color) : string
+    {
+        return sprintf('<i style="color: %s" class="fas fa-golf-ball"></i>', self::specialchars($color));
+    }
 }

@@ -5,7 +5,7 @@ global $updates;
 <a href="index.php" accesskey="h"><i class="fas fa-home"></i> home</a>
 <?php if (checkrole('balloon')) {
     ?>
-<a href="balloons.php" accesskey="b"><i class="fas fa-map-marker-alt"></i> balloons</a>
+<a href="balloons" accesskey="b"><i class="fas fa-map-marker-alt"></i> balloons</a>
 <?php
 } ?>
 <?php if (checkrole('jury')) {
