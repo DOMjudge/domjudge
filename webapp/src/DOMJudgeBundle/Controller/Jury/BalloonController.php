@@ -118,8 +118,7 @@ class BalloonController extends Controller
 
             $balloonId = $balloon->getBalloonId();
 
-            // this costs a lot of queries... proper fix?
-            $stime = $balloon->getSubmission()->getSubmitTime();
+            $stime = $balloonsData['submittime'];
             $contest = $balloonsData['cid'];
 
             if ( isset($freezetimes[$contest]) && $stime >= $freezetimes[$contest]) {
@@ -175,6 +174,7 @@ class BalloonController extends Controller
         } 
 
         return $this->render('@DOMJudge/jury/balloons.html.twig', [
+            'refresh' => ['after' => 60, 'url' => $this->generateUrl('jury_balloons')],
             'frozen_contests' => $frozen_contests,
             'balloons' => $balloons_table,
             'table_fields' => $table_fields,
