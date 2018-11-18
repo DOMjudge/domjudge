@@ -90,8 +90,9 @@
                         <td class="{{ item.cssclass|default('') }}"
                             {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
                             {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
-                            {%- if item.link is defined or row.link is defined %}<a href="{{ item.link|default(row.link) }}"
-                               {%- if item.linktitle is defined %} title="{{ item.linktitle }}"{% endif %}>{% endif %}
+                            {%- if item.link is defined %}<a href="{{ item.link }}"
+                               {%- if item.linktitle is defined %} title="{{ item.linktitle }}"{% endif %}>
+                            {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
                                 {{- (item.value|default(item.default|default('')))|raw -}}
                             {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
                         </td>
@@ -119,7 +120,8 @@
         $().ready(function () {
             $('.data-table').DataTable({
                 "paging": false,
-                "ordering": true,
+                "searching": {{ options.searching | default('true') }},
+                "ordering": {{ options.ordering | default('true') }},
                 "order": [[ {{ default_sort }}, '{{ default_sort_order }}']],
                 "info": false,
                 "autoWidth": true,

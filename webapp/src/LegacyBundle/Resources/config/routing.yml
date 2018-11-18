@@ -18,8 +18,12 @@ legacy.jury_judgehost:
     path: /jury/judgehost.php
 legacy.jury_internal_errors:
     path: /jury/internal_errors.php
+legacy.jury_internal_error:
+    path: /jury/internal_error.php
 legacy.jury_judgehost_restrictions:
     path: /jury/judgehost_restrictions.php
+legacy.jury_judgehost_restriction:
+    path: /jury/judgehost_restriction.php
 legacy.jury_clarification:
     path: /jury/clarification.php
 legacy.jury_language:
@@ -53,8 +57,6 @@ legacy.jury_refresh_cache:
     path: /jury/refresh_cache.php
 legacy.jury_check_judgings:
     path: /jury/check_judgings.php
-legacy.jury_auditlog:
-    path: /jury/auditlog.php
 
 
 legacy.jury_delete:
