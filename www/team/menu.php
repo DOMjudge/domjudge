@@ -31,6 +31,9 @@ $started = checkrole('jury') || $fdata['started'];
       <li class="nav-item">
           <a class="nav-link" href="https://docs" target="_blank"><i class="fas fa-book"></i> Docs</a>
       </li>
+      <li class="nav-item">
+          <a class="nav-link" href="team-manual.pdf"><i class="fas fa-file-pdf"></i> Team manual</a>
+      </li>
 <?php if (checkrole('jury') || checkrole('balloon')): ?>
           <li class="nav-item">
             <a class="nav-link" href="../jury"><i class="fas fa-arrow-right"></i> Jury</a>
