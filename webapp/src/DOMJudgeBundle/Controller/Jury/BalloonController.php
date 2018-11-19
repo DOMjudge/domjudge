@@ -90,6 +90,10 @@ class BalloonController extends Controller
         // Loop once over the results to get totals and awards
         $TOTAL_BALLOONS = $AWARD_BALLOONS = [];
         foreach ($balloons as $balloonsData) {
+            if ( $balloonsData['color'] === null ) {
+                continue;
+            }
+
             $TOTAL_BALLOONS[$balloonsData['teamid']][$balloonsData['cid']."-".$balloonsData['probshortname']] =
                 Utils::balloonSym($balloonsData['color']);
 
@@ -120,6 +124,11 @@ class BalloonController extends Controller
 
             $stime = $balloonsData['submittime'];
             $contest = $balloonsData['cid'];
+            $color = $balloonsData['color'];
+
+            if ( $color === null ) {
+                continue;
+            }
 
             if ( isset($freezetimes[$contest]) && $stime >= $freezetimes[$contest]) {
                 continue;
@@ -127,7 +136,7 @@ class BalloonController extends Controller
 
             $balloondata['balloonid']['value'] = $balloonId;
             $balloondata['time']['value'] = Utils::printtime($stime, $timeFormat);
-            $balloondata['solved']['value'] = Utils::balloonSym($balloonsData['color']) . " " . $balloonsData['probshortname'];
+            $balloondata['solved']['value'] = Utils::balloonSym($color) . " " . $balloonsData['probshortname'];
             $balloondata['team']['value'] = "t" . $balloonsData['teamid'] . ": " . $balloonsData['teamname'];
             $balloondata['location']['value'] = $balloonsData['room'];
             $balloondata['category']['value'] = $balloonsData['catname'];
