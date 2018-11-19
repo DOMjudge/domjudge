@@ -66,6 +66,15 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
             return true;
         }
 
+        // We also support it if it's a GET to the login route and we have only one user with the given IP addres
+        $clientIP = $this->container->get('request_stack')->getMasterRequest()->getClientIp();
+        $userRepo = $this->em->getRepository('DOMJudgeBundle:User');
+        if ($request->attributes->get('_route') === 'login' &&
+            $request->isMethod('GET') &&
+            count($userRepo->findBy(['ipaddress' => $clientIP])) === 1) {
+            return true;
+        }
+
         // Only operate if this is a POST to the login route
         return false;
     }
