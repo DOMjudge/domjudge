@@ -21,21 +21,13 @@ use Symfony\Component\HttpFoundation\Request;
 require __DIR__.'/../app/autoload.php';
 Debug::enable();
 
-$dotenvFile = __DIR__ . '/../../.env';
-if (is_readable($dotenvFile)) {
-    $dotenv = new \Symfony\Component\Dotenv\Dotenv();
-    $dotenv->load($dotenvFile);
-}
-
 $kernel = new AppKernel('dev', true);
 if (PHP_VERSION_ID < 70000) {
     $kernel->loadClassCache();
 }
 // Uncomment this if using proxies and you need the real client ip address
 // 10.0.0.0/8 should be set to the ip address of your trusted proxies
-if (getenv('TRUSTED_PROXY')) {
-    Request::setTrustedProxies([getenv('TRUSTED_PROXY')], Request::HEADER_X_FORWARDED_ALL);
-}
+// Request::setTrustedProxies(['10.0.0.0/8'], Request::HEADER_X_FORWARDED_ALL);
 $request = Request::createFromGlobals();
 $response = $kernel->handle($request);
 $response->send();
