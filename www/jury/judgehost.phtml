@@ -66,7 +66,7 @@
 	</thead>
 	<tbody>
 	{% for judging in judgingdata %}
-		{% set link	%} href="submission.php?id={{ judging.submitid }}&amp;jid={{ judging.judgingid }}"{% endset %}
+		{% set link	%} href="submissions/{{ judging.submitid }}?jid={{ judging.judgingid }}"{% endset %}
 		<tr{% if not judging.valid %} class="disabled"{% endif %}>
 		<td><a{{ link }}>j{{ judging.judgingid }}</a></td>
 		<td><a{{ link }}>{{ judging.starttime|time }}</a></td>
