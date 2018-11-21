@@ -273,6 +273,7 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
     $prop_file = 'domjudge-problem.ini';
     $yaml_file = 'problem.yaml';
     $tle_file = '.timelimit';
+    $submission_file = 'submissions.json';
 
     $ini_keys_problem = array('name', 'timelimit', 'special_run', 'special_compare');
     $ini_keys_contest_problem = array('probid', 'allow_submit', 'allow_judge', 'points', 'color');
@@ -583,6 +584,10 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
         $langs = $DB->q('KEYVALUETABLE SELECT langid, extensions
                          FROM language WHERE allow_submit = 1');
 
+        // Read submission details from optional file
+        $submission_file_string = $zip->getFromName($submission_file);
+        $submission_details = $submission_file_string===FALSE ? array() : json_decode($submission_file_string, TRUE);
+
         $njurysols = 0;
         echo "<ul>\n";
         for ($j = 0; $j < $zip->numFiles; $j++) {
@@ -635,6 +640,9 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
                     }
                 }
             }
+            if (isset($submission_details[$path]['langid'])) {
+                $langid = $submission_details[$path]['langid'];
+            }
             if (empty($langid)) {
                 echo "<li>Could not add jury solution <tt>$path</tt>: unknown language.</li>\n";
             } else {
@@ -661,16 +669,28 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
                 } elseif (!in_array($expectedResult, $results)) {
                     warning("annotated result '" . implode(', ', $results) . "' does not match directory for $filename");
                 }
+                $jury_team_id = $teamid;
+                if (isset($submission_details[$path]['team'])) {
+                    $json_team_id = $DB->q('MAYBEVALUE SELECT teamid FROM team WHERE name = %s',
+                        $submission_details[$path]['team']);
+                    if (isset($json_team_id)) {
+                        $jury_team_id = (int)$json_team_id;
+                    }
+                }
+                $entry_point = '__auto__';
+                if (isset($submission_details[$path]['entry_point'])) {
+                    $entry_point = $submission_details[$path]['entry_point'];
+                }
                 if ($totalsize <= dbconfig_get('sourcesize_limit')*1024) {
                     $sid = submit_solution(
-                        $teamid,
+                        $jury_team_id,
                         $probid,
                         $cid,
                         $langid,
                         $tmpfiles,
                         $files,
                         /* origsubmitid= */ null,
-                        /* entry_point= */ '__auto__',
+                        $entry_point,
                         null,
                         null,
                         null,
