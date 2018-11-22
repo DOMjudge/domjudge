@@ -60,7 +60,7 @@ security:
         main:
             pattern: ^/
             provider: domjudge_db_provider
-            user_checker: DOMJudgeBundle\Security\UserChecker
+            user_checker: DOMJudgeBundle\Security\WebInterfaceUserChecker
             logout_on_user_change: true
             guard:
               authenticators:
