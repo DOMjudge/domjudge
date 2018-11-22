@@ -130,10 +130,6 @@ The requirements for the deployment of DOMjudge are:
   <item> The `submit' command line client connects to API on the web server also
          via HTTP(S).
   </itemize>
-       When using the <tt>IP_ADDRESS</tt> authentication scheme, then each team
-       computer needs to have a unique IP address from the view of the
-       DOMjudge server, see <ref id="contestsetup:authentication"
-       name="Contest setup: team authentication"> for more details.
 </itemize>
 
 
@@ -894,13 +890,6 @@ the client ID and secret you need. For the openid provider set the URL to
 <tt>Authorized redirect URIs</tt> to the full url to
 <tt>/domjudge/auth/oid_cb.php</tt>.
 E.g. <tt>http(s)://yourhost.example.edu/domjudge/auth/oid_cb.php</tt>
-
-You also need to set the authentication scheme to <tt>PHP_SESSIONS</tt>
-in <tt>etc/domserver-config.php</tt> (the default) and make sure that
-the DOMjudge webserver base URL was set correctly with
-<tt>configure --with-baseurl=&lt;URL&gt;</tt>. For example, this will
-probably be something like this:
-<tt>http(s)://yourhost.example.edu/domjudge</tt>
 
 Finally, enable the setting <tt>Allow openid auth</tt>.
 
