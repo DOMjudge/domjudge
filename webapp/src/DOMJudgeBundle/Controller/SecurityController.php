@@ -44,12 +44,6 @@ class SecurityController extends Controller
             $user->setLastLogin(Utils::now());
             $user->setLastIpAddress($clientIP);
 
-            // Associate the IP they're logging in from as their IP address
-            // to use for future logins(using the ipaddress auth method).
-            // Only do this if it's the first time they're logging in.
-            if ($allowIPAuth && empty($user->getIpAddress())) {
-              $user->setIpAddress($clientIP);
-            }
             $this->getDoctrine()->getManager()->flush();
             return $this->redirect($this->generateUrl('root'));
         }
