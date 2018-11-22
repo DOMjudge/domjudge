@@ -271,7 +271,11 @@ class EventLogService implements ContainerAwareInterface
 
         // State is a special case, as it works without an ID
         if ($type !== 'state' && count(array_filter($ids)) !== count($dataIds)) {
-            $this->logger->warning('EventLogService::log API ID not specified or inferred from data');
+            $this->logger->warning(
+                sprintf("EventLogService::log API ID not specified or inferred from data for type %s and data ID's '%s'",
+                        $type, json_encode($dataIds)
+                )
+            );
             return;
         }
 
