@@ -130,7 +130,7 @@ class TeamAffiliationController extends Controller
                 $countryFlag = $countryCode;
                 $countryFlagPath = sprintf('images/countries/%s.png', $countryCode);
                 if (file_exists($webDir .'/'. $countryFlagPath)) {
-                    $countryFlag = sprintf('<img src="%s" alt="%s">', $assetPackage->getUrl($countryFlagPath), $countryCode);
+                    $countryFlag = sprintf('<img src="%s" alt="%s" class="countryflag">', $assetPackage->getUrl($countryFlagPath), $countryCode);
                 }
                 $affiliationdata['country'] = [
                     'value' => $countryFlag,
