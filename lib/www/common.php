@@ -439,7 +439,7 @@ function putTeam(int $teamid)
         if ($SHOW_FLAGS && !empty($team['country'])) {
             echo '<tr><td class="p-2">Country:</td><td class="p-2">';
             if (is_readable(WEBAPPDIR.'/web/'.$countryflag)) {
-                echo '<img src="../' . $countryflag . '" alt="' .
+                echo '<img class="countryflag" src="../' . $countryflag . '" alt="' .
                     specialchars($team['country']) . '" /> ';
             }
             echo specialchars($team['country']) . "</td></tr>\n";

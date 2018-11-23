@@ -200,3 +200,8 @@ div.submission-summary > span {
 	line-height: 1.5;
 	border-radius: 3px;
 }
+
+.countryflag {
+    height: 30px;
+    width: 40px;
+}
