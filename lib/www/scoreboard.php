@@ -327,7 +327,7 @@ function renderScoreBoardTable(
                         urlencode($teams[$team]['country']) . '.png';
                     echo ' ';
                     if (is_readable(WEBAPPDIR.'/web/'.$countryflag)) {
-                        echo '<img src="../' . $countryflag . '"' .
+                        echo '<img src="../' . $countryflag . '" class="countryflag"' .
                             ' alt="'   . specialchars($teams[$team]['country']) . '"' .
                             ' title="' . specialchars($teams[$team]['country']) . '" />';
                     } else {

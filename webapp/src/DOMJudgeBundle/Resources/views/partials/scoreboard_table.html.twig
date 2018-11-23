@@ -118,7 +118,7 @@
                                 {% set countryFlag = 'images/countries/' ~ score.team.affiliation.country ~ '.png' %}
                                 {% if countryFlag | assetExists %}
                                     <img src="{{ asset(countryFlag) }}" alt="{{ score.team.affiliation.country }}"
-                                         title="{{ score.team.affiliation.country }}"/>
+                                         title="{{ score.team.affiliation.country }}" class="countryflag"/>
                                 {% else %}
                                     {{ score.team.affiliation.country }}
                                 {% endif %}

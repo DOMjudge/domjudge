@@ -230,3 +230,8 @@ td.scorenc { border-color: silver; border-right: 0; }
     padding: .3em;
     cursor: pointer;
 }
+
+.countryflag {
+    height: 30px;
+    width: 40px;
+}

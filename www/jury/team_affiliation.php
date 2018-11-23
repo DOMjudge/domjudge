@@ -100,8 +100,8 @@ if ($SHOW_FLAGS) {
     echo '<tr><td>Country:</td><td>' . specialchars((string)$data['country']);
 
     if (is_readable(WEBAPPDIR.'/web/'.$countryflag)) {
-        echo ' <img src="../' . $countryflag . '" alt="' .
-            specialchars($data['country']) . "\" />";
+        echo ' <img src="../' . $countryflag . '" class="countryflag" alt="' .
+            specialchars($data['country']) . " \" />";
     }
     echo "</td></tr>\n";
 }

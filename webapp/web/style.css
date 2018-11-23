@@ -522,3 +522,8 @@ h6 { font-size: .75em; }
 .clarificationform {
     max-width: 800px;
 }
+
+.countryflag {
+    height: 30px;
+    width: 40px;
+}
