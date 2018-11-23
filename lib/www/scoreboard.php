@@ -671,7 +671,7 @@ function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = fal
                 $countryHTML = '';
                 $countryflag = 'images/countries/' . urlencode($affil['country']) . '.png';
                 if (is_readable(WEBAPPDIR.'/web/'.$countryflag)) {
-                    $countryHTML = '<img src="../' . $countryflag . '"' .
+                    $countryHTML = '<img class="countryflag" src="../' . $countryflag . '"' .
                         ' alt="'   . specialchars($affil['country']) . '"' .
                         ' title="' . specialchars($affil['country']) . '" />';
                 }
