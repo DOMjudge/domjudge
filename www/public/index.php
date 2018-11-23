@@ -26,6 +26,11 @@ $filter = initScorefilter();
 $menu = !$isstatic;
 require(LIBWWWDIR . '/header.php');
 
+if ($isstatic) {
+    echo '<img style="width:98%; height: auto; display: block; margin: -3rem auto 0 auto;" ' .
+        'src="../images/banner.png" />';
+}
+
 if ($isstatic && isset($_REQUEST['contest'])) {
     if ($_REQUEST['contest'] === 'auto') {
         $a = null;
