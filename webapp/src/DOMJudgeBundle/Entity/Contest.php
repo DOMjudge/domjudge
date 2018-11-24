@@ -947,33 +947,42 @@ class Contest
     /**
      * Calculates whether the contest has already started, stopped,
      * andd if scoreboard is currently frozen or final (unfrozen).
+     *
+     * This code is duplicate with lib/lib.misc.php:calcFreezeData()
      */
-    public function calcFreezeData()
+    public function calcFreezeData(bool $isjury = false)
     {
         $fdata = array(
-            'showfinal' => false,
-            'showfrozen' => false,
             'started' => false,
-            'stopped' => false,
             'running' => false,
+            'stopped' => false,
+            'showfrozen' => false, // Whether the public scoreboard is frozen.
+            'showfinal' => false, // Whether this scoreboard is showing final results.
         );
 
-        // Show final scores if contest is over and unfreezetime has been
-        // reached, or if contest is over and no freezetime had been set.
-        // We can compare $now and the dbfields stringwise.
+        if (!$this->getStarttimeEnabled()) {
+            return $fdata;
+        }
+
         $now = Utils::now();
-        $fdata['showfinal']  = ($this->getFreezetime()===null &&
-                                Utils::difftime($this->getEndtime(), $now) <= 0) ||
-                               ($this->getUnfreezetime()!==null &&
-                                Utils::difftime($this->getUnfreezetime(), $now) <= 0);
-        // Freeze scoreboard if freeze time has been reached and
-        // we're not showing the final score yet.
-        $fdata['showfrozen'] = !$fdata['showfinal'] && $this->getFreezetime()!==null &&
-                               Utils::difftime($this->getFreezetime(), $now) <= 0;
-        // contest is active but has not yet started
-        $fdata['started'] = Utils::difftime($this->getStarttime(), $now) <= 0;
-        $fdata['stopped'] = Utils::difftime($this->getEndtime(), $now) <= 0;
+
+        $fdata['started'] = Utils::difftime((float)$this->getStarttime(), $now) <= 0;
+        $fdata['stopped'] = Utils::difftime((float)$this->getEndtime(), $now) <= 0;
         $fdata['running'] = ($fdata['started'] && !$fdata['stopped']);
+
+        if ($isjury) {
+            $fdata['showfinal'] = Utils::difftime($this->getEndtime(), $now) <= 0;
+        } else {
+            // Show final scores if contest is over and unfreezetime has been
+            // reached, or if contest is over and no freezetime had been set.
+            $fdata['showfinal'] =
+                ($this->getFreezetime() === null && Utils::difftime($this->getEndtime(), $now) <= 0) ||
+                ($this->getUnfreezetime() !== null && Utils::difftime($this->getUnfreezetime(), $now) <= 0);
+        }
+
+        $fdata['showfrozen'] =
+            ($this->getFreezetime() !== null && Utils::difftime($this->getFreezetime(), $now) <= 0) &&
+            ($this->getUnfreezetime() === null || Utils::difftime($now, $this->getUnfreezetime()) <= 0);
 
         return $fdata;
     }
