@@ -147,7 +147,9 @@ function problemVisible($probid)
 /**
  * Given an array of contest data, calculates whether the contest
  * has already started, stopped, andd if scoreboard is currently
- * frozen or final (unfrozen).
+ * frozen or final (i.e. finished and unfrozen, *not* finalized).
+ *
+ * This code is duplicate with webapp/src/DOMJudgeBundle/Entity/Contest.php:calcFreezeData()
  */
 function calcFreezeData(array $cdata = null, bool $isjury = false) : array
 {
@@ -155,34 +157,33 @@ function calcFreezeData(array $cdata = null, bool $isjury = false) : array
 
     if (empty($cdata) || !$cdata['starttime_enabled']) {
         return array(
-            'showfinal' => false,
-            'showfrozen' => false,
             'started' => false,
-            'stopped' => false,
             'running' => false,
+            'stopped' => false,
+            'showfrozen' => false, // Whether the public scoreboard is frozen.
+            'showfinal' => false, // Whether this scoreboard is showing final results.
         );
     }
 
-    // Show final scores if contest is over and unfreezetime has been
-    // reached, or if contest is over and no freezetime had been set.
-    // We can compare $now and the dbfields stringwise.
     $now = now();
-    $fdata['showfinal']  = isset($cdata['finalizetime']) &&
-            difftime((float)$cdata['finalizetime'], $now) <= 0;
-    if (!$isjury) {
-        $fdata['showfinal'] = $fdata['showfinal'] &&
-            (!isset($cdata['freezetime']) ||
-             (isset($cdata['unfreezetime']) &&
-              difftime((float)$cdata['unfreezetime'], $now) <= 0));
-    }
-    // freeze scoreboard if freeze time has been reached and
-    // we're not showing the final score yet
-    $fdata['showfrozen'] = !$fdata['showfinal'] && isset($cdata['freezetime']) &&
-                  difftime((float)$cdata['freezetime'], $now) <= 0;
-    // contest is active but has not yet started
+
     $fdata['started'] = difftime((float)$cdata['starttime'], $now) <= 0;
     $fdata['stopped'] = difftime((float)$cdata['endtime'], $now) <= 0;
     $fdata['running'] = ($fdata['started'] && !$fdata['stopped']);
+
+    if ($isjury) {
+        $fdata['showfinal'] = difftime((float)$cdata['endtime'],$now) <= 0;
+    } else {
+        // Show final scores if contest is over and unfreezetime has been
+        // reached, or if contest is over and no freezetime had been set.
+        $fdata['showfinal'] =
+            ( !isset($cdata['freezetime']) && difftime((float)$cdata['endtime'],$now) <= 0 ) ||
+            ( isset($cdata['unfreezetime']) && difftime((float)$cdata['unfreezetime'], $now) <= 0 );
+    }
+
+    $fdata['showfrozen'] =
+        ( isset($cdata['freezetime']) && difftime((float)$cdata['freezetime'], $now) <= 0 ) &&
+        ( !isset($cdata['unfreezetime']) || difftime($now, (float)$cdata['unfreezetime']) <= 0 );
 
     return $fdata;
 }
