@@ -1,0 +1,31 @@
+{% extends 'base_bootstrap.html.twig' %}
+
+{% block extrahead %}
+<style>
+.error-template {padding: 40px 15px;text-align: center;}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="error-template">
+                <h1>
+                    {{ status_code }} {{ status_text }}</h1>
+                <div class="error-details">
+                    Sorry, an error has occured: {{ status_text }}.
+                </div>
+                <div class="error-details">
+                    Please contact a staff member for assistance.
+                </div>
+                {% if is_granted("ROLE_JURY") and exception.message is defined %}
+                <div class="error-details mt-4" style="text-align: left;">
+                    <code>{{ exception.message }}</code>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
