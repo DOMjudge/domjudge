@@ -363,18 +363,12 @@ function resetUploadForm(refreshtime, maxfiles)
 }
 
 var doReload = true;
-var reloadLocation = null;
 
 function reloadPage()
 {
 	'use strict';
-	// interval is in seconds
 	if (doReload) {
-		if ( reloadLocation ) {
-			window.location = reloadLocation;
-		} else {
-			location.reload();
-		}
+		location.reload();
 	}
 }
 
