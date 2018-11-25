@@ -223,8 +223,7 @@ Software required for building DOMjudge:
 
 In the most basic setup the team workstations only need (next to the tools
 needed for program development) a modern web browser. We support all
-versions of Firefox, Chrome and Edge. For Internet Explorer, the minimum
-required version is 10.
+versions of Firefox, Chrome and Edge.
 
 <chapt>Installation and configuration <label id="install_config">
 <p>
