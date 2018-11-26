@@ -1309,13 +1309,20 @@ int main(int argc, char **argv)
 				}
 			}
 
-			/* Only stop, if the child process is done *and* we
-			 * have read no new data in the last cycle. Otherwise
-			 * there's a small chance that we miss the last bits of
-			 * data.
+			/* Only stop, if the child process is done *and* one of
+			 * the following two conditions is true:
+			 * - we didn't read any new data either on stdout or
+			 *   stderr of the program
+			 * - stdout already filled the output limit
+			 * Otherwise there's a small chance that we miss the
+			 * last bits of data.
 			 */
-			if ( processed_sigchild && data_read[1] + data_read[2] == total_data_read ) {
-				break;
+			if ( processed_sigchild ) {
+				bool new_data = data_read[1] + data_read[2] == total_data_read;
+				bool stdout_streamsize = limit_streamsize && data_passed[1] >= streamsize;
+				if ( new_data || stdout_streamsize ) {
+					break;
+				}
 			}
 			total_data_read = data_read[1] + data_read[2];
 		}
