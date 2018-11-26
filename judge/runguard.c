@@ -1248,6 +1248,10 @@ int main(int argc, char **argv)
 			if ( received_SIGCHLD && !processed_sigchild ) {
 				if ( (pid = wait(&status))<0 ) error(errno,"waiting on child");
 				if ( pid==child_pid ) {
+					if ( received_signal == SIGALRM ) {
+						/* This is timelimit, do not process it further even if there's data in the pipes. */
+						break;
+					}
 					processed_sigchild = 1;
 				}
 			}
@@ -1310,17 +1314,19 @@ int main(int argc, char **argv)
 			}
 
 			/* Only stop, if the child process is done *and* one of
-			 * the following two conditions is true:
+			 * the following conditions is true:
 			 * - we didn't read any new data either on stdout or
 			 *   stderr of the program
 			 * - stdout already filled the output limit
+			 * - we killed the child
 			 * Otherwise there's a small chance that we miss the
 			 * last bits of data.
 			 */
 			if ( processed_sigchild ) {
 				bool new_data = data_read[1] + data_read[2] == total_data_read;
 				bool stdout_streamsize = limit_streamsize && data_passed[1] >= streamsize;
-				if ( new_data || stdout_streamsize ) {
+				bool timelimit = received_signal == SIGALRM;
+				if ( new_data || stdout_streamsize || timelimit ) {
 					break;
 				}
 			}
