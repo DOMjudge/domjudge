@@ -74,7 +74,7 @@ echo addHidden('cmd', $cmd) .
     addSubmit('Save') .
     addSubmit('Cancel', 'cancel', null, true, 'formnovalidate' .
               (isset($_GET['referrer']) ? ' formaction="' .
-                specialchars($_GET['referrer']) . '"' : '')) .
+                specialchars($_GET['referrer']) . '" formmethod="get"' : '')) .
     addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
