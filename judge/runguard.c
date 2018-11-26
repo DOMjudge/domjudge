@@ -878,6 +878,9 @@ int main(int argc, char **argv)
 	struct itimerval itimer;
 	struct sigaction sigact;
 
+	int total_data_read = 0;
+	int processed_sigchild = 0;
+
 	progname = argv[0];
 
 	/* Parse command-line options */
@@ -1242,9 +1245,11 @@ int main(int argc, char **argv)
 			r = pselect(nfds+1, &readfds, NULL, NULL, NULL, &emptymask);
 			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
 
-			if ( received_SIGCHLD ) {
+			if ( received_SIGCHLD && !processed_sigchild ) {
 				if ( (pid = wait(&status))<0 ) error(errno,"waiting on child");
-				if ( pid==child_pid ) break;
+				if ( pid==child_pid ) {
+					processed_sigchild = 1;
+				}
 			}
 
 			/* Check to see if data is available and pass it on */
@@ -1303,6 +1308,16 @@ int main(int argc, char **argv)
 					data_read[i] += nread;
 				}
 			}
+
+			/* Only stop, if the child process is done *and* we
+			 * have read no new data in the last cycle. Otherwise
+			 * there's a small chance that we miss the last bits of
+			 * data.
+			 */
+			if ( processed_sigchild && data_read[1] + data_read[2] == total_data_read ) {
+				break;
+			}
+			total_data_read = data_read[1] + data_read[2];
 		}
 
 		/* Close the output files */
