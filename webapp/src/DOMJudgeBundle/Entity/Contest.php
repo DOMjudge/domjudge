@@ -393,7 +393,7 @@ class Contest
         if (!$this->getStarttimeEnabled()) {
             return null;
         }
-        return $this->getStarttimeString() ? new \DateTime($this->getStarttimeString()) : null;
+        return $this->getStarttime() ? new \DateTime(Utils::absTime($this->getEndtime())) : null;
     }
 
     /**
@@ -451,7 +451,7 @@ class Contest
      */
     public function getEndTimeObject()
     {
-        return $this->getEndtimeString() ? new \DateTime($this->getEndtimeString()) : null;
+        return $this->getEndtime() ? new \DateTime(Utils::absTime($this->getEndtime())) : null;
     }
 
     /**
