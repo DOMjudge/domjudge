@@ -2,13 +2,14 @@
 
 namespace DOMJudgeBundle\Controller\Jury;
 
-use DOMJudgeBundle\Service\DOMJudgeService;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Service\DOMJudgeService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/analysis")
@@ -21,6 +22,12 @@ class AnalysisController extends Controller
      */
     private $DOMJudgeService;
 
+    const FILTERS = [
+        'visiblecat' => 'Teams from visible categories',
+        'hiddencat' => 'Teams from hidden categories',
+        'all' => 'All teams',
+    ];
+
     private static function set_or_increment(array &$array, string $index) {
       if (!array_key_exists($index, $array)) {
         $array[$index] = 0;
@@ -31,6 +38,26 @@ class AnalysisController extends Controller
     public function __construct(DOMJudgeService $DOMJudgeService)
     {
         $this->DOMJudgeService = $DOMJudgeService;
+    }
+
+    /**
+     * Apply the filter to the given query builder
+     * @param QueryBuilder $queryBuilder
+     * @param string       $filter
+     * @return QueryBuilder
+     */
+    protected function applyFilter(QueryBuilder $queryBuilder, string $filter)
+    {
+        switch ($filter) {
+            case 'visiblecat':
+                $queryBuilder->andWhere('tc.visible = true');
+                break;
+            case 'hiddencat':
+                $queryBuilder->andWhere('tc.visible = false');
+                break;
+        }
+
+        return $queryBuilder;
     }
 
     /**
@@ -46,6 +73,9 @@ class AnalysisController extends Controller
               'error' => 'No contest selected',
           ]);
         }
+
+        $filterKeys = array_keys(self::FILTERS);
+        $view = $request->query->get('view') ?: reset($filterKeys);
 
         // First collect information about problems in this contest
         $problems = $em->createQueryBuilder()
@@ -76,48 +106,42 @@ class AnalysisController extends Controller
         // Next select information about the teams
         $teams = [];
         if ($contest->getPublic()) {
-          $teams = $em->createQueryBuilder()
-            ->select('t', 'ts', 'j', 'lang', 'a')
-            ->from('DOMJudgeBundle:Team', 't')
-            ->join('t.category', 'tc')
-            ->join('t.affiliation', 'a')
-            ->join('t.submissions', 'ts')
-            ->join('ts.judgings', 'j')
-            ->join('ts.language', 'lang')
-            ->orderBy('t.teamid')
-            ->andWhere('tc.visible = true')
-            ->getQuery()->getResult();
-          ;
+            $teams = $this->applyFilter($em->createQueryBuilder()
+                                            ->select('t', 'ts', 'j', 'lang', 'a')
+                                            ->from('DOMJudgeBundle:Team', 't')
+                                            ->join('t.category', 'tc')
+                                            ->join('t.affiliation', 'a')
+                                            ->join('t.submissions', 'ts')
+                                            ->join('ts.judgings', 'j')
+                                            ->join('ts.language', 'lang')
+                                            ->orderBy('t.teamid'), $view)
+                ->getQuery()->getResult();
         } else {
-          $teams = $em->createQueryBuilder()
-            ->select('t', 'c', 'ts', 'j', 'lang', 'a')
-            ->from('DOMJudgeBundle:Team', 't')
-            ->join('t.contests', 'c')
-            ->join('t.affiliation', 'a')
-            ->join('t.category', 'tc')
-            ->join('t.submissions', 'ts')
-            ->join('ts.judgings', 'j')
-            ->join('ts.language', 'lang')
-            ->andWhere('c = :contest')
-            ->andWhere('tc.visible = true')
-            ->orderBy('t.teamid')
-            ->setParameter('contest', $contest)
-            ->getQuery()->getResult();
-          ;
+            $teams = $this->applyFilter($em->createQueryBuilder()
+                                            ->select('t', 'c', 'ts', 'j', 'lang', 'a')
+                                            ->from('DOMJudgeBundle:Team', 't')
+                                            ->join('t.contests', 'c')
+                                            ->join('t.affiliation', 'a')
+                                            ->join('t.category', 'tc')
+                                            ->join('t.submissions', 'ts')
+                                            ->join('ts.judgings', 'j')
+                                            ->join('ts.language', 'lang')
+                                            ->andWhere('c = :contest'), $view)
+                ->orderBy('t.teamid')
+                ->setParameter('contest', $contest)
+                ->getQuery()->getResult();
         }
 
         // Figure out how many submissions each team has
-        $results = $em->createQueryBuilder()
-          ->select('s.teamid as teamid, count(s.teamid) as num_submissions')
-          ->from('DOMJudgeBundle:Submission', 's')
-          ->join('s.team', 't')
-          ->join('t.category', 'tc')
-          ->andWhere('s.contest = :contest')
-          ->andWhere('tc.visible = true')
-          ->groupBy('s.teamid')
-          ->setParameter('contest', $contest)
-          ->getQuery()->getResult();
-        ;
+        $results = $this->applyFilter($em->createQueryBuilder()
+                                          ->select('s.teamid as teamid, count(s.teamid) as num_submissions')
+                                          ->from('DOMJudgeBundle:Submission', 's')
+                                          ->join('s.team', 't')
+                                          ->join('t.category', 'tc')
+                                          ->andWhere('s.contest = :contest'), $view)
+            ->groupBy('s.teamid')
+            ->setParameter('contest', $contest)
+            ->getQuery()->getResult();
         $num_submissions = [];
         foreach($results as $r) {
           $num_submissions[$r['teamid']] = $r['num_submissions'];
@@ -226,6 +250,8 @@ class AnalysisController extends Controller
             'teams' => $teams,
             'submissions' => $submissions,
             'misc' => $misc,
+            'filters' => self::FILTERS,
+            'view' => $view,
         ]);
     }
     /**
@@ -335,29 +361,30 @@ class AnalysisController extends Controller
         $em = $this->getDoctrine()->getManager();
         $contest = $this->DOMJudgeService->getCurrentContest();
 
+        $filterKeys = array_keys(self::FILTERS);
+        $view = $request->query->get('view') ?: reset($filterKeys);
+
         // Get a whole bunch of judgings(and related objects)
         // Where:
         //   - The judging is valid
         //   - The judging submission is part of the selected contest
         //   - The judging submission matches the problem we're analyzing
         //   - The submission was made by a team in a visible category
-        $judgings = $em->createQueryBuilder()
-          ->select('j, jr','s','team', 'sj')
-          ->from('DOMJudgeBundle:Judging', 'j')
-          ->join('j.submission', 's')
-          ->join('s.problem', 'p')
-          ->join('s.judgings', 'sj')
-          ->join('j.runs', 'jr')
-          ->join('s.team', 'team')
-          ->join('team.category', 'tc')
-          ->andWhere('j.valid = true')
-          ->andWhere('s.contest = :contest')
-          ->andWhere('s.problem = :problem')
-          ->andWhere('tc.visible = true')
-          ->setParameter('problem', $problem)
-          ->setParameter('contest', $contest)
-          ->getQuery()->getResult();
-        ;
+        $judgings = $this->applyFilter($em->createQueryBuilder()
+                                           ->select('j, jr', 's', 'team', 'sj')
+                                           ->from('DOMJudgeBundle:Judging', 'j')
+                                           ->join('j.submission', 's')
+                                           ->join('s.problem', 'p')
+                                           ->join('s.judgings', 'sj')
+                                           ->join('j.runs', 'jr')
+                                           ->join('s.team', 'team')
+                                           ->join('team.category', 'tc')
+                                           ->andWhere('j.valid = true')
+                                           ->andWhere('s.contest = :contest')
+                                           ->andWhere('s.problem = :problem'), $view)
+            ->setParameter('problem', $problem)
+            ->setParameter('contest', $contest)
+            ->getQuery()->getResult();
 
         // Create a summary of the results(how many correct, timelimit, wrong-answer, etc)
         $results = array();
@@ -409,6 +436,8 @@ class AnalysisController extends Controller
             'judgings' => $judgings,
             'results' => $results,
             'misc' => $misc,
+            'filters' => self::FILTERS,
+            'view' => $view,
         ]);
     }
 }

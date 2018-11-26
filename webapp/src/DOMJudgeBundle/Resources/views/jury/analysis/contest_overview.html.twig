@@ -41,6 +41,7 @@ $(function() {
   <div class="row">
     <div class="col-12 mt-3">
       <h1>{{ contest.name }}</h1>
+      {% include '@DOMJudge/jury/partials/analysis_filter.html.twig' %}
     </div>
     <div class="col-md-3 mt-3">
       <div class="card">
@@ -134,7 +135,7 @@ $(function() {
             <tbody>
             {% for p in problems %}
               {% set id=p.probid %}
-              <tr class='clickable-row' data-href="{{path('analysis_problem', {'probid': id}) }}">
+              <tr class='clickable-row' data-href="{{path('analysis_problem', {'probid': id, 'view': view}) }}">
                 <th scope="row">{{ id }}</th>
                 <td>{{ p.shortname ~ " - " ~ p.problem.name }}</td>
                 <td>{{ p.problem.timelimit }}</td>

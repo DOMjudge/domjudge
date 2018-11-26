@@ -1,0 +1,18 @@
+Filter:
+<div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+    {%- for key, label in filters %}
+
+        <label class="btn btn-secondary {% if key == view %}active{% endif %}">
+            <input type="radio" name="viewtype" autocomplete="off" value="{{ key }}"
+                   {% if key == view %}checked{% endif %}> {{ label }}
+        </label>
+    {%- endfor %}
+</div>
+
+<script>
+    $(function () {
+        $('input[name=viewtype]').on('change', function () {
+            window.location = '?view=' + $(this).val();
+        });
+    });
+</script>
