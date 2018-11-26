@@ -275,7 +275,7 @@ if ($SHOW_AFFILIATIONS && !empty($row['affilid'])) {
 if ($SHOW_FLAGS && !empty($row['country'])) {
     echo '<tr><td>Country:</td><td>';
     if (is_readable(WEBAPPDIR.'/web/'.$countryflag)) {
-        echo '<img src="../' . $countryflag . '" alt="' .
+        echo '<img src="../' . $countryflag . '" class="countryflag" alt="' .
             specialchars($row['country']) . '" /> ';
     }
     echo specialchars($row['country']) . "</td></tr>\n";
