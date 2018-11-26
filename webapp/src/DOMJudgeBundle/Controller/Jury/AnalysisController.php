@@ -270,7 +270,7 @@ class AnalysisController extends Controller
         foreach($judgings as $j) {
           if (!$j->getValid()) continue;
           if ($j->getResult()) {
-            AnalysisController::set_or_increment($results, $j->getResult());
+            AnalysisController::set_or_increment($results, $j->getResult() ?? 'pending');
           }
         }
         // Sort the judgings by runtime
@@ -360,15 +360,9 @@ class AnalysisController extends Controller
         ;
 
         // Create a summary of the results(how many correct, timelimit, wrong-answer, etc)
-        $set_or_increment = function(array &$array, string $index) {
-          if (!array_key_exists($index, $array)) {
-            $array[$index] = 0;
-          }
-          $array[$index] = $array[$index] +1;
-        };
         $results = array();
         foreach($judgings as $j) {
-          $set_or_increment($results, $j->getResult());
+            AnalysisController::set_or_increment($results, $j->getResult() ?? 'pending');
         }
 
         // Sort the judgings by runtime
