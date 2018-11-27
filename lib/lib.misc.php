@@ -149,7 +149,7 @@ function problemVisible($probid)
  * has already started, stopped, andd if scoreboard is currently
  * frozen or final (i.e. finished and unfrozen, *not* finalized).
  *
- * This code is duplicate with webapp/src/DOMJudgeBundle/Entity/Contest.php:calcFreezeData()
+ * This code is similar to webapp/src/DOMJudgeBundle/Utils/FreezeData.php
  */
 function calcFreezeData(array $cdata = null, bool $isjury = false) : array
 {

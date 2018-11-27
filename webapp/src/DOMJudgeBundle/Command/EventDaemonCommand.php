@@ -214,9 +214,9 @@ class EventDaemonCommand extends ContainerAwareCommand
 
             // Check for contest state changes:
             if ($freezeDataOld->running() !== $freezeData->running() ||
-                $freezeDataOld->showFrozen(true) !== $freezeData->showFrozen(true) ||
-                $freezeDataOld->showFinal(true) !== $freezeData->showFinal(true) ||
-                $freezeDataOld->showFinal(false) !== $freezeData->showFinal(false)) {
+                $freezeDataOld->showFrozen() !== $freezeData->showFrozen() ||
+                $freezeDataOld->showFinal(false) !== $freezeData->showFinal(false) ||
+                $freezeDataOld->finalized() !== $freezeData->finalized()) {
                 $this->logger->notice('Inserting contest state update event.');
                 $this->eventLogService->log('state', '', EventLogService::ACTION_UPDATE, $selectedContest->getCid(),
                                             null, '');

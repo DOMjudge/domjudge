@@ -124,7 +124,7 @@ class ScoreboardService
         $problems   = $this->getProblems($contest);
         $rankCache  = $this->getRankcache($contest, $team);
         $scoreCache = $this->getScorecache($contest, $team);
-        if ($jury || !$freezeData->showFrozen(false)) {
+        if ($jury || !$freezeData->showFrozen()) {
             $teamRank = $this->calculateTeamRank($contest, $team, $rankCache, $freezeData, $jury);
         } else {
             $teamRank = 0;
