@@ -162,7 +162,7 @@ FILE *child_stderr;
 int child_pipefd[3][2];
 int child_redirfd[3];
 
-struct timeval starttime, endtime;
+struct timeval progstarttime, starttime, endtime;
 struct tms startticks, endticks;
 
 struct option const long_opts[] = {
@@ -212,9 +212,14 @@ void verbose(const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
+	struct timeval currtime;
+	double runtime;
 
 	if ( ! be_quiet && be_verbose ) {
-		fprintf(stderr,"%s: verbose: ",progname);
+		gettimeofday(&currtime,NULL);
+		runtime = (currtime.tv_sec  - progstarttime.tv_sec ) +
+		          (currtime.tv_usec - progstarttime.tv_usec)*1E-6;
+		fprintf(stderr,"%s [%d @ %10.6lf]: verbose: ",progname,getpid(),runtime);
 		vfprintf(stderr,format,ap);
 		fprintf(stderr,"\n");
 	}
@@ -879,6 +884,8 @@ int main(int argc, char **argv)
 	struct sigaction sigact;
 
 	progname = argv[0];
+
+	if ( gettimeofday(&progstarttime,NULL) ) error(errno,"getting time");
 
 	/* Parse command-line options */
 	use_root = use_walltime = use_cputime = use_user = no_coredump = 0;
