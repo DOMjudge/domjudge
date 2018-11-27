@@ -588,7 +588,7 @@ if (IS_JURY && $respid!==null) {
     } ?>
 
 <div class="form-group">
-<input type="submit" value="Send" name="submit" class="btn btn-primary" />
+<button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-envelope"></i> Send</button>
 </div>
 </form>
 </div>

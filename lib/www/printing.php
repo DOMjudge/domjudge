@@ -70,7 +70,7 @@ function put_print_form()
     } ?>
     </select>
   </div>
-  <input type="submit" name="submit" value="Print code" class="btn btn-primary" />
+  <button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-print"></i> Print code</button>
 </form>
 </div>
 
