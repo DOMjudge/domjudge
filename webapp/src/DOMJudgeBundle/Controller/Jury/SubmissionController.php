@@ -357,7 +357,7 @@ class SubmissionController extends Controller
                 ->orderBy('t.rank');
             if ($outputDisplayLimit < 0) {
                 $queryBuilder
-                    ->addSelect('tc.output AS output_testcase')
+                    ->addSelect('tc.output AS output_reference')
                     ->addSelect('jro.output_run AS output_run')
                     ->addSelect('jro.output_diff AS output_diff')
                     ->addSelect('jro.output_error AS output_error')
