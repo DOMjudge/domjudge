@@ -92,15 +92,62 @@ class ClarificationController extends Controller
             }
         }
 
-        $categories = $this->DOMJudgeService->dbconfig_get('clar_categories');
         $queues     = $this->DOMJudgeService->dbconfig_get('clar_queues');
 
         return $this->render('@DOMJudge/jury/clarifications.html.twig', [
             'newClarifications' => $newClarifications,
             'oldClarifications' => $oldClarifications,
             'generalClarifications' => $generalClarifications,
-            'categories' => $categories,
             'queues' => $queues,
         ]);
+    }
+
+    /**
+     * @Route("/clarification", name="jury_clarification_new")
+     * @throws \Exception
+     */
+    public function sendClarificationAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $teams = $em->getRepository('DOMJudgeBundle:Team')->findAll();
+        foreach ($teams as $team) {
+            $teamlist[$team->getTeamid()] = sprintf("%s (t%s)", $team->getName(), $team->getTeamid());
+        }
+        asort($teamlist, SORT_STRING | SORT_FLAG_CASE);
+        $teamlist = ['domjudge-must-select' => '(select...)', '' => 'ALL'] + $teamlist;
+
+        $data= ['teams' => $teamlist ];
+
+        $subject_options = [];
+
+        $categories = $this->DOMJudgeService->dbconfig_get('clar_categories');
+        $contests = $this->DOMJudgeService->getCurrentContests();
+        foreach($contests as $cid => $cdata) {
+            $cshort = $cdata->getShortName();
+            foreach($categories as $name => $desc) {
+                $subject_options[$cshort]["$cid-$name"] = "$cshort - $desc";
+            }
+
+            $queryBuilder = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:ContestProblem', 'cp', 'cp.probid')
+                ->select('cp, p')
+                ->innerJoin('cp.problem', 'p')
+                ->where('cp.cid = :cid')
+                ->setParameter(':cid', $cdata->getCid())
+                ->orderBy('cp.shortname');
+
+            $contestproblems = $queryBuilder->getQuery()->getResult();
+            foreach($contestproblems as $cp) {
+                $subject_options[$cshort]["$cid-" . $cp->getProbid() ] = $cshort . ' - ' .$cp->getShortname() . ': ' . $cp->getProblem()->getName();
+            }
+        }
+
+        $data['subjects'] = $subject_options;
+
+        if ( $toteam = $request->query->get('teamto') ) {
+            $data['toteam'] = $toteam;
+        }
+
+        return $this->render('@DOMJudge/jury/clarification.html.twig', $data);
     }
 }

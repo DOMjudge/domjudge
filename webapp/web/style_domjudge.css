@@ -11,6 +11,10 @@
 .submitform {
     max-width: 450px;
 }
+.clarificationform {
+    max-width: 800px;
+    padding-top: 4em;
+}
 
 .disabled {
     color: silver !important;
