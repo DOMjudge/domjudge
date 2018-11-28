@@ -640,6 +640,7 @@ void terminate(int sig)
 
 static void child_handler(int sig)
 {
+	verbose("child handler: sig = %d", sig);
 	received_SIGCHLD = 1;
 }
 
@@ -1246,11 +1247,16 @@ int main(int argc, char **argv)
 				}
 			}
 
+			errno = 0;
+			verbose("calling pselect, nfds = %d", nfds);
 			r = pselect(nfds+1, &readfds, NULL, NULL, NULL, &emptymask);
+			verbose("pselect done, r = %d, errno = %d = %s", r, errno, strerror(errno));
+
 			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
 
 			if ( received_SIGCHLD ) {
 				if ( (pid = wait(&status))<0 ) error(errno,"waiting on child");
+				verbose("received_SIGCHLD for pid = %d", pid);
 				if ( pid==child_pid ) break;
 			}
 
