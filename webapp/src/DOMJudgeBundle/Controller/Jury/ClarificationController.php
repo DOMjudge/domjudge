@@ -108,6 +108,7 @@ class ClarificationController extends Controller
      */
     public function sendClarificationAction(Request $request)
     {
+        // TODO: use proper Symfony form for this
         $em = $this->getDoctrine()->getManager();
         $teams = $em->getRepository('DOMJudgeBundle:Team')->findAll();
         foreach ($teams as $team) {
