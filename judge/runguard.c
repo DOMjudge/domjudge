@@ -151,6 +151,7 @@ int64_t memsize;
 rlim_t filesize;
 rlim_t nproc;
 size_t streamsize;
+int use_splice;
 
 pid_t child_pid = -1;
 
@@ -858,6 +859,71 @@ void setrestrictions()
 	}
 }
 
+void pump_pipes(fd_set readfds, size_t data_read[], size_t data_passed[])
+{
+	ssize_t nread;
+	size_t to_read;
+	int i;
+
+	/* Check to see if data is available and pass it on */
+	for(i=1; i<=2; i++) {
+		if ( child_pipefd[i][PIPE_OUT] != -1 &&
+		     FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
+
+			if (limit_streamsize && data_passed[i] == streamsize) {
+				/* Throw away data if we're at the output limit, but
+				   still count how much data we consumed  */
+				nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
+			} else {
+				/* Otherwise copy the output to a file */
+				to_read = BUF_SIZE;
+				if (limit_streamsize) {
+					to_read = min(BUF_SIZE, streamsize-data_passed[i]);
+				}
+
+				if ( use_splice ) {
+					nread = splice(child_pipefd[i][PIPE_OUT], NULL,
+					               child_redirfd[i], NULL,
+					               to_read, SPLICE_F_MOVE);
+
+					if ( nread==-1 && errno==EINVAL ) {
+						use_splice = 0;
+						verbose("splice failed, switching to read/write");
+						/* Setting errno here to repeat the copy. */
+						errno = EAGAIN;
+					}
+				} else {
+					nread = read(child_pipefd[i][PIPE_OUT], buf, to_read);
+					if ( nread>0 ) {
+						nread = write(child_redirfd[i], buf, nread);
+					}
+				}
+
+				if ( nread>0 ) data_passed[i] += nread;
+
+				/* print message if we're at the streamsize limit */
+				if (limit_streamsize && data_passed[i] == streamsize) {
+					verbose("child fd %i limit reached",i);
+				}
+			}
+			if ( nread==-1 ) {
+				if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) continue;
+				error(errno,"copying data fd %d",i);
+			}
+			if ( nread==0 ) {
+				/* EOF detected: close fd and indicate this with -1 */
+				if ( close(child_pipefd[i][PIPE_OUT])!=0 ) {
+					error(errno,"closing pipe for fd %d",i);
+				}
+				child_pipefd[i][PIPE_OUT] = -1;
+				continue;
+			}
+			data_read[i] += nread;
+		}
+	}
+
+}
+
 int main(int argc, char **argv)
 {
 	sigset_t sigmask, emptymask;
@@ -876,9 +942,7 @@ int main(int argc, char **argv)
 	double tmpd;
 	size_t data_read[3];
 	size_t data_passed[3];
-	ssize_t nread;
-	size_t to_read;
-	int use_splice;
+	size_t total_data;
 	char str[256];
 
 	struct itimerval itimer;
@@ -1260,63 +1324,23 @@ int main(int argc, char **argv)
 				if ( pid==child_pid ) break;
 			}
 
-			/* Check to see if data is available and pass it on */
-			for(i=1; i<=2; i++) {
-				if ( child_pipefd[i][PIPE_OUT] != -1 &&
-				     FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
+			pump_pipes(readfds, data_read, data_passed);
+		}
 
-					if (limit_streamsize && data_passed[i] == streamsize) {
-						/* Throw away data if we're at the output limit, but
-						   still count how much data we consumed  */
-						nread = read(child_pipefd[i][PIPE_OUT], buf, BUF_SIZE);
-					} else {
-						/* Otherwise copy the output to a file */
-						to_read = BUF_SIZE;
-						if (limit_streamsize) {
-							to_read = min(BUF_SIZE, streamsize-data_passed[i]);
-						}
-
-						if ( use_splice ) {
-							nread = splice(child_pipefd[i][PIPE_OUT], NULL,
-							               child_redirfd[i], NULL,
-							               to_read, SPLICE_F_MOVE);
-
-							if ( nread==-1 && errno==EINVAL ) {
-								use_splice = 0;
-								verbose("splice failed, switching to read/write");
-								/* Setting errno here to repeat the copy. */
-								errno = EAGAIN;
-							}
-						} else {
-							nread = read(child_pipefd[i][PIPE_OUT], buf, to_read);
-							if ( nread>0 ) {
-								nread = write(child_redirfd[i], buf, nread);
-							}
-						}
-
-						if ( nread>0 ) data_passed[i] += nread;
-
-						/* print message if we're at the streamsize limit */
-						if (limit_streamsize && data_passed[i] == streamsize) {
-							verbose("child fd %i limit reached",i);
-						}
-					}
-					if ( nread==-1 ) {
-						if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) continue;
-						error(errno,"copying data fd %d",i);
-					}
-					if ( nread==0 ) {
-						/* EOF detected: close fd and indicate this with -1 */
-						if ( close(child_pipefd[i][PIPE_OUT])!=0 ) {
-							error(errno,"closing pipe for fd %d",i);
-						}
-						child_pipefd[i][PIPE_OUT] = -1;
-						continue;
-					}
-					data_read[i] += nread;
-				}
+		/* Reset pipe filedescriptors to use blocking I/O. */
+		FD_ZERO(&readfds);
+		for(i=1; i<=2; i++) {
+			if ( child_pipefd[i][PIPE_OUT]>=0 ) {
+				FD_SET(child_pipefd[i][PIPE_OUT],&readfds);
+				r = fcntl(child_pipefd[i][PIPE_OUT], F_GETFL);
+				fcntl(child_pipefd[i][PIPE_OUT], F_SETFL, i ^ O_NONBLOCK);
 			}
 		}
+
+		do {
+			total_data = data_passed[1] + data_passed[2];
+			pump_pipes(readfds, data_read, data_passed);
+		} while ( data_passed[1] + data_passed[2] > total_data );
 
 		/* Close the output files */
 		for(i=1; i<=2; i++) {
