@@ -14,9 +14,18 @@
     <tbody>
     {% for judgehost in form.judgehosts %}
         <tr>
-            <td>{{ form_widget(judgehost.hostname) }}</td>
-            <td>{{ form_widget(judgehost.active) }}</td>
-            <td>{{ form_widget(judgehost.restriction) }}</td>
+            <td>
+                {{ form_widget(judgehost.hostname) }}
+                {{ form_errors(judgehost.hostname) }}
+            </td>
+            <td>
+                {{ form_widget(judgehost.active) }}
+                {{ form_errors(judgehost.active) }}
+            </td>
+            <td>
+                {{ form_widget(judgehost.restriction) }}
+                {{ form_errors(judgehost.restriction) }}
+            </td>
             {% if allow_delete %}
                 <td>
                     <button type="button" data-delete class="btn btn-danger">Delete</button>
