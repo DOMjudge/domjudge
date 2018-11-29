@@ -17,11 +17,11 @@ global $updates;
         $ndown = count($updates['judgehosts']);
         if ($ndown > 0) {
             ?>
-<a class="new" href="judgehosts.php" accesskey="j" id="menu_judgehosts"><i class="fas fa-server"></i> judgehosts (<?php echo $ndown ?> down)</a>
+<a class="new" href="judgehosts" accesskey="j" id="menu_judgehosts"><i class="fas fa-server"></i> judgehosts (<?php echo $ndown ?> down)</a>
 <?php
         } else {
             ?>
-<a href="judgehosts.php" accesskey="j" id="menu_judgehosts"><i class="fas fa-server"></i> judgehosts</a>
+<a href="judgehosts" accesskey="j" id="menu_judgehosts"><i class="fas fa-server"></i> judgehosts</a>
 <?php
         }
         $nerr = count($updates['internal_error']);

@@ -390,6 +390,40 @@ class Utils
     }
 
     /**
+     * Print the time something took from start to end (which defaults to now).
+     *
+     * Copied from lib/www/print.php
+     * @param float $start
+     * @param null  $end
+     * @return string
+     */
+    public static function printtimediff(float $start, $end = null): string
+    {
+        if (is_null($end)) {
+            $end = microtime(true);
+        }
+        $ret  = '';
+        $diff = floor($end - $start);
+
+        if ($diff >= 24 * 60 * 60) {
+            $d    = floor($diff / (24 * 60 * 60));
+            $ret  .= $d . "d ";
+            $diff -= $d * 24 * 60 * 60;
+        }
+        if ($diff >= 60 * 60 || isset($d)) {
+            $h    = floor($diff / (60 * 60));
+            $ret  .= $h . ":";
+            $diff -= $h * 60 * 60;
+        }
+        $m    = floor($diff / 60);
+        $ret  .= sprintf('%02d:', $m);
+        $diff -= $m * 60;
+        $ret  .= sprintf('%02d', $diff);
+
+        return $ret;
+    }
+
+    /**
      * Wrapper around PHP's htmlspecialchars() to set desired options globally:
      *
      * - ENT_QUOTES: Also convert single quotes, in case string is contained

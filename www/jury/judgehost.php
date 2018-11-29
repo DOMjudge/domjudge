@@ -13,21 +13,6 @@ if (empty($id)) {
     error("Missing judge hostname");
 }
 
-if (isset($_REQUEST['cmd']) &&
-    ($_REQUEST['cmd'] == 'activate' || $_REQUEST['cmd'] == 'deactivate')) {
-    requireAdmin();
-
-    $DB->q('UPDATE judgehost SET active = %i WHERE hostname = %s',
-           ($_REQUEST['cmd'] == 'activate' ? 1 : 0), $id);
-    auditlog('judgehost', $id, 'marked ' . ($_REQUEST['cmd']=='activate'?'active':'inactive'));
-
-    // the request came from the overview page
-    if (isset($_GET['cmd'])) {
-        header("Location: judgehosts.php");
-	return;
-    }
-}
-
 $data = $DB->q('TUPLE SELECT judgehost.*, r.name AS restrictionname
                 FROM judgehost
                 LEFT JOIN judgehost_restriction r USING (restrictionid)
