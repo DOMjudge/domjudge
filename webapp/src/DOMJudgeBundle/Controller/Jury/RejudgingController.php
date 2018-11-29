@@ -51,13 +51,13 @@ class RejudgingController extends Controller
             ->getQuery()->getResult();
 
         $table_fields = [
-            'rejudgingid' => ['title' => 'ID', 'sort' => true],
-            'reason' => ['title' => 'reason', 'sort' => true],
-            'startuser' => ['title' => 'startuser', 'sort' => true],
-            'finishuser' => ['title' => 'finishuser', 'sort' => true],
-            'starttime' => ['title' => 'starttime', 'sort' => true],
-            'endtime' => ['title' => 'finishtime', 'sort' => true],
-            'status' => ['title' => 'status', 'sort' => true],
+            'rejudgingid' => ['title' => 'ID'],
+            'reason' => ['title' => 'reason'],
+            'startuser' => ['title' => 'startuser'],
+            'finishuser' => ['title' => 'finishuser'],
+            'starttime' => ['title' => 'starttime'],
+            'endtime' => ['title' => 'finishtime'],
+            'status' => ['title' => 'status'],
         ];
 
         $timeFormat       = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
