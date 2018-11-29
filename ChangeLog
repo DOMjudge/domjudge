@@ -5,6 +5,9 @@ Version 6.1.0 - DEV
  - Show testcase index and description on submissions page.
  - Add explicit config check for max test case size and max_allowed_packet.
  - Upgrade to Symfony 3.4.
+ - Rewrite API in Symfony, expose Swagger docs.
+ - Remove old v3 API.
+ - Rewrite parts of the jury interface in Symfony and Bootstrap.
  - Upgrade jQuery to 3.3, Bootstrap to 4.1.
  - Code cleanups, refactoring and improvements.
 
