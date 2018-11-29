@@ -30,8 +30,6 @@ legacy.jury_language:
     path: /jury/language.php
 legacy.jury_rejudge:
     path: /jury/rejudge.php
-legacy.jury_rejudgings:
-    path: /jury/rejudgings.php
 legacy.jury_rejudging:
     path: /jury/rejudging.php
 legacy.team_index:

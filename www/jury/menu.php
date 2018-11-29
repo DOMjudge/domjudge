@@ -51,11 +51,11 @@ global $updates;
     $nrejudgings = count($updates['rejudgings']);
         if ($nrejudgings > 0) {
             ?>
-<a class="new" href="rejudgings.php" accesskey="r" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings (<?php echo $nrejudgings ?> active)</a>
+<a class="new" href="rejudgings" accesskey="r" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings (<?php echo $nrejudgings ?> active)</a>
 <?php
         } else {
             ?>
-<a href="rejudgings.php" accesskey="r" id="menu_rejudgings"><i class="fa fa-sync"></i> rejudgings</a>
+<a href="rejudgings" accesskey="r" id="menu_rejudgings"><i class="fa fa-sync"></i> rejudgings</a>
 <?php
         } ?>
 <?php

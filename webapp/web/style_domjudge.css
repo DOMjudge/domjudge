@@ -20,6 +20,10 @@
     color: silver !important;
 }
 
+.unseen {
+    font-weight: bold;
+}
+
 .data-table .ignore, table td.ignore {
     text-decoration: line-through;
 }
