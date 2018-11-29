@@ -7,14 +7,18 @@ use DOMJudgeBundle\Entity\JudgehostRestriction;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class JudgehostType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('hostname');
+        $builder->add('hostname', TextType::class, [
+            'constraints' => [new NotBlank()],
+        ]);
         $builder->add('active', ChoiceType::class, [
             'choices' => [
                 'yes' => true,
