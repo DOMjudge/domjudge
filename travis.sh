@@ -46,6 +46,22 @@ make configure
 make build-scripts domserver judgehost
 sudo make install-domserver install-judgehost
 
+# Provoke runguard bug where we truncate the output in rare cases.
+cd ${DIR}/judge
+g++ -Wall -O2 -static provoke-pipe-bug.cc
+errors=0
+for i in $(seq 30000); do
+	sudo ./runguard -o /tmp/o -e /tmp/e -s 8 -t 1 -C 1 -p 64 -P 0 -u domjudge-run-0 -g domjudge-run ./a.out
+	char_count=$(wc -c /tmp/o | cut -d\   -f1)
+	if [ $char_count -ne 6309 ]; then
+		errors=$((errors + 1))
+	fi
+done
+echo "${errors} truncated outputs in runguard."
+if [ $errors -gt 0 ]; then
+	exit -1
+fi
+
 # setup database and add special user
 cd /opt/domjudge/domserver
 sudo bin/dj_setup_database install
@@ -188,19 +204,3 @@ $CHECK_API -n -C -a 'strict=1' http://admin:admin@localhost/domjudge/api
 # Validate the eventfeed against the api(currently ignore failures)
 cd ${DIR}/misc-tools
 ./compare-cds.sh http://localhost/domjudge 2 || true
-
-# Provoke runguard bug where we truncate the output in rare cases.
-cd ${DIR}/judge
-g++ -Wall -O2 -static provoke-pipe-bug.cc
-errors=0
-for i in $(seq 30000); do
-	./runguard -o /tmp/o -e /tmp/e -s 8 -t 1 -C 1 -p 64 ./a.out
-	char_count=$(wc -c /tmp/o | cut -d\   -f1)
-	if [ $char_count -ne 6309 ]; then
-		errors=$((errors + 1))
-	fi
-done
-echo "${errors} truncated outputs in runguard."
-if [ $errors -gt 0 ]; then
-	exit -1
-fi
