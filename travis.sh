@@ -81,14 +81,17 @@ sudo bin/create_cgroups
 # Provoke runguard bug where we truncate the output in rare cases.
 cd ${DIR}/judge
 g++ -Wall -O2 -static provoke-pipe-bug.cc
+set +x
 errors=0
 for i in $(seq 30000); do
 	sudo ./runguard -o /tmp/o -e /tmp/e -s 8 -t 1 -C 1 -p 64 -P 0 -u domjudge-run-0 -g domjudge-run ./a.out
 	char_count=$(sudo wc -c /tmp/o | cut -d\   -f1)
 	if [ $char_count -ne 6309 ]; then
+		echo "ERROR at iteration $i, read $char_count of 6309 expected characters."
 		errors=$((errors + 1))
 	fi
 done
+set -x
 echo "${errors} truncated outputs in runguard."
 if [ $errors -gt 0 ]; then
 	exit -1
