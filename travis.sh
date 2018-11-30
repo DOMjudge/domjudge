@@ -90,7 +90,7 @@ for i in $(seq 30000); do
 		echo "ERROR at iteration $i, read $char_count of 6309 expected characters."
 		errors=$((errors + 1))
 	fi
-	((i % 500 != 0)) && echo -n "iteration $i"
+	((i % 500 != 0)) && echo "iteration $i"
 done
 set -x
 echo "${errors} truncated outputs in runguard."
