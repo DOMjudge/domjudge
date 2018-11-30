@@ -85,7 +85,7 @@ switch ($kind) {
         break;
     case 'judgehost':
         $judgehost = $disabled['hostname'];
-        echo "<a href=\"judgehost.php?id=" . urlencode($judgehost) . "\">" . specialchars($judgehost) . "</a>";
+        echo "<a href=\"judgehosts/" . urlencode($judgehost) . "\">" . specialchars($judgehost) . "</a>";
         break;
     case 'language':
         $langid = $disabled['langid'];

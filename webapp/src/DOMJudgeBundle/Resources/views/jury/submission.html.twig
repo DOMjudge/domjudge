@@ -238,7 +238,7 @@
                 -#}</span>
                 {%- endif -%}
                 , Judgehost:
-                {% set judgehostLink = path('legacy.jury_judgehost', {id: selectedJudging.judgehost.hostname}) %}
+                {% set judgehostLink = path('jury_judgehost', {hostname: selectedJudging.judgehost.hostname}) %}
                 <a href="{{ judgehostLink }}">{{ selectedJudging.judgehost.hostname | printHost }}</a>,
                 <span class="judgetime">Judging started: {{ selectedJudging.starttime | printtime('%H:%M:%S') }}
                     {%- if selectedJudging.endtime -%}

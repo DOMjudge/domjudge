@@ -3,22 +3,26 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Judgehost;
+use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Form\Type\JudgehostsType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @Route("/jury")
  * @Security("has_role('ROLE_JURY')")
  */
-class JudgehostController extends Controller
+class JudgehostController extends BaseController
 {
+    // Note: when adding or modifying routes, make sure they do not clash with the /judgehosts/{hostname} route
+
     /**
      * @var EntityManagerInterface
      */
@@ -163,7 +167,7 @@ class JudgehostController extends Controller
             $judgehosts_table[] = [
                 'data' => $judgehostdata,
                 'actions' => $judgehostactions,
-                'link' => $this->generateUrl('legacy.jury_judgehost', ['id' => $judgehost->getHostname()]),
+                'link' => $this->generateUrl('jury_judgehost', ['hostname' => $judgehost->getHostname()]),
                 'cssclass' => $judgehost->getActive() ? '' : 'disabled',
             ];
         }
@@ -181,37 +185,92 @@ class JudgehostController extends Controller
     }
 
     /**
-     * @Route("/judgehosts/activate/{hostname}/", name="jury_judgehost_activate")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Route("/judgehosts/{hostname}/", name="jury_judgehost")
      * @param string $hostname
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function viewAction(string $hostname)
+    {
+        /** @var Judgehost $judgehost */
+        $judgehost = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Judgehost', 'j')
+            ->leftJoin('j.restriction', 'r')
+            ->select('j', 'r')
+            ->andWhere('j.hostname = :hostname')
+            ->setParameter(':hostname', $hostname)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        $reltime = floor(Utils::difftime(Utils::now(), (float)$judgehost->getPolltime()));
+        if ($reltime < $this->DOMJudgeService->dbconfig_get('judgehost_warning', 30)) {
+            $status = 'OK';
+        } elseif ($reltime < $this->DOMJudgeService->dbconfig_get('judgehost_critical', 120)) {
+            $status = 'Warning';
+        } else {
+            $status = 'Critical';
+        }
+
+        /** @var Judging[] $judgings */
+        $judgings = [];
+        if ($contests = $this->DOMJudgeService->getCurrentContest()) {
+            $judgings = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Judging', 'j')
+                ->select('j', 'r')
+                ->leftJoin('j.rejudging', 'r')
+                ->andWhere('j.contest IN (:contests)')
+                ->andWhere('j.judgehost = :judgehost')
+                ->setParameter(':contests', $contests)
+                ->setParameter(':judgehost', $judgehost)
+                ->orderBy('j.starttime', 'DESC')
+                ->addOrderBy('j.judgingid', 'DESC')
+                ->getQuery()
+                ->getResult();
+        }
+
+        return $this->render('@DOMJudge/jury/judgehost.html.twig', [
+            'judgehost' => $judgehost,
+            'status' => $status,
+            'judgings' => $judgings,
+        ]);
+    }
+
+    /**
+     * @Route("/judgehosts/{hostname}/activate/", name="jury_judgehost_activate")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param RouterInterface $router
+     * @param Request         $request
+     * @param string          $hostname
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function activateAction(string $hostname)
+    public function activateAction(RouterInterface $router, Request $request, string $hostname)
     {
         $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
         $judgehost->setActive(true);
         $this->entityManager->flush();
         $this->DOMJudgeService->auditlog('judgehost', $hostname, 'marked active');
-        return $this->redirectToRoute('jury_judgehosts');
+        return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
 
     /**
-     * @Route("/judgehosts/deactivate/{hostname}/", name="jury_judgehost_deactivate")
+     * @Route("/judgehosts/{hostname}/deactivate/", name="jury_judgehost_deactivate")
      * @Security("has_role('ROLE_ADMIN')")
-     * @param string $hostname
+     * @param RouterInterface $router
+     * @param Request         $request
+     * @param string          $hostname
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function deactivateAction(string $hostname)
+    public function deactivateAction(RouterInterface $router, Request $request, string $hostname)
     {
         $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
         $judgehost->setActive(false);
         $this->entityManager->flush();
         $this->DOMJudgeService->auditlog('judgehost', $hostname, 'marked inactive');
-        return $this->redirectToRoute('jury_judgehosts');
+        return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
 
     /**
-     * @Route("/judgehosts/activate-all/", methods={"POST"}, name="jury_judgehost_activate_all")
+     * @Route("/judgehosts/activate/all/", methods={"POST"}, name="jury_judgehost_activate_all")
      * @Security("has_role('ROLE_ADMIN')")
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -223,7 +282,7 @@ class JudgehostController extends Controller
     }
 
     /**
-     * @Route("/judgehosts/deactivate-all/", methods={"POST"}, name="jury_judgehost_deactivate_all")
+     * @Route("/judgehosts/deactivate/all/", methods={"POST"}, name="jury_judgehost_deactivate_all")
      * @Security("has_role('ROLE_ADMIN')")
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -235,7 +294,7 @@ class JudgehostController extends Controller
     }
 
     /**
-     * @Route("/judgehosts/add/", name="jury_judgehost_add")
+     * @Route("/judgehosts/add/multiple", name="jury_judgehost_add")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -263,7 +322,7 @@ class JudgehostController extends Controller
     }
 
     /**
-     * @Route("/judgehosts/edit/", name="jury_judgehost_edit")
+     * @Route("/judgehosts/edit/multiple/", name="jury_judgehost_edit")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response

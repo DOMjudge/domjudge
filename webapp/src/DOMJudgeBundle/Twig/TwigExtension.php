@@ -5,7 +5,6 @@ namespace DOMJudgeBundle\Twig;
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Judging;
-use DOMJudgeBundle\Entity\JudgingRunWithOutput;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
 use DOMJudgeBundle\Entity\Testcase;
@@ -64,6 +63,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('printtime', [$this, 'printtime']),
             new \Twig_SimpleFilter('printResult', [$this, 'printResult'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFilter('printYesNo', [$this, 'printYesNo']),
             new \Twig_SimpleFilter('testcaseReults', [$this, 'testcaseReults'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('displayTestcaseResults', [$this, 'displayTestcaseResults'],
                                    ['is_safe' => ['html']]),
@@ -170,6 +170,16 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             }
             return Utils::printtime($datetime, $format);
         }
+    }
+
+    /**
+     * print a yes/no field
+     * @param bool $val
+     * @return string
+     */
+    public static function printYesNo(bool $val): string
+    {
+        return $val ? 'Yes' : 'No';
     }
 
     /**

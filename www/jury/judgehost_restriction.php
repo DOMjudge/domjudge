@@ -186,7 +186,7 @@ if ($judgehosts->count() == 0) {
          "<tr><th scope=\"col\">hostname</th><th scope=\"col\">active</th></tr>\n" .
          "</thead>\n<tbody>\n";
     while ($judgehost = $judgehosts->next()) {
-        $link = '<a href="judgehost.php?id=' . urlencode($judgehost['hostname']) . '">';
+        $link = '<a href="judgehosts/' . urlencode($judgehost['hostname']) . '">';
         echo "<tr".($judgehost['active'] ? '': ' class="disabled"').
              "><td>"
              . $link . specialchars($judgehost['hostname']) .
