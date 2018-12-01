@@ -259,109 +259,102 @@ class JuryMiscController extends Controller
                 $this->DOMJudgeService->auditlog('scoreboard', null, 'refresh cache');
 
                 foreach ($contests as $contest) {
-                    // Do this in a transaction per contest to not have a half-working scoreboard
-                    $this->entityManager->transactional(function () use (
-                        $contest,
-                        $progressReporter,
-                        $scoreboardService
-                    ) {
-                        $queryBuilder = $this->entityManager->createQueryBuilder()
-                            ->from('DOMJudgeBundle:Team', 't')
-                            ->select('t')
-                            ->orderBy('t.teamid');
-                        if (!$contest->getPublic()) {
-                            $queryBuilder
-                                ->join('t.contests', 'c')
-                                ->andWhere('c.cid = :cid')
-                                ->setParameter(':cid', $contest->getCid());
-                        }
-                        /** @var Team[] $teams */
-                        $teams = $queryBuilder->getQuery()->getResult();
-                        /** @var Problem[] $problems */
-                        $problems = $this->entityManager->createQueryBuilder()
-                            ->from('DOMJudgeBundle:Problem', 'p')
-                            ->join('p.contest_problems', 'cp')
-                            ->select('p')
-                            ->andWhere('cp.contest = :contest')
-                            ->setParameter(':contest', $contest)
-                            ->orderBy('cp.shortname')
-                            ->getQuery()
-                            ->getResult();
+                    $queryBuilder = $this->entityManager->createQueryBuilder()
+                        ->from('DOMJudgeBundle:Team', 't')
+                        ->select('t')
+                        ->orderBy('t.teamid');
+                    if (!$contest->getPublic()) {
+                        $queryBuilder
+                            ->join('t.contests', 'c')
+                            ->andWhere('c.cid = :cid')
+                            ->setParameter(':cid', $contest->getCid());
+                    }
+                    /** @var Team[] $teams */
+                    $teams = $queryBuilder->getQuery()->getResult();
+                    /** @var Problem[] $problems */
+                    $problems = $this->entityManager->createQueryBuilder()
+                        ->from('DOMJudgeBundle:Problem', 'p')
+                        ->join('p.contest_problems', 'cp')
+                        ->select('p')
+                        ->andWhere('cp.contest = :contest')
+                        ->setParameter(':contest', $contest)
+                        ->orderBy('cp.shortname')
+                        ->getQuery()
+                        ->getResult();
 
-                        $message = sprintf('<p>Recalculating all values for the scoreboard cache for contest %d (%d teams, %d problems)...</p>',
-                                           $contest->getCid(), count($teams), count($problems));
-                        $progressReporter($message);
-                        $progressReporter('<pre>');
+                    $message = sprintf('<p>Recalculating all values for the scoreboard cache for contest %d (%d teams, %d problems)...</p>',
+                                       $contest->getCid(), count($teams), count($problems));
+                    $progressReporter($message);
+                    $progressReporter('<pre>');
 
-                        if (count($teams) == 0) {
-                            $progressReporter('No teams defined, doing nothing.</pre>');
-                            return;
-                        }
-                        if (count($problems) == 0) {
-                            $progressReporter('No problems defined, doing nothing.</pre>');
-                            return;
-                        }
+                    if (count($teams) == 0) {
+                        $progressReporter('No teams defined, doing nothing.</pre>');
+                        return;
+                    }
+                    if (count($problems) == 0) {
+                        $progressReporter('No problems defined, doing nothing.</pre>');
+                        return;
+                    }
 
-                        // for each team, fetch the status of each problem
-                        foreach ($teams as $team) {
-                            $progressReporter(sprintf('Team %d:', $team->getTeamid()));
+                    // for each team, fetch the status of each problem
+                    foreach ($teams as $team) {
+                        $progressReporter(sprintf('Team %d:', $team->getTeamid()));
 
-                            // for each problem fetch the result
-                            foreach ($problems as $problem) {
-                                $progressReporter(sprintf(' p%d', $problem->getProbid()));
-                                $scoreboardService->calculateScoreRow($contest, $team, $problem, false);
-                            }
-
-                            $progressReporter(" rankcache\n");
-                            $scoreboardService->updateRankCache($contest, $team);
+                        // for each problem fetch the result
+                        foreach ($problems as $problem) {
+                            $progressReporter(sprintf(' p%d', $problem->getProbid()));
+                            $scoreboardService->calculateScoreRow($contest, $team, $problem, false);
                         }
 
-                        $progressReporter('</pre>');
+                        $progressReporter(" rankcache\n");
+                        $scoreboardService->updateRankCache($contest, $team);
+                    }
 
-                        $progressReporter('<p>Deleting irrelevant data...</p>');
+                    $progressReporter('</pre>');
 
-                        // Drop all teams and problems that do not exist in the contest
-                        if (!empty($problems)) {
-                            $problemIds = array_map(function (Problem $problem) {
-                                return $problem->getProbid();
-                            }, $problems);
-                        } else {
-                            // problemId -1 will never happen, but otherwise the array is empty and that is not supported
-                            $problemIds = [-1];
-                        }
+                    $progressReporter('<p>Deleting irrelevant data...</p>');
 
-                        if (!empty($teams)) {
-                            $teamIds = array_map(function (Team $team) {
-                                return $team->getTeamid();
-                            }, $teams);
-                        } else {
-                            // teamId -1 will never happen, but otherwise the array is empty and that is not supported
-                            $teamIds = [-1];
-                        }
+                    // Drop all teams and problems that do not exist in the contest
+                    if (!empty($problems)) {
+                        $problemIds = array_map(function (Problem $problem) {
+                            return $problem->getProbid();
+                        }, $problems);
+                    } else {
+                        // problemId -1 will never happen, but otherwise the array is empty and that is not supported
+                        $problemIds = [-1];
+                    }
 
-                        $params = [
-                            ':cid' => $contest->getCid(),
-                            ':problemIds' => $problemIds,
-                        ];
-                        $types  = [
-                            ':problemIds' => Connection::PARAM_INT_ARRAY,
-                            ':teamIds' => Connection::PARAM_INT_ARRAY,
-                        ];
-                        $this->entityManager->getConnection()->executeQuery(
-                            'DELETE FROM scorecache WHERE cid = :cid AND probid NOT IN (:problemIds)',
-                            $params, $types);
+                    if (!empty($teams)) {
+                        $teamIds = array_map(function (Team $team) {
+                            return $team->getTeamid();
+                        }, $teams);
+                    } else {
+                        // teamId -1 will never happen, but otherwise the array is empty and that is not supported
+                        $teamIds = [-1];
+                    }
 
-                        $params = [
-                            ':cid' => $contest->getCid(),
-                            ':teamIds' => $teamIds,
-                        ];
-                        $this->entityManager->getConnection()->executeQuery(
-                            'DELETE FROM scorecache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
-                            $params, $types);
-                        $this->entityManager->getConnection()->executeQuery(
-                            'DELETE FROM rankcache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
-                            $params, $types);
-                    });
+                    $params = [
+                        ':cid' => $contest->getCid(),
+                        ':problemIds' => $problemIds,
+                    ];
+                    $types  = [
+                        ':problemIds' => Connection::PARAM_INT_ARRAY,
+                        ':teamIds' => Connection::PARAM_INT_ARRAY,
+                    ];
+                    $this->entityManager->getConnection()->executeQuery(
+                        'DELETE FROM scorecache WHERE cid = :cid AND probid NOT IN (:problemIds)',
+                        $params, $types);
+
+                    $params = [
+                        ':cid' => $contest->getCid(),
+                        ':teamIds' => $teamIds,
+                    ];
+                    $this->entityManager->getConnection()->executeQuery(
+                        'DELETE FROM scorecache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
+                        $params, $types);
+                    $this->entityManager->getConnection()->executeQuery(
+                        'DELETE FROM rankcache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
+                        $params, $types);
                 }
 
                 $timeEnd = microtime(true);
