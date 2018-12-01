@@ -232,6 +232,10 @@ class JudgehostController extends BaseController
             'judgehost' => $judgehost,
             'status' => $status,
             'judgings' => $judgings,
+            'refresh' => [
+                'after' => 15,
+                'url' => $this->generateUrl('jury_judgehost', ['hostname' => $judgehost->getHostname()]),
+            ],
         ]);
     }
 
