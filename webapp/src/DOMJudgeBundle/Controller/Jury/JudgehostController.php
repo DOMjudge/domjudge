@@ -185,7 +185,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/{hostname}/", name="jury_judgehost")
+     * @Route("/judgehosts/{hostname}", methods={"GET"}, name="jury_judgehost")
      * @param string $hostname
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -236,7 +236,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/{hostname}/activate/", name="jury_judgehost_activate")
+     * @Route("/judgehosts/{hostname}/activate", name="jury_judgehost_activate")
      * @Security("has_role('ROLE_ADMIN')")
      * @param RouterInterface $router
      * @param Request         $request
@@ -253,7 +253,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/{hostname}/deactivate/", name="jury_judgehost_deactivate")
+     * @Route("/judgehosts/{hostname}/deactivate", name="jury_judgehost_deactivate")
      * @Security("has_role('ROLE_ADMIN')")
      * @param RouterInterface $router
      * @param Request         $request
@@ -270,7 +270,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/activate/all/", methods={"POST"}, name="jury_judgehost_activate_all")
+     * @Route("/judgehosts/activate-all", methods={"POST"}, name="jury_judgehost_activate_all")
      * @Security("has_role('ROLE_ADMIN')")
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -282,7 +282,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/deactivate/all/", methods={"POST"}, name="jury_judgehost_deactivate_all")
+     * @Route("/judgehosts/deactivate-all", methods={"POST"}, name="jury_judgehost_deactivate_all")
      * @Security("has_role('ROLE_ADMIN')")
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -322,7 +322,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/edit/multiple/", name="jury_judgehost_edit")
+     * @Route("/judgehosts/edit/multiple", name="jury_judgehost_edit")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
