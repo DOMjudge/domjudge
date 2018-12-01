@@ -7,11 +7,14 @@ use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\Rejudging;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\RejudgingService;
 use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
@@ -148,7 +151,7 @@ class RejudgingController extends Controller
      * @param KernelInterface   $kernel
      * @param SubmissionService $submissionService
      * @param int               $rejudgingId
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -322,16 +325,64 @@ class RejudgingController extends Controller
     /**
      * @Route(
      *     "/rejudgings/{rejudgingId}/{action}",
-     *     methods={"POST"},
-     *     name="jury_rejudging_cancel_or_apply",
+     *     name="jury_rejudging_finish",
      *     requirements={"action": "cancel|apply"}
      * )
-     * @param int    $rejudgingId
-     * @param string $action
-     * @return void
+     * @param Request          $request
+     * @param RejudgingService $rejudgingService
+     * @param int              $rejudgingId
+     * @param string           $action
+     * @return Response|StreamedResponse
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function cancelOrApplyAction(int $rejudgingId, string $action)
+    public function finishAction(Request $request, RejudgingService $rejudgingService, int $rejudgingId, string $action)
     {
+        // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig outpit
 
+        /** @var Rejudging $rejudging */
+        $rejudging = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Rejudging', 'r')
+            ->select('r')
+            ->andWhere('r.rejudgingid = :rejudgingid')
+            ->setParameter(':rejudgingid', $rejudgingId)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if ($request->isXmlHttpRequest()) {
+            $response = new StreamedResponse();
+            $response->headers->set('X-Accel-Buffering', 'no');
+            $progressReporter = function (string $data, bool $isError = false) {
+                if ($isError) {
+                    echo sprintf('<div class="alert alert-danger">%s</div>', $data);
+                } else {
+                    echo $data;
+                }
+                ob_flush();
+                flush();
+            };
+            $response         = new StreamedResponse();
+            $response->headers->set('X-Accel-Buffering', 'no');
+            $response->setCallback(function () use ($progressReporter, $rejudging, $rejudgingService, $action) {
+                $timeStart = microtime(true);
+                if ($rejudgingService->finishRejudging($rejudging, $action, $progressReporter)) {
+                    $timeEnd      = microtime(true);
+                    $timeDiff     = sprintf('%.2f', $timeEnd - $timeStart);
+                    $rejudgingUrl = $this->generateUrl('jury_rejudging',
+                                                       ['rejudgingId' => $rejudging->getRejudgingid()]);
+                    echo sprintf(
+                        '<br/><br/><p>Rejudging <a href="%s">r%d</a> %s in %s seconds.</p>',
+                        $rejudgingUrl, $rejudging->getRejudgingid(),
+                        $action == RejudgingService::ACTION_APPLY ? 'applied' : 'canceled', $timeDiff
+                    );
+                }
+            });
+
+            return $response;
+        } else {
+            return $this->render('@DOMJudge/jury/rejudging_finish.html.twig', [
+                'action' => $action,
+                'rejudging' => $rejudging,
+            ]);
+        }
     }
 }

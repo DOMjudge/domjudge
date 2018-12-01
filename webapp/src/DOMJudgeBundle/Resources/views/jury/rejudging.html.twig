@@ -83,20 +83,9 @@
 
     {% if not rejudging.endtime %}
         <div>
-            <form action="{{ path('jury_rejudging_cancel_or_apply', {rejudgingId: rejudging.rejudgingid, action: 'cancel'}) }}"
-                  method="post" class="d-inline">
-                <button type="submit" class="btn btn-danger">
-                    <i class="fas fa-times"></i> Cancel rejudging
-                </button>
-            </form>
-
+            {{ button(path('jury_rejudging_finish', {rejudgingId: rejudging.rejudgingid, action: 'cancel'}), 'Cancel rejudging', 'danger', 'times') }}
             {% if todo == 0 %}
-                <form action="{{ path('jury_rejudging_cancel_or_apply', {rejudgingId: rejudging.rejudgingid, action: 'apply'}) }}"
-                      method="post" class="d-inline">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-check"></i> Apply rejudging
-                    </button>
-                </form>
+                {{ button(path('jury_rejudging_finish', {rejudgingId: rejudging.rejudgingid, action: 'apply'}), 'Apply rejudging', 'success', 'check') }}
             {% endif %}
         </div>
     {% endif %}
@@ -190,7 +179,8 @@
             </div>
             <div class="form-group col-md-2">
                 <label>&nbsp;</label>
-                <a href="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: viewTypes[view]}) }}" class="btn btn-secondary form-control">Clear</a>
+                <a href="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: viewTypes[view]}) }}"
+                   class="btn btn-secondary form-control">Clear</a>
             </div>
         </div>
     </form>
