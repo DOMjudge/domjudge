@@ -62,7 +62,7 @@ class ProblemController extends Controller
 
         $table_fields = [
             'probid' => ['title' => 'ID', 'sort' => true, 'default_sort' => true],
-            'name' => ['title' => 'teamname', 'sort' => true],
+            'name' => ['title' => 'name', 'sort' => true],
             'num_contests' => ['title' => '# contests', 'sort' => true],
             'timelimit' => ['title' => 'time limit', 'sort' => true],
             'memlimit' => ['title' => 'memory limit', 'sort' => true],
