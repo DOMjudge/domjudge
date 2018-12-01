@@ -183,26 +183,26 @@ class JuryMiscController extends Controller
                 ->where($qb->expr()->like('c.name', '?1'))
                 ->orWhere($qb->expr()->like('c.shortname', '?1'))
                 ->orWhere($qb->expr()->eq('c.cid', '?2'))
-		->orderBy('c.name', 'ASC');
+                ->orderBy('c.name', 'ASC');
 
             if ( $request->query->get('public') !== null ) {
                 $query = $query->andWhere($qb->expr()->eq('c.public', '?3'));
             }
-	    $query = $query->getQuery()
+            $query = $query->getQuery()
                 ->setParameter(1, '%' . $q . '%')
                 ->setParameter(2, $q);
-           if ( $request->query->get('public') !== null ) {
+            if ( $request->query->get('public') !== null ) {
                 $query = $query->setParameter(3, $request->query->get('public'));
-           }
-           $contests = $query->getResult();
+            }
+            $contests = $query->getResult();
 
-           $results = array_map(function (array $contest) {
-               $displayname = $contest['name'] . " (" .$contest['shortname'] . " - c". $contest['cid'] .")";
-               return [
-                   'id' => $contest['cid'],
-                   'text' => $displayname,
-                   'search' => $displayname,
-               ];
+            $results = array_map(function (array $contest) {
+                $displayname = $contest['name'] . " (" .$contest['shortname'] . " - c". $contest['cid'] .")";
+                return [
+                    'id' => $contest['cid'],
+                    'text' => $displayname,
+                    'search' => $displayname,
+                ];
             }, $contests);
         } else {
             throw new NotFoundHttpException("Unknown AJAX data type: " . $datatype);
