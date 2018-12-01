@@ -2,7 +2,7 @@
     <strong>Warning:</strong> Refresh scoreboard cache
     <hr>
     <p>{{ message }}</p>
-    <form action="{{ path('legacy.jury_refresh_cache') }}" method="POST">
+    <form action="{{ path('jury_refresh_cache') }}" method="POST">
         {% if contest is not empty %}
             <input type="hidden" name="cid" value="{{ contest.cid }}"/>
         {% endif %}

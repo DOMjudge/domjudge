@@ -88,7 +88,7 @@ if (!$data) {
 }
 
 if (isset($_GET['edited'])) {
-    echo addForm('refresh_cache.php') .
+    echo addForm('refresh-cache/') .
         msgbox(
             "Warning: Refresh scoreboard cache",
                "If the category sort order was changed, it may be necessary to " .

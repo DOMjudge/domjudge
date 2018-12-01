@@ -185,7 +185,7 @@ if (!$row) {
 }
 
 if (isset($_GET['edited'])) {
-    echo addForm('refresh_cache.php') .
+    echo addForm('refresh-cache/') .
          msgbox(
              "Warning: Refresh scoreboard cache",
              "If the membership of a team in a contest was changed, it may be necessary to recalculate any cached scoreboards.<br /><br />" .
