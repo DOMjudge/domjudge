@@ -39,7 +39,7 @@
                     <div class="form-group col-sm-6">
                         <label for="problems-filter">Filter on problem(s)</label>
                         <select class="select2 form-control" multiple data-filter-field="problem-id"
-                                data-ajax-url="{{ path('legacy.jury_ajax_problems', {select2: true}) }}">
+                                data-ajax-url="{{ path('jury_ajax_data', {datatype: 'problems', select2: true}) }}">
                             {%- for problem in filteredProblems %}
 
                                 <option value="{{ problem.probid }}" selected>
@@ -55,7 +55,7 @@
                     <div class="form-group col-sm-6">
                         <label for="problems-filter">Filter on language(s)</label>
                         <select class="select2 form-control" multiple data-filter-field="language-id"
-                                data-ajax-url="{{ path('legacy.jury_ajax_languages', {select2: true}) }}">
+                                data-ajax-url="{{ path('jury_ajax_data', {datatype: 'languages', select2: true}) }}">
                             {%- for language in filteredLanguages %}
 
                                 <option value="{{ language.langid }}" selected>
@@ -71,7 +71,7 @@
                     <div class="form-group col-sm-6">
                         <label for="problems-filter">Filter on team(s)</label>
                         <select class="select2 form-control" multiple data-filter-field="team-id"
-                                data-ajax-url="{{ path('legacy.jury_ajax_teams', {select2: true}) }}">
+                                data-ajax-url="{{ path('jury_ajax_data', {datatype: 'teams', select2: true}) }}">
                             {%- for team in filteredTeams %}
 
                                 <option value="{{ team.teamid }}" selected>

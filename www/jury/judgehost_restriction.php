@@ -58,19 +58,19 @@ if (!empty($_GET['cmd'])) {
 
 $types = array(
     'contest' => array(
-        'ajax' => 'ajax_contests.php',
+        'ajax' => './ajax/contests',
         'hintText' => 'Type to search for contest ID, name, or short name',
         'noResultsText' => 'No contests found',
         'allData' => $contests,
     ),
     'problem' => array(
-        'ajax' => 'ajax_problems.php',
+        'ajax' => './ajax/problems',
         'hintText' => 'Type to search for problem ID or name',
         'noResultsText' => 'No problems found',
         'allData' => $problems,
     ),
     'language' => array(
-        'ajax' => 'ajax_languages.php',
+        'ajax' => './ajax/languages',
         'hintText' => 'Type to search for language ID or name',
         'noResultsText' => 'No languages found',
         'allData' => $languages,

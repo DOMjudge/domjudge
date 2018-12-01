@@ -73,10 +73,3 @@ legacy.jury_testcase:
     path: /jury/testcase.php
 legacy.jury_team_output:
     path: /jury/team_output.php
-
-legacy.jury_ajax_problems:
-    path: /jury/ajax_problems.php
-legacy.jury_ajax_teams:
-    path: /jury/ajax_teams.php
-legacy.jury_ajax_languages:
-    path: /jury/ajax_languages.php

@@ -103,7 +103,7 @@ Relative time format: <b><kbd><?php echo $human_rel_datetime ?></kbd></b><br />
         <?php echo addInput('data[0][mapping][1][items]', '', 50); ?>
         <script type="text/javascript">
             $(function() {
-                $('#data_0__mapping__1__items_').tokenInput('ajax_teams.php', {
+                $('#data_0__mapping__1__items_').tokenInput('./ajax/teams', {
                     propertyToSearch: 'search',
                     hintText: 'Type to search for team ID or name',
                     noResultsText: 'No teams found',
@@ -160,7 +160,7 @@ $problem_name_mapping = $DB->q("KEYVALUETABLE SELECT probid, name FROM problem")
 <input type="text" id="problems_token_input" name="problems" />
 <script type="text/javascript">
 $(function() {
-    $('#problems_token_input').tokenInput('ajax_problems.php', {
+    $('#problems_token_input').tokenInput('./ajax/problems', {
         overwriteClasses: {
             tokenList: 'token-input-list token-input-list-wide'
         },

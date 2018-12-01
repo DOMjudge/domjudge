@@ -98,7 +98,7 @@ if ($num_contests > 0) {
         <?php echo addInput('data[0][mapping][0][items]', '', 50); ?>
         <script type="text/javascript">
             $(function() {
-                $('#data_0__mapping__0__items_').tokenInput('ajax_contests.php?public=0', {
+                $('#data_0__mapping__0__items_').tokenInput('./ajax/contests?public=0', {
                     propertyToSearch: 'search',
                     hintText: 'Type to search for contest ID, name, or short name',
                     noResultsText: 'No private contests found',
