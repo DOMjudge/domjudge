@@ -205,7 +205,7 @@
                 Judging j{{ selectedJudging.judgingid }}
                 {% if selectedJudging.rejudging %}
                     (rejudging
-                    <a href="{{ path('legacy.jury_rejudging', {id: selectedJudging.rejudgingid}) }}">
+                    <a href="{{ path('jury_rejudging', {rejudgingId: selectedJudging.rejudgingid}) }}">
                         r{{ selectedJudging.rejudgingid }}</a>, reason: {{ selectedJudging.rejudging.reason }})
                 {% elseif not selectedJudging.valid %}
                     (Invalid)

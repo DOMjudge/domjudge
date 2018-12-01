@@ -239,3 +239,17 @@ td.scorenc { border-color: silver; border-right: 0; }
     height: 30px;
     width: 40px;
 }
+
+table.rejudgetable td {
+    text-align: center;
+}
+table.rejudgetable td.changed {
+    background-color: #fdd;
+    font-weight: bold;
+}
+table.rejudgetable td.identical {
+    background-color: #dfd;
+}
+table.rejudgetable td.zero {
+    background-color: #F0F8FF;
+}

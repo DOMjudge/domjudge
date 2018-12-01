@@ -1,0 +1,212 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block title %}Rejudging r{{ rejudging.rejudgingid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Rejudging r{{ rejudging.rejudgingid }} {% if not rejudging.valid %}(canceled){% endif %}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>Reason</th>
+                    <td>
+                        {% if rejudging.reason is empty %}
+                            <span class="nodata">none</span>
+                        {% else %}
+                            {{ rejudging.reason }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if rejudging.startUser %}
+                    <tr>
+                        <th>Issued by</th>
+                        <td>
+                            <a href="{{ path('legacy.jury_user', {id: rejudging.startUser.userid}) }}">
+                                {{ rejudging.startUser.name }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if rejudging.finishUser %}
+                    <tr>
+                        <th>{% if rejudging.valid %}Accepted{% else %}Canceled{% endif %} by</th>
+                        <td>
+                            <a href="{{ path('legacy.jury_user', {id: rejudging.finishUser.userid}) }}">
+                                {{ rejudging.finishUser.name }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Start time</th>
+                    <td>
+                        {% if rejudging.starttime %}
+                            <span title="{{ rejudging.starttime | printtime('%Y-%m-%d %H:%M:%S (%Z)') }}">
+                                {{ rejudging.starttime | printtime }}
+                            </span>
+                        {% else %}
+                            <span class="nodata">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Apply time</th>
+                    <td>
+                        {% if rejudging.endtime %}
+                            <span title="{{ rejudging.endtime | printtime('%Y-%m-%d %H:%M:%S (%Z)') }}">
+                                {{ rejudging.endtime | printtime }}
+                            </span>
+                        {% else %}
+                            <span class="nodata">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if todo > 0 %}
+                    <tr>
+                        <th>Queued</th>
+                        <td>{{ todo }} unfinished judgings</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+    {% if not rejudging.endtime %}
+        <div>
+            <form action="{{ path('jury_rejudging_cancel_or_apply', {rejudgingId: rejudging.rejudgingid, action: 'cancel'}) }}"
+                  method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-times"></i> Cancel rejudging
+                </button>
+            </form>
+
+            {% if todo == 0 %}
+                <form action="{{ path('jury_rejudging_cancel_or_apply', {rejudgingId: rejudging.rejudgingid, action: 'apply'}) }}"
+                      method="post" class="d-inline">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Apply rejudging
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="mt-2">
+        <h2>Overview of changes</h2>
+        <table class="rejudgetable">
+            <tr>
+                <th title="old vs. new verdicts">-\+</th>
+                {% for verdict, abbreviation in verdicts %}
+                    {% if used[verdict] is defined %}
+                        <th title="{{ verdict }} (new)">{{ abbreviation }}</th>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+
+            {% for originalVerdict, changedVerdicts in verdictTable %}
+                {% if used[originalVerdict] is defined %}
+                    <tr>
+                        <th title="{{ originalVerdict }} (old)">{{ verdicts[originalVerdict] }}</th>
+                        {% for newVerdict, submitIds in changedVerdicts %}
+                            {% if used[newVerdict] is defined %}
+                                {% set numSubmissions = submitIds | length %}
+                                {% set link = null %}
+                                {% if originalVerdict == newVerdict %}
+                                    {% set class = 'identical' %}
+                                {% elseif numSubmissions == 0 %}
+                                    {% set class = 'zero' %}
+                                {% else %}
+                                    {% set class = 'changed' %}
+                                    {% set link = path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: 'all', oldverdict: originalVerdict, newverdict: newVerdict}) %}
+                                {% endif %}
+                                <td class="{{ class }}">
+                                    {% if link is not null %}
+                                        <a href="{{ link }}">{{ numSubmissions }}</a>
+                                    {% else %}
+                                        {{ numSubmissions }}
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    </div>
+
+    <h2 class="mt-4">Details</h2>
+
+    Show submissions:
+    <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+        {%- for idx, type in viewTypes %}
+
+            <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
+                <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
+                       {% if idx == view %}checked{% endif %}> {{ type }}
+            </label>
+        {%- endfor %}
+    </div>
+
+    <form action="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid}) }}" method="get">
+        <input type="hidden" name="view" value="{{ viewTypes[view] }}"/>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="oldverdict">Old verdict</label>
+                <select style="width: 100%" class="select2 form-control" name="oldverdict" id="oldverdict">
+                    <option value="all" {% if oldverdict == 'all' %}selected{% endif %}>all</option>
+                    {%- for verdict, abbreviation in verdicts %}
+                        <option value="{{ verdict }}" {% if oldverdict == verdict %}selected{% endif %}>
+                            {{ verdict }}
+                        </option>
+                    {%- endfor %}
+
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="newverdict">New verdict</label>
+                <select style="width: 100%" class="select2 form-control" name="newverdict" id="newverdict">
+                    <option value="all" {% if newverdict == 'all' %}selected{% endif %}>all</option>
+                    {%- for verdict, abbreviation in verdicts %}
+                        <option value="{{ verdict }}" {% if newverdict == verdict %}selected{% endif %}>
+                            {{ verdict }}
+                        </option>
+                    {%- endfor %}
+
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <label>&nbsp;</label>
+                <input class="btn btn-primary form-control" type="submit" value="Filter"/>
+            </div>
+            <div class="form-group col-md-2">
+                <label>&nbsp;</label>
+                <a href="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: viewTypes[view]}) }}" class="btn btn-secondary form-control">Clear</a>
+            </div>
+        </div>
+    </form>
+
+    {%- include '@DOMJudge/jury/partials/submission_list.html.twig' with {showContest: true} %}
+
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function () {
+            $('input[name=viewtype]').on('change', function () {
+                window.location = '{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: 'REPLACE_ME', oldverdict: oldverdict, newverdict: newverdict}) }}'.replace('REPLACE_ME', $(this).val());
+            });
+
+            $('.select2').select2();
+        });
+    </script>
+{% endblock %}

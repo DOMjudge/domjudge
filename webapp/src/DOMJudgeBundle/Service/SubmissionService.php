@@ -98,6 +98,8 @@ class SubmissionService
      * @param int   $limit
      * @return array An array with two elements: the first one is the list of submissions and the second one is an
      *              array with counts
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getSubmissionList(array $contests, array $restrictions, int $limit = 0)
     {
