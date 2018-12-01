@@ -54,7 +54,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="{{ path('legacy.jury_rejudge') }}" method="post">
+            <form action="{{ path('jury_create_rejudge') }}" method="post">
                 <div class="modal-body">
                     <input type="hidden" name="table" value="{{ table }}"/>
                     <input type="hidden" name="id" value="{{ id }}"/>

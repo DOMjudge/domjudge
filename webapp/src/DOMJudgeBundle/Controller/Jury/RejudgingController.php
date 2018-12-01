@@ -3,11 +3,15 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Judging;
+use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Rejudging;
 use DOMJudgeBundle\Entity\Submission;
+use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\RejudgingService;
+use DOMJudgeBundle\Service\ScoreboardService;
 use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -15,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
@@ -383,6 +388,182 @@ class RejudgingController extends Controller
                 'action' => $action,
                 'rejudging' => $rejudging,
             ]);
+        }
+    }
+
+    /**
+     * @Route("/rejudge/", methods={"POST"}, name="jury_create_rejudge")
+     * @param Request           $request
+     * @param ScoreboardService $scoreboardService
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function createAction(Request $request, ScoreboardService $scoreboardService)
+    {
+        $table       = $request->request->get('table');
+        $id          = $request->request->get('id');
+        $reason      = $request->request->get('reason') ?: sprintf('%s: %s', $table, $id);
+        $includeAll  = (bool)$request->request->get('include_all');
+        $fullRejudge = (bool)$request->request->get('full_rejudge');
+
+        if (empty($table) || empty($id)) {
+            throw new BadRequestHttpException('No table or id passed for selection in rejudging');
+        }
+
+        if ($includeAll && !$this->DOMJudgeService->checkrole('admin')) {
+            throw new BadRequestHttpException('Rejudging pending/correct submissions requires admin rights');
+        }
+
+        // Special case 'submission' for admin overrides
+        if ($this->DOMJudgeService->checkrole('admin') && ($table == 'submission')) {
+            $includeAll = true;
+        }
+
+        /* These are the tables that we can deal with. */
+        $tablemap = [
+            'contest' => 's.cid',
+            'judgehost' => 'j.judgehost',
+            'language' => 's.langid',
+            'problem' => 's.probid',
+            'submission' => 's.submitid',
+            'team' => 's.teamid'
+        ];
+
+        if (!isset($tablemap[$table])) {
+            throw new BadRequestHttpException(sprintf('unknown table %s in rejudging', $table));
+        }
+
+        // Only rejudge submissions in active contests.
+        $contests = $this->DOMJudgeService->getCurrentContests();
+
+        $queryBuilder = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Judging', 'j')
+            ->leftJoin('j.submission', 's')
+            ->select('j')
+            ->andWhere('j.contest IN (:contests)')
+            ->andWhere('j.valid = 1')
+            ->andWhere(sprintf('%s = :id', $tablemap[$table]))
+            ->setParameter(':contests', $contests)
+            ->setParameter(':id', $id);
+
+        if ($includeAll && $fullRejudge) {
+            $queryBuilder
+                ->andWhere('j.result IS NOT NULL')
+                ->andWhere('j.valid = 1');
+        } elseif (!$includeAll) {
+            $queryBuilder
+                ->andWhere('j.result != :correct')
+                ->setParameter(':correct', 'correct');
+        }
+
+        /** @var Judging[] $judgings */
+        $judgings = $queryBuilder->getQuery()->getResult();
+
+        if (empty($judgings)) {
+            throw new BadRequestHttpException('No judgings matched.');
+        }
+
+        /** @var Rejudging|null $rejudging */
+        $rejudging = null;
+        if ($fullRejudge) {
+            $rejudging = new Rejudging();
+            $rejudging
+                ->setStartUser($this->DOMJudgeService->getUser())
+                ->setStarttime(Utils::now())
+                ->setReason($reason);
+            $this->entityManager->persist($rejudging);
+            $this->entityManager->flush();
+        }
+
+        foreach ($judgings as $judging) {
+            // Reload judging and rejudging to make sure we have a fresh copy when the entity manager is cleared
+            /** @var Judging $judging */
+            $judging = $this->entityManager->getRepository(Judging::class)->find($judging->getJudgingid());
+            if ($rejudging) {
+                $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($rejudging->getRejudgingid());
+            }
+            $submission = $judging->getSubmission();
+            if ($submission->getRejudgingid() !== null) {
+                // Already associated rejudging
+                if ($table === 'submission') {
+                    // clean up rejudging. Note that if $table is 'submission', we will always have only one
+                    // judging so we can safely delete the rejudging
+                    $this->entityManager->remove($rejudging);
+                    $this->entityManager->flush();
+                    throw new BadRequestHttpException(sprintf('Submission is already part of rejudging r%d',
+                                                              $submission->getRejudgingid()));
+                } else {
+                    // silently skip that submission
+                    continue;
+                }
+            }
+
+            $this->entityManager->transactional(function () use (
+                $table,
+                $fullRejudge,
+                $judging,
+                $submission,
+                $rejudging,
+                $scoreboardService
+            ) {
+                if (!$fullRejudge) {
+                    $judging->setValid(false);
+                }
+
+                if ($submission->getRejudgingid() === null) {
+                    if ($rejudging) {
+                        // Reload rejudging to make sure we have fresh data
+                        $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($rejudging->getRejudgingid());
+                    }
+                    $submission
+                        ->setJudgehost(null)
+                        ->setRejudging($rejudging);
+                }
+
+                // Prioritize single submission rejudgings
+                if ($table == 'submission') {
+                    $team = $submission->getTeam();
+                    if ($team) {
+                        $team->setJudgingLastStarted(null);
+                    }
+                }
+
+                $this->entityManager->flush();
+
+                if (!$fullRejudge) {
+                    // Clear entity manager to get fresh data
+                    $this->entityManager->clear();
+                    $contest = $this->entityManager->getRepository(Contest::class)
+                        ->find($submission->getCid());
+                    $team    = $this->entityManager->getRepository(Team::class)
+                        ->find($submission->getTeamid());
+                    $problem = $this->entityManager->getRepository(Problem::class)
+                        ->find($submission->getProbid());
+                    $scoreboardService->calculateScoreRow($contest, $team, $problem);
+                }
+            });
+
+            if (!$fullRejudge) {
+                $this->DOMJudgeService->auditlog('judging', $judging->getJudgingid(), 'mark invalid', '(rejudge)');
+            }
+        }
+
+        if ($rejudging) {
+            return $this->redirectToRoute('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]);
+        } else {
+            switch ($table) {
+                case 'contest':
+                    return $this->redirectToRoute('legacy.jury_contest', ['id' => $id]);
+                case 'judgehost':
+                    return $this->redirectToRoute('jury_judgehost', ['hostname' => $id]);
+                case 'language':
+                    return $this->redirectToRoute('legacy.jury_language', ['id' => $id]);
+                case 'problem':
+                    return $this->redirectToRoute('legacy.jury_problem', ['id' => $id]);
+                case 'submission':
+                    return $this->redirectToRoute('jury_submission', ['submitId' => $id]);
+                case 'team':
+                    return $this->redirectToRoute('legacy.jury_team', ['id' => $id]);
+            }
         }
     }
 }

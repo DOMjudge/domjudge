@@ -24,8 +24,6 @@ legacy.jury_clarification:
     path: /jury/clarification.php
 legacy.jury_language:
     path: /jury/language.php
-legacy.jury_rejudge:
-    path: /jury/rejudge.php
 legacy.team_index:
     path: /team/
 legacy.team_problem:

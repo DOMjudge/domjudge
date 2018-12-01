@@ -87,7 +87,7 @@ function exportProblemLink($probid) : string
 function rejudgeForm(string $table, $id) : string
 {
     $ret = '<div id="rejudge" class="framed">' .
-         addForm('rejudge.php') .
+         addForm('rejudge/') .
          addHidden('table', $table) .
          addHidden('id', (string)$id);
 
