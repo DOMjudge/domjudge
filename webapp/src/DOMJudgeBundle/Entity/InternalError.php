@@ -53,8 +53,8 @@ class InternalError
     private $time;
 
     /**
-     * @var string
-     * @ORM\Column(type="text", length=4294967295, name="disabled", options={"comment"="Disabled stuff, JSON-encoded"}, nullable=false)
+     * @var array
+     * @ORM\Column(type="json_array", length=4294967295, name="disabled", options={"comment"="Disabled stuff, JSON-encoded"}, nullable=false)
      */
     private $disabled;
 
@@ -224,7 +224,7 @@ class InternalError
     /**
      * Set disabled
      *
-     * @param string $disabled
+     * @param array $disabled
      *
      * @return InternalError
      */
@@ -238,7 +238,7 @@ class InternalError
     /**
      * Get disabled
      *
-     * @return string
+     * @return array
      */
     public function getDisabled()
     {

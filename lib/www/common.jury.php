@@ -701,11 +701,3 @@ function importZippedProblem(ZipArchive $zip, string $filename, $probid = null, 
 
     return $probid;
 }
-
-// dis- or re-enable what caused an internal error
-function set_internal_error(array $disabled, /* int/null */ $cid, /* int/null */ $value)
-{
-    /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
-    global $G_SYMFONY;
-    $G_SYMFONY->setInternalError($disabled, $cid, $value);
-}

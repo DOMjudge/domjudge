@@ -910,7 +910,7 @@ class JudgehostController extends FOSRestController
             ->setDescription($description)
             ->setJudgehostlog($judgehostlog)
             ->setTime(Utils::now())
-            ->setDisabled($disabled);
+            ->setDisabled(json_decode($disabled, true));
 
         $this->entityManager->persist($error);
         $this->entityManager->flush();

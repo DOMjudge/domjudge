@@ -29,7 +29,7 @@
                     <li><a href="{{ path('jury_balloons') }}">Balloon Status</a></li>
                     {% if is_granted('ROLE_JURY') %}
                         <li><a href="{{ path('jury_clarifications') }}">Clarifications</a></li>
-                        <li><a href="{{ path('legacy.jury_internal_errors') }}">Internal Errors</a></li>
+                        <li><a href="{{ path('jury_internal_errors') }}">Internal Errors</a></li>
                     {% endif %}
                     {% if have_printing %}
                         <li><a href="{{ path('jury_print') }}">Print</a></li>

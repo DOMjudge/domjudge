@@ -12,10 +12,6 @@ legacy.jury_problem:
     path: /jury/problem.php
 legacy.jury_export_problem:
     path: /jury/export_problem.php
-legacy.jury_internal_errors:
-    path: /jury/internal_errors.php
-legacy.jury_internal_error:
-    path: /jury/internal_error.php
 legacy.jury_judgehost_restrictions:
     path: /jury/judgehost_restrictions.php
 legacy.jury_judgehost_restriction:

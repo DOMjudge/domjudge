@@ -27,7 +27,7 @@ global $updates;
         $nerr = count($updates['internal_error']);
         if ($nerr > 0) {
             ?>
-<a class="new" href="internal_errors.php" accesskey="e" id="menu_internal_error"><i class="fas fa-bolt"></i> internal error (<?php echo $nerr ?> new)</a>
+<a class="new" href="internal-errors" accesskey="e" id="menu_internal_error"><i class="fas fa-bolt"></i> internal error (<?php echo $nerr ?> new)</a>
 <?php
         }
     } ?>

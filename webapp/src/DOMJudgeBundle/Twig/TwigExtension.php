@@ -70,7 +70,8 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('externalCcsUrl', [$this, 'externalCcsUrl']),
             new \Twig_SimpleFilter('lineCount', [$this, 'lineCount']),
             new \Twig_SimpleFilter('autoExpand', [$this, 'autoExpand'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('base64', [$this, 'base64']),
+            new \Twig_SimpleFilter('base64', [$this, 'base64_encode']),
+            new \Twig_SimpleFilter('base64_decode', 'base64_decode'),
             new \Twig_SimpleFilter('parseRunDiff', [$this, 'parseRunDiff'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('runDiff', [$this, 'runDiff'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('codeEditor', [$this, 'codeEditor'], ['is_safe' => ['html']]),
@@ -398,16 +399,6 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
 </span>
 EOF;
         }
-    }
-
-    /**
-     * Base64 encode the given input
-     * @param string $input
-     * @return string
-     */
-    public function base64(string $input): string
-    {
-        return base64_encode($input);
     }
 
     /**
