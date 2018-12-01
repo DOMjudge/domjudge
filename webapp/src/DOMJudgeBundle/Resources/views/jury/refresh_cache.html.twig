@@ -54,6 +54,9 @@
 
             xhr.onprogress = function (e) {
                 $status.html(e.currentTarget.response);
+
+                // Scroll page to bottom of div to keep showing progress
+                $('html, body').animate({scrollTop: $status.offset().top + $status.height()}, 0);
             };
 
             xhr.send({% if contest is not empty %}'cid={{ contest.cid }}'{% endif %});
