@@ -277,7 +277,7 @@ class RejudgingController extends Controller
         }
 
         $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'diff', 4 => 'all'];
-        $view      = 4;
+        $view      = 3;
         if ($request->query->has('view')) {
             $index = array_search($request->query->get('view'), $viewTypes);
             if ($index !== false) {
