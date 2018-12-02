@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\Jury;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
+use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Judgehost;
 use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\Language;
@@ -14,6 +15,8 @@ use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
+use DOMJudgeBundle\Service\ScoreboardService;
 use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -723,6 +726,42 @@ class SubmissionController extends Controller
             'form' => $form->createView(),
             'selected' => $request->query->get('rank'),
         ]);
+    }
+
+    /**
+     * @Route("/submissions/{submitId}/update-status", name="jury_submission_update_status", methods={"POST"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param EventLogService   $eventLogService
+     * @param ScoreboardService $scoreboardService
+     * @param Request           $request
+     * @param int               $submitId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Exception
+     */
+    public function updateStatusAction(
+        EventLogService $eventLogService,
+        ScoreboardService $scoreboardService,
+        Request $request,
+        int $submitId
+    ) {
+        $submission = $this->entityManager->getRepository(Submission::class)->find($submitId);
+        $valid      = $request->request->getBoolean('valid');
+        $submission->setValid($valid);
+        $this->entityManager->flush();
+
+        // KLUDGE: We can't log an "undelete", so we re-"create".
+        // FIXME: We should also delete/recreate any dependent judging(runs).
+        $eventLogService->log('submission', $submission->getSubmitid(), ($valid ? 'create' : 'delete'),
+                              $submission->getCid());
+        $this->DOMJudgeService->auditlog('submission', $submission->getSubmitid(),
+                                         'marked ' . ($valid ? 'valid' : 'invalid'));
+        $contest = $this->entityManager->getRepository(Contest::class)->find($submission->getCid());
+        $team    = $this->entityManager->getRepository(Team::class)->find($submission->getTeamid());
+        $problem = $this->entityManager->getRepository(Problem::class)->find($submission->getProbid());
+        $scoreboardService->calculateScoreRow($contest, $team, $problem);
+
+        return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getSubmitid()]);
     }
 
     /**

@@ -46,9 +46,8 @@
             {% else %}
                 {% set action = 'unignore' %}
             {% endif %}
-            <form action="{{ path('legacy.jury_ignore_submission') }}" method="post" style="display: inline; ">
-                <input type="hidden" name="id" value="{{ submission.submitid }}"/>
-                <input type="hidden" name="val" value="{% if submission.valid %}0{% else %}1{% endif %}"/>
+            <form action="{{ path('jury_submission_update_status', {'submitId': submission.submitid}) }}" method="post" style="display: inline; ">
+                <input type="hidden" name="valid" value="{% if submission.valid %}0{% else %}1{% endif %}"/>
                 <input type="submit" class="btn btn-outline-secondary btn-sm"
                        value="{{ action | upper }} this submission"
                        onclick="return confirm('Really {{ action }} submission s{{ submission.submitid }}?');"/>
