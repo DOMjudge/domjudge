@@ -17,7 +17,8 @@ if (DEBUG & DEBUG_TIMINGS) {
 <script>
     $(function() {
         $('#cid').on('change', function() {
-            document.forms['selectcontestform'].submit();
+            var contestId = $(this).val();
+            window.location = 'change-contest/' + contestId;
         });
         if ( 'Notification' in window ) {
             $('#notify').show();

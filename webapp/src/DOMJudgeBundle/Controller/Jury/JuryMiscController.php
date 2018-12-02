@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\Jury;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
@@ -13,11 +14,13 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\ScoreboardService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Class JuryMiscController
@@ -26,7 +29,7 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * @package DOMJudgeBundle\Controller\Jury
  */
-class JuryMiscController extends Controller
+class JuryMiscController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -469,5 +472,22 @@ class JuryMiscController extends Controller
             'earlier' => $earlier,
             'verifyMultiple' => $verifyMultiple,
         ]);
+    }
+
+    /**
+     * @Route("/change-contest/{contestId}", name="jury_change_contest")
+     * @param Request         $request
+     * @param RouterInterface $router
+     * @param int             $contestId
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function changeContestAction(Request $request, RouterInterface $router, int $contestId)
+    {
+        if ($this->isLocalReferrer($router, $request)) {
+            $response = new RedirectResponse($request->headers->get('referer'));
+        } else {
+            $response = $this->redirectToRoute('jury_index');
+        }
+        return $this->DOMJudgeService->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false, $response);
     }
 }

@@ -111,11 +111,11 @@
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item disabled" href="#">Change Contest</a>
           {% if is_granted('ROLE_JURY') and contest is not empty %}
-          <a class="dropdown-item" href="{{ path('legacy.jury_change_contest', {'cid': -1}) }}">No contest</a>
+          <a class="dropdown-item" href="{{ path('jury_change_contest', {'contestId': -1}) }}">No contest</a>
           <div class="dropdown-divider"></div>
           {% endif %}
           {% for c in contests if c != contest %}
-          <a class="dropdown-item" href="{{ path('legacy.jury_change_contest', {'cid': c.cid}) }}">{{ c.shortname }}</a>
+          <a class="dropdown-item" href="{{ path('jury_change_contest', {'contestId': c.cid}) }}">{{ c.shortname }}</a>
           {% endfor %}
         </div>
       </li>

@@ -491,7 +491,6 @@ function putClock()
     // Show a contest selection form, if there are contests
     if (IS_JURY) {
         echo "<div id=\"selectcontest\">\n";
-        echo addForm('change_contest.php', 'get', 'selectcontestform');
         $contests = array_map(function ($c) {
             return $c['shortname'];
         }, $cdatas);
@@ -505,7 +504,6 @@ function putClock()
             $values[$contestid] = $name;
         }
         echo 'contest: ' . addSelect('cid', $values, $cid, true);
-        echo addEndForm();
         echo "</div>\n";
     } elseif (count($cdatas) > 1) {
         echo "<div class=\"nav-item dropdown\">\n";
