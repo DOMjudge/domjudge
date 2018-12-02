@@ -117,6 +117,22 @@ class Contest
     private $finalizetime;
 
     /**
+     * @var string|null
+     * @ORM\Column(type="string", length=64, name="finalizecomment", options={"comment"="Comments by the finalizer"},
+     *                            nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $finalizecomment;
+
+    /**
+     * @var int|null
+     * @ORM\Column(type="smallint", length=3, name="b", options={"comment"="Number of extra bronze medals"},
+     *                              nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $b;
+
+    /**
      * @var double
      * @ORM\Column(type="decimal", precision=32, scale=9, name="deactivatetime", options={"comment"="Time contest
      *                             becomes invisible in team/public views", "unsigned"=true}, nullable=true)
@@ -474,13 +490,53 @@ class Contest
     /**
      * Set finalizetime
      *
-     * @param string $finalizetimeString
+     * @param double $finalizetimeString
      *
      * @return Contest
      */
     public function setFinalizetime($finalizetimeString)
     {
-        return $this->finalizetime = $this->getAbsoluteTime($finalizetimeString);
+        $this->finalizetime = $finalizetimeString;
+        return $this;
+    }
+
+    /**
+     * Get finalizecomment
+     *
+     * @return string|null
+     */
+    public function getFinalizecomment()
+    {
+        return $this->finalizecomment;
+    }
+
+    /**
+     * Set finalizecomment
+     *
+     * @param string|null $finalizecomment
+     */
+    public function setFinalizecomment($finalizecomment)
+    {
+        $this->finalizecomment = $finalizecomment;
+    }
+
+    /**
+     * Get b
+     *
+     * @return int|null
+     */
+    public function getB()
+    {
+        return $this->b;
+    }
+
+    /**
+     * Set b
+     * @param int|null $b
+     */
+    public function setB($b)
+    {
+        $this->b = $b;
     }
 
     /**

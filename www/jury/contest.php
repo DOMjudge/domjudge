@@ -464,9 +464,9 @@ if (!empty($data['finalizetime'])) {
          "<tr><td>B:</td><td>" . htmlspecialchars($data['b']) . "</td></tr>\n" .
         "</table>\n<p>Comment:</p>\n<pre class=\"output_text\">" . htmlspecialchars($data['finalizecomment']) . "</pre>\n";
 
-    echo "<p><a href=\"finalize.php?id=" . (int)$data['cid'] . "\">update finalization</a></p>\n\n";
+    echo "<p><a href=\"contests/" . (int)$data['cid'] . "/finalize\">update finalization</a></p>\n\n";
 } else {
-    echo "<p><a href=\"finalize.php?id=" . (int)$data['cid'] . "\">finalize this contest</a></p>\n\n";
+    echo "<p><a href=\"contests/" . (int)$data['cid'] . "/finalize\">finalize this contest</a></p>\n\n";
 }
 
 if (ALLOW_REMOVED_INTERVALS) {

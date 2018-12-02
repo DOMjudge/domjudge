@@ -3,7 +3,9 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Form\Type\FinalizeContestType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
@@ -297,6 +299,80 @@ class ContestController extends Controller
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
             'edited' => $request->query->getBoolean('edited'),
+        ]);
+    }
+
+    /**
+     * @Route("/contests/{contestId}/finalize", name="jury_contest_finalize")
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function finalizeAction(Request $request, int $contestId)
+    {
+        /** @var Contest $contest */
+        $contest  = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        $blockers = [];
+        if (Utils::difftime((float)$contest->getEndtime(), Utils::now()) > 0) {
+            $blockers[] = sprintf('Contest not ended yet (will end at %s)',
+                                  Utils::printtime($contest->getEndtime(), '%Y-%m-%d %H:%M:%S (%Z)'));
+        }
+
+        /** @var int[] $submissionIds */
+        $submissionIds = array_map(function (array $data) {
+            return $data['submitid'];
+        }, $this->entityManager->createQueryBuilder()
+               ->from('DOMJudgeBundle:Submission', 's')
+               ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
+               ->select('s.submitid')
+               ->andWhere('s.contest = :contest')
+               ->andWhere('s.valid = true')
+               ->andWhere('j.result IS NULL')
+               ->setParameter(':contest', $contest)
+               ->orderBy('s.submitid')
+               ->getQuery()
+               ->getResult()
+        );
+
+        if (count($submissionIds) > 0) {
+            $blockers[] = 'Unjudged submissions found: s' . implode(', s', $submissionIds);
+        }
+
+        /** @var int[] $clarificationIds */
+        $clarificationIds = array_map(function (array $data) {
+            return $data['clarid'];
+        }, $this->entityManager->createQueryBuilder()
+               ->from('DOMJudgeBundle:Clarification', 'c')
+               ->select('c.clarid')
+               ->andWhere('c.contest = :contest')
+               ->andWhere('c.answered = false')
+               ->setParameter(':contest', $contest)
+               ->getQuery()
+               ->getResult()
+        );
+        if (count($clarificationIds) > 0) {
+            $blockers[] = 'Unanswered clarifications found: ' . implode(', ', $clarificationIds);
+        }
+
+        if (empty($contest->getFinalizecomment())) {
+            $contest->setFinalizecomment(sprintf('Finalized by: %s', $this->DOMJudgeService->getUser()->getName()));
+        }
+        $form = $this->createForm(FinalizeContestType::class, $contest);
+
+        if (empty($blockers)) {
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $contest->setFinalizetime(Utils::now());
+                $this->entityManager->flush();
+                $this->DOMJudgeService->auditlog('contest', $contest->getCid(), 'finalized',
+                                                 $contest->getFinalizecomment());
+                return $this->redirectToRoute('legacy.jury_contest', ['id' => $contest->getCid()]);
+            }
+        }
+
+        return $this->render('@DOMJudge/jury/contest_finalize.html.twig', [
+            'contest' => $contest,
+            'blockers' => $blockers,
+            'form' => $form->createView(),
         ]);
     }
 }

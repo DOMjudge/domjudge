@@ -28,8 +28,6 @@ legacy.jury_contest:
     path: /jury/contest.php
 legacy.jury_executable:
     path: /jury/executable.php
-legacy.jury_finalize:
-    path: /jury/finalize.php
 
 legacy.jury_checkconfig:
     path: /jury/checkconfig.php
