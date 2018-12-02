@@ -4,7 +4,10 @@ namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
+use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\Problem;
+use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\ScoreboardService;
@@ -369,6 +372,102 @@ class JuryMiscController extends Controller
             'contests' => $contests,
             'contest' => count($contests) === 1 ? reset($contests) : null,
             'doRefresh' => $request->request->has('refresh'),
+        ]);
+    }
+
+    /**
+     * @Route("/judging-verifier", name="jury_judging_verifier")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response|StreamedResponse
+     */
+    public function judgingVerifierAction(Request $request)
+    {
+        /** @var Submission[] $submissions */
+        $submissions = [];
+        if ($contests = $this->DOMJudgeService->getCurrentContests()) {
+            $submissions = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Submission', 's')
+                ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
+                ->select('s', 'j')
+                ->andWhere('s.contest IN (:contests)')
+                ->andWhere('j.result IS NOT NULL')
+                ->setParameter(':contests', $contests)
+                ->getQuery()
+                ->getResult();
+        }
+
+        $numChecked   = 0;
+        $numUnchecked = 0;
+
+        $unexpected = [];
+        $multiple   = [];
+        $verified   = [];
+        $nomatch    = [];
+        $earlier    = [];
+
+        $verifier = 'auto-verifier';
+
+        $verifyMultiple = (bool)$request->get('verify_multiple', false);
+
+        foreach ($submissions as $submission) {
+            // As we only load the needed judging, this will automatically be the first one
+            /** @var Judging $judging */
+            $judging         = $submission->getJudgings()->first();
+            $expectedResults = $submission->getExpectedResults();
+            $submissionLink  = $this->generateUrl('jury_submission', ['submitId' => $submission->getSubmitid()]);
+            $submissionId    = sprintf('s%d', $submission->getSubmitid());
+
+            if (!empty($expectedResults) && !$judging->getVerified()) {
+                $numChecked++;
+                $result = mb_strtoupper($judging->getResult());
+                if (!in_array($result, $expectedResults)) {
+                    $unexpected[] = sprintf("<a href='%s'>%s</a> has unexpected result '%s', should be one of: %s",
+                                            $submissionLink, $submissionId, $result, implode($expectedResults));
+                } elseif (count($expectedResults) > 1) {
+                    if ($verifyMultiple) {
+                        // Judging result is as expected, set judging to verified
+                        $judging
+                            ->setVerified(true)
+                            ->setJuryMember($verifier);
+                        $multiple[] = sprintf("<a href='%s'>%s</a> verified as %s out of multiple possible outcomes (%s)",
+                                              $submissionLink, $submissionId, $result, implode($expectedResults));
+                    } else {
+                        $multiple[] = sprintf("<a href='%s'>%s</a> is judged as %s but has multiple possible outcomes (%s)",
+                                              $submissionLink, $submissionId, $result, implode($expectedResults));
+                    }
+                } else {
+                    // Judging result is as expected, set judging to verified
+                    $judging
+                        ->setVerified(true)
+                        ->setJuryMember($verifier);
+                    $verified[] = sprintf("<a href='%s'>%s</a> verified as '%s'", $submissionLink, $submissionId,
+                                          $result);
+                }
+            } else {
+                $numUnchecked++;
+
+                if (empty($expectedResults)) {
+                    $nomatch[] = sprintf("expected results unknown in <a href='%s'>%s</a>, leaving submission unchecked",
+                                         $submissionLink, $submissionId);
+                } else {
+                    $earlier[] = sprintf("<a href='%s'>%s</a> already verified earlier", $submissionLink,
+                                         $submissionId);
+                }
+            }
+        }
+
+        $this->entityManager->flush();
+
+        return $this->render('@DOMJudge/jury/check_judgings.html.twig', [
+            'numChecked' => $numChecked,
+            'numUnchecked' => $numUnchecked,
+            'unexpected' => $unexpected,
+            'multiple' => $multiple,
+            'verified' => $verified,
+            'nomatch' => $nomatch,
+            'earlier' => $earlier,
+            'verifyMultiple' => $verifyMultiple,
         ]);
     }
 }

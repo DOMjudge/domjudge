@@ -39,8 +39,6 @@ legacy.jury_impexp:
     path: /jury/impexp.php
 legacy.jury_genpasswds:
     path: /jury/genpasswds.php
-legacy.jury_check_judgings:
-    path: /jury/check_judgings.php
 
 
 legacy.jury_delete:

@@ -148,9 +148,9 @@ curl $CURLOPTS -F "sendto=" -F "problem=2-" -F "bodytext=Testing" -F "submit=Sen
 	 "http://localhost/domjudge/jury/clarification.php" -o /dev/null
 
 while /bin/true; do
-	curl $CURLOPTS "http://localhost/domjudge/jury/check_judgings.php?verify_multiple=1" -o /dev/null
-	NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/check_judgings.php" | grep "submissions checked" | cut -d\  -f1)
-	NUMVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/check_judgings.php" | grep "not checked" | cut -d\  -f1)
+	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
+	NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked" | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
+	NUMVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
 	if [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
 		sleep 30s
 	else
@@ -158,13 +158,13 @@ while /bin/true; do
 	fi
 done
 
-NUMNOMAGIC=$(curl $CURLOPTS "http://localhost/domjudge/jury/check_judgings.php" | grep "not checked" | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
+NUMNOMAGIC=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string" | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
 
 # include debug output here
 if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 	echo "Exactly 2 submissions are expected to be unverified, but $NUMNOTVERIFIED are."
 	echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 0)."
-	curl $CURLOPTS "http://localhost/domjudge/jury/check_judgings.php?verify_multiple=1"
+	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1"
 	for i in /opt/domjudge/judgehost/judgings/*/*/*/compile.out; do
 		echo $i;
 		head -n 100 $i;
