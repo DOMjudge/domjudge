@@ -74,8 +74,8 @@ function delLinkMultiple(string $table, array $fields, array $values, string $re
  */
 function exportProblemLink($probid) : string
 {
-    return '<a href="export_problem.php?id=' . urlencode((string)$probid) .
-        '"><img src="../images/b_save.png" ' .
+    return '<a href="problems/' . urlencode((string)$probid) .
+        '/export"><img src="../images/b_save.png" ' .
         ' title="export problem as zip-file" alt="export" /></a>';
 }
 
