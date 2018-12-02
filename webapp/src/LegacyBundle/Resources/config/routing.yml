@@ -45,8 +45,6 @@ legacy.jury_team_category:
     path: /jury/team_category.php
 legacy.jury_team_affiliation:
     path: /jury/team_affiliation.php
-legacy.jury_toggle_notify:
-    path: /jury/toggle_notify.php
 legacy.jury_verify:
     path: /jury/verify.php
 legacy.jury_testcase:

@@ -105,7 +105,7 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 function toggleNotifications(enable, elem)
 {
 	'use strict';
-	var linkhref = 'toggle_notify.php?enable=1';
+	var linkhref = 'toggle-notify?enable=1';
 	if (elem) {
 		linkhref = elem.href;
 	}

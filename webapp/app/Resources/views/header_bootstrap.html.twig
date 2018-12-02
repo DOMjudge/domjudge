@@ -71,11 +71,11 @@
             {% endif %}
 
             {% if notify_flag %}
-            <a class="dropdown-item d-none" href="{{ path('legacy.jury_toggle_notify', {'enable': 0}) }}" id="notify" onclick="return toggleNotifications(false, this)">
+            <a class="dropdown-item d-none" href="{{ path('jury_toggle_notify', {'enable': 0}) }}" id="notify" onclick="return toggleNotifications(false, this)">
               <i class="fas fa-bell fa-fw"></i> Disable Notifications
             </a>
             {% else %}
-            <a class="dropdown-item d-none" href="{{ path('legacy.jury_toggle_notify', {'enable': 1}) }}" id="notify" onclick="return toggleNotifications(true, this)">
+            <a class="dropdown-item d-none" href="{{ path('jury_toggle_notify', {'enable': 1}) }}" id="notify" onclick="return toggleNotifications(true, this)">
               <i class="fas fa-bell fa-fw"></i> Enable Notifications
             </a>
             {% endif %}
