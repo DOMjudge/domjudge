@@ -36,6 +36,26 @@ parameters:
     domjudge.tmpdir: /tmp
 EOF
 
+cat > webapp/app/config/static.yml <<EOF
+parameters:
+    domjudge.version: unconfigured
+    domjudge.bindir: /bin
+    domjudge.etcdir: /etc
+    domjudge.wwwdir: /www
+    domjudge.webappdir: /webapp
+    domjudge.libdir: /lib
+    domjudge.sqldir: /sql
+    domjudge.libvendordir: /lib/vendor
+    domjudge.libwwwdir: /lib/www
+    domjudge.libsubmitdir: /lib/submit
+    domjudge.logdir: /output/log
+    domjudge.rundir: /output/run
+    domjudge.tmpdir: /output/tmp
+    domjudge.submitdir: /output/submissions
+    domjudge.baseurl: http://localhost/domjudge
+    domjudge.submitclient_enabled: yes
+EOF
+
 # install all php dependencies
 export SYMFONY_ENV="prod"
 composer install
