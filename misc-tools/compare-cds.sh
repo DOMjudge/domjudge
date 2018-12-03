@@ -35,8 +35,8 @@ CDS_LIVE_PASS="live"
 
 CDS_VERSION="2.1.1918"
 UTILS_VERSION="2.1.1917"
-CDS_URL="https://icpc.baylor.edu/icpctools/CDS/wlp.CDS-${CDS_VERSION}.zip"
-UTILS_URL="https://icpc.baylor.edu/icpctools/contestUtil/contestUtil-$UTILS_VERSION.zip"
+CDS_URL="https://pc2.ecs.csus.edu/pc2projects/build/CDS/dist/wlp.CDS-${CDS_VERSION}.zip"
+UTILS_URL="https://pc2.ecs.csus.edu/pc2projects/build/ContestUtil/dist/contestUtil-$UTILS_VERSION.zip"
 
 wait_for_quiet() {
   FILE_TO_WATCH="$1"
