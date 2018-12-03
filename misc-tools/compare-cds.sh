@@ -111,7 +111,7 @@ fi
 mkdir -p "$CDP_DIR"
 
 echo "Configuring CDS contest"
-cat <<EOF > "$CDS_DIR/usr/servers/cds/cdsConfig.xml"
+cat <<EOF > "$CDS_DIR/usr/servers/cds/config/cdsConfig.xml"
 <cds>
 	<contest location="$BASEDIR/icpctools/cdp">
 		<ccs url="$CCS_URL" user="$CCS_USER" password="$CCS_PASS"/>
