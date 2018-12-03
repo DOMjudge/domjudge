@@ -67,7 +67,7 @@ endif
 # generated. To circumvent this, we install a stub parameters.yml
 # file, and set its modification time in the past so that it will get
 # updated later during build with 'make domserver'.
-	$(MAKE) -C webapp params-from-stub
+	$(MAKE) -C webapp params-from-stub static-from-stub
 	composer $(subst 1,-q,$(QUIET)) install
 
 # Generate documentation for distribution. Remove this dependency from
