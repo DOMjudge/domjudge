@@ -93,7 +93,7 @@ if [ ! -d "$CONTESTUTIL_DIR" ]; then
   echo "    Extracting contest utils..."
   TMPDIR="$(mktemp -d)"
   unzip -d $TMPDIR $SOURCE_ARCHIVE >/dev/null 2>&1
-  mv $TMPDIR/contestUtil-2.0 $CONTESTUTIL_DIR
+  mv $TMPDIR/contestUtil-2.1 $CONTESTUTIL_DIR
   rm -r "$TMPDIR"
 fi
 echo "Contest utils present"
