@@ -303,9 +303,8 @@
 
         {# Show verify info, but only when a result is known #}
         {% if selectedJudging.result is not empty %}
-            <form action="{{ path('legacy.jury_verify') }}" method="post">
-                <input type="hidden" name="id" value="{{ selectedJudging.judgingid }}"/>
-                <input type="hidden" name="val" value="{% if selectedJudging.verified %}0{% else %}1{% endif %}"/>
+            <form action="{{ path('jury_judging_verify', {judgingId: selectedJudging.judgingid}) }}" method="post">
+                <input type="hidden" name="verified" value="{% if selectedJudging.verified %}0{% else %}1{% endif %}"/>
 
                 {# Display verification data: verified, by whom, and comment #}
                 <p>
@@ -318,7 +317,7 @@
                     {%- endif -%}
                     {% if not (verificationRequired and selectedJudging.verified and selectedJudging.valid) %}
                         <input type="submit" value="{% if selectedJudging.verified %}un{% endif %}mark verified"
-                               name="verify" class="btn btn-outline-secondary btn-sm"/>
+                               class="btn btn-outline-secondary btn-sm"/>
 
                         {% if not selectedJudging.verified %}
                             with comment

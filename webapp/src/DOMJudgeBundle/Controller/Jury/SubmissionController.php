@@ -14,6 +14,7 @@ use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\Testcase;
+use DOMJudgeBundle\Service\BalloonService;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ScoreboardService;
@@ -762,6 +763,66 @@ class SubmissionController extends Controller
         $scoreboardService->calculateScoreRow($contest, $team, $problem);
 
         return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getSubmitid()]);
+    }
+
+    /**
+     * @Route("/submissions/{judgingId}/verify", name="jury_judging_verify", methods={"POST"})
+     * @param EventLogService   $eventLogService
+     * @param ScoreboardService $scoreboardService
+     * @param BalloonService    $balloonService
+     * @param Request           $request
+     * @param int               $judgingId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function verifyAction(
+        EventLogService $eventLogService,
+        ScoreboardService $scoreboardService,
+        BalloonService $balloonService,
+        Request $request,
+        int $judgingId
+    ) {
+        $this->entityManager->transactional(function () use ($eventLogService, $request, $judgingId) {
+            /** @var Judging $judging */
+            $judging  = $this->entityManager->getRepository(Judging::class)->find($judgingId);
+            $verified = $request->request->getBoolean('verified');
+            $comment  = $request->request->get('comment');
+            $judging
+                ->setVerified($verified)
+                ->setJuryMember($verified ? $this->DOMJudgeService->getUser()->getUsername() : null)
+                ->setVerifyComment($comment);
+
+            $this->entityManager->flush();
+            $this->DOMJudgeService->auditlog('judging', $judging->getJudgingid(),
+                                             $verified ? 'set verified' : 'set unverified');
+
+            if ((bool)$this->DOMJudgeService->dbconfig_get('verification_required', false)) {
+                // Log to event table (case of no verification required is handled
+                // in the REST API API/JudgehostController::addJudgingRunAction
+                $eventLogService->log('judging', $judging->getJudgingid(), 'update', $judging->getCid());
+            }
+        });
+
+        if ((bool)$this->DOMJudgeService->dbconfig_get('verification_required', false)) {
+            $this->entityManager->clear();
+            /** @var Judging $judging */
+            $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
+            $scoreboardService->calculateScoreRow($judging->getContest(), $judging->getSubmission()->getTeam(),
+                                                  $judging->getSubmission()->getProblem());
+            $balloonService->updateBalloons($judging->getContest(), $judging->getSubmission(), $judging);
+        }
+
+        // Redirect to referrer page after verification or back to submission page when unverifying.
+        if ($request->request->getBoolean('verified')) {
+            $redirect = $request->request->get('redirect', $this->generateUrl('jury_submissions'));
+        } else {
+            $redirect = $this->generateUrl('jury_submission_by_judging', ['jid' => $judgingId]);
+        }
+
+        return $this->redirect($redirect);
     }
 
     /**

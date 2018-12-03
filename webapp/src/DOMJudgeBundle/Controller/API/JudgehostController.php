@@ -1101,7 +1101,7 @@ class JudgehostController extends FOSRestController
                                                       $judging->getJudgingid(), $result));
 
                 // Log to event table if no verification required
-                // (case of verification required is handled in www/jury/verify.php)
+                // (case of verification required is handled in jury/SubmissionController::verifyAction)
                 if (!$this->DOMJudgeService->dbconfig_get('verification_required', false)) {
                     if ($judging->getRejudgingid() === null) {
                         $this->eventLogService->log('judging', $judging->getJudgingid(),
