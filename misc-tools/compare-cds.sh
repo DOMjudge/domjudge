@@ -67,7 +67,7 @@ if [ ! -d "$CDS_DIR" ]; then
   SOURCE_ARCHIVE="icpctools/source_archives/icpctools-cds-$CDS_VERSION.zip"
   if [ ! -f $SOURCE_ARCHIVE ]; then
     echo "    Downloading cds($CDS_VERSION)..."
-    curl -L "$CDS_URL" -o $SOURCE_ARCHIVE >/dev/null 2>&1
+    curl -L --no-check-certificate "$CDS_URL" -o $SOURCE_ARCHIVE >/dev/null 2>&1
   fi
 
   echo "    Extracting cds..."
@@ -87,7 +87,7 @@ if [ ! -d "$CONTESTUTIL_DIR" ]; then
   SOURCE_ARCHIVE="icpctools/source_archives/icpctools-contestutil-$UTILS_VERSION.zip"
   if [ ! -f $SOURCE_ARCHIVE ]; then
     echo "    Downloading contest utils($UTILS_VERSION)..."
-    curl -L "$UTILS_URL" -o $SOURCE_ARCHIVE >/dev/null 2>&1
+    curl -L --no-check-certificate "$UTILS_URL" -o $SOURCE_ARCHIVE >/dev/null 2>&1
   fi
 
   echo "    Extracting contest utils..."
