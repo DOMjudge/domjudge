@@ -61,19 +61,13 @@ class SubmissionService
         LoggerInterface $logger,
         DOMJudgeService $DOMJudgeService,
         EventLogService $eventLogService,
-        ScoreboardService $scoreboardService,
-        string $rootDir
+        ScoreboardService $scoreboardService
     ) {
         $this->entityManager     = $entityManager;
         $this->logger            = $logger;
         $this->DOMJudgeService   = $DOMJudgeService;
         $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
-
-        // TODO: do this in a correct fashion using a Makefile
-        $dir          = realpath($rootDir . '/../../etc/');
-        $staticConfig = $dir . '/domserver-static.php';
-        require_once $staticConfig;
     }
 
     /**
@@ -474,8 +468,8 @@ class SubmissionService
                                                         $submission->getSubmitid(), $team->getTeamid(),
                                                         $language->getLangid(), $problem->getProbid()));
 
-        if (is_writable(SUBMITDIR)) {
-            // Copy the submission to SUBMITDIR for safe-keeping
+        if (is_writable($this->DOMJudgeService->getDomjudgeSubmitDir())) {
+            // Copy the submission to the submission directory for safe-keeping
             foreach ($files as $rank => $file) {
                 $fdata  = [
                     'cid' => $contest->getCid(),
@@ -486,7 +480,7 @@ class SubmissionService
                     'rank' => $rank,
                     'filename' => $file->getClientOriginalName()
                 ];
-                $toFile = SUBMITDIR . '/' . $this->getSourceFilename($fdata);
+                $toFile = $this->DOMJudgeService->getDomjudgeSubmitDir() . '/' . $this->getSourceFilename($fdata);
                 if (!@copy($file->getRealPath(), $toFile)) {
                     $this->logger->warning(sprintf("Could not copy '%s' to '%s'", $file->getRealPath(), $toFile));
                 }

@@ -25,7 +25,6 @@ class DOMJudgeService
     protected $logger;
     protected $request;
     protected $container;
-    protected $rootDir;
     protected $hasAllRoles = false;
     /** @var Configuration[] */
     protected $configCache = [];
@@ -40,13 +39,11 @@ class DOMJudgeService
         EntityManagerInterface $em,
         LoggerInterface $logger,
         RequestStack $requestStack,
-        string $rootDir,
         Container $container
     ) {
         $this->em        = $em;
         $this->logger    = $logger;
         $this->request   = $requestStack->getCurrentRequest();
-        $this->rootDir   = $rootDir;
         $this->container = $container;
     }
 
@@ -443,9 +440,7 @@ class DOMJudgeService
      */
     public function alert(string $messageType, string $description = '')
     {
-        // TODO: use LIBDIR when we have access to legacy constants
-        $dir   = realpath($this->rootDir . '/../../lib/');
-        $alert = $dir . '/alert';
+        $alert = $this->container->getParameter('domjudge.libdir') . '/alert';
         system(sprintf('%s %s %s &', $alert, escapeshellarg($messageType), escapeshellarg($description)));
     }
 
@@ -545,5 +540,41 @@ class DOMJudgeService
         }
 
         return $this->jsonDecode($response->getContent());
+    }
+
+    /**
+     * Get the etc directory of this DOMjudge installation
+     * @return string
+     */
+    public function getDomjudgeEtcDir(): string
+    {
+        return $this->container->getParameter('domjudge.etcdir');
+    }
+
+    /**
+     * Get the tmp directory of this DOMjudge installation
+     * @return string
+     */
+    public function getDomjudgeTmpDir(): string
+    {
+        return $this->container->getParameter('domjudge.tmpdir');
+    }
+
+    /**
+     * Get the submit directory of this DOMjudge installation
+     * @return string
+     */
+    public function getDomjudgeSubmitDir(): string
+    {
+        return $this->container->getParameter('domjudge.submitdir');
+    }
+
+    /**
+     * Get the web directory of this DOMjudge installation
+     * @return string
+     */
+    public function getDomjudgeWebDir(): string
+    {
+        return $this->container->getParameter('domjudge.wwwdir');
     }
 }

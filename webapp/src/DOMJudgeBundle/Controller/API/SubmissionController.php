@@ -265,7 +265,7 @@ class SubmissionController extends AbstractRestController
         /** @var SubmissionFileWithSourceCode[] $files */
         $files = $submission->getFilesWithSourceCode();
         $zip   = new \ZipArchive;
-        if (!($tmpfname = tempnam($this->getParameter('domjudge.tmpdir'), "submission_file-"))) {
+        if (!($tmpfname = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "submission_file-"))) {
             return new Response("Could not create temporary file.", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 

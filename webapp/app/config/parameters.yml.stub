@@ -17,7 +17,3 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret: STUB_NO_SECRET
-
-    # The parameters below are inserted at configure time.
-    domjudge.version: unconfigured
-    domjudge.tmpdir: /tmp

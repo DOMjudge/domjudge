@@ -30,13 +30,12 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      */
     protected $verdicts;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService, string $rootDir)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService)
     {
         parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
 
         global $VERDICTS;
-        $dir          = realpath($rootDir . '/../../etc/');
-        $commonConfig = $dir . '/common-config.php';
+        $commonConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/common-config.php';
         require_once $commonConfig;
 
         /** @var string[] $VERDICTS */

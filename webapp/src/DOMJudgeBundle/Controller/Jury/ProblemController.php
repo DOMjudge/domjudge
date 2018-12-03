@@ -20,7 +20,6 @@ use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Yaml\Yaml;
@@ -193,19 +192,13 @@ class ProblemController extends Controller
 
     /**
      * @Route("/problems/{problemId}/export", name="jury_export_problem")
-     * @Security("has_role('ROLE_ADMIn')")
-     * @param KernelInterface $kernel
-     * @param int             $problemId
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param int $problemId
      * @return StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function exportAction(KernelInterface $kernel, int $problemId)
+    public function exportAction(int $problemId)
     {
-        // TODO: do this in a correct fashion using a Makefile
-        $dir          = realpath($kernel->getRootDir() . '/../../etc/');
-        $staticConfig = $dir . '/domserver-static.php';
-        require_once $staticConfig;
-
         /** @var Problem $problem */
         $problem = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Problem', 'p')
@@ -254,7 +247,7 @@ class ProblemController extends Controller
         $yamlString = '# Problem exported by DOMjudge on ' . date('c') . "\n" . Yaml::dump($yaml);
 
         $zip = new ZipArchive();
-        if (!($tempFilename = tempnam(TMPDIR, "export-"))) {
+        if (!($tempFilename = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "export-"))) {
             throw new ServiceUnavailableHttpException('Could not create temporary file.');
         }
 

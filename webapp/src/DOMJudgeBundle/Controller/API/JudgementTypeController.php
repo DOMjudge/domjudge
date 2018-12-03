@@ -21,21 +21,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class JudgementTypeController extends AbstractRestController
 {
     /**
-     * @var string
-     */
-    protected $rootDir;
-
-    public function __construct(
-        EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
-        EventLogService $eventLogService,
-        string $rootDir
-    ) {
-        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
-        $this->rootDir = $rootDir;
-    }
-
-    /**
      * Get all the judgement types for this contest
      * @param Request $request
      * @return array
@@ -111,8 +96,7 @@ class JudgementTypeController extends AbstractRestController
     protected function getJudgementTypes(array $filteredOn = null)
     {
         global $VERDICTS;
-        $dir = realpath($this->rootDir . '/../../etc/');
-        $commonConfig = $dir . '/common-config.php';
+        $commonConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/common-config.php';
         require_once $commonConfig;
 
         $result = [];

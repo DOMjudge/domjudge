@@ -4,8 +4,9 @@ endif
 include $(TOPDIR)/Makefile.global
 
 PARAMS = app/config/parameters.yml
+STATIC = app/config/static.yml
 
-SUBST_CONFIGS = $(PARAMS).dist
+SUBST_CONFIGS = $(STATIC)
 
 $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)

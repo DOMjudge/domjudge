@@ -1,0 +1,19 @@
+# @configure_input@
+
+parameters:
+    domjudge.version: @DOMJUDGE_VERSION@
+    domjudge.bindir: @domserver_bindir@
+    domjudge.etcdir: @domserver_etcdir@
+    domjudge.wwwdir: @domserver_wwwdir@
+    domjudge.webappdir: @domserver_webappdir@
+    domjudge.libdir: @domserver_libdir@
+    domjudge.sqldir: @domserver_sqldir@
+    domjudge.libvendordir: @domserver_libvendordir@
+    domjudge.libwwwdir: @domserver_libwwwdir@
+    domjudge.libsubmitdir: @domserver_libsubmitdir@
+    domjudge.logdir: @domserver_logdir@
+    domjudge.rundir: @domserver_rundir@
+    domjudge.tmpdir: @domserver_tmpdir@
+    domjudge.submitdir: @domserver_submitdir@
+    domjudge.baseurl: @BASEURL@
+    domjudge.submitclient_enabled: @SUBMITCLIENT_ENABLED@

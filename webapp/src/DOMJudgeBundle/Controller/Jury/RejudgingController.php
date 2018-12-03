@@ -153,7 +153,6 @@ class RejudgingController extends Controller
     /**
      * @Route("/rejudgings/{rejudgingId}", name="jury_rejudging")
      * @param Request           $request
-     * @param KernelInterface   $kernel
      * @param SubmissionService $submissionService
      * @param int               $rejudgingId
      * @return Response
@@ -162,7 +161,6 @@ class RejudgingController extends Controller
      */
     public function viewAction(
         Request $request,
-        KernelInterface $kernel,
         SubmissionService $submissionService,
         int $rejudgingId
     ) {
@@ -196,10 +194,8 @@ class RejudgingController extends Controller
 
         $todo -= $done;
 
-        // TODO: use domserver-static.php for this path
         global $VERDICTS;
-        $dir          = realpath($kernel->getRootDir() . '/../../etc/');
-        $commonConfig = $dir . '/common-config.php';
+        $commonConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/common-config.php';
         require_once $commonConfig;
         /** @var string[] $VERDICTS */
 

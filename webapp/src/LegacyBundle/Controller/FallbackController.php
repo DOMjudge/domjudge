@@ -15,8 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class FallbackController extends Controller
 {
-    private $webDir;
-
     /**
      * @var DOMJudgeService
      */
@@ -48,7 +46,6 @@ class FallbackController extends Controller
     protected $twig;
 
     public function __construct(
-        $webDir,
         Container $container,
         DOMJudgeService $DOMJudgeService,
         EventLogService $eventLogService,
@@ -57,7 +54,6 @@ class FallbackController extends Controller
         SubmissionService $submissionService,
         \Twig_Environment $twig
     ) {
-        $this->webDir            = $webDir;
         $this->DOMJudgeService   = $DOMJudgeService;
         $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
@@ -79,7 +75,7 @@ class FallbackController extends Controller
         }
 
 
-        $thefile = realpath($this->webDir . $request->getPathInfo());
+        $thefile = realpath($this->DOMJudgeService->getDomjudgeWebDir() . $request->getPathInfo());
 
         if ($request->server->has('REQUEST_URI')) {
             $_SERVER['REQUEST_URI'] = $request->server->get('REQUEST_URI');
