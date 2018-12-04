@@ -10,10 +10,6 @@ legacy.jury_team:
     path: /jury/team.php
 legacy.jury_problem:
     path: /jury/problem.php
-legacy.jury_judgehost_restrictions:
-    path: /jury/judgehost_restrictions.php
-legacy.jury_judgehost_restriction:
-    path: /jury/judgehost_restriction.php
 legacy.jury_clarification:
     path: /jury/clarification.php
 legacy.jury_language:

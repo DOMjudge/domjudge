@@ -102,6 +102,86 @@ class JudgehostRestriction
     }
 
     /**
+     * Set restriction contests
+     * @param int[] $contests
+     * @return $this
+     */
+    public function setContests(array $contests)
+    {
+        $this->restrictions['contest'] = $contests;
+        return $this;
+    }
+
+    /**
+     * Get restriction contests
+     * @return int[]
+     */
+    public function getContests()
+    {
+        return $this->restrictions['contest'] ?? [];
+    }
+
+    /**
+     * Set restriction problems
+     * @param int[] $problems
+     * @return $this
+     */
+    public function setProblems(array $problems)
+    {
+        $this->restrictions['problem'] = $problems;
+        return $this;
+    }
+
+    /**
+     * Get restrction problems
+     * @return int[]
+     */
+    public function getProblems()
+    {
+        return $this->restrictions['problem'] ?? [];
+    }
+
+    /**
+     * Set restriction languages
+     * @param int[] $languages
+     * @return $this
+     */
+    public function setLanguages(array $languages)
+    {
+        $this->restrictions['language'] = $languages;
+        return $this;
+    }
+
+    /**
+     * Get restriction languages
+     * @return int[]
+     */
+    public function getLanguages()
+    {
+        return $this->restrictions['language'] ?? [];
+    }
+
+    /**
+     * Set restriction rejudge own
+     * @param bool $rejudgeOwn
+     * @return $this
+     */
+    public function setRejudgeOwn(bool $rejudgeOwn)
+    {
+        $this->restrictions['rejudge_own'] = $rejudgeOwn;
+        return $this;
+    }
+
+    /**
+     * Get restriction rejudge own
+     * @return bool
+     */
+    public function getRejudgeOwn()
+    {
+        return $this->restrictions['rejudge_own'] ?? true;
+    }
+
+    /**
      * Add judgehost
      *
      * @param \DOMJudgeBundle\Entity\Judgehost $judgehost
