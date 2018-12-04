@@ -860,8 +860,8 @@ void setrestrictions()
 
 void pump_pipes(fd_set readfds, size_t data_read[], size_t data_passed[])
 {
-	ssize_t nread;
-	size_t to_read;
+	ssize_t nread, nwritten;
+	size_t to_read, to_write;
 	int i;
 
 	/* Check to see if data is available and pass it on */
@@ -894,7 +894,15 @@ void pump_pipes(fd_set readfds, size_t data_read[], size_t data_passed[])
 				} else {
 					nread = read(child_pipefd[i][PIPE_OUT], buf, to_read);
 					if ( nread>0 ) {
-						nread = write(child_redirfd[i], buf, nread);
+						to_write = nread;
+						while ( to_write>0 ) {
+							nwritten = write(child_redirfd[i], buf, to_write);
+							if ( nwritten==-1 ) {
+								nread = -1;
+								break;
+							}
+							to_write -= nwritten;
+						}
 					}
 				}
 
