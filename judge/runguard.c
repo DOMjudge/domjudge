@@ -1345,6 +1345,7 @@ int main(int argc, char **argv)
 			}
 		}
 
+		use_splice = 0;
 		do {
 			total_data = data_passed[1] + data_passed[2];
 			pump_pipes(readfds, data_read, data_passed);
