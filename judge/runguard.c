@@ -884,7 +884,7 @@ void pump_pipes(fd_set readfds, size_t data_read[], size_t data_passed[])
 				if ( use_splice ) {
 					nread = splice(child_pipefd[i][PIPE_OUT], NULL,
 					               child_redirfd[i], NULL,
-					               to_read, SPLICE_F_MOVE);
+					               to_read, SPLICE_F_MOVE | SPLICE_F_NONBLOCK);
 
 					if ( nread==-1 && errno==EINVAL ) {
 						use_splice = 0;
@@ -1345,7 +1345,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		use_splice = 0;
+		use_splice = 1;
 		do {
 			total_data = data_passed[1] + data_passed[2];
 			pump_pipes(readfds, data_read, data_passed);
