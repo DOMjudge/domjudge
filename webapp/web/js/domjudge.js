@@ -816,18 +816,26 @@ function addFirstRow(templateid, tableid) {
 
 var refreshHandler = null;
 var refreshEnabled = false;
-function enableRefresh($url, $after, $method) {
+function enableRefresh($url, $after, usingAjax) {
     if (refreshEnabled) {
         return;
     }
     var refresh = function () {
-        if ($method) {
-            window[$method]($url);
+        if (usingAjax) {
+            $.ajax({
+                url: $url
+            }).done(function(data) {
+                var $refreshTarget = $('[data-ajax-refresh-target]');
+                $refreshTarget.html(data);
+                if ($refreshTarget.data('ajax-refresh-after')) {
+                    window[$refreshTarget.data('ajax-refresh-after')]();
+                }
+            });
         } else {
             window.location = $url;
         }
     };
-    if ($method) {
+    if (usingAjax) {
         refreshHandler = setInterval(refresh, $after * 1000);
     } else {
         refreshHandler = setTimeout(refresh, $after * 1000);
@@ -836,11 +844,11 @@ function enableRefresh($url, $after, $method) {
     setCookie('domjudge_refresh', 1);
 }
 
-function disableRefresh(isInterval) {
+function disableRefresh(usingAjax) {
     if (!refreshEnabled) {
         return;
     }
-    if (isInterval) {
+    if (usingAjax) {
         clearInterval(refreshHandler);
     } else {
         clearTimeout(refreshHandler);
@@ -849,11 +857,11 @@ function disableRefresh(isInterval) {
     setCookie('domjudge_refresh', 0);
 }
 
-function toggleRefresh($url, $after, $method) {
+function toggleRefresh($url, $after, usingAjax) {
     if ( refreshEnabled ) {
-        disableRefresh($method !== undefined);
+        disableRefresh(usingAjax);
     } else {
-        enableRefresh($url, $after, $method);
+        enableRefresh($url, $after, usingAjax);
     }
 
     var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';

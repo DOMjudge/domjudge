@@ -94,7 +94,7 @@ class SubmissionController extends Controller
         $refresh = [
             'after' => 15,
             'url' => $this->generateUrl('jury_submissions', ['view' => $viewTypes[$view]]),
-            'method' => 'updateSubmissionList',
+            'ajax' => true,
         ];
 
         $restrictions = [];
