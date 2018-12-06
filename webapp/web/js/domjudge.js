@@ -816,31 +816,44 @@ function addFirstRow(templateid, tableid) {
 
 var refreshHandler = null;
 var refreshEnabled = false;
-function enableRefresh($url, $after) {
+function enableRefresh($url, $after, $method) {
     if (refreshEnabled) {
         return;
     }
-    refreshHandler = setTimeout(function () {
-        window.location = $url;
-    }, $after*1000);
+    var refresh = function () {
+        if ($method) {
+            window[$method]($url);
+        } else {
+            window.location = $url;
+        }
+    };
+    if ($method) {
+        refreshHandler = setInterval(refresh, $after * 1000);
+    } else {
+        refreshHandler = setTimeout(refresh, $after * 1000);
+    }
     refreshEnabled = true;
     setCookie('domjudge_refresh', 1);
 }
 
-function disableRefresh() {
+function disableRefresh(isInterval) {
     if (!refreshEnabled) {
         return;
     }
-    clearTimeout(refreshHandler);
+    if (isInterval) {
+        clearInterval(refreshHandler);
+    } else {
+        clearTimeout(refreshHandler);
+    }
     refreshEnabled = false;
     setCookie('domjudge_refresh', 0);
 }
 
-function toggleRefresh($url, $after) {
+function toggleRefresh($url, $after, $method) {
     if ( refreshEnabled ) {
-        disableRefresh();
+        disableRefresh($method !== undefined);
     } else {
-        enableRefresh($url, $after);
+        enableRefresh($url, $after, $method);
     }
 
     var text = refreshEnabled ? 'Disable refresh' : 'Enable refresh';

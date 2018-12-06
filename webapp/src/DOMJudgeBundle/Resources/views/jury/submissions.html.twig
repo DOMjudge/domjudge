@@ -90,7 +90,9 @@
         </div>
     </div>
 
-    {%- include '@DOMJudge/jury/partials/submission_list.html.twig' with {showTestcases: true} %}
+    <div data-submission-list>
+        {%- include '@DOMJudge/jury/partials/submission_list.html.twig' with {showTestcases: true} %}
+    </div>
 
 {% endblock %}
 
@@ -125,9 +127,9 @@
                 $('select[data-filter-field]').val([]).trigger('change');
             });
 
-            var $trs = $('table.submissions-table > tbody tr');
-
             var process_submissions_filter = function () {
+                var $trs = $('table.submissions-table > tbody tr');
+
                 var filters = [];
 
                 $('select[data-filter-field]').each(function () {
@@ -170,6 +172,15 @@
 
             $('select[data-filter-field]').on('change', process_submissions_filter);
             process_submissions_filter();
+
+            window.updateSubmissionList = function(href) {
+                $.ajax({
+                    url: href
+                }).done(function(data) {
+                    $('[data-submission-list]').html(data);
+                    process_submissions_filter();
+                });
+            };
         });
     </script>
 {% endblock %}

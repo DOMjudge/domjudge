@@ -93,7 +93,8 @@ class SubmissionController extends Controller
 
         $refresh = [
             'after' => 15,
-            'url' => $this->generateUrl('jury_submissions', ['view' => $viewTypes[$view]])
+            'url' => $this->generateUrl('jury_submissions', ['view' => $viewTypes[$view]]),
+            'method' => 'updateSubmissionList',
         ];
 
         $restrictions = [];
@@ -149,7 +150,7 @@ class SubmissionController extends Controller
                 ->getResult();
         }
 
-        return $this->render('@DOMJudge/jury/submissions.html.twig', [
+        $data = [
             'refresh' => $refresh,
             'viewTypes' => $viewTypes,
             'view' => $view,
@@ -160,7 +161,15 @@ class SubmissionController extends Controller
             'filteredProblems' => $filteredProblems,
             'filteredLanguages' => $filteredLanguages,
             'filteredTeams' => $filteredTeams,
-        ], $response);
+        ];
+
+        // For ajax requests, only return the submission list partial
+        if ($request->isXmlHttpRequest()) {
+            $data['showTestcases'] = true;
+            return $this->render('@DOMJudge/jury/partials/submission_list.html.twig', $data);
+        }
+
+        return $this->render('@DOMJudge/jury/submissions.html.twig', $data, $response);
     }
 
     /**
