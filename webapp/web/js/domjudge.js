@@ -825,6 +825,20 @@ function enableRefresh($url, $after) {
     }, $after*1000);
     refreshEnabled = true;
     setCookie('domjudge_refresh', 1);
+
+    if(window.location.href == localStorage.getItem('lastUrl')) {
+    	window.scrollTo(0, localStorage.getItem('scrollTop'));
+    } else {
+    	localStorage.setItem('lastUrl', window.location.href);
+    	localStorage.setItem('scrollTop', 42);
+    }
+    var scrollTimeout;
+    document.addEventListener('scroll', function() {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(function() {
+        localStorage.setItem('scrollTop', $(window).scrollTop());
+      }, 100)
+    });
 }
 
 function disableRefresh() {
