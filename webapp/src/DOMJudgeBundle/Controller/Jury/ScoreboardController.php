@@ -51,6 +51,7 @@ class ScoreboardController extends Controller
             $data['refresh'] = [
                 'after' => 30,
                 'url' => $this->generateUrl('jury_scoreboard'),
+                'ajax' => true,
             ];
 
             $scoreFilter = $this->scoreboardService->initializeScoreboardFilter($request, $response);
@@ -67,6 +68,10 @@ class ScoreboardController extends Controller
             $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
         }
 
+        if ($request->isXmlHttpRequest()) {
+            $data['jury'] = true;
+            return $this->render('@DOMJudge/partials/scoreboard.html.twig', $data, $response);
+        }
         return $this->render('@DOMJudge/jury/scoreboard.html.twig', $data, $response);
     }
 }

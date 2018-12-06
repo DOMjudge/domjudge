@@ -11,6 +11,8 @@
 
 {% block content %}
 
-    {% include '@DOMJudge/partials/scoreboard.html.twig' with {jury: true} %}
+    <div data-ajax-refresh-target>
+        {% include '@DOMJudge/partials/scoreboard.html.twig' with {jury: true} %}
+    </div>
 
 {% endblock %}
