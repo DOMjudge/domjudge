@@ -108,7 +108,7 @@
                     {%- if claim -%}
                         <a class="btn btn-outline-secondary btn-sm" href="{{ claimLink }}">claim</a>
                     {%- elseif (not submission.judgings.first or not submission.judgings.first.verified) and juryMember == app.user.username -%}
-                        <a class="btn btn-outline-secondary btn-sm" href="{{ claimLink }}">unclaim</a>
+                        <a class="btn btn-info btn-sm" href="{{ claimLink }}">unclaim</a>
                     {%- else -%}
                         <a href="{{ link }}">{{ juryMember }}</a>
                     {%- endif -%}
