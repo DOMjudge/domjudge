@@ -340,6 +340,11 @@ class RejudgingController extends Controller
     {
         // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig outpit
 
+        // Disable the profiler toolbar to avoid OOMs.
+        if ($this->container->has('profiler')) {
+            $this->container->get('profiler')->disable();
+        }
+
         /** @var Rejudging $rejudging */
         $rejudging = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Rejudging', 'r')
