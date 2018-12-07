@@ -113,7 +113,7 @@ function tsv_teams_prepare($content)
             $affiliationExternalid = null;
         }
 
-        // Set team ID to external ID if it has the litteral value 'null' and the external ID is numeric
+        // Set team ID to external ID if it has the literal value 'null' and the external ID is numeric
         $teamId = @$line[0];
         if ($teamId === 'null' && is_numeric($teamExternalId)) {
             $teamId = (int)$teamExternalId;
@@ -161,6 +161,15 @@ function tsv_teams_set($data)
                 auditlog('team_affiliation', $affilid, 'added', 'imported from tsv');
             }
             $row['team']['affilid'] = $affilid;
+        }
+        if (!empty($row['team']['categoryid'])) {
+            $categid = $DB->q("MAYBEVALUE SELECT categoryid FROM team_category
+                               WHERE categoryid = %s", $row['team']['categoryid']);
+            if (empty($categid)) {
+                $DB->q("INSERT INTO team_category (categoryid, name) VALUES (%s, %s)",
+                    $row['team']['categoryid'], $row['team']['categoryid'] . " - auto-create during import");
+                auditlog('team_category', $categoryid, 'added', 'imported from tsv');
+            }
         }
         $replacecnt = $DB->q("RETURNAFFECTED REPLACE INTO team SET %S", $row['team']);
 
