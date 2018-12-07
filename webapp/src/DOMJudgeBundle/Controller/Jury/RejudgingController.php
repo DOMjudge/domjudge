@@ -57,19 +57,18 @@ class RejudgingController extends Controller
             ->from('DOMJudgeBundle:Rejudging', 'r')
             ->leftJoin('r.start_user', 's')
             ->leftJoin('r.finish_user', 'f')
-            ->orderBy('r.valid', 'DESC')
-            ->addOrderBy('r.endtime')
-            ->addOrderBy('r.rejudgingid')
+            ->orderBy('r.rejudgingid', 'DESC')
             ->getQuery()->getResult();
 
         $table_fields = [
-            'rejudgingid' => ['title' => 'ID'],
-            'reason' => ['title' => 'reason'],
-            'startuser' => ['title' => 'startuser'],
-            'finishuser' => ['title' => 'finishuser'],
-            'starttime' => ['title' => 'starttime'],
-            'endtime' => ['title' => 'finishtime'],
-            'status' => ['title' => 'status'],
+            'rejudgingid' => ['title' => 'ID',         'sort' => true,
+                              'default_sort' => true, 'default_sort_order' => 'desc'],
+            'reason'      => ['title' => 'reason',     'sort' => true],
+            'startuser'   => ['title' => 'startuser',  'sort' => true],
+            'finishuser'  => ['title' => 'finishuser', 'sort' => true],
+            'starttime'   => ['title' => 'starttime',  'sort' => true],
+            'endtime'     => ['title' => 'finishtime', 'sort' => true],
+            'status'      => ['title' => 'status',     'sort' => true],
         ];
 
         $timeFormat       = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
