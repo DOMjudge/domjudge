@@ -377,12 +377,15 @@ class Scoreboard
         $btimes = $b->getSolveTimes();
         rsort($atimes);
         rsort($btimes);
-        if (isset($atimes[0])) {
-            if ($atimes[0] != $btimes[0]) {
-                return $atimes[0] <=> $btimes[0];
-            }
+        if (isset($atimes[0]) && isset($btimes[0])) {
+            return $atimes[0] <=> $btimes[0];
+        } else if (!isset($atimes[0]) && !isset($btimes[0])) {
+            return 0;
+        } else if (!isset($atimes[0])) {
+            return -1;
+        } else if (!isset($btimes[0])) {
+            return 1;
         }
-        return 0;
     }
 
     /**
