@@ -45,6 +45,7 @@
         </div>
     </div>
 
+  {% if is_granted('ROLE_JURY') %}
   <div class="col-lg-3 col-sm-6 mt-3">
     <div class="card">
       <div class="card-header">
@@ -52,7 +53,6 @@
       </div>
       <div class="card-body">
         <ul>
-          {% if is_granted('ROLE_JURY') %}
             <li><a href="{{ path('jury_contests') }}">Contests</a></li>
             <li><a href="{{ path('jury_executables') }}">Executables</a></li>
             <li><a href="{{ path('jury_judgehosts') }}">Judgehosts</a></li>
@@ -63,11 +63,11 @@
             <li><a href="{{ path('jury_teams') }}">Teams</a></li>
             <li><a href="{{ path('jury_team_categories') }}">Team Categories</a></li>
             <li><a href="{{ path('jury_team_affiliations') }}">Team Affiliations</a></li>
-          {% endif %}
         </ul>
       </div>
     </div>
   </div>
+  {% endif %}
 
 
   {% if is_granted('ROLE_ADMIN') %}
