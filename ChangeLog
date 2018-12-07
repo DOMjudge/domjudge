@@ -1,5 +1,11 @@
 DOMjudge Programming Contest Judging System
 
+Version 5.3.4 - DEV
+-------------------
+ - Small fixes to the documentation.
+ - Fix two SQL queries that could return no result.
+ - Deal better with empty tickboxes from forms during deletes.
+
 Version 5.3.3 - 30 July 2018
 ----------------------------
  - Executables: allow edits only by admin.
