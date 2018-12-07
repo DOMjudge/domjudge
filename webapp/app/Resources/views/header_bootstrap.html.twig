@@ -9,7 +9,7 @@
 
       {% if is_granted('ROLE_BALLOON') and not is_granted('ROLE_JURY') and not is_granted('ROLE_ADMIN') %}
       <li class="nav-item">
-        <a class="nav-link" href="{{ path('legacy.jury_balloons') }}"><i class="fas fa-map-marker-alt"></i> balloons</a>
+        <a class="nav-link" href="{{ path('jury_balloons') }}"><i class="fas fa-map-marker-alt"></i> balloons</a>
       </li>
       {% endif %}
 
