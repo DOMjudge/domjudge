@@ -124,6 +124,9 @@ if ( ! isset($_POST['cancel']) ) {
 		// special case for many-to-one and many-to-many mappings
 		if ( $mappingdata != null ) {
 			foreach ( $mappingdata as $mapping ) {
+				if (empty($mapping['items'])) {
+					$mapping['items'] = array();
+				}
 				if (count($mapping['fk']) == 2) {
 					// Many-to-many
 
