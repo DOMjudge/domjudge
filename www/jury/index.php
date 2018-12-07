@@ -4,6 +4,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+global $REQUIRED_ROLES;
 $REQUIRED_ROLES = array('jury', 'balloon');
 require('init.php');
 

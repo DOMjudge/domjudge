@@ -39,6 +39,7 @@ function initBalloonfilter()
     return $balloonfilter;
 }
 
+global $REQUIRED_ROLES;
 $REQUIRED_ROLES = array('jury','balloon');
 require('init.php');
 $title = 'Balloon Status';
