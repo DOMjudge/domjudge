@@ -35,6 +35,19 @@ SUBDIRMOUNTS="etc usr lib lib64 bin"
 # Location of the pre-built chroot tree and where to bind mount from:
 CHROOTORIGINAL="@judgehost_chrootdir@"
 
+dj_umount() {
+	set +e
+	if ! sudo -n umount "$1" < /dev/null; then
+		>&2 echo "umount '$1' didn't succeed, trying harder"
+		if ! sudo -n umount -f -vvv "$1" < /dev/null; then
+			>&2 echo "umount '$1' failed twice"
+			>&2 lsof +c 15 +D "$1"
+			exit 1
+		fi
+	fi
+	set -e
+}
+
 case "$1" in
 	start)
 
@@ -66,7 +79,7 @@ case "$1" in
 
 	stop)
 
-		sudo -n umount "$PWD/proc" < /dev/null
+		dj_umount "$PWD/proc"
 
 		rm dev/urandom
 		rm dev/random
@@ -76,7 +89,7 @@ case "$1" in
 			if [ -L "$CHROOTORIGINAL/$i" ]; then
 				rm -f $i
 			elif [ -d "$CHROOTORIGINAL/$i" ]; then
-				sudo -n umount "$PWD/$i" < /dev/null
+				dj_umount "$PWD/$i"
 			fi
 		done
 # KLUDGE: We don't rmdir the empty mountpoint directories, since after
