@@ -27,7 +27,7 @@ logged_in();
 define('IS_ADMIN', checkrole('admin'));
 
 if (!isset($REQUIRED_ROLES)) {
-    $REQUIRED_ROLES = array('jury', 'balloon');
+    $REQUIRED_ROLES = array('jury');
 }
 $allowed = false;
 foreach ($REQUIRED_ROLES as $role) {
