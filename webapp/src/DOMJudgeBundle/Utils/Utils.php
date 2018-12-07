@@ -590,8 +590,9 @@ class Utils
                 $difftext = Utils::systemDiff($oldFile, $newFile);
             } else {
                 // Try generating temporary files for executing diff.
-                $oldFile = tempnam(TMPDIR, sprintf("source-old-s%s-", $oldSource->getSubmitid()));
-                $newFile = tempnam(TMPDIR, sprintf("source-new-s%s-", $newSource->getSubmitid()));
+                $tmpdir = $this->container->getParameter('domjudge.tmpdir');
+                $oldFile = tempnam($tmpdir, sprintf("source-old-s%s-", $oldSource->getSubmitid()));
+                $newFile = tempnam($tmpdir, sprintf("source-new-s%s-", $newSource->getSubmitid()));
 
                 if (!$oldFile || !$newFile) {
                     $difftext = "DOMjudge: error generating temporary files for diff.";

@@ -698,8 +698,9 @@ class SubmissionController extends Controller
 
             /** @var UploadedFile[] $filesToSubmit */
             $filesToSubmit = [];
+            $tmpdir = $this->container->getParameter('domjudge.tmpdir');
             foreach ($files as $file) {
-                if (!($tmpfname = tempnam(TMPDIR, "edit_source-"))) {
+                if (!($tmpfname = tempnam($tmpdir, "edit_source-"))) {
                     throw new ServiceUnavailableHttpException("Could not create temporary file.");
                 }
                 file_put_contents($tmpfname, $submittedData['source' . $file->getRank()]);
