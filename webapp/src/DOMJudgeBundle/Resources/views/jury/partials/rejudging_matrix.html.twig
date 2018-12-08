@@ -1,0 +1,42 @@
+<div class="mt-2">
+    <h2>Overview of changes</h2>
+    <table class="rejudgetable">
+        <tr>
+            <th title="old vs. new verdicts">-\+</th>
+            {% for verdict, abbreviation in verdicts %}
+                {% if used[verdict] is defined %}
+                    <th title="{{ verdict }} (new)">{{ abbreviation }}</th>
+                {% endif %}
+            {% endfor %}
+        </tr>
+
+        {% for originalVerdict, changedVerdicts in verdictTable %}
+            {% if used[originalVerdict] is defined %}
+                <tr>
+                    <th title="{{ originalVerdict }} (old)">{{ verdicts[originalVerdict] }}</th>
+                    {% for newVerdict, submitIds in changedVerdicts %}
+                        {% if used[newVerdict] is defined %}
+                            {% set numSubmissions = submitIds | length %}
+                            {% set link = null %}
+                            {% if originalVerdict == newVerdict %}
+                                {% set class = 'identical' %}
+                            {% elseif numSubmissions == 0 %}
+                                {% set class = 'zero' %}
+                            {% else %}
+                                {% set class = 'changed' %}
+                                {% set link = path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: 'all', oldverdict: originalVerdict, newverdict: newVerdict}) %}
+                            {% endif %}
+                            <td class="{{ class }}">
+                                {% if link is not null %}
+                                    <a href="{{ link }}">{{ numSubmissions }}</a>
+                                {% else %}
+                                    {{ numSubmissions }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+</div>

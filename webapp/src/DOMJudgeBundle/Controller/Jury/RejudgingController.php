@@ -303,7 +303,7 @@ class RejudgingController extends Controller
             $restrictions
         );
 
-        return $this->render('@DOMJudge/jury/rejudging.html.twig', [
+        $data = [
             'rejudging' => $rejudging,
             'todo' => $todo,
             'verdicts' => $VERDICTS,
@@ -318,8 +318,15 @@ class RejudgingController extends Controller
             'refresh' => [
                 'after' => 15,
                 'url' => $request->getRequestUri(),
+                'ajax' => true,
             ],
-        ]);
+        ];
+        if ($request->isXmlHttpRequest()) {
+            $data['ajax'] = true;
+            return $this->render('@DOMJudge/jury/partials/rejudging_submissions.html.twig', $data);
+        } else {
+            return $this->render('@DOMJudge/jury/rejudging.html.twig', $data);
+        }
     }
 
     /**
