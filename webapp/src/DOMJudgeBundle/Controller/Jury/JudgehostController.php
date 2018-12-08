@@ -186,11 +186,12 @@ class JudgehostController extends BaseController
 
     /**
      * @Route("/judgehosts/{hostname}", methods={"GET"}, name="jury_judgehost")
-     * @param string $hostname
+     * @param Request $request
+     * @param string  $hostname
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function viewAction(string $hostname)
+    public function viewAction(Request $request, string $hostname)
     {
         /** @var Judgehost $judgehost */
         $judgehost = $this->entityManager->createQueryBuilder()
@@ -228,15 +229,21 @@ class JudgehostController extends BaseController
                 ->getResult();
         }
 
-        return $this->render('@DOMJudge/jury/judgehost.html.twig', [
+        $data = [
             'judgehost' => $judgehost,
             'status' => $status,
             'judgings' => $judgings,
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_judgehost', ['hostname' => $judgehost->getHostname()]),
+                'ajax' => true,
             ],
-        ]);
+        ];
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('@DOMJudge/jury/partials/judgehost_judgings.html.twig', $data);
+        } else {
+            return $this->render('@DOMJudge/jury/judgehost.html.twig', $data);
+        }
     }
 
     /**

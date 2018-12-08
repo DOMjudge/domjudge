@@ -1,0 +1,44 @@
+{% if not judgings %}
+    <div class="alert alert-warning">No judgings</div>
+{% else %}
+    <table class="data-table table table-sm table-striped col-lg-4">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>started</th>
+            <th>runtime</th>
+            <th>result</th>
+            <th>valid</th>
+            <th>verified</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for judging in judgings %}
+            {% set link = path('jury_submission_by_judging', {jid: judging.judgingid}) %}
+            <tr class="{% if not judging.valid %}disabled{% endif %}">
+                <td><a href="{{ link }}">{{ judging.judgingid }}</a></td>
+                <td><a href="{{ link }}">{{ judging.starttime | printtime }}</a></td>
+                <td>
+                    <a href="{{ link }}">
+                        {% if judging.aborted %}
+                            [aborted]
+                        {% else %}
+                            {{ judging.starttime | timediff(judging.endtime) }}
+                        {% endif %}
+                    </a>
+                </td>
+                <td>
+                    <a href="{{ link }}">
+                        {{ judging.result | printResult(judging.valid) }}
+                        {% if judging.stillBusy %}
+                            (&hellip;)
+                        {% endif %}
+                    </a>
+                </td>
+                <td><a href="{{ link }}">{{ judging.valid | printYesNo }}</a></td>
+                <td><a href="{{ link }}">{{ judging.verified | printYesNo }}</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
