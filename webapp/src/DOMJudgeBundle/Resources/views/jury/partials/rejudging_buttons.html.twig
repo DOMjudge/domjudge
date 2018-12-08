@@ -1,0 +1,8 @@
+{% if not rejudging.endtime %}
+    <div>
+        {{ button(path('jury_rejudging_finish', {rejudgingId: rejudging.rejudgingid, action: 'cancel'}), 'Cancel rejudging', 'danger', 'times') }}
+        {% if todo == 0 %}
+            {{ button(path('jury_rejudging_finish', {rejudgingId: rejudging.rejudgingid, action: 'apply'}), 'Apply rejudging', 'success', 'check') }}
+        {% endif %}
+    </div>
+{% endif %}

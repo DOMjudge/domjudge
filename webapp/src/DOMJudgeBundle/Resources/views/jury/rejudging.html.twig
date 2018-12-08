@@ -71,24 +71,17 @@
                         {% endif %}
                     </td>
                 </tr>
-                {% if todo > 0 %}
-                    <tr>
-                        <th>Queued</th>
-                        <td>{{ todo }} unfinished judgings</td>
-                    </tr>
-                {% endif %}
+                <tr {% if todo <= 0 %}class="d-none"{% endif %}>
+                    <th>Queued</th>
+                    <td><span data-todo>{{ todo }}</span> unfinished judgings</td>
+                </tr>
             </table>
         </div>
     </div>
 
-    {% if not rejudging.endtime %}
-        <div>
-            {{ button(path('jury_rejudging_finish', {rejudgingId: rejudging.rejudgingid, action: 'cancel'}), 'Cancel rejudging', 'danger', 'times') }}
-            {% if todo == 0 %}
-                {{ button(path('jury_rejudging_finish', {rejudgingId: rejudging.rejudgingid, action: 'apply'}), 'Apply rejudging', 'success', 'check') }}
-            {% endif %}
-        </div>
-    {% endif %}
+    <div data-rejudging-buttons>
+        {% include '@DOMJudge/jury/partials/rejudging_buttons.html.twig' %}
+    </div>
 
     <div data-rejudging-matrix>
         {% include '@DOMJudge/jury/partials/rejudging_matrix.html.twig' %}
@@ -161,10 +154,23 @@
 
             $('.select2').select2();
 
-            window.updateMatrix = function() {
-                var $data = $('[data-new-rejudging-matrix]');
+            window.updateMatrix = function () {
+                var $matrixData = $('[data-new-rejudging-matrix]');
                 var $matrix = $('[data-rejudging-matrix]');
-                $matrix.html($data.children());
+                $matrix.html($matrixData.children());
+
+                var $buttonData = $('[data-new-rejudging-buttons]');
+                var $button = $('[data-rejudging-buttons]');
+                $button.html($buttonData.children());
+
+                var todo = $('[data-new-todo]').text();
+                var $todo = $('[data-todo]');
+                $todo.text(todo);
+                if (parseInt(todo) <= 0) {
+                    $todo.closest('tr').addClass('d-none');
+                } else {
+                    $todo.closest('tr').removeClass('d-none');
+                }
             }
         });
     </script>
