@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Compile, compare, and run script executable bundles
@@ -14,6 +15,7 @@ class Executable
      * @var string
      * @ORM\Id
      * @ORM\Column(type="string", name="execid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
+     * @Assert\Regex("/^[a-z0-9]+$/", message="Only alphanumeric values are allowed")
      */
     private $execid;
 
@@ -32,6 +34,7 @@ class Executable
     /**
      * @var string
      * @ORM\Column(type="string", name="description", length=255, options={"comment"="Description of this executable"}, nullable=true)
+     * @Assert\NotBlank()
      */
     private $description;
 
@@ -134,6 +137,15 @@ class Executable
     public function getZipfile()
     {
         return $this->zipfile;
+    }
+
+    /**
+     * Get the length of the zipfile
+     * @return int
+     */
+    public function getZipFileSize()
+    {
+        return strlen(stream_get_contents($this->getZipfile()));
     }
 
     /**

@@ -61,7 +61,7 @@
                     </a>
                 </div>
 
-                {{ file | codeEditor(submission.language.aceLanguage) }}
+                {{ file.sourcecode | codeEditor(file.rank, submission.language.aceLanguage) }}
             </div>
         {%- endfor %}
 

@@ -270,12 +270,12 @@ if (!empty($data['problemtext_type'])) {
 }
 
 echo '<tr><td>Run script:</td><td class="filename">' .
-    '<a href="executable.php?id=' . urlencode($data['special_run']) . '">' .
+    '<a href="executables/' . urlencode($data['special_run']) . '">' .
     specialchars($data['special_run']) . "</a>" .
     (@$defaultrun ? ' (default)' : '') . "</td></tr>\n";
 
 echo '<tr><td>Compare script:</td><td class="filename">' .
-    '<a href="executable.php?id=' . urlencode($data['special_compare']) . '">' .
+    '<a href="executables/' . urlencode($data['special_compare']) . '">' .
     specialchars($data['special_compare']) . "</a>" .
     (@$defaultcompare ? ' (default)' : '') . "</td></tr>\n";
 

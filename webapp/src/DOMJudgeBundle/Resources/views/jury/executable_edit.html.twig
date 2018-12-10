@@ -1,0 +1,34 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block title %}Edit executable {{ executable.execid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Edit executable {{ executable.execid }}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            {{ form(form) }}
+        </div>
+    </div>
+
+    <hr>
+    <i>or</i>
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <div class="row">
+            <div class="col-lg-4">
+                {{ form(uploadForm) }}
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}

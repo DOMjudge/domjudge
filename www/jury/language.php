@@ -156,7 +156,7 @@ echo addForm($pagename . '?id=' . urlencode((string)$id)) . "<p>\n" .
 if (empty($data['compile_script'])) {
         echo '<span class="nodata">none specified</span>';
     } else {
-        echo '<a href="executable.php?id=' . urlencode($data['compile_script']) . '">' .
+        echo '<a href="executables/' . urlencode($data['compile_script']) . '">' .
         specialchars($data['compile_script']) . '</a>';
     }
 ?>

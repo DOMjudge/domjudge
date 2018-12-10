@@ -462,8 +462,8 @@ EOF;
         // TODO: can be improved using diffposition.txt
         // FIXME: only show when diffposition.txt is set?
         // FIXME: cut off after XXX lines
-        $lines_team     = preg_split('/\n/', trim($runOutput['output_run']));
-        $lines_ref      = preg_split('/\n/', trim($runOutput['output_reference']));
+        $lines_team = preg_split('/\n/', trim($runOutput['output_run']));
+        $lines_ref  = preg_split('/\n/', trim($runOutput['output_reference']));
 
         $diffs    = array();
         $firstErr = sizeof($lines_team) + 1;
@@ -499,17 +499,21 @@ EOF;
 
     /**
      * Output a (readonly) code editor for the given submission file
-     * @param SubmissionFileWithSourceCode $fileWithSourceCode
-     * @param string                       $language
-     * @param bool                         $editable        Whether to allow editing
-     * @param string                       $elementToUpdate HTML element to update when input changes
+     * @param string      $code
+     * @param string      $index
+     * @param string|null $language        Ace language to use
+     * @param bool        $editable        Whether to allow editing
+     * @param string      $elementToUpdate HTML element to update when input changes
+     * @param string|null $filename        If $language is null, filename to use to determine language
      * @return string
      */
     public function codeEditor(
-        SubmissionFileWithSourceCode $fileWithSourceCode,
-        string $language,
+        string $code,
+        string $index,
+        string $language = null,
         bool $editable = false,
-        string $elementToUpdate = ''
+        string $elementToUpdate = '',
+        string $filename = null
     ) {
         $editor = <<<HTML
 <div class="editor" id="__EDITOR__">%s</div>
@@ -518,14 +522,14 @@ var __EDITOR__ = ace.edit("__EDITOR__");
 __EDITOR__.setTheme("ace/theme/eclipse");
 __EDITOR__.setOptions({ maxLines: Infinity });
 __EDITOR__.setReadOnly(%s);
-__EDITOR__.getSession().setMode("ace/mode/%s");
+%s
 document.getElementById("__EDITOR__").editor = __EDITOR__;
 %s
 </script>
 HTML;
-        $rank   = Utils::specialchars((string)$fileWithSourceCode->getRank());
+        $rank   = $index;
         $id     = sprintf('editor%s', $rank);
-        $code   = Utils::specialchars($fileWithSourceCode->getSourcecode());
+        $code   = Utils::specialchars($code);
         if ($elementToUpdate) {
             $extraForEdit = <<<JS
 __EDITOR__.getSession().on('change', function() {
@@ -537,8 +541,23 @@ JS;
         } else {
             $extraForEdit = '';
         }
+
+        if ($language !== null) {
+            $mode = sprintf('__EDITOR__.getSession().setMode("ace/mode/%s");', $language);
+        } elseif ($filename !== null) {
+            $modeTemplate = <<<JS
+var modelist = ace.require('ace/ext/modelist');
+var filePath = "%s";
+var mode = modelist.getModeForPath(filePath).mode;
+__EDITOR__.getSession().setMode(mode);
+JS;
+            $mode = sprintf($modeTemplate, Utils::specialchars($filename));
+        } else {
+            $mode = '';
+        }
+
         return str_replace('__EDITOR__', $id,
-                           sprintf($editor, $code, $editable ? 'false' : 'true', $language, $extraForEdit));
+                           sprintf($editor, $code, $editable ? 'false' : 'true', $mode, $extraForEdit));
     }
 
 
@@ -605,7 +624,8 @@ JS;
             $newFile,
             SUBMITDIR . '/' . $newsourcefile,
             $oldFile,
-            SUBMITDIR . '/' . $oldsourcefile
+            SUBMITDIR . '/' . $oldsourcefile,
+            $this->domjudge->getDomjudgeTmpDir()
         );
 
         return $this->parseSourceDiff($difftext);

@@ -17,7 +17,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use ZipArchive;
 
 class DOMJudgeService
 {
@@ -58,7 +60,9 @@ class DOMJudgeService
     public function getCurrentContest()
     {
         $selected_cid = $this->request->cookies->get('domjudge_cid');
-        if ($selected_cid == -1) return null;
+        if ($selected_cid == -1) {
+            return null;
+        }
 
         $contests = $this->getCurrentContests();
         foreach ($contests as $contest) {
@@ -79,15 +83,15 @@ class DOMJudgeService
      *
      * When $name is null, then all variables will be returned.
      * @param string|null $name
-     * @param mixed $default
-     * @param bool $onlyIfPublic
+     * @param mixed       $default
+     * @param bool        $onlyIfPublic
      * @return Configuration[]|mixed
      * @throws \Exception
      */
     public function dbconfig_get($name, $default = null, bool $onlyIfPublic = false)
     {
         if (empty($this->configCache)) {
-            $configs = $this->em->getRepository('DOMJudgeBundle:Configuration')->findAll();
+            $configs           = $this->em->getRepository('DOMJudgeBundle:Configuration')->findAll();
             $this->configCache = [];
             foreach ($configs as $config) {
                 $this->configCache[$config->getName()] = $config;
@@ -136,13 +140,13 @@ class DOMJudgeService
         string $key = 'cid'
     ) {
         $now = Utils::now();
-        $qb = $this->em->createQueryBuilder();
+        $qb  = $this->em->createQueryBuilder();
         $qb->select('c')->from('DOMJudgeBundle:Contest', 'c', 'c.cid');
         if ($onlyofteam !== null && $onlyofteam > 0) {
             $qb->leftJoin('c.teams', 'ct')
                 ->andWhere('ct.teamid = :teamid OR c.public = 1')
-               ->setParameter(':teamid', $onlyofteam);
-        // $contests = $DB->q("SELECT * FROM contest
+                ->setParameter(':teamid', $onlyofteam);
+            // $contests = $DB->q("SELECT * FROM contest
             //                     LEFT JOIN contestteam USING (cid)
             //                     WHERE (contestteam.teamid = %i OR contest.public = 1)
             //                     AND enabled = 1 ${extra}
@@ -158,11 +162,11 @@ class DOMJudgeService
             //                     ORDER BY activatetime");
         }
         $qb->andWhere('c.enabled = 1')
-           ->andWhere($qb->expr()->orX(
-               'c.deactivatetime is null',
-               $qb->expr()->gt('c.deactivatetime', $now)
-           ))
-           ->orderBy('c.activatetime');
+            ->andWhere($qb->expr()->orX(
+                'c.deactivatetime is null',
+                $qb->expr()->gt('c.deactivatetime', $now)
+            ))
+            ->orderBy('c.activatetime');
 
         if (!$alsofuture) {
             $qb->andWhere($qb->expr()->lte('c.activatetime', $now));
@@ -202,7 +206,7 @@ class DOMJudgeService
         return $this->em->getRepository(Problem::class)->find($probid);
     }
 
-    public function checkrole(string $rolename, bool $check_superset = true) : bool
+    public function checkrole(string $rolename, bool $check_superset = true): bool
     {
         if ($this->hasAllRoles) {
             return true;
@@ -220,7 +224,7 @@ class DOMJudgeService
                 return true;
             }
         }
-        return $authchecker->isGranted('ROLE_'.strtoupper($rolename));
+        return $authchecker->isGranted('ROLE_' . strtoupper($rolename));
     }
 
     public function getClientIp()
@@ -327,23 +331,23 @@ class DOMJudgeService
         return $response;
     }
 
-    public function getUpdates() : array
+    public function getUpdates(): array
     {
         $contest = $this->getCurrentContest();
 
         $clarifications = [];
         if ($contest) {
-           $clarifications = $this->em->createQueryBuilder()
-               ->select('clar.clarid', 'clar.body')
-               ->from('DOMJudgeBundle:Clarification', 'clar')
-               ->andWhere('clar.contest = :contest')
-               ->andWhere('clar.sender is not null')
-               ->andWhere('clar.answered = 0')
-               ->setParameter('contest', $contest)
-               ->getQuery()->getResult();
+            $clarifications = $this->em->createQueryBuilder()
+                ->select('clar.clarid', 'clar.body')
+                ->from('DOMJudgeBundle:Clarification', 'clar')
+                ->andWhere('clar.contest = :contest')
+                ->andWhere('clar.sender is not null')
+                ->andWhere('clar.answered = 0')
+                ->setParameter('contest', $contest)
+                ->getQuery()->getResult();
         }
 
-	$judgehosts = $this->em->createQueryBuilder()
+        $judgehosts = $this->em->createQueryBuilder()
             ->select('j.hostname', 'j.polltime')
             ->from('DOMJudgeBundle:Judgehost', 'j')
             ->andWhere('j.active = 1')
@@ -365,11 +369,11 @@ class DOMJudgeService
             ->getQuery()->getResult();
 
         return [
-                'clarifications' => $clarifications,
-                'judgehosts' => $judgehosts,
-                'rejudgings' => $rejudgings,
-                'internal_error' => $internal_error,
-            ];
+            'clarifications' => $clarifications,
+            'judgehosts' => $judgehosts,
+            'rejudgings' => $rejudgings,
+            'internal_error' => $internal_error,
+        ];
     }
 
     public function getHttpKernel()
@@ -402,15 +406,21 @@ class DOMJudgeService
     /**
      * Log an action to the auditlog table
      *
-     * @param string $datatype
-     * @param mixed $dataid
-     * @param string $action
+     * @param string     $datatype
+     * @param mixed      $dataid
+     * @param string     $action
      * @param mixed|null $extraInfo
      * @param mixed|null $forceUsername
-     * @param int|null $cid
+     * @param int|null   $cid
      */
-    public function auditlog(string $datatype, $dataid, string $action, $extraInfo = null, $forceUsername = null, $cid = null)
-    {
+    public function auditlog(
+        string $datatype,
+        $dataid,
+        string $action,
+        $extraInfo = null,
+        $forceUsername = null,
+        $cid = null
+    ) {
         if (!empty($forceUsername)) {
             $user = $forceUsername;
         } else {
@@ -463,7 +473,7 @@ class DOMJudgeService
      * @param $data
      * @return string
      */
-    public function jsonEncode($data) : string
+    public function jsonEncode($data): string
     {
         $res = json_encode($data);
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -474,8 +484,8 @@ class DOMJudgeService
 
     /**
      * Dis- or re-enable what caused an internal error
-     * @param array $disabled
-     * @param int|null $cid
+     * @param array     $disabled
+     * @param int|null  $cid
      * @param bool|null $enabled
      */
     public function setInternalError($disabled, $cid, $enabled)
@@ -523,7 +533,7 @@ class DOMJudgeService
      *
      * @param string $url
      * @param string $method
-     * @param array $queryData
+     * @param array  $queryData
      * @return mixed|null
      * @throws \Exception
      */
@@ -576,5 +586,25 @@ class DOMJudgeService
     public function getDomjudgeWebDir(): string
     {
         return $this->container->getParameter('domjudge.wwwdir');
+    }
+
+    /**
+     * Open the given ZIP file
+     * @param string $filename
+     * @return ZipArchive
+     */
+    public function openZipFile(string $filename): ZipArchive
+    {
+        $zip = new ZipArchive();
+        $res = $zip->open($filename, ZIPARCHIVE::CHECKCONS);
+        if ($res === ZIPARCHIVE::ER_NOZIP || $res === ZIPARCHIVE::ER_INCONS) {
+            throw new ServiceUnavailableHttpException('No valid zip archive given');
+        } elseif ($res === ZIPARCHIVE::ER_MEMORY) {
+            throw new ServiceUnavailableHttpException('Not enough memory to extract zip archive');
+        } elseif ($res !== true) {
+            throw new ServiceUnavailableHttpException('Unknown error while extracting zip archive');
+        }
+
+        return $zip;
     }
 }

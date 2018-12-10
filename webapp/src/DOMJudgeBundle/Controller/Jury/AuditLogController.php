@@ -134,7 +134,7 @@ class AuditLogController extends Controller
         case 'clarification': return $this->generateUrl('legacy.jury_clarification', ['id' => $id]);
         case 'configuration': return $this->generateUrl('jury_config');
         case 'contest': return $this->generateUrl('legacy.jury_contest', ['id' => $id]);
-        case 'executable': return $this->generateUrl('legacy.jury_executable', ['id' => $id]);
+        case 'executable': return $this->generateUrl('jury_executable', ['execId' => $id]);
         case 'internal_error': return $this->generateUrl('jury_internal_error', ['errorId' => $id]);
         case 'judgehost': return $this->generateUrl('jury_judgehost', ['hostname' => $id]);
         case 'judgehosts': return $this->generateUrl('jury_judgehosts');
