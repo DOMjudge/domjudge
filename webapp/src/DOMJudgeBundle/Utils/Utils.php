@@ -568,13 +568,15 @@ class Utils
      * @param string                       $newFile
      * @param SubmissionFileWithSourceCode $oldSource
      * @param string                       $oldFile
+     * @param string                       $tmpdir
      * @return string
      */
     public static function createDiff(
         SubmissionFileWithSourceCode $newSource,
         string $newFile,
         SubmissionFileWithSourceCode $oldSource,
-        string $oldFile
+        string $oldFile,
+        string $tmpdir
     ): string {
         // Try different ways of diffing, in order of preference.
         if (function_exists('xdiff_string_diff')) {
@@ -590,7 +592,6 @@ class Utils
                 $difftext = Utils::systemDiff($oldFile, $newFile);
             } else {
                 // Try generating temporary files for executing diff.
-                $tmpdir = $this->container->getParameter('domjudge.tmpdir');
                 $oldFile = tempnam($tmpdir, sprintf("source-old-s%s-", $oldSource->getSubmitid()));
                 $newFile = tempnam($tmpdir, sprintf("source-new-s%s-", $newSource->getSubmitid()));
 
