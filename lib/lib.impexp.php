@@ -336,9 +336,9 @@ function cmp_extid_name($a, $b)
         }
         return $a[1] - $b[1];
     }
-    $name_a = $extid_to_name[$a[0]];
-    $name_b = $extid_to_name[$b[0]];
-    $collator = new Collator('en_US');
+    $name_a = $extid_to_name[$a[0]] ?? '';
+    $name_b = $extid_to_name[$b[0]] ?? '';
+    $collator = new Collator('en');
     return $collator->compare($name_a, $name_b);
 }
 

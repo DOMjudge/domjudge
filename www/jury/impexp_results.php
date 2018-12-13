@@ -88,7 +88,7 @@ foreach ($probs as $probData) {
             continue;
         }
         if ($matrix[$teamData['teamid']][$probData['probid']]['is_correct'] && first_solved(
-            $matrix[$teamData['teamid']][$probData['probid']]['time'],
+            (float)$matrix[$teamData['teamid']][$probData['probid']]['time'],
                 @$summary['problems'][$probData['probid']]['best_time_sort'][$teamData['sortorder']]
         )) {
             $first_to_solve[$probData['probid']] = [
