@@ -2,13 +2,20 @@ DOMjudge Programming Contest Judging System
 
 Version 6.0.3 - DEV
 -------------------
+ - Fix a race condition in runguard where in rare cases not all output was
+   read from a pipe, resulting in wrong-answer verdicts.
+ - Document that php-intl is now a requirement and fix results export.
  - Fix problem name sanitizing in zip upload.
  - Improve error detection while uploading test cases.
  - Don't break judgedaemon if in/output are missing for a testcase.
- - Fix scoreboard summary row when affiliation logo's are enabled.
+ - Fix scoreboard summary row when affiliation logos are enabled.
  - Do not try to set session params, fixes notices in newer PHP versions.
  - Remove mention of obsolete AUTH_METHOD configuration variable.
  - Fix problem import from Baylor after API change.
+ - Set MySQL charset to UTF8mb4 for security and Emoji reasons.
+ - Fix for modifying a user when the user has no roles.
+ - Fix that users with balloons-only privileges could view more contest
+   data than was strictly necessary.
 
 Version 6.0.2 - 22 October 2018
 -------------------------------
