@@ -534,7 +534,7 @@ function renderScoreBoardTable(
                               $cat['color'] . ';"' : '') . '>' .
                         '<td>' .
                         jurylink(
-                            'team_category.php?id=' . urlencode((string)$cat['categoryid']),
+                            'categories/' . urlencode((string)$cat['categoryid']),
                              specialchars($cat['name'])
                         ) . "</td></tr>\n";
                 }

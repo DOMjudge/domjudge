@@ -3,6 +3,7 @@ namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Categories for teams (e.g.: participants, observers, ...)
@@ -34,6 +35,7 @@ class TeamCategory
     /**
      * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
+     * @Assert\NotBlank()
      */
     private $name;
 
@@ -41,6 +43,7 @@ class TeamCategory
      * @var int
      * @ORM\Column(type="smallint", name="sortorder", options={"comment"="Where to sort this category on the scoreboard"}, nullable=false)
      * @Serializer\Groups({"Nonstrict"})
+     * @Assert\GreaterThanOrEqual(0, message="Only non-negative sortorders are supported")
      */
     private $sortorder = 0;
 

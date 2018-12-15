@@ -335,7 +335,7 @@
                     <td>
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('legacy.jury_team_category', {id: category.categoryid}) %}
+                            {% set link = path('jury_team_category', {'categoryId': category.categoryid}) %}
                             <a {% if link %}href="{{ link }}"{% endif %}>{{ category.name }}</a>
                         {% endif %}
                     </td>

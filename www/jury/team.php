@@ -259,7 +259,7 @@ if (!empty($private_contests)) {
 <div class="col2"><table>
 <?php
 
-echo '<tr><td>Category:</td><td><a href="team_category.php?id=' .
+echo '<tr><td>Category:</td><td><a href="categories/' .
     urlencode((string)$row['categoryid']) . '">' .
     specialchars($row['catname']) . "</a></td></tr>\n";
 

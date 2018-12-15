@@ -3,13 +3,17 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\TeamCategory;
+use DOMJudgeBundle\Form\Type\TeamCategoryType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
+use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -97,10 +101,8 @@ class TeamCategoryController extends Controller
                 $categoryactions[] = [
                     'icon' => 'edit',
                     'title' => 'edit this category',
-                    'link' => $this->generateUrl('legacy.jury_team_category', [
-                        'cmd' => 'edit',
-                        'id' => $teamCategory->getCategoryid(),
-                        'referrer' => 'categories'
+                    'link' => $this->generateUrl('jury_team_category_edit', [
+                        'categoryId' => $teamCategory->getCategoryid(),
                     ])
                 ];
                 $categoryactions[] = [
@@ -121,7 +123,7 @@ class TeamCategoryController extends Controller
             $team_categories_table[] = [
                 'data' => $categorydata,
                 'actions' => $categoryactions,
-                'link' => $this->generateUrl('legacy.jury_team_category', ['id' => $teamCategory->getCategoryid()]),
+                'link' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),
                 'style' => $teamCategory->getColor() ? sprintf('background-color: %s;', $teamCategory->getColor()) : '',
             ];
         }
@@ -130,6 +132,112 @@ class TeamCategoryController extends Controller
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
             'edited' => $request->query->getBoolean('edited'),
+        ]);
+    }
+
+    /**
+     * @Route("/categories/{categoryId}", name="jury_team_category", requirements={"categoryId": "\d+"})
+     * @param Request           $request
+     * @param SubmissionService $submissionService
+     * @param int               $categoryId
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId)
+    {
+        /** @var TeamCategory $teamCategory */
+        $teamCategory = $this->entityManager->getRepository(TeamCategory::class)->find($categoryId);
+        if (!$teamCategory) {
+            throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
+        }
+
+        $restrictions = ['categoryid' => $teamCategory->getCategoryid()];
+        /** @var Submission[] $submissions */
+        list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
+            $this->DOMJudgeService->getCurrentContests(),
+            $restrictions
+        );
+
+        $data = [
+            'teamCategory' => $teamCategory,
+            'submissions' => $submissions,
+            'submissionCounts' => $submissionCounts,
+            'showContest' => count($this->DOMJudgeService->getCurrentContest()) > 1,
+            'refresh' => [
+                'after' => 15,
+                'url' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),
+                'ajax' => true,
+            ],
+        ];
+
+        // For ajax requests, only return the submission list partial
+        if ($request->isXmlHttpRequest()) {
+            $data['showTestcases'] = false;
+            return $this->render('@DOMJudge/jury/partials/submission_list.html.twig', $data);
+        }
+
+        return $this->render('@DOMJudge/jury/team_category.html.twig', $data);
+    }
+
+    /**
+     * @Route("/categories/{categoryId}/edit", name="jury_team_category_edit", requirements={"categoryId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $categoryId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function editAction(Request $request, int $categoryId)
+    {
+        /** @var TeamCategory $teamCategory */
+        $teamCategory = $this->entityManager->getRepository(TeamCategory::class)->find($categoryId);
+        if (!$teamCategory) {
+            throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
+        }
+
+        $form = $this->createForm(TeamCategoryType::class, $teamCategory);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->flush();
+            $this->DOMJudgeService->auditlog('team_category', $teamCategory->getCategoryid(),
+                                             'updated');
+            return $this->redirect($this->generateUrl('jury_team_category',
+                                                      ['categoryId' => $teamCategory->getCategoryid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/team_category_edit.html.twig', [
+            'teamCategory' => $teamCategory,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/categories/add", name="jury_team_category_add")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function addAction(Request $request)
+    {
+        $teamCategory = new TeamCategory();
+
+        $form = $this->createForm(TeamCategoryType::class, $teamCategory);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->persist($teamCategory);
+            $this->entityManager->flush();
+            $this->DOMJudgeService->auditlog('team_category', $teamCategory->getCategoryid(),
+                                             'added');
+            return $this->redirect($this->generateUrl('jury_team_category',
+                                                      ['categoryId' => $teamCategory->getCategoryid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/team_category_add.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 }
