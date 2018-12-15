@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 6.0.3 - DEV
--------------------
+Version 6.0.3 - 15 December 2018
+--------------------------------
  - Fix a race condition in runguard where in rare cases not all output was
    read from a pipe, resulting in wrong-answer verdicts.
  - Document that php-intl is now a requirement and fix results export.
