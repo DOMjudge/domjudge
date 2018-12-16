@@ -64,4 +64,61 @@ class UtilsTest extends TestCase
     {
         $this->assertEquals('-3:25:45', Utils::relTime(-12345.6789, true));
     }
+
+    public function testPrinttimeNotime()
+    {
+        $this->assertEquals('', Utils::printTime(null, "%H:%M"));
+    }
+
+    public function testPrinttime()
+    {
+        $timestamp = 1544964581.3604;
+        $expected = '2018-12-16 12:49';
+        $this->assertEquals($expected, Utils::printtime($timestamp, '%Y-%m-%d %H:%M'));
+    }
+
+    public function testPrinttimediff()
+    {
+        $start = $end = 1544964581.3604;
+
+        $this->assertEquals("00:00", Utils::printtimediff($start, $end));
+
+        $end += 1;
+        $this->assertEquals("00:01", Utils::printtimediff($start, $end));
+
+        $end += 123;
+        $this->assertEquals("02:04", Utils::printtimediff($start, $end));
+
+        $end += 4*60;
+        $this->assertEquals("06:04", Utils::printtimediff($start, $end));
+
+        $end += 59;
+        $this->assertEquals("07:03", Utils::printtimediff($start, $end));
+
+        $end += 13*60;
+        $this->assertEquals("20:03", Utils::printtimediff($start, $end));
+
+        $end += (72*60*60);
+        $this->assertEquals("3d 0:20:03", Utils::printtimediff($start, $end));
+
+        $end += (365*24*60*60);
+        $this->assertEquals("368d 0:20:03", Utils::printtimediff($start, $end));
+    }
+
+    public function testSpecialchars()
+    {
+        $plain = "Example string to test";
+        $this->assertEquals($plain, Utils::specialchars($plain));
+
+        $html = 'Example <a href="aap">string</a> to test';
+        $htmlenc = 'Example &lt;a href=&quot;aap&quot;&gt;string&lt;/a&gt; to test';
+        $this->assertEquals($htmlenc, Utils::specialchars($html));
+
+        $validutf = "Test Thĳs ⛪⚖";
+        $this->assertEquals($validutf, Utils::specialchars($validutf));
+
+        $invalidutf = "Test \xc3\x28 example";
+        $replacedutf = "Test �( example";
+        $this->assertEquals($replacedutf, Utils::specialchars($invalidutf));
+    }
 }
