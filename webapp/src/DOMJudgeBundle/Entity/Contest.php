@@ -1130,7 +1130,11 @@ class Contest
      */
     public function getScoreboardFreezeDuration()
     {
-        return Utils::relTime($this->getEndtime() - $this->getFreezetime());
+        if (!empty($this->getFreezetime())) {
+            return Utils::relTime($this->getEndtime() - $this->getFreezetime());
+        } else {
+            return null;
+        }
     }
 
     /**
