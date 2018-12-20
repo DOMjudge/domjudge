@@ -1105,7 +1105,7 @@ class Contest
      */
     public function getScoreboardFreezeDuration()
     {
-        if (!empty($this->getFreezetime()) {
+        if (!empty($this->getFreezetime())) {
             return Utils::relTime($this->getEndtime() - $this->getFreezetime());
         } else {
             return Utils::relTime(0);
