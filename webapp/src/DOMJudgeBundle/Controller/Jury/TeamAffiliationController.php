@@ -109,7 +109,7 @@ class TeamAffiliationController extends Controller
                 $affiliationactions[] = [
                     'icon' => 'edit',
                     'title' => 'edit this affiliation',
-                    'link' => $this->generateUrl('jury_team_affiliation', [
+                    'link' => $this->generateUrl('jury_team_affiliation_edit', [
                         'affilId' => $teamAffiliation->getAffilid(),
                     ])
                 ];
