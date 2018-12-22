@@ -35,8 +35,6 @@ legacy.jury_delete:
     path: /jury/delete.php
 legacy.jury_user:
     path: /jury/user.php
-legacy.jury_team_affiliation:
-    path: /jury/team_affiliation.php
 legacy.jury_testcase:
     path: /jury/testcase.php
 legacy.jury_team_output:

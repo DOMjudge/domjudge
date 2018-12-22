@@ -319,7 +319,7 @@ function renderScoreBoardTable(
             echo '<td class="scoreaf">';
             if (isset($teams[$team]['affilid'])) {
                 if (IS_JURY) {
-                    echo '<a href="team_affiliation.php?id=' .
+                    echo '<a href="affiliations/' .
                         urlencode((string)$teams[$team]['affilid']) . '">';
                 }
                 if (isset($teams[$team]['country'])) {
@@ -349,7 +349,7 @@ function renderScoreBoardTable(
                     $affilid = $teams[$team]['affilid_external'];
                 }
                 if (IS_JURY) {
-                    echo '<a href="team_affiliation.php?id=' .
+                    echo '<a href="affiliations/' .
                         urlencode((string)$teams[$team]['affilid']) . '">';
                 }
                 $affillogo = 'images/affiliations/' .  urlencode((string)$affilid) . '.png';

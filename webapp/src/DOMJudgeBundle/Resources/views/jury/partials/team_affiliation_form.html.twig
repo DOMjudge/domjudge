@@ -1,0 +1,16 @@
+<div class="row">
+    <div class="col-lg-4">
+        {{ form_start(form) }}
+        {{ form_row(form.shortname) }}
+        {{ form_row(form.name) }}
+        <div class="form-group">
+            {{ form_label(form.country) }}
+            {{ form_widget(form.country) }}
+            <small class="form-text text-muted">
+                <a target="_blank" href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3#Current_codes"><i class="fas fa-question-circle"></i></a>
+            </small>
+        </div>
+        {{ form_row(form.comments) }}
+        {{ form_end(form) }}
+    </div>
+</div>

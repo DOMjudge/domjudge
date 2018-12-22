@@ -18,7 +18,7 @@
     {%- if is_granted('ROLE_ADMIN') %}
 
         <p>
-            {{ button(path('legacy.jury_team_affiliation', {cmd: 'add', referrer: 'affiliations'}), 'Add new affiliation', 'primary', 'plus') }}
+            {{ button(path('jury_team_affiliation_add'), 'Add new affiliation', 'primary', 'plus') }}
         </p>
     {%- endif %}
 

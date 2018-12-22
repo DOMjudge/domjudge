@@ -4,8 +4,14 @@
 {% else %}
     {% set limitToTeamIds = [] %}
     {% for team in limitToTeams %}
-        {% set limitToTeamIds = limitToTeamIds | merge([team.id]) %}
+        {% set limitToTeamIds = limitToTeamIds | merge([team.teamid]) %}
     {% endfor %}
+{% endif %}
+{% if showLegends is not defined %}
+    {% set showLegends = false %}
+{% endif %}
+{% if static is not defined %}
+    {% set static = false %}
 {% endif %}
 
 <table class="scoreboard center {% if jury %}scoreboard_jury{% endif %}">
@@ -111,7 +117,7 @@
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('legacy.jury_team_affiliation', {id: score.team.affilid}) %}
+                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affilid}) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% if score.team.affiliation.country %}
@@ -132,7 +138,7 @@
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
-                            {% set link = path('legacy.jury_team_affiliation', {id: score.team.affilid}) %}
+                            {% set link = path('jury_team_affiliation', {'affilId': score.team.affilid}) %}
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% set affiliationId = score.team.affiliation.affilid %}

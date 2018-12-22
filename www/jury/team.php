@@ -269,7 +269,7 @@ if ($SHOW_AFFILIATIONS && !empty($row['affilid'])) {
         echo '<img src="../' . $affillogo . '" alt="' .
             specialchars($row['affshortname']) . '" /> ';
     }
-    echo '<a href="team_affiliation.php?id=' . urlencode((string)$row['affilid']) . '">' .
+    echo '<a href="affiliations/' . urlencode((string)$row['affilid']) . '">' .
         specialchars($row['affname']) . "</a></td></tr>\n";
 }
 if ($SHOW_FLAGS && !empty($row['country'])) {

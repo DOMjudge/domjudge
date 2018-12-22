@@ -1,0 +1,116 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block title %}Affiliation {{ teamAffiliation.affilid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Affiliation: {{ teamAffiliation.name }}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>ID</th>
+                    <td>{{ teamAffiliation.affilid }}</td>
+                </tr>
+                <tr>
+                    <th>Shortname</th>
+                    <td>{{ teamAffiliation.shortname }}</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>{{ teamAffiliation.name }}</td>
+                </tr>
+                <tr>
+                    <th>Logo</th>
+                    <td>
+                        {% set affiliationId = teamAffiliation.affilid %}
+                        {% if teamAffiliation.externalid is not null %}
+                            {% set affiliationId = teamAffiliation.externalid %}
+                        {% endif %}
+                        {% set affiliationLogo = 'images/affiliations/' ~ affiliationId ~ '.png' %}
+                        {% if affiliationLogo | assetExists %}
+                            <img src="{{ asset(affiliationLogo) }}" alt="{{ teamAffiliation.shortname }}"
+                                 title="{{ teamAffiliation.shortname }}"/>
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if showFlags %}
+                    <tr>
+                        <th>Country</th>
+                        <td>
+                            {{ teamAffiliation.country }}
+                            {% if teamAffiliation.country is not empty %}
+                                {% set countryFlag = 'images/countries/' ~ teamAffiliation.country ~ '.png' %}
+                                {% if countryFlag | assetExists %}
+                                    <img src="{{ asset(countryFlag) }}" alt="{{ teamAffiliation.country }}"
+                                         title="{{ teamAffiliation.country }}" class="countryflag"/>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if teamAffiliation.comments is not empty %}
+                    <tr>
+                        <th>Comments</th>
+                        <td>{{ teamAffiliation.comments }}</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+    {%- if is_granted('ROLE_ADMIN') -%}
+        <p>
+            {{ button(path('jury_team_affiliation_edit', {'affilId': teamAffiliation.affilid}), 'Edit', 'primary', 'edit') }}
+            {% set deleteUrl = path('legacy.jury_delete', {affilid: teamAffiliation.affilid, table: 'team_affiliation', referrer: 'affiliations', desc: teamAffiliation.name}) %}
+            {{ button(deleteUrl, 'Delete', 'danger', 'trash-alt') }}
+        </p>
+    {% endif %}
+
+    <h2>Teams from {{ teamAffiliation.name }}</h2>
+    {% if teamAffiliation.teams is empty %}
+        <p class="nodata">no teams</p>
+    {% else %}
+        <div class="row">
+            <div class="col-lg-4">
+                <table class="data-table table table-sm table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Teamname</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for team in teamAffiliation.teams %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('legacy.jury_team', {'id': team.teamid}) }}">{{ team.teamid }}</a>
+                            </td>
+                            <td>
+                                <a href="{{ path('legacy.jury_team', {'id': team.teamid}) }}">{{ team.name }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if scoreboard is defined %}
+            <div data-ajax-refresh-target>
+                {% include '@DOMJudge/partials/scoreboard_table.html.twig' with {displayRank: true, jury: true} %}
+            </div>
+        {% endif %}
+    {% endif %}
+
+{% endblock %}

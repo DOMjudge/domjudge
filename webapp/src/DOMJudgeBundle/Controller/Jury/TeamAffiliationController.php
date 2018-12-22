@@ -4,12 +4,15 @@ namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\TeamAffiliation;
+use DOMJudgeBundle\Form\Type\TeamAffiliationType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
+use DOMJudgeBundle\Service\ScoreboardService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
@@ -106,10 +109,8 @@ class TeamAffiliationController extends Controller
                 $affiliationactions[] = [
                     'icon' => 'edit',
                     'title' => 'edit this affiliation',
-                    'link' => $this->generateUrl('legacy.jury_team_affiliation', [
-                        'cmd' => 'edit',
-                        'id' => $teamAffiliation->getAffilid(),
-                        'referrer' => 'affiliations'
+                    'link' => $this->generateUrl('jury_team_affiliation', [
+                        'affilId' => $teamAffiliation->getAffilid(),
                     ])
                 ];
                 $affiliationactions[] = [
@@ -126,11 +127,12 @@ class TeamAffiliationController extends Controller
 
             $affiliationdata['num_teams'] = ['value' => $teamAffiliationData['num_teams']];
             if ($showFlags) {
-                $countryCode = $teamAffiliation->getCountry();
-                $countryFlag = $countryCode;
+                $countryCode     = $teamAffiliation->getCountry();
+                $countryFlag     = $countryCode;
                 $countryFlagPath = sprintf('images/countries/%s.png', $countryCode);
-                if (file_exists($webDir .'/'. $countryFlagPath)) {
-                    $countryFlag = sprintf('<img src="%s" alt="%s" class="countryflag">', $assetPackage->getUrl($countryFlagPath), $countryCode);
+                if (file_exists($webDir . '/' . $countryFlagPath)) {
+                    $countryFlag = sprintf('<img src="%s" alt="%s" class="countryflag">',
+                                           $assetPackage->getUrl($countryFlagPath), $countryCode);
                 }
                 $affiliationdata['country'] = [
                     'value' => $countryFlag,
@@ -142,7 +144,7 @@ class TeamAffiliationController extends Controller
             $team_affiliations_table[] = [
                 'data' => $affiliationdata,
                 'actions' => $affiliationactions,
-                'link' => $this->generateUrl('legacy.jury_team_affiliation', ['id' => $teamAffiliation->getAffilid()]),
+                'link' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
             ];
         }
 
@@ -150,6 +152,114 @@ class TeamAffiliationController extends Controller
             'team_affiliations' => $team_affiliations_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+        ]);
+    }
+
+    /**
+     * @Route("/affiliations/{affilId}", name="jury_team_affiliation", requirements={"affilId": "\d+"})
+     * @param Request           $request
+     * @param ScoreboardService $scoreboardService
+     * @param int               $affilId
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId)
+    {
+        /** @var TeamAffiliation $teamAffiliation */
+        $teamAffiliation = $this->entityManager->getRepository(TeamAffiliation::class)->find($affilId);
+        if (!$teamAffiliation) {
+            throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
+        }
+
+        $data = [
+            'teamAffiliation' => $teamAffiliation,
+            'showFlags' => $this->DOMJudgeService->dbconfig_get('show_flags', true),
+            'refresh' => [
+                'after' => 30,
+                'url' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
+                'ajax' => true,
+            ],
+        ];
+
+        if ($currentContest = $this->DOMJudgeService->getCurrentContest()) {
+            $data['scoreboard']           = $scoreboardService->getScoreboard($currentContest, true);
+            $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
+            $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
+            $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
+            $data['showPending']          = $this->DOMJudgeService->dbconfig_get('show_pending', false);
+            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', false);
+            $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+            $data['limitToTeams']         = $teamAffiliation->getTeams();
+        }
+
+        // For ajax requests, only return the submission list partial
+        if ($request->isXmlHttpRequest()) {
+            $data['displayRank'] = true;
+            $data['jury']        = true;
+            return $this->render('@DOMJudge/partials/scoreboard_table.html.twig', $data);
+        }
+
+        return $this->render('@DOMJudge/jury/team_affiliation.html.twig', $data);
+    }
+
+    /**
+     * @Route("/affiliations/{affilId}/edit", name="jury_team_affiliation_edit", requirements={"affilId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $affilId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function editAction(Request $request, int $affilId)
+    {
+        /** @var TeamAffiliation $teamAffiliation */
+        $teamAffiliation = $this->entityManager->getRepository(TeamAffiliation::class)->find($affilId);
+        if (!$teamAffiliation) {
+            throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
+        }
+
+        $form = $this->createForm(TeamAffiliationType::class, $teamAffiliation);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->flush();
+            $this->DOMJudgeService->auditlog('team_affiliation', $teamAffiliation->getAffilid(),
+                                             'updated');
+            return $this->redirect($this->generateUrl('jury_team_affiliation',
+                                                      ['affilId' => $teamAffiliation->getAffilid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/team_affiliation_edit.html.twig', [
+            'teamAffiliation' => $teamAffiliation,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/affiliations/add", name="jury_team_affiliation_add")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function addAction(Request $request)
+    {
+        $teamAffiliation = new TeamAffiliation();
+
+        $form = $this->createForm(TeamAffiliationType::class, $teamAffiliation);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->persist($teamAffiliation);
+            $this->entityManager->flush();
+            $this->DOMJudgeService->auditlog('team_affiliation', $teamAffiliation->getAffilid(),
+                                             'added');
+            return $this->redirect($this->generateUrl('jury_team_affiliation',
+                                                      ['affilId' => $teamAffiliation->getAffilid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/team_affiliation_add.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 }
