@@ -31,7 +31,7 @@
                     <tr>
                         <th>Issued by</th>
                         <td>
-                            <a href="{{ path('legacy.jury_user', {id: rejudging.startUser.userid}) }}">
+                            <a href="{{ path('jury_user', {'userId': rejudging.startUser.userid}) }}">
                                 {{ rejudging.startUser.name }}
                             </a>
                         </td>
@@ -41,7 +41,7 @@
                     <tr>
                         <th>{% if rejudging.valid %}Accepted{% else %}Canceled{% endif %} by</th>
                         <td>
-                            <a href="{{ path('legacy.jury_user', {id: rejudging.finishUser.userid}) }}">
+                            <a href="{{ path('jury_user', {'userId': rejudging.finishUser.userid}) }}">
                                 {{ rejudging.finishUser.name }}
                             </a>
                         </td>

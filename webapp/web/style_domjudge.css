@@ -58,6 +58,8 @@
     white-space: pre;
 }
 
+.teamid { font-family: monospace; }
+
 .nodata {
     color: gray;
     font-style: italic;

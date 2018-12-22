@@ -29,19 +29,23 @@ services:
     DOMJudgeBundle\Serializer\:
         resource: '../../src/DOMJudgeBundle/Serializer/*'
         tags:
-        -   name: jms_serializer.event_subscriber
+            -   name: jms_serializer.event_subscriber
 
     DOMJudgeBundle\ApiDescriber\ParameterRefMergeDescriber:
         tags:
-        -   name: nelmio_api_doc.describer
-            priority: -999
+            -   name: nelmio_api_doc.describer
+                priority: -999
 
     DOMJudgeBundle\Validator\Constraints\UserRegistrationValidator:
         tags:
-        -   name: validator.constraint_validator
+            -   name: validator.constraint_validator
 
     DOMJudgeBundle\EventListener\ApiHeadersListener:
         tags:
-        -   name: kernel.event_listener
-            event: kernel.response
-            method: onKernelResponse
+            -   name: kernel.event_listener
+                event: kernel.response
+                method: onKernelResponse
+
+    DOMJudgeBundle\Doctrine\HashPasswordSubscriber:
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }

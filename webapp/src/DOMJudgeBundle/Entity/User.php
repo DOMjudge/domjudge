@@ -62,6 +62,11 @@ class User implements UserInterface, \Serializable
     private $password;
 
     /**
+     * @var string|null
+     */
+    private $plainPassword;
+
+    /**
      * @var string
      * @ORM\Column(type="string", name="ip_address", length=255, options={"comment"="IP Address used to autologin"}, nullable=true)
      * @Serializer\SerializedName("ip")
@@ -104,9 +109,12 @@ class User implements UserInterface, \Serializable
     {
         return null;
     }
+
     public function eraseCredentials()
     {
+        $this->plainPassword = null;
     }
+
     public function serialize()
     {
         return serialize(array(
@@ -269,6 +277,20 @@ class User implements UserInterface, \Serializable
     }
 
     /**
+     * Set the plain password, used to create the encoded password
+     * @param string|null $plainPassword
+     *
+     * @return User
+     */
+    public function setPlainPassword($plainPassword): User
+    {
+        $this->plainPassword = $plainPassword;
+        // Make sure we let Doctrine know the password changed when we set a plain password by modifying the field
+        $this->password      = $this->password === null ? '' : null;
+        return $this;
+    }
+
+    /**
      * Get password
      *
      * @return string
@@ -276,6 +298,16 @@ class User implements UserInterface, \Serializable
     public function getPassword()
     {
         return $this->password;
+    }
+
+    /**
+     * Get the plain password, used to create the encoded password
+     *
+     * @return string|null
+     */
+    public function getPlainPassword()
+    {
+        return $this->plainPassword;
     }
 
     /**

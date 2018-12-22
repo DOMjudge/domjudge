@@ -224,11 +224,11 @@ if ($row['enabled'] != 1) {
 <tr><td>User:</td><td><?php
 if (count($users)) {
     foreach ($users as $user) {
-        echo "<a href=\"user.php?id=" . urlencode((string)$user['userid']) . "\">" .
+        echo "<a href=\"users/" . urlencode((string)$user['userid']) . "\">" .
             specialchars($user['username']) . "</a> ";
     }
 } else {
-    echo "<a href=\"user.php?cmd=add&amp;forteam=" . urlencode((string)$row['teamid']) .
+    echo "<a href=\"users/add?team=" . urlencode((string)$row['teamid']) .
         "\"><small>(add)</small></a>";
 }
 ?></td></tr>
