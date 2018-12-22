@@ -11,6 +11,10 @@
 
 {% block content %}
 
+    {% if edited %}
+        {% include '@DOMJudge/jury/refresh_scoreboard.html.twig' with {message: 'If the category sort order was changed, it may be necessary to recalculate any cached scoreboards.'} %}
+    {% endif %}
+
     <h1>Category {{ teamCategory.categoryid }}</h1>
 
     <div class="row">

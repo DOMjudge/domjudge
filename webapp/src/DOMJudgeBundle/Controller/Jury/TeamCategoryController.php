@@ -164,6 +164,7 @@ class TeamCategoryController extends Controller
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->DOMJudgeService->getCurrentContest()) > 1,
+            'edited' => $request->query->getBoolean('edited'),
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),
@@ -204,7 +205,7 @@ class TeamCategoryController extends Controller
             $this->DOMJudgeService->auditlog('team_category', $teamCategory->getCategoryid(),
                                              'updated');
             return $this->redirect($this->generateUrl('jury_team_category',
-                                                      ['categoryId' => $teamCategory->getCategoryid()]));
+                                                      ['categoryId' => $teamCategory->getCategoryid(), 'edited' => true]));
         }
 
         return $this->render('@DOMJudge/jury/team_category_edit.html.twig', [
