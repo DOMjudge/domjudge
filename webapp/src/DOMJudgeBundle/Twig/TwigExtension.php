@@ -70,7 +70,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('externalCcsUrl', [$this, 'externalCcsUrl']),
             new \Twig_SimpleFilter('lineCount', [$this, 'lineCount']),
             new \Twig_SimpleFilter('autoExpand', [$this, 'autoExpand'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('base64', [$this, 'base64_encode']),
+            new \Twig_SimpleFilter('base64', 'base64_encode'),
             new \Twig_SimpleFilter('base64_decode', 'base64_decode'),
             new \Twig_SimpleFilter('parseRunDiff', [$this, 'parseRunDiff'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('runDiff', [$this, 'runDiff'], ['is_safe' => ['html']]),
