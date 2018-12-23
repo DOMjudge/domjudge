@@ -440,7 +440,7 @@
                                                     Reference Output
                                                 </a>
                                                 /
-                                                <a href="{{ path('legacy.jury_team_output', {runid: run.firstJudgingRun.runid, cid: submission.cid}) }}">
+                                                <a href="{{ path('jury_submission_team_output', {'submission': submission.submitid, 'run': run.firstJudgingRun.runid, 'contest': submission.cid}) }}">
                                                     Team Output
                                                 </a>
                                             </td>

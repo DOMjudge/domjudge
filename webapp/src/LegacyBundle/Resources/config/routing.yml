@@ -33,5 +33,3 @@ legacy.jury_delete:
     path: /jury/delete.php
 legacy.jury_testcase:
     path: /jury/testcase.php
-legacy.jury_team_output:
-    path: /jury/team_output.php

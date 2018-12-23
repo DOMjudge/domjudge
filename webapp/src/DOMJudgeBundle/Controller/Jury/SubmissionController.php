@@ -8,6 +8,7 @@ use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Judgehost;
 use DOMJudgeBundle\Entity\Judging;
+use DOMJudgeBundle\Entity\JudgingRun;
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
@@ -28,6 +29,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
@@ -512,6 +514,38 @@ class SubmissionController extends Controller
     }
 
     /**
+     * @Route("/submissions/{submission}/runs/{contest}/{run}/team-output", name="jury_submission_team_output")
+     * @param Submission $submission
+     * @param Contest    $contest
+     * @param JudgingRun $run
+     */
+    public function teamOutputAction(Submission $submission, Contest $contest, JudgingRun $run)
+    {
+        if ($run->getJudging()->getSubmitid() !== $submission->getSubmitid() || $submission->getCid() !== $contest->getCid()) {
+            throw new BadRequestHttpException('Problem while fetching team output');
+        }
+
+        $filename = sprintf('p%d.t%d.%s.run%d.team%d.out', $submission->getProbid(), $run->getTestcase()->getRank(),
+                            $submission->getContestProblem()->getShortname(), $run->getRunid(),
+                            $submission->getTeamid());
+
+        $outputRun = $run->getJudgingRunOutput()->getOutputRun();
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($outputRun) {
+            echo $outputRun;
+        });
+        $response->headers->set('Content-Type', 'application/octet-stream');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->headers->set('Content-Length', strlen($outputRun));
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Connection', 'Keep-Alive');
+        $response->headers->set('Accept-Ranges', 'bytes');
+
+        return $response;
+    }
+
+    /**
      * @Route("/submissions/{submission}/source", name="jury_submission_source")
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -698,7 +732,7 @@ class SubmissionController extends Controller
 
             /** @var UploadedFile[] $filesToSubmit */
             $filesToSubmit = [];
-            $tmpdir = $this->DOMJudgeService->getDomjudgeTmpDir();
+            $tmpdir        = $this->DOMJudgeService->getDomjudgeTmpDir();
             foreach ($files as $file) {
                 if (!($tmpfname = tempnam($tmpdir, "edit_source-"))) {
                     throw new ServiceUnavailableHttpException("Could not create temporary file.");
