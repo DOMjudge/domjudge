@@ -62,44 +62,6 @@ function post_team($prikey, $cmd)
     }
 }
 
-function check_user($data, $keydata = null)
-{
-    global $DB;
-    $id = (isset($data['username']) ? $data['username'] : $keydata['username']);
-    if (! preg_match(ID_REGEX, $id)) {
-        ch_error("Username may only contain characters " . IDENTIFIER_CHARS . ".");
-    }
-    if (! empty($data['email'])  && ! filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-        ch_error("Email not valid.");
-    }
-    if (!empty($data['password'])) {
-        $data['password'] = dj_password_hash($data['password']);
-    } else {
-        unset($data['password']);
-    }
-    if (!empty($data['ip_address'])) {
-        if (!filter_var($data['ip_address'], FILTER_VALIDATE_IP)) {
-            ch_error("Invalid IP address.");
-        }
-        $ip = $DB->q("VALUE SELECT count(*) FROM user WHERE ip_address = %s AND username != %s", $data['ip_address'], $id);
-        if ($ip > 0) {
-            ch_error("IP address already assigned to another user.");
-        }
-    }
-
-    return $data;
-}
-
-
-function check_affiliation($data, $keydata = null)
-{
-    $id = (isset($data['affilid']) ? $data['affilid'] : $keydata['affilid']);
-    if (! preg_match(ID_REGEX, $id)) {
-        ch_error("Team affiliation ID may only contain characters " . IDENTIFIER_CHARS . ".");
-    }
-    return $data;
-}
-
 function check_problem($data, $keydata = null)
 {
     global $DB;
@@ -170,17 +132,6 @@ function check_problem($data, $keydata = null)
     return $data;
 }
 
-function check_judgehost($data, $keydata = null)
-{
-    $id = (isset($data['hostname']) ? $data['hostname'] : $keydata['hostname']);
-
-    if (! preg_match("/^[A-Za-z0-9_\-.]*$/", $id)) {
-        ch_error("Judgehost has invalid hostname.");
-    }
-
-    return $data;
-}
-
 function check_language($data, $keydata = null)
 {
     if (! is_numeric($data['time_factor']) || $data['time_factor'] <= 0) {
@@ -203,21 +154,6 @@ function check_language($data, $keydata = null)
     $exts = json_decode($data['extensions'], false, 2);
     if ($exts==null || !is_array($exts) || count($exts)==0) {
         ch_error("Language extension list is not a valid non-empty JSON array");
-    }
-
-    return $data;
-}
-
-function check_executable($data, $keydata = null)
-{
-    global $executable_types;
-
-    $id = (isset($data['execid']) ? $data['execid'] : $keydata['execid']);
-    if (! preg_match(ID_REGEX, $id)) {
-        ch_error("Executable ID may only contain characters " . IDENTIFIER_CHARS . ".");
-    }
-    if (!isset($data['type']) || !in_array($data['type'], $executable_types)) {
-        ch_error("Executable type '" . $data['type'] . "' is invalid.");
     }
 
     return $data;

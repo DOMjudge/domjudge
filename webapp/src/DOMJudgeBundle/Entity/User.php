@@ -3,12 +3,15 @@ namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Users that have access to DOMjudge
  * @ORM\Entity()
  * @ORM\Table(name="user", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @UniqueEntity("ipAddress")
  */
 class User implements UserInterface, \Serializable
 {
@@ -25,6 +28,7 @@ class User implements UserInterface, \Serializable
     /**
      * @var string
      * @ORM\Column(type="string", name="username", length=255, options={"comment"="User login name"}, nullable=false)
+     * @Assert\Regex("/^[a-zA-Z0-9_-]+$/", message="May only contain [a-zA-Z0-9_-].")
      */
     private $username;
 
@@ -37,6 +41,7 @@ class User implements UserInterface, \Serializable
     /**
      * @var string
      * @ORM\Column(type="string", name="email", length=255, options={"comment"="Email address"}, nullable=true)
+     * @Assert\Email()
      */
     private $email;
 
@@ -70,8 +75,9 @@ class User implements UserInterface, \Serializable
      * @var string
      * @ORM\Column(type="string", name="ip_address", length=255, options={"comment"="IP Address used to autologin"}, nullable=true)
      * @Serializer\SerializedName("ip")
+     * @Assert\Ip()
      */
-    private $ipaddress;
+    private $ipAddress;
 
     /**
      * @var boolean
@@ -313,13 +319,13 @@ class User implements UserInterface, \Serializable
     /**
      * Set ipaddress
      *
-     * @param string $ipaddress
+     * @param string $ipAddress
      *
      * @return User
      */
-    public function setIpAddress($ipaddress)
+    public function setIpAddress($ipAddress)
     {
-        $this->ipaddress = $ipaddress;
+        $this->ipAddress = $ipAddress;
 
         return $this;
     }
@@ -331,7 +337,7 @@ class User implements UserInterface, \Serializable
      */
     public function getIpAddress()
     {
-        return $this->ipaddress;
+        return $this->ipAddress;
     }
 
     /**
