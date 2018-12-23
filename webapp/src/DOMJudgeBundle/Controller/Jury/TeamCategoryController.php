@@ -163,7 +163,7 @@ class TeamCategoryController extends Controller
             'teamCategory' => $teamCategory,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
-            'showContest' => count($this->DOMJudgeService->getCurrentContest()) > 1,
+            'showContest' => count($this->DOMJudgeService->getCurrentContests()) > 1,
             'edited' => $request->query->getBoolean('edited'),
             'refresh' => [
                 'after' => 15,
