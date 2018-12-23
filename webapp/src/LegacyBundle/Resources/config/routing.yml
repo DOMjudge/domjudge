@@ -10,8 +10,6 @@ legacy.jury_problem:
     path: /jury/problem.php
 legacy.jury_clarification:
     path: /jury/clarification.php
-legacy.jury_language:
-    path: /jury/language.php
 legacy.team_index:
     path: /team/
 legacy.team_problem:

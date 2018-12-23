@@ -4,12 +4,16 @@ namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Language;
+use DOMJudgeBundle\Entity\Submission;
+use DOMJudgeBundle\Form\Type\LanguageType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
+use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -95,10 +99,8 @@ class LanguageController extends Controller
                 $langactions[] = [
                     'icon' => 'edit',
                     'title' => 'edit this language',
-                    'link' => $this->generateUrl('legacy.jury_language', [
-                        'cmd' => 'edit',
-                        'id' => $lang->getLangid(),
-                        'referrer' => 'languages'
+                    'link' => $this->generateUrl('jury_language_edit', [
+                        'langId' => $lang->getLangid()
                     ])
                 ];
                 $langactions[] = [
@@ -124,7 +126,7 @@ class LanguageController extends Controller
             $languages_table[] = [
                 'data' => $langdata,
                 'actions' => $langactions,
-                'link' => $this->generateUrl('legacy.jury_language', ['id' => $lang->getLangid()]),
+                'link' => $this->generateUrl('jury_language', ['langId' => $lang->getLangid()]),
                 'cssclass' => $lang->getAllowSubmit() ? '' : 'disabled',
             ];
         }
@@ -132,6 +134,166 @@ class LanguageController extends Controller
             'languages' => $languages_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
+        ]);
+    }
+
+    /**
+     * @Route("/languages/{langId}", name="jury_language")
+     * @param Request           $request
+     * @param SubmissionService $submissionService
+     * @param string            $langId
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function viewAction(Request $request, SubmissionService $submissionService, string $langId)
+    {
+        /** @var Language $language */
+        $language = $this->entityManager->getRepository(Language::class)->find($langId);
+        if (!$language) {
+            throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
+        }
+
+        $restrictions = ['langid' => $language->getLangid()];
+        /** @var Submission[] $submissions */
+        list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
+            $this->DOMJudgeService->getCurrentContests(),
+            $restrictions
+        );
+
+        $data = [
+            'language' => $language,
+            'submissions' => $submissions,
+            'submissionCounts' => $submissionCounts,
+            'showContest' => count($this->DOMJudgeService->getCurrentContests()) > 1,
+            'refresh' => [
+                'after' => 15,
+                'url' => $this->generateUrl('jury_language', ['langId' => $language->getLangid()]),
+                'ajax' => true,
+            ],
+        ];
+
+        // For ajax requests, only return the submission list partial
+        if ($request->isXmlHttpRequest()) {
+            $data['showTestcases'] = false;
+            return $this->render('@DOMJudge/jury/partials/submission_list.html.twig', $data);
+        }
+
+        return $this->render('@DOMJudge/jury/language.html.twig', $data);
+    }
+
+    /**
+     * @Route("/languages/{langId}/toggle-submit", name="jury_language_toggle_submit")
+     * @param Request $request
+     * @param string  $langId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function toggleSubmitAction(Request $request, string $langId)
+    {
+        /** @var Language $language */
+        $language = $this->entityManager->getRepository(Language::class)->find($langId);
+        if (!$language) {
+            throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
+        }
+
+        $language->setAllowSubmit($request->request->getBoolean('allow_submit'));
+        $this->entityManager->flush();
+
+        $this->DOMJudgeService->auditlog('language', $langId, 'set allow submit',
+                                         $request->request->getBoolean('allow_submit'));
+        return $this->redirectToRoute('jury_language', ['langId' => $langId]);
+    }
+
+    /**
+     * @Route("/languages/{langId}/toggle-judge", name="jury_language_toggle_judge")
+     * @param Request $request
+     * @param string  $langId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function toggleJudgeAction(Request $request, string $langId)
+    {
+        /** @var Language $language */
+        $language = $this->entityManager->getRepository(Language::class)->find($langId);
+        if (!$language) {
+            throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
+        }
+
+        $language->setAllowJudge($request->request->getBoolean('allow_judge'));
+        $this->entityManager->flush();
+
+        $this->DOMJudgeService->auditlog('language', $langId, 'set allow judge',
+                                         $request->request->getBoolean('allow_judge'));
+        return $this->redirectToRoute('jury_language', ['langId' => $langId]);
+    }
+
+    /**
+     * @Route("/languages/{langId}/edit", name="jury_language_edit")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param string  $langId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function editAction(Request $request, string $langId)
+    {
+        /** @var Language $language */
+        $language = $this->entityManager->getRepository(Language::class)->find($langId);
+        if (!$language) {
+            throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
+        }
+
+        $form = $this->createForm(LanguageType::class, $language);
+
+        $form->handleRequest($request);
+
+        dump($form->getErrors());
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Normalize extensions
+            if ($language->getExtensions()) {
+                $language->setExtensions(array_values($language->getExtensions()));
+            }
+            $this->entityManager->flush();
+            $this->DOMJudgeService->auditlog('language', $language->getLangid(),
+                                             'updated');
+            return $this->redirect($this->generateUrl('jury_language',
+                                                      ['langId' => $language->getLangid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/language_edit.html.twig', [
+            'language' => $language,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/languages//add", name="jury_language_add")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function addAction(Request $request)
+    {
+        $language = new Language();
+
+        $form = $this->createForm(LanguageType::class, $language);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Normalize extensions
+            if ($language->getExtensions()) {
+                $language->setExtensions(array_values($language->getExtensions()));
+            }
+            $this->entityManager->persist($language);
+            $this->entityManager->flush();
+            $this->DOMJudgeService->auditlog('language', $language->getLangid(),
+                                             'added');
+            return $this->redirect($this->generateUrl('jury_language',
+                                                      ['langId' => $language->getLangid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/language_add.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 }

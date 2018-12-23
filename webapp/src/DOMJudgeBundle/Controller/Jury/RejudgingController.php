@@ -563,7 +563,7 @@ class RejudgingController extends Controller
                 case 'judgehost':
                     return $this->redirectToRoute('jury_judgehost', ['hostname' => $id]);
                 case 'language':
-                    return $this->redirectToRoute('legacy.jury_language', ['id' => $id]);
+                    return $this->redirectToRoute('jury_language', ['langId' => $id]);
                 case 'problem':
                     return $this->redirectToRoute('legacy.jury_problem', ['id' => $id]);
                 case 'submission':

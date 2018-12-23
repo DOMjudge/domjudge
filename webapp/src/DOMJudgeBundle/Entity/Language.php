@@ -3,6 +3,7 @@ namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Programming languages in which teams can submit solutions
@@ -17,6 +18,8 @@ class Language
      * @ORM\Id
      * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
      * @Serializer\Exclude()
+     * @Assert\NotBlank()
+     * @Assert\Regex("/^[a-z0-9]+$/", message="Only alphanumeric values are allowed")
      */
     private $langid;
 
@@ -32,6 +35,7 @@ class Language
      * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive language name"}, nullable=false)
      * @Serializer\Groups({"Default", "Nonstrict"})
+     * @Assert\NotBlank()
      */
     private $name;
 
@@ -40,6 +44,7 @@ class Language
      * @ORM\Column(type="json_array", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("array<string>")
+     * @Assert\NotBlank()
      */
     private $extensions;
 
@@ -62,8 +67,10 @@ class Language
      * @ORM\Column(type="float", name="time_factor", options={"comment"="Language-specific factor multiplied by problem run times"}, nullable=false)
      * @Serializer\Type("double")
      * @Serializer\Groups({"Nonstrict"})
+     * @Assert\GreaterThan(0)
+     * @Assert\NotBlank()
      */
-    private $time_factor = 1;
+    private $timeFactor = 1;
 
     /**
      * @var string
@@ -252,7 +259,7 @@ class Language
      */
     public function setTimeFactor($timeFactor)
     {
-        $this->time_factor = $timeFactor;
+        $this->timeFactor = $timeFactor;
 
         return $this;
     }
@@ -264,7 +271,7 @@ class Language
      */
     public function getTimeFactor()
     {
-        return $this->time_factor;
+        return $this->timeFactor;
     }
 
     /**

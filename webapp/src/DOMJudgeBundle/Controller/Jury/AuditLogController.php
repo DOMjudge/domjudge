@@ -140,7 +140,7 @@ class AuditLogController extends Controller
         case 'judgehosts': return $this->generateUrl('jury_judgehosts');
         case 'judgehost_restriction': return $this->generateUrl('jury_judgehost_restriction', ['restrictionId' => $id]);
         case 'judging': return $this->generateUrl('jury_submission_by_judging', ['jid' => $id]);
-        case 'language': return $this->generateUrl('legacy.jury_language', ['id' => $id]);
+        case 'language': return $this->generateUrl('jury_language', ['langId' => $id]);
         case 'problem': return $this->generateUrl('legacy.jury_problem', ['id' => $id]);
         case 'submission': return $this->generateUrl('jury_submission', ['submitId' => $id]);
         case 'team': return $this->generateUrl('jury_team', ['teamId' => $id]);

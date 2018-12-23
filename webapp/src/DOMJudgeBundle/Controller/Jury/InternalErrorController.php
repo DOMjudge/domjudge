@@ -112,7 +112,7 @@ class InternalErrorController extends BaseController
                 $affectedText = $disabled['hostname'];
                 break;
             case 'language':
-                $affectedLink = $this->generateUrl('legacy.jury_language', ['id' => $disabled['langid']]);
+                $affectedLink = $this->generateUrl('jury_language', ['langId' => $disabled['langid']]);
                 $affectedText = $disabled['langid'];
                 break;
         }

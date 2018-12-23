@@ -17,7 +17,7 @@
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>
-            {{ button(path('legacy.jury_language', {cmd: 'add', referrer: 'languages'}), 'Add new language', 'primary', 'plus') }}
+            {{ button(path('jury_language_add'), 'Add new language', 'primary', 'plus') }}
         </p>
     {% endif %}
 

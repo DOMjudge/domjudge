@@ -86,7 +86,7 @@
 
         <span>
             <i class="fas fa-comments" title="Language:"></i>
-            <a href="{{ path('legacy.jury_language', {id: submission.langid}) }}">
+            <a href="{{ path('jury_language', {'langId': submission.langid}) }}">
                 {{ submission.language.name }}
             </a>
         </span>

@@ -71,7 +71,7 @@
                             {% endfor %}
                         {% elseif executable.type == 'compile' %}
                             {% for language in executable.languages %}
-                                <a href="{{ path('legacy.jury_language', {'id': language.langid}) }}">
+                                <a href="{{ path('jury_language', {'langId': language.langid}) }}">
                                     {{ language.langid }}
                                 </a>
                                 {% set used = true %}
