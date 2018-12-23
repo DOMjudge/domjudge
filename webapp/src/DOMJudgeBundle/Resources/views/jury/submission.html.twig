@@ -65,7 +65,7 @@
     <div class="submission-summary mb-2">
         <span>
             <i class="fas fa-users" title="Team:"></i>
-            <a href="{{ path('legacy.jury_team', {id: submission.teamid, cid: submission.cid}) }}">
+            <a href="{{ path('jury_team', {teamId: submission.teamid, cid: submission.cid}) }}">
                 {{ submission.team.name }} (t{{ submission.teamid }})
             </a>
         </span>

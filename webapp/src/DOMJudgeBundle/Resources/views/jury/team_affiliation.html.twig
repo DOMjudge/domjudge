@@ -94,10 +94,10 @@
                     {% for team in teamAffiliation.teams %}
                         <tr>
                             <td>
-                                <a href="{{ path('legacy.jury_team', {'id': team.teamid}) }}">{{ team.teamid }}</a>
+                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team.teamid }}</a>
                             </td>
                             <td>
-                                <a href="{{ path('legacy.jury_team', {'id': team.teamid}) }}">{{ team.name }}</a>
+                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team.name }}</a>
                             </td>
                         </tr>
                     {% endfor %}

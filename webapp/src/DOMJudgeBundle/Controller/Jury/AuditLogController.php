@@ -143,7 +143,7 @@ class AuditLogController extends Controller
         case 'language': return $this->generateUrl('legacy.jury_language', ['id' => $id]);
         case 'problem': return $this->generateUrl('legacy.jury_problem', ['id' => $id]);
         case 'submission': return $this->generateUrl('jury_submission', ['submitId' => $id]);
-        case 'team': return $this->generateUrl('legacy.jury_team', ['id' => $id]);
+        case 'team': return $this->generateUrl('jury_team', ['teamId' => $id]);
         case 'team_affiliation': return $this->generateUrl('jury_team_affiliation', ['affilId' => $id]);
         case 'team_category': return $this->generateUrl('jury_team_category', ['categoryId' => $id]);
         case 'user': return $this->generateUrl('jury_user', ['userId' => $id]);

@@ -437,7 +437,7 @@ if ($data['public']) {
                 echo '</td></tr>';
                 echo '<tr><td></td><td>';
             }
-            echo '<a href="team.php?id=' . $team['teamid'] . '&cid=' . $id . '">';
+            echo '<a href="teams/' . $team['teamid'] . '&cid=' . $id . '">';
             echo $team['name'] . ' (t' . $team['teamid'] . ')';
             echo '</a>';
         }

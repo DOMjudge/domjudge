@@ -88,8 +88,8 @@ class UserController extends Controller
                 $userdata['team'] = [
                     'value' => $u->getTeamid(),
                     'sortvalue' => $u->getTeamid(),
-                    'link' => $this->generateUrl('legacy.jury_team', [
-                        'id' => $u->getTeamid(),
+                    'link' => $this->generateUrl('jury_team', [
+                        'teamId' => $u->getTeamid(),
                     ]),
                     'linktitle' => $u->getTeam()->getName(),
                 ];
@@ -188,7 +188,7 @@ class UserController extends Controller
             $this->DOMJudgeService->auditlog('user', $user->getUserid(),
                                              'updated');
             return $this->redirect($this->generateUrl('jury_user',
-                                                      ['userId' => $user->getUserid(), 'edited' => true]));
+                                                      ['userId' => $user->getUserid()]));
         }
 
         return $this->render('@DOMJudge/jury/user_edit.html.twig', [

@@ -196,7 +196,7 @@ if (! $isgeneral) {
         echo '<p>See the <a href="clarification.php?id=' . $respid .
         '">original clarification ' . $respid . '</a> by ' .
         ($orig['sender']==null ? 'Jury' :
-            '<a href="team.php?id=' . urlencode($orig['sender']) . '">' .
+            '<a href="teams/' . urlencode($orig['sender']) . '">' .
             specialchars($orig['name'] . " (t" . $orig['sender'] . ")") .
             '</a>') .
         "</p>\n\n";

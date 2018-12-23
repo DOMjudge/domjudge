@@ -569,7 +569,7 @@ class RejudgingController extends Controller
                 case 'submission':
                     return $this->redirectToRoute('jury_submission', ['submitId' => $id]);
                 case 'team':
-                    return $this->redirectToRoute('legacy.jury_team', ['id' => $id]);
+                    return $this->redirectToRoute('jury_team', ['teamId' => $id]);
             }
         }
     }

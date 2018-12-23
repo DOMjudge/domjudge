@@ -1,8 +1,11 @@
 <?php declare(strict_types=1);
+
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * All teams participating in the contest
@@ -30,14 +33,16 @@ class Team implements ExternalRelationshipEntityInterface
     /**
      * @var string
      * TODO: ORM\Unique on first 190 characters
-     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Team ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Team ID in an external system",
+     *                            "collation"="utf8mb4_bin"}, nullable=true)
      * @Serializer\SerializedName("icpc_id")
      */
     private $externalid;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="name", length=255, options={"comment"="Team Name", "collation"="utf8mb4_bin"}, nullable=false)
+     * @ORM\Column(type="string", name="name", length=255, options={"comment"="Team Name", "collation"="utf8mb4_bin"},
+     *                            nullable=false)
      */
     private $name;
 
@@ -58,59 +63,72 @@ class Team implements ExternalRelationshipEntityInterface
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="enabled", options={"comment"="Whether the team is visible and operational"}, nullable=true)
+     * @ORM\Column(type="boolean", name="enabled", options={"comment"="Whether the team is visible and operational"},
+     *                             nullable=true)
      * @Serializer\Exclude()
      */
     private $enabled = true;
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="members", options={"comment"="Team member names (freeform)"}, nullable=true)
+     * @ORM\Column(type="text", length=4294967295, name="members", options={"comment"="Team member names (freeform)"},
+     *                          nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
     private $members;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"}, nullable=true)
+     * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"},
+     *                            nullable=true)
      * @Serializer\Exclude()
      */
     private $room;
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team"}, nullable=true)
+     * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team"},
+     *                          nullable=true)
      * @Serializer\Exclude()
      */
     private $comments;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started", options={"comment"="Start time of last judging for priorization", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started", options={"comment"="Start time
+     *                             of last judging for priorization", "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
      */
     private $judging_last_started;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="teampage_first_visited", options={"comment"="Time of first teampage view", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="teampage_first_visited", options={"comment"="Time of
+     *                             first teampage view", "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
      */
     private $teampage_first_visited;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=255, name="hostname", options={"comment"="Teampage first visited from this address"}, nullable=true)
+     * @ORM\Column(type="string", length=255, name="hostname", options={"comment"="Teampage first visited from this
+     *                            address"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $hostname;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="penalty", options={"comment"="Additional penalty time in minutes"}, nullable=false)
+     * @ORM\Column(type="integer", name="penalty", options={"comment"="Additional penalty time in minutes"},
+     *                             nullable=false)
      * @Serializer\Exclude()
      */
     private $penalty = 0;
+
+    /**
+     * @var bool
+     */
+    private $addUserForTeam = false;
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamAffiliation", inversedBy="teams")
@@ -468,6 +486,16 @@ class Team implements ExternalRelationshipEntityInterface
     }
 
     /**
+     * Set whether to add a user for this team. Will not be stored, but is used in validation
+     *
+     * @param bool $addUserForTeam
+     */
+    public function setAddUserForTeam(bool $addUserForTeam)
+    {
+        $this->addUserForTeam = $addUserForTeam;
+    }
+
+    /**
      * Get penalty
      *
      * @return integer
@@ -475,6 +503,16 @@ class Team implements ExternalRelationshipEntityInterface
     public function getPenalty()
     {
         return $this->penalty;
+    }
+
+    /**
+     * Whether to add a user for this team. Will not be stored, but is used in validation
+     *
+     * @return bool
+     */
+    public function getAddUserForTeam(): bool
+    {
+        return $this->addUserForTeam;
     }
 
     /**
@@ -524,12 +562,14 @@ class Team implements ExternalRelationshipEntityInterface
     {
         return $this->category;
     }
+
     /**
      * Constructor
      */
     public function __construct()
     {
         $this->contests = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->users = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -847,5 +887,26 @@ class Team implements ExternalRelationshipEntityInterface
     public function getExternalRelationships(): array
     {
         return ['organization_id' => $this->getAffiliation()];
+    }
+
+    /**
+     * @param ExecutionContextInterface $context
+     * @Assert\Callback()
+     */
+    public function validate(ExecutionContextInterface $context)
+    {
+        if ($this->getAddUserForTeam()) {
+            if (empty($this->getUsers()->first()->getUsername())) {
+                $context
+                    ->buildViolation('Required when adding a user')
+                    ->atPath('users[0].username')
+                    ->addViolation();
+            } elseif (!preg_match('/^[a-zA-Z0-9_-]+$/', $this->getUsers()->first()->getUsername())) {
+                $context
+                    ->buildViolation('May only contain [a-zA-Z0-9_-].')
+                    ->atPath('users[0].username')
+                    ->addViolation();
+            }
+        }
     }
 }

@@ -72,7 +72,7 @@
                     <th>Team</th>
                     {% if user.team %}
                         <td class="teamid">
-                            <a href="{{ path('legacy.jury_team', {'id': user.team.teamid}) }}">
+                            <a href="{{ path('jury_team', {'teamId': user.team.teamid}) }}">
                                 {{ user.team.name }} (t{{ user.team.teamid }})
                             </a>
                         </td>

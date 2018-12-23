@@ -88,7 +88,7 @@ function putClar(array $clar)
 
     echo '<tr><td>From:</td><td>';
     if (IS_JURY && $clar['sender']) {
-        echo '<a href="team.php?id=' . urlencode($clar['sender']) . '">' .
+        echo '<a href="teams/' . urlencode($clar['sender']) . '">' .
             $from . '</a>';
     } else {
         echo $from;
@@ -97,7 +97,7 @@ function putClar(array $clar)
 
     echo '<tr><td>To:</td><td>';
     if (IS_JURY && $clar['recipient']) {
-        echo '<a href="team.php?id=' . urlencode($clar['recipient']) . '">' .
+        echo '<a href="teams/' . urlencode($clar['recipient']) . '">' .
             $to . '</a>';
     } else {
         echo $to;

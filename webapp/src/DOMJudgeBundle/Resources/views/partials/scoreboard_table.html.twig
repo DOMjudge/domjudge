@@ -161,7 +161,7 @@
                 {% set link = null %}
                 {% if not static %}
                     {% if jury %}
-                        {% set link = path('legacy.jury_team', {id: score.team.teamid}) %}
+                        {% set link = path('jury_team', {teamId: score.team.teamid}) %}
                     {% elseif public %}
                         {% set link = path('legacy.public_team', {id: score.team.teamid}) %}
                     {% else %}
@@ -229,8 +229,8 @@
 
                     {% set link = null %}
                     {% if jury %}
-                        {% set restrict = 'probid:' ~ problem.probid %}
-                        {% set link = path('legacy.jury_team', {id: score.team.teamid, restrict: restrict}) %}
+                        {% set restrict = {probid: problem.probid} %}
+                        {% set link = path('jury_team', {teamId: score.team.teamid, restrict: restrict}) %}
                     {% endif %}
 
                     <td class="score_cell">

@@ -3,14 +3,21 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\Role;
 use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Entity\User;
+use DOMJudgeBundle\Form\Type\TeamType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
+use DOMJudgeBundle\Service\ScoreboardService;
+use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -149,11 +156,9 @@ class TeamController extends Controller
                 $teamactions[] = [
                     'icon' => 'edit',
                     'title' => 'edit this team',
-                    'link' => $this->generateUrl('legacy.jury_team', [
-                        'cmd' => 'edit',
-                        'id' => $t->getTeamId(),
-                        'referrer' => 'teams'
-                    ])
+                    'link' => $this->generateUrl('jury_team_edit', [
+                        'teamId' => $t->getTeamid(),
+                    ]),
                 ];
                 $teamactions[] = [
                     'icon' => 'trash-alt',
@@ -211,15 +216,193 @@ class TeamController extends Controller
             $teams_table[] = [
                 'data' => $teamdata,
                 'actions' => $teamactions,
-                'link' => $this->generateUrl('legacy.jury_team', ['id' => $t->getTeamId()]),
+                'link' => $this->generateUrl('jury_team', ['teamId' => $t->getTeamId()]),
                 'cssclass' => "category" . $t->getCategory()->getCategoryId() .
-                              ($t->getEnabled() ? '' : ' disabled'),
+                    ($t->getEnabled() ? '' : ' disabled'),
             ];
         }
         return $this->render('@DOMJudge/jury/teams.html.twig', [
             'teams' => $teams_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 1,
+        ]);
+    }
+
+    /**
+     * @Route("/teams/{teamId}", name="jury_team", requirements={"teamId": "\d+"})
+     * @param int               $teamId
+     * @param ScoreboardService $scoreboardService
+     * @param SubmissionService $submissionService
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function viewAction(
+        Request $request,
+        int $teamId,
+        ScoreboardService $scoreboardService,
+        SubmissionService $submissionService
+    ) {
+        /** @var Team $team */
+        $team = $this->entityManager->getRepository(Team::class)->find($teamId);
+        if (!$team) {
+            throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
+        }
+
+        $data = [
+            'refresh' => [
+                'after' => 15,
+                'url' => $request->getRequestUri(),
+                'ajax' => true,
+            ],
+            'team' => $team,
+            'showAffiliations' => (bool)$this->DOMJudgeService->dbconfig_get('show_affiliations', true),
+            'showFlags' => (bool)$this->DOMJudgeService->dbconfig_get('show_flags', true),
+            'showContest' => count($this->DOMJudgeService->getCurrentContests()) > 1,
+        ];
+
+        $currentContest = $this->DOMJudgeService->getCurrentContest();
+        if ($request->query->has('cid')) {
+            if (isset($this->DOMJudgeService->getCurrentContests()[$request->query->get('cid')])) {
+                $currentContest = $this->DOMJudgeService->getCurrentContests()[$request->query->get('cid')];
+            }
+        }
+
+        if ($currentContest) {
+            $data['scoreboard']           = $scoreboardService->getTeamScoreboard($currentContest, $teamId, true);
+            $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
+            $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
+            $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
+            $data['showPending']          = $this->DOMJudgeService->dbconfig_get('show_pending', false);
+            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', false);
+            $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+            $data['limitToTeams']         = [$team];
+        }
+
+        // We need to clear the entity manager, because loading the team scoreboard seems to break getting submission
+        // contestproblems for the contest we get the scoreboard for
+        $this->entityManager->clear();
+
+        $restrictions    = [];
+        $restrictionText = null;
+        if ($request->query->has('restrict')) {
+            $restrictions     = $request->query->get('restrict');
+            $restrictionTexts = [];
+            foreach ($restrictions as $key => $value) {
+                switch ($key) {
+                    case 'probid':
+                        $restrictionKeyText = 'problem';
+                        break;
+                    case 'langid':
+                        $restrictionKeyText = 'language';
+                        break;
+                    case 'judgehost':
+                        $restrictionKeyText = 'judgehost';
+                        break;
+                    default:
+                        throw new BadRequestHttpException(sprintf('Restriction on %s not allowed.', $key));
+                }
+                $restrictionTexts[] = sprintf('%s %s', $restrictionKeyText, $value);
+            }
+            $restrictionText = implode(', ', $restrictionTexts);
+        }
+        $restrictions['teamid'] = $teamId;
+        list($submissions, $submissionCounts) = $submissionService->getSubmissionList($this->DOMJudgeService->getCurrentContests(),
+                                                                                      $restrictions);
+        $data['restrictionText']  = $restrictionText;
+        $data['submissions']      = $submissions;
+        $data['submissionCounts'] = $submissionCounts;
+
+        if ($request->isXmlHttpRequest()) {
+            $data['displayRank'] = true;
+            $data['jury']        = true;
+            return $this->render('@DOMJudge/jury/partials/team_score_and_submissions.html.twig', $data);
+        }
+
+        return $this->render('@DOMJudge/jury/team.html.twig', $data);
+    }
+
+    /**
+     * @Route("/teams/{teamId}/edit", name="jury_team_edit", requirements={"teamId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $teamId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function editAction(Request $request, int $teamId)
+    {
+        /** @var Team $team */
+        $team = $this->entityManager->getRepository(Team::class)->find($teamId);
+        if (!$team) {
+            throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
+        }
+
+        $form = $this->createForm(TeamType::class, $team);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->flush();
+            $this->DOMJudgeService->auditlog('team', $team->getTeamid(),
+                                             'updated');
+            return $this->redirect($this->generateUrl('jury_team',
+                                                      ['teamId' => $team->getTeamid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/team_edit.html.twig', [
+            'team' => $team,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/teams/add", name="jury_team_add")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function addAction(Request $request)
+    {
+        $team = new Team();
+        $team->setAddUserForTeam(true);
+        $team->addUser(new User());
+        $form = $this->createForm(TeamType::class, $team);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var User $user */
+            $user = $team->getUsers()->first();
+            if (!$team->getAddUserForTeam()) {
+                // If we do not want to add a user, remove it again
+                $team->removeUser($user);
+            } else {
+                // Otherwise, add the team role to it
+                /** @var Role $role */
+                $role = $this->entityManager->createQueryBuilder()
+                    ->from('DOMJudgeBundle:Role', 'r')
+                    ->select('r')
+                    ->andWhere('r.dj_role = :team')
+                    ->setParameter(':team', 'team')
+                    ->getQuery()
+                    ->getOneOrNullResult();
+                $user->addRole($role);
+                $user->setTeam($team);
+                // Also set the user's name to the team name
+                $user->setName($team->getName());
+                $this->entityManager->persist($user);
+            }
+            $this->entityManager->persist($team);
+            $this->entityManager->flush();
+            $this->DOMJudgeService->auditlog('team', $team->getTeamid(),
+                                             'added');
+            return $this->redirect($this->generateUrl('jury_team',
+                                                      ['teamId' => $team->getTeamid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/team_add.html.twig', [
+            'team' => $team,
+            'form' => $form->createView(),
         ]);
     }
 }

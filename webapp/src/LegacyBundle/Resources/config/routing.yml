@@ -6,8 +6,6 @@ legacy.public_problem:
     path: /public/problem.php
 legacy.public_team:
     path: /public/team.php
-legacy.jury_team:
-    path: /jury/team.php
 legacy.jury_problem:
     path: /jury/problem.php
 legacy.jury_clarification:

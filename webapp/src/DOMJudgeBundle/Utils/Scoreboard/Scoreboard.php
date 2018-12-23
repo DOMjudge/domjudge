@@ -379,12 +379,18 @@ class Scoreboard
         rsort($btimes);
         if (isset($atimes[0]) && isset($btimes[0])) {
             return $atimes[0] <=> $btimes[0];
-        } else if (!isset($atimes[0]) && !isset($btimes[0])) {
-            return 0;
-        } else if (!isset($atimes[0])) {
-            return -1;
-        } else if (!isset($btimes[0])) {
-            return 1;
+        } else {
+            if (!isset($atimes[0]) && !isset($btimes[0])) {
+                return 0;
+            } else {
+                if (!isset($atimes[0])) {
+                    return -1;
+                } else {
+                    if (!isset($btimes[0])) {
+                        return 1;
+                    }
+                }
+            }
         }
     }
 
@@ -489,8 +495,11 @@ class Scoreboard
         if ($problemSummary === null) {
             return false;
         }
-        $problemTime = $this->summary->getProblem($problem->getProbid())->getBestTimes()[$sortOrder];
-        $eps         = 0.0000001;
-        return $teamTime - $eps <= $problemTime;
+        $problemTimes = $this->summary->getProblem($problem->getProbid())->getBestTimes();
+        if (!isset($problemTimes[$sortOrder])) {
+            return false;
+        }
+        $eps = 0.0000001;
+        return $teamTime - $eps <= $problemTimes[$sortOrder];
     }
 }
