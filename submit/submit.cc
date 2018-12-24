@@ -99,14 +99,14 @@ char readanswer(const char *answers);
 bool file_istext(char *filename);
 #endif
 
-bool websubmit();
+bool doAPIsubmit();
 
 Json::Value doAPIrequest(const char *, int);
 bool readlanguages();
 bool readproblems();
 bool readcontests();
 
-/* Helper function for using libcurl in websubmit() and doAPIrequest() */
+/* Helper function for using libcurl in doAPIsubmit() and doAPIrequest() */
 size_t writesstream(void *ptr, size_t size, size_t nmemb, void *sptr)
 {
 	stringstream *s = (stringstream *) sptr;
@@ -155,18 +155,32 @@ std::string decode_HTML_entities(std::string str)
 int nwarnings;
 
 /* Submission information */
-string baseurl, entry_point, langid, language, extension, contestid, contest, probid, problem;
+string contestid, langid, probid, baseurl, entry_point, extension;
 vector<string> filenames;
 char *submitdir;
 
-/* Language extensions: langid, name, require_entry_point, list of extensions */
-vector<vector<string> > languages;
+/* Active contests */
+struct contest {
+	string id, name, shortname;
+};
+vector<contest> contests;
+contest mycontest;
 
-/* Active contests: contestid, shortname, name */
-vector<vector<string> > contests;
+/* Languages */
+struct language {
+	string id, name;
+	bool require_entry_point;
+	vector<string> extensions;
+};
+vector<language> languages;
+language mylanguage;
 
-/* Problems: probid, label, name */
-vector<vector<string> > problems;
+/* Problems */
+struct problem {
+	string id, label, name;
+};
+vector<problem> problems;
+problem myproblem;
 
 string kotlin_base_entry_point(string filebase)
 {
@@ -271,37 +285,36 @@ int main(int argc, char **argv)
 
 	if ( !readcontests() ) warning(0,"could not obtain active contests");
 
-    if ( contestid.empty() ) {
-        if ( contests.size()==0 ) {
-            warnuser("no active contests found (and no contest specified)");
-        }
-        if ( contests.size()==1 ) {
-            contestid = contests[0][0];
-            contest = contests[0][2];
-        }
-        if ( contests.size()>1 ) {
-            warnuser("multiple active contests found, please specify one");
-        }
-    } else {
-        for ( i=0; i < contests.size(); i++ ) {
-            if (contests[i][0] == contestid || contests[i][1] == contestid) {
-                contestid = contests[i][0];
-                contest = contests[i][2];
-            }
-        }
-    }
+	if ( contestid.empty() ) {
+		if ( contests.size()==0 ) {
+			warnuser("no active contests found (and no contest specified)");
+		}
+		if ( contests.size()==1 ) {
+			mycontest = contests[0];
+		}
+		if ( contests.size()>1 ) {
+			warnuser("multiple active contests found, please specify one");
+		}
+	} else {
+		for(i=0; i<contests.size(); i++) {
+			if ( contests[i].id == contestid || contests[i].shortname == contestid ) {
+				mycontest = contests[i];
+				break;
+			}
+		}
+	}
 
-    bool languagesRead = false;
-    bool problemsRead  = false;
-    if ( !contestid.empty() ) {
-        languagesRead = readlanguages();
-        problemsRead = readproblems();
-    }
+	bool languagesRead = false;
+	bool problemsRead  = false;
+	if ( !mycontest.id.empty() ) {
+		languagesRead = readlanguages();
+		problemsRead = readproblems();
+	}
 
 	if ( show_help ) usage();
 	if ( show_version ) version(PROGRAM,VERSION);
 
-	if ( contestid.empty() || contest.empty() ) usage2(0,"no (valid) contest specified");
+	if ( mycontest.id.empty() ) usage2(0,"no (valid) contest specified");
 
 	if ( !languagesRead ) warning(0,"could not obtain language data");
 
@@ -356,62 +369,57 @@ int main(int argc, char **argv)
 	}
 
 	if ( !extension.empty() ) {
-        /* Check for languages matching file extension */
-        extension = stringtolower(extension);
-        for (i = 0; i < languages.size(); i++) {
-            for (j = 3; j < languages[i].size(); j++) {
-                if (languages[i][j] == extension) {
-                    langid = languages[i][0];
-                    language = languages[i][1];
-                    require_entry_point = languages[i][2];
-                    extension = languages[i][j];
-                }
-            }
-        }
-    } else {
-        for ( i=0; i < languages.size(); i++ ) {
-            if (languages[i][0] == langid) {
-                langid = languages[i][0];
-                language = languages[i][1];
-            }
-        }
+		/* Check for languages matching file extension */
+		extension = stringtolower(extension);
+		for(i=0; i<languages.size(); i++) {
+			for(j=0; j<languages[i].extensions.size(); j++) {
+				if ( languages[i].extensions[j] == extension ) {
+					mylanguage = languages[i];
+					goto lang_found;
+				}
+			}
+		}
+	} else {
+		for(i=0; i<languages.size(); i++) {
+			if ( languages[i].id == langid ) {
+				mylanguage = languages[i];
+				break;
+			}
+		}
+	}
+lang_found:
+
+	for(i=0; i<problems.size(); i++) {
+		if ( problems[i].id == probid || problems[i].label == probid ) {
+			myproblem = problems[i];
+			break;
+		}
 	}
 
-	if ( langid.empty() ) {
-		warnuser("no language for for extension `%s' and no language supplied",extension.c_str());
-		langid = extension;
-		language = extension;
-	}
-
-    for ( i=0; i < problems.size(); i++ ) {
-        if (problems[i][0] == probid || problems[i][1] == probid) {
-            probid = problems[i][0];
-            problem = problems[i][2];
-        }
-    }
-
-	if ( problem.empty()  ) usage2(0,"no problem specified");
-	if ( language.empty() ) usage2(0,"no language specified");
-	if ( baseurl.empty()  ) usage2(0,"no url specified");
+	if ( myproblem.id.empty()  ) usage2(0,"no problem specified or detected");
+	if ( mylanguage.id.empty() ) usage2(0,"no language specified or detected");
+	if ( baseurl.empty()       ) usage2(0,"no url specified");
 
 	/* Guess entry point if not already specified. */
-	if ( entry_point.empty() && require_entry_point == "true" ) {
-		if ( language == "Java" ) {
+	if ( entry_point.empty() && mylanguage.require_entry_point ) {
+		if ( mylanguage.name == "Java" ) {
 			entry_point = filebase;
-		} else if ( language == "Kotlin" ) {
+		} else if ( mylanguage.name == "Kotlin" ) {
 			entry_point = kotlin_base_entry_point(filebase) + "Kt";
-		} else if ( language == "Python 2" || language == "Python 2 (pypy)" || language == "Python 3" ) {
+		} else if ( mylanguage.name == "Python 2" ||
+		            mylanguage.name == "Python 2 (pypy)" ||
+		            mylanguage.name == "Python 3" ) {
 			entry_point = filebase + "." + fileext;
 		}
 	}
 
-	if ( entry_point.empty() && require_entry_point == "true" ) {
+	if ( entry_point.empty() && mylanguage.require_entry_point ) {
 		error(0, "Entry point required but not specified nor detected.");
 	}
 
-	logmsg(LOG_DEBUG,"contest is `%s'",contest.c_str());
-	logmsg(LOG_DEBUG,"problem is `%s'",problem.c_str());
-	logmsg(LOG_DEBUG,"language is `%s'",language.c_str());
+	logmsg(LOG_DEBUG,"contest is `%s'",mycontest.shortname.c_str());
+	logmsg(LOG_DEBUG,"problem is `%s'",myproblem.label.c_str());
+	logmsg(LOG_DEBUG,"language is `%s'",mylanguage.name.c_str());
 	logmsg(LOG_DEBUG,"entry_point is `%s'",entry_point.c_str());
 	logmsg(LOG_DEBUG,"url is `%s'",baseurl.c_str());
 
@@ -427,9 +435,9 @@ int main(int argc, char **argv)
 			}
 			printf("\n");
 		}
-		printf("  contest:     %s\n",contest.c_str());
-		printf("  problem:     %s\n",problem.c_str());
-		printf("  language:    %s\n",language.c_str());
+		printf("  contest:     %s\n",mycontest.shortname.c_str());
+		printf("  problem:     %s\n",myproblem.label.c_str());
+		printf("  language:    %s\n",mylanguage.name.c_str());
 		if ( !entry_point.empty() ) {
 			printf("  entry_point: %s\n",entry_point.c_str());
 		}
@@ -442,7 +450,7 @@ int main(int argc, char **argv)
 		if ( c=='n' ) error(0,"submission aborted by user");
 	}
 
-	return websubmit();
+	return doAPIsubmit();
 }
 
 void usage()
@@ -453,7 +461,7 @@ void usage()
 	printf(
 "Submit a solution for a problem.\n"
 "\n"
-"Options (see below for more information)\n"
+"Options (see below for more information):\n"
 "  -c  --contest=CONTEST          submit for contest with ID or short name CONTEST.\n"
 "                                     Defaults to the value of the\n"
 "                                     environment variable 'SUBMITCONTEST'.\n"
@@ -469,51 +477,60 @@ void usage()
 "      --help                     display this help and exit\n"
 "      --version                  output version information and exit\n"
 "\n"
-"The following option(s) should not be necessary for normal use\n"
-"  -u, --url=URL            submit to webserver with base address URL\n"
+"The following option(s) should not be necessary for normal use:\n"
+"  -u, --url=URL                  submit to server with base address URL\n"
 "\n"
 "Explanation of submission options:\n"
 "\n");
 	if ( contests.size()<=1 ) {
 		printf(
-"For CONTEST use the ID or short name as shown in the top-right contest selection box\n"
-"in the webinterface.");
+"For CONTEST use the ID or short name as shown in the top-right contest\n"
+"selection box in the webinterface.\n");
 		if ( contests.size()==1 ) {
-			printf(" Currently this defaults to the only active contest '%s'.",
-			       contests[0][0].c_str());
+			printf("Currently this defaults to the only active contest '%s'.\n",
+			       contests[0].shortname.c_str());
 		}
-		printf("\n\n");
+		printf("\n");
 	}
 	if ( contests.size()>=2 ) {
 		printf(
 "For CONTEST use one of the following:\n");
 		for(i=0; i<contests.size(); i++) {
-            printf("   %-25s  %s\n", (contests[i][0] + " (" + contests[i][1] + "):").c_str(), contests[i][2].c_str());
+			printf("   %-10s - %s\n",contests[i].shortname.c_str(),contests[i].name.c_str());
 		}
 		printf("\n");
 	}
-	printf(
-"For PROBLEM use the ID or label of the problem\n"
-"in lower- or uppercase. When not specified, PROBLEM defaults to the\n"
-"first FILENAME excluding the extension. For example, 'B.java' will\n"
-"indicate problem 'B'. The following are the current problems:\n");
-    for(i=0; i<problems.size(); i++) {
-        printf("   %-25s  %s\n", (problems[i][0] + " (" + problems[i][1] + "):").c_str(), problems[i][2].c_str());
-    }
-    printf("\n");
-	if ( languages.size()==0 ) {
+	if ( problems.size()==0 ) {
 		printf(
-"For LANGUAGE use the ID of the language in lower- or uppercase.\n");
+"For PROBLEM use the label as on the scoreboard.\n");
 	} else {
 		printf(
-"For LANGUAGE use one of the following ID's in lower- or uppercase:\n");
+"For PROBLEM use one of the following:\n");
+		for(i=0; i<problems.size(); i++) {
+			printf("   %-10s - %s\n",problems[i].label.c_str(),problems[i].name.c_str());
+		}
+	}
+	printf("\n");
+	printf(
+"When not specified, PROBLEM defaults to the first FILENAME excluding the\n"
+"extension. For example, 'B.java' will indicate problem 'B'.\n"
+"\n");
+	if ( languages.size()==0 ) {
+		printf(
+"For LANGUAGE use the ID or a common extension in lower- or uppercase.\n");
+	} else {
+		printf(
+"For LANGUAGE use one of the following IDs/extensions in lower- or uppercase:\n");
 		for(i=0; i<languages.size(); i++) {
-			printf("   %-15s  %s",(languages[i][0]+':').c_str(),languages[i][1].c_str());
-			for(j=3; j<languages[i].size(); j++) printf(", %s",languages[i][j].c_str());
+			printf("   %-20s  %s",(languages[i].name+':').c_str(),languages[i].id.c_str());
+			for(j=0; j<languages[i].extensions.size(); j++) {
+				if ( languages[i].extensions[j]==languages[i].id ) continue;
+				printf(", %s",languages[i].extensions[j].c_str());
+			}
 			printf("\n");
 		}
-        printf("\n");
 	}
+	printf("\n");
 	printf(
 "The default for LANGUAGE is the extension of FILENAME. For example,\n"
 "'B.java' will indicate a Java solution.\n"
@@ -521,7 +538,7 @@ void usage()
 "Set URL to the base address of the webinterface without the 'api/' suffix.\n");
 	if ( !baseurl.empty() ) {
 		printf("The (pre)configured URL is '%s'.\n",baseurl.c_str());
-    }
+	}
 	printf(
 "\n"
 "Examples:\n"
@@ -727,58 +744,64 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 
 bool readlanguages()
 {
-	Json::Value langs, exts;
+	Json::Value res, exts;
 
-	string endpoint = "contests/" + contestid + "/languages";
-	langs = doAPIrequest(endpoint.c_str(), 0);
+	string endpoint = "contests/" + mycontest.id + "/languages";
+	res = doAPIrequest(endpoint.c_str(), 0);
 
-	if ( langs.isNull() ) return false;
+	if ( res.isNull() || !res.isArray() ) return false;
 
-	for(Json::ArrayIndex i=0; i<langs.size(); i++) {
-		vector<string> lang;
+	for(Json::ArrayIndex i=0; i<res.size(); i++) {
+		language lang;
 
-		lang.push_back(langs[i]["id"].asString());
-		lang.push_back(langs[i]["name"].asString());
-		lang.push_back(langs[i]["require_entry_point"].asString());
-		if ( lang[0]=="" ||
-		     !(exts = langs[i]["extensions"]) ||
+		lang.id   = res[i]["id"].asString();
+		lang.name = res[i]["name"].asString();
+		lang.require_entry_point = res[i]["require_entry_point"].asBool();
+		if ( lang.id=="" ||
+		     !(exts = res[i]["extensions"]) ||
 		     !exts.isArray() || exts.size()==0 ) {
-			warning(0,"REST API returned unexpected JSON data for languages");
+			warning(0,"REST API returned unexpected JSON data for language %d",(int)i);
 			return false;
 		}
 
-		for(Json::ArrayIndex j=0; j<exts.size(); j++) lang.push_back(exts[j].asString());
+		for(Json::ArrayIndex j=0; j<exts.size(); j++) {
+			lang.extensions.push_back(exts[j].asString());
+		}
 
 		languages.push_back(lang);
 	}
+
+	logmsg(LOG_INFO,"read %d languages from the API",(int)languages.size());
 
 	return true;
 }
 
 bool readproblems()
 {
-    Json::Value res;
+	Json::Value res;
 
-    string endpoint = "contests/" + contestid + "/problems";
-    res = doAPIrequest(endpoint.c_str(), 0);
+	string endpoint = "contests/" + mycontest.id + "/problems";
+	res = doAPIrequest(endpoint.c_str(), 0);
 
-    if ( res.isNull() || !res.isArray() ) return false;
+	if ( res.isNull() || !res.isArray() ) return false;
 
-    for(Json::ArrayIndex i=0; i<res.size(); i++) {
-        vector<string> problem;
+	for(Json::ArrayIndex i=0; i<res.size(); i++) {
+		problem prob;
 
-        problem.push_back(res[i]["id"].asString());
-        problem.push_back(res[i]["label"].asString());
-        problem.push_back(res[i]["name"].asString());
-        if ( problem[0]=="" || problem[1]=="" ) {
-            warning(0,"REST API returned unexpected JSON data for problems");
-            return false;
-        }
+		prob.id    = res[i]["id"].asString();
+		prob.label = res[i]["label"].asString();
+		prob.name  = res[i]["name"].asString();
+		if ( prob.id=="" || prob.label=="" ) {
+			warning(0,"REST API returned unexpected JSON data for problem %d",(int)i);
+			return false;
+		}
 
-        problems.push_back(problem);
-    }
+		problems.push_back(prob);
+	}
 
-    return true;
+	logmsg(LOG_INFO,"read %d problems from the API",(int)problems.size());
+
+	return true;
 }
 
 bool readcontests()
@@ -790,23 +813,25 @@ bool readcontests()
 	if ( res.isNull() || !res.isArray() ) return false;
 
 	for(Json::ArrayIndex i=0; i<res.size(); i++) {
-		vector<string> contest;
+		contest cont;
 
-		contest.push_back(res[i]["id"].asString());
-		contest.push_back(res[i]["shortname"].asString());
-		contest.push_back(res[i]["name"].asString());
-		if ( contest[0]=="" || contest[1]=="" ) {
+		cont.id        = res[i]["id"].asString();
+		cont.shortname = res[i]["shortname"].asString();
+		cont.name      = res[i]["name"].asString();
+		if ( cont.id=="" || cont.shortname=="" ) {
 			warning(0,"REST API returned unexpected JSON data for contests");
 			return false;
 		}
 
-		contests.push_back(contest);
+		contests.push_back(cont);
 	}
+
+	logmsg(LOG_INFO,"read %d contests from the API",(int)contests.size());
 
 	return true;
 }
 
-bool websubmit()
+bool doAPIsubmit()
 {
 	CURL *handle;
 	CURLcode res;
@@ -820,7 +845,7 @@ bool websubmit()
 	Json::Reader reader;
 	Json::Value root;
 
-    url = strdup((baseurl + "api/" + API_VERSION + "contests/" + contestid + "/submissions").c_str());
+	url = strdup((baseurl + "api/" + API_VERSION + "contests/" + mycontest.id + "/submissions").c_str());
 
 	curlerrormsg[0] = 0;
 
@@ -851,10 +876,10 @@ bool websubmit()
 	for(size_t i=0; i<filenames.size(); i++) {
 		curlformadd(COPYNAME,"code[]", FILE, filenames[i].c_str());
 	}
-	curlformadd(COPYNAME,"problem", COPYCONTENTS,probid.c_str());
-	curlformadd(COPYNAME,"language", COPYCONTENTS,langid.c_str());
+	curlformadd(COPYNAME,"problem", COPYCONTENTS, myproblem.id.c_str());
+	curlformadd(COPYNAME,"language", COPYCONTENTS, mylanguage.id.c_str());
 	if ( !entry_point.empty() ) {
-		curlformadd(COPYNAME,"entry_point", COPYCONTENTS,entry_point.c_str());
+		curlformadd(COPYNAME,"entry_point", COPYCONTENTS, entry_point.c_str());
 	}
 
 	/* Set options for post */
