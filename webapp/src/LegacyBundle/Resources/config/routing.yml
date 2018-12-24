@@ -6,8 +6,6 @@ legacy.public_problem:
     path: /public/problem.php
 legacy.public_team:
     path: /public/team.php
-legacy.jury_problem:
-    path: /jury/problem.php
 legacy.jury_clarification:
     path: /jury/clarification.php
 legacy.team_index:
@@ -29,5 +27,3 @@ legacy.jury_genpasswds:
 
 legacy.jury_delete:
     path: /jury/delete.php
-legacy.jury_testcase:
-    path: /jury/testcase.php

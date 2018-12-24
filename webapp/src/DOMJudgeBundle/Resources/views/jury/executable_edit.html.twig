@@ -20,10 +20,10 @@
         </div>
     </div>
 
-    <hr>
-    <i>or</i>
-
     {% if is_granted('ROLE_ADMIN') %}
+        <hr>
+        <i>or</i>
+
         <div class="row">
             <div class="col-lg-4">
                 {{ form(uploadForm) }}

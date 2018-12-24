@@ -4,7 +4,7 @@ namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use DOMJudgeBundle\Entity\AuditLog;
+use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
@@ -129,24 +129,47 @@ class AuditLogController extends Controller
 
     private function generateDatatypeUrl(string $type, $id)
     {
-        switch($type) {
-        case 'balloon': return $this->generateUrl('jury_balloons');
-        case 'clarification': return $this->generateUrl('legacy.jury_clarification', ['id' => $id]);
-        case 'configuration': return $this->generateUrl('jury_config');
-        case 'contest': return $this->generateUrl('legacy.jury_contest', ['id' => $id]);
-        case 'executable': return $this->generateUrl('jury_executable', ['execId' => $id]);
-        case 'internal_error': return $this->generateUrl('jury_internal_error', ['errorId' => $id]);
-        case 'judgehost': return $this->generateUrl('jury_judgehost', ['hostname' => $id]);
-        case 'judgehosts': return $this->generateUrl('jury_judgehosts');
-        case 'judgehost_restriction': return $this->generateUrl('jury_judgehost_restriction', ['restrictionId' => $id]);
-        case 'judging': return $this->generateUrl('jury_submission_by_judging', ['jid' => $id]);
-        case 'language': return $this->generateUrl('jury_language', ['langId' => $id]);
-        case 'problem': return $this->generateUrl('legacy.jury_problem', ['id' => $id]);
-        case 'submission': return $this->generateUrl('jury_submission', ['submitId' => $id]);
-        case 'team': return $this->generateUrl('jury_team', ['teamId' => $id]);
-        case 'team_affiliation': return $this->generateUrl('jury_team_affiliation', ['affilId' => $id]);
-        case 'team_category': return $this->generateUrl('jury_team_category', ['categoryId' => $id]);
-        case 'user': return $this->generateUrl('jury_user', ['userId' => $id]);
+        switch ($type) {
+            case 'balloon':
+                return $this->generateUrl('jury_balloons');
+            case 'clarification':
+                return $this->generateUrl('legacy.jury_clarification', ['id' => $id]);
+            case 'configuration':
+                return $this->generateUrl('jury_config');
+            case 'contest':
+                return $this->generateUrl('legacy.jury_contest', ['id' => $id]);
+            case 'executable':
+                return $this->generateUrl('jury_executable', ['execId' => $id]);
+            case 'internal_error':
+                return $this->generateUrl('jury_internal_error', ['errorId' => $id]);
+            case 'judgehost':
+                return $this->generateUrl('jury_judgehost', ['hostname' => $id]);
+            case 'judgehosts':
+                return $this->generateUrl('jury_judgehosts');
+            case 'judgehost_restriction':
+                return $this->generateUrl('jury_judgehost_restriction', ['restrictionId' => $id]);
+            case 'judging':
+                return $this->generateUrl('jury_submission_by_judging', ['jid' => $id]);
+            case 'language':
+                return $this->generateUrl('jury_language', ['langId' => $id]);
+            case 'problem':
+                return $this->generateUrl('jury_problem', ['probId' => $id]);
+            case 'submission':
+                return $this->generateUrl('jury_submission', ['submitId' => $id]);
+            case 'team':
+                return $this->generateUrl('jury_team', ['teamId' => $id]);
+            case 'team_affiliation':
+                return $this->generateUrl('jury_team_affiliation', ['affilId' => $id]);
+            case 'team_category':
+                return $this->generateUrl('jury_team_category', ['categoryId' => $id]);
+            case 'user':
+                return $this->generateUrl('jury_user', ['userId' => $id]);
+            case 'testcase':
+                $testcase = $this->entityManager->getRepository(Testcase::class)->find($id);
+                if ($testcase) {
+                    return $this->generateUrl('jury_problem_testcases', ['probId' => $testcase->getProbid()]);
+                }
+                break;
         }
         return null;
     }

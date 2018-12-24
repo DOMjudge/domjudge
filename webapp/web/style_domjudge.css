@@ -59,6 +59,7 @@
 }
 
 .teamid { font-family: monospace; }
+.filename, .hostname { font-family: monospace; }
 
 .nodata {
     color: gray;

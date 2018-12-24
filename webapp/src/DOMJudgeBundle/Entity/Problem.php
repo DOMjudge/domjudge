@@ -1,15 +1,18 @@
 <?php declare(strict_types=1);
+
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use DOMJudgeBundle\Utils\Utils;
 use JMS\Serializer\Annotation as Serializer;
-use JMS\Serializer\Annotation\Groups;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Stores testcases per problem
  * @ORM\Entity()
  * @ORM\Table(name="problem", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\HasLifecycleCallbacks()
  */
 class Problem
 {
@@ -40,6 +43,7 @@ class Problem
      * @var double
      * @ORM\Column(type="float", name="timelimit", options={"comment"="Maximum run time (in seconds) for this problem"}, nullable=false)
      * @Serializer\Exclude()
+     * @Assert\GreaterThan(0)
      */
     private $timelimit = 0;
 
@@ -47,6 +51,7 @@ class Problem
      * @var int
      * @ORM\Column(type="integer", name="memlimit", options={"comment"="Maximum memory available (in kB) for this problem", "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
+     * @Assert\GreaterThan(0)
      */
     private $memlimit;
 
@@ -54,6 +59,7 @@ class Problem
      * @var int
      * @ORM\Column(type="integer", name="outputlimit", options={"comment"="Maximum output size (in kB) for this problem", "unsigned"=true}, nullable=true)
      * @Serializer\Exclude()
+     * @Assert\GreaterThan(0)
      */
     private $outputlimit;
 
@@ -85,6 +91,17 @@ class Problem
      * @Serializer\Exclude()
      */
     private $problemtext;
+
+    /**
+     * @var UploadedFile|null
+     * @Assert\File()
+     */
+    private $problemtextFile;
+
+    /**
+     * @var bool
+     */
+    private $clearProblemtext = false;
 
     /**
      * @var string
@@ -357,6 +374,31 @@ class Problem
     }
 
     /**
+     * @param UploadedFile|null $problemtextFile
+     * @return Problem
+     */
+    public function setProblemtextFile($problemtextFile)
+    {
+        $this->problemtextFile = $problemtextFile;
+        // Clear the problem text to make sure the entity is modified
+        $this->problemtext = '';
+
+        return $this;
+    }
+
+    /**
+     * @param bool $clearProblemtext
+     * @return Problem
+     */
+    public function setClearProblemtext(bool $clearProblemtext)
+    {
+        $this->clearProblemtext = $clearProblemtext;
+        $this->problemtext = null;
+
+        return $this;
+    }
+
+    /**
      * Get problemtext
      *
      * @return resource|string
@@ -364,6 +406,22 @@ class Problem
     public function getProblemtext()
     {
         return $this->problemtext;
+    }
+
+    /**
+     * @return UploadedFile|null
+     */
+    public function getProblemtextFile()
+    {
+        return $this->problemtextFile;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isClearProblemtext(): bool
+    {
+        return $this->clearProblemtext;
     }
 
     /**
@@ -452,6 +510,7 @@ class Problem
     {
         return $this->run_executable;
     }
+
     /**
      * Constructor
      */
@@ -628,5 +687,57 @@ class Problem
     public function getScorecache()
     {
         return $this->scorecache;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     * @ORM\PreUpdate()
+     * @throws \Exception
+     */
+    public function processProblemText()
+    {
+        if ($this->isClearProblemtext()) {
+            $this
+                ->setProblemtext(null)
+                ->setProblemtextType(null);
+        } elseif ($this->getProblemtextFile()) {
+            $content         = file_get_contents($this->getProblemtextFile()->getRealPath());
+            $clientName      = $this->getProblemtextFile()->getClientOriginalName();
+            $problemTextType = null;
+
+            if (strrpos($clientName, '.') !== false) {
+                $ext = substr($clientName, strrpos($clientName, '.') + 1);
+                if (in_array($ext, ['txt', 'html', 'pdf'])) {
+                    $problemTextType = $ext;
+                }
+            }
+            if (!isset($problemTextType)) {
+                $finfo = finfo_open(FILEINFO_MIME);
+
+                list($type) = explode('; ', finfo_file($finfo, $this->getProblemtextFile()->getRealPath()));
+
+                finfo_close($finfo);
+
+                switch ($type) {
+                    case 'application/pdf':
+                        $problemTextType = 'pdf';
+                        break;
+                    case 'text/html':
+                        $problemTextType = 'html';
+                        break;
+                    case 'text/plain':
+                        $problemTextType = 'txt';
+                        break;
+                }
+            }
+
+            if (!isset($problemTextType)) {
+                throw new \Exception('Problem statement has unknown file type.');
+            }
+
+            $this
+                ->setProblemtext($content)
+                ->setProblemtextType($problemTextType);
+        }
     }
 }

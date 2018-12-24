@@ -541,7 +541,7 @@ if (count($res) == 0) {
 
     $iseven = false;
     foreach ($res as $row) {
-        $link = '<a href="problem.php?id=' . urlencode($row['probid']) . '">';
+        $link = '<a href="problems/' . urlencode($row['probid']) . '">';
 
         echo '<tr class="' .
              ($iseven ? 'roweven' : 'rowodd') . '">' .

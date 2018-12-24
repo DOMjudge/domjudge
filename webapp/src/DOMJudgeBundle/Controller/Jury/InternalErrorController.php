@@ -101,7 +101,7 @@ class InternalErrorController extends BaseController
         $affectedLink = $affectedText = null;
         switch ($disabled['kind']) {
             case 'problem':
-                $affectedLink = $this->generateUrl('legacy.jury_problem', ['id' => $disabled['probid']]);
+                $affectedLink = $this->generateUrl('jury_problem', ['probId' => $disabled['probid']]);
                 $idData       = ['cid' => $internalError->getCid(), 'probid' => $disabled['probid']];
                 /** @var ContestProblem $problem */
                 $problem      = $this->entityManager->getRepository(ContestProblem::class)->find($idData);

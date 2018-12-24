@@ -6,7 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\JudgingRun;
 use DOMJudgeBundle\Entity\Testcase;
-use DOMJudgeBundle\Entity\TestcaseContent;
+use DOMJudgeBundle\Entity\TestcaseWithContent;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -134,9 +134,9 @@ class TestcaseController extends FOSRestController
             throw new BadRequestHttpException('Only \'input\' or \'output\' file allowed');
         }
 
-        /** @var TestcaseContent|null $testcaseContent */
-        $testcaseContent = $this->entityManager->createQueryBuilder()
-            ->from('DOMJudgeBundle:TestcaseContent', 'tcc')
+        /** @var TestcaseWithContent|null $testcaseWithContent */
+        $testcaseWithContent = $this->entityManager->createQueryBuilder()
+            ->from('TestcaseWithContent', 'tcc')
             ->select('tcc')
             ->andWhere('tcc.testcaseid = :id')
             ->setParameter(':id', $id)
@@ -144,13 +144,13 @@ class TestcaseController extends FOSRestController
             ->getQuery()
             ->getOneOrNullResult();
 
-        if ($testcaseContent === null) {
+        if ($testcaseWithContent === null) {
             throw new NotFoundHttpException(sprintf('Cannot find testcase \'%s\'', $id));
         }
 
         $streamHandle = $type === 'input'
-            ? $testcaseContent->getInput()
-            : $testcaseContent->getOutput();
+            ? $testcaseWithContent->getInput()
+            : $testcaseWithContent->getOutput();
 
         if ($streamHandle === null) {
             throw new NotFoundHttpException(sprintf('Cannot find the ' . $type . ' of testcase \'%s\'', $id));

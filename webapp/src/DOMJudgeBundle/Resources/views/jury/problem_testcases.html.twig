@@ -1,0 +1,170 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block title %}Testcases for {{ problem.probid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Testcases for {{ problem.name }} - {{ problem.name }}</h1>
+
+    <div class="mb-2">
+        <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">Back to problem p{{ problem.probid }}</a>
+    </div>
+
+    {% if app.session.flashBag.has('testcases') %}
+        {% for message in app.session.flashBag.get('testcases') %}
+            <div class="alert alert-info">
+                {{ message | raw }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        {# We use a variable here so indeting doesn't get screwed up #}
+        {% set formStart = '<form method="post" enctype="multipart/form-data">' %}
+        {{ formStart | raw }}
+    {% endif %}
+
+    {% if testcases is empty %}
+        <p class="nodata">No testcase(s) yet.</p>
+    {% else %}
+        <table class="table table-sm table-striped table-hover testcases">
+            <thead>
+            <tr>
+                <th class="testrank">#</th>
+                <th class="testsample">sample</th>
+                <th>download</th>
+                <th>size</th>
+                <th>md5</th>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <th>upload new</th>
+                {% endif %}
+                <th>description / image</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for rank, testcase in testcases %}
+                <tr>
+                    <td rowspan="2" class="testrank">
+                        <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'up'}) }}"
+                           title="Move testcase up"><i class="fas fa-arrow-up"></i></a><br>
+                        {{ testcase.rank }}<br>
+                        <a href="{{ path('jury_problem_testcase_move', {'probId': problem.probid, 'rank': testcase.rank, 'direction': 'down'}) }}"
+                           title="Move testcase down"><i class="fas fa-arrow-down"></i></a>
+                    </td>
+                    <td rowspan="2" class="testsample">
+                        <input type="checkbox" name="sample[{{ testcase.rank }}]" value="sample"
+                               {% if testcase.sample %}checked{% endif %} />
+                    </td>
+                    <td class="filename">
+                        <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'input'}) }}">
+                            p{{ problem.probid }}.t{{ testcase.rank }}.in
+                        </a>
+                    </td>
+                    <td class="size">
+                        {{ testcaseData[testcase.rank].input_size | printSize }}
+                    </td>
+                    <td class="md5">
+                        {{ testcase.md5sumInput }}
+                    </td>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <td>
+                            <input type="file" name="update_input[{{ testcase.rank }}]"/>
+                        </td>
+                    {% endif %}
+                    <td class="testdesc">
+                        {{ testcase.description(true) | descriptionExpand }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="filename">
+                        <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'output'}) }}">
+                            p{{ problem.probid }}.t{{ testcase.rank }}.out
+                        </a>
+                    </td>
+                    <td class="size">
+                        {{ testcaseData[testcase.rank].output_size | printSize }}
+                    </td>
+                    <td class="md5">
+                        {{ testcase.md5sumOutput }}
+                    </td>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <td>
+                            <input type="file" name="update_output[{{ testcase.rank }}]"/>
+                        </td>
+                    {% endif %}
+                    <td class="testimage">
+                        {% if testcaseData[testcase.rank].image_size > 0 %}
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'image'}) }}">
+                                <span class="filename">p{{ problem.probid }}.t{{ testcase.rank }}.png</span>
+                            </a>
+                        {% else %}
+                            <span class="nodata">No image</span>
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') %}
+                            &nbsp;
+                            <input type="file" name="update_image[{{ testcase.rank }}]"/>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <h2>Create new testcase</h2>
+
+        <div class="form-row">
+            <div class="form-group col-sm-4">
+                <label for="add_input">Input testdata</label>
+                <input type="file" name="add_input" id="add_input" class="form-control-file"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-sm-4">
+                <label for="add_output">Output testdata</label>
+                <input type="file" name="add_output" id="add_output" class="form-control-file"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-sm-4">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="add_sample" name="add_sample">
+                    <label class="custom-control-label" for="add_sample">Sample testcase</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-sm-4">
+                <label for="add_desc">Description</label>
+                <textarea name="add_desc" id="add_desc" rows="5" class="form-control"></textarea>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-sm-4">
+                <label for="add_image">Image</label>
+                <input type="file" name="add_image" id="add_image" class="form-control-file"/>
+            </div>
+        </div>
+
+        <input type="submit" class="btn btn-primary" value="Submit all changes">
+    {% endif %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        {# We use a variable here so indeting doesn't get screwed up #}
+        {% set formEnd = '</form>' %}
+        {{ formEnd | raw }}
+    {% endif %}
+
+{% endblock %}

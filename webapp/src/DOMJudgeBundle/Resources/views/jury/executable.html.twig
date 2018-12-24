@@ -57,14 +57,14 @@
                         {% endif %}
                         {% if executable.type == 'compare' %}
                             {% for problem in executable.problemsCompare %}
-                                <a href="{{ path('legacy.jury_problem', {'id': problem.probid}) }}">
+                                <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
                                     p{{ problem.probid }}
                                 </a>
                                 {% set used = true %}
                             {% endfor %}
                         {% elseif executable.type == 'run' %}
                             {% for problem in executable.problemsRun %}
-                                <a href="{{ path('legacy.jury_problem', {'id': problem.probid}) }}">
+                                <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
                                     p{{ problem.probid }}
                                 </a>
                                 {% set used = true %}

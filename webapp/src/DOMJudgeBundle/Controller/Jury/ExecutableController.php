@@ -267,10 +267,10 @@ class ExecutableController extends Controller
         }
 
         if (!($tempzipFile = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "/executable-"))) {
-            throw new ServiceUnavailableHttpException('Failed to create temporary file');
+            throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
         }
         if (file_put_contents($tempzipFile, stream_get_contents($executable->getZipfile())) === false) {
-            throw new ServiceUnavailableHttpException('Failed to write zip file to temporary file');
+            throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
         }
 
         $zip = $this->DOMJudgeService->openZipFile($tempzipFile);
@@ -400,10 +400,10 @@ class ExecutableController extends Controller
             $submittedData = $form->getData();
 
             if (!($tempzipFile = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "/executable-"))) {
-                throw new ServiceUnavailableHttpException('Failed to create temporary file');
+                throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
             }
             if (file_put_contents($tempzipFile, stream_get_contents($executable->getZipfile())) === false) {
-                throw new ServiceUnavailableHttpException('Failed to write zip file to temporary file');
+                throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
             }
 
             $zip = $this->DOMJudgeService->openZipFile($tempzipFile);
@@ -465,10 +465,10 @@ class ExecutableController extends Controller
     protected function dataForEditor(Executable $executable)
     {
         if (!($tempzipFile = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "/executable-"))) {
-            throw new ServiceUnavailableHttpException('Failed to create temporary file');
+            throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
         }
         if (file_put_contents($tempzipFile, stream_get_contents($executable->getZipfile())) === false) {
-            throw new ServiceUnavailableHttpException('Failed to write zip file to temporary file');
+            throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
         }
 
         $zip           = $this->DOMJudgeService->openZipFile($tempzipFile);

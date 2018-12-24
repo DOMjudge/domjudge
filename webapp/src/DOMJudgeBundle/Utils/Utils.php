@@ -637,4 +637,130 @@ class Utils
     {
         return sprintf('<i style="color: %s" class="fas fa-golf-ball"></i>', self::specialchars($color));
     }
+
+    /**
+     * Determine the image type for this image
+     * @param string $image
+     * @param string $error
+     * @return bool|string
+     */
+    public static function getImageType(string $image, &$error)
+    {
+        if (!function_exists('gd_info')) {
+            $error = "Cannot import image: the PHP GD library is missing.";
+            return false;
+        }
+
+        $info = getimagesizefromstring($image);
+        if ($info === false) {
+            $error = "Could not determine image information.";
+            return false;
+        }
+
+        $type = image_type_to_extension($info[2], false);
+
+        if (!in_array($type, array('jpeg', 'png', 'gif'))) {
+            $error = "Unsupported image type '$type' found.";
+            return false;
+        }
+
+        return $type;
+    }
+
+    /**
+     * Generate resized thumbnail image and return as as string.
+     * Return FALSE on errors and stores error message in $error if set.
+     * @param string $image
+     * @param        $thumbMaxSize
+     * @param        $tmpdir
+     * @param string $error
+     * @return bool|false|string
+     */
+    public static function getImageThumb(string $image, $thumbMaxSize, $tmpdir, &$error)
+    {
+        if (!function_exists('gd_info')) {
+            $error = "Cannot import image: the PHP GD library is missing.";
+            return false;
+        }
+
+        $type = self::getImageType($image, $error);
+        if ($type === false) {
+            $error = "Could not determine image information.";
+            return false;
+        }
+
+        $info = getimagesizefromstring($image);
+
+        $rescale   = $thumbMaxSize / max($info[0], $info[1]);
+        $thumbsize = array(
+            (int)round($info[0] * $rescale),
+            (int)round($info[1] * $rescale)
+        );
+
+        $orig  = imagecreatefromstring($image);
+        $thumb = imagecreatetruecolor($thumbsize[0], $thumbsize[1]);
+        if ($orig === false || $thumb === false) {
+            $error = 'Cannot create GD image.';
+            return false;
+        }
+
+        if (!imagecopyresampled($thumb, $orig, 0, 0, 0, 0,
+                                $thumbsize[0], $thumbsize[1], $info[0], $info[1])) {
+            $error = 'Cannot create resized thumbnail image.';
+            return false;
+        }
+
+        if (!($tmpfname = tempnam($tmpdir, "thumb-"))) {
+            $error = 'Cannot create temporary file in directory ' . $tmpdir . '.';
+            return false;
+        }
+
+        $success = false;
+        switch ($type) {
+            case 'jpeg':
+                $success = imagejpeg($thumb, $tmpfname);
+                break;
+            case 'png':
+                $success = imagepng($thumb, $tmpfname);
+                break;
+            case 'gif':
+                $success = imagegif($thumb, $tmpfname);
+                break;
+        }
+        if (!$success) {
+            $error = 'Failed to output thumbnail image.';
+            return false;
+        }
+        if (($thumbstr = file_get_contents($tmpfname)) === false) {
+            $error = 'Cannot read image from temporary file \'$tmpfname\'.';
+            return false;
+        }
+
+        imagedestroy($orig);
+        imagedestroy($thumb);
+
+        return $thumbstr;
+    }
+
+    /**
+     * Returns TRUE iff string $haystack starts with string $needle
+     * @param string $haystack
+     * @param string $needle
+     * @return bool
+     */
+    public static function startsWith(string $haystack, string $needle) : bool
+    {
+        return mb_substr($haystack, 0, mb_strlen($needle)) === $needle;
+    }
+
+    /**
+     * Returns TRUE iff string $haystack ends with string $needle
+     * @param string $haystack
+     * @param string $needle
+     * @return bool
+     */
+    public static function endsWith(string $haystack, string $needle) : bool
+    {
+        return mb_substr($haystack, mb_strlen($haystack)-mb_strlen($needle)) === $needle;
+    }
 }

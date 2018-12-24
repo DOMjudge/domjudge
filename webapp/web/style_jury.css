@@ -47,8 +47,6 @@ h1 {
 
 .md5 { font-family: monospace; }
 
-.testcases tr:hover { background: #ffffff; }
-.testcases a { color: blue; }
 .testcases td {
 	vertical-align: middle;
 	padding: 3px;
@@ -59,26 +57,16 @@ h1 {
 tr.summary td { border-top: 1px solid black; }
 
 .testrank {
-	line-height: 0.9;
-	border-right: 1px solid silver;
+	text-align: center;
 }
 
 .testsample {
 	text-align: center;
-	border-left: 1px solid silver;
 	max-width: 200px;
 }
 
 .testdesc {
-	border-left: 1px solid silver;
 	max-width: 400px;
-}
-
-.testimage {
-	border-left: 1px solid silver;
-}
-.testimage a {
-	display: inline;
 }
 
 /* set cell padding to 0 and <a> tag to 3 to make all of cell

@@ -130,7 +130,7 @@ function putClar(array $clar)
     } else {
         if (IS_JURY) {
             $currentSelectedCategory = $clar['cid'] . '-' . $clar['probid'];
-            echo '<a href="problem.php?id=' . urlencode((string)$clar['probid']) .
+            echo '<a href="problems/' . urlencode((string)$clar['probid']) .
                  '">' . $prefix . 'Problem ' . specialchars($clar['shortname'] . ": " .
                  $clar['probname']) . '</a>';
         } else {

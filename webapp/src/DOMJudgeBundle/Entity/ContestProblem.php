@@ -77,7 +77,7 @@ class ContestProblem
      * @ORM\Column(type="boolean", name="lazy_eval_results", options={"comment"="Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting"}, nullable=true)
      * @Serializer\Exclude()
      */
-    private $lazy_eval_results = true;
+    private $lazy_eval_results;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems", fetch="EAGER")

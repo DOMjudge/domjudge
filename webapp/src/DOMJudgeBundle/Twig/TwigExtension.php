@@ -64,6 +64,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('printResult', [$this, 'printResult'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printYesNo', [$this, 'printYesNo']),
+            new \Twig_SimpleFilter('printSize', [Utils::class, 'printSize'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('testcaseReults', [$this, 'testcaseReults'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('displayTestcaseResults', [$this, 'displayTestcaseResults'],
                                    ['is_safe' => ['html']]),
@@ -80,6 +81,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('assetExists', [$this, 'assetExists']),
             new \Twig_SimpleFilter('printTimeRelative', [$this, 'printTimeRelative']),
             new \Twig_SimpleFilter('scoreTime', [$this, 'scoreTime']),
+            new \Twig_SimpleFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
         ];
     }
 
@@ -722,5 +724,34 @@ JS;
     {
         return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->domjudge->dbconfig_get('penalty_time', 20),
                                       (bool)$this->domjudge->dbconfig_get('score_in_seconds', false));
+    }
+
+    /**
+     * Print the given description, collapsing it by default if it is too big
+     * @param string|null $description
+     * @return string
+     */
+    public function descriptionExpand(string $description = null) : string
+    {
+        if ($description == null) {
+            return '';
+        }
+        $descriptionLines = explode("\n", $description);
+        if (count($descriptionLines) <= 3) {
+            return implode('<br />', $descriptionLines);
+        } else {
+            $default = implode('<br />', array_slice($descriptionLines, 0, 3));
+            $defaultEscaped = htmlentities($default);
+            $expandedEscaaped = htmlentities(implode('<br />', $descriptionLines));
+            return <<<EOF
+<span>
+    <span data-expanded="$expandedEscaaped" data-collapsed="$defaultEscaped">
+    $default
+    </span>
+    <br/>
+    <a href="javascript:;" onclick="toggleExpand(event)">[expand]</a>
+</span>
+EOF;
+        }
     }
 }

@@ -417,7 +417,7 @@ class SubmissionService
 
         // First look up any expected results in file, so as to minimize the SQL transaction time below.
         if ($this->DOMJudgeService->checkrole('jury')) {
-            $results = $this->getExpectedResults(file_get_contents($files[0]->getRealPath()));
+            $results = self::getExpectedResults(file_get_contents($files[0]->getRealPath()));
         }
 
         $submission = new Submission();
@@ -502,7 +502,7 @@ class SubmissionService
      * @param string $source
      * @return array|null Array of expected results if found or null otherwise
      */
-    protected function getExpectedResults(string $source)
+    public static function getExpectedResults(string $source)
     {
         $matchstring = null;
         $pos         = false;
@@ -522,7 +522,7 @@ class SubmissionService
         $results  = explode(',', trim(mb_strtoupper($str)));
 
         foreach ($results as $key => $val) {
-            $results[$key] = $this->normalizeExpectedResult($val);
+            $results[$key] = self::normalizeExpectedResult($val);
         }
 
         return $results;
@@ -533,7 +533,7 @@ class SubmissionService
      * @param string $result
      * @return string
      */
-    protected function normalizeExpectedResult(string $result): string
+    public static function normalizeExpectedResult(string $result): string
     {
         $result = trim(mb_strtoupper($result));
         if (in_array($result, array_keys(self::PROBLEM_RESULT_REMAP))) {

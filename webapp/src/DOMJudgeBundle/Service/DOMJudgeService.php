@@ -598,11 +598,11 @@ class DOMJudgeService
         $zip = new ZipArchive();
         $res = $zip->open($filename, ZIPARCHIVE::CHECKCONS);
         if ($res === ZIPARCHIVE::ER_NOZIP || $res === ZIPARCHIVE::ER_INCONS) {
-            throw new ServiceUnavailableHttpException('No valid zip archive given');
+            throw new ServiceUnavailableHttpException(null, 'No valid zip archive given');
         } elseif ($res === ZIPARCHIVE::ER_MEMORY) {
-            throw new ServiceUnavailableHttpException('Not enough memory to extract zip archive');
+            throw new ServiceUnavailableHttpException(null, 'Not enough memory to extract zip archive');
         } elseif ($res !== true) {
-            throw new ServiceUnavailableHttpException('Unknown error while extracting zip archive');
+            throw new ServiceUnavailableHttpException(null, 'Unknown error while extracting zip archive');
         }
 
         return $zip;

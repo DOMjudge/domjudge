@@ -13,35 +13,21 @@
 
     <h1>Problems</h1>
 
+    {% if app.session.flashBag.has('problemZip') %}
+        {% for message in app.session.flashBag.get('problemZip') %}
+            <div class="alert alert-info">
+                {{ message | raw }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     {{ macros.table(problems, table_fields, num_actions) }}
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>
-            {{ button(path('legacy.jury_problem', {cmd: 'add', referrer: 'problems'}), 'Add new problem', 'primary', 'plus') }}
+            {{ button(path('jury_problem_add'), 'Add new problem', 'primary', 'plus') }}
         </p>
 
-        <form action="{{ path('legacy.jury_problem') }}" method="post" enctype="multipart/form-data">
-            <div class="form-row">
-                <div class="form-group col-sm-4">
-                    <label for="contest">Contest</label>
-                    <select name="contest" id="contest" class="custom-select">
-                        <option value="-1">Do not link to a contest</option>
-                        {% for contest in contests %}
-                            <option value="{{ contest.cid }}" {% if current_contest and current_contest.cid == contest.cid %}selected="selected"{% endif %}>
-                                c{{ contest.cid }}: {{ contest.shortname }} - {{ contest.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group col-sm-4">
-                    <label for="executable_archive__">Problem archive(s)</label>
-                    <input type="file" name="problem_archive[]" id="problem_archive__" required="" multiple=""
-                           accept="application/zip" class="form-control-file">
-                </div>
-            </div>
-            <input type="submit" name="upload" class="btn btn-primary" id="upload" value="Upload">
-        </form>
+        {{ form(form) }}
     {% endif %}
 {% endblock %}

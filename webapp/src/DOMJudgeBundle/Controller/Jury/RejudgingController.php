@@ -565,7 +565,7 @@ class RejudgingController extends Controller
                 case 'language':
                     return $this->redirectToRoute('jury_language', ['langId' => $id]);
                 case 'problem':
-                    return $this->redirectToRoute('legacy.jury_problem', ['id' => $id]);
+                    return $this->redirectToRoute('jury_problem', ['probId' => $id]);
                 case 'submission':
                     return $this->redirectToRoute('jury_submission', ['submitId' => $id]);
                 case 'team':

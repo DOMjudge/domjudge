@@ -1,17 +1,20 @@
 <?php declare(strict_types=1);
+
 namespace DOMJudgeBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * Stores testcases per problem
+ * Contents of a testcase
+ *
+ * This is a seperate class with a OneToOne relationship with Testcase so we can load it separately
  * @ORM\Entity()
  * @ORM\Table(name="testcase", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class Testcase
+class TestcaseWithContent
 {
-
     /**
      * @var int
      *
@@ -23,25 +26,29 @@ class Testcase
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="md5sum_input", length=32, options={"comment"="Checksum of input data"}, nullable=true)
+     * @ORM\Column(type="string", name="md5sum_input", length=32, options={"comment"="Checksum of input data"},
+     *                            nullable=true)
      */
     private $md5sum_input;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="md5sum_output", length=32, options={"comment"="Checksum of output data"}, nullable=true)
+     * @ORM\Column(type="string", name="md5sum_output", length=32, options={"comment"="Checksum of output data"},
+     *                            nullable=true)
      */
     private $md5sum_output;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="probid", options={"comment"="Corresponding problem ID", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="integer", name="probid", options={"comment"="Corresponding problem ID", "unsigned"=true},
+     *                             nullable=false)
      */
     private $probid;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="rank", options={"comment"="Determines order of the testcases in judging", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="integer", name="rank", options={"comment"="Determines order of the testcases in judging",
+     *                             "unsigned"=true}, nullable=false)
      */
     private $rank;
 
@@ -56,17 +63,44 @@ class Testcase
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="image_type", length=32, options={"comment"="File type of the image and thumbnail"}, nullable=true)
+     * @ORM\Column(type="string", name="image_type", length=32, options={"comment"="File type of the image and
+     *                            thumbnail"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $image_type;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="sample", options={"comment"="Sample testcases that can be shared with teams"}, nullable=false)
+     * @ORM\Column(type="boolean", name="sample", options={"comment"="Sample testcases that can be shared with teams"},
+     *                             nullable=false)
      * @Serializer\Exclude()
      */
     private $sample = false;
+
+    /**
+     * @var string
+     * @ORM\Column(type="blob", name="input", options={"comment"="Input data"}, nullable=false)
+     */
+    private $input;
+
+    /**
+     * @var string
+     * @ORM\Column(type="blob", name="output", options={"comment"="Output data"}, nullable=false)
+     */
+    private $output;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="image", options={"comment"="A graphical representation of this testcase"},
+     *                            nullable=true)
+     */
+    private $image;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="image_thumb", options={"comment"="Automatically created thumbnail of the image"}, nullable=true)
+     */
+    private $image_thumb;
 
     /**
      * @ORM\OneToMany(targetEntity="JudgingRun", mappedBy="testcase")
@@ -82,19 +116,11 @@ class Testcase
     private $problem;
 
     /**
-     * @var TestcaseWithContent
-     * @ORM\OneToOne(targetEntity="TestcaseWithContent")
-     * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid")
-     * @Serializer\Exclude()
-     */
-    private $testcase_content;
-
-    /**
      * Constructor
      */
     public function __construct()
     {
-        $this->judging_runs = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->judging_runs = new ArrayCollection();
     }
 
     /**
@@ -112,7 +138,7 @@ class Testcase
      *
      * @param string $md5sumInput
      *
-     * @return Testcase
+     * @return TestcaseWithContent
      */
     public function setMd5sumInput($md5sumInput)
     {
@@ -136,7 +162,7 @@ class Testcase
      *
      * @param string $md5sumOutput
      *
-     * @return Testcase
+     * @return TestcaseWithContent
      */
     public function setMd5sumOutput($md5sumOutput)
     {
@@ -160,7 +186,7 @@ class Testcase
      *
      * @param integer $probid
      *
-     * @return Testcase
+     * @return TestcaseWithContent
      */
     public function setProbid($probid)
     {
@@ -184,7 +210,7 @@ class Testcase
      *
      * @param integer $rank
      *
-     * @return Testcase
+     * @return TestcaseWithContent
      */
     public function setRank($rank)
     {
@@ -208,7 +234,7 @@ class Testcase
      *
      * @param resource|string $description
      *
-     * @return Testcase
+     * @return TestcaseWithContent
      */
     public function setDescription($description)
     {
@@ -220,6 +246,7 @@ class Testcase
     /**
      * Get description
      *
+     * @param bool $asString
      * @return resource|string|null
      */
     public function getDescription(bool $asString = false)
@@ -238,7 +265,7 @@ class Testcase
      *
      * @param string $imageType
      *
-     * @return Testcase
+     * @return TestcaseWithContent
      */
     public function setImageType($imageType)
     {
@@ -262,7 +289,7 @@ class Testcase
      *
      * @param boolean $sample
      *
-     * @return Testcase
+     * @return TestcaseWithContent
      */
     public function setSample($sample)
     {
@@ -282,13 +309,109 @@ class Testcase
     }
 
     /**
+     * Set input
+     *
+     * @param resource|string $input
+     *
+     * @return TestcaseWithContent
+     */
+    public function setInput($input)
+    {
+        $this->input = $input;
+
+        return $this;
+    }
+
+    /**
+     * Get input
+     *
+     * @return resource|string
+     */
+    public function getInput()
+    {
+        return $this->input;
+    }
+
+    /**
+     * Set output
+     *
+     * @param resource|string $output
+     *
+     * @return TestcaseWithContent
+     */
+    public function setOutput($output)
+    {
+        $this->output = $output;
+
+        return $this;
+    }
+
+    /**
+     * Get output
+     *
+     * @return resource|string
+     */
+    public function getOutput()
+    {
+        return $this->output;
+    }
+
+    /**
+     * Set image
+     *
+     * @param string $image
+     *
+     * @return TestcaseWithContent
+     */
+    public function setImage($image)
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    /**
+     * Get image
+     *
+     * @return string
+     */
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    /**
+     * Set imageThumb
+     *
+     * @param string $imageThumb
+     *
+     * @return TestcaseWithContent
+     */
+    public function setImageThumb($imageThumb)
+    {
+        $this->image_thumb = $imageThumb;
+
+        return $this;
+    }
+
+    /**
+     * Get imageThumb
+     *
+     * @return string
+     */
+    public function getImageThumb()
+    {
+        return $this->image_thumb;
+    }
+
+    /**
      * Add judgingRun
      *
-     * @param \DOMJudgeBundle\Entity\JudgingRun $judgingRun
+     * @param JudgingRun $judgingRun
      *
-     * @return Testcase
+     * @return TestcaseWithContent
      */
-    public function addJudgingRun(\DOMJudgeBundle\Entity\JudgingRun $judgingRun)
+    public function addJudgingRun(JudgingRun $judgingRun)
     {
         $this->judging_runs[] = $judgingRun;
 
@@ -298,9 +421,9 @@ class Testcase
     /**
      * Remove judgingRun
      *
-     * @param \DOMJudgeBundle\Entity\JudgingRun $judgingRun
+     * @param JudgingRun $judgingRun
      */
-    public function removeJudgingRun(\DOMJudgeBundle\Entity\JudgingRun $judgingRun)
+    public function removeJudgingRun(JudgingRun $judgingRun)
     {
         $this->judging_runs->removeElement($judgingRun);
     }
@@ -330,11 +453,11 @@ class Testcase
     /**
      * Set problem
      *
-     * @param \DOMJudgeBundle\Entity\Problem $problem
+     * @param Problem $problem
      *
-     * @return Testcase
+     * @return TestcaseWithContent
      */
-    public function setProblem(\DOMJudgeBundle\Entity\Problem $problem = null)
+    public function setProblem(Problem $problem = null)
     {
         $this->problem = $problem;
 
@@ -344,33 +467,10 @@ class Testcase
     /**
      * Get problem
      *
-     * @return \DOMJudgeBundle\Entity\Problem
+     * @return Problem
      */
     public function getProblem()
     {
         return $this->problem;
-    }
-
-    /**
-     * Set testcaseContent
-     *
-     * @param TestcaseWithContent|null $testcaseContent
-     * @return Testcase
-     */
-    public function setTestcaseContent(TestcaseWithContent $testcaseContent = null)
-    {
-        $this->testcase_content = $testcaseContent;
-
-        return $this;
-    }
-
-    /**
-     * Get testcaseContent
-     *
-     * @return TestcaseWithContent
-     */
-    public function getTestcaseContent()
-    {
-        return $this->testcase_content;
     }
 }
