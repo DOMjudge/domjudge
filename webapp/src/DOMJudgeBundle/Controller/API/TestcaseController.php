@@ -136,7 +136,7 @@ class TestcaseController extends FOSRestController
 
         /** @var TestcaseWithContent|null $testcaseWithContent */
         $testcaseWithContent = $this->entityManager->createQueryBuilder()
-            ->from('TestcaseWithContent', 'tcc')
+            ->from('DOMJudgeBundle:TestcaseWithContent', 'tcc')
             ->select('tcc')
             ->andWhere('tcc.testcaseid = :id')
             ->setParameter(':id', $id)
