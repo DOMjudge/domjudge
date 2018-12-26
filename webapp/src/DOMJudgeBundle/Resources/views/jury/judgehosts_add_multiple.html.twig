@@ -1,5 +1,6 @@
 {% extends "@DOMJudge/jury/base.html.twig" %}
 {% import _self as self %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
 
 {% block title %}Add Judgehosts - {{ parent() }}{% endblock %}
 
@@ -9,33 +10,6 @@
 
     {% include '@DOMJudge/jury/partials/judgehosts_form.html.twig' with {allow_add: true, allow_delete: true} %}
 
-    {# If we use this more often, move it to some macro #}
-    <script>
-        var $collectionHolder;
-
-        $(function () {
-            $collectionHolder = $('table.judgehosts tbody');
-            $collectionHolder.data('index', $collectionHolder.find('tr').length);
-            $('[data-add]').on('click', function (e) {
-                addJudgehostForm($collectionHolder);
-            });
-
-            $('[data-delete]').on('click', function () {
-                $(this).closest('tr').remove();
-            });
-
-            function addJudgehostForm($collectionHolder) {
-                var prototype = $('[data-prototype]').text();
-                var index = $collectionHolder.data('index');
-                prototype = prototype.replace(/__name__/g, index);
-                $collectionHolder.data('index', index + 1);
-                var $prototype = $(prototype);
-                $prototype.find('[data-delete]').on('click', function () {
-                    $(this).closest('tr').remove();
-                });
-                $collectionHolder.append($prototype);
-            }
-        });
-    </script>
+    {{ macros.collection_scripts() }}
 
 {% endblock %}

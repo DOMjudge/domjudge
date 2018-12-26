@@ -1,6 +1,6 @@
 {{ form_start(form) }}
 
-<table class="table table-sm table-striped judgehosts">
+<table class="table table-sm table-striped">
     <thead>
     <tr>
         <th>{{ form_label(form.judgehosts.vars.prototype.hostname) }}</th>
@@ -11,7 +11,7 @@
         {% endif %}
     </tr>
     </thead>
-    <tbody>
+    <tbody data-collection-holder>
     {% for judgehost in form.judgehosts %}
         <tr>
             <td>
@@ -28,12 +28,22 @@
             </td>
             {% if allow_delete %}
                 <td>
-                    <button type="button" data-delete class="btn btn-danger">Delete</button>
+                    <button type="button" data-delete class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
                 </td>
             {% endif %}
         </tr>
     {% endfor %}
     </tbody>
+    {% if allow_add %}
+        <tfoot>
+        <tr>
+            <td colspan="3"></td>
+            <td>
+                <button type="button" data-add class="btn btn-success"><i class="fas fa-plus"></i></button>
+            </td>
+        </tr>
+        </tfoot>
+    {% endif %}
 </table>
 {% if allow_add %}
     <script type="text/html" data-prototype>
@@ -42,11 +52,10 @@
             <td>{{ form_widget(form.judgehosts.vars.prototype.active) }}</td>
             <td>{{ form_widget(form.judgehosts.vars.prototype.restriction) }}</td>
             <td>
-                <button type="button" data-delete class="btn btn-danger">Delete</button>
+                <button type="button" data-delete class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
             </td>
         </tr>
     </script>
-    <button type="button" data-add class="btn btn-secondary">Add a judgehost</button>
 {% endif %}
 {{ form_widget(form.save) }}
 
