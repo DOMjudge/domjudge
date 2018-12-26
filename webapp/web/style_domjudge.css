@@ -256,3 +256,7 @@ table.rejudgetable td.identical {
 table.rejudgetable td.zero {
     background-color: #F0F8FF;
 }
+
+tr.ignore td, td.ignore, span.ignore {
+    text-decoration: line-through;
+}

@@ -140,7 +140,7 @@
                     </thead>
                     <tbody>
                     {% for contestProblem in problem.contestProblems %}
-                        {% set link = path('legacy.jury_contest', {'id': contestProblem.cid}) %}
+                        {% set link = path('jury_contest', {'contestId': contestProblem.cid}) %}
                         <tr>
                             <td><a href="{{ link }}">c{{ contestProblem.cid }}</a></td>
                             <td><a href="{{ link }}">{{ contestProblem.contest.shortname }}</a></td>

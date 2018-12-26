@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="{{ asset('css/select2-bootstrap.min.css') }}" type="text/css"/>
     <script type="text/javascript" src="{{ asset('js/select2.min.js') }}"></script>
     <script>
-        $(function() {
+        $(function () {
             $.fn.select2.defaults.set("theme", "bootstrap");
 
             $('select[multiple]').select2();
@@ -85,18 +85,18 @@
             {%- for row in data %}
 
                 <tr class="{{ row.cssclass|default('') }}"
-                    {%- if row.style is defined %} style="{{ row.style }}"{% endif %}>
+                        {%- if row.style is defined %} style="{{ row.style }}"{% endif %}>
                     {%- for key,column in fields %}
                         {%- set item = attribute(row.data, key) %}
 
                         <td class="{{ item.cssclass|default('') }}"
-                            {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
-                            {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
+                                {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
+                                {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
                             {%- if item.link is defined %}<a href="{{ item.link }}"
-                               {%- if item.linktitle is defined %} title="{{ item.linktitle }}"{% endif %}>
-                            {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
-                                {{- (item.value|default(item.default|default('')))|raw -}}
-                            {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
+                                    {%- if item.linktitle is defined %} title="{{ item.linktitle }}"{% endif %}>
+                                {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
+                                    {{- (item.value|default(item.default|default('')))|raw -}}
+                                    {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
                         </td>
                     {%- endfor %}
                     {%- for action in row.actions %}
@@ -137,6 +137,41 @@
                     {aTargets: ['_all'], bSortable: false, bSearchable: false}
                 ],
             });
+        });
+    </script>
+{% endmacro %}
+
+{% macro collection_scripts() %}
+    <script>
+        var $collectionHolder;
+
+        $(function () {
+            $collectionHolder = $('[data-collection-holder]');
+            $collectionHolder.data('index', $collectionHolder.find('tr').length);
+            $('[data-add]').on('click', function () {
+                addCollectionItem($collectionHolder);
+            });
+
+            $('[data-delete]').on('click', function () {
+                $(this).closest('tr').remove();
+            });
+
+            function addCollectionItem($collectionHolder) {
+                var prototype = $('[data-prototype]').text();
+                var index = $collectionHolder.data('index');
+                prototype = prototype.replace(/__name__/g, index);
+                $collectionHolder.data('index', index + 1);
+                var $prototype = $(prototype);
+                $prototype.find('[data-delete]').on('click', function () {
+                    $(this).closest('tr').remove();
+                });
+
+                $collectionHolder.append($prototype);
+
+                if ($collectionHolder.data('after-add')) {
+                    window[$collectionHolder.data('after-add')]();
+                }
+            }
         });
     </script>
 {% endmacro %}

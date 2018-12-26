@@ -1,0 +1,130 @@
+{{ form_start(form) }}
+<div class="row">
+    <div class="col-lg-4">
+
+        {# These are the errors related to removed intervals #}
+        {{ form_errors(form) }}
+
+        {{ form_row(form.shortname) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.activatetimeString) }}
+        {{ form_row(form.starttimeString) }}
+        {{ form_row(form.starttimeEnabled) }}
+        {{ form_row(form.freezetimeString) }}
+        {{ form_row(form.endtimeString) }}
+        {{ form_row(form.unfreezetimeString) }}
+        {{ form_row(form.deactivatetimeString) }}
+        {{ form_row(form.processBalloons) }}
+        {{ form_row(form.public) }}
+        <div data-teams-field>
+            {{ form_row(form.teams) }}
+        </div>
+        {{ form_row(form.enabled) }}
+    </div>
+    <div class="col-lg-4">
+        <b>Specification of contest times:</b><br/>
+        Each of the contest times can be specified as absolute time or relative<br/>
+        to the start time (except for start time itself). Use up to 6 subsecond<br/>
+        decimals and a timezone from the
+        <a target="_blank" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">
+            time zone database
+        </a>.<br/><br/>
+        Absolute time format: <b><tt>YYYY-MM-DD HH:MM:SS[.uuuuuu] timezone</tt></b><br/>
+        Relative time format: <b><tt>±[HHH]H:MM[:SS[.uuuuuu]]</tt></b><br/>
+    </div>
+</div>
+<table class="table table-sm table-striped">
+    <thead>
+    <tr>
+        <th>{{ form_label(form.problems.vars.prototype.problem) }}</th>
+        <th>{{ form_label(form.problems.vars.prototype.shortname) }}</th>
+        <th>{{ form_label(form.problems.vars.prototype.points) }}</th>
+        <th>{{ form_label(form.problems.vars.prototype.allowSubmit) }}</th>
+        <th>{{ form_label(form.problems.vars.prototype.allowJudge) }}</th>
+        <th>{{ form_label(form.problems.vars.prototype.color) }}</th>
+        <th>{{ form_label(form.problems.vars.prototype.lazyEvalResults) }}</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody data-collection-holder data-after-add="bindColor">
+    {% for problem in form.problems %}
+        <tr>
+            <td>
+                {{ form_errors(problem.problem) }}
+                {{ form_widget(problem.problem) }}
+            </td>
+            <td>
+                {{ form_errors(problem.shortname) }}
+                {{ form_widget(problem.shortname) }}
+            </td>
+            <td>
+                {{ form_errors(problem.points) }}
+                {{ form_widget(problem.points) }}
+            </td>
+            <td>
+                {{ form_errors(problem.allowSubmit) }}
+                {{ form_widget(problem.allowSubmit) }}
+            </td>
+            <td>
+                {{ form_errors(problem.allowJudge) }}
+                {{ form_widget(problem.allowJudge) }}
+            </td>
+            <td>
+                {{ form_errors(problem.color) }}
+                {{ form_widget(problem.color) }}
+            </td>
+            <td>
+                {{ form_errors(problem.lazyEvalResults) }}
+                {{ form_widget(problem.lazyEvalResults) }}
+            </td>
+            <td>
+                <button type="button" data-delete class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="7"></td>
+        <td>
+            <button type="button" data-add class="btn btn-success"><i class="fas fa-plus"></i></button>
+        </td>
+    </tr>
+    </tfoot>
+</table>
+
+<script type="text/html" data-prototype>
+    <tr>
+        <td>{{ form_widget(form.problems.vars.prototype.problem) }}</td>
+        <td>{{ form_widget(form.problems.vars.prototype.shortname) }}</td>
+        <td>{{ form_widget(form.problems.vars.prototype.points) }}</td>
+        <td>{{ form_widget(form.problems.vars.prototype.allowSubmit) }}</td>
+        <td>{{ form_widget(form.problems.vars.prototype.allowJudge) }}</td>
+        <td>{{ form_widget(form.problems.vars.prototype.color) }}</td>
+        <td>{{ form_widget(form.problems.vars.prototype.lazyEvalResults) }}</td>
+        <td>
+            <button type="button" data-delete class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
+        </td>
+    </tr>
+</script>
+
+{{ form_end(form) }}
+
+<script>
+    function bindColor() {
+        jscolor.bind();
+    }
+
+    $(function () {
+        function showHideTeams() {
+            if ($('#contest_public_1').is(':checked')) {
+                $('[data-teams-field]').show();
+            } else {
+                $('[data-teams-field]').hide();
+            }
+        }
+
+        $('#contest_public_1, #contest_public_0').on('change', showHideTeams);
+        showHideTeams();
+    })
+</script>

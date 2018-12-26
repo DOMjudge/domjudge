@@ -5,7 +5,11 @@ namespace DOMJudgeBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use DOMJudgeBundle\Utils\Utils;
+use FOS\RestBundle\Validator\Constraints\Regex;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Contests that will be run with this install
@@ -20,6 +24,8 @@ use JMS\Serializer\Annotation as Serializer;
  *     "penaltyTime",
  *     options={@Serializer\Type("int")}
  * )
+ * @ORM\HasLifecycleCallbacks()
+ * @UniqueEntity("shortname")
  */
 class Contest
 {
@@ -49,6 +55,7 @@ class Contest
     /**
      * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
+     * @Assert\NotBlank()
      */
     private $name;
 
@@ -57,6 +64,8 @@ class Contest
      * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Short name for this contest"},
      *                            nullable=false)
      * @Serializer\Groups({"Nonstrict"})
+     * @Assert\Regex("/^[a-z0-9]+$/i", message="Only alphanumeric values are allowed")
+     * @Assert\NotBlank()
      */
     private $shortname;
 
@@ -82,7 +91,7 @@ class Contest
      *                             e.g. to delay contest start"}, nullable=false)
      * @Serializer\Exclude()
      */
-    private $starttime_enabled;
+    private $starttimeEnabled = true;
 
     /**
      * @var double
@@ -130,7 +139,7 @@ class Contest
      *                              nullable=true)
      * @Serializer\Exclude()
      */
-    private $b;
+    private $b = 0;
 
     /**
      * @var double
@@ -145,48 +154,54 @@ class Contest
      * @ORM\Column(type="string", length=64, name="activatetime_string", options={"comment"="Authoritative absolute or
      *                            relative string representation of activatetime"}, nullable=false)
      * @Serializer\Exclude()
+     * @Regex("/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|-\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/")
      */
-    private $activatetime_string;
+    private $activatetimeString;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="starttime_string", options={"comment"="Authoritative absolute
      *                            (only!) string representation of starttime"}, nullable=false)
      * @Serializer\Exclude()
+     * @Regex("/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}$/")
      */
-    private $starttime_string;
+    private $starttimeString;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="freezetime_string", options={"comment"="Authoritative absolute or
      *                            relative string representation of freezetime"}, nullable=true)
      * @Serializer\Exclude()
+     * @Regex("/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/")
      */
-    private $freezetime_string;
+    private $freezetimeString;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="endtime_string", options={"comment"="Authoritative absolute or
      *                            relative string representation of endtime"}, nullable=false)
      * @Serializer\Exclude()
+     * @Regex("/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/")
      */
-    private $endtime_string;
+    private $endtimeString;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="unfreezetime_string", options={"comment"="Authoritative absolute or
      *                            relative string representation of unfreezetime"}, nullable=true)
      * @Serializer\Exclude()
+     * @Regex("/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/")
      */
-    private $unfreezetime_string;
+    private $unfreezetimeString;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="deactivatetime_string", options={"comment"="Authoritative absolute
      *                            or relative string representation of deactivatetime"}, nullable=true)
      * @Serializer\Exclude()
+     * @Regex("/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/")
      */
-    private $deactivatetime_string;
+    private $deactivatetimeString;
 
     /**
      * @var boolean
@@ -202,7 +217,7 @@ class Contest
      *                             contest?"}, nullable=false)
      * @Serializer\Exclude()
      */
-    private $process_balloons = true;
+    private $processBalloons = true;
 
     /**
      * @var boolean
@@ -235,8 +250,10 @@ class Contest
     private $submissions;
 
     /**
-     * @ORM\OneToMany(targetEntity="ContestProblem", mappedBy="contest")
+     * @ORM\OneToMany(targetEntity="ContestProblem", mappedBy="contest", orphanRemoval=true, cascade={"persist"})
+     * @ORM\OrderBy({"shortname" = "ASC"})
      * @Serializer\Exclude()
+     * @Assert\Valid()
      */
     private $problems;
 
@@ -262,8 +279,9 @@ class Contest
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="DOMJudgeBundle\Entity\RemovedInterval", mappedBy="contest")
      * @Serializer\Exclude()
+     * @Assert\Valid()
      */
-    private $removed_intervals;
+    private $removedIntervals;
 
 
     /**
@@ -271,8 +289,9 @@ class Contest
      */
     public function __construct()
     {
-        $this->teams             = new ArrayCollection();
-        $this->removed_intervals = new ArrayCollection();
+        $this->problems         = new ArrayCollection();
+        $this->teams            = new ArrayCollection();
+        $this->removedIntervals = new ArrayCollection();
     }
 
     /**
@@ -412,13 +431,13 @@ class Contest
     /**
      * Set starttime_enabled
      *
-     * @param boolean $starttime_enabled
+     * @param boolean $starttimeEnabled
      *
      * @return Contest
      */
-    public function setStarttimeEnabled($starttime_enabled)
+    public function setStarttimeEnabled($starttimeEnabled)
     {
-        $this->starttime_enabled = $starttime_enabled;
+        $this->starttimeEnabled = $starttimeEnabled;
 
         return $this;
     }
@@ -430,7 +449,7 @@ class Contest
      */
     public function getStarttimeEnabled()
     {
-        return $this->starttime_enabled;
+        return $this->starttimeEnabled;
     }
 
     /**
@@ -457,6 +476,7 @@ class Contest
      * Get the end time for this contest
      *
      * @return \DateTime|null
+     * @throws \Exception
      * @Serializer\VirtualProperty()
      * @Serializer\SerializedName("end_time")
      * @Serializer\Type("DateTime")
@@ -558,8 +578,8 @@ class Contest
      */
     public function setActivatetimeString($activatetimeString)
     {
-        $this->activatetime_string = $activatetimeString;
-        $this->activatetime        = $this->getAbsoluteTime($activatetimeString);
+        $this->activatetimeString = $activatetimeString;
+        $this->activatetime       = $this->getAbsoluteTime($activatetimeString);
 
         return $this;
     }
@@ -571,7 +591,7 @@ class Contest
      */
     public function getActivatetimeString()
     {
-        return $this->activatetime_string;
+        return $this->activatetimeString;
     }
 
     /**
@@ -583,7 +603,7 @@ class Contest
      */
     public function setStarttimeString($starttimeString)
     {
-        $this->starttime_string = $starttimeString;
+        $this->starttimeString = $starttimeString;
 
         $this->setActivatetimeString($this->getActivatetimeString());
         $this->setFreezetimeString($this->getFreezetimeString());
@@ -601,7 +621,7 @@ class Contest
      */
     public function getStarttimeString()
     {
-        return $this->starttime_string;
+        return $this->starttimeString;
     }
 
     /**
@@ -613,8 +633,8 @@ class Contest
      */
     public function setFreezetimeString($freezetimeString)
     {
-        $this->freezetime_string = $freezetimeString;
-        $this->freezetime        = $this->getAbsoluteTime($freezetimeString);
+        $this->freezetimeString = $freezetimeString;
+        $this->freezetime       = $this->getAbsoluteTime($freezetimeString);
 
         return $this;
     }
@@ -626,7 +646,7 @@ class Contest
      */
     public function getFreezetimeString()
     {
-        return $this->freezetime_string;
+        return $this->freezetimeString;
     }
 
     /**
@@ -638,8 +658,8 @@ class Contest
      */
     public function setEndtimeString($endtimeString)
     {
-        $this->endtime_string = $endtimeString;
-        $this->endtime        = $this->getAbsoluteTime($endtimeString);
+        $this->endtimeString = $endtimeString;
+        $this->endtime       = $this->getAbsoluteTime($endtimeString);
 
         return $this;
     }
@@ -651,7 +671,7 @@ class Contest
      */
     public function getEndtimeString()
     {
-        return $this->endtime_string;
+        return $this->endtimeString;
     }
 
     /**
@@ -663,8 +683,8 @@ class Contest
      */
     public function setUnfreezetimeString($unfreezetimeString)
     {
-        $this->unfreezetime_string = $unfreezetimeString;
-        $this->unfreezetime        = $this->getAbsoluteTime($unfreezetimeString);
+        $this->unfreezetimeString = $unfreezetimeString;
+        $this->unfreezetime       = $this->getAbsoluteTime($unfreezetimeString);
 
         return $this;
     }
@@ -676,7 +696,7 @@ class Contest
      */
     public function getUnfreezetimeString()
     {
-        return $this->unfreezetime_string;
+        return $this->unfreezetimeString;
     }
 
     /**
@@ -688,8 +708,8 @@ class Contest
      */
     public function setDeactivatetimeString($deactivatetimeString)
     {
-        $this->deactivatetime_string = $deactivatetimeString;
-        $this->deactivatetime        = $this->getAbsoluteTime($deactivatetimeString);
+        $this->deactivatetimeString = $deactivatetimeString;
+        $this->deactivatetime       = $this->getAbsoluteTime($deactivatetimeString);
 
         return $this;
     }
@@ -701,7 +721,7 @@ class Contest
      */
     public function getDeactivatetimeString()
     {
-        return $this->deactivatetime_string;
+        return $this->deactivatetimeString;
     }
 
     /**
@@ -807,7 +827,7 @@ class Contest
      */
     public function setProcessBalloons($processBalloons)
     {
-        $this->process_balloons = $processBalloons;
+        $this->processBalloons = $processBalloons;
 
         return $this;
     }
@@ -819,7 +839,7 @@ class Contest
      */
     public function getProcessBalloons()
     {
-        return $this->process_balloons;
+        return $this->processBalloons;
     }
 
     /**
@@ -832,6 +852,9 @@ class Contest
     public function setPublic($public)
     {
         $this->public = $public;
+        if ($this->public) {
+            $this->teams->clear();
+        }
 
         return $this;
     }
@@ -883,11 +906,11 @@ class Contest
     /**
      * Add problem
      *
-     * @param \DOMJudgeBundle\Entity\ContestProblem $problem
+     * @param ContestProblem $problem
      *
      * @return Contest
      */
-    public function addProblem(\DOMJudgeBundle\Entity\ContestProblem $problem)
+    public function addProblem(ContestProblem $problem)
     {
         $this->problems[] = $problem;
 
@@ -897,9 +920,9 @@ class Contest
     /**
      * Remove problem
      *
-     * @param \DOMJudgeBundle\Entity\ContestProblem $problem
+     * @param ContestProblem $problem
      */
-    public function removeProblem(\DOMJudgeBundle\Entity\ContestProblem $problem)
+    public function removeProblem(ContestProblem $problem)
     {
         $this->problems->removeElement($problem);
     }
@@ -1142,6 +1165,11 @@ class Contest
             ($this->deactivatetime == null || $this->deactivatetime > time());
     }
 
+    /**
+     * @param $time_string
+     * @return float|int|string|null
+     * @throws \Exception
+     */
     private function getAbsoluteTime($time_string)
     {
         if ($time_string === null) {
@@ -1154,12 +1182,27 @@ class Contest
             if (count($times) == 2) {
                 $times[2] = '00';
             }
-            $hours   = $times[0];
-            $minutes = $times[1];
-            $seconds = $times[2];
-            $seconds = $seconds + 60 * ($minutes + 60 * $hours);
-            $seconds *= $sign;
-            return $this->starttime + $seconds;
+            $hours        = $times[0];
+            $minutes      = $times[1];
+            $seconds      = $times[2];
+            $seconds      = $seconds + 60 * ($minutes + 60 * $hours);
+            $seconds      *= $sign;
+            $absoluteTime = $this->starttime + $seconds;
+
+            // Take into account the removed intervals
+            /** @var RemovedInterval[] $removedIntervals */
+            $removedIntervals = $this->getRemovedIntervals()->toArray();
+            usort($removedIntervals, function (RemovedInterval $a, RemovedInterval $b) {
+                return Utils::difftime((float)$a->getStarttime(), (float)$b->getStarttime());
+            });
+            foreach ($removedIntervals as $removedInterval) {
+                if (Utils::difftime((float)$removedInterval->getStarttime(), (float)$absoluteTime) <= 0) {
+                    $absoluteTime += Utils::difftime((float)$removedInterval->getEndtime(),
+                                                     (float)$removedInterval->getStarttime());
+                }
+            }
+
+            return $absoluteTime;
         } else {
             $date = new \DateTime($time_string);
             return $date->format('U.v');
@@ -1175,7 +1218,7 @@ class Contest
      */
     public function addRemovedInterval(RemovedInterval $removedInterval)
     {
-        $this->removed_intervals->add($removedInterval);
+        $this->removedIntervals->add($removedInterval);
 
         return $this;
     }
@@ -1187,7 +1230,7 @@ class Contest
      */
     public function removeRemovedInterval(RemovedInterval $removedInterval)
     {
-        $this->removed_intervals->removeElement($removedInterval);
+        $this->removedIntervals->removeElement($removedInterval);
     }
 
     /**
@@ -1197,7 +1240,7 @@ class Contest
      */
     public function getRemovedIntervals()
     {
-        return $this->removed_intervals;
+        return $this->removedIntervals;
     }
 
     /**
@@ -1352,5 +1395,111 @@ class Contest
     public function getMinutesRemaining(): int
     {
         return (int)floor(($this->getEndtime() - $this->getFreezetime()) / 60);
+    }
+
+    /**
+     * @ORM\PrePersist()
+     * @ORM\PreUpdate()
+     */
+    public function updateTimes()
+    {
+        // Update the start times, as this will update all other fields
+        $this->setStarttime(strtotime($this->getStarttimeString()));
+        $this->setStarttimeString($this->getStarttimeString());
+    }
+
+    /**
+     * @param ExecutionContextInterface $context
+     * @Assert\Callback()
+     */
+    public function validate(ExecutionContextInterface $context)
+    {
+        if (Utils::difftime((float)$this->getEndtime(), (float)$this->getStarttime(true)) <= 0) {
+            $context
+                ->buildViolation('Contest ends before it even starts')
+                ->atPath('endtimeString')
+                ->addViolation();
+        }
+        if (!empty($this->getFreezetime())) {
+            if (Utils::difftime((float)$this->getFreezetime(), (float)$this->getEndtime()) > 0 ||
+                Utils::difftime((float)$this->getFreezetime(), (float)$this->getStarttime()) < 0) {
+                $context
+                    ->buildViolation('Freezetime is out of start/endtime range')
+                    ->atPath('freezetimeString')
+                    ->addViolation();
+            }
+        }
+        if (Utils::difftime((float)$this->getActivatetime(), (float)$this->getStarttime()) > 0) {
+            $context
+                ->buildViolation('Activate time is later than starttime')
+                ->atPath('activatetimeString')
+                ->addViolation();
+        }
+        if (!empty($this->getUnfreezetime())) {
+            if (empty($this->getFreezetime())) {
+                $context
+                    ->buildViolation('Unfreezetime set but no freeze time. That makes no sense.')
+                    ->atPath('unfreezetimeString')
+                    ->addViolation();
+            }
+            if (Utils::difftime((float)$this->getUnfreezetime(), (float)$this->getEndtime()) < 0) {
+                $context
+                    ->buildViolation('Unfreezetime must be larger than endtime.')
+                    ->atPath('unfreezetimeString')
+                    ->addViolation();
+            }
+            if (!empty($this->getDeactivatetime()) &&
+                Utils::difftime((float)$this->getDeactivatetime(), (float)$this->getUnfreezetime()) < 0) {
+                $context
+                    ->buildViolation('Deactivatetime must be larger than unfreezetime.')
+                    ->atPath('deactivatetimeString')
+                    ->addViolation();
+            }
+        } else {
+            if (!empty($this->getDeactivatetime()) &&
+                Utils::difftime((float)$this->getDeactivatetime(), (float)$this->getEndtime()) < 0) {
+                $context
+                    ->buildViolation('Deactivatetime must be larger than endtime.')
+                    ->atPath('deactivatetimeString')
+                    ->addViolation();
+            }
+        }
+
+        /** @var ContestProblem $problem */
+        foreach ($this->problems as $idx => $problem) {
+            // Set cid and probid explicitly, as Doctrine doesn't understand our primary key
+            // that is also a foreign key
+            $problem->setContest($this);
+            $problem->setCid($this->getCid());
+            $problem->setProbid($problem->getProblem()->getProbid());
+
+            // Check if the problem ID is unique
+            $otherProblemIds = $this->problems->filter(function (ContestProblem $otherProblem) use ($problem) {
+                return $otherProblem !== $problem;
+            })->map(function (ContestProblem $problem) {
+                return $problem->getProblem()->getProbid();
+            })->toArray();
+            $problemId       = $problem->getProblem()->getProbid();
+            if (in_array($problemId, $otherProblemIds)) {
+                $context
+                    ->buildViolation('Each problem can only be added to a contest once')
+                    ->atPath(sprintf('problems[%d].problem', $idx))
+                    ->addViolation();
+            }
+
+            // Check if the problem shortname is unique
+            $otherShortNames = $this->problems->filter(function (ContestProblem $otherProblem) use ($problem) {
+                return $otherProblem !== $problem;
+            })->map(function (ContestProblem $problem) {
+                return $problem->getShortname();
+            })->toArray();
+            $shortname = $problem->getShortname();
+            if (in_array($shortname, $otherShortNames)) {
+                $context
+                    ->buildViolation('Each shortname should be unique within a contest')
+                    ->atPath(sprintf('problems[%d].shortname', $idx))
+                    ->addViolation();
+            }
+        }
     }
 }

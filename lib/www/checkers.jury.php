@@ -74,8 +74,8 @@ function check_relative_time($time, $basetime, $field, $removed_intervals = null
             $abstime = $basetime + $seconds;
             if (is_array($removed_intervals)) {
                 foreach ($removed_intervals as $intv) {
-                    if (difftime($intv['starttime'], $abstime)<=0) {
-                        $abstime += difftime($intv['endtime'], $intv['starttime']);
+                    if (difftime((float)$intv['starttime'], (float)$abstime)<=0) {
+                        $abstime += difftime((float)$intv['endtime'], (float)$intv['starttime']);
                     }
                 }
             }
@@ -130,14 +130,14 @@ function check_removed_intervals($contest, $intervals)
     }
 
     foreach ($intervals as $data) {
-        if (difftime($data['endtime'], $data['starttime']) <= 0) {
+        if (difftime((float)$data['endtime'], (float)$data['starttime']) <= 0) {
             ch_error('Interval ends before (or when) it starts');
         }
 
-        if (difftime($data['starttime'], $contest['starttime']) < 0) {
+        if (difftime((float)$data['starttime'], (float)$contest['starttime']) < 0) {
             ch_error("Interval starttime '$data[starttime_string]' outside of contest");
         }
-        if (difftime($data['endtime'], $contest['endtime']) > 0) {
+        if (difftime((float)$data['endtime'], (float)$contest['endtime']) > 0) {
             ch_error("Interval endtime '$data[endtime_string]' outside of contest");
         }
 
@@ -145,10 +145,10 @@ function check_removed_intervals($contest, $intervals)
             if (@$data['intervalid']===@$other['intervalid']) {
                 continue;
             }
-            if ((difftime($data['starttime'], $other['starttime']) >= 0 &&
-                 difftime($data['starttime'], $other['endtime']) <  0) ||
-                (difftime($data['endtime'], $other['starttime']) >  0 &&
-                 difftime($data['endtime'], $other['endtime']) <= 0)) {
+            if ((difftime((float)$data['starttime'], (float)$other['starttime']) >= 0 &&
+                 difftime((float)$data['starttime'], (float)$other['endtime']) <  0) ||
+                (difftime((float)$data['endtime'], (float)$other['starttime']) >  0 &&
+                 difftime((float)$data['endtime'], (float)$other['endtime']) <= 0)) {
                 ch_error('Removed intervals ' .
                          (isset($data['intervalid'])  ? $data['intervalid']  : 'new') .
                          ' and ' .

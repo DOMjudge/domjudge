@@ -14,8 +14,6 @@ legacy.team_problem:
     path: /team/problem.php
 legacy.team_team:
     path: /team/team.php
-legacy.jury_contest:
-    path: /jury/contest.php
 
 legacy.jury_checkconfig:
     path: /jury/checkconfig.php

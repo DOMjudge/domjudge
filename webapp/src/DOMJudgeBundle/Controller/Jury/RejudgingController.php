@@ -559,7 +559,7 @@ class RejudgingController extends Controller
         } else {
             switch ($table) {
                 case 'contest':
-                    return $this->redirectToRoute('legacy.jury_contest', ['id' => $id]);
+                    return $this->redirectToRoute('jury_contest', ['contestId' => $id]);
                 case 'judgehost':
                     return $this->redirectToRoute('jury_judgehost', ['hostname' => $id]);
                 case 'language':

@@ -3,6 +3,9 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Utils\Utils;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Time intervals removed from the contest for scoring
@@ -42,17 +45,19 @@ class RemovedInterval
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="starttime_string", options={"comment"="Authoritative (absolute only) string representation of starttime"}, nullable=false)
+     * @Assert\Regex("/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}$/")
      */
     private $starttime_string;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="endtime_string", options={"comment"="Authoritative (absolute only) string representation of endtime"}, nullable=false)
+     * @Assert\Regex("/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}$/")
      */
     private $endtime_string;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Contest", inversedBy="removed_intervals")
+     * @ORM\ManyToOne(targetEntity="Contest", inversedBy="removedIntervals")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
      */
     private $contest;
@@ -145,10 +150,13 @@ class RemovedInterval
      * @param string $starttimeString
      *
      * @return RemovedInterval
+     * @throws \Exception
      */
     public function setStarttimeString($starttimeString)
     {
         $this->starttime_string = $starttimeString;
+        $date                   = new \DateTime($starttimeString);
+        $this->starttime        = $date->format('U.v');
 
         return $this;
     }
@@ -169,10 +177,13 @@ class RemovedInterval
      * @param string $endtimeString
      *
      * @return RemovedInterval
+     * @throws \Exception
      */
     public function setEndtimeString($endtimeString)
     {
         $this->endtime_string = $endtimeString;
+        $date                 = new \DateTime($endtimeString);
+        $this->endtime        = $date->format('U.v');
 
         return $this;
     }
@@ -209,5 +220,62 @@ class RemovedInterval
     public function getContest()
     {
         return $this->contest;
+    }
+
+    /**
+     * @param ExecutionContextInterface $context
+     * @Assert\Callback()
+     */
+    public function validate(ExecutionContextInterface $context)
+    {
+        // Update all contest timing, taking into account all removed intervals
+        $this->getContest()->setStarttimeString($this->getContest()->getStarttimeString());
+
+        if ($this->getEndtime() <= $this->getStarttime()) {
+            $context
+                ->buildViolation('Interval ends before (or when) it starts')
+                ->atPath('starttimeString')
+                ->addViolation();
+
+            $context
+                ->buildViolation('Interval ends before (or when) it starts')
+                ->atPath('endtimeString')
+                ->addViolation();
+        }
+
+        if (Utils::difftime((float)$this->getStarttime(), (float)$this->getContest()->getStarttime(true)) < 0) {
+            $context
+                ->buildViolation('Interval starttime outside of contest')
+                ->atPath('starttimeString')
+                ->addViolation();
+        }
+        if (Utils::difftime((float)$this->getEndtime(), (float)$this->getContest()->getEndtime()) > 0) {
+            $context
+                ->buildViolation('Interval endtime outside of contest')
+                ->atPath('endtimeString')
+                ->addViolation();
+        }
+
+        /** @var RemovedInterval $removedInterval */
+        foreach ($this->getContest()->getRemovedIntervals() as $removedInterval) {
+            if ($removedInterval->getIntervalid() === $this->getIntervalid()) {
+                continue;
+            }
+
+            if ((Utils::difftime((float)$this->getStarttime(), (float)$removedInterval->getStarttime()) >= 0 &&
+                    Utils::difftime((float)$this->getStarttime(), (float)$removedInterval->getEndtime()) < 0) ||
+                (Utils::difftime((float)$this->getEndtime(), (float)$removedInterval->getStarttime()) > 0 &&
+                    Utils::difftime((float)$this->getEndtime(), (float)$removedInterval->getEndtime()) <= 0)) {
+                $context
+                    ->buildViolation(sprintf('Interval overlaps with interval %d', $removedInterval->getIntervalid()))
+                    ->atPath('starttimeString')
+                    ->addViolation();
+
+                $context
+                    ->buildViolation(sprintf('Interval overlaps with interval %d', $removedInterval->getIntervalid()))
+                    ->atPath('endtimeString')
+                    ->addViolation();
+            }
+        }
     }
 }

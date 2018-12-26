@@ -100,7 +100,7 @@ class AuditLogController extends Controller
             if ( $cid ) {
                     $data['where']['value'] = "c" . $cid;
                     $data['where']['sortvalue'] = $cid;
-                    $data['where']['link'] = $this->generateUrl('legacy.jury_contest', ['id' => $cid]);
+                    $data['where']['link'] = $this->generateUrl('jury_contest', ['contestId' => $cid]);
             } else {
                     $data['where']['value'] = '';
             }
@@ -137,7 +137,7 @@ class AuditLogController extends Controller
             case 'configuration':
                 return $this->generateUrl('jury_config');
             case 'contest':
-                return $this->generateUrl('legacy.jury_contest', ['id' => $id]);
+                return $this->generateUrl('jury_contest', ['contestId' => $id]);
             case 'executable':
                 return $this->generateUrl('jury_executable', ['execId' => $id]);
             case 'internal_error':

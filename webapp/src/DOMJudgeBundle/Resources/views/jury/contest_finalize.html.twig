@@ -49,7 +49,7 @@
         {{ form_row(form.b) }}
         {{ form_row(form.finalizecomment) }}
         {{ form_widget(form.finalize) }}
-        {{ button(path('legacy.jury_contest', {id: contest.cid}), 'Cancel', 'secondary') }}
+        {{ button(path('jury_contest', {'contestId': contest.cid}), 'Cancel', 'secondary') }}
         {{ form_end(form) }}
     {% endif %}
 

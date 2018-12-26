@@ -5,13 +5,16 @@ namespace DOMJudgeBundle\Controller\Jury;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\ContestProblem;
+use DOMJudgeBundle\Entity\RemovedInterval;
+use DOMJudgeBundle\Form\Type\ContestType;
 use DOMJudgeBundle\Form\Type\FinalizeContestType;
+use DOMJudgeBundle\Form\Type\RemovedIntervalType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -59,8 +62,12 @@ class ContestController extends Controller
 
     /**
      * @Route("/contests/", name="jury_contests")
+     * @param Request         $request
+     * @param KernelInterface $kernel
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
+    public function indexAction(Request $request, KernelInterface $kernel)
     {
         $em = $this->entityManager;
 
@@ -158,8 +165,7 @@ class ContestController extends Controller
 
         $timeFormat = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
 
-        // TODO: use directories from domserver-static here when we have access to it
-        $etcDir = realpath(sprintf('%s/../../etc', $kernel->getRootDir()));
+        $etcDir = $this->DOMJudgeService->getDomjudgeEtcDir();
         require_once $etcDir . '/domserver-config.php';
 
         if (ALLOW_REMOVED_INTERVALS) {
@@ -212,10 +218,8 @@ class ContestController extends Controller
                 $contestactions[] = [
                     'icon' => 'edit',
                     'title' => 'edit this contest',
-                    'link' => $this->generateUrl('legacy.jury_contest', [
-                        'cmd' => 'edit',
-                        'id' => $contest->getCid(),
-                        'referrer' => 'contests'
+                    'link' => $this->generateUrl('jury_contest_edit', [
+                        'contestId' => $contest->getCid(),
                     ])
                 ];
                 $contestactions[] = [
@@ -275,7 +279,7 @@ class ContestController extends Controller
             $contests_table[] = [
                 'data' => $contestdata,
                 'actions' => $contestactions,
-                'link' => $this->generateUrl('legacy.jury_contest', ['id' => $contest->getCid()]),
+                'link' => $this->generateUrl('jury_contest', ['contestId' => $contest->getCid()]),
                 'cssclass' => implode(' ', $styles),
             ];
         }
@@ -303,8 +307,187 @@ class ContestController extends Controller
     }
 
     /**
+     * @Route("/contests/{contestId}", name="jury_contest", requirements={"contestId": "\d+"})
+     * @param Request $request
+     * @param int     $contestId
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function viewAction(Request $request, int $contestId)
+    {
+        /** @var Contest $contest */
+        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
+        }
+
+        $etcDir = $this->DOMJudgeService->getDomjudgeEtcDir();
+        require_once $etcDir . '/domserver-config.php';
+
+        $newRemovedInterval = new RemovedInterval();
+        $newRemovedInterval->setContest($contest);
+        $contest->addRemovedInterval($newRemovedInterval);
+        $form = $this->createForm(RemovedIntervalType::class, $newRemovedInterval);
+        $form->handleRequest($request);
+        if ($this->isGranted('ROLE_ADMIN') && $form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->persist($newRemovedInterval);
+            $this->entityManager->flush();
+
+            return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
+        }
+
+        /** @var RemovedInterval[] $removedIntervals */
+        $removedIntervals = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:RemovedInterval', 'i')
+            ->select('i')
+            ->andWhere('i.contest = :contest')
+            ->setParameter(':contest', $contest)
+            ->orderBy('i.starttime')
+            ->getQuery()
+            ->getResult();
+
+        /** @var ContestProblem[] $problems */
+        $problems = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:ContestProblem', 'cp')
+            ->join('cp.problem', 'p')
+            ->select('cp', 'p')
+            ->andWhere('cp.contest = :contest')
+            ->setParameter(':contest', $contest)
+            ->orderBy('cp.shortname')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('@DOMJudge/jury/contest.html.twig', [
+            'contest' => $contest,
+            'isActive' => isset($this->DOMJudgeService->getCurrentContests()[$contest->getCid()]),
+            'allowRemovedIntervals' => ALLOW_REMOVED_INTERVALS,
+            'removedIntervalForm' => $form->createView(),
+            'removedIntervals' => $removedIntervals,
+            'problems' => $problems,
+        ]);
+    }
+
+    /**
+     * @Route("/contests/{contestId}/remove-interval/{intervalId}", name="jury_contest_remove_interval",
+     *                                                              requirements={"contestId": "\d+"},
+     *                                                              methods={"POST"})
+     * @param int $contestId
+     * @param int $intervalId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function removeIntervalAction(int $contestId, int $intervalId)
+    {
+        /** @var Contest $contest */
+        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
+        }
+
+        /** @var RemovedInterval $removedInterval */
+        $removedInterval = $this->entityManager->getRepository(RemovedInterval::class)->find($intervalId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Removed interval with ID %s not found', $intervalId));
+        }
+
+        if ($removedInterval->getContest()->getCid() !== $contest->getCid()) {
+            throw new NotFoundHttpException('Removed interval is of wrong contest');
+        }
+
+        $contest->removeRemovedInterval($removedInterval);
+        $this->entityManager->remove($removedInterval);
+        // Recalculate timing
+        $contest->setStarttimeString($contest->getStarttimeString());
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
+    }
+
+    /**
+     * @Route("/contests/{contestId}/edit", name="jury_contest_edit", requirements={"contestId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $contestId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function editAction(Request $request, int $contestId)
+    {
+        /** @var Contest $contest */
+        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
+        }
+
+        $form = $this->createForm(ContestType::class, $contest);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->flush();
+            $this->DOMJudgeService->auditlog('contest', $contest->getcid(),
+                                             'updated');
+            return $this->redirect($this->generateUrl('jury_contest',
+                                                      ['contestId' => $contest->getcid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/contest_edit.html.twig', [
+            'contest' => $contest,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/contests/add", name="jury_contest_add")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function addAction(Request $request)
+    {
+        $contest = new Contest();
+        // Set default activate time
+        $contest->setActivatetimeString(strftime('%Y-%m-%d %H:%M:00 ') . date_default_timezone_get());
+
+        $form = $this->createForm(ContestType::class, $contest);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->transactional(function () use ($contest) {
+                // A little 'hack': we need to first persist and save the contest, before we can persist and
+                // save the problem, because we need a contest ID
+                /** @var ContestProblem[] $problems */
+                $problems = $contest->getProblems()->toArray();
+                foreach ($contest->getProblems() as $problem) {
+                    $contest->removeProblem($problem);
+                }
+                $this->entityManager->persist($contest);
+                $this->entityManager->flush();
+
+                // Now we can assign the problems to the contest and persist them
+                foreach ($problems as $problem) {
+                    $problem
+                        ->setContest($contest)
+                        ->setCid($contest->getCid());
+                    $this->entityManager->persist($problem);
+                }
+                $this->entityManager->flush();
+            });
+            $this->DOMJudgeService->auditlog('contest', $contest->getcid(),
+                                             'added');
+            return $this->redirect($this->generateUrl('jury_contest',
+                                                      ['contestId' => $contest->getcid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/contest_add.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
      * @Route("/contests/{contestId}/finalize", name="jury_contest_finalize")
      * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $contestId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
     public function finalizeAction(Request $request, int $contestId)
     {
@@ -365,7 +548,7 @@ class ContestController extends Controller
                 $this->entityManager->flush();
                 $this->DOMJudgeService->auditlog('contest', $contest->getCid(), 'finalized',
                                                  $contest->getFinalizecomment());
-                return $this->redirectToRoute('legacy.jury_contest', ['id' => $contest->getCid()]);
+                return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
             }
         }
 

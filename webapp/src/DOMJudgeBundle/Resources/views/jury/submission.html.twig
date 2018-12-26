@@ -72,7 +72,7 @@
 
         <span>
             <i class="fas fa-trophy" title="Contest:"></i>
-            <a href="{{ path('legacy.jury_contest', {id: submission.cid}) }}">
+            <a href="{{ path('jury_contest', {'contestId': submission.cid}) }}">
                 {{ submission.contest.shortname }}
             </a>
         </span>

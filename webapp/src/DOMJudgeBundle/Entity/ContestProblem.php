@@ -4,6 +4,8 @@ namespace DOMJudgeBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * Many-to-Many mapping of contests and problems
@@ -48,6 +50,7 @@ class ContestProblem
      *
      * @ORM\Column(type="integer", name="points", options={"comment"="Number of points earened by solving this problem"}, nullable=false)
      * @Serializer\Exclude()
+     * @Assert\GreaterThanOrEqual(0)
      */
     private $points = 1;
 
@@ -56,14 +59,14 @@ class ContestProblem
      * @ORM\Column(type="boolean", name="allow_submit", options={"comment"="Are submissions accepted for this problem?"}, nullable=false)
      * @Serializer\Exclude()
      */
-    private $allow_submit = true;
+    private $allowSubmit = true;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_judge", options={"comment"="Are submissions for this problem judged?"}, nullable=false)
      * @Serializer\Exclude()
      */
-    private $allow_judge = true;
+    private $allowJudge = true;
 
     /**
      * @var string
@@ -73,11 +76,11 @@ class ContestProblem
     private $color;
 
     /**
-     * @var boolean
+     * @var boolean|null
      * @ORM\Column(type="boolean", name="lazy_eval_results", options={"comment"="Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting"}, nullable=true)
      * @Serializer\Exclude()
      */
-    private $lazy_eval_results;
+    private $lazyEvalResults;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems", fetch="EAGER")
@@ -212,7 +215,7 @@ class ContestProblem
      */
     public function setAllowSubmit($allowSubmit)
     {
-        $this->allow_submit = $allowSubmit;
+        $this->allowSubmit = $allowSubmit;
 
         return $this;
     }
@@ -224,7 +227,7 @@ class ContestProblem
      */
     public function getAllowSubmit()
     {
-        return $this->allow_submit;
+        return $this->allowSubmit;
     }
 
     /**
@@ -236,7 +239,7 @@ class ContestProblem
      */
     public function setAllowJudge($allowJudge)
     {
-        $this->allow_judge = $allowJudge;
+        $this->allowJudge = $allowJudge;
 
         return $this;
     }
@@ -248,7 +251,7 @@ class ContestProblem
      */
     public function getAllowJudge()
     {
-        return $this->allow_judge;
+        return $this->allowJudge;
     }
 
     /**
@@ -284,7 +287,7 @@ class ContestProblem
      */
     public function setLazyEvalResults($lazyEvalResults)
     {
-        $this->lazy_eval_results = $lazyEvalResults;
+        $this->lazyEvalResults = $lazyEvalResults;
 
         return $this;
     }
@@ -296,7 +299,7 @@ class ContestProblem
      */
     public function getLazyEvalResults()
     {
-        return $this->lazy_eval_results;
+        return $this->lazyEvalResults;
     }
 
     /**

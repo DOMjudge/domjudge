@@ -94,7 +94,7 @@
 
     {% if is_granted('ROLE_ADMIN') %}
         <p>
-            {{ button(path('legacy.jury_contest', {cmd: 'add', referrer: 'contests'}), 'Add new contest', 'primary', 'plus') }}
+            {{ button(path('jury_contest_add'), 'Add new contest', 'primary', 'plus') }}
         </p>
     {% endif %}
 
