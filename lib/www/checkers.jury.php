@@ -18,6 +18,112 @@ function ch_error(string $string)
     $CHECKER_ERRORS[] = $string;
 }
 
+function check_problem($data, $keydata = null)
+{
+    global $DB;
+
+    if (! is_numeric($data['timelimit']) || $data['timelimit'] <= 0) {
+        ch_error("Timelimit is not a valid positive number");
+    }
+    if (isset($data['shortname']) && ! preg_match(ID_REGEX, $data['shortname'])) {
+        ch_error("Problem shortname may only contain characters " . IDENTIFIER_CHARS . ".");
+    }
+
+    if (!empty($_FILES['data']['name'][0]['problemtext'])) {
+        $origname = $_FILES['data']['name'][0]['problemtext'];
+        $tempname = $_FILES['data']['tmp_name'][0]['problemtext'];
+        if (strrpos($origname, '.')!==false) {
+            $ext = substr($origname, strrpos($origname, '.')+1);
+            if (in_array($ext, array('txt','html','pdf'))) {
+                $data['problemtext_type'] = $ext;
+            }
+        }
+        if (!isset($data['problemtext_type'])) {
+            $finfo = finfo_open(FILEINFO_MIME);
+
+            list($type) = explode('; ', finfo_file($finfo, $tempname));
+
+            finfo_close($finfo);
+
+            switch ($type) {
+                case 'application/pdf':
+                    $data['problemtext_type'] = 'pdf';
+                    break;
+                case 'text/html':
+                    $data['problemtext_type'] = 'html';
+                    break;
+                case 'text/plain':
+                    $data['problemtext_type'] = 'txt';
+                    break;
+            }
+        }
+        if (!isset($data['problemtext_type'])) {
+            ch_error("Problem statement has unknown file type.");
+        }
+    }
+    if (!empty($data['problemtext']) &&
+        !isset($data['problemtext_type'])) {
+        ch_error("Problem statement has unknown file type.");
+    }
+    // Unset problemtext_type if problemtext was set to null explicitly.
+    if (array_key_exists('problemtext', $data) && empty($data['problemtext'])) {
+        $data['problemtext_type'] = null;
+    }
+
+    if (!empty($data['special_compare'])) {
+        if (! $DB->q('MAYBEVALUE SELECT execid FROM executable
+                       WHERE execid = %s AND type = %s',
+                     $data['special_compare'], 'compare')) {
+            ch_error("Unknown special compare script (or wrong type): " . $data['special_compare']);
+        }
+    }
+    if (!empty($data['special_run'])) {
+        if (! $DB->q('MAYBEVALUE SELECT execid FROM executable
+                      WHERE execid = %s AND type = %s',
+                     $data['special_run'], 'run')) {
+            ch_error("Unknown special run script (or wrong type): " . $data['special_run']);
+        }
+    }
+
+    return $data;
+}
+
+function check_language($data, $keydata = null)
+{
+    if (! is_numeric($data['time_factor']) || $data['time_factor'] <= 0) {
+        ch_error("Timelimit is not a valid positive factor");
+    }
+    $id = (isset($data['langid']) ? $data['langid'] : $keydata['langid']);
+    if (! preg_match(ID_REGEX, $id)) {
+        ch_error("Language ID may only contain characters " . IDENTIFIER_CHARS . ".");
+    }
+    if (empty($data['compile_script'])) {
+        ch_error("No compile script specified for language: " . $id);
+    } else {
+        global $DB;
+        if (! $DB->q('MAYBEVALUE SELECT execid FROM executable
+                      WHERE execid = %s AND type = %s',
+                     $data['compile_script'], 'compile')) {
+            ch_error("Unknown compile script (or wrong type): " . $data['compile_script']);
+        }
+    }
+    $exts = json_decode($data['extensions'], false, 2);
+    if ($exts==null || !is_array($exts) || count($exts)==0) {
+        ch_error("Language extension list is not a valid non-empty JSON array");
+    }
+
+    return $data;
+}
+
+function check_affiliation($data, $keydata = null)
+{
+    $id = (isset($data['affilid']) ? $data['affilid'] : $keydata['affilid']);
+    if (! preg_match(ID_REGEX, $id)) {
+        ch_error("Team affiliation ID may only contain characters " . IDENTIFIER_CHARS . ".");
+    }
+    return $data;
+}
+
 // Regex patterns for absolute/relative contest time formats. These
 // are also used in www/jury/contest.php.
 $pattern_timezone  = "[A-Za-z][A-Za-z0-9_\/+-]{1,35}";
