@@ -10,10 +10,16 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class TeamAffiliationType extends AbstractType
+class TeamAffiliationType extends AbstractExternalIdEntityType
 {
+    /**
+     * @param FormBuilderInterface $builder
+     * @param array                $options
+     * @throws \Exception
+     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $this->addExternalIdField($builder, TeamAffiliation::class);
         $builder->add('shortname');
         $builder->add('name');
         $builder->add('country', TextType::class, [

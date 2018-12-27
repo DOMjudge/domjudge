@@ -6,7 +6,6 @@ use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\Team;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -14,10 +13,16 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ContestType extends AbstractType
+class ContestType extends AbstractExternalIdEntityType
 {
+    /**
+     * @param FormBuilderInterface $builder
+     * @param array                $options
+     * @throws \Exception
+     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $this->addExternalIdField($builder, Contest::class);
         $builder->add('shortname', TextType::class);
         $builder->add('name', TextType::class);
         $builder->add('activatetimeString', TextType::class, [
