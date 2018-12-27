@@ -36,6 +36,12 @@
                     <th>CID</th>
                     <td>c{{ contest.cid }}</td>
                 </tr>
+                {% if showExternalId(contest) %}
+                    <tr>
+                        <th>External ID</th>
+                        <td>{{ contest.externalid }}</td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <th>Short name</th>
                     <td>{{ contest.shortname }}</td>

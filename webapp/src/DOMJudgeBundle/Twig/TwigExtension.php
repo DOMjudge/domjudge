@@ -9,6 +9,7 @@ use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
 use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -32,6 +33,11 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
     protected $submissionService;
 
     /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
@@ -40,11 +46,13 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         DOMJudgeService $domjudge,
         EntityManagerInterface $entityManager,
         SubmissionService $submissionService,
+        EventLogService $eventLogService,
         KernelInterface $kernel
     ) {
         $this->domjudge          = $domjudge;
         $this->entityManager     = $entityManager;
         $this->submissionService = $submissionService;
+        $this->eventLogService   = $eventLogService;
         $this->kernel            = $kernel;
     }
 
@@ -53,6 +61,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         return [
             new TwigFunction('button', [$this, 'button'], ['is_safe' => ['html']]),
             new TwigFunction('calculatePenaltyTime', [$this, 'calculatePenaltyTime']),
+            new TwigFunction('showExternalId', [$this, 'showExternalId']),
         ];
     }
 
@@ -553,7 +562,7 @@ var filePath = "%s";
 var mode = modelist.getModeForPath(filePath).mode;
 __EDITOR__.getSession().setMode(mode);
 JS;
-            $mode = sprintf($modeTemplate, Utils::specialchars($filename));
+            $mode         = sprintf($modeTemplate, Utils::specialchars($filename));
         } else {
             $mode = '';
         }
@@ -731,7 +740,7 @@ JS;
      * @param string|null $description
      * @return string
      */
-    public function descriptionExpand(string $description = null) : string
+    public function descriptionExpand(string $description = null): string
     {
         if ($description == null) {
             return '';
@@ -740,8 +749,8 @@ JS;
         if (count($descriptionLines) <= 3) {
             return implode('<br />', $descriptionLines);
         } else {
-            $default = implode('<br />', array_slice($descriptionLines, 0, 3));
-            $defaultEscaped = htmlentities($default);
+            $default          = implode('<br />', array_slice($descriptionLines, 0, 3));
+            $defaultEscaped   = htmlentities($default);
             $expandedEscaaped = htmlentities(implode('<br />', $descriptionLines));
             return <<<EOF
 <span>
@@ -753,5 +762,16 @@ JS;
 </span>
 EOF;
         }
+    }
+
+    /**
+     * Whether to show the external ID for the given entity
+     * @param object|string $entity
+     * @return bool
+     * @throws \Exception
+     */
+    public function showExternalId($entity): Bool
+    {
+        return $this->eventLogService->externalIdFieldForEntity($entity) !== null;
     }
 }

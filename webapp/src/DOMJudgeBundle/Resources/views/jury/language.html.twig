@@ -20,6 +20,12 @@
                     <th>ID/extension</th>
                     <td>{{ language.langid }}</td>
                 </tr>
+                {% if showExternalId(language) %}
+                    <tr>
+                        <th>External ID</th>
+                        <td>{{ language.externalid }}</td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <th>Name</th>
                     <td>{{ language.name }}</td>

@@ -475,12 +475,16 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Get the external ID field for a given entity type. Will return null if
      * no external ID field should be used
-     * @param string $entity
+     * @param object|string $entity
      * @return string|null
      * @throws \Exception
      */
     public function externalIdFieldForEntity($entity)
     {
+        // Allow to pass in a class instance: convert it to its class type
+        if (is_object($entity)) {
+            $entity = get_class($entity);
+        }
         // Special case: strip of Doctrine proxies
         if (strpos($entity, 'Proxies\\__CG__\\') === 0) {
             $entity = substr($entity, strlen('Proxies\\__CG__\\'));
