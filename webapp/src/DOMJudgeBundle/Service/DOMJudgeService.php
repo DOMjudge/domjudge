@@ -494,7 +494,7 @@ class DOMJudgeService
             case 'problem':
                 $this->em->createQueryBuilder()
                     ->update('DOMJudgeBundle:ContestProblem', 'p')
-                    ->set('p.allow_judge', ':enabled')
+                    ->set('p.allowJudge', ':enabled')
                     ->andWhere('p.cid = :cid')
                     ->andWhere('p.probid = :probid')
                     ->setParameter(':enabled', $enabled)
@@ -516,7 +516,7 @@ class DOMJudgeService
             case 'language':
                 $this->em->createQueryBuilder()
                     ->update('DOMJudgeBundle:Language', 'lang')
-                    ->set('lang.allow_judge', ':enabled')
+                    ->set('lang.allowJudge', ':enabled')
                     ->andWhere('lang.langid = :langid')
                     ->setParameter(':enabled', $enabled)
                     ->setParameter(':langid', $disabled['langid'])

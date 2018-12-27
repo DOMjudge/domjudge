@@ -174,7 +174,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->leftJoin('p.testcases', 'tc')
             ->select('cp, p, COUNT(tc.testcaseid) AS testdatacount')
             ->andWhere('cp.cid = :cid')
-            ->andWhere('cp.allow_submit = 1')
+            ->andWhere('cp.allowSubmit = 1')
             ->setParameter(':cid', $contestId)
             ->orderBy('cp.shortname')
             ->groupBy('cp.probid');

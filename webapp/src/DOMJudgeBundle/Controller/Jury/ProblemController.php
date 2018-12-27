@@ -1330,7 +1330,7 @@ class ProblemController extends Controller
             $allowedLanguages = $this->entityManager->createQueryBuilder()
                 ->from('DOMJudgeBundle:Language', 'l', 'l.langid')
                 ->select('l')
-                ->andWhere('l.allow_submit = true')
+                ->andWhere('l.allowSubmit = true')
                 ->getQuery()
                 ->getResult();
 

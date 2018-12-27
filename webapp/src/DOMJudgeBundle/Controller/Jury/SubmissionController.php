@@ -312,8 +312,8 @@ class SubmissionController extends Controller
                     ->join('s.contest_problem', 'cp')
                     ->andWhere('s.submitid = :submitid')
                     ->andWhere('s.judgehost IS NULL')
-                    ->andWhere('lang.allow_judge = 1')
-                    ->andWhere('cp.allow_judge = 1')
+                    ->andWhere('lang.allowJudge = 1')
+                    ->andWhere('cp.allowJudge = 1')
                     ->andWhere('s.valid = 1')
                     ->setParameter(':submitid', $submission->getSubmitid())
                     ->setMaxResults(1);
@@ -698,7 +698,7 @@ class SubmissionController extends Controller
                 'query_builder' => function (EntityRepository $er) use ($submission) {
                     return $er->createQueryBuilder('p')
                         ->join('p.contest_problems', 'cp')
-                        ->andWhere('cp.allow_submit = 1')
+                        ->andWhere('cp.allowSubmit = 1')
                         ->andWhere('cp.contest = :contest')
                         ->setParameter(':contest', $submission->getContest())
                         ->orderBy('p.name');
@@ -709,7 +709,7 @@ class SubmissionController extends Controller
                 'choice_label' => 'name',
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('lang')
-                        ->andWhere('lang.allow_submit = 1')
+                        ->andWhere('lang.allowSubmit = 1')
                         ->orderBy('lang.name');
                 }
             ])

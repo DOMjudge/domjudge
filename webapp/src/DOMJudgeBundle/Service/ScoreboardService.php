@@ -229,7 +229,7 @@ class ScoreboardService
                     ->select('s')
                     ->andWhere('s.contest = :contest')
                     ->andWhere(sprintf('s.is_correct_%s = 1', $variant))
-                    ->andWhere('cp.allow_submit = 1')
+                    ->andWhere('cp.allowSubmit = 1')
                     ->andWhere('s.team IN (:teams)')
                     ->setParameter(':contest', $contest)
                     ->setParameter(':teams', $teams)
@@ -689,7 +689,7 @@ class ScoreboardService
             ->from('DOMJudgeBundle:ContestProblem', 'cp', 'cp.probid')
             ->select('cp, p')
             ->innerJoin('cp.problem', 'p')
-            ->andWhere('cp.allow_submit = 1')
+            ->andWhere('cp.allowSubmit = 1')
             ->andWhere('cp.cid = :cid')
             ->setParameter(':cid', $contest->getCid())
             ->orderBy('cp.shortname');

@@ -53,14 +53,14 @@ class Language
      * @ORM\Column(type="boolean", name="allow_submit", options={"comment"="Are submissions accepted in this language?"}, nullable=false)
      * @Serializer\Exclude()
      */
-    private $allow_submit = true;
+    private $allowSubmit = true;
 
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_judge", options={"comment"="Are submissions in this language judged?"}, nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      */
-    private $allow_judge = true;
+    private $allowJudge = true;
 
     /**
      * @var double
@@ -211,7 +211,7 @@ class Language
      */
     public function setAllowSubmit($allowSubmit)
     {
-        $this->allow_submit = $allowSubmit;
+        $this->allowSubmit = $allowSubmit;
 
         return $this;
     }
@@ -223,7 +223,7 @@ class Language
      */
     public function getAllowSubmit()
     {
-        return $this->allow_submit;
+        return $this->allowSubmit;
     }
 
     /**
@@ -235,7 +235,7 @@ class Language
      */
     public function setAllowJudge($allowJudge)
     {
-        $this->allow_judge = $allowJudge;
+        $this->allowJudge = $allowJudge;
 
         return $this;
     }
@@ -247,7 +247,7 @@ class Language
      */
     public function getAllowJudge()
     {
-        return $this->allow_judge;
+        return $this->allowJudge;
     }
 
     /**

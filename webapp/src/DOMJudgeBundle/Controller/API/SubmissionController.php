@@ -177,7 +177,7 @@ class SubmissionController extends AbstractRestController
             ->andWhere(sprintf('p.%s = :problem',
                                $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
             ->andWhere('cp.cid = :cid')
-            ->andWhere('cp.allow_submit = 1')
+            ->andWhere('cp.allowSubmit = 1')
             ->setParameter(':problem', $request->request->get('problem'))
             ->setParameter(':cid', $this->getContestId($request))
             ->getQuery()
@@ -195,7 +195,7 @@ class SubmissionController extends AbstractRestController
             ->select('lang')
             ->andWhere(sprintf('lang.%s = :language',
                                $this->eventLogService->externalIdFieldForEntity(Language::class) ?? 'langid'))
-            ->andWhere('lang.allow_submit = 1')
+            ->andWhere('lang.allowSubmit = 1')
             ->setParameter(':language', $request->request->get('language'))
             ->getQuery()
             ->getOneOrNullResult();
