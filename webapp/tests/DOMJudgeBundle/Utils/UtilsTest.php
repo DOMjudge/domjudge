@@ -121,4 +121,88 @@ class UtilsTest extends TestCase
         $replacedutf = "Test �( example";
         $this->assertEquals($replacedutf, Utils::specialchars($invalidutf));
     }
+
+    public function testWrapUnquotedSingleLineUnquoted()
+    {
+        $text = "This is an example text.";
+        $this->assertEquals($text, Utils::wrap_unquoted($text));
+    }
+
+    public function testWrapUnquotedLongLineUnquoted()
+    {
+        $text = "This is an example text.";
+        $result = "This is an
+example
+text.";
+        $this->assertEquals($result, Utils::wrap_unquoted($text, 10));
+    }
+
+    public function testWrapUnquotedLongLineWithQuoted()
+    {
+        $text = "> > This is an example text.
+> And another long line appears here.
+> Also a shorter line.
+> Short.
+
+This is the unquoted part.
+> Really?
+Yes.
+
+By the way, pi > 3.
+Just so you know";
+        $result = "> > This is an example text.
+> And another long line appears here.
+> Also a shorter line.
+> Short.
+
+This is
+the
+unquoted
+part.
+> Really?
+Yes.
+
+By the
+way, pi >
+3.
+Just so
+you know";
+        $this->assertEquals($result, Utils::wrap_unquoted($text, 10));
+    }
+
+    public function testWrapUnquotedLongLineWithQuotedCustomQuoteCharacter()
+    {
+        $text = "# This is an example text.
+# And another long line appears here.
+
+> This is the unquoted part.
+
+";
+        $result = "# This is an example text.
+# And another long line appears here.
+
+> This is
+the
+unquoted
+part.";
+        $this->assertEquals($result, Utils::wrap_unquoted($text, 10, '#'));
+    }
+
+    public function testStartsWith()
+    {
+        $text = "The quick brown fox jumped over the lazy dog.";
+        $start = "The quick";
+        $this->assertTrue(Utils::startsWith($text, $start));
+        $this->assertTrue(Utils::startsWith($start, $start));
+        $this->assertFalse(Utils::startsWith($start, $text));
+    }
+
+    public function testEndsWith()
+    {
+        $text = "The quick brown fox jumped over the lazy dog.";
+        $end = "lazy dog.";
+        $this->assertTrue(Utils::endsWith($text, $end));
+        $this->assertTrue(Utils::endsWith($end, $end));
+        $this->assertFalse(Utils::endsWith($end, $text));
+    }
 }
