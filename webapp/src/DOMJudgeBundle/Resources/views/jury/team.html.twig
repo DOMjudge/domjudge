@@ -119,6 +119,7 @@
             {% set deleteUrl = path('legacy.jury_delete', {teamid: team.teamid, table: 'team', referrer: 'teams', desc: team.name}) %}
             {{ button(deleteUrl, 'Delete', 'danger', 'trash-alt') }}
         {% endif %}
+        {{ button(path('jury_clarification_send', {'teamto': team.teamid}), 'Send message', 'secondary', 'envelope') }}
         {% include '@DOMJudge/jury/partials/rejudge_form.html.twig' with {table: 'team', id: team.teamid, buttonClass: 'btn-secondary'} %}
     </p>
 
