@@ -24,7 +24,7 @@
     </thead>
     <tbody>
     {%- for clarification in clarifications %}
-        {%- set link = path('legacy.jury_clarification', {id: clarification.clarid}) %}
+        {%- set link = path('jury_clarification', {id: clarification.clarid}) %}
 
         <tr>
             <td><a href="{{ link }}">{{ clarification.clarid }}</a></td>
@@ -83,20 +83,17 @@
             {%- endif %}
 
             <td><a href="{{ link }}">{{ answered }}</a></td>
-            <td>
+            <td><form action="{{ path('jury_clarification_claim', {clarId: clarification.clarid}) }}" method="post" class="form-inline">
                 {%- if claim and clarification.sender -%}
-
-                    <a href="{{ path('legacy.jury_clarification', {id: clarification.clarid, claim: 1}) }}"
-                       class="btn btn-outline-secondary btn-sm">Claim</a>
+                    <button name="claimed" value="1"
+                       class="btn btn-outline-secondary btn-sm">Claim</button>
                 {%- elseif not clarification.answered and app.user.username == juryMember %}
-
-                    <a href="{{ path('legacy.jury_clarification', {id: clarification.clarid, unclaim: 1}) }}"
-                       class="btn btn-outline-secondary btn-sm">Unclaim</a>
+                    <button name="claimed" value="0"
+                       class="btn btn-outline-secondary btn-sm">Unclaim</button>
                 {%- else -%}
-
                     <a href="{{ link }}">{{ juryMember | raw }}</a>
                 {%- endif -%}
-
+		</form>
             </td>
         </tr>
     {%- endfor %}

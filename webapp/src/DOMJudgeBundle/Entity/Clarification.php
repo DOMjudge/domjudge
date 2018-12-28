@@ -15,6 +15,7 @@ class Clarification implements ExternalRelationshipEntityInterface
     /**
      * @var int
      * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="clarid", options={"comment"="Unique ID"}, nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
@@ -258,7 +259,7 @@ class Clarification implements ExternalRelationshipEntityInterface
     /**
      * Set submittime
      *
-     * @param string $submittime
+     * @param double $submittime
      *
      * @return Clarification
      */
@@ -272,7 +273,7 @@ class Clarification implements ExternalRelationshipEntityInterface
     /**
      * Get submittime
      *
-     * @return string
+     * @return double
      */
     public function getSubmittime()
     {

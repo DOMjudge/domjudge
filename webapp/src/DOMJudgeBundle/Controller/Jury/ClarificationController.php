@@ -5,11 +5,20 @@ namespace DOMJudgeBundle\Controller\Jury;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Entity\Clarification;
+use DOMJudgeBundle\Entity\ContestProblem;
+use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\Problem;
+use DOMJudgeBundle\Entity\User;
+use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
+use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Form\Exception\InvalidArgumentException;
 
 /**
  * @Route("/jury")
@@ -28,16 +37,24 @@ class ClarificationController extends Controller
     protected $DOMJudgeService;
 
     /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
+    /**
      * ClarificationController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
+     * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->eventLogService = $eventLogService;
     }
 
     /**
@@ -103,12 +120,100 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/clarification", name="jury_clarification_new")
+     * @Route("/clarifications/{id}", name="jury_clarification", requirements={"id": "\d+"})
      * @throws \Exception
      */
-    public function sendClarificationAction(Request $request)
+    public function viewAction(Request $request, int $id)
     {
-        // TODO: use proper Symfony form for this
+        /** @var Clarification $clarification */
+        $clarification = $this->entityManager->getRepository(Clarification::class)->find($id);
+        if (!$clarification) {
+            throw new NotFoundHttpException(sprintf('Clarification with ID %s not found', $id));
+        }
+
+        $clardata = ['list'=>[]];
+        $clardata['clarform'] = $this->getClarificationFormData();
+
+        $categories = $clardata['clarform']['subjects'];
+        $queues     = $this->DOMJudgeService->dbconfig_get('clar_queues');
+
+        if ( $irt = $clarification->getInReplyTo() ) {
+            $clarlist = [$irt];
+            $replies = $irt->getReplies() ?? [];
+            foreach($replies as $clar_reply) { $clarlist[] = $clar_reply; }
+        } else {
+            $clarlist = [$clarification];
+            $replies = $clarification->getReplies() ?? [];
+            foreach($replies as $clar_reply) { $clarlist[] = $clar_reply; }
+        }
+
+        $concernsteam = null;
+        foreach($clarlist as $k => $clar) {
+            $data = ['clarid' => $clar->getClarid()];
+            $data['time'] = $clar->getSubmittime();
+
+            $jurymember = $clar->getJuryMember();
+            if ( !empty($jurymember) ) {
+                $juryuser = $this->entityManager->getRepository(User::class)->findBy(['username'=>$jurymember]);
+                $data['from_jurymember'] = $juryuser[0]->getName();
+                $data['jurymember_is_me'] = $juryuser[0] == $this->getUser();
+            }
+
+            if ( $fromteam = $clar->getSender() ) {
+                $data['from_teamname'] = $fromteam->getName();
+                $data['from_teamid'] = $fromteam->getTeamid();
+                $concernsteam = $fromteam->getTeamid();
+            }
+            if ( $toteam = $clar->getRecipient() ) {
+                $data['to_teamname'] = $toteam->getName();
+                $data['to_teamid'] = $toteam->getTeamid();
+            }
+
+            $clarcontest = $clar->getContest()->getShortname();
+            if ( $clar->getProbId() ) {
+                $concernssubject = $clar->getContest()->getCid() . "-" . $clar->getProbId();
+            } elseif ( $clar->getCategory() ) {
+                $concernssubject = $clar->getContest()->getCid() . "-" . $clar->getCategory();
+            } else {
+                $concernssubject = "";
+            }
+            $data['subject'] = $categories[$clarcontest][$concernssubject];
+            $data['categoryid'] = $concernssubject;
+            $data['queue'] = $queues[$clar->getQueue()] ?? 'Unassigned issues';
+            $data['queueid'] = $clar->getQueue() ?? '';
+
+            $data['answered'] = $clar->getAnswered();
+
+            $data['body'] = $clar->getBody();
+            $clardata['list'][] = $data;
+        }
+    
+        if ( $concernsteam ) {
+            $clardata['clarform']['toteam'] = $concernsteam;
+        }
+        if ( $concernssubject ) {
+            $clardata['clarform']['onsubject'] = $concernssubject;
+        }
+    
+        $clardata['clarform']['quotedtext'] = "> " . str_replace("\n", "\n> ", Utils::wrap_unquoted($data['body'])) . "\n\n";
+        $clardata['clarform']['queues'] = $queues;
+    
+        return $this->render('@DOMJudge/jury/clarification.html.twig',
+            $clardata,
+        );
+    }
+
+    protected function getProblemShortName(int $probid, int $cid) : string
+    {
+        $cp = $this->entityManager->getRepository(ContestProblem::class)->findBy(['probid'=>$probid, 'cid' => $cid]);
+        if ( isset($cp[0]) ) {
+            return "problem " . $cp[0]->getShortName();
+        }
+        return "unknown problem";
+    }
+
+    protected function getClarificationFormData() : array
+    {
         $em = $this->getDoctrine()->getManager();
         $teams = $em->getRepository('DOMJudgeBundle:Team')->findAll();
         foreach ($teams as $team) {
@@ -145,10 +250,213 @@ class ClarificationController extends Controller
 
         $data['subjects'] = $subject_options;
 
+        return $data;
+    }
+
+    /**
+     * @Route("/clarifications/send", methods={"GET"}, name="jury_clarification_new")
+     * @throws \Exception
+     */
+    public function composeClarificationAction(Request $request)
+    {
+        // TODO: use proper Symfony form for this
+
+        $data = $this->getClarificationFormData();
+
         if ( $toteam = $request->query->get('teamto') ) {
             $data['toteam'] = $toteam;
         }
 
-        return $this->render('@DOMJudge/jury/clarification.html.twig', $data);
+        return $this->render('@DOMJudge/jury/clarification_new.html.twig', ['clarform' => $data]);
+    }
+
+    /**
+     * @Route("/clarifications/{clarId}/claim", name="jury_clarification_claim")
+     * @param Request $request
+     * @param int     $clarId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function toggleClaimAction(Request $request, int $clarId)
+    {
+        /** @var Clarification $clarification */
+        $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);
+        if (!$clarification) {
+            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+        }
+
+        if($request->request->getBoolean('claimed')) {
+            $clarification->setJuryMember($this->getUser()->getUsername());
+            $this->entityManager->flush();
+            return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
+        } else {
+            $clarification->setJuryMember(null);
+            $this->entityManager->flush();
+            return $this->redirectToRoute('jury_clarifications');
+        }
+    }
+
+    /**
+     * @Route("/clarifications/{clarId}/set-answered", name="jury_clarification_set_answered")
+     * @param Request $request
+     * @param int     $clarId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function toggleAnsweredAction(Request $request, int $clarId)
+    {
+        /** @var Clarification $clarification */
+        $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);
+        if (!$clarification) {
+            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+        }
+
+        $answered = $request->request->getBoolean('answered');
+        $clarification->setAnswered($answered);
+        $this->entityManager->flush();
+
+        if ( $answered ) {
+            return $this->redirectToRoute('jury_clarifications');
+        } else {
+            return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
+        }
+    }
+
+    /**
+     * @Route("/clarifications/{clarId}/change-subject", name="jury_clarification_change_subject")
+     * @param Request $request
+     * @param int     $clarId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function changeSubjectAction(Request $request, int $clarId)
+    {
+        /** @var Clarification $clarification */
+        $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);
+        if (!$clarification) {
+            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+        }
+
+        $subject = $request->request->get('subject');
+        list($cid, $probid) = explode('-', $subject);
+
+        $contest = $this->entityManager->getRepository(Contest::class)->find($cid);
+        $clarification->setContest($contest);
+
+        if (ctype_digit($probid)) {
+            $problem = $this->entityManager->getRepository(Problem::class)->find($probid);
+            $clarification->setProblem($problem);
+            $clarification->setCategory(null);
+        } else {
+            $clarification->setProblem(null);
+            $clarification->setCategory($probid);
+        }
+
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
+    }
+
+    /**
+     * @Route("/clarifications/{clarId}/change-queue", name="jury_clarification_change_queue")
+     * @param Request $request
+     * @param int     $clarId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function changeQueueAction(Request $request, int $clarId)
+    {
+        /** @var Clarification $clarification */
+        $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);
+        if (!$clarification) {
+            throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
+        }
+
+        $queue = $request->request->get('queue');
+        if ( $queue === "" ) {
+            $queue = null;
+        }
+        $clarification->setQueue($queue);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
+    }
+
+    /**
+     * @Route("/clarifications/send", methods={"POST"}, name="jury_clarification_send")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function sendAction(Request $request)
+    {
+        $clarification = new Clarification();
+
+        if($respid = $request->request->get('id')) {
+            $respclar = $this->entityManager->getRepository(Clarification::class)->find($respid);
+            $clarification->setInReplyTo($respclar);
+        }
+
+        $sendto = $request->request->get('sendto');
+        if (empty($sendto)) {
+            $sendto = null;
+        } elseif ($sendto === 'domjudge-must-select') {
+            throw new InvalidArgumentException('You must select somewhere to send the clarification to.');
+        } else {
+            $clarification->setRecipientId($sendto);
+            $team = $this->entityManager->getRepository(Team::class)->find($sendto);
+            $clarification->setRecipient($team);
+        }
+
+        $problem = $request->request->get('problem');
+        list($cid, $probid) = explode('-', $problem);
+
+        $contest = $this->entityManager->getRepository(Contest::class)->find($cid);
+        $clarification->setContest($contest);
+
+        if (ctype_digit($probid)) {
+            $problem = $this->entityManager->getRepository(Problem::class)->find($probid);
+            $clarification->setProblem($problem);
+            $clarification->setCategory(null);
+        } else {
+            $clarification->setProblem(null);
+            $clarification->setCategory($probid);
+        }
+
+        if($respid) {
+            $queue = $respclar->getQueue();
+        } else {
+            $queue = $this->DOMJudgeService->dbconfig_get('clar_default_problem_queue');
+            if ($queue === "") {
+                $queue = null;
+            }
+        }
+        $clarification->setQueue($queue);
+
+        $clarification->setJuryMember($this->getUser()->getUsername());
+        $clarification->setAnswered(true);
+        $clarification->setBody($request->request->get('bodytext'));
+        $clarification->setSubmittime(Utils::now());
+
+        $this->entityManager->persist($clarification);
+        if ($respid) {
+            $respclar->setAnswered(true);
+            $respclar->setJuryMember($this->getUser()->getUsername());
+            $this->entityManager->persist($respclar);
+        }
+        $this->entityManager->flush();
+
+        $clarId = $clarification->getClarId();
+        $this->DOMJudgeService->auditlog('clarification', $clarId, 'added');
+        $this->eventLogService->log('clarification', $clarId, 'create');
+
+        if($sendto) {
+            $team->addUnreadClarification($clarification);
+            $this->entityManager->persist($team);
+        } else {
+            $teams = $this->entityManager->getRepository(Team::class)->findAll();
+            foreach($teams as $team) {
+                $team->addUnreadClarification($clarification);
+                $this->entityManager->persist($team);
+            }
+        }
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
     }
 }

@@ -1,0 +1,38 @@
+<form action="{{ path('jury_clarification_send') }}" method="post" id="sendclar" onsubmit="return confirmClar();">
+
+{% if origclar.clarid is defined %}
+<input type="hidden" name="id" value="{{ origclar.clarid }}">
+{% endif %}
+
+<div class="form-group">
+<label for="sendto">Send to:</label>
+<select id="sendto" name="sendto" class="custom-select">
+{% for id,team in clarform.teams %}
+<option value="{{id}}"{% if clarform.toteam is defined and clarform.toteam == id %} selected{% endif %}>{{team}}</option>
+{% endfor %}
+</select>
+</div>
+
+<div class="form-group">
+<label for="subject">Subject:</label>
+<select name="problem" id="subject" class="custom-select">
+{% for contest,subject in clarform.subjects %}
+<optgroup label="{{ contest }}">
+{% for id,descr in subject %}
+<option value="{{id}}"{% if clarform.onsubject is defined and clarform.onsubject == id %} selected{% endif %}>{{descr}}</option>
+{% endfor %}
+</optgroup>
+{% endfor %}
+</select>
+</div>
+
+<div class="form-group">
+<label for="bodytext">Message:</label>
+<textarea class="form-control" name="bodytext" id="bodytext" rows="8" cols="85" required>{{ clarform.quotedtext|default("") }}</textarea>
+</div>
+
+
+<div class="form-group">
+<button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-envelope"></i> Send</button>
+</div>
+</form>

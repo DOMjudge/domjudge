@@ -23,7 +23,7 @@ class ContestProblem
      * @var int
      *
      * @ORM\Id
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
      * @Serializer\Exclude()
      */
     private $cid;
@@ -48,7 +48,7 @@ class ContestProblem
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="points", options={"comment"="Number of points earened by solving this problem"}, nullable=false)
+     * @ORM\Column(type="integer", name="points", options={"comment"="Number of points earned by solving this problem"}, nullable=false)
      * @Serializer\Exclude()
      * @Assert\GreaterThanOrEqual(0)
      */

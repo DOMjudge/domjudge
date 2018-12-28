@@ -260,3 +260,11 @@ table.rejudgetable td.zero {
 tr.ignore td, td.ignore, span.ignore {
     text-decoration: line-through;
 }
+
+.clarification-subject-form, .clarification-queue-form {
+    display: none;
+}
+
+.form-inline {
+    display: inline;
+}

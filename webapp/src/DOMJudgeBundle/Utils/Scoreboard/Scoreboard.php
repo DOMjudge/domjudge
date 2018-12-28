@@ -341,7 +341,7 @@ class Scoreboard
 
     /**
      * Main score comparison function, called from the 'scoreboardCompare' wrapper
-     * below. Scores based on the following criteria:
+     * above. Scores based on the following criteria:
      * - highest points from correct solutions;
      * - least amount of total time spent on these solutions;
      * - the tie-breaker function below

@@ -37,9 +37,9 @@
             {%- include '@DOMJudge/jury/partials/clarification_list.html.twig' with {clarifications: oldClarifications} %}
         {%- endif %}
 
-        <h3 id="clarifications">General requests:</h3>
+        <h3 id="clarifications">General clarifications:</h3>
         {%- if generalClarifications | length == 0 %}
-            <p class="nodata">No general clarification requests.</p>
+            <p class="nodata">No general clarifications.</p>
         {%- else %}
             {%- include '@DOMJudge/jury/partials/clarification_list.html.twig' with {clarifications: generalClarifications} %}
         {%- endif %}
