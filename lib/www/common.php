@@ -900,31 +900,6 @@ function putgetMainExtension(array $langdata)
     echo "\t\tdefault: return '';\n\t}\n}\n\n";
 }
 
-/**
- * Render page with help of twig.
- * Assumes rendering template in file with same base name and suffix .phtml
- */
-function renderPage($data, bool $header = true, bool $footer = true, $templateFile = null)
-{
-    if (empty($templateFile)) {
-        $templateFile = $_SERVER['PHP_SELF'];
-    }
-    $templateFile = basename($templateFile, '.php') . '.phtml';
-
-    $title = $data['title'];
-    $refresh = @$data['refresh'];
-    if ($header) {
-        require(LIBWWWDIR . '/header.php');
-    }
-
-    global $twig;
-    echo $twig->loadTemplate($templateFile)->render($data);
-
-    if ($footer) {
-        require(LIBWWWDIR . '/footer.php');
-    }
-}
-
 function descriptionExpand(string $description = null) : string
 {
     if ($description == null) {

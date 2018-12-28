@@ -87,19 +87,3 @@ $updates = array(
             WHERE status=%s', 'open'),
 );
 
-// set up twig
-// require_once(LIBVENDORDIR . '/autoload.php');
-// Twig_Autoloader::register();
-$loader = new Twig_Loader_Filesystem(array('.', LIBWWWDIR));
-$twig = new Twig_Environment($loader);
-
-$twig_safe = array('is_safe' => array('html'));
-$twig->addFilter(new Twig_SimpleFilter('host', 'printhost', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('humansize', 'printsize', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('time', 'printtime', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('timediff', 'printtimediff', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('result', 'printresult', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('jud_busy', 'printjudgingbusy', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('yesno', 'printyn', $twig_safe));
-$twig->addFilter(new Twig_SimpleFilter('description_expand', 'descriptionExpand', $twig_safe));
-unset($twig_safe);
