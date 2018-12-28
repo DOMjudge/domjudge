@@ -199,7 +199,7 @@ class ClarificationController extends Controller
         $clardata['clarform']['queues'] = $queues;
     
         return $this->render('@DOMJudge/jury/clarification.html.twig',
-            $clardata,
+            $clardata
         );
     }
 
