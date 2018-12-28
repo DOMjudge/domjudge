@@ -450,8 +450,8 @@ class ClarificationController extends Controller
         $this->entityManager->flush();
 
         $clarId = $clarification->getClarId();
-        $this->DOMJudgeService->auditlog('clarification', $clarId, 'added');
-        $this->eventLogService->log('clarification', $clarId, 'create');
+        $this->DOMJudgeService->auditlog('clarification', $clarId, 'added', null, null, $cid);
+        $this->eventLogService->log('clarification', $clarId, 'create', $cid);
 
         if($sendto) {
             $team->addUnreadClarification($clarification);
