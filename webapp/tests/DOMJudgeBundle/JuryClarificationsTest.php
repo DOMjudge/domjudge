@@ -150,7 +150,8 @@ class JuryClarificationsTest extends WebTestCase
 
         $options = $crawler->filter('option')->extract(array('_text'));
         $this->assertEquals('ALL', $options[1]);
-        $this->assertEquals('Example teamname (t2)', $options[2]);
+        $this->assertEquals('DOMjudge (t1)', $options[2]);
+        $this->assertEquals('Example teamname (t2)', $options[3]);
 
         $labels = $crawler->filter('label')->extract(array('_text'));
         $this->assertEquals('Send to:', $labels[0]);

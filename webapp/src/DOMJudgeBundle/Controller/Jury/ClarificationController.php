@@ -177,7 +177,11 @@ class ClarificationController extends Controller
             } else {
                 $concernssubject = "";
             }
-            $data['subject'] = $categories[$clarcontest][$concernssubject];
+            if ($concernssubject !== "") {
+                $data['subject'] = $categories[$clarcontest][$concernssubject];
+            } else {
+                $data['subject'] = $clarcontest;
+            }
             $data['categoryid'] = $concernssubject;
             $data['queue'] = $queues[$clar->getQueue()] ?? 'Unassigned issues';
             $data['queueid'] = $clar->getQueue() ?? '';
@@ -415,7 +419,11 @@ class ClarificationController extends Controller
             $clarification->setCategory(null);
         } else {
             $clarification->setProblem(null);
-            $clarification->setCategory($probid);
+            if ($probid !== "") {
+                $clarification->setCategory($probid);
+            } else {
+                $clarification->setCategory(null);
+	    }
         }
 
         if($respid) {

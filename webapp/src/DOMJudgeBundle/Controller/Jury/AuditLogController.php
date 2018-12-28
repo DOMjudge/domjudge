@@ -91,7 +91,9 @@ class AuditLogController extends Controller
             $data['what']['value'] = $datatype . " " . $dataid . " " .
                             $logline->getAction() . " " .
                             $logline->getExtraInfo();
-            $dataurl = $this->generateDatatypeUrl($datatype, $dataid);
+            if( !is_null($dataid) ) {
+                $dataurl = $this->generateDatatypeUrl($datatype, $dataid);
+            }
             if ( $dataurl ) {
                 $data['what']['link'] = $dataurl;
             }
@@ -133,7 +135,7 @@ class AuditLogController extends Controller
             case 'balloon':
                 return $this->generateUrl('jury_balloons');
             case 'clarification':
-                return $this->generateUrl('legacy.jury_clarification', ['id' => $id]);
+                return $this->generateUrl('jury_clarification', ['id' => $id]);
             case 'configuration':
                 return $this->generateUrl('jury_config');
             case 'contest':
