@@ -165,7 +165,7 @@ curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F
 
 # Send a general clarification to later test if we see the event.
 curl $CURLOPTS -F "sendto=" -F "problem=2-" -F "bodytext=Testing" -F "submit=Send" \
-	 "http://localhost/domjudge/jury/clarification.php" -o /dev/null
+	 "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
 
 while /bin/true; do
 	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
