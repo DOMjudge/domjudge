@@ -40,7 +40,7 @@ function genpw($users, $group, $format)
         // update the user table with a password
         $DB->q('UPDATE user SET password = %s WHERE username = %s',
                dj_password_hash($pass), $user['username']);
-        auditlog('user', $user['username'], 'set password');
+        auditlog('user', $user['userid'], 'set password');
         $line = implode(
             "\t",
             array(

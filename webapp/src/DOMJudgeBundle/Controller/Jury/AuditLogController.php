@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\Jury;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use DOMJudgeBundle\Entity\Testcase;
+use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
@@ -165,6 +166,11 @@ class AuditLogController extends Controller
             case 'team_category':
                 return $this->generateUrl('jury_team_category', ['categoryId' => $id]);
             case 'user':
+                // Pre 6.1, usernames were stored instead of numeric ids
+                if (!is_numeric($id)) {
+                    $user = $this->entityManager->getRepository(User::class)->findOneBy(['username'=>$id]);
+                    $id = $user->getUserId();
+                }
                 return $this->generateUrl('jury_user', ['userId' => $id]);
             case 'testcase':
                 $testcase = $this->entityManager->getRepository(Testcase::class)->find($id);
