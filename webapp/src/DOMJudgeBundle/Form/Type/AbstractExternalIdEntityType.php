@@ -46,7 +46,7 @@ class AbstractExternalIdEntityType extends AbstractType
                 'constraints' => [
                     new Regex(
                         [
-                            'pattern' => '/^ [a-zA-Z0-9_-] +$/i',
+                            'pattern' => '/^[a-zA-Z0-9_-]+$/i',
                             'message' => 'Only letters, numbers, dashes and underscores are allowed',
                         ]
                     )
