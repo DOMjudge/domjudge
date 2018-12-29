@@ -121,4 +121,7 @@ server {
 #			internal;
 #		}
 #	}
+
+#	error_log /var/log/nginx/domjudge.log;
+#	access_log /var/log/nginx/domjudge.log;
 # }
