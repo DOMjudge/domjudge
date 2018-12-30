@@ -169,11 +169,13 @@ class ClarificationController extends Controller
                 $data['to_teamid'] = $toteam->getTeamid();
             }
 
-            $clarcontest = $clar->getContest()->getShortname();
+            $contest = $clar->getContest();
+            $data['contest'] = $contest;
+            $clarcontest = $contest->getShortname();
             if ( $clar->getProbId() ) {
-                $concernssubject = $clar->getContest()->getCid() . "-" . $clar->getProbId();
+                $concernssubject = $contest->getCid() . "-" . $clar->getProbId();
             } elseif ( $clar->getCategory() ) {
-                $concernssubject = $clar->getContest()->getCid() . "-" . $clar->getCategory();
+                $concernssubject = $contest->getCid() . "-" . $clar->getCategory();
             } else {
                 $concernssubject = "";
             }
@@ -423,7 +425,7 @@ class ClarificationController extends Controller
                 $clarification->setCategory($probid);
             } else {
                 $clarification->setCategory(null);
-	    }
+            }
         }
 
         if($respid) {

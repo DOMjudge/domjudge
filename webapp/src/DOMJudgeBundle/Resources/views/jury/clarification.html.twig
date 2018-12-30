@@ -26,7 +26,7 @@
 <div class="card mb-3 {% if clar.from_teamid is not defined %}border-primary{% endif %}">
 <div class="card-header"><div class="row">
 <div class="col-sm">Clarification {{ clar.clarid }}</div>
-<div class="col-sm text-muted text-right">{{ clar.time | printtime }}</div>
+<div class="col-sm text-muted text-right">{{ clar.time | printtimeHover(clar.contest) }}</div>
 </div></div>
 <div class="card-body">
 <div class="card-title">
