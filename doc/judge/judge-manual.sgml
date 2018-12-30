@@ -118,7 +118,7 @@ submissions, but leave them queued; this is useful in case an
 unexpected problem shows up with one of the problems. Timelimit is the
 maximum number of seconds a submission for this problem is allowed to
 run before a `TIMELIMIT' response is given (to be multiplied possibly
-by a language factor). Note that a `timelimit overshoot' can be
+by a language factor). A `timelimit overshoot' can be
 configured to let submissions run a bit longer. Although DOMjudge will
 use the actual limit to determine the verdict, this allows judges to
 see if a submission is close to the timelimit.
@@ -136,13 +136,12 @@ the administrator's manual.
 The `Languages' overview is quite the same. It has a timefactor
 column; submissions in a language that has time factor 2 will be
 allowed to run twice the time that has been specified under Problems.
-This can be used to compensate for the execution speed of a language,
-e.g. Java.
+This can be used to compensate for the execution speed of a language.
 
 <sect>Verifying testdata
 <p>
 
-For checking whether the your testdata conforms to the specifications
+For checking whether your testdata conforms to the specifications
 of your problem statement, we recommend the checktestdata program,
 which is available from a <htmlurl name="separate repository"
 url="https://github.com/DOMjudge/checktestdata">.
@@ -304,7 +303,7 @@ judgehost, press the `Rejudge all' button and confirm.
 There are two different ways to run a rejudging, depending on whether
 the <tt>create rejudging</tt> button toggled:
 <enum>
-<item>Without this button toggled, an "old-style" rejudging is
+<item>Without this button toggled, an instant rejudging is
   performed where the results are directly made effective.
 <item>When toggled, a "rejudging" set is created, and all affected
   submissions are rejudged, but the new judgings are not made
@@ -370,8 +369,8 @@ way that the message is self-contained (e.g. by keeping the quoted
 text), since the other teams cannot view the original request.
 
 <p>
-The menu on every page of the jury interface will mention the number
-of unanswered clarification requests: ``(1 new)''. This number is
+The menu on every page of the jury interface will show the number
+of unanswered clarification requests in a blue badge. This number is
 automatically updated, even without reloading the page.
 
 
