@@ -70,6 +70,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         return [
             new \Twig_SimpleFilter('timediff', [$this, 'timediff']),
             new \Twig_SimpleFilter('printtime', [$this, 'printtime']),
+            new \Twig_SimpleFilter('printtimeHover', [$this, 'printtimeHover'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printResult', [$this, 'printResult'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printYesNo', [$this, 'printYesNo']),
@@ -181,6 +182,26 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             }
             return Utils::printtime($datetime, $format);
         }
+    }
+
+    /**
+     * Helper function to print a time in the default/configured format,
+     * and a hover title attribute with the full datetime string.
+     *
+     * @param string|float $datetime
+     * @param Contest|null $contest If given, print time relative to that contest start.
+     * @return string
+     * @throws \Exception
+     */
+    public function printtimeHover($datetime, Contest $contest = null): string
+    {
+        if ($datetime === null) {
+            $datetime = Utils::now();
+        }
+        return '<span title="' .
+            Utils::printtime($datetime, '%Y-%m-%d %H:%M (%Z)') . '">' .
+            $this->printtime($datetime, null, $contest) .
+            '</span>';
     }
 
     /**
