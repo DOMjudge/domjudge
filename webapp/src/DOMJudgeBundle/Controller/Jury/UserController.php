@@ -33,12 +33,19 @@ class UserController extends BaseController
      */
     private $DOMJudgeService;
 
+    /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->eventLogService = $eventLogService;
     }
 
     /**
@@ -169,13 +176,12 @@ class UserController extends BaseController
     /**
      * @Route("/users/{userId}/edit", name="jury_user_edit", requirements={"userId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
-     * @param EventLogService $eventLogService
      * @param Request         $request
      * @param int             $userId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function editAction(EventLogService $eventLogService, Request $request, int $userId)
+    public function editAction(Request $request, int $userId)
     {
         /** @var User $user */
         $user = $this->entityManager->getRepository(User::class)->find($userId);
@@ -188,7 +194,7 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $eventLogService, $this->DOMJudgeService, $user, $user->getUserid(),
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $user, $user->getUserid(),
                               false);
             return $this->redirect($this->generateUrl('jury_user',
                                                       ['userId' => $user->getUserid()]));
@@ -203,12 +209,11 @@ class UserController extends BaseController
     /**
      * @Route("/users/add", name="jury_user_add")
      * @Security("has_role('ROLE_ADMIN')")
-     * @param EventLogService $eventLogService
      * @param Request         $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function addAction(EventLogService $eventLogService, Request $request)
+    public function addAction(Request $request)
     {
         $user = new User();
         if ($request->query->has('team')) {
@@ -221,7 +226,7 @@ class UserController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($user);
-            $this->saveEntity($this->entityManager, $eventLogService, $this->DOMJudgeService, $user, $user->getUserid(),
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $user, $user->getUserid(),
                               true);
             return $this->redirect($this->generateUrl('jury_user',
                                                       ['userId' => $user->getUserid()]));
