@@ -79,7 +79,6 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
                                    ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('externalCcsUrl', [$this, 'externalCcsUrl']),
             new \Twig_SimpleFilter('lineCount', [$this, 'lineCount']),
-            new \Twig_SimpleFilter('autoExpand', [$this, 'autoExpand'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('base64', 'base64_encode'),
             new \Twig_SimpleFilter('base64_decode', 'base64_decode'),
             new \Twig_SimpleFilter('parseRunDiff', [$this, 'parseRunDiff'], ['is_safe' => ['html']]),
@@ -381,35 +380,6 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
     public function lineCount(string $input): int
     {
         return mb_substr_count($input, "\n");
-    }
-
-    /**
-     * Show an automatically expanding text
-     * @param string|null $text
-     * @return string
-     */
-    public function autoExpand(string $text = null): string
-    {
-        if ($text == null) {
-            return '';
-        }
-        $descriptionLines = explode("\n", $text);
-        if (count($descriptionLines) <= 3) {
-            return implode('<br />', $descriptionLines);
-        } else {
-            $default         = implode('<br />', array_slice($descriptionLines, 0, 3));
-            $defaultEscaped  = htmlentities($default);
-            $expandedEsacped = htmlentities(implode('<br />', $descriptionLines));
-            return <<<EOF
-<span>
-    <span data-expanded="$expandedEsacped" data-collapsed="$defaultEscaped">
-    $default
-    </span>
-    <br/>
-    <a href="javascript:;" onclick="toggleExpand(event)">[expand]</a>
-</span>
-EOF;
-        }
     }
 
     /**
@@ -747,14 +717,14 @@ JS;
         }
         $descriptionLines = explode("\n", $description);
         if (count($descriptionLines) <= 3) {
-            return implode('<br />', $descriptionLines);
+            return implode('<br>', $descriptionLines);
         } else {
-            $default          = implode('<br />', array_slice($descriptionLines, 0, 3));
-            $defaultEscaped   = htmlentities($default);
-            $expandedEscaaped = htmlentities(implode('<br />', $descriptionLines));
+            $default          = implode('<br>', array_slice($descriptionLines, 0, 3));
+            $defaultEscaped   = Utils::specialchars($default);
+            $expandedEscaped  = Utils::specialchars(implode('<br>', $descriptionLines));
             return <<<EOF
 <span>
-    <span data-expanded="$expandedEscaaped" data-collapsed="$defaultEscaped">
+    <span data-expanded="$expandedEscaped" data-collapsed="$defaultEscaped">
     $default
     </span>
     <br/>
