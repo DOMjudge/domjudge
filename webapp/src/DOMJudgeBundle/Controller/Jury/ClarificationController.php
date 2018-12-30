@@ -452,15 +452,16 @@ class ClarificationController extends Controller
         $clarId = $clarification->getClarId();
         $this->DOMJudgeService->auditlog('clarification', $clarId, 'added', null, null, $cid);
         $this->eventLogService->log('clarification', $clarId, 'create', $cid);
+        // Reload clarification to make sure we have a fresh one after calling the event log service
+        $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);
 
         if($sendto) {
+            $team = $this->entityManager->getRepository(Team::class)->find($sendto);
             $team->addUnreadClarification($clarification);
-            $this->entityManager->persist($team);
         } else {
             $teams = $this->entityManager->getRepository(Team::class)->findAll();
             foreach($teams as $team) {
                 $team->addUnreadClarification($clarification);
-                $this->entityManager->persist($team);
             }
         }
         $this->entityManager->flush();
