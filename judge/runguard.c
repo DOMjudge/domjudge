@@ -1321,7 +1321,7 @@ int main(int argc, char **argv)
 			r = pselect(nfds+1, &readfds, NULL, NULL, NULL, &emptymask);
 			if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
 
-			if ( received_SIGCHLD ) {
+			if ( received_SIGCHLD || received_signal == SIGALRM ) {
 				if ( (pid = wait(&status))<0 ) error(errno,"waiting on child");
 				if ( pid==child_pid ) break;
 			}
