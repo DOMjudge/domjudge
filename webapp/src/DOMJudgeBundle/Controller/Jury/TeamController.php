@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Role;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\User;
@@ -13,7 +14,6 @@ use DOMJudgeBundle\Service\ScoreboardService;
 use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -26,7 +26,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/jury")
  * @Security("has_role('ROLE_JURY')")
  */
-class TeamController extends Controller
+class TeamController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -327,6 +327,7 @@ class TeamController extends Controller
      * @param Request $request
      * @param int     $teamId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function editAction(Request $request, int $teamId)
     {
@@ -341,9 +342,8 @@ class TeamController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('team', $team->getTeamid(),
-                                             'updated');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $team,
+                              $team->getTeamid(), false);
             return $this->redirect($this->generateUrl('jury_team',
                                                       ['teamId' => $team->getTeamid()]));
         }
@@ -360,6 +360,7 @@ class TeamController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Exception
      */
     public function addAction(Request $request)
     {
@@ -393,9 +394,8 @@ class TeamController extends Controller
                 $this->entityManager->persist($user);
             }
             $this->entityManager->persist($team);
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('team', $team->getTeamid(),
-                                             'added');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $team,
+                              $team->getTeamid(), true);
             return $this->redirect($this->generateUrl('jury_team',
                                                       ['teamId' => $team->getTeamid()]));
         }

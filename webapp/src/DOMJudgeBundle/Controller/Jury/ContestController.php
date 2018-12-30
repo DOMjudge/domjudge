@@ -4,6 +4,7 @@ namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\RemovedInterval;
@@ -14,7 +15,6 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/jury")
  * @Security("has_role('ROLE_JURY')")
  */
-class ContestController extends Controller
+class ContestController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -407,6 +407,7 @@ class ContestController extends Controller
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function editAction(Request $request, int $contestId)
     {
@@ -421,9 +422,8 @@ class ContestController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('contest', $contest->getcid(),
-                                             'updated');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $contest,
+                              $contest->getCid(), false);
             return $this->redirect($this->generateUrl('jury_contest',
                                                       ['contestId' => $contest->getcid()]));
         }
@@ -469,10 +469,9 @@ class ContestController extends Controller
                         ->setCid($contest->getCid());
                     $this->entityManager->persist($problem);
                 }
-                $this->entityManager->flush();
+                $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $contest,
+                                  $contest->getCid(), true);
             });
-            $this->DOMJudgeService->auditlog('contest', $contest->getcid(),
-                                             'added');
             return $this->redirect($this->generateUrl('jury_contest',
                                                       ['contestId' => $contest->getcid()]));
         }

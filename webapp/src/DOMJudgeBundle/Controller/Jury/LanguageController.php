@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Form\Type\LanguageType;
@@ -10,7 +11,6 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/jury")
  * @Security("has_role('ROLE_JURY')")
  */
-class LanguageController extends Controller
+class LanguageController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -232,6 +232,7 @@ class LanguageController extends Controller
      * @param Request $request
      * @param string  $langId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function editAction(Request $request, string $langId)
     {
@@ -252,9 +253,8 @@ class LanguageController extends Controller
             if ($language->getExtensions()) {
                 $language->setExtensions(array_values($language->getExtensions()));
             }
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('language', $language->getLangid(),
-                                             'updated');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $language,
+                              $language->getLangid(), false);
             return $this->redirect($this->generateUrl('jury_language',
                                                       ['langId' => $language->getLangid()]));
         }
@@ -270,6 +270,7 @@ class LanguageController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function addAction(Request $request)
     {
@@ -285,9 +286,8 @@ class LanguageController extends Controller
                 $language->setExtensions(array_values($language->getExtensions()));
             }
             $this->entityManager->persist($language);
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('language', $language->getLangid(),
-                                             'added');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $language,
+                              $language->getLangid(), true);
             return $this->redirect($this->generateUrl('jury_language',
                                                       ['langId' => $language->getLangid()]));
         }

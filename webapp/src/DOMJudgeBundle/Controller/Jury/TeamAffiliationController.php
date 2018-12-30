@@ -3,13 +3,13 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\TeamAffiliation;
 use DOMJudgeBundle\Form\Type\TeamAffiliationType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ScoreboardService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/jury")
  * @Security("has_role('ROLE_JURY')")
  */
-class TeamAffiliationController extends Controller
+class TeamAffiliationController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -208,6 +208,7 @@ class TeamAffiliationController extends Controller
      * @param Request $request
      * @param int     $affilId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function editAction(Request $request, int $affilId)
     {
@@ -222,9 +223,8 @@ class TeamAffiliationController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('team_affiliation', $teamAffiliation->getAffilid(),
-                                             'updated');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $teamAffiliation,
+                              $teamAffiliation->getAffilid(), false);
             return $this->redirect($this->generateUrl('jury_team_affiliation',
                                                       ['affilId' => $teamAffiliation->getAffilid()]));
         }
@@ -240,6 +240,7 @@ class TeamAffiliationController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function addAction(Request $request)
     {
@@ -251,9 +252,8 @@ class TeamAffiliationController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($teamAffiliation);
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('team_affiliation', $teamAffiliation->getAffilid(),
-                                             'added');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $teamAffiliation,
+                              $teamAffiliation->getAffilid(), true);
             return $this->redirect($this->generateUrl('jury_team_affiliation',
                                                       ['affilId' => $teamAffiliation->getAffilid()]));
         }

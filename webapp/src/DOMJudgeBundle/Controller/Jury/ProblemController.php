@@ -4,6 +4,7 @@ namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\Executable;
@@ -22,7 +23,6 @@ use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -39,7 +39,7 @@ use ZipArchive;
  * @Route("/jury")
  * @Security("has_role('ROLE_JURY')")
  */
-class ProblemController extends Controller
+class ProblemController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -846,9 +846,8 @@ class ProblemController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('problem', $problem->getProbid(),
-                                             'updated');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $problem,
+                              $problem->getProbid(), false);
             return $this->redirect($this->generateUrl('jury_problem',
                                                       ['probId' => $problem->getProbid(), 'edited' => true]));
         }
@@ -897,6 +896,7 @@ class ProblemController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function addAction(Request $request)
     {
@@ -908,9 +908,8 @@ class ProblemController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($problem);
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('problem', $problem->getProbid(),
-                                             'added');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $problem,
+                              $problem->getProbid(), true);
             return $this->redirect($this->generateUrl('jury_problem',
                                                       ['probId' => $problem->getProbid()]));
         }

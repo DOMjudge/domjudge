@@ -2,6 +2,10 @@
 
 namespace DOMJudgeBundle\Controller;
 
+use Doctrine\Common\Util\Inflector;
+use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
@@ -54,5 +58,39 @@ abstract class BaseController extends Controller
         }
 
         return $this->redirect($defaultUrl);
+    }
+
+    /**
+     * Save the given entity, adding an eventlog and audilog entry
+     * @param EntityManagerInterface $entityManager
+     * @param EventLogService        $eventLogService
+     * @param DOMJudgeService        $DOMJudgeService
+     * @param object                 $entity
+     * @param mixed                  $id
+     * @param bool                   $isNewEntity
+     * @throws \Exception
+     */
+    protected function saveEntity(
+        EntityManagerInterface $entityManager,
+        EventLogService $eventLogService,
+        DOMJudgeService $DOMJudgeService,
+        $entity,
+        $id,
+        bool $isNewEntity
+    ) {
+        $class = get_class($entity);
+        $parts = explode('\\', $class);
+        $entityType = $parts[count($parts) - 1];
+        $auditLogType = Inflector::tableize($entityType);
+
+        $entityManager->flush();
+        if ($endpoint = $eventLogService->endpointForEntity($entity)) {
+            if ($contest = $DOMJudgeService->getCurrentContest()) {
+                $eventLogService->log($endpoint, $id,
+                                      $isNewEntity ? EventLogService::ACTION_CREATE : EventLogService::ACTION_UPDATE,
+                                      $contest->getCid());
+            }
+        }
+        $DOMJudgeService->auditlog($auditLogType, $id, $isNewEntity ? 'added' : 'updated');
     }
 }

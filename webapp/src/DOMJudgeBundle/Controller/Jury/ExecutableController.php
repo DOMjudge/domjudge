@@ -3,13 +3,14 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Executable;
 use DOMJudgeBundle\Form\Type\ExecutableType;
 use DOMJudgeBundle\Form\Type\ExecutableUploadType;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -26,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/jury")
  * @Security("has_role('ROLE_JURY')")
  */
-class ExecutableController extends Controller
+class ExecutableController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -303,11 +304,13 @@ class ExecutableController extends Controller
     /**
      * @Route("/executables/{execId}/edit", name="jury_executable_edit")
      * @Security("has_role('ROLE_ADMIN')")
-     * @param Request $request
-     * @param string  $execId
+     * @param EventLogService $eventLogService
+     * @param Request         $request
+     * @param string          $execId
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
-    public function editAction(Request $request, string $execId)
+    public function editAction(EventLogService $eventLogService, Request $request, string $execId)
     {
         /** @var Executable $executable */
         $executable = $this->entityManager->getRepository(Executable::class)->find($execId);
@@ -320,9 +323,8 @@ class ExecutableController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('executable', $executable->getExecid(),
-                                             'updated');
+            $this->saveEntity($this->entityManager, $eventLogService, $this->DOMJudgeService, $executable,
+                              $executable->getExecid(), false);
             return $this->redirect($this->generateUrl('jury_executable',
                                                       ['execId' => $executable->getExecid()]));
         }
@@ -349,11 +351,8 @@ class ExecutableController extends Controller
             $executable
                 ->setMd5sum(md5_file($archive->getRealPath()))
                 ->setZipfile(file_get_contents($archive->getRealPath()));
-            $this->entityManager->flush();
-
-            $this->DOMJudgeService->auditlog('executable', $executable->getExecid(), 'upload zip',
-                                             $archive->getClientOriginalName());
-
+            $this->saveEntity($this->entityManager, $eventLogService, $this->DOMJudgeService, $executable,
+                              $executable->getExecid(), false);
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
 
@@ -432,10 +431,12 @@ class ExecutableController extends Controller
     /**
      * @Route("/executables//add", name="jury_executable_add")
      * @Security("has_role('ROLE_ADMIN')")
-     * @param Request $request
+     * @param EventLogService $eventLogService
+     * @param Request         $request
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
-    public function addAction(Request $request)
+    public function addAction(EventLogService $eventLogService, Request $request)
     {
         $executable = new Executable();
 
@@ -445,9 +446,8 @@ class ExecutableController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($executable);
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('executable', $executable->getExecid(),
-                                             'added');
+            $this->saveEntity($this->entityManager, $eventLogService, $this->DOMJudgeService, $executable,
+                              $executable->getExecid(), true);
             return $this->redirect($this->generateUrl('jury_executable',
                                                       ['execId' => $executable->getExecid()]));
         }

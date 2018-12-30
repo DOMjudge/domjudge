@@ -527,4 +527,27 @@ class EventLogService implements ContainerAwareInterface
             return null;
         }
     }
+
+    /**
+     * Get the endpoint to use for the given entity
+     * @param object|string $entity
+     * @return string|null
+     */
+    public function endpointForEntity($entity)
+    {
+        // Allow to pass in a class instance: convert it to its class type
+        if (is_object($entity)) {
+            $entity = get_class($entity);
+        }
+        // Special case: strip of Doctrine proxies
+        if (strpos($entity, 'Proxies\\__CG__\\') === 0) {
+            $entity = substr($entity, strlen('Proxies\\__CG__\\'));
+        }
+
+        if (isset($this->entityToEndpoint[$entity])) {
+            return $this->entityToEndpoint[$entity];
+        }
+
+        return null;
+    }
 }

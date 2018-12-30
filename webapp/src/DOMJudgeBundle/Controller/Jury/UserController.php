@@ -3,15 +3,15 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Role;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Form\Type\UserType;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/jury")
  * @Security("has_role('ROLE_JURY')")
  */
-class UserController extends Controller
+class UserController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -43,8 +43,10 @@ class UserController extends Controller
 
     /**
      * @Route("/users/", name="jury_users")
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
-    public function indexAction(Request $request, Packages $assetPackage)
+    public function indexAction()
     {
         /** @var User[] $users */
         $users = $this->entityManager->createQueryBuilder()
@@ -167,11 +169,13 @@ class UserController extends Controller
     /**
      * @Route("/users/{userId}/edit", name="jury_user_edit", requirements={"userId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
-     * @param Request $request
-     * @param int     $userId
+     * @param EventLogService $eventLogService
+     * @param Request         $request
+     * @param int             $userId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
-    public function editAction(Request $request, int $userId)
+    public function editAction(EventLogService $eventLogService, Request $request, int $userId)
     {
         /** @var User $user */
         $user = $this->entityManager->getRepository(User::class)->find($userId);
@@ -184,9 +188,8 @@ class UserController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('user', $user->getUserid(),
-                                             'updated');
+            $this->saveEntity($this->entityManager, $eventLogService, $this->DOMJudgeService, $user, $user->getUserid(),
+                              false);
             return $this->redirect($this->generateUrl('jury_user',
                                                       ['userId' => $user->getUserid()]));
         }
@@ -200,10 +203,12 @@ class UserController extends Controller
     /**
      * @Route("/users/add", name="jury_user_add")
      * @Security("has_role('ROLE_ADMIN')")
-     * @param Request $request
+     * @param EventLogService $eventLogService
+     * @param Request         $request
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
-    public function addAction(Request $request)
+    public function addAction(EventLogService $eventLogService, Request $request)
     {
         $user = new User();
         if ($request->query->has('team')) {
@@ -216,9 +221,8 @@ class UserController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($user);
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('user', $user->getUserid(),
-                                             'added');
+            $this->saveEntity($this->entityManager, $eventLogService, $this->DOMJudgeService, $user, $user->getUserid(),
+                              true);
             return $this->redirect($this->generateUrl('jury_user',
                                                       ['userId' => $user->getUserid()]));
         }

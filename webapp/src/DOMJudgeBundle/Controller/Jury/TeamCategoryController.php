@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\TeamCategory;
 use DOMJudgeBundle\Form\Type\TeamCategoryType;
@@ -10,7 +11,6 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -21,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("/jury")
  * @Security("has_role('ROLE_JURY')")
  */
-class TeamCategoryController extends Controller
+class TeamCategoryController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -187,6 +187,7 @@ class TeamCategoryController extends Controller
      * @param Request $request
      * @param int     $categoryId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function editAction(Request $request, int $categoryId)
     {
@@ -201,11 +202,13 @@ class TeamCategoryController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('team_category', $teamCategory->getCategoryid(),
-                                             'updated');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $teamCategory,
+                              $teamCategory->getCategoryid(), false);
             return $this->redirect($this->generateUrl('jury_team_category',
-                                                      ['categoryId' => $teamCategory->getCategoryid(), 'edited' => true]));
+                                                      [
+                                                          'categoryId' => $teamCategory->getCategoryid(),
+                                                          'edited' => true
+                                                      ]));
         }
 
         return $this->render('@DOMJudge/jury/team_category_edit.html.twig', [
@@ -219,6 +222,7 @@ class TeamCategoryController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function addAction(Request $request)
     {
@@ -230,9 +234,8 @@ class TeamCategoryController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($teamCategory);
-            $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('team_category', $teamCategory->getCategoryid(),
-                                             'added');
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $teamCategory,
+                              $teamCategory->getCategoryid(), true);
             return $this->redirect($this->generateUrl('jury_team_category',
                                                       ['categoryId' => $teamCategory->getCategoryid()]));
         }
