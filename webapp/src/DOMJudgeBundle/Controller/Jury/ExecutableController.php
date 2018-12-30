@@ -40,14 +40,25 @@ class ExecutableController extends BaseController
     protected $DOMJudgeService;
 
     /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
+    /**
      * ExecutableController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
+     * @param EventLogService        $eventLogService
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService
+    )
     {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->eventLogService = $eventLogService;
     }
 
     /**
@@ -304,13 +315,12 @@ class ExecutableController extends BaseController
     /**
      * @Route("/executables/{execId}/edit", name="jury_executable_edit")
      * @Security("has_role('ROLE_ADMIN')")
-     * @param EventLogService $eventLogService
      * @param Request         $request
      * @param string          $execId
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function editAction(EventLogService $eventLogService, Request $request, string $execId)
+    public function editAction(Request $request, string $execId)
     {
         /** @var Executable $executable */
         $executable = $this->entityManager->getRepository(Executable::class)->find($execId);
@@ -323,7 +333,7 @@ class ExecutableController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $eventLogService, $this->DOMJudgeService, $executable,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $executable,
                               $executable->getExecid(), false);
             return $this->redirect($this->generateUrl('jury_executable',
                                                       ['execId' => $executable->getExecid()]));
@@ -351,7 +361,7 @@ class ExecutableController extends BaseController
             $executable
                 ->setMd5sum(md5_file($archive->getRealPath()))
                 ->setZipfile(file_get_contents($archive->getRealPath()));
-            $this->saveEntity($this->entityManager, $eventLogService, $this->DOMJudgeService, $executable,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $executable,
                               $executable->getExecid(), false);
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
@@ -431,12 +441,11 @@ class ExecutableController extends BaseController
     /**
      * @Route("/executables//add", name="jury_executable_add")
      * @Security("has_role('ROLE_ADMIN')")
-     * @param EventLogService $eventLogService
      * @param Request         $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function addAction(EventLogService $eventLogService, Request $request)
+    public function addAction(Request $request)
     {
         $executable = new Executable();
 
@@ -446,7 +455,7 @@ class ExecutableController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($executable);
-            $this->saveEntity($this->entityManager, $eventLogService, $this->DOMJudgeService, $executable,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $executable,
                               $executable->getExecid(), true);
             return $this->redirect($this->generateUrl('jury_executable',
                                                       ['execId' => $executable->getExecid()]));
