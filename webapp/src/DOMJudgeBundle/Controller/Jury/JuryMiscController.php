@@ -77,47 +77,6 @@ class JuryMiscController extends BaseController
     }
 
     /**
-     * @Route("/index.php", name="jury_index_php_redirect")
-     */
-    public function indexRedirectAction(Request $request)
-    {
-        return $this->redirectToRoute('jury_index');
-    }
-
-    /**
-     * @Route("/balloons.php", name="jury_balloons_php_redirect")
-     */
-    public function balloonsRedirectAction(Request $request)
-    {
-        return $this->redirectToRoute('jury_balloons');
-    }
-
-
-    /**
-     * @Route("/print", methods={"GET"}, name="jury_print")
-     * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
-     */
-    public function printShowAction(Request $request)
-    {
-        $em       = $this->getDoctrine()->getManager();
-        $langs    = $em->getRepository('DOMJudgeBundle:Language')->findAll();
-        $langlist = [];
-        foreach ($langs as $lang) {
-            $langlist[$lang->getLangid()] = $lang->getName();
-        }
-        asort($langlist);
-        return $this->render('DOMJudgeBundle:jury:print.html.twig', ['langlist' => $langlist]);
-    }
-
-    /**
-     * @Route("/print.php", methods={"GET"}, name="jury_print_php_redirect")
-     */
-    public function printRedirectAction(Request $request)
-    {
-        return $this->redirectToRoute('jury_print');
-    }
-
-    /**
      * @Route("/updates", methods={"GET"}, name="jury_ajax_updates")
      * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
      */

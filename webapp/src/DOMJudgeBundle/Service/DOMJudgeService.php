@@ -607,4 +607,13 @@ class DOMJudgeService
 
         return $zip;
     }
+
+    /**
+     * Legacy function to make print send method available outside
+     * Symfony. Can be removed if the team interface uses Symfony.
+     */
+    public function sendPrint(...$args) : array
+    {
+        return \DOMJudgeBundle\Utils\Printing::send(...$args);
+    }
 }
