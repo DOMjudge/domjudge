@@ -4,6 +4,7 @@ namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -16,6 +17,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *     exp="object.getExternalId()",
  *     options={@Serializer\SerializedName("externalid"), @Serializer\Type("string"), @Serializer\Groups({"Nonstrict"})}
  * )
+ * @UniqueEntity("externalid")
  */
 class Team implements ExternalRelationshipEntityInterface
 {
@@ -132,14 +134,14 @@ class Team implements ExternalRelationshipEntityInterface
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamAffiliation", inversedBy="teams")
-     * @ORM\JoinColumn(name="affilid", referencedColumnName="affilid")
+     * @ORM\JoinColumn(name="affilid", referencedColumnName="affilid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $affiliation;
 
     /**
      * @ORM\ManyToOne(targetEntity="TeamCategory", inversedBy="teams")
-     * @ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid")
+     * @ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $category;
@@ -153,6 +155,7 @@ class Team implements ExternalRelationshipEntityInterface
     /**
      * @ORM\OneToMany(targetEntity="User", mappedBy="team")
      * @Serializer\Exclude()
+     * @Assert\Valid()
      */
     private $users;
 

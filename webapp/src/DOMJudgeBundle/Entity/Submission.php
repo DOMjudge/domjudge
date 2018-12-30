@@ -6,11 +6,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use DOMJudgeBundle\Utils\Utils;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * All incoming submissions
  * @ORM\Entity()
  * @ORM\Table(name="submission", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @UniqueEntity("externalid")
  */
 class Submission implements ExternalRelationshipEntityInterface
 {
@@ -88,14 +90,6 @@ class Submission implements ExternalRelationshipEntityInterface
      */
     private $submittime;
 
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", name="judgehost", length=50, options={"comment"="Current/last judgehost judging this submission", "collation"="utf8mb4_bin"}, nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $judgehost;
-
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="valid", options={"comment"="If false ignore this submission in all scoreboard calculations"}, nullable=false)
@@ -126,29 +120,38 @@ class Submission implements ExternalRelationshipEntityInterface
     private $entry_point;
 
     /**
+     * @var Judgehost|null
+     *
+     * @ORM\ManyToOne(targetEntity="Judgehost")
+     * @ORM\JoinColumn(name="judgehost", referencedColumnName="hostname", onDelete="SET NULL")
+     * @Serializer\Exclude()
+     */
+    private $judgehost;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="submissions")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Language", inversedBy="submissions")
-     * @ORM\JoinColumn(name="langid", referencedColumnName="langid")
+     * @ORM\JoinColumn(name="langid", referencedColumnName="langid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $language;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="submissions")
-     * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
+     * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $team;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="submissions")
-     * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
+     * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $problem;
@@ -192,7 +195,7 @@ class Submission implements ExternalRelationshipEntityInterface
     /**
      * rejudgings have one parent judging
      * @ORM\ManyToOne(targetEntity="Rejudging", inversedBy="submissions")
-     * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid")
+     * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $rejudging;
@@ -455,7 +458,7 @@ class Submission implements ExternalRelationshipEntityInterface
     /**
      * Set judgehost
      *
-     * @param string $judgehost
+     * @param Judgehost|null $judgehost
      *
      * @return Submission
      */
@@ -469,7 +472,7 @@ class Submission implements ExternalRelationshipEntityInterface
     /**
      * Get judgehost
      *
-     * @return string
+     * @return Judgehost|null
      */
     public function getJudgehost()
     {

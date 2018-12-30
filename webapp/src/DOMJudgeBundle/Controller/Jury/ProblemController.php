@@ -195,12 +195,10 @@ class ProblemController extends BaseController
                 $problemactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this problem',
-                    'link' => $this->generateUrl('legacy.jury_delete', [
-                        'table' => 'problem',
-                        'probid' => $p->getProbid(),
-                        'referrer' => 'problems',
-                        'desc' => $p->getName(),
-                    ])
+                    'link' => $this->generateUrl('jury_problem_delete', [
+                        'probId' => $p->getProbid(),
+                    ]),
+                    'ajaxModal' => true,
                 ];
             }
 
@@ -889,6 +887,25 @@ class ProblemController extends BaseController
             'form' => $form->createView(),
             'uploadForm' => $uploadForm->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/problems/{probId}/delete", name="jury_problem_delete", requirements={"probId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $probId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function deleteAction(Request $request, int $probId)
+    {
+        /** @var Problem $problem */
+        $problem = $this->entityManager->getRepository(Problem::class)->find($probId);
+        if (!$problem) {
+            throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
+        }
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $problem, $problem->getName(), $this->generateUrl('jury_problems'));
     }
 
     /**

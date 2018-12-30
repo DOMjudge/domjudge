@@ -3,12 +3,14 @@ namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Programming languages in which teams can submit solutions
  * @ORM\Entity()
  * @ORM\Table(name="language", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @UniqueEntity("externalid")
  */
 class Language
 {

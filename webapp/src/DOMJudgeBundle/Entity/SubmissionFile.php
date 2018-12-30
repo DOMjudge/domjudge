@@ -41,7 +41,7 @@ class SubmissionFile
 
     /**
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="files")
-     * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
+     * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid", onDelete="CASCADE")
      */
     private $submission;
 

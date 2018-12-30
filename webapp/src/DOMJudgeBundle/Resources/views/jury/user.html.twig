@@ -101,8 +101,7 @@
     {%- if is_granted('ROLE_ADMIN') -%}
         <p>
             {{ button(path('jury_user_edit', {'userId': user.userid}), 'Edit', 'primary', 'edit') }}
-            {% set deleteUrl = path('legacy.jury_delete', {userid: user.userid, table: 'user', referrer: 'users', desc: user.name}) %}
-            {{ button(deleteUrl, 'Delete', 'danger', 'trash-alt') }}
+            {{ button(path('jury_user_delete', {'userId': user.userid}), 'Delete', 'danger', 'trash-alt', true) }}
         </p>
     {% endif %}
 

@@ -108,12 +108,10 @@ class TeamCategoryController extends BaseController
                 $categoryactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this category',
-                    'link' => $this->generateUrl('legacy.jury_delete', [
-                        'table' => 'team_category',
-                        'categoryid' => $teamCategory->getCategoryid(),
-                        'referrer' => 'categories',
-                        'desc' => $teamCategory->getName(),
-                    ])
+                    'link' => $this->generateUrl('jury_team_category_delete', [
+                        'categoryId' => $teamCategory->getCategoryid(),
+                    ]),
+                    'ajaxModal' => true,
                 ];
             }
 
@@ -215,6 +213,26 @@ class TeamCategoryController extends BaseController
             'teamCategory' => $teamCategory,
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/categories/{categoryId}/delete", name="jury_team_category_delete", requirements={"categoryId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $categoryId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function deleteAction(Request $request, int $categoryId)
+    {
+        /** @var TeamCategory $teamCategory */
+        $teamCategory = $this->entityManager->getRepository(TeamCategory::class)->find($categoryId);
+        if (!$teamCategory) {
+            throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
+        }
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $teamCategory,
+                                   $teamCategory->getName(), $this->generateUrl('jury_team_categories'));
     }
 
     /**

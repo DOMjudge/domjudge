@@ -127,14 +127,14 @@ class Judging implements ExternalRelationshipEntityInterface
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="judgings")
-     * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
+     * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $submission;
@@ -149,7 +149,7 @@ class Judging implements ExternalRelationshipEntityInterface
     /**
      * rejudgings have one parent judging
      * @ORM\ManyToOne(targetEntity="Rejudging", inversedBy="judgings")
-     * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid")
+     * @ORM\JoinColumn(name="rejudgingid", referencedColumnName="rejudgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $rejudging;
@@ -157,7 +157,7 @@ class Judging implements ExternalRelationshipEntityInterface
     /**
      * rejudgings have one parent judging
      * @ORM\ManyToOne(targetEntity="Judging")
-     * @ORM\JoinColumn(name="prevjudgingid", referencedColumnName="judgingid")
+     * @ORM\JoinColumn(name="prevjudgingid", referencedColumnName="judgingid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $original_judging;

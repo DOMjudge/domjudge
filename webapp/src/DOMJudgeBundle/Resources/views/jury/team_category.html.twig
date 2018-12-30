@@ -49,8 +49,7 @@
     {%- if is_granted('ROLE_ADMIN') -%}
         <p>
             {{ button(path('jury_team_category_edit', {'categoryId': teamCategory.categoryid}), 'Edit', 'primary', 'edit') }}
-            {% set deleteUrl = path('legacy.jury_delete', {categoryid: teamCategory.categoryid, table: 'team_category', referrer: 'categories', desc: teamCategory.name}) %}
-            {{ button(deleteUrl, 'Delete', 'danger', 'trash-alt') }}
+            {{ button(path('jury_team_category_delete', {'categoryId': teamCategory.categoryid}), 'Delete', 'danger', 'trash-alt', true) }}
         </p>
     {% endif %}
 

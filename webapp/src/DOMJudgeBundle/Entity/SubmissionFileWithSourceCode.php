@@ -42,7 +42,7 @@ class SubmissionFileWithSourceCode
 
     /**
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="files_with_source_code")
-     * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
+     * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid", onDelete="CASCADE")
      */
     private $submission;
 

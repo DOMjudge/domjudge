@@ -61,14 +61,14 @@ class Rejudging
     /**
      * Who started the rejudging
      * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="userid_start", referencedColumnName="userid")
+     * @ORM\JoinColumn(name="userid_start", referencedColumnName="userid", onDelete="SET NULL")
      */
     private $start_user;
 
     /**
      * Who finished the rejudging
      * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="userid_finish", referencedColumnName="userid")
+     * @ORM\JoinColumn(name="userid_finish", referencedColumnName="userid", onDelete="SET NULL")
      */
     private $finish_user;
 

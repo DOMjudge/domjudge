@@ -122,12 +122,10 @@ class UserController extends BaseController
                 $useractions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this user',
-                    'link' => $this->generateUrl('legacy.jury_delete', [
-                        'table' => 'user',
-                        'userid' => $u->getUserid(),
-                        'referrer' => 'users',
-                        'desc' => $u->getName(),
-                    ])
+                    'link' => $this->generateUrl('jury_user_delete', [
+                        'userId' => $u->getUserid(),
+                    ]),
+                    'ajaxModal' => true,
                 ];
             }
 
@@ -176,8 +174,8 @@ class UserController extends BaseController
     /**
      * @Route("/users/{userId}/edit", name="jury_user_edit", requirements={"userId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
-     * @param Request         $request
-     * @param int             $userId
+     * @param Request $request
+     * @param int     $userId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
@@ -194,7 +192,8 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $user, $user->getUserid(),
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $user,
+                              $user->getUserid(),
                               false);
             return $this->redirect($this->generateUrl('jury_user',
                                                       ['userId' => $user->getUserid()]));
@@ -207,9 +206,29 @@ class UserController extends BaseController
     }
 
     /**
+     * @Route("/users/{userId}/delete", name="jury_user_delete", requirements={"userId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $userId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function deleteAction(Request $request, int $userId)
+    {
+        /** @var User $user */
+        $user = $this->entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
+        }
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $user, $user->getName(),
+                                   $this->generateUrl('jury_users'));
+    }
+
+    /**
      * @Route("/users/add", name="jury_user_add")
      * @Security("has_role('ROLE_ADMIN')")
-     * @param Request         $request
+     * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
@@ -226,7 +245,8 @@ class UserController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($user);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $user, $user->getUserid(),
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $user,
+                              $user->getUserid(),
                               true);
             return $this->redirect($this->generateUrl('jury_user',
                                                       ['userId' => $user->getUserid()]));

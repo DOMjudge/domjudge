@@ -67,7 +67,7 @@ class JudgingRunWithOutput
 
     /**
      * @ORM\ManyToOne(targetEntity="Judging", inversedBy="runs")
-     * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid")
+     * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid", onDelete="CASCADE")
      */
     private $judging;
 

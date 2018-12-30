@@ -26,6 +26,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * )
  * @ORM\HasLifecycleCallbacks()
  * @UniqueEntity("shortname")
+ * @UniqueEntity("externalid")
  */
 class Contest
 {

@@ -220,15 +220,26 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
      * @param string      $text
      * @param string      $type
      * @param string|null $icon
+     * @param bool        $isAjaxModal
      * @return string
      */
-    public function button(string $url, string $text, string $type = 'primary', string $icon = null)
-    {
+    public function button(
+        string $url,
+        string $text,
+        string $type = 'primary',
+        string $icon = null,
+        bool $isAjaxModal = false
+    ) {
         if ($icon) {
             $icon = sprintf('<i class="fas fa-%s"></i>&nbsp;', $icon);
         }
 
-        return sprintf('<a href="%s" class="btn btn-%s" title="%s">%s%s</a>', $url, $type, $text, $icon, $text);
+        if ($isAjaxModal) {
+            return sprintf('<button href="%s" class="btn btn-%s" title="%s" data-ajax-modal>%s%s</button>', $url, $type,
+                           $text, $icon, $text);
+        } else {
+            return sprintf('<a href="%s" class="btn btn-%s" title="%s">%s%s</a>', $url, $type, $text, $icon, $text);
+        }
     }
 
     /**
@@ -740,9 +751,9 @@ JS;
         if (count($descriptionLines) <= 3) {
             return implode('<br>', $descriptionLines);
         } else {
-            $default          = implode('<br>', array_slice($descriptionLines, 0, 3));
-            $defaultEscaped   = Utils::specialchars($default);
-            $expandedEscaped  = Utils::specialchars(implode('<br>', $descriptionLines));
+            $default         = implode('<br>', array_slice($descriptionLines, 0, 3));
+            $defaultEscaped  = Utils::specialchars($default);
+            $expandedEscaped = Utils::specialchars(implode('<br>', $descriptionLines));
             return <<<EOF
 <span>
     <span data-expanded="$expandedEscaped" data-collapsed="$defaultEscaped">

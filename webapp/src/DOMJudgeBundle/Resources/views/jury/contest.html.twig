@@ -133,8 +133,7 @@
     <p>
         {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_contest_edit', {'contestId': contest.cid}), 'Edit', 'primary', 'edit') }}
-            {% set deleteUrl = path('legacy.jury_delete', {cid: contest.cid, table: 'contest', referrer: 'contests', desc: contest.name}) %}
-            {{ button(deleteUrl, 'Delete', 'danger', 'trash-alt') }}
+            {{ button(path('jury_contest_delete', {'contestId': contest.cid}), 'Delete', 'danger', 'trash-alt', true) }}
         {% endif %}
         {% if contest.finalizetime %}
             {{ button(path('jury_contest_finalize', {'contestId': contest.cid}), 'Update finalization', 'secondary', 'lock') }}
@@ -260,7 +259,7 @@
                             </td>
                             <td>
                                 {% if is_granted('ROLE_ADMIN') %}
-                                    <a href="{{ path('legacy.jury_delete', {'table': 'contestproblem', 'cid': contest.cid, 'probid': problem.probid, 'referrer': 'contests', desc: problem.shortname}) }}">
+                                    <a href="{{ path('jury_contest_problem_delete', {'contestId': contest.cid, 'probId': problem.probid}) }}" data-ajax-modal>
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
                                 {% endif %}

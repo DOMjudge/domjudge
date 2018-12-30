@@ -62,7 +62,7 @@ class JudgingRun
 
     /**
      * @ORM\ManyToOne(targetEntity="Judging", inversedBy="runs")
-     * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid")
+     * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $judging;

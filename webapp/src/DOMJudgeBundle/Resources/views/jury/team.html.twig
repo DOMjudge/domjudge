@@ -116,8 +116,7 @@
     <p>
         {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_team_edit', {'teamId': team.teamid}), 'Edit', 'primary', 'edit') }}
-            {% set deleteUrl = path('legacy.jury_delete', {teamid: team.teamid, table: 'team', referrer: 'teams', desc: team.name}) %}
-            {{ button(deleteUrl, 'Delete', 'danger', 'trash-alt') }}
+            {{ button(path('jury_team_delete', {'teamId': team.teamid}), 'Delete', 'danger', 'trash-alt', true) }}
         {% endif %}
         {{ button(path('jury_clarification_send', {'teamto': team.teamid}), 'Send message', 'secondary', 'envelope') }}
         {% include '@DOMJudge/jury/partials/rejudge_form.html.twig' with {table: 'team', id: team.teamid, buttonClass: 'btn-secondary'} %}

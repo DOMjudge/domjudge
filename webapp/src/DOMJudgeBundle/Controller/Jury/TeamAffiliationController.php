@@ -116,12 +116,10 @@ class TeamAffiliationController extends BaseController
                 $affiliationactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this affiliation',
-                    'link' => $this->generateUrl('legacy.jury_delete', [
-                        'table' => 'team_affiliation',
-                        'affilid' => $teamAffiliation->getAffilid(),
-                        'referrer' => 'affiliations',
-                        'desc' => $teamAffiliation->getName(),
-                    ])
+                    'link' => $this->generateUrl('jury_team_affiliation_delete', [
+                        'affilId' => $teamAffiliation->getAffilid(),
+                    ]),
+                    'ajaxModal' => true,
                 ];
             }
 
@@ -233,6 +231,26 @@ class TeamAffiliationController extends BaseController
             'teamAffiliation' => $teamAffiliation,
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/affiliations/{affilId}/delete", name="jury_team_affiliation_delete", requirements={"affilId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $affilId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function deleteAction(Request $request, int $affilId)
+    {
+        /** @var TeamAffiliation $teamAffiliation */
+        $teamAffiliation = $this->entityManager->getRepository(TeamAffiliation::class)->find($affilId);
+        if (!$teamAffiliation) {
+            throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
+        }
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $teamAffiliation,
+                                   $teamAffiliation->getName(), $this->generateUrl('jury_team_affiliations'));
     }
 
     /**

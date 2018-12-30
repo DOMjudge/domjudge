@@ -91,8 +91,7 @@
             <p>
                 {{ button(path('jury_executable_download', {'execId': executable.execid}), 'Download', 'secondary', 'file-download') }}
                 {{ button(path('jury_executable_edit', {'execId': executable.execid}), 'Edit', 'primary', 'edit') }}
-                {% set deleteUrl = path('legacy.jury_delete', {execid: executable.execid, table: 'executable', referrer: 'executables', desc: executable.description}) %}
-                {{ button(deleteUrl, 'Delete', 'danger', 'trash-alt') }}
+                {{ button(path('jury_executable_delete', {'execId': executable.execid}), 'Delete', 'danger', 'trash-alt', true) }}
             </p>
         {% endif %}
     </div>

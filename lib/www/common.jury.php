@@ -41,34 +41,6 @@ function editLink(string $table, $value, bool $multi = false) : string
 }
 
 /**
- * Return a link to delete a specific data element from a given table.
- * Takes the table, the key field to match on and the value.
- * Optionally specify an extra description of the item to be deleted.
- */
-function delLink(string $table, string $field, $value, $desc = null) : string
-{
-    return delLinkMultiple($table, array($field), array($value), '', $desc);
-}
-
-/**
- * Return a link to delete a specific data element from a given table.
- * Takes the table, the key fields to match on and the values.
- */
-function delLinkMultiple(string $table, array $fields, array $values, string $referrer = '', $desc = null) : string
-{
-    $arguments = '';
-    foreach ($fields as $i => $field) {
-        $arguments .= '&amp;' . $field . '=' . urlencode((string)$values[$i]);
-    }
-    return "<a href=\"delete.php?table=" . urlencode($table) . $arguments .
-           "&amp;referrer=" . urlencode($referrer) .
-           (isset($desc) ? "&amp;desc=".urlencode($desc)  : '') .
-           "\"><img src=\"../images/delete.png\" " .
-           "alt=\"delete\" title=\"delete this " . specialchars($table) .
-           "\" class=\"picto\" /></a>";
-}
-
-/**
  * Returns a link to export a problem as zip-file.
  *
  */

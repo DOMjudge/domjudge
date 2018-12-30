@@ -4,11 +4,13 @@ namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use DOMJudgeBundle\Utils\Utils;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Clarification requests by teams and responses by the jury
  * @ORM\Entity()
  * @ORM\Table(name="clarification", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @UniqueEntity("externalid")
  */
 class Clarification implements ExternalRelationshipEntityInterface
 {
@@ -112,21 +114,21 @@ class Clarification implements ExternalRelationshipEntityInterface
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="clarifications")
-     * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
+     * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $problem;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="clarifications")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Clarification", inversedBy="replies")
-     * @ORM\JoinColumn(name="respid", referencedColumnName="clarid")
+     * @ORM\JoinColumn(name="respid", referencedColumnName="clarid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $in_reply_to;
@@ -139,14 +141,14 @@ class Clarification implements ExternalRelationshipEntityInterface
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="sent_clarifications")
-     * @ORM\JoinColumn(name="sender", referencedColumnName="teamid")
+     * @ORM\JoinColumn(name="sender", referencedColumnName="teamid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $sender;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="received_clarifications")
-     * @ORM\JoinColumn(name="recipient", referencedColumnName="teamid")
+     * @ORM\JoinColumn(name="recipient", referencedColumnName="teamid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $recipient;

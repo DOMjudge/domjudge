@@ -12,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(name="user", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  * @UniqueEntity("ipAddress")
+ * @UniqueEntity("username")
  */
 class User implements UserInterface, \Serializable
 {
@@ -95,7 +96,7 @@ class User implements UserInterface, \Serializable
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="users")
-     * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
+     * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $team;

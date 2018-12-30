@@ -64,8 +64,7 @@
                 {% set class = 'success' %}
             {%- endif -%}
             {{ button(url, action, class, icon) }}
-            {% set deleteUrl = path('legacy.jury_delete', {hostname: judgehost.hostname, table: 'judgehost', referrer: 'judgehosts'}) %}
-            {{ button(deleteUrl, 'Delete judgehost', 'danger', 'trash-alt') }}
+            {{ button(path('jury_judgehost_delete', {'hostname': judgehost.hostname}), 'Delete judgehost', 'danger', 'trash-alt', true) }}
         {% endif %}
         {% include '@DOMJudge/jury/partials/rejudge_form.html.twig' with {table: 'judgehost', id: judgehost.hostname, buttonClass: 'btn-primary'} %}
     </div>

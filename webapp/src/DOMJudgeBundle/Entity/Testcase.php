@@ -76,7 +76,7 @@ class Testcase
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="testcases")
-     * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
+     * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $problem;

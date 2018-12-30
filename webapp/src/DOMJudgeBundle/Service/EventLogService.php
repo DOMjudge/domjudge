@@ -399,7 +399,7 @@ class EventLogService implements ContainerAwareInterface
                 $event = new Event();
                 $event
                     ->setEventtime($now)
-                    ->setCid($contestId)
+                    ->setContest($this->entityManager->getRepository(Contest::class)->find($contestId))
                     ->setEndpointtype($type)
                     ->setEndpointid($ids[$idx])
                     ->setDatatype($table)

@@ -3,6 +3,7 @@ namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Affilitations for teams (e.g.: university, company)
@@ -13,6 +14,7 @@ use JMS\Serializer\Annotation as Serializer;
  *     exp="object.getAffilid()",
  *     options={@Serializer\Type("string")}
  * )
+ * @UniqueEntity("externalid")
  */
 class TeamAffiliation
 {

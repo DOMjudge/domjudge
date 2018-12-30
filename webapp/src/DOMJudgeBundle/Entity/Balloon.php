@@ -33,7 +33,7 @@ class Balloon
 
     /**
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="balloons")
-     * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid")
+     * @ORM\JoinColumn(name="submitid", referencedColumnName="submitid", onDelete="CASCADE")
      */
     private $submission;
 

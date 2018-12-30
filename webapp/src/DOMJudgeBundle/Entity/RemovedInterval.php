@@ -58,7 +58,7 @@ class RemovedInterval
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="removedIntervals")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
     private $contest;
 

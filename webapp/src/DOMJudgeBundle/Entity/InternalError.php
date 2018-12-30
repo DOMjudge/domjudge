@@ -66,13 +66,13 @@ class InternalError
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="internal_errors")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="SET NULL")
      */
     private $contest;
 
     /**
      * @ORM\ManyToOne(targetEntity="Judging")
-     * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid")
+     * @ORM\JoinColumn(name="judgingid", referencedColumnName="judgingid", onDelete="SET NULL")
      */
     private $judging;
 

@@ -54,8 +54,7 @@ class ExecutableController extends BaseController
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
         EventLogService $eventLogService
-    )
-    {
+    ) {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
         $this->eventLogService = $eventLogService;
@@ -157,12 +156,10 @@ class ExecutableController extends BaseController
                 $execactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this executable',
-                    'link' => $this->generateUrl('legacy.jury_delete', [
-                        'table' => 'executable',
-                        'execid' => $e->getExecid(),
-                        'referrer' => 'executables',
-                        'desc' => $e->getDescription(),
-                    ])
+                    'link' => $this->generateUrl('jury_executable_delete', [
+                        'execId' => $e->getExecid(),
+                    ]),
+                    'ajaxModal' => true,
                 ];
                 $execactions[] = [
                     'icon' => 'file-download',
@@ -315,8 +312,8 @@ class ExecutableController extends BaseController
     /**
      * @Route("/executables/{execId}/edit", name="jury_executable_edit")
      * @Security("has_role('ROLE_ADMIN')")
-     * @param Request         $request
-     * @param string          $execId
+     * @param Request $request
+     * @param string  $execId
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
@@ -371,6 +368,26 @@ class ExecutableController extends BaseController
             'form' => $form->createView(),
             'uploadForm' => $uploadForm->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/executables/{execId}/delete", name="jury_executable_delete")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param string  $execId
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function deleteAction(Request $request, string $execId)
+    {
+        /** @var Executable $executable */
+        $executable = $this->entityManager->getRepository(Executable::class)->find($execId);
+        if (!$executable) {
+            throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
+        }
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $executable,
+                                   $executable->getDescription(), $this->generateUrl('jury_executables'));
     }
 
     /**
@@ -441,7 +458,7 @@ class ExecutableController extends BaseController
     /**
      * @Route("/executables//add", name="jury_executable_add")
      * @Security("has_role('ROLE_ADMIN')")
-     * @param Request         $request
+     * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */

@@ -26,6 +26,13 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-12">
+      {% if app.session.flashBag.has('generalSuccess') %}
+        {% for message in app.session.flashBag.get('generalSuccess') %}
+          <div class="alert alert-success">
+            {{ message | raw }}
+          </div>
+        {% endfor %}
+      {% endif %}
       {% block content %}{{ body|raw }}{% endblock %}
     </div>
   </div>

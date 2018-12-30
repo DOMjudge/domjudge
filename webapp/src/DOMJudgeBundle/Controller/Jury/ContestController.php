@@ -225,12 +225,10 @@ class ContestController extends BaseController
                 $contestactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this contest',
-                    'link' => $this->generateUrl('legacy.jury_delete', [
-                        'table' => 'contest',
-                        'cid' => $contest->getCid(),
-                        'referrer' => 'contests',
-                        'desc' => $contest->getName(),
-                    ])
+                    'link' => $this->generateUrl('jury_contest_delete', [
+                        'contestId' => $contest->getCid(),
+                    ]),
+                    'ajaxModal' => true,
                 ];
             }
 
@@ -432,6 +430,50 @@ class ContestController extends BaseController
             'contest' => $contest,
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/contests/{contestId}/delete", name="jury_contest_delete", requirements={"contestId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $contestId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function deleteAction(Request $request, int $contestId)
+    {
+        /** @var Contest $contest */
+        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        if (!$contest) {
+            throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
+        }
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $contest,
+                                   $contest->getName(), $this->generateUrl('jury_contests'));
+    }
+
+    /**
+     * @Route("/contests/{contestId}/problems/{probId}/delete", name="jury_contest_problem_delete", requirements={"contestId":
+     *                                                          "\d+", "probId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $contestId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function deleteProblemAction(Request $request, int $contestId, int $probId)
+    {
+        /** @var ContestProblem $contestProblem */
+        $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
+                                                                                               'cid' => $contestId,
+                                                                                               'probid' => $probId
+                                                                                           ]);
+        if (!$contestProblem) {
+            throw new NotFoundHttpException(sprintf('Contest problem with contest ID %s and problem ID %s not found', $contestId, $probId));
+        }
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $contestProblem,
+                                   $contestProblem->getShortname(), $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 
     /**

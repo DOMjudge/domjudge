@@ -71,8 +71,7 @@
     <div class="mb-4">
         {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_judgehost_restriction_edit', {'restrictionId': judgehostRestriction.restrictionid}), 'Edit', 'primary', 'edit') }}
-            {% set deleteUrl = path('legacy.jury_delete', {restrictionid: judgehostRestriction.restrictionid, table: 'judgehost_restriction', referrer: 'judgehost-restrictions', desc: judgehostRestriction.name}) %}
-            {{ button(deleteUrl, 'Delete', 'danger', 'trash-alt') }}
+            {{ button(path('jury_judgehost_restriction_delete', {'restrictionId': judgehostRestriction.restrictionid}), 'Delete', 'danger', 'trash-alt', true) }}
         {% endif %}
     </div>
 

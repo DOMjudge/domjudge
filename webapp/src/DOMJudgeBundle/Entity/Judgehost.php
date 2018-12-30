@@ -42,7 +42,7 @@ class Judgehost
 
     /**
      * @ORM\ManyToOne(targetEntity="JudgehostRestriction", inversedBy="judgehosts")
-     * @ORM\JoinColumn(name="restrictionid", referencedColumnName="restrictionid")
+     * @ORM\JoinColumn(name="restrictionid", referencedColumnName="restrictionid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $restriction;

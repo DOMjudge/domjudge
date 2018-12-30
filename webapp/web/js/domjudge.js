@@ -949,3 +949,29 @@ function updateMenuInternalErrors(num)
         $("#menu_internal_error").addClass("text-danger").removeClass("disabled");
     }
 }
+
+function initializeAjaxModals()
+{
+	var $body = $('body');
+	$body.on('click', '[data-ajax-modal]', function() {
+		var url = $(this).attr('href');
+		$.ajax({
+			url: url
+		}).done(function(data) {
+			var $data = $(data);
+			$('body').append($data);
+			$data.modal('show');
+		});
+		return false;
+	});
+
+	$body.on('click', '.modal-dialog button[data-url]', function() {
+		var url = $(this).data('url');
+		$.ajax({
+			url: url,
+			method: 'POST'
+		}).done(function(data) {
+			window.location = data.url;
+		});
+	});
+}

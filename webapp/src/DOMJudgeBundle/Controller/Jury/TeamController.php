@@ -163,12 +163,10 @@ class TeamController extends BaseController
                 $teamactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this team',
-                    'link' => $this->generateUrl('legacy.jury_delete', [
-                        'table' => 'team',
-                        'teamid' => $t->getTeamId(),
-                        'referrer' => 'teams',
-                        'desc' => $t->getName(),
-                    ])
+                    'link' => $this->generateUrl('jury_team_delete', [
+                        'teamId' => $t->getTeamId(),
+                    ]),
+                    'ajaxModal' => true,
                 ];
             }
             $teamactions[] = [
@@ -352,6 +350,26 @@ class TeamController extends BaseController
             'team' => $team,
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/teams/{teamId}/delete", name="jury_team_delete", requirements={"teamId": "\d+"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $teamId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function deleteAction(Request $request, int $teamId)
+    {
+        /** @var Team $team */
+        $team = $this->entityManager->getRepository(Team::class)->find($teamId);
+        if (!$team) {
+            throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
+        }
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $team, $team->getName(),
+                                   $this->generateUrl('jury_teams'));
     }
 
     /**

@@ -78,6 +78,14 @@ class Event
     private $cid;
 
     /**
+     * @var Contest
+     *
+     * @ORM\ManyToOne(targetEntity="Contest", inversedBy="problems")
+     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
+     */
+    private $contest;
+
+    /**
      * Set eventid
      *
      * @param integer $eventid
@@ -291,5 +299,27 @@ class Event
     public function getContent()
     {
         return $this->content;
+    }
+
+    /**
+     * Set contest
+     *
+     * @param Contest|null $contest
+     * @return Event
+     */
+    public function setContest($contest)
+    {
+        $this->contest = $contest;
+        return $this;
+    }
+
+    /**
+     * Get contest
+     *
+     * @return Contest|null
+     */
+    public function getContest()
+    {
+        return $this->contest;
     }
 }

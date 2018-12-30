@@ -89,12 +89,10 @@ class JudgehostRestrictionController extends BaseController
                 $judgehostrestrictionactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this judgehost restriction',
-                    'link' => $this->generateUrl('legacy.jury_delete', [
-                        'table' => 'judgehost_restriction',
-                        'restrictionid' => $judgehostRestriction->getRestrictionid(),
-                        'referrer' => 'judgehost-restrictions',
-                        'desc' => $judgehostRestriction->getName(),
-                    ])
+                    'link' => $this->generateUrl('jury_judgehost_restriction_delete', [
+                        'restrictionId' => $judgehostRestriction->getRestrictionid(),
+                    ]),
+                    'ajaxModal' => true,
                 ];
             }
 
@@ -191,6 +189,24 @@ class JudgehostRestrictionController extends BaseController
             'judgehostRestriction' => $judgehostRestriction,
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/judgehost-restrictions/{restrictionId}/delete", name="jury_judgehost_restriction_delete")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param int     $restrictionId
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function deleteAction(Request $request, int $restrictionId)
+    {
+        /** @var JudgehostRestriction $judgehostRestriction */
+        $judgehostRestriction = $this->entityManager->getRepository(JudgehostRestriction::class)->find($restrictionId);
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $judgehostRestriction, $judgehostRestriction->getName(), $this->generateUrl('jury_judgehost_restrictions'));
     }
 
     /**

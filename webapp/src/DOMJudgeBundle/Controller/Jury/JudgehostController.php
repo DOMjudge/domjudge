@@ -155,11 +155,10 @@ class JudgehostController extends BaseController
                 $judgehostactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this judgehost',
-                    'link' => $this->generateUrl('legacy.jury_delete', [
-                        'table' => 'judgehost',
+                    'link' => $this->generateUrl('jury_judgehost_delete', [
                         'hostname' => $judgehost->getHostname(),
-                        'referrer' => 'judgehosts',
                     ]),
+                    'ajaxModal' => true,
                 ];
             }
 
@@ -244,6 +243,31 @@ class JudgehostController extends BaseController
         } else {
             return $this->render('@DOMJudge/jury/judgehost.html.twig', $data);
         }
+    }
+
+    /**
+     * @Route("/judgehosts/{hostname}/delete", name="jury_judgehost_delete")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param string  $hostname
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function deleteAction(Request $request, string $hostname)
+    {
+        /** @var Judgehost $judgehost */
+        $judgehost = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Judgehost', 'j')
+            ->leftJoin('j.restriction', 'r')
+            ->select('j', 'r')
+            ->andWhere('j.hostname = :hostname')
+            ->setParameter(':hostname', $hostname)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $judgehost, $judgehost->getHostname(), $this->generateUrl('jury_judgehosts'));
     }
 
     /**

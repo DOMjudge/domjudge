@@ -19,7 +19,3 @@ legacy.jury_impexp:
     path: /jury/impexp.php
 legacy.jury_genpasswds:
     path: /jury/genpasswds.php
-
-
-legacy.jury_delete:
-    path: /jury/delete.php

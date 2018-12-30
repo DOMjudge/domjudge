@@ -84,8 +84,7 @@
     <p>
         {%- if is_granted('ROLE_ADMIN') -%}
             {{ button(path('jury_language_edit', {'langId': language.langid}), 'Edit', 'primary', 'edit') }}
-            {% set deleteUrl = path('legacy.jury_delete', {langid: language.langid, table: 'language', referrer: 'languages', desc: language.name}) %}
-            {{ button(deleteUrl, 'Delete', 'danger', 'trash-alt') }}
+            {{ button(path('jury_language_delete', {'langId': language.langid}), 'Delete', 'danger', 'trash-alt', true) }}
         {% endif %}
         {% include '@DOMJudge/jury/partials/rejudge_form.html.twig' with {table: 'language', id: language.langid, buttonClass: 'btn-secondary'} %}
     </p>

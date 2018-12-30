@@ -78,8 +78,7 @@
     {%- if is_granted('ROLE_ADMIN') -%}
         <p>
             {{ button(path('jury_team_affiliation_edit', {'affilId': teamAffiliation.affilid}), 'Edit', 'primary', 'edit') }}
-            {% set deleteUrl = path('legacy.jury_delete', {affilid: teamAffiliation.affilid, table: 'team_affiliation', referrer: 'affiliations', desc: teamAffiliation.name}) %}
-            {{ button(deleteUrl, 'Delete', 'danger', 'trash-alt') }}
+            {{ button(path('jury_team_affiliation_delete', {'affilId': teamAffiliation.affilid}), 'Delete', 'danger', 'trash-alt', true) }}
         </p>
     {% endif %}
 

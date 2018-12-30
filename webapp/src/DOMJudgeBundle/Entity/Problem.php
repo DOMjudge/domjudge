@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use DOMJudgeBundle\Utils\Utils;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -13,6 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(name="problem", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  * @ORM\HasLifecycleCallbacks()
+ * @UniqueEntity("externalid")
  */
 class Problem
 {

@@ -106,12 +106,10 @@ class LanguageController extends BaseController
                 $langactions[] = [
                     'icon' => 'trash-alt',
                     'title' => 'delete this language',
-                    'link' => $this->generateUrl('legacy.jury_delete', [
-                        'table' => 'language',
-                        'langid' => $lang->getLangid(),
-                        'referrer' => 'languages',
-                        'desc' => $lang->getName(),
-                    ])
+                    'link' => $this->generateUrl('jury_language_delete', [
+                        'langId' => $lang->getLangid(),
+                    ]),
+                    'ajaxModal' => true,
                 ];
             }
 
@@ -263,6 +261,25 @@ class LanguageController extends BaseController
             'language' => $language,
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route("/languages/{langId}/delete", name="jury_language_delete")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @param string  $langId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function deleteAction(Request $request, string $langId)
+    {
+        /** @var Language $language */
+        $language = $this->entityManager->getRepository(Language::class)->find($langId);
+        if (!$language) {
+            throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
+        }
+
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $language, $language->getName(), $this->generateUrl('jury_languages'));
     }
 
     /**

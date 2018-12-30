@@ -84,14 +84,14 @@ class ContestProblem
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems", fetch="EAGER")
-     * @ORM\JoinColumn(name="probid", referencedColumnName="probid")
+     * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Inline()
      */
     private $problem;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="problems")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $contest;
