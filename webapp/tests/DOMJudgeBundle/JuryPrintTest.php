@@ -4,7 +4,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
-class JuryClarificationsTest extends WebTestCase
+class JuryPrintTest extends WebTestCase
 {
     private function loginHelper($username, $password, $redirectPage, $responseCode)
     {
