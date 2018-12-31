@@ -203,7 +203,6 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 	-rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)
 	ln -sf $(CURDIR)/judge  $(judgehost_libjudgedir)
 	ln -sf $(CURDIR)/submit $(domserver_libsubmitdir)
-	ln -sfn $(CURDIR)/doc $(domserver_wwwdir)/jury/doc
 # Add symlinks to binaries:
 	$(MKDIR_P) $(judgehost_bindir) $(domserver_bindir)
 	ln -sf $(CURDIR)/judge/judgedaemon $(judgehost_bindir)
@@ -279,7 +278,6 @@ maintainer-postinstall-nginx: maintainer-postinstall-permissions
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:
 	rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)
-	rm -f $(domserver_wwwdir)/jury/doc
 	rm -rf $(judgehost_bindir)
 
 # Rules to configure and build for a Coverity scan.

@@ -98,11 +98,11 @@
       </div>
       <div class="card-body">
         <ul>
-        <li><a href="doc/judge/judge-manual.html">Judge manual</a>
-            (also <a href="doc/judge/judge-manual.pdf">PDF</a>)</li>
-        <li><a href="doc/admin/admin-manual.html">Administrator manual</a>
-            (also <a href="doc/admin/admin-manual.pdf">PDF</a>)</li>
-        <li><a href="doc/team/team-manual.pdf">Team manual</a>
+        <li><a href="{{ asset('doc/judge/judge-manual.html') }}">Judge manual</a>
+            (also <a href="{{ asset('doc/judge/judge-manual.pdf') }}">PDF</a>)</li>
+        <li><a href="{{ asset('doc/admin/admin-manual.html') }}">Administrator manual</a>
+            (also <a href="{{ asset('doc/admin/admin-manual.pdf') }} ">PDF</a>)</li>
+        <li><a href="{{ asset('doc/team/team-manual.pdf') }}">Team manual</a>
             (PDF only)</li>
         <li><a href="{{ path('app.swagger_ui') }}">API documentation</a><br />
             See also the <a href="https://clics.ecs.baylor.edu/index.php/Contest_API">ICPC Contest API</a>.</li>
