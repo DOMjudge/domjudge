@@ -8,11 +8,13 @@ use DOMJudgeBundle\Entity\Role;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Form\Type\UserType;
+use DOMJudgeBundle\Form\Type\GeneratePasswordsType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
@@ -254,6 +256,75 @@ class UserController extends BaseController
 
         return $this->render('@DOMJudge/jury/user_add.html.twig', [
             'user' => $user,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/users/generate-passwords", name="jury_generate_passwords")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function generatePasswordsAction(Request $request)
+    {
+        $form = $this->createForm(GeneratePasswordsType::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $groups = $form->get('group')->getData();
+
+            $users = $this->entityManager->getRepository(User::class)->findAll();
+
+            $changes = [];
+            foreach ($users as $user) {
+                 $doit = false;
+                 $roles = $user->getRoleList();
+
+                 $isjury = in_array('jury', $roles);
+                 $isadmin = in_array('admin', $roles);
+
+                 if ( in_array('team', $groups) || in_array('team_nopass', $groups) ) {
+                     if ( $user->getTeamid() && ! $isjury && ! $isadmin ) {
+                         if ( in_array('team', $groups) || empty($user->getPassword()) ) {
+                             $doit = true;
+                             $role = 'team';
+                         }
+                     }
+                 }
+
+                 if ( (in_array('judge', $groups) && $isjury) ||
+                    (in_array('admin', $groups) && $isadmin))
+                 {
+                     $doit = true;
+                     $role = in_array('admin', $groups) ? 'admin' : 'judge';
+                 }
+
+                if ( $doit ) {
+                    $newpass = Utils::generatePassword();
+                    $user->setPlainPassword($newpass);
+                    $this->DOMJudgeService->auditlog('user', $user->getUserid(), 'set password');
+                    $changes[] = [
+                            'type' => $role,
+                            'id' => $user->getUserid(),
+                            'fullname' => $user->getName(),
+                            'username' => $user->getUsername(),
+                            'password' => $newpass,
+                    ];
+                }
+            }
+            $this->entityManager->flush();
+            $response = $this->render('@DOMJudge/jury/tsv/userdata.tsv.twig', [
+                'data' => $changes,
+            ]);
+            $disposition = $response->headers->makeDisposition(
+                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                'userdata.tsv');
+            $response->headers->set('Content-Disposition', $disposition);
+            $response->headers->set('Content-Type', 'text/plain');
+            return $response;
+        }
+
+        return $this->render('@DOMJudge/jury/user_generate_passwords.html.twig', [
             'form' => $form->createView(),
         ]);
     }
