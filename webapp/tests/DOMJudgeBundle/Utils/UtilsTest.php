@@ -205,4 +205,24 @@ part.";
         $this->assertTrue(Utils::endsWith($end, $end));
         $this->assertFalse(Utils::endsWith($end, $text));
     }
+
+    public function testGeneratePassword()
+    {
+        $passes = [];
+        $onlyalnum = true;
+        $containsforbidden = false;
+        for ($i=0; $i < 100; ++$i) {
+            $pass = Utils::generatePassword();
+            $onlyalnum = $onlyalnum && ctype_alnum($pass);
+            $containsforbidden = $containsforbidden || preg_match('/o01l[A-Z]/', $pass);
+            $passes[] = $pass;
+        }
+
+        $this->assertEquals(1, max(array_count_values($passes)));
+        $this->assertEquals(6, min(array_map('strlen', $passes)));
+        $this->assertEquals(6, max(array_map('strlen', $passes)));
+        $this->assertTrue($onlyalnum);
+        $this->assertFalse($containsforbidden);
+    }
+
 }

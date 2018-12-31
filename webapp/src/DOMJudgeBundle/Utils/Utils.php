@@ -797,14 +797,14 @@ class Utils
      */
     public static function generatePassword()
     {
-        $chars = array('a','b','c','d','e','f','g','h','i','j','k','m','n','p','q','r',
-                       's','t','u','v','w','x','y','z','2','3','4','5','6','7','8','9');
+        $chars = ['a','b','c','d','e','f','g','h','i','j','k','m','n','p','q','r',
+                  's','t','u','v','w','x','y','z','2','3','4','5','6','7','8','9'];
 
         $max_chars = count($chars) - 1;
 
         $rand_str = '';
         for ($i = 0; $i < 6; ++$i) {
-            $rand_str .= $chars[mt_rand(0, $max_chars)];
+            $rand_str .= $chars[random_int(0, $max_chars)];
         }
 
         return $rand_str;
