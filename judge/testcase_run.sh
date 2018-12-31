@@ -3,7 +3,7 @@
 # Script to test (run and compare) submissions with a single testcase
 #
 # Usage: $0 <testdata.in> <testdata.out> <timelimit> <workdir>
-#           <run> <compare>
+#           <run> <compare> <compare-args>
 #
 # <testdata.in>     File containing test-input with absolute pathname.
 # <testdata.out>    File containing test-output with absolute pathname.
