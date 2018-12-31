@@ -10,6 +10,7 @@ security:
     encoders:
         DOMJudgeBundle\Entity\User:
             algorithm: bcrypt
+            cost: 10
     providers:
         domjudge_db_provider:
           entity:
