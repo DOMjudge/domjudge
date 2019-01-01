@@ -128,7 +128,6 @@ INSERT INTO `role` (`roleid`, `role`, `description`) VALUES
 (2, 'jury',              'Jury User'),
 (3, 'team',              'Team Member'),
 (4, 'balloon',           'Balloon runner'),
-(5, 'print',             'print'),
 (6, 'judgehost',         '(Internal/System) Judgehost'),
 (7, 'event_reader',      '(Internal/System) event_reader'),
 (8, 'full_event_reader', '(Internal/System) full_event_reader');
