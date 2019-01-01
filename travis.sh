@@ -132,7 +132,7 @@ EOF
 
 # start eventdaemon
 cd /opt/domjudge/domserver/
-bin/eventdaemon &
+bin/eventdaemon -C 2 &
 sleep 5
 
 # start judgedaemon
