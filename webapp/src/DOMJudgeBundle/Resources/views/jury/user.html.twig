@@ -59,10 +59,16 @@
                     </td>
                 </tr>
                 <tr>
+                    <th>Enabled</th>
+                    <td>
+                        {{ user.enabled | printYesNo }}
+                    </td>
+                </tr>
+                <tr>
                     <th>Roles</th>
                     <td>
                         {% for role in user.roles %}
-                            {{ role.djRole }} - {{ role.description }}<br>
+                            {{ role.description }}<br>
                         {% else %}
                             No roles assigned
                         {% endfor %}
