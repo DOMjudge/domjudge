@@ -2,7 +2,7 @@
 global $updates;
 ?>
 <nav><div id="menutop">
-<a href="index.php" accesskey="h"><i class="fas fa-home"></i> home</a>
+<a href="." accesskey="h"><i class="fas fa-home"></i> home</a>
 <?php if (checkrole('balloon')) {
     ?>
 <a href="balloons" accesskey="b"><i class="fas fa-map-marker-alt"></i> balloons</a>
