@@ -110,7 +110,6 @@ class JuryMiscController extends BaseController
                 return [
                     'id' => $problem['probid'],
                     'text' => $displayname,
-                    'search' => $displayname,
                 ];
             }, $problems);
         } elseif ($datatype === 'teams') {
@@ -128,7 +127,6 @@ class JuryMiscController extends BaseController
                 return [
                     'id' => $team['teamid'],
                     'text' => $displayname,
-                    'search' => $displayname,
                 ];
             }, $teams);
         } elseif ($datatype === 'languages') {
@@ -146,7 +144,6 @@ class JuryMiscController extends BaseController
                 return [
                     'id' => $language['langid'],
                     'text' => $displayname,
-                    'search' => $displayname,
                 ];
             }, $languages);
         } elseif ($datatype === 'contests') {
@@ -173,19 +170,13 @@ class JuryMiscController extends BaseController
                 return [
                     'id' => $contest['cid'],
                     'text' => $displayname,
-                    'search' => $displayname,
                 ];
             }, $contests);
         } else {
             throw new NotFoundHttpException("Unknown AJAX data type: " . $datatype);
         }
 
-        // TODO: remove this branch and setting of 'search' above when we use select2 exclusively
-        if ($request->query->get('select2') ?? false) {
-            return $this->json(['results' => $results]);
-        } else {
-            return $this->json($results);
-        }
+        return $this->json(['results' => $results]);
     }
 
     /**
