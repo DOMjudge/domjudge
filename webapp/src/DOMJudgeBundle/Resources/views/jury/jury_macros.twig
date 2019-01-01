@@ -89,13 +89,17 @@
                     {%- for key,column in fields %}
                         {%- set item = attribute(row.data, key) %}
 
-                        <td class="{{ item.cssclass|default('') }}"
+                        <td
+                           class="{{ item.cssclass|default('') }}{% if key == "status" %} {{ item.value|statusClass() }}{% endif %}"
                                 {%- if item.title is defined %} title="{{ item.title }}"{% endif %}
                                 {%- if item.sortvalue is defined %} data-sort="{{ item.sortvalue }}"{% endif %}>
-                            {%- if item.link is defined %}<a href="{{ item.link }}"
-                                    {%- if item.linktitle is defined %} title="{{ item.linktitle }}"{% endif %}>
+                            {%- if item.link is defined %}<a href="{{ item.link }}">
                                 {%- elseif row.link is defined %}<a href="{{ row.link }}">{% endif %}
+                                    {% if key == "status" %}
+                                    {{- (item.value|default(item.default|default('')))|statusIcon()|raw -}}
+                                    {% else %}
                                     {{- (item.value|default(item.default|default('')))|raw -}}
+                                    {% endif %}
                                     {%- if item.link is defined or row.link is defined -%}</a>{% endif %}
                         </td>
                     {%- endfor %}

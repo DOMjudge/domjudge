@@ -77,6 +77,8 @@ class JudgehostController extends BaseController
         $workcontest     = $this->entityManager->getConnection()->fetchAll($query, $params);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $time_warn = $this->DOMJudgeService->dbconfig_get('judgehost_warning', 30);
+        $time_crit = $this->DOMJudgeService->dbconfig_get('judgehost_critical', 120);
         $judgehosts_table = [];
         foreach ($judgehosts as $judgehost) {
             $judgehostdata    = [];
@@ -96,16 +98,16 @@ class JudgehostController extends BaseController
             $judgehostdata['hostname']['cssclass'] = 'text-monospace small';
 
             if (empty($judgehost->getPolltime())) {
-                $statusclass = 'judgehost-nocon';
+                $status = 'noconn';
                 $statustitle = "never checked in";
             } else {
                 $relTime = floor(Utils::difftime($now, (float)$judgehost->getPolltime()));
-                if ($relTime < $this->DOMJudgeService->dbconfig_get('judgehost_warning', 30)) {
-                    $statusclass = 'judgehost-ok';
-                } elseif ($relTime < $this->DOMJudgeService->dbconfig_get('judgehost_critical', 120)) {
-                    $statusclass = 'judgehost-warn';
+                if ($relTime < $time_warn) {
+                    $status = 'ok';
+                } elseif ($relTime < $time_crit) {
+                    $status = 'warn';
                 } else {
-                    $statusclass = 'judgehost-crit';
+                    $status = 'crit';
                 }
                 $statustitle = sprintf('last checked in %ss ago',
                                        Utils::printtimediff((float)$judgehost->getPolltime()));
@@ -119,12 +121,11 @@ class JudgehostController extends BaseController
             );
             $judgehostdata = array_merge($judgehostdata, [
                 'status' => [
-                    'value' => "\u{25CF}",
-                    'cssclass' => $statusclass,
-                    'linktitle' => $statustitle,
+                    'value' => $status,
+                    'title' => $statustitle,
                 ],
                 'load' => [
-                    'linktitle' => 'load during the last 2 and 10 minutes and the whole contest',
+                    'title' => 'load during the last 2 and 10 minutes and the whole contest',
                     'value' => $load,
                 ],
                 'active' => [

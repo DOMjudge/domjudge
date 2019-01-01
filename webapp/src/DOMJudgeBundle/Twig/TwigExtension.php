@@ -90,6 +90,8 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('assetExists', [$this, 'assetExists']),
             new \Twig_SimpleFilter('printTimeRelative', [$this, 'printTimeRelative']),
             new \Twig_SimpleFilter('scoreTime', [$this, 'scoreTime']),
+            new \Twig_SimpleFilter('statusClass', [$this, 'statusClass']),
+            new \Twig_SimpleFilter('statusIcon', [$this, 'statusIcon']),
             new \Twig_SimpleFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
         ];
     }
@@ -240,6 +242,39 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         } else {
             return sprintf('<a href="%s" class="btn btn-%s" title="%s">%s%s</a>', $url, $type, $text, $icon, $text);
         }
+    }
+
+    /**
+     * Map user/team/judgehost status to a cssclass
+     * @param string $status
+     * @return string
+     */
+    public static function statusClass(string $status): string
+    {
+        switch($status) {
+            case 'noconn': return 'text-muted';
+            case 'crit': return 'text-danger';
+            case 'warn': return 'text-warning';
+            case 'ok': return 'text-success';
+        }
+        return '';
+    }
+
+    /**
+     * Map user/team/judgehost status to an icon
+     * @param string $status
+     * @return string
+     */
+    public static function statusIcon(string $status): string
+    {
+        switch($status) {
+            case 'noconn': $icon = 'question'; break;
+            case 'crit': $icon = 'times'; break;
+            case 'warn': $icon = 'exclamation'; break;
+	    case 'ok': $icon = 'check'; break;
+	    default: return $status;
+        }
+        return sprintf('<i class="fas fa-%s-circle"></i>', $icon);
     }
 
     /**

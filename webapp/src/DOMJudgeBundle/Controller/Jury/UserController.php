@@ -72,11 +72,12 @@ class UserController extends BaseController
             'email' => ['title' => 'email', 'sort' => true],
             'roles' => ['title' => 'roles', 'sort' => true],
             'team' => ['title' => 'team', 'sort' => true],
-            'bubble' => ['title' => '', 'sort' => true],
+            'status' => ['title' => '', 'sort' => true],
         ];
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $users_table      = [];
+        $timeFormat  = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
         foreach ($users as $u) {
             $userdata    = [];
             $useractions = [];
@@ -87,11 +88,10 @@ class UserController extends BaseController
                 }
             }
 
-            $statusclass = 'team-nocon';
+            $status = 'noconn';
             $statustitle = "no connections made";
             if ($u->getLastLogin()) {
-                $statusclass = "team-ok";
-                $timeFormat  = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
+                $status = "ok";
                 $statustitle = sprintf('logged in: %s', Utils::printtime($u->getLastLogin(), $timeFormat));
             }
 
@@ -102,7 +102,7 @@ class UserController extends BaseController
                     'link' => $this->generateUrl('jury_team', [
                         'teamId' => $u->getTeamid(),
                     ]),
-                    'linktitle' => $u->getTeam()->getName(),
+                    'title' => $u->getTeam()->getName(),
                 ];
             }
 
@@ -133,11 +133,10 @@ class UserController extends BaseController
 
             // merge in the rest of the data
             $userdata = array_merge($userdata, [
-                'bubble' => [
-                    'value' => "\u{25CF}",
-                    'sortvalue' => $statusclass,
-                    'cssclass' => $statusclass,
-                    'linktitle' => $statustitle,
+                'status' => [
+                    'value' => $status,
+                    'sortvalue' => $status,
+                    'title' => $statustitle,
                 ],
             ]);
             // Save this to our list of rows

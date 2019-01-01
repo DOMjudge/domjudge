@@ -108,8 +108,8 @@ class TeamController extends BaseController
             'num_contests' => ['title' => '# contests', 'sort' => true,],
             'hostname' => ['title' => 'host', 'sort' => true,],
             'room' => ['title' => 'room', 'sort' => true,],
-            'bubble' => ['title' => '', 'sort' => false,],
-            'status' => ['title' => 'status', 'sort' => true,],
+            'status' => ['title' => '', 'sort' => false,],
+            'stats' => ['title' => 'stats', 'sort' => true,],
         ];
 
         // Insert external ID field when configured to use it
@@ -134,19 +134,19 @@ class TeamController extends BaseController
             // Add some elements for the solved status
             $num_solved    = 0;
             $num_submitted = 0;
-            $statusclass   = 'team-nocon';
-            $statustitle   = "no connections made";
+            $status = 'noconn';
+            $statustitle = "no connections made";
             if ($t->getTeampageFirstVisited()) {
-                $statusclass = 'team-nosub';
+                $status = 'crit';
                 $statustitle = "teampage viewed, no submissions";
             }
             if (isset($teams_that_submitted[$t->getTeamId()]) && $teams_that_submitted[$t->getTeamId()] > 0) {
-                $statusclass   = "team-nocor";
+                $status = "warn";
                 $statustitle   = "submitted, none correct";
                 $num_submitted = $teams_that_submitted[$t->getTeamId()];
             }
             if (isset($teams_that_solved[$t->getTeamId()]) && $teams_that_solved[$t->getTeamId()] > 0) {
-                $statusclass = "team-ok";
+                $status = "ok";
                 $statustitle = "correct submissions(s)";
                 $num_solved  = $teams_that_solved[$t->getTeamId()];
             }
@@ -183,7 +183,7 @@ class TeamController extends BaseController
             if ($t->getAffiliation()) {
                 $teamdata['affiliation'] = [
                     'value' => $t->getAffiliation()->getShortname(),
-                    'linktitle' => $t->getAffiliation()->getName()
+                    'title' => $t->getAffiliation()->getName()
                 ];
             } else {
                 $teamdata['affiliation'] = ['value' => '&nbsp;'];
@@ -199,15 +199,14 @@ class TeamController extends BaseController
             // merge in the rest of the data
             $teamdata = array_merge($teamdata, [
                 'num_contests' => ['value' => (int)($t->getContests()->count()) + $num_public_contests],
-                'bubble' => [
-                    'value' => "\u{25CF}",
-                    'cssclass' => $statusclass,
-                    'linktitle' => $statustitle,
-                ],
                 'status' => [
+                    'value' => $status,
+                    'title' => $statustitle,
+                ],
+                'stats' => [
                     'cssclass' => 'text-right',
                     'value' => "$num_solved/$num_submitted",
-                    'linktitle' => "$num_solved correct / $num_submitted submitted",
+                    'title' => "$num_solved correct / $num_submitted submitted",
                 ],
             ]);
             // Save this to our list of rows
