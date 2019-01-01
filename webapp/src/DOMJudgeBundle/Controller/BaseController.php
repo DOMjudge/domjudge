@@ -263,9 +263,13 @@ abstract class BaseController extends Controller
 
             $this->addFlash('generalSuccess', sprintf('Successfully deleted %s %s "%s"',
                                                       $readableType, implode(', ', $primaryKeyData), $description));
-            return new JsonResponse(['url' => $redirectUrl]);
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse(['url' => $redirectUrl]);
+            } else {
+                return $this->redirect($redirectUrl);
+            }
         } else {
-            return $this->render('@DOMJudge/jury/delete.html.twig', [
+            $data = [
                 'type' => $readableType,
                 'primaryKey' => implode(', ', $primaryKeyData),
                 'description' => $description,
@@ -273,7 +277,13 @@ abstract class BaseController extends Controller
                 'isError' => $isError,
                 'hideModalSubmit' => $isError,
                 'modalUrl' => $request->getRequestUri(),
-            ]);
+                'redirectUrl' => $redirectUrl,
+            ];
+            if ($request->isXmlHttpRequest()) {
+                return $this->render('@DOMJudge/jury/delete_modal.html.twig', $data);
+            } else {
+                return $this->render('@DOMJudge/jury/delete.html.twig', $data);
+            }
         }
     }
 

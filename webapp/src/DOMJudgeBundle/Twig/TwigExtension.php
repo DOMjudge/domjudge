@@ -235,8 +235,8 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         }
 
         if ($isAjaxModal) {
-            return sprintf('<button href="%s" class="btn btn-%s" title="%s" data-ajax-modal>%s%s</button>', $url, $type,
-                           $text, $icon, $text);
+            return sprintf('<a href="%s" class="btn btn-%s" title="%s" data-ajax-modal>%s%s</a>', $url, $type, $text,
+                           $icon, $text);
         } else {
             return sprintf('<a href="%s" class="btn btn-%s" title="%s">%s%s</a>', $url, $type, $text, $icon, $text);
         }
