@@ -171,16 +171,21 @@ class JudgehostController extends BaseController
             ];
         }
 
-
-        return $this->render('@DOMJudge/jury/judgehosts.html.twig', [
+        $data = [
             'judgehosts' => $judgehosts_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
             'refresh' => [
-                'after' => 15,
+                'after' => 5,
                 'url' => $this->generateUrl('jury_judgehosts'),
+                'ajax' => true,
             ]
-        ]);
+        ];
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('@DOMJudge/jury/partials/judgehost_list.html.twig', $data);
+        } else {
+            return $this->render('@DOMJudge/jury/judgehosts.html.twig', $data);
+        }
     }
 
     /**

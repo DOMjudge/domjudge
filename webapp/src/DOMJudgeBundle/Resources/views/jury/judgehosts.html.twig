@@ -13,7 +13,9 @@
 
     <h1>Judgehosts</h1>
 
-    {{ macros.table(judgehosts, table_fields, num_actions, {ordering: 'false'}) }}
+    <div data-ajax-refresh-target>
+        {% include '@DOMJudge/jury/partials/judgehost_list.html.twig' %}
+    </div>
 
     {%- if is_granted('ROLE_ADMIN') %}
 
