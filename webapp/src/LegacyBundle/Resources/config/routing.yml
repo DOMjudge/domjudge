@@ -17,5 +17,3 @@ legacy.jury_checkconfig:
     path: /jury/checkconfig.php
 legacy.jury_impexp:
     path: /jury/impexp.php
-legacy.jury_genpasswds:
-    path: /jury/genpasswds.php
