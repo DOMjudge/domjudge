@@ -35,7 +35,6 @@
 		"ext-mysqli": "*",
 		"ext-zip": "*",
 		"ext-pcntl": "*",
-		"jumbojett/openid-connect-php": "0.1.*",
 		"mustangostang/spyc": "0.5.*",
 		"php": ">= 7.0",
 		"ircmaxell/password-compat": "*",
