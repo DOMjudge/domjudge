@@ -1312,7 +1312,13 @@ int main(int argc, char **argv)
 			if ( child_pipefd[i][PIPE_OUT]>=0 ) {
 				FD_SET(child_pipefd[i][PIPE_OUT],&readfds);
 				r = fcntl(child_pipefd[i][PIPE_OUT], F_GETFL);
-				fcntl(child_pipefd[i][PIPE_OUT], F_SETFL, i ^ O_NONBLOCK);
+				if (r == -1) {
+					error(errno, "fcntl, getting flags");
+				}
+				r = fcntl(child_pipefd[i][PIPE_OUT], F_SETFL, r ^ O_NONBLOCK);
+				if (r == -1) {
+					error(errno, "fcntl, setting flags");
+				}
 			}
 		}
 
