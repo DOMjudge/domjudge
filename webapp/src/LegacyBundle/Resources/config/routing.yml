@@ -1,5 +1,3 @@
-legacy.index:
-    path: /
 legacy.public:
     path: /public/
 legacy.public_problem:

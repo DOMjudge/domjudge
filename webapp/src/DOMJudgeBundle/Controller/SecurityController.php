@@ -51,7 +51,7 @@ class SecurityController extends Controller
               $user->setIpAddress($clientIP);
             }
             $this->getDoctrine()->getManager()->flush();
-            return $this->redirect($this->generateUrl('legacy.index'));
+            return $this->redirect($this->generateUrl('root'));
         }
 
         $authUtils = $this->get('security.authentication_utils');
@@ -85,7 +85,7 @@ class SecurityController extends Controller
     {
         // Redirect if already logged in
         if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return $this->redirect($this->generateUrl('legacy.index'));
+            return $this->redirect($this->generateUrl('root'));
         }
         if (!$this->DOMJudgeService->dbconfig_get('allow_registration', false)) {
             throw new \Symfony\Component\HttpKernel\Exception\HttpException(400, "Registration not enabled");
