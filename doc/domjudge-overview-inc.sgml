@@ -109,9 +109,6 @@ to name them here too (with non-GPL licences listed where applicable):
 <item> lib.database.php by Jeroen van Wolffelaar et al.
 <item> runguard.c was originally based on timeout from The
        Coroner's Toolkit by Wietse Venema.
-<item> sorttable.js, by Stuart Langridge, licenced under
-       the MIT licence, see <tt>COPYING.MIT</tt>.
-       It was downloaded from <url url="http://www.kryogenix.org/code/browser/sorttable/">.
 <item> jscolor.js by Jan Odvarko, licenced under the GNU LGPL. It
        was obtained at <url url="http://jscolor.com">.
 <item> tabber.js by Patrick Fitzgerald, licenced under the MIT

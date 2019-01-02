@@ -62,8 +62,6 @@ themselves and these copyrights/attributions can also be found in the
 administrator manual.
 
 Various JavaScript libraries/snippets are included under www/js/:
-- sorttable.js: copyright Stuart Langridge, licenced under the MIT
-  licence, see COPYING.MIT.
 - jscolor.js: copyright Jan Odvarko, licenced under the GNU LGPL.
 - tabber.js: copyright Patrick Fitzgerald, licenced under the MIT licence.
 - Ace editor: licenced under the BSD licence, see COPYING.BSD.

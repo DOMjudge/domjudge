@@ -58,7 +58,6 @@ if (IS_JURY) {
         echo "    <link rel=\"stylesheet\" href=\"../token-input.css?v=" . ASSET_TAG . "\">\n";
         echo "    <script src=\"../js/jquery.tokeninput.min.js?v=" . ASSET_TAG . "\"></script>\n";
     }
-    echo "    <script src=\"../js/sorttable.js?v=" . ASSET_TAG . "\"></script>\n";
 }
 ?>
     <script src="../js/domjudge.js?v=<?=ASSET_TAG?>"></script>
