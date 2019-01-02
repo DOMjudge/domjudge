@@ -268,3 +268,8 @@ tr.ignore td, td.ignore, span.ignore {
 .form-inline {
     display: inline;
 }
+
+.input-group-text {
+    font-size: small;
+    width: 3em;
+}

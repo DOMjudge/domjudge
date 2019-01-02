@@ -271,8 +271,8 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             case 'noconn': $icon = 'question'; break;
             case 'crit': $icon = 'times'; break;
             case 'warn': $icon = 'exclamation'; break;
-	    case 'ok': $icon = 'check'; break;
-	    default: return $status;
+            case 'ok': $icon = 'check'; break;
+            default: return $status;
         }
         return sprintf('<i class="fas fa-%s-circle"></i>', $icon);
     }

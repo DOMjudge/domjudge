@@ -381,6 +381,9 @@ class ClarificationController extends Controller
         $clarification->setQueue($queue);
         $this->entityManager->flush();
 
+        if($request->isXmlHttpRequest()) {
+            return $this->json(true);
+        }
         return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
     }
 

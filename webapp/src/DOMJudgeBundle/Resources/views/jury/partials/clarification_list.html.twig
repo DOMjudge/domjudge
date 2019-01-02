@@ -12,7 +12,7 @@
         <th scope="col">from</th>
         <th scope="col">to</th>
         <th scope="col">subject</th>
-        {%- if queues | length > 1 %}
+        {%- if false and queues | length > 1 %}
 
             <th scope="col">queue</th>
         {%- endif %}
@@ -20,6 +20,9 @@
         <th scope="col">text</th>
         <th scope="col">answered</th>
         <th scope="col">by</th>
+{% if is_granted('ROLE_ADMIN') and queues | length > 1 %}
+        <th scope="col">queue</th>
+{% endif %}
     </tr>
     </thead>
     <tbody>
@@ -57,7 +60,7 @@
                         general
                     {%- endif -%}
             </a></td>
-            {%- if queues | length > 1 %}
+            {%- if false and queues | length > 1 %}
 
                 <td><a href="{{ link }}">
                     {{- queues[clarification.queue]|default('') -}}
@@ -86,15 +89,27 @@
             <td><form action="{{ path('jury_clarification_claim', {clarId: clarification.clarid}) }}" method="post" class="form-inline">
                 {%- if claim and clarification.sender -%}
                     <button name="claimed" value="1"
-                       class="btn btn-outline-secondary btn-sm">Claim</button>
+                       class="btn btn-outline-success btn-sm">Claim</button>
                 {%- elseif not clarification.answered and app.user.username == juryMember %}
                     <button name="claimed" value="0"
-                       class="btn btn-outline-secondary btn-sm">Unclaim</button>
+                       class="btn btn-outline-success btn-sm">Unclaim</button>
                 {%- else -%}
                     <a href="{{ link }}">{{ juryMember | raw }}</a>
                 {%- endif -%}
 		</form>
             </td>
+{% if is_granted('ROLE_ADMIN') and queues | length > 1 %}
+            <td>
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                 <div class="input-group-prepend"><div class="input-group-text" id="qig{{clarification.clarid}}"><i class="fab fa-quora"></i></div></div>
+                 {% for qk,qv in queues %}
+                 <label class="btn btn-sm btn-outline-secondary{% if qk == clarification.queue %} active{% endif %}">
+                 <input class="qbut" type="radio" name="queue[{{ clarification.clarid }}]" data-clarid="{{ clarification.clarid }}" id="q_{{ qk }}" value="{{ qk }}" autocomplete="off"{% if qk == clarification.queue %} checked{% endif %}> {{ qv }}
+                 </label>
+                 {% endfor %}
+            </div>
+            </td>
+{% endif %}
         </tr>
     {%- endfor %}
 
