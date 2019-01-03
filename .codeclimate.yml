@@ -53,7 +53,3 @@ exclude_paths:
 - "webapp/web/js/ace/"
 - "webapp/web/js/jquery*.js"
 - "webapp/web/js/jscolor.js"
-- "webapp/web/js/js.cookie*.js"
-- "webapp/web/js/sorttable.js"
-- "webapp/web/js/tabber.js"
-- "www/api/v3/"

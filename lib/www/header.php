@@ -39,7 +39,7 @@ if (!isset($menu)) {
 
     <title><?php echo $title?></title>
 
-    <link rel="icon" href="../images/favicon.png">
+    <link rel="icon" href="../favicon.ico">
 <?php if (! IS_JURY): ?>
     <link rel="stylesheet" href="../css/bootstrap.min.css?v=<?=ASSET_TAG?>">
 <?php endif; ?>
