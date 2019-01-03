@@ -91,7 +91,7 @@ class ContestController extends BaseController
             }
 
             if ($time === 'finalize') {
-                return $this->redirectToRoute('legacy.jury_finalize', ['id' => $contest->getCid()]);
+                return $this->redirectToRoute('jury_contest_finalize', ['contestId' => $contest->getCid()]);
             }
 
             $now       = (int)floor(Utils::now());
