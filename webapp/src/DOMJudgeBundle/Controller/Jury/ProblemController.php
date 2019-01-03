@@ -1089,7 +1089,8 @@ class ProblemController extends BaseController
                     $yamlProblemProperties['special_compare_args'] = $yamlData['validator_flags'];
                 }
 
-                if (isset($yamlData['validation']) && $yamlData['validation'] == 'custom') {
+                if (isset($yamlData['validation'])
+                    && ($yamlData['validation'] == 'custom' || $yamlData['validation'] == 'custom interactive')) {
                     // search for validator
                     $validatorFiles = [];
                     for ($j = 0; $j < $zip->numFiles; $j++) {
@@ -1157,7 +1158,12 @@ class ProblemController extends BaseController
                                 ->setType('compare');
                             $this->entityManager->persist($executable);
 
-                            $problem->setCompareExecutable($executable);
+                            if ($yamlData['validation'] == 'custom interactive') {
+                                $problem->setCombinedRunCompare(true);
+                                $problem->setRunExecutable($executable);
+                            } else {
+                                $problem->setCompareExecutable($executable);
+                            }
 
                             $messages[] = sprintf("Added output validator '%s'", $outputValidatorName);
                         }
