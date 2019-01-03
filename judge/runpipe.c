@@ -15,8 +15,7 @@
 
    When this program is sent a SIGTERM, this signal is passed to both
    programs. This program will return when both programs are finished
-   and if either of the programs had non-zero exitcode, the first
-   non-zero exitcode will be returned.
+   and reports back the exit code of the first program.
  */
 
 #include "config.h"
@@ -57,10 +56,15 @@ pid_t  cmd_pid[MAX_CMDS];
 int    cmd_fds[MAX_CMDS][3];
 int    cmd_exit[MAX_CMDS];
 
+int outputmeta;
+char *metafilename;
+FILE *metafile;
+
 struct option const long_opts[] = {
 	{"verbose", no_argument,       NULL,         'v'},
 	{"help",    no_argument,       &show_help,    1 },
 	{"version", no_argument,       &show_version, 1 },
+	{"outmeta", required_argument, NULL,         'M'},
 	{ NULL,     0,                 NULL,          0 }
 };
 
@@ -70,6 +74,7 @@ void usage()
 Usage: %s [OPTION]... COMMAND1 [ARGS...] = COMMAND2 [ARGS...]\n\
 Run two commands with stdin/stdout bi-directionally connected.\n\
 \n\
+  -M, --outmeta=FILE   write metadata (runtime, exitcode, etc.) of first program to FILE\n\
   -v, --verbose        display some extra warnings and information\n\
       --help           display this help and exit\n\
       --version        output version information and exit\n\
@@ -89,6 +94,27 @@ void verb(const char *format, ...)
 		fprintf(stderr,"%s: verbose: ",progname);
 		vfprintf(stderr,format,ap);
 		fprintf(stderr,"\n");
+	}
+
+	va_end(ap);
+}
+
+void write_meta(const char *key, const char *format, ...)
+{
+	va_list ap;
+
+	if ( !outputmeta ) return;
+
+	va_start(ap,format);
+
+	if ( fprintf(metafile,"%s: ",key)<=0 ) {
+		error(0,"cannot write to file `%s'",metafilename);
+	}
+	if ( vfprintf(metafile,format,ap)<0 ) {
+		error(0,"cannot write to file `%s'(vfprintf)",metafilename);
+	}
+	if ( fprintf(metafile,"\n")<=0 ) {
+		error(0,"cannot write to file `%s'",metafilename);
 	}
 
 	va_end(ap);
@@ -147,12 +173,16 @@ int main(int argc, char **argv)
 	/* Parse command-line options */
 	be_verbose = show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+M:",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
 		case 'v': /* verbose option */
 			be_verbose = 1;
+			break;
+		case 'M': /* outputmeta option */
+			outputmeta = 1;
+			metafilename = strdup(optarg);
 			break;
 		case ':': /* getopt error */
 		case '?':
@@ -258,7 +288,24 @@ int main(int argc, char **argv)
 			error(errno,"waiting for children");
 		}
 
-		for(i=0; i<ncmds; i++) if ( cmd_pid[i]==pid ) break;
+		for(i=0; i<ncmds; i++) if ( cmd_pid[i]==pid ) {
+			if (i == 0 && cmd_exit[1] == -1) {
+				/* If the second command hasn't finished yet, then write out metadata. */
+				if ( WIFEXITED(status) ) {
+					exitcode = WEXITSTATUS(status);
+					if ( outputmeta && (metafile = fopen(metafilename,"w"))==NULL ) {
+						error(errno,"cannot open `%s'",metafilename);
+					}
+					write_meta("exitcode","%d",exitcode);
+					/* TODO: add more meta data like run time. */
+					if ( outputmeta && fclose(metafile)!=0 ) {
+						error(errno,"closing file `%s'",metafilename);
+					}
+				}
+			}
+			warning(0, "command #%d, pid %d has exited (with status %d)",i+1,pid,status);
+			break;
+		}
 		if ( i>=ncmds ) error(0, "waited for unknown child");
 
 		cmd_exit[i] = status;
@@ -269,7 +316,7 @@ int main(int argc, char **argv)
 		}
 	} while ( 1 );
 
-	/* Check exit status of commands */
+	/* Check exit status of commands and report back the exit code of the first. */
 	myexitcode = exitcode = 0;
 	for(i=0; i<ncmds; i++) {
 		if ( cmd_exit[i]!=0 ) {
@@ -283,13 +330,14 @@ int main(int argc, char **argv)
 					error(0,"command #%d exit status unknown: %d",i+1,status);
 				}
 			} else {
-				/* Return the exitstatus of the first failed command */
+				/* Log the exitstatus of the failed commands */
 				exitcode = WEXITSTATUS(status);
 				if ( exitcode!=0 ) {
 					warning(0,"command #%d exited with exitcode %d",i+1,exitcode);
 				}
 			}
-			if ( myexitcode==0 ) myexitcode = exitcode;
+			/* Only report it for the first command. */
+			if ( i==0 ) myexitcode = exitcode;
 		}
 	}
 
