@@ -6,7 +6,7 @@
 
 {% block extrahead %}
     {{ parent() }}
-    <script src="{{ asset('js/jscolor.js') }}"></script>
+    {{ macros.jscolor_extrahead() }}
 {% endblock %}
 
 {% block content %}
