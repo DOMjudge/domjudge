@@ -396,7 +396,8 @@ class JudgehostController extends FOSRestController
             'run' => $submission->getProblem()->getSpecialRun(),
             'compare' => $submission->getProblem()->getSpecialCompare(),
             'compare_args' => $submission->getProblem()->getSpecialCompareArgs(),
-            'compile_script' => $submission->getLanguage()->getCompileScript()
+            'compile_script' => $submission->getLanguage()->getCompileScript(),
+            'combined_run_compare' => $submission->getProblem()->getCombinedRunCompare()
         ];
 
         // Merge defaults
