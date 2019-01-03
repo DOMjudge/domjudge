@@ -143,10 +143,17 @@ logmsg $LOG_DEBUG "run_juryprog: '$RUN_JURYPROG'"
 if [ ! -d "$WORKDIR" ] || [ ! -w "$WORKDIR" ] || [ ! -x "$WORKDIR" ]; then
 	error "Workdir not found or not writable: $WORKDIR"
 fi
+if [ -z "$COMPARE_SCRIPT" ]; then
+	export COMBINED_RUN_COMPARE=1
+else
+	export COMBINED_RUN_COMPARE=0
+fi
 [ -x "$WORKDIR/$PROGRAM" ] || error "submission program not found or not executable"
-[ -x "$COMPARE_SCRIPT" ] || error "compare script not found or not executable: $COMPARE_SCRIPT"
 [ -x "$RUN_SCRIPT" ] || error "run script not found or not executable: $RUN_SCRIPT"
 [ -x "$RUNGUARD" ] || error "runguard not found or not executable: $RUNGUARD"
+if [ ! -x "$COMPARE_SCRIPT" ] && [ $COMBINED_RUN_COMPARE -eq 0 ]; then 
+	error "compare script not found or not executable: $COMPARE_SCRIPT"
+fi
 
 cd "$WORKDIR"
 
@@ -199,9 +206,22 @@ $GAINROOT cp -pR /dev/null ../dev/null
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
+if [ $COMBINED_RUN_COMPARE -eq 1 ]; then
+	# Combined run and compare scripts already now need the feedback
+	# directory and perhaps access to the test answers.
+	mkdir feedback
+	exitcode=0
+	cp "$TESTOUT" "$WORKDIR/testdata.out"
+	RUNARGS="testdata.in testdata.out program.out compare.meta feedback"
+else
+	RUNARGS="testdata.in program.out"
+fi
+
+echo $RUNARGS
+
 # To suppress false positive of FILELIMIT misspelling of TIMELIMIT:
 # shellcheck disable=SC2153
-runcheck ./run testdata.in program.out \
+runcheck ./run $RUNARGS \
 	$GAINROOT "$RUNGUARD" ${DEBUG:+-v -V "DEBUG=$DEBUG"} $CPUSET_OPT \
 	${USE_CHROOT:+-r "$PWD/.."} \
 	--nproc=$PROCLIMIT \
@@ -218,26 +238,28 @@ if [ -n "$output" ] ; then
 	error "found processes still running as '$RUNUSER', check manually:\n$output"
 fi
 
-# We first compare the output, so that even if the submission gets a
-# timelimit exceeded or runtime error verdict later, the jury can
-# still view the diff with what the submission produced.
-logmsg $LOG_INFO "comparing output"
+if [ $COMBINED_RUN_COMPARE -eq 0 ]; then
+	# We first compare the output, so that even if the submission gets a
+	# timelimit exceeded or runtime error verdict later, the jury can
+	# still view the diff with what the submission produced.
+	logmsg $LOG_INFO "comparing output"
 
-# Copy testdata output, only after program has run
-cp "$TESTOUT" "$WORKDIR/testdata.out"
+	# Copy testdata output, only after program has run
+	cp "$TESTOUT" "$WORKDIR/testdata.out"
 
-logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
+	logmsg $LOG_DEBUG "starting compare script '$COMPARE_SCRIPT'"
 
-exitcode=0
-# Create dir for feedback files and make it writable for $RUNUSER
-mkdir feedback
-chmod a+w feedback
+	exitcode=0
+	# Create dir for feedback files and make it writable for $RUNUSER
+	mkdir feedback
+	chmod a+w feedback
 
-runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
-	-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
-	-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
-	"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
-	                  >compare.tmp 2>&1
+	runcheck $GAINROOT "$RUNGUARD" ${DEBUG:+-v} $CPUSET_OPT -u "$RUNUSER" -g "$RUNGROUP" \
+		-m $SCRIPTMEMLIMIT -t $SCRIPTTIMELIMIT -c \
+		-f $SCRIPTFILELIMIT -s $SCRIPTFILELIMIT -M compare.meta -- \
+		"$COMPARE_SCRIPT" testdata.in testdata.out feedback/ $COMPARE_ARGS < program.out \
+				  >compare.tmp 2>&1
+fi
 
 # Make sure that all feedback files are owned by the current
 # user/group, so that we can append content.
@@ -311,7 +333,7 @@ if [ $exitcode -eq 42 ]; then
 	cleanexit ${E_CORRECT:-1}
 elif [ $exitcode -eq 43 ]; then
 	# Special case detect no-output:
-	if [ ! -s program.out ];  then
+	if [ ! -s program.out ] && [ $COMBINED_RUN_COMPARE -eq 0 ];  then
 		echo "Program produced no output." >>system.out
 		echo "$resourceinfo" >>system.out
 		cleanexit ${E_NO_OUTPUT:-1}

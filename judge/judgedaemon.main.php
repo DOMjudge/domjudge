@@ -855,18 +855,24 @@ function judge(array $row)
         $hardtimelimit = $row['maxruntime'] +
                          overshoot_time($row['maxruntime'], $overshoot);
 
-        list($compare_runpath, $error) = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
-        if (isset($error)) {
-            logmsg(LOG_ERR, "fetching executable failed for compare script '" . $row['compare'] . "':" . $error);
-            disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
-            return;
-        }
-
         list($run_runpath, $error) = fetch_executable($workdirpath, $row['run'], $row['run_md5sum']);
         if (isset($error)) {
             logmsg(LOG_ERR, "fetching executable failed for run script '" . $row['run'] . "':" . $error);
             disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
             return;
+        }
+
+        if ($row['combined_run_compare']) {
+            // set to empty string to signal the testcase_run script that the
+            // run script also acts as compare script
+            $compare_runpath = '';
+        } else {
+            list($compare_runpath, $error) = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
+            if (isset($error)) {
+                logmsg(LOG_ERR, "fetching executable failed for compare script '" . $row['compare'] . "':" . $error);
+                disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
+                return;
+            }
         }
 
         system(LIBJUDGEDIR . "/testcase_run.sh $cpuset_opt $tcfile[input] $tcfile[output] " .
