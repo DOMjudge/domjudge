@@ -17,6 +17,8 @@ ALTER TABLE `configuration` DROP COLUMN `category`;
 
 ALTER TABLE `configuration`
   ADD COLUMN `category` varchar(32) NOT NULL DEFAULT 'Uncategorized' COMMENT 'Option category of the configuration variable' AFTER `public`;
+ALTER TABLE `problem`
+  ADD COLUMN `combined_run_compare` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Use the exit code of the run script to compute the verdict' AFTER `special_compare_args`;
 
 
 --

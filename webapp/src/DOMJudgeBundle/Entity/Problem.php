@@ -88,6 +88,13 @@ class Problem
     private $special_compare_args;
 
     /**
+     * @var boolean
+     * @ORM\Column(type="boolean", name="combined_run_compare", options={"comment"="Use the exit code of the run script to compute the verdict"}, nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $combined_run_compare = FALSE;
+
+    /**
      * @var resource
      * @ORM\Column(type="blob", name="problemtext", options={"comment"="Problem text in HTML/PDF/ASCII"}, nullable=true)
      * @Serializer\Exclude()
@@ -359,6 +366,30 @@ class Problem
     public function getSpecialCompareArgs()
     {
         return $this->special_compare_args;
+    }
+
+    /**
+     * Set combinedRunCompare
+     *
+     * @param boolean $combinedRunCompare
+     *
+     * @return Problem
+     */
+    public function setCombinedRunCompare($combinedRunCompare)
+    {
+        $this->combined_run_compare = $combinedRunCompare;
+
+        return $this;
+    }
+
+    /**
+     * Get combinedRunCompare
+     *
+     * @return boolean
+     */
+    public function getCombinedRunCompare()
+    {
+        return $this->combined_run_compare;
     }
 
     /**
