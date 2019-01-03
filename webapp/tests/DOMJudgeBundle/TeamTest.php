@@ -53,7 +53,7 @@ class TeamTest extends WebTestCase
     {
         # test incorrect and correct password
         $this->loginHelper('dummy', 'foo', 'http://localhost/login', 200);
-        $this->loginHelper('dummy', 'dummy', 'http://localhost/', 302);
+        $this->loginHelper('dummy', 'dummy', 'http://localhost/team/', 200);
     }
 
     // This just injects a user object into the session so symfony will think we're logged in
