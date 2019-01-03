@@ -12,10 +12,6 @@
         <th scope="col">from</th>
         <th scope="col">to</th>
         <th scope="col">subject</th>
-        {%- if false and queues | length > 1 %}
-
-            <th scope="col">queue</th>
-        {%- endif %}
 
         <th scope="col">text</th>
         <th scope="col">answered</th>
@@ -60,12 +56,6 @@
                         general
                     {%- endif -%}
             </a></td>
-            {%- if false and queues | length > 1 %}
-
-                <td><a href="{{ link }}">
-                    {{- queues[clarification.queue]|default('') -}}
-                </a></td>
-            {%- endif %}
 
             <td><a href="{{ link }}">{{ clarification.summary }}</a></td>
             {%- set claim = false %}
