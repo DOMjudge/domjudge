@@ -217,7 +217,7 @@ else
 	RUNARGS="testdata.in program.out"
 fi
 
-echo $RUNARGS
+
 
 # To suppress false positive of FILELIMIT misspelling of TIMELIMIT:
 # shellcheck disable=SC2153
