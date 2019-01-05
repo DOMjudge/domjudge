@@ -200,7 +200,8 @@ function read_judgehostlog(int $n = 20) : string
 // fetches new executable from database if necessary
 // runs build to compile executable
 // returns array with absolute path to run script and possibly error message
-function fetch_executable(string $workdirpath, string $execid, string $md5sum) : array
+function fetch_executable(
+    string $workdirpath, string $execid, string $md5sum, bool $combined_run_compare = false) : array
 {
     $execpath = "$workdirpath/executable/" . $execid;
     $execmd5path = $execpath . "/md5sum";
@@ -298,6 +299,54 @@ function fetch_executable(string $workdirpath, string $execid, string $md5sum) :
                     $buildscript .= "echo '#!/bin/sh' > run\n";
                     $buildscript .= "echo 'python '$source' >> run\n";
                     break;
+                }
+                if ( $combined_run_compare ) {
+                    $buildscript .= <<<'EOT'
+mv run runjury
+
+cat <<'EOF' > run
+#!/bin/sh
+
+# Run wrapper-script to be called from 'testcase_run.sh'.
+#
+# This script is meant to simplify writing interactive problems where the
+# contestants' solution bi-directionally communicates with a jury program, e.g.
+# while playing a two player game.
+#
+# Usage: $0 <testin> <testout> <progout> <metafile> <feedbackdir> <program>...
+#
+# <testin>      File containing test-input.
+# <testout>     File containing test-output.
+# <progout>     File where to write solution output. Note: this is unused.
+# <feedbackdir> Directory to write jury feedback files to.
+# <program>     Command and options of the program to be run.
+
+# A jury-written program called 'runjury' should be available; this program
+# will normally be compiled by the build script in the validator directory.
+# This program should communicate with the contestants' program to provide
+# input and read output via stdin/stdout. This wrapper script handles the setup
+# of bi-directional pipes. The jury program should accept the following calling
+# syntax:
+#
+#    runjury <testin> <testout> <feedbackdir> < <output of the program>
+#
+# The jury program should exit with exitcode 42 if the submissions is accepted,
+# 43 otherwise.
+
+TESTIN="$1";  shift
+TESTOUT="$1"; shift
+PROGOUT="$1"; shift
+META="$1"; shift
+FEEDBACK="$1"; shift
+
+# Run the program while redirecting its stdin/stdout to 'runjury' via
+# 'runpipe'. Note that "$@" expands to separate, quoted arguments.
+exec ../dj-bin/runpipe -M "$META" ./runjury "$TESTIN" "$TESTOUT" "$FEEDBACK" = "$@"
+EOF
+
+chmod +x run
+
+EOT;
                 }
                 if (file_put_contents($execbuildpath, $buildscript) === false) {
                     error("Could not write file 'build' in $execpath");
@@ -855,7 +904,8 @@ function judge(array $row)
         $hardtimelimit = $row['maxruntime'] +
                          overshoot_time($row['maxruntime'], $overshoot);
 
-        list($run_runpath, $error) = fetch_executable($workdirpath, $row['run'], $row['run_md5sum']);
+        list($run_runpath, $error) =
+            fetch_executable($workdirpath, $row['run'], $row['run_md5sum'], $row['combined_run_compare']);
         if (isset($error)) {
             logmsg(LOG_ERR, "fetching executable failed for run script '" . $row['run'] . "':" . $error);
             disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
