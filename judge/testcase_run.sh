@@ -310,22 +310,27 @@ memory_bytes=$(    grep '^memory-bytes: ' program.meta | sed 's/memory-bytes: //
 resourceinfo="\
 runtime: ${program_cputime}s cpu, ${program_walltime}s wall
 memory used: ${memory_bytes} bytes"
-if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
-	if [ $COMBINED_RUN_COMPARE -eq 1 ] && grep '^exitcode: 43' compare.meta > /dev/null 2>&1 ; then
-		# For interactive problems with combined run/compare scripts, a
-		# WA may override TLE.
-		# FIXME: For now, we only write to compare.meta if the
-		# validator exited first, but we should always write the meta
-		# file and include information about which exited first and
-		# when.
+
+if [ $COMBINED_RUN_COMPARE -eq 1 ] && grep '^exitcode: 43' compare.meta > /dev/null 2>&1 ; then
+	# For interactive problems with combined run/compare scripts, a
+	# WA may override TLE and RTE.
+	# FIXME: For now, we only write to compare.meta if the
+	# validator exited first, but we should always write the meta
+	# file and include information about which exited first and
+	# when.
+	if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
 		echo "Timelimit exceeded, but validator exited first with WA." >>system.out
-		echo "$resourceinfo" >>system.out
-		cleanexit ${E_WRONG_ANSWER:-1}
-	else
-		echo "Timelimit exceeded." >>system.out
-		echo "$resourceinfo" >>system.out
-		cleanexit ${E_TIMELIMIT:-1}
+	elif [ "$program_exit" != "0" ]; then
+		echo "Non-zero exitcode $program_exit, but validator exited first with WA." >>system.out
 	fi
+	echo "$resourceinfo" >>system.out
+	cleanexit ${E_WRONG_ANSWER:-1}
+fi
+
+if grep '^time-result: .*timelimit' program.meta >/dev/null 2>&1 ; then
+	echo "Timelimit exceeded." >>system.out
+	echo "$resourceinfo" >>system.out
+	cleanexit ${E_TIMELIMIT:-1}
 fi
 if [ "$program_exit" != "0" ]; then
 	echo "Non-zero exitcode $program_exit" >>system.out
