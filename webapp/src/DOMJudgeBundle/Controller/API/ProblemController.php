@@ -2,13 +2,19 @@
 
 namespace DOMJudgeBundle\Controller\API;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Helpers\ContestProblemWrapper;
 use DOMJudgeBundle\Helpers\OrdinalArray;
+use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
+use DOMJudgeBundle\Service\ImportProblemService;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -25,6 +31,20 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class ProblemController extends AbstractRestController implements QueryObjectTransformer
 {
+    /**
+     * @var ImportProblemService
+     */
+    protected $importProblemService;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
+        ImportProblemService $importProblemService
+    ) {
+        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
+        $this->importProblemService = $importProblemService;
+    }
     /**
      * Get all the problems for this contest
      * @param Request $request
@@ -91,6 +111,40 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         }
 
         return $this->renderData($request, $objects);
+    }
+
+    /**
+     * Add one or more problems to this contest.
+     * @param Request $request
+     * @return int
+     * @Rest\Post("")
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function addProblemAction(Request $request)
+    {
+        $files = $request->files->get('zip') ?: [];
+        $contestId = $this->getContestId($request);
+        /** @var Contest $contest */
+        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        $allMessages = [];
+        /** @var UploadedFile $file */
+        foreach ($files as $file) {
+            try {
+                $zip         = $this->DOMJudgeService->openZipFile($file->getRealPath());
+                $clientName  = $file->getClientOriginalName();
+                $messages    = [];
+                $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest, $messages);
+                $allMessages = array_merge($allMessages, $messages);
+                $this->DOMJudgeService->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
+                $probIds[] = $newProblem->getProbid();
+            } catch (Exception $e) {
+                dump($e);
+            } finally {
+                $zip->close();
+            }
+        }
+        dump($allMessages);
+        return $probIds;
     }
 
     /**
