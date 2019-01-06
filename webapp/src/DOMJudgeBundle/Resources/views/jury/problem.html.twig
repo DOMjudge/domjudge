@@ -95,17 +95,24 @@
                         {% endif %}
                     </td>
                 </tr>
-                <tr>
-                    <th>Compare script</th>
-                    <td class="filename">
-                        {% if problem.compareExecutable is not empty %}
-                            <a href="{{ path('jury_executable', {'execId': problem.compareExecutable.execid}) }}">{{ problem.compareExecutable.execid }}</a>
-                        {% else %}
-                            <a href="{{ path('jury_executable', {'execId': defaultCompareExecutable}) }}">{{ defaultCompareExecutable }}</a>
-                            (default)
-                        {% endif %}
-                    </td>
-                </tr>
+		{% if problem.combinedRunCompare %}
+                  <tr>
+                     <th>Compare script</th>
+                     <td>Run script combines run and compare script.</td>
+                  </tr>
+                {% else %}
+                  <tr>
+                      <th>Compare script</th>
+                      <td class="filename">
+                          {% if problem.compareExecutable is not empty %}
+                              <a href="{{ path('jury_executable', {'execId': problem.compareExecutable.execid}) }}">{{ problem.compareExecutable.execid }}</a>
+                          {% else %}
+                              <a href="{{ path('jury_executable', {'execId': defaultCompareExecutable}) }}">{{ defaultCompareExecutable }}</a>
+                              (default)
+                          {% endif %}
+                      </td>
+                  </tr>
+                {% endif %}
                 {% if problem.specialCompareArgs is not empty %}
                     <tr>
                         <th>Compare script arguments</th>

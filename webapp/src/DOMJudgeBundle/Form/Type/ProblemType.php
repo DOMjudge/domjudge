@@ -75,6 +75,10 @@ class ProblemType extends AbstractExternalIdEntityType
             'label' => 'Compare script arguments',
             'required' => false,
         ]);
+        $builder->add('combinedRunCompare', CheckboxType::class, [
+            'label' => 'Use run script as compare script.',
+            'required' => false,
+        ]);
         $builder->add('save', SubmitType::class);
 
         // Remove clearProblemtext field when we do not have a problem text
