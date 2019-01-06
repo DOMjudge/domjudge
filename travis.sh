@@ -152,6 +152,19 @@ fi
 cd ${DIR}/tests
 make check-syntax check test-stress
 
+# Prepare to load example problems from Kattis/problemtools
+echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
+cd /tmp
+git clone https://github.com/Kattis/problemtools.git
+cd problemtools/examples
+for i in hello different guess; do
+	(
+		cd "$i"
+		zip -r "../${i}.zip" -- *
+	)
+	curl -X POST -n -N -F zip[]=@${i}.zip http://localhost/domjudge/api/contests/2/problems
+done
+
 # wait for and check results
 NUMSUBS=$(curl http://admin:admin@localhost/domjudge/api/contests/2/submissions | python -mjson.tool | grep -c '"id":')
 export COOKIEJAR
