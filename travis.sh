@@ -155,7 +155,7 @@ make check-syntax check test-stress
 # Prepare to load example problems from Kattis/problemtools
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
 cd /tmp
-git clone https://github.com/Kattis/problemtools.git
+git clone --depth=1 https://github.com/Kattis/problemtools.git
 cd problemtools/examples
 for i in hello different guess; do
 	(
