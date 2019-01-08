@@ -1415,6 +1415,7 @@ class Contest
      */
     public function validate(ExecutionContextInterface $context)
     {
+        $this->updateTimes();
         if (Utils::difftime((float)$this->getEndtime(), (float)$this->getStarttime(true)) <= 0) {
             $context
                 ->buildViolation('Contest ends before it even starts')
