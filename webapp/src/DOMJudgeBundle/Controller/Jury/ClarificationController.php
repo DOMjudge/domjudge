@@ -285,7 +285,7 @@ class ClarificationController extends Controller
     public function toggleClaimAction(Request $request, int $clarId)
     {
         /** @var Clarification $clarification */
-        $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);
+        $clarification = $this->entityManager->getReference(Clarification::class, $clarId);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
         }
@@ -310,7 +310,7 @@ class ClarificationController extends Controller
     public function toggleAnsweredAction(Request $request, int $clarId)
     {
         /** @var Clarification $clarification */
-        $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);
+        $clarification = $this->entityManager->getReference(Clarification::class, $clarId);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
         }
@@ -335,7 +335,7 @@ class ClarificationController extends Controller
     public function changeSubjectAction(Request $request, int $clarId)
     {
         /** @var Clarification $clarification */
-        $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);
+        $clarification = $this->entityManager->getReference(Clarification::class, $clarId);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
         }
@@ -343,11 +343,11 @@ class ClarificationController extends Controller
         $subject = $request->request->get('subject');
         list($cid, $probid) = explode('-', $subject);
 
-        $contest = $this->entityManager->getRepository(Contest::class)->find($cid);
+        $contest = $this->entityManager->getReference(Contest::class, $cid);
         $clarification->setContest($contest);
 
         if (ctype_digit($probid)) {
-            $problem = $this->entityManager->getRepository(Problem::class)->find($probid);
+            $problem = $this->entityManager->getReference(Problem::class, $probid);
             $clarification->setProblem($problem);
             $clarification->setCategory(null);
         } else {
@@ -369,7 +369,7 @@ class ClarificationController extends Controller
     public function changeQueueAction(Request $request, int $clarId)
     {
         /** @var Clarification $clarification */
-        $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);
+        $clarification = $this->entityManager->getReference(Clarification::class, $clarId);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
         }
@@ -408,18 +408,18 @@ class ClarificationController extends Controller
             throw new InvalidArgumentException('You must select somewhere to send the clarification to.');
         } else {
             $clarification->setRecipientId($sendto);
-            $team = $this->entityManager->getRepository(Team::class)->find($sendto);
+            $team = $this->entityManager->getReference(Team::class, $sendto);
             $clarification->setRecipient($team);
         }
 
         $problem = $request->request->get('problem');
         list($cid, $probid) = explode('-', $problem);
 
-        $contest = $this->entityManager->getRepository(Contest::class)->find($cid);
+        $contest = $this->entityManager->getReference(Contest::class, $cid);
         $clarification->setContest($contest);
 
         if (ctype_digit($probid)) {
-            $problem = $this->entityManager->getRepository(Problem::class)->find($probid);
+            $problem = $this->entityManager->getReference(Problem::class, $probid);
             $clarification->setProblem($problem);
             $clarification->setCategory(null);
         } else {
