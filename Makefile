@@ -88,12 +88,12 @@ build-scripts:
 build:             SUBDIRS=        lib                      import tests misc-tools
 domserver:         SUBDIRS=etc         sql www              import       misc-tools webapp
 install-domserver: SUBDIRS=etc     lib sql www              import       misc-tools webapp
-judgehost:         SUBDIRS=etc                 judge              misc-tools
-install-judgehost: SUBDIRS=etc     lib         judge              misc-tools
+judgehost:         SUBDIRS=etc                 judge                     misc-tools
+install-judgehost: SUBDIRS=etc     lib         judge                     misc-tools
 docs:              SUBDIRS=    doc
-install-docs:      SUBDIRS=    doc                                           webapp
-dist:              SUBDIRS=        lib sql                        misc-tools
-clean:             SUBDIRS=etc doc lib sql www judge submit tests misc-tools webapp
+install-docs:      SUBDIRS=    doc                                                  webapp
+dist:              SUBDIRS=        lib sql                               misc-tools
+clean:             SUBDIRS=etc doc lib sql www judge submit        tests misc-tools webapp
 distclean:         SUBDIRS=etc doc lib sql www judge submit import tests misc-tools webapp
 maintainer-clean:  SUBDIRS=etc doc lib sql www judge submit import tests misc-tools webapp
 
