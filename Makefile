@@ -55,16 +55,10 @@ submitclient:
 install-domserver: domserver domserver-create-dirs
 install-judgehost: judgehost judgehost-create-dirs
 install-docs: docs-create-dirs
-dist: configure composer-prod
+dist: configure composer-dependencies
 
 # Install PHP dependencies
-composer-prod: composer
-	SYMFONY_ENV=prod composer $(subst 1,-q,$(QUIET)) --no-dev --classmap-authoritative install
-
-composer-dev: composer
-	composer $(subst 1,-q,$(QUIET)) install
-
-composer:
+composer-dependencies:
 ifeq (, $(shell which composer))
 	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
 endif
@@ -74,6 +68,7 @@ endif
 # file, and set its modification time in the past so that it will get
 # updated later during build with 'make domserver'.
 	$(MAKE) -C webapp params-from-stub static-from-stub
+	composer $(subst 1,-q,$(QUIET)) install
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
@@ -175,7 +170,7 @@ paths.mk:
 MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -D_FORTIFY_SOURCE=2 \
               -fPIE -Wformat -Wformat-security -ansi -pedantic
 MAINT_LDFLAGS=-fPIE -pie -Wl,-z,relro -Wl,-z,now
-maintainer-conf: dist composer-dev
+maintainer-conf: dist
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
@@ -311,5 +306,5 @@ clean-autoconf:
 
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
         clean-autoconf $(addprefix maintainer-,conf install uninstall) \
-        config submitclient distdocs composer-dev composer-prod composer \
+        config submitclient distdocs composer-dependencies \
         coverity-conf coverity-build

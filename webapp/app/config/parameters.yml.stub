@@ -17,7 +17,3 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret: STUB_NO_SECRET
-
-doctrine:
-    dbal:
-        server_version: 5.6
