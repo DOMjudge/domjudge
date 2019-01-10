@@ -145,10 +145,7 @@ remove_db_users()
 	echo "DROP DATABASE IF EXISTS \`$DBNAME\`;"
 # Also drop "@%" users, since those may have been created by pre-4.0 versions
 # of DOMjudge.
-# In MySQL < 5.0.2, 'DROP USER' only removes the user, not its privileges:
-	echo "REVOKE ALL PRIVILEGES, GRANT OPTION FROM
-		'$domjudge_DBUSER'@'%', '$domjudge_DBUSER'@'localhost';"
-	echo "DROP USER
+	echo "DROP USER IF EXISTS
 		'$domjudge_DBUSER'@'%', '$domjudge_DBUSER'@'localhost';"
 	echo "FLUSH PRIVILEGES;"
 	) | mysql -f
