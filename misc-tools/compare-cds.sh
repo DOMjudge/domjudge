@@ -18,7 +18,7 @@ echo "Starting CDS validation of contest $DOMJUDGE_CID on $DOMJUDGE_URL"
 echo ""
 CCS_URL="${DOMJUDGE_URL}/api/contests/$DOMJUDGE_CID"
 CCS_USER="admin"
-CCS_PASS="admin"
+CCS_PASS=$(cat ../etc/initial_admin_password.secret)
 
 # Whether to launch the eventdaemon or not
 RUN_EVENTDAEMON=0

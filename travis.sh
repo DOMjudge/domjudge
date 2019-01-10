@@ -69,6 +69,7 @@ sudo make install-domserver install-judgehost
 # setup database and add special user
 cd /opt/domjudge/domserver
 sudo bin/dj_setup_database install
+ADMINPASS=$(cat etc/initial_admin_password.secret)
 echo "INSERT INTO user (userid, username, name, password, teamid) VALUES (3, 'dummy', 'dummy user for example team', '\$2y\$10\$0d0sPmeAYTJ/Ya7rvA.kk.zvHu758ScyuHAjps0A6n9nm3eFmxW2K', 2)" | mysql domjudge
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | mysql domjudge
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 3);" | mysql domjudge
@@ -166,7 +167,7 @@ for i in hello different guess; do
 done
 
 # wait for and check results
-NUMSUBS=$(curl http://admin:admin@localhost/domjudge/api/contests/2/submissions | python -mjson.tool | grep -c '"id":')
+NUMSUBS=$(curl http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python -mjson.tool | grep -c '"id":')
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
 export CURLOPTS="-sq -m 30 -b $COOKIEJAR"
@@ -174,7 +175,7 @@ export CURLOPTS="-sq -m 30 -b $COOKIEJAR"
 # Make an initial request which will get us a session id, and grab the csrf token from it
 CSRFTOKEN=$(curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge/login" 2>/dev/null | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')
 # Make a second request with our session + csrf token to actually log in
-curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=admin" "http://localhost/domjudge/login"
+curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F "_password=$ADMINPASS" "http://localhost/domjudge/login"
 
 # Send a general clarification to later test if we see the event.
 curl $CURLOPTS -F "sendto=" -F "problem=2-" -F "bodytext=Testing" -F "submit=Send" \
@@ -216,7 +217,7 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 fi
 
 # Check the Contest API:
-$CHECK_API -n -C -a 'strict=1' http://admin:admin@localhost/domjudge/api
+$CHECK_API -n -C -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
 
 # Validate the eventfeed against the api(currently ignore failures)
 cd ${DIR}/misc-tools
