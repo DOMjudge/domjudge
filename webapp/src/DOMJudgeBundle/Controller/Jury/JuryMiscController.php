@@ -57,22 +57,7 @@ class JuryMiscController extends BaseController
      */
     public function indexAction(Request $request)
     {
-        $errors = array();
-        if ($this->DOMJudgeService->checkrole('admin')) {
-            $result = $this->entityManager->createQueryBuilder()
-                ->select('u.username, u.password')
-                ->from('DOMJudgeBundle:User', 'u')
-                ->join('u.roles', 'r')
-                ->andWhere('r.dj_role = :role')
-                ->setParameter('role', 'admin')
-                ->getQuery()->getResult();
-            foreach ($result as $row) {
-                if ($row['password'] && password_verify($row['username'], $row['password'])) {
-                    $errors[] = "Security alert: the password of the user '"
-                        . $row['username'] . "' matches their username. You should change it immediately!";
-                }
-            }
-        }
+        $errors = [];
         return $this->render('DOMJudgeBundle:jury:index.html.twig', ['errors' => $errors]);
     }
 

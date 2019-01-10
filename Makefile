@@ -128,6 +128,8 @@ endif
 		etc/restapi.secret
 	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
 		etc/dbpasswords.secret
+	-$(INSTALL_WEBSITE) -m 0600 -t $(DESTDIR)$(domserver_etcdir) \
+		etc/initial_admin_password.secret
 
 install-judgehost-l:
 	$(MAKE) check-root

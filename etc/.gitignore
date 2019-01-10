@@ -9,5 +9,6 @@
 /config.h
 /dbpasswords.secret
 /restapi.secret
+/initial_admin_password.secret
 /sudoers-domjudge
 /domjudge-judgehost.init

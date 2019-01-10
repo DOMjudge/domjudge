@@ -275,7 +275,6 @@ On the domserver host:
        </tt>
 
 <item> Check that the web interface works (/team, /public and /jury).
-<item> Change the admin password from its default value ('admin').
 <item> Check that the API (/api) works and create credentials for the judgehosts.
 <item> Create teams, user accounts and add useful contest data through
        the jury web interface or with phpMyAdmin.
@@ -527,7 +526,7 @@ For this, you need an installed and configured MySQL server and
 administrator access to it. Run
 <code>
 dj_setup_database genpass
-dj_setup_database [-u <admin_user>] [-p <password>|-r] install
+dj_setup_database [-u <mysql admin user>] [-p <password>|-r] install
 </code>
 This first creates the DOMjudge database credentials file
 <tt>etc/dbpasswords.secret</tt> (optionally change the random
@@ -539,6 +538,9 @@ specified, the mysql client will try to read
 credentials from <tt>$HOME/.my.cnf</tt> as usual. The command
 <tt>uninstall</tt> can be passed to <tt>dj_setup_database</tt> to
 remove the DOMjudge database and users; <em>this deletes all data!</em>
+
+The script also creates the initial "admin" user with password
+stored in <tt>etc/initial_admin_password.secret</tt>.
 
 The domjudge database contains a number of tables, some of which need
 to be manually filled with data before the contest can be run. See the
@@ -598,9 +600,8 @@ service apache2 reload
 </verb>
 
 An Nginx webserver configuration snippet is also provided
-in <tt>etc/nginx-conf</tt>. This alternative webserver is less
-well-tested than the Apache setup, so your mileage may vary. Feedback
-is very welcome, though.
+in <tt>etc/nginx-conf</tt>. You still need <tt>htpasswd</tt>
+from <tt>apache2-utils</tt> though.
 
 The judgehosts connect to DOMjudge via the DOMjudge API so need
 to be able to access at least this part of the web interface.
@@ -856,8 +857,8 @@ configuration variables on the page <tt>Configuration settings</tt>
 available in the administrator interface, and changes take effect
 immediately. The administrator interface can be reached
 on <tt>http(s)://yourhost.example.edu/domjudge/jury/</tt> and the
-default username is <tt>admin</tt> with password <tt>admin</tt>.
-Make sure to change the default password immediately.
+default username is <tt>admin</tt> with initial password stored in
+<tt>etc/initial_admin_password.secret</tt>.
 
 Some settings that are tightly coupled to the filesystem can be
 configured in the files in <tt>etc</tt>: <tt>domserver-config.php,

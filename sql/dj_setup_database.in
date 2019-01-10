@@ -11,6 +11,7 @@ SQLDIR="@domserver_sqldir@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
 RESTPWFILE="$ETCDIR/restapi.secret"
+ADMINPWFILE="$ETCDIR/initial_admin_password.secret"
 
 DEFAULTDATA_FILES="$SQLDIR/mysql_db_defaultdata.sql $SQLDIR/mysql_db_files_defaultdata.sql"
 EXAMPLES_FILES="$SQLDIR/mysql_db_examples.sql $SQLDIR/mysql_db_files_examples.sql"
@@ -213,6 +214,9 @@ genpass)
 	echo "Running '$ETCDIR/genrestapicredentials'..."
 	$ETCDIR/genrestapicredentials > "$RESTPWFILE"
 	echo "Password file '$RESTPWFILE' created."
+	echo "Running '$ETCDIR/genadminpassword'..."
+	$ETCDIR/genadminpassword > "$ADMINPWFILE"
+	echo "Password file '$ADMINPWFILE' created."
 	;;
 
 uninstall)
@@ -241,12 +245,13 @@ bare-install|install)
 		FILES="$FILES $EXAMPLES_FILES"
 	fi
 	RESTPW=$(grep -v ^# $RESTPWFILE | cut -f4)
-	# NOTE: the hash function and cost below have to be kept
-	# synchronised with those used in the code!
-	PWHASH=$(htpasswd -nbB -C 10 foouser "$RESTPW" | sed 's/^foouser://')
+	RESTPWHASH=$(htpasswd -nbB -C 10 foouser "$RESTPW" | sed 's/^foouser://')
+	ADMINPW=$(cat $ADMINPWFILE)
+	ADMINPWHASH=$(htpasswd -nbB -C 10 foouser "$ADMINPW" | sed 's/^foouser://')
 	(
 		cat $FILES
-		echo "UPDATE user SET password = '$PWHASH' WHERE username='judgehost';"
+		echo "UPDATE user SET password = '$RESTPWHASH' WHERE username='judgehost';"
+		echo "UPDATE user SET password = '$ADMINPWHASH' WHERE username='admin';"
 	) | mysql -D "$DBNAME"
 	if [ "$1" = "install" ]; then
 		verbose "SQL structure and default/example data installed."
