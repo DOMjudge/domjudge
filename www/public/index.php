@@ -26,6 +26,12 @@ $filter = initScorefilter();
 $menu = !$isstatic;
 require(LIBWWWDIR . '/header.php');
 
+// TODO: make this banner contest specific? perhaps add it to the DB?
+$banner = WEBAPPDIR . '/web/images/banner.png';
+if ($isstatic && is_readable($banner)) {
+  echo '<img class="banner" src="../images/banner.png" />';
+}
+
 if ($isstatic && isset($_REQUEST['contest'])) {
     if ($_REQUEST['contest'] === 'auto') {
         $a = null;

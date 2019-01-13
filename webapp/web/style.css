@@ -462,3 +462,10 @@ h6 { font-size: .75em; }
     height: 30px;
     width: 40px;
 }
+
+.banner {
+    width: 98%;
+    height: auto;
+    display: block;
+    margin: -6rem auto 0 auto;
+}
