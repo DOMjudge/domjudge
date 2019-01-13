@@ -372,7 +372,7 @@ class Utils
         if ($exact) {
             $decimals = 0;
         }
-        return sprintf("%.${decimals}lf&nbsp;%s", round($display, $decimals), $units[$i]);
+        return sprintf("%.${decimals}lf %s", round($display, $decimals), $units[$i]);
     }
 
     /**
@@ -802,5 +802,18 @@ class Utils
         }
 
         return $rand_str;
+    }
+
+    /**
+     * Convert size value as returned by ini_get to bytes.
+     */
+    public static function phpini_to_bytes(string $size_str)
+    {
+        switch (substr($size_str, -1)) {
+            case 'M': case 'm': return (int)$size_str * 1048576;
+            case 'K': case 'k': return (int)$size_str * 1024;
+            case 'G': case 'g': return (int)$size_str * 1073741824;
+            default: return $size_str;
+        }
     }
 }
