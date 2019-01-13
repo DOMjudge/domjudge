@@ -582,11 +582,7 @@ class Utils
         if (function_exists('xdiff_string_diff')) {
             // The PECL xdiff PHP-extension.
             $difftext = xdiff_string_diff($oldSource->getSourcecode(), $newSource->getSourcecode(), 2, true);
-        } elseif (!(bool)ini_get('safe_mode') ||
-            strtolower(ini_get('safe_mode')) == 'off') {
-            // Only try executing diff when safe_mode is off, otherwise
-            // the shell exec will fail.
-
+        } else {
             if (is_readable($oldFile) && is_readable($newFile)) {
                 // A direct diff on the sources in the SUBMITDIR.
                 $difftext = Utils::systemDiff($oldFile, $newFile);
@@ -626,8 +622,6 @@ class Utils
                     unlink($newFile);
                 }
             }
-        } else {
-            $difftext = "DOMjudge: diff functionality not available in PHP or via shell exec.";
         }
 
         return $difftext;
