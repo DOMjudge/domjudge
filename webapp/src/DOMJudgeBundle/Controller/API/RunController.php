@@ -46,7 +46,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * Get all the runs for this contest
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
-     * @Security("has_role('ROLE_JURY') or has_role('ROLE_JUDGEHOST')")
+     * @Security("has_role('ROLE_JURY') or has_role('ROLE_JUDGEHOST') or has_role('ROLE_API_READER')")
      * @Rest\Get("")
      * @SWG\Response(
      *     response="200",
@@ -99,7 +99,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      * @param string $id
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @Security("has_role('ROLE_JURY') or has_role('ROLE_JUDGEHOST')")
+     * @Security("has_role('ROLE_JURY') or has_role('ROLE_JUDGEHOST') or has_role('ROLE_API_READER')")
      * @Rest\Get("/{id}")
      * @SWG\Response(
      *     response="200",

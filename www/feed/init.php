@@ -19,8 +19,8 @@ require_once(LIBWWWDIR . '/auth.php');
 setup_database_connection();
 logged_in();
 
-if (!checkrole('full_event_reader')) {
-    error("User role full_event_reader required.");
+if (!checkrole('api_reader')) {
+    error("User role api_reader required.");
 }
 
 define('IS_JURY', true);
