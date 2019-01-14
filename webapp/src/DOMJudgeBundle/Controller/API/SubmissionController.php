@@ -230,7 +230,7 @@ class SubmissionController extends AbstractRestController
      * Get the files for the given submission as a ZIP archive
      * @Rest\Get("/{id}/files", name="submission_files")
      * @SWG\Get(produces={"application/zip"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_API_SOURCE_READER')")
      * @param Request $request
      * @param string  $id
      * @return Response|StreamedResponse

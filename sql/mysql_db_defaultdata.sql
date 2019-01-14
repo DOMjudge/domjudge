@@ -124,13 +124,14 @@ INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_e
 --
 
 INSERT INTO `role` (`roleid`, `role`, `description`) VALUES
-(1, 'admin',             'Administrative User'),
-(2, 'jury',              'Jury User'),
-(3, 'team',              'Team Member'),
-(4, 'balloon',           'Balloon runner'),
-(6, 'judgehost',         '(Internal/System) Judgehost'),
-(7, 'event_reader',      '(Internal/System) event_reader'),
-(8, 'full_event_reader', '(Internal/System) full_event_reader');
+(1,  'admin',             'Administrative User'),
+(2,  'jury',              'Jury User'),
+(3,  'team',              'Team Member'),
+(4,  'balloon',           'Balloon runner'),
+(6,  'judgehost',         '(Internal/System) Judgehost'),
+(9,  'api_reader',        'API reader'),
+(10, 'api_writer',        'API writer'),
+(11, 'api_source_reader', 'Source code reader');
 
 --
 -- Dumping data for table `team_category`
