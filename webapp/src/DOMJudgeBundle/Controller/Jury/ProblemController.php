@@ -121,7 +121,7 @@ class ProblemController extends BaseController
             if (!empty($messages)) {
                 $message = '<ul>' . implode('', array_map(function (string $message) {
                         return sprintf('<li>%s</li>', $message);
-                    }, $messages)) . '</ul>';
+                    }, $allMessages)) . '</ul>';
 
                 $this->addFlash('problemZip', $message);
             }
