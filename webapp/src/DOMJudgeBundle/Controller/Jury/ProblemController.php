@@ -7,12 +7,9 @@ use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
-use DOMJudgeBundle\Entity\Executable;
-use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
-use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Entity\TestcaseWithContent;
 use DOMJudgeBundle\Form\Type\ProblemType;
@@ -74,10 +71,10 @@ class ProblemController extends BaseController
         SubmissionService $submissionService,
         ImportProblemService $importProblemService
     ) {
-        $this->entityManager     = $entityManager;
-        $this->DOMJudgeService   = $DOMJudgeService;
-        $this->eventLogService   = $eventLogService;
-        $this->submissionService = $submissionService;
+        $this->entityManager        = $entityManager;
+        $this->DOMJudgeService      = $DOMJudgeService;
+        $this->eventLogService      = $eventLogService;
+        $this->submissionService    = $submissionService;
         $this->importProblemService = $importProblemService;
     }
 
@@ -104,13 +101,16 @@ class ProblemController extends BaseController
             $newProblem = null;
             /** @var Contest|null $contest */
             $contest     = $formData['contest'] ?? null;
+            $contestId   = $contest->getCid();
             $allMessages = [];
             foreach ($archives as $archive) {
                 try {
                     $zip         = $this->DOMJudgeService->openZipFile($archive->getRealPath());
                     $clientName  = $archive->getClientOriginalName();
                     $messages    = [];
-                    $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest, $messages);
+                    $contest     = $this->entityManager->getRepository(Contest::class)->find($contestId);
+                    $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest,
+                                                                                    $messages);
                     $allMessages = array_merge($allMessages, $messages);
                     $this->DOMJudgeService->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
                 } finally {
@@ -913,7 +913,8 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $problem, $problem->getName(), $this->generateUrl('jury_problems'));
+        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $problem,
+                                   $problem->getName(), $this->generateUrl('jury_problems'));
     }
 
     /**
