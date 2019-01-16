@@ -72,8 +72,8 @@ server {
 # }
 
 # server {
-# 	listen 37.34.61.89:443;
-# 	listen [2a01:7c8:aaad:41b::1337]:443;
+# 	listen   443;
+# 	listen   [::]:443;
 
 # 	server_name _default_;
 
