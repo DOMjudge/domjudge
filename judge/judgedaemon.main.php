@@ -644,7 +644,7 @@ function read_metadata(string $filename)
     if (!is_readable($filename)) return null;
 
     // Don't quite treat it as YAML, but simply key/value pairs.
-    $contents = preg_replace('/: (.*)$/', ': "$1"', dj_file_get_contents($filename));
+    $contents = preg_replace('/: (.*)$/m', ': "$1"', dj_file_get_contents($filename));
 
     return spyc_load($contents);
 }
