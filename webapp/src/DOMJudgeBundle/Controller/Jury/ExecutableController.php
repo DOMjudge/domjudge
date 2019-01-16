@@ -428,14 +428,23 @@ class ExecutableController extends BaseController
             if (!($tempzipFile = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "/executable-"))) {
                 throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
             }
-            if (file_put_contents($tempzipFile, stream_get_contents($executable->getZipfile())) === false) {
+            if (file_put_contents($tempzipFile, $executable->getZipfile(true)) === false) {
                 throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
             }
 
             $zip = $this->DOMJudgeService->openZipFile($tempzipFile);
             foreach ($editorData['filenames'] as $idx => $filename) {
+                $permission = $opsys = $attr = null;
+                if ($zip->getExternalAttributesName($filename, $opsys, $attr) && $opsys === \ZipArchive::OPSYS_UNIX) {
+                    $permission = $attr;
+                }
+
                 $newContent = $submittedData['source' . $idx];
                 $zip->addFromString($filename, str_replace("\r\n", "\n", $newContent));
+
+                if ($permission !== null) {
+                    $zip->setExternalAttributesName($filename, $opsys, $permission);
+                }
             }
 
             $zip->close();
@@ -493,7 +502,7 @@ class ExecutableController extends BaseController
         if (!($tempzipFile = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "/executable-"))) {
             throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
         }
-        if (file_put_contents($tempzipFile, stream_get_contents($executable->getZipfile())) === false) {
+        if (file_put_contents($tempzipFile, $executable->getZipfile(true)) === false) {
             throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
         }
 

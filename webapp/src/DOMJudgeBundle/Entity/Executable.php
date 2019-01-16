@@ -32,6 +32,8 @@ class Executable
      */
     private $zipfile;
 
+    private $zipfile_as_string = null;
+
     /**
      * @var string
      * @ORM\Column(type="string", name="description", length=255, options={"comment"="Description of this executable"}, nullable=true)
@@ -134,10 +136,17 @@ class Executable
     /**
      * Get zipfile
      *
+     * @param bool $asString
      * @return resource|string
      */
-    public function getZipfile()
+    public function getZipfile(bool $asString = false)
     {
+        if ($asString && $this->zipfile !== null) {
+            if ($this->zipfile_as_string === null) {
+                $this->zipfile_as_string = stream_get_contents($this->zipfile);
+            }
+            return $this->zipfile_as_string;
+        }
         return $this->zipfile;
     }
 
