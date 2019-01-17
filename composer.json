@@ -35,6 +35,8 @@
 		"ext-mysqli": "*",
 		"ext-zip": "*",
 		"ext-pcntl": "*",
+		"ext-intl": "*",
+		"ext-gd": "*",
 		"mustangostang/spyc": "0.5.*",
 		"php": ">= 7.0",
 		"ircmaxell/password-compat": "*",

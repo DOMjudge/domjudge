@@ -4,12 +4,14 @@ namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\TeamAffiliation;
+use DOMJudgeBundle\Service\CheckConfigService;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
@@ -31,22 +33,29 @@ class ConfigController extends Controller
     protected $DOMJudgeService;
 
     /**
+     * @var CheckConfigService
+     */
+    protected $CheckConfigService;
+
+    /**
      * TeamCategoryController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService
+        DOMJudgeService $DOMJudgeService,
+        CheckConfigService $checkConfigService
     ) {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->checkConfigService = $checkConfigService;
     }
 
     /**
      * @Route("/config", name="jury_config")
      */
-    public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
+    public function indexAction(Request $request)
     {
         /** @var Configuration[] */
         $options = $this->entityManager->getRepository('DOMJudgeBundle:Configuration')->findAll();
@@ -117,5 +126,29 @@ class ConfigController extends Controller
             'options' => $all_data,
             'edited' => $edited
         ]);
+    }
+
+    /**
+     * @Route("/config/check", name="jury_config_check")
+     */
+    public function checkAction(Request $request)
+    {
+        $results = $this->checkConfigService->runAll();
+        return $this->render('@DOMJudge/jury/config_check.html.twig', [
+            'results' => $results
+        ]);
+    }
+
+    /**
+     * @Route("/config/check/phpinfo", name="jury_config_phpinfo")
+     */
+    public function phpinfoAction(Request $request)
+    {
+        ob_start();
+        phpinfo();
+        $phpinfo = ob_get_contents();
+        ob_end_clean();
+
+        return new Response($phpinfo);
     }
 }

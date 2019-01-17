@@ -143,7 +143,7 @@ class JudgehostRestriction
 
     /**
      * Set restriction languages
-     * @param int[] $languages
+     * @param string[] $languages
      * @return $this
      */
     public function setLanguages(array $languages)
@@ -154,7 +154,7 @@ class JudgehostRestriction
 
     /**
      * Get restriction languages
-     * @return int[]
+     * @return string[]
      */
     public function getLanguages()
     {

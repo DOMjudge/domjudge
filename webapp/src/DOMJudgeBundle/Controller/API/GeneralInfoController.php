@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\User;
+use DOMJudgeBundle\Service\CheckConfigService;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -42,6 +43,11 @@ class GeneralInfoController extends FOSRestController
     protected $eventLogService;
 
     /**
+     * @var EventLogService
+     */
+    protected $checkConfigService;
+
+    /**
      * @var RouterInterface
      */
     protected $router;
@@ -56,12 +62,14 @@ class GeneralInfoController extends FOSRestController
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
         EventLogService $eventLogService,
+        CheckConfigService $checkConfigService,
         RouterInterface $router
     ) {
-        $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->eventLogService = $eventLogService;
-        $this->router          = $router;
+        $this->entityManager      = $entityManager;
+        $this->DOMJudgeService    = $DOMJudgeService;
+        $this->eventLogService    = $eventLogService;
+        $this->checkConfigService = $checkConfigService;
+        $this->router             = $router;
     }
 
     /**
@@ -93,6 +101,7 @@ class GeneralInfoController extends FOSRestController
      *         type="object",
      *         @SWG\Property(property="api_version", type="integer"),
      *         @SWG\Property(property="domjudge_version", type="string"),
+     *         @SWG\Property(property="environment", type="string"),
      *         @SWG\Property(property="doc_url", type="string")
      *     )
      * )
@@ -102,6 +111,7 @@ class GeneralInfoController extends FOSRestController
         $data = [
             'api_version' => $this->apiVersion,
             'domjudge_version' => $this->getParameter('domjudge.version'),
+            'environment' => $this->container->getParameter('kernel.environment'),
             'doc_url' => $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL),
         ];
         return $data;
@@ -230,6 +240,44 @@ class GeneralInfoController extends FOSRestController
             return [$name => $result];
         }
 
+        return $result;
+    }
+
+    /**
+     * Check the DOMjudge configuration
+     * @Rest\Get("/config/check")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @SWG\Response(
+     *     response="200",
+     *     description="Result of the various checks performed",
+     *     @SWG\Schema(type="object")
+     * )
+     * @param Request $request
+     * @return array
+     * @throws \Exception
+     */
+    public function getConfigCheck(Request $request)
+    {
+        $result = $this->checkConfigService->runAll();
+
+        // Determine HTTP response code.
+        // If at least one test error: 500
+        // If at least one test warning: 300
+        // Otherwise 200
+        $aggregate = 200;
+        foreach ( $result as $cat ) {
+            foreach($cat as $test) {
+                if ($test['result'] == 'E') {
+                    $aggregate = 500;
+                    continue 2;
+                }
+                if ($test['result'] == 'W') {
+                    $aggregate = 300;
+                }
+            }
+        }
+
+        // TODO: set HTTP response code
         return $result;
     }
 
