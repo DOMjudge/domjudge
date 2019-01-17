@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -81,6 +82,9 @@ class ExecutableController extends BaseController
                 $zip         = $this->DOMJudgeService->openZipFile($archive->getRealPath());
                 $filename    = $archive->getClientOriginalName();
                 $id          = substr($filename, 0, strlen($filename) - strlen(".zip"));
+                if ( ! preg_match ('#^[a-z0-9_-]+$#i', $id) ) {
+                    throw new InvalidArgumentException(sprintf("File base name '%s' must contain only alphanumerics", $id));
+                }
                 $description = $id;
                 $type        = $data['type'];
 
