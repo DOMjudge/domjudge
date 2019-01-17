@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "2a314444941de32daa3c7d5e25b17a4c",
+    "content-hash": "67a400b2f2f816c1a8c56696a1eec353",
     "packages": [
         {
             "name": "angel-vladov/select2-bootstrap-theme",
@@ -839,12 +839,12 @@
             "version": "v2.5.14",
             "source": {
                 "type": "git",
-                "url": "https://github.com/doctrine/doctrine2.git",
+                "url": "https://github.com/doctrine/orm.git",
                 "reference": "810a7baf81462a5ddf10e8baa8cb94b6eec02754"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/810a7baf81462a5ddf10e8baa8cb94b6eec02754",
+                "url": "https://api.github.com/repos/doctrine/orm/zipball/810a7baf81462a5ddf10e8baa8cb94b6eec02754",
                 "reference": "810a7baf81462a5ddf10e8baa8cb94b6eec02754",
                 "shasum": ""
             },
@@ -4992,6 +4992,8 @@
         "ext-mysqli": "*",
         "ext-zip": "*",
         "ext-pcntl": "*",
+        "ext-intl": "*",
+        "ext-gd": "*",
         "php": ">= 7.0"
     },
     "platform-dev": []
