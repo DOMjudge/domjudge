@@ -273,3 +273,10 @@ tr.ignore td, td.ignore, span.ignore {
     font-size: small;
     width: 3em;
 }
+
+.card-header .fa {
+    transition: .5s transform ease-in-out;
+}
+.card-header .collapsed .fa {
+    transform: rotate(90deg);
+}
