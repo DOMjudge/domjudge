@@ -116,9 +116,25 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Add one or more problems to this contest.
      * @param Request $request
-     * @return int
+     * @return array
      * @Rest\Post("")
      * @Security("has_role('ROLE_ADMIN')")
+     * @SWG\Post(consumes={"multipart/form-data"})
+     * @SWG\Parameter(
+     *     name="zip[]",
+     *     in="formData",
+     *     type="file",
+     *     required=true,
+     *     description="The problem archives to import"
+     * )
+     * @SWG\Response(
+     *     response="200",
+     *     description="Returns the IDs of the just imported problems",
+     *     @SWG\Schema(
+     *         type="array",
+     *         @SWG\Items(type="integer", description="The IDs of the imported problems")
+     *     )
+     * )
      */
     public function addProblemAction(Request $request)
     {
