@@ -16,7 +16,7 @@ class Executable
      * @ORM\Id
      * @ORM\Column(type="string", name="execid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
      * @Assert\NotBlank()
-     * @Assert\Regex("/^[a-z0-9]+$/", message="Only alphanumeric values are allowed")
+     * @Assert\Regex("/^[a-z0-9_-]+$/", message="Only alphanumeric values are allowed")
      */
     private $execid;
 
