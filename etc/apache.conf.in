@@ -62,6 +62,24 @@ RewriteRule .git/ - [F]
 RewriteRule .gitignore$ - [F]
 RewriteRule Makefile$ - [F]
 
+<IfModule headers_module>
+    # Strict-Transport-Security is not set by default since it will break
+    # instalations without a valid TLS certificate. Enable it if your
+    # DOMjudge installation only runs with a valid TLS certificate.
+    #Header set Strict-Transport-Security "max-age=31556952"
+
+    # The X-Frame-Options header defends against so-called 'clickjacking' attacks.
+    # Should you want to load part of ODMjudge (e.g. the public scoreboard) in
+    # a HTML frame or iframe, disable this header for that part of DOMjudge only.
+    Header set X-Frame-Options "DENY"
+
+    # The following headers should be fine for any DOMjudge installation.
+    Header set Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'"
+    Header set Referrer-Policy "same-origin"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
 # If you want to allow large file uploads for testcases, you must
 # ensure that the following PHP settings are all set to high enough
 # values. The following example will allow to upload testcases of
