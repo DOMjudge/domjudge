@@ -32,10 +32,10 @@ class SecurityController extends Controller
         $allowIPAuth = false;
         $authmethods = [];
         if ($this->container->hasParameter('domjudge.authmethods')) {
-          $authmethods = $this->container->getParameter('domjudge.authmethods');
+            $authmethods = $this->container->getParameter('domjudge.authmethods');
         }
         if (in_array('ipaddress', $authmethods)) {
-          $allowIPAuth = true;
+            $allowIPAuth = true;
         }
 
         $clientIP = $this->DOMJudgeService->getClientIp();
@@ -58,8 +58,8 @@ class SecurityController extends Controller
 
         $auth_ipaddress_users = [];
         if ($allowIPAuth) {
-          $em = $this->getDoctrine()->getManager();
-          $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipaddress' => $clientIP]);
+            $em = $this->getDoctrine()->getManager();
+            $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipaddress' => $clientIP]);
         }
 
         return $this->render('DOMJudgeBundle:security:login.html.twig', array(
