@@ -465,34 +465,6 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/executables//add", name="jury_executable_add")
-     * @Security("has_role('ROLE_ADMIN')")
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
-     */
-    public function addAction(Request $request)
-    {
-        $executable = new Executable();
-
-        $form = $this->createForm(ExecutableType::class, $executable);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($executable);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $executable,
-                              $executable->getExecid(), true);
-            return $this->redirect($this->generateUrl('jury_executable',
-                                                      ['execId' => $executable->getExecid()]));
-        }
-
-        return $this->render('@DOMJudge/jury/executable_add.html.twig', [
-            'form' => $form->createView(),
-        ]);
-    }
-
-    /**
      * Get the data to use for the executable editor
      * @param Executable $executable
      * @return array
