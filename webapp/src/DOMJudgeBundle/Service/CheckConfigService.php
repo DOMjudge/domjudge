@@ -3,16 +3,16 @@
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use DOMJudgeBundle\Utils\Utils;
-use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Entity\Executable;
-use DOMJudgeBundle\Entity\Problem;
-use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Judgehost;
+use DOMJudgeBundle\Entity\Language;
+use DOMJudgeBundle\Entity\Problem;
+use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TeamAffiliation;
-use DOMJudgeBundle\Entity\Submission;
+use DOMJudgeBundle\Entity\User;
+use DOMJudgeBundle\Utils\Utils;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * Class CheckConfigService
@@ -593,14 +593,29 @@ class CheckConfigService
                 }
             }
             if ( $show_logos ) {
-                if ( $aid = $affiliation->getAffilid() ) {
-                    $logopath = $webDir . sprintf('images/affiliations/%s.png', $aid);
-                    if ( ! file_exists($logopath) ) {
+                if ($aid = $affiliation->getAffilid()) {
+                    $logopaths = [$webDir . sprintf('images/affiliations/%s.png', $aid)];
+                    if ($externalAffilid = $affiliation->getExternalid()) {
+                        $logopaths[] = $webDir . sprintf('images/affiliations/%s.png', $externalAffilid);
+                    }
+                    $exists   = false;
+                    $readable = false;
+                    foreach ($logopaths as $logopath) {
+                        if (file_exists($logopath)) {
+                            $exists = true;
+                            if (is_readable($logopath)) {
+                                $readable = true;
+                            }
+                        }
+                    }
+                    if (!$exists) {
                         $result = 'W';
-                        $desc .= sprintf("Logo for %s does not exist (looking for %s)\n", $affiliation->getShortname(), $logopath);
-                    } elseif ( ! is_readable($logopath) ) {
+                        $desc   .= sprintf("Logo for %s does not exist (looking for %s)\n",
+                                           $affiliation->getShortname(), implode(', ', $logopaths));
+                    } elseif (!$readable) {
                         $result = 'W';
-                        $desc .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(), $flagpath);
+                        $desc   .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(),
+                                           implode(', ', $logopaths));
                     }
                 }
             }
