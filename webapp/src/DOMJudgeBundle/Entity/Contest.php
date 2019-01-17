@@ -65,7 +65,7 @@ class Contest
      * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Short name for this contest"},
      *                            nullable=false)
      * @Serializer\Groups({"Nonstrict"})
-     * @Assert\Regex("/^[a-z0-9_-]+$/i", message="Only alphanumeric values are allowed")
+     * @Assert\Regex("/^[a-z0-9_-]+$/i", message="Only alphanumeric characters and _- are allowed")
      * @Assert\NotBlank()
      */
     private $shortname;
