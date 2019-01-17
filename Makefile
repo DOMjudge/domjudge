@@ -238,7 +238,7 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 	@echo "    - Configure webserver"
 	@echo "        Apache 2:"
 	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-enabled/domjudge.conf"
-	@echo "           a2enmod rewrite"
+	@echo "           a2enmod rewrite headers"
 	@echo "           systemctl restart apache2"
 	@echo "        Nginx + PHP-FPM:"
 	@echo "           ln -sf $(CURDIR)/etc/nginx-conf /etc/nginx/sites-enabled/"
@@ -261,7 +261,7 @@ maintainer-postinstall-permissions:
 maintainer-postinstall-apache: maintainer-postinstall-permissions
 	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
 	ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-enabled/domjudge.conf
-	a2enmod rewrite
+	a2enmod rewrite headers
 	systemctl restart apache2
 
 maintainer-postinstall-nginx: maintainer-postinstall-permissions
