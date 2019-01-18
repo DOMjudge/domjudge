@@ -5,7 +5,8 @@ namespace DOMJudgeBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use DOMJudgeBundle\Utils\Utils;
-use FOS\RestBundle\Validator\Constraints\Regex;
+use DOMJudgeBundle\Validator\Constraints\Identifier;
+use DOMJudgeBundle\Validator\Constraints\TimeString;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -65,7 +66,7 @@ class Contest
      * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Short name for this contest"},
      *                            nullable=false)
      * @Serializer\Groups({"Nonstrict"})
-     * @Assert\Regex("/^[a-z0-9_-]+$/i", message="Only alphanumeric characters and _- are allowed")
+     * @Identifier()
      * @Assert\NotBlank()
      */
     private $shortname;
@@ -155,7 +156,7 @@ class Contest
      * @ORM\Column(type="string", length=64, name="activatetime_string", options={"comment"="Authoritative absolute or
      *                            relative string representation of activatetime"}, nullable=false)
      * @Serializer\Exclude()
-     * @Regex("/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|-\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/")
+     * @TimeString(relativeIsPositive=false)
      */
     private $activatetimeString;
 
@@ -164,7 +165,7 @@ class Contest
      * @ORM\Column(type="string", length=64, name="starttime_string", options={"comment"="Authoritative absolute
      *                            (only!) string representation of starttime"}, nullable=false)
      * @Serializer\Exclude()
-     * @Regex("/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}$/")
+     * @TimeString(allowRelative=false)
      */
     private $starttimeString;
 
@@ -173,7 +174,7 @@ class Contest
      * @ORM\Column(type="string", length=64, name="freezetime_string", options={"comment"="Authoritative absolute or
      *                            relative string representation of freezetime"}, nullable=true)
      * @Serializer\Exclude()
-     * @Regex("/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/")
+     * @TimeString()
      */
     private $freezetimeString;
 
@@ -182,7 +183,7 @@ class Contest
      * @ORM\Column(type="string", length=64, name="endtime_string", options={"comment"="Authoritative absolute or
      *                            relative string representation of endtime"}, nullable=false)
      * @Serializer\Exclude()
-     * @Regex("/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/")
+     * @TimeString()
      */
     private $endtimeString;
 
@@ -191,7 +192,7 @@ class Contest
      * @ORM\Column(type="string", length=64, name="unfreezetime_string", options={"comment"="Authoritative absolute or
      *                            relative string representation of unfreezetime"}, nullable=true)
      * @Serializer\Exclude()
-     * @Regex("/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/")
+     * @TimeString()
      */
     private $unfreezetimeString;
 
@@ -200,7 +201,7 @@ class Contest
      * @ORM\Column(type="string", length=64, name="deactivatetime_string", options={"comment"="Authoritative absolute
      *                            or relative string representation of deactivatetime"}, nullable=true)
      * @Serializer\Exclude()
-     * @Regex("/^(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}|\+\d{1,4}:\d\d(:\d\d(\.\d{1,6})?)?)$/")
+     * @TimeString()
      */
     private $deactivatetimeString;
 

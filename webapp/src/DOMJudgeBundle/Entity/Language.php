@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Validator\Constraints\Identifier;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -21,7 +22,7 @@ class Language
      * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
      * @Serializer\Exclude()
      * @Assert\NotBlank()
-     * @Assert\Regex("/^[a-z0-9_-]+$/", message="Only alphanumeric characters and _- are allowed")
+     * @Identifier()
      */
     private $langid;
 

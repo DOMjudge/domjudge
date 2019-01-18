@@ -2,6 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Validator\Constraints\Identifier;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -16,7 +17,7 @@ class Executable
      * @ORM\Id
      * @ORM\Column(type="string", name="execid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
      * @Assert\NotBlank()
-     * @Assert\Regex("/^[a-z0-9_-]+$/", message="Only alphanumeric characters and _- are allowed")
+     * @Identifier()
      */
     private $execid;
 

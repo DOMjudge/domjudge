@@ -4,6 +4,7 @@ namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use DOMJudgeBundle\Utils\Utils;
+use DOMJudgeBundle\Validator\Constraints\TimeString;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -45,14 +46,14 @@ class RemovedInterval
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="starttime_string", options={"comment"="Authoritative (absolute only) string representation of starttime"}, nullable=false)
-     * @Assert\Regex("/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}$/")
+     * @TimeString(allowRelative=false)
      */
     private $starttime_string;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="endtime_string", options={"comment"="Authoritative (absolute only) string representation of endtime"}, nullable=false)
-     * @Assert\Regex("/^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d(\.\d{1,6})? [A-Za-z][A-Za-z0-9_\/+-]{1,35}$/")
+     * @TimeString(allowRelative=false)
      */
     private $endtime_string;
 
