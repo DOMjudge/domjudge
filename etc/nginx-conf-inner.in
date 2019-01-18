@@ -1,0 +1,45 @@
+# @configure_input@
+
+# inner nginx configuration for DOMjudge
+# This is in a separate file to not have duplicate config
+
+server_name _default_;
+
+# set max upload size. Make sure the PHP values also high enough
+client_max_body_size 128M;
+
+# Variables used in the nginx configuration
+set $domjudgeRoot @domserver_webappdir@/web;
+set $frontController app.php;
+# Set this to '' instead of /domjudge when running in the roof of your system
+set $prefix /domjudge;
+
+# Uncomment to run it out of the root of your system
+# location / {
+# 	root $domjudgeRoot;
+# 	try_files $uri @domjudgeFront;
+# }
+
+# Or you can install it with a prefix
+location /domjudge { return 301 /domjudge/; }
+location /domjudge/ {
+	root $domjudgeRoot;
+	rewrite ^/domjudge/(.*)$ /$1 break;
+	try_files $uri @domjudgeFront;
+}
+
+location @domjudgeFront {
+	fastcgi_split_path_info ^(.+\.php)(/.*)$;
+	fastcgi_pass domjudge;
+	include fastcgi_params;
+	fastcgi_param SCRIPT_FILENAME $domjudgeRoot/$frontController;
+	fastcgi_param SCRIPT_NAME $prefix/$frontController;
+	fastcgi_param REQUEST_URI $prefix$uri?$args;
+	fastcgi_param DOCUMENT_ROOT $domjudgeRoot;
+	# Prevents URIs that include the front controller. This will 404:
+	# http://domain.tld/app_dev.php/some-path
+	internal;
+}
+
+error_log /var/log/nginx/domjudge.log;
+access_log /var/log/nginx/domjudge.log;

@@ -17,49 +17,7 @@ server {
 	listen 80;
 	listen [::]:80;
 
-	server_name _default_;
-
-	# set max upload size. Make sure the PHP values also high enough
-	client_max_body_size 128M;
-
-	# Uncomment to run it out of the root of your system
-	#location / {
-	#	root @domserver_webappdir@/web;
-	#	try_files $uri /app.php$is_args$args;
-	#
-	#	location ~ ^/app\.php(/|$) {
-	#		fastcgi_split_path_info ^(.+\.php)(/.*)$;
-	#		fastcgi_pass domjudge;
-	#		include fastcgi_params;
-	#		fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
-	#		fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
-	#		# Prevents URIs that include the front controller. This will 404:
-	#		# http://domain.tld/app.php/some-path
-	#		internal;
-	#	}
-	#}
-
-	# Or you can install it with a prefix
-	location /domjudge { return 301 /domjudge/; }
-	location ~ /domjudge(/.*) {
-		root @domserver_webappdir@/web;
-		# try to serve file directly, fallback to app.php
-		try_files $1 /domjudge/app.php$is_args$args;
-
-		location ~ ^/domjudge/app\.php(/|$) {
-			fastcgi_split_path_info ^(.+\.php)(/.*)$;
-			fastcgi_pass domjudge;
-			include fastcgi_params;
-			fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
-			fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
-			# Prevents URIs that include the front controller. This will 404:
-			# http://domain.tld/app.php/some-path
-			internal;
-		}
-	}
-
-	error_log /var/log/nginx/domjudge.log;
-	access_log /var/log/nginx/domjudge.log;
+	include @domserver_etcdir@/nginx-conf-inner;
 }
 
 # Alternatively, use HTTPS and redirect HTTP to HTTPS:
@@ -75,8 +33,6 @@ server {
 # 	listen   443;
 # 	listen   [::]:443;
 
-# 	server_name _default_;
-
 # 	ssl on;
 # 	ssl_certificate /path/to/your/SSL-certificate-with-chain.crt;
 # 	ssl_certificate_key /path/to/your/SSL-key.key;
@@ -85,43 +41,5 @@ server {
 #	ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA;
 # 	ssl_prefer_server_ciphers on;
 
-# 	# set max upload size. Make sure the PHP values also high enough
-# 	client_max_body_size 128M;
-
-#	# Run it out of the root of the system
-#	location / {
-#		root @domserver_webappdir@/web;
-#		try_files $uri /app.php$is_args$args;
-#		location ~ ^/app\.php(/|$) {
-#			fastcgi_split_path_info ^(.+\.php)(/.*)$;
-#			fastcgi_pass domjudge;
-#			include fastcgi_params;
-#			fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
-#			fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
-#			# Prevents URIs that include the front controller. This will 404:
-#			# http://domain.tld/app.php/some-path
-#			internal;
-#		}
-#	}
-
-#	# Or you can install it with a prefix
-#	location /domjudge { return 301 /domjudge/; }
-#	location ~ /domjudge(/.*) {
-#		root @domserver_webappdir@/web;
-#		# try to serve file directly, fallback to app.php
-#		try_files $1 /domjudge/app.php$is_args$args;
-#		location ~ ^/domjudge/app\.php(/|$) {
-#			fastcgi_split_path_info ^(.+\.php)(/.*)$;
-#			fastcgi_pass domjudge;
-#			include fastcgi_params;
-#			fastcgi_param SCRIPT_FILENAME @domserver_webappdir@/web/app.php;
-#			fastcgi_param DOCUMENT_ROOT @domserver_webappdir@/web;
-#			# Prevents URIs that include the front controller. This will 404:
-#			# http://domain.tld/app.php/some-path
-#			internal;
-#		}
-#	}
-
-#	error_log /var/log/nginx/domjudge.log;
-#	access_log /var/log/nginx/domjudge.log;
+# 	include @domserver_etcdir@/nginx-conf-inner;
 # }

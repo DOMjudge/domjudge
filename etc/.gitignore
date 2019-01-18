@@ -4,6 +4,7 @@
 /submit-config.h
 /apache.conf
 /nginx-conf
+/nginx-conf-inner
 /domjudge-fpm.conf
 /config.h.in
 /config.h
