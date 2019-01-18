@@ -11,7 +11,7 @@ use Doctrine\ORM\Query\Lexer;
  *
  * Truncate function that truncates a field from the database if too long and adds a truncation message
  *
- * TruncateFunction ::= "TRUNACE" "(" ArithmeticPrimary "," ArithmeticPrimary "," ArithmeticPrimary ")"
+ * TruncateFunction ::= "TRUNCATE" "(" ArithmeticPrimary "," ArithmeticPrimary "," ArithmeticPrimary ")"
  *
  * @package DOMJudgeBundle\Doctrine\ORM\Query\AST\Functions
  */
