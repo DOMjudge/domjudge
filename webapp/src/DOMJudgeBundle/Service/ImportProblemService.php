@@ -282,16 +282,18 @@ class ImportProblemService
                                 }
                                 $outputValidatorName = $outputValidatorName . "_" . $clashCount;
                             }
+
+                            $combinedRunCompare = $yamlData['validation'] == 'custom interactive';
                             $executable = new Executable();
                             $executable
                                 ->setExecid($outputValidatorName)
                                 ->setMd5sum(md5($outputValidatorZip))
                                 ->setZipfile($outputValidatorZip)
                                 ->setDescription(sprintf('output validator for %s', $problem->getName()))
-                                ->setType('compare');
+                                ->setType($combinedRunCompare ? 'run' : 'compare');
                             $this->entityManager->persist($executable);
 
-                            if ($yamlData['validation'] == 'custom interactive') {
+                            if ($combinedRunCompare) {
                                 $problem->setCombinedRunCompare(true);
                                 $problem->setRunExecutable($executable);
                             } else {
