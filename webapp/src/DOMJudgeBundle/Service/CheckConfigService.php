@@ -10,6 +10,7 @@ use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TeamAffiliation;
+use DOMJudgeBundle\Entity\TestcaseWithContent;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -133,7 +134,7 @@ class CheckConfigService
         foreach($optional as $ext => $why) {
             if ( !extension_loaded($ext) ) {
                 $state = 'W';
-		$remark .= sprintf("Optional PHP extension '%s' not loaded; needed for %s\n",
+                $remark .= sprintf("Optional PHP extension '%s' not loaded; needed for %s\n",
                     $ext, $why);
             }
         }
@@ -397,6 +398,7 @@ class CheckConfigService
     {
         $problems = $this->entityManager->getRepository(Problem::class)->findAll();
         $script_filesize_limit = $this->DOMJudgeService->dbconfig_get('script_filesize_limit');
+        $output_limit = $this->DOMJudgeService->dbconfig_get('output_limit');
 
         $problemerrors = $scripterrors = [];
         $result = 'O';
@@ -441,7 +443,21 @@ class CheckConfigService
                 $result = 'E';
                 $moreproblemerrors[$probid] .= sprintf("No testcases for p%s\n", $probid);
             } else {
-                // TODO: check for testcase size vs output_limit in an efficient way.
+                $problem_output_limit = 1024 * ($problem->getOutputLimit() ?: $output_limit);
+                $tcsizequery = $this->entityManager->createQueryBuilder()
+                     ->select('tc.testcaseid')
+                     ->from('DOMJudgeBundle:TestcaseWithContent', 'tc')
+                     ->where('length(tc.output) > :maxoutput')
+                     ->andWhere('tc.probid = :probid')
+                     ->setParameter(':probid', $probid)
+                     ->setParameter(':maxoutput', $problem_output_limit)
+                     ->getQuery()
+                     ->getResult();
+                foreach($tcsizequery as $row) {
+                    $result = 'E';
+                    $moreproblemerrors[$probid] .= sprintf("Testcase number %s for p%s exceeds output limit of %s\n",
+                    $row['testcaseid'], $probid, $problem_output_limit);
+                }
             }
         }
 
