@@ -11,7 +11,5 @@ legacy.team_problem:
 legacy.team_team:
     path: /team/team.php
 
-legacy.jury_checkconfig:
-    path: /jury/checkconfig.php
 legacy.jury_impexp:
     path: /jury/impexp.php
