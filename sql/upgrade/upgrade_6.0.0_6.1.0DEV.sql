@@ -66,6 +66,10 @@ INSERT INTO `role` (`role`, `description`) VALUES
 
 DELETE FROM `role` WHERE `role` IN ('print', 'event_reader', 'full_event_reader');
 
+UPDATE `language` SET `externalid` = 'ada' WHERE langid = 'adb';
+UPDATE `language` SET `externalid` = 'ruby' WHERE langid = 'rb';
+UPDATE `language` SET `externalid` = `langid` WHERE `externalid` IS NULL;
+
 --
 -- Finally remove obsolete structures after moving data
 --

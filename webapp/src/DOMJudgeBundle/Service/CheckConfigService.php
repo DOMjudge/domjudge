@@ -2,17 +2,22 @@
 
 namespace DOMJudgeBundle\Service;
 
+use Doctrine\Common\Util\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\Executable;
 use DOMJudgeBundle\Entity\Judgehost;
+use DOMJudgeBundle\Entity\JudgingRunWithOutput;
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
+use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TeamAffiliation;
 use DOMJudgeBundle\Entity\TestcaseWithContent;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -32,9 +37,19 @@ class CheckConfigService
     protected $DOMJudgeService;
 
     /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
+    /**
      * @var ValidatorInterface
      */
     protected $validator;
+
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
 
     /**
      * @var bool
@@ -46,17 +61,22 @@ class CheckConfigService
      */
     protected $project_dir;
 
-    public function __construct(bool $debug,
+    public function __construct(
+        bool $debug,
         string $project_dir,
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
+        RouterInterface $router,
         ValidatorInterface $validator
     ) {
-        $this->debug             = $debug;
-        $this->project_dir       = $project_dir;
-        $this->entityManager     = $entityManager;
-        $this->DOMJudgeService   = $DOMJudgeService;
-        $this->validator         = $validator;
+        $this->debug           = $debug;
+        $this->project_dir     = $project_dir;
+        $this->entityManager   = $entityManager;
+        $this->DOMJudgeService = $DOMJudgeService;
+        $this->eventLogService = $eventLogService;
+        $this->router          = $router;
+        $this->validator       = $validator;
     }
 
     public function runAll()
@@ -111,6 +131,8 @@ class CheckConfigService
         ];
 
         $results['Submissions'] = $submissions;
+
+        $results['External identifiers'] = $this->checkAllExternalIdentifiers();
 
         return $results;
     }
@@ -335,7 +357,7 @@ class CheckConfigService
         }
         return ['caption' => 'Submitdir writable',
                 'result' => 'W',
-                'desc' => sprint('The webserver has no write access to Submitdir (%s), ' .
+                'desc' => sprintf('The webserver has no write access to Submitdir (%s), ' .
                 'and thus will not be able to make backup copies of submissions.', $submitdir)];
     }
 
@@ -511,7 +533,7 @@ class CheckConfigService
             $desc .= "Language $langid: ";
             if ( count($errors) > 0 || !empty($morelanguageerrors[$langid]) ) {
                 $desc .= (string)$errors . " " .
-                $morelanguageerrors[$langid] . "\n";
+                    $morelanguageerrors[$langid] . "\n";
             } else {
                 $desc .= "OK\n";
             }
@@ -719,5 +741,89 @@ class CheckConfigService
             'result' => $result,
             'desc' => "Validated all submissions:\n\n" .
                     ($desc ?: 'No submissions with problems found.')];
+    }
+
+    public function checkAllExternalIdentifiers()
+    {
+        // Get all entity classes
+        $dir   = realpath(sprintf('%s/webapp/src/DOMJudgeBundle/Entity', $this->project_dir));
+        $files = glob($dir . '/*.php');
+
+        $result = [];
+
+        foreach ($files as $file) {
+            $parts      = explode('/', $file);
+            $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
+            $class      = sprintf('DOMJudgeBundle\\Entity\\%s', $shortClass);
+            try {
+                if (class_exists($class) && !in_array($class, [
+                        // These three entities are already checked in other classes
+                        SubmissionFileWithSourceCode::class,
+                        JudgingRunWithOutput::class,
+                        TestcaseWithContent::class,
+                        // Contestproblem is checked using Problem
+                        ContestProblem::class,
+                    ]) && ($externalIdField = $this->eventLogService->externalIdFieldForEntity($class))) {
+
+                    $result[$shortClass] = $this->checkExternalIdentifiers($class, $externalIdField);
+                }
+            } catch (\BadMethodCallException $e) {
+                // Ignore, this entity does not have an API endpoint
+            }
+        }
+
+        return $result;
+    }
+
+    protected function checkExternalIdentifiers($class, $externalIdField)
+    {
+        $parts      = explode('\\', $class);
+        $entityType = $parts[count($parts) - 1];
+        $result     = 'O';
+
+        $rowsWithoutExternalId = $this->entityManager->createQueryBuilder()
+            ->from($class, 'e')
+            ->select('e')
+            ->andWhere(sprintf('e.%s IS NULL or e.%s = :empty', $externalIdField, $externalIdField))
+            ->setParameter(':empty', '')
+            ->getQuery()
+            ->getResult();
+
+        if (!empty($rowsWithoutExternalId)) {
+            $result      = 'E';
+            $description = '';
+            $metadata    = $this->entityManager->getClassMetadata($class);
+            foreach ($rowsWithoutExternalId as $entity) {
+                $route       = sprintf('jury_%s', Inflector::tableize($entityType));
+                $routeParams = [];
+                foreach ($metadata->getIdentifierColumnNames() as $column) {
+                    // By default the ID param is the same as the column but then with Id instead of id
+                    $param = str_replace('id', 'Id', $column);
+                    if ($param === 'cId') {
+                        // For contests we use contestId instead of cId
+                        $param = 'contestId';
+                    } elseif ($param === 'clarId') {
+                        // For clarifications it is id instead of clarId
+                        $param = 'id';
+                    }
+                    $getter              = sprintf('get%s', ucfirst($column));
+                    $routeParams[$param] = $entity->{$getter}();
+                }
+                $description .= sprintf("<a href=\"%s\">%s %s</a> does not have an external ID\n",
+                                        $this->router->generate($route, $routeParams),
+                                        ucfirst(str_replace('_', ' ', Inflector::tableize($entityType))),
+                                        implode(', ', $metadata->getIdentifierValues($entity))
+                );
+            }
+        } else {
+            $description = 'All entities OK';
+        }
+
+        return [
+            'caption' => ucfirst(Inflector::pluralize(str_replace('_', ' ', Inflector::tableize($entityType)))),
+            'result' => $result,
+            'desc' => $description,
+            'escape' => false,
+        ];
     }
 }
