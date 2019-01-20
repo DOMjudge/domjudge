@@ -482,13 +482,16 @@ class Scoreboard
     }
 
     /**
-     * Determine whether this team solved this problem first
+     * Determine whether this team was the first team to solve this problem
      * @param Team           $team
      * @param ContestProblem $problem
      * @return bool
      */
     public function solvedFirst(Team $team, ContestProblem $problem): bool
     {
+        if ( ! $this->matrix[$team->getTeamid()][$problem->getProbid()]->isCorrect() ) {
+            return false;
+        }
         $teamTime       = $this->matrix[$team->getTeamid()][$problem->getProbid()]->getTime();
         $sortOrder      = $team->getCategory()->getSortorder();
         $problemSummary = $this->summary->getProblem($problem->getProbid());
