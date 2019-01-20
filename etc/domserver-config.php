@@ -32,7 +32,7 @@ define('DJ_MYSQL_CONNECT_FLAGS', null);
 // Although we use this feature at the ICPC World Finals, we strongly
 // discourage using it, and we don't guarantee the code is completely
 // bug-free. This code is rarely tested!
-define('ALLOW_REMOVED_INTERVALS', false);
+define('ALLOW_REMOVED_INTERVALS', true);
 
 // Specify URL of the iCAT webinterface. Uncommenting this will enable
 // the ICPC Analytics iCAT integration for jury members.
