@@ -47,6 +47,21 @@ function getClarCategories() : array
 }
 
 /**
+ * Returns the list of clarification queues as a key,value array.
+ */
+function getClarQueues() : array
+{
+    $queues = dbconfig_get('clar_queues');
+
+    $clarqueues = [null => 'Unassigned issues'];
+    foreach ($queues as $key => $val) {
+        $clarqueues[$key] = $val;
+    }
+
+    return $clarqueues;
+}
+
+/**
  * Output a single clarification.
  * Helperfunction for putClarification, do _not_ use directly!
  */
