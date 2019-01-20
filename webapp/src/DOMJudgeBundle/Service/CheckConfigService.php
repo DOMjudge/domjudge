@@ -717,7 +717,7 @@ class CheckConfigService
                 $valids += (int)$judging->getValid();
 
                 if ($judging->getValid() && $judging->getEndtime() === null &&
-                    Utils::difftime($judging->getStarttime(), Utils::now()) > 300) {
+                    Utils::difftime((float) $judging->getStarttime(), Utils::now()) > 300) {
                     $result = ($result == 'E') ? 'E' : 'W';
                     $moresubmissionerrors[$submitid] .= sprintf("has been running for more than 5 minutes without a result\n", $submitid);
                 }
