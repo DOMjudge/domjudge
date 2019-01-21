@@ -82,7 +82,7 @@ class SubmissionVisitor implements EventSubscriberInterface
                                                           ]);
             $apiRootRoute       = $this->router->generate('api_root');
             $relativeFilesRoute = substr($filesRoute, strlen($apiRootRoute) + 1); // +1 because api_root does not contain final /
-            $visitor->setData('files', [['href' => $relativeFilesRoute]]);
+            $visitor->setData('files', [['href' => $relativeFilesRoute, 'mime' => 'application/zip']]);
         }
     }
 }
