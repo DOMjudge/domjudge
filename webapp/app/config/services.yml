@@ -46,6 +46,12 @@ services:
                 event: kernel.response
                 method: onKernelResponse
 
+    DOMJudgeBundle\EventListener\BodyTooBigListener:
+        tags:
+            -   name: kernel.event_listener
+                event: kernel.controller
+                method: onKernelController
+
     DOMJudgeBundle\Doctrine\HashPasswordSubscriber:
         tags:
             - { name: doctrine.event_subscriber, connection: default }
