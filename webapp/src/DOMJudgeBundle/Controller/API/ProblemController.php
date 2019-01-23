@@ -249,8 +249,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->orderBy('cp.shortname')
             ->groupBy('cp.probid');
 
-        // For non-jury users, only expose the problems after the contest has started
-        if (!$this->DOMJudgeService->checkrole('jury') && $contest->getStartTimeObject()->getTimestamp() > time()) {
+        // For non-API-reader users, only expose the problems after the contest has started
+        if (!$this->DOMJudgeService->checkrole('api_reader') && $contest->getStartTimeObject()->getTimestamp() > time()) {
             $queryBuilder->andWhere('1 = 0');
         }
 
