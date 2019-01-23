@@ -131,11 +131,11 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             $queryBuilder
                 ->andWhere('j.result = :result')
                 ->setParameter(':result', $request->query->get('result'));
-        } elseif (!($this->DOMJudgeService->checkrole('jury') || $this->DOMJudgeService->checkrole('judgehost'))) {
+        } elseif (!($this->DOMJudgeService->checkrole('api_reader') || $this->DOMJudgeService->checkrole('judgehost'))) {
             $queryBuilder->andWhere('j.result IS NOT NULL');
         }
 
-        if (!($this->DOMJudgeService->checkrole('jury') || $this->DOMJudgeService->checkrole('judgehost'))) {
+        if (!($this->DOMJudgeService->checkrole('api_reader') || $this->DOMJudgeService->checkrole('judgehost'))) {
             $queryBuilder
                 ->andWhere('s.teamid = :team')
                 ->setParameter(':team', $this->DOMJudgeService->getUser()->getTeamid());
@@ -149,7 +149,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
 
         // If one or more ID's are not given directly or we do not have the correct permissions, only show judgements before contest end
         $allowAllJudgings = true;
-        if (!$this->DOMJudgeService->checkrole('jury') && !$this->DOMJudgeService->checkrole('judgehost')) {
+        if (!$this->DOMJudgeService->checkrole('api_reader') && !$this->DOMJudgeService->checkrole('judgehost')) {
             $allowAllJudgings = false;
         } elseif (!$request->attributes->has('id') && !$request->query->has('ids')) {
             $allowAllJudgings = false;

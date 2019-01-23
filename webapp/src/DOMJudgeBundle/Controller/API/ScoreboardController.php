@@ -108,14 +108,15 @@ class ScoreboardController extends AbstractRestController
             $filter->setAffiliations([$request->query->get('affiliation')]);
         }
         $allTeams = $request->query->getBoolean('allteams', false);
-        $public   = false;
-        if ($this->DOMJudgeService->checkrole('jury') && $request->query->has('public')) {
+        $public   = !$this->DOMJudgeService->checkrole('api_reader');
+        if ($this->DOMJudgeService->checkrole('api_reader') && $request->query->has('public')) {
             $public = $request->query->getBoolean('public');
         }
 
-        $contest       = $this->entityManager->getRepository(Contest::class)->find($this->getContestId($request));
-        $isJury        = $this->isGranted('ROLE_JURY');
-        $accessAllowed = ($isJury && $contest->getEnabled()) || (!$isJury && $contest->isActive());
+        /** @var Contest $contest */
+        $contest         = $this->entityManager->getRepository(Contest::class)->find($this->getContestId($request));
+        $inactiveAllowed = $this->isGranted('ROLE_API_READER');
+        $accessAllowed   = ($inactiveAllowed && $contest->getEnabled()) || (!$inactiveAllowed && $contest->isActive());
         if (!$accessAllowed) {
             throw new AccessDeniedHttpException();
         }

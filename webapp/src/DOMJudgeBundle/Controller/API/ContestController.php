@@ -5,7 +5,6 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Event;
-use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Utils\Utils;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -52,7 +51,7 @@ class ContestController extends AbstractRestController
     /**
      * Get the given contest
      * @param Request $request
-     * @param string $id
+     * @param string  $id
      * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
@@ -164,7 +163,7 @@ class ContestController extends AbstractRestController
      * @Rest\Get("/{id}/contest-yaml")
      * @SWG\Get(produces={"application/x-yaml"})
      * @param Request $request
-     * @param string $id
+     * @param string  $id
      * @return StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
@@ -202,7 +201,7 @@ class ContestController extends AbstractRestController
      * Get the current contest state
      * @Rest\Get("/{id}/state")
      * @param Request $request
-     * @param string $id
+     * @param string  $id
      * @return array|null
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @SWG\Parameter(ref="#/parameters/id")
@@ -214,9 +213,9 @@ class ContestController extends AbstractRestController
      */
     public function getContestStateAction(Request $request, string $id)
     {
-        $contest = $this->getContestWithId($request, $id);
-        $isJury  = $this->isGranted('ROLE_JURY');
-        if (($isJury && $contest->getEnabled()) || (!$isJury && $contest->isActive())) {
+        $contest         = $this->getContestWithId($request, $id);
+        $inactiveAllowed = $this->isGranted('ROLE_API_READER');
+        if (($inactiveAllowed && $contest->getEnabled()) || (!$inactiveAllowed && $contest->isActive())) {
             return $contest->getState();
         } else {
             throw new AccessDeniedHttpException();
@@ -229,7 +228,7 @@ class ContestController extends AbstractRestController
      * @SWG\Get(produces={"application/x-ndjson"})
      * @Security("has_role('ROLE_JURY') or has_role('ROLE_API_READER')")
      * @param Request $request
-     * @param string $id
+     * @param string  $id
      * @return Response|StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @SWG\Parameter(ref="#/parameters/id")
@@ -311,7 +310,7 @@ class ContestController extends AbstractRestController
             if ($request->query->has('stream')) {
                 $stream = $request->query->getBoolean('stream');
             }
-            $isJury = $this->isGranted('ROLE_JURY');
+            $canViewAll = $this->isGranted('ROLE_API_READER');
             while (true) {
                 $qb = $this->entityManager->createQueryBuilder()
                     ->from('DOMJudgeBundle:Event', 'e')
@@ -327,7 +326,7 @@ class ContestController extends AbstractRestController
                         ->andWhere('e.endpointtype IN (:types)')
                         ->setParameter(':types', $typeFilter);
                 }
-                if (!$isJury) {
+                if (!$canViewAll) {
                     $restricted_types = ['judgements', 'runs', 'clarifications'];
                     if ($contest->getStarttime() === null || Utils::now() < $contest->getStarttime()) {
                         $restricted_types[] = 'problems';
@@ -344,7 +343,7 @@ class ContestController extends AbstractRestController
                 foreach ($events as $event) {
                     $data = $event->getContent();
                     // Filter fields with specific access restrictions.
-                    if (!$isJury) {
+                    if (!$canViewAll) {
                         if ($event->getEndpointtype() == 'submissions') {
                             unset($data['entry_point']);
                             unset($data['language_id']);
@@ -377,7 +376,7 @@ class ContestController extends AbstractRestController
                     $now = Utils::now();
                     if ($lastUpdate + 10 < $now) {
                         # Send keep alive every 10s. Guarantee according to spec is 120s.
-			# However, nginx drops the connection if we don't update for 60s.
+                        # However, nginx drops the connection if we don't update for 60s.
                         echo "\n";
                         ob_flush();
                         flush();
@@ -411,7 +410,7 @@ class ContestController extends AbstractRestController
     /**
      * Get the contest with the given ID
      * @param Request $request
-     * @param string $id
+     * @param string  $id
      * @return Contest
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
