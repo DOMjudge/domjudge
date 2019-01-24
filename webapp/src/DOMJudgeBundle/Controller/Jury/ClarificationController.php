@@ -136,6 +136,7 @@ class ClarificationController extends Controller
 
         $categories = $clardata['clarform']['subjects'];
         $queues     = $this->DOMJudgeService->dbconfig_get('clar_queues');
+        $clar_answers = $this->DOMJudgeService->dbconfig_get('clar_answers', []);
 
         if ( $irt = $clarification->getInReplyTo() ) {
             $clarlist = [$irt];
@@ -203,6 +204,7 @@ class ClarificationController extends Controller
     
         $clardata['clarform']['quotedtext'] = "> " . str_replace("\n", "\n> ", Utils::wrap_unquoted($data['body'])) . "\n\n";
         $clardata['clarform']['queues'] = $queues;
+        $clardata['clarform']['answers'] = $clar_answers;
     
         return $this->render('@DOMJudge/jury/clarification.html.twig',
             $clardata
