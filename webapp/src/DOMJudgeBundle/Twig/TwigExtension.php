@@ -98,7 +98,6 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
 
     public function getGlobals()
     {
-        $notify_flag    = (bool)($this->domjudge->getCookie("domjudge_notify"));
         $refresh_cookie = $this->domjudge->getCookie("domjudge_refresh");
         $refresh_flag   = ($refresh_cookie == null || (bool)$refresh_cookie);
 
@@ -111,7 +110,6 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             'contest' => $this->domjudge->getCurrentContest(),
             'contests' => $this->domjudge->getCurrentContests(),
             'have_printing' => $this->domjudge->dbconfig_get('enable_printing', 0),
-            'notify_flag' => $notify_flag,
             'refresh_flag' => $refresh_flag,
             'icat_url' => defined('ICAT_URL') ? ICAT_URL : null,
             'ext_ccs_url' => defined('EXT_CCS_URL') ? EXT_CCS_URL : null,

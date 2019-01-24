@@ -356,13 +356,13 @@ class DOMJudgeService
             ->getQuery()->getResult();
 
         $rejudgings = $this->em->createQueryBuilder()
-            ->select('r')
+            ->select('r.rejudgingid, r.starttime, r.endtime')
             ->from('DOMJudgeBundle:Rejudging', 'r')
             ->andWhere('r.endtime is null')
             ->getQuery()->getResult();
 
         $internal_error = $this->em->createQueryBuilder()
-            ->select('ie')
+            ->select('ie.errorid', 'ie.description')
             ->from('DOMJudgeBundle:InternalError', 'ie')
             ->andWhere('ie.status = :status')
             ->setParameter('status', 'open')

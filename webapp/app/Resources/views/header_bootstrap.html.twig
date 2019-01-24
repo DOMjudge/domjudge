@@ -70,15 +70,12 @@
             <a class="dropdown-item disabled" href="#">{{ app.user.getName() }}</a>
             {% endif %}
 
-            {% if notify_flag %}
-            <a class="dropdown-item d-none" href="{{ path('jury_toggle_notify', {'enable': 0}) }}" id="notify" onclick="return toggleNotifications(false, this)">
-              <i class="fas fa-bell fa-fw"></i> Disable Notifications
+            <a class="dropdown-item d-none" href="#" id="notify_disable">
+              <i class="fas fa-bell-slash fa-fw"></i> Disable Notifications
             </a>
-            {% else %}
-            <a class="dropdown-item d-none" href="{{ path('jury_toggle_notify', {'enable': 1}) }}" id="notify" onclick="return toggleNotifications(true, this)">
+            <a class="dropdown-item d-none" href="#" id="notify_enable">
               <i class="fas fa-bell fa-fw"></i> Enable Notifications
             </a>
-            {% endif %}
 
             {% if refresh is defined and refresh %}
               <a class="dropdown-item" href="#" id="refresh-navitem">

@@ -425,22 +425,4 @@ class JuryMiscController extends BaseController
         return $this->DOMJudgeService->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
                                                  $response);
     }
-
-    /**
-     * @Route("/toggle-notify", name="jury_toggle_notify")
-     * @param Request         $request
-     * @param RouterInterface $router
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function toggleNotifyAction(Request $request, RouterInterface $router)
-    {
-        if ($this->isLocalReferrer($router, $request)) {
-            $response = new RedirectResponse($request->headers->get('referer'));
-        } else {
-            $response = $this->redirectToRoute('jury_index');
-        }
-
-        return $this->DOMJudgeService->setCookie('domjudge_notify', $request->query->get('enable'), 0, null, '', false,
-                                                 false, $response);
-    }
 }
