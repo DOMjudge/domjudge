@@ -771,11 +771,13 @@ function toggleExpand(event)
 	}
 }
 
-function clarificationAppendAnswer(replace = false) {
-	var newtext = document.forms['sendclar'].answertext.value;
-	var elem = document.getElementById('bodytext');
-	if ( replace ) { elem.value = newtext; } else { elem.value += '\n' + newtext; }
-	return false;
+function clarificationAppendAnswer() {
+	'use strict';
+	if ( $('#clar_answers').val() == '_default' ) { return; }
+	var selected = $("#clar_answers option:selected").text();
+	var textbox = $('#bodytext');
+	textbox.append('\n' + selected);
+	textbox.scrollTop(textbox[0].scrollHeight);
 }
 
 function confirmLogout() {

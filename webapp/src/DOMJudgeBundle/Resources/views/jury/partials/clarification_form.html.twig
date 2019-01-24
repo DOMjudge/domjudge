@@ -31,8 +31,29 @@
 <textarea class="form-control" name="bodytext" id="bodytext" rows="8" cols="85" required>{{ clarform.quotedtext|default("") }}</textarea>
 </div>
 
-
+<div class="row">
+<div class="col-sm">
 <div class="form-group">
 <button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-envelope"></i> Send</button>
 </div>
+</div>
+
+<div class="col-sm text-right">
+{% if clarform.answers is defined and clarform.answers|length > 0 %}
+<div class="input-group">
+<div class="input-group-prepend">
+<div class="input-group-text"><i class="fas fa-fish"></i></div>
+</div>
+<select class="custom-select form-control-sm" id="clar_answers">
+<option selected value="_default">Add canned answer...</option>
+{% for item in clarform.answers %}
+<option>{{ item }}</option>
+{% endfor %}
+</select>
+</div>
+{% endif %}
+</div>
+
+</div>
+
 </form>
