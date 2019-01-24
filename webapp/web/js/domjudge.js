@@ -99,113 +99,97 @@ function updateMenu(doreload_clarifications, doreload_judgehosts, doreload_rejud
 	handle.send(null);
 }
 
-// If the browser supports desktop notifications, toggle whether these
-// are enabled. This requires user permission.
-// Returns whether setting it was successful.
-function toggleNotifications(enable, elem)
+function enableNotifications()
 {
-	'use strict';
-	var linkhref = 'toggle-notify?enable=1';
-	if (elem) {
-		linkhref = elem.href;
-	}
-	if ( enable ) {
-		if ( !('Notification' in window) ) {
-			alert('Your browser does not support desktop notifications.');
-			return false;
-		}
-		if ( !('localStorage' in window) || window.localStorage===null ) {
-			alert('Your browser does not support local storage;\n'+
-			      'this is required to keep track of sent notifications.');
-			return false;
-		}
+    'use strict';
 
-		// Ask user (via browser) for permission if not already granted.
-		if ( Notification.permission==='denied' ) {
-			alert('Browser denied permission to send desktop notifications.\n' +
-			      'Re-enable notification permission in the browser and retry.');
-		} else {
-			if ( Notification.permission!=='granted' ) {
-				Notification.requestPermission(function (permission) {
-					// Safari and Chrome don't support the static 'permission'
-					// variable, so in this case we set it ourselves.
-					if ( !('permission' in Notification) ) {
-						Notification.permission = permission;
-					}
-					if ( Notification.permission!=='granted' ) {
-						alert('Browser denied permission to send desktop notifications.');
-					} else {
-						sendNotification('DOMjudge notifications enabled.',
-						                 {'timeout': 5});
-						window.location.href = linkhref;
-						return false;
-					}
-				});
-			}
-		}
+    if ( !('Notification' in window) ) {
+        alert('Your browser does not support desktop notifications.');
+        return false;
+    }
+    if ( !('localStorage' in window) || window.localStorage===null ) {
+        alert('Your browser does not support local storage;\n'+
+              'this is required to keep track of sent notifications.');
+        return false;
+    }
+    // Ask user (via browser) for permission if not already granted.
+    if ( Notification.permission==='denied' ) {
+        alert('Browser denied permission to send desktop notifications.\n' +
+              'Re-enable notification permission in the browser and retry.');
+        return false;
+    }
 
-		return (Notification.permission==='granted');
-	} else {
-		// disable: no need/possibility to ask user to revoke permission.
+    if ( Notification.permission!=='granted' ) {
+        Notification.requestPermission(function (permission) {
+            // Safari and Chrome don't support the static 'permission'
+            // variable, so in this case we set it ourselves.
+            if ( !('permission' in Notification) ) {
+                Notification.permission = permission;
+            }
+            if ( Notification.permission!=='granted' ) {
+                alert('Browser denied permission to send desktop notifications.');
+                return false;
+            }
+        });
+    }
 
-		// FIXME: Should we close any notifications currently showing?
-	}
+    setCookie('domjudge_notify', 1);
+    sendNotification('DOMjudge notifications enabled.');
+    $("#notify_disable").removeClass('d-none');
+    $("#notify_disable").show();
+    $("#notify_enable").hide();
+    return true;
+}
 
-	return true;
+function disableNotifications()
+{
+    'use strict';
+    setCookie('domjudge_notify', 0);
+    $("#notify_enable").removeClass('d-none');
+    $("#notify_enable").show();
+    $("#notify_disable").hide();
+    return true;
 }
 
 // Send a notification if notifications have been enabled.
 // The options argument is passed to the Notification constructor,
 // except that the following tags (if found) are interpreted and
 // removed from options:
-// * timeout    notification timeout in seconds (default: 5 minutes)
 // * link       URL to redirect to on click, relative to DOMjudge base
 //
 // We use HTML5 localStorage to keep track of which notifications the
 // client has already received to display each notification only once.
 function sendNotification(title, options)
 {
-	'use strict';
-	if ( getCookie('domjudge_notify')!=1 ) return;
+    'use strict';
+    if ( getCookie('domjudge_notify')!=1 ) return;
 
-//	if ( typeof options.tag === 'undefined' ) options.tag = null;
+    // Check if we already sent this notification:
+    var senttags = localStorage.getItem('domjudge_notifications_sent');
+    if ( senttags===null || senttags==='' ) {
+        senttags = [];
+    } else {
+        senttags = senttags.split(',');
+    }
+    if ( options.tag!==null && senttags.indexOf(options.tag)>=0 ) { return; }
 
-	// Check if we already sent this notification:
-	var senttags = localStorage.getItem('notifications_sent');
-	if ( senttags===null || senttags==='' ) {
-		senttags = [];
-	} else {
-		senttags = senttags.split(',');
-	}
-	if ( options.tag!==null && senttags.indexOf(options.tag)>=0 ) return;
+    var link = null;
+    if ( typeof options.link !== 'undefined' ) {
+        link = options.link;
+        delete options.link;
+    }
+    options['icon'] = domjudge_base_url + '/apple-touch-icon.png';
 
-	var timeout = 600;
-	if ( typeof options.timeout !== 'undefined' ) {
-		timeout = options.timeout;
-		delete options.timeout;
-	}
+    var not = new Notification(title, options);
 
-	var link = null;
-	if ( typeof options.link !== 'undefined' ) {
-		link = options.link;
-		delete options.link;
-	}
+    if ( link!==null ) {
+        not.onclick = function() { window.open(link); }
+    }
 
-	var not = new Notification(title, options);
-
-	not.onshow = function() { setTimeout(not.close, timeout*1000); }
-// FIXME: setting timeout doesn't work in Chromium nor in Firefox
-// (also overriden by default 4 second close timeout, see:
-// https://bugzilla.mozilla.org/show_bug.cgi?id=875114).
-
-	if ( link!==null ) {
-		not.onclick = function() { window.open(link); }
-	}
-
-	if ( options.tag!==null ) {
-		senttags.push(options.tag);
-		localStorage.setItem('notifications_sent',senttags.join(','));
-	}
+    if ( options.tag!==null ) {
+        senttags.push(options.tag);
+        localStorage.setItem('domjudge_notifications_sent',senttags.join(','));
+    }
 }
 
 // make corresponding testcase description editable
@@ -772,12 +756,12 @@ function toggleExpand(event)
 }
 
 function clarificationAppendAnswer() {
-	'use strict';
-	if ( $('#clar_answers').val() == '_default' ) { return; }
-	var selected = $("#clar_answers option:selected").text();
-	var textbox = $('#bodytext');
-	textbox.append('\n' + selected);
-	textbox.scrollTop(textbox[0].scrollHeight);
+    'use strict';
+    if ( $('#clar_answers').val() == '_default' ) { return; }
+    var selected = $("#clar_answers option:selected").text();
+    var textbox = $('#bodytext');
+    textbox.append('\n' + selected);
+    textbox.scrollTop(textbox[0].scrollHeight);
 }
 
 function confirmLogout() {
@@ -889,16 +873,17 @@ function updateMenuAlerts()
 {
     'use strict';
     $.getJSON( $('#menuDefault').data('update-url'), function( json ) {
-      updateMenuClarifications(json.clarifications.length);
-      updateMenuRejudgings(json.rejudgings.length);
-      updateMenuJudgehosts(json.judgehosts.length);
-      updateMenuInternalErrors(json.internal_error.length);
+      updateMenuClarifications(json.clarifications);
+      updateMenuRejudgings(json.rejudgings);
+      updateMenuJudgehosts(json.judgehosts);
+      updateMenuInternalErrors(json.internal_error);
     });
 }
 
-function updateMenuClarifications(num)
+function updateMenuClarifications(data)
 {
     'use strict';
+    var num = data.length;
     if ( num == 0 ) {
         $("#num-alerts-clarifications").hide();
         $("#menu_clarifications").removeClass("text-info");
@@ -906,12 +891,19 @@ function updateMenuClarifications(num)
         $("#num-alerts-clarifications").html(num);
         $("#num-alerts-clarifications").show();
         $("#menu_clarifications").addClass("text-info");
+        for (var i=0; i<num; i++) {
+            sendNotification('New clarification requested.',
+                 {'tag': 'clar_' + data[i].clarid,
+                  'link': domjudge_base_url + '/jury/clarifications/'+data[i].clarid,
+                  'body': data[i].body });
+	}
     }
 }
 
-function updateMenuRejudgings(num)
+function updateMenuRejudgings(data)
 {
     'use strict';
+    var num = data.length;
     if ( num == 0 ) {
         $("#num-alerts-rejudgings").hide();
         $("#menu_rejudgings").removeClass("text-info");
@@ -922,9 +914,10 @@ function updateMenuRejudgings(num)
     }
 }
 
-function updateMenuJudgehosts(num)
+function updateMenuJudgehosts(data)
 {
     'use strict';
+    var num = data.length;
     if ( num == 0 ) {
         $("#num-alerts-judgehosts").hide();
         $("#num-alerts-judgehosts-sub").html("");
@@ -934,12 +927,20 @@ function updateMenuJudgehosts(num)
         $("#num-alerts-judgehosts").show();
         $("#num-alerts-judgehosts-sub").html(num + " down");
         $("#menu_judgehosts").addClass("text-danger");
+        for(var i=0; i<num; i++) {
+            sendNotification('Judgehost down.',
+                {'tag': 'host_'+data[i].hostname+'@'+
+                 Math.floor(data[i].polltime),
+                 'link': domjudge_base_url + '/jury/judgehosts/' + encodeURIComponent(data[i].hostname),
+	         'body': data[i].hostname + ' is down'});
+        }
     }
 }
 
-function updateMenuInternalErrors(num)
+function updateMenuInternalErrors(data)
 {
     'use strict';
+    var num = data.length;
     if ( num == 0 ) {
         $("#num-alerts-internalerrors").hide();
         $("#num-alerts-internalerrors-sub").html("");
@@ -949,6 +950,12 @@ function updateMenuInternalErrors(num)
         $("#num-alerts-internalerrors").show();
         $("#num-alerts-internalerrors-sub").html(num + " new");
         $("#menu_internal_error").addClass("text-danger").removeClass("disabled");
+        for(var i=0; i<num; i++) {
+            sendNotification('Judgehost internal error occurred.',
+                {'tag': 'ie_'+data[i].errorid,
+                 'link': domjudge_base_url + '/internal-errors/' + data[i].errorid,
+	         'body': data[i].description});
+        }
     }
 }
 

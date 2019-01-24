@@ -20,10 +20,17 @@
 
   {% block extrafooter %}{% endblock %}
   <script>
+      var domjudge_base_url = "{{ app.request.getBaseURL() }}";
       $(function() {
           /* Show the notification options if the browser supports it */
           if ( 'Notification' in window ) {
-              $('#notify').removeClass('d-none');
+              $('#notify_disable').click(disableNotifications);
+              $('#notify_enable').click(enableNotifications);
+              if ( getCookie('domjudge_notify')!=1 ) {
+                  $('#notify_enable').removeClass('d-none');
+              } else {
+                  $('#notify_disable').removeClass('d-none');
+              }
           }
           /* toggle refresh if set */
           {% if refresh is defined and refresh %}
