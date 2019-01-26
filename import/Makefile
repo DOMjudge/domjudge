@@ -3,7 +3,7 @@ TOPDIR=..
 endif
 include $(TOPDIR)/Makefile.global
 
-SUBST_FILES = import.php import-RESTfeed import-XMLfeed run-import-XMLfeed.sh
+SUBST_FILES = import.php import-RESTfeed import-XMLfeed run-import-XMLfeed.sh import-event-feed
 
 config: $(SUBST_FILES)
 

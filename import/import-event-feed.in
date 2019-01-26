@@ -1,0 +1,50 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+/**
+ * @configure_input@
+ *
+ * Import contest data from an event feed following the Contest API specification.
+ * See https://clics.ecs.baylor.edu/index.php?title=Contest_API
+ *
+ * The following assumptions and caveats are of note:
+ * - The contest that will be imported to will already contain the problems,
+ *   because the event feed does not contain the testcases
+ * - Problems will be updated, but not their test_data_count, time_limit or ordinal
+ * - Judgement types will not be imported, but only verified
+ * - Languages will not be imported, but only verified
+ * - Team members will not be imported
+ * - Judgements will not be imported
+ * - Runs will not be imported, but their verdict will be stored on the submission
+ * - Awards will not be imported
+ * - State will not be imported
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licenced
+ * under the GNU GPL. See README and COPYING for details.
+ */
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Debug\Debug;
+
+if (isset($_SERVER['REMOTE_ADDR'])) {
+    die("Commandline use only");
+}
+
+require('@domserver_etcdir@/domserver-static.php');
+
+set_time_limit(0);
+
+/** @var Composer\Autoload\ClassLoader $loader */
+$loader = require WEBAPPDIR.'/app/autoload.php';
+
+$input = new ArgvInput();
+$env = $input->getParameterOption(['--env', '-e'], getenv('SYMFONY_ENV') ?: 'prod');
+$debug = getenv('SYMFONY_DEBUG') !== '0' && !$input->hasParameterOption(['--no-debug', '']) && $env !== 'prod';
+
+if ($debug) {
+    Debug::enable();
+}
+
+$kernel = new AppKernel($env, $debug);
+$application = new Application($kernel);
+$application->setDefaultCommand('import:eventfeed', true);
+$application->run($input);
