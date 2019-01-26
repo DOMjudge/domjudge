@@ -25,7 +25,12 @@
 
 <div class="card mb-3 {% if clar.from_teamid is not defined %}border-primary{% endif %}">
 <div class="card-header"><div class="row">
-<div class="col-sm">Clarification {{ clar.clarid }}</div>
+<div class="col-sm">
+    Clarification {{ clar.clarid }}
+    {% if showExternalId %}
+        (external ID: {{ clar.externalid }})
+    {% endif %}
+</div>
 <div class="col-sm text-muted text-right">{{ clar.time | printtimeHover(clar.contest) }}</div>
 </div></div>
 <div class="card-body">
@@ -36,7 +41,10 @@ From:
 {% if clar.from_teamid is defined %}
 <a href="{{ path('jury_team', {teamId: clar.from_teamid}) }}">{{ clar.from_teamname }} (t{{ clar.from_teamid }})</a>
 {% else %}
-Jury ({{ clar.from_jurymember }})
+Jury
+    {% if clar.from_jurymember is defined %}
+        ({{ clar.from_jurymember }})
+    {% endif %}
 {% endif %}
 </div>
 
@@ -63,7 +71,7 @@ Subject: <span class="clarification-subject">{{ clar.subject }}
 </div>
 
 <div class="row">
-<div class="col-sm">To: 
+<div class="col-sm">To:
 {% if clar.to_teamid is defined %}
 <a href="{{ path('jury_team', {teamId: clar.to_teamid}) }}">{{ clar.to_teamname }} (t{{ clar.to_teamid }})</a>
 {% elseif clar.from_teamid is defined %}
