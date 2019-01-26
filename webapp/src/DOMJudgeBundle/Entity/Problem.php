@@ -104,11 +104,13 @@ class Problem
     /**
      * @var UploadedFile|null
      * @Assert\File()
+     * @Serializer\Exclude()
      */
     private $problemtextFile;
 
     /**
      * @var bool
+     * @Serializer\Exclude()
      */
     private $clearProblemtext = false;
 

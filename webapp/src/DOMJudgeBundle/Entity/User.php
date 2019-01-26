@@ -70,6 +70,7 @@ class User implements UserInterface, \Serializable
 
     /**
      * @var string|null
+     * @Serializer\Exclude()
      */
     private $plainPassword;
 
