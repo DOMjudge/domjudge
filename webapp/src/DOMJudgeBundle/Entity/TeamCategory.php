@@ -91,10 +91,9 @@ class TeamCategory
      *
      * @return TeamCategory
      */
-    public function setCategoryid($categoryid)
+    public function setCategoryid(int $categoryid)
     {
         $this->categoryid = $categoryid;
-
         return $this;
     }
 

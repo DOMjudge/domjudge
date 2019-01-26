@@ -2,3 +2,4 @@
 /import-RESTfeed
 /import-XMLfeed
 /run-import-XMLfeed.sh
+/import-event-feed
