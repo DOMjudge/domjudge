@@ -129,6 +129,7 @@ class Team implements ExternalRelationshipEntityInterface
 
     /**
      * @var bool
+     * @Serializer\Exclude()
      */
     private $addUserForTeam = false;
 
