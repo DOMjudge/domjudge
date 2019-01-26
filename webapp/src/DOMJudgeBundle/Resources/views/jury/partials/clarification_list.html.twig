@@ -3,6 +3,9 @@
     <thead>
     <tr>
         <th scope="col">ID</th>
+        {% if showExternalId %}
+            <th scope="col">external ID</th>
+        {% endif %}
         {%- if current_contests | length > 1 %}
 
             <th scope="col">contest</th>
@@ -27,6 +30,9 @@
 
         <tr>
             <td><a href="{{ link }}">{{ clarification.clarid }}</a></td>
+            {% if showExternalId %}
+                <td><a href="{{ link }}">{{ clarification.externalid }}</a></td>
+            {% endif %}
             {%- if current_contests | length > 1 %}
 
                 <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>

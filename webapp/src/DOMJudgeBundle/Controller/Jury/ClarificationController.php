@@ -111,11 +111,13 @@ class ClarificationController extends Controller
 
         $queues     = $this->DOMJudgeService->dbconfig_get('clar_queues');
 
+
         return $this->render('@DOMJudge/jury/clarifications.html.twig', [
             'newClarifications' => $newClarifications,
             'oldClarifications' => $oldClarifications,
             'generalClarifications' => $generalClarifications,
             'queues' => $queues,
+            'showExternalId' => $this->eventLogService->externalIdFieldForEntity(Clarification::class),
         ]);
     }
 
@@ -133,6 +135,7 @@ class ClarificationController extends Controller
 
         $clardata = ['list'=>[]];
         $clardata['clarform'] = $this->getClarificationFormData();
+        $clardata['showExternalId'] = $this->eventLogService->externalIdFieldForEntity(Clarification::class);
 
         $categories = $clardata['clarform']['subjects'];
         $queues     = $this->DOMJudgeService->dbconfig_get('clar_queues');
@@ -150,7 +153,7 @@ class ClarificationController extends Controller
 
         $concernsteam = null;
         foreach($clarlist as $k => $clar) {
-            $data = ['clarid' => $clar->getClarid()];
+            $data = ['clarid' => $clar->getClarid(), 'externalid' => $clar->getExternalid()];
             $data['time'] = $clar->getSubmittime();
 
             $jurymember = $clar->getJuryMember();
