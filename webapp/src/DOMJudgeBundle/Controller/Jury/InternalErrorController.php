@@ -9,6 +9,7 @@ use DOMJudgeBundle\Entity\InternalError;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -96,6 +97,9 @@ class InternalErrorController extends BaseController
     {
         /** @var InternalError $internalError */
         $internalError = $this->entityManager->getRepository(InternalError::class)->find($errorId);
+        if (!$internalError) {
+            throw new NotFoundHttpException(sprintf('Internal Error with ID %s not found', $errorId));
+        }
 
         $disabled     = $internalError->getDisabled();
         $affectedLink = $affectedText = null;

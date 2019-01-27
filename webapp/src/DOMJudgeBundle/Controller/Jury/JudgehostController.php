@@ -11,6 +11,7 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
@@ -207,6 +208,10 @@ class JudgehostController extends BaseController
             ->setParameter(':hostname', $hostname)
             ->getQuery()
             ->getOneOrNullResult();
+
+        if (!$judgehost) {
+            throw new NotFoundHttpException(sprintf('Judgehost with hostname %s not found', $hostname));
+        }
 
         $reltime = floor(Utils::difftime(Utils::now(), (float)$judgehost->getPolltime()));
         if ($reltime < $this->DOMJudgeService->dbconfig_get('judgehost_warning', 30)) {

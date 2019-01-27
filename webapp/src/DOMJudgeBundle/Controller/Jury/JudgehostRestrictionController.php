@@ -12,6 +12,7 @@ use DOMJudgeBundle\Form\Type\JudgehostRestrictionType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -131,6 +132,9 @@ class JudgehostRestrictionController extends BaseController
             ->setParameter(':restrictionId', $restrictionId)
             ->getQuery()
             ->getOneOrNullResult();
+        if (!$judgehostRestriction) {
+            throw new NotFoundHttpException(sprintf('Judgehost restriction with ID %s not found', $restrictionId));
+        }
 
         /** @var Contest[] $contests */
         $contests = $this->entityManager->createQueryBuilder()
