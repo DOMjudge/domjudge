@@ -100,15 +100,23 @@ class ProblemController extends BaseController
             /** @var Problem|null $newProblem */
             $newProblem = null;
             /** @var Contest|null $contest */
-            $contest     = $formData['contest'] ?? null;
-            $contestId   = $contest->getCid();
+            $contest = $formData['contest'] ?? null;
+            if ($contest === null) {
+                $contestId = null;
+            } else {
+                $contestId = $contest->getCid();
+            }
             $allMessages = [];
             foreach ($archives as $archive) {
                 try {
-                    $zip         = $this->DOMJudgeService->openZipFile($archive->getRealPath());
-                    $clientName  = $archive->getClientOriginalName();
-                    $messages    = [];
-                    $contest     = $this->entityManager->getRepository(Contest::class)->find($contestId);
+                    $zip        = $this->DOMJudgeService->openZipFile($archive->getRealPath());
+                    $clientName = $archive->getClientOriginalName();
+                    $messages   = [];
+                    if ($contestId === null) {
+                        $contest = null;
+                    } else {
+                        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+                    }
                     $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest,
                                                                                     $messages);
                     $allMessages = array_merge($allMessages, $messages);
