@@ -150,7 +150,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             ->setDescription(
                 'Import contest data from an event feed following the Contest API specification (https://clics.ecs.baylor.edu/index.php?title=Contest_API)' . PHP_EOL . PHP_EOL .
                 'The following assumptions and caveats are of note:' . PHP_EOL .
-                '- The contest that will be imported to will already contain the problems,' . PHP_EOL .
+                '- The contest that will be imported to should already contain the problems,' . PHP_EOL .
                 '  because the event feed does not contain the testcases' . PHP_EOL .
                 '- Problems will be updated, but not their test_data_count, time_limit or ordinal' . PHP_EOL .
                 '- Judgement types will not be imported, but only verified' . PHP_EOL .

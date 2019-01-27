@@ -7,7 +7,7 @@
  * See https://clics.ecs.baylor.edu/index.php?title=Contest_API
  *
  * The following assumptions and caveats are of note:
- * - The contest that will be imported to will already contain the problems,
+ * - The contest that will be imported to should already contain the problems,
  *   because the event feed does not contain the testcases
  * - Problems will be updated, but not their test_data_count, time_limit or ordinal
  * - Judgement types will not be imported, but only verified
