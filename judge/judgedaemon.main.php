@@ -616,7 +616,7 @@ while (true) {
     // restart the judging loop
 }
 
-function disable(string $kind, string $idcolumn, $id, string $description, int $judgingid, int $cid, $extra_log = null)
+function disable(string $kind, string $idcolumn, $id, string $description, int $judgingid, string $cid, $extra_log = null)
 {
     $disabled = dj_json_encode(array(
         'kind' => $kind,
@@ -632,7 +632,7 @@ function disable(string $kind, string $idcolumn, $id, string $description, int $
         'judgehosts/internal-error',
         'POST',
         'judgingid=' . urlencode((string)$judgingid) .
-        '&cid=' . urlencode((string)$cid) .
+        '&cid=' . urlencode($cid) .
         '&description=' . urlencode($description) .
         '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
         '&disabled=' . urlencode($disabled)
@@ -739,7 +739,7 @@ function judge(array $row)
     );
     if (isset($error)) {
         logmsg(LOG_ERR, "fetching executable failed for compile script '" . $row['compile_script'] . "':" . $error);
-        disable('language', 'langid', $row['langid'], $error, $row['judgingid'], $row['cid']);
+        disable('language', 'langid', $row['langid'], $error, $row['judgingid'], (string)$row['cid']);
         return;
     }
 
@@ -771,10 +771,10 @@ function judge(array $row)
         if (preg_match('/^compile script: /', $internalError)) {
             $internalError = preg_replace('/^compile script: /', '', $internalError);
             $description = "The compile script returned an error: $internalError";
-            disable('language', 'langid', $row['langid'], $description, $row['judgingid'], $row['cid'], $compile_output);
+            disable('language', 'langid', $row['langid'], $description, $row['judgingid'], (string)$row['cid'], $compile_output);
         } else {
             $description = "Running compile.sh caused an error/crash: $internalError";
-            disable('judgehost', 'hostname', $myhost, $description, $row['judgingid'], $row['cid'], $compile_output);
+            disable('judgehost', 'hostname', $myhost, $description, $row['judgingid'], (string)$row['cid'], $compile_output);
         }
         logmsg(LOG_ERR, $description);
         // revoke readablity for domjudge-run user to this workdir
@@ -787,7 +787,7 @@ function judge(array $row)
         alert('error');
         logmsg(LOG_ERR, "Unknown exitcode from compile.sh for s$row[submitid]: $retval");
         $description = "compile script '" . $row['compile_script'] . "' returned exit code " . $retval;
-        disable('language', 'langid', $row['langid'], $description, $row['judgingid'], $row['cid'], $compile_output);
+        disable('language', 'langid', $row['langid'], $description, $row['judgingid'], (string)$row['cid'], $compile_output);
         // revoke readablity for domjudge-run user to this workdir
         chmod($workdir, 0700);
         return;
@@ -908,7 +908,7 @@ function judge(array $row)
             fetch_executable($workdirpath, $row['run'], $row['run_md5sum'], $row['combined_run_compare']);
         if (isset($error)) {
             logmsg(LOG_ERR, "fetching executable failed for run script '" . $row['run'] . "':" . $error);
-            disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
+            disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], (string)$row['cid']);
             return;
         }
 
@@ -920,7 +920,7 @@ function judge(array $row)
             list($compare_runpath, $error) = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
             if (isset($error)) {
                 logmsg(LOG_ERR, "fetching executable failed for compare script '" . $row['compare'] . "':" . $error);
-                disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
+                disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], (string)$row['cid']);
                 return;
             }
         }
@@ -947,7 +947,7 @@ function judge(array $row)
 
         if ($result === 'compare-error') {
             logmsg(LOG_ERR, "comparing failed for compare script '" . $row['compare'] . "'");
-            disable('problem', 'probid', $row['probid'], "compare script '" . $row['compare'] . "' crashed", $row['judgingid'], $row['cid']);
+            disable('problem', 'probid', $row['probid'], "compare script '" . $row['compare'] . "' crashed", $row['judgingid'], (string)$row['cid']);
             return;
         }
 
@@ -1024,7 +1024,7 @@ function fetchTestcase(array $row, $workdirpath, $rank): array
             if ($content === NULL) {
                 $error = 'Download of ' . $inout . ' failed for case ' . $tc['testcaseid'] . ', check your problem integrity.';
                 logmsg(LOG_ERR, $error);
-                disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], $row['cid']);
+                disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], (string)$row['cid']);
                 return NULL;
             }
             $content = base64_decode(dj_json_decode($content));
