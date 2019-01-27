@@ -109,6 +109,12 @@
                         </td>
                     </tr>
                 {% endif %}
+                {% if team.members is not empty %}
+                    <tr>
+                        <th>Members</th>
+                        <td>{{ team.members | nl2br }}</td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
     </div>
