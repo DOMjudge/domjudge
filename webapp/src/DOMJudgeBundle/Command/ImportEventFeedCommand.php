@@ -286,6 +286,18 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             $this->importFromUrl($feed);
         }
 
+        if (!empty(array_filter($this->pendingEvents))) {
+            $this->logger->warning(sprintf('Some events could not be processed, because they still have missing dependant events:'));
+        }
+        foreach ($this->pendingEvents as $type => $eventData) {
+            foreach ($eventData as $id => $events) {
+                foreach ($events as $event) {
+                    $this->logger->warning(sprintf('Could not process %s event %s, because it is dependant on missing %s event %s',
+                                                   $event['type'], $event['id'], $type, $id));
+                }
+            }
+        }
+
         return 0;
     }
 
