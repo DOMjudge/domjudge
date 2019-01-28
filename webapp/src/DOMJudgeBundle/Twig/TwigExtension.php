@@ -455,7 +455,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
     public function parseRunDiff(string $difftext): string
     {
         $line = strtok($difftext, "\n"); //first line
-        if (sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1) {
+        if ($line === false || sscanf($line, "### DIFFERENCES FROM LINE %d ###\n", $firstdiff) != 1) {
             return Utils::specialchars($difftext);
         }
         $return = $line . "\n";
