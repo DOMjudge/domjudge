@@ -325,7 +325,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $sinceEventIdFound = $this->sinceEventId === null;
 
         $buffer = '';
-        while (!feof($file)) {
+        while (!feof($file) || !empty($buffer)) {
             // Read the file until we find a newline or the end of the stream
             while (!feof($file) && ($newlinePos = strpos($buffer, "\n")) === false) {
                 $buffer .= fread($file, 1024);
@@ -395,7 +395,9 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             while (!$body->eof() || !empty($buffer)) {
                 // Read the stream until we find a newline or the end of the stream
                 while (!$body->eof() && ($newlinePos = strpos($buffer, "\n")) === false) {
-                    $buffer .= $body->read(1024);
+                    // Read 1 byte at a time to make sure we are also getting the last few events when the server
+                    // keeps open the connection
+                    $buffer .= $body->read(1);
                 }
                 $newlinePos = strpos($buffer, "\n");
                 if ($newlinePos === false) {
