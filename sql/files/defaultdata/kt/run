@@ -45,7 +45,7 @@ else
 fi
 
 # Byte-compile:
-kotlinc -d . "$@"
+/usr/lib/kotlinc/bin/kotlinc -d . "$@"
 EXITCODE=$?
 [ "$EXITCODE" -ne 0 ] && exit $EXITCODE
 
@@ -87,7 +87,7 @@ fi
 # Add -J-DONLINE_JUDGE or -J-DDOMJUDGE below if you want it make easier for
 # teams to do local debugging.
 
-exec kotlin -Dfile.encoding=UTF-8 -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
+exec /usr/lib/kotlinc/bin/kotlin -Dfile.encoding=UTF-8 -J-XX:+UseSerialGC -J-Xss${MEMSTACK}k -J-Xms${MEMLIMITJAVA}k -J-Xmx${MEMLIMITJAVA}k '$MAINCLASS' "\$@"
 EOF
 
 chmod a+x "$DEST"
