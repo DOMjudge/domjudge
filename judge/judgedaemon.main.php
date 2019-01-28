@@ -341,12 +341,13 @@ FEEDBACK="$1"; shift
 
 # Run the program while redirecting its stdin/stdout to 'runjury' via
 # 'runpipe'. Note that "$@" expands to separate, quoted arguments.
-exec ../dj-bin/runpipe -M "$META" ./runjury "$TESTIN" "$TESTOUT" "$FEEDBACK" = "$@"
+exec ../dj-bin/runpipe -M "$META" __EXECPATH__/runjury "$TESTIN" "$TESTOUT" "$FEEDBACK" = "$@"
 EOF
 
 chmod +x run
 
 EOT;
+                    $buildscript = preg_replace('/__EXECPATH__/', $execpath, $buildscript);
                 }
                 if (file_put_contents($execbuildpath, $buildscript) === false) {
                     error("Could not write file 'build' in $execpath");
