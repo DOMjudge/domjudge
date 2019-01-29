@@ -137,10 +137,6 @@ COMPARE_ARGS="$3";
 logmsg $LOG_DEBUG "arguments: '$TESTIN' '$TESTOUT' '$TIMELIMIT' '$WORKDIR'"
 logmsg $LOG_DEBUG "optionals: '$RUN_SCRIPT' '$COMPARE_SCRIPT' '$COMPARE_ARGS'"
 
-# optional runjury program
-RUN_JURYPROG="${RUN_SCRIPT}jury"
-logmsg $LOG_DEBUG "run_juryprog: '$RUN_JURYPROG'"
-
 [ -r "$TESTIN"  ] || error "test-input not found: $TESTIN"
 [ -r "$TESTOUT" ] || error "test-output not found: $TESTOUT"
 if [ ! -d "$WORKDIR" ] || [ ! -w "$WORKDIR" ] || [ ! -x "$WORKDIR" ]; then
@@ -185,20 +181,14 @@ cp "$TESTIN" "$WORKDIR/testdata.in"
 
 # shellcheck disable=SC2174
 mkdir -p -m 0711 ../bin ../dj-bin ../dev
-# Copy the run-script and a statically compiled shell:
-cp -p  "$RUN_SCRIPT"  ./run
-chmod a+rx run
+# Copy a statically compiled shell:
 if [ ! -x ../bin/sh ]; then
 	cp -pL "$STATICSHELL" ../bin/sh || true
-	chmod a+rx ../bin/sh || true
+	chmod a+rx            ../bin/sh || true
 fi
-# If using a custom runjury script, copy additional support programs
-# if required:
-if [ -x "$RUN_JURYPROG" ]; then
-	cp -p "$RUN_JURYPROG" ./runjury
-	cp -pL "$RUNPIPE"     ../dj-bin/runpipe
-	chmod a+rx runjury ../dj-bin/runpipe
-fi
+# ... and a support program for interactive problems:
+cp -pL "$RUNPIPE" ../dj-bin/runpipe
+chmod a+rx        ../dj-bin/runpipe
 
 # If we need to create a writable temp directory, do so
 if [ "$CREATE_WRITABLE_TEMP_DIR" ]; then
@@ -228,7 +218,7 @@ fi
 exitcode=0
 # To suppress false positive of FILELIMIT misspelling of TIMELIMIT:
 # shellcheck disable=SC2153
-runcheck ./run $RUNARGS \
+runcheck "$RUN_SCRIPT" $RUNARGS \
 	$GAINROOT "$RUNGUARD" ${DEBUG:+-v -V "DEBUG=$DEBUG"} ${TMPDIR:+ -V "TMPDIR=$TMPDIR"} $CPUSET_OPT \
 	${USE_CHROOT:+-r "$PWD/.."} \
 	--nproc=$PROCLIMIT \

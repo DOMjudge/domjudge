@@ -31,6 +31,8 @@
 TESTIN="$1";  shift
 PROGOUT="$1"; shift
 
+MYDIR=$(dirname $0)
+
 # Run the program while redirecting its stdin/stdout to 'runjury' via
 # 'runpipe'. Note that "$@" expands to separate, quoted arguments.
-exec ../dj-bin/runpipe ./runjury "$TESTIN" "$PROGOUT" = "$@"
+exec ../dj-bin/runpipe "$MYDIR/runjury" "$TESTIN" "$PROGOUT" = "$@"
