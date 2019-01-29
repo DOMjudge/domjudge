@@ -547,7 +547,7 @@ class ProblemController extends BaseController
             ->from('DOMJudgeBundle:Testcase', 'tc', 'tc.rank')
             ->join('tc.testcase_content', 'content')
             ->select('tc', 'LENGTH(content.input) AS input_size', 'LENGTH(content.output) AS output_size',
-                     'LENGTH(content.image) AS image_size')
+                     'LENGTH(content.image) AS image_size', 'tc.image_type')
             ->andWhere('tc.problem = :problem')
             ->setParameter(':problem', $problem)
             ->orderBy('tc.rank')

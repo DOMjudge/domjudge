@@ -2,7 +2,7 @@
 {% import _self as self %}
 {% import "@DOMJudge/jury/jury_macros.twig" as macros %}
 
-{% block title %}Testcases for {{ problem.probid }} - {{ parent() }}{% endblock %}
+{% block title %}Testcases for p{{ problem.probid }} - {{ parent() }}{% endblock %}
 
 {% block extrahead %}
     {{ parent() }}
@@ -11,7 +11,7 @@
 
 {% block content %}
 
-    <h1>Testcases for {{ problem.name }} - {{ problem.name }}</h1>
+    <h1>Testcases for p{{ problem.probid }} - {{ problem.name }}</h1>
 
     <div class="mb-2">
         <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">Back to problem p{{ problem.probid }}</a>
@@ -70,13 +70,14 @@
                     <td class="size">
                         {{ testcaseData[testcase.rank].input_size | printSize }}
                     </td>
-                    <td class="md5">
+                    <td class="md5 small">
                         {{ testcase.md5sumInput }}
                     </td>
                     {% if is_granted('ROLE_ADMIN') %}
-                        <td>
-                            <input type="file" name="update_input[{{ testcase.rank }}]"/>
-                        </td>
+                        <td><div class="custom-file">
+                            <input type="file" class="custom-file-input" name="update_input[{{ testcase.rank }}]" id="update_input_{{testcase.rank}}">
+                            <label class="custom-file-label text-truncate text-muted" for="update_input_{{testcase.rank}}">new input file</label>
+                        </div></td>
                     {% endif %}
                     <td class="testdesc">
                         {{ testcase.description(true) | descriptionExpand }}
@@ -91,25 +92,36 @@
                     <td class="size">
                         {{ testcaseData[testcase.rank].output_size | printSize }}
                     </td>
-                    <td class="md5">
+                    <td class="md5 small">
                         {{ testcase.md5sumOutput }}
                     </td>
                     {% if is_granted('ROLE_ADMIN') %}
-                        <td>
-                            <input type="file" name="update_output[{{ testcase.rank }}]"/>
-                        </td>
+                        <td><div class="custom-file">
+                            <input type="file" class="custom-file-input" name="update_output[{{ testcase.rank }}]" id="update_output_{{testcase.rank}}">
+                            <label class="custom-file-label text-truncate text-muted" for="update_output_{{testcase.rank}}">new output file</label>
+                        </div></td>
                     {% endif %}
                     <td class="testimage">
                         {% if testcaseData[testcase.rank].image_size > 0 %}
                             <a href="{{ path('jury_problem_testcase_fetch', {'probId': problem.probid, 'rank': testcase.rank, 'type': 'image'}) }}">
-                                <span class="filename">p{{ problem.probid }}.t{{ testcase.rank }}.png</span>
+                                <span class="filename">p{{ problem.probid }}.t{{ testcase.rank }}.{{ testcaseData[testcase.rank].image_type }}</span>
                             </a>
-                        {% else %}
-                            <span class="nodata">No image</span>
-                        {% endif %}
-                        {% if is_granted('ROLE_ADMIN') %}
+                            {% if is_granted('ROLE_ADMIN') %}
                             &nbsp;
-                            <input type="file" name="update_image[{{ testcase.rank }}]"/>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}">
+                                <label class="custom-file-label text-truncate text-muted" for="update_image_{{testcase.rank}}">replace image</label>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            {% if is_granted('ROLE_ADMIN') %}
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="update_image[{{ testcase.rank }}]" id="update_image_{{testcase.rank}}">
+                                <label class="custom-file-label text-truncate text-muted" for="update_image_{{testcase.rank}}">add an image</label>
+                            </div>
+                            {% else %}
+                            <span class="nodata">No image</span>
+                            {% endif %}
                         {% endif %}
                     </td>
                 </tr>

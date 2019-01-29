@@ -14,7 +14,7 @@
     <h1>Balloons</h1>
 
     {% for cid,cname in frozen_contests %}
-        <div class="alert alert-info">Scoreboard of c{{ cid }} ({{ cname }}) is now frozen.</div>
+        <div class="alert alert-info"><i class="fas fa-snowflake"></i> Scoreboard of c{{ cid }} ({{ cname }}) is now frozen.</div>
     {% endfor %}
 
     {{ macros.table(balloons, table_fields, num_actions) }}
