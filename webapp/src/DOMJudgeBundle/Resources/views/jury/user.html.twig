@@ -88,7 +88,13 @@
                 </tr>
                 <tr>
                     <th>Last login</th>
-                    <td>{{ user.lastLogin | printtime('%a %d %b %Y %T %Z') }}</td>
+                    <td>
+                        {% if user.lastLogin %}
+                            {{ user.lastLogin | printtime('%a %d %b %Y %T %Z') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <th>Last IP</th>
