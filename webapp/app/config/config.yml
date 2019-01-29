@@ -209,6 +209,7 @@ nelmio_api_doc:
                     judgingid: { type: integer }
                     submitid: { type: integer }
                     cid: { type: integer }
+                    rest_cid: { type: string }
                     teamid: { type: integer }
                     probid: { type: integer }
                     langid: { type: string }

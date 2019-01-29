@@ -376,11 +376,15 @@ class JudgehostController extends FOSRestController
         $submission->getTeam()->setJudgingLastStarted(Utils::now());
         $this->entityManager->flush();
 
+        $contestIdField  = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
+        $contestIdGetter = sprintf('get%s', ucfirst($contestIdField));
+
         // Build up result
         $maxRunTime = $submission->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor();
         $result     = [
             'submitid' => $submission->getSubmitid(),
             'cid' => $submission->getContest()->getCid(),
+            'rest_cid' => $submission->getContest()->{$contestIdGetter}(),
             'teamid' => $submission->getTeamid(),
             'probid' => $submission->getProbid(),
             'langid' => $submission->getLangid(),
