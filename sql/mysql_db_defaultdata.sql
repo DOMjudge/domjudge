@@ -41,7 +41,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `des
 ('clar_default_problem_queue', '"jury"', 'string', '1', 'Clarification', 'Queue to assign to problem clarifications'),
 ('show_pending', '1', 'bool', '1', 'Display', 'Show pending submissions on the scoreboard?'),
 ('show_flags', '0', 'bool', '1', 'Display', 'Show country flags in the interfaces?'),
-('show_affiliations', '1', 'bool', '1', 'Display', 'Show affiliation names in the interfaces?'),
+('show_affiliations', '0', 'bool', '1', 'Display', 'Show affiliation names in the interfaces?'),
 ('show_affiliation_logos', '1', 'bool', '1', 'Display', 'Show affiliation logos on the scoreboard?'),
 ('show_teams_submissions', '1', 'bool', '1', 'Display', 'Show problem columns with submission information on the public and team scoreboards?'),
 ('show_compile', '2', 'int', '1', 'Display', 'Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always.'),
