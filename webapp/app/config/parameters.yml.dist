@@ -26,4 +26,4 @@ parameters:
 
     # Additional auth methods can be enabled here. This is an array.
     # Supported values are 'ipaddress', and 'xheaders' currently.
-    domjudge.authmethods: []
+    domjudge.authmethods: ['ipaddress']
