@@ -216,19 +216,16 @@ $GAINROOT cp -pR /dev/null ../dev/null
 # Run the solution program (within a restricted environment):
 logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
 
+RUNARGS="testdata.in program.out"
 if [ $COMBINED_RUN_COMPARE -eq 1 ]; then
-	# Combined run and compare scripts already now need the feedback
-	# directory and perhaps access to the test answers.
+	# A combined run and compare script may now already need the
+	# feedback directory, and perhaps access to the test answers (but
+	# only the original that lives outside the chroot).
 	mkdir feedback
-	exitcode=0
-	cp "$TESTOUT" "$WORKDIR/testdata.out"
-	RUNARGS="testdata.in testdata.out program.out compare.meta feedback"
-else
-	RUNARGS="testdata.in program.out"
+	RUNARGS="$RUNARGS $TESTOUT compare.meta feedback"
 fi
 
-
-
+exitcode=0
 # To suppress false positive of FILELIMIT misspelling of TIMELIMIT:
 # shellcheck disable=SC2153
 runcheck ./run $RUNARGS \
