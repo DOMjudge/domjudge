@@ -313,7 +313,7 @@ cat <<'EOF' > run
 # contestants' solution bi-directionally communicates with a jury program, e.g.
 # while playing a two player game.
 #
-# Usage: $0 <testin> <testout> <progout> <metafile> <feedbackdir> <program>...
+# Usage: $0 <testin> <progout> <testout> <metafile> <feedbackdir> <program>...
 #
 # <testin>      File containing test-input.
 # <testout>     File containing test-output.
@@ -334,8 +334,8 @@ cat <<'EOF' > run
 # 43 otherwise.
 
 TESTIN="$1";  shift
-TESTOUT="$1"; shift
 PROGOUT="$1"; shift
+TESTOUT="$1"; shift
 META="$1"; shift
 FEEDBACK="$1"; shift
 
