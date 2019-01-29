@@ -12,7 +12,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Users that have access to DOMjudge
  * @ORM\Entity()
  * @ORM\Table(name="user", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
- * @UniqueEntity("ipAddress")
  * @UniqueEntity("username")
  */
 class User implements UserInterface, \Serializable

@@ -59,7 +59,7 @@ class SecurityController extends Controller
         $auth_ipaddress_users = [];
         if ($allowIPAuth) {
             $em = $this->getDoctrine()->getManager();
-            $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipaddress' => $clientIP]);
+            $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipAddress' => $clientIP]);
         }
 
         return $this->render('DOMJudgeBundle:security:login.html.twig', array(
