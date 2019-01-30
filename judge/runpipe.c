@@ -83,9 +83,9 @@ Arguments starting with a `=' must be escaped by prepending an extra `='.\n", pr
 	exit(0);
 }
 
-void verbose(const char *, ...) __attribute__((format (printf, 1, 2)));
+void verb(const char *, ...) __attribute__((format (printf, 1, 2)));
 
-void verbose(const char *format, ...)
+void verb(const char *format, ...)
 {
 	va_list ap;
 	va_start(ap,format);
@@ -136,7 +136,7 @@ void terminate(int sig)
 	}
 
 	/* Send kill signal to all children */
-	verbose("sending SIGTERM");
+	verb("sending SIGTERM");
 	if ( kill(0,SIGTERM)!=0 ) error(errno,"sending SIGTERM");
 }
 
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 	/* Parse command-line options */
 	be_verbose = show_help = show_version = 0;
 	opterr = 0;
-	while ( (opt = getopt_long(argc,argv,"+o:M:v",long_opts,(int *) 0))!=-1 ) {
+	while ( (opt = getopt_long(argc,argv,"+M:v",long_opts,(int *) 0))!=-1 ) {
 		switch ( opt ) {
 		case 0:   /* long-only option */
 			break;
@@ -274,7 +274,7 @@ int main(int argc, char **argv)
 		cmd_pid[i] = execute(cmd_name[i], (const char **)cmd_args[i],
 		                     cmd_nargs[i], cmd_fds[i], 0);
 		if ( cmd_pid[i]==-1 ) error(errno,"failed to execute command #%d",i+1);
-		verbose("started #%d, pid %d: %s",i+1,cmd_pid[i],cmd_name[i]);
+		verb("started #%d, pid %d: %s",i+1,cmd_pid[i],cmd_name[i]);
 	}
 
 	/* Wait for running child commands and check exit status. */
@@ -309,7 +309,7 @@ int main(int argc, char **argv)
 		if ( i>=ncmds ) error(0, "waited for unknown child");
 
 		cmd_exit[i] = status;
-		verbose("command #%d, pid %d has exited (with status %d)",i+1,pid,status);
+		verb("command #%d, pid %d has exited (with status %d)",i+1,pid,status);
 
 		if ( close(cmd_fds[i][0])!=0 || close(cmd_fds[i][1])!=0 ) {
 			error(errno,"closing command #%d FD's",i+1);
