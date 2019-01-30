@@ -170,7 +170,7 @@ if (isset($_POST['import'])) {
 
                 $probid = $DB->q('RETURNID INSERT INTO problem
                                   SET name = %s, timelimit = %i, externalid = %s',
-                                 $probname, @$problem['short-name'], 10);
+                                 $probname, 10, @$problem['short-name']);
                 // TODO: ask Fredrik about configuration of timelimit
 
                 $DB->q('INSERT INTO contestproblem (cid, probid, shortname, color)
