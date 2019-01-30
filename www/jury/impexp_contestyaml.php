@@ -169,8 +169,8 @@ if (isset($_POST['import'])) {
                 $problabel = first_defined(@$problem['label'], @$problem['letter']);
 
                 $probid = $DB->q('RETURNID INSERT INTO problem
-                                  SET name = %s, timelimit = %i',
-                                 $probname, 10);
+                                  SET name = %s, timelimit = %i, externalid = %s',
+                                 $probname, @$problem['short-name'], 10);
                 // TODO: ask Fredrik about configuration of timelimit
 
                 $DB->q('INSERT INTO contestproblem (cid, probid, shortname, color)
