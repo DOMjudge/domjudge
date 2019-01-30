@@ -76,6 +76,19 @@ class JudgehostController extends BaseController
         $params[':from'] = $contest ? $contest->getStarttime() : 0;
         $workcontest     = $this->entityManager->getConnection()->fetchAll($query, $params);
 
+        $map = function ($work) {
+            $result = [];
+            foreach ($work as $item) {
+                $result[$item['judgehost']] = $item['load'];
+            }
+
+            return $result;
+        };
+
+        $work2min    = $map($work2min);
+        $work10min   = $map($work10min);
+        $workcontest = $map($workcontest);
+
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $time_warn = $this->DOMJudgeService->dbconfig_get('judgehost_warning', 30);
         $time_crit = $this->DOMJudgeService->dbconfig_get('judgehost_critical', 120);
