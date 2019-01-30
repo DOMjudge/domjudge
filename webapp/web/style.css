@@ -221,7 +221,15 @@ legend {
 	white-space: nowrap;
 }
 .scoreboard .scoreaf { white-space: nowrap; border: 0; text-align: center; }
-.scoreboard .scoreaf img { vertical-align: middle; }
+.scoreboard .scoreaf img {
+	vertical-align: middle;
+	height: 32px;
+	width: 32px;
+}
+img.affiliation-logo {
+	height: 32px;
+	width: 32px;
+}
 .univ {
 	font-size: 80%;
 	font-weight: normal;

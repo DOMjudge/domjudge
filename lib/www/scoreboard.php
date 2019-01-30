@@ -674,7 +674,7 @@ function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = fal
             $affillogo = 'images/affiliations/' .  urlencode((string)$affil['externalid']) . '.png';
             $logoHTML = '';
             if (is_readable(WEBAPPDIR.'/web/'.$affillogo)) {
-                $logoHTML = '<img src="../' . $affillogo . '" style="padding-right: 10px;" />';
+                $logoHTML = '<img class="affiliation-logo" src="../' . $affillogo . '" style="padding-right: 10px;" />';
             }
             print '<li class="list-group-item">' . $logoHTML . $affil['taname'] . '</li>';
             $lastAffil = $affil['taname'];
