@@ -226,6 +226,10 @@ legend {
 	height: 32px;
 	width: 32px;
 }
+img.affiliation-logo {
+	height: 32px;
+	width: 32px;
+}
 .univ {
 	font-size: 80%;
 	font-weight: normal;
