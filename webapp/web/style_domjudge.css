@@ -175,6 +175,11 @@ del {
     color: dimgrey;
 }
 
+img.affiliation-logo {
+    height: 32px;
+    width: 32px;
+}
+
 .scoreheader {
     font-variant: small-caps;
     border-bottom: 2px solid black;
