@@ -88,7 +88,7 @@
                             {% set affiliationLogo = 'images/affiliations/' ~ affiliationId ~ '.png' %}
                             {% if affiliationLogo | assetExists %}
                                 <img src="{{ asset(affiliationLogo) }}" alt="{{ team.affiliation.shortname }}"
-                                     title="{{ team.affiliation.shortname }}"/>
+                                     title="{{ team.affiliation.shortname }}" class="affiliation-logo"/>
                             {% endif %}
                             <a href="{{ path('jury_team_affiliation', {'affilId': team.affiliation.affilid}) }}">
                                 {{ team.affiliation.name }}

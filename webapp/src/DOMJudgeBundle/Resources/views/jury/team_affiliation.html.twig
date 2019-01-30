@@ -36,7 +36,7 @@
                 </tr>
                 <tr>
                     <th>Logo</th>
-                    <td>
+                    <td class="affiliation-logo">
                         {% set affiliationId = teamAffiliation.affilid %}
                         {% if teamAffiliation.externalid is not null %}
                             {% set affiliationId = teamAffiliation.externalid %}
@@ -44,7 +44,7 @@
                         {% set affiliationLogo = 'images/affiliations/' ~ affiliationId ~ '.png' %}
                         {% if affiliationLogo | assetExists %}
                             <img src="{{ asset(affiliationLogo) }}" alt="{{ teamAffiliation.shortname }}"
-                                 title="{{ teamAffiliation.shortname }}"/>
+                                 title="{{ teamAffiliation.shortname }}" class="affiliation-logo"/>
                         {% else %}
                             Not available
                         {% endif %}
