@@ -86,7 +86,7 @@ class TeamTest extends WebTestCase
         $message = var_export($response, true);
         $this->assertEquals(200, $response->getStatusCode(), $message);
 
-        $this->assertEquals(1, $crawler->filter('html:contains("Utrecht University")')->count());
+        $this->assertEquals(1, $crawler->filter('html:contains("Example teamname")')->count());
 
         $h3s = $crawler->filter('h3')->extract(array('_text'));
         $this->assertEquals('Submissions', $h3s[0]);
