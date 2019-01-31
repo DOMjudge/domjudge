@@ -157,7 +157,7 @@ class EventDaemonCommand extends ContainerAwareCommand
         if (!$user) {
             $this->logger->error('No admin user found. Please create at least one');
         }
-        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoleList());
+        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
         $this->tokenStorage->setToken($token);
 
         while (true) {
