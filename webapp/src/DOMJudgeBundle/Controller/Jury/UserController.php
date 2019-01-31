@@ -7,8 +7,8 @@ use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Role;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\User;
-use DOMJudgeBundle\Form\Type\UserType;
 use DOMJudgeBundle\Form\Type\GeneratePasswordsType;
+use DOMJudgeBundle\Form\Type\UserType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
@@ -18,6 +18,8 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
  * @Route("/jury")
@@ -40,14 +42,21 @@ class UserController extends BaseController
      */
     protected $eventLogService;
 
+    /**
+     * @var TokenStorageInterface
+     */
+    protected $tokenStorage;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
-        EventLogService $eventLogService
+        EventLogService $eventLogService,
+        TokenStorageInterface $tokenStorage
     ) {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
         $this->eventLogService = $eventLogService;
+        $this->tokenStorage    = $tokenStorage;
     }
 
     /**
@@ -196,6 +205,19 @@ class UserController extends BaseController
             $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $user,
                               $user->getUserid(),
                               false);
+
+            // If we save the currently logged in used, update the login token
+            if ($user->getUserid() === $this->DOMJudgeService->getUser()->getUserid()) {
+                $token = new UsernamePasswordToken(
+                    $user,
+                    null,
+                    'main',
+                    $user->getRoles()
+                );
+
+                $this->tokenStorage->setToken($token);
+            }
+
             return $this->redirect($this->generateUrl('jury_user',
                                                       ['userId' => $user->getUserid()]));
         }
