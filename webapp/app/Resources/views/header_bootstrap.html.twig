@@ -123,7 +123,7 @@
       <span id="timeleft">{%- if current_contest is null -%}
           no contest
         {%- elseif current_contest.starttime(false) < now and current_contest.endtime >= now -%}
-          {{ now|timediff(contest.getEndTime()) }}
+          {{ now|timediff(current_contest.getEndTime()) }}
         {%- elseif current_contest.activatetime < now and current_contest.starttime(false) >= now -%}
             {%- if current_contest.starttimeEnabled -%}
               time to start: {{ now|timediff(current_contest.starttime) }}
