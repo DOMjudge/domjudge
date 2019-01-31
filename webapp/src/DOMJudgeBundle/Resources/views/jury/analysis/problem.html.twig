@@ -229,7 +229,7 @@ $(function(){
           {% set count = 0 %}
           {% for submission in submissions if submission.result %}
             {% if submission.result == result %}{% set count = count +1 %}{% endif %}
-            [ {{ (submission.submittime - contest.starttime)/60.0 }},
+            [ {{ (submission.submittime - current_contest.starttime)/60.0 }},
               {{ count }}
             ],
             {% endfor %}
@@ -248,7 +248,7 @@ $(function(){
           .y(function(d) { return d[1] })   //...in case your data is formatted differently.
           .showYAxis(true)        //Show the y-axis
           .showXAxis(true)        //Show the x-axis
-          .forceX([0, {{ (contest.endtime - contest.starttime) / 60 }}])
+          .forceX([0, {{ (current_contest.endtime - current_contest.starttime) / 60 }}])
           .forceY([0, {{ submissions|length *1.10 }}])
           ;
       chart.xAxis     //Chart x-axis settings

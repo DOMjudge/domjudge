@@ -107,8 +107,8 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
 
         // These variables mostly exist for the header template
         return [
-            'contest' => $this->domjudge->getCurrentContest(),
-            'contests' => $this->domjudge->getCurrentContests(),
+            'current_contest' => $this->domjudge->getCurrentContest(),
+            'current_contests' => $this->domjudge->getCurrentContests(),
             'have_printing' => $this->domjudge->dbconfig_get('enable_printing', 0),
             'refresh_flag' => $refresh_flag,
             'icat_url' => defined('ICAT_URL') ? ICAT_URL : null,

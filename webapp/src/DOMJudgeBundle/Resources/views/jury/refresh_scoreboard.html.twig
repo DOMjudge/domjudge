@@ -3,8 +3,8 @@
     <hr>
     <p>{{ message }}</p>
     <form action="{{ path('jury_refresh_cache') }}" method="POST">
-        {% if contest is not empty %}
-            <input type="hidden" name="cid" value="{{ contest.cid }}"/>
+        {% if current_contest is not empty %}
+            <input type="hidden" name="cid" value="{{ current_contest.cid }}"/>
         {% endif %}
         <input type="submit" name="refresh" value="Recalculate caches now" class="btn btn-primary"/>
     </form>

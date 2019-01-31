@@ -3,7 +3,7 @@
     <thead>
     <tr>
         <th scope="col">ID</th>
-        {%- if contests | length > 1 %}
+        {%- if current_contests | length > 1 %}
 
             <th scope="col">contest</th>
         {%- endif %}
@@ -27,7 +27,7 @@
 
         <tr>
             <td><a href="{{ link }}">{{ clarification.clarid }}</a></td>
-            {%- if contests | length > 1 %}
+            {%- if current_contests | length > 1 %}
 
                 <td><a href="{{ link }}">{{ clarification.contest.shortname }}</a></td>
             {%- endif %}

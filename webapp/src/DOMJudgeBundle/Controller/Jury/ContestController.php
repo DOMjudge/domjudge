@@ -295,7 +295,6 @@ class ContestController extends BaseController
             ->getOneOrNullResult();
 
         return $this->render('@DOMJudge/jury/contests.html.twig', [
-            'current_contests' => $this->DOMJudgeService->getCurrentContests(),
             'upcoming_contest' => $upcomingContest,
             'contests_table' => $contests_table,
             'table_fields' => $table_fields,

@@ -2,15 +2,15 @@
     {% set static = false %}
 {% endif %}
 
-{% if contest is null %}
+{% if current_contest is null %}
     <p class="nodata">No active contest</p>
 {% else %}
     <div class="card">
         <div class="card-header" style="font-family: Roboto, sans-serif; display: flex;">
-            <span style="font-weight: bold;">{{ contest.name }}</span>
+            <span style="font-weight: bold;">{{ current_contest.name }}</span>
             <span style="color: DimGray; margin-left: auto;">
                 {% if scoreboard.freezeData.showFinal(jury) %}
-                    {% if contest.finalizetime is empty %}
+                    {% if current_contest.finalizetime is empty %}
                         preliminary results - not final
                     {% else %}
                         final standings
@@ -18,9 +18,9 @@
                 {% elseif scoreboard.freezeData.stopped %}
                     contest over, waiting for results
                 {% elseif not scoreboard.freezeData.started %}
-                    {{ contest | printContestStart }}
+                    {{ current_contest | printContestStart }}
                 {% else %}
-                    starts: {{ contest.starttime | printtime }} - ends: {{ contest.endtime | printtime }}
+                    starts: {{ current_contest.starttime | printtime }} - ends: {{ current_contest.endtime | printtime }}
                 {% endif %}
             </span>
         </div>
@@ -66,10 +66,10 @@
             <div class="alert alert-warning" role="alert" style="font-size: 80%;">
                 {% if jury %}
                     <a href="{{ path('legacy.public') }}">The public scoreboard</a>
-                    was frozen with {{ contest.minutesRemaining }} minutes remaining
+                    was frozen with {{ current_contest.minutesRemaining }} minutes remaining
                 {% else %}
-                    The scoreboard was frozen with {{ contest.minutesRemaining }} minutes remaining - solutions
-                    submitted in the last {{ contest.minutesRemaining }} minutes of the contest are still shown as pending.
+                    The scoreboard was frozen with {{ current_contest.minutesRemaining }} minutes remaining - solutions
+                    submitted in the last {{ current_contest.minutesRemaining }} minutes of the contest are still shown as pending.
                 {% endif %}
             </div>
         {% endif %}

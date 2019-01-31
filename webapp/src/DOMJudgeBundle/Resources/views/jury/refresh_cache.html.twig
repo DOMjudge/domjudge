@@ -24,7 +24,7 @@
                 and is not necessary in normal operating circumstances.
                 <br/><br/>
                 Refresh scoreboard cache for
-                {% if contest is not empty %}
+                {% if current_contest is not empty %}
                     {{ contest.shortname }}
                 {% else %}
                     all active contests
@@ -32,8 +32,8 @@
                 now?
             </p>
             <form action="{{ path('jury_refresh_cache') }}" method="post">
-                {% if contest is not empty %}
-                    <input type="hidden" name="cid" value="{{ contest.cid }}"/>
+                {% if current_contest is not empty %}
+                    <input type="hidden" name="cid" value="{{ current_contest.cid }}"/>
                 {% endif %}
                 <button type="submit" class="btn btn-danger" name="refresh">
                     <i class="fas fa-sync-alt"></i> Refresh now!
@@ -59,7 +59,7 @@
                 $('html, body').animate({scrollTop: $status.offset().top + $status.height()}, 0);
             };
 
-            xhr.send({% if contest is not empty %}'cid={{ contest.cid }}'{% endif %});
+            xhr.send({% if current_contest is not empty %}'cid={{ current_contest.cid }}'{% endif %});
         });
     </script>
 {% endblock %}
