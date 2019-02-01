@@ -20,12 +20,16 @@
                     <th>ID</th>
                     <td>{{ team.teamid }}</td>
                 </tr>
-                {% if showExternalId(team) %}
-                    <tr>
-                        <th>External ID</th>
-                        <td>{{ team.externalid }}</td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <th>External ID</th>
+                    <td>
+                        {% if team.externalid %}
+                            {{ team.externalid }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
                 <tr>
                     <th>Name</th>
                     <td>{{ team.name }}</td>

@@ -80,7 +80,6 @@ class EventLogService implements ContainerAwareInterface
         'teams' => [
             self::KEY_TYPE => self::TYPE_CONFIGURATION,
             self::KEY_TABLES => ['team', 'contestteam'],
-            self::KEY_EXTERNAL_ID => 'externalid',
         ],
         'state' => [
             self::KEY_TYPE => self::TYPE_AGGREGATE,
