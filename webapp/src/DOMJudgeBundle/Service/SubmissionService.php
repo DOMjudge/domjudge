@@ -15,6 +15,8 @@ use DOMJudgeBundle\Utils\FreezeData;
 use DOMJudgeBundle\Utils\Utils;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Class SubmissionService
@@ -322,16 +324,16 @@ class SubmissionService
         }
 
         if (empty($team)) {
-            throw new \BadMethodCallException("Team not found");
+            throw new BadRequestHttpException("Team not found");
         }
         if (empty($problem)) {
-            throw new \BadMethodCallException("Problem not found");
+            throw new BadRequestHttpException("Problem not found");
         }
         if (empty($contest)) {
-            throw new \BadMethodCallException("Contest not found");
+            throw new BadRequestHttpException("Contest not found");
         }
         if (empty($language)) {
-            throw new \BadMethodCallException("Language not found");
+            throw new BadRequestHttpException("Language not found");
         }
 
         if (empty($submitTime)) {
@@ -339,10 +341,10 @@ class SubmissionService
         }
 
         if (count($files) == 0) {
-            throw new \BadMethodCallException("No files specified.");
+            throw new BadRequestHttpException("No files specified.");
         }
         if (count($files) > $this->DOMJudgeService->dbconfig_get('sourcefiles_limit', 100)) {
-            throw new \BadMethodCallException("Tried to submit more than the allowed number of source files.");
+            throw new BadRequestHttpException("Tried to submit more than the allowed number of source files.");
         }
 
         $filenames = [];
@@ -354,24 +356,24 @@ class SubmissionService
         }
 
         if (count($files) != count($filenames)) {
-            throw new \BadMethodCallException("Duplicate filenames detected.");
+            throw new BadRequestHttpException("Duplicate filenames detected.");
         }
 
         $sourceSize = $this->DOMJudgeService->dbconfig_get('sourcesize_limit');
 
         $freezeData = new FreezeData($contest);
         if (!$this->DOMJudgeService->checkrole('jury') && !$freezeData->started()) {
-            throw new \BadMethodCallException(
+            throw new AccessDeniedHttpException(
                 sprintf("The contest is closed, no submissions accepted. [c%d]", $contest->getCid()));
         }
 
         if (!$language->getAllowSubmit()) {
-            throw new \BadMethodCallException(
+            throw new BadRequestHttpException(
                 sprintf("Language '%s' not found in database or not submittable.", $language->getLangid()));
         }
 
         if ($language->getRequireEntryPoint() && empty($entryPoint)) {
-            throw new \BadMethodCallException(
+            throw new BadRequestHttpException(
                 sprintf("Entry point required for '%s' but none given.", $language->getLangid()));
         }
 
@@ -381,16 +383,16 @@ class SubmissionService
         }
 
         if (!empty($entryPoint) && !preg_match(self::FILENAME_REGEX, $entryPoint)) {
-            throw new \BadMethodCallException(sprintf("Entry point '%s' contains illegal characters."), $entryPoint);
+            throw new BadRequestHttpException(sprintf("Entry point '%s' contains illegal characters.", $entryPoint));
         }
 
         if (!$this->DOMJudgeService->checkrole('jury') && !$team->getEnabled()) {
-            throw new \BadMethodCallException(
+            throw new BadRequestHttpException(
                 sprintf("Team '%d' not found in database or not enabled.", $team->getTeamid()));
         }
 
         if (!$problem->getAllowSubmit()) {
-            throw new \BadMethodCallException(
+            throw new BadRequestHttpException(
                 sprintf("Problem p%d not submittable [c%d].",
                         $problem->getProbid(), $contest->getCid()));
         }
@@ -401,16 +403,16 @@ class SubmissionService
         $totalSize = 0;
         foreach ($files as $file) {
             if (!$file->isReadable()) {
-                throw new \BadMethodCallException("File '%s' not found (or not readable).", $file->getRealPath());
+                throw new BadRequestHttpException("File '%s' not found (or not readable).", $file->getRealPath());
             }
             if (!preg_match(self::FILENAME_REGEX, $file->getClientOriginalName())) {
-                throw new \BadMethodCallException(sprintf("Illegal filename '%s'.", $file->getClientOriginalName()));
+                throw new BadRequestHttpException(sprintf("Illegal filename '%s'.", $file->getClientOriginalName()));
             }
             $totalSize += $file->getSize();
         }
 
         if ($totalSize > $sourceSize * 1024) {
-            throw new \BadMethodCallException(sprintf("Submission file(s) are larger than %d kB.", $sourceSize));
+            throw new BadRequestHttpException(sprintf("Submission file(s) are larger than %d kB.", $sourceSize));
         }
 
         $this->logger->info('input verified');
