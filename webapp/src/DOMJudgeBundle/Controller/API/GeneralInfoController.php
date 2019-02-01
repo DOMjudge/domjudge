@@ -120,7 +120,7 @@ class GeneralInfoController extends FOSRestController
     /**
      * Get general status information
      * @Rest\Get("/status")
-     * @Security("has_role('ROLE_JURY')")
+     * @Security("has_role('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="General status information for the currently active contests",
