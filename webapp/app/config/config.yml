@@ -93,6 +93,10 @@ fos_rest:
         enabled: true
         messages:
                 Symfony\Component\HttpKernel\Exception\BadRequestHttpException: true
+                Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException: true
+                Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException: true
+                Symfony\Component\HttpKernel\Exception\NotFoundHttpException: true
+                Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException: true
 
 # Swiftmailer Configuration
 swiftmailer:
