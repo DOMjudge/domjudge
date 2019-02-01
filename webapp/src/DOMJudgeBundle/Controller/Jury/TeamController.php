@@ -102,6 +102,7 @@ class TeamController extends BaseController
 
         $table_fields = [
             'teamid' => ['title' => 'ID', 'sort' => true,],
+            'externalid' => ['title' => 'external ID', 'sort' => true,],
             'name' => ['title' => 'teamname', 'sort' => true, 'default_sort' => true],
             'category' => ['title' => 'category', 'sort' => true,],
             'affiliation' => ['title' => 'affiliation', 'sort' => true,],
@@ -111,13 +112,6 @@ class TeamController extends BaseController
             'status' => ['title' => '', 'sort' => false,],
             'stats' => ['title' => 'stats', 'sort' => true,],
         ];
-
-        // Insert external ID field when configured to use it
-        if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(Team::class)) {
-            $table_fields = array_slice($table_fields, 0, 1, true) +
-                [$externalIdField => ['title' => 'external ID', 'sort' => true]] +
-                array_slice($table_fields, 1, null, true);
-        }
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $teams_table      = [];

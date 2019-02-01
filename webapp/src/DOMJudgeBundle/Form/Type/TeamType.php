@@ -19,6 +19,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Regex;
 
 class TeamType extends AbstractExternalIdEntityType
 {
@@ -29,7 +30,18 @@ class TeamType extends AbstractExternalIdEntityType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $this->addExternalIdField($builder, Team::class);
+        $builder->add('externalid', TextType::class, [
+            'label' => 'External ID',
+            'required' => false,
+            'constraints' => [
+                new Regex(
+                    [
+                        'pattern' => '/^[a-zA-Z0-9_-]+$/i',
+                        'message' => 'Only letters, numbers, dashes and underscores are allowed',
+                    ]
+                )
+            ]
+        ]);
         $builder->add('name', TextType::class, [
             'label' => 'Team name',
         ]);
