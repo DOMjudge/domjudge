@@ -89,7 +89,7 @@
 		</form>
             </td>
 {% if is_granted('ROLE_ADMIN') and queues | length > 1 %}
-            <td>
+            <td data-search="{{ queues[clarification.queue]|default('') }}">
             <div class="btn-group btn-group-toggle" data-toggle="buttons">
                  <div class="input-group-prepend"><div class="input-group-text" id="qig{{clarification.clarid}}"><i class="fab fa-quora"></i></div></div>
                  {% for qk,qv in queues %}

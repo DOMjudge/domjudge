@@ -47,7 +47,7 @@
 
     <script>
         $().ready(function () {
-            $('.data-table').DataTable({
+            var table = $('.data-table').DataTable({
                 "paging": false,
                 "ordering": true,
                 "info": false,
@@ -63,10 +63,19 @@
             $('.qbut').on('change', function () {
                 var icon = $("#qig" + $(this).attr('data-clarid') );
                 icon.html('<i class="fas fa-spinner fa-spin"></i>');
+                var parenttd = $(this).closest('td');
+                var parenttr = $(this).closest('tr');
+                var newname = $(this).closest('label').text().trim();
                 $.post("{{ path('jury_clarification_change_queue', {'clarId': 'replaceme'}) }}".replace('replaceme', $(this).attr('data-clarid')),
                     {'queue': $(this).val()})
                     .done(function( data ) {
-                        icon.html(data ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>');
+                        if ( data ) {
+                            parenttd.attr('data-search', newname);
+                            table.rows(parenttr).invalidate();
+                            icon.html('<i class="fas fa-check"></i>');
+                        } else {
+                            icon.html('<i class="fas fa-times"></i>');
+                        }
                     });
             });
         });
