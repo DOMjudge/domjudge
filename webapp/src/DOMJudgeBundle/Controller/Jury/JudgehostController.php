@@ -63,7 +63,6 @@ class JudgehostController extends BaseController
 
         $now           = Utils::now();
         $contest       = $this->DOMJudgeService->getCurrentContest();
-        $contestLength = ($contest === null ? null : Utils::difftime($now, (float)$contest->getStarttime()));
         $query         = 'SELECT judgehost, SUM(IF(endtime, endtime, :now) - GREATEST(:from, starttime)) AS `load`
                           FROM judging
                           WHERE endtime > :from OR (endtime IS NULL and valid = 1)
@@ -127,12 +126,21 @@ class JudgehostController extends BaseController
                                        Utils::printtimediff((float)$judgehost->getPolltime()));
             }
 
-            $load          = sprintf(
-                '%.2f&nbsp;%.2f&nbsp;%.2f',
+            $load = sprintf(
+                '%.2f&nbsp;%.2f&nbsp;',
                 ($work2min[$judgehost->getHostname()] ?? 0) / (2 * 60),
-                ($work10min[$judgehost->getHostname()] ?? 0) / (10 * 60),
-                ($workcontest[$judgehost->getHostname()] ?? 0) / ($contestLength ?? 1)
+                ($work10min[$judgehost->getHostname()] ?? 0) / (10 * 60)
             );
+            if ( $contest ) {
+                $contestLength = Utils::difftime($now, (float)$contest->getStarttime());
+                $load .= sprintf(
+                    '%.2f',
+                    ($workcontest[$judgehost->getHostname()] ?? 0) / $contestLength
+                );
+            } else {
+                $load .= 'N/A';
+            }
+
             $judgehostdata = array_merge($judgehostdata, [
                 'status' => [
                     'value' => $status,
