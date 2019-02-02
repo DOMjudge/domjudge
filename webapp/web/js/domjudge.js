@@ -810,11 +810,15 @@ function enableRefresh($url, $after, usingAjax) {
         if (usingAjax) {
             $.ajax({
                 url: $url
-            }).done(function(data) {
-                var $refreshTarget = $('[data-ajax-refresh-target]');
-                $refreshTarget.html(data);
-                if ($refreshTarget.data('ajax-refresh-after')) {
-                    window[$refreshTarget.data('ajax-refresh-after')]();
+            }).done(function(data, status, jqXHR) {
+                if (jqXHR.getResponseHeader('X-Login-Page')) {
+                    window.location = jqXHR.getResponseHeader('X-Login-Page');
+                } else {
+                    var $refreshTarget = $('[data-ajax-refresh-target]');
+                    $refreshTarget.html(data);
+                    if ($refreshTarget.data('ajax-refresh-after')) {
+                        window[$refreshTarget.data('ajax-refresh-after')]();
+                    }
                 }
             });
         } else {

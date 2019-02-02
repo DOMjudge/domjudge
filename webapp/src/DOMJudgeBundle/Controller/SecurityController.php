@@ -4,6 +4,7 @@ namespace DOMJudgeBundle\Controller;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
@@ -62,6 +63,10 @@ class SecurityController extends Controller
             $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipAddress' => $clientIP]);
         }
 
+        // Add a header so we can detect that this is the login page
+        $response = new Response();
+        $response->headers->set('X-Login-Page', $this->generateUrl('login'));
+
         return $this->render('DOMJudgeBundle:security:login.html.twig', array(
             'last_username' => $lastUsername,
             'error'         => $error,
@@ -69,7 +74,7 @@ class SecurityController extends Controller
             'allowed_authmethods'   => $authmethods,
             'auth_xheaders_present' => $request->headers->get('X-DOMjudge-Login'),
             'auth_ipaddress_users'  => $auth_ipaddress_users,
-        ));
+        ), $response);
     }
 
     /**
