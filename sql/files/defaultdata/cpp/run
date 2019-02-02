@@ -5,15 +5,32 @@
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift
+MAINSOURCE=""
 
-# Add -DONLINE_JUDGE or -DDOMJUDGE below if you want it make easier for teams
-# to do local debugging.
+EXTENSIONS=".cc .cpp .cxx .c++"
 
-# -x c++:   Explicitly set compile language to C++ (no object files or
-#           other languages autodetected by extension)
-# -Wall:    Report all warnings
+# Filter out files without extension .cc from the list of source
+# files. Note that POSIX shell does *not* support arrays, so we store
+# them in a single variable that has to be used unquoted. We don't
+# need to quote the files since they can only contain "nice" characters.
+SOURCES=''
+while [ $# -gt 0 ]; do
+    for ext in $EXTENSIONS ; do
+        if [ "x${1%$ext}" != "x$1" ]; then
+            SOURCES="$SOURCES $1"
+            [ -z "$MAINSOURCE" ] && MAINSOURCE="$1"
+        fi
+    done
+    shift
+done
+if [ -z "$SOURCES" ]; then
+    echo "No source files found with extensions '$EXTENSIONS'."
+    exit 1
+fi
+
+# -g:       Enable debug symbols
 # -O2:      Level 2 optimizations (default for speed)
 # -static:  Static link with all libraries
 # -pipe:    Use pipes for communication between stages of compilation
-g++ -x c++ -Wall -O2 -std=gnu++14 -static -pipe -o "$DEST" "$@"
+g++ -g -O2 -std=gnu++14 -static -o "$DEST" $SOURCES
 exit $?
