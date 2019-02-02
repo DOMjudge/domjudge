@@ -74,6 +74,7 @@ char *logfile;
 const char *progname;
 
 int quiet;
+int assume_yes;
 int show_help;
 int show_version;
 
@@ -85,6 +86,7 @@ struct option const long_opts[] = {
 	{"contest",     required_argument, NULL,         'c'},
 	{"entry_point", optional_argument, NULL,         'e'},
 	{"quiet",       no_argument,       NULL,         'q'},
+	{"assume_yes",  no_argument,       NULL,         'y'},
 	{"help",        no_argument,       &show_help,    1 },
 	{"version",     no_argument,       &show_version, 1 },
 	{ NULL,         0,                 NULL,          0 }
@@ -246,7 +248,7 @@ int main(int argc, char **argv)
 
 	quiet = show_help = show_version = 0;
 	opterr = 0;
-	while ( (c = getopt_long(argc,argv,"p:l:u:c:e:v::q",long_opts,NULL))!=-1 ) {
+	while ( (c = getopt_long(argc,argv,"p:l:u:c:e:v::qy",long_opts,NULL))!=-1 ) {
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -270,6 +272,9 @@ int main(int argc, char **argv)
 		case 'q': /* quiet option */
 			verbose = LOG_ERR;
 			quiet = 1;
+			break;
+		case 'y': /* assume_yes option */
+			assume_yes = 1;
 			break;
 		case ':': /* getopt error */
 		case '?':
@@ -424,7 +429,7 @@ lang_found:
 	logmsg(LOG_DEBUG,"url is `%s'",baseurl.c_str());
 
 	/* Ask user for confirmation */
-	if ( ! quiet ) {
+	if ( ! assume_yes ) {
 		printf("Submission information:\n");
 		if ( filenames.size()==1 ) {
 			printf("  filename:    %s\n",filenames[0].c_str());
@@ -472,8 +477,8 @@ void usage()
 "  -v, --verbose[=LEVEL]          increase verbosity or set to LEVEL, where LEVEL\n"
 "                                     must be numerically specified as in 'syslog.h'\n"
 "                                     defaults to LOG_INFO without argument\n"
-"  -q, --quiet                    set verbosity to LOG_ERR and suppress user\n"
-"                                     input and warning/info messages\n"
+"  -q, --quiet                    suppress warning/info messages, set verbosity=LOG_ERR\n"
+"  -y, --assume-yes               suppress user input and assume yes\n"
 "      --help                     display this help and exit\n"
 "      --version                  output version information and exit\n"
 "\n"
