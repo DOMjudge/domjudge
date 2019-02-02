@@ -73,8 +73,8 @@ class AwardsController extends AbstractRestController
             throw new AccessDeniedHttpException();
         }
 
-        $probuseextid = !empty($this->eventLogService->externalIdFieldForEntity(Problem::class));
-        $teamuseextid = !empty($this->eventLogService->externalIdFieldForEntity(Team::class));
+        $probuseextid = !is_null($this->eventLogService->externalIdFieldForEntity(Problem::class));
+        $teamuseextid = !is_null($this->eventLogService->externalIdFieldForEntity(Team::class));
 
         $additionalBronzeMedals = $contest->getB() ?? 0;
 
@@ -82,12 +82,12 @@ class AwardsController extends AbstractRestController
 
         $group_winners = $problem_winners = [];
         foreach ($scoreboard->getTeams() as $team) {
-            $teamid = $teamuseextid ? $team->getExternalid() : $team->getTeamid();
+            $teamid = (string)($teamuseextid ? $team->getExternalid() : $team->getTeamid());
             if ( $scoreboard->isBestInCategory($team) ) {
                 $group_winners[$team->getCategoryId()][] = $teamid;
             }
             foreach($scoreboard->getProblems() as $problem) {
-                $probid = $probuseextid ? $problem->getExternalid() : $problem->getProbid();
+                $probid = (string)($probuseextid ? $problem->getExternalid() : $problem->getProbid());
                 if ($scoreboard->solvedFirst($team, $problem)) {
                     $problem_winners[$probid][] = $teamid;
                 }
@@ -98,7 +98,7 @@ class AwardsController extends AbstractRestController
         // can we assume this is ordered just walk the first 12+B entries?
         foreach ($scoreboard->getScores() as $teamScore) {
             $rank = $teamScore->getRank();
-            $teamid = $teamuseextid ? $teamScore->getTeam()->getExternalid() : $teamScore->getTeam()->getTeamid();
+            $teamid = (string)($teamuseextid ? $teamScore->getTeam()->getExternalid() : $teamScore->getTeam()->getTeamid());
 
             if ($rank === 1) {
                 $overall_winners[] = $teamid;
