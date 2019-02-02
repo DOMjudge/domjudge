@@ -922,7 +922,11 @@ bool doAPIsubmit()
 		}
 		curl_formfree(post);
 		curl_easy_cleanup(handle);
-		error(0, "Submission failed.");
+		if ( http_code == 401 ) {
+			error(0, "Authentication failed. Please check your DOMjudge credentials.");
+		} else {
+			error(0, "Submission failed (code %li)", http_code);
+		}
 	}
 
 #undef curlsetopt
