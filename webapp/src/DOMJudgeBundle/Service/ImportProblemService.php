@@ -3,25 +3,21 @@
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\Executable;
-use DOMJudgeBundle\Entity\JudgingRun;
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
-use DOMJudgeBundle\Entity\SubmissionFileWithSourceCode;
 use DOMJudgeBundle\Entity\Team;
-use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Entity\TestcaseWithContent;
-use DOMJudgeBundle\Utils\FreezeData;
 use DOMJudgeBundle\Utils\Utils;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\ConstraintViolationInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Yaml\Yaml;
 use ZipArchive;
 
@@ -56,18 +52,25 @@ class ImportProblemService
      */
     protected $eventLogService;
 
+    /**
+     * @var ValidatorInterface
+     */
+    protected $validator;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,
         DOMJudgeService $DOMJudgeService,
         EventLogService $eventLogService,
-        SubmissionService $submissionService
+        SubmissionService $submissionService,
+        ValidatorInterface $validator
     ) {
         $this->entityManager     = $entityManager;
         $this->logger            = $logger;
         $this->DOMJudgeService   = $DOMJudgeService;
         $this->eventLogService   = $eventLogService;
         $this->submissionService = $submissionService;
+        $this->validator         = $validator;
     }
 
     /**
@@ -77,7 +80,7 @@ class ImportProblemService
      * @param Problem|null $problem
      * @param Contest|null $contest
      * @param array        $messages
-     * @return Problem
+     * @return Problem|null
      * @throws \Exception
      */
     public function importZippedProblem(
@@ -191,10 +194,34 @@ class ImportProblemService
             $propertyAccessor->setValue($problem, $key, $value);
         }
 
+        $hasErrors = false;
+        $errors    = $this->validator->validate($problem);
+        if ($errors->count()) {
+            $hasErrors = true;
+            /** @var ConstraintViolationInterface $error */
+            foreach ($errors as $error) {
+                $messages[] = sprintf('Error: problem.%s: %s', $error->getPropertyPath(), $error->getMessage());
+            }
+        }
+
         if ($contestProblem !== null) {
             foreach ($contestProblemProperties as $key => $value) {
                 $propertyAccessor->setValue($contestProblem, $key, $value);
             }
+
+            $errors = $this->validator->validate($contestProblem);
+            if ($errors->count()) {
+                $hasErrors = true;
+                /** @var ConstraintViolationInterface $error */
+                foreach ($errors as $error) {
+                    $messages[] = sprintf('Error: contestproblem.%s: %s', $error->getPropertyPath(),
+                                          $error->getMessage());
+                }
+            }
+        }
+
+        if ($hasErrors) {
+            return null;
         }
 
         // parse problem.yaml
@@ -285,7 +312,7 @@ class ImportProblemService
                             }
 
                             $combinedRunCompare = $yamlData['validation'] == 'custom interactive';
-                            $executable = new Executable();
+                            $executable         = new Executable();
                             $executable
                                 ->setExecid($outputValidatorName)
                                 ->setMd5sum(md5($outputValidatorZip))

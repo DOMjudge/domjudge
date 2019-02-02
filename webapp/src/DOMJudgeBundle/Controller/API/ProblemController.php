@@ -14,8 +14,8 @@ use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ImportProblemService;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Swagger\Annotations as SWG;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -45,6 +45,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
         $this->importProblemService = $importProblemService;
     }
+
     /**
      * Get all the problems for this contest
      * @param Request $request
@@ -135,28 +136,36 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *         @SWG\Items(type="integer", description="The IDs of the imported problems")
      *     )
      * )
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function addProblemAction(Request $request)
     {
-        $files = $request->files->get('zip') ?: [];
+        $files     = $request->files->get('zip') ?: [];
         $contestId = $this->getContestId($request);
         /** @var Contest $contest */
-        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        $contest     = $this->entityManager->getRepository(Contest::class)->find($contestId);
         $allMessages = [];
+        $probIds     = [];
         /** @var UploadedFile $file */
         foreach ($files as $file) {
+            $zip = null;
             try {
                 $zip         = $this->DOMJudgeService->openZipFile($file->getRealPath());
                 $clientName  = $file->getClientOriginalName();
                 $messages    = [];
-                $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest, $messages);
+                $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest,
+                                                                                $messages);
                 $allMessages = array_merge($allMessages, $messages);
-                $this->DOMJudgeService->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
-                $probIds[] = $newProblem->getProbid();
-            } catch (Exception $e) {
+                if ($newProblem) {
+                    $this->DOMJudgeService->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
+                    $probIds[] = $newProblem->getProbid();
+                }
+            } catch (\Exception $e) {
                 dump($e);
             } finally {
-                $zip->close();
+                if ($zip) {
+                    $zip->close();
+                }
             }
         }
         dump($allMessages);
@@ -166,7 +175,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     /**
      * Get the given problem for this contest
      * @param Request $request
-     * @param string $id
+     * @param string  $id
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception

@@ -120,7 +120,10 @@ class ProblemController extends BaseController
                     $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest,
                                                                                     $messages);
                     $allMessages = array_merge($allMessages, $messages);
-                    $this->DOMJudgeService->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
+                    if ($newProblem) {
+                        $this->DOMJudgeService->auditlog('problem', $newProblem->getProbid(), 'upload zip',
+                                                         $clientName);
+                    }
                 } finally {
                     $zip->close();
                 }
@@ -881,8 +884,9 @@ class ProblemController extends BaseController
             try {
                 $zip        = $this->DOMJudgeService->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
-                $this->importProblemService->importZippedProblem($zip, $clientName, $problem, $contest, $messages);
-                $this->DOMJudgeService->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
+                if ($this->importProblemService->importZippedProblem($zip, $clientName, $problem, $contest, $messages)) {
+                    $this->DOMJudgeService->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
+                }
             } finally {
                 $zip->close();
             }
