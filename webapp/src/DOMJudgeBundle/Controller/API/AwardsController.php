@@ -73,18 +73,23 @@ class AwardsController extends AbstractRestController
             throw new AccessDeniedHttpException();
         }
 
-        $b = $contest->getB() ?? 0;
+        $probuseextid = !empty($this->eventLogService->externalIdFieldForEntity(Problem::class));
+        $teamuseextid = !empty($this->eventLogService->externalIdFieldForEntity(Team::class));
+
+        $additionalBronzeMedals = $contest->getB() ?? 0;
 
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, null, true);
 
         $group_winners = $problem_winners = [];
         foreach ($scoreboard->getTeams() as $team) {
+            $teamid = $teamuseextid ? $team->getExternalid() : $team->getTeamid();
             if ( $scoreboard->isBestInCategory($team) ) {
-                $group_winners[$team->getCategoryId()][] = $team->getTeamid();
+                $group_winners[$team->getCategoryId()][] = $teamid;
             }
             foreach($scoreboard->getProblems() as $problem) {
+                $probid = $probuseextid ? $problem->getExternalid() : $problem->getProbid();
                 if ($scoreboard->solvedFirst($team, $problem)) {
-                    $problem_winners[$problem->getProbid()][] = $team->getTeamid();
+                    $problem_winners[$probid][] = $teamid;
                 }
             }
         }
@@ -93,16 +98,16 @@ class AwardsController extends AbstractRestController
         // can we assume this is ordered just walk the first 12+B entries?
         foreach ($scoreboard->getScores() as $teamScore) {
             $rank = $teamScore->getRank();
-            $teamid = $teamScore->getTeam()->getTeamid();
+            $teamid = $teamuseextid ? $teamScore->getTeam()->getExternalid() : $teamScore->getTeam()->getTeamid();
 
             if ($rank === 1) {
-                $overall_winners[] = $teamid();
+                $overall_winners[] = $teamid;
             }
             if ($rank <= 4 ) {
                 $medal_winners['gold'][] = $teamid;
             } elseif ($rank <= 8 ) {
                 $medal_winners['silver'][] = $teamid;
-            } elseif ($rank <= 12 + $b ) {
+            } elseif ($rank <= 12 + $additionalBronzeMedals ) {
                 $medal_winners['bronze'][] = $teamid;
             }
         }
