@@ -152,7 +152,7 @@ abstract class AbstractRestController extends FOSRestController
             ->from('DOMJudgeBundle:Contest', 'c')
             ->select('c')
             ->andWhere('c.enabled = 1')
-	    ->andWhere(
+            ->andWhere(
                 $qb->expr()->lte('c.activatetime', $now)
             )
             ->andWhere($qb->expr()->orX(
