@@ -14,6 +14,11 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     exp="object.getAffilid()",
  *     options={@Serializer\Type("string")}
  * )
+ * @Serializer\VirtualProperty(
+ *     "shortName",
+ *     exp="object.getShortname()",
+ *     options={@Serializer\Type("string"), @Serializer\SerializedName("shortname"), @Serializer\Groups({"Nonstrict"})}
+ * )
  * @UniqueEntity("externalid")
  */
 class TeamAffiliation
@@ -39,13 +44,14 @@ class TeamAffiliation
     /**
      * @var string
      * @ORM\Column(type="string", name="shortname", length=32, options={"comment"="Short descriptive name"}, nullable=false)
-     * @Serializer\Groups({"Nonstrict"})
+     * @Serializer\SerializedName("name")
      */
     private $shortname;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
+     * @Serializer\SerializedName("formal_name")
      */
     private $name;
 
