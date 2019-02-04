@@ -489,7 +489,7 @@ class Scoreboard
      */
     public function solvedFirst(Team $team, ContestProblem $problem): bool
     {
-        if ( ! $this->matrix[$team->getTeamid()][$problem->getProbid()]->isCorrect() ) {
+        if (!$this->matrix[$team->getTeamid()][$problem->getProbid()]->isCorrect()) {
             return false;
         }
         $teamTime       = $this->matrix[$team->getTeamid()][$problem->getProbid()]->getTime();

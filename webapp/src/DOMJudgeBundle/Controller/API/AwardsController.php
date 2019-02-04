@@ -85,7 +85,7 @@ class AwardsController extends AbstractRestController
         $group_winners = $problem_winners = [];
         foreach ($scoreboard->getTeams() as $team) {
             $teamid = (string)($teamuseextid ? $team->getExternalid() : $team->getTeamid());
-            if ( $scoreboard->isBestInCategory($team) ) {
+            if ($scoreboard->isBestInCategory($team)) {
                 $group_winners[$team->getCategoryId()][] = $teamid;
             }
             foreach($scoreboard->getProblems() as $problem) {
@@ -97,22 +97,22 @@ class AwardsController extends AbstractRestController
         }
 
         $results = [];
-        foreach($group_winners as $id => $team_ids) {
+        foreach ($group_winners as $id => $team_ids) {
             $type = 'group-winner-' . $id;
             $result = [ 'id' => $type,
                 'citation' => 'Winner(s) of group ' . $id,
                 'team_ids' => $team_ids];
-            if ( $requestedType === $type ) {
+            if ($requestedType === $type) {
                 return $result;
             }
             $results[] = $result;
         }
-        foreach($problem_winners as $id => $team_ids) {
+        foreach ($problem_winners as $id => $team_ids) {
             $type = 'first-to-solve-' . $id;
             $result = [ 'id' => $type,
                 'citation' => 'First to solve problem ' . $id,
                 'team_ids' => $team_ids];
-            if ( $requestedType === $type ) {
+            if ($requestedType === $type) {
                 return $result;
             }
             $results[] = $result;
@@ -136,29 +136,29 @@ class AwardsController extends AbstractRestController
             }
         }
 
-        if ( count($overall_winners) > 0 ) {
+        if (count($overall_winners) > 0) {
             $type = 'winner';
             $result = ['id' => $type,
                 'citation' => 'Contest winner',
                 'team_ids' => $overall_winners ];
-            if ( $requestedType === $type ) {
+            if ($requestedType === $type) {
                 return $result;
             }
             $results[] = $result;
         }
-        foreach($medal_winners as $metal => $team_ids) {
+        foreach ($medal_winners as $metal => $team_ids) {
             $type = $metal . '-medal';
             $result = ['id' => $metal . '-medal',
                 'citation' => ucfirst($metal) . ' medal winner',
                 'team_ids' => $team_ids ];
-            if ( $requestedType === $type ) {
+            if ($requestedType === $type) {
                 return $result;
             }
             $results[] = $result;
         }
 
         // Specific type was requested, but not found above.
-        if ( !is_null($requestedType) ) {
+        if (!is_null($requestedType)) {
             return [];
         }
 
