@@ -247,6 +247,14 @@ nelmio_api_doc:
                     thawed: { type: string, format: date-time }
                     finalized: { type: string, format: date-time }
                     end_of_updates: { type: string, format: date-time }
+            Award:
+                type: object
+                properties:
+                    id: { type: string }
+                    citation: { type: string }
+                    team_ids:
+                        type: array
+                        items: { type: string }
         parameters:
             cid:
                 name: cid

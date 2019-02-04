@@ -50,38 +50,74 @@ class AwardsController extends AbstractRestController
     }
 
     /**
-     * Get the awards standings for this contest
+     * Get all the awards standings for this contest
      * @param Request $request
      * @return array
      * @Rest\Get("")
-     * @Rest\Get("/{requestedType}")
      * @SWG\Response(
      *     response="200",
-     *     description="Returns the current teams qualifying for each award"
+     *     description="Returns the current teams qualifying for each award",
+     *     @SWG\Schema(
+     *         type="array",
+     *         @SWG\Items(ref="#/definitions/Award")
+     *     )
      * )
      * @throws \Exception
      */
-    public function getAwardsAction(Request $request, string $requestedType = null)
+    public function listAction(Request $request)
+    {
+        return $this->getAwardsData($request);
+    }
+
+    /**
+     * Get the given clarifications for this contest
+     * @param Request $request
+     * @param string  $id
+     * @return array
+     * @Rest\Get("/{id}")
+     * @SWG\Response(
+     *     response="200",
+     *     description="Returns the award for this contest",
+     *     @SWG\Schema(ref="#/definitions/Award")
+     * )
+     * @SWG\Parameter(ref="#/parameters/id")
+     * @throws \Exception
+     */
+    public function singleAction(Request $request, string $id)
+    {
+        $award = $this->getAwardsData($request, $id);
+
+        if ($award === null) {
+            throw new NotFoundHttpException(sprintf('Object with ID \'%s\' not found', $id));
+        }
+
+        return $award;
+    }
+
+    /**
+     * Get the awards data for the given request and optional award ID
+     * @param Request     $request
+     * @param string|null $requestedType
+     * @return array
+     * @throws \Exception
+     */
+    protected function getAwardsData(Request $request, string $requestedType = null)
     {
         $public   = false;
         if ($this->DOMJudgeService->checkrole('jury') && $request->query->has('public')) {
             $public = $request->query->getBoolean('public');
         }
-
+        /** @var Contest $contest */
         $contest       = $this->entityManager->getRepository(Contest::class)->find($this->getContestId($request));
         $isJury        = $this->isGranted('ROLE_JURY');
         $accessAllowed = ($isJury && $contest->getEnabled()) || (!$isJury && $contest->isActive());
         if (!$accessAllowed) {
             throw new AccessDeniedHttpException();
         }
-
         $probuseextid = !is_null($this->eventLogService->externalIdFieldForEntity(Problem::class));
         $teamuseextid = !is_null($this->eventLogService->externalIdFieldForEntity(Team::class));
-
         $additionalBronzeMedals = $contest->getB() ?? 0;
-
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, null, true);
-
         $group_winners = $problem_winners = [];
         foreach ($scoreboard->getTeams() as $team) {
             $teamid = (string)($teamuseextid ? $team->getExternalid() : $team->getTeamid());
@@ -95,7 +131,6 @@ class AwardsController extends AbstractRestController
                 }
             }
         }
-
         $results = [];
         foreach ($group_winners as $id => $team_ids) {
             $type = 'group-winner-' . $id;
@@ -117,13 +152,11 @@ class AwardsController extends AbstractRestController
             }
             $results[] = $result;
         }
-
         $overall_winners = $medal_winners = [];
         // can we assume this is ordered just walk the first 12+B entries?
         foreach ($scoreboard->getScores() as $teamScore) {
             $rank = $teamScore->getRank();
             $teamid = (string)($teamuseextid ? $teamScore->getTeam()->getExternalid() : $teamScore->getTeam()->getTeamid());
-
             if ($rank === 1) {
                 $overall_winners[] = $teamid;
             }
@@ -135,7 +168,6 @@ class AwardsController extends AbstractRestController
                 $medal_winners['bronze'][] = $teamid;
             }
         }
-
         if (count($overall_winners) > 0) {
             $type = 'winner';
             $result = ['id' => $type,
@@ -159,7 +191,7 @@ class AwardsController extends AbstractRestController
 
         // Specific type was requested, but not found above.
         if (!is_null($requestedType)) {
-            return [];
+            return null;
         }
 
         return $results;
