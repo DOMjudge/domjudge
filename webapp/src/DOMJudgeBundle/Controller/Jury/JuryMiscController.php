@@ -359,37 +359,49 @@ class JuryMiscController extends BaseController
                 $numChecked++;
                 $result = mb_strtoupper($judging->getResult());
                 if (!in_array($result, $expectedResults)) {
-                    $unexpected[] = sprintf("<a href='%s'>%s</a> has unexpected result '%s', should be one of: %s",
-                                            $submissionLink, $submissionId, $result, implode($expectedResults));
+                    $unexpected[] = sprintf(
+                        "<a href='%s'>%s</a> has unexpected result '%s', should be one of: %s",
+                        $submissionLink, $submissionId, $result, implode(', ', $expectedResults)
+                    );
                 } elseif (count($expectedResults) > 1) {
                     if ($verifyMultiple) {
                         // Judging result is as expected, set judging to verified
                         $judging
                             ->setVerified(true)
                             ->setJuryMember($verifier);
-                        $multiple[] = sprintf("<a href='%s'>%s</a> verified as %s out of multiple possible outcomes (%s)",
-                                              $submissionLink, $submissionId, $result, implode($expectedResults));
+                        $multiple[] = sprintf(
+                            "<a href='%s'>%s</a> verified as %s out of multiple possible outcomes (%s)",
+                            $submissionLink, $submissionId, $result, implode(', ', $expectedResults)
+                        );
                     } else {
-                        $multiple[] = sprintf("<a href='%s'>%s</a> is judged as %s but has multiple possible outcomes (%s)",
-                                              $submissionLink, $submissionId, $result, implode($expectedResults));
+                        $multiple[] = sprintf(
+                            "<a href='%s'>%s</a> is judged as %s but has multiple possible outcomes (%s)",
+                            $submissionLink, $submissionId, $result, implode(', ', $expectedResults)
+                        );
                     }
                 } else {
                     // Judging result is as expected, set judging to verified
                     $judging
                         ->setVerified(true)
                         ->setJuryMember($verifier);
-                    $verified[] = sprintf("<a href='%s'>%s</a> verified as '%s'", $submissionLink, $submissionId,
-                                          $result);
+                    $verified[] = sprintf(
+                        "<a href='%s'>%s</a> verified as '%s'",
+                        $submissionLink, $submissionId, $result
+                    );
                 }
             } else {
                 $numUnchecked++;
 
                 if (empty($expectedResults)) {
-                    $nomatch[] = sprintf("expected results unknown in <a href='%s'>%s</a>, leaving submission unchecked",
-                                         $submissionLink, $submissionId);
+                    $nomatch[] = sprintf(
+                        "expected results unknown in <a href='%s'>%s</a>, leaving submission unchecked",
+                        $submissionLink, $submissionId
+                    );
                 } else {
-                    $earlier[] = sprintf("<a href='%s'>%s</a> already verified earlier", $submissionLink,
-                                         $submissionId);
+                    $earlier[] = sprintf(
+                        "<a href='%s'>%s</a> already verified earlier",
+                        $submissionLink, $submissionId
+                    );
                 }
             }
         }
