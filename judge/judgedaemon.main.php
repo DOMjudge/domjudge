@@ -343,7 +343,7 @@ MYDIR=$(dirname $0)
 
 # Run the program while redirecting its stdin/stdout to 'runjury' via
 # 'runpipe'. Note that "$@" expands to separate, quoted arguments.
-exec ../dj-bin/runpipe -M "$META" "$MYDIR/runjury" "$TESTIN" "$TESTOUT" "$FEEDBACK" = "$@"
+exec ../dj-bin/runpipe ${DEBUG:+-v} -M "$META" -o "$PROGOUT" "$MYDIR/runjury" "$TESTIN" "$TESTOUT" "$FEEDBACK" = "$@"
 EOF
 
 chmod +x run
