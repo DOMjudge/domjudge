@@ -35,4 +35,4 @@ MYDIR=$(dirname $0)
 
 # Run the program while redirecting its stdin/stdout to 'runjury' via
 # 'runpipe'. Note that "$@" expands to separate, quoted arguments.
-exec ../dj-bin/runpipe "$MYDIR/runjury" "$TESTIN" "$PROGOUT" = "$@"
+exec ../dj-bin/runpipe ${DEBUG:+-v} "$MYDIR/runjury" "$TESTIN" "$PROGOUT" = "$@"
