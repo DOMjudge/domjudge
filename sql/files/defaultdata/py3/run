@@ -23,7 +23,11 @@ MAINSOURCE="${ENTRY_POINT}"
 SOURCES=''
 while [ $# -gt 0 ]; do
     if [ "x${1%.py}" != "x$1" ]; then
-        SOURCES="$SOURCES $1"
+        if [ -z "$SOURCES" ]; then
+            SOURCES="$1"
+        else
+            SOURCES="$SOURCES $1"
+        fi
         [ -z "$MAINSOURCE" ] && MAINSOURCE="$1"
     fi
     shift
