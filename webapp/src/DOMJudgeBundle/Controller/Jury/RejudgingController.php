@@ -21,7 +21,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -469,8 +468,17 @@ class RejudgingController extends Controller
         /** @var Judging[] $judgings */
         $judgings = $queryBuilder->getQuery()->getResult();
 
+        /** @var Submission|null $submissionWithoutJudging */
+        $submissionWithoutJudging = null;
+
+        // Special case: if for some reason the submission has a judgehost but we have no judgings yet,
+        // we want to be able to rejudge it anyway. We do this by loading the submission directly
         if (empty($judgings)) {
-            throw new BadRequestHttpException('No judgings matched.');
+            if ($table === 'submission') {
+                $submissionWithoutJudging = $this->entityManager->getRepository(Submission::class)->find($id);
+            } else {
+                throw new BadRequestHttpException('No judgings matched.');
+            }
         }
 
         /** @var Rejudging|null $rejudging */
@@ -485,14 +493,12 @@ class RejudgingController extends Controller
             $this->entityManager->flush();
         }
 
-        foreach ($judgings as $judging) {
-            // Reload judging and rejudging to make sure we have a fresh copy when the entity manager is cleared
-            /** @var Judging $judging */
-            $judging = $this->entityManager->getRepository(Judging::class)->find($judging->getJudgingid());
-            if ($rejudging) {
-                $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($rejudging->getRejudgingid());
-            }
-            $submission = $judging->getSubmission();
+        $rejudgeSubmission = function (Submission $submission, Judging $judging = null) use (
+            $table,
+            $rejudging,
+            $fullRejudge,
+            $scoreboardService
+        ) {
             if ($submission->getRejudgingid() !== null) {
                 // Already associated rejudging
                 if ($table === 'submission') {
@@ -504,7 +510,7 @@ class RejudgingController extends Controller
                                                               $submission->getRejudgingid()));
                 } else {
                     // silently skip that submission
-                    continue;
+                    return;
                 }
             }
 
@@ -516,7 +522,7 @@ class RejudgingController extends Controller
                 $rejudging,
                 $scoreboardService
             ) {
-                if (!$fullRejudge) {
+                if (!$fullRejudge && $judging !== null) {
                     $judging->setValid(false);
                 }
 
@@ -553,8 +559,24 @@ class RejudgingController extends Controller
                 }
             });
 
-            if (!$fullRejudge) {
+            if (!$fullRejudge && $judging !== null) {
                 $this->DOMJudgeService->auditlog('judging', $judging->getJudgingid(), 'mark invalid', '(rejudge)');
+            }
+        };
+
+        if ($submissionWithoutJudging !== null) {
+            $rejudgeSubmission($submissionWithoutJudging);
+        } else {
+            foreach ($judgings as $judging) {
+                // Reload judging and rejudging to make sure we have a fresh copy when the entity manager is cleared
+                /** @var Judging $judging */
+                $judging = $this->entityManager->getRepository(Judging::class)->find($judging->getJudgingid());
+                if ($rejudging) {
+                    $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($rejudging->getRejudgingid());
+                }
+                $submission = $judging->getSubmission();
+
+                $rejudgeSubmission($submission, $judging);
             }
         }
 
