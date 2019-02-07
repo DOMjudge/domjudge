@@ -30,6 +30,11 @@ class ScoreboardMatrixItem
     protected $penaltyTime;
 
     /**
+     * @var int
+     */
+    protected $sortOrder;
+
+    /**
      * ScoreboardMatrixItem constructor.
      * @param bool $isCorrect
      * @param int $numberOfSubmissions
@@ -37,13 +42,14 @@ class ScoreboardMatrixItem
      * @param float|string $time
      * @param int $penaltyTime
      */
-    public function __construct(bool $isCorrect, int $numberOfSubmissions, int $numberOfPendingSubmissions, $time, int $penaltyTime)
+    public function __construct(bool $isCorrect, int $numberOfSubmissions, int $numberOfPendingSubmissions, $time, int $penaltyTime, int $sortOrder)
     {
         $this->isCorrect                  = $isCorrect;
         $this->numberOfSubmissions        = $numberOfSubmissions;
         $this->numberOfPendingSubmissions = $numberOfPendingSubmissions;
         $this->time                       = $time;
         $this->penaltyTime                = $penaltyTime;
+        $this->sortOrder                  = $sortOrder;
     }
 
     /**
@@ -84,5 +90,13 @@ class ScoreboardMatrixItem
     public function getPenaltyTime(): int
     {
         return $this->penaltyTime;
+    }
+    
+    /**
+     * @return int
+     */
+    public function getSortOrder(): int
+    {
+        return $this->sortOrder;
     }
 }

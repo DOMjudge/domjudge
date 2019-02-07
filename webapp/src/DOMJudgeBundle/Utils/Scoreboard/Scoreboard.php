@@ -237,7 +237,8 @@ class Scoreboard
                 $scoreRow->getSubmissions($this->restricted),
                 $scoreRow->getPending($this->restricted),
                 $scoreRow->getSolveTime($this->restricted),
-                $penalty
+                $penalty,
+                $scoreRow->getTeam()->getCategory()->getSortOrder()
             );
 
             if ($scoreRow->getIsCorrect($this->restricted)) {
@@ -489,20 +490,22 @@ class Scoreboard
      */
     public function solvedFirst(Team $team, ContestProblem $problem): bool
     {
+        // Did not solve it - cannot be first
         if (!$this->matrix[$team->getTeamid()][$problem->getProbid()]->isCorrect()) {
             return false;
         }
         $teamTime       = $this->matrix[$team->getTeamid()][$problem->getProbid()]->getTime();
         $sortOrder      = $team->getCategory()->getSortorder();
-        $problemSummary = $this->summary->getProblem($problem->getProbid());
-        if ($problemSummary === null) {
-            return false;
+        foreach ($this->matrix as $teamid => $row) {
+            $matrixitem = $row[$problem->getProbid()];
+            // Check for all other teams for this problem in the same sortorder,
+            // if they submitted it earlier and that's correct or has pending submissions, we are not first (yet)
+            if ($teamid != $team->getTeamid() && $sortOrder == $matrixitem->getSortOrder() &&
+                ($matrixitem->isCorrect() || $matrixitem->getNumberOfPendingSubmissions() > 0) &&
+                $teamTime > $matrixitem->getTime()) {
+                return false;
+            }
         }
-        $problemTimes = $this->summary->getProblem($problem->getProbid())->getBestTimes();
-        if (!isset($problemTimes[$sortOrder])) {
-            return false;
-        }
-        $eps = 0.0000001;
-        return $teamTime - $eps <= $problemTimes[$sortOrder];
+        return true;
     }
 }
