@@ -103,7 +103,8 @@ class SingleTeamScoreboard extends Scoreboard
                 $scoreRow->getSubmissions($this->restricted),
                 $scoreRow->getPending($this->restricted),
                 $scoreRow->getSolveTime($this->restricted),
-                $penalty
+                $penalty,
+                $scoreRow->getTeam()->getCategory()->getSortOrder()
             );
         }
 
@@ -113,7 +114,7 @@ class SingleTeamScoreboard extends Scoreboard
             $teamId    = $this->team->getTeamid();
             $problemId = $contestProblem->getProbid();
             if (!isset($this->matrix[$teamId][$problemId])) {
-                $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, 0, 0, 0, 0);
+                $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, 0, 0, 0, 0, 0);
             }
         }
     }

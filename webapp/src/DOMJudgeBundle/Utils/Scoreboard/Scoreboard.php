@@ -291,7 +291,7 @@ class Scoreboard
                 $problemId = $contestProblem->getProbid();
                 // Provide default scores when nothing submitted for this team + problem yet
                 if (!isset($this->matrix[$teamId][$problemId])) {
-                    $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, 0, 0, 0, 0);
+                    $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, 0, 0, 0, 0, 0);
                 }
 
                 $problemMatrixItem = $this->matrix[$teamId][$problemId];
