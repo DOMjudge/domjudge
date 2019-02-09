@@ -717,17 +717,11 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             $action = EventLogService::ACTION_CREATE;
         }
 
-        $affiliation->setName($event['data']['name']);
+        $affiliation
+            ->setName($event['data']['formal_name'] ?? $event['data']['name'])
+            ->setShortname($event['data']['name']);
         if (isset($event['data']['country'])) {
             $affiliation->setCountry($event['data']['country']);
-        }
-
-        // Non-spec: DOMjudge provides a shortname. If we get it, set it. Otherwise use the full name
-        if (isset($event['data']['shortname'])) {
-            $affiliation->setShortname($event['data']['shortname']);
-        } else {
-            // We only allow 32 chars, so use substring
-            $affiliation->setShortname(substr($affiliation->getName(), 0, 32));
         }
 
         // Save data and emit event
