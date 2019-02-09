@@ -14,7 +14,6 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -181,11 +180,9 @@ class GeneralInfoController extends FOSRestController
      *     description="Result of the various checks performed",
      *     @SWG\Schema(type="object")
      * )
-     * @param Request $request
-     * @return array
-     * @throws \Exception
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    public function getConfigCheck(Request $request)
+    public function getConfigCheckAction()
     {
         $result = $this->checkConfigService->runAll();
 
@@ -194,8 +191,8 @@ class GeneralInfoController extends FOSRestController
         // If at least one test warning: 300
         // Otherwise 200
         $aggregate = 200;
-        foreach ( $result as $cat ) {
-            foreach($cat as $test) {
+        foreach ($result as &$cat) {
+            foreach ($cat as &$test) {
                 if ($test['result'] == 'E') {
                     $aggregate = 500;
                     continue 2;
@@ -203,11 +200,13 @@ class GeneralInfoController extends FOSRestController
                 if ($test['result'] == 'W') {
                     $aggregate = 300;
                 }
+                unset($test['escape']);
             }
+            unset($test);
         }
+        unset($cat);
 
-        // TODO: set HTTP response code
-        return $result;
+        return $this->json($result, $aggregate);
     }
 
     /**
