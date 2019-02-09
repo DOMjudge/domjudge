@@ -391,6 +391,64 @@ class ContestController extends AbstractRestController
     }
 
     /**
+     * Get general status information
+     * @Rest\Get("/{id}/status")
+     * @Security("has_role('ROLE_API_READER')")
+     * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Response(
+     *     response="200",
+     *     description="General status information for the given contest",
+     *     @SWG\Schema(
+     *         type="object",
+     *         @SWG\Property(property="num_submissions", type="integer"),
+     *         @SWG\Property(property="num_queued", type="integer"),
+     *         @SWG\Property(property="num_judging", type="integer")
+     *     )
+     * )
+     * @param Request $request
+     * @param string  $id
+     * @return array
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getStatusAction(Request $request, string $id)
+    {
+        $contest = $this->getContestWithId($request, $id);
+
+        $result                    = [];
+        $result['num_submissions'] = (int)$this->entityManager
+            ->createQuery(
+                'SELECT COUNT(s)
+                FROM DOMJudgeBundle:Submission s
+                WHERE s.cid = :cid')
+            ->setParameter(':cid', $contest->getCid())
+            ->getSingleScalarResult();
+        $result['num_queued']      = (int)$this->entityManager
+            ->createQuery(
+                'SELECT COUNT(s)
+                FROM DOMJudgeBundle:Submission s
+                LEFT JOIN DOMJudgeBundle:Judging j WITH (j.submitid = s.submitid AND j.valid != 0)
+                WHERE s.cid = :cid
+                AND j.result IS NULL
+                AND s.valid = 1')
+            ->setParameter(':cid', $contest->getCid())
+            ->getSingleScalarResult();
+        $result['num_judging']     = (int)$this->entityManager
+            ->createQuery(
+                'SELECT COUNT(s)
+                FROM DOMJudgeBundle:Submission s
+                LEFT JOIN DOMJudgeBundle:Judging j WITH (j.submitid = s.submitid)
+                WHERE s.cid = :cid
+                AND j.result IS NULL
+                AND j.valid = 1
+                AND s.valid = 1')
+            ->setParameter(':cid', $contest->getCid())
+            ->getSingleScalarResult();
+
+        return $result;
+    }
+
+    /**
      * @inheritdoc
      */
     protected function getQueryBuilder(Request $request): QueryBuilder

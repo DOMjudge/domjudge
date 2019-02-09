@@ -56,6 +56,8 @@ class GeneralInfoController extends FOSRestController
      * GeneralInfoController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
+     * @param EventLogService        $eventLogService
+     * @param CheckConfigService     $checkConfigService
      * @param RouterInterface        $router
      */
     public function __construct(
@@ -115,79 +117,6 @@ class GeneralInfoController extends FOSRestController
             'doc_url' => $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL),
         ];
         return $data;
-    }
-
-    /**
-     * Get general status information
-     * @Rest\Get("/status")
-     * @Security("has_role('ROLE_API_READER')")
-     * @SWG\Response(
-     *     response="200",
-     *     description="General status information for the currently active contests",
-     *     @SWG\Schema(
-     *         type="array",
-     *         @SWG\Items(
-     *             type="object",
-     *             @SWG\Property(property="cid", type="integer"),
-     *             @SWG\Property(property="num_submissions", type="integer"),
-     *             @SWG\Property(property="num_queued", type="integer"),
-     *             @SWG\Property(property="num_judging", type="integer")
-     *         )
-     *     )
-     * )
-     * @return array
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    public function getStatusAction()
-    {
-        if ($this->DOMJudgeService->checkrole('jury')) {
-            $onlyOfTeam = null;
-        } elseif ($this->DOMJudgeService->checkrole('team') && $this->DOMJudgeService->getUser()->getTeamid()) {
-            $onlyOfTeam = $this->DOMJudgeService->getUser()->getTeamid();
-        } else {
-            $onlyOfTeam = -1;
-        }
-        $contests = $this->DOMJudgeService->getCurrentContests(true, $onlyOfTeam);
-        if (empty($contests)) {
-            throw new BadRequestHttpException('No active contest');
-        }
-
-        $result = [];
-        foreach ($contests as $contest) {
-            $resultItem                    = ['cid' => $contest->getCid()];
-            $resultItem['num_submissions'] = (int)$this->entityManager
-                ->createQuery(
-                    'SELECT COUNT(s)
-                FROM DOMJudgeBundle:Submission s
-                WHERE s.cid = :cid')
-                ->setParameter(':cid', $contest->getCid())
-                ->getSingleScalarResult();
-            $resultItem['num_queued']      = (int)$this->entityManager
-                ->createQuery(
-                    'SELECT COUNT(s)
-                FROM DOMJudgeBundle:Submission s
-                LEFT JOIN DOMJudgeBundle:Judging j WITH (j.submitid = s.submitid AND j.valid != 0)
-                WHERE s.cid = :cid
-                AND j.result IS NULL
-                AND s.valid = 1')
-                ->setParameter(':cid', $contest->getCid())
-                ->getSingleScalarResult();
-            $resultItem['num_judging']     = (int)$this->entityManager
-                ->createQuery(
-                    'SELECT COUNT(s)
-                FROM DOMJudgeBundle:Submission s
-                LEFT JOIN DOMJudgeBundle:Judging j WITH (j.submitid = s.submitid)
-                WHERE s.cid = :cid
-                AND j.result IS NULL
-                AND j.valid = 1
-                AND s.valid = 1')
-                ->setParameter(':cid', $contest->getCid())
-                ->getSingleScalarResult();
-            $result[]                      = $resultItem;
-        }
-
-        return $result;
     }
 
     /**
