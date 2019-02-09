@@ -213,7 +213,7 @@ class Scoreboard
     }
 
     /**
-     * Calculate the scoreboard data, filling the summary, matrix and scores properteis
+     * Calculate the scoreboard data, filling the summary, matrix and scores properties
      */
     protected function calculateScoreboard()
     {
@@ -298,7 +298,7 @@ class Scoreboard
                 $problemSummary->addNumberOfSubmissions($problemMatrixItem->getNumberOfSubmissions());
                 $problemSummary->addNumberOfPendingSubmissions($problemMatrixItem->getNumberOfPendingSubmissions());
                 $problemSummary->addNumberOfCorrectSubmissions($problemMatrixItem->isCorrect() ? 1 : 0);
-                if ($problemMatrixItem->isCorrect()) {
+                if ($problemMatrixItem->isCorrect() || $problemMatrixItem->getNumberOfPendingSubmissions()) {
                     $problemSummary->updateBestTime($teamScore->getTeam()->getCategory()->getSortorder(),
                                                     $problemMatrixItem->getTime());
                 }

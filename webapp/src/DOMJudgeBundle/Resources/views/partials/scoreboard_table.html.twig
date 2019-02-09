@@ -86,6 +86,7 @@
     <tbody>
     {% set previousSortOrder = -1 %}
     {% set previousTeam = null %}
+    {% set firsttosolveknown = [] %}
     {% for score in scoreboard.scores if (limitToTeams is null or score.team.teamid in limitToTeamIds) %}
         {% set classes = [] %}
         {% if score.team.category.sortorder != previousSortOrder %}
@@ -201,6 +202,7 @@
                         {% set scoreCssClass = 'score_correct' %}
                         {% if scoreboard.solvedFirst(score.team, problem) %}
                             {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
+                            {% set firsttosolveknown = firsttosolveknown|merge([problem.probid]) %}
                         {% endif %}
                     {% elseif showPending and scoreboard.matrix[score.team.teamid][problem.probid].numberOfPendingSubmissions > 0 %}
                         {% set scoreCssClass = 'score_pending' %}
@@ -302,7 +304,7 @@
 
                             <i class="fas fa-clock fa-fw"></i>
                             <span style="font-size:90%;" title="first solved">
-                                {% if scoreboard.summary.problem(problem.probid).bestTimeInMinutes(0) is not null %}
+                                {% if problem.probid in firsttosolveknown %}
                                     {{ scoreboard.summary.problem(problem.probid).bestTimeInMinutes(0) }}min
                                 {% else %}
                                     n/a

@@ -328,6 +328,10 @@ class ScoreboardService
             $judging    = $submission->getJudgings()->first() ?: null;
             $submitTime = $contest->getContestTime((float)$submission->getSubmittime());
 
+            $timeJury    = $submitTime;
+            if (!$submission->isAfterFreeze()) {
+                $timePubl    = $submitTime;
+            }
             // Check if this submission has a publicly visible judging result:
             if ($judging === null || ($verificationRequired && !$judging->getVerified()) || empty($judging->getResult())) {
                 $pendingJury++;
@@ -347,10 +351,8 @@ class ScoreboardService
             // if correct, don't look at any more submissions after this one
             if ($judging->getResult() == Judging::RESULT_CORRECT) {
                 $correctJury = true;
-                $timeJury    = $submitTime;
                 if (!$submission->isAfterFreeze()) {
                     $correctPubl = true;
-                    $timePubl    = $submitTime;
                 }
                 // stop counting after a first correct submission
                 break;
