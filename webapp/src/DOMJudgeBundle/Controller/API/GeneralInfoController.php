@@ -190,15 +190,14 @@ class GeneralInfoController extends FOSRestController
         // If at least one test error: 500
         // If at least one test warning: 300
         // Otherwise 200
+        // We use max() here to make sure that if it is 300/500 it will never be 'lowered'
         $aggregate = 200;
         foreach ($result as &$cat) {
             foreach ($cat as &$test) {
                 if ($test['result'] == 'E') {
-                    $aggregate = 500;
-                    continue 2;
-                }
-                if ($test['result'] == 'W') {
-                    $aggregate = 300;
+                    $aggregate = max($aggregate, 500);
+                } elseif ($test['result'] == 'W') {
+                    $aggregate = max($aggregate, 300);
                 }
                 unset($test['escape']);
             }
