@@ -258,6 +258,7 @@ function renderScoreBoardTable(
     $prevsortorder = -1;
     $usedCategories = array();
     $bestInCat = array();
+    $firsttosolveknown = [];
     foreach ($scores as $team => $totals) {
         // skip if we have limitteams and the team is not listed
         if (!empty($limitteams) && !in_array($team, $limitteams)) {
@@ -405,6 +406,7 @@ function renderScoreBoardTable(
                         @$summary['problems'][$prob]['best_time_sort'][$totals['sortorder']]
                     )) {
                         $score_css_class .= ' score_first';
+                        $firsttosolveknown[] = $prob;
                     }
                 } elseif ($matrix[$team][$prob]['num_pending'] > 0 && $SHOW_PENDING) {
                     $score_css_class = 'score_pending';
@@ -490,7 +492,7 @@ function renderScoreBoardTable(
                     $summary['problems'][$prob]['num_pending'] .
                     '</span>';
                 $best = @$summary['problems'][$prob]['best_time_sort'][0];
-                $best = empty($best) ? 'n/a' : ((int)($best/60)) . 'min';
+                $best = !in_array($prob, $firsttosolveknown) ? 'n/a' : ((int)($best/60)) . 'min';
                 $best = '<i class="fas fa-clock fa-fw"> </i>' .
                     '<span style="font-size:90%;" title="first solved"> ' . $best . '</span>';
 

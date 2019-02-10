@@ -323,6 +323,10 @@ class ScoreboardService
         $correctJury     = false;
         $correctPubl     = false;
 
+        // Loop over the submissions to find whether it is correct
+        // and update the times/scores. We stop the loop at the
+        // first correct solution, as we don't want to count any
+        // submissions after that.
         foreach ($submissions as $submission) {
             /** @var Judging|null $judging */
             $judging    = $submission->getJudgings()->first() ?: null;
