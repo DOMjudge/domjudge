@@ -44,6 +44,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 /* These defines are needed in 'version' and 'logmsg' */
@@ -155,7 +156,7 @@ std::string decode_HTML_entities(std::string str)
 int nwarnings;
 
 /* Submission information */
-string contestid, langid, probid, baseurl, entry_point, extension;
+string contestid, langid, probid, baseurl, entry_point;
 vector<string> filenames;
 char *submitdir;
 
@@ -296,8 +297,9 @@ int main(int argc, char **argv)
 			warnuser("multiple active contests found, please specify one");
 		}
 	} else {
+		contestid = stringtolower(contestid);
 		for(i=0; i<contests.size(); i++) {
-			if ( contests[i].id == contestid || contests[i].shortname == contestid ) {
+			if ( stringtolower(contests[i].id) == contestid || stringtolower(contests[i].shortname) == contestid ) {
 				mycontest = contests[i];
 				break;
 			}
@@ -364,33 +366,25 @@ int main(int argc, char **argv)
 		fileext = filebase.substr(filebase.rfind('.')+1);
 		filebase.erase(filebase.find('.'));
 
-		if ( probid.empty() ) probid    = filebase;
-		if ( langid.empty() ) extension = fileext;
+		if ( probid.empty() ) probid = filebase;
+		if ( langid.empty() ) langid = fileext;
 	}
 
-	if ( !extension.empty() ) {
-		/* Check for languages matching file extension */
-		extension = stringtolower(extension);
-		for(i=0; i<languages.size(); i++) {
-			for(j=0; j<languages[i].extensions.size(); j++) {
-				if ( languages[i].extensions[j] == extension ) {
-					mylanguage = languages[i];
-					goto lang_found;
-				}
-			}
-		}
-	} else {
-		for(i=0; i<languages.size(); i++) {
-			if ( languages[i].id == langid ) {
+	/* Check for languages matching file extension */
+	langid = stringtolower(langid);
+	for(i=0; i<languages.size(); i++) {
+		for(j=0; j<languages[i].extensions.size(); j++) {
+			if ( stringtolower(languages[i].extensions[j]) == langid ) {
 				mylanguage = languages[i];
-				break;
+				goto lang_found;
 			}
 		}
 	}
 lang_found:
 
+	probid = stringtolower(probid);
 	for(i=0; i<problems.size(); i++) {
-		if ( problems[i].id == probid || problems[i].label == probid ) {
+		if ( stringtolower(problems[i].id) == probid || stringtolower(problems[i].label) == probid ) {
 			myproblem = problems[i];
 			break;
 		}
@@ -522,9 +516,8 @@ void usage()
 		printf(
 "For LANGUAGE use one of the following IDs/extensions in lower- or uppercase:\n");
 		for(i=0; i<languages.size(); i++) {
-			printf("   %-20s  %s",(languages[i].name+':').c_str(),languages[i].id.c_str());
-			for(j=0; j<languages[i].extensions.size(); j++) {
-				if ( languages[i].extensions[j]==languages[i].id ) continue;
+			printf("   %-20s  %s",(languages[i].name+':').c_str(),languages[i].extensions[0].c_str());
+			for(j=1; j<languages[i].extensions.size(); j++) {
 				printf(", %s",languages[i].extensions[j].c_str());
 			}
 			printf("\n");
@@ -764,9 +757,12 @@ bool readlanguages()
 			return false;
 		}
 
+		lang.extensions.push_back(lang.id);
 		for(Json::ArrayIndex j=0; j<exts.size(); j++) {
 			lang.extensions.push_back(exts[j].asString());
 		}
+		vector<string>::iterator last = unique(lang.extensions.begin(),lang.extensions.end());
+		lang.extensions.erase(last, lang.extensions.end());
 
 		languages.push_back(lang);
 	}
