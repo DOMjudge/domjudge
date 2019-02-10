@@ -12,10 +12,29 @@ SUBMIT = \
 		tmp=`mktemp -d --tmpdir` ; \
 		unzip -jnq -d "$$tmp" "$$i" ; \
 		main=`grep -l '@EXPECTED_RESULTS@' "$$tmp/"*` ; \
-		$(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; \
+		if [ "$${i%test-multifile-multipackage.java.zip}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -e zoo.goo.moo.b.B "$$main" "$$tmp/"* ; \
+		elif [ "$${i%test-extra-file.java.zip}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -e Main "$$main" "$$tmp/"* ; \
+		else \
+			$(SUBMITCMD) $(SUBMITOPTS) "$$main" "$$tmp/"* ; \
+		fi ; \
 		rm -rf "$$tmp" ; \
 	else \
-		$(SUBMITCMD) $(SUBMITOPTS) "$$i" ; \
+		if [ "$${i%.java}" != "$$i" ]; then \
+			entry=`grep "class .* {" "$$i" | sed -e 's/.*class //' | sed -e 's/ .*//'`; \
+			$(SUBMITCMD) $(SUBMITOPTS) -e "$$entry" "$$i" ; \
+		elif [ "$${i%as_cpp.*}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -l cpp "$$i" ; \
+		elif [ "$${i%as_c.*}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -l c "$$i" ; \
+		elif [ "$${i%as_py2.*}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -l py2 "$$i" ; \
+		elif [ "$${i%as_py3.*}" != "$$i" ]; then \
+			$(SUBMITCMD) $(SUBMITOPTS) -l py3 "$$i" ; \
+		else \
+			$(SUBMITCMD) $(SUBMITOPTS) "$$i" ; \
+		fi ; \
 	fi ; \
 	echo
 
