@@ -9,7 +9,7 @@ class JuryClarificationsTest extends WebTestCase
     public function testJuryRedirectToLogin()
     {
         $client = self::createClient();
-        $client->request('GET', '/jury/');
+        $client->request('GET', '/jury');
 
         $response = $client->getResponse();
         $message = var_export($response, true);
@@ -53,7 +53,7 @@ class JuryClarificationsTest extends WebTestCase
     {
         # test incorrect and correct password
         $this->loginHelper('dummy', 'foo', 'http://localhost/login', 200);
-        $this->loginHelper('dummy', 'dummy', 'http://localhost/jury/', 200);
+        $this->loginHelper('dummy', 'dummy', 'http://localhost/jury', 200);
     }
 
     // This just injects a user object into the session so symfony will think we're logged in
@@ -80,7 +80,7 @@ class JuryClarificationsTest extends WebTestCase
     {
         $client = self::createClient();
         $this->logIn($client);
-        $crawler = $client->request('GET', '/jury/');
+        $crawler = $client->request('GET', '/jury');
 
         $response = $client->getResponse();
         $message = var_export($response, true);
@@ -93,7 +93,7 @@ class JuryClarificationsTest extends WebTestCase
     {
         $client = self::createClient();
         $this->logIn($client);
-        $crawler = $client->request('GET', '/jury/');
+        $crawler = $client->request('GET', '/jury');
 
         $response = $client->getResponse();
         $message = var_export($response, true);
@@ -101,7 +101,7 @@ class JuryClarificationsTest extends WebTestCase
 
         $link = $crawler->selectLink('Clarifications')->link();
         $message = var_export($link, true);
-        $this->assertEquals('http://localhost/jury/clarifications/', $link->getUri(), $message);
+        $this->assertEquals('http://localhost/jury/clarifications', $link->getUri(), $message);
 
         $crawler = $client->click($link);
 
@@ -137,7 +137,7 @@ class JuryClarificationsTest extends WebTestCase
     {
         $client = self::createClient();
         $this->logIn($client);
-        $crawler = $client->request('GET', '/jury/clarifications/');
+        $crawler = $client->request('GET', '/jury/clarifications');
 
         $link = $crawler->selectLink('Send Clarification')->link();
         $message = var_export($link, true);

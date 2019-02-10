@@ -62,7 +62,7 @@ class JuryPrintTest extends WebTestCase
     {
         $client = self::createClient();
         $this->logIn($client);
-        $crawler = $client->request('GET', '/jury/');
+        $crawler = $client->request('GET', '/jury');
 
         $response = $client->getResponse();
         $message = var_export($response, true);
