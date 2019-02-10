@@ -444,7 +444,8 @@ lang_found:
 		if ( c=='n' ) error(0,"submission aborted by user");
 	}
 
-	return doAPIsubmit();
+	doAPIsubmit();
+	return 0;
 }
 
 void usage()
