@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/judgehosts")
  * @Security("has_role('ROLE_JURY')")
  */
 class JudgehostController extends BaseController
@@ -41,7 +41,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/", name="jury_judgehosts")
+     * @Route("", name="jury_judgehosts")
      */
     public function indexAction(Request $request)
     {
@@ -204,7 +204,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/{hostname}", methods={"GET"}, name="jury_judgehost")
+     * @Route("/{hostname}", methods={"GET"}, name="jury_judgehost")
      * @param Request $request
      * @param string  $hostname
      * @return \Symfony\Component\HttpFoundation\Response
@@ -270,7 +270,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/{hostname}/delete", name="jury_judgehost_delete")
+     * @Route("/{hostname}/delete", name="jury_judgehost_delete")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $hostname
@@ -295,7 +295,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/{hostname}/activate", name="jury_judgehost_activate")
+     * @Route("/{hostname}/activate", name="jury_judgehost_activate")
      * @Security("has_role('ROLE_ADMIN')")
      * @param RouterInterface $router
      * @param Request         $request
@@ -312,7 +312,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/{hostname}/deactivate", name="jury_judgehost_deactivate")
+     * @Route("/{hostname}/deactivate", name="jury_judgehost_deactivate")
      * @Security("has_role('ROLE_ADMIN')")
      * @param RouterInterface $router
      * @param Request         $request
@@ -329,7 +329,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/activate-all", methods={"POST"}, name="jury_judgehost_activate_all")
+     * @Route("/activate-all", methods={"POST"}, name="jury_judgehost_activate_all")
      * @Security("has_role('ROLE_ADMIN')")
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -341,7 +341,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/deactivate-all", methods={"POST"}, name="jury_judgehost_deactivate_all")
+     * @Route("/deactivate-all", methods={"POST"}, name="jury_judgehost_deactivate_all")
      * @Security("has_role('ROLE_ADMIN')")
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -353,7 +353,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/add/multiple", name="jury_judgehost_add")
+     * @Route("/add/multiple", name="jury_judgehost_add")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -381,7 +381,7 @@ class JudgehostController extends BaseController
     }
 
     /**
-     * @Route("/judgehosts/edit/multiple", name="jury_judgehost_edit")
+     * @Route("/edit/multiple", name="jury_judgehost_edit")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response

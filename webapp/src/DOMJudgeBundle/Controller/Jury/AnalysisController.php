@@ -61,7 +61,7 @@ class AnalysisController extends Controller
     }
 
     /**
-     *@Route("/", name="analysis_index")
+     * @Route("", name="analysis_index")
      */
     public function indexAction(Request $request)
     {
@@ -255,7 +255,7 @@ class AnalysisController extends Controller
         ]);
     }
     /**
-     *@Route("/team/{teamid}", name="analysis_team")
+     * @Route("/team/{teamid}", name="analysis_team")
      */
     public function teamAction(Request $request, Team $team)
     {
@@ -354,7 +354,7 @@ class AnalysisController extends Controller
         ]);
     }
     /**
-     *@Route("/problem/{probid}", name="analysis_problem")
+     * @Route("/problem/{probid}", name="analysis_problem")
      */
     public function problemAction(Request $request, Problem $problem)
     {

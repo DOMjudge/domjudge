@@ -23,7 +23,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 
 /**
- * @Route("/jury")
+ * @Route("/jury/teams")
  * @Security("has_role('ROLE_JURY')")
  */
 class TeamController extends BaseController
@@ -54,7 +54,7 @@ class TeamController extends BaseController
     }
 
     /**
-     * @Route("/teams/", name="jury_teams")
+     * @Route("", name="jury_teams")
      */
     public function indexAction(Request $request, Packages $assetPackage)
     {
@@ -220,7 +220,7 @@ class TeamController extends BaseController
     }
 
     /**
-     * @Route("/teams/{teamId}", name="jury_team", requirements={"teamId": "\d+"})
+     * @Route("/{teamId}", name="jury_team", requirements={"teamId": "\d+"})
      * @param int               $teamId
      * @param ScoreboardService $scoreboardService
      * @param SubmissionService $submissionService
@@ -313,7 +313,7 @@ class TeamController extends BaseController
     }
 
     /**
-     * @Route("/teams/{teamId}/edit", name="jury_team_edit", requirements={"teamId": "\d+"})
+     * @Route("/{teamId}/edit", name="jury_team_edit", requirements={"teamId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $teamId
@@ -346,7 +346,7 @@ class TeamController extends BaseController
     }
 
     /**
-     * @Route("/teams/{teamId}/delete", name="jury_team_delete", requirements={"teamId": "\d+"})
+     * @Route("/{teamId}/delete", name="jury_team_delete", requirements={"teamId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $teamId
@@ -366,7 +366,7 @@ class TeamController extends BaseController
     }
 
     /**
-     * @Route("/teams/add", name="jury_team_add")
+     * @Route("/add", name="jury_team_add")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response

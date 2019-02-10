@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/scoreboard")
  * @Security("has_role('ROLE_JURY')")
  */
 class ScoreboardController extends Controller
@@ -40,7 +40,7 @@ class ScoreboardController extends Controller
     }
 
     /**
-     * @Route("/scoreboard/", name="jury_scoreboard")
+     * @Route("", name="jury_scoreboard")
      * @throws \Exception
      */
     public function scoreboardAction(Request $request)

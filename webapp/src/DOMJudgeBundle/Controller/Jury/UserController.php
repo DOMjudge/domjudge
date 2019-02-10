@@ -22,7 +22,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/users")
  * @Security("has_role('ROLE_JURY')")
  */
 class UserController extends BaseController
@@ -60,7 +60,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/users/", name="jury_users")
+     * @Route("", name="jury_users")
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
@@ -165,7 +165,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/users/{userId}", name="jury_user", requirements={"userId": "\d+"})
+     * @Route("/{userId}", name="jury_user", requirements={"userId": "\d+"})
      * @param Request $request
      * @param int     $userId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -182,7 +182,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/users/{userId}/edit", name="jury_user_edit", requirements={"userId": "\d+"})
+     * @Route("/{userId}/edit", name="jury_user_edit", requirements={"userId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $userId
@@ -229,7 +229,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/users/{userId}/delete", name="jury_user_delete", requirements={"userId": "\d+"})
+     * @Route("/{userId}/delete", name="jury_user_delete", requirements={"userId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $userId
@@ -249,7 +249,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/users/add", name="jury_user_add")
+     * @Route("/add", name="jury_user_add")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -282,7 +282,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/users/generate-passwords", name="jury_generate_passwords")
+     * @Route("/generate-passwords", name="jury_generate_passwords")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response

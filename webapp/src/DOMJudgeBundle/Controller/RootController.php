@@ -11,7 +11,7 @@ use Symfony\Component\Routing\RouterInterface;
 /**
  * Class RootController
  *
- * @Route("/")
+ * @Route("")
  *
  * @package DOMJudgeBundle\Controller
  */
@@ -32,7 +32,7 @@ class RootController extends BaseController
     }
 
     /**
-     * @Route("/", name="root")
+     * @Route("", name="root")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */

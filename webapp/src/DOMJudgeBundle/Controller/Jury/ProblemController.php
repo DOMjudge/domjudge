@@ -34,7 +34,7 @@ use ZipArchive;
 
 
 /**
- * @Route("/jury")
+ * @Route("/jury/problems")
  * @Security("has_role('ROLE_JURY')")
  */
 class ProblemController extends BaseController
@@ -79,7 +79,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/problems/", name="jury_problems")
+     * @Route("", name="jury_problems")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
@@ -268,7 +268,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/problems/{problemId}/export", name="jury_export_problem")
+     * @Route("/{problemId}/export", name="jury_export_problem")
      * @Security("has_role('ROLE_ADMIN')")
      * @param int $problemId
      * @return StreamedResponse
@@ -441,7 +441,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/problems/{probId}", name="jury_problem", requirements={"probId": "\d+"})
+     * @Route("/{probId}", name="jury_problem", requirements={"probId": "\d+"})
      * @param Request           $request
      * @param SubmissionService $submissionService
      * @param int               $probId
@@ -491,7 +491,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/problems/{probId}/text", name="jury_problem_text", requirements={"probId": "\d+"})
+     * @Route("/{probId}/text", name="jury_problem_text", requirements={"probId": "\d+"})
      * @param int $probId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -532,7 +532,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/problems/{probId}/testcases", name="jury_problem_testcases", requirements={"probId": "\d+"})
+     * @Route("/{probId}/testcases", name="jury_problem_testcases", requirements={"probId": "\d+"})
      * @param Request $request
      * @param int     $probId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -711,7 +711,7 @@ class ProblemController extends BaseController
 
     /**
      * @Route(
-     *     "/problems/{probId}/testcases/{rank}/move/{direction}",
+     *     "/{probId}/testcases/{rank}/move/{direction}",
      *     name="jury_problem_testcase_move",
      *     requirements={"probId": "\d+", "rank": "\d+", "direction": "up|down"}
      *     )
@@ -782,7 +782,7 @@ class ProblemController extends BaseController
 
     /**
      * @Route(
-     *     "/problems/{probId}/testcases/{rank}/fetch/{type}",
+     *     "/{probId}/testcases/{rank}/fetch/{type}",
      *     name="jury_problem_testcase_fetch",
      *     requirements={"probId": "\d+", "rank": "\d+", "type": "input|output|image"}
      *     )
@@ -843,7 +843,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/problems/{probId}/edit", name="jury_problem_edit", requirements={"probId": "\d+"})
+     * @Route("/{probId}/edit", name="jury_problem_edit", requirements={"probId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $probId
@@ -910,7 +910,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/problems/{probId}/delete", name="jury_problem_delete", requirements={"probId": "\d+"})
+     * @Route("/{probId}/delete", name="jury_problem_delete", requirements={"probId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $probId
@@ -930,7 +930,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/problems/add", name="jury_problem_add")
+     * @Route("/add", name="jury_problem_add")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response

@@ -25,7 +25,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/executables")
  * @Security("has_role('ROLE_JURY')")
  */
 class ExecutableController extends BaseController
@@ -62,7 +62,7 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/executables/", name="jury_executables")
+     * @Route("", name="jury_executables")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -194,7 +194,7 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/executables/{execId}", name="jury_executable")
+     * @Route("/{execId}", name="jury_executable")
      * @param Request $request
      * @param string  $execId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -216,7 +216,7 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/executables/{execId}/content", name="jury_executable_content")
+     * @Route("/{execId}/content", name="jury_executable_content")
      * @Security("has_role('ROLE_ADMIN')")
      * @param string $execId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -233,7 +233,7 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/executables/{execId}/download", name="jury_executable_download")
+     * @Route("/{execId}/download", name="jury_executable_download")
      * @Security("has_role('ROLE_ADMIN')")
      * @param string $execId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -265,7 +265,7 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/executables/{execId}/download/{index}", name="jury_executable_download_single")
+     * @Route("/{execId}/download/{index}", name="jury_executable_download_single")
      * @Security("has_role('ROLE_ADMIN')")
      * @param string $execId
      * @param int    $index
@@ -314,7 +314,7 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/executables/{execId}/edit", name="jury_executable_edit")
+     * @Route("/{execId}/edit", name="jury_executable_edit")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $execId
@@ -375,7 +375,7 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/executables/{execId}/delete", name="jury_executable_delete")
+     * @Route("/{execId}/delete", name="jury_executable_delete")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $execId
@@ -395,7 +395,7 @@ class ExecutableController extends BaseController
     }
 
     /**
-     * @Route("/executables/{execId}/edit-files", name="jury_executable_edit_files")
+     * @Route("/{execId}/edit-files", name="jury_executable_edit_files")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $execId

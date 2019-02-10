@@ -36,7 +36,7 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/submissions")
  * @Security("has_role('ROLE_JURY')")
  */
 class SubmissionController extends Controller
@@ -73,7 +73,7 @@ class SubmissionController extends Controller
     }
 
     /**
-     * @Route("/submissions/", name="jury_submissions")
+     * @Route("", name="jury_submissions")
      */
     public function indexAction(Request $request)
     {
@@ -175,7 +175,7 @@ class SubmissionController extends Controller
     }
 
     /**
-     * @Route("/submissions/{submitId}", name="jury_submission")
+     * @Route("/{submitId}", name="jury_submission")
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      */
@@ -479,7 +479,7 @@ class SubmissionController extends Controller
     }
 
     /**
-     * @Route("/submissions/by-judging-id/{jid}", name="jury_submission_by_judging")
+     * @Route("/by-judging-id/{jid}", name="jury_submission_by_judging")
      */
     public function viewForJudgingAction(Judging $jid)
     {
@@ -490,7 +490,7 @@ class SubmissionController extends Controller
     }
 
     /**
-     * @Route("/submissions/by-external-id/{extid}", name="jury_submission_by_external_id")
+     * @Route("/by-external-id/{extid}", name="jury_submission_by_external_id")
      */
     public function viewForExternalIdAction(string $externalId)
     {
@@ -514,7 +514,7 @@ class SubmissionController extends Controller
     }
 
     /**
-     * @Route("/submissions/{submission}/runs/{contest}/{run}/team-output", name="jury_submission_team_output")
+     * @Route("/{submission}/runs/{contest}/{run}/team-output", name="jury_submission_team_output")
      * @param Submission $submission
      * @param Contest    $contest
      * @param JudgingRun $run
@@ -546,7 +546,7 @@ class SubmissionController extends Controller
     }
 
     /**
-     * @Route("/submissions/{submission}/source", name="jury_submission_source")
+     * @Route("/{submission}/source", name="jury_submission_source")
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function sourceAction(Request $request, Submission $submission)
@@ -663,7 +663,7 @@ class SubmissionController extends Controller
     }
 
     /**
-     * @Route("/submissions/{submission}/edit-source", name="jury_submission_edit_source")
+     * @Route("/{submission}/edit-source", name="jury_submission_edit_source")
      */
     public function editSourceAction(Request $request, Submission $submission)
     {
@@ -774,7 +774,7 @@ class SubmissionController extends Controller
     }
 
     /**
-     * @Route("/submissions/{submitId}/update-status", name="jury_submission_update_status", methods={"POST"})
+     * @Route("/{submitId}/update-status", name="jury_submission_update_status", methods={"POST"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param EventLogService   $eventLogService
      * @param ScoreboardService $scoreboardService
@@ -810,7 +810,7 @@ class SubmissionController extends Controller
     }
 
     /**
-     * @Route("/submissions/{judgingId}/verify", name="jury_judging_verify", methods={"POST"})
+     * @Route("/{judgingId}/verify", name="jury_judging_verify", methods={"POST"})
      * @param EventLogService   $eventLogService
      * @param ScoreboardService $scoreboardService
      * @param BalloonService    $balloonService

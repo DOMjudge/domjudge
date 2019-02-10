@@ -17,7 +17,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/judgehost-restrictions")
  * @Security("has_role('ROLE_JURY')")
  */
 class JudgehostRestrictionController extends BaseController
@@ -39,7 +39,7 @@ class JudgehostRestrictionController extends BaseController
     }
 
     /**
-     * @Route("/judgehost-restrictions/", name="jury_judgehost_restrictions")
+     * @Route("", name="jury_judgehost_restrictions")
      */
     public function indexAction(Request $request)
     {
@@ -115,7 +115,7 @@ class JudgehostRestrictionController extends BaseController
     }
 
     /**
-     * @Route("/judgehost-restrictions/{restrictionId}", name="jury_judgehost_restriction",
+     * @Route("/{restrictionId}", name="jury_judgehost_restriction",
      *                                                   requirements={"restrictionId": "\d+"})
      * @param int $restrictionId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -166,7 +166,7 @@ class JudgehostRestrictionController extends BaseController
     }
 
     /**
-     * @Route("/judgehost-restrictions/{restrictionId}/edit", name="jury_judgehost_restriction_edit")
+     * @Route("/{restrictionId}/edit", name="jury_judgehost_restriction_edit")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $restrictionId
@@ -196,7 +196,7 @@ class JudgehostRestrictionController extends BaseController
     }
 
     /**
-     * @Route("/judgehost-restrictions/{restrictionId}/delete", name="jury_judgehost_restriction_delete")
+     * @Route("/{restrictionId}/delete", name="jury_judgehost_restriction_delete")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $restrictionId
@@ -214,7 +214,7 @@ class JudgehostRestrictionController extends BaseController
     }
 
     /**
-     * @Route("/judgehost-restrictions/add", name="jury_judgehost_restriction_add")
+     * @Route("/add", name="jury_judgehost_restriction_add")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response

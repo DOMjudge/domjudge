@@ -16,7 +16,7 @@ use Symfony\Component\Routing\RouterInterface;
 /**
  * Class PrintController
  *
- * @Route("/jury")
+ * @Route("/jury/print")
  * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
  *
  * @package DOMJudgeBundle\Controller\Jury
@@ -45,7 +45,7 @@ class PrintController extends BaseController
     }
 
     /**
-     * @Route("/print", name="jury_print")
+     * @Route("", name="jury_print")
      */
     public function showAction(Request $request)
     {

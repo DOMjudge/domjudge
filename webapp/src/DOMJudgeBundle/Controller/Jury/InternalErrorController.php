@@ -14,7 +14,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/internal-errors")
  * @Security("has_role('ROLE_JURY')")
  */
 class InternalErrorController extends BaseController
@@ -36,7 +36,7 @@ class InternalErrorController extends BaseController
     }
 
     /**
-     * @Route("/internal-errors/", name="jury_internal_errors")
+     * @Route("", name="jury_internal_errors")
      */
     public function indexAction()
     {
@@ -89,7 +89,7 @@ class InternalErrorController extends BaseController
     }
 
     /**
-     * @Route("/internal-errors/{errorId}", methods={"GET"}, name="jury_internal_error")
+     * @Route("/{errorId}", methods={"GET"}, name="jury_internal_error")
      * @param int $errorId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -134,7 +134,7 @@ class InternalErrorController extends BaseController
 
     /**
      * @Route(
-     *     "/internal-errors/{errorId}/{action}",
+     *     "/{errorId}/{action}",
      *     name="jury_internal_error_handle",
      *     methods={"POST"},
      *     requirements={"action": "ignore|resolve"}

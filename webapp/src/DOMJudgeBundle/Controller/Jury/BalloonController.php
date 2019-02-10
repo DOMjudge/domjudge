@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/balloons")
  * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
  */
 class BalloonController extends Controller
@@ -53,7 +53,7 @@ class BalloonController extends Controller
     }
 
     /**
-     * @Route("/balloons/", name="jury_balloons")
+     * @Route("", name="jury_balloons")
      */
     public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
     {
@@ -192,7 +192,7 @@ class BalloonController extends Controller
     }
 
     /**
-     * @Route("/balloons/{balloonId}/done", name="jury_balloons_setdone")
+     * @Route("/{balloonId}/done", name="jury_balloons_setdone")
      */
     public function setDoneAction(Request $request, int $balloonId)
     {

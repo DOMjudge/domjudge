@@ -18,7 +18,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/affiliations")
  * @Security("has_role('ROLE_JURY')")
  */
 class TeamAffiliationController extends BaseController
@@ -55,7 +55,7 @@ class TeamAffiliationController extends BaseController
     }
 
     /**
-     * @Route("/affiliations/", name="jury_team_affiliations")
+     * @Route("", name="jury_team_affiliations")
      */
     public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
     {
@@ -154,7 +154,7 @@ class TeamAffiliationController extends BaseController
     }
 
     /**
-     * @Route("/affiliations/{affilId}", name="jury_team_affiliation", requirements={"affilId": "\d+"})
+     * @Route("/{affilId}", name="jury_team_affiliation", requirements={"affilId": "\d+"})
      * @param Request           $request
      * @param ScoreboardService $scoreboardService
      * @param int               $affilId
@@ -201,7 +201,7 @@ class TeamAffiliationController extends BaseController
     }
 
     /**
-     * @Route("/affiliations/{affilId}/edit", name="jury_team_affiliation_edit", requirements={"affilId": "\d+"})
+     * @Route("/{affilId}/edit", name="jury_team_affiliation_edit", requirements={"affilId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $affilId
@@ -234,7 +234,7 @@ class TeamAffiliationController extends BaseController
     }
 
     /**
-     * @Route("/affiliations/{affilId}/delete", name="jury_team_affiliation_delete", requirements={"affilId": "\d+"})
+     * @Route("/{affilId}/delete", name="jury_team_affiliation_delete", requirements={"affilId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $affilId
@@ -254,7 +254,7 @@ class TeamAffiliationController extends BaseController
     }
 
     /**
-     * @Route("/affiliations/add", name="jury_team_affiliation_add")
+     * @Route("/add", name="jury_team_affiliation_add")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response

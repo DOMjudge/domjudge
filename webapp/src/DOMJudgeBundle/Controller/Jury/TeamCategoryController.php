@@ -18,7 +18,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/categories")
  * @Security("has_role('ROLE_JURY')")
  */
 class TeamCategoryController extends BaseController
@@ -55,7 +55,7 @@ class TeamCategoryController extends BaseController
     }
 
     /**
-     * @Route("/categories/", name="jury_team_categories")
+     * @Route("", name="jury_team_categories")
      */
     public function indexAction(Request $request, Packages $assetPackage)
     {
@@ -134,7 +134,7 @@ class TeamCategoryController extends BaseController
     }
 
     /**
-     * @Route("/categories/{categoryId}", name="jury_team_category", requirements={"categoryId": "\d+"})
+     * @Route("/{categoryId}", name="jury_team_category", requirements={"categoryId": "\d+"})
      * @param Request           $request
      * @param SubmissionService $submissionService
      * @param int               $categoryId
@@ -180,7 +180,7 @@ class TeamCategoryController extends BaseController
     }
 
     /**
-     * @Route("/categories/{categoryId}/edit", name="jury_team_category_edit", requirements={"categoryId": "\d+"})
+     * @Route("/{categoryId}/edit", name="jury_team_category_edit", requirements={"categoryId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $categoryId
@@ -216,7 +216,7 @@ class TeamCategoryController extends BaseController
     }
 
     /**
-     * @Route("/categories/{categoryId}/delete", name="jury_team_category_delete", requirements={"categoryId": "\d+"})
+     * @Route("/{categoryId}/delete", name="jury_team_category_delete", requirements={"categoryId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $categoryId
@@ -236,7 +236,7 @@ class TeamCategoryController extends BaseController
     }
 
     /**
-     * @Route("/categories/add", name="jury_team_category_add")
+     * @Route("/add", name="jury_team_category_add")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response

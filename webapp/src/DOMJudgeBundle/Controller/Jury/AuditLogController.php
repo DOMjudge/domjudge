@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/auditlog")
  * @Security("has_role('ROLE_ADMIN')")
  */
 class AuditLogController extends Controller
@@ -54,7 +54,7 @@ class AuditLogController extends Controller
     }
 
     /**
-     * @Route("/auditlog/", name="jury_auditlog")
+     * @Route("", name="jury_auditlog")
      */
     public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
     {

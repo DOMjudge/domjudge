@@ -96,6 +96,20 @@ class FallbackController extends Controller
             }
         }
         if ($thefile===false || !file_exists($thefile)) {
+            // Check if the URL ends with a /. If so, redirect to the version without.
+            // Based on: https://symfony.com/doc/3.4/routing/redirect_trailing_slash.html
+            // This can be removed once we update to Symfony 4.1+
+            $pathInfo = $request->getPathInfo();
+            $requestUri = $request->getRequestUri();
+
+            if (strrpos($pathInfo, '/') === strlen($pathInfo) - 1) {
+                $url = str_replace($pathInfo, rtrim($pathInfo, ' /'), $requestUri);
+
+                // 308 (Permanent Redirect) is similar to 301 (Moved Permanently) except
+                // that it does not allow changing the request method (e.g. from POST to GET)
+                return $this->redirect($url, 308);
+            }
+
             return Response::create('Not found.', 404);
         }
         chdir(dirname($thefile));

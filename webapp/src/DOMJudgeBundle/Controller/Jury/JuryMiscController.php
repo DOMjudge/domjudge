@@ -52,7 +52,7 @@ class JuryMiscController extends BaseController
     }
 
     /**
-     * @Route("/", name="jury_index")
+     * @Route("", name="jury_index")
      * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
      */
     public function indexAction(Request $request)
@@ -165,7 +165,7 @@ class JuryMiscController extends BaseController
     }
 
     /**
-     * @Route("/refresh-cache/", name="jury_refresh_cache")
+     * @Route("/refresh-cache", name="jury_refresh_cache")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request           $request
      * @param ScoreboardService $scoreboardService

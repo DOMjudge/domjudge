@@ -24,7 +24,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/contests")
  * @Security("has_role('ROLE_JURY')")
  */
 class ContestController extends BaseController
@@ -61,7 +61,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/contests/", name="jury_contests")
+     * @Route("", name="jury_contests")
      * @param Request         $request
      * @param KernelInterface $kernel
      * @return \Symfony\Component\HttpFoundation\Response
@@ -304,7 +304,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/contests/{contestId}", name="jury_contest", requirements={"contestId": "\d+"})
+     * @Route("/{contestId}", name="jury_contest", requirements={"contestId": "\d+"})
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -364,7 +364,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/contests/{contestId}/remove-interval/{intervalId}", name="jury_contest_remove_interval",
+     * @Route("/{contestId}/remove-interval/{intervalId}", name="jury_contest_remove_interval",
      *                                                              requirements={"contestId": "\d+"},
      *                                                              methods={"POST"})
      * @param int $contestId
@@ -399,7 +399,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/contests/{contestId}/edit", name="jury_contest_edit", requirements={"contestId": "\d+"})
+     * @Route("/{contestId}/edit", name="jury_contest_edit", requirements={"contestId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $contestId
@@ -432,7 +432,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/contests/{contestId}/delete", name="jury_contest_delete", requirements={"contestId": "\d+"})
+     * @Route("/{contestId}/delete", name="jury_contest_delete", requirements={"contestId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $contestId
@@ -452,7 +452,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/contests/{contestId}/problems/{probId}/delete", name="jury_contest_problem_delete", requirements={"contestId":
+     * @Route("/{contestId}/problems/{probId}/delete", name="jury_contest_problem_delete", requirements={"contestId":
      *                                                          "\d+", "probId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
@@ -476,7 +476,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/contests/add", name="jury_contest_add")
+     * @Route("/add", name="jury_contest_add")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
@@ -523,7 +523,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/contests/{contestId}/finalize", name="jury_contest_finalize")
+     * @Route("/{contestId}/finalize", name="jury_contest_finalize")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $contestId

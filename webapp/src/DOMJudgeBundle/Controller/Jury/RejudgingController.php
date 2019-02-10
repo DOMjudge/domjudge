@@ -26,7 +26,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/rejudgings")
  * @Security("has_role('ROLE_JURY')")
  */
 class RejudgingController extends Controller
@@ -48,7 +48,7 @@ class RejudgingController extends Controller
     }
 
     /**
-     * @Route("/rejudgings/", name="jury_rejudgings")
+     * @Route("", name="jury_rejudgings")
      */
     public function indexAction(Request $request)
     {
@@ -151,7 +151,7 @@ class RejudgingController extends Controller
     }
 
     /**
-     * @Route("/rejudgings/{rejudgingId}", name="jury_rejudging")
+     * @Route("/{rejudgingId}", name="jury_rejudging")
      * @param Request           $request
      * @param SubmissionService $submissionService
      * @param int               $rejudgingId
@@ -335,7 +335,7 @@ class RejudgingController extends Controller
 
     /**
      * @Route(
-     *     "/rejudgings/{rejudgingId}/{action}",
+     *     "/{rejudgingId}/{action}",
      *     name="jury_rejudging_finish",
      *     requirements={"action": "cancel|apply"}
      * )
@@ -403,7 +403,7 @@ class RejudgingController extends Controller
     }
 
     /**
-     * @Route("/rejudge/", methods={"POST"}, name="jury_create_rejudge")
+     * @Route("/add", methods={"POST"}, name="jury_create_rejudge")
      * @param Request           $request
      * @param ScoreboardService $scoreboardService
      * @return \Symfony\Component\HttpFoundation\RedirectResponse

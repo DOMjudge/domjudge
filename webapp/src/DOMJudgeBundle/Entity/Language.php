@@ -22,6 +22,7 @@ class Language
      * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
      * @Serializer\Exclude()
      * @Assert\NotBlank()
+     * @Assert\NotEqualTo("add")
      * @Identifier()
      */
     private $langid;

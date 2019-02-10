@@ -3,21 +3,17 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
-use DOMJudgeBundle\Entity\TeamAffiliation;
+use DOMJudgeBundle\Entity\Configuration;
 use DOMJudgeBundle\Service\CheckConfigService;
 use DOMJudgeBundle\Service\DOMJudgeService;
-use DOMJudgeBundle\Service\EventLogService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/config")
  * @Security("has_role('ROLE_ADMIN')")
  */
 class ConfigController extends Controller
@@ -41,19 +37,20 @@ class ConfigController extends Controller
      * TeamCategoryController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
+     * @param CheckConfigService     $checkConfigService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
         CheckConfigService $checkConfigService
     ) {
-        $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->entityManager      = $entityManager;
+        $this->DOMJudgeService    = $DOMJudgeService;
         $this->checkConfigService = $checkConfigService;
     }
 
     /**
-     * @Route("/config", name="jury_config")
+     * @Route("", name="jury_config")
      */
     public function indexAction(Request $request)
     {
@@ -129,7 +126,7 @@ class ConfigController extends Controller
     }
 
     /**
-     * @Route("/config/check", name="jury_config_check")
+     * @Route("/check", name="jury_config_check")
      */
     public function checkAction(Request $request)
     {
@@ -140,7 +137,7 @@ class ConfigController extends Controller
     }
 
     /**
-     * @Route("/config/check/phpinfo", name="jury_config_phpinfo")
+     * @Route("/check/phpinfo", name="jury_config_phpinfo")
      */
     public function phpinfoAction(Request $request)
     {

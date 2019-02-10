@@ -18,7 +18,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/languages")
  * @Security("has_role('ROLE_JURY')")
  */
 class LanguageController extends BaseController
@@ -55,7 +55,7 @@ class LanguageController extends BaseController
     }
 
     /**
-     * @Route("/languages/", name="jury_languages")
+     * @Route("", name="jury_languages")
      */
     public function indexAction(Request $request, Packages $assetPackage)
     {
@@ -135,8 +135,41 @@ class LanguageController extends BaseController
         ]);
     }
 
+    // Note that the add action appears before the view action to make sure /add is not seen as a language
     /**
-     * @Route("/languages/{langId}", name="jury_language")
+     * @Route("/add", name="jury_language_add")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function addAction(Request $request)
+    {
+        $language = new Language();
+
+        $form = $this->createForm(LanguageType::class, $language);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Normalize extensions
+            if ($language->getExtensions()) {
+                $language->setExtensions(array_values($language->getExtensions()));
+            }
+            $this->entityManager->persist($language);
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $language,
+                              $language->getLangid(), true);
+            return $this->redirect($this->generateUrl('jury_language',
+                                                      ['langId' => $language->getLangid()]));
+        }
+
+        return $this->render('@DOMJudge/jury/language_add.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/{langId}", name="jury_language")
      * @param Request           $request
      * @param SubmissionService $submissionService
      * @param string            $langId
@@ -181,7 +214,7 @@ class LanguageController extends BaseController
     }
 
     /**
-     * @Route("/languages/{langId}/toggle-submit", name="jury_language_toggle_submit")
+     * @Route("/{langId}/toggle-submit", name="jury_language_toggle_submit")
      * @param Request $request
      * @param string  $langId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -203,7 +236,7 @@ class LanguageController extends BaseController
     }
 
     /**
-     * @Route("/languages/{langId}/toggle-judge", name="jury_language_toggle_judge")
+     * @Route("/{langId}/toggle-judge", name="jury_language_toggle_judge")
      * @param Request $request
      * @param string  $langId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -225,7 +258,7 @@ class LanguageController extends BaseController
     }
 
     /**
-     * @Route("/languages/{langId}/edit", name="jury_language_edit")
+     * @Route("/{langId}/edit", name="jury_language_edit")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $langId
@@ -264,7 +297,7 @@ class LanguageController extends BaseController
     }
 
     /**
-     * @Route("/languages/{langId}/delete", name="jury_language_delete")
+     * @Route("/{langId}/delete", name="jury_language_delete")
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $langId
@@ -280,37 +313,5 @@ class LanguageController extends BaseController
         }
 
         return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $language, $language->getName(), $this->generateUrl('jury_languages'));
-    }
-
-    /**
-     * @Route("/languages//add", name="jury_language_add")
-     * @Security("has_role('ROLE_ADMIN')")
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
-     */
-    public function addAction(Request $request)
-    {
-        $language = new Language();
-
-        $form = $this->createForm(LanguageType::class, $language);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Normalize extensions
-            if ($language->getExtensions()) {
-                $language->setExtensions(array_values($language->getExtensions()));
-            }
-            $this->entityManager->persist($language);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $language,
-                              $language->getLangid(), true);
-            return $this->redirect($this->generateUrl('jury_language',
-                                                      ['langId' => $language->getLangid()]));
-        }
-
-        return $this->render('@DOMJudge/jury/language_add.html.twig', [
-            'form' => $form->createView(),
-        ]);
     }
 }

@@ -21,7 +21,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 
 /**
- * @Route("/jury")
+ * @Route("/jury/clarifications")
  * @Security("has_role('ROLE_JURY')")
  */
 class ClarificationController extends Controller
@@ -58,7 +58,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/clarifications/", name="jury_clarifications")
+     * @Route("", name="jury_clarifications")
      * @throws \Exception
      */
     public function indexAction(Request $request)
@@ -120,7 +120,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/clarifications/{id}", name="jury_clarification", requirements={"id": "\d+"})
+     * @Route("/{id}", name="jury_clarification", requirements={"id": "\d+"})
      * @throws \Exception
      */
     public function viewAction(Request $request, int $id)
@@ -262,7 +262,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/clarifications/send", methods={"GET"}, name="jury_clarification_new")
+     * @Route("/send", methods={"GET"}, name="jury_clarification_new")
      * @throws \Exception
      */
     public function composeClarificationAction(Request $request)
@@ -279,7 +279,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/clarifications/{clarId}/claim", name="jury_clarification_claim")
+     * @Route("/{clarId}/claim", name="jury_clarification_claim")
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -304,7 +304,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/clarifications/{clarId}/set-answered", name="jury_clarification_set_answered")
+     * @Route("/{clarId}/set-answered", name="jury_clarification_set_answered")
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -329,7 +329,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/clarifications/{clarId}/change-subject", name="jury_clarification_change_subject")
+     * @Route("/{clarId}/change-subject", name="jury_clarification_change_subject")
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -363,7 +363,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/clarifications/{clarId}/change-queue", name="jury_clarification_change_queue")
+     * @Route("/{clarId}/change-queue", name="jury_clarification_change_queue")
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -390,7 +390,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/clarifications/send", methods={"POST"}, name="jury_clarification_send")
+     * @Route("/send", methods={"POST"}, name="jury_clarification_send")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
