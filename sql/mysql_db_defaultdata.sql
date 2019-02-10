@@ -15,7 +15,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `des
 ('compile_penalty', '0', 'bool', '1', 'Scoring', 'Should submissions with compiler-error incur penalty time (and show on the scoreboard)?'),
 ('penalty_time', '20', 'int', '1', 'Scoring', 'Penalty time in minutes per wrong submission (if finally solved).'),
 ('results_prio', '{"memory-limit":99,"output-limit":99,"run-error":99,"timelimit":99,"wrong-answer":99,"no-output":99,"correct":1}', 'array_keyval', '0', 'Scoring', 'Priorities of results for determining final result with multiple testcases. Higher priority is used first as final result. With equal priority, the first occurring result determines the final result.'),
-('results_remap', '{"no-output":"wrong-answer"}', 'array_keyval', '0', 'Scoring', 'Remap testcase result, e.g. to disable a specific result type such as ''no-output''.'),
+('results_remap', '{"no-output":"wrong-answer", "output-limit":"wrong-answer"}', 'array_keyval', '0', 'Scoring', 'Remap testcase result, e.g. to disable a specific result type such as ''no-output''.'),
 ('score_in_seconds', '0', 'bool', '1', 'Scoring', 'Should the scoreboard resolution be measured in seconds instead of minutes?'),
 ('memory_limit', '2097152', 'int', '0', 'Judging', 'Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB! Can be overridden per problem.'),
 ('output_limit', '8192', 'int', '0', 'Judging', 'Maximum output (in kB) submissions may generate. Any excessive output is truncated, so this should be greater than the maximum testdata output.'),

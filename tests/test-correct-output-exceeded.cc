@@ -3,7 +3,7 @@
  * whitespace, surpassing the default output limit. Current behaviour
  * is that an output limit error is generated.
  *
- * @EXPECTED_RESULTS@: OUTPUT-LIMIT
+ * @EXPECTED_RESULTS@: OUTPUT-LIMIT,WRONG-ANSWER
  */
 
 #include <iostream>
