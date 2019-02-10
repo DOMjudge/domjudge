@@ -626,7 +626,7 @@ bool file_istext(char *filename)
 	const char *filetype;
 	bool res;
 
-	if ( (cookie = magic_open(MAGIC_MIME))==NULL ) goto magicerror;
+	if ( (cookie = magic_open(MAGIC_MIME|MAGIC_SYMLINK))==NULL ) goto magicerror;
 
 	if ( magic_load(cookie,NULL)!=0 ) goto magicerror;
 
