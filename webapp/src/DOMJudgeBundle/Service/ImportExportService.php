@@ -168,7 +168,6 @@ class ImportExportService
             throw new BadRequestHttpException('No current contest');
         }
 
-
         /** @var TeamCategory[] $categories */
         $categories  = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'c', 'c.categoryid')

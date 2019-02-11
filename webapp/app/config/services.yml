@@ -62,3 +62,7 @@ services:
     DOMJudgeBundle\Service\BaylorCmsService:
         arguments:
             $domjudgeVersion: '%domjudge.version%'
+
+    DOMJudgeBundle\Controller\Jury\ImportExportController:
+        arguments:
+            $domjudgeVersion: '%domjudge.version%'

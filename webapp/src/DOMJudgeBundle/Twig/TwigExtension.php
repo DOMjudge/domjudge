@@ -93,6 +93,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('statusClass', [$this, 'statusClass']),
             new \Twig_SimpleFilter('statusIcon', [$this, 'statusIcon']),
             new \Twig_SimpleFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
         ];
     }
 
@@ -808,5 +809,36 @@ EOF;
     public function showExternalId($entity): Bool
     {
         return $this->eventLogService->externalIdFieldForEntity($entity) !== null;
+    }
+
+    /**
+     * Wrap unquoted text
+     * @param string $text
+     * @param int    $width
+     * @param string $quote
+     * @return string
+     */
+    public function wrapUnquoted(string $text, int $width = 75, string $quote = '>'): string
+    {
+        $lines = explode("\n", $text);
+
+        $result   = '';
+        $unquoted = '';
+
+        foreach ($lines as $line) {
+            // Check for quoted lines
+            if (strspn($line, $quote) > 0) {
+                // First append unquoted text wrapped, then quoted line:
+                $result   .= wordwrap($unquoted, $width);
+                $unquoted = '';
+                $result   .= $line . "\n";
+            } else {
+                $unquoted .= $line . "\n";
+            }
+        }
+
+        $result .= wordwrap(rtrim($unquoted), $width);
+
+        return $result;
     }
 }
