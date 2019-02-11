@@ -95,6 +95,8 @@ struct option const long_opts[] = {
 
 void version();
 void usage();
+void curl_setup();
+void curl_cleanup();
 void usage2(int , const char *, ...) __attribute__((format (printf, 2, 3)));
 void warnuser(const char *, ...)     __attribute__((format (printf, 1, 2)));
 char readanswer(const char *answers);
@@ -104,7 +106,7 @@ bool file_istext(char *filename);
 
 bool doAPIsubmit();
 
-Json::Value doAPIrequest(const char *, int);
+Json::Value doAPIrequest(const char *);
 bool readlanguages();
 bool readproblems();
 bool readcontests();
@@ -185,6 +187,9 @@ struct problem {
 vector<problem> problems;
 problem myproblem;
 
+CURL *handle;
+char curlerrormsg[CURL_ERROR_SIZE];
+
 string kotlin_base_entry_point(string filebase)
 {
 	if ( filebase.empty() ) return "_";
@@ -238,6 +243,8 @@ int main(int argc, char **argv)
 	logfile = allocstr("%s/submit.log",submitdir);
 	stdlog = fopen(logfile,"a");
 	if ( stdlog==NULL ) error(errno,"cannot open logfile `%s'",logfile);
+
+	curl_setup();
 
 	logmsg(LOG_INFO,"started");
 
@@ -453,6 +460,37 @@ lang_found:
 	return 0;
 }
 
+void curl_setup()
+{
+	handle = curl_easy_init();
+	if ( handle == NULL ) {
+		warning(0,"curl_easy_init() error");
+		return;
+	}
+
+	curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, writesstream);
+	curl_easy_setopt(handle, CURLOPT_ERRORBUFFER,   curlerrormsg);
+	curl_easy_setopt(handle, CURLOPT_FAILONERROR,   0);
+	curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION,1);
+	curl_easy_setopt(handle, CURLOPT_MAXREDIRS,     10);
+	curl_easy_setopt(handle, CURLOPT_NETRC,         CURL_NETRC_OPTIONAL);
+	curl_easy_setopt(handle, CURLOPT_TIMEOUT,       timeout_secs);
+	curl_easy_setopt(handle, CURLOPT_USERAGENT,     DOMJUDGE_PROGRAM " (" PROGRAM " using cURL)");
+
+	if ( verbose >= LOG_DEBUG ) {
+		curl_easy_setopt(handle, CURLOPT_VERBOSE,   1);
+	} else {
+		curl_easy_setopt(handle, CURLOPT_NOPROGRESS,1);
+	}
+}
+
+void curl_cleanup()
+{
+	// Passing a null handle is a no-op, so this is safe.
+	curl_easy_cleanup(handle);
+}
+
+
 void usage()
 {
 	size_t i,j;
@@ -552,6 +590,7 @@ void usage()
 	       "    %s -p hello -l C HelloWorld.cpp\n\n",progname);
 	printf("Submit multiple files (the problem and language are taken from the first):\n"
 	       "    %s hello.java message.java\n\n",progname);
+	curl_cleanup();
 	exit(0);
 }
 
@@ -565,6 +604,7 @@ void usage2(int errnum, const char *mesg, ...)
 	va_end(ap);
 
 	printf("Type '%s --help' to get help.\n",progname);
+	curl_cleanup();
 	exit(1);
 }
 
@@ -650,14 +690,11 @@ magicerror:
 #endif /* HAVE_MAGIC_H */
 
 /*
- * Make an API call 'funcname'. If failonerror is false, then a NULL
- * value is returned when the call fails; if true, then error() is called.
+ * Make an API call 'funcname'. A NULL value is returned when the call fails.
  */
-Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
+Json::Value doAPIrequest(const char *funcname)
 {
-	CURL *handle;
 	CURLcode res;
-	char curlerrormsg[CURL_ERROR_SIZE];
 	char *url;
 	stringstream curloutput;
 	Json::Reader reader;
@@ -667,75 +704,24 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 
 	curlerrormsg[0] = 0;
 
-	handle = curl_easy_init();
-	if ( handle == NULL ) {
-		free(url);
-		if ( failonerror ) {
-			error(0,"curl_easy_init() error");
-		} else {
-			warning(0,"curl_easy_init() error");
-		}
-		return result;
-	}
-
-/* helper macros to easily set curl options */
-#define curlsetopt(opt,val) \
-	if ( curl_easy_setopt(handle, CURLOPT_ ## opt, val)!=CURLE_OK ) { \
-		curl_easy_cleanup(handle); \
-		free(url); \
-		if ( failonerror ) { \
-			error(0,"setting curl option '" #opt "': %s, aborting",curlerrormsg); \
-		} else { \
-			warning(0,"setting curl option '" #opt "': %s, aborting",curlerrormsg); \
-		} \
-		return result; }
-
-	/* Set options for post */
-	curlsetopt(ERRORBUFFER,   curlerrormsg);
-	curlsetopt(FAILONERROR,   failonerror);
-	curlsetopt(FOLLOWLOCATION,1);
-	curlsetopt(MAXREDIRS,     10);
-	curlsetopt(TIMEOUT,       timeout_secs);
-	curlsetopt(URL,           url);
-	curlsetopt(WRITEFUNCTION, writesstream);
-	curlsetopt(WRITEDATA,     (void *)&curloutput);
-	curlsetopt(USERAGENT,     DOMJUDGE_PROGRAM " (" PROGRAM " using cURL)");
-
-	if ( verbose >= LOG_DEBUG ) {
-		curlsetopt(VERBOSE,   1);
-	} else {
-		curlsetopt(NOPROGRESS,1);
-	}
+	curl_easy_setopt(handle, CURLOPT_URL,           url);
+	curl_easy_setopt(handle, CURLOPT_WRITEDATA,     (void *)&curloutput);
 
 	logmsg(LOG_INFO,"connecting to %s",url);
 
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
-		curl_easy_cleanup(handle);
-		if ( failonerror ) {
-			error(0,"downloading '%s': %s",url,curlerrormsg);
-		} else {
-			warning(0,"downloading '%s': %s",url,curlerrormsg);
-		}
+		warning(0,"downloading '%s': %s",url,curlerrormsg);
 		free(url);
 		return result;
 	}
-
-#undef curlsetopt
-
-	curl_easy_cleanup(handle);
 
 	free(url);
 
 	logmsg(LOG_DEBUG,"API call '%s' returned:\n%s\n",funcname,curloutput.str().c_str());
 
 	if ( !reader.parse(curloutput, result) ) {
-		if ( failonerror ) {
-			error(0,"parsing REST API output: %s",
-			      reader.getFormattedErrorMessages().c_str());
-		} else {
-			warning(0,"parsing REST API output: %s",
-			        reader.getFormattedErrorMessages().c_str());
-		}
+		warning(0,"parsing REST API output: %s",
+		        reader.getFormattedErrorMessages().c_str());
 	}
 
 	return result;
@@ -746,7 +732,7 @@ bool readlanguages()
 	Json::Value res, exts;
 
 	string endpoint = "contests/" + mycontest.id + "/languages";
-	res = doAPIrequest(endpoint.c_str(), 0);
+	res = doAPIrequest(endpoint.c_str());
 
 	if ( res.isNull() || !res.isArray() ) return false;
 
@@ -783,7 +769,7 @@ bool readproblems()
 	Json::Value res;
 
 	string endpoint = "contests/" + mycontest.id + "/problems";
-	res = doAPIrequest(endpoint.c_str(), 0);
+	res = doAPIrequest(endpoint.c_str());
 
 	if ( res.isNull() || !res.isArray() ) return false;
 
@@ -810,7 +796,7 @@ bool readcontests()
 {
 	Json::Value res;
 
-	res = doAPIrequest("contests", 0);
+	res = doAPIrequest("contests");
 
 	if ( res.isNull() || !res.isArray() ) return false;
 
@@ -835,12 +821,10 @@ bool readcontests()
 
 bool doAPIsubmit()
 {
-	CURL *handle;
 	CURLcode res;
+	curl_mime *mime;
+	curl_mimepart *part;
 	long http_code;
-	char curlerrormsg[CURL_ERROR_SIZE];
-	struct curl_httppost *post = NULL;
-	struct curl_httppost *last = NULL;
 	char *url;
 	stringstream curloutput;
 	string line;
@@ -851,79 +835,52 @@ bool doAPIsubmit()
 
 	curlerrormsg[0] = 0;
 
-	handle = curl_easy_init();
-	if ( handle == NULL ) error(0,"curl_easy_init() error");
-
-/* helper macros to easily set curl options and fill forms */
-#define curlsetopt(opt,val) \
-	if ( curl_easy_setopt(handle, CURLOPT_ ## opt, val)!=CURLE_OK ) { \
-		warning(0,"setting curl option '" #opt "': %s, aborting download",curlerrormsg); \
-		curl_easy_cleanup(handle); \
-		curl_formfree(post); \
-		free(url); \
-		return false; }
-#define curlformadd(nametype,namecont,valtype,valcont) \
-	if ( curl_formadd(&post, &last, \
-			CURLFORM_ ## nametype, namecont, \
-			CURLFORM_ ## valtype, valcont, \
-			CURLFORM_END) != 0 ) { \
-		curl_formfree(post); \
-		curl_easy_cleanup(handle); \
-		free(url); \
-		error(0,"libcurl could not add form field '%s'='%s'",namecont,valcont); \
-	}
-
 	/* Fill post form */
-
+	mime = curl_mime_init(handle);
 	for(size_t i=0; i<filenames.size(); i++) {
-		curlformadd(COPYNAME,"code[]", FILE, filenames[i].c_str());
+		part = curl_mime_addpart(mime);
+		curl_mime_name(part, "code[]");
+		curl_mime_filedata(part, filenames[i].c_str());
 	}
-	curlformadd(COPYNAME,"problem", COPYCONTENTS, myproblem.id.c_str());
-	curlformadd(COPYNAME,"language", COPYCONTENTS, mylanguage.id.c_str());
+	part = curl_mime_addpart(mime);
+	curl_mime_name(part, "problem");
+	curl_mime_data(part, myproblem.id.c_str(), CURL_ZERO_TERMINATED);
+	part = curl_mime_addpart(mime);
+	curl_mime_name(part, "language");
+	curl_mime_data(part, mylanguage.id.c_str(), CURL_ZERO_TERMINATED);
 	if ( !entry_point.empty() ) {
-		curlformadd(COPYNAME,"entry_point", COPYCONTENTS, entry_point.c_str());
+		part = curl_mime_addpart(mime);
+		curl_mime_name(part, "entry_point");
+		curl_mime_data(part, entry_point.c_str(), CURL_ZERO_TERMINATED);
 	}
 
 	/* Set options for post */
-	curlsetopt(ERRORBUFFER,   curlerrormsg);
-	curlsetopt(FOLLOWLOCATION,1);
-	curlsetopt(MAXREDIRS,     10);
-	curlsetopt(TIMEOUT,       timeout_secs);
-	curlsetopt(URL,           url);
-	curlsetopt(NETRC,         CURL_NETRC_OPTIONAL);
-	curlsetopt(HTTPPOST,      post);
-	curlsetopt(HTTPGET,       0);
-	curlsetopt(WRITEFUNCTION, writesstream);
-	curlsetopt(WRITEDATA,     (void *)&curloutput);
-	curlsetopt(USERAGENT     ,DOMJUDGE_PROGRAM " (" PROGRAM " using cURL)");
+	curl_easy_setopt(handle, CURLOPT_MIMEPOST,      mime);
+	curl_easy_setopt(handle, CURLOPT_URL,           url);
+	curl_easy_setopt(handle, CURLOPT_WRITEDATA,     (void *)&curloutput);
 
-	if ( verbose >= LOG_DEBUG ) {
-		curlsetopt(VERBOSE,   1);
-	} else {
-		curlsetopt(NOPROGRESS,1);
-	}
-
-	logmsg(LOG_NOTICE,"connecting to %s",url);
+	logmsg(LOG_INFO,"connecting to %s",url);
 
 	// Something went wrong when connecting to the API
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
-		curl_formfree(post);
-		curl_easy_cleanup(handle);
+		curl_mime_free(mime);
+		curl_cleanup();
+		free(url);
 		error(0,"'%s': %s",url,curlerrormsg);
 	}
 
+	curl_mime_free(mime);
 	free(url);
 
 	logmsg(LOG_DEBUG,"API call 'submissions' returned:\n%s\n",curloutput.str().c_str());
 
 	// The connection worked, but we may have received an HTTP error
 	curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
+	curl_cleanup();
 	if ( http_code >= 300 ) {
 		while ( getline(curloutput,line) ) {
 			printf("%s\n", decode_HTML_entities(line).c_str());
 		}
-		curl_formfree(post);
-		curl_easy_cleanup(handle);
 		if ( http_code == 401 ) {
 			error(0, "Authentication failed. Please check your DOMjudge credentials.");
 		} else {
@@ -931,20 +888,14 @@ bool doAPIsubmit()
 		}
 	}
 
-#undef curlsetopt
-#undef curlformadd
 	// We got a successful HTTP response. It worked.
 	// But check that we indeed received a submission ID.
 	if ( !reader.parse(curloutput, root) ) {
-		curl_formfree(post);
-		curl_easy_cleanup(handle);
 		error(0,"parsing REST API output: %s",
 		        reader.getFormattedErrorMessages().c_str());
 	}
 
 	if ( !root.isInt() ) {
-		curl_formfree(post);
-		curl_easy_cleanup(handle);
 		error(0,"REST API returned unexpected JSON data");
 	}
 
