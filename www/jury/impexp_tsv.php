@@ -21,8 +21,6 @@ if ($act == 'im') {
     require(LIBWWWDIR . '/header.php');
     tsv_import($fmt);
     require(LIBWWWDIR . '/footer.php');
-} elseif ($act == 'ex') {
-    tsv_export($fmt);
 } else {
     error("Unknown action.");
 }

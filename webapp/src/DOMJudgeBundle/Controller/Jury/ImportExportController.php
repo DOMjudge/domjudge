@@ -6,8 +6,10 @@ use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Form\Type\BaylorCmsType;
 use DOMJudgeBundle\Form\Type\TsvImportType;
 use DOMJudgeBundle\Service\BaylorCmsService;
+use DOMJudgeBundle\Service\ImportExportService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -21,9 +23,17 @@ class ImportExportController extends BaseController
      */
     protected $baylorCmsService;
 
-    public function __construct(BaylorCmsService $baylorCmsService)
-    {
-        $this->baylorCmsService = $baylorCmsService;
+    /**
+     * @var ImportExportService
+     */
+    protected $importExportService;
+
+    public function __construct(
+        BaylorCmsService $baylorCmsService,
+        ImportExportService $importExportService
+    ) {
+        $this->baylorCmsService    = $baylorCmsService;
+        $this->importExportService = $importExportService;
     }
 
     /**
@@ -76,10 +86,41 @@ class ImportExportController extends BaseController
     /**
      * @Route("/export/{type}.tsv", name="jury_tsv_export", requirements={"type": "(groups|teams|scoreboard|results)"})
      * @param string $type
+     * @return StreamedResponse
+     * @throws \Exception
      */
     public function exportTsvAction(string $type)
     {
+        $data    = [];
+        $version = 1;
+        switch ($type) {
+            case 'groups':
+                $data = $this->importExportService->getGroupData();
+                break;
+            case 'teams':
+                $data = $this->importExportService->getTeamData();
+                break;
+            case 'scoreboard':
+                $data = $this->importExportService->getScoreboardData();
+                break;
+            case 'results':
+                $data = $this->importExportService->getResultsData();
+                break;
+        }
 
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($type, $version, $data) {
+            echo sprintf("%s\t%s\n", $type, $version);
+            // output the rows, filtering out any tab characters in the data
+            foreach ($data as $row) {
+                echo implode("\t", str_replace("\t", " ", $row)) . "\n";
+            }
+        });
+        $filename = sprintf('%s.tsv', $type);
+        $response->headers->set('Content-Type', sprintf('text/plain; name="%s"; charset=utf-8', $filename));
+        $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $filename));
+
+        return $response;
     }
 
     /**
