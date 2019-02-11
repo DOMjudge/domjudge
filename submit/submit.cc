@@ -822,8 +822,8 @@ bool readcontests()
 bool doAPIsubmit()
 {
 	CURLcode res;
-	curl_mime *mime;
-	curl_mimepart *part;
+	struct curl_httppost *post = NULL;
+	struct curl_httppost *last = NULL;
 	long http_code;
 	char *url;
 	stringstream curloutput;
@@ -836,26 +836,21 @@ bool doAPIsubmit()
 	curlerrormsg[0] = 0;
 
 	/* Fill post form */
-	mime = curl_mime_init(handle);
 	for(size_t i=0; i<filenames.size(); i++) {
-		part = curl_mime_addpart(mime);
-		curl_mime_name(part, "code[]");
-		curl_mime_filedata(part, filenames[i].c_str());
+		curl_formadd(&post, &last, CURLFORM_COPYNAME, "code[]",
+			CURLFORM_FILE, filenames[i].c_str(), CURLFORM_END);
 	}
-	part = curl_mime_addpart(mime);
-	curl_mime_name(part, "problem");
-	curl_mime_data(part, myproblem.id.c_str(), CURL_ZERO_TERMINATED);
-	part = curl_mime_addpart(mime);
-	curl_mime_name(part, "language");
-	curl_mime_data(part, mylanguage.id.c_str(), CURL_ZERO_TERMINATED);
+	curl_formadd(&post, &last, CURLFORM_COPYNAME, "problem",
+		CURLFORM_COPYCONTENTS, myproblem.id.c_str(), CURLFORM_END);
+	curl_formadd(&post, &last, CURLFORM_COPYNAME, "language",
+		CURLFORM_COPYCONTENTS, mylanguage.id.c_str(), CURLFORM_END);
 	if ( !entry_point.empty() ) {
-		part = curl_mime_addpart(mime);
-		curl_mime_name(part, "entry_point");
-		curl_mime_data(part, entry_point.c_str(), CURL_ZERO_TERMINATED);
+		curl_formadd(&post, &last, CURLFORM_COPYNAME, "entry_point",
+			CURLFORM_COPYCONTENTS, entry_point.c_str(), CURLFORM_END);
 	}
 
 	/* Set options for post */
-	curl_easy_setopt(handle, CURLOPT_MIMEPOST,      mime);
+	curl_easy_setopt(handle, CURLOPT_HTTPPOST,      post);
 	curl_easy_setopt(handle, CURLOPT_URL,           url);
 	curl_easy_setopt(handle, CURLOPT_WRITEDATA,     (void *)&curloutput);
 
@@ -863,13 +858,13 @@ bool doAPIsubmit()
 
 	// Something went wrong when connecting to the API
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
-		curl_mime_free(mime);
+		curl_formfree(post);
 		curl_cleanup();
 		free(url);
 		error(0,"'%s': %s",url,curlerrormsg);
 	}
 
-	curl_mime_free(mime);
+	curl_formfree(post);
 	free(url);
 
 	logmsg(LOG_DEBUG,"API call 'submissions' returned:\n%s\n",curloutput.str().c_str());
