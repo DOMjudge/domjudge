@@ -58,3 +58,7 @@ services:
 
     DOMJudgeBundle\Service\CheckConfigService:
         arguments: ['%kernel.debug%', '%kernel.project_dir%']
+
+    DOMJudgeBundle\Service\BaylorCmsService:
+        arguments:
+            $domjudgeVersion: '%domjudge.version%'

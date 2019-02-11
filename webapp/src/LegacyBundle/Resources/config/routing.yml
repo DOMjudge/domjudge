@@ -10,6 +10,3 @@ legacy.team_problem:
     path: /team/problem.php
 legacy.team_team:
     path: /team/team.php
-
-legacy.jury_impexp:
-    path: /jury/impexp.php

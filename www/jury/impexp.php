@@ -44,25 +44,6 @@ requireAdmin();
 </li>
 </ul>
 
-<h2>Import teams / Upload standings from / to icpc.baylor.edu</h2>
-
-<p>
-Create a "Web Services Token" with appropriate rights in the "Export" section
-for your contest at <a
-href="https://icpc.baylor.edu/login">https://icpc.baylor.edu/login</a>. You can
-find the Contest ID (e.g. <code>Southwestern-Europe-2014</code>) in the URL.
-</p>
-
 <?php
-
-echo addForm("impexp_baylor.php");
-echo "<table>\n";
-echo "<tr><td><label for=\"contest\">Contest ID:</label></td>" .
-    "<td>" . addInput('contest', @$contest, null, null, 'required') . "</td></tr>\n";
-echo "<tr><td><label for=\"token\">Access token:</label></td>" .
-    "<td>" . addInput('token', @$token, null, null, 'required') . "</td></tr>\n";
-echo "</table>\n";
-echo addSubmit('Fetch teams', 'fetch') .
-     addSubmit('Upload standings', 'upload') . addEndForm();
 
 require(LIBWWWDIR . '/footer.php');
