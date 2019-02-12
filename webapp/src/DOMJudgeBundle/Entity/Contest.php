@@ -1498,9 +1498,9 @@ class Contest
             $otherShortNames = $this->problems->filter(function (ContestProblem $otherProblem) use ($problem) {
                 return $otherProblem !== $problem;
             })->map(function (ContestProblem $problem) {
-                return $problem->getShortname();
+                return strtolower($problem->getShortname());
             })->toArray();
-            $shortname = $problem->getShortname();
+            $shortname = strtolower($problem->getShortname());
             if (in_array($shortname, $otherShortNames)) {
                 $context
                     ->buildViolation('Each shortname should be unique within a contest')
