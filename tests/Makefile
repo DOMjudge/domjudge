@@ -32,7 +32,18 @@ check-syntax:
 		echo "$$output" ; exit 1 ; \
 	fi
 
-check: test-normal test-fltcmp test-boolfind
+check-client: $(SUBMITCMD)
+	$(SUBMITCMD) --something 2>&1 | grep -a "unknown option or missing argument"
+	$(SUBMITCMD) --help | grep "the only active contest 'demo'"
+	$(SUBMITCMD) -c demo --help | grep "Java:\s*java"
+	$(SUBMITCMD) -c dEMo --help | grep "hello\s*-\s*Hello World"
+	$(SUBMITCMD) -c DEMO -l c -y -p hello ../tests/test-hello.c
+	$(SUBMITCMD) -c DEMO -l Cpp -y -p hello ../tests/test-hello.c++
+	ln -sf ../tests/test-hello.c++ hello.c++
+	$(SUBMITCMD) -c DEMO -y hello.c++
+	rm -f hello.c++
+
+check: check-client test-normal test-fltcmp test-boolfind
 
 PROBLEM=hello
 test-fltcmp: PROBLEM=fltcmp
