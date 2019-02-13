@@ -22,7 +22,8 @@
         <li>
             HTML, export:
             <ul>
-                <li><a href="{{ path('jury_html_export', {'type': 'results'}) }}" target="_blank"><code>results.html</code></a></li>
+                <li><a href="{{ path('jury_html_export', {'type': 'results'}) }}"
+                       target="_blank"><code>results.html</code></a></li>
                 <li>
                     <a href="{{ path('jury_html_export', {'type': 'results-icpc'}) }}" target="_blank">
                         <code>results.html</code> for on ICPC site
@@ -38,6 +39,14 @@
     <h4>Tab-separated import</h4>
     <div class="row">
         <div class="col-md-6">
+            {% if app.session.flashBag.has('tsvImport') %}
+                {% for message in app.session.flashBag.get('tsvImport') %}
+                    <div class="alert alert-success">
+                        {{ message | raw }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
             {{ form(tsv_form) }}
         </div>
     </div>

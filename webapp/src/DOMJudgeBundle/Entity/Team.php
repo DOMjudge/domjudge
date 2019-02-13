@@ -200,6 +200,15 @@ class Team implements ExternalRelationshipEntityInterface
      */
     private $rankcache;
 
+    /**
+     * Set teamid
+     *
+     * @param int $teamid
+     */
+    public function setTeamid($teamid)
+    {
+        $this->teamid = $teamid;
+    }
 
     /**
      * Get teamid

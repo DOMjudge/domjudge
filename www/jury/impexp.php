@@ -18,18 +18,6 @@ requireAdmin();
 
 <ul>
 <li><a href="impexp_contestyaml.php">Contest data (contest.yaml)</a></li>
-<li>
-<?php echo addForm('impexp_tsv.php', 'post', null, 'multipart/form-data') .
-    'Tab separated, import: ' .
-    '<label for="fmt">type:</label> ' .
-    addSelect('fmt', array('groups','teams','accounts')) .
-        ', <label for="tsv">file:</label>' .
-        addFileField('tsv') .
-        addHidden('act', 'im') .
-        addSubmit('import') .
-        addEndForm();
-?>
-</li>
 </ul>
 
 <?php

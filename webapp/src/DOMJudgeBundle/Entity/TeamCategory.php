@@ -85,6 +85,20 @@ class TeamCategory
     }
 
     /**
+     * Set categoryid
+     *
+     * @param int $categoryid
+     *
+     * @return TeamCategory
+     */
+    public function setCategoryid($categoryid)
+    {
+        $this->categoryid = $categoryid;
+
+        return $this;
+    }
+
+    /**
      * Get categoryid
      *
      * @return integer

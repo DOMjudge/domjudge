@@ -18,6 +18,7 @@ use DOMJudgeBundle\Utils\Scoreboard\Filter;
 use DOMJudgeBundle\Utils\Scoreboard\ScoreboardMatrixItem;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -94,7 +95,11 @@ class ImportExportController extends BaseController
         $tsvForm->handleRequest($request);
 
         if ($tsvForm->isSubmitted() && $tsvForm->isValid()) {
-
+            $type = $tsvForm->get('type')->getData();
+            $file = $tsvForm->get('file')->getData();
+            $count = $this->importExportService->importTsv($type, $file);
+            $this->addFlash('tsvImport', sprintf('%d items imported', $count));
+            return $this->redirectToRoute('jury_import_export');
         }
 
         $baylorForm = $this->createForm(BaylorCmsType::class);
