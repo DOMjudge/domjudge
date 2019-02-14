@@ -9,12 +9,10 @@ configure.php: configure.php.in $(TOPDIR)/paths.mk
 domserver: configure.php
 
 install-domserver:
-	for d in public team jury ; do \
+	for d in public team ; do \
 		$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)/$$d $$d/*.php ; \
 	done
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_wwwdir)              *.php
-	rm -f $(DESTDIR)$(domserver_wwwdir)/jury/doc
-	$(LN_S) $(domjudge_docdir) $(DESTDIR)$(domserver_wwwdir)/jury/doc
 
 distclean-l:
 	-rm -f configure.php
