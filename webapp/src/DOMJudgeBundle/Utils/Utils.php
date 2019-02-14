@@ -212,6 +212,28 @@ class Utils
     }
 
     /**
+     * Calculate the difference between two HH:MM:SS strings and output again in that format.
+     * Assumes that $time1 >= $time2.
+     * @param string $time1
+     * @param string $time2
+     * @return string
+     */
+    public static function timeStringDiff(string $time1, string $time2)
+    {
+        sscanf($time1, '%2d:%2d:%2d', $h1, $m1, $s1);
+        sscanf($time2, '%2d:%2d:%2d', $h2, $m2, $s2);
+
+        $s = 3600 * ($h1 - $h2) + 60 * ($m1 - $m2) + ($s1 - $s2);
+
+        $h = floor($s / (60 * 60));
+        $s -= $h * 60 * 60;
+        $m = floor($s / 60);
+        $s -= $m * 60;
+
+        return sprintf('%02d:%02d:%02d', $h, $m, $s);
+    }
+
+    /**
      * Convert the given color to a hex value
      * @param string $color
      * @return string|null

@@ -3,9 +3,16 @@
 namespace DOMJudgeBundle\Service;
 
 use Collator;
+use DateTime;
+use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use DOMJudgeBundle\Entity\Configuration;
+use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\ContestProblem;
+use DOMJudgeBundle\Entity\Language;
+use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Role;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TeamAffiliation;
@@ -16,7 +23,10 @@ use DOMJudgeBundle\Utils\Scoreboard\ScoreboardMatrixItem;
 use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Validator\ConstraintViolationInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ImportExportService
 {
@@ -40,16 +50,190 @@ class ImportExportService
      */
     protected $eventLogService;
 
+    /**
+     * @var ValidatorInterface
+     */
+    protected $validator;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         ScoreboardService $scoreboardService,
         DOMJudgeService $DOMJudgeService,
-        EventLogService $eventLogService
+        EventLogService $eventLogService,
+        ValidatorInterface $validator
     ) {
         $this->entityManager     = $entityManager;
         $this->scoreboardService = $scoreboardService;
         $this->DOMJudgeService   = $DOMJudgeService;
         $this->eventLogService   = $eventLogService;
+        $this->validator         = $validator;
+    }
+
+    /**
+     * Get the YAML data for a given contest
+     * @param Contest $contest
+     * @return array
+     * @throws \Exception
+     */
+    public function getContestYamlData(Contest $contest)
+    {
+        // TODO: it seems we dump contest.yaml and system.yaml and problemset.yaml in one here?
+
+        $data = [
+            'name' => $contest->getName(),
+            'short-name' => $contest->getShortname(),
+            'start-time' => Utils::absTime($contest->getStarttime(), true),
+            'duration' => Utils::relTime($contest->getContestTime((float)$contest->getEndtime())),
+        ];
+        if ($contest->getFreezetime() !== null) {
+            $data['scoreboard-freeze-duration'] = Utils::relTime(
+                $contest->getContestTime((float)$contest->getEndtime()) - $contest->getContestTime((float)$contest->getFreezetime()),
+                true);
+        }
+        $data = array_merge($data, [
+            'penalty-time' => $this->DOMJudgeService->dbconfig_get('penalty_time'),
+            'default-clars' => $this->DOMJudgeService->dbconfig_get('clar_answers'),
+            'clar-categories' => array_values($this->DOMJudgeService->dbconfig_get('clar_categories')),
+            'languages' => [],
+            'problems' => [],
+        ]);
+
+        /** @var Language[] $languages */
+        $languages = $this->entityManager->getRepository(Language::class)->findAll();
+        foreach ($languages as $language) {
+            // TODO: compiler, -flags, runner, -flags?
+            $data['languages'][] = [
+                'name' => $language->getName(),
+            ];
+        }
+
+        /** @var ContestProblem $contestProblem */
+        foreach ($contest->getProblems() as $contestProblem) {
+            // Our color field can be both a HTML color name and an RGB value.
+            // If it is in RGB, we try to find the closest HTML color name.
+            $color              = $contestProblem->getColor() === null ? null : Utils::convertToColor($contestProblem->getColor());
+            $data['problems'][] = [
+                'label' => $contestProblem->getShortname(),
+                'name' => $contestProblem->getProblem()->getName(),
+                'color' => $color === null ? $contestProblem->getColor() : $color,
+                'rgb' => $contestProblem->getColor() === null ? null : Utils::convertToHex($contestProblem->getColor()),
+            ];
+        }
+
+        return $data;
+    }
+
+    public function importContestYaml($data)
+    {
+        if (empty($data)) {
+            throw new BadRequestHttpException('Error parsing YAML file.');
+        }
+
+        $identifierChars = '[a-zA-Z0-9_-]';
+        $invalid_regex   = '/[^' . substr($identifierChars, 1) . '/';
+
+        if (is_string($data['start-time'])) {
+            $starttime = date_create_from_format(DateTime::ISO8601, $data['start-time']);
+        } else {
+            /** @var DateTime $starttime */
+            $starttime = $data['start-time'];
+        }
+        $starttime->setTimezone(new DateTimeZone(date_default_timezone_get()));
+        $contest = new Contest();
+        $contest
+            ->setName($data['name'])
+            ->setShortname(preg_replace(
+                               $invalid_regex,
+                               '_',
+                               $data['short-name']
+                           ))
+            ->setExternalid($contest->getShortname())
+            ->setStarttimeString(date_format($starttime, 'Y-m-d H:i:s e'))
+            ->setActivatetimeString('-1:00')
+            ->setEndtimeString(sprintf('+%s', $data['duration']));
+
+        /** @var string|null $freezeDuration */
+        $freezeDuration = $data['scoreboard-freeze-duration'] ?? $data['scoreboard-freeze-length'] ?? null;
+        /** @var string|null $freezeStart */
+        $freezeStart = $data['scoreboard-freeze'] ?? $data['freeze'] ?? null;
+
+        if ($freezeDuration !== null) {
+            $contest->setFreezetimeString(sprintf('+%s', Utils::timeStringDiff($data['duration'], $freezeDuration)));
+        } elseif ($freezeStart !== null) {
+            $contest->setFreezetimeString(sprintf('+%s', $freezeStart));
+        }
+
+        $errors = $this->validator->validate($contest);
+        if ($errors->count()) {
+            $messages = [];
+            /** @var ConstraintViolationInterface $error */
+            foreach ($errors as $error) {
+                $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
+            }
+
+            throw new NotAcceptableHttpException(sprintf("Contest has errors:\n\n%s", implode("\n", $messages)));
+        }
+
+        $this->entityManager->persist($contest);
+        $this->entityManager->flush();
+
+        $penaltyTime = $data['penalty-time'] ?? $data['penalty'] ?? null;
+        if ($penaltyTime !== null) {
+            $penaltyTimeConfiguration = $this->entityManager->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
+            $penaltyTimeConfiguration->setValue((int)$penaltyTime);
+        }
+
+        if (isset($data['default-clars'])) {
+            $clarificationAnswersConfiguration = $this->entityManager->getRepository(Configuration::class)->findOneBy(['name' => 'clar_answers']);
+            $clarificationAnswersConfiguration->setValue($data['default-clars']);
+        }
+
+        if (is_array($data['clar-categories'] ?? null)) {
+            $clarificationCategoriesConfiguration = $this->entityManager->getRepository(Configuration::class)->findOneBy(['name' => 'clar_categories']);
+            $categories                           = [];
+            foreach ($data['clar-categories'] as $category) {
+                $categoryKey              = substr(
+                    str_replace([' ', ',', '.'], '-', strtolower($category)),
+                    0,
+                    9
+                );
+                $categories[$categoryKey] = $category;
+            }
+            $clarificationCategoriesConfiguration->setValue($categories);
+        }
+
+        // We do not import language details, as there's very little to actually import
+
+        if (isset($data['problems'])) {
+            foreach ($data['problems'] as $problemData) {
+
+                // Deal with obsolete attribute names:
+                $problemName  = $problemData['name'] ?? $problemData['short-name'] ?? null;
+                $problemLabel = $problemData['label'] ?? $problemData['letter'] ?? null;
+
+                $problem = new Problem();
+                $problem
+                    ->setName($problemName)
+                    ->setTimelimit(10);
+                // TODO: ask Fredrik about configuration of timelimit
+
+                $this->entityManager->persist($problem);
+                $this->entityManager->flush();
+
+                $contestProblem = new ContestProblem();
+                $contestProblem
+                    ->setShortname($problemLabel)
+                    ->setColor($problemData['rgb'])
+                    // We need to set both the entities as well as the ID's because of the composite primary key
+                    ->setProblem($problem)
+                    ->setProbid($problem->getProbid())
+                    ->setContest($contest)
+                    ->setCid($contest->getCid());
+                $this->entityManager->persist($contestProblem);
+            }
+        }
+
+        $this->entityManager->flush();
     }
 
     /**

@@ -6,9 +6,12 @@ use Collator;
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Clarification;
+use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\TeamCategory;
 use DOMJudgeBundle\Form\Type\BaylorCmsType;
+use DOMJudgeBundle\Form\Type\ContestExportType;
+use DOMJudgeBundle\Form\Type\ContestImportType;
 use DOMJudgeBundle\Form\Type\TsvImportType;
 use DOMJudgeBundle\Service\BaylorCmsService;
 use DOMJudgeBundle\Service\DOMJudgeService;
@@ -23,6 +26,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * @Route("/jury/import-export")
@@ -87,6 +91,7 @@ class ImportExportController extends BaseController
      * @Route("", name="jury_import_export")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function indexAction(Request $request)
     {
@@ -95,8 +100,8 @@ class ImportExportController extends BaseController
         $tsvForm->handleRequest($request);
 
         if ($tsvForm->isSubmitted() && $tsvForm->isValid()) {
-            $type = $tsvForm->get('type')->getData();
-            $file = $tsvForm->get('file')->getData();
+            $type  = $tsvForm->get('type')->getData();
+            $file  = $tsvForm->get('file')->getData();
             $count = $this->importExportService->importTsv($type, $file);
             $this->addFlash('tsvImport', sprintf('%d items imported', $count));
             return $this->redirectToRoute('jury_import_export');
@@ -126,12 +131,51 @@ class ImportExportController extends BaseController
     }
 
     /**
-     * @Route("/contest-yaml", name="jury_contest_yaml_export")
+     * @Route("/contest-yaml", name="jury_import_export_yaml")
+     * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
-    public function contestYamlAction()
+    public function contestYamlAction(Request $request)
     {
-        return $this->render('@DOMJudge/jury/import_export_contest_yaml.html.twig');
+        $exportForm = $this->createForm(ContestExportType::class);
+
+        $exportForm->handleRequest($request);
+
+        if ($exportForm->isSubmitted() && $exportForm->isValid()) {
+            /** @var Contest $contest */
+            $contest  = $exportForm->get('contest')->getData();
+            $response = new StreamedResponse();
+            $response->setCallback(function () use ($contest) {
+                echo Yaml::dump($this->importExportService->getContestYamlData($contest));
+            });
+            $response->headers->set('Content-Type', 'application/x-yaml');
+            $response->headers->set('Content-Disposition', 'attachment; filename="contest.yaml"');
+            $response->headers->set('Content-Transfer-Encoding', 'binary');
+            $response->headers->set('Connection', 'Keep-Alive');
+            $response->headers->set('Accept-Ranges', 'bytes');
+
+            return $response;
+        }
+
+        $importForm = $this->createForm(ContestImportType::class);
+
+        $importForm->handleRequest($request);
+
+        if ($importForm->isSubmitted() && $importForm->isValid()) {
+            /** @var UploadedFile $file */
+            $file = $importForm->get('file')->getData();
+            $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
+            $this->importExportService->importContestYaml($data);
+            $this->addFlash('yamlImport',
+                            sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
+            return $this->redirectToRoute('jury_import_export_yaml');
+        }
+
+        return $this->render('@DOMJudge/jury/import_export_contest_yaml.html.twig', [
+            'export_form' => $exportForm->createView(),
+            'import_form' => $importForm->createView(),
+        ]);
     }
 
     /**
