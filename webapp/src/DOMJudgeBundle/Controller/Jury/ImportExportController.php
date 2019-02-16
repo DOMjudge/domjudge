@@ -8,6 +8,7 @@ use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Clarification;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
+use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TeamCategory;
 use DOMJudgeBundle\Form\Type\BaylorCmsType;
 use DOMJudgeBundle\Form\Type\ContestExportType;
@@ -15,6 +16,7 @@ use DOMJudgeBundle\Form\Type\ContestImportType;
 use DOMJudgeBundle\Form\Type\TsvImportType;
 use DOMJudgeBundle\Service\BaylorCmsService;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ImportExportService;
 use DOMJudgeBundle\Service\ScoreboardService;
 use DOMJudgeBundle\Utils\Scoreboard\Filter;
@@ -59,6 +61,11 @@ class ImportExportController extends BaseController
      */
     protected $DOMJudgeService;
 
+    /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
     /** @var string */
     protected $domjudgeVersion;
 
@@ -69,6 +76,7 @@ class ImportExportController extends BaseController
      * @param EntityManagerInterface $entityManager
      * @param ScoreboardService      $scoreboardService
      * @param DOMJudgeService        $DOMJudgeService
+     * @param EventLogService        $eventLogService
      * @param string                 $domjudgeVersion
      */
     public function __construct(
@@ -77,6 +85,7 @@ class ImportExportController extends BaseController
         EntityManagerInterface $entityManager,
         ScoreboardService $scoreboardService,
         DOMJudgeService $DOMJudgeService,
+        EventLogService $eventLogService,
         string $domjudgeVersion
     ) {
         $this->baylorCmsService    = $baylorCmsService;
@@ -84,6 +93,7 @@ class ImportExportController extends BaseController
         $this->entityManager       = $entityManager;
         $this->scoreboardService   = $scoreboardService;
         $this->DOMJudgeService     = $DOMJudgeService;
+        $this->eventLogService     = $eventLogService;
         $this->domjudgeVersion     = $domjudgeVersion;
     }
 
@@ -269,9 +279,11 @@ class ImportExportController extends BaseController
         $scoreboard = $this->scoreboardService->getScoreboard($contest, true, $filter);
         $teams      = $scoreboard->getTeams();
 
+        $useExternalId = $this->eventLogService->externalIdFieldForEntity(Team::class) !== null;
+
         $teamNames = [];
         foreach ($teams as $team) {
-            $teamNames[$team->getExternalid()] = $team->getName();
+            $teamNames[$useExternalId ? $team->getExternalid() : $team->getTeamid()] = $team->getName();
         }
 
         $awarded       = [];
@@ -279,7 +291,10 @@ class ImportExportController extends BaseController
         $honorable     = [];
         $regionWinners = [];
 
-        foreach ($this->importExportService->getResultsData() as $row) {
+        // TODO: allow to specify this
+        $sortOrder = 0;
+
+        foreach ($this->importExportService->getResultsData($sortOrder) as $row) {
             $team = $teamNames[$row[0]];
 
             if ($row[6] !== '') {
@@ -330,7 +345,7 @@ class ImportExportController extends BaseController
                 'time' => null,
             ];
             foreach ($teams as $team) {
-                if (!isset($categories[$team->getCategoryid()])) {
+                if (!isset($categories[$team->getCategoryid()]) || $team->getCategory()->getSortorder() !== $sortOrder) {
                     continue;
                 }
 
@@ -340,7 +355,7 @@ class ImportExportController extends BaseController
                     $firstToSolve[$problem->getProbid()] = [
                         'problem' => $problem->getShortname(),
                         'problem_name' => $problem->getProblem()->getName(),
-                        'team' => $teamNames[$team->getExternalid()],
+                        'team' => $teamNames[$useExternalId ? $team->getExternalid() : $team->getTeamid()],
                         'time' => Utils::scoretime($matrixItem->getTime(), $scoreIsInSeconds),
                     ];
                 }

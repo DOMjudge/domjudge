@@ -345,11 +345,12 @@ class ImportExportService
     }
 
     /**
-     * Get results data
+     * Get results data for the given sortorder
+     * @param int $sortOrder
      * @return array
      * @throws \Exception
      */
-    public function getResultsData()
+    public function getResultsData(int $sortOrder)
     {
         // we'll here assume that the requested file will be of the current contest,
         // as all our scoreboard interfaces do
@@ -365,6 +366,8 @@ class ImportExportService
         if ($contest === null) {
             throw new BadRequestHttpException('No current contest');
         }
+
+        $useExternalId = $this->eventLogService->externalIdFieldForEntity(Team::class) !== null;
 
         /** @var TeamCategory[] $categories */
         $categories  = $this->entityManager->createQueryBuilder()
@@ -409,6 +412,9 @@ class ImportExportService
         $data         = [];
 
         foreach ($scoreboard->getScores() as $teamScore) {
+            if ($teamScore->getTeam()->getCategory()->getSortorder() !== $sortOrder) {
+                continue;
+            }
             $maxTime = -1;
             /** @var ScoreboardMatrixItem $matrixItem */
             foreach ($scoreboard->getMatrix()[$teamScore->getTeam()->getTeamid()] as $matrixItem) {
@@ -444,7 +450,7 @@ class ImportExportService
             }
 
             $data[] = [
-                $teamScore->getTeam()->getExternalid(),
+                $useExternalId ? $teamScore->getTeam()->getExternalid() : $teamScore->getTeam()->getTeamid(),
                 $rank,
                 $awardString,
                 $teamScore->getNumberOfPoints(),
