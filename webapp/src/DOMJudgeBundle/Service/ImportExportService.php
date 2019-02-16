@@ -280,10 +280,10 @@ class ImportExportService
                 $team->getExternalid(),
                 $team->getCategoryid(),
                 $team->getName(),
-                $team->getAffiliation()->getName(),
-                $team->getAffiliation()->getShortname(),
-                $team->getAffiliation()->getCountry(),
-                $team->getAffiliation()->getExternalid(),
+                $team->getAffiliation() ? $team->getAffiliation()->getName() : '',
+                $team->getAffiliation() ? $team->getAffiliation()->getShortname() : '',
+                $team->getAffiliation() ? $team->getAffiliation()->getCountry() : '',
+                $team->getAffiliation() ? $team->getAffiliation()->getExternalid() : '',
             ];
         }
 
