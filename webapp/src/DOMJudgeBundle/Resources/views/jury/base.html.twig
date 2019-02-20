@@ -1,31 +1,62 @@
-{% extends "::base_bootstrap.html.twig" %}
-{% import _self as self %}
+{% extends "@DOMJudge/base.html.twig" %}
 
 {% block title %}{{ title|default('DOMjudge') }}{% endblock %}
 
 {% block extrahead %}
-<link rel="stylesheet" href="{{asset('style_domjudge.css')}}">
-<link rel="stylesheet" href="{{asset('style_jury.css')}}">
-
-{# <script src="{{asset('js/jury.js')}}"></script> #}
-
-{{ extrahead|default('') }}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('style_jury.css') }}">
 {% endblock %}
 
 {% block body %}
-{% include '::header_bootstrap.html.twig' %}
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-12">
-      {% if app.session.flashBag.has('generalSuccess') %}
-        {% for message in app.session.flashBag.get('generalSuccess') %}
-          <div class="alert alert-success">
-            {{ message | raw }}
-          </div>
-        {% endfor %}
-      {% endif %}
-      {% block content %}{{ body|raw }}{% endblock %}
+    {% include '@DOMJudge/jury/menu.html.twig' %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                {% if app.session.flashBag.has('generalSuccess') %}
+                    {% for message in app.session.flashBag.get('generalSuccess') %}
+                        <div class="alert alert-success">
+                            {{ message | raw }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% block content %}{{ body|raw }}{% endblock %}
+            </div>
+        </div>
     </div>
-  </div>
-</div>
+{% endblock %}
+{% block extrafooter %}
+    <script>
+        $(function () {
+            $('.custom-file-input').on('change', function () {
+                var fileName = $(this).val().split('\\').pop();
+                $(this).next('.custom-file-label').html(fileName);
+                $(this).next('.custom-file-label').removeClass('text-muted');
+            });
+            /* Show the notification options if the browser supports it */
+            if ('Notification' in window) {
+                $('#notify_disable').click(disableNotifications);
+                $('#notify_enable').click(enableNotifications);
+                if (getCookie('domjudge_notify') != 1) {
+                    $('#notify_enable').removeClass('d-none');
+                } else {
+                    $('#notify_disable').removeClass('d-none');
+                }
+            }
+            /* toggle refresh if set */
+            {% if refresh is defined and refresh %}
+            $('#refresh-navitem').on('click', function () {
+                toggleRefresh('{{ refresh.url }}', {{ refresh.after }}, {{ refresh.ajax | default(0) }});
+            });
+            {% endif %}
+            /* Enable page refresh if set if wanted by the page, and wanted by the user */
+            {% if refresh is defined and refresh and refresh_flag %}
+            enableRefresh('{{ refresh.url }}', {{ refresh.after }}, {{ refresh.ajax | default(0) }});
+            {% endif %}
+
+            updateMenuAlerts();
+            setInterval(updateMenuAlerts, 20000);
+
+            initializeAjaxModals();
+        });
+    </script>
 {% endblock %}

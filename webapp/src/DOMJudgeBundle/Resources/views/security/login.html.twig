@@ -1,15 +1,15 @@
-{% extends "::base_bootstrap.html.twig" %}
+{% extends "@DOMJudge/base.html.twig" %}
 
 {% block title %}Login{% endblock %}
 
 {% block extrahead %}
-<link rel="stylesheet" href="{{asset('style_login.css')}}">
+    <link rel="stylesheet" href="{{ asset('style_login.css') }}">
 {% endblock %}
 
 {% block body %}
 <div class="form-signin" id="loginform">
-  <img class="mb-4" src="images/DOMjudgelogo.png" alt="DOMjudge" width="72">
-  {% for message in app.flashes('notice') %}
+  <img class="mb-4" src="{{ asset('images/DOMjudgelogo.png') }}" alt="DOMjudge" width="72">
+  {% for message in app.session.flashBag.get('notice') %}
   <div class="alert alert-success" role="alert">
   {{ message }}
   </div>

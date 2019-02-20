@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- DOMjudge version {{ DOMJUDGE_VERSION }} sftb-->
+    <meta charset="{{ DJ_CHARACTER_SET }}">
+    <title>{% block title %}DOMjudge{% endblock %}</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="{{ asset("css/bootstrap.min.css") }}">
+    <link rel="stylesheet" href="{{ asset("css/fontawesome-all.min.css") }}">
+    <script src="{{ asset("js/jquery.min.js") }}"></script>
+    <script src="{{ asset("js/bootstrap.bundle.min.js") }}"></script>
+
+    <script src="{{ asset("js/domjudge.js") }}"></script>
+    {% block extrahead %}
+        <link rel="stylesheet" href="{{ asset('style_domjudge.css') }}">
+
+        {{ extrahead|default('') }}
+    {% endblock %}
+</head>
+<body style="padding-top: 4.5rem;">
+{% block body %}{% endblock %}
+
+<script>
+    var domjudge_base_url = "{{ app.request.getBaseURL() }}";
+</script>
+{% block extrafooter %}{% endblock %}
+</body>
+</html>
