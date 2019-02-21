@@ -1,5 +1,5 @@
-legacy.public:
-    path: /public/
+legacy.public_problems:
+    path: /public/problems.php
 legacy.public_problem:
     path: /public/problem.php
 legacy.public_team:

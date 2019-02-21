@@ -2,6 +2,12 @@
     {% set static = false %}
 {% endif %}
 
+{% if ajax is defined and ajax and not static and public %}
+    <div class="d-none">
+        {% include '@DOMJudge/partials/scoreboard_progress_bar.html.twig' %}
+    </div>
+{% endif %}
+
 {% if current_contest is null %}
     <p class="nodata">No active contest</p>
 {% else %}
@@ -25,12 +31,8 @@
             </span>
         </div>
 
-        {% if static and scoreboard.freezeData.started and not scoreboard.freezeData.stopped %}
-            {% set percentage = scoreboard.progress %}
-            <div class="progress" style="margin-top:0; height: 10px;">
-                <div class="progress-bar" role="progressbar" style="width: {{ percentage }}%;"
-                     aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
+        {% if static %}
+            {% include '@DOMJudge/partials/scoreboard_progress_bar.html.twig' %}
         {% endif %}
     </div> {# card #}
 
@@ -65,7 +67,7 @@
         {% if scoreboard.freezeData.showFrozen(false) %}
             <div class="alert alert-warning" role="alert" style="font-size: 80%;">
                 {% if jury %}
-                    <a href="{{ path('legacy.public') }}">The public scoreboard</a>
+                    <a href="{{ path('public_index') }}">The public scoreboard</a>
                     was frozen with {{ current_contest.minutesRemaining }} minutes remaining
                 {% else %}
                     The scoreboard was frozen with {{ current_contest.minutesRemaining }} minutes remaining - solutions
@@ -135,7 +137,7 @@
         {% include '@DOMJudge/partials/scoreboard_table.html.twig' with {displayRank: true, showLegends: true} %}
 
         <p id="lastmod">
-            Last Update: {{ null | printtime('%a %d %b %Y %T %Z') }}<br />
+            Last Update: {{ null | printtime('%a %d %b %Y %T %Z') }}<br/>
             using <a href="https://www.domjudge.org/">DOMjudge</a>
         </p>
 

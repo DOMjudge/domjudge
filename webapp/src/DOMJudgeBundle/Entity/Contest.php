@@ -4,6 +4,7 @@ namespace DOMJudgeBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Utils\FreezeData;
 use DOMJudgeBundle\Utils\Utils;
 use DOMJudgeBundle\Validator\Constraints\Identifier;
 use DOMJudgeBundle\Validator\Constraints\TimeString;
@@ -1401,6 +1402,15 @@ class Contest
     public function getMinutesRemaining(): int
     {
         return (int)floor(($this->getEndtime() - $this->getFreezetime()) / 60);
+    }
+
+    /**
+     * Get the freeze data for this contest
+     * @return FreezeData
+     */
+    public function getFreezeData()
+    {
+        return new FreezeData($this);
     }
 
     /**

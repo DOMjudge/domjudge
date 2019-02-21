@@ -110,6 +110,8 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         return [
             'current_contest' => $this->domjudge->getCurrentContest(),
             'current_contests' => $this->domjudge->getCurrentContests(),
+            'current_public_contest' => $this->domjudge->getCurrentContest(-1),
+            'current_public_contests' => $this->domjudge->getCurrentContests(-1),
             'have_printing' => $this->domjudge->dbconfig_get('enable_printing', 0),
             'refresh_flag' => $refresh_flag,
             'icat_url' => defined('ICAT_URL') ? ICAT_URL : null,

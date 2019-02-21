@@ -57,25 +57,6 @@ class DOMJudgeService
         return $this->em;
     }
 
-    public function getCurrentContest()
-    {
-        $selected_cid = $this->request->cookies->get('domjudge_cid');
-        if ($selected_cid == -1) {
-            return null;
-        }
-
-        $contests = $this->getCurrentContests();
-        foreach ($contests as $contest) {
-            if ($contest->getCid() == $selected_cid) {
-                return $contest;
-            }
-        }
-        if (count($contests) > 0) {
-            return reset($contests);
-        }
-        return null;
-    }
-
     /**
      * Query configuration variable, with optional default value in case
      * the variable does not exist and boolean to indicate if cached
@@ -121,24 +102,13 @@ class DOMJudgeService
     }
 
     /**
-     * Will return all the contests that are currently active.
-     * When fulldata is true, returns the total row as an array
-     * instead of just the ID (array indices will be contest ID's then).
-     * If $onlyofteam is not null, only show contests that team is part
-     * of. If it is -1, only show publicly visible contests.
-     * If $alsofuture is true, also show the contests that start in the future.
-     * The results will have the value of field $key in the database as key.
-     *
-     * This is equivalent to $cdata in the old codebase.
-     *
+     * Return all the contests that are currently active indexed by contest ID
+     * @param int|null $onlyofteam If -1, get only public contests. If > 0 get only contests for the given team
+     * @param bool     $alsofuture If true, also get future contests
      * @return Contest[]
      */
-    public function getCurrentContests(
-        bool $fulldata = false,
-        $onlyofteam = null,
-        bool $alsofuture = false,
-        string $key = 'cid'
-    ) {
+    public function getCurrentContests($onlyofteam = null, bool $alsofuture = false)
+    {
         $now = Utils::now();
         $qb  = $this->em->createQueryBuilder();
         $qb->select('c')->from('DOMJudgeBundle:Contest', 'c', 'c.cid');
@@ -174,6 +144,31 @@ class DOMJudgeService
 
         $contests = $qb->getQuery()->getResult();
         return $contests;
+    }
+
+    /**
+     * Get the currently selected contest
+     * @param int|null $onlyofteam If -1, get only public contests. If > 0 get only contests for the given team
+     * @param bool     $alsofuture If true, also get future contests
+     * @return Contest|null
+     */
+    public function getCurrentContest($onlyofteam = null, bool $alsofuture = false)
+    {
+        $selected_cid = $this->request->cookies->get('domjudge_cid');
+        if ($selected_cid == -1) {
+            return null;
+        }
+
+        $contests = $this->getCurrentContests($onlyofteam, $alsofuture);
+        foreach ($contests as $contest) {
+            if ($contest->getCid() == $selected_cid) {
+                return $contest;
+            }
+        }
+        if (count($contests) > 0) {
+            return reset($contests);
+        }
+        return null;
     }
 
     /**
@@ -612,7 +607,7 @@ class DOMJudgeService
      * Legacy function to make print send method available outside
      * Symfony. Can be removed if the team interface uses Symfony.
      */
-    public function sendPrint(...$args) : array
+    public function sendPrint(...$args): array
     {
         return \DOMJudgeBundle\Utils\Printing::send(...$args);
     }

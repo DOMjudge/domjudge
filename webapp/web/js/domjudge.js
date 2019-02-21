@@ -478,10 +478,10 @@ function getHeartCol(row) {
 	// search for td before the team name
 	for (var i = 1; i < 4; i++) {
 		if (tds[i].className == "scoretn") {
-			return tds[i - 1];
+			return tds[i - 1].children[0];
 		}
 	}
-	return tds[1];
+	return tds[1].children[0];
 }
 
 function getTeamname(row)
@@ -530,15 +530,35 @@ function toggle(id, show)
 	var cookieVal = JSON.stringify(favTeams);
 	setCookie("domjudge_teamselection", cookieVal);
 
-	window.location.reload();
+
+	$.ajax({
+		url: scoreboardUrl
+	}).done(function(data, status, jqXHR) {
+		var $refreshTarget = $('[data-ajax-refresh-target]');
+		var $data = $(data);
+		// When using the static scoreboard, we need to find the children of the [data-ajax-refresh-target]
+		var $dataRefreshTarget = $data.find('[data-ajax-refresh-target]');
+		if ($dataRefreshTarget.length) {
+			$data = $dataRefreshTarget.children();
+		}
+		$refreshTarget.html($data);
+
+		var $newProgress = $('[data-ajax-refresh-target] > [data-progress-bar]');
+		if ($newProgress.length) {
+			var $oldProgress = $('body > [data-progress-bar]');
+			$oldProgress.html($newProgress.children());
+			$newProgress.parent().remove();
+		}
+		initFavouriteTeams();
+	});
 }
 
 function addHeart(rank, row, id, isFav)
 {
 	'use strict';
 	var heartCol = getHeartCol(row);
-	var color = isFav ? "red" : "gray";
-	return heartCol.innerHTML + "<span class=\"heart\" style=\"color:" + color + ";\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\">&#9829;</span>";
+	var iconClass = isFav ? "fas fa-heart" : "far fa-heart";
+	return heartCol.innerHTML + "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\"></span>";
 }
 
 function initFavouriteTeams()
@@ -714,7 +734,13 @@ function enableRefresh($url, $after, usingAjax) {
                     window.location = jqXHR.getResponseHeader('X-Login-Page');
                 } else {
                     var $refreshTarget = $('[data-ajax-refresh-target]');
-                    $refreshTarget.html(data);
+                    var $data = $(data);
+                    // When using the static scoreboard, we need to find the children of the [data-ajax-refresh-target]
+                    var $dataRefreshTarget = $data.find('[data-ajax-refresh-target]');
+                    if ($dataRefreshTarget.length) {
+                        $data = $dataRefreshTarget.children();
+                    }
+                    $refreshTarget.html($data);
                     if ($refreshTarget.data('ajax-refresh-after')) {
                         window[$refreshTarget.data('ajax-refresh-after')]();
                     }

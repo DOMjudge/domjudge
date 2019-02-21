@@ -306,7 +306,7 @@ class EventLogService implements ContainerAwareInterface
             } elseif ($type === 'teams') {
                 $expectedEvents = 0;
                 foreach ($dataIds as $dataId) {
-                    $contests        = $this->DOMJudgeService->getCurrentContests(false, $dataId);
+                    $contests        = $this->DOMJudgeService->getCurrentContests($dataId);
                     $contestIdsForId = array_map(function (Contest $contest) {
                         return $contest->getCid();
                     }, $contests);

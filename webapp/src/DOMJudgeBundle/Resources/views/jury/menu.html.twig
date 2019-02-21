@@ -101,50 +101,8 @@
                 </li>
             {% endif %}
 
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownContests" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-trophy"></i> {{ current_contest.shortname|default('no contest') }}
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item disabled" href="#">Change Contest</a>
-                    {% if is_granted('ROLE_JURY') and current_contest is not empty %}
-                        <a class="dropdown-item" href="{{ path('jury_change_contest', {'contestId': -1}) }}">No contest</a>
-                        <div class="dropdown-divider"></div>
-                    {% endif %}
-                    {% for c in current_contests if c != current_contest %}
-                        <a class="dropdown-item" href="{{ path('jury_change_contest', {'contestId': c.cid}) }}">{{ c.shortname }}</a>
-                    {% endfor %}
-                </div>
-            </li>
+            {% include '@DOMJudge/partials/menu_change_contest.html.twig' with {contest: current_contest, contests: current_contests, change_path: 'jury_change_contest', show_no_contest: true} %}
         </ul>
-        <div class="navbar-text" style="white-space:nowrap;">
-            <i style="padding-left: 10px;" class="fas fa-clock"></i>
-            {% set now = 'now'|date('U') %}
-            <span id="timeleft">{%- if current_contest is null -%}
-          no contest
-        {%- elseif current_contest.starttime(false) < now and current_contest.endtime >= now -%}
-                    {{ now|timediff(current_contest.getEndTime()) }}
-                {%- elseif current_contest.activatetime < now and current_contest.starttime(false) >= now -%}
-                    {%- if current_contest.starttimeEnabled -%}
-                        time to start: {{ now|timediff(current_contest.starttime) }}
-                    {%- else -%}
-                        start delayed
-                    {%- endif -%}
-                {%- endif -%}</span>
-        </div>
+        {% include '@DOMJudge/partials/menu_countdown.html.twig' with {contest: current_contest} %}
     </div>
-
-
-    <script>
-        var initial = {{ now }};
-        var activatetime = {{ current_contest.activatetime|default(-1) }};
-        var starttime = {{ current_contest.starttime|default(-1) }};
-        var endtime = {{ current_contest.endtime|default(-1) }};
-        var offset = 0;
-        var date = new Date(initial*1000);
-        var timeleftelt = document.getElementById("timeleft");
-
-        setInterval(function(){updateClock();},1000);
-        updateClock();
-    </script>
 </nav>

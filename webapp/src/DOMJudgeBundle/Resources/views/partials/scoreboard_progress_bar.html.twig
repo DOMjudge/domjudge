@@ -1,0 +1,7 @@
+{% if scoreboard.freezeData.started and not scoreboard.freezeData.stopped %}
+    {% set percentage = scoreboard.progress %}
+    <div class="progress" style="margin-top:{{ margin|default(0) }}px; height: 10px;" data-progress-bar>
+        <div class="progress-bar" role="progressbar" style="width: {{ percentage }}%;"
+             aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+{% endif %}

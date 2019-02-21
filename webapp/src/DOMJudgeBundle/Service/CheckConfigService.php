@@ -382,7 +382,7 @@ class CheckConfigService
     public function checkContestsValidate()
     {
         // Fetch all active and future contests
-        $contests = $this->DOMJudgeService->getCurrentContests(false, null, true);
+        $contests = $this->DOMJudgeService->getCurrentContests(null, true);
 
         $contesterrors = $cperrors = [];
         $result = 'O';
@@ -558,7 +558,7 @@ class CheckConfigService
         }
 
         $languages = $this->entityManager->getRepository(Language::class)->findAll();
-        $contests = $this->DOMJudgeService->getCurrentContests(false, null, true);
+        $contests = $this->DOMJudgeService->getCurrentContests(null, true);
 
         $desc = '';
         $result = 'O';

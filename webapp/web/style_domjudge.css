@@ -143,6 +143,7 @@ del {
 }
 .scoreboard td, .scoreboard th {
     border-right: 1px solid silver;
+    padding: 0px;
 }
 .scoreboard td.score_cell {
     min-width: 4.2em;
@@ -284,4 +285,11 @@ tr.ignore td, td.ignore, span.ignore {
 }
 .card-header .collapsed .fa {
     transform: rotate(90deg);
+}
+
+.banner {
+    width: 98%;
+    height: auto;
+    display: block;
+    margin: -3rem auto 3rem auto;
 }

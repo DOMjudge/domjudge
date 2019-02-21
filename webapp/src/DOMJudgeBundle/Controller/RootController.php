@@ -49,6 +49,6 @@ class RootController extends BaseController
                 return $this->redirectToRoute('jury_balloons');
             }
         }
-        return $this->redirectToRoute('legacy.public');
+        return $this->redirectToRoute('public_index');
     }
 }
