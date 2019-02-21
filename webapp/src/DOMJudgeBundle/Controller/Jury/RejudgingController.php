@@ -443,10 +443,12 @@ class RejudgingController extends Controller
             throw new BadRequestHttpException(sprintf('unknown table %s in rejudging', $table));
         }
 
+        $em = $this->entityManager;
+
         // Only rejudge submissions in active contests.
         $contests = $this->DOMJudgeService->getCurrentContests();
 
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
             ->leftJoin('j.submission', 's')
             ->select('j')
@@ -481,25 +483,27 @@ class RejudgingController extends Controller
                 ->setStartUser($this->DOMJudgeService->getUser())
                 ->setStarttime(Utils::now())
                 ->setReason($reason);
-            $this->entityManager->persist($rejudging);
-            $this->entityManager->flush();
+            $em->persist($rejudging);
+            $em->flush();
         }
 
         foreach ($judgings as $judging) {
-            // Reload judging and rejudging to make sure we have a fresh copy when the entity manager is cleared
+            // Reload judging and rejudging to make sure we have a fresh copy
+            // when the entity manager is cleared
             /** @var Judging $judging */
-            $judging = $this->entityManager->getRepository(Judging::class)->find($judging->getJudgingid());
+            $judging = $em->getRepository(Judging::class)->find($judging->getJudgingid());
             if ($rejudging) {
-                $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($rejudging->getRejudgingid());
+                $rejudging = $em->getRepository(Rejudging::class)->find($rejudging->getRejudgingid());
             }
             $submission = $judging->getSubmission();
             if ($submission->getRejudgingid() !== null) {
                 // Already associated rejudging
                 if ($table === 'submission') {
-                    // clean up rejudging. Note that if $table is 'submission', we will always have only one
-                    // judging so we can safely delete the rejudging
-                    $this->entityManager->remove($rejudging);
-                    $this->entityManager->flush();
+                    // clean up rejudging. Note that if $table is
+                    // 'submission', we will always have only one judging so
+                    // we can safely delete the rejudging
+                    $em->remove($rejudging);
+                    $em->flush();
                     throw new BadRequestHttpException(sprintf('Submission is already part of rejudging r%d',
                                                               $submission->getRejudgingid()));
                 } else {
@@ -508,7 +512,7 @@ class RejudgingController extends Controller
                 }
             }
 
-            $this->entityManager->transactional(function () use (
+            $em->transactional(function () use (
                 $table,
                 $fullRejudge,
                 $judging,
@@ -523,7 +527,7 @@ class RejudgingController extends Controller
                 if ($submission->getRejudgingid() === null) {
                     if ($rejudging) {
                         // Reload rejudging to make sure we have fresh data
-                        $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($rejudging->getRejudgingid());
+                        $rejudging = $em->getRepository(Rejudging::class)->find($rejudging->getRejudgingid());
                     }
                     $submission
                         ->setJudgehost(null)
@@ -538,16 +542,16 @@ class RejudgingController extends Controller
                     }
                 }
 
-                $this->entityManager->flush();
+                $em->flush();
 
                 if (!$fullRejudge) {
                     // Clear entity manager to get fresh data
-                    $this->entityManager->clear();
-                    $contest = $this->entityManager->getRepository(Contest::class)
+                    $em->clear();
+                    $contest = $em->getRepository(Contest::class)
                         ->find($submission->getCid());
-                    $team    = $this->entityManager->getRepository(Team::class)
+                    $team    = $em->getRepository(Team::class)
                         ->find($submission->getTeamid());
-                    $problem = $this->entityManager->getRepository(Problem::class)
+                    $problem = $em->getRepository(Problem::class)
                         ->find($submission->getProbid());
                     $scoreboardService->calculateScoreRow($contest, $team, $problem);
                 }
