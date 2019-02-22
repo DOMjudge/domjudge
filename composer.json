@@ -42,7 +42,7 @@
 		"ircmaxell/password-compat": "*",
 		"doctrine/doctrine-bundle": "^1.9",
 		"doctrine/doctrine-cache-bundle": "^1.2",
-		"doctrine/orm": "^2.5",
+		"doctrine/orm": "^2.6.3",
 		"sensio/distribution-bundle": "^5.0.19",
 		"sensio/framework-extra-bundle": "^5.0.0",
 		"symfony/monolog-bundle": "^3.1.0",
