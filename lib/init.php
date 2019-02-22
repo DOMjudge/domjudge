@@ -12,11 +12,6 @@ require_once(LIBDIR . '/lib.misc.php');
 require_once(LIBDIR . '/lib.dbconfig.php');
 require_once(LIBDIR . '/use_db.php');
 
-if (!file_exists(LIBDIR . '/relations.php')) {
-    error("'".LIBDIR . "/relations.php' is missing, regenerate with 'make dist'.");
-}
-require_once(LIBDIR . '/relations.php');
-
 // Initialize default timezone to system default. PHP generates
 // E_NOTICE warning messages otherwise.
 @date_default_timezone_set(@date_default_timezone_get());
