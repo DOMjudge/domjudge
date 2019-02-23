@@ -512,8 +512,7 @@ class RejudgingController extends Controller
                 $judging,
                 $submission,
                 $rejudging,
-                $scoreboardService,
-                $em
+                $scoreboardService
             ) {
                 if (!$fullRejudge) {
                     $judging->setValid(false);
