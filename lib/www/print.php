@@ -4,7 +4,7 @@
  * Functions for formatting certain output to the user.
  * All output is HTML-safe, so input should not be escaped.
  *
- * Part of the DOMjudge Programming Contest Jury System and licenced
+ * Part of the DOMjudge Programming Contest Jury System and licensed
  * under the GNU GPL. See README and COPYING for details.
  */
 

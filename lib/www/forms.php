@@ -2,7 +2,7 @@
 /**
  * Simple functions to start a form, add a field to a form, end a form.
  *
- * Part of the DOMjudge Programming Contest Jury System and licenced
+ * Part of the DOMjudge Programming Contest Jury System and licensed
  * under the GNU GPL. See README and COPYING for details.
  */
 

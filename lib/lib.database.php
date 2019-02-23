@@ -2,11 +2,11 @@
 /**
  * Database abstraction functions.
  *
- * Part of the DOMjudge Programming Contest Jury System and licenced
+ * Part of the DOMjudge Programming Contest Jury System and licensed
  * under the GNU GPL. See README and COPYING for details.
  *
  * Originally based on: lib.database.php 1.4.1, Copyright (C) 2001-2010
- * Jeroen van Wolffelaar <jeroen@php.net>, et al.; licenced under the
+ * Jeroen van Wolffelaar <jeroen@php.net>, et al.; licensed under the
  * GNU GPL version 2 or higher.
  */
 

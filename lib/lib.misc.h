@@ -78,7 +78,7 @@ char *stripendline(char *) __attribute__((nonnull (1)));
 
 void version(const char *, const char *) __attribute__((nonnull (1, 2)));
 /* Print standard program name and version, with disclaimer and GPL
- * license info. Arguments: program name and version strings.
+ * licence info. Arguments: program name and version strings.
  */
 
 #ifdef __cplusplus

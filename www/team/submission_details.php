@@ -2,7 +2,7 @@
 /**
  * Gives a team the details of a judging of their submission: errors etc.
  *
- * Part of the DOMjudge Programming Contest Jury System and licenced
+ * Part of the DOMjudge Programming Contest Jury System and licensed
  * under the GNU GPL. See README and COPYING for details.
  */
 

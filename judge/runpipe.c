@@ -4,7 +4,7 @@
    Idea based on the program dpipe from the Virtual Distributed
    Ethernet package.
 
-   Part of the DOMjudge Programming Contest Jury System and licenced
+   Part of the DOMjudge Programming Contest Jury System and licensed
    under the GNU GPL. See README and COPYING for details.
 
 

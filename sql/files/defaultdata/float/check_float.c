@@ -1,7 +1,7 @@
 /*
    check_float -- program to compare output data containing floats.
 
-   Part of the DOMjudge Programming Contest Jury System and licenced
+   Part of the DOMjudge Programming Contest Jury System and licensed
    under the GNU GPL. See README and COPYING for details.
 
 

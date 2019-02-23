@@ -692,7 +692,7 @@ Version 2.2.0 - 11 August 2008
  - Added 'domjudge_plugin' mysql user for the plugin webinterface.
  - Cache hostname in team table to prevent slowdown on hosts without
    working reverse.
- - Removed LGPL licence by relicencing 2 files to GPL.
+ - Removed LGPL licence by relicensing 2 files to GPL.
  - Added ability to download source code for jury.
  - Allow bash-static to be replaced by any static POSIX shell.
  - In MySQL privileges table, add 'localhost' entries next to '%' entries
@@ -714,7 +714,7 @@ Version 2.1.1 - SVN
 Version 2.1.0 - 5 September 2007
 --------------------------------
  - Drop tempfile and mkstemps binaries, they are not necessary.
- - Change runguard license to GPL 2 or higher. The current code
+ - Change runguard licence to GPL 2 or higher. The current code
    is a different implementation of the original idea from timeout.
  - Make shell scripts /bin/sh where possible, set them to bash
    where we rely on bash-specific features.
@@ -890,7 +890,7 @@ Version 1.1.0 - 22 December 2005
  - Fixed that no compiler output gives compilation error.
  - When solutions timeout, first try to kill graciously (Closes: #1312848).
  - Removed LaTeX packages from the sources to remove GPL/LPPL conflicts.
- - Changed runguard license to IBM Public License.
+ - Changed runguard licence to IBM Public Licence.
  - Added diff to previous submission in source display (Closes: #1310244).
  - Extra check on submission filenames to prevent theoretical exploits
    (Closes: #1355816).
