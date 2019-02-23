@@ -41,7 +41,7 @@ by running 'make dist', see the online documentation, section
 "Developer information" for more details.
 
 
-Copyright & Licencing
+Copyright & Licensing
 ---------------------
 
 DOMjudge is Copyright (c) 2004 - 2019 by the DOMjudge developers and
@@ -62,13 +62,13 @@ themselves and these copyrights/attributions can also be found in the
 administrator manual.
 
 Various JavaScript libraries/snippets are included under www/js/:
-- jscolor.js: copyright Jan Odvarko, licenced under the GNU LGPL.
-- tabber.js: copyright Patrick Fitzgerald, licenced under the MIT licence.
-- Ace editor: licenced under the BSD licence, see COPYING.BSD.
-- jQuery: licenced under the MIT licence, see COPYING.MIT.
+- jscolor.js: copyright Jan Odvarko, licensed under the GNU LGPL.
+- tabber.js: copyright Patrick Fitzgerald, licensed under the MIT licence.
+- Ace editor: licensed under the BSD licence, see COPYING.BSD.
+- jQuery: licensed under the MIT licence, see COPYING.MIT.
 - jQuery TokenInput: dual licensed under GPL and MIT licences, see COPYING and COPYING.MIT.
 
-The Spyc PHP YAML parser is included, licenced under the MIT licence,
+The Spyc PHP YAML parser is included, licensed under the MIT licence,
 see COPYING.MIT.
 
 Font Awesome is copyright FortAwesome.
@@ -77,9 +77,9 @@ Font License: SIL OFL 1.1 (http://scripts.sil.org/OFL)
 Code License: the MIT licence, see COPYING.MIT
 
 The default validator from the Kattis problemtools package is
-included, licenced under the MIT licence, see COPYING.MIT.
+included, licensed under the MIT licence, see COPYING.MIT.
 
-The M4 autoconf macros are licenced under all-permissive and GPL3+
+The M4 autoconf macros are licensed under all-permissive and GPL3+
 licences; see the respective files under m4/ for details.
 
 Furthermore, a binary version of the dash shell (statically compiled)

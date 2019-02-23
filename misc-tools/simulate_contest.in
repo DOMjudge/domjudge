@@ -6,7 +6,7 @@
  * Program to do a "relive" simulation of a previous contest: all
  * original results are added to the scoreboard in real contest time.
  *
- * Part of the DOMjudge Programming Contest Jury System and licenced
+ * Part of the DOMjudge Programming Contest Jury System and licensed
  * under the GNU GPL. See README and COPYING for details.
  */
 if (isset($_SERVER['REMOTE_ADDR'])) {

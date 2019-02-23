@@ -109,30 +109,30 @@ to name them here too (with non-GPL licences listed where applicable):
 <item> lib.database.php by Jeroen van Wolffelaar et al.
 <item> runguard.c was originally based on timeout from The
        Coroner's Toolkit by Wietse Venema.
-<item> jscolor.js by Jan Odvarko, licenced under the GNU LGPL. It
+<item> jscolor.js by Jan Odvarko, licensed under the GNU LGPL. It
        was obtained at <url url="http://jscolor.com">.
-<item> tabber.js by Patrick Fitzgerald, licenced under the MIT
+<item> tabber.js by Patrick Fitzgerald, licensed under the MIT
        licence, see <tt>COPYING.MIT</tt>. It was downloaded from
        <url url="http://www.barelyfitz.com/projects/tabber/">.
-<item> Ace code editor by Ajax.org B.V., licenced under the BSD
+<item> Ace code editor by Ajax.org B.V., licensed under the BSD
        licence, see <tt>COPYING.BSD</tt>. It was downloaded from
        <url url="https://github.com/ajaxorg/ace-builds">,
        the <tt>src-min-noconflict</tt> version.
-<item> jQuery JavaScript library by the jQuery Foundation, licenced
+<item> jQuery JavaScript library by the jQuery Foundation, licensed
        under the MIT licence, see <tt>COPYING.MIT</tt>. It was
        downloaded from <url url="http://jquery.com/">.
 <item> jQuery TokenInput by James Smith, dual
-       licenced under the GPL and MIT licences, see <tt>COPYING</tt>
+       licensed under the GPL and MIT licences, see <tt>COPYING</tt>
        and <tt>COPYING.MIT</tt>. It was downloaded from
        <url url="https://github.com/loopj/jquery-tokeninput">.
-<item> JavaScript Cookie by Klaus Hartl and Fagner Brack, licenced
+<item> JavaScript Cookie by Klaus Hartl and Fagner Brack, licensed
        under the MIT licence, see <tt>COPYING.MIT</tt>. It was
        downloaded from <url url="https://github.com/js-cookie/js-cookie">.
 <item> The Spyc PHP YAML parser by Chris Wanstrath and Vlad Andersen,
-       licenced under the MIT licence, see <tt>COPYING.MIT</tt>. It
+       licensed under the MIT licence, see <tt>COPYING.MIT</tt>. It
        was downloaded from <url url="https://github.com/mustangostang/spyc/">.
 <item> The default compare script was included from the
-       Kattis problemtools package, and licenced under the MIT
+       Kattis problemtools package, and licensed under the MIT
        licence, see <tt>COPYING.MIT</tt>. It was downloaded from
        <url url="https://github.com/Kattis/problemtools/tree/master/support/default_validator">.
 <item> The DOMjudge logo is based on the NKP 2004 logo made by
@@ -140,7 +140,7 @@ to name them here too (with non-GPL licences listed where applicable):
 <item> Several icons have been taken from the phpMyAdmin project.
 <item> Several M4 autoconf macros from the <htmlurl name="Autoconf archive"
        url="http://www.gnu.org/software/autoconf-archive/"> by various
-       people are included under <tt>m4/</tt>. These are licenced
+       people are included under <tt>m4/</tt>. These are licensed
        under all-permissive and GPL3+ licences; see the respective
        files for details.
 </itemize>

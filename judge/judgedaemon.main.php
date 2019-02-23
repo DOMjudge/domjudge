@@ -3,7 +3,7 @@
  * Request a yet unjudged submission from the domserver, judge it, and pass
  * the results back to the domserver.
  *
- * Part of the DOMjudge Programming Contest Jury System and licenced
+ * Part of the DOMjudge Programming Contest Jury System and licensed
  * under the GNU GPL. See README and COPYING for details.
  */
 if (isset($_SERVER['REMOTE_ADDR'])) {

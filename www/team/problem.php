@@ -2,7 +2,7 @@
 /**
  * View/download a specific problem text or sample testcase.
  *
- * Part of the DOMjudge Programming Contest Jury System and licenced
+ * Part of the DOMjudge Programming Contest Jury System and licensed
  * under the GNU GPL. See README and COPYING for details.
  */
 
