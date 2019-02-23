@@ -836,16 +836,16 @@
         },
         {
             "name": "doctrine/orm",
-            "version": "v2.5.14",
+            "version": "v2.5.15",
             "source": {
                 "type": "git",
-                "url": "https://github.com/doctrine/orm.git",
-                "reference": "810a7baf81462a5ddf10e8baa8cb94b6eec02754"
+                "url": "https://github.com/DOMjudge/orm.git",
+                "reference": "472ecd65d87f2e3675572eace4820e62c14c74b0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/orm/zipball/810a7baf81462a5ddf10e8baa8cb94b6eec02754",
-                "reference": "810a7baf81462a5ddf10e8baa8cb94b6eec02754",
+                "url": "https://api.github.com/repos/DOMjudge/orm/zipball/472ecd65d87f2e3675572eace4820e62c14c74b0",
+                "reference": "472ecd65d87f2e3675572eace4820e62c14c74b0",
                 "shasum": ""
             },
             "require": {
