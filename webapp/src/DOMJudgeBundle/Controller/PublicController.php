@@ -60,7 +60,7 @@ class PublicController extends BaseController
         $data       = [];
         $refreshUrl = $this->generateUrl('public_index');
         // Determine contest to use
-        $contest = $this->DOMJudgeService->getCurrentContest();
+        $contest = $this->DOMJudgeService->getCurrentContest(-1);
 
         if ($static) {
             $data['hide_menu'] = false;
