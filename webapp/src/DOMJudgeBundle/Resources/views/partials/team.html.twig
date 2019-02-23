@@ -1,0 +1,63 @@
+{% if team is empty %}
+    <div class="alert alert-danger mt-4">
+        No team found by this id.
+    </div>
+{% else %}
+    <h1 class="mt-3">Team {{ team.name }}</h1>
+    {% set teamId = team.teamId %}
+    {% if team.externalid is not null %}
+        {% set teamId = team.externalid %}
+    {% endif %}
+    {% set teamImage = 'images/teams/' ~ teamId ~ '.jpg' %}
+    {% if teamImage | assetExists %}
+        <img id="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.name }}"
+             title="Picture of team {{ team.name }}"/>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>Name</th>
+                    <td>{{ team.name }}</td>
+                </tr>
+                <tr>
+                    <th>Category</th>
+                    <td>{{ team.category.name }}</td>
+                </tr>
+                {% if team.members is not empty %}
+                    <tr>
+                        <th>Members</th>
+                        <td>{{ team.members }}</td>
+                    </tr>
+                {% endif %}
+                {% if showAffiliations and team.affiliation is not empty %}
+                    <tr>
+                        <th>Affiliation</th>
+                        <td>{{ team.affiliation.name }}</td>
+                    </tr>
+                    {% if showFlags and team.affiliation.country is not empty %}
+                        <tr>
+                            <th>Country</th>
+                            <td>
+                                {% set countryFlag = 'images/countries/' ~ team.affiliation.country ~ '.png' %}
+                                {% if countryFlag | assetExists %}
+                                    <img src="{{ asset(countryFlag) }}" alt="{{ team.affiliation.country }}"
+                                         title="{{ team.affiliation.country }}" class="countryflag"/>
+                                {% endif %}
+                                {{ team.affiliation.country }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endif %}
+                {% if team.room is not empty %}
+                    <tr>
+                        <th>Location</th>
+                        <td>{{ team.room }}</td>
+                    </tr>
+                {% endif %}
+            </table>
+            <a href="{{ scoreboardPath }}">Back to the scoreboard</a>
+        </div>
+    </div>
+{% endif %}

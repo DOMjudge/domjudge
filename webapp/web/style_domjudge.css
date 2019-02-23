@@ -293,3 +293,5 @@ tr.ignore td, td.ignore, span.ignore {
     display: block;
     margin: -3rem auto 3rem auto;
 }
+
+#teampicture { position: absolute; right: 4ex; top: 7ex; }

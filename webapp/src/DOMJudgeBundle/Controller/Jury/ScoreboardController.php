@@ -57,6 +57,7 @@ class ScoreboardController extends Controller
             $scoreFilter = $this->scoreboardService->initializeScoreboardFilter($request, $response);
             $scoreboard  = $this->scoreboardService->getScoreboard($contest, true, $scoreFilter);
 
+            $data['contest']              = $contest;
             $data['scoreFilter']          = $scoreFilter;
             $data['scoreboard']           = $scoreboard;
             $data['filterValues']         = $this->scoreboardService->getFilterValues($contest, true);

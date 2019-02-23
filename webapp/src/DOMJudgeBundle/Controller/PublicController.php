@@ -2,6 +2,8 @@
 
 namespace DOMJudgeBundle\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\ScoreboardService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -30,10 +32,19 @@ class PublicController extends BaseController
      */
     protected $scoreboardService;
 
-    public function __construct(DOMJudgeService $DOMJudgeService, ScoreboardService $scoreboardService)
-    {
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+
+    public function __construct(
+        DOMJudgeService $DOMJudgeService,
+        ScoreboardService $scoreboardService,
+        EntityManagerInterface $entityManager
+    ) {
         $this->DOMJudgeService   = $DOMJudgeService;
         $this->scoreboardService = $scoreboardService;
+        $this->entityManager     = $entityManager;
     }
 
     /**
@@ -102,6 +113,8 @@ class PublicController extends BaseController
             $scoreFilter = $this->scoreboardService->initializeScoreboardFilter($request, $response);
             $scoreboard  = $this->scoreboardService->getScoreboard($contest, false, $scoreFilter);
 
+            $data['contest']              = $contest;
+            $data['static']               = $static;
             $data['static']               = $static;
             $data['scoreFilter']          = $scoreFilter;
             $data['scoreboard']           = $scoreboard;
@@ -139,5 +152,24 @@ class PublicController extends BaseController
         }
         return $this->DOMJudgeService->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
                                                  $response);
+    }
+
+    /**
+     * @Route("/team/{teamId}", name="public_team")
+     * @param int $teamId
+     * @return Response
+     * @throws \Exception
+     */
+    public function teamAction(int $teamId)
+    {
+        $team             = $this->entityManager->getRepository(Team::class)->find($teamId);
+        $showFlags        = (bool)$this->DOMJudgeService->dbconfig_get('show_flags', true);
+        $showAffiliations = (bool)$this->DOMJudgeService->dbconfig_get('show_affiliations', true);
+
+        return $this->render('@DOMJudge/public/team.html.twig', [
+            'team' => $team,
+            'showFlags' => $showFlags,
+            'showAffiliations' => $showAffiliations,
+        ]);
     }
 }

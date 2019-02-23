@@ -159,4 +159,25 @@ class FreezeData
 
         return $this->cache[self::KEY_FINALIZED];
     }
+
+    /**
+     * Get the progress of this freezedata
+     * @return int
+     */
+    public function getProgress()
+    {
+        $now = Utils::now();
+        if (!$this->started()) {
+            return -1;
+        }
+        $left = Utils::difftime((float)$this->contest->getEndtime(), $now);
+        if ($left <= 0) {
+            return 100;
+        }
+
+        $passed   = Utils::difftime((float)$this->contest->getStarttime(), $now);
+        $duration = Utils::difftime((float)$this->contest->getStarttime(), (float)$this->contest->getEndtime());
+        return (int)($passed * 100. / $duration);
+    }
+
 }

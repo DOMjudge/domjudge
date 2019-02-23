@@ -9,7 +9,7 @@
 
     <div class="collapse navbar-collapse" id="menuDefault">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item {% if current_route in ['public_index'] %}active{% endif %}">
+            <li class="nav-item {% if current_route in ['public_index', 'public_team'] %}active{% endif %}">
                 <a class="nav-link" href="{{ path('public_index') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
             </li>
             <li class="nav-item {% if current_route == 'legacy.public_problems' %}active{% endif %}">
@@ -48,4 +48,4 @@
         {% include '@DOMJudge/partials/menu_countdown.html.twig' with {contest: current_public_contest} %}
     </div>
 </nav>
-{% include '@DOMJudge/partials/scoreboard_progress_bar.html.twig' with {margin: -9} %}
+{% include '@DOMJudge/partials/scoreboard_progress_bar.html.twig' with {margin: -9, contest: current_public_contest} %}
