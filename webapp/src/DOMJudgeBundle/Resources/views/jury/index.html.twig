@@ -15,12 +15,34 @@
 {% endfor %}
 
 <a href="https://www.domjudge.org/">
-  <img src="../images/DOMjudgelogo.png" id="djlogo" alt="DOMjudge logo" class="float-right d-none d-lg-block" title="The DOMjudge logo: free as in beer!" />
+  <img src="../images/DOMjudgelogo.png" id="djlogo" alt="DOMjudge logo" class="float-right d-none d-md-block" title="The DOMjudge logo: free as in beer!" />
 </a>
 
 <div class="row equal mt-3">
-    <div class="col-lg-3 col-sm-6 mt-3">
-        <div class="card">
+    <div class="col-lg-4 col-md-5 col-sm-6 mt-3">
+        {% if is_granted('ROLE_JURY') %}
+        <div class="card mb-3">
+            <div class="card-header">
+                Before contest:
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li><a href="{{ path('jury_contests') }}">Contests</a></li>
+                    <li><a href="{{ path('jury_executables') }}">Executables</a></li>
+                    <li><a href="{{ path('jury_judgehosts') }}">Judgehosts</a></li>
+                    <li><a href="{{ path('jury_judgehost_restrictions') }}">Judgehost Restrictions</a></li>
+                    <li><a href="{{ path('jury_languages') }}">Languages</a></li>
+                    <li><a href="{{ path('jury_problems') }}">Problems</a></li>
+                    <li><a href="{{ path('jury_users') }}">Users</a></li>
+                    <li><a href="{{ path('jury_teams') }}">Teams</a></li>
+                    <li><a href="{{ path('jury_team_categories') }}">Team Categories</a></li>
+                    <li><a href="{{ path('jury_team_affiliations') }}">Team Affiliations</a></li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mb-3">
             <div class="card-header">
                 During contest:
             </div>
@@ -45,33 +67,8 @@
         </div>
     </div>
 
-  {% if is_granted('ROLE_JURY') %}
-  <div class="col-lg-3 col-sm-6 mt-3">
-    <div class="card">
-      <div class="card-header">
-        Before contest:
-      </div>
-      <div class="card-body">
-        <ul>
-            <li><a href="{{ path('jury_contests') }}">Contests</a></li>
-            <li><a href="{{ path('jury_executables') }}">Executables</a></li>
-            <li><a href="{{ path('jury_judgehosts') }}">Judgehosts</a></li>
-            <li><a href="{{ path('jury_judgehost_restrictions') }}">Judgehost Restrictions</a></li>
-            <li><a href="{{ path('jury_languages') }}">Languages</a></li>
-            <li><a href="{{ path('jury_problems') }}">Problems</a></li>
-            <li><a href="{{ path('jury_users') }}">Users</a></li>
-            <li><a href="{{ path('jury_teams') }}">Teams</a></li>
-            <li><a href="{{ path('jury_team_categories') }}">Team Categories</a></li>
-            <li><a href="{{ path('jury_team_affiliations') }}">Team Affiliations</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-
-  {% if is_granted('ROLE_ADMIN') %}
-  <div class="col-lg-3 col-sm-6 mt-3">
+  <div class="col-lg-4 col-md-5 col-sm-6 mt-3">
+    {% if is_granted('ROLE_ADMIN') %}
     <div class="card mb-3">
       <div class="card-header">
         Administrator:
@@ -88,11 +85,9 @@
         </ul>
       </div>
     </div>
-  </div>
-  {% endif %}
+    {% endif %}
 
-  <div class="col-lg-3 col-sm-6 mt-3">
-    <div class="card">
+    <div class="card mb-3">
       <div class="card-header">
         Documentation:
       </div>
