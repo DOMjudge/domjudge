@@ -60,7 +60,7 @@
                         {% set link = path('jury_problem', {'probId': problem.probid}) %}
                     {% elseif problem.problem.hasProblemtext %}
                         {% if public %}
-                            {% set link = path('legacy.public_problem', {id: problem.probid}) %}
+                            {% set link = path('public_problem_text', {probId: problem.probid}) %}
                         {% else %}
                             {% set link = path('legacy.team_problem', {id: problem.probid}) %}
                         {% endif %}

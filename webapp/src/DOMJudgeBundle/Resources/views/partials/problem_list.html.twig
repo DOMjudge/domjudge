@@ -1,0 +1,93 @@
+{# problem \DOMJudgeBundle\Entity\ContestProblem #}
+
+<h1 class="mt-4 text-center">Contest problems</h1>
+
+{% if problems is empty %}
+    <div class="alert alert-secondary">No problem texts available at this point.</div>
+{% else %}
+    <div class="container">
+        <div class="row problem-list">
+            {% for row in problems|batch(3, []) %}
+                <div class="col-md-12">
+                    <div class="card-deck my-md-3">
+                        {% for problemData in row %}
+                            {% if problemData is empty %}
+                                <div class="card" style="border: none;"></div>
+                            {% else %}
+                                {% set problem = problemData.0 %}
+                                {% set numsamples = problemData.numsamples %}
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h3 class="card-title">
+                                            {% if problem.color %}
+                                                <div class="circle"
+                                                     style="background-color: {{ problem.color }};"></div>
+                                                Problem {{ problem.shortName }}
+                                            {% endif %}
+                                        </h3>
+                                        <h4 class="card-subtitle mb-2 text-muted">
+                                            {{ problem.problem.name }}
+                                        </h4>
+                                        {% if showLimits %}
+                                            <h5 class="card-subtitle mb-2 text-muted">
+                                                Limits: {{ problem.problem.timelimit }}
+                                                second
+                                                {%- if problem.problem.timelimit > 1 %}s{% endif %}
+                                                {%- if timeFactorDiffers -%}
+                                                    <sup>*</sup>
+                                                {% endif %}
+                                                /
+                                                {{ ((problem.problem.memlimit | default(defaultMemoryLimit)) * 1024) | printSize }}
+                                            </h5>
+                                        {% endif %}
+
+                                        {% if problem.problem.problemtextType is not empty %}
+                                            <div class="text-center">
+                                                <a class="btn btn-secondary" role="button"
+                                                   href="{{ path('public_problem_text', {'probId': problem.probid}) }}">
+                                                    <i class="fas fa-file-{{ problem.problem.problemtextType }}"></i>
+                                                    problem text
+                                                </a>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if numsamples is not empty %}
+                                            <div>
+                                                <br/>
+                                            </div>
+                                            <h4 class="card-subtitle mb-2">Samples</h4>
+                                            <ol class="text-center list-group list-group-flush">
+                                                {% for i in 1..numsamples %}
+                                                    <li class="list-group-item">
+                                                        <a class="btn btn-outline-secondary" role="button"
+                                                           href="{{ path('public_problem_sample_testcase', {'probId': problem.probid, 'type': 'input', 'index': i}) }}">
+                                                            input {% if numsamples > 1 %}#{{ i }}{% endif %}
+                                                        </a>
+                                                        <a class="btn btn-outline-secondary" role="button"
+                                                           href="{{ path('public_problem_sample_testcase', {'probId': problem.probid, 'type': 'output', 'index': i}) }}">
+                                                            output {% if numsamples > 1 %}#{{ i }}{% endif %}
+                                                        </a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ol>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if showLimits and timeFactorDiffers %}
+            <div class="row">
+                <div class="col-md-12 my-sm-3">
+                    <div class=" alert alert-secondary" role="alert">
+                        * language time factors apply
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

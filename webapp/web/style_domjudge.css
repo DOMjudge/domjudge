@@ -295,3 +295,19 @@ tr.ignore td, td.ignore, span.ignore {
 }
 
 #teampicture { position: absolute; right: 4ex; top: 7ex; }
+
+.problem-list h3,h4,h5 {
+    text-align: center;
+}
+
+.problem-list h3 {
+    font-size: 1.17em;
+}
+
+.problem-list h4 {
+    font-size: 1.12em
+}
+
+.problem-list h5 {
+    font-size: .83em;
+}

@@ -1,7 +1,3 @@
-legacy.public_problems:
-    path: /public/problems.php
-legacy.public_problem:
-    path: /public/problem.php
 legacy.team_index:
     path: /team/
 legacy.team_problem:
