@@ -19,9 +19,8 @@ class GeneralAvailabilityTest extends WebTestCase
 
     public function urlProvider()
     {
-        yield ['/public/problems.php', 200];
-        yield ['/public/index.php', 200];
-        yield ['/public/', 200];
+        yield ['/public/problems', 200];
+        yield ['/public', 200];
         yield ['/login', 200];
 
         yield ['/api', 200];
@@ -32,8 +31,8 @@ class GeneralAvailabilityTest extends WebTestCase
         // fully featured server environment.
 
         yield ['/', 302];
-        yield ['/team/', 302];
-        yield ['/jury/', 302];
+        yield ['/team', 302];
+        yield ['/jury', 302];
         yield ['/logout', 302];
 
         yield ['/public/doesnotexist.php', 404];
