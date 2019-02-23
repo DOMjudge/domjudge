@@ -150,7 +150,7 @@ class RejudgingController extends Controller
     }
 
     /**
-     * @Route("/rejudgings/{rejudgingId}", name="jury_rejudging")
+     * @Route("/rejudgings/{rejudgingId}", name="jury_rejudging", requirements={"rejudgingId": "\d+"})
      * @param Request           $request
      * @param SubmissionService $submissionService
      * @param int               $rejudgingId
@@ -494,8 +494,10 @@ class RejudgingController extends Controller
                 if ($table === 'submission') {
                     // clean up rejudging. Note that if $table is 'submission', we will always have only one
                     // judging so we can safely delete the rejudging
-                    $this->entityManager->remove($rejudging);
-                    $this->entityManager->flush();
+                    if ($rejudging) {
+                        $this->entityManager->remove($rejudging);
+                        $this->entityManager->flush();
+                    }
                     throw new BadRequestHttpException(sprintf('Submission is already part of rejudging r%d',
                                                               $submission->getRejudgingid()));
                 } else {
@@ -510,7 +512,8 @@ class RejudgingController extends Controller
                 $judging,
                 $submission,
                 $rejudging,
-                $scoreboardService
+                $scoreboardService,
+                $em
             ) {
                 if (!$fullRejudge) {
                     $judging->setValid(false);
