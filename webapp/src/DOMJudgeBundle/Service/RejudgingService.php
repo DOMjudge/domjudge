@@ -187,7 +187,7 @@ class RejudgingService
                     $submission = $this->entityManager->getRepository(Submission::class)->find($submission['submitid']);
                     $this->balloonService->updateBalloons($contest, $submission);
                 });
-            } else {
+            } elseif ($action === self::ACTION_CANCEL) {
                 // Restore old judgehost association
                 /** @var Judging $validJudging */
                 $validJudging = $this->entityManager->createQueryBuilder()
@@ -209,6 +209,9 @@ class RejudgingService
                             SET rejudgingid = NULL,
                                 judgehost = :judgehost
                             WHERE rejudgingid = :rejudgingid', $params);
+            } else {
+                $error = "Unknown action '$action' specified.";
+                throw new \BadMethodCallException($error);
             }
         }
 
