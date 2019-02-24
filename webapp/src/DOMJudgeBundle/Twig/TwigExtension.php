@@ -106,8 +106,11 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         $dir = realpath(sprintf('%s/../../etc', $this->kernel->getRootDir()));
         require_once $dir . '/domserver-config.php';
 
+        $user = $this->domjudge->getUser();
+        $team = $user ? $user->getTeam() : null;
+
         // These variables mostly exist for the header template
-        $data = [
+        return [
             'current_contest' => $this->domjudge->getCurrentContest(),
             'current_contests' => $this->domjudge->getCurrentContests(),
             'current_public_contest' => $this->domjudge->getCurrentContest(-1),
@@ -116,15 +119,9 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             'refresh_flag' => $refresh_flag,
             'icat_url' => defined('ICAT_URL') ? ICAT_URL : null,
             'ext_ccs_url' => defined('EXT_CCS_URL') ? EXT_CCS_URL : null,
+            'current_team_contest' => $team ? $this->domjudge->getCurrentContest($user->getTeamid()) : null,
+            'current_team_contests' => $team ? $this->domjudge->getCurrentContests($user->getTeamid()) : null,
         ];
-
-        $user = $this->domjudge->getUser();
-        if ($user && $user->getTeam()) {
-            $data['current_team_contest'] = $this->domjudge->getCurrentContest($user->getTeamid());
-            $data['current_team_contests'] = $this->domjudge->getCurrentContests($user->getTeamid());
-        }
-
-        return $data;
     }
 
     public function timediff($start, $end = null)
@@ -260,11 +257,15 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
      */
     public static function statusClass(string $status): string
     {
-        switch($status) {
-            case 'noconn': return 'text-muted';
-            case 'crit': return 'text-danger';
-            case 'warn': return 'text-warning';
-            case 'ok': return 'text-success';
+        switch ($status) {
+            case 'noconn':
+                return 'text-muted';
+            case 'crit':
+                return 'text-danger';
+            case 'warn':
+                return 'text-warning';
+            case 'ok':
+                return 'text-success';
         }
         return '';
     }
@@ -276,12 +277,21 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
      */
     public static function statusIcon(string $status): string
     {
-        switch($status) {
-            case 'noconn': $icon = 'question'; break;
-            case 'crit': $icon = 'times'; break;
-            case 'warn': $icon = 'exclamation'; break;
-            case 'ok': $icon = 'check'; break;
-            default: return $status;
+        switch ($status) {
+            case 'noconn':
+                $icon = 'question';
+                break;
+            case 'crit':
+                $icon = 'times';
+                break;
+            case 'warn':
+                $icon = 'exclamation';
+                break;
+            case 'ok':
+                $icon = 'check';
+                break;
+            default:
+                return $status;
         }
         return sprintf('<i class="fas fa-%s-circle"></i>', $icon);
     }

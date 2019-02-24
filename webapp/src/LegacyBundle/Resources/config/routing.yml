@@ -1,4 +1,2 @@
 legacy.team_index:
     path: /team/
-legacy.team_submit:
-    path: /team/submit.php

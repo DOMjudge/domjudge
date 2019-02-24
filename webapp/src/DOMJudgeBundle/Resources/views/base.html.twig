@@ -26,8 +26,12 @@
     var domjudge_base_url = "{{ app.request.getBaseURL() }}";
     $(function () {
         $('.custom-file-input').on('change', function () {
-            var fileName = $(this).val().split('\\').pop();
-            $(this).next('.custom-file-label').html(fileName);
+            var files = this.files;
+            var fileNames = [];
+            for (var i = 0; i < files.length; i++) {
+                fileNames.push(files.item(i).name);
+            }
+            $(this).next('.custom-file-label').html(fileNames.join(", "));
             $(this).next('.custom-file-label').removeClass('text-muted');
         });
 

@@ -1,17 +1,15 @@
 <?php declare(strict_types=1);
 namespace DOMJudgeBundle\Controller;
 
+use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Entity\User;
+use DOMJudgeBundle\Form\Type\UserRegistrationType;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Utils\Utils;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-
-use DOMJudgeBundle\Utils\Utils;
-use DOMJudgeBundle\Form\UserRegistrationType;
-use DOMJudgeBundle\Entity\User;
-use DOMJudgeBundle\Entity\Team;
 
 class SecurityController extends Controller
 {
