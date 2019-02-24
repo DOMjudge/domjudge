@@ -1,31 +1,29 @@
 <?php declare(strict_types=1);
 
-namespace DOMJudgeBundle\Controller;
+namespace DOMJudgeBundle\Controller\Team;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query\Expr\Join;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\ContestProblem;
-use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TestcaseWithContent;
 use DOMJudgeBundle\Service\DOMJudgeService;
-use DOMJudgeBundle\Service\ScoreboardService;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\RouterInterface;
 
 /**
- * Class PublicController
+ * Class ProblemController
  *
- * @Route("/public")
+ * @Route("/team")
+ * @Security("is_granted('ROLE_TEAM')")
+ * @Security("user.getTeam() !== null", message="You do not have a team associated with your account.")
  *
- * @package DOMJudgeBundle\Controller
+ * @package DOMJudgeBundle\Controller\Team
  */
-class PublicController extends BaseController
+class ProblemController extends BaseController
 {
     /**
      * @var DOMJudgeService
@@ -33,136 +31,31 @@ class PublicController extends BaseController
     protected $DOMJudgeService;
 
     /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
      * @var EntityManagerInterface
      */
     protected $entityManager;
 
-    public function __construct(
-        DOMJudgeService $DOMJudgeService,
-        ScoreboardService $scoreboardService,
-        EntityManagerInterface $entityManager
-    ) {
-        $this->DOMJudgeService   = $DOMJudgeService;
-        $this->scoreboardService = $scoreboardService;
-        $this->entityManager     = $entityManager;
-    }
-
     /**
-     * @Route("", name="public_index")
-     * @param Request $request
-     * @return Response
-     * @throws \Exception
+     * ProblemController constructor.
+     * @param DOMJudgeService        $DOMJudgeService
+     * @param EntityManagerInterface $entityManager
      */
-    public function scoreboardAction(Request $request)
+    public function __construct(DOMJudgeService $DOMJudgeService, EntityManagerInterface $entityManager)
     {
-        $response   = new Response();
-        $static     = $request->query->getBoolean('static');
-        $data       = [];
-        $refreshUrl = $this->generateUrl('public_index');
-        // Determine contest to use
-        $contest = $this->DOMJudgeService->getCurrentContest(-1);
-
-        if ($static) {
-            $data['hide_menu'] = false;
-            $refreshParams     = [
-                'static' => 1,
-            ];
-            // For static scoreboards, allow to pass a contest= param
-            if ($contestId = $request->query->get('contest')) {
-                if ($contestId === 'auto') {
-                    // Automatically detect the contest that is activated the latest
-                    $contest      = null;
-                    $activateTime = null;
-                    foreach ($this->DOMJudgeService->getCurrentContests(-1) as $possibleContest) {
-                        if (!$possibleContest->getPublic() || !$possibleContest->getEnabled()) {
-                            continue;
-                        }
-                        if ($activateTime === null || $activateTime < $possibleContest->getActivatetime()) {
-                            $activateTime = $possibleContest->getActivatetime();
-                            $contest      = $possibleContest;
-                        }
-                    }
-                } else {
-                    // Find the contest with the given ID
-                    $contest = null;
-                    foreach ($this->DOMJudgeService->getCurrentContests(-1) as $possibleContest) {
-                        if ($possibleContest->getCid() == $contestId || $possibleContest->getExternalid() == $contestId) {
-                            $contest = $possibleContest;
-                            break;
-                        }
-                    }
-
-                    if ($contest) {
-                        $refreshParams['contest'] = $contest->getCid();
-                    } else {
-                        throw new NotFoundHttpException('Specified contest not found');
-                    }
-                }
-            }
-
-            $refreshUrl = sprintf('?%s', http_build_query($refreshParams));
-        }
-
-        $data = $this->scoreboardService->getScoreboardTwigData($request, $response, $refreshUrl, false, true, $static,
-                                                                $contest);
-
-        if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/partials/scoreboard.html.twig', $data, $response);
-        }
-        return $this->render('@DOMJudge/public/scoreboard.html.twig', $data, $response);
+        $this->DOMJudgeService = $DOMJudgeService;
+        $this->entityManager   = $entityManager;
     }
 
     /**
-     * @Route("/change-contest/{contestId}", name="public_change_contest")
-     * @param Request         $request
-     * @param RouterInterface $router
-     * @param int             $contestId
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function changeContestAction(Request $request, RouterInterface $router, int $contestId)
-    {
-        if ($this->isLocalReferrer($router, $request)) {
-            $response = new RedirectResponse($request->headers->get('referer'));
-        } else {
-            $response = $this->redirectToRoute('public_index');
-        }
-        return $this->DOMJudgeService->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
-                                                 $response);
-    }
-
-    /**
-     * @Route("/team/{teamId}", name="public_team")
-     * @param int $teamId
-     * @return Response
-     * @throws \Exception
-     */
-    public function teamAction(int $teamId)
-    {
-        $team             = $this->entityManager->getRepository(Team::class)->find($teamId);
-        $showFlags        = (bool)$this->DOMJudgeService->dbconfig_get('show_flags', true);
-        $showAffiliations = (bool)$this->DOMJudgeService->dbconfig_get('show_affiliations', true);
-
-        return $this->render('@DOMJudge/public/team.html.twig', [
-            'team' => $team,
-            'showFlags' => $showFlags,
-            'showAffiliations' => $showAffiliations,
-        ]);
-    }
-
-    /**
-     * @Route("/problems", name="public_problems")
+     * @Route("/problems", name="team_problems")
      * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      */
     public function problemsAction()
     {
-        $contest            = $this->DOMJudgeService->getCurrentContest(-1);
+        $user               = $this->DOMJudgeService->getUser();
+        $contest            = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
         $showLimits         = (bool)$this->DOMJudgeService->dbconfig_get('show_limits_on_team_page');
         $defaultMemoryLimit = (int)$this->DOMJudgeService->dbconfig_get('memory_limit', 0);
         $timeFactorDiffers  = false;
@@ -192,7 +85,7 @@ class PublicController extends BaseController
                 ->getResult();
         }
 
-        return $this->render('@DOMJudge/public/problems.html.twig', [
+        return $this->render('@DOMJudge/team/problems.html.twig', [
             'problems' => $problems,
             'showLimits' => $showLimits,
             'defaultMemoryLimit' => $defaultMemoryLimit,
@@ -202,13 +95,14 @@ class PublicController extends BaseController
 
 
     /**
-     * @Route("/problems/{probId}/text", name="public_problem_text", requirements={"probId": "\d+"})
+     * @Route("/problems/{probId}/text", name="team_problem_text", requirements={"probId": "\d+"})
      * @param int $probId
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function problemTextAction(int $probId)
     {
-        $contest = $this->DOMJudgeService->getCurrentContest(-1);
+        $user    = $this->DOMJudgeService->getUser();
+        $contest = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -254,7 +148,7 @@ class PublicController extends BaseController
     /**
      * @Route(
      *     "/{probId}/sample/{index}/{type}",
-     *     name="public_problem_sample_testcase",
+     *     name="team_problem_sample_testcase",
      *     requirements={"probId": "\d+", "index": "\d+", "type": "input|output"}
      *     )
      * @param int    $probId
@@ -265,7 +159,8 @@ class PublicController extends BaseController
      */
     public function sampleTestcaseAction(int $probId, int $index, string $type)
     {
-        $contest = $this->DOMJudgeService->getCurrentContest(-1);
+        $user    = $this->DOMJudgeService->getUser();
+        $contest = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -306,10 +201,10 @@ class PublicController extends BaseController
 
         switch ($type) {
             case 'input':
-                $content = $testcase->getInput();
+                $content = stream_get_contents($testcase->getInput());
                 break;
             case 'output':
-                $content = $testcase->getOutput();
+                $content = stream_get_contents($testcase->getOutput());
                 break;
         }
 

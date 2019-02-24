@@ -107,7 +107,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         require_once $dir . '/domserver-config.php';
 
         // These variables mostly exist for the header template
-        return [
+        $data = [
             'current_contest' => $this->domjudge->getCurrentContest(),
             'current_contests' => $this->domjudge->getCurrentContests(),
             'current_public_contest' => $this->domjudge->getCurrentContest(-1),
@@ -117,6 +117,14 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             'icat_url' => defined('ICAT_URL') ? ICAT_URL : null,
             'ext_ccs_url' => defined('EXT_CCS_URL') ? EXT_CCS_URL : null,
         ];
+
+        $user = $this->domjudge->getUser();
+        if ($user && $user->getTeam()) {
+            $data['current_team_contest'] = $this->domjudge->getCurrentContest($user->getTeamid());
+            $data['current_team_contests'] = $this->domjudge->getCurrentContests($user->getTeamid());
+        }
+
+        return $data;
     }
 
     public function timediff($start, $end = null)

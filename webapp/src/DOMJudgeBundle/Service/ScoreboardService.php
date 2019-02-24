@@ -623,6 +623,60 @@ class ScoreboardService
     }
 
     /**
+     * Get the scoreboard Twig data for a given contest
+     * @param Request      $request
+     * @param Response     $response
+     * @param string       $refreshUrl
+     * @param bool         $jury
+     * @param bool         $public
+     * @param bool         $static
+     * @param Contest|null $contest
+     * @return array
+     * @throws \Exception
+     */
+    public function getScoreboardTwigData(
+        Request $request,
+        Response $response,
+        string $refreshUrl,
+        bool $jury,
+        bool $public,
+        bool $static,
+        Contest $contest = null
+    ) {
+        $data = [];
+        if ($contest) {
+            $data['refresh'] = [
+                'after' => 30,
+                'url' => $refreshUrl,
+                'ajax' => true,
+            ];
+
+            $scoreFilter = $this->initializeScoreboardFilter($request, $response);
+            $scoreboard  = $this->getScoreboard($contest, false, $scoreFilter);
+
+            $data['contest']              = $contest;
+            $data['static']               = $static;
+            $data['scoreFilter']          = $scoreFilter;
+            $data['scoreboard']           = $scoreboard;
+            $data['filterValues']         = $this->getFilterValues($contest, true);
+            $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
+            $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
+            $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
+            $data['showPending']          = $this->DOMJudgeService->dbconfig_get('show_pending', false);
+            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', true);
+            $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            $data['jury']   = $jury;
+            $data['public'] = $public;
+            $data['ajax']   = true;
+        }
+
+        return $data;
+    }
+
+    /**
      * Get the teams to display on the scoreboard
      * @param Contest     $contest
      * @param bool        $jury

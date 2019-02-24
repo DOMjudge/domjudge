@@ -1,6 +1,6 @@
 legacy.team_index:
     path: /team/
-legacy.team_problem:
-    path: /team/problem.php
-legacy.team_team:
-    path: /team/team.php
+legacy.team_print:
+    path: /team/print.php
+legacy.team_submit:
+    path: /team/submit.php

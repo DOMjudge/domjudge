@@ -41,36 +41,19 @@ class ScoreboardController extends Controller
 
     /**
      * @Route("", name="jury_scoreboard")
+     * @param Request $request
+     * @return Response
      * @throws \Exception
      */
     public function scoreboardAction(Request $request)
     {
-        $response = new Response();
-        $data     = [];
-        if ($contest = $this->DOMJudgeService->getCurrentContest()) {
-            $data['refresh'] = [
-                'after' => 30,
-                'url' => $this->generateUrl('jury_scoreboard'),
-                'ajax' => true,
-            ];
-
-            $scoreFilter = $this->scoreboardService->initializeScoreboardFilter($request, $response);
-            $scoreboard  = $this->scoreboardService->getScoreboard($contest, true, $scoreFilter);
-
-            $data['contest']              = $contest;
-            $data['scoreFilter']          = $scoreFilter;
-            $data['scoreboard']           = $scoreboard;
-            $data['filterValues']         = $this->scoreboardService->getFilterValues($contest, true);
-            $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
-            $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
-            $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
-            $data['showPending']          = $this->DOMJudgeService->dbconfig_get('show_pending', false);
-            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', true);
-            $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
-        }
+        $response   = new Response();
+        $refreshUrl = $this->generateUrl('team_scoreboard');
+        $contest    = $this->DOMJudgeService->getCurrentContest();
+        $data       = $this->scoreboardService->getScoreboardTwigData($request, $response, $refreshUrl, false, false,
+                                                                      false, $contest);
 
         if ($request->isXmlHttpRequest()) {
-            $data['jury'] = true;
             return $this->render('@DOMJudge/partials/scoreboard.html.twig', $data, $response);
         }
         return $this->render('@DOMJudge/jury/scoreboard.html.twig', $data, $response);

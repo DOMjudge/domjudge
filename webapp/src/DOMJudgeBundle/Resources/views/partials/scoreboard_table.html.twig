@@ -62,7 +62,7 @@
                         {% if public %}
                             {% set link = path('public_problem_text', {probId: problem.probid}) %}
                         {% else %}
-                            {% set link = path('legacy.team_problem', {id: problem.probid}) %}
+                            {% set link = path('team_problem_text', {probId: problem.probid}) %}
                         {% endif %}
                     {% endif %}
                 {% endif %}
@@ -165,7 +165,7 @@
                     {% elseif public %}
                         {% set link = path('public_team', {teamId: score.team.teamid}) %}
                     {% else %}
-                        {% set link = path('legacy.team_team', {id: score.team.teamid}) %}
+                        {% set link = path('team_team', {teamId: score.team.teamid}) %}
                     {% endif %}
                 {% endif %}
                 <a {% if link is not null %}href="{{ link }}"{% endif %}>

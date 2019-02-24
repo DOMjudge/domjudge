@@ -1,0 +1,9 @@
+{% extends "@DOMJudge/team/base.html.twig" %}
+
+{% block title %}
+    {% if team is not empty %}Team t{{ team.teamid }} - {% endif %}{{ parent() }}
+{% endblock %}
+
+{% block content %}
+    {% include '@DOMJudge/partials/team.html.twig' with {scoreboardPath: path('team_scoreboard')} %}
+{% endblock %}
