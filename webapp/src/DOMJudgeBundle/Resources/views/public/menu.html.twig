@@ -40,7 +40,7 @@
         {% include '@DOMJudge/partials/menu_login_logout_button.html.twig' %}
 
         <ul class="navbar-nav">
-            {% if current_public_contests is not empty %}
+            {% if current_public_contests | length > 1 %}
                 {% include '@DOMJudge/partials/menu_change_contest.html.twig' with {contest: current_public_contest, contests: current_public_contests, change_path: 'public_change_contest', show_no_contest: false} %}
             {% endif %}
         </ul>
