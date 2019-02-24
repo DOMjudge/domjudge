@@ -4,9 +4,12 @@ namespace DOMJudgeBundle\Controller\Team;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Controller\BaseController;
+use DOMJudgeBundle\Entity\Clarification;
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Form\Type\PrintType;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\ScoreboardService;
+use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Printing;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -38,14 +41,117 @@ class MiscController extends BaseController
     protected $entityManager;
 
     /**
+     * @var ScoreboardService
+     */
+    protected $scoreboardService;
+
+    /**
+     * @var SubmissionService
+     */
+    protected $submissionService;
+
+    /**
      * MiscController constructor.
      * @param DOMJudgeService        $DOMJudgeService
      * @param EntityManagerInterface $entityManager
+     * @param ScoreboardService      $scoreboardService
+     * @param SubmissionService      $submissionService
      */
-    public function __construct(DOMJudgeService $DOMJudgeService, EntityManagerInterface $entityManager)
+    public function __construct(
+        DOMJudgeService $DOMJudgeService,
+        EntityManagerInterface $entityManager,
+        ScoreboardService $scoreboardService,
+        SubmissionService $submissionService
+    ) {
+        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->entityManager     = $entityManager;
+        $this->scoreboardService = $scoreboardService;
+        $this->submissionService = $submissionService;
+    }
+
+    /**
+     * @Route("", name="team_index")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function homeAction(Request $request)
     {
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->entityManager   = $entityManager;
+        $user    = $this->DOMJudgeService->getUser();
+        $team    = $user->getTeam();
+        $teamId  = $team->getTeamid();
+        $contest = $this->DOMJudgeService->getCurrentContest($teamId);
+
+        $data = [
+            'team' => $team,
+            'contest' => $contest,
+            'refresh' => [
+                'after' => 15,
+                'url' => $this->generateUrl('team_index'),
+                'ajax' => true,
+            ],
+        ];
+        if ($contest) {
+            $data['scoreboard']           = $this->scoreboardService->getTeamScoreboard($contest, $teamId, true);
+            $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
+            $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
+            $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
+            $data['showPending']          = $this->DOMJudgeService->dbconfig_get('show_pending', false);
+            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', true);
+            $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+            $data['verificationRequired'] = $this->DOMJudgeService->dbconfig_get('verification_required', false);
+            $data['limitToTeams']         = [$team];
+            // We need to clear the entity manager, because loading the team scoreboard seems to break getting submission
+            // contestproblems for the contest we get the scoreboard for
+            $this->entityManager->clear();
+            $data['submissions'] = $this->submissionService->getSubmissionList([$contest->getCid() => $contest],
+                                                                               ['teamid' => $teamId], 0)[0];
+
+            /** @var Clarification[] $clarifications */
+            $clarifications = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Clarification', 'c')
+                ->leftJoin('c.problem', 'p')
+                ->leftJoin('c.sender', 's')
+                ->leftJoin('c.recipient', 'r')
+                ->select('c', 'p')
+                ->andWhere('c.contest = :contest')
+                ->andWhere('c.sender IS NULL')
+                ->andWhere('c.recipient = :team OR c.recipient IS NULL')
+                ->setParameter(':contest', $contest)
+                ->setParameter(':team', $team)
+                ->addOrderBy('c.submittime', 'DESC')
+                ->addOrderBy('c.clarid', 'DESC')
+                ->getQuery()
+                ->getResult();
+
+            /** @var Clarification[] $clarificationRequests */
+            $clarificationRequests = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Clarification', 'c')
+                ->leftJoin('c.problem', 'p')
+                ->leftJoin('c.sender', 's')
+                ->leftJoin('c.recipient', 'r')
+                ->select('c', 'p')
+                ->andWhere('c.contest = :contest')
+                ->andWhere('c.sender = :team')
+                ->setParameter(':contest', $contest)
+                ->setParameter(':team', $team)
+                ->addOrderBy('c.submittime', 'DESC')
+                ->addOrderBy('c.clarid', 'DESC')
+                ->getQuery()
+                ->getResult();
+
+            $data['clarifications']        = $clarifications;
+            $data['clarificationRequests'] = $clarificationRequests;
+            $data['categories']            = $this->DOMJudgeService->dbconfig_get('clar_categories');
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            $data['ajax'] = true;
+            return $this->render('@DOMJudge/team/partials/index_content.html.twig', $data);
+        }
+
+        return $this->render('@DOMJudge/team/index.html.twig', $data);
     }
 
     /**

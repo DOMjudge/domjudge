@@ -1,2 +1,4 @@
-legacy.team_index:
-    path: /team/
+legacy.team_submission:
+    path: /team/submission_details.php
+legacy.team_clarification:
+    path: /team/clarification.php

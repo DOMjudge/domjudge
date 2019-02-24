@@ -55,19 +55,22 @@
         {% if showTeamSubmissions or jury %}
             {% for problem in scoreboard.problems %}
                 {% set link = null %}
+                {% set target = '_self' %}
                 {% if not static %}
                     {% if jury %}
                         {% set link = path('jury_problem', {'probId': problem.probid}) %}
                     {% elseif problem.problem.hasProblemtext %}
                         {% if public %}
                             {% set link = path('public_problem_text', {probId: problem.probid}) %}
+                            {% set target = '_blank' %}
                         {% else %}
                             {% set link = path('team_problem_text', {probId: problem.probid}) %}
+                            {% set target = '_blank' %}
                         {% endif %}
                     {% endif %}
                 {% endif %}
                 <th title="problem {{ problem.problem.name }}" scope="col">
-                    <a {% if link %}href="{{ link }}"{% endif %}>
+                    <a {% if link %}href="{{ link }}"{% endif %} target="{{ target }}">
                         {{ problem.shortname }}
                         {% if problem.color is not empty %}
                             <div class="circle" style="background: {{ problem.color }};"></div>

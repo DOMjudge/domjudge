@@ -573,6 +573,9 @@ function enableRefresh($url, $after, usingAjax) {
                     if ($dataRefreshTarget.length) {
                         $data = $dataRefreshTarget.children();
                     }
+                    if ($refreshTarget.data('ajax-refresh-before')) {
+                        window[$refreshTarget.data('ajax-refresh-before')]();
+                    }
                     $refreshTarget.html($data);
                     if ($refreshTarget.data('ajax-refresh-after')) {
                         window[$refreshTarget.data('ajax-refresh-after')]();

@@ -43,7 +43,7 @@ class RootController extends BaseController
                 return $this->redirectToRoute('jury_index');
             }
             if ( $this->DOMJudgeService->checkrole('team', false) ) {
-                return $this->redirectToRoute('legacy.team_index');
+                return $this->redirectToRoute('team_index');
             }
             if ( $this->DOMJudgeService->checkrole('balloon') ) {
                 return $this->redirectToRoute('jury_balloons');

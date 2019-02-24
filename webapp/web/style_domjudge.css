@@ -311,3 +311,25 @@ tr.ignore td, td.ignore, span.ignore {
 .problem-list h5 {
     font-size: .83em;
 }
+
+#teamwelcome {
+    padding-top: 3rem;
+}
+#teamwelcometeam {
+    font-weight: bold;
+}
+#contestnotstarted {
+    color: silver;
+    margin-top: .2ex;
+    font-weight: normal;
+}
+
+h3.teamoverview {
+    border-top: solid 1px darkgray;
+    border-bottom: solid 1px darkgray;
+    background-color: #c4d8ff;
+    margin-top: 2ex;
+    padding-left: 1ex;
+    font-size: 1.17em;
+    text-align: center;
+}

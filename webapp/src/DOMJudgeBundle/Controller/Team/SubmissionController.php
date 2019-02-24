@@ -84,7 +84,7 @@ class SubmissionController extends BaseController
                                                  null, $contest->getCid());
                 $this->addFlash('submissionSuccess',
                                 '<strong>Submission done!</strong> Watch for the verdict in the list below.');
-                return $this->redirectToRoute('legacy.team_index');
+                return $this->redirectToRoute('team_index');
             }
         }
 
