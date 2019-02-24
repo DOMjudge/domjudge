@@ -475,13 +475,25 @@ function getRank(row)
 function getHeartCol(row) {
 	'use strict';
 	var tds = row.getElementsByTagName("td");
+	var td = null;
 	// search for td before the team name
 	for (var i = 1; i < 4; i++) {
 		if (tds[i].className == "scoretn") {
-			return tds[i - 1].children[0];
+			td = tds[i - 1];
+			break;
 		}
 	}
-	return tds[1].children[0];
+	if (td === null) {
+		td = tds[1];
+	}
+	if (td !== null) {
+		if (td.children.length) {
+			return td.children[0];
+		}
+		return td;
+	}
+
+	return null;
 }
 
 function getTeamname(row)
