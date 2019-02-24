@@ -3,8 +3,11 @@
 namespace DOMJudgeBundle\Controller\Team;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Controller\BaseController;
+use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\Problem;
+use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Form\Type\SubmitProblemType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\SubmissionService;
@@ -99,6 +102,69 @@ class SubmissionController extends BaseController
         return $this->render('@DOMJudge/team/submit.html.twig', [
             'form' => $form->createView(),
             'languages' => $languages,
+        ]);
+    }
+
+    /**
+     * @Route("/submission/{submitId}", name="team_submission")
+     * @param int $submitId
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function viewAction(int $submitId)
+    {
+        $verificationRequired = (bool)$this->DOMJudgeService->dbconfig_get('verification_required', false);;
+        $showCompile      = $this->DOMJudgeService->dbconfig_get('show_compile', 2);
+        $showSampleOutput = $this->DOMJudgeService->dbconfig_get('show_sample_output', 0);
+        $user             = $this->DOMJudgeService->getUser();
+        $team             = $user->getTeam();
+        $contest          = $this->DOMJudgeService->getCurrentContest($team->getTeamid());
+        /** @var Judging $judging */
+        $judging = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Judging', 'j')
+            ->join('j.submission', 's')
+            ->join('s.contest_problem', 'cp')
+            ->join('cp.problem', 'p')
+            ->join('s.language', 'l')
+            ->select('j', 's', 'cp', 'p', 'l')
+            ->andWhere('j.submitid = :submitId')
+            ->andWhere('j.valid = 1')
+            ->andWhere('s.team = :team')
+            ->setParameter(':submitId', $submitId)
+            ->setParameter(':team', $team)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        // Update seen status when viewing submission
+        if ($judging && $judging->getSubmission()->getSubmittime() < $contest->getEndtime() && (!$verificationRequired || $judging->getVerified())) {
+            $judging->setSeen(true);
+            $this->entityManager->flush();
+        }
+
+        /** @var Testcase[] $runs */
+        $runs = [];
+        if ($showSampleOutput && $judging && $judging->getResult() !== 'compiler-error') {
+            $runs = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Testcase', 't')
+                ->join('t.testcase_content', 'tc')
+                ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
+                ->leftJoin('jr.judging_run_output', 'jro')
+                ->select('t', 'jr', 'tc', 'jro')
+                ->andWhere('t.problem = :problem')
+                ->andWhere('t.sample = 1')
+                ->setParameter(':judging', $judging)
+                ->setParameter(':problem', $judging->getSubmission()->getProblem())
+                ->orderBy('t.rank')
+                ->getQuery()
+                ->getResult();
+        }
+
+        return $this->render('@DOMJudge/team/submission.html.twig', [
+            'judging' => $judging,
+            'verificationRequired' => $verificationRequired,
+            'showCompile' => $showCompile,
+            'showSampleOutput' => $showSampleOutput,
+            'runs' => $runs,
         ]);
     }
 }

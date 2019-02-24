@@ -17,7 +17,7 @@
         {%- for submission in submissions %}
             {% set link = null %}
             {% if submission.submittime < current_team_contest.endtime and submission.result and submission.judgings.first is not empty and submission.judgings.first.result is not empty and (not verificationRequired or submission.judgings.first.verified) %}
-                {% set link = path('legacy.team_submission', {id: submission.submitid}) %}
+                {% set link = path('team_submission', {submitId: submission.submitid}) %}
             {% endif %}
 
             {% set classes = '' %}

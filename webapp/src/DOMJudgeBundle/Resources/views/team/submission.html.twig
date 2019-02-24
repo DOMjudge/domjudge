@@ -1,0 +1,127 @@
+{% extends '@DOMJudge/team/base.html.twig' %}
+
+{# @var judgingRun \DOMJudgeBundle\Entity\JudgingRun #}
+
+{% block title %}Submission details - {{ parent() }}{% endblock %}
+
+{% block content %}
+    {% if judging is empty or judging.submission.submittime >= current_team_contest.endtime or (verificationRequired and not judging.verified) %}
+        <div class="alert alert-danger">Submission not found for this team or not judged yet.</div>
+    {% else %}
+        <h1 class="text-center mt-4">Submission details</h1>
+        <div class="container">
+            {% if not judging.valid %}
+                <div class="alert alert-warning">This submission is being ignored. It is not used in determining your
+                    score.
+                </div>
+            {% endif %}
+
+            <div class="d-flex flex-row">
+                <div class="p-2">
+                    Problem:
+                    <b>
+                        <span class="probid">
+                            {{ judging.submission.contestProblem.shortname }}</span> -
+                        {{ judging.submission.contestProblem.problem.name }}
+                    </b>
+                </div>
+                <div class="p-2">
+                    Submitted:
+                    <b>{{ judging.submission.submittime | printtime(null, current_team_contest) }}</b>
+                </div>
+                <div class="p-2">
+                    Language:
+                    <b>{{ judging.submission.language.name }}</b>
+                </div>
+                <div class="p-2">
+                    Compilation:
+                    {% if judging.result == 'compiler-error' %}
+                        <span class="badge badge-danger">failed</span>
+                    {% else %}
+                        <span class="badge badge-success">successful</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if judging.result != 'compiler-error' %}
+                <div class="d-flex flex-row">
+                    <div class="p-2">
+                        Run result: {{ judging.result | printResult(true) }}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if showCompile == 2 or (showCompile == 1 and judging.result == 'compiler-error') %}
+                <hr/>
+                <h4 class="text-center">Compilation output</h4>
+                {% if judging.outputCompile(true) is not empty %}
+                    <pre class="output_text pre-scrollable">{{ judging.outputCompile(true) }}</pre>
+                {% else %}
+                    <p class="nodata">There were no compiler errors or warnings.</p>
+                {% endif %}
+            {% endif %}
+
+            {% if showSampleOutput and judging.result != 'compiler-error' %}
+                <hr/>
+                <h4 class="text-center">Run(s) on the provided sample data</h4>
+
+                {% if runs is empty %}
+                    <p class="nodata">No sample cases available.</p>
+                {% else %}
+                    {% for run in runs %}
+                        <h5 id="run-{{ run.rank }}" class="text-center mt-4">Run {{ run.rank }}</h5>
+
+                        {% set judgingRun = run.judgingRuns.first %}
+                        {% if judgingRun == null or judgingRun.runresult == null %}
+                            <p class="nodata">Run not finished yet.</p>
+                        {% else %}
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <table class="table table-sm table-striped">
+                                        <tr>
+                                            <th>Description</th>
+                                            <td>{{ run.description(true) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Runtime</th>
+                                            <td>{{ judgingRun.runtime }} sec</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Result</th>
+                                            <td>
+                                                <span class="sol sol_{% if judgingRun.runresult != 'correct' %} in{% endif %}correct">
+                                                    {{ judgingRun.runresult }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <h6 class="text-center">Program output</h6>
+                            {% if judgingRun.judgingRunOutput.outputRun is not empty %}
+                                <pre class="output_text">{{ judgingRun.judgingRunOutput.outputRun }}</pre>
+                            {% else %}
+                                <p class="nodata">There was no program output.</p>
+                            {% endif %}
+
+                            <h6 class="text-center">Diff output</h6>
+                            {% if judgingRun.judgingRunOutput.outputDiff is not empty %}
+                                <pre class="output_text">{{ judgingRun.judgingRunOutput.outputDiff }}</pre>
+                            {% else %}
+                                <p class="nodata">There was no diff output.</p>
+                            {% endif %}
+
+                            <h6 class="text-center">Error output (info/debug/errors)</h6>
+                            {% if judgingRun.judgingRunOutput.outputError is not empty %}
+                                <pre class="output_text">{{ judgingRun.judgingRunOutput.outputError }}</pre>
+                            {% else %}
+                                <p class="nodata">There was no stderr output.</p>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %} {# not runs is empty #}
+            {% endif %} {# showSampleOutput and judging.result != 'compiler-error' #}
+        </div>
+    {% endif %} {# not (judging is empty or judging.submission.submittime >= current_team_contest.endtime or (verificationRequired and not judging.verified)) #}
+{% endblock %}

@@ -87,7 +87,7 @@ class MiscController extends BaseController
             'team' => $team,
             'contest' => $contest,
             'refresh' => [
-                'after' => 15,
+                'after' => 30,
                 'url' => $this->generateUrl('team_index'),
                 'ajax' => true,
             ],
