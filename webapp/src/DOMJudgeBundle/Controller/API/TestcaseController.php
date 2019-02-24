@@ -148,15 +148,13 @@ class TestcaseController extends FOSRestController
             throw new NotFoundHttpException(sprintf('Cannot find testcase \'%s\'', $id));
         }
 
-        $streamHandle = $type === 'input'
+        $contents = $type === 'input'
             ? $testcaseWithContent->getInput()
             : $testcaseWithContent->getOutput();
 
-        if ($streamHandle === null) {
+        if ($contents === null) {
             throw new NotFoundHttpException(sprintf('Cannot find the ' . $type . ' of testcase \'%s\'', $id));
         }
-
-        $contents = stream_get_contents($streamHandle);
 
         return base64_encode($contents);
     }

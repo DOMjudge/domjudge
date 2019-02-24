@@ -79,13 +79,13 @@ class TestcaseWithContent
 
     /**
      * @var string
-     * @ORM\Column(type="blob", name="input", options={"comment"="Input data"}, nullable=false)
+     * @ORM\Column(type="string", name="input", options={"comment"="Input data"}, nullable=false)
      */
     private $input;
 
     /**
      * @var string
-     * @ORM\Column(type="blob", name="output", options={"comment"="Output data"}, nullable=false)
+     * @ORM\Column(type="string", name="output", options={"comment"="Output data"}, nullable=false)
      */
     private $output;
 
@@ -311,7 +311,7 @@ class TestcaseWithContent
     /**
      * Set input
      *
-     * @param resource|string $input
+     * @param string $input
      *
      * @return TestcaseWithContent
      */
@@ -325,7 +325,7 @@ class TestcaseWithContent
     /**
      * Get input
      *
-     * @return resource|string
+     * @return string
      */
     public function getInput()
     {
@@ -335,7 +335,7 @@ class TestcaseWithContent
     /**
      * Set output
      *
-     * @param resource|string $output
+     * @param string $output
      *
      * @return TestcaseWithContent
      */
@@ -349,7 +349,7 @@ class TestcaseWithContent
     /**
      * Get output
      *
-     * @return resource|string
+     * @return string
      */
     public function getOutput()
     {
