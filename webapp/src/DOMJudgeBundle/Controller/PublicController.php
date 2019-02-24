@@ -128,7 +128,7 @@ class PublicController extends BaseController
             $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
             $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
             $data['showPending']          = $this->DOMJudgeService->dbconfig_get('show_pending', false);
-            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', false);
+            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', true);
             $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
         }
 
