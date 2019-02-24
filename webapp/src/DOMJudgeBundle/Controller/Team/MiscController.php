@@ -2,8 +2,10 @@
 
 namespace DOMJudgeBundle\Controller\Team;
 
+use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Controller\BaseController;
-use DOMJudgeBundle\Form\PrintType;
+use DOMJudgeBundle\Entity\Language;
+use DOMJudgeBundle\Form\Type\PrintType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Utils\Printing;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -31,12 +33,19 @@ class MiscController extends BaseController
     protected $DOMJudgeService;
 
     /**
-     * MiscController constructor.
-     * @param DOMJudgeService $DOMJudgeService
+     * @var EntityManagerInterface
      */
-    public function __construct(DOMJudgeService $DOMJudgeService)
+    protected $entityManager;
+
+    /**
+     * MiscController constructor.
+     * @param DOMJudgeService        $DOMJudgeService
+     * @param EntityManagerInterface $entityManager
+     */
+    public function __construct(DOMJudgeService $DOMJudgeService, EntityManagerInterface $entityManager)
     {
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->entityManager   = $entityManager;
     }
 
     /**
@@ -65,7 +74,7 @@ class MiscController extends BaseController
      */
     public function printAction(Request $request)
     {
-        if ( ! $this->DOMJudgeService->dbconfig_get('enable_printing', 0) ) {
+        if (!$this->DOMJudgeService->dbconfig_get('enable_printing', 0)) {
             throw new AccessDeniedHttpException("Printing disabled in config");
         }
 
@@ -76,23 +85,34 @@ class MiscController extends BaseController
             $data = $form->getData();
 
             /** @var UploadedFile $file */
-            $file = $data['code'];
-            $realfile = $file->getRealPath();
-            $originalfilename = $file->getClientOriginalName()??'';
+            $file             = $data['code'];
+            $realfile         = $file->getRealPath();
+            $originalfilename = $file->getClientOriginalName() ?? '';
 
-            $langid = $data['langid'];
+            $langid   = $data['langid'];
             $username = $this->getUser()->getUsername();
 
             $team = $this->DOMJudgeService->getUser()->getTeam();
-            $ret = Printing::send($realfile, $originalfilename, $langid, $username, $team->getName(), $team->getRoom());
+            $ret  = Printing::send($realfile, $originalfilename, $langid, $username, $team->getName(),
+                                   $team->getRoom());
 
             return $this->render('@DOMJudge/team/print_result.html.twig', [
-                'success' => $ret[0], 'output' => $ret[1],
+                'success' => $ret[0],
+                'output' => $ret[1],
             ]);
         }
 
+        /** @var Language[] $languages */
+        $languages = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Language', 'l')
+            ->select('l')
+            ->andWhere('l.allowSubmit = 1')
+            ->getQuery()
+            ->getResult();
+
         return $this->render('@DOMJudge/team/print.html.twig', [
             'form' => $form->createView(),
+            'languages' => $languages,
         ]);
     }
 }

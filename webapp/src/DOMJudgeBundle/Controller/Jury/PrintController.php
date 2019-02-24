@@ -2,16 +2,17 @@
 
 namespace DOMJudgeBundle\Controller\Jury;
 
+use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Controller\BaseController;
+use DOMJudgeBundle\Entity\Language;
+use DOMJudgeBundle\Form\Type\PrintType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Utils\Printing;
-use DOMJudgeBundle\Form\PrintType;
-use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\RouterInterface;
 
 /**
  * Class PrintController
@@ -46,10 +47,13 @@ class PrintController extends BaseController
 
     /**
      * @Route("", name="jury_print")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
      */
     public function showAction(Request $request)
     {
-        if ( ! $this->DOMJudgeService->dbconfig_get('enable_printing', 0) ) {
+        if (!$this->DOMJudgeService->dbconfig_get('enable_printing', 0)) {
             throw new AccessDeniedHttpException("Printing disabled in config");
         }
 
@@ -59,11 +63,12 @@ class PrintController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $file = $data['code'];
-            $realfile = $file->getRealPath();
-            $originalfilename = $file->getClientOriginalName()??'';
+            /** @var UploadedFile $file */
+            $file             = $data['code'];
+            $realfile         = $file->getRealPath();
+            $originalfilename = $file->getClientOriginalName() ?? '';
 
-            $langid = $data['langid'];
+            $langid   = $data['langid'];
             $username = $this->getUser()->getUsername();
 
             // Since this is the Jury interface, there's not necessarily a
@@ -71,12 +76,22 @@ class PrintController extends BaseController
             $ret = Printing::send($realfile, $originalfilename, $langid, $username, "");
 
             return $this->render('@DOMJudge/jury/print_result.html.twig', [
-                    'success' => $ret[0], 'output' => $ret[1],
+                'success' => $ret[0],
+                'output' => $ret[1],
             ]);
         }
 
+        /** @var Language[] $languages */
+        $languages = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:Language', 'l')
+            ->select('l')
+            ->andWhere('l.allowSubmit = 1')
+            ->getQuery()
+            ->getResult();
+
         return $this->render('@DOMJudge/jury/print.html.twig', [
             'form' => $form->createView(),
+            'languages' => $languages,
         ]);
     }
 }

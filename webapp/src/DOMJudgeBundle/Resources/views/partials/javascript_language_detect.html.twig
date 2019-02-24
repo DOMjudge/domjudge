@@ -1,0 +1,28 @@
+{# @var language \DOMJudgeBundle\Entity\Language #}
+<script>
+    function getMainExtension(ext) {
+        switch (ext) {
+                {% for language in languages %}
+                {% for extension in language.extensions %}
+            case '{{ extension }}':
+                return '{{ language.langid }}';
+                {% endfor %}
+                {% endfor %}
+            default:
+                return '';
+        }
+    }
+
+    function getEntryPoint(mainext) {
+        switch (mainext) {
+                {% for language in languages %}
+                {% if language.requireEntryPoint %}
+            case '{{ language.langid }}':
+                return '{{ language.entryPointDescription | default('Entry point') }}';
+                {% endif %}
+                {% endfor %}
+            default:
+                return '';
+        }
+    }
+</script>

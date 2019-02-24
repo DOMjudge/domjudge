@@ -1,18 +1,13 @@
 <?php declare(strict_types=1);
-namespace DOMJudgeBundle\Form;
+
+namespace DOMJudgeBundle\Form\Type;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Language;
-use DOMJudgeBundle\Form\Type\BootstrapFileType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-
-use DOMJudgeBundle\Validator\Constraints;
+use Symfony\Component\Form\FormBuilderInterface;
 
 class PrintType extends AbstractType
 {
@@ -39,6 +34,9 @@ class PrintType extends AbstractType
         $builder
             ->add('code', BootstrapFileType::class, [
                 'label' => 'Source file:',
+                'attr' => [
+                    'onchange' => 'detectLanguage(this.value)',
+                ],
             ])
             ->add('langid', ChoiceType::class, [
                 'label' => 'Language:',

@@ -1,11 +1,6 @@
 {% extends "@DOMJudge/team/base.html.twig" %}
-{% import _self as self %}
 
-{% block title %}{{ parent() }} - Print{% endblock %}
-
-{% block extrahead %}
-    {{ parent() }}
-{% endblock %}
+{% block title %}Print - {{ parent() }}{% endblock %}
 
 {% block content %}
 
@@ -16,4 +11,9 @@
         </div>
     </main>
 
+{% endblock %}
+
+{% block extrafooter %}
+    {{ parent() }}
+    {% include '@DOMJudge/partials/javascript_print.html.twig' %}
 {% endblock %}
