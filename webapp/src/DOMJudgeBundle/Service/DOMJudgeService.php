@@ -575,15 +575,6 @@ class DOMJudgeService
     }
 
     /**
-     * Get the web directory of this DOMjudge installation
-     * @return string
-     */
-    public function getDomjudgeWebDir(): string
-    {
-        return $this->container->getParameter('domjudge.wwwdir');
-    }
-
-    /**
      * Open the given ZIP file
      * @param string $filename
      * @return ZipArchive

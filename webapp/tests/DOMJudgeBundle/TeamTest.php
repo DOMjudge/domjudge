@@ -9,7 +9,7 @@ class TeamTest extends WebTestCase
     public function testTeamRedirectToLogin()
     {
         $client = self::createClient();
-        $client->request('GET', '/team/');
+        $client->request('GET', '/team');
 
         $response = $client->getResponse();
         $message = var_export($response, true);
@@ -80,7 +80,7 @@ class TeamTest extends WebTestCase
     {
         $client = self::createClient();
         $this->logIn($client);
-        $crawler = $client->request('GET', '/team/');
+        $crawler = $client->request('GET', '/team');
 
         $response = $client->getResponse();
         $message = var_export($response, true);
@@ -98,7 +98,7 @@ class TeamTest extends WebTestCase
     {
         $client = self::createClient();
         $this->logIn($client);
-        $crawler = $client->request('GET', '/team/');
+        $crawler = $client->request('GET', '/team');
 
         $response = $client->getResponse();
         $message = var_export($response, true);
@@ -106,7 +106,7 @@ class TeamTest extends WebTestCase
 
         $link = $crawler->selectLink('request clarification')->link();
         $message = var_export($link, true);
-        $this->assertEquals('http://localhost/team/clarification.php', $link->getUri(), $message);
+        $this->assertEquals('http://localhost/team/clarifications/add', $link->getUri(), $message);
 
         # Note that we would like to click the link here but we cannot do
         # that since we have too much global state, e.g. define IS_JURY

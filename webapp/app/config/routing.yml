@@ -25,11 +25,9 @@ logout:
 overriden_routes:
     resource: "@DOMJudgeBundle/Resources/config/routing.yml"
 
-fallback:
+# Add this route manually at the bottom, as it must be the last
+remove_trailing_slash:
     path: /{path}
-    defaults: { _controller: "LegacyBundle\\Controller\\FallbackController:fallback" }
+    defaults: { _controller: DOMJudgeBundle:Redirecting:removeTrailingSlash }
     requirements:
         path: .*
-
-legacy_routes:
-    resource: "@LegacyBundle/Resources/config/routing.yml"

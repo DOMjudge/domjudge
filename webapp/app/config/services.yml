@@ -17,11 +17,6 @@ services:
         tags:
             - { name: twig.extension }
 
-    LegacyBundle\Controller\:
-        resource: '../../src/LegacyBundle/Controller'
-        public: true
-        tags: ['controller.service_arguments']
-
     DOMJudgeBundle\:
         resource: '../../src/DOMJudgeBundle/*'
         exclude: '../../src/DOMJudgeBundle/{Entity,Repository,Tests}'
