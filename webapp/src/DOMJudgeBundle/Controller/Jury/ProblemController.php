@@ -354,8 +354,8 @@ class ProblemController extends BaseController
 
         foreach ($testcases as $testcase) {
             $filename = sprintf('data/%s/%d', $testcase->getSample() ? 'sample' : 'secret', $testcase->getRank());
-            $zip->addFromString($filename . '.in', stream_get_contents($testcase->getInput()));
-            $zip->addFromString($filename . '.ans', stream_get_contents($testcase->getOutput()));
+            $zip->addFromString($filename . '.in', $testcase->getInput());
+            $zip->addFromString($filename . '.ans', $testcase->getOutput());
 
             if (!empty($testcase->getDescription(true))) {
                 $description = $testcase->getDescription(true);
@@ -821,10 +821,10 @@ class ProblemController extends BaseController
 
         switch ($type) {
             case 'input':
-                $content = stream_get_contents($testcase->getInput());
+                $content = $testcase->getInput();
                 break;
             case 'output':
-                $content = stream_get_contents($testcase->getOutput());
+                $content = $testcase->getOutput();
                 break;
             case 'image':
                 $content = $testcase->getImage();

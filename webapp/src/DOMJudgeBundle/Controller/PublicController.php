@@ -330,10 +330,10 @@ class PublicController extends BaseController
 
         switch ($type) {
             case 'input':
-                $content = stream_get_contents($testcase->getInput());
+                $content = $testcase->getInput();
                 break;
             case 'output':
-                $content = stream_get_contents($testcase->getOutput());
+                $content = $testcase->getOutput();
                 break;
         }
 
