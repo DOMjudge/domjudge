@@ -27,11 +27,6 @@
 {% block extrafooter %}
     <script>
         $(function () {
-            $('.custom-file-input').on('change', function () {
-                var fileName = $(this).val().split('\\').pop();
-                $(this).next('.custom-file-label').html(fileName);
-                $(this).next('.custom-file-label').removeClass('text-muted');
-            });
             /* Show the notification options if the browser supports it */
             if ('Notification' in window) {
                 $('#notify_disable').click(disableNotifications);

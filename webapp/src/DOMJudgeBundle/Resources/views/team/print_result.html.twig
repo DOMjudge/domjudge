@@ -1,0 +1,29 @@
+{% extends "@DOMJudge/team/base.html.twig" %}
+{% import _self as self %}
+
+{% block title %}{{ parent() }} - Print{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+    <main role="main" class="pl-4 pt-5">
+        <div class="container submitform">
+            <h1 class="text-center">Print source</h1>
+
+            <pre class="output_text mb-3">
+{{ output }}
+</pre>
+
+            {% if success %}
+                <div class="alert alert-success">File has been printed</div>
+            {% else %}
+                <div class="alert alert-danger">Error while printing. Contact staff.</div>
+            {% endif %}
+
+        </div>
+    </main>
+
+{% endblock %}

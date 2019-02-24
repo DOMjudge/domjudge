@@ -25,6 +25,12 @@
 <script>
     var domjudge_base_url = "{{ app.request.getBaseURL() }}";
     $(function () {
+        $('.custom-file-input').on('change', function () {
+            var fileName = $(this).val().split('\\').pop();
+            $(this).next('.custom-file-label').html(fileName);
+            $(this).next('.custom-file-label').removeClass('text-muted');
+        });
+
         /* toggle refresh if set */
         {% if refresh is defined and refresh %}
         $('#refresh-navitem').on('click', function () {

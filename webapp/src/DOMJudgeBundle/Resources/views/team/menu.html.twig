@@ -22,8 +22,8 @@
                 {% endif %}
             </li>
             {% if have_printing %}
-                <li class="nav-item {% if current_route == 'legacy.team_print' %}active{% endif %}">
-                    <a class="nav-link" href="{{ path('legacy.team_print') }}"><i class="fas fa-file-alt"></i> Print</a>
+                <li class="nav-item {% if current_route == 'team_print' %}active{% endif %}">
+                    <a class="nav-link" href="{{ path('team_print') }}"><i class="fas fa-file-alt"></i> Print</a>
                 </li>
             {% endif %}
             <li class="nav-item {% if current_route in ['team_scoreboard', 'team_team'] %}active{% endif %}">

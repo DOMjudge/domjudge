@@ -3,6 +3,7 @@ namespace DOMJudgeBundle\Form;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Language;
+use DOMJudgeBundle\Form\Type\BootstrapFileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -36,7 +37,7 @@ class PrintType extends AbstractType
         $languageChoices = ['plain text' => ''] + $languageChoices;
 
         $builder
-            ->add('code', FileType::class, [
+            ->add('code', BootstrapFileType::class, [
                 'label' => 'Source file:',
             ])
             ->add('langid', ChoiceType::class, [
