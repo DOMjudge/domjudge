@@ -20,6 +20,12 @@
 
 #include "config.h"
 
+/* For Linux specific fcntl F_SETPIPE_SZ command. */
+#if __gnu_linux__
+#define _GNU_SOURCE
+#define PROC_MAX_PIPE_SIZE "/proc/sys/fs/pipe-max-size"
+#endif
+
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -165,6 +171,45 @@ void set_fd_close_exec(int fd, int value)
 		error(errno,"setting filedescriptor flags");
 	}
 }
+
+/* Try to resize pipes to their maximum size on Linux.
+   We do this to make it as unlikely as possible for either the jury
+   or team program to get blocked writing to the other side, if that
+   side doesn't consume data from the pipe. See also:
+   https://github.com/Kattis/problemtools/issues/113
+
+   max_pipe_size == -1 means uninitialized, and -2 means that we
+   couldn't read from the proc file.
+ */
+#ifdef PROC_MAX_PIPE_SIZE
+int max_pipe_size = -1;
+
+void resize_pipe(int fd)
+{
+	FILE *f;
+	int r;
+
+	if ( max_pipe_size<=-2 ) return;
+	if ( max_pipe_size==-1 ) {
+		if ( (f = fopen(PROC_MAX_PIPE_SIZE, "r"))==NULL ) {
+			max_pipe_size = -2;
+			warning(errno, "could not open '%s'", PROC_MAX_PIPE_SIZE);
+			return;
+		}
+		if ( fscanf(f, "%d", &max_pipe_size)!=1 ) {
+			max_pipe_size = -2;
+			warning(errno, "could not read from '%s'", PROC_MAX_PIPE_SIZE);
+			return;
+		}
+	}
+
+	r = fcntl(fd, F_SETPIPE_SZ, max_pipe_size);
+	if ( r==-1 ) {
+		warning(errno, "could not change pipe size");
+	}
+	verb("set pipe fd %d to size %d", fd, r);
+}
+#endif
 
 void pump_pipes(int *fd_out, int *fd_in)
 {
@@ -330,6 +375,9 @@ int main(int argc, char **argv)
 		if ( pipe(pipe_fd[i])!=0 ) error(errno,"creating pipes");
 		set_fd_close_exec(pipe_fd[i][0], 1);
 		set_fd_close_exec(pipe_fd[i][1], 1);
+#ifdef PROC_MAX_PIPE_SIZE
+		resize_pipe(pipe_fd[i][1]);
+#endif
 	}
 
 	/* Setup file and extra pipe for writing program output. */
@@ -340,6 +388,9 @@ int main(int argc, char **argv)
 		if ( pipe(progout_pipe_fd)!=0 ) error(errno,"creating pipes");
 		set_fd_close_exec(progout_pipe_fd[0], 1);
 		set_fd_close_exec(progout_pipe_fd[1], 1);
+#ifdef PROC_MAX_PIPE_SIZE
+		resize_pipe(progout_pipe_fd[1]);
+#endif
 		verb("writing program #2 output via pipe %d -> %d",
 		     progout_pipe_fd[1], progout_pipe_fd[0]);
 	}
