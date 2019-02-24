@@ -124,7 +124,7 @@ class RejudgingService
             ->join('s.judgings', 'j')
             ->select('s.submitid, s.cid, s.teamid, s.probid, j.judgingid, j.result')
             ->andWhere('s.rejudging = :rejudging')
-            ->andWhere('j.rejudging = :rejudging')
+            ->andWhere('j.rejudging = :rejudging OR j.rejudging IS NULL')
             ->setParameter(':rejudging', $rejudging)
             ->getQuery()
             ->getResult();
