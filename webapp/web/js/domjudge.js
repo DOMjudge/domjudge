@@ -585,7 +585,7 @@ function initFavouriteTeams()
 	var toAdd = new Array();
 	var cntFound = 0;
 	var lastRank = 0;
-	for (var j = 0; j < scoreboard.length - 1; j++) {
+	for (var j = 0; j < scoreboard.length; j++) {
 		var found = false;
 		var teamname = getTeamname(scoreboard[j]);
 		if (teamname === null) {
