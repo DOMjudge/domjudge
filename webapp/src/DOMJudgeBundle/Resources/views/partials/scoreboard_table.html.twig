@@ -342,8 +342,8 @@
                         {% set link = null %}
                         {% if jury %}
                             {% set link = path('jury_team_category', {'categoryId': category.categoryid}) %}
-                            <a {% if link %}href="{{ link }}"{% endif %}>{{ category.name }}</a>
                         {% endif %}
+                        <a {% if link %}href="{{ link }}"{% endif %}>{{ category.name }}</a>
                     </td>
                 </tr>
             {% endfor %}
