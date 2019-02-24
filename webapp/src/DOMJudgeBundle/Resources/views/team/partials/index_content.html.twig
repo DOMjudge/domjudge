@@ -14,8 +14,8 @@
     </div>
 
     <div class="mt-4" data-flash-messages>
-        {% if app.session.flashBag.has('submissionSuccess') %}
-            {% for message in app.session.flashBag.get('submissionSuccess') %}
+        {% if app.session.flashBag.has('teamIndexSuccess') %}
+            {% for message in app.session.flashBag.get('teamIndexSuccess') %}
                 {% include '@DOMJudge/partials/alert.html.twig' with {'type': 'success'} %}
             {% endfor %}
         {% endif %}
@@ -43,7 +43,7 @@
             {% endif %}
 
             <div class="m-1">
-                <a href="{{ path('legacy.team_clarification') }}" class="btn btn-secondary btn-sm">
+                <a href="{{ path('team_clarification_add') }}" class="btn btn-secondary btn-sm">
                     request clarification
                 </a>
             </div>

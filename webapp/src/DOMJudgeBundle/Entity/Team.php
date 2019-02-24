@@ -895,6 +895,18 @@ class Team implements ExternalRelationshipEntityInterface
     }
 
     /**
+     * Return whether this team can view the given clarification
+     * @param Clarification $clarification
+     * @return bool
+     */
+    public function canViewClarification(Clarification $clarification)
+    {
+        return ($clarification->getSenderId() === $this->getTeamid() ||
+            $clarification->getRecipientId() === $this->getTeamid() ||
+            ($clarification->getSender() === null && $clarification->getRecipient() === null));
+    }
+
+    /**
      * @inheritdoc
      */
     public function getExternalRelationships(): array

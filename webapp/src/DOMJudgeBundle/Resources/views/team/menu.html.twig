@@ -9,7 +9,7 @@
 
     <div class="collapse navbar-collapse" id="menuDefault">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item {% if current_route == 'team_index' %}active{% endif %}">
+            <li class="nav-item {% if current_route in ['team_index', 'team_clarification', 'team_clarification_add', 'team_submission'] %}active{% endif %}">
                 <a class="nav-link" href="{{ path('team_index') }}"><i class="fas fa-home"></i> Home</a>
             </li>
             <li class="nav-item {% if current_route == 'team_problems' %}active{% endif %}">

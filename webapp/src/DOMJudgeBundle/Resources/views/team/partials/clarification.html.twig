@@ -1,0 +1,44 @@
+<div class="card mb-3">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-sm">
+                Subject:
+                {% if clarification.problem %}
+                    Problem {{ clarification.problem.contestProblems.first.shortname }}: {{ clarification.problem.name }}
+                {% elseif clarification.category %}
+                    {{ categories[clarification.category]|default('general') }}
+                {% else %}
+                    General issue
+                {% endif %}
+            </div>
+            <div class="col-sm text-muted text-right">{{ clarification.submittime | printtimeHover(clarification.contest) }}</div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="card-title">
+            <div class="row">
+                <div class="col-sm">
+                    From:
+                    {% if clarification.sender is not empty %}
+                        {{ clarification.sender.name }} (t{{ clarification.sender.teamid }})
+                    {% else %}
+                        Jury
+                    {% endif %}
+                </div>
+                <div class="col-sm">To:
+                    {% if clarification.recipient is not empty %}
+                        {{ clarification.recipient.name }} (t{{ clarification.recipient.teamid }})
+                    {% elseif clarification.sender is not null %}
+                        Jury
+                    {% else %}
+                        <strong>All</strong>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card-text">
+            <pre class="output-text bg-light p-3">{{ clarification.body }}</pre>
+        </div>
+    </div>
+</div>

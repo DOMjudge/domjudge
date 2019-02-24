@@ -85,7 +85,7 @@ class SubmissionController extends BaseController
 
                 $this->DOMJudgeService->auditlog('submission', $submission->getSubmitid(), 'added', 'via teampage',
                                                  null, $contest->getCid());
-                $this->addFlash('submissionSuccess',
+                $this->addFlash('teamIndexSuccess',
                                 '<strong>Submission done!</strong> Watch for the verdict in the list below.');
                 return $this->redirectToRoute('team_index');
             }

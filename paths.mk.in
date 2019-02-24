@@ -94,7 +94,6 @@ psdir          = @psdir@
 # Installation paths
 domserver_bindir       = @domserver_bindir@
 domserver_etcdir       = @domserver_etcdir@
-domserver_wwwdir       = @domserver_wwwdir@
 domserver_webappdir    = @domserver_webappdir@
 domserver_sqldir       = @domserver_sqldir@
 domserver_libdir       = @domserver_libdir@
@@ -120,12 +119,11 @@ judgehost_cgroupdir    = @judgehost_cgroupdir@
 
 domjudge_docdir        = @domjudge_docdir@
 
-domserver_dirs = $(domserver_bindir) $(domserver_etcdir) $(domserver_wwwdir) \
+domserver_dirs = $(domserver_bindir) $(domserver_etcdir) \
                  $(domserver_libdir) $(domserver_libsubmitdir) $(domserver_libvendordir) \
                  $(domserver_libwwwdir) $(domserver_logdir) $(domserver_rundir) \
                  $(domserver_tmpdir) $(domserver_submitdir) $(domserver_sqldir)/upgrade \
-                 $(addprefix $(domserver_webappdir)/web/images/,affiliations countries teams) \
-                 $(addprefix $(domserver_wwwdir)/,public team jury api auth)
+                 $(addprefix $(domserver_webappdir)/web/images/,affiliations countries teams)
 
 judgehost_dirs = $(judgehost_bindir) $(judgehost_etcdir) $(judgehost_libdir) \
                  $(judgehost_libvendordir) $(judgehost_libjudgedir) $(judgehost_logdir) \
@@ -144,7 +142,6 @@ define substconfigvars
 	-e 's,@DOMJUDGE_VERSION[@],@DOMJUDGE_VERSION@,g' \
 	-e 's,@domserver_bindir[@],@domserver_bindir@,g' \
 	-e 's,@domserver_etcdir[@],@domserver_etcdir@,g' \
-	-e 's,@domserver_wwwdir[@],@domserver_wwwdir@,g' \
 	-e 's,@domserver_webappdir[@],@domserver_webappdir@,g' \
 	-e 's,@domserver_sqldir[@],@domserver_sqldir@,g' \
 	-e 's,@domserver_libdir[@],@domserver_libdir@,g' \

@@ -4,7 +4,6 @@ parameters:
     domjudge.version: @DOMJUDGE_VERSION@
     domjudge.bindir: @domserver_bindir@
     domjudge.etcdir: @domserver_etcdir@
-    domjudge.wwwdir: @domserver_wwwdir@
     domjudge.webappdir: @domserver_webappdir@
     domjudge.libdir: @domserver_libdir@
     domjudge.sqldir: @domserver_sqldir@

@@ -11,7 +11,7 @@
         </thead>
         <tbody>
         {%- for clarification in clarifications %}
-            {%- set link = path('legacy.team_clarification', {id: clarification.clarid}) %}
+            {%- set link = path('team_clarification', {clarId: clarification.clarid}) %}
 
             <tr class="{% if team.unreadClarifications.contains(clarification) %}unseen{% endif %}">
                 <td><a href="{{ link }}">{{ clarification.submittime | printtime(null, clarification.contest) }}</a>

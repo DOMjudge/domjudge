@@ -1,0 +1,52 @@
+{% extends '@DOMJudge/team/base.html.twig' %}
+
+{% block title %}View clarification - {{ parent() }}{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mt-4">
+        {% if clarification.senderId == team.teamid %}
+            Clarification Request
+        {% else %}
+            Clarification
+        {% endif %}
+    </h1>
+
+    <div class="container clarificationform">
+        {% include '@DOMJudge/team/partials/clarification.html.twig' with {clarification: clarification } %}
+        {% for reply in clarification.replies if team.canViewClarification(reply) %}
+            {% include '@DOMJudge/team/partials/clarification.html.twig' with {clarification: reply } %}
+        {% endfor %}
+        <div class="mt-3">
+            <button class="btn btn-secondary btn-sm" data-toggle="collapse" data-target="#collapsereplyform"
+                    aria-expanded="false" aria-controls="collapsereplyform">
+                <i class="fa fa-reply"></i> reply to this clarification
+            </button>
+        </div>
+    </div>
+
+    <div class="collapse mt-3 container clarificationform" id="collapsereplyform">
+        <div class="card card-body">
+            {{ form_start(form) }}
+            {{ form_row(form.recipient) }}
+            {{ form_row(form.subject) }}
+            {{ form_row(form.message) }}
+            <div class="form-group">
+                <button type="submit" name="submit" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Send
+                </button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extrafooter %}
+    {{ parent() }}
+    <script>
+        $(function () {
+            $('form[name=team_clarification]').on('submit', function () {
+                return confirm("Send clarification request to Jury?");
+            });
+        });
+    </script>
+{% endblock %}

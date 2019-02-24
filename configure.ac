@@ -141,7 +141,6 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_root,        '')
 	AC_SUBST(domserver_bindir,      $bindir)
 	AC_SUBST(domserver_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
-	AC_SUBST(domserver_wwwdir,      $datadir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_sqldir,      $datadir/${PACKAGE_TARNAME}/sql)
 	AC_SUBST(domserver_libdir,      $libdir/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_libvendordir,$libdir/${PACKAGE_TARNAME}/vendor)
@@ -188,7 +187,6 @@ AX_WITH_COMMENT(4,[    ])
 AX_WITH_COMMENT(5,[More fine tuning of all installation (sub)directories:])
 AX_PATH(domserver_bindir,       [$domserver_root/bin])
 AX_PATH(domserver_etcdir,       [$domserver_root/etc])
-AX_PATH(domserver_wwwdir,       [$domserver_root/www])
 AX_PATH(domserver_webappdir,    [$domserver_root/webapp])
 AX_PATH(domserver_sqldir,       [$domserver_root/sql])
 AX_PATH(domserver_libdir,       [$domserver_root/lib])
@@ -386,7 +384,6 @@ echo "    - run..............: $domserver_rundir"
 echo "    - sql..............: $domserver_sqldir"
 echo "    - submit...........: $domserver_submitdir"
 echo "    - tmp..............: $domserver_tmpdir"
-echo "    - www..............: $domserver_wwwdir"
 echo "    - webapp...........: $domserver_webappdir"
 echo ""
 echo " * judgehost...........: $judgehost_root"
