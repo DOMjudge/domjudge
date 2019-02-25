@@ -30,4 +30,4 @@ remove_trailing_slash:
     path: /{path}
     defaults: { _controller: DOMJudgeBundle:Redirecting:removeTrailingSlash }
     requirements:
-        path: .*
+        path: .*\/$
