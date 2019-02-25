@@ -15,9 +15,7 @@
 
     {% if app.session.flashBag.has('problemZip') %}
         {% for message in app.session.flashBag.get('problemZip') %}
-            <div class="alert alert-info">
-                {{ message | raw }}
-            </div>
+            {% include '@DOMJudge/partials/alert.html.twig' with {type: 'info'} %}
         {% endfor %}
     {% endif %}
 

@@ -16,9 +16,7 @@
 
             {% if app.session.flashBag.has('yamlImport') %}
                 {% for message in app.session.flashBag.get('yamlImport') %}
-                    <div class="alert alert-success">
-                        {{ message | raw }}
-                    </div>
+                    {% include '@DOMJudge/partials/alert.html.twig' with {type: 'success'} %}
                 {% endfor %}
             {% endif %}
 

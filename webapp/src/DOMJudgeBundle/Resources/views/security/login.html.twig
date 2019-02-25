@@ -10,9 +10,7 @@
 <div class="form-signin" id="loginform">
   <img class="mb-4" src="{{ asset('images/DOMjudgelogo.png') }}" alt="DOMjudge" width="72">
   {% for message in app.session.flashBag.get('notice') %}
-  <div class="alert alert-success" role="alert">
-  {{ message }}
-  </div>
+      {% include '@DOMJudge/partials/alert.html.twig' with {type: 'success'} %}
   {% endfor %}
   <br class="clearfix">
   <div class="main-login mr-2">

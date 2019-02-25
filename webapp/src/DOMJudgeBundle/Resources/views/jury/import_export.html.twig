@@ -41,9 +41,7 @@
         <div class="col-md-6">
             {% if app.session.flashBag.has('tsvImport') %}
                 {% for message in app.session.flashBag.get('tsvImport') %}
-                    <div class="alert alert-success">
-                        {{ message | raw }}
-                    </div>
+                    {% include '@DOMJudge/partials/alert.html.twig' with {type: 'success'} %}
                 {% endfor %}
             {% endif %}
 
@@ -63,9 +61,7 @@
 
             {% if app.session.flashBag.has('baylorCms') %}
                 {% for message in app.session.flashBag.get('baylorCms') %}
-                    <div class="alert alert-success">
-                        {{ message | raw }}
-                    </div>
+                    {% include '@DOMJudge/partials/alert.html.twig' with {type: 'success'} %}
                 {% endfor %}
             {% endif %}
 
