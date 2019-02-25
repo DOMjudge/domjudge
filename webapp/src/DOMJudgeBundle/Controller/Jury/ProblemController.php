@@ -118,11 +118,14 @@ class ProblemController extends BaseController
                         $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
                     }
                     $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest,
-                                                                                    $messages);
+                                                                                    $messages, $errorMessage);
                     $allMessages = array_merge($allMessages, $messages);
                     if ($newProblem) {
                         $this->DOMJudgeService->auditlog('problem', $newProblem->getProbid(), 'upload zip',
                                                          $clientName);
+                    } else {
+                        $this->addFlash('danger', $errorMessage);
+                        return $this->redirectToRoute('jury_problems');
                     }
                 } finally {
                     $zip->close();
@@ -581,13 +584,15 @@ class ProblemController extends BaseController
                         if ($type === 'image') {
                             $imageType = Utils::getImageType($content, $error);
                             if ($imageType === false) {
-                                throw new BadRequestHttpException(sprintf('image: %s', $error));
+                                $this->addFlash('danger', sprintf('image: %s', $error));
+                                return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                             }
                             $thumb = Utils::getImageThumb($content, $thumbnailSize,
                                                           $this->DOMJudgeService->getDomjudgeTmpDir(), $error);
                             if ($thumb === false) {
                                 $thumb = null;
-                                throw new BadRequestHttpException(sprintf('image: %s', $error));
+                                $this->addFlash('danger', sprintf('image: %s', $error));
+                                return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                             }
 
                             $testcase->getTestcaseContent()
@@ -652,13 +657,15 @@ class ProblemController extends BaseController
                     $content   = file_get_contents($imageFile->getRealPath());
                     $imageType = Utils::getImageType($content, $error);
                     if ($imageType === false) {
-                        throw new BadRequestHttpException(sprintf('image: %s', $error));
+                        $this->addFlash('danger', sprintf('image: %s', $error));
+                        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
                     $thumb = Utils::getImageThumb($content, $thumbnailSize,
                                                   $this->DOMJudgeService->getDomjudgeTmpDir(), $error);
                     if ($thumb === false) {
                         $thumb = null;
-                        throw new BadRequestHttpException(sprintf('image: %s', $error));
+                        $this->addFlash('danger', sprintf('image: %s', $error));
+                        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
 
                     $newTestcase
@@ -884,8 +891,12 @@ class ProblemController extends BaseController
             try {
                 $zip        = $this->DOMJudgeService->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
-                if ($this->importProblemService->importZippedProblem($zip, $clientName, $problem, $contest, $messages)) {
+                if ($this->importProblemService->importZippedProblem($zip, $clientName, $problem, $contest, $messages,
+                                                                     $errorMessage)) {
                     $this->DOMJudgeService->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
+                } else {
+                    $this->addFlash('danger', $errorMessage);
+                    return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
                 }
             } finally {
                 $zip->close();

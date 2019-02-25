@@ -292,8 +292,9 @@ class SubmissionService
      * @param string|null        $externalId
      * @param float|null         $submitTime
      * @param string|null        $externalResult
-     * @return Submission
-     * @throws \Exception
+     * @param string|null        $message
+     * @return Submission|null
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function submitSolution(
         $team,
@@ -305,7 +306,8 @@ class SubmissionService
         string $entryPoint = null,
         $externalId = null,
         float $submitTime = null,
-        $externalResult = null
+        $externalResult = null,
+        string &$message = null
     ) {
         if (!$team instanceof Team) {
             $team = $this->entityManager->getRepository(Team::class)->find($team);
@@ -344,19 +346,22 @@ class SubmissionService
             throw new BadRequestHttpException("No files specified.");
         }
         if (count($files) > $this->DOMJudgeService->dbconfig_get('sourcefiles_limit', 100)) {
-            throw new BadRequestHttpException("Tried to submit more than the allowed number of source files.");
+            $message = "Tried to submit more than the allowed number of source files.";
+            return null;
         }
 
         $filenames = [];
         foreach ($files as $file) {
             if (!$file->isValid()) {
-                throw new \BadMethodCallException($file->getErrorMessage());
+                $message = $file->getErrorMessage();
+                return null;
             }
             $filenames[$file->getClientOriginalName()] = $file->getClientOriginalName();
         }
 
         if (count($files) != count($filenames)) {
-            throw new BadRequestHttpException("Duplicate filenames detected.");
+            $message = "Duplicate filenames detected.";
+            return null;
         }
 
         $sourceSize = $this->DOMJudgeService->dbconfig_get('sourcesize_limit');
@@ -373,8 +378,8 @@ class SubmissionService
         }
 
         if ($language->getRequireEntryPoint() && empty($entryPoint)) {
-            throw new BadRequestHttpException(
-                sprintf("Entry point required for '%s' but none given.", $language->getLangid()));
+            $message = sprintf("Entry point required for '%s' but none given.", $language->getLangid());
+            return null;
         }
 
         if ($this->DOMJudgeService->checkrole('jury') && $entryPoint == '__auto__') {
@@ -383,7 +388,8 @@ class SubmissionService
         }
 
         if (!empty($entryPoint) && !preg_match(self::FILENAME_REGEX, $entryPoint)) {
-            throw new BadRequestHttpException(sprintf("Entry point '%s' contains illegal characters.", $entryPoint));
+            $message = sprintf("Entry point '%s' contains illegal characters.", $entryPoint);
+            return null;
         }
 
         if (!$this->DOMJudgeService->checkrole('jury') && !$team->getEnabled()) {
@@ -403,16 +409,19 @@ class SubmissionService
         $totalSize = 0;
         foreach ($files as $file) {
             if (!$file->isReadable()) {
-                throw new BadRequestHttpException("File '%s' not found (or not readable).", $file->getRealPath());
+                $message = sprintf("File '%s' not found (or not readable).", $file->getRealPath());
+                return null;
             }
             if (!preg_match(self::FILENAME_REGEX, $file->getClientOriginalName())) {
-                throw new BadRequestHttpException(sprintf("Illegal filename '%s'.", $file->getClientOriginalName()));
+                $message = sprintf("Illegal filename '%s'.", $file->getClientOriginalName());
+                return null;
             }
             $totalSize += $file->getSize();
         }
 
         if ($totalSize > $sourceSize * 1024) {
-            throw new BadRequestHttpException(sprintf("Submission file(s) are larger than %d kB.", $sourceSize));
+            $message = sprintf("Submission file(s) are larger than %d kB.", $sourceSize);
+            return null;
         }
 
         $this->logger->info('input verified');

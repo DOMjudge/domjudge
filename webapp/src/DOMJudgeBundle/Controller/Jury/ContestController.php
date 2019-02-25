@@ -82,7 +82,7 @@ class ContestController extends BaseController
             /** @var Contest $contest */
             $contest = $em->getRepository(Contest::class)->find($request->request->get('contest'));
             if (!$contest) {
-                throw new NotFoundHttpException('contest not found');
+                throw new NotFoundHttpException('Contest not found');
             }
 
             $time = key($doNow);
@@ -103,8 +103,9 @@ class ContestController extends BaseController
             if (in_array($time, $start_actions, true)) {
                 $enabled = $time === 'delay_start' ? 0 : 1;
                 if (Utils::difftime((float)$contest->getStarttime(false), $now) <= $maxSeconds) {
-                    throw new BadRequestHttpException(sprintf("Cannot %s less than %d seconds before contest start.",
-                                                              $time, $maxSeconds));
+                    $this->addFlash('error', sprintf("Cannot %s less than %d seconds before contest start.",
+                                                     $time, $maxSeconds));
+                    return $this->redirectToRoute('jury_contests');
                 }
                 $contest->setStarttimeEnabled($enabled);
                 $em->flush();
@@ -122,8 +123,9 @@ class ContestController extends BaseController
             if ($time == 'start') {
                 if ($contest->getStarttimeEnabled() && Utils::difftime((float)$contest->getStarttime(false),
                                                                        $now) <= $maxSeconds) {
-                    throw new BadRequestHttpException(sprintf("Cannot update starttime less than %d seconds before contest start.",
+                    $this->addFlash('danger', sprintf("Cannot update starttime less than %d seconds before contest start.",
                                                               $maxSeconds));
+                    return $this->redirectToRoute('jury_contests');
                 }
                 $contest
                     ->setStarttime($now)

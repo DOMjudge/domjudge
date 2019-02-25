@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\Jury;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Judgehost;
 use DOMJudgeBundle\Entity\Judging;
@@ -22,7 +23,6 @@ use DOMJudgeBundle\Service\ScoreboardService;
 use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -34,12 +34,13 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @Route("/jury/submissions")
  * @Security("has_role('ROLE_JURY')")
  */
-class SubmissionController extends Controller
+class SubmissionController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -57,19 +58,27 @@ class SubmissionController extends Controller
     protected $submissionService;
 
     /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
      * SubmissionController constructor.
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
      * @param SubmissionService      $submissionService
+     * @param RouterInterface        $router
      */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
-        SubmissionService $submissionService
+        SubmissionService $submissionService,
+        RouterInterface $router
     ) {
         $this->entityManager     = $entityManager;
         $this->DOMJudgeService   = $DOMJudgeService;
         $this->submissionService = $submissionService;
+        $this->router            = $router;
     }
 
     /**
@@ -664,11 +673,17 @@ class SubmissionController extends Controller
 
     /**
      * @Route("/{submission}/edit-source", name="jury_submission_edit_source")
+     * @param Request    $request
+     * @param Submission $submission
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     * @throws \Exception
      */
     public function editSourceAction(Request $request, Submission $submission)
     {
         if (!$this->DOMJudgeService->getUser()->getTeam() || !$this->DOMJudgeService->checkrole('team')) {
-            throw new BadRequestHttpException('You cannot re-submit code without being a team.');
+            $this->addFlash('danger', 'You cannot re-submit code without being a team.');
+            return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_submission',
+                                                                                              ['submitId' => $submission->getSubmitid()]));
         }
 
         /** @var SubmissionFileWithSourceCode[] $files */
@@ -755,11 +770,20 @@ class SubmissionController extends Controller
                 $language,
                 $filesToSubmit,
                 $submission->getOrigsubmitid() ?? $submission->getSubmitid(),
-                $entryPoint
+                $entryPoint,
+                null,
+                null,
+                null,
+                $message
             );
 
             foreach ($filesToSubmit as $file) {
                 unlink($file->getRealPath());
+            }
+
+            if (!$submission) {
+                $this->addFlash('danger', $message);
+                return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getSubmitid()]);
             }
 
             return $this->redirectToRoute('jury_submission', ['submitId' => $submittedSubmission->getSubmitid()]);

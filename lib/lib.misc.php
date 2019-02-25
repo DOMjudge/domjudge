@@ -757,7 +757,10 @@ function submit_solution(
             $uploadedFiles[] = new \Symfony\Component\HttpFoundation\File\UploadedFile($file, $filenames[$index], null, null, null, $allowLocalFiles);
         }
 
-        $submission = $G_SUBMISSION_SERVICE->submitSolution($team, $prob, $contest, $lang, $uploadedFiles, $origsubmitid, $entry_point, $extid, $submittime, $extresult);
+        $submission = $G_SUBMISSION_SERVICE->submitSolution($team, $prob, $contest, $lang, $uploadedFiles, $origsubmitid, $entry_point, $extid, $submittime, $extresult, $message);
+        if (!$submission) {
+            error($message);
+        }
         return $submission->getSubmitid();
     }
 

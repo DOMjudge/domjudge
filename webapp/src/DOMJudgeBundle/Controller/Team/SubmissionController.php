@@ -81,12 +81,17 @@ class SubmissionController extends BaseController
                 $files      = $form->get('code')->getData();
                 $entryPoint = $form->get('entry_point')->getData() ?: null;
                 $submission = $this->submissionService->submitSolution($team, $problem->getProbid(), $contest,
-                                                                       $language, $files, null, $entryPoint);
+                                                                       $language, $files, null, $entryPoint, null, null,
+                                                                       null, $message);
 
-                $this->DOMJudgeService->auditlog('submission', $submission->getSubmitid(), 'added', 'via teampage',
-                                                 null, $contest->getCid());
-                $this->addFlash('success',
-                                '<strong>Submission done!</strong> Watch for the verdict in the list below.');
+                if ($submission) {
+                    $this->DOMJudgeService->auditlog('submission', $submission->getSubmitid(), 'added', 'via teampage',
+                                                     null, $contest->getCid());
+                    $this->addFlash('success',
+                                    '<strong>Submission done!</strong> Watch for the verdict in the list below.');
+                } else {
+                    $this->addFlash('danger', $message);
+                }
                 return $this->redirectToRoute('team_index');
             }
         }

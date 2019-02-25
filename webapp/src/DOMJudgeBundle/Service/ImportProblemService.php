@@ -80,15 +80,19 @@ class ImportProblemService
      * @param Problem|null $problem
      * @param Contest|null $contest
      * @param array        $messages
+     * @param string|null  $errorMessage
      * @return Problem|null
-     * @throws \Exception
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function importZippedProblem(
         ZipArchive $zip,
         $clientName,
         Problem $problem = null,
         Contest $contest = null,
-        array &$messages = []
+        array &$messages = [],
+        string &$errorMessage = null
     ) {
         // This might take a while
         ini_set('max_execution_time', '300');
@@ -614,8 +618,13 @@ class ImportProblemService
                                                                                                            ]);
                         $submission     = $this->submissionService->submitSolution($team, $contestProblem, $contest,
                                                                                    $languageToUse, $filesToSubmit, null,
-                                                                                   '__auto__');
-                        $submission     = $this->entityManager->getRepository(Submission::class)->find($submission->getSubmitid());
+                                                                                   '__auto__', null, null, null,
+                                                                                   $submissionMessage);
+                        if (!$submission) {
+                            $errorMessage = $submissionMessage;
+                            return null;
+                        }
+                        $submission = $this->entityManager->getRepository(Submission::class)->find($submission->getSubmitid());
                         $submission->setExpectedResults($results);
                         // Flush changes to submission
                         $this->entityManager->flush();

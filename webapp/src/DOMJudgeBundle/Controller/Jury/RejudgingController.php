@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\Problem;
@@ -15,21 +16,20 @@ use DOMJudgeBundle\Service\ScoreboardService;
 use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @Route("/jury/rejudgings")
  * @Security("has_role('ROLE_JURY')")
  */
-class RejudgingController extends Controller
+class RejudgingController extends BaseController
 {
     /**
      * @var EntityManagerInterface
@@ -41,10 +41,19 @@ class RejudgingController extends Controller
      */
     protected $DOMJudgeService;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
-    {
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        RouterInterface $router
+    ) {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->router          = $router;
     }
 
     /**
@@ -62,14 +71,18 @@ class RejudgingController extends Controller
             ->getQuery()->getResult();
 
         $table_fields = [
-            'rejudgingid' => ['title' => 'ID',         'sort' => true,
-                              'default_sort' => true, 'default_sort_order' => 'desc'],
-            'reason'      => ['title' => 'reason',     'sort' => true],
-            'startuser'   => ['title' => 'startuser',  'sort' => true],
-            'finishuser'  => ['title' => 'finishuser', 'sort' => true],
-            'starttime'   => ['title' => 'starttime',  'sort' => true],
-            'endtime'     => ['title' => 'finishtime', 'sort' => true],
-            'status'      => ['title' => 'status',     'sort' => true],
+            'rejudgingid' => [
+                'title' => 'ID',
+                'sort' => true,
+                'default_sort' => true,
+                'default_sort_order' => 'desc'
+            ],
+            'reason' => ['title' => 'reason', 'sort' => true],
+            'startuser' => ['title' => 'startuser', 'sort' => true],
+            'finishuser' => ['title' => 'finishuser', 'sort' => true],
+            'starttime' => ['title' => 'starttime', 'sort' => true],
+            'endtime' => ['title' => 'finishtime', 'sort' => true],
+            'status' => ['title' => 'status', 'sort' => true],
         ];
 
         $timeFormat       = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
@@ -472,7 +485,8 @@ class RejudgingController extends Controller
         $judgings = $queryBuilder->getQuery()->getResult();
 
         if (empty($judgings)) {
-            throw new BadRequestHttpException('No judgings matched.');
+            $this->addFlash('danger', 'No judgings matched.');
+            return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_index'));
         }
 
         /** @var Rejudging|null $rejudging */
@@ -506,8 +520,9 @@ class RejudgingController extends Controller
                         $em->remove($rejudging);
                         $em->flush();
                     }
-                    throw new BadRequestHttpException(sprintf('Submission is already part of rejudging r%d',
-                                                              $submission->getRejudgingid()));
+                    $this->addFlash('danger', sprintf('Submission is already part of rejudging r%d',
+                                                      $submission->getRejudgingid()));
+                    return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_index'));
                 } else {
                     // silently skip that submission
                     continue;

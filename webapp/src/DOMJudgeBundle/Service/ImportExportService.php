@@ -23,7 +23,6 @@ use DOMJudgeBundle\Utils\Scoreboard\ScoreboardMatrixItem;
 use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -123,10 +122,11 @@ class ImportExportService
         return $data;
     }
 
-    public function importContestYaml($data)
+    public function importContestYaml($data, string &$message = null): bool
     {
         if (empty($data)) {
-            throw new BadRequestHttpException('Error parsing YAML file.');
+            $message = 'Error parsing YAML file.';
+            return false;
         }
 
         $identifierChars = '[a-zA-Z0-9_-]';
@@ -171,7 +171,8 @@ class ImportExportService
                 $messages[] = sprintf('%s: %s', $error->getPropertyPath(), $error->getMessage());
             }
 
-            throw new NotAcceptableHttpException(sprintf("Contest has errors:\n\n%s", implode("\n", $messages)));
+            $message = sprintf("Contest has errors:\n\n%s", implode("\n", $messages));
+            return false;
         }
 
         $this->entityManager->persist($contest);
@@ -234,6 +235,7 @@ class ImportExportService
         }
 
         $this->entityManager->flush();
+        return true;
     }
 
     /**
@@ -494,10 +496,11 @@ class ImportExportService
      * Import a TSV file
      * @param string       $type
      * @param UploadedFile $file
+     * @param string|null  $message
      * @return int
      * @throws \Exception
      */
-    public function importTsv(string $type, UploadedFile $file): int
+    public function importTsv(string $type, UploadedFile $file, string &$message = null): int
     {
         $content = file($file->getRealPath());
         // The first line of the tsv is always the format with a version number.
@@ -511,28 +514,31 @@ class ImportExportService
         }
         $regex = sprintf("/^(File_Version|%s)\t%s$/i", $type, $versionMatch);
         if (!preg_match($regex, $version)) {
-            throw new BadRequestHttpException(sprintf("Unknown format or version: %s != %s", $version, $versionMatch));
+            $message = sprintf("Unknown format or version: %s != %s", $version, $versionMatch);
+            return -1;
         }
 
         switch ($type) {
             case 'groups':
-                return $this->importGroupsTsv($content);
+                return $this->importGroupsTsv($content, $message);
             case 'teams':
-                return $this->importTeamsTsv($content);
+                return $this->importTeamsTsv($content, $message);
             case 'accounts':
-                return $this->importAccountsTsv($content);
+                return $this->importAccountsTsv($content, $message);
             default:
-                throw new BadRequestHttpException(sprintf('Invalid TSV type %s', $type));
+                $message = sprintf('Invalid TSV type %s', $type);
+                return -1;
         }
     }
 
     /**
      * Import groups TSV
-     * @param array $content
+     * @param array       $content
+     * @param string|null $message
      * @return int
      * @throws \Exception
      */
-    protected function importGroupsTsv(array $content): int
+    protected function importGroupsTsv(array $content, string &$message = null): int
     {
         $groupData = [];
         $l         = 1;
@@ -540,7 +546,8 @@ class ImportExportService
             $l++;
             $line = explode("\t", trim($line));
             if (!is_numeric($line[0])) {
-                throw new BadRequestHttpException(sprintf('Invalid id format on line %d', $l));
+                $message = sprintf('Invalid id format on line %d', $l);
+                return -1;
             }
             $groupData[] = [
                 'categoryid' => @$line[0],
@@ -578,11 +585,12 @@ class ImportExportService
 
     /**
      * Import teams TSV
-     * @param array $content
+     * @param array       $content
+     * @param string|null $message
      * @return int
-     * @throws \Exception
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    protected function importTeamsTsv(array $content): int
+    protected function importTeamsTsv(array $content, string &$message = null): int
     {
         $teamData = [];
         $l        = 1;
@@ -732,11 +740,12 @@ class ImportExportService
 
     /**
      * Import accounts TSV
-     * @param array $content
+     * @param array       $content
+     * @param string|null $message
      * @return int
      * @throws \Exception
      */
-    protected function importAccountsTsv(array $content): int
+    protected function importAccountsTsv(array $content, string &$message = null): int
     {
         $accountData = [];
         $l           = 1;
@@ -779,19 +788,22 @@ class ImportExportService
                     // nnn is a zero-padded team number.
                     $teamId = preg_replace('/^[^0-9]*0*([0-9]+)$/', '\1', $line[2]);
                     if (!preg_match('/^[0-9]+$/', $teamId)) {
-                        throw new BadRequestHttpException(sprintf('cannot parse team id on line %d from "%s"', $l,
-                                                                  $line[2]));
+                        $message = sprintf('cannot parse team id on line %d from "%s"', $l,
+                                           $line[2]);
+                        return -1;
                     }
                     $team = $this->entityManager->getRepository(Team::class)->find($teamId);
                     if ($team === null) {
-                        throw new BadRequestHttpException(sprintf('unknown team id %s on line %d', $teamId, $l));
+                        $message = sprintf('unknown team id %s on line %d', $teamId, $l);
+                        return -1;
                     }
                     break;
                 case 'analyst':
                     // Ignore type analyst for now. We don't have a useful mapping yet.
                     continue 2;
                 default:
-                    throw new BadRequestHttpException(sprintf('unknown role on line %d: %s', $l, $line[0]));
+                    $message = sprintf('unknown role on line %d: %s', $l, $line[0]);
+                    return -1;
             }
 
             // accounts.tsv contains data pertaining to users, their roles and teams. Hence return data for both tables.

@@ -128,7 +128,8 @@ class ProblemController extends BaseController
                 $mimetype = 'text/plain';
                 break;
             default:
-                throw new BadRequestHttpException(sprintf('Problem p%d text has unknown type', $probId));
+                $this->addFlash('danger', sprintf('Problem p%d text has unknown type', $probId));
+                return $this->redirectToRoute('team_problems');
         }
 
         $filename    = sprintf('prob-%s.%s', $problem->getName(), $problem->getProblemtextType());

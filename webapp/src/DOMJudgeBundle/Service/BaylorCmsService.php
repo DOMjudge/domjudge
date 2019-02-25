@@ -10,8 +10,6 @@ use DOMJudgeBundle\Entity\TeamCategory;
 use DOMJudgeBundle\Entity\User;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class BaylorCmsService
 {
@@ -49,6 +47,7 @@ class BaylorCmsService
         $this->entityManager   = $entityManager;
         $this->client          = new Client(
             [
+                'http_errors' => false,
                 'base_uri' => self::BASE_URI,
                 'headers' => [
                     'User-Agent' => 'DOMjudge/' . $domjudgeVersion,
@@ -60,34 +59,40 @@ class BaylorCmsService
 
     /**
      * Import teams from the Baylor CMS
-     * @param string $token
-     * @param string $contest
-     * @throws AccessDeniedHttpException
-     * @throws BadRequestHttpException
+     * @param string      $token
+     * @param string      $contest
+     * @param string|null $message
+     * @return bool
      */
-    public function importTeams(string $token, string $contest)
+    public function importTeams(string $token, string $contest, string &$message = null): bool
     {
-        $bearerToken = $this->getBearerToken($token);
-        $response    = $this->client->get(self::WS_CLICS . $contest, [
+        $bearerToken = $this->getBearerToken($token, $message);
+        if ($bearerToken === null) {
+            return false;
+        }
+        $response = $this->client->get(self::WS_CLICS . $contest, [
             'headers' => [
                 'Authorization' => 'bearer ' . $bearerToken
             ],
         ]);
 
         if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500) {
-            throw new AccessDeniedHttpException(sprintf('Access forbidden, is your token valid? Did you specify the correct contest ID? %s',
-                                                        $response->getBody()));
+            $message = sprintf('Access forbidden, is your token valid? Did you specify the correct contest ID? %s',
+                               $response->getBody());
+            return false;
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
-            throw new BadRequestHttpException(sprintf('Unknown error while retrieving data from icpc.baylor.edu, status code: %d, %s',
-                                                      $response->getStatusCode(), $response->getBody()));
+            $message = sprintf('Unknown error while retrieving data from icpc.baylor.edu, status code: %d, %s',
+                               $response->getStatusCode(), $response->getBody());
+            return false;
         }
 
         $body = (string)$response->getBody();
         $json = $this->DOMJudgeService->jsonDecode((string)$body);
 
         if ($json === null) {
-            throw new BadRequestHttpException(sprintf('Error retrieving API data. API gave us: %s', $body));
+            $message = sprintf('Error retrieving API data. API gave us: %s', $body);
+            return false;
         }
 
         $participants = $this->entityManager->getRepository(TeamCategory::class)->findOneBy(['name' => 'Participants']);
@@ -159,30 +164,32 @@ class BaylorCmsService
                 }
             }
         }
+
+        return true;
     }
 
     /**
      * Upload standings to the Baylor CMS
-     * @param string $token
-     * @param string $contest
-     * @throws AccessDeniedHttpException
-     * @throws BadRequestHttpException
+     * @param string      $token
+     * @param string      $contest
+     * @param string|null $message
+     * @return bool
      */
-    public function uploadStandings(string $token, string $contest)
+    public function uploadStandings(string $token, string $contest, string &$message = null)
     {
-        throw new BadRequestHttpException('Sorry, standings upload is broken because of a format change.');
-
         // TODO: reimplement
+
+        $message = 'Sorry, standings upload is broken because of a format change.';
+        return false;
     }
 
     /**
      * Convert the given web service token to a bearer token
-     * @param string $token
-     * @return string
-     * @throws AccessDeniedHttpException
-     * @throws BadRequestHttpException
+     * @param string      $token
+     * @param string|null $message
+     * @return string|null
      */
-    protected function getBearerToken(string $token): string
+    protected function getBearerToken(string $token, string &$message = null)
     {
         $response = $this->client->post(self::WS_TOKEN_URL, [
             RequestOptions::FORM_PARAMS => [
@@ -194,12 +201,14 @@ class BaylorCmsService
         ]);
 
         if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500) {
-            throw new AccessDeniedHttpException(sprintf('Access forbidden, is your token valid? %s',
-                                                        $response->getBody()));
+            $message = sprintf('Access forbidden, is your token valid? %s',
+                               $response->getBody());
+            return null;
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
-            throw new BadRequestHttpException(sprintf('Unknown error while retrieving data from icpc.baylor.edu, status code: %d, %s',
-                                                      $response->getStatusCode(), $response->getBody()));
+            $message = sprintf('Unknown error while retrieving data from icpc.baylor.edu, status code: %d, %s',
+                               $response->getStatusCode(), $response->getBody());
+            return null;
         }
 
         $body = $this->DOMJudgeService->jsonDecode((string)$response->getBody());
