@@ -367,22 +367,7 @@ function toggle(id, show)
 	$.ajax({
 		url: scoreboardUrl
 	}).done(function(data, status, jqXHR) {
-		var $refreshTarget = $('[data-ajax-refresh-target]');
-		var $data = $(data);
-		// When using the static scoreboard, we need to find the children of the [data-ajax-refresh-target]
-		var $dataRefreshTarget = $data.find('[data-ajax-refresh-target]');
-		if ($dataRefreshTarget.length) {
-			$data = $dataRefreshTarget.children();
-		}
-		$refreshTarget.html($data);
-
-		var $newProgress = $('[data-ajax-refresh-target] > [data-progress-bar]');
-		if ($newProgress.length) {
-			var $oldProgress = $('body > [data-progress-bar]');
-			$oldProgress.html($newProgress.children());
-			$newProgress.parent().remove();
-		}
-		initFavouriteTeams();
+		processAjaxResponse(jqXHR, data);
 	});
 }
 
@@ -552,6 +537,27 @@ function addFirstRow(templateid, tableid) {
     }
 }
 
+function processAjaxResponse(jqXHR, data) {
+    if (jqXHR.getResponseHeader('X-Login-Page')) {
+        window.location = jqXHR.getResponseHeader('X-Login-Page');
+    } else {
+        var $refreshTarget = $('[data-ajax-refresh-target]');
+        var $data = $(data);
+        // When using the static scoreboard, we need to find the children of the [data-ajax-refresh-target]
+        var $dataRefreshTarget = $data.find('[data-ajax-refresh-target]');
+        if ($dataRefreshTarget.length) {
+            $data = $dataRefreshTarget.children();
+        }
+        if ($refreshTarget.data('ajax-refresh-before')) {
+            window[$refreshTarget.data('ajax-refresh-before')]();
+        }
+        $refreshTarget.html($data);
+        if ($refreshTarget.data('ajax-refresh-after')) {
+            window[$refreshTarget.data('ajax-refresh-after')]();
+        }
+    }
+}
+
 var refreshHandler = null;
 var refreshEnabled = false;
 function enableRefresh($url, $after, usingAjax) {
@@ -563,24 +569,7 @@ function enableRefresh($url, $after, usingAjax) {
             $.ajax({
                 url: $url
             }).done(function(data, status, jqXHR) {
-                if (jqXHR.getResponseHeader('X-Login-Page')) {
-                    window.location = jqXHR.getResponseHeader('X-Login-Page');
-                } else {
-                    var $refreshTarget = $('[data-ajax-refresh-target]');
-                    var $data = $(data);
-                    // When using the static scoreboard, we need to find the children of the [data-ajax-refresh-target]
-                    var $dataRefreshTarget = $data.find('[data-ajax-refresh-target]');
-                    if ($dataRefreshTarget.length) {
-                        $data = $dataRefreshTarget.children();
-                    }
-                    if ($refreshTarget.data('ajax-refresh-before')) {
-                        window[$refreshTarget.data('ajax-refresh-before')]();
-                    }
-                    $refreshTarget.html($data);
-                    if ($refreshTarget.data('ajax-refresh-after')) {
-                        window[$refreshTarget.data('ajax-refresh-after')]();
-                    }
-                }
+                processAjaxResponse(jqXHR, data);
             });
         } else {
             window.location = $url;

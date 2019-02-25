@@ -21,7 +21,7 @@
 
         $(function () {
             window.initializeScoreboard = function () {
-                var $newProgress = $('[data-ajax-refresh-target] > [data-progress-bar]');
+                var $newProgress = $('[data-ajax-refresh-target] > .d-none > [data-progress-bar]');
                 if ($newProgress.length) {
                     var $oldProgress = $('body > [data-progress-bar]');
                     $oldProgress.html($newProgress.children());
