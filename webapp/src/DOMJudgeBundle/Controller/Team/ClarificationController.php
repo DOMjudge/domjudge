@@ -151,6 +151,13 @@ class ClarificationController extends BaseController
             $clarification = $clarification->getInReplyTo();
         }
 
+        // Mark clarification as read
+        $team->removeUnreadClarification($clarification);
+        foreach ($clarification->getReplies() as $reply) {
+            $team->removeUnreadClarification($reply);
+        }
+        $this->entityManager->flush();
+
         return $this->render('@DOMJudge/team/clarification.html.twig', [
             'clarification' => $clarification,
             'team' => $team,
@@ -173,7 +180,7 @@ class ClarificationController extends BaseController
         $contest    = $this->DOMJudgeService->getCurrentContest($team->getTeamid());
 
         $formData = [];
-        $form = $this->createForm(TeamClarificationType::class, $formData);
+        $form     = $this->createForm(TeamClarificationType::class, $formData);
 
         $form->handleRequest($request);
 
