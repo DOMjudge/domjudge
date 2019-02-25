@@ -115,7 +115,7 @@ class SecurityController extends Controller
             $em->persist($team);
             $em->flush();
 
-            $this->addFlash('notice', 'Account registered successfully. Please log in.');
+            $this->addFlash('success', 'Account registered successfully. Please log in.');
 
             return $this->redirect($this->generateUrl('login'));
         }

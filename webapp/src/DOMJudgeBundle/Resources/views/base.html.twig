@@ -20,7 +20,19 @@
     {% endblock %}
 </head>
 <body style="padding-top: 4.5rem;">
-{% block body %}{% endblock %}
+{% block menu %}{% endblock %}
+{% block body %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                {% block messages %}
+                    {% include '@DOMJudge/partials/messages.html.twig' %}
+                {% endblock %}
+                {% block content %}{{ body|raw }}{% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
 <script>
     var domjudge_base_url = "{{ app.request.getBaseURL() }}";

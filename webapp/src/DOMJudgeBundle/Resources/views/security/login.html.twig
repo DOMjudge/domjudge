@@ -6,12 +6,11 @@
     <link rel="stylesheet" href="{{ asset('style_login.css') }}">
 {% endblock %}
 
+{% block messages %}{% endblock %}
 {% block body %}
 <div class="form-signin" id="loginform">
   <img class="mb-4" src="{{ asset('images/DOMjudgelogo.png') }}" alt="DOMjudge" width="72">
-  {% for message in app.session.flashBag.get('notice') %}
-      {% include '@DOMJudge/partials/alert.html.twig' with {type: 'success'} %}
-  {% endfor %}
+  {% include '@DOMJudge/partials/messages.html.twig' %}
   <br class="clearfix">
   <div class="main-login mr-2">
     <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>

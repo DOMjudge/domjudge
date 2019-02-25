@@ -113,7 +113,7 @@ class ImportExportController extends BaseController
             $type  = $tsvForm->get('type')->getData();
             $file  = $tsvForm->get('file')->getData();
             $count = $this->importExportService->importTsv($type, $file);
-            $this->addFlash('tsvImport', sprintf('%d items imported', $count));
+            $this->addFlash('success', sprintf('%d items imported', $count));
             return $this->redirectToRoute('jury_import_export');
         }
 
@@ -126,10 +126,10 @@ class ImportExportController extends BaseController
             $accessToken = $baylorForm->get('access_token')->getData();
             if ($baylorForm->get('fetch_teams')->isClicked()) {
                 $this->baylorCmsService->importTeams($accessToken, $contestId);
-                $this->addFlash('baylorCms', 'Teams successfully imported');
+                $this->addFlash('success', 'Teams successfully imported');
             } else {
                 $this->baylorCmsService->uploadStandings($accessToken, $contestId);
-                $this->addFlash('baylorCms', 'Standings successfully uploaded');
+                $this->addFlash('success', 'Standings successfully uploaded');
             }
             return $this->redirectToRoute('jury_import_export');
         }
@@ -177,7 +177,7 @@ class ImportExportController extends BaseController
             $file = $importForm->get('file')->getData();
             $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
             $this->importExportService->importContestYaml($data);
-            $this->addFlash('yamlImport',
+            $this->addFlash('success',
                             sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
             return $this->redirectToRoute('jury_import_export_yaml');
         }

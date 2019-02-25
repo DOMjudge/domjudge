@@ -261,7 +261,7 @@ abstract class BaseController extends Controller
                                                               [':teamid' => $entityId]);
             }
 
-            $this->addFlash('generalSuccess', sprintf('Successfully deleted %s %s "%s"',
+            $this->addFlash('success', sprintf('Successfully deleted %s %s "%s"',
                                                       $readableType, implode(', ', $primaryKeyData), $description));
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);

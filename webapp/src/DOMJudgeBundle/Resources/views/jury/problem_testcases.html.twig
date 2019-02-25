@@ -17,12 +17,6 @@
         <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">Back to problem p{{ problem.probid }}</a>
     </div>
 
-    {% if app.session.flashBag.has('testcases') %}
-        {% for message in app.session.flashBag.get('testcases') %}
-            {% include '@DOMJudge/partials/alert.html.twig' with {type: 'info'} %}
-        {% endfor %}
-    {% endif %}
-
     {% if is_granted('ROLE_ADMIN') %}
         {# We use a variable here so indeting doesn't get screwed up #}
         {% set formStart = '<form method="post" enctype="multipart/form-data">' %}

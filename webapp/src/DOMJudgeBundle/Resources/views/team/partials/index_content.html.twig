@@ -14,11 +14,7 @@
     </div>
 
     <div class="mt-4" data-flash-messages>
-        {% if app.session.flashBag.has('teamIndexSuccess') %}
-            {% for message in app.session.flashBag.get('teamIndexSuccess') %}
-                {% include '@DOMJudge/partials/alert.html.twig' with {'type': 'success'} %}
-            {% endfor %}
-        {% endif %}
+        {% include '@DOMJudge/partials/messages.html.twig' %}
     </div>
 
     <div class="row">

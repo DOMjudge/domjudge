@@ -12,9 +12,6 @@
         <main role="main" class="pl-4 pt-5">
             <div class="container submitform">
                 <h1 class="text-center">Submit</h1>
-                {% for message in app.session.flashBag.get('submissionFail') %}
-                    {% include '@DOMJudge/partials/alert.html.twig' with {type: 'danger'} %}
-                {% endfor %}
                 {{ form_start(form) }}
                 {{ form_row(form.code) }}
                 {{ form_row(form.problem) }}

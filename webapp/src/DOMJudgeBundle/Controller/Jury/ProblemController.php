@@ -134,7 +134,7 @@ class ProblemController extends BaseController
                         return sprintf('<li>%s</li>', $message);
                     }, $allMessages)) . '</ul>';
 
-                $this->addFlash('problemZip', $message);
+                $this->addFlash('info', $message);
             }
 
             if (count($archives) === 1 && $newProblem !== null) {
@@ -695,7 +695,7 @@ class ProblemController extends BaseController
                         return sprintf('<li>%s</li>', $message);
                     }, $messages)) . '</ul>';
 
-                $this->addFlash('testcases', $message);
+                $this->addFlash('info', $message);
             }
             return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
         }
@@ -896,7 +896,7 @@ class ProblemController extends BaseController
                         return sprintf('<li>%s</li>', $message);
                     }, $messages)) . '</ul>';
 
-                $this->addFlash('problemZip', $message);
+                $this->addFlash('info', $message);
             }
 
             return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);

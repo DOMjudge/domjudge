@@ -2,15 +2,8 @@
 
 {% block title %}{{ title|default('DOMjudge') }}{% endblock %}
 
-{% block body %}
+{% block menu %}
     {% if hide_menu is not defined %}
         {% include '@DOMJudge/public/menu.html.twig' %}
     {% endif %}
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                {% block content %}{{ body|raw }}{% endblock %}
-            </div>
-        </div>
-    </div>
 {% endblock %}

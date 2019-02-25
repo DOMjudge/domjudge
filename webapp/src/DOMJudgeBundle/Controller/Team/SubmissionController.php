@@ -69,9 +69,9 @@ class SubmissionController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($contest === null) {
-                $this->addFlash('submissionFail', 'No active contest');
+                $this->addFlash('danger', 'No active contest');
             } elseif (!$this->DOMJudgeService->checkrole('jury') && !$contest->getFreezeData()->started()) {
-                $this->addFlash('submissionFail', 'Contest has not yet started');
+                $this->addFlash('danger', 'Contest has not yet started');
             } else {
                 /** @var Problem $problem */
                 $problem = $form->get('problem')->getData();
@@ -85,7 +85,7 @@ class SubmissionController extends BaseController
 
                 $this->DOMJudgeService->auditlog('submission', $submission->getSubmitid(), 'added', 'via teampage',
                                                  null, $contest->getCid());
-                $this->addFlash('teamIndexSuccess',
+                $this->addFlash('success',
                                 '<strong>Submission done!</strong> Watch for the verdict in the list below.');
                 return $this->redirectToRoute('team_index');
             }

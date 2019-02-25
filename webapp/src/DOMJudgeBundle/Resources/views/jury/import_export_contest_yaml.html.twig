@@ -14,12 +14,6 @@
                 clarification answers, etc.). This action can not be undone!
             </div>
 
-            {% if app.session.flashBag.has('yamlImport') %}
-                {% for message in app.session.flashBag.get('yamlImport') %}
-                    {% include '@DOMJudge/partials/alert.html.twig' with {type: 'success'} %}
-                {% endfor %}
-            {% endif %}
-
             {{ form(import_form) }}
         </div>
     </div>

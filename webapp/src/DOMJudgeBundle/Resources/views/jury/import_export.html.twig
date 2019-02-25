@@ -39,12 +39,6 @@
     <h4>Tab-separated import</h4>
     <div class="row">
         <div class="col-md-6">
-            {% if app.session.flashBag.has('tsvImport') %}
-                {% for message in app.session.flashBag.get('tsvImport') %}
-                    {% include '@DOMJudge/partials/alert.html.twig' with {type: 'success'} %}
-                {% endfor %}
-            {% endif %}
-
             {{ form(tsv_form) }}
         </div>
     </div>
@@ -58,12 +52,6 @@
                         href="https://icpc.baylor.edu/login" target="_blank">https://icpc.baylor.edu/login</a>.
                 You can find the Contest ID (e.g. <code>Southwestern-Europe-2014</code>) in the URL.
             </div>
-
-            {% if app.session.flashBag.has('baylorCms') %}
-                {% for message in app.session.flashBag.get('baylorCms') %}
-                    {% include '@DOMJudge/partials/alert.html.twig' with {type: 'success'} %}
-                {% endfor %}
-            {% endif %}
 
             {{ form_start(baylor_form) }}
             {{ form_row(baylor_form.contest_id) }}

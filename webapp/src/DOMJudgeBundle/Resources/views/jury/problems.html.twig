@@ -13,12 +13,6 @@
 
     <h1>Problems</h1>
 
-    {% if app.session.flashBag.has('problemZip') %}
-        {% for message in app.session.flashBag.get('problemZip') %}
-            {% include '@DOMJudge/partials/alert.html.twig' with {type: 'info'} %}
-        {% endfor %}
-    {% endif %}
-
     {{ macros.table(problems, table_fields, num_actions) }}
 
     {% if is_granted('ROLE_ADMIN') %}

@@ -2,13 +2,6 @@
 
 {% block title %}{{ title|default('DOMjudge') }}{% endblock %}
 
-{% block body %}
+{% block menu %}
     {% include '@DOMJudge/team/menu.html.twig' %}
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                {% block content %}{{ body|raw }}{% endblock %}
-            </div>
-        </div>
-    </div>
 {% endblock %}
