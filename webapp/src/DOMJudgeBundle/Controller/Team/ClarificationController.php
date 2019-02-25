@@ -146,6 +146,11 @@ class ClarificationController extends BaseController
             throw new UnauthorizedHttpException('Permission denied');
         }
 
+        // Get the "parent" message if we have one
+        if ($clarification->getInReplyTo()) {
+            $clarification = $clarification->getInReplyTo();
+        }
+
         return $this->render('@DOMJudge/team/clarification.html.twig', [
             'clarification' => $clarification,
             'team' => $team,
