@@ -29,22 +29,22 @@
             {% endif %}
             <tr class="{{ classes }}">
                 <td>
-                    <a {% if link %}href="{{ link }}"{% endif %}>
+                    <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
                         {{ submission.submittime | printtime(null, submission.contest) }}
                     </a>
                 </td>
                 <td class="probid">
-                    <a {% if link %}href="{{ link }}"{% endif %} title="{{ submission.problem.name }}">
+                    <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %} title="{{ submission.problem.name }}">
                         {{ submission.contestProblem.shortname }}
                     </a>
                 </td>
                 <td class="langid">
-                    <a {% if link %}href="{{ link }}"{% endif %} title="{{ submission.language.name }}">
+                    <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %} title="{{ submission.language.name }}">
                         {{ submission.langid }}
                     </a>
                 </td>
                 <td>
-                    <a {% if link %}href="{{ link }}"{% endif %}>
+                    <a data-ajax-modal data-ajax-modal-after="markSeen" {% if link %}href="{{ link }}"{% endif %}>
                         {%- if submission.submittime > submission.contest.endtime %}
                             {{ 'too-late' | printResult(true, false) }}
                         {%- elseif submission.judgings.first is empty or submission.judgings.first.result is empty %}

@@ -48,5 +48,9 @@
 
             $('[data-flash-messages]').html($flash);
         }
+
+        function markSeen($elem) {
+            $elem.closest('tr').removeClass('unseen');
+        }
     </script>
 {% endblock %}

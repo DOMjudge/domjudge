@@ -686,7 +686,7 @@ function updateMenuJudgehosts(data)
                 {'tag': 'host_'+data[i].hostname+'@'+
                  Math.floor(data[i].polltime),
                  'link': domjudge_base_url + '/jury/judgehosts/' + encodeURIComponent(data[i].hostname),
-	         'body': data[i].hostname + ' is down'});
+                 'body': data[i].hostname + ' is down'});
         }
     }
 }
@@ -708,7 +708,7 @@ function updateMenuInternalErrors(data)
             sendNotification('Judgehost internal error occurred.',
                 {'tag': 'ie_'+data[i].errorid,
                  'link': domjudge_base_url + '/internal-errors/' + data[i].errorid,
-	         'body': data[i].description});
+                 'body': data[i].description});
         }
     }
 }
@@ -717,13 +717,20 @@ function initializeAjaxModals()
 {
 	var $body = $('body');
 	$body.on('click', '[data-ajax-modal]', function() {
-		var url = $(this).attr('href');
+		var $elem = $(this);
+		var url = $elem.attr('href');
+		if (!url) {
+			return;
+		}
 		$.ajax({
 			url: url
 		}).done(function(data) {
 			var $data = $(data);
 			$('body').append($data);
 			$data.modal('show');
+			if ($elem.data('ajax-modal-after')) {
+				window[$elem.data('ajax-modal-after')]($elem);
+			}
 		});
 		return false;
 	});

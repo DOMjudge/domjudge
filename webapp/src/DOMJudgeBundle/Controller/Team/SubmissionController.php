@@ -112,11 +112,12 @@ class SubmissionController extends BaseController
 
     /**
      * @Route("/submission/{submitId}", name="team_submission")
-     * @param int $submitId
+     * @param Request $request
+     * @param int     $submitId
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function viewAction(int $submitId)
+    public function viewAction(Request $request, int $submitId)
     {
         $verificationRequired = (bool)$this->DOMJudgeService->dbconfig_get('verification_required', false);;
         $showCompile      = $this->DOMJudgeService->dbconfig_get('show_compile', 2);
@@ -164,12 +165,18 @@ class SubmissionController extends BaseController
                 ->getResult();
         }
 
-        return $this->render('@DOMJudge/team/submission.html.twig', [
+        $data = [
             'judging' => $judging,
             'verificationRequired' => $verificationRequired,
             'showCompile' => $showCompile,
             'showSampleOutput' => $showSampleOutput,
             'runs' => $runs,
-        ]);
+        ];
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('@DOMJudge/team/submission_modal.html.twig', $data);
+        } else {
+            return $this->render('@DOMJudge/team/submission.html.twig', $data);
+        }
     }
 }
