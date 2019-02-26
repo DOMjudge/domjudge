@@ -15,7 +15,7 @@
     {% endif %}
 
     <div class="row">
-        <div class="col-lg-4">
+        <div class="col-lg-{{ size | default(4) }}">
             <table class="table table-sm table-striped">
                 <tr>
                     <th>Name</th>

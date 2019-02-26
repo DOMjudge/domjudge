@@ -1,4 +1,4 @@
-{% extends "@DOMJudge/jury/modal_form.html.twig" %}
+{% extends "@DOMJudge/partials/modal.html.twig" %}
 
 {% block title %}Delete {{ type }} {{ primaryKey }} - "{{ description }}"{% endblock %}
 
@@ -27,8 +27,8 @@
 
 {% endblock %}
 
-{% block cancelButtonText %}
-    {% if isError %}OK{% else %}{{ parent() }}{% endif %}
+{% block closeButtonText %}
+    {% if isError %}OK{% else %}Cancel{% endif %}
 {% endblock %}
 
 {% block buttonText %}Delete{% endblock %}

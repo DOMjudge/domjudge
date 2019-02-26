@@ -14,9 +14,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    {% block cancelButtonText %}Cancel{% endblock %}
+                    {% block closeButtonText %}Close{% endblock %}
                 </button>
-                {% if not hideModalSubmit|default(false) %}
+                {% if showModalSubmit|default(false) %}
                     <button type="button" class="btn {{ buttonClass|default('btn-danger') }}" data-url="{{ modalUrl }}">
                         {% block buttonText %}{% endblock %}
                     </button>

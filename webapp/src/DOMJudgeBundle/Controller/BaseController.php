@@ -275,7 +275,7 @@ abstract class BaseController extends Controller
                 'description' => $description,
                 'messages' => $messages,
                 'isError' => $isError,
-                'hideModalSubmit' => $isError,
+                'showModalSubmit' => !$isError,
                 'modalUrl' => $request->getRequestUri(),
                 'redirectUrl' => $redirectUrl,
             ];

@@ -57,6 +57,8 @@
         {% if refresh is defined and refresh and refresh_flag %}
         enableRefresh('{{ refresh.url }}', {{ refresh.after }}, {{ refresh.ajax | default(0) }});
         {% endif %}
+
+        initializeAjaxModals();
     });
 </script>
 {% block extrafooter %}{% endblock %}

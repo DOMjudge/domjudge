@@ -77,20 +77,26 @@ class ScoreboardController extends BaseController
 
     /**
      * @Route("/team/{teamId}", name="team_team")
-     * @param int $teamId
+     * @param Request $request
+     * @param int     $teamId
      * @return Response
      * @throws \Exception
      */
-    public function teamAction(int $teamId)
+    public function teamAction(Request $request, int $teamId)
     {
         $team             = $this->entityManager->getRepository(Team::class)->find($teamId);
         $showFlags        = (bool)$this->DOMJudgeService->dbconfig_get('show_flags', true);
         $showAffiliations = (bool)$this->DOMJudgeService->dbconfig_get('show_affiliations', true);
-
-        return $this->render('@DOMJudge/team/team.html.twig', [
+        $data             = [
             'team' => $team,
             'showFlags' => $showFlags,
             'showAffiliations' => $showAffiliations,
-        ]);
+        ];
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('@DOMJudge/team/team_modal.html.twig', $data);
+        } else {
+            return $this->render('@DOMJudge/team/team.html.twig', $data);
+        }
     }
 }

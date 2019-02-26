@@ -13,7 +13,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
@@ -137,21 +136,27 @@ class PublicController extends BaseController
 
     /**
      * @Route("/team/{teamId}", name="public_team")
-     * @param int $teamId
+     * @param Request $request
+     * @param int     $teamId
      * @return Response
      * @throws \Exception
      */
-    public function teamAction(int $teamId)
+    public function teamAction(Request $request, int $teamId)
     {
         $team             = $this->entityManager->getRepository(Team::class)->find($teamId);
         $showFlags        = (bool)$this->DOMJudgeService->dbconfig_get('show_flags', true);
         $showAffiliations = (bool)$this->DOMJudgeService->dbconfig_get('show_affiliations', true);
-
-        return $this->render('@DOMJudge/public/team.html.twig', [
+        $data             = [
             'team' => $team,
             'showFlags' => $showFlags,
             'showAffiliations' => $showAffiliations,
-        ]);
+        ];
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('@DOMJudge/public/team_modal.html.twig', $data);
+        } else {
+            return $this->render('@DOMJudge/public/team.html.twig', $data);
+        }
     }
 
     /**

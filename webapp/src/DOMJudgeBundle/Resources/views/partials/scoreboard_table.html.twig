@@ -162,16 +162,19 @@
             <td class="scoretn"
                 {% if color is not null %}style="background: {{ color }};"{% endif %} {% if jury %}title="{{ score.team.name }}"{% endif %}>
                 {% set link = null %}
+                {% set extra = null %}
                 {% if not static %}
                     {% if jury %}
                         {% set link = path('jury_team', {teamId: score.team.teamid}) %}
                     {% elseif public %}
                         {% set link = path('public_team', {teamId: score.team.teamid}) %}
+                        {% set extra = 'data-ajax-modal' %}
                     {% else %}
                         {% set link = path('team_team', {teamId: score.team.teamid}) %}
+                        {% set extra = 'data-ajax-modal' %}
                     {% endif %}
                 {% endif %}
-                <a {% if link is not null %}href="{{ link }}"{% endif %}>
+                <a {% if extra is not null %}{{ extra }}{% endif %} {% if link is not null %}href="{{ link }}"{% endif %}>
                     {% if scoreboard.usedCategories(limitToTeamIds) | length > 1 and scoreboard.bestInCategory(score.team, limitToTeamIds) %}
                         <span class="badge badge-warning" style="margin-right: 2em; font-weight: normal;">
                             {{ score.team.category.name }}
