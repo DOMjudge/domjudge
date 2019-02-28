@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query;
 use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Judging;
@@ -464,7 +465,7 @@ class RejudgingController extends BaseController
         $queryBuilder = $em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
             ->leftJoin('j.submission', 's')
-            ->select('j')
+            ->select('j', 's')
             ->andWhere('j.contest IN (:contests)')
             ->andWhere('j.valid = 1')
             ->andWhere(sprintf('%s = :id', $tablemap[$table]))
@@ -481,8 +482,10 @@ class RejudgingController extends BaseController
                 ->setParameter(':correct', 'correct');
         }
 
-        /** @var Judging[] $judgings */
-        $judgings = $queryBuilder->getQuery()->getResult();
+        /** @var array[] $judgings */
+        $judgings = $queryBuilder
+            ->getQuery()
+            ->getResult(Query::HYDRATE_ARRAY);
 
         if (empty($judgings)) {
             $this->addFlash('danger', 'No judgings matched.');
@@ -502,15 +505,8 @@ class RejudgingController extends BaseController
         }
 
         foreach ($judgings as $judging) {
-            // Reload judging and rejudging to make sure we have a fresh copy
-            // when the entity manager is cleared
-            /** @var Judging $judging */
-            $judging = $em->getRepository(Judging::class)->find($judging->getJudgingid());
-            if ($rejudging) {
-                $rejudging = $em->getRepository(Rejudging::class)->find($rejudging->getRejudgingid());
-            }
-            $submission = $judging->getSubmission();
-            if ($submission->getRejudgingid() !== null) {
+            $submission = $judging['submission'];
+            if ($submission['rejudgingid'] !== null) {
                 // Already associated rejudging
                 if ($table === 'submission') {
                     // clean up rejudging. Note that if $table is
@@ -521,7 +517,7 @@ class RejudgingController extends BaseController
                         $em->flush();
                     }
                     $this->addFlash('danger', sprintf('Submission is already part of rejudging r%d',
-                                                      $submission->getRejudgingid()));
+                                                      $submission['rejudgingid']));
                     return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_index'));
                 } else {
                     // silently skip that submission
@@ -539,28 +535,30 @@ class RejudgingController extends BaseController
                 $em
             ) {
                 if (!$fullRejudge) {
-                    $judging->setValid(false);
+                    $em->getConnection()->executeUpdate('UPDATE judging SET valid = false WHERE judgingid = :judgingid',
+                                                        [
+                                                            ':judgingid' => $judging['judgingid'],
+                                                        ]);
                 }
 
-                if ($submission->getRejudgingid() === null) {
-                    if ($rejudging) {
-                        // Reload rejudging to make sure we have fresh data
-                        $rejudging = $em->getRepository(Rejudging::class)->find($rejudging->getRejudgingid());
-                    }
-                    $submission
-                        ->setJudgehost(null)
-                        ->setRejudging($rejudging);
+                if ($submission['rejudgingid'] === null) {
+                    $em->getConnection()->executeUpdate('UPDATE submission SET judgehost = null, rejudgingid = :rejudgingid WHERE submitid = :submitid',
+                                                        [
+                                                            ':rejudgingid' => $rejudging->getRejudgingid(),
+                                                            ':submitid' => $submission['submitid'],
+                                                        ]);
                 }
 
                 // Prioritize single submission rejudgings
                 if ($table == 'submission') {
-                    $team = $submission->getTeam();
-                    if ($team) {
-                        $team->setJudgingLastStarted(null);
+                    $teamid = $submission['teamidd'];
+                    if ($teamid) {
+                        $em->getConnection()->executeUpdate('UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
+                                                            [
+                                                                ':teamid' => $teamid,
+                                                            ]);
                     }
                 }
-
-                $em->flush();
 
                 if (!$fullRejudge) {
                     // Clear entity manager to get fresh data
@@ -576,7 +574,7 @@ class RejudgingController extends BaseController
             });
 
             if (!$fullRejudge) {
-                $this->DOMJudgeService->auditlog('judging', $judging->getJudgingid(), 'mark invalid', '(rejudge)');
+                $this->DOMJudgeService->auditlog('judging', $judging['judgingid'], 'mark invalid', '(rejudge)');
             }
         }
 
