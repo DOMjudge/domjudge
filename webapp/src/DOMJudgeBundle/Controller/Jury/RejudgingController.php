@@ -521,7 +521,7 @@ class RejudgingController extends Controller
                                                                          ]);
                 }
 
-                if ($submission['rejudgingid'] === null) {
+                if ($submission['rejudgingid'] === null && $rejudging !== null) {
                     $this->entityManager->getConnection()->executeUpdate('UPDATE submission SET judgehost = null, rejudgingid = :rejudgingid WHERE submitid = :submitid',
                                                                          [
                                                                              ':rejudgingid' => $rejudging->getRejudgingid(),
@@ -531,7 +531,7 @@ class RejudgingController extends Controller
 
                 // Prioritize single submission rejudgings
                 if ($table == 'submission') {
-                    $teamid = $submission['teamidd'];
+                    $teamid = $submission['teamid'];
                     if ($teamid) {
                         $this->entityManager->getConnection()->executeUpdate('UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
                                                                              [
@@ -544,11 +544,11 @@ class RejudgingController extends Controller
                     // Clear entity manager to get fresh data
                     $this->entityManager->clear();
                     $contest = $this->entityManager->getRepository(Contest::class)
-                        ->find($submission->getCid());
+                        ->find($submission['cid']);
                     $team    = $this->entityManager->getRepository(Team::class)
-                        ->find($submission->getTeamid());
+                        ->find($submission['teamid']);
                     $problem = $this->entityManager->getRepository(Problem::class)
-                        ->find($submission->getProbid());
+                        ->find($submission['probid']);
                     $scoreboardService->calculateScoreRow($contest, $team, $problem);
                 }
             });
