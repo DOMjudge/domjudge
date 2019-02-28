@@ -37,6 +37,9 @@
                 lastResponseLength = response.length;
 
                 $status.append(output);
+
+                // Scroll page to bottom of div to keep showing progress
+                $('html, body').animate({scrollTop: $status.offset().top + $status.height()}, 0);
             };
 
             xhr.send();
