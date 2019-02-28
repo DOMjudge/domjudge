@@ -541,7 +541,7 @@ class RejudgingController extends BaseController
                                                         ]);
                 }
 
-                if ($submission['rejudgingid'] === null) {
+                if ($submission['rejudgingid'] === null && $rejudging !== null) {
                     $em->getConnection()->executeUpdate('UPDATE submission SET judgehost = null, rejudgingid = :rejudgingid WHERE submitid = :submitid',
                                                         [
                                                             ':rejudgingid' => $rejudging->getRejudgingid(),
@@ -551,7 +551,7 @@ class RejudgingController extends BaseController
 
                 // Prioritize single submission rejudgings
                 if ($table == 'submission') {
-                    $teamid = $submission['teamidd'];
+                    $teamid = $submission['teamid'];
                     if ($teamid) {
                         $em->getConnection()->executeUpdate('UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
                                                             [
@@ -564,11 +564,11 @@ class RejudgingController extends BaseController
                     // Clear entity manager to get fresh data
                     $em->clear();
                     $contest = $em->getRepository(Contest::class)
-                        ->find($submission->getCid());
+                        ->find($submission['cid']);
                     $team    = $em->getRepository(Team::class)
-                        ->find($submission->getTeamid());
+                        ->find($submission['teamid']);
                     $problem = $em->getRepository(Problem::class)
-                        ->find($submission->getProbid());
+                        ->find($submission['probid']);
                     $scoreboardService->calculateScoreRow($contest, $team, $problem);
                 }
             });
