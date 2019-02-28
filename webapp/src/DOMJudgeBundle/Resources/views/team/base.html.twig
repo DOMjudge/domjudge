@@ -5,3 +5,8 @@
 {% block menu %}
     {% include '@DOMJudge/team/menu.html.twig' %}
 {% endblock %}
+
+{% block extrafooter %}
+    {{ parent() }}
+    {% include '@DOMJudge/team/partials/submit_scripts.html.twig' %}
+{% endblock %}

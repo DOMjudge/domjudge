@@ -2,7 +2,7 @@
 <script>
     function getMainExtension(ext) {
         switch (ext) {
-                {% for language in languages %}
+                {% for language in submission_languages %}
                 {% for extension in language.extensions %}
             case '{{ extension }}':
                 return '{{ language.langid }}';
@@ -15,7 +15,7 @@
 
     function getEntryPoint(mainext) {
         switch (mainext) {
-                {% for language in languages %}
+                {% for language in submission_languages %}
                 {% if language.requireEntryPoint %}
             case '{{ language.langid }}':
                 return '{{ language.entryPointDescription | default('Entry point') }}';

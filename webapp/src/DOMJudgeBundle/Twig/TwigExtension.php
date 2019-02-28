@@ -121,6 +121,12 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             'ext_ccs_url' => defined('EXT_CCS_URL') ? EXT_CCS_URL : null,
             'current_team_contest' => $team ? $this->domjudge->getCurrentContest($user->getTeamid()) : null,
             'current_team_contests' => $team ? $this->domjudge->getCurrentContests($user->getTeamid()) : null,
+            'submission_languages' => $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Language', 'l')
+                ->select('l')
+                ->andWhere('l.allowSubmit = 1')
+                ->getQuery()
+                ->getResult(),
         ];
     }
 

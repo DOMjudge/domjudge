@@ -12,6 +12,7 @@ use DOMJudgeBundle\Form\Type\SubmitProblemType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\SubmissionService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -42,14 +43,21 @@ class SubmissionController extends BaseController
      */
     protected $DOMJudgeService;
 
+    /**
+     * @var FormFactoryInterface
+     */
+    protected $formFactory;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         SubmissionService $submissionService,
-        DOMJudgeService $DOMJudgeService
+        DOMJudgeService $DOMJudgeService,
+        FormFactoryInterface $formFactory
     ) {
         $this->entityManager     = $entityManager;
         $this->submissionService = $submissionService;
         $this->DOMJudgeService   = $DOMJudgeService;
+        $this->formFactory       = $formFactory;
     }
 
     /**
@@ -63,7 +71,10 @@ class SubmissionController extends BaseController
         $user    = $this->DOMJudgeService->getUser();
         $team    = $user->getTeam();
         $contest = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
-        $form    = $this->createForm(SubmitProblemType::class);
+        $form    = $this->formFactory
+            ->createBuilder(SubmitProblemType::class)
+            ->setAction($this->generateUrl('team_submit'))
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -96,18 +107,13 @@ class SubmissionController extends BaseController
             }
         }
 
-        /** @var Language[] $languages */
-        $languages = $this->entityManager->createQueryBuilder()
-            ->from('DOMJudgeBundle:Language', 'l')
-            ->select('l')
-            ->andWhere('l.allowSubmit = 1')
-            ->getQuery()
-            ->getResult();
+        $data = ['form' => $form->createView()];
 
-        return $this->render('@DOMJudge/team/submit.html.twig', [
-            'form' => $form->createView(),
-            'languages' => $languages,
-        ]);
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('@DOMJudge/team/submit_modal.html.twig', $data);
+        } else {
+            return $this->render('@DOMJudge/team/submit.html.twig', $data);
+        }
     }
 
     /**

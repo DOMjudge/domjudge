@@ -37,7 +37,7 @@
 <script>
     var domjudge_base_url = "{{ app.request.getBaseURL() }}";
     $(function () {
-        $('.custom-file-input').on('change', function () {
+        $('body').on('change', '.custom-file-input', function () {
             var files = this.files;
             var fileNames = [];
             for (var i = 0; i < files.length; i++) {
