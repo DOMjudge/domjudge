@@ -19,6 +19,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -40,10 +41,19 @@ class RejudgingController extends Controller
      */
     protected $DOMJudgeService;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
-    {
+    /**
+     * @var SessionInterface
+     */
+    protected $session;
+
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        SessionInterface $session
+    ) {
         $this->entityManager   = $entityManager;
         $this->DOMJudgeService = $DOMJudgeService;
+        $this->session         = $session;
     }
 
     /**
@@ -167,6 +177,9 @@ class RejudgingController extends Controller
         SubmissionService $submissionService,
         int $rejudgingId
     ) {
+        // Close the session, as this might take a while and we don't need the session below
+        $this->session->save();
+
         /** @var Rejudging $rejudging */
         $rejudging = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Rejudging', 'r')
