@@ -236,35 +236,39 @@ class RejudgingController extends BaseController
             }
         }
 
-        $expr = $this->entityManager->getExpressionBuilder();
-
         /** @var Judging[] $originalVerdicts */
-        $originalVerdicts = $this->entityManager->createQueryBuilder()
-            ->from('DOMJudgeBundle:Judging', 'j', 'j.submitid')
-            ->select('j')
-            ->where(
-                $expr->in('j.judgingid',
-                          $this->entityManager->createQueryBuilder()
-                              ->from('DOMJudgeBundle:Judging', 'j2')
-                              ->select('j2.prevjudgingid')
-                              ->andWhere('j2.rejudging = :rejudging')
-                              ->andWhere('j2.endtime IS NOT NULL')
-                              ->getDQL()
-                )
-            )
-            ->setParameter(':rejudging', $rejudging)
-            ->getQuery()
-            ->getResult();
-
         /** @var Judging[] $newVerdicts */
-        $newVerdicts = $this->entityManager->createQueryBuilder()
-            ->from('DOMJudgeBundle:Judging', 'j', 'j.submitid')
-            ->select('j')
-            ->andWhere('j.rejudging = :rejudging')
-            ->andWhere('j.endtime IS NOT NULL')
-            ->setParameter(':rejudging', $rejudging)
-            ->getQuery()
-            ->getResult();
+        $originalVerdicts = [];
+        $newVerdicts      = [];
+
+        $this->entityManager->transactional(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
+            $expr             = $this->entityManager->getExpressionBuilder();
+            $originalVerdicts = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Judging', 'j', 'j.submitid')
+                ->select('j')
+                ->where(
+                    $expr->in('j.judgingid',
+                              $this->entityManager->createQueryBuilder()
+                                  ->from('DOMJudgeBundle:Judging', 'j2')
+                                  ->select('j2.prevjudgingid')
+                                  ->andWhere('j2.rejudging = :rejudging')
+                                  ->andWhere('j2.endtime IS NOT NULL')
+                                  ->getDQL()
+                    )
+                )
+                ->setParameter(':rejudging', $rejudging)
+                ->getQuery()
+                ->getResult();
+
+            $newVerdicts = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Judging', 'j', 'j.submitid')
+                ->select('j')
+                ->andWhere('j.rejudging = :rejudging')
+                ->andWhere('j.endtime IS NOT NULL')
+                ->setParameter(':rejudging', $rejudging)
+                ->getQuery()
+                ->getResult();
+        });
 
         // Helper function to add verdicts
         $addVerdict = function ($unknownVerdict) use ($VERDICTS, &$verdictTable) {
