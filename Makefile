@@ -66,9 +66,11 @@ endif
 # that properly, we need a configured system with dbpasswords.secret
 # generated. To circumvent this, we install a stub parameters.yml
 # file, and set its modification time in the past so that it will get
-# updated later during build with 'make domserver'.
+# updated later during build with 'make domserver'. We use --no-scripts
+# because at this point the autoload.php file is not generated yet, which
+# is needed to run the post-install scripts.
 	$(MAKE) -C webapp params-from-stub static-from-stub
-	composer $(subst 1,-q,$(QUIET)) install
+	composer $(subst 1,-q,$(QUIET)) install --no-scripts
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.

@@ -1,7 +1,13 @@
 ifndef TOPDIR
 TOPDIR=..
 endif
+
+REC_TARGETS = domserver
+
 include $(TOPDIR)/Makefile.global
+
+# Subdirectories to recurse into for REC_TARGETS
+SUBDIRS = app
 
 PARAMS = app/config/parameters.yml
 STATIC = app/config/static.yml
