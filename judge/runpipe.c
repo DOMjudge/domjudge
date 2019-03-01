@@ -448,7 +448,13 @@ int main(int argc, char **argv)
 		if ( write_progout ) {
 			pump_pipes(&progout_pipe_fd[0], &pipe_fd[0][1]);
 
-			pid = waitpid(-1, &status, WNOHANG);
+			pid = 0;
+			for(i=0; i<ncmds; i++) {
+				if ( cmd_exit[i]==-1 ) {
+					pid = waitpid(cmd_pid[i], &status, WNOHANG);
+					if ( pid != 0 ) break;
+				}
+			}
 			if ( pid==0 ) continue;
 		} else {
 			pid = waitpid(-1, &status, 0);
@@ -482,6 +488,10 @@ int main(int argc, char **argv)
 
 		cmd_exit[i] = status;
 		verb("command #%d, pid %d has exited (with status %d)",i+1,pid,status);
+		if (cmd_exit[0] != -1 && cmd_exit[1] != -1) {
+			/* Both child processes are done. */
+			break;
+		}
 	};
 
 	/* Reset pipe filedescriptors to use blocking I/O. */
