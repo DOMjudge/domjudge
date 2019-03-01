@@ -731,6 +731,10 @@ function initializeAjaxModals()
 			if ($elem.data('ajax-modal-after')) {
 				window[$elem.data('ajax-modal-after')]($elem);
 			}
+
+			$data.on('hidden.bs.modal', function() {
+				$data.remove();
+			});
 		});
 		return false;
 	});
