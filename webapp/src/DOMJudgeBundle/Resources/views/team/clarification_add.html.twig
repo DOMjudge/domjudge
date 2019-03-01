@@ -20,14 +20,3 @@
         </div>
     </div>
 {% endblock %}
-
-{% block extrafooter %}
-    {{ parent() }}
-    <script>
-        $(function () {
-            $('form[name=team_clarification]').on('submit', function () {
-                return confirm("Send clarification request to Jury?");
-            });
-        });
-    </script>
-{% endblock %}

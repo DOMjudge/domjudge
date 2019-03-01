@@ -9,4 +9,12 @@
 {% block extrafooter %}
     {{ parent() }}
     {% include '@DOMJudge/team/partials/submit_scripts.html.twig' %}
+
+    <script>
+        $(function () {
+            $('body').on('submit', 'form[name=team_clarification]', function () {
+                return confirm("Send clarification request to Jury?");
+            });
+        });
+    </script>
 {% endblock %}

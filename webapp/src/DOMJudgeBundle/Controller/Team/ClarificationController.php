@@ -12,6 +12,7 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
@@ -43,14 +44,21 @@ class ClarificationController extends BaseController
      */
     protected $eventLogService;
 
+    /**
+     * @var FormFactoryInterface
+     */
+    protected $formFactory;
+
     public function __construct(
         DOMJudgeService $DOMJudgeService,
         EntityManagerInterface $entityManager,
-        EventLogService $eventLogService
+        EventLogService $eventLogService,
+        FormFactoryInterface $formFactory
     ) {
         $this->DOMJudgeService = $DOMJudgeService;
         $this->entityManager   = $entityManager;
         $this->eventLogService = $eventLogService;
+        $this->formFactory     = $formFactory;
     }
 
     /**
@@ -96,7 +104,10 @@ class ClarificationController extends BaseController
 
             $formData['message'] = $message;
         }
-        $form = $this->createForm(TeamClarificationType::class, $formData);
+        $form = $this->formFactory
+            ->createBuilder(TeamClarificationType::class, $formData)
+            ->setAction($this->generateUrl('team_clarification', ['clarId' => $clarId]))
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -158,12 +169,18 @@ class ClarificationController extends BaseController
         }
         $this->entityManager->flush();
 
-        return $this->render('@DOMJudge/team/clarification.html.twig', [
+        $data = [
             'clarification' => $clarification,
             'team' => $team,
             'categories' => $categories,
             'form' => $form->createView(),
-        ]);
+        ];
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('@DOMJudge/team/clarification_modal.html.twig', $data);
+        } else {
+            return $this->render('@DOMJudge/team/clarification.html.twig', $data);
+        }
     }
 
     /**
@@ -180,7 +197,10 @@ class ClarificationController extends BaseController
         $contest    = $this->DOMJudgeService->getCurrentContest($team->getTeamid());
 
         $formData = [];
-        $form     = $this->createForm(TeamClarificationType::class, $formData);
+        $form     = $this->formFactory
+            ->createBuilder(TeamClarificationType::class, $formData)
+            ->setAction($this->generateUrl('team_clarification_add'))
+            ->getForm();
 
         $form->handleRequest($request);
 
@@ -222,9 +242,15 @@ class ClarificationController extends BaseController
             return $this->redirectToRoute('team_index');
         }
 
-        return $this->render('@DOMJudge/team/clarification_add.html.twig', [
+        $data = [
             'categories' => $categories,
             'form' => $form->createView(),
-        ]);
+        ];
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('@DOMJudge/team/clarification_add_modal.html.twig', $data);
+        } else {
+            return $this->render('@DOMJudge/team/clarification_add.html.twig', $data);
+        }
     }
 }
