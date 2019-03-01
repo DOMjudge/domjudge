@@ -45,9 +45,7 @@ class ProfilerDisableListener
     {
         // Disable the profiler for users with the judgehost permission but not the admin one, unless DEBUG contains DEBUG_JUDGE
         if ($this->DOMJudgeService->checkrole('judgehost') && !$this->DOMJudgeService->checkrole('admin')) {
-            // TODO: use domserver-static.php defines here
-            $dir = realpath(sprintf('%s/../../etc', $this->kernel->getRootDir()));
-            require_once $dir . '/common-config.php';
+            require_once $this->DOMJudgeService->getDomjudgeEtcDir() . '/common-config.php';
 
             if (!(DEBUG & DEBUG_JUDGE)) {
                 $this->profiler->disable();

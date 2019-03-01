@@ -103,9 +103,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
         $refresh_cookie = $this->domjudge->getCookie("domjudge_refresh");
         $refresh_flag   = ($refresh_cookie == null || (bool)$refresh_cookie);
 
-        // TODO: use domserver-static.php defines here
-        $dir = realpath(sprintf('%s/../../etc', $this->kernel->getRootDir()));
-        require_once $dir . '/domserver-config.php';
+        require_once $this->domjudge->getDomjudgeEtcDir() . '/domserver-config.php';
 
         $user = $this->domjudge->getUser();
         $team = $user ? $user->getTeam() : null;
@@ -421,9 +419,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
      */
     public function externalCcsUrl(Submission $submission)
     {
-        // TODO: use domserver-static.php defines here
-        $dir = realpath(sprintf('%s/../../etc', $this->kernel->getRootDir()));
-        require_once $dir . '/domserver-config.php';
+        require_once $this->domjudge->getDomjudgeEtcDir() . '/domserver-config.php';
 
         if (defined('EXT_CCS_URL')) {
             if ($submission->getExternalid()) {
@@ -721,9 +717,7 @@ JS;
                                                                          'filename' => $oldFile->getFilename()
                                                                      ]);
 
-        // TODO: remove this if we have access to domserver-static everywhere
-        $dir = realpath(sprintf('%s/../../etc', $this->kernel->getRootDir()));
-        require_once $dir . '/domserver-static.php';
+        require_once $this->domjudge->getDomjudgeEtcDir() . '/domserver-static.php';
 
         $difftext = Utils::createDiff(
             $newFile,
