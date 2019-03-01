@@ -7,6 +7,9 @@
  * Part of the DOMjudge Programming Contest Jury System and licensed
  * under the GNU GPL. See README and COPYING for details.
  */
+
+// TODO: still used in combined_scoreboard. Refactor them and remove this
+
 if (!defined('DOMJUDGE_VERSION')) {
     die("DOMJUDGE_VERSION not defined.");
 }

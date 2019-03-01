@@ -6,6 +6,8 @@
 
 require_once(LIBVENDORDIR . '/autoload.php');
 
+// TODO: still used in some import scripts. Refactor them and remove this
+
 // The IP need not be set when included from
 // import-{REST,XML}feed scripts, so suppress empty value.
 $ip = @$_SERVER['REMOTE_ADDR'];

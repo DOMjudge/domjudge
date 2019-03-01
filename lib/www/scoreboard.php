@@ -7,6 +7,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+// TODO: still used in combined_scoreboard. Refactor them and remove this
+
 
 /**
  * The calcScoreRow is in lib/lib.misc.php because it's used by other
@@ -783,109 +785,6 @@ collapse("filter");
     $lastupdate = printtime(now(), '%a %d %b %Y %T %Z');
     echo "<p id=\"lastmod\">Last Update: $lastupdate<br />\n" .
          "using <a href=\"https://www.domjudge.org/\">DOMjudge</a></p>\n\n";
-
-    return;
-}
-
-/**
- * Reads scoreboard filter settings from a cookie and explicit POST of
- * filter settings. Also sets the cookie, so must be called before
- * headers are sent. Returns the scoreboard filter settings array.
- */
-function initScorefilter() : array
-{
-    $scorefilter = array();
-
-    // Read scoreboard filter options from cookie and explicit POST
-    if (isset($_COOKIE['domjudge_scorefilter'])) {
-        $scorefilter = dj_json_decode($_COOKIE['domjudge_scorefilter']);
-    }
-
-    if (isset($_REQUEST['clear'])) {
-        $scorefilter = array();
-    }
-
-    if (isset($_REQUEST['filter'])) {
-        $scorefilter = array();
-        foreach (array('affilid', 'country', 'categoryid') as $type) {
-            if (!empty($_REQUEST[$type])) {
-                $scorefilter[$type] = $_REQUEST[$type];
-            }
-        }
-    }
-
-    dj_setcookie('domjudge_scorefilter', dj_json_encode($scorefilter));
-
-    return $scorefilter;
-}
-
-/**
- * Output a team row from the scoreboard based on the cached data in
- * table 'scoreboard'.
- */
-function putTeamRow(array $cdata, array $teamids)
-{
-    global $DB;
-
-    if (empty($cdata)) {
-        return;
-    }
-
-    $fdata = calcFreezeData($cdata);
-    $displayrank = IS_JURY || !$fdata['showfrozen'];
-    $cid = $cdata['cid'];
-
-    if (! $fdata['started']) {
-        if (! IS_JURY) {
-            global $teamdata;
-            echo "<h1 id=\"teamwelcome\">welcome team <span id=\"teamwelcometeam\">" .
-                specialchars($teamdata['name']) . "</span>!</h1>\n\n";
-            echo "<h2 id=\"contestnotstarted\">contest " .
-                printContestStart($cdata) . "</h2>\n\n";
-        }
-
-        return;
-    }
-
-    // For computing team row, use smart trick when only a single team is requested such
-    // that we don't need to compute the whole scoreboard.
-    // This does not fully populate the summary, so the first correct problem per problem
-    // is not computed and hence not shown in the individual team row.
-    if (count($teamids) == 1) {
-        // Use symfony Scoreboard Service to get the scoreboard and transform it to the old data
-        /** @var \DOMJudgeBundle\Service\ScoreboardService $G_SCOREBOARD_SERVICE */
-        /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
-        global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
-        $contest    = $G_SYMFONY->getContest($cdata['cid']);
-        $scoreboard = $G_SCOREBOARD_SERVICE->getTeamScoreboard($contest, (int)reset($teamids), true);
-        if ($scoreboard === null) {
-            return;
-        }
-        $sdata      = convertScoreboard($scoreboard);
-    } else {
-        // Otherwise, calculate scoreboard as jury to display non-visible teams
-        $sdata = genScoreBoard($cdata, true);
-    }
-
-    // Render the row based on this info
-    $myteamid = null;
-    $static = false;
-
-    if (! IS_JURY) {
-        echo "<div id=\"teamscoresummary\">\n";
-    }
-    renderScoreBoardTable(
-        $sdata,
-        $myteamid,
-        $static,
-        $teamids,
-        $displayrank,
-        true,
-        false
-    );
-    if (! IS_JURY) {
-        echo "</div>\n\n";
-    }
 
     return;
 }

@@ -4,6 +4,9 @@
 /**
  * Common page footer
  */
+
+// TODO: still used in combined_scoreboard. Refactor them and remove this
+
 if (!defined('DOMJUDGE_VERSION')) {
     die("DOMJUDGE_VERSION not defined.");
 }

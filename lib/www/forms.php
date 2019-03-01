@@ -6,6 +6,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+// TODO: still used in combined_scoreboard. Refactor them and remove this
+
 /**
  * Helper function to create form fields, not to be called directly,
  * only by other functions below.
@@ -26,68 +28,6 @@ function addInputField(string $type, $name = null, $value = null, string $attrib
         ($name  !== null ? ' name="'.specialchars($name).'"' : '') . $id .
         ($value !== null ? ' value="'.specialchars((string)$value).'"' : '') .
         ' ' . $attributes . " />\n";
-}
-
-/**
- * Password input field
-function addPwField($name , $value = null) {
-    return addInputField('password', $name , $value);
-}
- */
-
-
-/**
- * Form checkbox
- */
-function addCheckBox(string $name, bool $checked = false, $value = null) : string
-{
-    return addInputField(
-        'checkbox',
-        $name,
-        $value,
-        ($checked ? ' checked="checked"' : '')
-    );
-}
-
-
-/**
- * Form radio button
- */
-function addRadioButton(string $name, bool $checked = false, $value = null) : string
-{
-    return addInputField(
-        'radio',
-        $name,
-        $value,
-        ($checked ? ' checked="checked"' : '')
-    );
-}
-
-/**
- * A hidden form field.
- */
-function addHidden(string $name, string $value = null) : string
-{
-    return addInputField('hidden', $name, $value);
-}
-
-/**
- * An input textbox.
- */
-function addInput(string $name, $value = '', $size = 0, $maxlength = 0, $extraattr = null) : string
-{
-    $attr = '';
-    if ($size) {
-        $attr .= ' size="'.(int)$size.'"';
-    }
-    if ($maxlength) {
-        $attr .= ' maxlength="'.(int)$maxlength .'"';
-    }
-    if ($extraattr) {
-        $attr .= ' ' . $extraattr;
-    }
-
-    return addInputField('text', $name, $value, $attr);
 }
 
 /**
@@ -149,60 +89,6 @@ function addSubmit(string $value, $name = null, $onclick = null, bool $enable = 
         (empty($extraattrs) ? '' : " $extraattrs")
     );
 }
-/**
- * Form reset button, $value = caption
- */
-function addReset(string $value) : string
-{
-    return addInputField('reset', null, $value);
-}
-
-/**
- * A normal non-submit button.
- */
-function addButton(string $name, string $value, $onclick = null, bool $enable = true, string $extraattrs = "") : string
-{
-    return addInputField(
-        'button',
-        $name,
-        $value,
-        (empty($onclick) ? null : ' onclick="'.specialchars($onclick).'"') .
-        ($enable ? '' : ' disabled="disabled"') .
-        (empty($extraattrs) ? '' : " $extraattrs")
-    );
-}
-
-/**
- * Textarea form element.
- */
-function addTextArea(string $name, $text = '', int $cols = 40, int $rows = 10, string $attr = '') : string
-{
-    return '<textarea name="'.specialchars($name).'" '.
-        'rows="'.(int)$rows .'" cols="'.(int)$cols.'" '.
-        'id="' . specialchars(strtr($name, '[]', '__')).'" ' .
-        $attr . '>'.specialchars((string)$text) ."</textarea>\n";
-}
-
-/**
- * 'Add row' button, that adds a row to a table based on a template using jQuery and javascript
- * Usage:
- * templateid: HTML ID of the template tag to use
- * tableid: HTML ID of the table to add a row to
- * value: Text to display in the button
- * name: Name (and ID) of the button or null if not needed
- */
-function addAddRowButton(string $templateid, string $tableid, string $value = 'Add row', $name = null) : string
-{
-    $return = addInputField('button', $name, $value, 'onclick="addRow(\'' .
-                                    specialchars($templateid) . '\', \'' .
-                                    specialchars($tableid) . '\')"');
-    $return .= "<script type=\"text/javascript\">
-    $(function() {
-        addFirstRow('" . specialchars($templateid) . "', '" . specialchars($tableid) . "');
-    });
-</script>";
-    return $return;
-}
 
 /**
  * Make a <form> start-tag.
@@ -229,12 +115,4 @@ function addForm(string $action, string $method = 'post', $id = '', string $enct
 function addEndForm() : string
 {
     return "</form>\n\n";
-}
-
-/**
- * File upload field
- */
-function addFileField(string $name, $dummy = null, string $extraattr = "") : string
-{
-    return addInputField('file', $name, null, $extraattr);
 }
