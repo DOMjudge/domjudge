@@ -141,6 +141,7 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_root,        '')
 	AC_SUBST(domserver_bindir,      $bindir)
 	AC_SUBST(domserver_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
+	AC_SUBST(domserver_webappdir,   $datadir/${PACKAGE_TARNAME}/webapp)
 	AC_SUBST(domserver_sqldir,      $datadir/${PACKAGE_TARNAME}/sql)
 	AC_SUBST(domserver_libdir,      $libdir/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_libvendordir,$libdir/${PACKAGE_TARNAME}/vendor)
