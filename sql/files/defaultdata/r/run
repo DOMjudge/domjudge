@@ -21,10 +21,7 @@ if [ -z "$ENTRY_POINT" ]; then
     echo "Info: detected entry_point: $MAINCLASS"
 fi
 
-# Check syntax
-Rscript "$@"
-EXITCODE=$?
-[ "$EXITCODE" -ne 0 ] && exit $EXITCODE
+# No easy way to test R scripts for syntax
 
 # Check if entry point is valid
 if [ ! -r "$MAINSOURCE" ]; then
@@ -35,7 +32,7 @@ fi
 # Write executing script:
 cat > "$DEST" <<EOF
 #!/bin/sh
-# Generated shell-script to execute python interpreter on source.
+# Generated shell-script to execute R interpreter on source.
 
 # Detect dirname and change dir to prevent class not found errors.
 if [ "\${0%/*}" != "\$0" ]; then
