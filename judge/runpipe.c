@@ -27,6 +27,7 @@
 #endif
 
 #include <sys/select.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <errno.h>
@@ -211,19 +212,22 @@ void resize_pipe(int fd)
 }
 #endif
 
-void pump_pipes(int *fd_out, int *fd_in)
+void pump_pipes(int *fd_out, int *fd_in, int from_val)
 {
 	ssize_t nread, to_write, nwritten;
 	fd_set readfds;
 	char buf[BUF_SIZE+1];
 	int r;
+	struct timeval tv;
 
 	if ( *fd_out<0 ) return;
 
 	FD_ZERO(&readfds);
 	FD_SET(*fd_out, &readfds);
 
-	r = select(*fd_out+1, &readfds, NULL, NULL, NULL);
+	tv.tv_sec = 0;
+	tv.tv_usec = 1000; /* FIXME: this is just in order to not block */
+	r = select(*fd_out+1, &readfds, NULL, NULL, &tv);
 	if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
 
 	if ( FD_ISSET(*fd_out, &readfds) ) {
@@ -233,6 +237,11 @@ void pump_pipes(int *fd_out, int *fd_in)
 			buf[nread] = 0;
 			/* First write to file. */
 			errno = 0;
+			if (from_val) {
+				fwrite("> ", 1, 2, progoutfile);
+			} else {
+				fwrite("< ", 1, 2, progoutfile);
+			}
 			nwritten = fwrite(buf, 1, nread, progoutfile);
 			if ( nwritten<nread ) {
 				error(errno,"writing to `%s'", progoutfilename);
@@ -289,7 +298,7 @@ int main(int argc, char **argv)
 	char *arg;
 	int   i, r, fd_out, newcmd, argsize = 0;
 	int   pipe_fd[MAX_CMDS][2];
-	int   progout_pipe_fd[2];
+	int   progout_pipe_fd[MAX_CMDS][2];
 
 	progname = argv[0];
 
@@ -388,6 +397,7 @@ int main(int argc, char **argv)
 	   executing a forked subcommand, required ones are reset below. */
 	for(i=0; i<ncmds; i++) {
 		if ( pipe(pipe_fd[i])!=0 ) error(errno,"creating pipes");
+		verb("command #%d: read fd=%d, write fd=%d", i, pipe_fd[i][0], pipe_fd[i][1]);
 		set_fd_close_exec(pipe_fd[i][0], 1);
 		set_fd_close_exec(pipe_fd[i][1], 1);
 #ifdef PROC_MAX_PIPE_SIZE
@@ -400,22 +410,25 @@ int main(int argc, char **argv)
 		if ( (progoutfile = fopen(progoutfilename,"w"))==NULL ) {
 			error(errno,"cannot open `%s'",progoutfilename);
 		}
-		if ( pipe(progout_pipe_fd)!=0 ) error(errno,"creating pipes");
-		set_fd_close_exec(progout_pipe_fd[0], 1);
-		set_fd_close_exec(progout_pipe_fd[1], 1);
+		for(i=0; i<ncmds; i++) {
+			if ( pipe(progout_pipe_fd[i])!=0 ) error(errno,"creating pipes");
+			set_fd_close_exec(progout_pipe_fd[i][0], 1);
+			set_fd_close_exec(progout_pipe_fd[i][1], 1);
 #ifdef PROC_MAX_PIPE_SIZE
-		resize_pipe(progout_pipe_fd[1]);
+			resize_pipe(progout_pipe_fd[i][1]);
 #endif
-		verb("writing program #2 output via pipe %d -> %d",
-		     progout_pipe_fd[1], progout_pipe_fd[0]);
+			verb("writing program #%d output via pipe %d -> %d",
+			     i, progout_pipe_fd[i][1], progout_pipe_fd[i][0]);
+		}
 	}
 
 	/* Execute commands as subprocesses and connect pipes as required. */
 	for(i=0; i<ncmds; i++) {
-		fd_out = ( i==1 && write_progout ? progout_pipe_fd[1] : pipe_fd[1-i][1] );
+		fd_out = write_progout ? progout_pipe_fd[i][1] : pipe_fd[1-i][1];
 		cmd_fds[i][0] = pipe_fd[i][0];
 		cmd_fds[i][1] = fd_out;
 		cmd_fds[i][2] = FDREDIR_NONE;
+		verb("pipes for command #%d are %d and %d", i, cmd_fds[i][0], cmd_fds[i][1]);
 
 		set_fd_close_exec(pipe_fd[i][0], 0);
 		set_fd_close_exec(fd_out, 0);
@@ -432,9 +445,9 @@ int main(int argc, char **argv)
 
 	if ( write_progout ) {
 		if ( close(pipe_fd[1][0])!=0 ) error(errno,"closing pipe read end");
-		if ( close(pipe_fd[1][1])!=0 ) error(errno,"closing pipe write end");
 		if ( close(pipe_fd[0][0])!=0 ) error(errno,"closing pipe read end");
-		if ( close(progout_pipe_fd[1])!=0 ) error(errno,"closing pipe write end");
+		if ( close(progout_pipe_fd[0][1])!=0 ) error(errno,"closing pipe write end");
+		if ( close(progout_pipe_fd[1][1])!=0 ) error(errno,"closing pipe write end");
 	} else {
 		for(i=0; i<ncmds; i++) {
 			if ( close(pipe_fd[i][0])!=0 ) error(errno,"closing pipe read end");
@@ -446,7 +459,9 @@ int main(int argc, char **argv)
 	while ( 1 ) {
 
 		if ( write_progout ) {
-			pump_pipes(&progout_pipe_fd[0], &pipe_fd[0][1]);
+			for(i=0; i<ncmds; i++) {
+				pump_pipes(&progout_pipe_fd[i][0], &pipe_fd[1-i][1], 1-i);
+			}
 
 			pid = 0;
 			for(i=0; i<ncmds; i++) {
@@ -495,16 +510,18 @@ int main(int argc, char **argv)
 	};
 
 	/* Reset pipe filedescriptors to use blocking I/O. */
-	if ( write_progout && progout_pipe_fd[0]>=0 ) {
-		r = fcntl(progout_pipe_fd[0], F_GETFL);
-		if (r == -1) error(errno, "fcntl, getting flags");
+	for(i=0; i<ncmds; i++) {
+		if ( write_progout && progout_pipe_fd[i][0]>=0 ) {
+			r = fcntl(progout_pipe_fd[i][0], F_GETFL);
+			if (r == -1) error(errno, "fcntl, getting flags");
 
-		r = fcntl(progout_pipe_fd[0], F_SETFL, r ^ O_NONBLOCK);
-		if (r == -1) error(errno, "fcntl, setting flags");
+			r = fcntl(progout_pipe_fd[i][0], F_SETFL, r ^ O_NONBLOCK);
+			if (r == -1) error(errno, "fcntl, setting flags");
 
-		do {
-			pump_pipes(&progout_pipe_fd[0], &pipe_fd[0][1]);
-		} while ( progout_pipe_fd[0]>=0 );
+			do {
+				pump_pipes(&progout_pipe_fd[i][0], &pipe_fd[1-i][1], 1-i);
+			} while ( progout_pipe_fd[i][0]>=0 );
+		}
 	}
 
 	/* Check exit status of commands and report back the exit code of the first. */
