@@ -50,6 +50,30 @@ install-domserver:
 # KLUDGE: how to install a tree of files with correct permissions?
 	for d in app bin src web tests ; do \
 		cp -R           -t $(DESTDIR)$(domserver_webappdir) $$d ; \
+	done
+# Change webapp/web/doc symlink
+	rm $(DESTDIR)$(domserver_webappdir)/web/doc
+	ln -s $(DESTDIR)$(domjudge_docdir) $(DESTDIR)$(domserver_webappdir)/web/doc
+# Now change all relative symlinks in webapp/web to their correct paths
+	for link in $$(find $(DESTDIR)$(domserver_webappdir)/web -maxdepth 1 -type l); do \
+		target=$$(readlink $$link) ; \
+		if echo $${target} | grep -q '^..\/..\/lib\/vendor' ; then \
+			rm $$link ; \
+			realtarget=$(DESTDIR)$(domserver_libvendordir)$$(echo $${target} | sed 's/..\/..\/lib\/vendor//') ; \
+			ln -s $$realtarget $$link ; \
+		fi \
+	done
+	for dir in css js ; do \
+		for link in $$(find $(DESTDIR)$(domserver_webappdir)/web/$$dir -maxdepth 1 -type l) ; do \
+			target=$$(readlink $$link) ; \
+			if echo $${target} | grep -q '^..\/..\/..\/lib\/vendor' ; then \
+				rm $$link ; \
+				realtarget=$(DESTDIR)$(domserver_libvendordir)$$(echo $${target} | sed 's/..\/..\/..\/lib\/vendor//') ; \
+				ln -s $$realtarget $$link ; \
+			fi \
+		done ; \
+	done
+	for d in app bin src web tests ; do \
 		chmod -R a+rX      $(DESTDIR)$(domserver_webappdir)/$$d ; \
 	done
 	-for d in cache logs sessions ; do \
