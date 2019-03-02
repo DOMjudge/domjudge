@@ -116,7 +116,8 @@ INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_e
 ('py3', 'python3', 'Python 3', '["py3"]', 0, "Main file", 0, 1, 1, 'py3'),
 ('rb', 'ruby', 'Ruby', '["rb"]', 0, "Main file", 0, 1, 1, 'rb'),
 ('scala', 'scala', 'Scala', '["scala"]', 0, NULL, 0, 1, 1, 'scala'),
-('sh', 'sh', 'POSIX shell', '["sh"]', 0, "Main file", 0, 1, 1, 'sh');
+('sh', 'sh', 'POSIX shell', '["sh"]', 0, "Main file", 0, 1, 1, 'sh'),
+('r', 'r', 'R', '["R"]', 0, "Main file", 0, 1, 1, 'r');
 
 
 --
