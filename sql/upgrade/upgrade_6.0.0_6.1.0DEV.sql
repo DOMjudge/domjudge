@@ -76,7 +76,11 @@ UPDATE `language` SET `externalid` = 'ada' WHERE langid = 'adb';
 UPDATE `language` SET `externalid` = 'ruby' WHERE langid = 'rb';
 UPDATE `language` SET `externalid` = `langid` WHERE `externalid` IS NULL;
 
-INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_entry_point`, `entry_point_description`, `allow_submit`, `allow_judge`, `time_factor`, `compile_script`) VALUES ('r', 'r', 'R', '["R"]', 0, "Main file", 0, 1, 1, 'r');
+INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
+('r', 'r', 'compile');
+
+INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_entry_point`, `entry_point_description`, `allow_submit`, `allow_judge`, `time_factor`, `compile_script`)
+VALUES ('r', 'r', 'R', '["R"]', 0, "Main file", 0, 1, 1, 'r');
 
 --
 -- Finally remove obsolete structures after moving data

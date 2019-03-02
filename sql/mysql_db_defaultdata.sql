@@ -90,7 +90,8 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 ('rb', 'rb', 'compile'),
 ('run', 'default run script', 'run'),
 ('scala', 'scala', 'compile'),
-('sh', 'sh', 'compile');
+('sh', 'sh', 'compile'),
+('r', 'r', 'compile');
 
 --
 -- Dumping data for table `language`
