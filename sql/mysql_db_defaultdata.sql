@@ -52,7 +52,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `des
 ('thumbnail_size', '128', 'int', '0', 'Display', 'Maximum width/height of a thumbnail for uploaded testcase images.'),
 ('show_limits_on_team_page', '0', 'bool', '1', 'Display', 'Show time and memory limit on the team problems page'),
 ('enable_printing', '0', 'bool', '1', 'Misc', 'Enable teams and jury to send source code to a printer via the DOMjudge web interface.'),
-('allow_registration', '0', 'bool', '1', 'Misc', 'Allow users to register themselves with the system?'),
+('registration_category_name', '""', 'string', '1', 'Misc', 'Team category for users that register themselves with the system. Disabled if empty.'),
 ('allow_openid_auth', '0', 'bool', '1', 'Misc', 'Allow users to log in using OpenID'),
 ('openid_autocreate_team', '1', 'bool', '1', 'Misc', 'Create a team for each user that logs in with OpenID'),
 ('openid_provider', '"https://accounts.google.com"', 'string', '1', 'Misc', 'OpenID Provider URL'),

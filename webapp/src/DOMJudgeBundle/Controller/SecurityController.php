@@ -1,7 +1,9 @@
 <?php declare(strict_types=1);
+
 namespace DOMJudgeBundle\Controller;
 
 use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Entity\TeamCategory;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Form\Type\UserRegistrationType;
 use DOMJudgeBundle\Service\DOMJudgeService;
@@ -55,9 +57,10 @@ class SecurityController extends Controller
         // last username entered by the user
         $lastUsername = $authUtils->getLastUsername();
 
+        $em = $this->getDoctrine()->getManager();
+
         $auth_ipaddress_users = [];
         if ($allowIPAuth) {
-            $em = $this->getDoctrine()->getManager();
             $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipAddress' => $clientIP]);
         }
 
@@ -65,13 +68,16 @@ class SecurityController extends Controller
         $response = new Response();
         $response->headers->set('X-Login-Page', $this->generateUrl('login'));
 
+        $registrationCategoryName = $this->DOMJudgeService->dbconfig_get('registration_category_name', '');
+        $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
+
         return $this->render('DOMJudgeBundle:security:login.html.twig', array(
             'last_username' => $lastUsername,
-            'error'         => $error,
-            'allow_registration'    => $this->DOMJudgeService->dbconfig_get('allow_registration', false),
-            'allowed_authmethods'   => $authmethods,
+            'error' => $error,
+            'allow_registration' => $registrationCategory !== null,
+            'allowed_authmethods' => $authmethods,
             'auth_xheaders_present' => $request->headers->get('X-DOMjudge-Login'),
-            'auth_ipaddress_users'  => $auth_ipaddress_users,
+            'auth_ipaddress_users' => $auth_ipaddress_users,
         ), $response);
     }
 
@@ -84,20 +90,23 @@ class SecurityController extends Controller
         if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirect($this->generateUrl('root'));
         }
-        if (!$this->DOMJudgeService->dbconfig_get('allow_registration', false)) {
+
+        $em                       = $this->getDoctrine()->getManager();
+        $registrationCategoryName = $this->DOMJudgeService->dbconfig_get('registration_category_name', '');
+        $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
+
+        if (!$registrationCategory === null) {
             throw new \Symfony\Component\HttpKernel\Exception\HttpException(400, "Registration not enabled");
         }
 
-        $user = new User();
+        $user              = new User();
         $registration_form = $this->createForm(UserRegistrationType::class, $user);
         $registration_form->handleRequest($request);
         if ($registration_form->isSubmitted() && $registration_form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $self_registered_category = $em->getRepository('DOMJudgeBundle:TeamCategory')->findOneByName('Self-Registered');
             $team_role = $em->getRepository('DOMJudgeBundle:Role')->findOneBy(['dj_role' => 'team']);
 
             $plainPass = $registration_form->get('plainPassword')->getData();
-            $password = $this->get('security.password_encoder')->encodePassword($user, $plainPass);
+            $password  = $this->get('security.password_encoder')->encodePassword($user, $plainPass);
             $user->setPassword($password);
             $user->setName($user->getUsername());
             $user->addRole($team_role);
@@ -108,7 +117,7 @@ class SecurityController extends Controller
             $user->setTeam($team);
             $team->addUser($user);
             $team->setName($user->getUsername());
-            $team->setCategory($self_registered_category);
+            $team->setCategory($registrationCategory);
             $team->setComments('Registered by ' . $this->DOMJudgeService->getClientIp() . ' on ' . date('r'));
 
             $em->persist($user);
@@ -121,7 +130,7 @@ class SecurityController extends Controller
         }
 
         return $this->render('DOMJudgeBundle:security:register.html.twig', array(
-                'registration_form' => $registration_form->createView(),
+            'registration_form' => $registration_form->createView(),
         ));
     }
 }
