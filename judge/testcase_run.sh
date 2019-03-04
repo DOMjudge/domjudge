@@ -200,6 +200,7 @@ fi
 # If we need to create a writable temp directory, do so
 if [ "$CREATE_WRITABLE_TEMP_DIR" ]; then
 	export TMPDIR="$PREFIX/write_tmp"
+	# shellcheck disable=SC2174
 	mkdir -m 777 -p "$WORKDIR/write_tmp"
 fi
 
