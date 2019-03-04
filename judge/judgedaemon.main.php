@@ -663,13 +663,14 @@ function judge(array $row)
     global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled;
 
     // Set configuration variables for called programs
-    putenv('USE_CHROOT='        . (USE_CHROOT ? '1' : ''));
-    putenv('SCRIPTTIMELIMIT='   . dbconfig_get_rest('script_timelimit'));
-    putenv('SCRIPTMEMLIMIT='    . dbconfig_get_rest('script_memory_limit'));
-    putenv('SCRIPTFILELIMIT='   . dbconfig_get_rest('script_filesize_limit'));
-    putenv('MEMLIMIT='          . $row['memlimit']);
-    putenv('FILELIMIT='         . $row['outputlimit']);
-    putenv('PROCLIMIT='         . dbconfig_get_rest('process_limit'));
+    putenv('USE_CHROOT='               . (USE_CHROOT ? '1' : ''));
+    putenv('CREATE_WRITABLE_TEMP_DIR=' . (CREATE_WRITABLE_TEMP_DIR ? '1' : ''));
+    putenv('SCRIPTTIMELIMIT='          . dbconfig_get_rest('script_timelimit'));
+    putenv('SCRIPTMEMLIMIT='           . dbconfig_get_rest('script_memory_limit'));
+    putenv('SCRIPTFILELIMIT='          . dbconfig_get_rest('script_filesize_limit'));
+    putenv('MEMLIMIT='                 . $row['memlimit']);
+    putenv('FILELIMIT='                . $row['outputlimit']);
+    putenv('PROCLIMIT='                . dbconfig_get_rest('process_limit'));
     if ($row['entry_point'] !== null) {
         putenv('ENTRY_POINT=' . $row['entry_point']);
     } else {

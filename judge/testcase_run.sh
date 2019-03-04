@@ -197,6 +197,12 @@ if [ -x "$RUN_JURYPROG" ]; then
 	chmod a+rx runjury ../dj-bin/runpipe
 fi
 
+# If we need to create a writable temp directory, do so
+if [ "$CREATE_WRITABLE_TEMP_DIR" ]; then
+	export TMPDIR="$PREFIX/write_tmp"
+	mkdir -m 777 -p "$WORKDIR/write_tmp"
+fi
+
 # We copy /dev/null: mknod (and the major/minor device numbers) are
 # not portable, while a fifo link has the problem that a cat program
 # must be run and killed.
@@ -222,7 +228,7 @@ fi
 # To suppress false positive of FILELIMIT misspelling of TIMELIMIT:
 # shellcheck disable=SC2153
 runcheck ./run $RUNARGS \
-	$GAINROOT "$RUNGUARD" ${DEBUG:+-v -V "DEBUG=$DEBUG"} $CPUSET_OPT \
+	$GAINROOT "$RUNGUARD" ${DEBUG:+-v -V "DEBUG=$DEBUG"} ${TMPDIR:+ -V "TMPDIR=$TMPDIR"} $CPUSET_OPT \
 	${USE_CHROOT:+-r "$PWD/.."} \
 	--nproc=$PROCLIMIT \
 	--no-core --streamsize=$FILELIMIT \
