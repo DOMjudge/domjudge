@@ -29,10 +29,6 @@ if [ ! -r "$MAINSOURCE" ]; then
     exit 1
 fi
 
-# Enable creating writable directory - needed by R to store temporary files
-# via `tempfile` function - if this is ommited, we get error like:
-# Fatal error: cannot create 'R_TempDir'
-export CREATE_WRITABLE_TEMP_DIR=1
 
 # Write executing script:
 cat > "$DEST" <<EOF
