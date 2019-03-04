@@ -16,4 +16,4 @@ define('USE_CHROOT', true);
 // R). Setting this to true will create a directory "write_tmp" where
 // the submission can write to. Also the environment variable TMPDIR will
 // be set to this directory
-define('CREATE_WRITABLE_TEMP_DIR', false);
+define('CREATE_WRITABLE_TEMP_DIR', getenv('DOMJUDGE_CREATE_WRITABLE_TEMP_DIR') ? true : false);
