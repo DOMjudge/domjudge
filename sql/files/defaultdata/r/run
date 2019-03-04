@@ -18,7 +18,7 @@ MAINSOURCE="${ENTRY_POINT:-$1}"
 
 # Report the entry point, so it can be saved, e.g. for later replay:
 if [ -z "$ENTRY_POINT" ]; then
-    echo "Info: detected entry_point: $MAINCLASS"
+    echo "Info: detected entry_point: $MAINSOURCE"
 fi
 
 # No easy way to test R scripts for syntax
@@ -28,6 +28,11 @@ if [ ! -r "$MAINSOURCE" ]; then
     echo "Error: main source file '$MAINSOURCE' is not readable" >&2
     exit 1
 fi
+
+# Enable creating writable directory - needed by R to store temporary files
+# via `tempfile` function - if this is ommited, we get error like:
+# Fatal error: cannot create 'R_TempDir'
+export CREATE_WRITABLE_TEMP_DIR=1
 
 # Write executing script:
 cat > "$DEST" <<EOF
@@ -43,7 +48,7 @@ fi
 # debugging.
 # export ONLINE_JUDGE=1 DOMJUDGE=1
 
-exec Rscript "$MAINSOURCE" "\$@"
+exec Rscript "$MAINSOURCE"
 EOF
 
 chmod a+x "$DEST"
