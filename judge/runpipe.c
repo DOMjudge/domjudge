@@ -228,7 +228,7 @@ void pump_pipes(int *fd_out, int *fd_in, int from_val)
 	FD_SET(*fd_out, &readfds);
 
 	tv.tv_sec = 0;
-	tv.tv_usec = 1000; /* FIXME: this is just in order to not block */
+	tv.tv_usec = 10000; /* FIXME: this is just in order to not block */
 	r = select(*fd_out+1, &readfds, NULL, NULL, &tv);
 	if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
 
@@ -465,9 +465,7 @@ int main(int argc, char **argv)
 
 		if ( write_progout ) {
 			for(i=0; i<ncmds; i++) {
-				if ( cmd_exit[i]==-1 ) {
-					pump_pipes(&progout_pipe_fd[i][0], &pipe_fd[i][1], 1-i);
-				}
+				pump_pipes(&progout_pipe_fd[i][0], &pipe_fd[1-i][1], 1-i);
 			}
 
 			pid = 0;
