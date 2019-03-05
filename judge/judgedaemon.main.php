@@ -664,7 +664,7 @@ function judge(array $row)
 
     // Set configuration variables for called programs
     putenv('USE_CHROOT='               . (USE_CHROOT ? '1' : ''));
-    putenv('DOMJUDGE_CREATE_WRITABLE_TEMP_DIR=' . (CREATE_WRITABLE_TEMP_DIR ? '1' : ''));
+    putenv('CREATE_WRITABLE_TEMP_DIR=' . (CREATE_WRITABLE_TEMP_DIR ? '1' : ''));
     putenv('SCRIPTTIMELIMIT='          . dbconfig_get_rest('script_timelimit'));
     putenv('SCRIPTMEMLIMIT='           . dbconfig_get_rest('script_memory_limit'));
     putenv('SCRIPTFILELIMIT='          . dbconfig_get_rest('script_filesize_limit'));
