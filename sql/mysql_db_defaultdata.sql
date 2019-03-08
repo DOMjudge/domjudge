@@ -87,11 +87,11 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 ('plg', 'plg', 'compile'),
 ('py2', 'py2', 'compile'),
 ('py3', 'py3', 'compile'),
+('r', 'r', 'compile'),
 ('rb', 'rb', 'compile'),
 ('run', 'default run script', 'run'),
 ('scala', 'scala', 'compile'),
 ('sh', 'sh', 'compile'),
-('r', 'r', 'compile'),
 ('swift', 'swift', 'compile');
 
 --
@@ -116,10 +116,10 @@ INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_e
 ('plg', 'prolog', 'Prolog', '["plg"]', 0, "Main file", 0, 1, 1, 'plg'),
 ('py2', 'python2', 'Python 2', '["py2","py"]', 0, "Main file", 0, 1, 1, 'py2'),
 ('py3', 'python3', 'Python 3', '["py3"]', 0, "Main file", 0, 1, 1, 'py3'),
+('r', 'r', 'R', '["R"]', 0, "Main file", 0, 1, 1, 'r'),
 ('rb', 'ruby', 'Ruby', '["rb"]', 0, "Main file", 0, 1, 1, 'rb'),
 ('scala', 'scala', 'Scala', '["scala"]', 0, NULL, 0, 1, 1, 'scala'),
 ('sh', 'sh', 'POSIX shell', '["sh"]', 0, "Main file", 0, 1, 1, 'sh'),
-('r', 'r', 'R', '["R"]', 0, "Main file", 0, 1, 1, 'r'),
 ('swift', 'swift', 'Swift', '["swift"]', 0, "Main file", 0, 1, 1, 'swift');
 
 
