@@ -15,6 +15,7 @@ Version 6.1.0 - DEV
  - Remove old v3 API.
  - Upgrade jQuery to 3.3, Bootstrap to 4.1.
  - Add support for the R programming language (#516 thanks Michał Kaczanowicz).
+ - Add support for the Swift programming language.
  - Add support for creating a writable tempdirectory for submissions.
 
 Version 6.0.3 - 15 December 2018

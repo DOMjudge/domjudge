@@ -1,0 +1,57 @@
+#!/bin/sh
+
+# Swift compile wrapper-script for 'compile.sh'.
+# See that script for syntax and more info.
+
+DEST="$1" ; shift
+MEMLIMIT="$1" ; shift
+MAINSOURCE="$ENTRY_POINT"
+
+# If we do not have a main source yet but a `main.swift` file exists, that is the main source
+if [ -z "$MAINSOURCE" ] && [ -f main.swift ]; then
+    MAINSOURCE="main.swift"
+fi
+
+# Filter out files without .swift extension from the list of source
+# files. Note that POSIX shell does *not* support arrays, so we store
+# them in a single variable that has to be used unquoted. We don't
+# need to quote the files since they can only contain "nice" characters.
+# We will also move the main source file to a file called main.swift, as
+# this is required by the Swift compiler
+SOURCES=''
+while [ $# -gt 0 ]; do
+    if [ "x${1%.swift}" != "x$1" ]; then
+        SOURCE="$1"
+        [ -z "$MAINSOURCE" ] && MAINSOURCE="$1"
+        if [ "x$SOURCE" = "x$MAINSOURCE" ] && [ "x$MAINSOURCE" != "xmain.swift" ]; then
+            if [ -f "main.swift" ]; then
+                echo "main.swift exists but is not the main source; not allowed by Swift compiler"
+                exit 1
+            else
+                mv "$SOURCE" main.swift
+                SOURCE="main.swift"
+            fi
+        fi
+
+        SOURCES="$SOURCES $SOURCE"
+    fi
+    shift
+done
+if [ -z "$SOURCES" ]; then
+    echo "No source files found with '.swift' extension."
+    exit 1
+fi
+
+# Report the entry point, so it can be saved, e.g. for later replay:
+if [ -z "$ENTRY_POINT" ]; then
+    echo "Info: detected entry_point: $MAINSOURCE"
+fi
+
+# Add -DONLINE_JUDGE or -DDOMJUDGE below if you want it make easier for teams
+# to do local debugging.
+
+# -O:                 Optimizations (default for speed)
+# -static-executable: Statically link the executable
+# -static-stdlib:     Statically link the Swift standard library
+swiftc -O -static-executable -static-stdlib -o "$DEST" $SOURCES
+exit $?
