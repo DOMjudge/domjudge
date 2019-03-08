@@ -44,7 +44,7 @@ fi
 # debugging.
 # export ONLINE_JUDGE=1 DOMJUDGE=1
 
-exec Rscript "$MAINSOURCE"
+exec Rscript "$MAINSOURCE" "\$@"
 EOF
 
 chmod a+x "$DEST"
