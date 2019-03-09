@@ -511,6 +511,13 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
     }
 
     public function interactiveLog(string $log) {
+        $truncated = '/\[output display truncated after \d* B\]$/';
+        $matches = array();
+        $truncation = "";
+        if (preg_match($truncated, $log, $matches)) {
+            $truncation = $matches[0];
+            $log = preg_replace($truncated, "", $log);
+        }
         $header = "<table><tr><th>time</th><th>validator</th><th>submission<th></tr>\n";
         $body = "";
         $idx = 0;
@@ -520,7 +527,14 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
             $time = substr($log, $idx + 1, $slashPos - $idx - 1);
             $idx = $slashPos + 1;
             $closePos = strpos($log, "]", $idx);
-            $len = (int)(substr($log, $idx, $closePos - $idx));
+            if ($closePos === FALSE) {
+                break;
+            }
+            $lenStr = substr($log, $idx, $closePos - $idx);
+            $len = (int)$lenStr;
+            if ($idx + 3 + $len >= strlen($log)) {
+                break;
+            }
             $idx = $closePos + 1;
             $is_validator = $log{$idx} == '>';
             $content = htmlspecialchars(substr($log, $idx + 3, $len));
@@ -535,7 +549,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
                 . $team
                 . "</tr>\n";
         }
-        return $header . $body . "</table>";
+        return $header . $body . "</table>" . $truncation;
     }
 
     /**
