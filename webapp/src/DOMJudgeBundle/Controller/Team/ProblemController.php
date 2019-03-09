@@ -11,7 +11,6 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -217,6 +216,50 @@ class ProblemController extends BaseController
         $response->headers->set('Content-Type', sprintf('%s; name="%s', $mimetype, $filename));
         $response->headers->set('Content-Disposition', sprintf('attachment; filename="%s"', $filename));
         $response->headers->set('Content-Length', strlen($content));
+
+        return $response;
+    }
+
+    /**
+     * @Route(
+     *     "/{probId}/samples.zip",
+     *     name="team_problem_sample_zip",
+     *     requirements={"probId": "\d+"}
+     *     )
+     * @param int $probId
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function sampleZipAction(int $probId)
+    {
+        $user    = $this->DOMJudgeService->getUser();
+        $contest = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
+        if (!$contest || !$contest->getFreezeData()->started()) {
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+        }
+        /** @var ContestProblem $contestProblem */
+        $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
+                                                                                               'probid' => $probId,
+                                                                                               'cid' => $contest->getCid(),
+                                                                                           ]);
+        if (!$contestProblem) {
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+        }
+
+        $zipFilename    = $this->DOMJudgeService->getSamplesZip($contestProblem);
+        $outputFilename = sprintf('samples-%s.zip', $contestProblem->getShortname());
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($zipFilename) {
+            $fp = fopen($zipFilename, 'rb');
+            fpassthru($fp);
+            unlink($zipFilename);
+        });
+        $response->headers->set('Content-Type', 'application/zip');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $outputFilename . '"');
+        $response->headers->set('Content-Length', filesize($zipFilename));
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Connection', 'Keep-Alive');
+        $response->headers->set('Accept-Ranges', 'bytes');
 
         return $response;
     }

@@ -69,6 +69,12 @@
                                                         </a>
                                                     </li>
                                                 {% endfor %}
+                                                <li class="list-group-item">
+                                                    <a class="btn btn-outline-secondary" role="button"
+                                                       href="{{ path(problem_sample_zip_path, {'probId': problem.probid}) }}">
+                                                        zip with all samples
+                                                    </a>
+                                                </li>
                                             </ol>
                                         {% endif %}
                                     </div>

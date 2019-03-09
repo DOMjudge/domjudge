@@ -329,4 +329,47 @@ class PublicController extends BaseController
 
         return $response;
     }
+
+    /**
+     * @Route(
+     *     "/{probId}/samples.zip",
+     *     name="public_problem_sample_zip",
+     *     requirements={"probId": "\d+"}
+     *     )
+     * @param int $probId
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function sampleZipAction(int $probId)
+    {
+        $contest = $this->DOMJudgeService->getCurrentContest(-1);
+        if (!$contest || !$contest->getFreezeData()->started()) {
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+        }
+        /** @var ContestProblem $contestProblem */
+        $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
+                                                                                               'probid' => $probId,
+                                                                                               'cid' => $contest->getCid(),
+                                                                                           ]);
+        if (!$contestProblem) {
+            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+        }
+
+        $zipFilename    = $this->DOMJudgeService->getSamplesZip($contestProblem);
+        $outputFilename = sprintf('samples-%s.zip', $contestProblem->getShortname());
+
+        $response = new StreamedResponse();
+        $response->setCallback(function () use ($zipFilename) {
+            $fp = fopen($zipFilename, 'rb');
+            fpassthru($fp);
+            unlink($zipFilename);
+        });
+        $response->headers->set('Content-Type', 'application/zip');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $outputFilename . '"');
+        $response->headers->set('Content-Length', filesize($zipFilename));
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+        $response->headers->set('Connection', 'Keep-Alive');
+        $response->headers->set('Accept-Ranges', 'bytes');
+
+        return $response;
+    }
 }

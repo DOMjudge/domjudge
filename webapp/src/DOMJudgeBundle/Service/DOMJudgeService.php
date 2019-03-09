@@ -3,11 +3,14 @@
 namespace DOMJudgeBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Entity\AuditLog;
 use DOMJudgeBundle\Entity\Configuration;
 use DOMJudgeBundle\Entity\Contest;
+use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Entity\TestcaseWithContent;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
 use Psr\Log\LoggerInterface;
@@ -601,5 +604,64 @@ class DOMJudgeService
     public function sendPrint(...$args): array
     {
         return \DOMJudgeBundle\Utils\Printing::send(...$args);
+    }
+
+    /**
+     * Get a ZIP with sample data
+     *
+     * @param ContestProblem $contestProblem
+     * @return string Filename of the location of the temporary ZIP file. Make sure to remove it after use
+     */
+    public function getSamplesZip(ContestProblem $contestProblem)
+    {
+        /** @var TestcaseWithContent[] $testcases */
+        $testcases = $this->em->createQueryBuilder()
+            ->from('DOMJudgeBundle:TestcaseWithContent', 'tc')
+            ->join('tc.problem', 'p')
+            ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
+            ->select('tc')
+            ->andWhere('tc.probid = :problem')
+            ->andWhere('tc.sample = 1')
+            ->andWhere('cp.allowSubmit = 1')
+            ->setParameter(':problem', $contestProblem->getProbid())
+            ->setParameter(':contest', $contestProblem->getCid())
+            ->orderBy('tc.testcaseid')
+            ->getQuery()
+            ->getResult();
+
+
+        $zip = new ZipArchive();
+        if (!($tempFilename = tempnam($this->getDomjudgeTmpDir(), "export-"))) {
+            throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
+        }
+
+        $res = $zip->open($tempFilename, ZipArchive::OVERWRITE);
+        if ($res !== true) {
+            throw new ServiceUnavailableHttpException(null, 'Could not create temporary zip file.');
+        }
+
+        foreach ($testcases as $index => $testcase) {
+            foreach (['input', 'output'] as $type) {
+                $extension = substr($type, 0, -3);
+
+                $filename = sprintf("%s.%s", $index + 1, $extension);
+                $content  = null;
+
+                switch ($type) {
+                    case 'input':
+                        $content = $testcase->getInput();
+                        break;
+                    case 'output':
+                        $content = $testcase->getOutput();
+                        break;
+                }
+
+                $zip->addFromString($filename, $content);
+            }
+        }
+
+        $zip->close();
+
+        return $tempFilename;
     }
 }
