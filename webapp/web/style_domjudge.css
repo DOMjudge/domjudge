@@ -333,3 +333,18 @@ h3.teamoverview {
     font-size: 1.17em;
     text-align: center;
 }
+
+.ajax-loader {
+    top: 8px;
+    right: 10px;
+    margin-left: 10px;
+    position: relative;
+}
+
+.navbar-dark .ajax-loader {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-light .ajax-loader {
+    color: rgba(0, 0, 0, .5);
+}
