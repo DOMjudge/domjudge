@@ -84,6 +84,7 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             new \Twig_SimpleFilter('base64_decode', 'base64_decode'),
             new \Twig_SimpleFilter('parseRunDiff', [$this, 'parseRunDiff'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('runDiff', [$this, 'runDiff'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFilter('interactiveLog', [$this, 'interactiveLog'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('codeEditor', [$this, 'codeEditor'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('showDiff', [$this, 'showDiff'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printContestStart', [$this, 'printContestStart']),
@@ -495,6 +496,34 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
             $line   = strtok("\n");
         }
         return $return;
+    }
+
+    public function interactiveLog(string $log) {
+        $header = "<table><tr><th>time</th><th>validator</th><th>submission<th></tr>\n";
+        $body = "";
+        $idx = 0;
+        while ($idx < strlen($log)) {
+            $slashPos = strpos($log, "/", $idx);
+            if ($slashPos === FALSE) break;
+            $time = substr($log, $idx + 1, $slashPos - $idx - 1);
+            $idx = $slashPos + 1;
+            $closePos = strpos($log, "]", $idx);
+            $len = (int)(substr($log, $idx, $closePos - $idx));
+            $idx = $closePos + 1;
+            $is_validator = $log{$idx} == '>';
+            $content = htmlspecialchars(substr($log, $idx + 3, $len));
+            $content = '<td class="output_text">'
+                . str_replace("\n", "\u{21B5}<br/>", $content)
+                . '</td>';
+            $idx += $len + 4;
+            $team = $is_validator ? '<td/>' : $content;
+            $validator = $is_validator ? $content : '<td/>';
+            $body .= "<tr><td>$time</td>"
+                . $validator
+                . $team
+                . "</tr>\n";
+        }
+        return $header . $body . "</table>";
     }
 
     /**
