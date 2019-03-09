@@ -652,13 +652,13 @@ class ScoreboardService
             ];
 
             $scoreFilter = $this->initializeScoreboardFilter($request, $response);
-            $scoreboard  = $this->getScoreboard($contest, false, $scoreFilter);
+            $scoreboard  = $this->getScoreboard($contest, $jury, $scoreFilter);
 
             $data['contest']              = $contest;
             $data['static']               = $static;
             $data['scoreFilter']          = $scoreFilter;
             $data['scoreboard']           = $scoreboard;
-            $data['filterValues']         = $this->getFilterValues($contest, true);
+            $data['filterValues']         = $this->getFilterValues($contest, $jury);
             $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
             $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
             $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);

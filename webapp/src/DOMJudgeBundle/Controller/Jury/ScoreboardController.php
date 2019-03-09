@@ -48,9 +48,9 @@ class ScoreboardController extends Controller
     public function scoreboardAction(Request $request)
     {
         $response   = new Response();
-        $refreshUrl = $this->generateUrl('team_scoreboard');
+        $refreshUrl = $this->generateUrl('jury_scoreboard');
         $contest    = $this->DOMJudgeService->getCurrentContest();
-        $data       = $this->scoreboardService->getScoreboardTwigData($request, $response, $refreshUrl, false, false,
+        $data       = $this->scoreboardService->getScoreboardTwigData($request, $response, $refreshUrl, true, false,
                                                                       false, $contest);
 
         if ($request->isXmlHttpRequest()) {
