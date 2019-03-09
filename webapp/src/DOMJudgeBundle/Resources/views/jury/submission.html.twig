@@ -479,7 +479,14 @@
                             </tr>
                         </table>
 
-                        {% if not combinedRunCompare %}
+                        {% if combinedRunCompare %}
+                            <h5>Validator output</h5>
+                            {% if runsOutput[runIdx].output_diff is empty %}
+                                <p class="nodata">There was no validator output.</p>
+                            {% else %}
+                                <pre class="output_text">{{ runsOutput[runIdx].output_diff | parseRunDiff }}</pre>
+                            {% endif %}
+                        {% else %}
                             <h5>Diff output</h5>
                             {% if runsOutput[runIdx].output_diff is empty %}
                                 <p class="nodata">There was no diff output.</p>
