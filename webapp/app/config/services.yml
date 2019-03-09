@@ -47,6 +47,12 @@ services:
                 event: kernel.controller
                 method: onKernelController
 
+    DOMJudgeBundle\Security\UserStateUpdater:
+        tags:
+            -   name: kernel.event_listener
+                event: security.authentication.success
+                method: updateUserState
+
     DOMJudgeBundle\Doctrine\HashPasswordSubscriber:
         tags:
             - { name: doctrine.event_subscriber, connection: default }
