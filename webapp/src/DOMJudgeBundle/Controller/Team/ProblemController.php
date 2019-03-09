@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Controller\Team;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\TestcaseWithContent;
@@ -202,10 +203,10 @@ class ProblemController extends BaseController
 
         switch ($type) {
             case 'input':
-                $content = stream_get_contents($testcase->getInput());
+                $content = $testcase->getInput();
                 break;
             case 'output':
-                $content = stream_get_contents($testcase->getOutput());
+                $content = $testcase->getOutput();
                 break;
         }
 
