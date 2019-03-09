@@ -479,18 +479,24 @@
                             </tr>
                         </table>
 
-                        <h5>Diff output</h5>
-                        {% if runsOutput[runIdx].output_diff is empty %}
-                            <p class="nodata">There was no diff output.</p>
+                        {% if not combinedRunCompare %}
+                            <h5>Diff output</h5>
+                            {% if runsOutput[runIdx].output_diff is empty %}
+                                <p class="nodata">There was no diff output.</p>
+                            {% else %}
+                                <pre class="output_text">{{ runsOutput[runIdx].output_diff | parseRunDiff }}</pre>
+                            {% endif %}
+
+                            {% if run.firstJudgingRun.runresult != 'correct' %}
+                                {{ runsOutput[runIdx] | runDiff }}
+                            {% endif %}
+                        {% endif %}
+
+                        {% if combinedRunCompare %}
+                            <h5>Validator/Submission interaction</h5>
                         {% else %}
-                            <pre class="output_text">{{ runsOutput[runIdx].output_diff | parseRunDiff }}</pre>
+                            <h5>Program output</h5>
                         {% endif %}
-
-                        {% if run.firstJudgingRun.runresult != 'correct' %}
-                            {{ runsOutput[runIdx] | runDiff }}
-                        {% endif %}
-
-                        <h5>Program output</h5>
                         {% if runsOutput[runIdx].output_run is empty %}
                             <p class="nodata">There was no program output.</p>
                         {% else %}

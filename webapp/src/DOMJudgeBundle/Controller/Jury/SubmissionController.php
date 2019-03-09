@@ -465,6 +465,7 @@ class SubmissionController extends Controller
             'unjudgableReasons' => $unjudgableReasons,
             'verificationRequired' => (bool)$this->DOMJudgeService->dbconfig_get('verification_required', false),
             'claimWarning' => $claimWarning,
+            'combinedRunCompare' => $submission->getProblem()->getCombinedRunCompare(),
         ];
 
         if ($selectedJudging === null) {
