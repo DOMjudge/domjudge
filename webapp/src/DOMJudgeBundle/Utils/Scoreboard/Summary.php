@@ -5,9 +5,9 @@ namespace DOMJudgeBundle\Utils\Scoreboard;
 class Summary
 {
     /**
-     * @var int
+     * @var int[]
      */
-    protected $numberOfPoints = 0;
+    protected $numberOfPoints = [];
 
     /**
      * @var int[]
@@ -36,19 +36,24 @@ class Summary
     }
 
     /**
+     * @param int $sortorder
      * @return int
      */
-    public function getNumberOfPoints(): int
+    public function getNumberOfPoints(int $sortorder): int
     {
-        return $this->numberOfPoints;
+        return $this->numberOfPoints[$sortorder] ?? 0;
     }
 
     /**
+     * @param int $sortorder
      * @param int $numberOfPoints
      */
-    public function addNumberOfPoints(int $numberOfPoints)
+    public function addNumberOfPoints(int $sortorder, int $numberOfPoints)
     {
-        $this->numberOfPoints += $numberOfPoints;
+        if (!isset($this->numberOfPoints[$sortorder])) {
+            $this->numberOfPoints[$sortorder] = 0;
+        }
+        $this->numberOfPoints[$sortorder] += $numberOfPoints;
     }
 
     /**

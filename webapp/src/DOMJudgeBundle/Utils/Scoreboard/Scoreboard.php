@@ -277,7 +277,8 @@ class Scoreboard
 
             // Keep summary statistics for the bottom row of our table
             // The numberOfPoints summary is useful only if they're all 1-point problems.
-            $this->summary->addNumberOfPoints($teamScore->getNumberOfPoints());
+            $sortOrder = $teamScore->getTeam()->getCategory()->getSortorder();
+            $this->summary->addNumberOfPoints($sortOrder, $teamScore->getNumberOfPoints());
             if ($teamScore->getTeam()->getAffiliation()) {
                 $this->summary->incrementAffiliationValue($teamScore->getTeam()->getAffiliation()->getAffilid());
                 if ($teamScore->getTeam()->getAffiliation()->getCountry()) {
@@ -295,12 +296,12 @@ class Scoreboard
 
                 $problemMatrixItem = $this->matrix[$teamId][$problemId];
                 $problemSummary    = $this->summary->getProblem($problemId);
-                $problemSummary->addNumberOfSubmissions($problemMatrixItem->getNumberOfSubmissions());
-                $problemSummary->addNumberOfPendingSubmissions($problemMatrixItem->getNumberOfPendingSubmissions());
-                $problemSummary->addNumberOfCorrectSubmissions($problemMatrixItem->isCorrect() ? 1 : 0);
+                $problemSummary->addNumberOfSubmissions($sortOrder, $problemMatrixItem->getNumberOfSubmissions());
+                $problemSummary->addNumberOfPendingSubmissions($sortOrder,
+                                                               $problemMatrixItem->getNumberOfPendingSubmissions());
+                $problemSummary->addNumberOfCorrectSubmissions($sortOrder, $problemMatrixItem->isCorrect() ? 1 : 0);
                 if ($problemMatrixItem->isCorrect()) {
-                    $problemSummary->updateBestTime($teamScore->getTeam()->getCategory()->getSortorder(),
-                                                    $problemMatrixItem->getTime());
+                    $problemSummary->updateBestTime($sortOrder, $problemMatrixItem->getTime());
                 }
             }
         }

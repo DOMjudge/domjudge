@@ -112,14 +112,14 @@ function convertScoreboard(\DOMJudgeBundle\Utils\Scoreboard\Scoreboard $scoreboa
     }, $scoreboard->getTeams());
 
     $summary = [
-        'num_points' => $scoreboard->getSummary()->getNumberOfPoints(),
+        'num_points' => $scoreboard->getSummary()->getNumberOfPoints(0),
         'affils' => $scoreboard->getSummary()->getAffiliations(),
         'countries' => $scoreboard->getSummary()->getCountries(),
         'problems' => array_map(function (\DOMJudgeBundle\Utils\Scoreboard\ProblemSummary $problemSummary) {
             return [
-                'num_submissions' => $problemSummary->getNumberOfSubmissions(),
-                'num_pending' => $problemSummary->getNumberOfPendingSubmissions(),
-                'num_correct' => $problemSummary->getNumberOfCorrectSubmissions(),
+                'num_submissions' => $problemSummary->getNumberOfSubmissions(0),
+                'num_pending' => $problemSummary->getNumberOfPendingSubmissions(0),
+                'num_correct' => $problemSummary->getNumberOfCorrectSubmissions(0),
                 'best_time_sort' => $problemSummary->getBestTimes(),
             ];
         }, $scoreboard->getSummary()->getProblems()),
