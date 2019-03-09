@@ -75,6 +75,8 @@ int outputmeta;
 char *metafilename;
 FILE *metafile;
 
+struct timeval start_time;
+
 struct option const long_opts[] = {
 	{"verbose", no_argument,       NULL,         'v'},
 	{"help",    no_argument,       &show_help,    1 },
@@ -219,6 +221,7 @@ void pump_pipes(int *fd_out, int *fd_in, int from_val)
 	char buf[BUF_SIZE+1];
 	int r;
 	struct timeval tv;
+	double diff;
 
 	if ( *fd_out<0 ) return;
 
@@ -229,6 +232,9 @@ void pump_pipes(int *fd_out, int *fd_in, int from_val)
 	tv.tv_usec = 1000; /* FIXME: this is just in order to not block */
 	r = select(*fd_out+1, &readfds, NULL, NULL, &tv);
 	if ( r==-1 && errno!=EINTR ) error(errno,"waiting for child data");
+	gettimeofday(&tv, NULL);
+	diff = (double)(tv.tv_usec - start_time.tv_usec) / 1000000
+		+ (double)(tv.tv_sec - start_time.tv_sec);
 
 	if ( FD_ISSET(*fd_out, &readfds) ) {
 		nread = read(*fd_out, buf, BUF_SIZE);
@@ -237,12 +243,9 @@ void pump_pipes(int *fd_out, int *fd_in, int from_val)
 			buf[nread] = 0;
 			/* First write to file. */
 			errno = 0;
-			if (from_val) {
-				fwrite("> ", 1, 2, progoutfile);
-			} else {
-				fwrite("< ", 1, 2, progoutfile);
-			}
+			fprintf(progoutfile, "[ %6.3fs/%ld]%c: ", diff, nread, from_val ? '>' : '<');
 			nwritten = fwrite(buf, 1, nread, progoutfile);
+			fprintf(progoutfile, "\n");
 			if ( nwritten<nread ) {
 				error(errno,"writing to `%s'", progoutfilename);
 			}
@@ -442,6 +445,7 @@ int main(int argc, char **argv)
 		set_fd_close_exec(pipe_fd[i][0], 1);
 		set_fd_close_exec(fd_out, 1);
 	}
+	gettimeofday(&start_time, NULL);
 
 	if ( write_progout ) {
 		if ( close(pipe_fd[1][0])!=0 ) error(errno,"closing pipe read end");
