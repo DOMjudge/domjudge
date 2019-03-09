@@ -90,7 +90,7 @@ class SecurityController extends Controller
         $registrationCategoryName = $this->DOMJudgeService->dbconfig_get('registration_category_name', '');
         $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
 
-        if (!$registrationCategory === null) {
+        if ($registrationCategory !== null) {
             throw new \Symfony\Component\HttpKernel\Exception\HttpException(400, "Registration not enabled");
         }
 
