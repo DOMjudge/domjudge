@@ -6,6 +6,7 @@ use DOMJudgeBundle\Service\EventLogService;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
 
 /**
@@ -49,7 +50,8 @@ class AbstractExternalIdEntityType extends AbstractType
                             'pattern' => '/^[a-zA-Z0-9_-]+$/i',
                             'message' => 'Only letters, numbers, dashes and underscores are allowed',
                         ]
-                    )
+                    ),
+                    new NotBlank(),
                 ]
             ]);
         }
