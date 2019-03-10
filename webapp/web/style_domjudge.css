@@ -334,6 +334,10 @@ h3.teamoverview {
     text-align: center;
 }
 
+.ajax-loader-container {
+    height: 40px;
+}
+
 .ajax-loader {
     top: 8px;
     right: 10px;
