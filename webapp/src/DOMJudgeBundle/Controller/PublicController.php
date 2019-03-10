@@ -61,14 +61,12 @@ class PublicController extends BaseController
     {
         $response   = new Response();
         $static     = $request->query->getBoolean('static');
-        $data       = [];
         $refreshUrl = $this->generateUrl('public_index');
         // Determine contest to use
         $contest = $this->DOMJudgeService->getCurrentContest(-1);
 
         if ($static) {
-            $data['hide_menu'] = false;
-            $refreshParams     = [
+            $refreshParams = [
                 'static' => 1,
             ];
             // For static scoreboards, allow to pass a contest= param
@@ -109,6 +107,10 @@ class PublicController extends BaseController
 
         $data = $this->scoreboardService->getScoreboardTwigData($request, $response, $refreshUrl, false, true, $static,
                                                                 $contest);
+
+        if ($static) {
+            $data['hide_menu'] = true;
+        }
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('@DOMJudge/partials/scoreboard.html.twig', $data, $response);
