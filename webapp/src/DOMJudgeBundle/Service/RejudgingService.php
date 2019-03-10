@@ -77,7 +77,7 @@ class RejudgingService
     public function finishRejudging(Rejudging $rejudging, string $action, callable $progressReporter = null)
     {
         // This might take a while
-        ini_set('max_execution_time', 300);
+        ini_set('max_execution_time', '300');
         
         if ($rejudging->getEndtime()) {
             $error = sprintf('Rejudging already %s.', $rejudging->getValid() ? 'applied' : 'canceled');
