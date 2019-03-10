@@ -74,6 +74,8 @@ FILE *progoutfile;
 int outputmeta;
 char *metafilename;
 FILE *metafile;
+int validator_exited_first;
+int submission_still_alive;
 
 struct timeval start_time;
 
@@ -277,6 +279,19 @@ void pump_pipes(int *fd_out, int *fd_in, int from_val)
 			error(errno,"copying data from fd %d", *fd_out);
 		}
 		if ( nread==0 ) {
+			warning(0, "pipe of #%d is empty", 1 + 1-from_val);
+			/* in validator: before we close the pipe
+			 * (on which the submission may either crash or act weirdly)
+			 * let's check if the submission is already done
+			 */
+			if ( from_val ) {
+				if ( submission_still_alive ) {
+					warning(0, "validator exited first");
+					validator_exited_first = 1;
+				}
+			} else {
+				submission_still_alive = 0;
+			}
 			/* EOF detected: close input/output pipe fds. */
 			if ( *fd_out>=0 && close(*fd_out)!=0 ) {
 				error(errno,"closing pipe for fd %d", *fd_out);
@@ -396,6 +411,9 @@ int main(int argc, char **argv)
 		error(errno,"installing signal handler");
 	}
 
+	validator_exited_first = 0;
+	submission_still_alive = 1;
+
 	/* Create pipes and by default close all file descriptors when
 	   executing a forked subcommand, required ones are reset below. */
 	for(i=0; i<ncmds; i++) {
@@ -486,7 +504,7 @@ int main(int argc, char **argv)
 		}
 
 		for(i=0; i<ncmds; i++) if ( cmd_pid[i]==pid ) {
-			if (i == 0 && cmd_exit[1] == -1) {
+			if (i == 0 && validator_exited_first) {
 				/* If the second command hasn't finished yet, then write out metadata. */
 				if ( WIFEXITED(status) ) {
 					exitcode = WEXITSTATUS(status);
@@ -499,6 +517,9 @@ int main(int argc, char **argv)
 						error(errno,"closing file `%s'",metafilename);
 					}
 				}
+			}
+			if (i == 1) {
+				submission_still_alive = 0;
 			}
 			warning(0, "command #%d, pid %d has exited (with status %d)",i+1,pid,status);
 			break;
