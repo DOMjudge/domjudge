@@ -503,6 +503,13 @@ int main(int argc, char **argv)
 			error(errno,"waiting for children");
 		}
 
+		/* Pump pipes one more time to improve detection which program exited first. */
+		if ( write_progout ) {
+			for(i=0; i<ncmds; i++) {
+				pump_pipes(&progout_pipe_fd[i][0], &pipe_fd[1-i][1], 1-i);
+			}
+		}
+
 		for(i=0; i<ncmds; i++) if ( cmd_pid[i]==pid ) {
 			if (i == 0 && validator_exited_first) {
 				/* If the second command hasn't finished yet, then write out metadata. */
