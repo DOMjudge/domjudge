@@ -75,14 +75,15 @@ case "$1" in
 		mkdir -p dev
 		sudo -n cp -pR /dev/random  dev < /dev/null
 		sudo -n cp -pR /dev/urandom dev < /dev/null
+		sudo -n chmod o-w dev/random dev/urandom < /dev/null
 		;;
 
 	stop)
 
 		dj_umount "$PWD/proc"
 
-		rm dev/urandom
-		rm dev/random
+		rm -f dev/urandom
+		rm -f dev/random
 		rmdir dev || true
 
 		for i in $SUBDIRMOUNTS ; do

@@ -20,4 +20,5 @@
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/umount -f -vvv @judgehost_judgedir@/*
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/cp -pR /dev/random dev
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/cp -pR /dev/urandom dev
+@DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/chmod o-w dev/random dev/urandom
 
