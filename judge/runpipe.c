@@ -511,20 +511,6 @@ int main(int argc, char **argv)
 		}
 
 		for(i=0; i<ncmds; i++) if ( cmd_pid[i]==pid ) {
-			if (i == 0 && validator_exited_first) {
-				/* If the second command hasn't finished yet, then write out metadata. */
-				if ( WIFEXITED(status) ) {
-					exitcode = WEXITSTATUS(status);
-					if ( outputmeta && (metafile = fopen(metafilename,"w"))==NULL ) {
-						error(errno,"cannot open `%s'",metafilename);
-					}
-					write_meta("exitcode","%d",exitcode);
-					/* TODO: add more meta data like run time. */
-					if ( outputmeta && fclose(metafile)!=0 ) {
-						error(errno,"closing file `%s'",metafilename);
-					}
-				}
-			}
 			if (i == 1) {
 				submission_still_alive = 0;
 			}
@@ -537,6 +523,17 @@ int main(int argc, char **argv)
 		verb("command #%d, pid %d has exited (with status %d)",i+1,pid,status);
 		if (cmd_exit[0] != -1 && cmd_exit[1] != -1) {
 			/* Both child processes are done. */
+			if (validator_exited_first && WIFEXITED(cmd_exit[0])) {
+				exitcode = WEXITSTATUS(cmd_exit[0]);
+				if ( outputmeta && (metafile = fopen(metafilename,"w"))==NULL ) {
+					error(errno,"cannot open `%s'",metafilename);
+				}
+				write_meta("exitcode","%d", exitcode);
+				/* TODO: add more meta data like run time. */
+				if ( outputmeta && fclose(metafile)!=0 ) {
+					error(errno,"closing file `%s'",metafilename);
+				}
+			}
 			break;
 		}
 	};
