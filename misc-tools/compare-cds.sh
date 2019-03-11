@@ -33,8 +33,8 @@ CDS_PRESENTATION_PASS="presentation"
 CDS_MYICPC_PASS="myicpc"
 CDS_LIVE_PASS="live"
 
-CDS_VERSION="2.1.1918"
-UTILS_VERSION="2.1.1917"
+CDS_VERSION="2.1.1992"
+UTILS_VERSION="2.1.1992"
 CDS_URL="https://pc2.ecs.csus.edu/pc2projects/build/CDS/dist/wlp.CDS-${CDS_VERSION}.zip"
 UTILS_URL="https://pc2.ecs.csus.edu/pc2projects/build/ContestUtil/dist/contestUtil-$UTILS_VERSION.zip"
 
