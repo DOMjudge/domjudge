@@ -556,10 +556,14 @@ class RejudgingController extends BaseController
                                                         ]);
                 }
 
-                if ($submission['rejudgingid'] === null && $rejudging !== null) {
-                    $em->getConnection()->executeUpdate('UPDATE submission SET judgehost = null, rejudgingid = :rejudgingid WHERE submitid = :submitid',
+                $em->getConnection()->executeUpdate('UPDATE submission SET judgehost = null WHERE submitid = :submitid',
+                                                    [
+                                                        ':submitid' => $submission['submitid'],
+                                                    ]);
+                if ($rejudging) {
+                    $em->getConnection()->executeUpdate('UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid',
                                                         [
-                                                            ':rejudgingid' => $rejudging ? $rejudging->getRejudgingid() : null,
+                                                            ':rejudgingid' => $rejudging->getRejudgingid(),
                                                             ':submitid' => $submission['submitid'],
                                                         ]);
                 }
