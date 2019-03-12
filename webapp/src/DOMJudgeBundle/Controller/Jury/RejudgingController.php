@@ -538,10 +538,14 @@ class RejudgingController extends Controller
                                                                          ]);
                 }
 
-                if ($submission['rejudgingid'] === null) {
-                    $this->entityManager->getConnection()->executeUpdate('UPDATE submission SET judgehost = null, rejudgingid = :rejudgingid WHERE submitid = :submitid',
+                $this->entityManager->getConnection()->executeUpdate('UPDATE submission SET judgehost = null WHERE submitid = :submitid',
+                                                                     [
+                                                                         ':submitid' => $submission['submitid'],
+                                                                     ]);
+                if ($rejudging !== null) {
+                    $this->entityManager->getConnection()->executeUpdate('UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid',
                                                                          [
-                                                                             ':rejudgingid' => $rejudging ? $rejudging->getRejudgingid() : null,
+                                                                             ':rejudgingid' => $rejudging->getRejudgingid(),
                                                                              ':submitid' => $submission['submitid'],
                                                                          ]);
                 }
