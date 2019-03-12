@@ -39,6 +39,9 @@ cleanup ()
 			rm -f "$WORKDIR/testdata.out"
 			ln -s "$TESTOUT" "$WORKDIR/testdata.out"
 		fi
+
+		# Remove access to workdir for next runs
+		chmod go= "$WORKDIR"
 	fi
 
 	# Copy runguard and program stderr to system output. The display is
