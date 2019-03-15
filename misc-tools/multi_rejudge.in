@@ -67,7 +67,7 @@ if ($cid===null) {
 
 $numact_jh = $DB->q('VALUE SELECT COUNT(*) FROM judgehost WHERE active=1');
 
-$RESTRICTION = '{"contest":[],"problem":[],"language":[],"rejudge_own":"0"}';
+$RESTRICTION = '{"rejudge_own":false}';
 
 $restrict_id = $DB->q('MAYBEVALUE SELECT restrictionid FROM judgehost_restriction
                        WHERE restrictions = %s', $RESTRICTION);
@@ -112,6 +112,11 @@ while (true) {
 
     echo "\n" . ($numact_jh - $min_numjudgings) . " more round(s) to go\n";
 
+    $rejudgingid = $DB->q('RETURNID INSERT INTO rejudging
+                            (starttime, reason, userid_start)
+                            VALUES (%s,%s,%i)',
+                            now(), 'multi_rejudge', 1);
+
     $rows = $DB->q('SELECT submitid,COUNT(*) AS cnt
                     FROM judging
                     WHERE cid=%i AND valid=1
@@ -129,8 +134,7 @@ while (true) {
 
         echo ".";
         $DB->q('START TRANSACTION');
-        $DB->q('UPDATE judging SET valid = 0 WHERE submitid = %i', $sid);
-        $DB->q('UPDATE submission SET judgehost = NULL WHERE submitid = %i', $sid);
+        $DB->q('UPDATE submission SET judgehost = NULL, rejudgingid = %i WHERE submitid = %i', $rejudgingid, $sid);
         $DB->q('COMMIT');
     }
     echo "\n";
