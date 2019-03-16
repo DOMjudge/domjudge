@@ -202,6 +202,7 @@ class Submission implements ExternalRelationshipEntityInterface
 
     /**
      * @var string Holds the old result in the case this submission is displayed in a rejudging table
+     * @Serializer\Exclude()
      */
     private $old_result;
 
