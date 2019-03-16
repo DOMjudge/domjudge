@@ -100,6 +100,9 @@ class Judging implements ExternalRelationshipEntityInterface
      */
     private $output_compile;
 
+    /**
+     * @Serializer\Exclude()
+     */
     private $output_compile_as_string = null;
 
     /**
