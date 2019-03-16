@@ -77,18 +77,20 @@
         {% endif %}
 
         {% if not static %}
-            <div class="btn-group-toggle mt-2" data-toggle="buttons">
-                <label class="btn btn-outline-secondary">
-                    <input type="checkbox" id="filter-toggle" autocomplete="off">
-                    <i class="fas fa-filter"></i> Filter
-                </label>
-                {% if scoreFilter.filteredOn is not empty %}
-                    (filtered on {{ scoreFilter.filteredOn }})
+	<div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm m-2 dropdown-toggle" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false" id="filter-toggle">
+                <i class="fas fa-filter"></i>
+                {% if scoreFilter.filteredOn is empty %}
+                    Filter
+                {% else %}
+                    Filtered ({{ scoreFilter.filteredOn }})
                 {% endif %}
-            </div>
-            <div class="card mt-3 d-none pl-2 pb-2 pt-2" id="filter-card" style="display: inline-block;">
+            </button>
+
+            <div class="dropdown-menu" aria-labelledby="filter-toggle">
                 <form action="{{ app.request.uri }}" method="get">
-                    <div class="mb-2 form-inline">
+                    <div class="m-2 p-2 form-inline">
                         {% if filterValues.affiliations | length > 1 %}
                             <select class="form-control mr-2" multiple size="8" name="affiliations[]">
                                 {% for affiliationId, affiliation in filterValues.affiliations %}
@@ -113,23 +115,12 @@
                                 {% endfor %}
                             </select>
                         {% endif %}
+                    <input type="submit" class="btn btn-primary btn-sm align-top" name="filter" value="filter"/>
+                    <input type="submit" class="btn btn-secondary btn-sm align-top" name="clear" value="clear"/>
                     </div>
-                    <input type="submit" class="btn btn-primary" name="filter" value="filter"/>
-                    <input type="submit" class="btn btn-secondary" name="clear" value="clear"/>
                 </form>
             </div>
-
-            <script>
-                $(function () {
-                    $('#filter-toggle').on('change', function () {
-                        if ($(this).is(':checked')) {
-                            $('#filter-card').removeClass('d-none');
-                        } else {
-                            $('#filter-card').addClass('d-none');
-                        }
-                    });
-                })
-            </script>
+        </div>
         {% else %} {# not static #}
             <br/>
         {% endif %} {# not static #}
