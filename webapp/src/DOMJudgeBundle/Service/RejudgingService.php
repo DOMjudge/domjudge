@@ -121,14 +121,18 @@ class RejudgingService
         }
 
         // Get all submissions that we should consider
-        /** @var array $submissions */
-        $submissions = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->join('s.judgings', 'j')
             ->select('s.submitid, s.cid, s.teamid, s.probid, j.judgingid, j.result')
-            ->andWhere('s.rejudging = :rejudging')
-            ->andWhere('j.rejudging = :rejudging OR j.rejudging IS NULL')
+            ->andWhere('s.rejudging = :rejudging');
+        if ($action === self::ACTION_APPLY) {
+            $queryBuilder->andWhere('j.rejudging = :rejudging');
+        }
+        /** @var array $submissions */
+        $submissions = $queryBuilder
             ->setParameter(':rejudging', $rejudging)
+            ->groupBy('s.submitid')
             ->getQuery()
             ->getResult();
 
@@ -205,13 +209,15 @@ class RejudgingService
 
                 $params = [
                     ':judgehost' => $validJudging->getJudgehost()->getHostname(),
-                    'rejudgingid' => $rejudgingId,
+                    ':rejudgingid' => $rejudgingId,
+                    ':submitid' => $submission['submitid'],
                 ];
                 $this->entityManager->getConnection()->executeQuery(
                     'UPDATE submission
                             SET rejudgingid = NULL,
                                 judgehost = :judgehost
-                            WHERE rejudgingid = :rejudgingid', $params);
+                            WHERE rejudgingid = :rejudgingid
+                            AND submitid = :submitid', $params);
             } else {
                 $error = "Unknown action '$action' specified.";
                 throw new \BadMethodCallException($error);
