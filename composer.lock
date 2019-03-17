@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "bba334625941faa9b93010e1474d523e",
+    "content-hash": "281ac7adfa4a71f12fdd124881221145",
     "packages": [
         {
             "name": "angel-vladov/select2-bootstrap-theme",
@@ -836,101 +836,14 @@
         },
         {
             "name": "doctrine/orm",
-            "version": "v2.5.15",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/DOMjudge/orm.git",
-                "reference": "472ecd65d87f2e3675572eace4820e62c14c74b0"
-            },
+            "version": "2.5.15",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/DOMjudge/orm/zipball/472ecd65d87f2e3675572eace4820e62c14c74b0",
-                "reference": "472ecd65d87f2e3675572eace4820e62c14c74b0",
-                "shasum": ""
+                "url": "https://github.com/DOMjudge/orm/archive/v2.5.15.zip",
+                "reference": null,
+                "shasum": null
             },
-            "archive": {
-                "exclude": [
-                    "!vendor",
-                    "tests",
-                    "*phpunit.xml",
-                    ".travis.yml",
-                    "build.xml",
-                    "build.properties",
-                    "composer.phar",
-                    "vendor/satooshi",
-                    "lib/vendor",
-                    "*.swp",
-                    "*coveralls.yml"
-                ]
-            },
-            "require": {
-                "doctrine/cache": "~1.4",
-                "doctrine/collections": "~1.2",
-                "doctrine/common": ">=2.5-dev,<2.9-dev",
-                "doctrine/dbal": ">=2.5-dev,<2.7-dev",
-                "doctrine/instantiator": "^1.0.1",
-                "ext-pdo": "*",
-                "php": ">=5.4",
-                "symfony/console": "~2.5|~3.0|~4.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "~4.0",
-                "symfony/yaml": "~2.3|~3.0|~4.0"
-            },
-            "suggest": {
-                "symfony/yaml": "If you want to use YAML Metadata Mapping Driver"
-            },
-            "bin": [
-                "bin/doctrine",
-                "bin/doctrine.php"
-            ],
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.6.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-0": {
-                    "Doctrine\\ORM\\": "lib/"
-                }
-            },
-            "autoload-dev": {
-                "psr-0": {
-                    "Doctrine\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Guilherme Blanco",
-                    "email": "guilhermeblanco@gmail.com"
-                },
-                {
-                    "name": "Roman Borschel",
-                    "email": "roman@code-factory.org"
-                },
-                {
-                    "name": "Benjamin Eberlei",
-                    "email": "kontakt@beberlei.de"
-                },
-                {
-                    "name": "Jonathan Wage",
-                    "email": "jonwage@gmail.com"
-                }
-            ],
-            "description": "Object-Relational-Mapper for PHP",
-            "homepage": "http://www.doctrine-project.org",
-            "keywords": [
-                "database",
-                "orm"
-            ],
-            "support": {
-                "source": "https://github.com/DOMjudge/orm/tree/v2.5.15"
-            },
-            "time": "2019-02-23T16:39:45+00:00"
+            "type": "library"
         },
         {
             "name": "exsyst/swagger",
@@ -1030,7 +943,9 @@
             "version": "5.5.0",
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/5.5.0/fontawesome-free-5.5.0-web.zip"
+                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/5.5.0/fontawesome-free-5.5.0-web.zip",
+                "reference": null,
+                "shasum": null
             },
             "type": "library"
         },
@@ -3744,32 +3659,32 @@
         },
         {
             "name": "twig/twig",
-            "version": "v2.5.0",
+            "version": "v2.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "6a5f676b77a90823c2d4eaf76137b771adf31323"
+                "reference": "70c59531da43afe598c66135e39cac39475a2f51"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/6a5f676b77a90823c2d4eaf76137b771adf31323",
-                "reference": "6a5f676b77a90823c2d4eaf76137b771adf31323",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/70c59531da43afe598c66135e39cac39475a2f51",
+                "reference": "70c59531da43afe598c66135e39cac39475a2f51",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.0",
                 "symfony/polyfill-ctype": "^1.8",
-                "symfony/polyfill-mbstring": "~1.0"
+                "symfony/polyfill-mbstring": "^1.3"
             },
             "require-dev": {
                 "psr/container": "^1.0",
                 "symfony/debug": "^2.7",
-                "symfony/phpunit-bridge": "^3.3"
+                "symfony/phpunit-bridge": "^3.4.19|^4.1.8"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.5-dev"
+                    "dev-master": "2.7-dev"
                 }
             },
             "autoload": {
@@ -3807,7 +3722,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2018-07-13T07:18:09+00:00"
+            "time": "2019-03-12T18:48:26+00:00"
         },
         {
             "name": "webmozart/assert",
