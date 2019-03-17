@@ -507,6 +507,29 @@ class RejudgingController extends BaseController
             return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_index'));
         }
 
+        $rejudging = $this->createRejudging($reason, $judgings, $fullRejudge, $scoreboardService);
+
+        if ($rejudging) {
+            return $this->redirectToRoute('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]);
+        } else {
+            switch ($table) {
+                case 'contest':
+                    return $this->redirectToRoute('jury_contest', ['contestId' => $id]);
+                case 'judgehost':
+                    return $this->redirectToRoute('jury_judgehost', ['hostname' => $id]);
+                case 'language':
+                    return $this->redirectToRoute('jury_language', ['langId' => $id]);
+                case 'problem':
+                    return $this->redirectToRoute('jury_problem', ['probId' => $id]);
+                case 'submission':
+                    return $this->redirectToRoute('jury_submission', ['submitId' => $id]);
+                case 'team':
+                    return $this->redirectToRoute('jury_team', ['teamId' => $id]);
+            }
+        }
+    }
+
+    public function createRejudging($reason, $judgings, $fullRejudge, $scoreboardService) {
         /** @var Rejudging|null $rejudging */
         $rejudging = null;
         if ($fullRejudge) {
@@ -519,14 +542,13 @@ class RejudgingController extends BaseController
             $em->flush();
         }
 
+        $singleJudging = count($judgings) == 1;
         foreach ($judgings as $judging) {
             $submission = $judging['submission'];
             if ($submission['rejudgingid'] !== null) {
                 // Already associated rejudging
-                if ($table === 'submission') {
-                    // clean up rejudging. Note that if $table is
-                    // 'submission', we will always have only one judging so
-                    // we can safely delete the rejudging
+                if ($singleJudging) {
+                    // Clean up before throwing an error
                     if ($rejudging) {
                         $em->remove($rejudging);
                         $em->flush();
@@ -541,7 +563,7 @@ class RejudgingController extends BaseController
             }
 
             $em->transactional(function () use (
-                $table,
+                $singleJudging,
                 $fullRejudge,
                 $judging,
                 $submission,
@@ -568,8 +590,7 @@ class RejudgingController extends BaseController
                                                         ]);
                 }
 
-                // Prioritize single submission rejudgings
-                if ($table == 'submission') {
+                if ($singleJudging) {
                     $teamid = $submission['teamid'];
                     if ($teamid) {
                         $em->getConnection()->executeUpdate('UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
@@ -596,24 +617,6 @@ class RejudgingController extends BaseController
                 $this->DOMJudgeService->auditlog('judging', $judging['judgingid'], 'mark invalid', '(rejudge)');
             }
         }
-
-        if ($rejudging) {
-            return $this->redirectToRoute('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]);
-        } else {
-            switch ($table) {
-                case 'contest':
-                    return $this->redirectToRoute('jury_contest', ['contestId' => $id]);
-                case 'judgehost':
-                    return $this->redirectToRoute('jury_judgehost', ['hostname' => $id]);
-                case 'language':
-                    return $this->redirectToRoute('jury_language', ['langId' => $id]);
-                case 'problem':
-                    return $this->redirectToRoute('jury_problem', ['probId' => $id]);
-                case 'submission':
-                    return $this->redirectToRoute('jury_submission', ['submitId' => $id]);
-                case 'team':
-                    return $this->redirectToRoute('jury_team', ['teamId' => $id]);
-            }
-        }
+        return $rejudging;
     }
 }
