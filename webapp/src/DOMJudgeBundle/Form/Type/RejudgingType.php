@@ -12,22 +12,21 @@ use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 
-class RejudgingType extends AbstractExternalIdEntityType
+class RejudgingType extends AbstractType
 {
     /**
      * @var DOMJudgeService
      */
     private $DOMJudgeService;
 
-    public function __construct(EventLogService $eventLogService,
-        DOMJudgeService $DOMJudgeService) {
+    public function __construct(DOMJudgeService $DOMJudgeService) {
         $this->DOMJudgeService = $DOMJudgeService;
-        parent::__construct($eventLogService);
     }
 
     /**
