@@ -135,6 +135,16 @@ class RejudgingType extends AbstractExternalIdEntityType
             'choices' => array_combine($verdicts, $verdicts),
             'data' => $incorrectVerdicts,
         ]);
+        $builder->add('before', TextType::class, [
+            'label' => 'before (in form ±[HHH]H:MM[:SS[.uuuuuu]])',
+            'required' => false,
+            'mapped' => false,
+        ]);
+        $builder->add('after', TextType::class, [
+            'label' => 'after (in form ±[HHH]H:MM[:SS[.uuuuuu]])',
+            'required' => false,
+            'mapped' => false,
+        ]);
 
         $builder->add('save', SubmitType::class);
     }

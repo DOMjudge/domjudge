@@ -1177,7 +1177,7 @@ class Contest
      * @return float|int|string|null
      * @throws \Exception
      */
-    private function getAbsoluteTime($time_string)
+    public function getAbsoluteTime($time_string)
     {
         if ($time_string === null) {
             return null;

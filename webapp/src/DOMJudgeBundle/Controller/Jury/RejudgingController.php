@@ -491,6 +491,26 @@ class RejudgingController extends BaseController
                     ->andWhere('j.result IN (:verdicts)')
                     ->setParameter(':verdicts', $verdicts);
             }
+            $before = $formData['before']->getViewData();
+            $after = $formData['after']->getViewData();
+            if (!empty($before) || !empty($after)) {
+                if (count($contests) != 1) {
+                    throw new BadRequestHttpException('Only allowed to set before/after restrictions with exactly one selected contest.');
+                }
+                $contest = $contests[0];
+                if (!empty($before)) {
+                    $beforeTime = $contest->getAbsoluteTime($before);
+                    $queryBuilder
+                        ->andWhere('s.submittime <= :before')
+                        ->setParameter(':before', $beforeTime);
+                }
+                if (!empty($after)) {
+                    $afterTime = $contest->getAbsoluteTime($after);
+                    $queryBuilder
+                        ->andWhere('s.submittime >= :after')
+                        ->setParameter(':after', $afterTime);
+                }
+            }
 
             /** @var array[] $judgings */
             $judgings = $queryBuilder
