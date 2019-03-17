@@ -10,6 +10,11 @@ class ScoreboardMatrixItem
     protected $isCorrect;
 
     /**
+     * @var bool
+     */
+    protected $isFirst;
+
+    /**
      * @var int
      */
     protected $numberOfSubmissions;
@@ -32,14 +37,16 @@ class ScoreboardMatrixItem
     /**
      * ScoreboardMatrixItem constructor.
      * @param bool $isCorrect
+     * @param bool $isFirst
      * @param int $numberOfSubmissions
      * @param int $numberOfPendingSubmissions
      * @param float|string $time
      * @param int $penaltyTime
      */
-    public function __construct(bool $isCorrect, int $numberOfSubmissions, int $numberOfPendingSubmissions, $time, int $penaltyTime)
+    public function __construct(bool $isCorrect, bool $isFirst, int $numberOfSubmissions, int $numberOfPendingSubmissions, $time, int $penaltyTime)
     {
         $this->isCorrect                  = $isCorrect;
+        $this->isFirst                    = $isFirst;
         $this->numberOfSubmissions        = $numberOfSubmissions;
         $this->numberOfPendingSubmissions = $numberOfPendingSubmissions;
         $this->time                       = $time;
@@ -52,6 +59,14 @@ class ScoreboardMatrixItem
     public function isCorrect(): bool
     {
         return $this->isCorrect;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFirst(): bool
+    {
+        return $this->isFirst;
     }
 
     /**

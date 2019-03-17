@@ -234,6 +234,7 @@ class Scoreboard
 
             $this->matrix[$scoreRow->getTeam()->getTeamid()][$scoreRow->getProblem()->getProbid()] = new ScoreboardMatrixItem(
                 $scoreRow->getIsCorrect($this->restricted),
+                $scoreRow->getIsFirstToSolve(),
                 $scoreRow->getSubmissions($this->restricted),
                 $scoreRow->getPending($this->restricted),
                 $scoreRow->getSolveTime($this->restricted),
@@ -291,7 +292,7 @@ class Scoreboard
                 $problemId = $contestProblem->getProbid();
                 // Provide default scores when nothing submitted for this team + problem yet
                 if (!isset($this->matrix[$teamId][$problemId])) {
-                    $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, 0, 0, 0, 0);
+                    $this->matrix[$teamId][$problemId] = new ScoreboardMatrixItem(false, false, 0, 0, 0, 0);
                 }
 
                 $problemMatrixItem = $this->matrix[$teamId][$problemId];
@@ -300,7 +301,7 @@ class Scoreboard
                 $problemSummary->addNumberOfPendingSubmissions($sortOrder,
                                                                $problemMatrixItem->getNumberOfPendingSubmissions());
                 $problemSummary->addNumberOfCorrectSubmissions($sortOrder, $problemMatrixItem->isCorrect() ? 1 : 0);
-                if ($problemMatrixItem->isCorrect()) {
+                if ($problemMatrixItem->isFirst()) {
                     $problemSummary->updateBestTime($sortOrder, $problemMatrixItem->getTime());
                 }
             }
@@ -490,20 +491,6 @@ class Scoreboard
      */
     public function solvedFirst(Team $team, ContestProblem $problem): bool
     {
-        if (!$this->matrix[$team->getTeamid()][$problem->getProbid()]->isCorrect()) {
-            return false;
-        }
-        $teamTime       = $this->matrix[$team->getTeamid()][$problem->getProbid()]->getTime();
-        $sortOrder      = $team->getCategory()->getSortorder();
-        $problemSummary = $this->summary->getProblem($problem->getProbid());
-        if ($problemSummary === null) {
-            return false;
-        }
-        $problemTimes = $this->summary->getProblem($problem->getProbid())->getBestTimes();
-        if (!isset($problemTimes[$sortOrder])) {
-            return false;
-        }
-        $eps = 0.0000001;
-        return $teamTime - $eps <= $problemTimes[$sortOrder];
+        return $this->matrix[$team->getTeamid()][$problem->getProbid()]->isFirst();
     }
 }

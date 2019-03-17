@@ -326,7 +326,8 @@ class ScoreboardService
         foreach ($submissions as $submission) {
             /** @var Judging|null $judging */
             $judging    = $submission->getJudgings()->first() ?: null;
-            $submitTime = $contest->getContestTime((float)$submission->getSubmittime());
+            $absSubmitTime = (float)$submission->getSubmittime();
+            $submitTime = $contest->getContestTime($absSubmitTime);
 
             // Check if this submission has a publicly visible judging result:
             if ($judging === null || ($verificationRequired && !$judging->getVerified()) || empty($judging->getResult())) {
@@ -357,6 +358,42 @@ class ScoreboardService
             }
         }
 
+        // See if this submission was the first to solve this problem
+        // (only relevant if it was correct in the first place)
+        $firstToSolve = false;
+        if ($correctJury) {
+            $params = [
+                ':cid' => $contest->getCid(),
+                ':probid' => $problem->getProbid(),
+                ':teamSortOrder' => $team->getCategory()->getSortorder(),
+                ':submitTime' => $absSubmitTime,
+                ':correctResult' => Judging::RESULT_CORRECT,
+            ];
+
+            // Find out how many valid submissions were submitted earlier
+            // that have a valid judging that is correct, or are awaiting judgement.
+            // Only if there are 0 found, we are definitely the first to solve this problem.
+	    // To find relevant submissions/judgings:
+	    // - submission needs to be valid (not invalidated)
+	    // - a judging is present, but
+	    //   - it's not part of a rejudging
+	    //   - either it's still ongoing (pending judgement, could be correct)
+	    //   - or already judged to be correct (if it's judged but != correct, it's not a first to solve)
+	    // - or the submission is still queued for judgement (judgehost is NULL).
+            $firstToSolve = 0 == $this->entityManager->getConnection()->fetchColumn('
+                SELECT count(*) FROM submission s
+                    LEFT JOIN judging j USING (submitid)
+                    LEFT JOIN team t USING(teamid)
+                    LEFT JOIN team_category tc USING (categoryid)
+                WHERE s.valid = 1 AND
+                    ((j.valid = 1 AND ( j.rejudgingid IS NULL AND (j.result IS NULL OR j.result = :correctResult))) OR
+                      s.judgehost IS NULL) AND
+                    s.cid = :cid AND s.probid = :probid AND
+                    tc.sortorder = :teamSortOrder AND
+                    round(s.submittime,4) < :submitTime',
+                $params);
+        }
+
         // Use a direct REPLACE INTO query to drastically speed this up
         $params = [
             ':cid' => $contest->getCid(),
@@ -370,13 +407,14 @@ class ScoreboardService
             ':pendingPublic' => $pendingPubl,
             ':solvetimePublic' => (int)$timePubl,
             ':isCorrectPublic' => (int)$correctPubl,
+            ':isFirstToSolve' => (int)$firstToSolve,
         ];
         $this->entityManager->getConnection()->executeQuery('REPLACE INTO scorecache
             (cid, teamid, probid,
              submissions_restricted, pending_restricted, solvetime_restricted, is_correct_restricted,
-             submissions_public, pending_public, solvetime_public, is_correct_public)
+             submissions_public, pending_public, solvetime_public, is_correct_public, is_first_to_solve)
             VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :isCorrectRestricted,
-            :submissionsPublic, :pendingPublic, :solvetimePublic, :isCorrectPublic)', $params);
+            :submissionsPublic, :pendingPublic, :solvetimePublic, :isCorrectPublic, :isFirstToSolve)', $params);
 
         if ($this->entityManager->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
                                                                [':lock' => $lockString]) != 1) {

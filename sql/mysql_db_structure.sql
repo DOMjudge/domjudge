@@ -399,6 +399,7 @@ CREATE TABLE `scorecache` (
   `pending_public` int(4) unsigned NOT NULL DEFAULT '0' COMMENT 'Number of submissions pending judgement (public)',
   `solvetime_public` decimal(32,9) NOT NULL DEFAULT '0.000000000' COMMENT 'Seconds into contest when problem solved (public)',
   `is_correct_public` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Has there been a correct submission? (public)',
+  `is_first_to_solve` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Is this the first solution to this problem?',
   PRIMARY KEY (`cid`,`teamid`,`probid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard cache';
 
