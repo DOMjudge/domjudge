@@ -28,8 +28,15 @@
 			}
 		},
 		{
-			"type": "vcs",
-			"url": "https://github.com/DOMjudge/orm"
+			"type": "package",
+			"package": {
+				"name": "doctrine/orm",
+				"version": "2.5.15",
+				"dist": {
+					"url": "https://github.com/DOMjudge/orm/archive/v2.5.15.zip",
+					"type": "zip"
+				}
+			}
 		}
 	],
 	"require": {
