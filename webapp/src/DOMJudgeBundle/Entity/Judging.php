@@ -89,7 +89,6 @@ class Judging implements ExternalRelationshipEntityInterface
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="valid", options={"comment"="Old judging is marked as invalid when rejudging"}, nullable=false)
-     * @Serializer\Exclude()
      */
     private $valid = true;
 
