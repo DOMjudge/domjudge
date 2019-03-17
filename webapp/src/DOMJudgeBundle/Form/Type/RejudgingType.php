@@ -9,6 +9,8 @@ use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Rejudging;
 use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Service\EventLogService;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -18,12 +20,24 @@ use Symfony\Component\Form\FormBuilderInterface;
 class RejudgingType extends AbstractExternalIdEntityType
 {
     /**
+     * @var DOMJudgeService
+     */
+    private $DOMJudgeService;
+
+    public function __construct(EventLogService $eventLogService,
+        DOMJudgeService $DOMJudgeService) {
+        $this->DOMJudgeService = $DOMJudgeService;
+        parent::__construct($eventLogService);
+    }
+
+    /**
      * @param FormBuilderInterface $builder
      * @param array                $options
      * @throws \Exception
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $currentContest = $this->DOMJudgeService->getCurrentContest();
         $builder->add('reason', TextType::class);
         $builder->add('contest', EntityType::class, [
             'mapped' => false,
@@ -38,7 +52,13 @@ class RejudgingType extends AbstractExternalIdEntityType
                     ->where('c.enabled = 1')
                     ->orderBy('c.cid');
             },
+            'data' => [$currentContest],
         ]);
+        $problems = array_map(function($contestProblem) {
+            return $contestProblem->getProblem();
+          },
+          $currentContest->getProblems()->getValues()
+        );
         $builder->add('problem', EntityType::class, [
             'mapped' => false,
             'multiple' => true,
@@ -51,6 +71,7 @@ class RejudgingType extends AbstractExternalIdEntityType
                     ->createQueryBuilder('p')
                     ->orderBy('p.name');
             },
+            'data' => $problems,
         ]);
         $builder->add('language', EntityType::class, [
             'mapped' => false,
