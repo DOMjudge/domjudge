@@ -1,0 +1,21 @@
+{% extends "@DOMJudge/jury/base.html.twig" %}
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
+{% block title %}Add rejudging - {{ parent() }}{% endblock %}
+
+{% block content %}
+
+    <h1>Add rejudging</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            {{ form(form) }}
+        </div>
+    </div>
+
+{% endblock %}
