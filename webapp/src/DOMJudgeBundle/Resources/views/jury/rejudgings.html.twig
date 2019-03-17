@@ -19,4 +19,8 @@
         {{ macros.table(rejudgings, table_fields, 0) }}
     {% endif %}
 
+    <p>
+        {{ button(path('jury_rejudging_add'), 'Add new rejudging', 'primary', 'plus') }}
+    </p>
+
 {% endblock %}

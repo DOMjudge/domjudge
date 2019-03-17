@@ -11,6 +11,7 @@ use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Rejudging;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Form\Type\RejudgingType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\RejudgingService;
 use DOMJudgeBundle\Service\ScoreboardService;
@@ -432,7 +433,82 @@ class RejudgingController extends BaseController
     }
 
     /**
-     * @Route("/add", methods={"POST"}, name="jury_create_rejudge")
+     * @Route("/add", name="jury_rejudging_add")
+     * @param Request $request
+     * @param ScoreboardService $scoreboardService
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function addAction(Request $request, ScoreboardService $scoreboardService)
+    {
+        $rejudging = new Rejudging();
+        $form = $this->createForm(RejudgingType::class, $rejudging);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $formData = $form->all();
+            $reason = $formData['reason']->getViewData();
+
+            $queryBuilder = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Judging', 'j')
+                ->leftJoin('j.submission', 's')
+                ->select('j', 's')
+                ->andWhere('j.valid = 1');
+
+            $contests = $formData['contest']->getData();
+            if (count($contests)) {
+                $queryBuilder
+                    ->andWhere('j.contest IN (:contests)')
+                    ->setParameter(':contests', $contests);
+            }
+            $problems = $formData['problem']->getData();
+            if (count($problems)) {
+                $queryBuilder
+                    ->andWhere('s.problem IN (:problems)')
+                    ->setParameter(':problems', $problems);
+            }
+            $languages = $formData['language']->getData();
+            if (count($languages)) {
+                $queryBuilder
+                    ->andWhere('s.language IN (:languages)')
+                    ->setParameter(':languages', $languages);
+            }
+            $teams = $formData['team']->getData();
+            if (count($teams)) {
+                $queryBuilder
+                    ->andWhere('s.team IN (:teams)')
+                    ->setParameter(':teams', $teams);
+            }
+            $judgehosts = $formData['judgehost']->getData();
+            if (count($judgehosts)) {
+                $queryBuilder
+                    ->andWhere('j.judgehost IN (:judgehosts)')
+                    ->setParameter(':judgehosts', $judgehosts);
+            }
+            $verdicts = $formData['verdict']->getViewData();
+            if (count($verdicts)) {
+                $queryBuilder
+                    ->andWhere('j.result IN (:verdicts)')
+                    ->setParameter(':verdicts', $verdicts);
+            }
+
+            /** @var array[] $judgings */
+            $judgings = $queryBuilder
+                ->getQuery()
+                ->getResult(Query::HYDRATE_ARRAY);
+            if (empty($judgings)) {
+                throw new BadRequestHttpException('No judgings matched.');
+            }
+            $rejudging = $this->createRejudging($reason, $judgings, true, $scoreboardService);
+            return $this->redirectToRoute('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]);
+        }
+        return $this->render('@DOMJudge/jury/rejudging_form.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/create", methods={"POST"}, name="jury_create_rejudge")
      * @param Request           $request
      * @param ScoreboardService $scoreboardService
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
