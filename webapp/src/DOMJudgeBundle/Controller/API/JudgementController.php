@@ -127,15 +127,17 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             ->groupBy('j.judgingid')
             ->orderBy('j.judgingid');
 
+        $roleAllowsVisibility = $this->DOMJudgeService->checkrole('api_reader')
+            || $this->DOMJudgeService->checkrole('judgehost');
         if ($request->query->has('result')) {
             $queryBuilder
                 ->andWhere('j.result = :result')
                 ->setParameter(':result', $request->query->get('result'));
-        } elseif (!($this->DOMJudgeService->checkrole('api_reader') || $this->DOMJudgeService->checkrole('judgehost'))) {
+        } elseif (!$roleAllowsVisibility) {
             $queryBuilder->andWhere('j.result IS NOT NULL');
         }
 
-        if (!($this->DOMJudgeService->checkrole('api_reader') || $this->DOMJudgeService->checkrole('judgehost'))) {
+        if (!$roleAllowsVisibility) {
             $queryBuilder
                 ->andWhere('s.teamid = :team')
                 ->setParameter(':team', $this->DOMJudgeService->getUser()->getTeamid());
@@ -147,17 +149,14 @@ class JudgementController extends AbstractRestController implements QueryObjectT
                 ->setParameter(':submission', $request->query->get('submission_id'));
         }
 
-        // If one or more ID's are not given directly or we do not have the correct permissions, only show judgements before contest end
-        $allowAllJudgings = true;
-        if (!$this->DOMJudgeService->checkrole('api_reader') && !$this->DOMJudgeService->checkrole('judgehost')) {
-            $allowAllJudgings = false;
-        } elseif (!$request->attributes->has('id') && !$request->query->has('ids')) {
-            $allowAllJudgings = false;
-        }
-        if (!$allowAllJudgings) {
+        $specificJudgingRequested = $request->attributes->has('id')
+            || $request->query->has('ids');
+        // If we don't have correct permissions or didn't request a specific
+        // judging (necessary for the event log), then exclude some judgings:
+        if (!$roleAllowsVisibility && !$specificJudgingRequested) {
             $queryBuilder
                 ->andWhere('s.submittime < c.endtime')
-                ->andWhere('j.rejudgingid IS NULL OR j.valid = 1');
+                ->andWhere('j.valid = 1');
             if ($this->DOMJudgeService->dbconfig_get('verification_required', false)) {
                 $queryBuilder->andWhere('j.verified = 1');
             }
