@@ -15,7 +15,7 @@ use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Twig\TwigFunction;
 
-class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsInterface
+class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\Extension\GlobalsInterface
 {
     /**
      * @var DOMJudgeService
