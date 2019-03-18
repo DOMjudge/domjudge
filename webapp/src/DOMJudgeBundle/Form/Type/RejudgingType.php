@@ -83,12 +83,7 @@ class RejudgingType extends AbstractType
             'class' => Team::class,
             'required' => false,
             'choice_label' => 'name',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('t')
-                    ->where('t.enabled = 1')
-                    ->orderBy('t.name');
-            },
+            'choices' => [],
         ]);
         $builder->add('judgehosts', EntityType::class, [
             'multiple' => true,
@@ -130,6 +125,7 @@ class RejudgingType extends AbstractType
         $builder->add('save', SubmitType::class);
 
         $formProblemModifier = function (FormInterface $form, $contests = []) {
+            /** @var Contest[] $contests */
             $problems = $this->entityManager->createQueryBuilder()
                 ->from('DOMJudgeBundle:Problem', 'p')
                 ->join('p.contest_problems', 'cp')
@@ -147,6 +143,38 @@ class RejudgingType extends AbstractType
                 'required' => false,
                 'choice_label' => 'name',
                 'choices' => $problems,
+            ]);
+
+            $teamsQueryBuilder = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Team', 't')
+                ->select('t')
+                ->andWhere('t.enabled = 1')
+                ->addOrderBy('t.name');
+
+            $anyPublic = false;
+            foreach ($contests as $contest) {
+                if ($contest->getPublic()) {
+                    $anyPublic = true;
+                    break;
+                }
+            }
+
+            if (!$anyPublic) {
+                $teamsQueryBuilder
+                    ->join('t.contests', 'c')
+                    ->andWhere('c IN (:contests)')
+                    ->setParameter(':contests', $contests);
+            }
+
+            $teams = $teamsQueryBuilder->getQuery()->getResult();
+
+            $form->add('teams', EntityType::class, [
+                'multiple' => true,
+                'label' => 'Team',
+                'class' => Team::class,
+                'required' => false,
+                'choice_label' => 'name',
+                'choices' => $teams,
             ]);
         };
 
