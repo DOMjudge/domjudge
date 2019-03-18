@@ -19,3 +19,31 @@
     </div>
 
 {% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function () {
+            var $contests = $('#rejudging_contests');
+            $('#rejudging_contests').on('change', function () {
+                var $problems = $('#rejudging_problems');
+                var $form = $(this).closest('form');
+                var data = {};
+                data[$contests.attr('name')] = $contests.val();
+                data[$problems.attr('name')] = $problems.val();
+                $.ajax({
+                    url: $form.attr('action'),
+                    type: $form.attr('method'),
+                    data: data,
+                    success: function (html) {
+                        var $newProblems = $(html).find('#rejudging_problems');
+                        $newProblems.closest('.form-group').find('.invalid-feedback').remove();
+                        $('#rejudging_problems').closest('.form-group').replaceWith(
+                            $newProblems.closest('.form-group')
+                        );
+                        $newProblems.select2();
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

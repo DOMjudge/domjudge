@@ -18,6 +18,7 @@ use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -422,20 +423,32 @@ class RejudgingController extends Controller
 
     /**
      * @Route("/rejudgings/add", name="jury_rejudging_add")
-     * @param Request $request
-     * @param ScoreboardService $scoreboardService
+     * @param Request              $request
+     * @param ScoreboardService    $scoreboardService
+     * @param FormFactoryInterface $formFactory
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function addAction(Request $request, ScoreboardService $scoreboardService)
+    public function addAction(Request $request, ScoreboardService $scoreboardService, FormFactoryInterface $formFactory)
     {
-        $rejudging = new Rejudging();
-        $form = $this->createForm(RejudgingType::class, $rejudging);
+        $formBuilder = $formFactory->createBuilder(RejudgingType::class);
+        $formData    = [];
+        if (!$request->isXmlHttpRequest()) {
+            $formData['contests'] = [$this->DOMJudgeService->getCurrentContest()];
+        }
+        $verdicts             = $formBuilder->get('verdicts')->getOption('choices');
+        $incorrectVerdicts    = array_filter($verdicts, function ($k) {
+            return $k != 'correct';
+        });
+        $formData['verdicts'] = $incorrectVerdicts;
+
+        $form = $formBuilder->setData($formData)->getForm();
+
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $formData = $form->all();
-            $reason = $formData['reason']->getViewData();
+        if ($form->isSubmitted() && $form->isValid() && !$request->isXmlHttpRequest()) {
+            $formData = $form->getData();
+            $reason   = $formData['reason'];
 
             $queryBuilder = $this->entityManager->createQueryBuilder()
                 ->from('DOMJudgeBundle:Judging', 'j')
@@ -443,48 +456,49 @@ class RejudgingController extends Controller
                 ->select('j', 's')
                 ->andWhere('j.valid = 1');
 
-            $contests = $formData['contest']->getData();
+            $contests = $formData['contests'];
             if (count($contests)) {
                 $queryBuilder
                     ->andWhere('j.contest IN (:contests)')
                     ->setParameter(':contests', $contests);
             }
-            $problems = $formData['problem']->getData();
+            $problems = $formData['problems'];
             if (count($problems)) {
                 $queryBuilder
                     ->andWhere('s.problem IN (:problems)')
                     ->setParameter(':problems', $problems);
             }
-            $languages = $formData['language']->getData();
+            $languages = $formData['languages'];
             if (count($languages)) {
                 $queryBuilder
                     ->andWhere('s.language IN (:languages)')
                     ->setParameter(':languages', $languages);
             }
-            $teams = $formData['team']->getData();
+            $teams = $formData['teams'];
             if (count($teams)) {
                 $queryBuilder
                     ->andWhere('s.team IN (:teams)')
                     ->setParameter(':teams', $teams);
             }
-            $judgehosts = $formData['judgehost']->getData();
+            $judgehosts = $formData['judgehosts'];
             if (count($judgehosts)) {
                 $queryBuilder
                     ->andWhere('j.judgehost IN (:judgehosts)')
                     ->setParameter(':judgehosts', $judgehosts);
             }
-            $verdicts = $formData['verdict']->getViewData();
+            $verdicts = $formData['verdicts'];
             if (count($verdicts)) {
                 $queryBuilder
                     ->andWhere('j.result IN (:verdicts)')
                     ->setParameter(':verdicts', $verdicts);
             }
-            $before = $formData['before']->getViewData();
-            $after = $formData['after']->getViewData();
+            $before = $formData['before'];
+            $after  = $formData['after'];
             if (!empty($before) || !empty($after)) {
                 if (count($contests) != 1) {
                     throw new BadRequestHttpException('Only allowed to set before/after restrictions with exactly one selected contest.');
                 }
+                /** @var Contest $contest */
                 $contest = $contests[0];
                 if (!empty($before)) {
                     $beforeTime = $contest->getAbsoluteTime($before);
@@ -610,7 +624,12 @@ class RejudgingController extends Controller
         }
     }
 
-    public function createRejudging($reason, $judgings, $fullRejudge, $scoreboardService) {
+    public function createRejudging(
+        string $reason,
+        array $judgings,
+        bool $fullRejudge,
+        ScoreboardService $scoreboardService
+    ) {
         /** @var Rejudging|null $rejudging */
         $rejudging = null;
         if ($fullRejudge) {
