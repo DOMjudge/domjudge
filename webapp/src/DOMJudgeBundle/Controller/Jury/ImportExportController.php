@@ -144,9 +144,23 @@ class ImportExportController extends BaseController
             return $this->redirectToRoute('jury_import_export');
         }
 
+        /** @var TeamCategory[] $teamCategories */
+        $teamCategories = $this->entityManager->createQueryBuilder()
+            ->from('DOMJudgeBundle:TeamCategory', 'c', 'c.categoryid')
+            ->select('c')
+            ->where('c.visible = 1')
+            ->groupBy('c.sortorder')
+            ->orderBy('c.sortorder')
+            ->getQuery()
+            ->getResult();
+        $sortOrders = array_map(function($teamCategory) {
+            return $teamCategory->getSortorder();
+        }, $teamCategories);
+
         return $this->render('@DOMJudge/jury/import_export.html.twig', [
             'tsv_form' => $tsvForm->createView(),
             'baylor_form' => $baylorForm->createView(),
+            'sort_orders' => $sortOrders,
         ]);
     }
 
@@ -203,11 +217,12 @@ class ImportExportController extends BaseController
 
     /**
      * @Route("/export/{type}.tsv", name="jury_tsv_export", requirements={"type": "(groups|teams|scoreboard|results)"})
+     * @param Request $request
      * @param string $type
      * @return StreamedResponse
      * @throws \Exception
      */
-    public function exportTsvAction(string $type)
+    public function exportTsvAction(Request $request, string $type)
     {
         $data    = [];
         $version = 1;
@@ -222,7 +237,8 @@ class ImportExportController extends BaseController
                 $data = $this->importExportService->getScoreboardData();
                 break;
             case 'results':
-                $data = $this->importExportService->getResultsData();
+                $sortOrder = (int) ($request->query->get('sort_order'));
+                $data = $this->importExportService->getResultsData($sortOrder);
                 break;
         }
 

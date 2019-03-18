@@ -14,9 +14,20 @@
         <li>
             Tab separated, export:
             <ul>
-                {% for type in ['groups', 'teams', 'scoreboard', 'results'] %}
-                    <li><a href="{{ path('jury_tsv_export', {'type': type}) }}"><code>{{ type }}.tsv</code></a></li>
+                {% for type in ['groups', 'teams', 'scoreboard'] %}
+                    <li>
+                        <a href="{{ path('jury_tsv_export', {'type': type}) }}"><code>{{ type }}.tsv</code></a>
+                    </li>
                 {% endfor %}
+                <li> <code>results.tsv</code> for sort order
+                    <ul>
+                        {% for sort_order in sort_orders %}
+                          <li>
+                            <a href="{{ path('jury_tsv_export', {'type': 'results'}) }}?sort_order={{ sort_order }}">{{ sort_order }}</a>
+                          </li>
+                        {% endfor %}
+                    </ul>
+                </li>
             </ul>
         </li>
         <li>
