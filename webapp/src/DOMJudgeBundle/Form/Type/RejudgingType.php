@@ -2,31 +2,37 @@
 
 namespace DOMJudgeBundle\Form\Type;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Judgehost;
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
-use DOMJudgeBundle\Entity\Rejudging;
 use DOMJudgeBundle\Entity\Team;
-use DOMJudgeBundle\Service\DOMJudgeService;
-use DOMJudgeBundle\Service\EventLogService;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormInterface;
 
 class RejudgingType extends AbstractType
 {
     /**
-     * @var DOMJudgeService
+     * @var EntityManagerInterface
      */
-    private $DOMJudgeService;
+    protected $entityManager;
 
-    public function __construct(DOMJudgeService $DOMJudgeService) {
-        $this->DOMJudgeService = $DOMJudgeService;
+    /**
+     * RejudgingType constructor.
+     * @param EntityManagerInterface $entityManager
+     */
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -36,10 +42,8 @@ class RejudgingType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $currentContest = $this->DOMJudgeService->getCurrentContest();
         $builder->add('reason', TextType::class);
-        $builder->add('contest', EntityType::class, [
-            'mapped' => false,
+        $builder->add('contests', EntityType::class, [
             'label' => 'Contest',
             'class' => Contest::class,
             'required' => false,
@@ -51,29 +55,16 @@ class RejudgingType extends AbstractType
                     ->where('c.enabled = 1')
                     ->orderBy('c.cid');
             },
-            'data' => [$currentContest],
         ]);
-        $problems = array_map(function($contestProblem) {
-            return $contestProblem->getProblem();
-          },
-          $currentContest->getProblems()->getValues()
-        );
-        $builder->add('problem', EntityType::class, [
-            'mapped' => false,
+        $builder->add('problems', EntityType::class, [
             'multiple' => true,
             'label' => 'Problem',
             'class' => Problem::class,
             'required' => false,
             'choice_label' => 'name',
-            'query_builder' => function (EntityRepository $er) {
-                return $er
-                    ->createQueryBuilder('p')
-                    ->orderBy('p.name');
-            },
-            'data' => $problems,
+            'choices' => [],
         ]);
-        $builder->add('language', EntityType::class, [
-            'mapped' => false,
+        $builder->add('languages', EntityType::class, [
             'multiple' => true,
             'label' => 'Language',
             'class' => Language::class,
@@ -86,8 +77,7 @@ class RejudgingType extends AbstractType
                     ->orderBy('l.name');
             },
         ]);
-        $builder->add('team', EntityType::class, [
-            'mapped' => false,
+        $builder->add('teams', EntityType::class, [
             'multiple' => true,
             'label' => 'Team',
             'class' => Team::class,
@@ -100,8 +90,7 @@ class RejudgingType extends AbstractType
                     ->orderBy('t.name');
             },
         ]);
-        $builder->add('judgehost', EntityType::class, [
-            'mapped' => false,
+        $builder->add('judgehosts', EntityType::class, [
             'multiple' => true,
             'label' => 'Judgehost',
             'class' => Judgehost::class,
@@ -123,28 +112,56 @@ class RejudgingType extends AbstractType
             'timelimit',
             'wrong-answer',
         ];
-        $incorrectVerdicts = array_filter($verdicts, function($k) {
-            return $k != 'correct';
-        });
-        $builder->add('verdict', ChoiceType::class, [
+        $builder->add('verdicts', ChoiceType::class, [
             'label' => 'Verdict',
-            'mapped' => false,
             'multiple' => true,
             'required' => false,
             'choices' => array_combine($verdicts, $verdicts),
-            'data' => $incorrectVerdicts,
         ]);
         $builder->add('before', TextType::class, [
             'label' => 'before (in form ±[HHH]H:MM[:SS[.uuuuuu]])',
             'required' => false,
-            'mapped' => false,
         ]);
         $builder->add('after', TextType::class, [
             'label' => 'after (in form ±[HHH]H:MM[:SS[.uuuuuu]])',
             'required' => false,
-            'mapped' => false,
         ]);
 
         $builder->add('save', SubmitType::class);
+
+        $formProblemModifier = function (FormInterface $form, $contests = []) {
+            $problems = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Problem', 'p')
+                ->join('p.contest_problems', 'cp')
+                ->select('p')
+                ->andWhere('cp.contest IN (:contests)')
+                ->setParameter(':contests', $contests)
+                ->addOrderBy('p.name')
+                ->getQuery()
+                ->getResult();
+
+            $form->add('problems', EntityType::class, [
+                'multiple' => true,
+                'label' => 'Problem',
+                'class' => Problem::class,
+                'required' => false,
+                'choice_label' => 'name',
+                'choices' => $problems,
+            ]);
+        };
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA,
+            function (FormEvent $event) use ($formProblemModifier) {
+                $data = $event->getData();
+                $formProblemModifier($event->getForm(), $data['contests'] ?? []);
+            }
+        );
+
+        $builder->get('contests')->addEventListener(FormEvents::POST_SUBMIT,
+            function (FormEvent $event) use ($formProblemModifier) {
+                $contests = $event->getForm()->getData();
+                $formProblemModifier($event->getForm()->getParent(), $contests);
+            }
+        );
     }
 }
