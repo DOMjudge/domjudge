@@ -352,3 +352,9 @@ h3.teamoverview {
 .navbar-light .ajax-loader {
     color: rgba(0, 0, 0, .5);
 }
+
+.scrollable-menu {
+    height: auto;
+    max-height: 500px;
+    overflow-x: hidden;
+}
