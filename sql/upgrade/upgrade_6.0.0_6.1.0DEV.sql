@@ -20,6 +20,8 @@ ALTER TABLE `configuration`
 ALTER TABLE `problem`
   ADD COLUMN `combined_run_compare` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Use the exit code of the run script to compute the verdict' AFTER `special_compare_args`;
 
+ALTER TABLE `scorecache`
+  ADD COLUMN `is_first_to_solve` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Is this the first solution to this problem?';
 
 --
 -- Transfer data from old to new structure

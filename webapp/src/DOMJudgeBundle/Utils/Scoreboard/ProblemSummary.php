@@ -114,8 +114,6 @@ class ProblemSummary
      */
     public function updateBestTime(int $sortorder, $bestTime)
     {
-        if (!isset($this->bestTimes[$sortorder]) || $bestTime < $this->bestTimes[$sortorder]) {
-            $this->bestTimes[$sortorder] = $bestTime;
-        }
+        $this->bestTimes[$sortorder] = $bestTime;
     }
 }

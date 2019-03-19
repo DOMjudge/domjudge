@@ -65,7 +65,12 @@ class ScoreCache
      */
     private $solvetime_public;
 
-
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", name="is_first_to_solve", options={"comment"="Is this team the first to solve for this problem,sortorder?"}, nullable=false)
+     */
+    private $is_first_to_solve = false;
 
     /**
      * @ORM\Id
@@ -278,6 +283,30 @@ class ScoreCache
     public function getSolvetimePublic()
     {
         return $this->solvetime_public;
+    }
+
+    /**
+     * Set isFirstToSolve
+     *
+     * @param boolean $isFirstToSolve
+     *
+     * @return ScoreCache
+     */
+    public function setIsFirstToSolve(bool $isFirstToSolve)
+    {
+        $this->is_first_to_solve = $isFirstToSolve;
+
+        return $this;
+    }
+
+    /**
+     * Get isFirstToSolve
+     *
+     * @return boolean
+     */
+    public function getIsFirstToSolve() : bool
+    {
+        return $this->is_first_to_solve;
     }
 
     /**
