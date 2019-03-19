@@ -508,7 +508,11 @@ class RejudgingController extends BaseController
             $after  = $formData['after'];
             if (!empty($before) || !empty($after)) {
                 if (count($contests) != 1) {
-                    throw new BadRequestHttpException('Only allowed to set before/after restrictions with exactly one selected contest.');
+                    $this->addFlash('danger',
+                                    'Only allowed to set before/after restrictions with exactly one selected contest.');
+                    return $this->render('@DOMJudge/jury/rejudging_form.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
                 }
                 /** @var Contest $contest */
                 $contest = $contests[0];
@@ -531,7 +535,10 @@ class RejudgingController extends BaseController
                 ->getQuery()
                 ->getResult(Query::HYDRATE_ARRAY);
             if (empty($judgings)) {
-                throw new BadRequestHttpException('No judgings matched.');
+                $this->addFlash('danger', 'No judgings matched.');
+                return $this->render('@DOMJudge/jury/rejudging_form.html.twig', [
+                    'form' => $form->createView(),
+                ]);
             }
             $rejudging = $this->createRejudging($request, $reason, $judgings, true, $scoreboardService);
             return $this->redirectToRoute('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]);
