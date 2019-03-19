@@ -153,7 +153,7 @@ class ImportExportController extends BaseController
             ->orderBy('c.sortorder')
             ->getQuery()
             ->getResult();
-        $sortOrders = array_map(function($teamCategory) {
+        $sortOrders     = array_map(function ($teamCategory) {
             return $teamCategory->getSortorder();
         }, $teamCategories);
 
@@ -218,7 +218,7 @@ class ImportExportController extends BaseController
     /**
      * @Route("/export/{type}.tsv", name="jury_tsv_export", requirements={"type": "(groups|teams|scoreboard|results)"})
      * @param Request $request
-     * @param string $type
+     * @param string  $type
      * @return StreamedResponse
      * @throws \Exception
      */
@@ -237,8 +237,8 @@ class ImportExportController extends BaseController
                 $data = $this->importExportService->getScoreboardData();
                 break;
             case 'results':
-                $sortOrder = (int) ($request->query->get('sort_order'));
-                $data = $this->importExportService->getResultsData($sortOrder);
+                $sortOrder = $request->query->getInt('sort_order');
+                $data      = $this->importExportService->getResultsData($sortOrder);
                 break;
         }
 
@@ -320,8 +320,7 @@ class ImportExportController extends BaseController
         $honorable     = [];
         $regionWinners = [];
 
-        // TODO: allow to specify this
-        $sortOrder = 0;
+        $sortOrder = $request->query->getInt('sort_order');
 
         foreach ($this->importExportService->getResultsData($sortOrder) as $row) {
             $team = $teamNames[$row[0]];
@@ -413,6 +412,7 @@ class ImportExportController extends BaseController
             'domjudgeVersion' => $this->domjudgeVersion,
             'title' => sprintf('Results for %s', $contest->getName()),
             'download' => $request->query->getBoolean('download'),
+            'sortOrder' => $sortOrder,
         ];
         if ($useIcpcLayout) {
             $response = $this->render('@DOMJudge/jury/export/results_icpc.html.twig', $data);

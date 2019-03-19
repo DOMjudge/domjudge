@@ -1,5 +1,5 @@
 {% if not download %}
-    <a href="{{ path('jury_html_export', {'type': 'results-icpc', 'download': true}) }}">Download</a>
+    <a href="{{ path('jury_html_export', {'type': 'results-icpc', 'download': true, 'sort_order': sortOrder}) }}">Download</a>
 {% endif %}
 
 <div id="xwikicontent">
