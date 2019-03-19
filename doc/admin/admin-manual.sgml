@@ -1269,6 +1269,9 @@ conservative in adding and upgrading SQL data, so check that e.g. new
 compile scripts are present or add them manually, and check the
 upgrade scripts manually for any other data upgraded.
 
+If you have any active contests, it may be advisable to run
+"Refresh scoreboard cache" from the DOMjudge web interface after
+the upgrade.
 
 <chapt>Setting up a contest <label id="contestsetup">
 <p>
