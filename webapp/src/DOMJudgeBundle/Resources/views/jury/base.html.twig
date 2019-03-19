@@ -2,6 +2,16 @@
 
 {% block title %}{{ title|default('DOMjudge') }}{% endblock %}
 
+{% block messages %}
+    {{ parent() }}
+
+    {% if app.session.flashBag.has('scoreboard_refresh') %}
+        {% for message in app.session.flashBag.get('scoreboard_refresh') %}
+            {% include '@DOMJudge/jury/refresh_scoreboard.html.twig' %}
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+
 {% block extrahead %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('style_jury.css') }}">

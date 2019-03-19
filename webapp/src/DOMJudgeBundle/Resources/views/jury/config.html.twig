@@ -11,9 +11,6 @@
 
 {% block content %}
     <h1>Configuration</h1>
-    {% if edited %}
-        {% include '@DOMJudge/jury/refresh_scoreboard.html.twig' with {message: 'After changing specific settings, you might need to refresh the scoreboard.'} %}
-    {% endif %}
 
     <form action="{{ app.request.uri }}" method="post">
         {% for category in options %}

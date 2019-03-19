@@ -129,7 +129,6 @@ class TeamCategoryController extends BaseController
             'team_categories' => $team_categories_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
-            'edited' => $request->query->getBoolean('edited'),
         ]);
     }
 
@@ -162,7 +161,6 @@ class TeamCategoryController extends BaseController
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->DOMJudgeService->getCurrentContests()) > 1,
-            'edited' => $request->query->getBoolean('edited'),
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),
@@ -202,11 +200,8 @@ class TeamCategoryController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $teamCategory,
                               $teamCategory->getCategoryid(), false);
-            return $this->redirect($this->generateUrl('jury_team_category',
-                                                      [
-                                                          'categoryId' => $teamCategory->getCategoryid(),
-                                                          'edited' => true
-                                                      ]));
+            $this->addFlash('scoreboard_refresh', 'If the category sort order was changed, it may be necessary to recalculate any cached scoreboards.');
+            return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
         }
 
         return $this->render('@DOMJudge/jury/team_category_edit.html.twig', [
@@ -254,8 +249,7 @@ class TeamCategoryController extends BaseController
             $this->entityManager->persist($teamCategory);
             $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $teamCategory,
                               $teamCategory->getCategoryid(), true);
-            return $this->redirect($this->generateUrl('jury_team_category',
-                                                      ['categoryId' => $teamCategory->getCategoryid()]));
+            return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
         }
 
         return $this->render('@DOMJudge/jury/team_category_add.html.twig', [

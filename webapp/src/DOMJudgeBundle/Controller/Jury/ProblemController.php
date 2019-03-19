@@ -872,8 +872,7 @@ class ProblemController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $problem,
                               $problem->getProbid(), false);
-            return $this->redirect($this->generateUrl('jury_problem',
-                                                      ['probId' => $problem->getProbid(), 'edited' => true]));
+            return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
         }
 
         $data       = [];

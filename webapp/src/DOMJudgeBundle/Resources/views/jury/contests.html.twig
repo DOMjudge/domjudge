@@ -10,11 +10,6 @@
 {% endblock %}
 
 {% block content %}
-
-    {% if edited %}
-        {% include '@DOMJudge/jury/refresh_scoreboard.html.twig' with {message: 'After changing the contest start time, it may be necessary to recalculate any cached scoreboards.'} %}
-    {% endif %}
-
     <h1>Contests</h1>
 
     <h3>Current contests</h3>

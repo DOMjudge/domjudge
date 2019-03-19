@@ -111,7 +111,8 @@ class ContestController extends BaseController
                 $em->flush();
                 $this->eventLogService->log('contest', $contest->getCid(), EventLogService::ACTION_UPDATE,
                                             $contest->getCid());
-                return $this->redirectToRoute('jury_contests', ['edited' => 1]);
+                $this->addFlash('scoreboard_refresh', 'After changing the contest start time, it may be necessary to recalculate any cached scoreboards.');
+                return $this->redirectToRoute('jury_contests');
             }
 
             $juryTimeData = $contest->getJuryTimeData();
@@ -135,7 +136,8 @@ class ContestController extends BaseController
 
                 $this->eventLogService->log('contest', $contest->getCid(), EventLogService::ACTION_UPDATE,
                                             $contest->getCid());
-                return $this->redirectToRoute('jury_contests', ['edited' => 1]);
+                $this->addFlash('scoreboard_refresh', 'After changing the contest start time, it may be necessary to recalculate any cached scoreboards.');
+                return $this->redirectToRoute('jury_contests');
             } else {
                 $method = sprintf('set%stimeString', $time);
                 $contest->{$method}($nowstring);
@@ -301,7 +303,6 @@ class ContestController extends BaseController
             'contests_table' => $contests_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
-            'edited' => $request->query->getBoolean('edited'),
         ]);
     }
 

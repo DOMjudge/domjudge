@@ -56,9 +56,8 @@ class ConfigController extends Controller
     {
         /** @var Configuration[] */
         $options = $this->entityManager->getRepository('DOMJudgeBundle:Configuration')->findAll();
-        $edited = FALSE;
         if ($request->getMethod() == 'POST' && $request->request->has('save')) {
-            $edited = TRUE;
+            $this->addFlash('scoreboard_refresh', 'After changing specific settings, you might need to refresh the scoreboard.');
             foreach ($options as $option) {
                 if ($option->getType() == 'bool') {
                     $val = $request->request->has('config_' . $option->getName());
@@ -90,6 +89,8 @@ class ConfigController extends Controller
                     $option->setValue($result);
                 }
             }
+
+            return $this->redirectToRoute('jury_config');
         }
         $this->entityManager->flush();
         /** @var Configuration[] */
@@ -121,7 +122,6 @@ class ConfigController extends Controller
         }
         return $this->render('@DOMJudge/jury/config.html.twig', [
             'options' => $all_data,
-            'edited' => $edited
         ]);
     }
 
