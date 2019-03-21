@@ -110,8 +110,9 @@ $(function(){
                 "label" : "j{{ j.judgingid }}",
                 "value" : {{ j.maxRuntime() }},
                 "valid" : {{ j.valid ? "true":"false" }},
-                "submittime"  : "{{ j.submission.submittime|number_format(0,'','')|date('Y-m-d\\TH:i:sP') }}",
+                "submittime"  : "{{ j.submission.submittime | printtime(null, j.submission.contest) }}",
                 "color" : "{{ colors[j.result] }}",
+		"firstfile" : "{{ j.submission.files[0].filename }}",
               },
             {% endfor %}
           ]
@@ -148,7 +149,13 @@ $(function(){
           if (!obj.data.valid) {
             prepend = "<b>(INVALID)</b><br>"
           }
-          return prepend + "<b>max " + format(obj.data.value) + ' seconds</b><br><b>SubmitTime:</b>' + obj.data.submittime + '<br>click to view judging'
+        return prepend
+          + '<div style="background: LightCyan;">'
+          + '<b>Submitted:</b> ' + obj.data.submittime + '<br/>'
+          + '<b>First file:</b> <tt>' + obj.data.firstfile + '</tt><br/>'
+          + '<b>max. Runtime:</b> ' + format(obj.data.value) + 's</b><br/>'
+          + '<small>click to view judging</small>'
+          + '</div>';
         });
 
         // Create our timelimit line

@@ -113,8 +113,9 @@ $(function(){
               "label" : "j{{ j.judgingid }}",
               "value" : {{ j.maxRuntime() }},
               "team"  : "{{ j.submission.team.name }}",
-              "submittime"  : "{{ j.submission.submittime|number_format(0,'','')|date('Y-m-d\\TH:i:sP') }}",
+              "submittime"  : "{{ j.submission.submittime | printtime(null, j.submission.contest) }}",
               "color" : "{{ colors[j.result] }}",
+              "firstfile" : "{{ j.submission.files[0].filename }}",
             },
           {% endfor %}
         ]
@@ -147,7 +148,13 @@ $(function(){
       // More useful tooltip
       chart.tooltip.contentGenerator(function (obj) {
         var format = d3.format(".3f");
-        return "<b>max " + format(obj.data.value) + " seconds</b><br><b>Team:</b> " + obj.data.team + '<br><b>SubmitTime:</b>' + obj.data.submittime + '<br>click to view judging'
+        return '<div style="background: LightCyan;">'
+	  + '<b>Team:</b> ' + obj.data.team + '<br/>'
+          + '<b>Submitted:</b> ' + obj.data.submittime + '<br/>'
+          + '<b>First file:</b> <tt>' + obj.data.firstfile + '</tt><br/>'
+          + '<b>max. Runtime:</b> ' + format(obj.data.value) + 's</b><br/>'
+          + '<small>click to view judging</small>'
+          + '</div>';
       });
 
       // Create our timelimit line
