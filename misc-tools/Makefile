@@ -7,7 +7,7 @@ TARGETS =
 OBJECTS =
 
 SUBST_DOMSERVER = save_sources2file restore_sources2db \
-                  combined_scoreboard judging_statistics balloons \
+                  judging_statistics balloons \
                   simulate_contest create_accounts multi_rejudge \
                   eventdaemon
 
