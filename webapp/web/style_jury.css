@@ -11,34 +11,15 @@ h1 {
     font-size: 2em;
     padding-top: .5rem;
 }
-.balloons td {
-	padding-right: 2ex;
-	padding-bottom: 2ex;
-	border-bottom: solid 1px silver;
-	vertical-align: middle;
-}
 .frozen { font-style: italic; }
 
 .teamstatus { text-align: center; }
 .teamstatus img { vertical-align: middle; }
 
-.filename, .hostname { font-family: monospace; }
-
 .highlight { background-color: yellow !important; }
 
 .highlight.roweven, .highlight.even { background-color: yellow !important; }
 .highlight.rowodd, .highlight.odd { background-color: #ffffaa !important; }
-
-.msgbox {
-	background-color: #fffff0;
-	border: 1px solid #f2e93a;
-}
-
-.msgbox legend {
-	background-color: #fffff0;
-	border-right: 2px solid #f2e93a;
-	border-bottom: 2px solid #f2e93a;
-}
 
 .size {
 	text-align: right;
@@ -172,7 +153,3 @@ div.submission-summary > span {
 	border-radius: 3px;
 }
 
-.countryflag {
-    height: 30px;
-    width: 40px;
-}
