@@ -13,6 +13,7 @@ Version 6.1.0 - DEV
    allows to control how often updates are sent back; more often is slower.
  - Upgrade to Symfony 3.4.
  - Remove old v3 API.
+ - Remove combined_scoreboard tool.
  - Upgrade jQuery to 3.3, Bootstrap to 4.1.
  - Add support for the R programming language (#516 thanks Michał Kaczanowicz).
  - Add support for the Swift programming language.

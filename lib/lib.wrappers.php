@@ -7,38 +7,6 @@
  */
 
 /**
- * Wrapper around PHP setcookie function to automatically set some
- * DOMjudge specific defaults and check the return value.
- * - cookies are defined in a common path for all web interfaces
- */
-function dj_setcookie(
-    string $name,
-    string $value = '',
-    int $expire = 0,
-    string $path = '',
-    string $domain = '',
-    bool $secure = false,
-    bool $httponly = false
-) {
-    if (!isset($path)) {
-        // KLUDGE: We want to find the DOMjudge base path, but this
-        // information is not directly available as configuration, so
-        // we extract it from the executed PHP script.
-        $path = preg_replace('/\/(api|jury|public|team)\/?$/', '/', dirname($_SERVER['REQUEST_URI']));
-    }
-
-    $ret = setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
-
-    if ($ret!==true) {
-        warning("Cookie '$name' not set properly.");
-    }
-
-    logmsg(LOG_DEBUG, "Cookie set: $name=$value, expire=$expire, path=$path");
-
-    return $ret;
-}
-
-/**
  * Decode a JSON string and handle errors.
  */
 function dj_json_decode(string $str)
