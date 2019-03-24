@@ -15,7 +15,9 @@
         <div class="card-header" style="font-family: Roboto, sans-serif; display: flex;">
             <span style="font-weight: bold;">{{ current_contest.name }}</span>
             <span style="color: DimGray; margin-left: auto;">
-                {% if scoreboard.freezeData.showFinal(jury) %}
+                {% if scoreboard is null %}
+                    {{ current_contest | printContestStart }}
+                {% elseif scoreboard.freezeData.showFinal(jury) %}
                     {% if current_contest.finalizetime is empty %}
                         preliminary results - not final
                     {% else %}
@@ -23,8 +25,6 @@
                     {% endif %}
                 {% elseif scoreboard.freezeData.stopped %}
                     contest over, waiting for results
-                {% elseif not scoreboard.freezeData.started %}
-                    {{ current_contest | printContestStart }}
                 {% else %}
                     starts: {{ current_contest.starttime | printtime }} - ends: {{ current_contest.endtime | printtime }}
                 {% endif %}
@@ -36,7 +36,7 @@
         {% endif %}
     </div> {# card #}
 
-    {% if not scoreboard.freezeData.started and not jury %}
+    {% if scoreboard is null and not jury %}
         {# Display a list of teams by group. This is targeted for World Finals, but looks nice anyway #}
         {% for affiliationGroupRow in groupedAffiliations %}
             <br/><br/>
@@ -132,5 +132,5 @@
             using <a href="https://www.domjudge.org/">DOMjudge</a>
         </p>
 
-    {% endif %} {# not scoreboard.freezeData.started and not jury #}
+    {% endif %} {# not scoreboard is null and not jury #}
 {% endif %}
