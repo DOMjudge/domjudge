@@ -1,3 +1,9 @@
+body {
+    color: black;
+    background-color: white;
+    font-family: Roboto, sans-serif;
+}
+
 /* menu */
 #menuDefault ul li.nav-item {
     white-space: nowrap;
