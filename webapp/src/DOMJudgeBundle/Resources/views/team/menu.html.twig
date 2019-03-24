@@ -53,7 +53,7 @@
             {% endif %}
         </div>
 
-        {% include '@DOMJudge/partials/menu_login_logout_button.html.twig' %}
+        {% include '@DOMJudge/partials/menu_login_logout_button.html.twig' with {confirmLogout: true} %}
 
         <ul class="navbar-nav">
             <li class="ajax-loader-container">

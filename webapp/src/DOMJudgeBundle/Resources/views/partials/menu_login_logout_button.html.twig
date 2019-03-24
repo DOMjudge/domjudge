@@ -1,5 +1,8 @@
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-    <a class="nav-link justify-content-center" href="{{ path('logout') }}">
+    <a class="nav-link justify-content-center" href="{{ path('logout') }}"
+    {% if confirmLogout is defined %}
+        onclick="return confirmLogout();"
+    {% endif %}>
         <button type="button" class="btn btn-outline-info btn-sm">
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
