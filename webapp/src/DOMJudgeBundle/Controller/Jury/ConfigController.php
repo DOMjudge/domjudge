@@ -90,9 +90,9 @@ class ConfigController extends Controller
                 }
             }
 
+            $this->entityManager->flush();
             return $this->redirectToRoute('jury_config');
         }
-        $this->entityManager->flush();
         /** @var Configuration[] */
         $options = $this->entityManager->getRepository('DOMJudgeBundle:Configuration')->findAll();
         $categories = array();
