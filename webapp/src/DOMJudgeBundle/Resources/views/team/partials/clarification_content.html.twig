@@ -1,11 +1,3 @@
-<h1 class="text-center mt-4">
-    {% if clarification.senderId == team.teamid %}
-        Clarification Request
-    {% else %}
-        Clarification
-    {% endif %}
-</h1>
-
 <div class="container clarificationform">
     {% include '@DOMJudge/team/partials/clarification.html.twig' with {clarification: clarification } %}
     {% for reply in clarification.replies if team.canViewClarification(reply) %}

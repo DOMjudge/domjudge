@@ -1,7 +1,6 @@
 {% if judging is empty or judging.submission.submittime >= current_team_contest.endtime or (verificationRequired and not judging.verified) %}
     <div class="alert alert-danger">Submission not found for this team or not judged yet.</div>
 {% else %}
-    <h1 class="text-center mt-4">Submission details</h1>
     <div class="container">
         {% if not judging.valid %}
             <div class="alert alert-warning">This submission is being ignored. It is not used in determining your

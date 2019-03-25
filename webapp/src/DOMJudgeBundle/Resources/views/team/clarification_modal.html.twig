@@ -1,6 +1,12 @@
 {% extends "@DOMJudge/partials/modal.html.twig" %}
 
-{% block title %}View clarification{% endblock %}
+{% block title %}
+{% if clarification.senderId == team.teamid %}
+Clarification Request
+{% else %}
+View clarification
+{% endif %}
+{% endblock %}
 
 {% block content %}
     {% include '@DOMJudge/team/partials/clarification_content.html.twig' %}

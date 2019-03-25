@@ -3,5 +3,8 @@
 {% block title %}View clarification - {{ parent() }}{% endblock %}
 
 {% block content %}
+    <h1 class="text-center mt-4">Clarification
+    {% if clarification.senderId == team.teamid %}Request{% endif%}</h1>
+
     {% include '@DOMJudge/team/partials/clarification_content.html.twig' %}
 {% endblock %}
