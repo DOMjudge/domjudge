@@ -40,6 +40,7 @@ class PrintType extends AbstractType
             ])
             ->add('langid', ChoiceType::class, [
                 'label' => 'Language:',
+                'required' => false,
                 'choices' => $languageChoices,
             ])
             ->add('print', SubmitType::class, [
