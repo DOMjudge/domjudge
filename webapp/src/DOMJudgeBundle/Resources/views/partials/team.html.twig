@@ -3,7 +3,6 @@
         No team found by this id.
     </div>
 {% else %}
-    <h1 class="mt-3">Team {{ team.name }}</h1>
     {% set teamId = team.teamId %}
     {% if team.externalid is not null %}
         {% set teamId = team.externalid %}

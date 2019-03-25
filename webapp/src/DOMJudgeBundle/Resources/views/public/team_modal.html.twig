@@ -1,7 +1,7 @@
 {% extends "@DOMJudge/partials/modal.html.twig" %}
 
 {% block title %}
-    {% if team is not empty %}Team t{{ team.teamid }} - {{ team.name }}{% endif %}
+    {% if team is not empty %}{{ team.name }}{% endif %}
 {% endblock %}
 
 {% block content %}
