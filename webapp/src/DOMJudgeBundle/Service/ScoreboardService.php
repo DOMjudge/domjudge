@@ -699,7 +699,7 @@ class ScoreboardService
             $data['scoreFilter']          = $scoreFilter;
             $data['scoreboard']           = $scoreboard;
             $data['filterValues']         = $this->getFilterValues($contest, $jury);
-            $data['groupedAffiliations']  = $this->getGroupedAffiliations($contest);
+            $data['groupedAffiliations']  = empty($scoreboard) ? $this->getGroupedAffiliations($contest) : null;
             $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
             $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
             $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
