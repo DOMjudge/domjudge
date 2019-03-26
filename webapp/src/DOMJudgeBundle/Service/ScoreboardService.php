@@ -585,7 +585,9 @@ class ScoreboardService
             $affiliations = [];
             /** @var Team $team */
             foreach ($category->getTeams() as $team) {
-                $affiliations[$team->getAffiliation()->getName()] = $team->getAffiliation()->getName();
+                if ($teamaffil = $team->getAffiliation()) {
+                    $affiliations[$teamaffil->getName()] = $teamaffil->getName();
+                }
             }
 
             if (!empty($affiliations)) {
