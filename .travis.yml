@@ -6,7 +6,7 @@ services:
 
 before_install:
 # Takes about 1.5minutes to pull
-- time docker pull domjudge/travisci:1.0
+- time docker pull domjudge/travisci:1.0.1
 # These get copied into the container since we mount /etc/{passwd,shadow,group}
 # for some reason doing this inside the container fails with "failure while writing changes to /etc/passwd"
 - sudo useradd -d /nonexistent -g nogroup -s /bin/false domjudge-run-0
