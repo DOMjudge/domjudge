@@ -182,6 +182,8 @@ class ImportProblemService
                     $contestProblem
                         ->setProblem($problem)
                         ->setContest($contest);
+                } else {
+                    unset($contestProblemProperties['shortname']);
                 }
             }
         }
