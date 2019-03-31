@@ -527,7 +527,7 @@ class SubmissionService
         foreach ($results as $key => $val) {
             $result = self::normalizeExpectedResult($val);
             $lowerResult = mb_strtolower($result);
-            if (in_array($lowerResult, $resultsRemap)) {
+            if (isset($resultsRemap[$lowerResult])) {
                 $result = mb_strtoupper($resultsRemap[$lowerResult]);
             }
             $results[$key] = $result;
