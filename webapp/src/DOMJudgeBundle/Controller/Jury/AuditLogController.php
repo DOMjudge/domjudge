@@ -99,7 +99,7 @@ class AuditLogController extends Controller
             if( !is_null($dataid) ) {
                 $dataurl = $this->generateDatatypeUrl($datatype, $dataid);
             }
-            if ( $dataurl ) {
+            if (isset($dataurl)) {
                 $data['what']['link'] = $dataurl;
             }
 
