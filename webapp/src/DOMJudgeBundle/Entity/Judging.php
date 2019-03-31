@@ -128,6 +128,14 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     private $prevjudgingid;
 
     /**
+     * @var string
+     * @ORM\Column(type="string", name="judgehost", length=64, options={"comment"="Judgehost that performed the judging"}, nullable=true)
+     * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
+     * @Serializer\SerializedName("judgehost")
+     */
+    private $judgehost_name;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
@@ -147,7 +155,6 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @Serializer\Exclude()
      */
     private $judgehost;
-
     /**
      * rejudgings have one parent judging
      * @ORM\ManyToOne(targetEntity="Rejudging", inversedBy="judgings")
@@ -575,6 +582,30 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     public function getPrevjudgingid()
     {
         return $this->prevjudgingid;
+    }
+
+    /**
+     * Get judgehost name
+     *
+     * @param string $judgehost_name
+     *
+     * @return Judging
+     */
+    public function setJudgehostName(string $judgehost_name)
+    {
+        $this->judgehost_name = $judgehost_name;
+
+        return $this;
+    }
+
+    /**
+     * Set judgehost name
+     *
+     * @return string
+     */
+    public function getJudgehostName(): string
+    {
+        return $this->judgehost_name;
     }
 
     /**
