@@ -608,6 +608,8 @@ class ImportProblemService
                     } elseif (!in_array($expectedResult, $results)) {
                         $messages[] = sprintf("Annotated result '%s' does not match directory for %s",
                                               implode(', ', $results), $path);
+                    } elseif (!empty($expectedResult)) {
+                        $results = [$expectedResult];
                     }
                     if ($totalSize <= $this->DOMJudgeService->dbconfig_get('sourcesize_limit') * 1024) {
                         $contest        = $this->entityManager->getRepository(Contest::class)->find($contest->getCid());
