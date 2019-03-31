@@ -60,6 +60,7 @@ class AuditLogController extends Controller
     {
         $timeFormat = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
 
+        $showAll = $request->query->get('showAll', false);
         $page = $request->query->get('page', 1);
         $limit = 1000;
 
@@ -70,10 +71,13 @@ class AuditLogController extends Controller
                     ->orderBy('a.logid', 'DESC');
 
         $paginator = new Paginator($query);
-        $paginator->getQuery()
-                  ->setFirstResult($limit * ($page - 1))
-                  ->setMaxResults($limit);
-
+        if ($showAll) {
+            $paginator->getQuery();
+        } else {
+            $paginator->getQuery()
+                      ->setFirstResult($limit * ($page - 1))
+                      ->setMaxResults($limit);
+        }
         $auditlog_table= [];
         foreach($paginator as $logline) {
 
@@ -126,7 +130,8 @@ class AuditLogController extends Controller
             'table_fields' => $table_fields,
             'table_options' => ['ordering' => 'false', 'searching' => 'false'],
             'maxPages' => $maxPages,
-            'thisPage' => $thisPage
+            'thisPage' => $thisPage,
+            'showAll' => $showAll,
         ]);
     }
 
