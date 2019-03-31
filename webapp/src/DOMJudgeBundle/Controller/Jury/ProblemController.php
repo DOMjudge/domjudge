@@ -878,6 +878,14 @@ class ProblemController extends BaseController
 
             /** @var Contest|null $contest */
             $contest = $data['contest'] ?? null;
+            /** @var ContestProblem $contestProblem */
+            foreach ($problem->getContestProblems() as $contestProblem) {
+                if (($currentContest = $this->DOMJudgeService->getCurrentContest()) !== null &&
+                    $contestProblem->getCid() === $currentContest->getCid()) {
+                    $contest = $currentContest;
+                    break;
+                }
+            }
             try {
                 $zip        = $this->DOMJudgeService->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
