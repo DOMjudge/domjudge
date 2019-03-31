@@ -93,14 +93,15 @@ void usage()
 	printf("\
 Usage: %s [OPTION]... COMMAND1 [ARGS...] = COMMAND2 [ARGS...]\n\
 Run two commands with stdin/stdout bi-directionally connected.\n\
-\n\
+\n", progname);
+	printf("\
   -o, --outprog=FILE   write stdout from second program to FILE\n\
   -M, --outmeta=FILE   write metadata (runtime, exitcode, etc.) of first program to FILE\n\
   -v, --verbose        display some extra warnings and information\n\
       --help           display this help and exit\n\
       --version        output version information and exit\n\
 \n\
-Arguments starting with a `=' must be escaped by prepending an extra `='.\n", progname);
+Arguments starting with a `=' must be escaped by prepending an extra `='.\n");
 	exit(0);
 }
 
