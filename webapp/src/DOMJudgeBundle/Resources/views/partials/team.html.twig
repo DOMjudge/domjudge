@@ -33,7 +33,17 @@
                 {% if showAffiliations and team.affiliation is not empty %}
                     <tr>
                         <th>Affiliation</th>
-                        <td>{{ team.affiliation.name }}</td>
+                        <td>
+                        {% set affiliationId = team.affiliation.affilid %}
+                        {% if team.affiliation.externalid is not null %}
+                            {% set affiliationId = team.affiliation.externalid %}
+                        {% endif %}
+                        {% set affiliationLogo = 'images/affiliations/' ~ affiliationId ~ '.png' %}
+                        {% if affiliationLogo | assetExists %}
+                            <img src="{{ asset(affiliationLogo) }}" alt="{{ team.affiliation.shortname }}"
+                                 title="{{ team.affiliation.shortname }}" class="affiliation-logo">
+                        {% endif %}
+{{ team.affiliation.name }}</td>
                     </tr>
                     {% if showFlags and team.affiliation.country is not empty %}
                         <tr>
