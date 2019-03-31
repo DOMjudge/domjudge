@@ -93,7 +93,7 @@ require(LIBWWWDIR . '/impexp_header.php');
             ?>
             <tr class="top-line">
                 <td><?= $clarification['clarid'] ?></td>
-                <td><?= printtime($clarification['submittime'], null, $clarification['cid']) ?></td>
+                <td><?= printtime((float)$clarification['submittime'], null, (int)$clarification['cid']) ?></td>
                 <td><?= $from ?></td>
                 <td><?= $to ?></td>
                 <td>
