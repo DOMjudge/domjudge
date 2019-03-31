@@ -2032,32 +2032,7 @@ the judgehosts which restricts outgoing network access.
 
 <sect>Java compilers
 <p>
-Java is difficult to deal with in an automatic way. It is probably
-most preferable to use OpenJDK or Oracle Java, because that's the
-version contestants will be used to. The GNU Compiler for Java (GCJ) is
-easier to deal with but may lack some features.
-
-The recommended way of using Java is by setting up the chroot (see
-section <ref id="install_config:judgehost:chroot"
-name="creating a chroot environment">), but you can also choose one of
-the alternatives as described below.
-
-<enum>
-<item> As an alternative the <tt>gcj</tt> compiler from GNU can be
-       used instead of Oracle's version. This one generates true machine
-       code and can link statically. However a few function calls
-       cannot be linked statically (see `GCJ compiler warnings' in
-       this FAQ). Secondly, the static library <tt>libgcj.a</tt>
-       doesn't seem to be included in all GNU/Linux distributions: at
-       least not in RedHat Enterprise Linux 4.
-<item> One can disable the chroot environment in
-       <tt>etc/judgehost-config.php</tt> by disabling <tt>USE_CHROOT</tt>.
-       Disabling the chroot environment removes this layer of
-       security against submissions that attempt to
-       cheat, but it is a simple solution to getting Java to work, for
-       demo or testing purposes. <bf>Note</bf>: no guarantees about system
-       security can be made when running a contest with chroot disabled!
-</enum>
+Specific considerations for using Java in DOMjudge.
 
 <sect>The Java virtual machine (jvm) and memory limits
 <p>
@@ -2116,28 +2091,6 @@ The alternative (and default) is to use the script
 <tt>java_javac_detect</tt>, which automatically detects the
 main class and even corrects the source filename when it is declared
 public.
-
-When using the GNU gcj compiler, the same holds for the
-<tt>java_gcj</tt> script as for <tt>java_javac</tt>.
-
-<sect>GCJ compiler warnings
-<p>
-
-When using the GNU GCJ compiler script <tt>java_gcj</tt> for compiling
-Java sources, it can give a whole lot of warning messages of the form
-<verb>
-/usr/lib/gcc-lib/i386-linux/3.2.3/libgcj.a(gc_dlopen.o)(.text+0xbc):
-In function `GC_dlopen': Using 'dlopen' in statically linked
-applications requires at runtime the shared libraries from the glibc
-version used for linking
-</verb>
-
-These are generated because you are trying to compile statically
-linked sources, but some functions can not be static, e.g. the
-`dlopen' function above. These are <em>warnings</em> and can be safely
-ignored, because under normal programming contest conditions people
-are not allowed to use these functions anyway (and they are not
-accessible within the chroot-ed environment the program is run in).
 
 <sect>Memory limit errors in the web interface<label id="problems:memory">
 <p>

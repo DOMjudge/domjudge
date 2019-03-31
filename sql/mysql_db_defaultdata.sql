@@ -77,7 +77,6 @@ INSERT INTO `executable` (`execid`, `description`, `type`) VALUES
 ('float', 'default compare script for floats with prec 1E-7', 'compare'),
 ('hs', 'hs', 'compile'),
 ('kt', 'kt', 'compile'),
-('java_gcj', 'java_gcj', 'compile'),
 ('java_javac', 'java_javac', 'compile'),
 ('java_javac_detect', 'java_javac_detect', 'compile'),
 ('js', 'js', 'compile'),
