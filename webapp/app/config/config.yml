@@ -172,6 +172,7 @@ nelmio_api_doc:
             JudgementExtraFields:
                 properties:
                     judgement_type_id: { type: string }
+                    judgehost: { type: string }
                     max_run_time: { type: number, format: float }
             # Fields for runs that are added by the JudgingRunWrapper class
             RunExtraFields:
