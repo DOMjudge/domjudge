@@ -499,7 +499,7 @@ function clarificationAppendAnswer() {
     if ( $('#clar_answers').val() == '_default' ) { return; }
     var selected = $("#clar_answers option:selected").text();
     var textbox = $('#bodytext');
-    textbox.append('\n' + selected);
+    textbox.val(textbox.val().replace(/\n$/, "") + '\n' + selected);
     textbox.scrollTop(textbox[0].scrollHeight);
 }
 
