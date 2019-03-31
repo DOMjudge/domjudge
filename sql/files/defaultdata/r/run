@@ -9,8 +9,7 @@
 # allowing this interpreted source to be used transparantly as if it
 # was compiled to a standalone binary.
 #
-# NOTICE: when this compiler script is used with USE_CHROOT on, the
-# chroot requires r to be installed
+# This script requires that Rscript is installed in the chroot.
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift

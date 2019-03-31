@@ -19,8 +19,8 @@
 #
 # This script supports languages by calling separate compile scripts.
 # These compile scripts should compile the source(s) to a statically linked,
-# standalone executable, or you should turn off USE_CHROOT, or create a chroot
-# environment that has interpreter/dynamic library support.
+# standalone executable, or create a chroot environment that has
+# interpreter/dynamic library support.
 #
 # Syntax for these compile scripts is:
 #

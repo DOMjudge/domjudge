@@ -156,14 +156,7 @@ fi
 
 cd "$WORKDIR"
 
-# Check whether we're going to run in a chroot environment:
-if [ -z "$USE_CHROOT" ] || [ "$USE_CHROOT" -eq 0 ]; then
-# unset to allow shell default parameter substitution on USE_CHROOT:
-	unset USE_CHROOT
-	PREFIX=$PWD
-else
-	PREFIX="/$(basename "$PWD")"
-fi
+PREFIX="/$(basename "$PWD")"
 
 # Make testing/execute dir accessible for RUNUSER:
 chmod a+x "$WORKDIR" "$WORKDIR/execdir"
@@ -204,7 +197,7 @@ logmsg $LOG_DEBUG "creating /dev/null character-special device"
 $GAINROOT cp -pR /dev/null ../dev/null
 
 # Run the solution program (within a restricted environment):
-logmsg $LOG_INFO "running program (USE_CHROOT = ${USE_CHROOT:-0})"
+logmsg $LOG_INFO "running program"
 
 RUNARGS="testdata.in program.out"
 if [ $COMBINED_RUN_COMPARE -eq 1 ]; then
@@ -220,7 +213,7 @@ exitcode=0
 # shellcheck disable=SC2153
 runcheck "$RUN_SCRIPT" $RUNARGS \
 	$GAINROOT "$RUNGUARD" ${DEBUG:+-v -V "DEBUG=$DEBUG"} ${TMPDIR:+ -V "TMPDIR=$TMPDIR"} $CPUSET_OPT \
-	${USE_CHROOT:+-r "$PWD/.."} \
+	-r "$PWD/.." \
 	--nproc=$PROCLIMIT \
 	--no-core --streamsize=$FILELIMIT \
 	--user="$RUNUSER" --group="$RUNGROUP" \

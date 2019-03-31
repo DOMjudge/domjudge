@@ -3,9 +3,7 @@
 # Scala compile wrapper-script for 'compile.sh'.
 # See that script for syntax and more info.
 #
-# NOTICE: this compiler script cannot be used with the USE_CHROOT
-# configuration option turned on, unless proper preconfiguration of
-# the chroot environment has been taken care of!
+# This script requires that scala is installed in the chroot.
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift

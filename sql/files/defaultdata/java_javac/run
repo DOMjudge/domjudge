@@ -6,9 +6,7 @@
 # This script byte-compiles with the javac compiler and generates
 # a shell script to run it with the java interpreter later.
 #
-# NOTICE: this compiler script cannot be used with the USE_CHROOT
-# configuration option turned on, unless proper preconfiguration of
-# the chroot environment has been taken care of!
+# This script requires that java is present in the chroot.
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift

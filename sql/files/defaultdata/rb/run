@@ -9,9 +9,7 @@
 # allowing this interpreted source to be used transparantly as if it
 # was compiled to a standalone binary.
 #
-# NOTICE: this compiler script cannot be used with the USE_CHROOT
-# configuration option turned on! (Unless proper preconfiguration of
-# the chroot environment has been taken care of.)
+# This script requires that ruby is installed in the chroot.
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift

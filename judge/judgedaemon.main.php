@@ -177,6 +177,7 @@ $waittime = 5;
 
 define('SCRIPT_ID', 'judgedaemon');
 define('PIDFILE', RUNDIR.'/judgedaemon.pid');
+define('CHROOT_SCRIPT', 'chroot-startstop.sh');
 
 function usage()
 {
@@ -477,23 +478,7 @@ read_credentials();
 // unprivileged user.
 umask(0022);
 
-// Warn when chroot has been disabled. This has security implications.
-if (! USE_CHROOT) {
-    logmsg(LOG_WARNING, "Chroot disabled. This reduces judgehost security.");
-} else {
-    if (!is_dir(CHROOTDIR)) {
-        if (!defined('CHROOT_SCRIPT')) {
-            logmsg(LOG_ERR, "Pre-built chroot tree '" . CHROOTDIR .
-                   "' not found and no chroot-dir set, exiting.");
-            exit;
-        }
-        logmsg(LOG_WARNING, "Pre-built chroot tree '".CHROOTDIR.
-               "' not found: using minimal chroot.");
-    } else {
-        define('CHROOT_SCRIPT', 'chroot-startstop.sh');
-    }
-}
-
+// TODO: check for chroot viability
 
 // Perform setup work for each endpoint we are communicating with
 foreach ($endpoints as $endpointID => $endpoint) {
@@ -665,7 +650,6 @@ function judge(array $row)
     global $EXITCODES, $myhost, $options, $workdirpath, $exitsignalled, $gracefulexitsignalled;
 
     // Set configuration variables for called programs
-    putenv('USE_CHROOT='               . (USE_CHROOT ? '1' : ''));
     putenv('CREATE_WRITABLE_TEMP_DIR=' . (CREATE_WRITABLE_TEMP_DIR ? '1' : ''));
     putenv('SCRIPTTIMELIMIT='          . dbconfig_get_rest('script_timelimit'));
     putenv('SCRIPTMEMLIMIT='           . dbconfig_get_rest('script_memory_limit'));
@@ -815,13 +799,11 @@ function judge(array $row)
         return;
     }
 
-    // Optionally create chroot environment
-    if (USE_CHROOT && CHROOT_SCRIPT) {
-        logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
-        system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
-        if ($retval!=0) {
-            error("chroot script exited with exitcode $retval");
-        }
+    // create chroot environment
+    logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." start'");
+    system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' start', $retval);
+    if ($retval!=0) {
+        error("chroot script exited with exitcode $retval");
     }
 
     // Query timelimit overshoot here once for all testcases
@@ -986,13 +968,11 @@ function judge(array $row)
     // revoke readablity for domjudge-run user to this workdir
     chmod($workdir, 0700);
 
-    // Optionally destroy chroot environment
-    if (USE_CHROOT && CHROOT_SCRIPT) {
-        logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
-        system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
-        if ($retval!=0) {
-            error("chroot script exited with exitcode $retval");
-        }
+    // destroy chroot environment
+    logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." stop'");
+    system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' stop', $retval);
+    if ($retval!=0) {
+        error("chroot script exited with exitcode $retval");
     }
 
     // Evict all contents of the workdir from the kernel fs cache

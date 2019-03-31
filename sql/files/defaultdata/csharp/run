@@ -6,9 +6,7 @@
 # This script byte-compiles with the GNU mono compiler and generates
 # a shell script to run it with the mono CLI code generator later.
 #
-# NOTICE: this compiler script cannot be used with the USE_CHROOT
-# configuration option turned on, unless proper preconfiguration of
-# the chroot environment has been taken care of!
+# This script requires mono to be installed in the chroot.
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift

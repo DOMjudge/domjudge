@@ -190,7 +190,6 @@ Version 5.1.0 - 7 December 2015
  - Port XML event feed from ICPC-live branch.
  - Port clarification categories feature from ICPC-live branch.
  - Merge Debian/Ubuntu chroot scripts and add minor fixes.
- - Drop CHROOT_SCRIPT setting, use hardcoded chroot-startstop.sh.
  - Fix float compare script output and relative checking.
  - Fix various small bugs in problem ZIP import.
  - Fix ACE editor to resize after tab change (#145).

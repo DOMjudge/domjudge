@@ -7,9 +7,7 @@
 # generates a shell script to run it with the java interpreter with Kotlin
 # libraries later.
 #
-# NOTICE: this compiler script cannot be used with the USE_CHROOT
-# configuration option turned on, unless proper preconfiguration of
-# the chroot environment has been taken care of!
+# This script requires that kotlinc is installed in the chroot.
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift

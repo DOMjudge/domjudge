@@ -8,9 +8,7 @@
 # It autodetects the main class name and optionally renames the source
 # file if the class is public.
 #
-# NOTICE: this compiler script cannot be used with the USE_CHROOT
-# configuration option turned on, unless proper preconfiguration of
-# the chroot environment has been taken care of!
+# This script requires that java is installed in the chroot.
 
 DEST="$1" ; shift
 MEMLIMIT="$1" ; shift

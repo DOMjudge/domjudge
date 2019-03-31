@@ -10,7 +10,6 @@
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/cp -pR /dev/null ../dev/null
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/chown -R @DOMJUDGE_USER@\: @judgehost_judgedir@/*
 
-# The following is needed if you set USE_CHROOT=1 (recommended).
 # The chroot path below must match the path in chroot-startstop.sh.
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/mount -n --bind /proc proc
 @DOMJUDGE_USER@ ALL=(root) NOPASSWD: /bin/umount /*/proc
