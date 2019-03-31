@@ -690,6 +690,7 @@ Json::Value doAPIrequest(const char *funcname, int failonerror = 1)
 	curlsetopt(FAILONERROR,   failonerror);
 	curlsetopt(FOLLOWLOCATION,1);
 	curlsetopt(MAXREDIRS,     10);
+	curlsetopt(NETRC,         CURL_NETRC_OPTIONAL);
 	curlsetopt(TIMEOUT,       timeout_secs);
 	curlsetopt(URL,           url);
 	curlsetopt(WRITEFUNCTION, writesstream);
