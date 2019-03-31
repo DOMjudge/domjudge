@@ -233,6 +233,12 @@ install-examples)
 	cat $EXAMPLES_FILES | mysql -D "$DBNAME"
 	;;
 
+create-db-users)
+	read_dbpasswords
+	create_db_users
+	verbose "Created empty database and users."
+	;;
+
 bare-install|install)
 	read_dbpasswords
 	create_db_users
@@ -296,7 +302,7 @@ upgrade)
 	rm -f $TMPOUT
 	;;
 
-	*)
+*)
 	echo "Error: Unknown subcommand '$1'"
 	usage
 	exit 1
