@@ -348,10 +348,11 @@ if (in_array('variations', $reports)) {
         min(MAX_LIST_LEN, count($runtime_spread))
     );
 
-    for ($i=0; $i<MAX_LIST_LEN; $i++) {
-        if (!(list($key, $val) = each($runtime_spread))) {
-            break;
-        }
+    $i = 0;
+    foreach($runtime_spread as $val) {
+        if ($i >= MAX_LIST_LEN) break;
+        ++$i;
+
         list($spread, $submitid, $tcid) = $val;
         printf(
             " %5s/%s: %.3fs over %d judgings with result: %s\n",
