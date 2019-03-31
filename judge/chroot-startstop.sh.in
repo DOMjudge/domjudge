@@ -12,16 +12,19 @@
 # files). Afterwards it is also called to cleanup.
 #
 # You can adapt this script to your environment, e.g. if you need to make
-# more/other subdirectories available in the chroot environment.
+# more/other subdirectories available in the chroot environment. Or
+# make it a no-op if you only want the very basic chroot.
 #
-# See also bin/dj_make_chroot.sh for a script to generate a minimal
-# chroot environment with Java included. Note that if you modify paths
+# See bin/dj_make_chroot.sh for a script to generate the
+# chroot environment. Note that if you modify paths
 # in this script, then the associated sudo rules (see
 # etc/sudoers-domjudge) must also be updated.
 #
 # This script will be called from judgedaemon.main.php in the root
-# directory of the chroot environment with one parameter: either
-# 'start' to setup, or 'stop' to destroy the chroot environment.
+# directory of the chroot environment with one parameter, either:
+# - 'check' to perform some sanity checks;
+# - 'start' to setup; or
+# - 'stop' to destroy the chroot environment.
 #
 # We always use 'sudo -n <command> < /dev/null' to make sure that sudo
 # doesn't try to ask for a password, but just fails.
@@ -49,6 +52,24 @@ dj_umount() {
 }
 
 case "$1" in
+	check)
+		if [ ! -d "$CHROOTORIGINAL" ]; then
+			>&2 echo "chroot dir '$CHROOTORIGINAL' does not exist, run dj_create_chroot"
+			exit 2
+		fi
+		for i in $SUBDIRMOUNTS ; do
+			if [ ! -e "$CHROOTORIGINAL/$i" ]; then
+				>&2 echo "chroot subdir '$CHROOTORIGINAL/$i' not found, rerun dj_create_chroot"
+				exit 2
+			fi
+		done
+		# This directory is removed at the very end of the debootstrap run, if it's
+		# still present, building the chroot did not complete.
+		if [ -d "$CHROOTORIGINAL/debootstrap" ]; then
+			>&2 echo "chroot dir '$CHROOTORIGINAL' incomplete, rerun dj_create_chroot"
+			exit 2
+		fi
+		;;
 	start)
 
 		# Mount (bind) the proc filesystem (needed by Java for /proc/self/stat):

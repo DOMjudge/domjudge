@@ -315,8 +315,7 @@ Optionally:
 <item> Install the submit client on the team workstations.
 <item> Start the balloon notification daemon: <tt>cd bin; ./balloons</tt>;
        or use the balloon web interface.
-<item> On the judgehosts, create a pre-built chroot tree to support
-       interpreted or byte-compiled languages such as Java:<newline>
+<item> On the judgehosts, create a pre-built chroot tree:<newline>
        <tt>sudo bin/dj_make_chroot [optional arguments]</tt><newline>
        <tt>$EDITOR lib/judge/chroot-startstop.sh</tt><newline>
        Modifying <tt>chroot-startstop.sh</tt> is typically not

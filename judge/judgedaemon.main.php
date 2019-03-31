@@ -478,7 +478,12 @@ read_credentials();
 // unprivileged user.
 umask(0022);
 
-// TODO: check for chroot viability
+// Check basic prerequisites for chroot at judgehost startup
+logmsg(LOG_INFO, "executing chroot script: '".CHROOT_SCRIPT." check'");
+system(LIBJUDGEDIR.'/'.CHROOT_SCRIPT.' check', $retval);
+if ($retval!=0) {
+    error("chroot sanity check exited with exitcode $retval");
+}
 
 // Perform setup work for each endpoint we are communicating with
 foreach ($endpoints as $endpointID => $endpoint) {
