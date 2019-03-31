@@ -6,6 +6,8 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+use DOMJudgeBundle\Service\DOMJudgeService;
+
 /** Import functions **/
 function tsv_import($fmt)
 {
@@ -227,6 +229,10 @@ function tsv_accounts_prepare($content)
                 $roleids[] = $juryroleid;
                 $roleids[] = $teamroleid;
                 $juryteam = array('name' => $line[1], 'categoryid' => $jurycatid, 'members' => $line[1]);
+                // When we are not the primary source of team data, we need a team external ID so generate one
+                if (dbconfig_get('data_source', 0) >= 1) {
+                    $juryteam['externalid'] = 'dj-' . $line[2];
+                }
                 break;
             case 'team':
                 $roleids[] = $teamroleid;
