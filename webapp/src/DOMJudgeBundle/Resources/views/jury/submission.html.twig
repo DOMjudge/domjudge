@@ -131,6 +131,15 @@
                 View source code
             </a>
         </span>
+
+        {% if ext_ccs_url is not null and submission.externalid is null %}
+            <span>
+                <i class="fas fa-link"></i>
+                <a href="{{ submission | externalCcsUrl }}" target="_blank">
+                    View in Kattis
+                </a>
+            </span>
+        {% endif %}
     </div>
 
     {% if ext_ccs_url is not null and submission.externalid %}
