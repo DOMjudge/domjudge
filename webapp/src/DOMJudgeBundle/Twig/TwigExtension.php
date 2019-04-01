@@ -413,8 +413,12 @@ class TwigExtension extends \Twig_Extension implements \Twig_Extension_GlobalsIn
         $dir = realpath(sprintf('%s/../../etc', $this->kernel->getRootDir()));
         require_once $dir . '/domserver-config.php';
 
-        if (defined('EXT_CCS_URL') && $submission->getExternalid()) {
-            return sprintf('%s%s', EXT_CCS_URL, $submission->getExternalid());
+        if (defined('EXT_CCS_URL')) {
+            if ($submission->getExternalid()) {
+                return sprintf('%s%s', EXT_CCS_URL, $submission->getExternalid());
+            } else {
+                return sprintf('%s%s', EXT_CCS_URL, $submission->getSubmitid());
+            }
         }
 
         return null;
