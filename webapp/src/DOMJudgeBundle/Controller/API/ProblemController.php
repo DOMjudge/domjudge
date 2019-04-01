@@ -128,6 +128,12 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *     required=true,
      *     description="The problem archives to import"
      * )
+     * @SWG\Parameter(
+     *     name="problem",
+     *     in="formData",
+     *     type="string",
+     *     description="Optional: problem id to update."
+     * )
      * @SWG\Response(
      *     response="200",
      *     description="Returns the IDs of the just imported problems",
@@ -146,6 +152,24 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         $contest     = $this->entityManager->getRepository(Contest::class)->find($contestId);
         $allMessages = [];
         $probIds     = [];
+
+        $probId = $request->request->get('problem');
+        $problem = null;
+        if (!empty($probId)) {
+            if (sizeof($files) != 1) {
+                throw new BadRequestHttpException('Can only take one problem zip if \'problem\' is set.');
+            }
+            $problem = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Problem', 'p')
+                ->select('p')
+                ->andWhere(sprintf('%s = :id', $this->getIdField()))
+                ->setParameter(':id', $probId)
+                ->getQuery()
+                ->getOneOrNullResult();
+            if (empty($problem)) {
+                throw new BadRequestHttpException('Specified \'problem\' does not exist.');
+            }
+        }
         /** @var UploadedFile $file */
         foreach ($files as $file) {
             $zip = null;
