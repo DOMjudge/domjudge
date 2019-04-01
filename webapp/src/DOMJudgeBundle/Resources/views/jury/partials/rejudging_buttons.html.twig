@@ -5,4 +5,34 @@
             {{ button(path('jury_rejudging_finish', {rejudgingId: rejudging.rejudgingid, action: 'apply'}), 'Apply rejudging', 'success', 'check') }}
         {% endif %}
     </div>
+{% else %}
+    <div>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#rejudge-modal">
+            <i class="fas fa-sync"></i> Repeat rejudging
+        </button>
+    </div>
+
+    <div class="modal fade" id="rejudge-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Repeat rejudging</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ path('jury_create_rejudge') }}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="table" value="rejudging"/>
+                        <input type="hidden" name="id" value="{{ rejudging.rejudgingid }}"/>
+                        This will create a new rejudging with the same submissions as this rejudging.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <input type="submit" value="Repeat rejudging" class="btn btn-primary"/>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 {% endif %}

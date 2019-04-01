@@ -573,6 +573,14 @@ class RejudgingController extends BaseController
         // Special case 'submission' for admin overrides
         if ($this->DOMJudgeService->checkrole('admin') && ($table == 'submission')) {
             $includeAll = true;
+        } elseif ($table === 'rejudging') {
+            $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($id);
+            if ($rejudging === null) {
+                throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $id));
+            }
+            $includeAll  = true;
+            $fullRejudge = true;
+            $reason      = $rejudging->getReason();
         }
 
         /* These are the tables that we can deal with. */
@@ -582,7 +590,8 @@ class RejudgingController extends BaseController
             'language' => 's.langid',
             'problem' => 's.probid',
             'submission' => 's.submitid',
-            'team' => 's.teamid'
+            'team' => 's.teamid',
+            'rejudging' => 'j2.rejudgingid',
         ];
 
         if (!isset($tablemap[$table])) {
@@ -603,6 +612,10 @@ class RejudgingController extends BaseController
             ->andWhere(sprintf('%s = :id', $tablemap[$table]))
             ->setParameter(':contests', $contests)
             ->setParameter(':id', $id);
+
+        if ($table === 'rejudging') {
+            $queryBuilder->join('s.judgings', 'j2');
+        }
 
         if ($includeAll && $fullRejudge) {
             $queryBuilder
