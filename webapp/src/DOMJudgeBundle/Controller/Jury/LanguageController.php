@@ -277,8 +277,6 @@ class LanguageController extends BaseController
 
         $form->handleRequest($request);
 
-        dump($form->getErrors());
-
         if ($form->isSubmitted() && $form->isValid()) {
             // Normalize extensions
             if ($language->getExtensions()) {
