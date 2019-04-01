@@ -446,7 +446,8 @@ class RejudgingController extends BaseController
         $formBuilder = $formFactory->createBuilder(RejudgingType::class);
         $formData    = [];
         if (!$request->isXmlHttpRequest()) {
-            $formData['contests'] = [$this->DOMJudgeService->getCurrentContest()];
+            $currentContest = $this->DOMJudgeService->getCurrentContest();
+            $formData['contests'] = is_null($currentContest) ? [] : [$currentContest];
         }
         $verdicts             = $formBuilder->get('verdicts')->getOption('choices');
         $incorrectVerdicts    = array_filter($verdicts, function ($k) {
