@@ -49,5 +49,15 @@
           initializeAjaxModals();
       });
   </script>
+  {% set myhost = app.request.getHost() %}
+  {% if myhost == "domjudge-backup" %}
+  <style>
+    .navbar { background-color: darkred !important; }
+  </style>
+  {% elseif myhost == "localhost" %}
+  <style>
+    .navbar { background-color: forestgreen !important; }
+  </style>
+  {% endif %}
 </body>
 </html>
