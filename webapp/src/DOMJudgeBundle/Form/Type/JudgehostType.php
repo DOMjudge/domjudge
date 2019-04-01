@@ -17,7 +17,7 @@ class JudgehostType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('hostname', TextType::class, [
-            'constraints' => [new NotBlank()],
+            'attr' => ['readonly' => true],
         ]);
         $builder->add('active', ChoiceType::class, [
             'choices' => [

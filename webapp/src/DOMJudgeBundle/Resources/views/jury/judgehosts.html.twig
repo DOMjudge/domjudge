@@ -32,10 +32,9 @@
                     Stop all judgehosts
                 </button>
             </form>
-        </div>
-        <div>
-            {{ button(path('jury_judgehost_add'), 'Add multiple new judgehosts', 'primary', 'plus') }}
-            {{ button(path('jury_judgehost_edit'), 'Edit multiple judgehosts', 'secondary', 'edit') }}
+            <div class="d-inline">
+                {{ button(path('jury_judgehost_edit'), 'Edit judgehosts', 'secondary', 'edit') }}
+            </div>
         </div>
 
     {%- endif %}

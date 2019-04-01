@@ -6,19 +6,15 @@
         <th>{{ form_label(form.judgehosts.vars.prototype.hostname) }}</th>
         <th>{{ form_label(form.judgehosts.vars.prototype.active) }}</th>
         <th>{{ form_label(form.judgehosts.vars.prototype.restriction) }}</th>
-        {% if allow_delete %}
-            <th></th>
-        {% endif %}
     </tr>
     </thead>
     <tbody data-collection-holder>
     {% for judgehost in form.judgehosts %}
         <tr>
-            <td>
+            <td style="width: 20%">
                 {{ form_widget(judgehost.hostname) }}
-                {{ form_errors(judgehost.hostname) }}
             </td>
-            <td>
+            <td style="width: 10%">
                 {{ form_widget(judgehost.active) }}
                 {{ form_errors(judgehost.active) }}
             </td>
@@ -26,37 +22,11 @@
                 {{ form_widget(judgehost.restriction) }}
                 {{ form_errors(judgehost.restriction) }}
             </td>
-            {% if allow_delete %}
-                <td>
-                    <button type="button" data-delete class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
-                </td>
-            {% endif %}
         </tr>
     {% endfor %}
     </tbody>
-    {% if allow_add %}
-        <tfoot>
-        <tr>
-            <td colspan="3"></td>
-            <td>
-                <button type="button" data-add class="btn btn-success"><i class="fas fa-plus"></i></button>
-            </td>
-        </tr>
-        </tfoot>
-    {% endif %}
 </table>
-{% if allow_add %}
-    <script type="text/html" data-prototype>
-        <tr>
-            <td>{{ form_widget(form.judgehosts.vars.prototype.hostname) }}</td>
-            <td>{{ form_widget(form.judgehosts.vars.prototype.active) }}</td>
-            <td>{{ form_widget(form.judgehosts.vars.prototype.restriction) }}</td>
-            <td>
-                <button type="button" data-delete class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>
-            </td>
-        </tr>
-    </script>
-{% endif %}
+
 {{ form_widget(form.save) }}
 
 {{ form_end(form) }}
