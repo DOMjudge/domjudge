@@ -77,12 +77,13 @@ $(function(){
         d3.select('#maxruntime svg')
             .datum(run_max_times)
             .call(chart);
+        var svgsize = chart.container.clientWidth || chart.container.parentNode.clientWidth;
         var line = d3.select('#maxruntime svg')
             .append('line')
             .attr({
               x1: chart.margin().left,
               y1: chart.yAxis.scale()({{timelimit}})+ chart.margin().top,
-              x2: +chart.container.clientWidth - chart.margin().right,
+              x2: +svgsize - chart.margin().right,
               y2: chart.yAxis.scale()({{timelimit}}) + chart.margin().top,
             })
             .style("stroke", "#F00");
@@ -116,13 +117,13 @@ $(function(){
       d3.select('#testcaseruntime svg')
           .datum(testcase_times)
           .call(chart);
-
+      var svgsize = chart.container.clientWidth || chart.container.parentNode.clientWidth;
       var line = d3.select('#testcaseruntime svg')
           .append('line')
           .attr({
             x1: chart.margin().left,
             y1: chart.yAxis.scale()({{timelimit}})+ chart.margin().top,
-            x2: +chart.container.clientWidth - chart.margin().right,
+            x2: +svgsize - chart.margin().right,
             y2: chart.yAxis.scale()({{timelimit}}) + chart.margin().top,
           })
           .style("stroke", "#F00");

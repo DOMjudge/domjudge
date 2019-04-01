@@ -157,12 +157,13 @@ $(function(){
         .style("stroke", "#F00");
 
       // update the line in case the chart dimensions have changed
+      var svgsize = chart.container.clientWidth || chart.container.parentNode.clientWidth;
       updateline = function(){
         line = d3.select('#maxruntime svg #maxline')
         .attr({
           x1: chart.margin().left,
           y1: chart.yAxis.scale()({{timelimit}})+ chart.margin().top,
-          x2: +chart.container.clientWidth - chart.margin().right,
+          x2: +svgsize - chart.margin().right,
           y2: chart.yAxis.scale()({{timelimit}}) + chart.margin().top,
         })
       }

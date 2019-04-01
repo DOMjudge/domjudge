@@ -157,12 +157,13 @@ $(function(){
           .attr({id: 'maxline'})
           .style("stroke", "#F00");
 
+        var svgsize = chart.container.clientWidth || chart.container.parentNode.clientWidth;
         updateline_{{problem.probid}} = function(){
           line = d3.select('#maxruntime_{{problem.probid}} svg #maxline')
           .attr({
             x1: chart.margin().left,
             y1: chart.yAxis.scale()({{problem.timelimit}})+ chart.margin().top,
-            x2: +chart.container.clientWidth - chart.margin().right,
+            x2: +svgsize - chart.margin().right,
             y2: chart.yAxis.scale()({{problem.timelimit}}) + chart.margin().top,
           })
         }
