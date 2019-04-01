@@ -40,4 +40,4 @@ define('ALLOW_REMOVED_INTERVALS', true);
 
 // Specify URL to external CCS's submission page for linking external
 // submission IDs. The external ID is appended to the URL below.
-//define('EXT_CCS_URL', 'https://ccs.example.com/submissions/');
+define('EXT_CCS_URL', 'https://kattis/external-submission/test1-1/');
