@@ -194,18 +194,18 @@ class ClarificationController extends Controller
             $data['body'] = $clar->getBody();
             $clardata['list'][] = $data;
         }
-    
+
         if ( $concernsteam ) {
             $clardata['clarform']['toteam'] = $concernsteam;
         }
         if ( $concernssubject ) {
             $clardata['clarform']['onsubject'] = $concernssubject;
         }
-    
+
         $clardata['clarform']['quotedtext'] = "> " . str_replace("\n", "\n> ", Utils::wrap_unquoted($data['body'])) . "\n\n";
         $clardata['clarform']['queues'] = $queues;
         $clardata['clarform']['answers'] = $clar_answers;
-    
+
         return $this->render('@DOMJudge/jury/clarification.html.twig',
             $clardata
         );
