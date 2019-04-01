@@ -364,3 +364,8 @@ h3.teamoverview {
     max-height: 500px;
     overflow-x: hidden;
 }
+
+.error-template {
+    padding: 40px 15px;
+    text-align: center;
+}
