@@ -216,7 +216,7 @@ class SubmissionController extends BaseController
             ->join('s.problem', 'p')
             ->join('s.language', 'l')
             ->join('s.contest', 'c')
-            ->join('s.contest_problem', 'cp')
+            ->leftJoin('s.contest_problem', 'cp')
             ->select('s', 't', 'p', 'l', 'c', 'cp')
             ->andWhere('s.submitid = :submitid')
             ->setParameter(':submitid', $submitId)

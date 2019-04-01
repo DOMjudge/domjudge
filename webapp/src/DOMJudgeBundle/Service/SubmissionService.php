@@ -107,6 +107,7 @@ class SubmissionService
             ->from('DOMJudgeBundle:Submission', 's')
             ->select('s', 'j')
             ->join('s.team', 't')
+            ->join('s.contest_problem', 'cp')
             ->andWhere('s.cid IN (:contests)')
             ->setParameter(':contests', array_keys($contests))
             ->orderBy('s.submittime', 'DESC')

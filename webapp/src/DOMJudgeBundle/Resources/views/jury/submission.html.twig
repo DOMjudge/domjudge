@@ -46,7 +46,8 @@
             {% else %}
                 {% set action = 'unignore' %}
             {% endif %}
-            <form action="{{ path('jury_submission_update_status', {'submitId': submission.submitid}) }}" method="post" style="display: inline; ">
+            <form action="{{ path('jury_submission_update_status', {'submitId': submission.submitid}) }}" method="post"
+                  style="display: inline; ">
                 <input type="hidden" name="valid" value="{% if submission.valid %}0{% else %}1{% endif %}"/>
                 <input type="submit" class="btn btn-outline-secondary btn-sm"
                        value="{{ action | upper }} this submission"
@@ -59,6 +60,12 @@
 
     {% if not submission.valid %}
         <div class="alert alert-danger">This submission is not used during scoreboard calculations.</div>
+    {% endif %}
+
+    {% if not submission.contestProblem %}
+        <div class="alert alert-danger">
+            This submission is for a problem that is not part (anymore) of the contest of the submission.
+        </div>
     {% endif %}
 
     {# Condensed submission info on a single line with icons #}
@@ -80,7 +87,11 @@
         <span>
             <i class="fas fa-book-open" title="Problem:"></i>
             <a href="{{ path('jury_problem', {'probId': submission.probid}) }}">
-                {{ submission.contestProblem.shortname }}: {{ submission.problem.name }}
+                {% if submission.contestProblem %}
+                    {{ submission.contestProblem.shortname }}: {{ submission.problem.name }}
+                {% else %}
+                    {{ submission.problem.name }}
+                {% endif %}
             </a>
         </span>
 
@@ -325,7 +336,7 @@
                                    style="display: inline; width: auto;"/>
                         {% endif %}
 
-                        {% if icat_url is not null %}
+                        {% if icat_url is not null and submission.contestProblem %}
                             <button class="btn btn-outline-secondary btn-sm" id="post-to-icat">
                                 post to iCAT
                             </button>
@@ -333,21 +344,23 @@
                     {% endif %}
                 </p>
             </form>
-            <script>
-                $(function () {
-                    $('#post-to-icat').on('click', function () {
-                        postVerifyCommentToICAT(
-                            '{{ icat_url }}/insert_entry.php',
-                            '{{ app.user.username }}',
-                            '{{ submission.teamid }}',
-                            '{{ submission.contestProblem.shortname }}',
-                            '{{ submission.externalid }}'
-                        );
-                        alert('Comment posted to iCAT.');
-                        return false;
+            {% if submission.contestProblem %}
+                <script>
+                    $(function () {
+                        $('#post-to-icat').on('click', function () {
+                            postVerifyCommentToICAT(
+                                '{{ icat_url }}/insert_entry.php',
+                                '{{ app.user.username }}',
+                                '{{ submission.teamid }}',
+                                '{{ submission.contestProblem.shortname }}',
+                                '{{ submission.externalid }}'
+                            );
+                            alert('Comment posted to iCAT.');
+                            return false;
+                        });
                     });
-                });
-            </script>
+                </script>
+            {% endif %}
 
             {% if submission.externalresult is not empty and submission.externalresult != selectedJudging.result and ext_ccs_url is not null %}
                 <div class="alert alert-danger">
