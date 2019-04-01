@@ -1422,7 +1422,7 @@ class Contest extends BaseApiEnttiy
                     ->addViolation();
             }
         }
-        if (Utils::difftime((float)$this->getActivatetime(), (float)$this->getStarttime()) > 0) {
+        if (Utils::difftime((float)$this->getActivatetime(), (float)$this->getStarttime(false)) > 0) {
             $context
                 ->buildViolation('Activate time is later than starttime')
                 ->atPath('activatetimeString')
