@@ -132,7 +132,7 @@ class ClarificationController extends Controller
         }
 
         $clardata = ['list'=>[]];
-        $clardata['clarform'] = $this->getClarificationFormData();
+        $clardata['clarform'] = $this->getClarificationFormData($clarification->getSender());
 
         $categories = $clardata['clarform']['subjects'];
         $queues     = $this->DOMJudgeService->dbconfig_get('clar_queues');
@@ -220,12 +220,16 @@ class ClarificationController extends Controller
         return "unknown problem";
     }
 
-    protected function getClarificationFormData() : array
+    protected function getClarificationFormData(Team $team = null) : array
     {
         $em = $this->getDoctrine()->getManager();
-        $teams = $em->getRepository('DOMJudgeBundle:Team')->findAll();
-        foreach ($teams as $team) {
+        if ($team !== null) {
             $teamlist[$team->getTeamid()] = sprintf("%s (t%s)", $team->getName(), $team->getTeamid());
+        } else {
+            $teams = $em->getRepository('DOMJudgeBundle:Team')->findAll();
+            foreach ($teams as $team) {
+                $teamlist[$team->getTeamid()] = sprintf("%s (t%s)", $team->getName(), $team->getTeamid());
+            }
         }
         asort($teamlist, SORT_STRING | SORT_FLAG_CASE);
         $teamlist = ['domjudge-must-select' => '(select...)', '' => 'ALL'] + $teamlist;
