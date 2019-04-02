@@ -575,7 +575,8 @@ while (true) {
 
     // Request open submissions to judge. Any errors will be treated as
     // non-fatal: we will just keep on retrying in this loop.
-    $judging = request(sprintf('judgehosts/next-judging/%s', urlencode($myhost)), 'POST', '', false);
+    $url = sprintf('judgehosts/next-judging/%s', urlencode($myhost));
+    $judging = request($url, 'POST', '', false);
     // If $judging is null, an error occurred; don't try to decode.
     if (!is_null($judging)) {
         $row = dj_json_decode($judging);
@@ -644,7 +645,7 @@ function read_metadata(string $filename)
 function send_unsent_judging_runs($unsent_judging_runs, $myhost, $judgingid) {
     request(
         sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
-            urlencode((string)$judgingid)),
+                urlencode((string)$judgingid)),
         'POST',
         'batch=' . json_encode($unsent_judging_runs)
     );
@@ -706,7 +707,9 @@ function judge(array $row)
     }
 
     // Get the source code from the DB and store in local file(s)
-    $sources = request(sprintf('contests/%s/submissions/%s/source-code', $row['cid'], $row['submitid']), 'GET', '');
+    $url = sprintf('contests/%s/submissions/%s/source-code',
+                   urlencode((string)$row['cid']), $row['submitid']);
+    $sources = request($url, 'GET', '');
     $sources = dj_json_decode($sources);
     $files = array();
     foreach ($sources as $source) {
@@ -842,7 +845,8 @@ function judge(array $row)
 
         if (!$lastcase_correct) {
             // get the next testcase
-            $testcase = request(sprintf('testcases/next-to-judge/%s', $row['judgingid']), 'GET', '');
+            $url = sprintf('testcases/next-to-judge/%s', $row['judgingid']);
+            $testcase = request($url, 'GET', '');
             $tc = dj_json_decode($testcase);
             if ($tc === null) {
                 $disabled = dj_json_encode(array(
@@ -1008,7 +1012,8 @@ function fetchTestcase(array $row, $workdirpath, $rank): array
             $tc['md5sum_' . $inout] . "." . substr($inout, 0, -3);
 
         if (!file_exists($tcfile[$inout])) {
-            $content = request(sprintf('testcases/%s/file/%s', $tc['testcaseid'], $inout), 'GET', '', FALSE);
+            $url = sprintf('testcases/%s/file/%s', $tc['testcaseid'], $inout);
+            $content = request($url, 'GET', '', FALSE);
             if ($content === NULL) {
                 $error = 'Download of ' . $inout . ' failed for case ' . $tc['testcaseid'] . ', check your problem integrity.';
                 logmsg(LOG_ERR, $error);
