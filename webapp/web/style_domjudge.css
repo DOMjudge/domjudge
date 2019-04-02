@@ -241,7 +241,7 @@ td.scorenc { border-color: silver; border-right: 0; }
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    border: solid 1px black;
+    border: 1px solid black;
     display: inline-block;
 }
 
@@ -302,7 +302,7 @@ tr.ignore td, td.ignore, span.ignore {
 
 #teampicture {
     width: 100%;
-    border: solid 1px black;
+    border: 1px solid black;
 }
 
 .problem-list h3,h4,h5 {
