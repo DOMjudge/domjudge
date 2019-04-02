@@ -302,7 +302,7 @@ td.scorenc { border-color: silver; border-right: 0; }
 
 #teamscoresummary { margin-top: 2.5em; }
 
-#teampicture { position: absolute; right: 4ex; top: 7ex; }
+#teampicture { width: 50%; float: right; }
 
 /* between different sortorder-categories, print a thick line */
 .sortorderswitch { border-top: 2px solid black; }
