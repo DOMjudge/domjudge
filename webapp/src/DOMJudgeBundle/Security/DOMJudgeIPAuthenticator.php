@@ -60,9 +60,10 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
           return true;
         }
 
-        // We also support authenticating if it's a POST to the login route
+        // We also support authenticating if it's a POST to the login route and loginmethod is set correctly
         if (   $request->attributes->get('_route') === 'login'
-            && $request->isMethod('POST')) {
+            && $request->isMethod('POST')
+            && $request->request->get('loginmethod') === 'ipaddress') {
             return true;
         }
 
