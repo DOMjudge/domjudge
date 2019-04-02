@@ -23,6 +23,8 @@ ALTER TABLE `problem`
 ALTER TABLE `scorecache`
   ADD COLUMN `is_first_to_solve` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Is this the first solution to this problem?' AFTER `is_correct_public`;
 
+ALTER TABLE `testcase` ADD INDEX `sample` (`sample`);
+
 --
 -- Transfer data from old to new structure
 --
