@@ -333,7 +333,8 @@ class Scoreboard
 
         // Else, order by teamname alphabetically
         if ($a->getTeam()->getName() != $b->getTeam()->getName()) {
-            return strcasecmp($a->getTeam()->getName(), $b->getTeam()->getName());
+            $collator = new \Collator('en');
+            return $collator->compare($a->getTeam()->getName(), $b->getTeam()->getName());
         }
         // Undecided, should never happen in practice
         return 0;

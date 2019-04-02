@@ -992,7 +992,8 @@ function cmp(array $a, array $b) : int
     }
     // else, order by teamname alphabetically
     if ($a['teamname'] != $b['teamname']) {
-        return strcasecmp($a['teamname'], $b['teamname']);
+        $collator = new \Collator('en');
+        return $collator->compare($a['teamname'], $b['teamname']);
     }
     // undecided, should never happen in practice
     return 0;
