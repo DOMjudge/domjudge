@@ -500,7 +500,7 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/by-external-id/{extid}", name="jury_submission_by_external_id")
+     * @Route("/by-external-id/{externalId}", name="jury_submission_by_external_id")
      */
     public function viewForExternalIdAction(string $externalId)
     {
