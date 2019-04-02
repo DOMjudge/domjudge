@@ -208,6 +208,9 @@ function tsv_accounts_prepare($content)
     $teamroleid = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'team');
     $juryroleid = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'jury');
     $adminroleid = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'admin');
+    $apiReaderRoleId = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'api_reader');
+    $apiWriterRoleId = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'api_writer');
+    $apiSourceReaderRoleId = $DB->q('VALUE SELECT roleid FROM role WHERE role = %s', 'api_source_reader');
 
     $jurycatid = $DB->q('MAYBEVALUE SELECT categoryid FROM team_category WHERE name = "Jury"');
     if (!$jurycatid) {
@@ -256,6 +259,12 @@ function tsv_accounts_prepare($content)
                 error('unknown role on line ' . $l . ': ' . $line[0]);
         }
 
+        if ($line[2] === 'cds') {
+            $roleids = [$apiReaderRoleId, $apiWriterRoleId, $apiSourceReaderRoleId];
+        } elseif ($line[2] === 'kattis') {
+            $roleids = [$apiReaderRoleId, $apiSourceReaderRoleId];
+        }
+
         // accounts.tsv contains data pertaining both to users and userroles.
         // hence return data for both tables.
 
@@ -295,6 +304,7 @@ function tsv_accounts_set($data)
         $DB->q("INSERT INTO user SET %S ON DUPLICATE KEY UPDATE %S", $row['user'], $row['user']);
         $userid = $DB->q("VALUE SELECT userid FROM user WHERE username = %s", $row['user']['username']);
         auditlog('user', $userid, 'replaced', 'imported from tsv');
+        $DB->q("DELETE FROM userrole WHERE userid = %i", $userid);
         foreach ($row['userroles'] as $roleid) {
             $userrole_data = array(
                 'userid' => $userid,
