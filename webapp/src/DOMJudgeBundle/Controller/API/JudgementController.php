@@ -37,12 +37,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
 
-        global $VERDICTS;
-        $commonConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/common-config.php';
-        require_once $commonConfig;
-
-        /** @var string[] $VERDICTS */
-        $this->verdicts = $VERDICTS;
+        $verdictsConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/verdicts.php';
+        $this->verdicts = include $verdictsConfig;
     }
 
     /**

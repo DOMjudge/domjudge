@@ -95,13 +95,11 @@ class JudgementTypeController extends AbstractRestController
      */
     protected function getJudgementTypes(array $filteredOn = null)
     {
-        global $VERDICTS;
-        $commonConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/common-config.php';
-        require_once $commonConfig;
+        $verdictsConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdicts       = include $verdictsConfig;
 
         $result = [];
-        /** @var string[] $VERDICTS */
-        foreach ($VERDICTS as $name => $label) {
+        foreach ($verdicts as $name => $label) {
             $penalty = true;
             $solved  = false;
             if ($name == 'correct') {

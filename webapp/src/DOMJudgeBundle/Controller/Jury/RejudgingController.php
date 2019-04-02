@@ -224,16 +224,14 @@ class RejudgingController extends BaseController
 
         $todo -= $done;
 
-        global $VERDICTS;
-        $commonConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/common-config.php';
-        require_once $commonConfig;
-        /** @var string[] $VERDICTS */
+        $verdictsConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdicts       = include $verdictsConfig;
 
         $used         = [];
         $verdictTable = [];
         // pre-fill $verdictTable to get a consistent ordering
-        foreach ($VERDICTS as $verdict => $abbrev) {
-            foreach ($VERDICTS as $verdict2 => $abbrev2) {
+        foreach ($verdicts as $verdict => $abbrev) {
+            foreach ($verdicts as $verdict2 => $abbrev2) {
                 $verdictTable[$verdict][$verdict2] = array();
             }
         }
@@ -293,7 +291,7 @@ class RejudgingController extends BaseController
 
             // add verdicts to data structures if they are unknown up to now
             foreach ([$newVerdict, $originalVerdict] as $verdict) {
-                if (!array_key_exists($verdict->getResult(), $VERDICTS)) {
+                if (!array_key_exists($verdict->getResult(), $verdicts)) {
                     $addVerdict($verdict->getResult());
                 }
             }
@@ -341,7 +339,7 @@ class RejudgingController extends BaseController
         $data = [
             'rejudging' => $rejudging,
             'todo' => $todo,
-            'verdicts' => $VERDICTS,
+            'verdicts' => $verdicts,
             'used' => $used,
             'verdictTable' => $verdictTable,
             'viewTypes' => $viewTypes,

@@ -264,10 +264,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $this->sinceEventId = $input->getOption('since-event');
 
         // We need the verdicts to validate judgement-types
-        global $VERDICTS;
-        $commonConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/common-config.php';
-        require_once $commonConfig;
-        $this->verdicts = $VERDICTS;
+        $verdictsConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/verdicts.php';
+        $this->verdicts = include $verdictsConfig;
 
         $feed = $input->getArgument('feed-url');
         if (file_exists($feed)) {

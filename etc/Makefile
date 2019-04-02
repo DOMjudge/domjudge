@@ -47,14 +47,14 @@ install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_etcdir) \
 		gendbpasswords genrestapicredentials genadminpassword
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
-		domserver-config.php common-config.php
+		domserver-config.php common-config.php verdicts.php
 # Password files are installed from root Makefile.
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
 		judgehost-static.php sudoers-domjudge
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
-		judgehost-config.php common-config.php
+		judgehost-config.php common-config.php verdicts.php
 # Password files are installed from root Makefile.
 
 # Let only distclean (_not_ the local variant) depend on password
