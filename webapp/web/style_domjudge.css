@@ -295,3 +295,5 @@ tr.ignore td, td.ignore, span.ignore {
 .card-header .collapsed .fa {
     transform: rotate(90deg);
 }
+
+#teampicture { width: 50%; float: right; border: 1px solid black;}
