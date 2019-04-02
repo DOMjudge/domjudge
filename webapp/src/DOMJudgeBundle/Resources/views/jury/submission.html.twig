@@ -133,6 +133,20 @@
         </div>
     {% endif %}
 
+    {% if submission.externalresult is not empty and submission.externalresult != selectedJudging.result and ext_ccs_url is not null %}
+        <div class="alert alert-danger">
+            <strong>Results differ!</strong>
+            <hr>
+            <p>
+                This submission was judged as
+                <a href="{{ submission | externalCcsUrl }}" target="_blank">
+                    {{ submission.externalresult | printResult(true, true) }}
+                    by the external CCS</a>, but as {{ selectedJudging.result | printResult(true, true) }}
+                by DOMjudge.
+            </p>
+        </div>
+    {% endif %}
+
     {% if judgings | length > 1 or (judgings | length == 1 and selectedJudging is null) %}
         <table class="judging-table table table-striped table-hover table-sm" style="width: auto;">
             <caption>Judgings</caption>
@@ -360,21 +374,6 @@
                         });
                     });
                 </script>
-            {% endif %}
-
-            {% if submission.externalresult is not empty and submission.externalresult != selectedJudging.result and ext_ccs_url is not null %}
-                <div class="alert alert-danger">
-                    <strong>Results differ!</strong>
-                    <hr>
-                    <p>
-                        This submission was judged as
-                        <a href="{{ submission | externalCcsUrl }}" target="_blank">
-                            {{ submission.externalresult | printResult(true, true) }}
-                        </a>
-                        by the external CCS, but as {{ selectedJudging.result | printResult(true, true) }}
-                        by DOMjudge.
-                    </p>
-                </div>
             {% endif %}
         {% else %}
             <div class="alert alert-warning">Judging is not ready yet!</div>
