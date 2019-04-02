@@ -16,6 +16,11 @@ require(ETCDIR . '/judgehost-config.php');
 
 $endpoints = [];
 
+function judging_directory(string $workdirpath, array $judging)
+{
+    return "$workdirpath/$jud[cid]/$jud[submitid]/$jud[judgingid]";
+}
+
 function read_credentials()
 {
     global $endpoints;
@@ -504,7 +509,7 @@ foreach ($endpoints as $endpointID => $endpoint) {
     $unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
     $unfinished = dj_json_decode($unfinished);
     foreach ($unfinished as $jud) {
-        $workdir = "$workdirpath/c$jud[cid]-s$jud[submitid]-j$jud[judgingid]";
+        $workdir = judging_directory($workdirpath, $jud);
         @chmod($workdir, 0700);
         logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] .
                " in my name; given back");
@@ -678,7 +683,7 @@ function judge(array $row)
     }
 
     // create workdir for judging
-    $workdir = "$workdirpath/c$row[cid]-s$row[submitid]-j$row[judgingid]";
+    $workdir = judging_directory($workdirpath, $row);
 
     logmsg(LOG_INFO, "Working directory: $workdir");
 
