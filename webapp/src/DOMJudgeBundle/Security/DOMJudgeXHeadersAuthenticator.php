@@ -45,7 +45,8 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
         }
         // We also support authenticating if it's a POST to the login route
         if (   $request->attributes->get('_route') === 'login'
-            && $request->isMethod('POST')) {
+            && $request->isMethod('POST')
+            && $request->request->get('loginmethod') === 'xheaders') {
             return true;
         }
         return false;
