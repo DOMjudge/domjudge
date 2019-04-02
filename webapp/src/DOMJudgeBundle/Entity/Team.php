@@ -204,10 +204,14 @@ class Team implements ExternalRelationshipEntityInterface
      * Set teamid
      *
      * @param int $teamid
+     *
+     * @return Team
      */
     public function setTeamid($teamid)
     {
         $this->teamid = $teamid;
+
+        return $this;
     }
 
     /**

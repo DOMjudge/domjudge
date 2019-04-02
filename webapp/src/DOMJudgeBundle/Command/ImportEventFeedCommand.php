@@ -3,6 +3,8 @@
 namespace DOMJudgeBundle\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Id\AssignedGenerator;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use DOMJudgeBundle\Entity\Clarification;
 use DOMJudgeBundle\Entity\Configuration;
 use DOMJudgeBundle\Entity\Contest;
@@ -232,10 +234,14 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                                           $this->getContainer()->getParameter('domjudge.version')));
         }
 
-        // For team categories we want to overwrite the ID so change the ID generator
+        // For teams and team categories we want to overwrite the ID so change the ID generator
         $metadata = $this->entityManager->getClassMetaData(TeamCategory::class);
-        $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+        $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
+        $metadata->setIdGenerator(new AssignedGenerator());
+
+        $metadata = $this->entityManager->getClassMetaData(Team::class);
+        $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
+        $metadata->setIdGenerator(new AssignedGenerator());
 
         // Find an admin user as we need one to make sure we can read all events
         /** @var User $user */
@@ -814,11 +820,12 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $this->logger->info(sprintf('Importing team %s event %s', $event['op'], $event['id']));
 
         $teamId = $event['data']['id'];
+        $icpcId = $event['data']['icpc_id'];
 
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the team
 
-            $team = $this->entityManager->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
+            $team = $this->entityManager->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
             if ($team) {
                 $this->entityManager->remove($team);
                 $this->entityManager->flush();
@@ -834,12 +841,14 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the team
         /** @var Team $team */
-        $team = $this->entityManager->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
+        $team = $this->entityManager->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
         if ($team) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
             $team = new Team();
-            $team->setExternalid($teamId);
+            $team
+                ->setTeamid($teamId)
+                ->setExternalid($icpcId);
             $action = EventLogService::ACTION_CREATE;
         }
 
@@ -946,7 +955,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $fromTeam   = null;
         if ($fromTeamId !== null) {
             /** @var Team $fromTeam */
-            $fromTeam = $this->entityManager->getRepository(Team::class)->findOneBy(['externalid' => $fromTeamId]);
+            $fromTeam = $this->entityManager->getRepository(Team::class)->findOneBy(['teamid' => $fromTeamId]);
             if (!$fromTeam) {
                 $this->addPendingEvent('team', $fromTeamId, $event);
                 return;
@@ -957,7 +966,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $toTeam   = null;
         if ($toTeamId !== null) {
             /** @var Team $toTeam */
-            $toTeam = $this->entityManager->getRepository(Team::class)->findOneBy(['externalid' => $toTeamId]);
+            $toTeam = $this->entityManager->getRepository(Team::class)->findOneBy(['teamid' => $toTeamId]);
             if (!$toTeam) {
                 $this->addPendingEvent('team', $toTeamId, $event);
                 return;
@@ -1085,7 +1094,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         $teamId = $event['data']['team_id'];
         /** @var Team $team */
-        $team = $this->entityManager->getRepository(Team::class)->findOneBy(['externalid' => $teamId]);
+        $team = $this->entityManager->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
         if (!$team) {
             $this->addPendingEvent('team', $teamId, $event);
             return;
