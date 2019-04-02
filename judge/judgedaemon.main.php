@@ -123,7 +123,7 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
             error($errstr);
         } else {
             warning($errstr);
-            $endpoint['errorred'] = true;
+            $endpoints[$endpointID]['errorred'] = true;
             return null;
         }
     }
@@ -135,13 +135,13 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
             error($errstr);
         } else {
             warning($errstr);
-            $endpoint['errorred'] = true;
+            $endpoints[$endpointID]['errorred'] = true;
             return null;
         }
     }
 
-    if ( $endpoint['errorred'] ) {
-        $endpoint['errorred'] = false;
+    if ( $endpoints[$endpointID]['errorred'] ) {
+        $endpoints[$endpointID]['errorred'] = false;
         logmsg(LOG_NOTICE, "Reconnected to endpoint $endpointID.");
     }
 
