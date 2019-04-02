@@ -1139,30 +1139,6 @@ class Contest
     }
 
     /**
-     * Helper function to serialize this for the REST API
-     *
-     * @return array
-     */
-    public function serializeForAPI($penalty_time, $strict = false)
-    {
-        $res = [
-            'id' => (string)$this->getCid(),
-            'name' => $this->getName(),
-            'formal_name' => $this->getName(),
-            'start_time' => Utils::absTime($this->getStarttime()),
-            'duration' => $this->getDuration(),
-            'scoreboard_freeze_duration' => $this->getScoreboardFreezeDuration(),
-            'penalty_time' => (int)$penalty_time,
-        ];
-        if (!$strict) {
-            $res['external_id'] = $this->getExternalId();
-            $res['shortname']   = $this->getShortname();
-            $res['end_time']    = Utils::absTime($this->getEndtime());
-        }
-        return $res;
-    }
-
-    /**
      * Returns true iff the contest is already and still active, and not disabled.
      */
     public function isActive()
