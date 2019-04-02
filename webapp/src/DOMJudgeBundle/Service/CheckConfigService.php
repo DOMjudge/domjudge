@@ -179,10 +179,12 @@ class CheckConfigService
         $max_files = ini_get('max_file_uploads');
 
         $result = 'O';
-        if ($max_files < max(100, $sourcefiles_limit)) {
+        if ($max_files <= $sourcefiles_limit) {
+            $result = 'E';
+        } elseif ($max_files < 100) {
             $result = 'W';
         }
-        $desc = sprintf("PHP 'max_file_uploads' set to %s. This should be set higher than the maximum number of test cases per problem and the DOMjudge configuration setting 'sourcefiles_limit' (now set to %s)", $max_files, $sourcefiles_limit);
+        $desc = sprintf("PHP 'max_file_uploads' set to %s. This must be set strictly higher than the maximum number of test cases per problem and the DOMjudge configuration setting 'sourcefiles_limit' (now set to %s)", $max_files, $sourcefiles_limit);
 
         $sizes = [];
         $postmaxvars = ['post_max_size', 'memory_limit', 'upload_max_filesize'];
@@ -194,7 +196,7 @@ class CheckConfigService
                 }
             }
         }
-        if (min($sizes) < 52428800) {
+        if ($result !== 'E' && min($sizes) < 52428800) {
             $result = 'W';
         }
 
