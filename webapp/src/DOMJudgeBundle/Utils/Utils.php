@@ -162,7 +162,7 @@ class Utils
     // returns the milliseconds part of a time stamp truncated at three digits
     private static function getMillis(float $seconds) : string
     {
-        return sprintf(".%03d", floor(1000*($seconds - floor($seconds))));
+        return sprintf(".%03d", floor(1000 * $seconds - 1000 * floor($seconds)));
     }
 
     // prints the absolute time as yyyy-mm-ddThh:mm:ss(.uuu)?[+-]zz(:mm)?
