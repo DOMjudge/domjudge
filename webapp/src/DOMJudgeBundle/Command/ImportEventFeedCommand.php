@@ -510,19 +510,29 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         $durationNegative     = ($durationData[1] === '-');
         $freezeNegative       = ($freezeData[1] === '-');
-        $fullDuration         = $durationNegative ? $duration : ('+' . $duration);
         $durationHourModifier = $durationNegative ? -1 : 1;
         $freezeHourModifier   = $freezeNegative ? -1 : 1;
-        $freezeHour           = $durationHourModifier * $durationData[2] - $freezeHourModifier * $freezeData[2];
-        $freeze               = sprintf(
+
+        $durationInSeconds = $durationHourModifier * $durationData[2] * 3600
+            + 60 * $durationData[3]
+            + (double)sprintf('%d.%d', $durationData[4], $durationData[5]);
+        $freezeInSeconds = $freezeHourModifier * $freezeData[2] * 3600
+            + 60 * $freezeData[3]
+            + (double)sprintf('%d.%d', $freezeData[4], $freezeData[5]);
+        $freezeStartSeconds = $durationInSeconds - $freezeInSeconds;
+
+        $freezeHour         = floor($freezeStartSeconds / 3600);
+        $freezeMinutes      = floor(($freezeStartSeconds % 3600) / 60);
+        $freezeSeconds      = floor(($freezeStartSeconds % 60) / 60);
+        $freezeMilliseconds = $freezeStartSeconds - floor($freezeStartSeconds);
+
+        $fullFreeze = sprintf(
             '%d:%02d:%02d.%03d',
             $freezeHour,
-            $durationData[3] - $freezeData[3],
-            $durationData[4] - $freezeData[4],
-            $durationData[5] - $freezeData[5]
+            $freezeMinutes,
+            $freezeSeconds,
+            $freezeMilliseconds
         );
-
-        $fullFreeze = ($freezeHour < 0) ? $freeze : ('+' . $freeze);
 
         // The timezones are given in ISO 8601 and we only support names.
         // This is why we will use the platform default timezone and just verify it matches
