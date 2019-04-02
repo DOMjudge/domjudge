@@ -296,4 +296,4 @@ tr.ignore td, td.ignore, span.ignore {
     transform: rotate(90deg);
 }
 
-#teampicture { width: 50%; float: right; border: 1px solid black;}
+#teampicture { width: 100%; float: right; border: 1px solid black;}
