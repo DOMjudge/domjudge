@@ -64,7 +64,7 @@ class JudgehostController extends BaseController
         $contest       = $this->DOMJudgeService->getCurrentContest();
         $query         = 'SELECT judgehost, SUM(IF(endtime, endtime, :now) - GREATEST(:from, starttime)) AS `load`
                           FROM judging
-                          WHERE endtime > :from OR (endtime IS NULL AND (valid = 1 OR rejudgingid IS NOT NULL)
+                          WHERE endtime > :from OR (endtime IS NULL AND (valid = 1 OR rejudgingid IS NOT NULL))
                           GROUP BY judgehost';
         $params        = [':now' => $now];
 
