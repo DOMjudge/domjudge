@@ -300,7 +300,10 @@ tr.ignore td, td.ignore, span.ignore {
     margin: -3rem auto 3rem auto;
 }
 
-#teampicture { position: absolute; right: 4ex; top: 7ex; }
+#teampicture {
+    width: 100%;
+    border: solid 1px black;
+}
 
 .problem-list h3,h4,h5 {
     text-align: center;
