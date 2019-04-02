@@ -32,13 +32,6 @@ if ($isstatic && is_readable($banner)) {
   echo '<img class="banner" src="../images/banner.png" />';
 }
 
-if ($isstatic) {
-       echo '<div class="alert alert-danger" role="alert">' .
-               'This is just a test contest with random submissions, no real data.' .
-               '</div>';
-}
-
-
 if ($isstatic && isset($_REQUEST['contest'])) {
     if ($_REQUEST['contest'] === 'auto') {
         $a = null;
