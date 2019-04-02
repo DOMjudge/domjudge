@@ -271,16 +271,16 @@ class RejudgingController extends BaseController
         });
 
         // Helper function to add verdicts
-        $addVerdict = function ($unknownVerdict) use ($VERDICTS, &$verdictTable) {
+        $addVerdict = function ($unknownVerdict) use ($verdicts, &$verdictTable) {
             // add column to existing rows
-            foreach ($VERDICTS as $verdict => $abbreviation) {
+            foreach ($verdicts as $verdict => $abbreviation) {
                 $verdictTable[$verdict][$unknownVerdict] = [];
             }
             // add verdict to known verdicts
             $verdicts[$unknownVerdict] = $unknownVerdict;
             // add row
             $verdictTable[$unknownVerdict] = [];
-            foreach ($VERDICTS as $verdict => $abbreviation) {
+            foreach ($verdicts as $verdict => $abbreviation) {
                 $verdictTable[$unknownVerdict][$verdict] = [];
             }
         };
