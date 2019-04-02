@@ -513,6 +513,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $freezeNegative       = ($freezeData[1] === '-');
         $durationHourModifier = $durationNegative ? -1 : 1;
         $freezeHourModifier   = $freezeNegative ? -1 : 1;
+        $fullDuration         = $durationNegative ? $duration : ('+' . $duration);
 
         $durationInSeconds = $durationHourModifier * $durationData[2] * 3600
             + 60 * $durationData[3]
@@ -528,7 +529,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $freezeMilliseconds = $freezeStartSeconds - floor($freezeStartSeconds);
 
         $fullFreeze = sprintf(
-            '%d:%02d:%02d.%03d',
+            '%s%d:%02d:%02d.%03d',
+            $freezeHour < 0 ? '' : '+',
             $freezeHour,
             $freezeMinutes,
             $freezeSeconds,
