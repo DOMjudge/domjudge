@@ -84,7 +84,7 @@ struct option const long_opts[] = {
 	{"url",         required_argument, NULL,         'u'},
 	{"verbose",     optional_argument, NULL,         'v'},
 	{"contest",     required_argument, NULL,         'c'},
-	{"entry_point", optional_argument, NULL,         'e'},
+	{"entry_point", required_argument, NULL,         'e'},
 	{"quiet",       no_argument,       NULL,         'q'},
 	{"help",        no_argument,       &show_help,    1 },
 	{"version",     no_argument,       &show_version, 1 },
@@ -156,8 +156,9 @@ std::string decode_HTML_entities(std::string str)
 int nwarnings;
 
 /* Submission information */
-string contestid, langid, probid, baseurl, entry_point;
+string contestid, langid, probid, baseurl;
 vector<string> filenames;
+char *entry_point;
 char *submitdir;
 
 /* Active contests */
@@ -248,6 +249,8 @@ int main(int argc, char **argv)
 	quiet = show_help = show_version = 0;
 	opterr = 0;
 	while ( (c = getopt_long(argc,argv,"p:l:u:c:e:v::q",long_opts,NULL))!=-1 ) {
+		logmsg(LOG_DEBUG, "read option `%c' with argument `%s'",
+		       c, ( optarg==NULL ? "NULL" : optarg ));
 		switch ( c ) {
 		case 0:   /* long-only option */
 			break;
@@ -256,7 +259,7 @@ int main(int argc, char **argv)
 		case 'l': langid      = string(optarg); break;
 		case 'u': baseurl     = string(optarg); break;
 		case 'c': contestid   = string(optarg); break;
-		case 'e': entry_point = string(optarg); break;
+		case 'e': entry_point = strdup(optarg); break;
 
 		case 'v': /* verbose option */
 			if ( optarg!=NULL ) {
@@ -280,6 +283,8 @@ int main(int argc, char **argv)
 			error(0,"getopt returned character code `%c' ??",c);
 		}
 	}
+
+	logmsg(LOG_INFO,"set verbosity to %d", verbose);
 
 	/* Make sure that baseurl terminates with a '/' for later concatenation. */
 	if ( !baseurl.empty() && baseurl[baseurl.length()-1]!='/' ) baseurl += '/';
@@ -395,26 +400,26 @@ lang_found:
 	if ( baseurl.empty()       ) usage2(0,"no url specified");
 
 	/* Guess entry point if not already specified. */
-	if ( entry_point.empty() && mylanguage.require_entry_point ) {
+	if ( entry_point==NULL && mylanguage.require_entry_point ) {
 		if ( mylanguage.name == "Java" ) {
-			entry_point = filebase;
+			entry_point = strdup(filebase.c_str());
 		} else if ( mylanguage.name == "Kotlin" ) {
-			entry_point = kotlin_base_entry_point(filebase) + "Kt";
+			entry_point = strdup(string(kotlin_base_entry_point(filebase) + "Kt").c_str());
 		} else if ( mylanguage.name == "Python 2" ||
 		            mylanguage.name == "Python 2 (pypy)" ||
 		            mylanguage.name == "Python 3" ) {
-			entry_point = filebase + "." + fileext;
+			entry_point = strdup(string(filebase + "." + fileext).c_str());
 		}
 	}
 
-	if ( entry_point.empty() && mylanguage.require_entry_point ) {
+	if ( entry_point==NULL && mylanguage.require_entry_point ) {
 		error(0, "Entry point required but not specified nor detected.");
 	}
 
 	logmsg(LOG_DEBUG,"contest is `%s'",mycontest.shortname.c_str());
 	logmsg(LOG_DEBUG,"problem is `%s'",myproblem.label.c_str());
 	logmsg(LOG_DEBUG,"language is `%s'",mylanguage.name.c_str());
-	logmsg(LOG_DEBUG,"entry_point is `%s'",entry_point.c_str());
+	logmsg(LOG_DEBUG,"entry_point is `%s'",entry_point);
 	logmsg(LOG_DEBUG,"url is `%s'",baseurl.c_str());
 
 	/* Ask user for confirmation */
@@ -432,8 +437,8 @@ lang_found:
 		printf("  contest:     %s\n",mycontest.shortname.c_str());
 		printf("  problem:     %s\n",myproblem.label.c_str());
 		printf("  language:    %s\n",mylanguage.name.c_str());
-		if ( !entry_point.empty() ) {
-			printf("  entry_point: %s\n",entry_point.c_str());
+		if ( entry_point!=NULL ) {
+			printf("  entry_point: %s\n",entry_point);
 		}
 		printf("  url:         %s\n",baseurl.c_str());
 
@@ -876,8 +881,8 @@ bool doAPIsubmit()
 	}
 	curlformadd(COPYNAME,"problem", COPYCONTENTS, myproblem.id.c_str());
 	curlformadd(COPYNAME,"language", COPYCONTENTS, mylanguage.id.c_str());
-	if ( !entry_point.empty() ) {
-		curlformadd(COPYNAME,"entry_point", COPYCONTENTS, entry_point.c_str());
+	if ( entry_point!=NULL ) {
+		curlformadd(COPYNAME,"entry_point", COPYCONTENTS, entry_point);
 	}
 
 	/* Set options for post */
