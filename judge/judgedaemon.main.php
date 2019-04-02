@@ -152,6 +152,7 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
 
     if ( $endpoints[$endpointID]['errorred'] ) {
         $endpoints[$endpointID]['errorred'] = false;
+        $endpoints[$endpointID]['waiting'] = false;
         logmsg(LOG_NOTICE, "Reconnected to endpoint $endpointID.");
     }
 
