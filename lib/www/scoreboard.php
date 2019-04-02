@@ -916,13 +916,7 @@ function printContestStart(array $cdata) : string
     if (!$cdata['starttime_enabled']) {
         $res = "start delayed, was scheduled ";
     }
-    if (printtime(now(), '%Y%m%d') == printtime($cdata['starttime'], '%Y%m%d')) {
-        // Today
-        $res .= "at " . printtime($cdata['starttime']);
-    } else {
-        // Print full date
-        $res .= "on " . printtime($cdata['starttime'], '%a %d %b %Y %T %Z');
-    }
+    $res .= "on " . printtime($cdata['starttime'], '%a %d %b %Y at %T %Z');
     return $res;
 }
 
