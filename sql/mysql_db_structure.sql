@@ -546,6 +546,7 @@ CREATE TABLE `testcase` (
   PRIMARY KEY  (`testcaseid`),
   UNIQUE KEY `rank` (`probid`,`rank`),
   KEY `probid` (`probid`),
+  KEY `sample` (`sample`),
   CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores testcases per problem';
 
