@@ -79,7 +79,7 @@ if (isset($_POST['import'])) {
         $starttime->setTimezone(new DateTimeZone(date_default_timezone_get()));
 
         $contest['starttime_string'] = date_format($starttime, 'Y-m-d H:i:s e');
-        $contest['activatetime_string'] = '-1:00';
+        $contest['activatetime_string'] = '-24:00';
         $contest['endtime_string'] = '+' . $contest_yaml_data['duration'];
         // First try new key then fallback to old 'scoreboard-freeze':
         $freeze_duration = first_defined(
