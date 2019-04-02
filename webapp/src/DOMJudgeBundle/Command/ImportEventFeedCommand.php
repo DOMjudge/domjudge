@@ -545,21 +545,28 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // The timezones are given in ISO 8601 and we only support names.
         // This is why we will use the platform default timezone and just verify it matches
-        $startTime       = new \DateTime($event['data']['start_time']);
-        $timezone        = new \DateTimeZone($startTime->format('e'));
-        $defaultTimezone = new \DateTimeZone(date_default_timezone_get());
-        if ($timezone->getOffset($startTime) !== $defaultTimezone->getOffset($startTime)) {
-            $this->logger->warning(sprintf('Time zone offset (%s) of start time does not match system time zone %s',
-                                           $startTime->format('e'), date_default_timezone_get()));
-        }
+        $startTime       = $event['data']['start_time'] === null ? null : new \DateTime($event['data']['start_time']);
+        if ($startTime !== null) {
+            $timezone = new \DateTimeZone($startTime->format('e'));
+            $defaultTimezone = new \DateTimeZone(date_default_timezone_get());
+            if ($timezone->getOffset($startTime) !== $defaultTimezone->getOffset($startTime)) {
+                $this->logger->warning(sprintf('Time zone offset (%s) of start time does not match system time zone %s',
+                    $startTime->format('e'), date_default_timezone_get()));
+            }
+            // Now set the data
+            $contest
+                ->setStarttimeEnabled(true)
+                ->setStarttimeString($startTime->format('Y-m-d H:i:s') . ' ' . date_default_timezone_get())
+                ->setEndtimeString($fullDuration)
+                ->setFreezetimeString($fullFreeze)
+                ->updateTimes();
 
-        // Now set the data
-        $contest
-            ->setName($event['data']['name'])
-            ->setStarttimeString($startTime->format('Y-m-d H:i:s') . ' ' . date_default_timezone_get())
-            ->setEndtimeString($fullDuration)
-            ->setFreezetimeString($fullFreeze)
-            ->updateTimes();
+        } else {
+            // Now set the data
+            $contest
+                ->setName($event['data']['name'])
+                ->setStarttimeEnabled(false);
+        }
 
         // Also update the penalty time
         /** @var Configuration $penaltyTimeConfig */
