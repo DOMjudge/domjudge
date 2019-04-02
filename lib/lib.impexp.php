@@ -292,7 +292,7 @@ function tsv_accounts_set($data)
             auditlog('team', $teamid, 'added', 'imported from tsv, autocreated for judge');
             $row['user']['teamid'] = $teamid;
         }
-        $DB->q("REPLACE INTO user SET %S", $row['user']);
+        $DB->q("INSERT INTO user SET %S ON DUPLICATE KEY UPDATE %S", $row['user'], $row['user']);
         $userid = $DB->q("VALUE SELECT userid FROM user WHERE username = %s", $row['user']['username']);
         auditlog('user', $userid, 'replaced', 'imported from tsv');
         foreach ($row['userroles'] as $roleid) {
@@ -300,7 +300,7 @@ function tsv_accounts_set($data)
                 'userid' => $userid,
                 'roleid' => $roleid
             );
-            $DB->q("INSERT INTO userrole SET %S", $userrole_data);
+            $DB->q("REPLACE INTO userrole SET %S", $userrole_data);
             auditlog('userrole', $userid, 'insert', 'imported from tsv');
         }
         $cnt++;
