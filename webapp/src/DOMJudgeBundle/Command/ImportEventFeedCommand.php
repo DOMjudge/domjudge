@@ -225,6 +225,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $contest = $this->entityManager->getRepository(Contest::class)->find($input->getArgument('contest-id'));
         if (!$contest) {
             $this->logger->error(sprintf('Contest with ID %s not found, exiting.', $input->getArgument('contest-id')));
+            return 1;
         } else {
             $this->logger->notice(sprintf('Starting event feed import into contest with ID %d [DOMjudge/%s]',
                                           $contest->getCid(),
