@@ -31,14 +31,15 @@ function read_credentials()
         }
         list($endpointID, $resturl, $restuser, $restpass) = preg_split("/\s+/", trim($credential));
         if (array_key_exists($endpointID, $endpoints)) {
-            error("Error parsing REST API credentials. Duplicate endpoint ID.");
+            error("Error parsing REST API credentials. Duplicate endpoint ID '$endpointID'.");
         }
         $endpoints[$endpointID] = [
             "url" => $resturl,
             "user" => $restuser,
             "pass" => $restpass,
-            "waiting" => false
-            ];
+            "waiting" => false,
+            "errorred" => false,
+        ];
     }
     if (count($endpoints) <= 0) {
         error("Error parsing REST API credentials.");
@@ -122,6 +123,7 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
             error($errstr);
         } else {
             warning($errstr);
+            $endpoint['errorred'] = true;
             return null;
         }
     }
@@ -133,8 +135,14 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
             error($errstr);
         } else {
             warning($errstr);
+            $endpoint['errorred'] = true;
             return null;
         }
+    }
+
+    if ( $endpoint['errorred'] ) {
+        $endpoint['errorred'] = false;
+        logmsg(LOG_NOTICE, "Reconnected to endpoint $endpointID.");
     }
 
     return $response;
@@ -497,7 +505,7 @@ if (! USE_CHROOT) {
 
 // Perform setup work for each endpoint we are communicating with
 foreach ($endpoints as $endpointID => $endpoint) {
-    logmsg(LOG_NOTICE, "Registering judgehost on endpoint " . $endpoint['url']);
+    logmsg(LOG_NOTICE, "Registering judgehost on endpoint $endpointID: " . $endpoint['url']);
     $endpoints[$endpointID]['ch'] = setup_curl_handle($endpoint['user'], $endpoint['pass']);
 
     // Create directory where to test submissions
