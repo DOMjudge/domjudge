@@ -782,7 +782,7 @@ collapse("filter");
     // freeze time
     $lastupdate = printtime(now(), '%a %d %b %Y %T %Z');
     echo "<p id=\"lastmod\">Last Update: $lastupdate<br />\n" .
-         "using <a href=\"https://www.domjudge.org/\">DOMjudge</a></p>\n\n";
+	    "using <a href=\"https://www.domjudge.org/\" target=\"_top\">DOMjudge</a></p>\n\n";
 
     return;
 }
