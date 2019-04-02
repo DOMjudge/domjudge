@@ -779,6 +779,12 @@ Finally start the judgedaemon (optionally binding it to CPU core X):
 <code>bin/judgedaemon [-n X]</code>
 If using the <tt>-n X</tt> option, then an extra user
 <tt>domjudge-run-X</tt> must also be created.
+Additionally, you could add a kernel parameter <tt>isolcpus=X</tt>
+to make the Linux kernel not schedule any processes on CPU X,
+except those explicitly bound to it. This might improve runtime
+consistency under some circumstances; however, in a test running a
+single judgedaemon on 6 CPU core machines, we did not see any
+significant improvement of runtime or decrease in variations.
 
 <p>
 Upon its first connection to the domserver API, the judgehost will be
