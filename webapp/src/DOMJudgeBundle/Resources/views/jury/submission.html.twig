@@ -133,7 +133,7 @@
         </div>
     {% endif %}
 
-    {% if submission.externalresult is not empty and submission.externalresult != selectedJudging.result and ext_ccs_url is not null %}
+    {% if submission.externalresult is not empty and selectedJudging is not null and submission.externalresult != selectedJudging.result and ext_ccs_url is not null %}
         <div class="alert alert-danger">
             <strong>Results differ!</strong>
             <hr>
