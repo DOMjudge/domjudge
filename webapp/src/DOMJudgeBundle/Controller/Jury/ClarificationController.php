@@ -69,6 +69,11 @@ class ClarificationController extends Controller
             $contestIds = [-1];
         }
 
+        $currentQueue = $request->query->get('queue');
+        if ($currentQueue === 'all') {
+            $currentQueue = null;
+        }
+
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Clarification', 'clar')
             ->leftJoin('clar.problem', 'p')
@@ -78,6 +83,16 @@ class ClarificationController extends Controller
             ->setParameter(':contestIds', $contestIds)
             ->orderBy('clar.submittime', 'DESC')
             ->addOrderBy('clar.clarid', 'DESC');
+
+        if ($currentQueue !== null) {
+            if ($currentQueue === '') {
+                $queryBuilder->andWhere('clar.queue IS NULL');
+            } else {
+                $queryBuilder
+                    ->andWhere('clar.queue = :queue')
+                    ->setParameter(':queue', $currentQueue);
+            }
+        }
 
         /**
          * @var Clarification[] $newClarifications
@@ -109,7 +124,7 @@ class ClarificationController extends Controller
             }
         }
 
-        $queues     = $this->DOMJudgeService->dbconfig_get('clar_queues');
+        $queues = $this->DOMJudgeService->dbconfig_get('clar_queues');
 
 
         return $this->render('@DOMJudge/jury/clarifications.html.twig', [
@@ -118,6 +133,7 @@ class ClarificationController extends Controller
             'generalClarifications' => $generalClarifications,
             'queues' => $queues,
             'showExternalId' => $this->eventLogService->externalIdFieldForEntity(Clarification::class),
+            'currentQueue' => $currentQueue,
         ]);
     }
 
