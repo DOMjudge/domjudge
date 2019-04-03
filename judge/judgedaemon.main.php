@@ -132,8 +132,13 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
     }
     $status = curl_getinfo($curl_handle, CURLINFO_HTTP_CODE);
     if ($status < 200 || $status >= 300) {
-        $errstr = "Error while executing curl $verb to url " . $url .
-            ": http status code: " . $status . ", response: " . $response;
+        if ($status == 401) {
+            $errstr = "Authentication failed (error $status) while contacting $url. " .
+                "Check credentials in restapi.secret.";
+        } else {
+            $errstr = "Error while executing curl $verb to url " . $url .
+                ": http status code: " . $status . ", response: " . $response;
+        }
         if ($failonerror) {
             error($errstr);
         } else {
