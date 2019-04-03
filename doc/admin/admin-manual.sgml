@@ -2008,12 +2008,6 @@ the file system (next to the database), then <tt>&lt;domserver_submitdir&gt;</tt
 writable for the web server, see also <ref
 id="install_config:storage_submissions" name="storage of submissions">.
 
-You should take care not to serve any files over the web that
-are not under the DOMjudge 'www/' directory, because they might
-contain sensitive data (e.g. those under <tt>etc/</tt>). DOMjudge
-comes with <tt>.htaccess</tt> files that try to prevent this, but
-double-check that it's not accessible.
-
 <sect>External security <label id="security:external">
 <p>
 
