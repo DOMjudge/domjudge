@@ -14,7 +14,10 @@
 
     <h1>{{ action | capitalize }} rejudging r{{ rejudging.rejudgingid }}</h1>
 
+    {% if action == "apply" %}
     <p>Applying rejudge may take some time, please be patient.</p>
+    {% endif %}
+
     <div id="rejudging-status"></div>
 
 {% endblock %}
