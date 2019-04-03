@@ -169,6 +169,12 @@ function collapse(x)
 	}
 }
 
+function collapse2(x)
+{
+	'use strict';
+	$(x).toggleClass('d-none');
+}
+
 function addFileUpload()
 {
 	'use strict';

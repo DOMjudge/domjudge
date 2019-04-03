@@ -8,35 +8,23 @@
 
 {% block messages %}{% endblock %}
 {% block body %}
+
+{% set hasaltmethods =
+    ("xheaders" in allowed_authmethods and auth_xheaders_present) or
+    ("ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0)
+%}
+{% set showregular = not hasaltmethods or error %}
+
 <div class="form-signin" id="loginform">
   <img class="mb-4" src="{{ asset('images/DOMjudgelogo.png') }}" alt="DOMjudge" width="72">
   {% include '@DOMJudge/partials/messages.html.twig' %}
-  <br class="clearfix">
-  <div class="main-login mr-2">
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <form action="{{ path('login') }}" method="post">
-      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-        <div class="login-content">
-          {% if error %}
-          <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-          {% endif %}
 
-          <label for="username" class="sr-only">Username</label>
-          <input type="text" id="username" name="_username" class="form-control" placeholder="Username" required autofocus>
-          <label for="inputPassword" class="sr-only">Password</label>
-          <input type="password" id="inputPassword" name="_password" class="form-control" placeholder="Password" required>
-        </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-        {% if allow_registration %}
-        <div class="mt-3">Don't have an account?<br /><a href="{{url('register', {}, true)}}">Register now</a>.</div>
-        {% endif %}
-    </form>
-  </div>
-  {% if ("xheaders" in allowed_authmethods and auth_xheaders_present) or
-        ("ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0)
-  %}
-  <div class="vertical-line"></div>
-  <div class="additional-logins ml-2">
+  <br class="clearfix">
+
+  {% if hasaltmethods %}
+  <div class="additional-logins mr-2">
+    <a class="float-right text-muted" href="#" title="more auth methods"
+        onclick="collapse2('.regularLoginform'); return false;" role="button"><i class="fas fa-user-ninja"></i></a>
     {% if "xheaders" in allowed_authmethods and auth_xheaders_present %}
     <h1 class="h3 mb-3 font-weight-normal">Preconfigured Sign In</h1>
     <form action="{{ path('login') }}" method="post">
@@ -60,7 +48,10 @@
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         <input type="hidden" name="loginmethod" value="ipaddress">
         <div class="login-content">
-          <p>You can log in automatically to an account based on your IP Address. The accounts associated with your IP are shown below.</p>
+          <p>You can log in automatically to an account based on your IP Address.
+          {% if auth_ipaddress_users == 1 %}The accounts associated with your IP are shown below.
+          {% else %}The account associated with your IP is shown below.{% endif %}
+          </p>
         </div>
 
         {% for u in auth_ipaddress_users %}
@@ -74,7 +65,31 @@
     </script>
     {% endif %}
   </div>
+
+  <div class="vertical-line regularLoginform{% if not showregular %} d-none{% endif %}"></div>
   {% endif %}
+
+  <div class="main-login ml-2 regularLoginform {% if not showregular %} d-none{% endif %}">
+    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+    <form action="{{ path('login') }}" method="post">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <div class="login-content">
+          {% if error %}
+          <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+          {% endif %}
+
+          <label for="username" class="sr-only">Username</label>
+          <input type="text" id="username" name="_username" class="form-control" placeholder="Username" required autofocus>
+          <label for="inputPassword" class="sr-only">Password</label>
+          <input type="password" id="inputPassword" name="_password" class="form-control" placeholder="Password" required>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        {% if allow_registration %}
+        <div class="mt-3">Don't have an account?<br /><a href="{{url('register', {}, true)}}">Register now</a>.</div>
+        {% endif %}
+    </form>
+  </div>
+
   <p class="mt-5 mb-3 small text-muted">DOMjudge {{DOMJUDGE_VERSION}}</p>
 </div>
 
