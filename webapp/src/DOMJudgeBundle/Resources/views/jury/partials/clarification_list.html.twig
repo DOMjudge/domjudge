@@ -19,9 +19,9 @@
         <th scope="col">text</th>
         <th scope="col">state</th>
         <th scope="col">who</th>
-{% if is_granted('ROLE_ADMIN') and queues | length > 1 %}
-        <th scope="col">queue</th>
-{% endif %}
+        {% if queues | length > 1 %}
+             <th scope="col">queue</th>
+        {% endif %}
     </tr>
     </thead>
     <tbody>
@@ -94,7 +94,7 @@
                 {%- endif -%}
 		</form>
             </td>
-{% if is_granted('ROLE_ADMIN') and queues | length > 1 %}
+{% if queues | length > 1 %}
             <td data-search="{{ queues[clarification.queue]|default('') }}">
             <div class="btn-group btn-group-toggle" data-toggle="buttons">
                  <div class="input-group-prepend"><div class="input-group-text" id="qig{{clarification.clarid}}"><i class="fab fa-quora"></i></div></div>
