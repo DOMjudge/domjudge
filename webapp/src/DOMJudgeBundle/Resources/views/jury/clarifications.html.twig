@@ -18,6 +18,27 @@
         <div class="alert alert-danger">No active contest(s)</div>
     {%- else %}
 
+        {% if queues | length > 0 %}
+        <h3>Filter on queue</h3>
+            <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+                <label class="btn btn-secondary {% if currentQueue is null %}active{% endif %}">
+                    <input type="radio" name="queue" autocomplete="off" value="all"
+                           {% if currentQueue is null %}checked{% endif %}> All
+                </label>
+                <label class="btn btn-secondary {% if currentQueue is not null and currentQueue == '' %}active{% endif %}">
+                    <input type="radio" name="queue" autocomplete="off" value=""
+                           {% if currentQueue is not null and currentQueue == '' %}checked{% endif %}> Unassigned
+                </label>
+                {%- for queue, name in queues %}
+                    <label class="btn btn-secondary {% if currentQueue == queue %}active{% endif %}">
+                        <input type="radio" name="queue" autocomplete="off" value="{{ queue }}"
+                               {% if currentQueue == queue %}checked{% endif %}> {{ name }}
+                    </label>
+                {%- endfor %}
+
+            </div>
+        {% endif %}
+
         <p><a href="{{ path('jury_clarification_new') }}">Send Clarification</a></p>
         <p><a href="#newrequests">View New Clarification Requests</a></p>
         <p><a href="#oldrequests">View Old Clarification Requests</a></p>
@@ -77,6 +98,10 @@
                             icon.html('<i class="fas fa-times"></i>');
                         }
                     });
+            });
+
+            $('input[name=queue]').on('change', function () {
+                window.location = '{{ path('jury_clarifications', {'queue': 'REPLACE_ME'}) }}'.replace('REPLACE_ME', $(this).val());
             });
         });
     </script>
