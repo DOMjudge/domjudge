@@ -78,7 +78,7 @@ function dj_file_get_contents(string $filename, int $maxsize = -1) : string
     }
 
     if ($maxsize >= 0 && filesize($filename) > $maxsize) {
-        $res = file_get_contents($filename, false, null, -1, $maxsize);
+        $res = file_get_contents($filename, false, null, 0, $maxsize);
         if ($res===false) {
             error("Error reading from file: $filename");
         }
