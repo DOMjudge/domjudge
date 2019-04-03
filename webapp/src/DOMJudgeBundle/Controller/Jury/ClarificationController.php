@@ -191,7 +191,7 @@ class ClarificationController extends Controller
 
             $data['answered'] = $clar->getAnswered();
 
-            $data['body'] = $clar->getBody();
+            $data['body'] = Utils::wrap_unquoted($clar->getBody(), 78);
             $clardata['list'][] = $data;
         }
 
