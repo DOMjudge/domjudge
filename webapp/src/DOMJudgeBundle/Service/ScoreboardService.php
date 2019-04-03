@@ -112,7 +112,7 @@ class ScoreboardService
         $freezeData = new FreezeData($contest);
 
         // Don't leak information before start of contest
-        if (!$freezeData->started()) {
+        if (!$jury && !$freezeData->started()) {
             return null;
         }
 
