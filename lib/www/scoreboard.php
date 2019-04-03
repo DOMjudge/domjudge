@@ -687,6 +687,11 @@ function putScoreBoard(array $cdata = null, $myteamid = null, bool $static = fal
             echo '<div class="card" style="border: none;"></div>';
         }
         echo '</div>';
+
+        // copied from below. FIXME
+        $lastupdate = printtime(now(), '%a %d %b %Y %T %Z');
+        echo "<p id=\"lastmod\">Last Update: $lastupdate<br />\n" .
+            "using <a href=\"https://www.domjudge.org/\" target=\"_top\">DOMjudge</a></p>\n\n";
         return;
     }
 
