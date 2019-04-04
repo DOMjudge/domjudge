@@ -114,10 +114,11 @@ install-docs-l:
 # doesn't work because we're not root.
 install-domserver-l:
 	$(MAKE) check-root
-# Fix permissions for special directories (don't touch tmpdir when FHS enabled):
+# Fix permissions for special directories:
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_rundir)
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
+# Special case create tmpdir here, only when FHS not enabled:
 ifneq "$(FHS_ENABLED)" "yes"
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
 endif
@@ -133,10 +134,11 @@ endif
 
 install-judgehost-l:
 	$(MAKE) check-root
-# Fix permissions for special directories (don't touch tmpdir when FHS enabled):
+# Fix permissions for special directories:
 	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_logdir)
 	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_rundir)
 	-$(INSTALL_USER) -m 0711 -d $(DESTDIR)$(judgehost_judgedir)
+# Special case create tmpdir here, only when FHS not enabled:
 ifneq "$(FHS_ENABLED)" "yes"
 	-$(INSTALL_USER) -m 0700 -d $(DESTDIR)$(judgehost_tmpdir)
 endif

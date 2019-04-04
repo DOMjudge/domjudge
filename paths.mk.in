@@ -119,15 +119,17 @@ judgehost_cgroupdir    = @judgehost_cgroupdir@
 
 domjudge_docdir        = @domjudge_docdir@
 
+# The tmpdir's are not in these lists, since they would otherwise get
+# their permissions overwritten in FHS install mode.
 domserver_dirs = $(domserver_bindir) $(domserver_etcdir) \
                  $(domserver_libdir) $(domserver_libsubmitdir) $(domserver_libvendordir) \
                  $(domserver_libwwwdir) $(domserver_logdir) $(domserver_rundir) \
-                 $(domserver_tmpdir) $(domserver_submitdir) $(domserver_sqldir)/upgrade \
+                 $(domserver_submitdir) $(domserver_sqldir)/upgrade \
                  $(addprefix $(domserver_webappdir)/web/images/,affiliations countries teams)
 
 judgehost_dirs = $(judgehost_bindir) $(judgehost_etcdir) $(judgehost_libdir) \
                  $(judgehost_libvendordir) $(judgehost_libjudgedir) $(judgehost_logdir) \
-                 $(judgehost_rundir) $(judgehost_tmpdir) $(judgehost_judgedir)
+                 $(judgehost_rundir) $(judgehost_judgedir)
 
 docs_dirs      = $(addprefix $(domjudge_docdir)/,admin judge team examples logos)
 
