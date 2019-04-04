@@ -636,11 +636,17 @@ function toggleRefresh($url, $after, usingAjax) {
 function updateMenuAlerts()
 {
     'use strict';
-    $.getJSON( $('#menuDefault').data('update-url'), function( json ) {
-      updateMenuClarifications(json.clarifications);
-      updateMenuRejudgings(json.rejudgings);
-      updateMenuJudgehosts(json.judgehosts);
-      updateMenuInternalErrors(json.internal_error);
+    $.ajax({
+        url: $('#menuDefault').data('update-url')
+    }).done(function(json, status, jqXHR) {
+        if (jqXHR.getResponseHeader('X-Login-Page')) {
+            window.location = jqXHR.getResponseHeader('X-Login-Page');
+        } else {
+            updateMenuClarifications(json.clarifications);
+            updateMenuRejudgings(json.rejudgings);
+            updateMenuJudgehosts(json.judgehosts);
+            updateMenuInternalErrors(json.internal_error);
+        }
     });
 }
 
@@ -734,17 +740,21 @@ function initializeAjaxModals()
 		}
 		$.ajax({
 			url: url
-		}).done(function(data) {
-			var $data = $(data);
-			$('body').append($data);
-			$data.modal('show');
-			if ($elem.data('ajax-modal-after')) {
-				window[$elem.data('ajax-modal-after')]($elem);
-			}
+		}).done(function(data, status, jqXHR) {
+			if (jqXHR.getResponseHeader('X-Login-Page')) {
+				window.location = jqXHR.getResponseHeader('X-Login-Page');
+			} else {
+				var $data = $(data);
+				$('body').append($data);
+				$data.modal('show');
+				if ($elem.data('ajax-modal-after')) {
+					window[$elem.data('ajax-modal-after')]($elem);
+				}
 
-			$data.on('hidden.bs.modal', function() {
-				$data.remove();
-			});
+				$data.on('hidden.bs.modal', function () {
+					$data.remove();
+				});
+			}
 		});
 		return false;
 	});
