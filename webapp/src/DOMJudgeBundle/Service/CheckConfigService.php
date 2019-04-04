@@ -153,15 +153,15 @@ class CheckConfigService
         $optional = ['curl' => 'exporting to/importing from Baylor website'];
 
         $state = 'O'; $remark = '';
-        foreach($optional as $ext => $why) {
-            if ( !extension_loaded($ext) ) {
+        foreach ($optional as $ext => $why) {
+            if (!extension_loaded($ext)) {
                 $state = 'W';
                 $remark .= sprintf("Optional PHP extension '%s' not loaded; needed for %s\n",
                     $ext, $why);
             }
         }
-        foreach($required as $ext) {
-            if ( !extension_loaded($ext) ) {
+        foreach ($required as $ext) {
+            if (!extension_loaded($ext)) {
                 $state = 'E';
                 $remark .= sprintf("Required PHP extension '%s' not loaded.\n", $ext);
             }
@@ -228,7 +228,7 @@ class CheckConfigService
         $r = $this->entityManager->getConnection()->fetchAll('SHOW variables WHERE Variable_name IN
                         ("innodb_log_file_size", "max_connections", "max_allowed_packet", "tx_isolation")'); 
         $vars = [];
-        foreach($r as $row) {
+        foreach ($r as $row) {
             $vars[$row['Variable_name']] = $row['Value'];
         }
         $max_inout_r = $this->entityManager->getConnection()->fetchAll('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase');
@@ -236,18 +236,18 @@ class CheckConfigService
 
         $result = 'O';
         $desc = '';
-        if($vars['max_connections'] < 300) {
+        if ($vars['max_connections'] < 300) {
             $result = 'W';
             $desc .= sprintf("MySQL's max_connections is set to %s. In our experience you need at least 300, but better 1000 connections to prevent connection refusal during the contest.\n", $vars['max_connections']);
         }
 
-        if($vars['innodb_log_file_size'] < 128*1024*1024) {
+        if ($vars['innodb_log_file_size'] < 128*1024*1024) {
             $result = 'W';
             $desc .= sprintf("MySQL's innodb_log_file_size is set to %s. You may want to raise this to 10x the maximum test case size (now %s).\n", Utils::printsize((int)$vars['innodb_log_file_size']), Utils::printsize($max_inout));
         }
 
         $tx = ['REPEATABLE-READ', 'SERIALIZABLE'];
-        if ( ! in_array($vars['tx_isolation'], $tx) ) {
+        if (!in_array($vars['tx_isolation'], $tx)) {
             $result = 'W';
             $desc .= sprintf("MySQL's transaction isolation level is set to %s. You should set this to %s to prevent data inconsistencies.\n", $vars['tx_isolation'], implode(' or ', $tx));
         }
@@ -273,7 +273,7 @@ class CheckConfigService
 
         /** @var User $user */
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => 'admin']);
-        if ( $user && password_verify('admin', $user->getPassword())) {
+        if ($user && password_verify('admin', $user->getPassword())) {
             $res = 'E';
             $desc = 'The "admin" user still has the default password. You should change it immediately.';
         }
@@ -289,9 +289,9 @@ class CheckConfigService
         $desc = '';
 
         $scripts = ['compare', 'run'];
-        foreach($scripts as $type) {
+        foreach ($scripts as $type) {
             $scriptid = $this->DOMJudgeService->dbconfig_get('default_' . $type);
-            if ( ! $this->entityManager->getRepository(Executable::class)->find($scriptid) ) {
+            if (!$this->entityManager->getRepository(Executable::class)->find($scriptid)) {
                 $res = 'E';
                 $desc .= sprintf("The default %s script '%s' does not exist.\n", $type, $scriptid);
             } else {
@@ -306,8 +306,8 @@ class CheckConfigService
 
     public function checkScriptFilesizevsMemoryLimit()
     {
-        if ( $this->DOMJudgeService->dbconfig_get('script_filesize_limit') < 
-             $this->DOMJudgeService->dbconfig_get('memory_limit') ) {
+        if ($this->DOMJudgeService->dbconfig_get('script_filesize_limit') < 
+            $this->DOMJudgeService->dbconfig_get('memory_limit')) {
              $result = 'W';
         } else {
              $result = 'O';
@@ -320,7 +320,7 @@ class CheckConfigService
 
     public function checkDebugDisabled()
     {
-        if ( $this->debug ) {
+        if ($this->debug) {
             return ['caption' => 'Debugging',
                 'result' => 'W',
                 'desc' => "Debugging enabled.\nShould not be enabled on live systems."];
@@ -333,7 +333,7 @@ class CheckConfigService
     public function checkTmpdirWritable()
     {
         $tmpdir = $this->DOMJudgeService->getDomjudgeTmpDir();
-        if ( is_writable($tmpdir) ) {
+        if (is_writable($tmpdir)) {
             return ['caption' => 'TMPDIR writable',
                     'result' => 'O',
                     'desc' => sprintf('TMPDIR (%s) can be used to store temporary ' .
@@ -350,7 +350,7 @@ class CheckConfigService
     public function checkSubmitdirWritable()
     {
         $submitdir = $this->DOMJudgeService->getDomjudgeSubmitdir();
-        if ( is_writable($submitdir) ) {
+        if (is_writable($submitdir)) {
             return ['caption' => 'Submitdir writable',
                     'result' => 'O',
                     'desc' => sprintf('Submitdir (%s) can be used to save backup ' .
@@ -367,7 +367,7 @@ class CheckConfigService
     public function checkContestActive()
     {
         $contests = $this->DOMJudgeService->getCurrentContests();
-        if ( empty($contests) ) {
+        if (empty($contests)) {
             return ['caption' => 'Active contests',
                     'result' => 'E',
                     'desc' => 'No currently active contests found. System will not function.'];
@@ -388,17 +388,17 @@ class CheckConfigService
 
         $contesterrors = $cperrors = [];
         $result = 'O';
-        foreach($contests as $contest) {
+        foreach ($contests as $contest) {
             $cid = $contest->getCid();
             $errors = $this->validator->validate($contest);
-            if ( count($errors) ) {
+            if (count($errors)) {
                 $result = 'E';
             }
             $contesterrors[$cid] = $errors;
 
             $cperrors[$cid] = '';
-            foreach($contest->getProblems() as $cp) {
-                if(empty($cp->getColor())) {
+            foreach ($contest->getProblems() as $cp) {
+                if (empty($cp->getColor())) {
                     $result = ($result == 'E' ? 'E' : 'W');
                     $cperrors[$cid] .= "No color for problem " . $cp->getShortname() . " in contest c" . $cid . "\n";
                 }
@@ -406,7 +406,7 @@ class CheckConfigService
         }
 
         $desc = '';
-        foreach($contesterrors as $cid => $errors) {
+        foreach ($contesterrors as $cid => $errors) {
             $desc .= "Contest: c$cid: " .
                     (count($errors) == 0 ? 'no errors' : (string)$errors) ."\n" .$cperrors[$cid];
         }
@@ -426,44 +426,44 @@ class CheckConfigService
 
         $problemerrors = $scripterrors = [];
         $result = 'O';
-        foreach($problems as $problem) {
+        foreach ($problems as $problem) {
             $probid = $problem->getProbid();
             $errors = $this->validator->validate($problem);
-            if ( count($errors) ) {
+            if (count($errors)) {
                 $result = 'E';
             }
             $problemerrors[$probid] = $errors;
 
             $moreproblemerrors[$probid] = '';
-            if ( $special_compare = $problem->getSpecialCompare() ) {
+            if ($special_compare = $problem->getSpecialCompare()) {
                 $exec = $this->entityManager->getRepository(Executable::class)->findOneBy(['execid' => $special_compare]);
-                if ( !$exec ) {
+                if (!$exec) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special compare script %s not found for p%s\n", $special_compare, $probid);
-                } elseif ( $exec->getType() !== "compare" ) { 
+                } elseif ($exec->getType() !== "compare") { 
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special compare script %s exists but is of wrong type (%s instead of compare) for p%s\n", $special_compare, $exec->getType(), $probid);
                 }
             }
-            if ( $special_run = $problem->getSpecialRun() ) {
+            if ($special_run = $problem->getSpecialRun()) {
                 $exec = $this->entityManager->getRepository(Executable::class)->findOneBy(['execid' => $special_run]);
-                if ( !$exec ) {
+                if (!$exec) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special run script %s not found for p%s\n", $special_run, $probid);
-                } elseif ( $exec->getType() !== "run" ) { 
+                } elseif ($exec->getType() !== "run") { 
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special run script %s exists but is of wrong type (%s instead of run) for p%s\n", $special_run, $exec->getType(), $probid);
                 }
             }
 
             $memlimit = $problem->getMemlimit();
-            if ( $memlimit !== null && $memlimit > $script_filesize_limit) {
+            if ($memlimit !== null && $memlimit > $script_filesize_limit) {
                 $result = 'E';
                 $moreproblemerrors[$probid] .= sprintf("problem-specific memory limit %s is larger than global script filesize limit (%s).\n", $memlimit, $script_filesize_limit);
             }
 
             $tcs = $problem->getTestcases();
-            if ( count($tcs) === 0 ) {
+            if (count($tcs) === 0) {
                 $result = 'E';
                 $moreproblemerrors[$probid] .= sprintf("No testcases for p%s\n", $probid);
             } else {
@@ -477,7 +477,7 @@ class CheckConfigService
                      ->setParameter(':maxoutput', $problem_output_limit)
                      ->getQuery()
                      ->getResult();
-                foreach($tcsizequery as $row) {
+                foreach ($tcsizequery as $row) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Testcase number %s for p%s exceeds output limit of %s\n",
                     $row['testcaseid'], $probid, $problem_output_limit);
@@ -486,9 +486,9 @@ class CheckConfigService
         }
 
         $desc = '';
-        foreach($problemerrors as $probid => $errors) {
+        foreach ($problemerrors as $probid => $errors) {
             $desc .= "Problem p$probid: ";
-            if ( count($errors) > 0 || !empty($moreproblemerrors[$probid]) ) {
+            if (count($errors) > 0 || !empty($moreproblemerrors[$probid])) {
                 $desc .= (string)$errors . " " .
                     $moreproblemerrors[$probid] . "\n";
             } else {
@@ -509,21 +509,21 @@ class CheckConfigService
 
         $languageerrors = $scripterrors = [];
         $result = 'O';
-        foreach($languages as $language) {
+        foreach ($languages as $language) {
             $langid = $language->getLangid();
             $errors = $this->validator->validate($language);
-            if ( count($errors) ) {
+            if (count($errors)) {
                 $result = 'E';
             }
             $languageerrors[$langid] = $errors;
 
             $morelanguageerrors[$langid] = '';
-            if ( $compile = $language->getCompileScript() ) {
+            if ($compile = $language->getCompileScript()) {
                $exec = $this->entityManager->getRepository(Executable::class)->findOneBy(['execid' => $compile]);
-               if ( !$exec ) {
+               if (!$exec) {
                    $result = 'E';
                    $morelanguageerrors[$langid] .= sprintf("Compile script %s not found for %s\n", $compile, $langid);
-               } elseif ( $exec->getType() !== "compile" ) { 
+               } elseif ($exec->getType() !== "compile") { 
                    $result = 'E';
                    $morelanguageerrors[$langid] .= sprintf("Compile script %s exists but is of wrong type (%s instead of compile) for %s\n", $compile, $exec->getType(), $langid);
                }
@@ -531,9 +531,9 @@ class CheckConfigService
         }
 
         $desc = '';
-        foreach($languageerrors as $langid => $errors) {
+        foreach ($languageerrors as $langid => $errors) {
             $desc .= "Language $langid: ";
-            if ( count($errors) > 0 || !empty($morelanguageerrors[$langid]) ) {
+            if (count($errors) > 0 || !empty($morelanguageerrors[$langid])) {
                 $desc .= (string)$errors . " " .
                     $morelanguageerrors[$langid] . "\n";
             } else {
@@ -551,8 +551,8 @@ class CheckConfigService
     {
         $judgehosts = $this->entityManager->getRepository(Judgehost::class)->findBy(['active' => 1]);
 
-        foreach($judgehosts as $judgehost) {
-            if ( $judgehost->getRestrictionid() === null ) {
+        foreach ($judgehosts as $judgehost) {
+            if ($judgehost->getRestrictionid() === null) {
                 return ['caption' => 'Problem, language and contest judgability',
                     'result' => 'O',
                     'desc' => sprintf("At least one judgehost (%s) is active and unrestricted.", $judgehost->getHostname())];
@@ -564,26 +564,26 @@ class CheckConfigService
 
         $desc = '';
         $result = 'O';
-        foreach($contests as $contest) {
-            foreach($contest->getProblems() as $cp ) {
-                foreach($languages as $lang) {
-                    if ( !$lang->getAllowSubmit() ) {
+        foreach ($contests as $contest) {
+            foreach ($contest->getProblems() as $cp ) {
+                foreach ($languages as $lang) {
+                    if (!$lang->getAllowSubmit()) {
                         continue;
                     }
                     $found1 = false;
-                    foreach($judgehosts as $judgehost) {
+                    foreach ($judgehosts as $judgehost) {
                         $rest = $judgehost->getRestriction();
                         $rest_c = $rest->getContests();
                         $rest_p = $rest->getProblems();
                         $rest_l = $rest->getLanguages();
-                        if ( ( empty($rest_c) || in_array($contest->getCid(), $rest_c) ) &&
-                             ( empty($rest_p) || in_array($cp->getProbid(), $rest_p) ) &&
-                             ( empty($rest_l) || in_array($lang->getLangid(), $rest_l) ) ) {
+                        if ((empty($rest_c) || in_array($contest->getCid(), $rest_c)) &&
+                            (empty($rest_p) || in_array($cp->getProbid(), $rest_p)) &&
+                            (empty($rest_l) || in_array($lang->getLangid(), $rest_l))) {
                             $found1 = true;
                             continue;
                         }
                     }
-                    if ( ! $found1 ) {
+                    if (!$found1) {
                         $result = 'E';
                         $desc .= sprintf("No active judgehost that allows combination c%s-p%s-%s\n",
                             $contest->getCid(), $cp->getProbid(), $lang->getLangid());
@@ -614,24 +614,24 @@ class CheckConfigService
         $result = 'O';
         $desc = '';
         $webDir = sprintf('%s/webapp/web/', $this->project_dir);
-        foreach($affils as $affiliation) {
+        foreach ($affils as $affiliation) {
             // don't care about unused affiliations
-            if ( count($affiliation->getTeams()) === 0 ) {
+            if (count($affiliation->getTeams()) === 0) {
                 continue;
             }
-            if ( $show_flags ) {
-                if ( $countryCode = $affiliation->getCountry() ) {
+            if ($show_flags) {
+                if ($countryCode = $affiliation->getCountry()) {
                     $flagpath = $webDir . sprintf('images/countries/%s.png', $countryCode);
-                    if ( ! file_exists($flagpath) ) {
+                    if (!file_exists($flagpath)) {
                         $result = 'W';
                         $desc .= sprintf("Flag for %s does not exist (looking for %s)\n", $countryCode, $flagpath);
-                    } elseif ( ! is_readable($flagpath) ) {
+                    } elseif (!is_readable($flagpath)) {
                          $result = 'W';
                           $desc .= sprintf("Flag for %s not readable (looking for %s)\n", $countryCode, $flagpath);
                     }
                 }
             }
-            if ( $show_logos ) {
+            if ($show_logos) {
                 if ($aid = $affiliation->getAffilid()) {
                     $logopaths = [$webDir . sprintf('images/affiliations/%s.png', $aid)];
                     if ($externalAffilid = $affiliation->getExternalid()) {
@@ -673,11 +673,11 @@ class CheckConfigService
         $result = 'O';
         $desc = '';
         $seen = [];
-        foreach($teams as $team) {
+        foreach ($teams as $team) {
             $seen[$team->getName()][] = $team->getTeamid();
         }
-        foreach($seen as $teamname => $teams) {
-            if ( count($teams) > 1 ) {
+        foreach ($seen as $teamname => $teams) {
+            if (count($teams) > 1) {
                 $result = 'W';
                 $desc .= sprintf("Team name '%s' in use by multiple teams: %s",
                          $teamname, implode(',', $teams));
@@ -696,25 +696,25 @@ class CheckConfigService
 
         $submissionerrors = [];
         $result = 'O';
-        foreach($submissions as $submission) {
+        foreach ($submissions as $submission) {
             $submitid = $submission->getSubmitid();
             $errors = $this->validator->validate($submission);
-            if ( count($errors) ) {
+            if (count($errors)) {
                 $result = 'E';
             }
             $submissionerrors[$submitid] = $errors;
 
             $moresubmissionerrors[$submitid] = '';
-            if ( count($submission->getFiles()) === 0 ) {
+            if (count($submission->getFiles()) === 0) {
                 $result = 'E';
                 $moresubmissionerrors[$submitid] .= sprintf("has no associated files\n", $submitid);
             }
-            if ( $submission->getJudgehost() !== null && count($submission->getJudgings()) === 0 ) {
+            if ($submission->getJudgehost() !== null && count($submission->getJudgings()) === 0) {
                 $result = 'E';
                 $moresubmissionerrors[$submitid] .= sprintf("has a judgehost but no judgings\n", $submitid);
             }
             $valids = 0;
-            foreach($submission->getJudgings() as $judging) {
+            foreach ($submission->getJudgings() as $judging) {
                 $valids += (int)$judging->getValid();
 
                 if ($judging->getValid() && $judging->getEndtime() === null &&
@@ -723,15 +723,15 @@ class CheckConfigService
                     $moresubmissionerrors[$submitid] .= sprintf("has been running for more than 5 minutes without a result\n", $submitid);
                 }
             }
-            if ( $valids > 1 ) {
+            if ($valids > 1) {
                 $result = 'E';
                 $moresubmissionerrors[$submitid] .= sprintf("has more than 1 valid judging\n", $submitid);
             }
         }
 
         $desc = '';
-        foreach($submissionerrors as $sid => $errors) {
-            if ( count($errors) > 0 || !empty($moresubmissionerrors[$sid]) ) {
+        foreach ($submissionerrors as $sid => $errors) {
+            if (count($errors) > 0 || !empty($moresubmissionerrors[$sid])) {
                 $desc .= "Submission s$sid: ";
                 $desc .= (string)$errors . " " .
                     $moresubmissionerrors[$sid] . "\n";
