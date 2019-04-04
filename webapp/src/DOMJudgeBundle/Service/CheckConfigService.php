@@ -263,7 +263,7 @@ class CheckConfigService
 
         return ['caption' => 'MySQL settings',
                 'result' => $result,
-                'desc' => $desc];
+                'desc' => $desc ?: 'MySQL settings are all ok'];
     }
 
     public function checkAdminPass()
@@ -600,11 +600,10 @@ class CheckConfigService
 
     public function checkAffiliations()
     {
-        $show_affiliations = $this->DOMJudgeService->dbconfig_get('show_affiliations');
         $show_logos = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos');
         $show_flags = $this->DOMJudgeService->dbconfig_get('show_flags');
 
-        if ( !$show_affiliations || (!$show_logos && !$show_flags) ) {
+        if (!$show_logos && !$show_flags) {
             return ['caption' => 'Team affiliations',
                 'result' => 'O',
                 'desc' => 'Affiliations display disabled, skipping checks'];
