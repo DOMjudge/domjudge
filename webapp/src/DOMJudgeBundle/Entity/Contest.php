@@ -30,7 +30,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * @UniqueEntity("shortname")
  * @UniqueEntity("externalid")
  */
-class Contest
+class Contest extends BaseApiEnttiy
 {
     const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
 
@@ -43,7 +43,7 @@ class Contest
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    private $cid;
+    protected $cid;
 
     /**
      * @var string
@@ -53,7 +53,7 @@ class Contest
      * @Serializer\SerializedName("external_id")
      * TODO: ORM\Unique on first 190 characters
      */
-    private $externalid;
+    protected $externalid;
 
     /**
      * @var string

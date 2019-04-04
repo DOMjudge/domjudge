@@ -19,7 +19,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * )
  * @UniqueEntity("externalid")
  */
-class Team implements ExternalRelationshipEntityInterface
+class Team extends BaseApiEnttiy implements ExternalRelationshipEntityInterface
 {
     /**
      * @var int
@@ -30,7 +30,7 @@ class Team implements ExternalRelationshipEntityInterface
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    private $teamid;
+    protected $teamid;
 
     /**
      * @var string
@@ -39,7 +39,7 @@ class Team implements ExternalRelationshipEntityInterface
      *                            "collation"="utf8mb4_bin"}, nullable=true)
      * @Serializer\SerializedName("icpc_id")
      */
-    private $externalid;
+    protected $externalid;
 
     /**
      * @var string

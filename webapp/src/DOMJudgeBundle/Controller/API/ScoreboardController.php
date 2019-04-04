@@ -6,8 +6,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Event;
-use DOMJudgeBundle\Entity\Problem;
-use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ScoreboardService;
@@ -146,11 +144,9 @@ class ScoreboardController extends AbstractRestController
         $scoreIsInSecods = (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
 
         foreach ($scorebard->getScores() as $teamScore) {
-            $teamIdField  = $this->eventLogService->externalIdFieldForEntity(Team::class) ?? 'teamid';
-            $teamIdGetter = sprintf('get%s', ucfirst($teamIdField));
-            $row          = [
+            $row = [
                 'rank' => $teamScore->getRank(),
-                'team_id' => (string)$teamScore->getTeam()->{$teamIdGetter}(),
+                'team_id' => (string)$teamScore->getTeam()->getApiId($this->eventLogService, $this->entityManager),
                 'score' => [
                     'num_solved' => $teamScore->getNumberOfPoints(),
                     'total_time' => $teamScore->getTotalTime(),
@@ -160,12 +156,10 @@ class ScoreboardController extends AbstractRestController
 
             /** @var ScoreboardMatrixItem $matrixItem */
             foreach ($scorebard->getMatrix()[$teamScore->getTeam()->getTeamid()] as $problemId => $matrixItem) {
-                $contestProblem  = $scorebard->getProblems()[$problemId];
-                $problemIdField  = $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid';
-                $problemIdGetter = sprintf('get%s', ucfirst($problemIdField));
-                $problem         = [
+                $contestProblem = $scorebard->getProblems()[$problemId];
+                $problem        = [
                     'label' => $contestProblem->getShortname(),
-                    'problem_id' => (string)$contestProblem->{$problemIdGetter}(),
+                    'problem_id' => (string)$contestProblem->getApiId($this->eventLogService, $this->entityManager),
                     'num_judged' => $matrixItem->getNumberOfSubmissions(),
                     'num_pending' => $matrixItem->getNumberOfPendingSubmissions(),
                     'solved' => $matrixItem->isCorrect(),

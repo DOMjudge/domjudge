@@ -187,10 +187,8 @@ class EventDaemonCommand extends ContainerAwareCommand
             $contestStart        = $selectedContest->getStarttime();
             $contestStartEnabled = $selectedContest->getStarttimeEnabled();
             if ($contestStartOld !== $contestStart || $contestStartEnabledOld !== $contestStartEnabled) {
-                $contestIdField  = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-                $contestIdGetter = sprintf('get%s', ucfirst($contestIdField));
-                $contestId       = $selectedContest->{$contestIdGetter}();
-                $url             = sprintf('/contests/%s', $contestId);
+                $contestId = $selectedContest->getApiId($this->eventLogService, $this->entityManager);
+                $url       = sprintf('/contests/%s', $contestId);
                 $this->DOMJudgeService->withAllRoles(function () use ($url, $selectedContest) {
                     $this->insertEvent($selectedContest, 'contests',
                                        $this->DOMJudgeService->internalApiRequest($url, Request::METHOD_GET));
@@ -286,9 +284,7 @@ class EventDaemonCommand extends ContainerAwareCommand
         foreach ($this->eventLogService->apiEndpoints as $endpoint => $endpointData) {
             if ($endpointData[EventLogService::KEY_TYPE] === EventLogService::TYPE_CONFIGURATION &&
                 isset($endpointData[EventLogService::KEY_URL])) {
-                $contestIdField  = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
-                $contestIdGetter = sprintf('get%s', ucfirst($contestIdField));
-                $contestId       = $contest->{$contestIdGetter}();
+                $contestId = $contest->getApiId($this->eventLogService, $this->entityManager);
 
                 $url = sprintf('/contests/%s%s', $contestId, $endpointData[EventLogService::KEY_URL]);
                 $this->DOMJudgeService->withAllRoles(function () use ($url, &$data) {

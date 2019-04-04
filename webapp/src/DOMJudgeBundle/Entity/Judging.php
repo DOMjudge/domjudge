@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(name="judging", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class Judging implements ExternalRelationshipEntityInterface
+class Judging extends BaseApiEnttiy implements ExternalRelationshipEntityInterface
 {
     // constants for results
     const RESULT_CORRECT = 'correct';
@@ -25,7 +25,7 @@ class Judging implements ExternalRelationshipEntityInterface
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    private $judgingid;
+    protected $judgingid;
 
     /**
      * @var int

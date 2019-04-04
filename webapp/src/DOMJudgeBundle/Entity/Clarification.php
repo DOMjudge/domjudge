@@ -12,7 +12,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Table(name="clarification", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  * @UniqueEntity("externalid")
  */
-class Clarification implements ExternalRelationshipEntityInterface
+class Clarification extends BaseApiEnttiy implements ExternalRelationshipEntityInterface
 {
     /**
      * @var int
@@ -22,13 +22,13 @@ class Clarification implements ExternalRelationshipEntityInterface
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    private $clarid;
+    protected $clarid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Clarification ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
      */
-    private $externalid;
+    protected $externalid;
 
     /**
      * @var int

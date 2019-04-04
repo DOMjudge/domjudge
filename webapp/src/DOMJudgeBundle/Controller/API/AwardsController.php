@@ -114,18 +114,16 @@ class AwardsController extends AbstractRestController
         if (!$accessAllowed) {
             throw new AccessDeniedHttpException();
         }
-        $probuseextid = !is_null($this->eventLogService->externalIdFieldForEntity(Problem::class));
-        $teamuseextid = !is_null($this->eventLogService->externalIdFieldForEntity(Team::class));
         $additionalBronzeMedals = $contest->getB() ?? 0;
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, null, true);
         $group_winners = $problem_winners = [];
         foreach ($scoreboard->getTeams() as $team) {
-            $teamid = (string)($teamuseextid ? $team->getExternalid() : $team->getTeamid());
+            $teamid = (string)$team->getApiId($this->eventLogService, $this->entityManager);
             if ($scoreboard->isBestInCategory($team)) {
                 $group_winners[$team->getCategoryId()][] = $teamid;
             }
             foreach($scoreboard->getProblems() as $problem) {
-                $probid = (string)($probuseextid ? $problem->getExternalid() : $problem->getProbid());
+                $probid = (string)$problem->getApiId($this->eventLogService, $this->entityManager);
                 if ($scoreboard->solvedFirst($team, $problem)) {
                     $problem_winners[$probid][] = $teamid;
                 }
@@ -156,7 +154,7 @@ class AwardsController extends AbstractRestController
         // can we assume this is ordered just walk the first 12+B entries?
         foreach ($scoreboard->getScores() as $teamScore) {
             $rank = $teamScore->getRank();
-            $teamid = (string)($teamuseextid ? $teamScore->getTeam()->getExternalid() : $teamScore->getTeam()->getTeamid());
+            $teamid = (string)$teamScore->getTeam()->getApiId($this->eventLogService, $this->entityManager);
             if ($rank === 1) {
                 $overall_winners[] = $teamid;
             }

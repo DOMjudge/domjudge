@@ -12,7 +12,7 @@ use DOMJudgeBundle\Utils\Utils;
  * @ORM\Entity()
  * @ORM\Table(name="judging_run", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class JudgingRunWithOutput
+class JudgingRunWithOutput extends BaseApiEnttiy
 {
     /**
      * @var int
@@ -21,7 +21,7 @@ class JudgingRunWithOutput
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="runid", options={"comment"="Unique ID"}, nullable=false)
      */
-    private $runid;
+    protected $runid;
 
     /**
      * @var string

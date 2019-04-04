@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\HasLifecycleCallbacks()
  * @UniqueEntity("externalid")
  */
-class Problem
+class Problem extends BaseApiEnttiy
 {
 
     /**
@@ -27,13 +27,13 @@ class Problem
      * @ORM\Column(type="integer", name="probid", options={"comment"="Unique ID"}, nullable=false)
      * @Serializer\Exclude()
      */
-    private $probid;
+    protected $probid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="External ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
      */
-    private $externalid;
+    protected $externalid;
 
     /**
      * @var string

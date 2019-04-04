@@ -308,11 +308,9 @@ class ImportExportController extends BaseController
         $scoreboard = $this->scoreboardService->getScoreboard($contest, true, $filter);
         $teams      = $scoreboard->getTeams();
 
-        $useExternalId = $this->eventLogService->externalIdFieldForEntity(Team::class) !== null;
-
         $teamNames = [];
         foreach ($teams as $team) {
-            $teamNames[$useExternalId ? $team->getExternalid() : $team->getTeamid()] = $team->getName();
+            $teamNames[$team->getApiId($this->eventLogService, $this->entityManager)] = $team->getName();
         }
 
         $awarded       = [];
@@ -383,7 +381,7 @@ class ImportExportController extends BaseController
                     $firstToSolve[$problem->getProbid()] = [
                         'problem' => $problem->getShortname(),
                         'problem_name' => $problem->getProblem()->getName(),
-                        'team' => $teamNames[$useExternalId ? $team->getExternalid() : $team->getTeamid()],
+                        'team' => $teamNames[$team->getApiId($this->eventLogService, $this->entityManager)],
                         'time' => Utils::scoretime($matrixItem->getTime(), $scoreIsInSeconds),
                     ];
                 }

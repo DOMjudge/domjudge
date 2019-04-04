@@ -369,8 +369,6 @@ class ImportExportService
             throw new BadRequestHttpException('No current contest');
         }
 
-        $useExternalId = $this->eventLogService->externalIdFieldForEntity(Team::class) !== null;
-
         /** @var TeamCategory[] $categories */
         $categories  = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'c', 'c.categoryid')
@@ -452,7 +450,7 @@ class ImportExportService
             }
 
             $data[] = [
-                $useExternalId ? $teamScore->getTeam()->getExternalid() : $teamScore->getTeam()->getTeamid(),
+                $teamScore->getTeam()->getApiId($this->eventLogService, $this->entityManager),
                 $rank,
                 $awardString,
                 $teamScore->getNumberOfPoints(),

@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @UniqueEntity("langid")
  * @UniqueEntity("externalid")
  */
-class Language
+class Language extends BaseApiEnttiy
 {
 
     /**
@@ -26,7 +26,7 @@ class Language
      * @Assert\NotEqualTo("add")
      * @Identifier()
      */
-    private $langid;
+    protected $langid;
 
     /**
      * @var string
@@ -34,7 +34,7 @@ class Language
      * @Serializer\SerializedName("id")
      * @Serializer\Groups({"Default", "Nonstrict"})
      */
-    private $externalid;
+    protected $externalid;
 
     /**
      * @var string

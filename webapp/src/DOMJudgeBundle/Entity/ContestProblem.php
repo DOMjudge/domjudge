@@ -2,7 +2,10 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping as ORM;
+use DOMJudgeBundle\Service\EventLogService;
+use Exception;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -426,5 +429,17 @@ class ContestProblem
     public function getExternalId()
     {
         return $this->getProblem()->getExternalid();
+    }
+
+    /**
+     * Get the API ID for this entity
+     * @param EventLogService        $eventLogService
+     * @param EntityManagerInterface $entityManager
+     * @return mixed
+     * @throws Exception
+     */
+    public function getApiId(EventLogService $eventLogService, EntityManagerInterface $entityManager)
+    {
+        return $this->getProblem()->getApiId($eventLogService, $entityManager);
     }
 }

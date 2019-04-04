@@ -14,7 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Table(name="submission", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  * @UniqueEntity("externalid")
  */
-class Submission implements ExternalRelationshipEntityInterface
+class Submission extends BaseApiEnttiy implements ExternalRelationshipEntityInterface
 {
     /**
      * @var int
@@ -25,13 +25,13 @@ class Submission implements ExternalRelationshipEntityInterface
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    private $submitid;
+    protected $submitid;
 
     /**
      * @var string
      * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Submission ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
      */
-    private $externalid;
+    protected $externalid;
 
     /**
      * @var string

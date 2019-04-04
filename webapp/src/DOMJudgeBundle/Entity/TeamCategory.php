@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     options={@Serializer\Type("string")}
  * )
  */
-class TeamCategory
+class TeamCategory extends BaseApiEnttiy
 {
     /**
      * @var int
@@ -30,7 +30,7 @@ class TeamCategory
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    private $categoryid;
+    protected $categoryid;
 
     /**
      * @var string

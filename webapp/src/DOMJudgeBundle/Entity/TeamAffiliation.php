@@ -21,7 +21,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * )
  * @UniqueEntity("externalid")
  */
-class TeamAffiliation
+class TeamAffiliation extends BaseApiEnttiy
 {
     /**
      * @var int
@@ -31,7 +31,7 @@ class TeamAffiliation
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
-    private $affilid;
+    protected $affilid;
 
     /**
      * @var string
@@ -39,7 +39,7 @@ class TeamAffiliation
      * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Team affiliation ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
      * @Serializer\Exclude()
      */
-    private $externalid;
+    protected $externalid;
 
     /**
      * @var string
