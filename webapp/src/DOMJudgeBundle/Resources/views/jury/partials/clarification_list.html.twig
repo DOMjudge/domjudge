@@ -17,8 +17,8 @@
         <th scope="col">subject</th>
 
         <th scope="col">text</th>
-        <th scope="col">answered</th>
-        <th scope="col">by</th>
+        <th scope="col">state</th>
+        <th scope="col">who</th>
 {% if is_granted('ROLE_ADMIN') and queues | length > 1 %}
         <th scope="col">queue</th>
 {% endif %}
@@ -66,13 +66,13 @@
             <td><a href="{{ link }}">{{ clarification.summary }}</a></td>
             {%- set claim = false %}
             {%- if clarification.answered %}
-                {%- set answered = 'yes' %}
+                {%- set answered = '<i class="fas fa-check" title="is answered"></i>' %}
             {%- else %}
-                {%- set answered = 'no' %}
+                {%- set answered = '<i class="fas fa-times" title="not answered"></i>' %}
                 {%- if clarification.juryMember is empty %}
                     {%- set claim = 'yes' %}
                 {%- else %}
-                    {%- set answered = 'claimed' %}
+                    {%- set answered = '<i class="fas fa-user-lock" title="claimed"></i>' %}
                 {%- endif %}
             {%- endif %}
             {%- if clarification.juryMember is empty %}
@@ -81,7 +81,7 @@
                 {%- set juryMember = clarification.juryMember %}
             {%- endif %}
 
-            <td><a href="{{ link }}">{{ answered }}</a></td>
+            <td><a href="{{ link }}">{{ answered | raw }}</a></td>
             <td><form action="{{ path('jury_clarification_claim', {clarId: clarification.clarid}) }}" method="post" class="form-inline">
                 {%- if claim and clarification.sender -%}
                     <button name="claimed" value="1"
