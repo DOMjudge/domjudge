@@ -482,21 +482,21 @@ class DOMJudgeService
 
     /**
      * Dis- or re-enable what caused an internal error
-     * @param array     $disabled
-     * @param int|null  $cid
-     * @param bool|null $enabled
+     * @param array        $disabled
+     * @param Contest|null $contest
+     * @param bool|null    $enabled
      */
-    public function setInternalError($disabled, $cid, $enabled)
+    public function setInternalError($disabled, $contest, $enabled)
     {
         switch ($disabled['kind']) {
             case 'problem':
                 $this->em->createQueryBuilder()
                     ->update('DOMJudgeBundle:ContestProblem', 'p')
                     ->set('p.allowJudge', ':enabled')
-                    ->andWhere('p.cid = :cid')
+                    ->andWhere('p.contest = :cid')
                     ->andWhere('p.probid = :probid')
                     ->setParameter(':enabled', $enabled)
-                    ->setParameter(':cid', $cid)
+                    ->setParameter(':cid', $contest)
                     ->setParameter(':probid', $disabled['probid'])
                     ->getQuery()
                     ->execute();

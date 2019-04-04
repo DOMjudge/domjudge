@@ -18,7 +18,7 @@ $endpoints = [];
 
 function judging_directory(string $workdirpath, array $judging)
 {
-    return "$workdirpath/$jud[cid]/$jud[submitid]/$jud[judgingid]";
+    return "$workdirpath/$judging[cid]/$judging[submitid]/$judging[judgingid]";
 }
 
 function read_credentials()

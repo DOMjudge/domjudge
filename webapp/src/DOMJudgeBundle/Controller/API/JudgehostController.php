@@ -205,7 +205,7 @@ class JudgehostController extends FOSRestController
             return [
                 'judgingid' => $judging->getJudgingid(),
                 'submitid' => $judging->getSubmitid(),
-                'cid' => $judging->getCid(),
+                'cid' => $judging->getContest()->getApiId($this->eventLogService, $this->entityManager),
             ];
         }, $judgings);
     }
@@ -380,7 +380,7 @@ class JudgehostController extends FOSRestController
         $maxRunTime = $submission->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor();
         $result     = [
             'submitid' => $submission->getSubmitid(),
-            'cid' => $submission->getContest()->getCid(),
+            'cid' => $submission->getContest()->getApiId($this->eventLogService, $this->entityManager),
             'teamid' => $submission->getTeamid(),
             'probid' => $submission->getProbid(),
             'langid' => $submission->getLangid(),
@@ -886,10 +886,17 @@ class JudgehostController extends FOSRestController
             ->setParameter(':status', 'open')
             ->setMaxResults(1);
 
+        /** @var Contest|null $contest */
+        $contest = null;
         if ($cid) {
-            $queryBuilder
-                ->andWhere('e.cid = :cid')
-                ->setParameter(':cid', $cid);
+            $contestIdField = $this->eventLogService->externalIdFieldForEntity(Contest::class) ?? 'cid';
+            $contest        = $this->entityManager->createQueryBuilder()
+                ->from('DOMJudgeBundle:Contest', 'c')
+                ->select('c')
+                ->andWhere(sprintf('c.%s = :cid', $contestIdField))
+                ->setParameter(':cid', $cid)
+                ->getQuery()
+                ->getSingleResult();
         }
 
         /** @var InternalError $error */
@@ -904,7 +911,7 @@ class JudgehostController extends FOSRestController
         $error
             ->setJudging($judgingId ? $this->entityManager->getReference(Judging::class,
                                                                          $judgingId) : null)
-            ->setContest($cid ? $this->entityManager->getReference(Contest::class, $cid) : null)
+            ->setContest($contest)
             ->setDescription($description)
             ->setJudgehostlog($judgehostlog)
             ->setTime(Utils::now())
@@ -915,7 +922,7 @@ class JudgehostController extends FOSRestController
 
         $disabled = $this->DOMJudgeService->jsonDecode($disabled);
 
-        $this->DOMJudgeService->setInternalError($disabled, $cid, false);
+        $this->DOMJudgeService->setInternalError($disabled, $contest, false);
 
         if (in_array($disabled['kind'], ['problem', 'language', 'judgehost']) && $judgingId) {
             // give back judging if we have to

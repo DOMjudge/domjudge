@@ -151,7 +151,7 @@ class InternalErrorController extends BaseController
         $this->entityManager->transactional(function () use ($internalError, $status) {
             $internalError->setStatus($status);
             if ($status === InternalError::STATUS_RESOLVED) {
-                $this->DOMJudgeService->setInternalError($internalError->getDisabled(), (int)$internalError->getCid(),
+                $this->DOMJudgeService->setInternalError($internalError->getDisabled(), $internalError->getContest(),
                                                          true);
                 $this->DOMJudgeService->auditlog('internal_error', $internalError->getErrorid(),
                                                  sprintf('internal error: %s', $status));
