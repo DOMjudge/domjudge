@@ -8,13 +8,13 @@ use DOMJudgeBundle\Service\EventLogService;
 use Exception;
 
 /**
- * Class BaseApiEnttiy
+ * Class BaseApiEntity
  *
  * Base entity class API entities should use to support getting the API ID
  *
  * @package DOMJudgeBundle\Entity
  */
-abstract class BaseApiEnttiy
+abstract class BaseApiEntity
 {
     /**
      * Get the API ID for this entity

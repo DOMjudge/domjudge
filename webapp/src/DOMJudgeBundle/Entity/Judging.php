@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(name="judging", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class Judging extends BaseApiEnttiy implements ExternalRelationshipEntityInterface
+class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     // constants for results
     const RESULT_CORRECT = 'correct';

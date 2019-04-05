@@ -10,7 +10,7 @@ use JMS\Serializer\Annotation as Serializer;
  * @ORM\Entity()
  * @ORM\Table(name="judging_run", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class JudgingRun extends BaseApiEnttiy
+class JudgingRun extends BaseApiEntity
 {
 
     /**

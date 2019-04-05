@@ -21,7 +21,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * )
  * @UniqueEntity("externalid")
  */
-class TeamAffiliation extends BaseApiEnttiy
+class TeamAffiliation extends BaseApiEntity
 {
     /**
      * @var int

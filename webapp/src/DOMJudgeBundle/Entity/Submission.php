@@ -15,7 +15,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Table(name="submission", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  * @UniqueEntity("externalid")
  */
-class Submission extends BaseApiEnttiy implements ExternalRelationshipEntityInterface
+class Submission extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     /**
      * @var int

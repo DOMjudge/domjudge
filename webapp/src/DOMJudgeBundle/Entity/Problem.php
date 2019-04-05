@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\HasLifecycleCallbacks()
  * @UniqueEntity("externalid")
  */
-class Problem extends BaseApiEnttiy
+class Problem extends BaseApiEntity
 {
 
     /**

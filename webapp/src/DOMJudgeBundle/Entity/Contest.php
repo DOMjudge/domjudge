@@ -30,7 +30,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * @UniqueEntity("shortname")
  * @UniqueEntity("externalid")
  */
-class Contest extends BaseApiEnttiy
+class Contest extends BaseApiEntity
 {
     const STARTTIME_UPDATE_MIN_SECONDS_BEFORE = 30;
 

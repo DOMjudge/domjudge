@@ -19,7 +19,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * )
  * @UniqueEntity("externalid")
  */
-class Team extends BaseApiEnttiy implements ExternalRelationshipEntityInterface
+class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     /**
      * @var int

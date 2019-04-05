@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @UniqueEntity("langid")
  * @UniqueEntity("externalid")
  */
-class Language extends BaseApiEnttiy
+class Language extends BaseApiEntity
 {
 
     /**

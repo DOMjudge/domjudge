@@ -12,7 +12,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @ORM\Table(name="clarification", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  * @UniqueEntity("externalid")
  */
-class Clarification extends BaseApiEnttiy implements ExternalRelationshipEntityInterface
+class Clarification extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
     /**
      * @var int
