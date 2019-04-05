@@ -13,10 +13,18 @@
     <h1>
         Source code for submission
         <a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">s{{ submission.submitid }}</a>
-        {%- if submission.origsubmitid %}
+        {%- if submission.originalSubmission %}
             (resubmit of
-            <a href="{{ path('jury_submission', {submitId: submission.origsubmitid}) }}">s{{ submission.origsubmitid }}</a>)
+            <a href="{{ path('jury_submission', {submitId: submission.originalSubmission.submitid}) }}">s{{ submission.originalSubmission.submitid }}</a>)
         {%- endif %}
+        {% if submission.resubmissions is not empty %}
+            (resubmitted as
+            {%- for resubmission in submission.resubmissions %}
+                <a href="{{ path('jury_submission', {submitId: resubmission.origsubmitid}) }}">s{{ resubmission.submitid }}</a>
+                {%- if not loop.last -%},{%- endif -%}
+            {%- endfor -%}
+            )
+        {% endif %}
 
     </h1>
 

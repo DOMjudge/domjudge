@@ -32,9 +32,18 @@
     <div class="mb-3">
         <h1 style="display: inline;">
             Submission {{ submission.submitid }}
-            {% if submission.origsubmitid %}
-                {% set origSubmissionUrl = path('jury_submission', {submitId: submission.origsubmitid}) %}
-                (resubmit of <a href="{{ origSubmissionUrl }}">s{{ submission.origsubmitid }}</a>)
+            {% if submission.originalSubmission %}
+                {% set origSubmissionUrl = path('jury_submission', {submitId: submission.originalSubmission.submitid}) %}
+                (resubmit of <a href="{{ origSubmissionUrl }}">s{{ submission.originalSubmission.submitid }}</a>)
+            {% endif %}
+            {% if submission.resubmissions is not empty %}
+                (resubmitted as
+                {%- for resubmission in submission.resubmissions -%}
+                    {% set resubmissionUrl = path('jury_submission', {submitId: resubmission.submitid}) %}
+                    <a href="{{ resubmissionUrl }}">s{{ resubmission.submitid }}</a>
+                    {%- if not loop.last -%},{%- endif -%}
+                {%- endfor -%}
+                )
             {% endif %}
             {% if not submission.valid %}
                 (ignored)
