@@ -9,39 +9,10 @@ include $(TOPDIR)/Makefile.global
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = app
 
-PARAMS = app/config/parameters.yml
-STATIC = app/config/static.yml
-
-SUBST_CONFIGS = $(STATIC)
-
-$(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
-	$(substconfigvars)
-
-$(PARAMS): %: %.dist $(TOPDIR)/etc/dbpasswords.secret
-	@[ -n "$(QUIET)" ] || echo "Generating '$@'..."
-	$(TOPDIR)/etc/gensymfonyparams $^ > $@
-
-# Rule to generate $(PARAMS) file from a stub during 'make dist':
-params-from-stub: $(PARAMS).stub
-	if [ ! -r $(PARAMS) ]; then \
-		cp $< $(PARAMS) ; \
-		touch -d '1971-01-01 00:00:00' $(PARAMS) ; \
-	fi
-
-# Rule to generate $(STATIC) file from a stub during 'make dist':
-static-from-stub: $(STATIC).stub
-	if [ ! -r $(STATIC) ]; then \
-		cp $< $(STATIC) ; \
-		touch -d '1971-01-01 00:00:00' $(STATIC) ; \
-	fi
-
 # Clear Symfony cache for maintainer-mode operation:
 clear-cache:
 	bin/console --env=dev cache:clear
 	bin/console --env=prod cache:clear
-
-# Don't try to create dbpasswords.secret here if it doesn't exist:
-$(TOPDIR)/etc/dbpasswords.secret:
 
 domserver: $(PARAMS) $(SUBST_CONFIGS)
 
@@ -91,4 +62,4 @@ maintainer-clean-l:
 		done ; \
 	done
 
-.PHONY: params-from-stub static-from-stub clear-cache
+.PHONY: clear-cache
