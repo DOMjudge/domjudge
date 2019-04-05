@@ -209,8 +209,9 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 	ln -sf $(CURDIR)/judge/runpipe  $(judgehost_bindir)
 	ln -sf $(CURDIR)/sql/dj_setup_database $(domserver_bindir)
 	$(MAKE) -C misc-tools maintainer-install
-# Make tmpdir, submitdir writable for webserver, because
-# judgehost-create-dirs sets wrong permissions:
+# Create tmpdir and make tmpdir, submitdir writable for webserver,
+# because judgehost-create-dirs sets wrong permissions:
+	mkdir -p $(domserver_tmpdir)
 	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
 # Run Symfony in DEV mode under Apache:
 	sed -i 's/^\(RewriteRule .*\) app\.php /\1 app_dev.php /' $(CURDIR)/etc/apache.conf
