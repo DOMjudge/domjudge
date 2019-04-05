@@ -219,7 +219,12 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 # Run Symfony in DEV mode under Apache:
 	sed -i 's/^\(RewriteRule .*\) app\.php /\1 app_dev.php /' $(CURDIR)/etc/apache.conf
 # Make sure we're running from a clean state:
-	$(MAKE) -C webapp clear-cache
+	@echo "Checking whether the database is set up..."
+	@if sql/dj_setup_database status ; then \
+		$(MAKE) -C webapp clear-cache ; \
+	else \
+		echo "Database not installed and accessible yet, fix this manually and rerun." ; \
+	fi
 	@echo ""
 	@echo "========== Maintainer Install Completed =========="
 	@echo ""
