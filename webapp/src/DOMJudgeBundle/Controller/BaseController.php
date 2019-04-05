@@ -4,6 +4,7 @@ namespace DOMJudgeBundle\Controller;
 
 use Doctrine\Common\Util\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\BaseApiEnttiy;
 use DOMJudgeBundle\Entity\JudgingRunWithOutput;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\RankCache;
@@ -133,7 +134,8 @@ abstract class BaseController extends Controller
             $parts      = explode('/', $file);
             $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
             $class      = sprintf('DOMJudgeBundle\\Entity\\%s', $shortClass);
-            if (class_exists($class) && !in_array($class, [RankCache::class, ScoreCache::class])) {
+            if (class_exists($class) && !in_array($class,
+                [RankCache::class, ScoreCache::class, BaseApiEnttiy::class])) {
                 $metadata = $entityManager->getClassMetadata($class);
 
                 $tableRelations = [];
