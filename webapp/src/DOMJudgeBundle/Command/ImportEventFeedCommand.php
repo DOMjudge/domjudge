@@ -48,7 +48,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -117,7 +117,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     /**
      * ImportEventFeedCommand constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      * @param ScoreboardService      $scoreboardService
      * @param SubmissionService      $submissionService
@@ -126,7 +126,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
         SubmissionService $submissionService,
@@ -135,7 +135,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     ) {
         parent::__construct($name);
         $this->entityManager     = $entityManager;
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
         $this->submissionService = $submissionService;
@@ -211,7 +211,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         pcntl_signal(SIGTERM, [$this, 'stopCommand']);
         pcntl_signal(SIGINT, [$this, 'stopCommand']);
 
-        $dataSource = (int)$this->DOMJudgeService->dbconfig_get('data_source');
+        $dataSource = (int)$this->dj->dbconfig_get('data_source');
         if ($dataSource !== DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
             if ($input->getOption('force')) {
                 $this->logger->warning(sprintf('data_source configuration setting is set to %d; --force given so continuing...',
@@ -264,7 +264,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $this->sinceEventId = $input->getOption('since-event');
 
         // We need the verdicts to validate judgement-types
-        $verdictsConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $this->verdicts = include $verdictsConfig;
 
         $feed = $input->getArgument('feed-url');
@@ -343,7 +343,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                 $line   = substr($buffer, 0, $newlinePos);
                 $buffer = substr($buffer, $newlinePos + 1);
             }
-            $event = $this->DOMJudgeService->jsonDecode($line);
+            $event = $this->dj->jsonDecode($line);
 
             if ($sinceEventIdFound) {
                 $this->importEvent($event);
@@ -413,7 +413,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                     $buffer = substr($buffer, $newlinePos + 1);
                 }
                 if (!empty($line)) {
-                    $event = $this->DOMJudgeService->jsonDecode($line);
+                    $event = $this->dj->jsonDecode($line);
                     $this->importEvent($event);
 
                     $this->lastEventId = $event['id'];
@@ -603,7 +603,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                 $penalty = false;
                 $solved  = true;
             } elseif ($verdict === 'CE') {
-                $penalty = (bool)$this->DOMJudgeService->dbconfig_get('compile_penalty', false);
+                $penalty = (bool)$this->dj->dbconfig_get('compile_penalty', false);
             }
 
             if ($penalty !== $event['data']['penalty']) {
@@ -1201,7 +1201,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                     $zipUrl = $this->baseurl . $zipUrl;
                 }
 
-                $tmpdir = $this->DOMJudgeService->getDomjudgeTmpDir();
+                $tmpdir = $this->dj->getDomjudgeTmpDir();
 
                 // Check if we have a local file
                 if (file_exists($zipUrl)) {

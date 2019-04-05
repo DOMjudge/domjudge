@@ -19,7 +19,7 @@ class ScoreboardController extends Controller
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var ScoreboardService
@@ -28,14 +28,14 @@ class ScoreboardController extends Controller
 
     /**
      * ScoreboardController constructor.
-     * @param DOMJudgeService   $DOMJudgeService
+     * @param DOMJudgeService   $dj
      * @param ScoreboardService $scoreboardService
      */
     public function __construct(
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         ScoreboardService $scoreboardService
     ) {
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->scoreboardService = $scoreboardService;
     }
 
@@ -49,7 +49,7 @@ class ScoreboardController extends Controller
     {
         $response   = new Response();
         $refreshUrl = $this->generateUrl('jury_scoreboard');
-        $contest    = $this->DOMJudgeService->getCurrentContest();
+        $contest    = $this->dj->getCurrentContest();
         $data       = $this->scoreboardService->getScoreboardTwigData($request, $response, $refreshUrl, true, false,
                                                                       false, $contest);
 

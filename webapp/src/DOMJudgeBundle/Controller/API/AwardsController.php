@@ -104,7 +104,7 @@ class AwardsController extends AbstractRestController
     protected function getAwardsData(Request $request, string $requestedType = null)
     {
         $public   = false;
-        if ($this->DOMJudgeService->checkrole('jury') && $request->query->has('public')) {
+        if ($this->dj->checkrole('jury') && $request->query->has('public')) {
             $public = $request->query->getBoolean('public');
         }
         /** @var Contest $contest */

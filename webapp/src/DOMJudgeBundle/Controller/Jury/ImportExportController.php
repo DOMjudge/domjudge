@@ -59,7 +59,7 @@ class ImportExportController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -75,7 +75,7 @@ class ImportExportController extends BaseController
      * @param ImportExportService    $importExportService
      * @param EntityManagerInterface $entityManager
      * @param ScoreboardService      $scoreboardService
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      * @param string                 $domjudgeVersion
      */
@@ -84,7 +84,7 @@ class ImportExportController extends BaseController
         ImportExportService $importExportService,
         EntityManagerInterface $entityManager,
         ScoreboardService $scoreboardService,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         string $domjudgeVersion
     ) {
@@ -92,7 +92,7 @@ class ImportExportController extends BaseController
         $this->importExportService = $importExportService;
         $this->entityManager       = $entityManager;
         $this->scoreboardService   = $scoreboardService;
-        $this->DOMJudgeService     = $DOMJudgeService;
+        $this->dj                  = $dj;
         $this->eventLogService     = $eventLogService;
         $this->domjudgeVersion     = $domjudgeVersion;
     }
@@ -297,12 +297,12 @@ class ImportExportController extends BaseController
             $categoryIds[] = $category->getCategoryid();
         }
 
-        $contest = $this->DOMJudgeService->getCurrentContest();
+        $contest = $this->dj->getCurrentContest();
         if ($contest === null) {
             throw new BadRequestHttpException('No current contest');
         }
 
-        $scoreIsInSeconds = (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+        $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
         $filter           = new Filter();
         $filter->setCategories($categoryIds);
         $scoreboard = $this->scoreboardService->getScoreboard($contest, true, $filter);
@@ -432,18 +432,18 @@ class ImportExportController extends BaseController
      */
     protected function getClarificationsHtml()
     {
-        $contest = $this->DOMJudgeService->getCurrentContest();
+        $contest = $this->dj->getCurrentContest();
         if ($contest === null) {
             throw new BadRequestHttpException('No current contest');
         }
 
-        $queues              = (array)$this->DOMJudgeService->dbconfig_get('clar_queues');
+        $queues              = (array)$this->dj->dbconfig_get('clar_queues');
         $clarificationQueues = [null => 'Unassigned issues'];
         foreach ($queues as $key => $val) {
             $clarificationQueues[$key] = $val;
         }
 
-        $categories = (array)$this->DOMJudgeService->dbconfig_get('clar_categories');
+        $categories = (array)$this->dj->dbconfig_get('clar_categories');
 
         $clarificationCategories = [];
         foreach ($categories as $key => $val) {

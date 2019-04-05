@@ -21,24 +21,24 @@ class SubmitProblemType extends AbstractType
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EntityManagerInterface
      */
     protected $entityManager;
 
-    public function __construct(DOMJudgeService $DOMJudgeService, EntityManagerInterface $entityManager)
+    public function __construct(DOMJudgeService $dj, EntityManagerInterface $entityManager)
     {
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->entityManager   = $entityManager;
+        $this->dj            = $dj;
+        $this->entityManager = $entityManager;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $allowMultipleFiles = $this->DOMJudgeService->dbconfig_get('sourcefiles_limit', 100) > 1;
-        $user               = $this->DOMJudgeService->getUser();
-        $contest            = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
+        $allowMultipleFiles = $this->dj->dbconfig_get('sourcefiles_limit', 100) > 1;
+        $user               = $this->dj->getUser();
+        $contest            = $this->dj->getCurrentContest($user->getTeamid());
 
         $builder->add('code', BootstrapFileType::class, [
             'label' => 'Source file' . ($allowMultipleFiles ? 's' : ''),

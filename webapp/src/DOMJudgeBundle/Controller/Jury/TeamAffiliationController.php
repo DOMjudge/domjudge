@@ -31,7 +31,7 @@ class TeamAffiliationController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -41,16 +41,16 @@ class TeamAffiliationController extends BaseController
     /**
      * TeamCategoryController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
 
@@ -68,7 +68,7 @@ class TeamAffiliationController extends BaseController
             ->groupBy('a.affilid')
             ->getQuery()->getResult();
 
-        $showFlags = $this->DOMJudgeService->dbconfig_get('show_flags', true);
+        $showFlags = $this->dj->dbconfig_get('show_flags', true);
 
         $table_fields = [
             'affilid' => ['title' => 'ID', 'sort' => true],
@@ -171,7 +171,7 @@ class TeamAffiliationController extends BaseController
 
         $data = [
             'teamAffiliation' => $teamAffiliation,
-            'showFlags' => $this->DOMJudgeService->dbconfig_get('show_flags', true),
+            'showFlags' => $this->dj->dbconfig_get('show_flags', true),
             'refresh' => [
                 'after' => 30,
                 'url' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
@@ -179,14 +179,14 @@ class TeamAffiliationController extends BaseController
             ],
         ];
 
-        if ($currentContest = $this->DOMJudgeService->getCurrentContest()) {
+        if ($currentContest = $this->dj->getCurrentContest()) {
             $data['scoreboard']           = $scoreboardService->getScoreboard($currentContest, true);
-            $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
-            $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
-            $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
-            $data['showPending']          = $this->DOMJudgeService->dbconfig_get('show_pending', false);
-            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', true);
-            $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+            $data['showFlags']            = $this->dj->dbconfig_get('show_flags', true);
+            $data['showAffiliationLogos'] = $this->dj->dbconfig_get('show_affiliation_logos', false);
+            $data['showAffiliations']     = $this->dj->dbconfig_get('show_affiliations', true);
+            $data['showPending']          = $this->dj->dbconfig_get('show_pending', false);
+            $data['showTeamSubmissions']  = $this->dj->dbconfig_get('show_teams_submissions', true);
+            $data['scoreInSeconds']       = $this->dj->dbconfig_get('score_in_seconds', false);
             $data['limitToTeams']         = $teamAffiliation->getTeams();
         }
 
@@ -221,7 +221,7 @@ class TeamAffiliationController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $teamAffiliation,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $teamAffiliation,
                               $teamAffiliation->getAffilid(), false);
             return $this->redirect($this->generateUrl('jury_team_affiliation',
                                                       ['affilId' => $teamAffiliation->getAffilid()]));
@@ -249,7 +249,7 @@ class TeamAffiliationController extends BaseController
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $teamAffiliation,
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $teamAffiliation,
                                    $teamAffiliation->getName(), $this->generateUrl('jury_team_affiliations'));
     }
 
@@ -270,7 +270,7 @@ class TeamAffiliationController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($teamAffiliation);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $teamAffiliation,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $teamAffiliation,
                               $teamAffiliation->getAffilid(), true);
             return $this->redirect($this->generateUrl('jury_team_affiliation',
                                                       ['affilId' => $teamAffiliation->getAffilid()]));

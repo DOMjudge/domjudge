@@ -13,24 +13,24 @@ class UserStateUpdater
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EntityManagerInterface
      */
     protected $entityManager;
 
-    public function __construct(DOMJudgeService $DOMJudgeService, EntityManagerInterface $entityManager)
+    public function __construct(DOMJudgeService $dj, EntityManagerInterface $entityManager)
     {
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->entityManager   = $entityManager;
+        $this->dj            = $dj;
+        $this->entityManager = $entityManager;
     }
 
     public function updateUserState(AuthenticationEvent $event)
     {
         if ($event->getAuthenticationToken() && ($user = $event->getAuthenticationToken()->getUser()) && $user instanceof User) {
             $user->setLastLogin(Utils::now());
-            $user->setLastIpAddress($this->DOMJudgeService->getClientIp());
+            $user->setLastIpAddress($this->dj->getClientIp());
 
             if ($user->getTeam() && !$user->getTeam()->getTeampageFirstVisited()) {
                 $user->getTeam()->setTeampageFirstVisited(Utils::now());

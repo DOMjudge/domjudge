@@ -40,7 +40,7 @@ class ImportProblemService
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var SubmissionService
@@ -60,14 +60,14 @@ class ImportProblemService
     public function __construct(
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         SubmissionService $submissionService,
         ValidatorInterface $validator
     ) {
         $this->entityManager     = $entityManager;
         $this->logger            = $logger;
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->eventLogService   = $eventLogService;
         $this->submissionService = $submissionService;
         $this->validator         = $validator;
@@ -281,7 +281,7 @@ class ImportProblemService
                         if (!$sameDir) {
                             $messages[] = 'Found multiple custom output validators.';
                         } else {
-                            $tmpzipfiledir = exec("mktemp -d --tmpdir=" . $this->DOMJudgeService->getDomjudgeTmpDir(),
+                            $tmpzipfiledir = exec("mktemp -d --tmpdir=" . $this->dj->getDomjudgeTmpDir(),
                                                   $dontcare, $retval);
                             if ($retval != 0) {
                                 throw new ServiceUnavailableHttpException(null, 'failed to create temporary directory');
@@ -422,9 +422,9 @@ class ImportProblemService
                                                   $imageType);
                             $imageFile  = false;
                         } else {
-                            $thumbnailSize = $this->DOMJudgeService->dbconfig_get('thumbnail_size', 128);
+                            $thumbnailSize = $this->dj->dbconfig_get('thumbnail_size', 128);
                             $imageThumb    = Utils::getImageThumb($imageFile, $thumbnailSize,
-                                                                  $this->DOMJudgeService->getDomjudgeTmpDir(),
+                                                                  $this->dj->getDomjudgeTmpDir(),
                                                                   $errormsg);
                             if ($imageThumb === false) {
                                 $imageThumb = null;
@@ -511,7 +511,7 @@ class ImportProblemService
         // submit reference solutions
         if ($contest === null) {
             $messages[] = 'No jury solutions added: problem is not linked to a contest (yet).';
-        } elseif (!$this->DOMJudgeService->getUser()->getTeam()) {
+        } elseif (!$this->dj->getUser()->getTeam()) {
             $messages[] = 'No jury solutions added: must associate team with your user first.';
         } elseif ($contestProblem->getAllowSubmit()) {
             // First find all submittable languages:
@@ -574,7 +574,7 @@ class ImportProblemService
                     }
                 }
 
-                $tmpDir = $this->DOMJudgeService->getDomjudgeTmpDir();
+                $tmpDir = $this->dj->getDomjudgeTmpDir();
 
                 if (empty($languageToUse)) {
                     $messages[] = sprintf('Could not add jury solution <tt>%s</tt>: unknown language.', $path);
@@ -611,9 +611,9 @@ class ImportProblemService
                     } elseif (!empty($expectedResult)) {
                         $results = [$expectedResult];
                     }
-                    if ($totalSize <= $this->DOMJudgeService->dbconfig_get('sourcesize_limit') * 1024) {
+                    if ($totalSize <= $this->dj->dbconfig_get('sourcesize_limit') * 1024) {
                         $contest        = $this->entityManager->getRepository(Contest::class)->find($contest->getCid());
-                        $team           = $this->entityManager->getRepository(Team::class)->find($this->DOMJudgeService->getUser()->getTeamid());
+                        $team           = $this->entityManager->getRepository(Team::class)->find($this->dj->getUser()->getTeamid());
                         $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
                                                                                                                'probid' => $problem->getProbid(),
                                                                                                                'cid' => $contest->getCid()

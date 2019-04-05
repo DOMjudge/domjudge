@@ -46,7 +46,7 @@ class SubmissionService
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -61,13 +61,13 @@ class SubmissionService
     public function __construct(
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService
     ) {
         $this->entityManager     = $entityManager;
         $this->logger            = $logger;
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
     }
@@ -346,7 +346,7 @@ class SubmissionService
         if (count($files) == 0) {
             throw new BadRequestHttpException("No files specified.");
         }
-        if (count($files) > $this->DOMJudgeService->dbconfig_get('sourcefiles_limit', 100)) {
+        if (count($files) > $this->dj->dbconfig_get('sourcefiles_limit', 100)) {
             $message = "Tried to submit more than the allowed number of source files.";
             return null;
         }
@@ -365,10 +365,10 @@ class SubmissionService
             return null;
         }
 
-        $sourceSize = $this->DOMJudgeService->dbconfig_get('sourcesize_limit');
+        $sourceSize = $this->dj->dbconfig_get('sourcesize_limit');
 
         $freezeData = new FreezeData($contest);
-        if (!$this->DOMJudgeService->checkrole('jury') && !$freezeData->started()) {
+        if (!$this->dj->checkrole('jury') && !$freezeData->started()) {
             throw new AccessDeniedHttpException(
                 sprintf("The contest is closed, no submissions accepted. [c%d]", $contest->getCid()));
         }
@@ -383,7 +383,7 @@ class SubmissionService
             return null;
         }
 
-        if ($this->DOMJudgeService->checkrole('jury') && $entryPoint == '__auto__') {
+        if ($this->dj->checkrole('jury') && $entryPoint == '__auto__') {
             // Fall back to auto detection when we're importing jury submissions.
             $entryPoint = null;
         }
@@ -393,7 +393,7 @@ class SubmissionService
             return null;
         }
 
-        if (!$this->DOMJudgeService->checkrole('jury') && !$team->getEnabled()) {
+        if (!$this->dj->checkrole('jury') && !$team->getEnabled()) {
             throw new BadRequestHttpException(
                 sprintf("Team '%d' not found in database or not enabled.", $team->getTeamid()));
         }
@@ -428,8 +428,9 @@ class SubmissionService
         $this->logger->info('input verified');
 
         // First look up any expected results in file, so as to minimize the SQL transaction time below.
-        if ($this->DOMJudgeService->checkrole('jury')) {
-            $results = self::getExpectedResults(file_get_contents($files[0]->getRealPath()), $this->DOMJudgeService->dbconfig_get('results_remap', []));
+        if ($this->dj->checkrole('jury')) {
+            $results = self::getExpectedResults(file_get_contents($files[0]->getRealPath()),
+                $this->dj->dbconfig_get('results_remap', []));
         }
 
         $submission = new Submission();
@@ -445,7 +446,7 @@ class SubmissionService
 
         // Add expected results from source. We only do this for jury submissions
         // to prevent accidental auto-verification of team submissions.
-        if ($this->DOMJudgeService->checkrole('jury') && !empty($results)) {
+        if ($this->dj->checkrole('jury') && !empty($results)) {
             $submission->setExpectedResults($results);
         }
         $this->entityManager->persist($submission);
@@ -476,11 +477,11 @@ class SubmissionService
 
         $this->scoreboardService->calculateScoreRow($contest, $team, $problem->getProblem());
 
-        $this->DOMJudgeService->alert('submit', sprintf('submission %d: team %d, language %s, problem %d',
+        $this->dj->alert('submit', sprintf('submission %d: team %d, language %s, problem %d',
                                                         $submission->getSubmitid(), $team->getTeamid(),
                                                         $language->getLangid(), $problem->getProbid()));
 
-        if (is_writable($this->DOMJudgeService->getDomjudgeSubmitDir())) {
+        if (is_writable($this->dj->getDomjudgeSubmitDir())) {
             // Copy the submission to the submission directory for safe-keeping
             foreach ($files as $rank => $file) {
                 $fdata  = [
@@ -492,7 +493,7 @@ class SubmissionService
                     'rank' => $rank,
                     'filename' => $file->getClientOriginalName()
                 ];
-                $toFile = $this->DOMJudgeService->getDomjudgeSubmitDir() . '/' . $this->getSourceFilename($fdata);
+                $toFile = $this->dj->getDomjudgeSubmitDir() . '/' . $this->getSourceFilename($fdata);
                 if (!@copy($file->getRealPath(), $toFile)) {
                     $this->logger->warning(sprintf("Could not copy '%s' to '%s'", $file->getRealPath(), $toFile));
                 }

@@ -174,7 +174,7 @@ class ContestController extends AbstractRestController
     public function getContestYamlAction(Request $request, string $id)
     {
         $contest      = $this->getContestWithId($request, $id);
-        $penalty_time = $this->DOMJudgeService->dbconfig_get('penalty_time', 20);
+        $penalty_time = $this->dj->dbconfig_get('penalty_time', 20);
         $response     = new StreamedResponse();
         $response->setCallback(function () use ($contest, $penalty_time) {
             echo "name:                     " . $contest->getName() . "\n";

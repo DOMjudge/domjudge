@@ -41,7 +41,7 @@ class EventDaemonCommand extends ContainerAwareCommand
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -65,14 +65,14 @@ class EventDaemonCommand extends ContainerAwareCommand
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         TokenStorageInterface $tokenStorage,
         string $name = null
     ) {
         parent::__construct($name);
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
         $this->tokenStorage    = $tokenStorage;
     }
@@ -110,7 +110,7 @@ class EventDaemonCommand extends ContainerAwareCommand
         pcntl_signal(SIGINT, [$this, 'stopCommand']);
 
         $selectedContest = null;
-        $contests        = $this->DOMJudgeService->getCurrentContests();
+        $contests        = $this->dj->getCurrentContests();
         if (count($contests) == 1) {
             $selectedContest = reset($contests);
         }
@@ -176,7 +176,7 @@ class EventDaemonCommand extends ContainerAwareCommand
                 return 0;
             }
 
-            $contests = $this->DOMJudgeService->getCurrentContests();
+            $contests = $this->dj->getCurrentContests();
 
             if (!array_key_exists($selectedContest->getCid(), $contests)) {
                 $this->logger->error(sprintf('Contest ID \'%s\' not found (anymore) in active contests.',
@@ -189,9 +189,9 @@ class EventDaemonCommand extends ContainerAwareCommand
             if ($contestStartOld !== $contestStart || $contestStartEnabledOld !== $contestStartEnabled) {
                 $contestId = $selectedContest->getApiId($this->eventLogService, $this->entityManager);
                 $url       = sprintf('/contests/%s', $contestId);
-                $this->DOMJudgeService->withAllRoles(function () use ($url, $selectedContest) {
+                $this->dj->withAllRoles(function () use ($url, $selectedContest) {
                     $this->insertEvent($selectedContest, 'contests',
-                                       $this->DOMJudgeService->internalApiRequest($url, Request::METHOD_GET));
+                                       $this->dj->internalApiRequest($url, Request::METHOD_GET));
                 });
                 $contestStartOld        = $contestStart;
                 $contestStartEnabledOld = $contestStartEnabled;
@@ -255,7 +255,7 @@ class EventDaemonCommand extends ContainerAwareCommand
             ->getQuery()
             ->getOneOrNullResult();
 
-        $json = $this->DOMJudgeService->jsonEncode($data);
+        $json = $this->dj->jsonEncode($data);
 
         // Check if there's already an old event and create/update
         // depending on previous state.
@@ -263,7 +263,7 @@ class EventDaemonCommand extends ContainerAwareCommand
             $this->eventLogService->log($endpoint, null, EventLogService::ACTION_CREATE, $contest->getCid(), $json,
                                         $data['id']);
         } else {
-            if (empty($event->getContent()) || $this->DOMJudgeService->jsonEncode($event->getContent()) !== $json) {
+            if (empty($event->getContent()) || $this->dj->jsonEncode($event->getContent()) !== $json) {
                 $this->eventLogService->log($endpoint, null, 'update', $contest->getCid(), $json, $data['id']);
             } else {
                 $this->logger->debug(sprintf('Skipping create %s/%s: already present', $endpoint, $data['id']));
@@ -287,8 +287,8 @@ class EventDaemonCommand extends ContainerAwareCommand
                 $contestId = $contest->getApiId($this->eventLogService, $this->entityManager);
 
                 $url = sprintf('/contests/%s%s', $contestId, $endpointData[EventLogService::KEY_URL]);
-                $this->DOMJudgeService->withAllRoles(function () use ($url, &$data) {
-                    $data = $this->DOMJudgeService->internalApiRequest($url);
+                $this->dj->withAllRoles(function () use ($url, &$data) {
+                    $data = $this->dj->internalApiRequest($url);
                 });
 
                 if ($data === null) {

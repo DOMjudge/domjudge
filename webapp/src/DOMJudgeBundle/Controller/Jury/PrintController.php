@@ -32,17 +32,17 @@ class PrintController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * PrintController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
     {
-        $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->entityManager = $entityManager;
+        $this->dj            = $dj;
     }
 
     /**
@@ -53,7 +53,7 @@ class PrintController extends BaseController
      */
     public function showAction(Request $request)
     {
-        if (!$this->DOMJudgeService->dbconfig_get('enable_printing', 0)) {
+        if (!$this->dj->dbconfig_get('enable_printing', 0)) {
             throw new AccessDeniedHttpException("Printing disabled in config");
         }
 

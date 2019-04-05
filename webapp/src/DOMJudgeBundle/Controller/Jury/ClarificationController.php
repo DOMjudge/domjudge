@@ -34,7 +34,7 @@ class ClarificationController extends Controller
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -44,16 +44,16 @@ class ClarificationController extends Controller
     /**
      * ClarificationController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
 
@@ -63,7 +63,7 @@ class ClarificationController extends Controller
      */
     public function indexAction(Request $request)
     {
-        $contestIds = array_keys($this->DOMJudgeService->getCurrentContests());
+        $contestIds = array_keys($this->dj->getCurrentContests());
         // cid -1 will never happen, but otherwise the array is empty and that is not supported
         if (empty($contestIds)) {
             $contestIds = [-1];
@@ -124,8 +124,7 @@ class ClarificationController extends Controller
             }
         }
 
-        $queues = $this->DOMJudgeService->dbconfig_get('clar_queues');
-
+        $queues = $this->dj->dbconfig_get('clar_queues');
 
         return $this->render('@DOMJudge/jury/clarifications.html.twig', [
             'newClarifications' => $newClarifications,
@@ -154,8 +153,8 @@ class ClarificationController extends Controller
         $clardata['showExternalId'] = $this->eventLogService->externalIdFieldForEntity(Clarification::class);
 
         $categories = $clardata['clarform']['subjects'];
-        $queues     = $this->DOMJudgeService->dbconfig_get('clar_queues');
-        $clar_answers = $this->DOMJudgeService->dbconfig_get('clar_answers', []);
+        $queues     = $this->dj->dbconfig_get('clar_queues');
+        $clar_answers = $this->dj->dbconfig_get('clar_answers', []);
 
         if ( $irt = $clarification->getInReplyTo() ) {
             $clarlist = [$irt];
@@ -213,18 +212,18 @@ class ClarificationController extends Controller
             $data['body'] = Utils::wrap_unquoted($clar->getBody(), 78);
             $clardata['list'][] = $data;
         }
-    
+
         if ( $concernsteam ) {
             $clardata['clarform']['toteam'] = $concernsteam;
         }
         if ( $concernssubject ) {
             $clardata['clarform']['onsubject'] = $concernssubject;
         }
-    
+
         $clardata['clarform']['quotedtext'] = "> " . str_replace("\n", "\n> ", Utils::wrap_unquoted($data['body'])) . "\n\n";
         $clardata['clarform']['queues'] = $queues;
         $clardata['clarform']['answers'] = $clar_answers;
-    
+
         return $this->render('@DOMJudge/jury/clarification.html.twig',
             $clardata
         );
@@ -257,8 +256,8 @@ class ClarificationController extends Controller
 
         $subject_options = [];
 
-        $categories = $this->DOMJudgeService->dbconfig_get('clar_categories');
-        $contests = $this->DOMJudgeService->getCurrentContests();
+        $categories = $this->dj->dbconfig_get('clar_categories');
+        $contests = $this->dj->getCurrentContests();
         foreach($contests as $cid => $cdata) {
             $cshort = $cdata->getShortName();
             foreach($categories as $name => $desc) {
@@ -459,7 +458,7 @@ class ClarificationController extends Controller
         if($respid) {
             $queue = $respclar->getQueue();
         } else {
-            $queue = $this->DOMJudgeService->dbconfig_get('clar_default_problem_queue');
+            $queue = $this->dj->dbconfig_get('clar_default_problem_queue');
             if ($queue === "") {
                 $queue = null;
             }
@@ -480,7 +479,7 @@ class ClarificationController extends Controller
         $this->entityManager->flush();
 
         $clarId = $clarification->getClarId();
-        $this->DOMJudgeService->auditlog('clarification', $clarId, 'added', null, null, $cid);
+        $this->dj->auditlog('clarification', $clarId, 'added', null, null, $cid);
         $this->eventLogService->log('clarification', $clarId, 'create', $cid);
         // Reload clarification to make sure we have a fresh one after calling the event log service
         $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);

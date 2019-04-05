@@ -42,7 +42,7 @@ class ImportExportService
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -57,13 +57,13 @@ class ImportExportService
     public function __construct(
         EntityManagerInterface $entityManager,
         ScoreboardService $scoreboardService,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         ValidatorInterface $validator
     ) {
         $this->entityManager     = $entityManager;
         $this->scoreboardService = $scoreboardService;
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->eventLogService   = $eventLogService;
         $this->validator         = $validator;
     }
@@ -90,9 +90,9 @@ class ImportExportService
                 true);
         }
         $data = array_merge($data, [
-            'penalty-time' => $this->DOMJudgeService->dbconfig_get('penalty_time'),
-            'default-clars' => $this->DOMJudgeService->dbconfig_get('clar_answers'),
-            'clar-categories' => array_values($this->DOMJudgeService->dbconfig_get('clar_categories')),
+            'penalty-time' => $this->dj->dbconfig_get('penalty_time'),
+            'default-clars' => $this->dj->dbconfig_get('clar_answers'),
+            'clar-categories' => array_values($this->dj->dbconfig_get('clar_categories')),
             'languages' => [],
             'problems' => [],
         ]);
@@ -311,11 +311,11 @@ class ImportExportService
         // 6+2i-1	Number of submissions for problem i	2	integer
         // 6+2i	Time when problem i was solved	233	integer   -1 if not solved
 
-        $contest = $this->DOMJudgeService->getCurrentContest();
+        $contest = $this->dj->getCurrentContest();
         if ($contest === null) {
             throw new BadRequestHttpException('No current contest');
         }
-        $scoreIsInSeconds = (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+        $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
         $scoreboard       = $this->scoreboardService->getScoreboard($contest, true);
 
         $data = [];
@@ -364,7 +364,7 @@ class ImportExportService
         // 6 	Time of the last submission 	233 	integer
         // 7 	Group Winner 	North American 	string
 
-        $contest = $this->DOMJudgeService->getCurrentContest();
+        $contest = $this->dj->getCurrentContest();
         if ($contest === null) {
             throw new BadRequestHttpException('No current contest');
         }
@@ -381,7 +381,7 @@ class ImportExportService
             $categoryIds[] = $category->getCategoryid();
         }
 
-        $scoreIsInSeconds = (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+        $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
         $filter           = new Filter();
         $filter->setCategories($categoryIds);
         $scoreboard = $this->scoreboardService->getScoreboard($contest, true, $filter);
@@ -570,11 +570,11 @@ class ImportExportService
             }
             $teamCategory->setName($groupItem['name']);
             $this->entityManager->flush();
-            if ($contest = $this->DOMJudgeService->getCurrentContest()) {
+            if ($contest = $this->dj->getCurrentContest()) {
                 $this->eventLogService->log('team_category', $teamCategory->getCategoryid(), $action,
                                             $contest->getCid());
             }
-            $this->DOMJudgeService->auditlog('team_category', $teamCategory->getCategoryid(), 'replaced',
+            $this->dj->auditlog('team_category', $teamCategory->getCategoryid(), 'replaced',
                                              'imported from tsv');
         }
 
@@ -672,7 +672,7 @@ class ImportExportService
                     $this->entityManager->persist($teamAffiliation);
                     $this->entityManager->flush();
                     $createdAffiliations[] = $teamAffiliation->getAffilid();
-                    $this->DOMJudgeService->auditlog('team_affiliation', $teamAffiliation->getAffilid(), 'added',
+                    $this->dj->auditlog('team_affiliation', $teamAffiliation->getAffilid(), 'added',
                                                      'imported from tsv');
                 }
             }
@@ -687,7 +687,7 @@ class ImportExportService
                         ->setCategoryid($teamItem['categoryid'])
                         ->setName($teamItem['categoryid'] . ' - auto-create during import');
                     $this->entityManager->persist($teamCategory);
-                    $this->DOMJudgeService->auditlog('team_category', $teamCategory->getCategoryid(), 'added',
+                    $this->dj->auditlog('team_category', $teamCategory->getCategoryid(), 'added',
                                                      'imported from tsv');
                 }
             }
@@ -718,10 +718,10 @@ class ImportExportService
                 $updatedTeams[] = $team->getTeamid();
             }
 
-            $this->DOMJudgeService->auditlog('team', $team->getTeamid(), 'replaced', 'imported from tsv');
+            $this->dj->auditlog('team', $team->getTeamid(), 'replaced', 'imported from tsv');
         }
 
-        if ($contest = $this->DOMJudgeService->getCurrentContest()) {
+        if ($contest = $this->dj->getCurrentContest()) {
             if (!empty($createdAffiliations)) {
                 $this->eventLogService->log('team_affiliation', $createdAffiliations, 'create', $contest->getCid());
             }
@@ -839,7 +839,7 @@ class ImportExportService
                 $this->eventLogService->log('team', $team->getTeamid(), $action);
                 // Reload team as eventlog will have cleared it
                 $team = $this->entityManager->getRepository(Team::class)->find($team->getTeamid());
-                $this->DOMJudgeService->auditlog('team', $team->getTeamid(), 'replaced',
+                $this->dj->auditlog('team', $team->getTeamid(), 'replaced',
                                                  'imported from tsv, autocreated for judge');
                 $accountItem['user']['team'] = $team;
             }
@@ -862,7 +862,7 @@ class ImportExportService
             }
             $this->entityManager->flush();
 
-            $this->DOMJudgeService->auditlog('user', $user->getUserid(), 'replaced', 'imported from tsv');
+            $this->dj->auditlog('user', $user->getUserid(), 'replaced', 'imported from tsv');
         }
 
         return count($accountData);

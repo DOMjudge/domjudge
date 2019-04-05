@@ -33,7 +33,7 @@ class MiscController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EntityManagerInterface
@@ -52,18 +52,18 @@ class MiscController extends BaseController
 
     /**
      * MiscController constructor.
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EntityManagerInterface $entityManager
      * @param ScoreboardService      $scoreboardService
      * @param SubmissionService      $submissionService
      */
     public function __construct(
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EntityManagerInterface $entityManager,
         ScoreboardService $scoreboardService,
         SubmissionService $submissionService
     ) {
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->entityManager     = $entityManager;
         $this->scoreboardService = $scoreboardService;
         $this->submissionService = $submissionService;
@@ -78,10 +78,10 @@ class MiscController extends BaseController
      */
     public function homeAction(Request $request)
     {
-        $user    = $this->DOMJudgeService->getUser();
+        $user    = $this->dj->getUser();
         $team    = $user->getTeam();
         $teamId  = $team->getTeamid();
-        $contest = $this->DOMJudgeService->getCurrentContest($teamId);
+        $contest = $this->dj->getCurrentContest($teamId);
 
         $data = [
             'team' => $team,
@@ -94,13 +94,13 @@ class MiscController extends BaseController
         ];
         if ($contest) {
             $data['scoreboard']           = $this->scoreboardService->getTeamScoreboard($contest, $teamId, true);
-            $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
-            $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
-            $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
-            $data['showPending']          = $this->DOMJudgeService->dbconfig_get('show_pending', false);
-            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', true);
-            $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
-            $data['verificationRequired'] = $this->DOMJudgeService->dbconfig_get('verification_required', false);
+            $data['showFlags']            = $this->dj->dbconfig_get('show_flags', true);
+            $data['showAffiliationLogos'] = $this->dj->dbconfig_get('show_affiliation_logos', false);
+            $data['showAffiliations']     = $this->dj->dbconfig_get('show_affiliations', true);
+            $data['showPending']          = $this->dj->dbconfig_get('show_pending', false);
+            $data['showTeamSubmissions']  = $this->dj->dbconfig_get('show_teams_submissions', true);
+            $data['scoreInSeconds']       = $this->dj->dbconfig_get('score_in_seconds', false);
+            $data['verificationRequired'] = $this->dj->dbconfig_get('verification_required', false);
             $data['limitToTeams']         = [$team];
             // We need to clear the entity manager, because loading the team scoreboard seems to break getting submission
             // contestproblems for the contest we get the scoreboard for
@@ -143,7 +143,7 @@ class MiscController extends BaseController
 
             $data['clarifications']        = $clarifications;
             $data['clarificationRequests'] = $clarificationRequests;
-            $data['categories']            = $this->DOMJudgeService->dbconfig_get('clar_categories');
+            $data['categories']            = $this->dj->dbconfig_get('clar_categories');
         }
 
         if ($request->isXmlHttpRequest()) {
@@ -168,7 +168,7 @@ class MiscController extends BaseController
         } else {
             $response = $this->redirectToRoute('public_index');
         }
-        return $this->DOMJudgeService->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
+        return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
                                                  $response);
     }
 
@@ -180,7 +180,7 @@ class MiscController extends BaseController
      */
     public function printAction(Request $request)
     {
-        if (!$this->DOMJudgeService->dbconfig_get('enable_printing', 0)) {
+        if (!$this->dj->dbconfig_get('enable_printing', 0)) {
             throw new AccessDeniedHttpException("Printing disabled in config");
         }
 
@@ -198,7 +198,7 @@ class MiscController extends BaseController
             $langid   = $data['langid'];
             $username = $this->getUser()->getUsername();
 
-            $team = $this->DOMJudgeService->getUser()->getTeam();
+            $team = $this->dj->getUser()->getTeam();
             $ret  = Printing::send($realfile, $originalfilename, $langid, $username, $team->getName(),
                                    $team->getRoom());
 

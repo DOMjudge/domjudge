@@ -103,7 +103,7 @@ class TeamController extends AbstractRestController
                 ->setParameter(':affiliation', $request->query->get('affiliation'));
         }
 
-        if (!$this->DOMJudgeService->checkrole('api_reader') || $request->query->getBoolean('public')) {
+        if (!$this->dj->checkrole('api_reader') || $request->query->getBoolean('public')) {
             $queryBuilder->andWhere('tc.visible = 1');
         }
 

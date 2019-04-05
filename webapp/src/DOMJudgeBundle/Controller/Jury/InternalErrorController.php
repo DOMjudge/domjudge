@@ -27,12 +27,12 @@ class InternalErrorController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
     {
-        $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->entityManager = $entityManager;
+        $this->dj            = $dj;
     }
 
     /**
@@ -151,9 +151,9 @@ class InternalErrorController extends BaseController
         $this->entityManager->transactional(function () use ($internalError, $status) {
             $internalError->setStatus($status);
             if ($status === InternalError::STATUS_RESOLVED) {
-                $this->DOMJudgeService->setInternalError($internalError->getDisabled(), $internalError->getContest(),
+                $this->dj->setInternalError($internalError->getDisabled(), $internalError->getContest(),
                                                          true);
-                $this->DOMJudgeService->auditlog('internal_error', $internalError->getErrorid(),
+                $this->dj->auditlog('internal_error', $internalError->getErrorid(),
                                                  sprintf('internal error: %s', $status));
             }
         });

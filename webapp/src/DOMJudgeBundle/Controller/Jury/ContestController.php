@@ -37,7 +37,7 @@ class ContestController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -47,16 +47,16 @@ class ContestController extends BaseController
     /**
      * TeamCategoryController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
 
@@ -96,7 +96,7 @@ class ContestController extends BaseController
 
             $now       = (int)floor(Utils::now());
             $nowstring = strftime('%Y-%m-%d %H:%M:%S ', $now) . date_default_timezone_get();
-            $this->DOMJudgeService->auditlog('contest', $contest->getCid(), $time . ' now', $nowstring);
+            $this->dj->auditlog('contest', $contest->getCid(), $time . ' now', $nowstring);
 
             // Special case delay/resume start (only sets/unsets starttime_undefined).
             $maxSeconds = Contest::STARTTIME_UPDATE_MIN_SECONDS_BEFORE;
@@ -165,11 +165,11 @@ class ContestController extends BaseController
             'endtime' => ['title' => 'end', 'sort' => true],
         ];
 
-        $currentContests = $this->DOMJudgeService->getCurrentContests();
+        $currentContests = $this->dj->getCurrentContests();
 
-        $timeFormat = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
+        $timeFormat = (string)$this->dj->dbconfig_get('time_format', '%H:%M');
 
-        $etcDir = $this->DOMJudgeService->getDomjudgeEtcDir();
+        $etcDir = $this->dj->getDomjudgeEtcDir();
         require_once $etcDir . '/domserver-config.php';
 
         if (ALLOW_REMOVED_INTERVALS) {
@@ -320,7 +320,7 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
-        $etcDir = $this->DOMJudgeService->getDomjudgeEtcDir();
+        $etcDir = $this->dj->getDomjudgeEtcDir();
         require_once $etcDir . '/domserver-config.php';
 
         $newRemovedInterval = new RemovedInterval();
@@ -358,7 +358,7 @@ class ContestController extends BaseController
 
         return $this->render('@DOMJudge/jury/contest.html.twig', [
             'contest' => $contest,
-            'isActive' => isset($this->DOMJudgeService->getCurrentContests()[$contest->getCid()]),
+            'isActive' => isset($this->dj->getCurrentContests()[$contest->getCid()]),
             'allowRemovedIntervals' => ALLOW_REMOVED_INTERVALS,
             'removedIntervalForm' => $form->createView(),
             'removedIntervals' => $removedIntervals,
@@ -422,7 +422,7 @@ class ContestController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $contest,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $contest,
                               $contest->getCid(), false);
             return $this->redirect($this->generateUrl('jury_contest',
                                                       ['contestId' => $contest->getcid()]));
@@ -450,7 +450,7 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $contest,
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $contest,
                                    $contest->getName(), $this->generateUrl('jury_contests'));
     }
 
@@ -474,7 +474,7 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest problem with contest ID %s and problem ID %s not found', $contestId, $probId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $contestProblem,
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $contestProblem,
                                    $contestProblem->getShortname(), $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 
@@ -513,7 +513,7 @@ class ContestController extends BaseController
                         ->setCid($contest->getCid());
                     $this->entityManager->persist($problem);
                 }
-                $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $contest,
+                $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $contest,
                                   $contest->getCid(), true);
             });
             return $this->redirect($this->generateUrl('jury_contest',
@@ -579,7 +579,7 @@ class ContestController extends BaseController
         }
 
         if (empty($contest->getFinalizecomment())) {
-            $contest->setFinalizecomment(sprintf('Finalized by: %s', $this->DOMJudgeService->getUser()->getName()));
+            $contest->setFinalizecomment(sprintf('Finalized by: %s', $this->dj->getUser()->getName()));
         }
         $form = $this->createForm(FinalizeContestType::class, $contest);
 
@@ -589,7 +589,7 @@ class ContestController extends BaseController
             if ($form->isSubmitted() && $form->isValid()) {
                 $contest->setFinalizetime(Utils::now());
                 $this->entityManager->flush();
-                $this->DOMJudgeService->auditlog('contest', $contest->getCid(), 'finalized',
+                $this->dj->auditlog('contest', $contest->getCid(), 'finalized',
                                                  $contest->getFinalizecomment());
                 return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
             }

@@ -28,7 +28,7 @@ class ProblemController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EntityManagerInterface
@@ -37,13 +37,13 @@ class ProblemController extends BaseController
 
     /**
      * ProblemController constructor.
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EntityManagerInterface $entityManager
      */
-    public function __construct(DOMJudgeService $DOMJudgeService, EntityManagerInterface $entityManager)
+    public function __construct(DOMJudgeService $dj, EntityManagerInterface $entityManager)
     {
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->entityManager   = $entityManager;
+        $this->dj            = $dj;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -54,10 +54,10 @@ class ProblemController extends BaseController
      */
     public function problemsAction()
     {
-        $user               = $this->DOMJudgeService->getUser();
-        $contest            = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
-        $showLimits         = (bool)$this->DOMJudgeService->dbconfig_get('show_limits_on_team_page');
-        $defaultMemoryLimit = (int)$this->DOMJudgeService->dbconfig_get('memory_limit', 0);
+        $user               = $this->dj->getUser();
+        $contest            = $this->dj->getCurrentContest($user->getTeamid());
+        $showLimits         = (bool)$this->dj->dbconfig_get('show_limits_on_team_page');
+        $defaultMemoryLimit = (int)$this->dj->dbconfig_get('memory_limit', 0);
         $timeFactorDiffers  = false;
         if ($showLimits) {
             $timeFactorDiffers = $this->entityManager->createQueryBuilder()
@@ -101,8 +101,8 @@ class ProblemController extends BaseController
      */
     public function problemTextAction(int $probId)
     {
-        $user    = $this->DOMJudgeService->getUser();
-        $contest = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
+        $user    = $this->dj->getUser();
+        $contest = $this->dj->getCurrentContest($user->getTeamid());
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -160,8 +160,8 @@ class ProblemController extends BaseController
      */
     public function sampleTestcaseAction(int $probId, int $index, string $type)
     {
-        $user    = $this->DOMJudgeService->getUser();
-        $contest = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
+        $user    = $this->dj->getUser();
+        $contest = $this->dj->getCurrentContest($user->getTeamid());
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -231,8 +231,8 @@ class ProblemController extends BaseController
      */
     public function sampleZipAction(int $probId)
     {
-        $user    = $this->DOMJudgeService->getUser();
-        $contest = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
+        $user    = $this->dj->getUser();
+        $contest = $this->dj->getCurrentContest($user->getTeamid());
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -245,7 +245,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
 
-        $zipFilename    = $this->DOMJudgeService->getSamplesZip($contestProblem);
+        $zipFilename    = $this->dj->getSamplesZip($contestProblem);
         $outputFilename = sprintf('samples-%s.zip', $contestProblem->getShortname());
 
         $response = new StreamedResponse();

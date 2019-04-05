@@ -38,7 +38,7 @@ class ExecutableController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -48,16 +48,16 @@ class ExecutableController extends BaseController
     /**
      * ExecutableController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
 
@@ -79,7 +79,7 @@ class ExecutableController extends BaseController
             $archives = $data['archives'];
             $id       = null;
             foreach ($archives as $archive) {
-                $zip         = $this->DOMJudgeService->openZipFile($archive->getRealPath());
+                $zip         = $this->dj->openZipFile($archive->getRealPath());
                 $filename    = $archive->getClientOriginalName();
                 $id          = substr($filename, 0, strlen($filename) - strlen(".zip"));
                 if ( ! preg_match ('#^[a-z0-9_-]+$#i', $id) ) {
@@ -111,7 +111,7 @@ class ExecutableController extends BaseController
 
                 $zip->close();
 
-                $this->DOMJudgeService->auditlog('executable', $id, 'upload zip', $archive->getClientOriginalName());
+                $this->dj->auditlog('executable', $id, 'upload zip', $archive->getClientOriginalName());
             }
 
             $this->entityManager->flush();
@@ -210,8 +210,8 @@ class ExecutableController extends BaseController
 
         return $this->render('@DOMJudge/jury/executable.html.twig', [
             'executable' => $executable,
-            'default_compare' => (string)$this->DOMJudgeService->dbconfig_get('default_compare'),
-            'default_run' => (string)$this->DOMJudgeService->dbconfig_get('default_run'),
+            'default_compare' => (string)$this->dj->dbconfig_get('default_compare'),
+            'default_run' => (string)$this->dj->dbconfig_get('default_run'),
         ]);
     }
 
@@ -279,14 +279,14 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        if (!($tempzipFile = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "/executable-"))) {
+        if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
             throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
         }
         if (file_put_contents($tempzipFile, stream_get_contents($executable->getZipfile())) === false) {
             throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
         }
 
-        $zip = $this->DOMJudgeService->openZipFile($tempzipFile);
+        $zip = $this->dj->openZipFile($tempzipFile);
 
         if ($index < 0 || $index >= $zip->numFiles) {
             throw new BadRequestHttpException(sprintf('File with index %d not found', $index));
@@ -334,7 +334,7 @@ class ExecutableController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $executable,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $executable,
                               $executable->getExecid(), false);
             return $this->redirect($this->generateUrl('jury_executable',
                                                       ['execId' => $executable->getExecid()]));
@@ -362,7 +362,7 @@ class ExecutableController extends BaseController
             $executable
                 ->setMd5sum(md5_file($archive->getRealPath()))
                 ->setZipfile(file_get_contents($archive->getRealPath()));
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $executable,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $executable,
                               $executable->getExecid(), false);
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
@@ -390,7 +390,7 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $executable,
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $executable,
                                    $executable->getDescription(), $this->generateUrl('jury_executables'));
     }
 
@@ -429,14 +429,14 @@ class ExecutableController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $submittedData = $form->getData();
 
-            if (!($tempzipFile = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "/executable-"))) {
+            if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
                 throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
             }
             if (file_put_contents($tempzipFile, $executable->getZipfile(true)) === false) {
                 throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
             }
 
-            $zip = $this->DOMJudgeService->openZipFile($tempzipFile);
+            $zip = $this->dj->openZipFile($tempzipFile);
             foreach ($editorData['filenames'] as $idx => $filename) {
                 $permission = $opsys = $attr = null;
                 if ($zip->getExternalAttributesName($filename, $opsys, $attr) && $opsys === \ZipArchive::OPSYS_UNIX) {
@@ -457,7 +457,7 @@ class ExecutableController extends BaseController
                 ->setMd5sum(md5_file($tempzipFile))
                 ->setZipfile(file_get_contents($tempzipFile));
             $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('executable', $executable->getExecid(), 'updated');
+            $this->dj->auditlog('executable', $executable->getExecid(), 'updated');
 
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
@@ -475,14 +475,14 @@ class ExecutableController extends BaseController
      */
     protected function dataForEditor(Executable $executable)
     {
-        if (!($tempzipFile = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "/executable-"))) {
+        if (!($tempzipFile = tempnam($this->dj->getDomjudgeTmpDir(), "/executable-"))) {
             throw new ServiceUnavailableHttpException(null, 'Failed to create temporary file');
         }
         if (file_put_contents($tempzipFile, $executable->getZipfile(true)) === false) {
             throw new ServiceUnavailableHttpException(null, 'Failed to write zip file to temporary file');
         }
 
-        $zip           = $this->DOMJudgeService->openZipFile($tempzipFile);
+        $zip           = $this->dj->openZipFile($tempzipFile);
         $skippedBinary = [];
         $filenames     = [];
         $files         = [];

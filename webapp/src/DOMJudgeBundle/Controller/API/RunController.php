@@ -34,7 +34,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
     {
         parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
 
-        $verdictsConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $this->verdicts = include $verdictsConfig;
     }
 
@@ -157,7 +157,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
             $queryBuilder
                 ->andWhere('s.submittime < c.endtime')
                 ->andWhere('j.rejudgingid IS NULL OR j.valid = 1');
-            if ($this->DOMJudgeService->dbconfig_get('verification_required', false)) {
+            if ($this->dj->dbconfig_get('verification_required', false)) {
                 $queryBuilder->andWhere('j.verified = 1');
             }
         }

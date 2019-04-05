@@ -106,8 +106,8 @@ class ScoreboardController extends AbstractRestController
             $filter->setAffiliations([$request->query->get('affiliation')]);
         }
         $allTeams = $request->query->getBoolean('allteams', false);
-        $public   = !$this->DOMJudgeService->checkrole('api_reader');
-        if ($this->DOMJudgeService->checkrole('api_reader') && $request->query->has('public')) {
+        $public   = !$this->dj->checkrole('api_reader');
+        if ($this->dj->checkrole('api_reader') && $request->query->has('public')) {
             $public = $request->query->getBoolean('public');
         }
 
@@ -141,7 +141,7 @@ class ScoreboardController extends AbstractRestController
             'rows' => [],
         ];
 
-        $scoreIsInSecods = (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+        $scoreIsInSecods = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
 
         foreach ($scorebard->getScores() as $teamScore) {
             $row = [

@@ -18,11 +18,11 @@ class SecurityController extends Controller
     /**
      * @var DOMJudgeService
      */
-    private $DOMJudgeService;
+    private $dj;
 
-    public function __construct(DOMJudgeService $DOMJudgeService)
+    public function __construct(DOMJudgeService $dj)
     {
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj = $dj;
     }
 
     /**
@@ -40,7 +40,7 @@ class SecurityController extends Controller
             $allowIPAuth = true;
         }
 
-        $ipAutologin = $this->DOMJudgeService->dbconfig_get('ip_autologin', false);
+        $ipAutologin = $this->dj->dbconfig_get('ip_autologin', false);
         if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY') && !$ipAutologin) {
             return $this->redirect($this->generateUrl('root'));
         }
@@ -55,7 +55,7 @@ class SecurityController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $clientIP = $this->DOMJudgeService->getClientIp();
+        $clientIP = $this->dj->getClientIp();
         $auth_ipaddress_users = [];
         if ($allowIPAuth) {
             $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipAddress' => $clientIP]);
@@ -65,7 +65,7 @@ class SecurityController extends Controller
         $response = new Response();
         $response->headers->set('X-Login-Page', $this->generateUrl('login'));
 
-        $registrationCategoryName = $this->DOMJudgeService->dbconfig_get('registration_category_name', '');
+        $registrationCategoryName = $this->dj->dbconfig_get('registration_category_name', '');
         $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
 
         return $this->render('DOMJudgeBundle:security:login.html.twig', array(
@@ -89,7 +89,7 @@ class SecurityController extends Controller
         }
 
         $em                       = $this->getDoctrine()->getManager();
-        $registrationCategoryName = $this->DOMJudgeService->dbconfig_get('registration_category_name', '');
+        $registrationCategoryName = $this->dj->dbconfig_get('registration_category_name', '');
         $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
 
         if ($registrationCategory === null) {
@@ -115,7 +115,7 @@ class SecurityController extends Controller
             $team->addUser($user);
             $team->setName($user->getUsername());
             $team->setCategory($registrationCategory);
-            $team->setComments('Registered by ' . $this->DOMJudgeService->getClientIp() . ' on ' . date('r'));
+            $team->setComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
 
             $em->persist($user);
             $em->persist($team);

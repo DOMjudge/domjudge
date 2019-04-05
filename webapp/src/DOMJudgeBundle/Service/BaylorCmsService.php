@@ -20,7 +20,7 @@ class BaylorCmsService
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EntityManagerInterface
@@ -34,16 +34,16 @@ class BaylorCmsService
 
     /**
      * BaylorCmsService constructor.
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EntityManagerInterface $entityManager
      * @param                        $domjudgeVersion
      */
     public function __construct(
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EntityManagerInterface $entityManager,
         $domjudgeVersion
     ) {
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj = $dj;
         $this->entityManager   = $entityManager;
         $this->client          = new Client(
             [
@@ -88,7 +88,7 @@ class BaylorCmsService
         }
 
         $body = (string)$response->getBody();
-        $json = $this->DOMJudgeService->jsonDecode((string)$body);
+        $json = $this->dj->jsonDecode((string)$body);
 
         if ($json === null) {
             $message = sprintf('Error retrieving API data. API gave us: %s', $body);
@@ -211,7 +211,7 @@ class BaylorCmsService
             return null;
         }
 
-        $body = $this->DOMJudgeService->jsonDecode((string)$response->getBody());
+        $body = $this->dj->jsonDecode((string)$response->getBody());
         return $body['access_token'];
     }
 }

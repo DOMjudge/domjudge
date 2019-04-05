@@ -31,7 +31,7 @@ class LanguageController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -41,16 +41,16 @@ class LanguageController extends BaseController
     /**
      * LanguageController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
 
@@ -157,7 +157,7 @@ class LanguageController extends BaseController
                 $language->setExtensions(array_values($language->getExtensions()));
             }
             $this->entityManager->persist($language);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $language,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $language,
                               $language->getLangid(), true);
             return $this->redirect($this->generateUrl('jury_language',
                                                       ['langId' => $language->getLangid()]));
@@ -188,7 +188,7 @@ class LanguageController extends BaseController
         $restrictions = ['langid' => $language->getLangid()];
         /** @var Submission[] $submissions */
         list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
-            $this->DOMJudgeService->getCurrentContests(),
+            $this->dj->getCurrentContests(),
             $restrictions
         );
 
@@ -196,7 +196,7 @@ class LanguageController extends BaseController
             'language' => $language,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
-            'showContest' => count($this->DOMJudgeService->getCurrentContests()) > 1,
+            'showContest' => count($this->dj->getCurrentContests()) > 1,
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_language', ['langId' => $language->getLangid()]),
@@ -230,7 +230,7 @@ class LanguageController extends BaseController
         $language->setAllowSubmit($request->request->getBoolean('allow_submit'));
         $this->entityManager->flush();
 
-        $this->DOMJudgeService->auditlog('language', $langId, 'set allow submit',
+        $this->dj->auditlog('language', $langId, 'set allow submit',
                                          $request->request->getBoolean('allow_submit'));
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
@@ -252,7 +252,7 @@ class LanguageController extends BaseController
         $language->setAllowJudge($request->request->getBoolean('allow_judge'));
         $this->entityManager->flush();
 
-        $this->DOMJudgeService->auditlog('language', $langId, 'set allow judge',
+        $this->dj->auditlog('language', $langId, 'set allow judge',
                                          $request->request->getBoolean('allow_judge'));
         return $this->redirectToRoute('jury_language', ['langId' => $langId]);
     }
@@ -282,7 +282,7 @@ class LanguageController extends BaseController
             if ($language->getExtensions()) {
                 $language->setExtensions(array_values($language->getExtensions()));
             }
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $language,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $language,
                               $language->getLangid(), false);
             return $this->redirect($this->generateUrl('jury_language',
                                                       ['langId' => $language->getLangid()]));
@@ -310,6 +310,6 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $language, $language->getName(), $this->generateUrl('jury_languages'));
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $language, $language->getName(), $this->generateUrl('jury_languages'));
     }
 }

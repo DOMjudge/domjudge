@@ -47,7 +47,7 @@ class ProblemController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    private $DOMJudgeService;
+    private $dj;
 
     /**
      * @var EventLogService
@@ -66,13 +66,13 @@ class ProblemController extends BaseController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         SubmissionService $submissionService,
         ImportProblemService $importProblemService
     ) {
         $this->entityManager        = $entityManager;
-        $this->DOMJudgeService      = $DOMJudgeService;
+        $this->dj                   = $dj;
         $this->eventLogService      = $eventLogService;
         $this->submissionService    = $submissionService;
         $this->importProblemService = $importProblemService;
@@ -87,7 +87,7 @@ class ProblemController extends BaseController
     public function indexAction(Request $request)
     {
         $formData = [
-            'contest' => $this->DOMJudgeService->getCurrentContest(),
+            'contest' => $this->dj->getCurrentContest(),
         ];
         $form     = $this->createForm(ProblemUploadMultipleType::class, $formData);
         $form->handleRequest($request);
@@ -109,7 +109,7 @@ class ProblemController extends BaseController
             $allMessages = [];
             foreach ($archives as $archive) {
                 try {
-                    $zip        = $this->DOMJudgeService->openZipFile($archive->getRealPath());
+                    $zip        = $this->dj->openZipFile($archive->getRealPath());
                     $clientName = $archive->getClientOriginalName();
                     $messages   = [];
                     if ($contestId === null) {
@@ -121,7 +121,7 @@ class ProblemController extends BaseController
                                                                                     $messages, $errorMessage);
                     $allMessages = array_merge($allMessages, $messages);
                     if ($newProblem) {
-                        $this->DOMJudgeService->auditlog('problem', $newProblem->getProbid(), 'upload zip',
+                        $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
                                                          $clientName);
                     } else {
                         $this->addFlash('danger', $errorMessage);
@@ -264,7 +264,7 @@ class ProblemController extends BaseController
             /** @var Contest[] $contests */
             $contests                = $this->entityManager->getRepository(Contest::class)->findAll();
             $data['contests']        = $contests;
-            $data['current_contest'] = $this->DOMJudgeService->getCurrentContest();
+            $data['current_contest'] = $this->dj->getCurrentContest();
         }
 
         return $this->render('@DOMJudge/jury/problems.html.twig', $data);
@@ -288,7 +288,7 @@ class ProblemController extends BaseController
             ->select('p', 'cp')
             ->andWhere('p.probid = :problemId')
             ->setParameter(':problemId', $problemId)
-            ->setParameter(':contest', $this->DOMJudgeService->getCurrentContest())
+            ->setParameter(':contest', $this->dj->getCurrentContest())
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -329,7 +329,7 @@ class ProblemController extends BaseController
         $yamlString = '# Problem exported by DOMjudge on ' . date('c') . "\n" . Yaml::dump($yaml);
 
         $zip = new ZipArchive();
-        if (!($tempFilename = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "export-"))) {
+        if (!($tempFilename = tempnam($this->dj->getDomjudgeTmpDir(), "export-"))) {
             throw new ServiceUnavailableHttpException(null, 'Could not create temporary file.');
         }
 
@@ -381,7 +381,7 @@ class ProblemController extends BaseController
             ->andWhere('s.contest = :contest')
             ->andWhere('s.expected_results IS NOT NULL')
             ->setParameter(':problem', $problem)
-            ->setParameter(':contest', $this->DOMJudgeService->getCurrentContest())
+            ->setParameter(':contest', $this->dj->getCurrentContest())
             ->getQuery()
             ->getResult();
 
@@ -464,7 +464,7 @@ class ProblemController extends BaseController
         $restrictions = ['probid' => $problem->getProbid()];
         /** @var Submission[] $submissions */
         list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
-            $this->DOMJudgeService->getCurrentContests(),
+            $this->dj->getCurrentContests(),
             $restrictions
         );
 
@@ -472,11 +472,11 @@ class ProblemController extends BaseController
             'problem' => $problem,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
-            'defaultMemoryLimit' => (int)$this->DOMJudgeService->dbconfig_get('memory_limit'),
-            'defaultOutputLimit' => (int)$this->DOMJudgeService->dbconfig_get('output_limit'),
-            'defaultRunExecutable' => (string)$this->DOMJudgeService->dbconfig_get('default_run'),
-            'defaultCompareExecutable' => (string)$this->DOMJudgeService->dbconfig_get('default_compare'),
-            'showContest' => count($this->DOMJudgeService->getCurrentContests()) > 1,
+            'defaultMemoryLimit' => (int)$this->dj->dbconfig_get('memory_limit'),
+            'defaultOutputLimit' => (int)$this->dj->dbconfig_get('output_limit'),
+            'defaultRunExecutable' => (string)$this->dj->dbconfig_get('default_run'),
+            'defaultCompareExecutable' => (string)$this->dj->dbconfig_get('default_compare'),
+            'showContest' => count($this->dj->getCurrentContests()) > 1,
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_problem', ['probId' => $problem->getProbid()]),
@@ -568,8 +568,8 @@ class ProblemController extends BaseController
         if ($request->isMethod('POST')) {
             $messages      = [];
             $maxrank       = 0;
-            $outputLimit   = $this->DOMJudgeService->dbconfig_get('output_limit');
-            $thumbnailSize = $this->DOMJudgeService->dbconfig_get('thumbnail_size', 128);
+            $outputLimit   = $this->dj->dbconfig_get('output_limit');
+            $thumbnailSize = $this->dj->dbconfig_get('thumbnail_size', 128);
             foreach ($testcases as $rank => $testcase) {
                 $newSample = isset($request->request->get('sample')[$rank]);
                 if ($newSample !== $testcase->getSample()) {
@@ -588,7 +588,7 @@ class ProblemController extends BaseController
                                 return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                             }
                             $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                          $this->DOMJudgeService->getDomjudgeTmpDir(), $error);
+                                                          $this->dj->getDomjudgeTmpDir(), $error);
                             if ($thumb === false) {
                                 $thumb = null;
                                 $this->addFlash('danger', sprintf('image: %s', $error));
@@ -606,7 +606,7 @@ class ProblemController extends BaseController
                             $testcase->getTestcaseContent()->{$md5Method}(md5($content));
                         }
 
-                        $this->DOMJudgeService->auditlog('testcase', $probId, 'updated',
+                        $this->dj->auditlog('testcase', $probId, 'updated',
                                                          sprintf('%s rank %d', $type, $rank));
 
                         $message = sprintf('Updated %s for testcase %d with file %s (%s)', $type, $rank,
@@ -661,7 +661,7 @@ class ProblemController extends BaseController
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
                     $thumb = Utils::getImageThumb($content, $thumbnailSize,
-                                                  $this->DOMJudgeService->getDomjudgeTmpDir(), $error);
+                                                  $this->dj->getDomjudgeTmpDir(), $error);
                     if ($thumb === false) {
                         $thumb = null;
                         $this->addFlash('danger', sprintf('image: %s', $error));
@@ -675,7 +675,7 @@ class ProblemController extends BaseController
                 }
 
                 $this->entityManager->persist($newTestcase);
-                $this->DOMJudgeService->auditlog('testcase', $probId, 'added', sprintf("rank %d", $maxrank));
+                $this->dj->auditlog('testcase', $probId, 'added', sprintf("rank %d", $maxrank));
 
                 $inFile  = $request->files->get('add_input');
                 $outFile = $request->files->get('add_output');
@@ -780,7 +780,7 @@ class ProblemController extends BaseController
                 $other->setRank($currentRank);
             });
 
-            $this->DOMJudgeService->auditlog('testcase', $probId, 'switch rank',
+            $this->dj->auditlog('testcase', $probId, 'switch rank',
                                              sprintf("%d <=> %d", $current->getRank(), $other->getRank()));
         }
 
@@ -870,7 +870,7 @@ class ProblemController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $problem,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $problem,
                               $problem->getProbid(), false);
             return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
         }
@@ -896,11 +896,11 @@ class ProblemController extends BaseController
                 }
             }
             try {
-                $zip        = $this->DOMJudgeService->openZipFile($archive->getRealPath());
+                $zip        = $this->dj->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
                 if ($this->importProblemService->importZippedProblem($zip, $clientName, $problem, $contest, $messages,
                                                                      $errorMessage)) {
-                    $this->DOMJudgeService->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
+                    $this->dj->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
                 } else {
                     $this->addFlash('danger', $errorMessage);
                     return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
@@ -943,7 +943,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $problem,
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $problem,
                                    $problem->getName(), $this->generateUrl('jury_problems'));
     }
 
@@ -964,7 +964,7 @@ class ProblemController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($problem);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $problem,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $problem,
                               $problem->getProbid(), true);
             return $this->redirect($this->generateUrl('jury_problem',
                                                       ['probId' => $problem->getProbid()]));

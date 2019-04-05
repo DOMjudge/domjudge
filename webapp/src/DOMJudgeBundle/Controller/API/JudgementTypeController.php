@@ -95,7 +95,7 @@ class JudgementTypeController extends AbstractRestController
      */
     protected function getJudgementTypes(array $filteredOn = null)
     {
-        $verdictsConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $verdicts       = include $verdictsConfig;
 
         $result = [];
@@ -107,7 +107,7 @@ class JudgementTypeController extends AbstractRestController
                 $solved  = true;
             }
             if ($name == 'compiler-error') {
-                $penalty = $this->DOMJudgeService->dbconfig_get('compile_penalty', false);
+                $penalty = $this->dj->dbconfig_get('compile_penalty', false);
             }
             if ($filteredOn !== null && !in_array($label, $filteredOn)) {
                 continue;

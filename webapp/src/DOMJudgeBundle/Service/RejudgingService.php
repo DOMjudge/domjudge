@@ -25,7 +25,7 @@ class RejudgingService
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var ScoreboardService
@@ -52,13 +52,13 @@ class RejudgingService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         ScoreboardService $scoreboardService,
         EventLogService $eventLogService,
         BalloonService $balloonService
     ) {
         $this->entityManager     = $entityManager;
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->scoreboardService = $scoreboardService;
         $this->eventLogService   = $eventLogService;
         $this->balloonService    = $balloonService;
@@ -78,7 +78,7 @@ class RejudgingService
     {
         // This might take a while
         ini_set('max_execution_time', '300');
-        
+
         if ($rejudging->getEndtime()) {
             $error = sprintf('Rejudging already %s.', $rejudging->getValid() ? 'applied' : 'canceled');
             if ($progressReporter) {
@@ -136,7 +136,7 @@ class RejudgingService
             ->getQuery()
             ->getResult();
 
-        $this->DOMJudgeService->auditlog('rejudging', $rejudgingId, $action . 'ing rejudge', '(start)');
+        $this->dj->auditlog('rejudging', $rejudgingId, $action . 'ing rejudge', '(start)');
 
         // This loop uses direct queries instead of Doctrine classes to speed it up drastically
 
@@ -227,14 +227,14 @@ class RejudgingService
         // Update the rejudging itself
         /** @var Rejudging $rejudging */
         $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($rejudgingId);
-        $user      = $this->entityManager->getRepository(User::class)->find($this->DOMJudgeService->getUser()->getUserid());
+        $user      = $this->entityManager->getRepository(User::class)->find($this->dj->getUser()->getUserid());
         $rejudging
             ->setEndtime(Utils::now())
             ->setFinishUser($user)
             ->setValid($action === self::ACTION_APPLY);
         $this->entityManager->flush();
 
-        $this->DOMJudgeService->auditlog('rejudging', $rejudgingId, $action . 'ing rejudge', '(end)');
+        $this->dj->auditlog('rejudging', $rejudgingId, $action . 'ing rejudge', '(end)');
 
         return true;
     }

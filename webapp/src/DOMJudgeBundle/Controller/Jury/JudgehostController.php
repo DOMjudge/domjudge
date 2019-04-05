@@ -32,12 +32,12 @@ class JudgehostController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
     {
-        $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->entityManager = $entityManager;
+        $this->dj            = $dj;
     }
 
     /**
@@ -62,7 +62,7 @@ class JudgehostController extends BaseController
         ];
 
         $now           = Utils::now();
-        $contest       = $this->DOMJudgeService->getCurrentContest();
+        $contest       = $this->dj->getCurrentContest();
         $query         = 'SELECT judgehost, SUM(IF(endtime, endtime, :now) - GREATEST(:from, starttime)) AS `load`
                           FROM judging
                           WHERE endtime > :from OR (endtime IS NULL AND (valid = 1 OR rejudgingid IS NOT NULL))
@@ -90,8 +90,8 @@ class JudgehostController extends BaseController
         $workcontest = $map($workcontest);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $time_warn = $this->DOMJudgeService->dbconfig_get('judgehost_warning', 30);
-        $time_crit = $this->DOMJudgeService->dbconfig_get('judgehost_critical', 120);
+        $time_warn = $this->dj->dbconfig_get('judgehost_warning', 30);
+        $time_crit = $this->dj->dbconfig_get('judgehost_critical', 120);
         $judgehosts_table = [];
         foreach ($judgehosts as $judgehost) {
             $judgehostdata    = [];
@@ -235,9 +235,9 @@ class JudgehostController extends BaseController
         }
 
         $reltime = floor(Utils::difftime(Utils::now(), (float)$judgehost->getPolltime()));
-        if ($reltime < $this->DOMJudgeService->dbconfig_get('judgehost_warning', 30)) {
+        if ($reltime < $this->dj->dbconfig_get('judgehost_warning', 30)) {
             $status = 'OK';
-        } elseif ($reltime < $this->DOMJudgeService->dbconfig_get('judgehost_critical', 120)) {
+        } elseif ($reltime < $this->dj->dbconfig_get('judgehost_critical', 120)) {
             $status = 'Warning';
         } else {
             $status = 'Critical';
@@ -245,7 +245,7 @@ class JudgehostController extends BaseController
 
         /** @var Judging[] $judgings */
         $judgings = [];
-        if ($contests = $this->DOMJudgeService->getCurrentContest()) {
+        if ($contests = $this->dj->getCurrentContest()) {
             $judgings = $this->entityManager->createQueryBuilder()
                 ->from('DOMJudgeBundle:Judging', 'j')
                 ->select('j', 'r')
@@ -299,7 +299,7 @@ class JudgehostController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $judgehost, $judgehost->getHostname(), $this->generateUrl('jury_judgehosts'));
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $judgehost, $judgehost->getHostname(), $this->generateUrl('jury_judgehosts'));
     }
 
     /**
@@ -315,7 +315,7 @@ class JudgehostController extends BaseController
         $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
         $judgehost->setActive(true);
         $this->entityManager->flush();
-        $this->DOMJudgeService->auditlog('judgehost', $hostname, 'marked active');
+        $this->dj->auditlog('judgehost', $hostname, 'marked active');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
 
@@ -332,7 +332,7 @@ class JudgehostController extends BaseController
         $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
         $judgehost->setActive(false);
         $this->entityManager->flush();
-        $this->DOMJudgeService->auditlog('judgehost', $hostname, 'marked inactive');
+        $this->dj->auditlog('judgehost', $hostname, 'marked inactive');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
 
@@ -344,7 +344,7 @@ class JudgehostController extends BaseController
     public function activateAllAction()
     {
         $this->entityManager->createQuery('UPDATE DOMJudgeBundle:Judgehost j set j.active = true')->execute();
-        $this->DOMJudgeService->auditlog('judgehost', null, 'marked all active');
+        $this->dj->auditlog('judgehost', null, 'marked all active');
         return $this->redirectToRoute('jury_judgehosts');
     }
 
@@ -356,7 +356,7 @@ class JudgehostController extends BaseController
     public function deactivateAllAction()
     {
         $this->entityManager->createQuery('UPDATE DOMJudgeBundle:Judgehost j set j.active = false')->execute();
-        $this->DOMJudgeService->auditlog('judgehost', null, 'marked all inactive');
+        $this->dj->auditlog('judgehost', null, 'marked all inactive');
         return $this->redirectToRoute('jury_judgehosts');
     }
 
@@ -376,7 +376,7 @@ class JudgehostController extends BaseController
             /** @var Judgehost $judgehost */
             foreach ($form->getData()['judgehosts'] as $judgehost) {
                 $this->entityManager->persist($judgehost);
-                $this->DOMJudgeService->auditlog('judgehost', $judgehost->getHostname(), 'added');
+                $this->dj->auditlog('judgehost', $judgehost->getHostname(), 'added');
             }
             $this->entityManager->flush();
 
@@ -405,7 +405,7 @@ class JudgehostController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->DOMJudgeService->auditlog('judgehosts', null, 'updated');
+            $this->dj->auditlog('judgehosts', null, 'updated');
             $this->entityManager->flush();
 
             return $this->redirectToRoute('jury_judgehosts');

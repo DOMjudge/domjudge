@@ -38,17 +38,17 @@ class JuryMiscController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * GeneralInfoController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
     {
-        $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->entityManager = $entityManager;
+        $this->dj            = $dj;
     }
 
     /**
@@ -67,7 +67,7 @@ class JuryMiscController extends BaseController
      */
     public function updatesAction(Request $request)
     {
-        return $this->json($this->DOMJudgeService->getUpdates());
+        return $this->json($this->dj->getUpdates());
     }
 
     /**
@@ -175,13 +175,13 @@ class JuryMiscController extends BaseController
     {
         // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig outpit
 
-        $contests = $this->DOMJudgeService->getCurrentContests();
+        $contests = $this->dj->getCurrentContests();
         if ($cid = $request->request->get('cid')) {
             if (!isset($contests[$cid])) {
                 throw new BadRequestHttpException(sprintf('Contest %s not found', $cid));
             }
             $contests = [$cid => $contests[$cid]];
-        } elseif ($request->cookies->has('domjudge_cid') && ($contest = $this->DOMJudgeService->getCurrentContest())) {
+        } elseif ($request->cookies->has('domjudge_cid') && ($contest = $this->dj->getCurrentContest())) {
             $contests = [$contest->getCid() => $contest];
         }
 
@@ -196,7 +196,7 @@ class JuryMiscController extends BaseController
             $response->setCallback(function () use ($contests, $progressReporter, $scoreboardService) {
                 $timeStart = microtime(true);
 
-                $this->DOMJudgeService->auditlog('scoreboard', null, 'refresh cache');
+                $this->dj->auditlog('scoreboard', null, 'refresh cache');
 
                 foreach ($contests as $contest) {
                     $queryBuilder = $this->entityManager->createQueryBuilder()
@@ -322,7 +322,7 @@ class JuryMiscController extends BaseController
     {
         /** @var Submission[] $submissions */
         $submissions = [];
-        if ($contests = $this->DOMJudgeService->getCurrentContests()) {
+        if ($contests = $this->dj->getCurrentContests()) {
             $submissions = $this->entityManager->createQueryBuilder()
                 ->from('DOMJudgeBundle:Submission', 's')
                 ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
@@ -434,7 +434,7 @@ class JuryMiscController extends BaseController
         } else {
             $response = $this->redirectToRoute('jury_index');
         }
-        return $this->DOMJudgeService->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
+        return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
                                                  $response);
     }
 }
