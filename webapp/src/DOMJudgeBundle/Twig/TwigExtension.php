@@ -75,7 +75,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
             new \Twig_SimpleFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printYesNo', [$this, 'printYesNo']),
             new \Twig_SimpleFilter('printSize', [Utils::class, 'printSize'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('testcaseReults', [$this, 'testcaseReults'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFilter('testcaseResults', [$this, 'testcaseResults'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('displayTestcaseResults', [$this, 'displayTestcaseResults'],
                                    ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('externalCcsUrl', [$this, 'externalCcsUrl']),
@@ -293,7 +293,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
      * @param Submission $submission
      * @return string
      */
-    public function testcaseReults(Submission $submission)
+    public function testcaseResults(Submission $submission)
     {
         // We use a direct SQL query here for performance reasons
         $judging   = $submission->getJudgings()->first();
