@@ -59,7 +59,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `des
 ('openid_clientid', '""', 'string', '0','Misc', 'OpenID Connect client id'),
 ('openid_clientsecret', '""', 'string', '0', 'Misc', 'OpenID Connect client secret'),
 ('data_source', '0', 'int', '0', 'Misc', 'Source of data. Choices: 0 = all local, 1 = configuration data external, 2 = configuration and live data external'),
-('ip_autologin', '0', 'bool', '0', 'Misc', 'IP authentication still requires a button to be pressed, enable this option to skip this step');
+('ip_autologin', '0', 'bool', '0', 'Misc', 'Enable to skip the login page when using IP authentication.');
 
 
 --
