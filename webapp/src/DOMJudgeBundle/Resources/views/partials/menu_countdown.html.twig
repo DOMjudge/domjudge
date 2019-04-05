@@ -1,17 +1,13 @@
 <div class="navbar-text" style="white-space:nowrap;">
     <i style="padding-left: 10px;" class="fas fa-clock"></i>
     {% set now = 'now'|date('U') %}
-    <span id="timeleft">{%- if contest is null -%}
+    <span id="timeleft">
+        {%- if contest is null -%}
           no contest
-        {%- elseif contest.starttime(false) < now and contest.endtime >= now -%}
-            {{ now|timediff(contest.getEndTime()) }}
-        {%- elseif contest.activatetime < now and contest.starttime(false) >= now -%}
-            {%- if contest.starttimeEnabled -%}
-                time to start: {{ now|timediff(contest.starttime) }}
-            {%- else -%}
-                start delayed
-            {%- endif -%}
-        {%- endif -%}</span>
+        {%- else -%}
+            {{ contest.countdown }}
+        {%- endif -%}
+    </span>
 </div>
 
 <script>
