@@ -56,23 +56,13 @@ install-domserver:
 	rm $(DESTDIR)$(domserver_webappdir)/web/doc
 	ln -s $(DESTDIR)$(domjudge_docdir) $(DESTDIR)$(domserver_webappdir)/web/doc
 # Now change all relative symlinks in webapp/web to their correct paths
-	for link in $$(find $(DESTDIR)$(domserver_webappdir)/web -maxdepth 1 -type l); do \
+	for link in $$(find $(DESTDIR)$(domserver_webappdir)/web/$$dir -maxdepth 2 -type l); do \
 		target=$$(readlink $$link) ; \
-		if echo $${target} | grep -q '^..\/..\/lib\/vendor' ; then \
+		if echo $${target} | grep -q '\.\./\.\./lib/vendor' ; then \
 			rm $$link ; \
-			realtarget=$(DESTDIR)$(domserver_libvendordir)$$(echo $${target} | sed 's/..\/..\/lib\/vendor//') ; \
+			realtarget=$(DESTDIR)$(domserver_libvendordir)$$(echo $${target} | sed 's!^.*\.\./\.\./lib/vendor!!') ; \
 			ln -s $$realtarget $$link ; \
 		fi \
-	done
-	for dir in css js ; do \
-		for link in $$(find $(DESTDIR)$(domserver_webappdir)/web/$$dir -maxdepth 1 -type l) ; do \
-			target=$$(readlink $$link) ; \
-			if echo $${target} | grep -q '^..\/..\/..\/lib\/vendor' ; then \
-				rm $$link ; \
-				realtarget=$(DESTDIR)$(domserver_libvendordir)$$(echo $${target} | sed 's/..\/..\/..\/lib\/vendor//') ; \
-				ln -s $$realtarget $$link ; \
-			fi \
-		done ; \
 	done
 	-for d in cache logs sessions ; do \
 		$(INSTALL_WEBSITE) -m 0775 -d $(DESTDIR)$(domserver_webappdir)/var/$$d ; \
