@@ -69,7 +69,7 @@ EOF
 
 # install all php dependencies
 export SYMFONY_ENV="prod"
-composer install
+composer install --no-scripts
 
 # configure, make and install (but skip documentation)
 make configure
