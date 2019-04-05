@@ -19,6 +19,7 @@ Version 6.1.0 - DEV
  - Add support for the Swift programming language.
  - Add support for creating a writable tempdirectory for submissions.
  - Add option to download all sample files of a problem in a single zip.
+ - Add etc/initial_admin_password.secret during install.
 
 Version 6.0.3 - 15 December 2018
 --------------------------------

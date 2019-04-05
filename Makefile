@@ -131,6 +131,9 @@ endif
 		etc/dbpasswords.secret
 	-$(INSTALL_WEBSITE) -m 0600 -t $(DESTDIR)$(domserver_etcdir) \
 		etc/initial_admin_password.secret
+	@echo ""
+	@echo "Domserver install complete. Admin web interface password can be found in:"
+	@echo "$(DESTDIR)$(domserver_etcdir)/initial_admin_password.secret"
 
 install-judgehost-l:
 	$(MAKE) check-root
@@ -248,6 +251,8 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 	@echo "           ln -sf $(CURDIR)/etc/domjudge-fpm /etc/php/7.0/fpm/pool.d/domjudge.conf"
 	@echo "           systemctl restart nginx"
 	@echo "           systemctl restart php-fpm"
+	@echo ""
+	@echo "The admin password for the web interface is in etc/initial_admin_password.secret"
 
 maintainer-postinstall-permissions:
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret
