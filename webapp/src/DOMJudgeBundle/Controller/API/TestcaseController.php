@@ -26,15 +26,15 @@ class TestcaseController extends FOSRestController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * TestcaseController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      */
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $em)
     {
-        $this->entityManager = $entityManager;
+        $this->em = $em;
     }
 
     /**
@@ -55,7 +55,7 @@ class TestcaseController extends FOSRestController
     {
         // First, check if the judging has an endtime, because then we are done
         /** @var Judging $judging */
-        $judging = $this->entityManager->createQueryBuilder()
+        $judging = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
             ->join('j.submission', 's')
             ->leftJoin('j.runs', 'jr')
@@ -74,7 +74,7 @@ class TestcaseController extends FOSRestController
             return '';
         }
 
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Testcase', 't')
             ->select('t')
             ->andWhere('t.probid = :probid')
@@ -135,7 +135,7 @@ class TestcaseController extends FOSRestController
         }
 
         /** @var TestcaseWithContent|null $testcaseWithContent */
-        $testcaseWithContent = $this->entityManager->createQueryBuilder()
+        $testcaseWithContent = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TestcaseWithContent', 'tcc')
             ->select('tcc')
             ->andWhere('tcc.testcaseid = :id')

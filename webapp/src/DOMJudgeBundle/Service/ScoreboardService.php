@@ -36,7 +36,7 @@ class ScoreboardService
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -50,17 +50,17 @@ class ScoreboardService
 
     /**
      * ScoreboardService constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         LoggerInterface $logger
     ) {
-        $this->entityManager = $entityManager;
-        $this->dj            = $dj;
-        $this->logger        = $logger;
+        $this->em     = $em;
+        $this->dj     = $dj;
+        $this->logger = $logger;
     }
 
     /**
@@ -168,7 +168,7 @@ class ScoreboardService
         $sortOrder  = $team->getCategory()->getSortorder();
 
         // Number of teams that definitely ranked higher
-        $better = $this->entityManager->createQueryBuilder()
+        $better = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:RankCache', 'r')
             ->join('r.team', 't')
             ->join('t.category', 'tc')
@@ -192,7 +192,7 @@ class ScoreboardService
         // solved at least one problem, so this list should usually be short
         if ($points > 0) {
             /** @var RankCache[] $tied */
-            $tied = $this->entityManager->createQueryBuilder()
+            $tied = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:RankCache', 'r')
                 ->join('r.team', 't')
                 ->join('t.category', 'tc')
@@ -222,7 +222,7 @@ class ScoreboardService
 
                 // Get submission times for each of the teams
                 /** @var ScoreCache[] $tiedScores */
-                $tiedScores = $this->entityManager->createQueryBuilder()
+                $tiedScores = $this->em->createQueryBuilder()
                     ->from('DOMJudgeBundle:ScoreCache', 's')
                     ->join('s.problem', 'p')
                     ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
@@ -280,7 +280,7 @@ class ScoreboardService
 
         // First acquire an advisory lock to prevent other calls to this method from interfering with our update.
         $lockString = sprintf('domjudge.%d.%d.%d', $contest->getCid(), $team->getTeamid(), $problem->getProbid());
-        if ($this->entityManager->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
+        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
                                                                [':lock' => $lockString]) != 1) {
             throw new \Exception(sprintf("ScoreboardService::calculateScoreRow failed to obtain lock '%s'",
                                          $lockString));
@@ -291,7 +291,7 @@ class ScoreboardService
         // that these will not count as solved. Correct submissions with
         // submittime after contest end should never happen, unless one
         // resets the contest time after successful judging.
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->select('s, j, c')
             ->leftJoin('s.contest', 'c')
@@ -380,7 +380,7 @@ class ScoreboardService
 	    //   - either it's still ongoing (pending judgement, could be correct)
 	    //   - or already judged to be correct (if it's judged but != correct, it's not a first to solve)
 	    // - or the submission is still queued for judgement (judgehost is NULL).
-            $firstToSolve = 0 == $this->entityManager->getConnection()->fetchColumn('
+            $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j USING (submitid)
                     LEFT JOIN team t USING(teamid)
@@ -409,14 +409,14 @@ class ScoreboardService
             ':isCorrectPublic' => (int)$correctPubl,
             ':isFirstToSolve' => (int)$firstToSolve,
         ];
-        $this->entityManager->getConnection()->executeQuery('REPLACE INTO scorecache
+        $this->em->getConnection()->executeQuery('REPLACE INTO scorecache
             (cid, teamid, probid,
              submissions_restricted, pending_restricted, solvetime_restricted, is_correct_restricted,
              submissions_public, pending_public, solvetime_public, is_correct_public, is_first_to_solve)
             VALUES (:cid, :teamid, :probid, :submissionsRestricted, :pendingRestricted, :solvetimeRestricted, :isCorrectRestricted,
             :submissionsPublic, :pendingPublic, :solvetimePublic, :isCorrectPublic, :isFirstToSolve)', $params);
 
-        if ($this->entityManager->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
+        if ($this->em->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
                                                                [':lock' => $lockString]) != 1) {
             throw new \Exception('ScoreboardService::calculateScoreRow failed to release lock');
         }
@@ -444,7 +444,7 @@ class ScoreboardService
 
         // First acquire an advisory lock to prevent other calls to this method from interfering with our update.
         $lockString = sprintf('domjudge.%d.%d', $contest->getCid(), $team->getTeamid());
-        if ($this->entityManager->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
+        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
                                                                [':lock' => $lockString]) != 1) {
             throw new \Exception(sprintf("ScoreboardService::updateRankCache failed to obtain lock '%s'", $lockString));
         }
@@ -452,7 +452,7 @@ class ScoreboardService
         // Fetch contest problems. We can not add it as a relation on ScoreCache as Doctrine doesn't seem to like that its keys
         // are part of the primary key
         /** @var ContestProblem[] $contestProblems */
-        $contestProblems = $this->entityManager->createQueryBuilder()
+        $contestProblems = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:ContestProblem', 'cp', 'cp.probid')
             ->select('cp')
             ->andWhere('cp.contest = :contest')
@@ -474,7 +474,7 @@ class ScoreboardService
 
         // Now fetch the ScoreCache entries
         /** @var ScoreCache[] $scoreCacheRows */
-        $scoreCacheRows = $this->entityManager->createQueryBuilder()
+        $scoreCacheRows = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:ScoreCache', 's')
             ->select('s')
             ->andWhere('s.contest = :contest')
@@ -509,12 +509,12 @@ class ScoreboardService
             ':pointsPublic' => $numPoints['public'],
             ':totalTimePublic' => $totalTime['public'],
         ];
-        $this->entityManager->getConnection()->executeQuery('REPLACE INTO rankcache (cid, teamid,
+        $this->em->getConnection()->executeQuery('REPLACE INTO rankcache (cid, teamid,
             points_restricted, totaltime_restricted,
             points_public, totaltime_public)
             VALUES (:cid, :teamid, :pointsRestricted, :totalTimeRestricted, :pointsPublic, :totalTimePublic)', $params);
 
-        if ($this->entityManager->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
+        if ($this->em->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
                                                                [':lock' => $lockString]) != 1) {
             throw new \Exception('ScoreboardService::updateRankCache failed to release lock');
         }
@@ -561,7 +561,7 @@ class ScoreboardService
      */
     public function getGroupedAffiliations(Contest $contest)
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'cat')
             ->select('cat', 't', 'affil')
             ->leftJoin('cat.teams', 't')
@@ -615,7 +615,7 @@ class ScoreboardService
         $showFlags        = $this->dj->dbconfig_get('show_flags', true);
         $showAffiliations = $this->dj->dbconfig_get('show_affiliations', true);
 
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'c')
             ->select('c');
         if (!$jury) {
@@ -632,7 +632,7 @@ class ScoreboardService
         if (empty($categories) || !$showAffiliations) {
             $filters['affiliations'] = [];
         } else {
-            $queryBuilder = $this->entityManager->createQueryBuilder()
+            $queryBuilder = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:TeamAffiliation', 'a')
                 ->select('a')
                 ->join('a.teams', 't')
@@ -726,7 +726,7 @@ class ScoreboardService
      */
     protected function getTeams(Contest $contest, bool $jury = false, Filter $filter = null)
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Team', 't', 't.teamid')
             ->innerJoin('t.category', 'tc')
             ->leftJoin('t.affiliation', 'ta')
@@ -780,7 +780,7 @@ class ScoreboardService
      */
     protected function getProblems(Contest $contest)
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:ContestProblem', 'cp', 'cp.probid')
             ->select('cp, p')
             ->innerJoin('cp.problem', 'p')
@@ -799,7 +799,7 @@ class ScoreboardService
      */
     protected function getCategories(bool $jury)
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'cat', 'cat.categoryid')
             ->select('cat')
             ->orderBy('cat.sortorder')
@@ -821,7 +821,7 @@ class ScoreboardService
      */
     protected function getScorecache(Contest $contest, Team $team = null)
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:ScoreCache', 's')
             ->select('s')
             ->andWhere('s.contest = :contest')
@@ -845,7 +845,7 @@ class ScoreboardService
      */
     protected function getRankcache(Contest $contest, Team $team)
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:RankCache', 'r')
             ->select('r')
             ->andWhere('r.contest = :contest')

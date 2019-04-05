@@ -24,7 +24,7 @@ abstract class AbstractRestController extends FOSRestController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -43,7 +43,7 @@ abstract class AbstractRestController extends FOSRestController
      */
     public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj, EventLogService $eventLogService)
     {
-        $this->entityManager   = $entityManager;
+        $this->em   = $entityManager;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
@@ -57,7 +57,7 @@ abstract class AbstractRestController extends FOSRestController
     protected function performListAction(Request $request)
     {
         // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
-        $this->entityManager->clear();
+        $this->em->clear();
         $queryBuilder = $this->getQueryBuilder($request);
 
         if ($request->query->has('ids')) {
@@ -98,7 +98,7 @@ abstract class AbstractRestController extends FOSRestController
     protected function performSingleAction(Request $request, string $id)
     {
         // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
-        $this->entityManager->clear();
+        $this->em->clear();
         $queryBuilder = $this->getQueryBuilder($request)
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter(':id', $id);
@@ -147,7 +147,7 @@ abstract class AbstractRestController extends FOSRestController
     protected function getContestQueryBuilder(): QueryBuilder
     {
         $now = Utils::now();
-        $qb  = $this->entityManager->createQueryBuilder();
+        $qb  = $this->em->createQueryBuilder();
         $qb
             ->from('DOMJudgeBundle:Contest', 'c')
             ->select('c')

@@ -33,7 +33,7 @@ class JuryMiscController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -47,8 +47,8 @@ class JuryMiscController extends BaseController
      */
     public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
     {
-        $this->entityManager = $entityManager;
-        $this->dj            = $dj;
+        $this->em = $entityManager;
+        $this->dj = $dj;
     }
 
     /**
@@ -78,7 +78,7 @@ class JuryMiscController extends BaseController
     public function ajaxDataAction(Request $request, string $datatype)
     {
         $q  = $request->query->get('q');
-        $qb = $this->entityManager->createQueryBuilder();
+        $qb = $this->em->createQueryBuilder();
 
         if ($datatype === 'problems') {
             $problems = $qb->from('DOMJudgeBundle:Problem', 'p')
@@ -199,7 +199,7 @@ class JuryMiscController extends BaseController
                 $this->dj->auditlog('scoreboard', null, 'refresh cache');
 
                 foreach ($contests as $contest) {
-                    $queryBuilder = $this->entityManager->createQueryBuilder()
+                    $queryBuilder = $this->em->createQueryBuilder()
                         ->from('DOMJudgeBundle:Team', 't')
                         ->select('t')
                         ->orderBy('t.teamid');
@@ -212,7 +212,7 @@ class JuryMiscController extends BaseController
                     /** @var Team[] $teams */
                     $teams = $queryBuilder->getQuery()->getResult();
                     /** @var Problem[] $problems */
-                    $problems = $this->entityManager->createQueryBuilder()
+                    $problems = $this->em->createQueryBuilder()
                         ->from('DOMJudgeBundle:Problem', 'p')
                         ->join('p.contest_problems', 'cp')
                         ->select('p')
@@ -281,7 +281,7 @@ class JuryMiscController extends BaseController
                         ':problemIds' => Connection::PARAM_INT_ARRAY,
                         ':teamIds' => Connection::PARAM_INT_ARRAY,
                     ];
-                    $this->entityManager->getConnection()->executeQuery(
+                    $this->em->getConnection()->executeQuery(
                         'DELETE FROM scorecache WHERE cid = :cid AND probid NOT IN (:problemIds)',
                         $params, $types);
 
@@ -289,10 +289,10 @@ class JuryMiscController extends BaseController
                         ':cid' => $contest->getCid(),
                         ':teamIds' => $teamIds,
                     ];
-                    $this->entityManager->getConnection()->executeQuery(
+                    $this->em->getConnection()->executeQuery(
                         'DELETE FROM scorecache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
                         $params, $types);
-                    $this->entityManager->getConnection()->executeQuery(
+                    $this->em->getConnection()->executeQuery(
                         'DELETE FROM rankcache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
                         $params, $types);
                 }
@@ -323,7 +323,7 @@ class JuryMiscController extends BaseController
         /** @var Submission[] $submissions */
         $submissions = [];
         if ($contests = $this->dj->getCurrentContests()) {
-            $submissions = $this->entityManager->createQueryBuilder()
+            $submissions = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Submission', 's')
                 ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
                 ->select('s', 'j')
@@ -406,7 +406,7 @@ class JuryMiscController extends BaseController
             }
         }
 
-        $this->entityManager->flush();
+        $this->em->flush();
 
         return $this->render('@DOMJudge/jury/check_judgings.html.twig', [
             'numChecked' => $numChecked,

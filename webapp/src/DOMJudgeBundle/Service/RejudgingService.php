@@ -20,7 +20,7 @@ class RejudgingService
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -44,20 +44,20 @@ class RejudgingService
 
     /**
      * RejudgingService constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $DOMJudgeService
      * @param ScoreboardService      $scoreboardService
      * @param EventLogService        $eventLogService
      * @param BalloonService         $balloonService
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         ScoreboardService $scoreboardService,
         EventLogService $eventLogService,
         BalloonService $balloonService
     ) {
-        $this->entityManager     = $entityManager;
+        $this->em                = $em;
         $this->dj                = $dj;
         $this->scoreboardService = $scoreboardService;
         $this->eventLogService   = $eventLogService;
@@ -91,7 +91,7 @@ class RejudgingService
 
         $rejudgingId = $rejudging->getRejudgingid();
 
-        $todo = $this->entityManager->createQueryBuilder()
+        $todo = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->select('COUNT(s)')
             ->andWhere('s.rejudging = :rejudging')
@@ -99,7 +99,7 @@ class RejudgingService
             ->getQuery()
             ->getSingleScalarResult();
 
-        $done = $this->entityManager->createQueryBuilder()
+        $done = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
             ->select('COUNT(j)')
             ->andWhere('j.rejudging = :rejudging')
@@ -121,7 +121,7 @@ class RejudgingService
         }
 
         // Get all submissions that we should consider
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->join('s.judgings', 'j')
             ->select('s.submitid, s.cid, s.teamid, s.probid, j.judgingid, j.result')
@@ -146,36 +146,36 @@ class RejudgingService
             }
 
             if ($action === self::ACTION_APPLY) {
-                $this->entityManager->transactional(function () use ($submission, $rejudgingId) {
+                $this->em->transactional(function () use ($submission, $rejudgingId) {
                     // First invalidate old judging, maybe different from prevjudgingid!
-                    $this->entityManager->getConnection()->executeQuery(
+                    $this->em->getConnection()->executeQuery(
                         'UPDATE judging SET valid=0 WHERE submitid = :submitid',
                         [':submitid' => $submission['submitid']]
                     );
 
                     // Then set judging to valid
-                    $this->entityManager->getConnection()->executeQuery(
+                    $this->em->getConnection()->executeQuery(
                         'UPDATE judging SET valid=1 WHERE submitid = :submitid AND rejudgingid = :rejudgingid',
                         [':submitid' => $submission['submitid'], ':rejudgingid' => $rejudgingId]
                     );
 
                     // Remove relation from submission to rejudge
-                    $this->entityManager->getConnection()->executeQuery(
+                    $this->em->getConnection()->executeQuery(
                         'UPDATE submission SET rejudgingid=NULL WHERE submitid = :submitid',
                         [':submitid' => $submission['submitid']]
                     );
 
                     // Last update cache
-                    $contest = $this->entityManager->getRepository(Contest::class)->find($submission['cid']);
-                    $team    = $this->entityManager->getRepository(Team::class)->find($submission['teamid']);
-                    $problem = $this->entityManager->getRepository(Problem::class)->find($submission['probid']);
+                    $contest = $this->em->getRepository(Contest::class)->find($submission['cid']);
+                    $team    = $this->em->getRepository(Team::class)->find($submission['teamid']);
+                    $problem = $this->em->getRepository(Problem::class)->find($submission['probid']);
                     $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
                     // Update event log
                     $this->eventLogService->log('judging', $submission['judgingid'], EventLogService::ACTION_CREATE,
                                                 $submission['cid']);
 
-                    $runData = $this->entityManager->createQueryBuilder()
+                    $runData = $this->em->createQueryBuilder()
                         ->from('DOMJudgeBundle:JudgingRun', 'r')
                         ->select('r.runid')
                         ->andWhere('r.judgingid = :judgingid')
@@ -190,14 +190,14 @@ class RejudgingService
                     }
 
                     // Update ballons
-                    $contest    = $this->entityManager->getRepository(Contest::class)->find($submission['cid']);
-                    $submission = $this->entityManager->getRepository(Submission::class)->find($submission['submitid']);
+                    $contest    = $this->em->getRepository(Contest::class)->find($submission['cid']);
+                    $submission = $this->em->getRepository(Submission::class)->find($submission['submitid']);
                     $this->balloonService->updateBalloons($contest, $submission);
                 });
             } elseif ($action === self::ACTION_CANCEL) {
                 // Restore old judgehost association
                 /** @var Judging $validJudging */
-                $validJudging = $this->entityManager->createQueryBuilder()
+                $validJudging = $this->em->createQueryBuilder()
                     ->from('DOMJudgeBundle:Judging', 'j')
                     ->join('j.judgehost', 'jh')
                     ->select('j', 'jh')
@@ -212,7 +212,7 @@ class RejudgingService
                     ':rejudgingid' => $rejudgingId,
                     ':submitid' => $submission['submitid'],
                 ];
-                $this->entityManager->getConnection()->executeQuery(
+                $this->em->getConnection()->executeQuery(
                     'UPDATE submission
                             SET rejudgingid = NULL,
                                 judgehost = :judgehost
@@ -226,13 +226,13 @@ class RejudgingService
 
         // Update the rejudging itself
         /** @var Rejudging $rejudging */
-        $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($rejudgingId);
-        $user      = $this->entityManager->getRepository(User::class)->find($this->dj->getUser()->getUserid());
+        $rejudging = $this->em->getRepository(Rejudging::class)->find($rejudgingId);
+        $user      = $this->em->getRepository(User::class)->find($this->dj->getUser()->getUserid());
         $rejudging
             ->setEndtime(Utils::now())
             ->setFinishUser($user)
             ->setValid($action === self::ACTION_APPLY);
-        $this->entityManager->flush();
+        $this->em->flush();
 
         $this->dj->auditlog('rejudging', $rejudgingId, $action . 'ing rejudge', '(end)');
 

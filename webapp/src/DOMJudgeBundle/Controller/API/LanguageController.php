@@ -68,7 +68,7 @@ class LanguageController extends AbstractRestController
         // Make sure the contest exists by calling getContestId. Most API endpoints use the contest to filter its
         // queries, but the languages endpoint does not. So we just call it here
         $this->getContestId($request);
-        return $this->entityManager->createQueryBuilder()
+        return $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Language', 'lang')
             ->select('lang')
             ->andWhere('lang.allowSubmit = 1');

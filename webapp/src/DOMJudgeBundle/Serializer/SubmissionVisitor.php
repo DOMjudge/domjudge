@@ -35,7 +35,7 @@ class SubmissionVisitor implements EventSubscriberInterface
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * SubmissionVisitor constructor.
@@ -47,12 +47,12 @@ class SubmissionVisitor implements EventSubscriberInterface
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         RouterInterface $router,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $em
     ) {
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
         $this->router          = $router;
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
     }
 
     /**
@@ -84,9 +84,9 @@ class SubmissionVisitor implements EventSubscriberInterface
             $filesRoute         = $this->router->generate('submission_files',
                                                           [
                                                               'cid' => $submission->getContest()->getApiId($this->eventLogService,
-                                                                                                           $this->entityManager),
+                                                                                                           $this->em),
                                                               'id' => $submission->getApiId($this->eventLogService,
-                                                                                            $this->entityManager)
+                                                                                            $this->em)
                                                           ]);
             $apiRootRoute       = $this->router->generate('api_root');
             $relativeFilesRoute = substr(

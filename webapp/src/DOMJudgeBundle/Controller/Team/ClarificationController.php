@@ -38,7 +38,7 @@ class ClarificationController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var EventLogService
@@ -52,12 +52,12 @@ class ClarificationController extends BaseController
 
     public function __construct(
         DOMJudgeService $dj,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         EventLogService $eventLogService,
         FormFactoryInterface $formFactory
     ) {
         $this->dj              = $dj;
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->eventLogService = $eventLogService;
         $this->formFactory     = $formFactory;
     }
@@ -77,7 +77,7 @@ class ClarificationController extends BaseController
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
         /** @var Clarification|null $clarification */
-        $clarification = $this->entityManager->createQueryBuilder()
+        $clarification = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Clarification', 'c')
             ->leftJoin('c.problem', 'p')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
@@ -122,7 +122,7 @@ class ClarificationController extends BaseController
             if (!ctype_digit($problemId)) {
                 $category = $problemId;
             } else {
-                $problem = $this->entityManager->getRepository(Problem::class)->find($problemId);
+                $problem = $this->em->getRepository(Problem::class)->find($problemId);
                 $queue   = $this->dj->dbconfig_get('clar_default_problem_queue');
                 if ($queue === "") {
                     $queue = null;
@@ -139,8 +139,8 @@ class ClarificationController extends BaseController
                 ->setQueue($queue)
                 ->setBody($formData['message']);
 
-            $this->entityManager->persist($newClarification);
-            $this->entityManager->flush();
+            $this->em->persist($newClarification);
+            $this->em->flush();
 
             $this->dj->auditlog('clarification', $newClarification->getClarid(), 'added', null, null,
                                              $contest->getCid());
@@ -168,7 +168,7 @@ class ClarificationController extends BaseController
         foreach ($clarification->getReplies() as $reply) {
             $team->removeUnreadClarification($reply);
         }
-        $this->entityManager->flush();
+        $this->em->flush();
 
         $data = [
             'clarification' => $clarification,
@@ -215,7 +215,7 @@ class ClarificationController extends BaseController
             if (!ctype_digit($problemId)) {
                 $category = $problemId;
             } else {
-                $problem = $this->entityManager->getRepository(Problem::class)->find($problemId);
+                $problem = $this->em->getRepository(Problem::class)->find($problemId);
                 $queue   = $this->dj->dbconfig_get('clar_default_problem_queue');
                 if ($queue === "") {
                     $queue = null;
@@ -232,8 +232,8 @@ class ClarificationController extends BaseController
                 ->setQueue($queue)
                 ->setBody($formData['message']);
 
-            $this->entityManager->persist($newClarification);
-            $this->entityManager->flush();
+            $this->em->persist($newClarification);
+            $this->em->flush();
 
             $this->dj->auditlog('clarification', $newClarification->getClarid(), 'added', null, null,
                                              $contest->getCid());

@@ -112,7 +112,7 @@ class ScoreboardController extends AbstractRestController
         }
 
         /** @var Contest $contest */
-        $contest         = $this->entityManager->getRepository(Contest::class)->find($this->getContestId($request));
+        $contest         = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
         $inactiveAllowed = $this->isGranted('ROLE_API_READER');
         $accessAllowed   = ($inactiveAllowed && $contest->getEnabled()) || (!$inactiveAllowed && $contest->isActive());
         if (!$accessAllowed) {
@@ -122,7 +122,7 @@ class ScoreboardController extends AbstractRestController
         // Get the event for this scoreboard
         // TODO: add support for after_event_id
         /** @var Event $event */
-        $event = $this->entityManager->createQueryBuilder()
+        $event = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Event', 'e')
             ->select('e')
             ->orderBy('e.eventid', 'DESC')
@@ -146,7 +146,7 @@ class ScoreboardController extends AbstractRestController
         foreach ($scorebard->getScores() as $teamScore) {
             $row = [
                 'rank' => $teamScore->getRank(),
-                'team_id' => (string)$teamScore->getTeam()->getApiId($this->eventLogService, $this->entityManager),
+                'team_id' => (string)$teamScore->getTeam()->getApiId($this->eventLogService, $this->em),
                 'score' => [
                     'num_solved' => $teamScore->getNumberOfPoints(),
                     'total_time' => $teamScore->getTotalTime(),
@@ -159,7 +159,7 @@ class ScoreboardController extends AbstractRestController
                 $contestProblem = $scorebard->getProblems()[$problemId];
                 $problem        = [
                     'label' => $contestProblem->getShortname(),
-                    'problem_id' => (string)$contestProblem->getApiId($this->eventLogService, $this->entityManager),
+                    'problem_id' => (string)$contestProblem->getApiId($this->eventLogService, $this->em),
                     'num_judged' => $matrixItem->getNumberOfSubmissions(),
                     'num_pending' => $matrixItem->getNumberOfPendingSubmissions(),
                     'solved' => $matrixItem->isCorrect(),

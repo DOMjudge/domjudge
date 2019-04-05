@@ -21,15 +21,15 @@ class ExecutableController extends FOSRestController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * ExecutableController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      */
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $em)
     {
-        $this->entityManager = $entityManager;
+        $this->em = $em;
     }
 
     /**
@@ -49,7 +49,7 @@ class ExecutableController extends FOSRestController
     public function singleAction(string $id)
     {
         /** @var Executable|null $executable */
-        $executable = $this->entityManager->createQueryBuilder()
+        $executable = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Executable', 'e')
             ->select('e')
             ->andWhere('e.execid = :id')

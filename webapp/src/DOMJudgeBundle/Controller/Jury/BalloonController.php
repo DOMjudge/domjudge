@@ -24,7 +24,7 @@ class BalloonController extends Controller
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -38,16 +38,16 @@ class BalloonController extends Controller
 
     /**
      * BalloonController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
@@ -60,7 +60,7 @@ class BalloonController extends Controller
         $timeFormat = (string)$this->dj->dbconfig_get('time_format', '%H:%M');
         $showPostFreeze = (bool)$this->dj->dbconfig_get('show_balloons_postfreeze', false);
 
-        $em = $this->entityManager;
+        $em = $this->em;
         $query = $em->createQueryBuilder()
             ->select('b', 's.submittime', 'p.probid',
                 't.teamid', 't.name AS teamname', 't.room', 'c.name AS catname',
@@ -196,7 +196,7 @@ class BalloonController extends Controller
      */
     public function setDoneAction(Request $request, int $balloonId)
     {
-        $em = $this->entityManager;
+        $em = $this->em;
         $balloon = $em->getRepository(Balloon::class)->find($balloonId);
         if (!$balloon) {
             throw new NotFoundHttpException('balloon not found');

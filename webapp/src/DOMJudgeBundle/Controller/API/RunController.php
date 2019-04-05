@@ -120,7 +120,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:JudgingRun', 'jr')
             ->leftJoin('jr.judging', 'j')
             ->leftJoin('jr.testcase', 'tc')

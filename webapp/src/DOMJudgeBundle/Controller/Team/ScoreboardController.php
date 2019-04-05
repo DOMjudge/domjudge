@@ -36,22 +36,22 @@ class ScoreboardController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * ScoreboardController constructor.
      * @param DOMJudgeService        $dj
      * @param ScoreboardService      $scoreboardService
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      */
     public function __construct(
         DOMJudgeService $dj,
         ScoreboardService $scoreboardService,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $em
     ) {
         $this->dj                = $dj;
         $this->scoreboardService = $scoreboardService;
-        $this->entityManager     = $entityManager;
+        $this->em                = $em;
     }
 
     /**
@@ -84,7 +84,7 @@ class ScoreboardController extends BaseController
      */
     public function teamAction(Request $request, int $teamId)
     {
-        $team             = $this->entityManager->getRepository(Team::class)->find($teamId);
+        $team             = $this->em->getRepository(Team::class)->find($teamId);
         $showFlags        = (bool)$this->dj->dbconfig_get('show_flags', true);
         $showAffiliations = (bool)$this->dj->dbconfig_get('show_affiliations', true);
         $data             = [

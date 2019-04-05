@@ -43,7 +43,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -116,7 +116,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
     /**
      * ImportEventFeedCommand constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      * @param ScoreboardService      $scoreboardService
@@ -125,7 +125,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
      * @param string|null            $name
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
@@ -134,7 +134,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         string $name = null
     ) {
         parent::__construct($name);
-        $this->entityManager     = $entityManager;
+        $this->em                = $em;
         $this->dj                = $dj;
         $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
@@ -224,7 +224,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             }
         }
 
-        $contest = $this->entityManager->getRepository(Contest::class)->find($input->getArgument('contest-id'));
+        $contest = $this->em->getRepository(Contest::class)->find($input->getArgument('contest-id'));
         if (!$contest) {
             $this->logger->error(sprintf('Contest with ID %s not found, exiting.', $input->getArgument('contest-id')));
             return 1;
@@ -235,17 +235,17 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         }
 
         // For teams and team categories we want to overwrite the ID so change the ID generator
-        $metadata = $this->entityManager->getClassMetaData(TeamCategory::class);
+        $metadata = $this->em->getClassMetaData(TeamCategory::class);
         $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new AssignedGenerator());
 
-        $metadata = $this->entityManager->getClassMetaData(Team::class);
+        $metadata = $this->em->getClassMetaData(Team::class);
         $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new AssignedGenerator());
 
         // Find an admin user as we need one to make sure we can read all events
         /** @var User $user */
-        $user = $this->entityManager->createQueryBuilder()
+        $user = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:User', 'u')
             ->select('u')
             ->join('u.roles', 'r')
@@ -504,7 +504,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, reload the contest so we can set it's data
         /** @var Contest $contest */
-        $contest = $this->entityManager->getRepository(Contest::class)->find($this->contestId);
+        $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
 
         // We need to convert the freeze to a value from the start instead of the end so perform some regex magic
         $duration     = $event['data']['duration'];
@@ -568,11 +568,11 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // Also update the penalty time
         /** @var Configuration $penaltyTimeConfig */
-        $penaltyTimeConfig = $this->entityManager->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
+        $penaltyTimeConfig = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
         $penaltyTimeConfig->setValue((int)$event['data']['penalty_time']);
 
         // Save data and emit event
-        $this->entityManager->flush();
+        $this->em->flush();
         // For contests we know we always do an update action as the contest must exist for this script to run
         $this->eventLogService->log('contest', $contest->getCid(), EventLogService::ACTION_UPDATE, $contest->getCid());
     }
@@ -635,7 +635,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         $extId = $event['data']['id'];
         /** @var Language $language */
-        $language = $this->entityManager->getRepository(Language::class)->findOneBy(['externalid' => $extId]);
+        $language = $this->em->getRepository(Language::class)->findOneBy(['externalid' => $extId]);
         if (!$language) {
             $this->logger->error(sprintf('Can not find language with external ID %s in DOMjudge', $extId));
         } else {
@@ -663,10 +663,10 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the category
 
-            $category = $this->entityManager->getRepository(TeamCategory::class)->find($groupId);
+            $category = $this->em->getRepository(TeamCategory::class)->find($groupId);
             if ($category) {
-                $this->entityManager->remove($category);
-                $this->entityManager->flush();
+                $this->em->remove($category);
+                $this->em->flush();
                 $this->eventLogService->log('groups', $category->getCategoryid(), EventLogService::ACTION_DELETE,
                                             $this->contestId, null, $category->getCategoryid());
                 return;
@@ -679,7 +679,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the category
         /** @var TeamCategory $category */
-        $category = $this->entityManager->getRepository(TeamCategory::class)->find($groupId);
+        $category = $this->em->getRepository(TeamCategory::class)->find($groupId);
         if ($category) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
@@ -694,9 +694,9 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // Save data and emit event
         if ($action === EventLogService::ACTION_CREATE) {
-            $this->entityManager->persist($category);
+            $this->em->persist($category);
         }
-        $this->entityManager->flush();
+        $this->em->flush();
         $this->eventLogService->log('groups', $category->getCategoryid(), $action, $this->contestId);
 
         $this->processPendingEvents('group', $category->getCategoryid());
@@ -716,10 +716,10 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the affiliation
 
-            $affiliation = $this->entityManager->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $organizationId]);
+            $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $organizationId]);
             if ($affiliation) {
-                $this->entityManager->remove($affiliation);
-                $this->entityManager->flush();
+                $this->em->remove($affiliation);
+                $this->em->flush();
                 $this->eventLogService->log('organizations', $affiliation->getAffilid(), EventLogService::ACTION_DELETE,
                                             $this->contestId, null, $affiliation->getExternalid());
                 return;
@@ -732,7 +732,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the affiliation
         /** @var TeamAffiliation $affiliation */
-        $affiliation = $this->entityManager->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $organizationId]);
+        $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $organizationId]);
         if ($affiliation) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
@@ -750,9 +750,9 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // Save data and emit event
         if ($action === EventLogService::ACTION_CREATE) {
-            $this->entityManager->persist($affiliation);
+            $this->em->persist($affiliation);
         }
-        $this->entityManager->flush();
+        $this->em->flush();
         $this->eventLogService->log('organizations', $affiliation->getAffilid(), $action, $this->contestId);
 
         $this->processPendingEvents('organization', $affiliation->getExternalid());
@@ -776,7 +776,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the problem
         /** @var Problem $problem */
-        $problem = $this->entityManager->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+        $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
         if (!$problem) {
             $this->logger->error(sprintf('Problem %s not found in DOMjudge. Can not import', $problemId));
             return;
@@ -784,7 +784,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // Now find the contest problem
         /** @var ContestProblem $contestProblem */
-        $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
                                                                                                'cid' => $this->contestId,
                                                                                                'probid' => $problem->getProbid()
                                                                                            ]);
@@ -794,7 +794,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             $contestProblem = new ContestProblem();
             $contestProblem
                 ->setProblem($problem)
-                ->setContest($this->entityManager->getRepository(Contest::class)->find($this->contestId));
+                ->setContest($this->em->getRepository(Contest::class)->find($this->contestId));
             $action = EventLogService::ACTION_CREATE;
             $problem->addContestProblem($contestProblem);
         }
@@ -807,9 +807,9 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // Save data and emit event
         if ($action === EventLogService::ACTION_CREATE) {
-            $this->entityManager->persist($contestProblem);
+            $this->em->persist($contestProblem);
         }
-        $this->entityManager->flush();
+        $this->em->flush();
         $this->eventLogService->log('problems', $problem->getProbid(), $action, $this->contestId);
 
         $this->processPendingEvents('problem', $problem->getExternalid());
@@ -830,10 +830,10 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the team
 
-            $team = $this->entityManager->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
+            $team = $this->em->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
             if ($team) {
-                $this->entityManager->remove($team);
-                $this->entityManager->flush();
+                $this->em->remove($team);
+                $this->em->flush();
                 $this->eventLogService->log('teams', $team->getTeamid(), EventLogService::ACTION_DELETE,
                                             $this->contestId, null, $team->getExternalid());
                 return;
@@ -846,7 +846,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the team
         /** @var Team $team */
-        $team = $this->entityManager->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
+        $team = $this->em->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
         if ($team) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
@@ -871,7 +871,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                                              $groupId));
             } else {
                 /** @var TeamCategory $category */
-                $category = $this->entityManager->getRepository(TeamCategory::class)->find($groupId);
+                $category = $this->em->getRepository(TeamCategory::class)->find($groupId);
                 if (!$category) {
                     $this->addPendingEvent('group', $groupId, $event);
                     return;
@@ -883,7 +883,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $affiliation    = null;
         if ($organizationId !== null) {
             /** @var TeamAffiliation $affiliation */
-            $affiliation = $this->entityManager->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $organizationId]);
+            $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $organizationId]);
             if (!$affiliation) {
                 $this->addPendingEvent('organization', $organizationId, $event);
                 return;
@@ -897,7 +897,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // Also check if this is a private contest. If so, we need to add the team to the contest
         /** @var Contest $contest */
-        $contest = $this->entityManager->getRepository(Contest::class)->find($this->contestId);
+        $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
         if (!$contest->getPublic()) {
             if (!$contest->getTeams()->contains($team)) {
                 $contest->addTeam($team);
@@ -906,9 +906,9 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // Save data and emit event
         if ($action === EventLogService::ACTION_CREATE) {
-            $this->entityManager->persist($team);
+            $this->em->persist($team);
         }
-        $this->entityManager->flush();
+        $this->em->flush();
         $this->eventLogService->log('teams', $team->getTeamid(), $action, $this->contestId);
 
         $this->processPendingEvents('team', $team->getExternalid());
@@ -928,10 +928,10 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the team
 
-            $clarification = $this->entityManager->getRepository(Clarification::class)->findOneBy(['externalid' => $clarificationId]);
+            $clarification = $this->em->getRepository(Clarification::class)->findOneBy(['externalid' => $clarificationId]);
             if ($clarification) {
-                $this->entityManager->remove($clarification);
-                $this->entityManager->flush();
+                $this->em->remove($clarification);
+                $this->em->flush();
                 $this->eventLogService->log('clarifications', $clarification->getClarid(),
                                             EventLogService::ACTION_DELETE,
                                             $this->contestId, null, $clarification->getExternalid());
@@ -945,7 +945,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the clarification
         /** @var Clarification $clarification */
-        $clarification = $this->entityManager->getRepository(Clarification::class)->findOneBy(['externalid' => $clarificationId]);
+        $clarification = $this->em->getRepository(Clarification::class)->findOneBy(['externalid' => $clarificationId]);
         if ($clarification) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
@@ -960,7 +960,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $fromTeam   = null;
         if ($fromTeamId !== null) {
             /** @var Team $fromTeam */
-            $fromTeam = $this->entityManager->getRepository(Team::class)->findOneBy(['teamid' => $fromTeamId]);
+            $fromTeam = $this->em->getRepository(Team::class)->findOneBy(['teamid' => $fromTeamId]);
             if (!$fromTeam) {
                 $this->addPendingEvent('team', $fromTeamId, $event);
                 return;
@@ -971,7 +971,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $toTeam   = null;
         if ($toTeamId !== null) {
             /** @var Team $toTeam */
-            $toTeam = $this->entityManager->getRepository(Team::class)->findOneBy(['teamid' => $toTeamId]);
+            $toTeam = $this->em->getRepository(Team::class)->findOneBy(['teamid' => $toTeamId]);
             if (!$toTeam) {
                 $this->addPendingEvent('team', $toTeamId, $event);
                 return;
@@ -982,7 +982,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $inReplyTo   = null;
         if ($inReplyToId !== null) {
             /** @var Clarification $inReplyTo */
-            $inReplyTo = $this->entityManager->getRepository(Clarification::class)->findOneBy(['externalid' => $inReplyToId]);
+            $inReplyTo = $this->em->getRepository(Clarification::class)->findOneBy(['externalid' => $inReplyToId]);
             if (!$inReplyTo) {
                 $this->addPendingEvent('clarification', $inReplyToId, $event);
                 return;
@@ -993,14 +993,14 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $problem   = null;
         if ($problemId !== null) {
             /** @var Problem $problem */
-            $problem = $this->entityManager->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+            $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
             if (!$problem) {
                 $this->addPendingEvent('problem', $problemId, $event);
                 return;
             }
         }
 
-        $contest = $this->entityManager->getRepository(Contest::class)->find($this->contestId);
+        $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
 
         $time       = new \DateTime($event['data']['time']);
         $submitTime = sprintf('%d.%d', $time->getTimestamp(), $time->format('u'));
@@ -1020,9 +1020,9 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // Save data and emit event
         if ($action === EventLogService::ACTION_CREATE) {
-            $this->entityManager->persist($clarification);
+            $this->em->persist($clarification);
         }
-        $this->entityManager->flush();
+        $this->em->flush();
         $this->eventLogService->log('clarifications', $clarification->getClarid(), $action, $this->contestId);
 
         $this->processPendingEvents('clarification', $clarification->getExternalid());
@@ -1042,16 +1042,16 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to mark the submission as not valid and then emit a delete event
 
-            $submission = $this->entityManager->getRepository(Submission::class)->findOneBy(['externalid' => $submissionId]);
+            $submission = $this->em->getRepository(Submission::class)->findOneBy(['externalid' => $submissionId]);
             if ($submission) {
                 $submission->setValid(false);
-                $this->entityManager->flush();
+                $this->em->flush();
                 $this->eventLogService->log('submissions', $submission->getSubmitid(), EventLogService::ACTION_DELETE,
                                             $this->contestId);
 
-                $contest = $this->entityManager->getRepository(Contest::class)->find($submission->getCid());
-                $team    = $this->entityManager->getRepository(Team::class)->find($submission->getTeamid());
-                $problem = $this->entityManager->getRepository(Problem::class)->find($submission->getProbid());
+                $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
+                $team    = $this->em->getRepository(Team::class)->find($submission->getTeamid());
+                $problem = $this->em->getRepository(Problem::class)->find($submission->getProbid());
                 $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
                 return;
             } else {
@@ -1063,11 +1063,11 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the submission
         /** @var Submission $submission */
-        $submission = $this->entityManager->getRepository(Submission::class)->findOneBy(['externalid' => $submissionId]);
+        $submission = $this->em->getRepository(Submission::class)->findOneBy(['externalid' => $submissionId]);
 
         $languageId = $event['data']['language_id'];
         /** @var Language $language */
-        $language = $this->entityManager->getRepository(Language::class)->findOneBy(['externalid' => $languageId]);
+        $language = $this->em->getRepository(Language::class)->findOneBy(['externalid' => $languageId]);
         if (!$language) {
             $this->logger->error(sprintf('Can not import submission %s because language %s is missing',
                                          $event['data']['id'],
@@ -1077,7 +1077,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         $problemId = $event['data']['problem_id'];
         /** @var Problem $problem */
-        $problem = $this->entityManager->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
+        $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
         if (!$problem) {
             $this->addPendingEvent('problem', $problemId, $event);
             return;
@@ -1085,7 +1085,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // Find the contest problem
         /** @var ContestProblem $contestProblem */
-        $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
                                                                                                'cid' => $this->contestId,
                                                                                                'probid' => $problem->getProbid()
                                                                                            ]);
@@ -1099,7 +1099,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         $teamId = $event['data']['team_id'];
         /** @var Team $team */
-        $team = $this->entityManager->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
+        $team = $this->em->getRepository(Team::class)->findOneBy(['teamid' => $teamId]);
         if (!$team) {
             $this->addPendingEvent('team', $teamId, $event);
             return;
@@ -1145,7 +1145,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                 if ($submission->getEntryPoint() === null) {
                     // Special case: if we did not have an entrypoint yet, but we do get one now, update it
                     $submission->setEntryPoint($entryPoint);
-                    $this->entityManager->flush();
+                    $this->em->flush();
                     $this->logger->info(sprintf('Updated entrypoint for submission %s to %s',
                                                 $submission->getExternalid(), $entryPoint));
                     $this->eventLogService->log('submissions', $submission->getSubmitid(),
@@ -1172,13 +1172,13 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             if (!$submission->getValid()) {
                 $submission->setValid(true);
 
-                $this->entityManager->flush();
+                $this->em->flush();
                 $this->eventLogService->log('submissions', $submission->getSubmitid(), EventLogService::ACTION_CREATE,
                                             $this->contestId);
 
-                $contest = $this->entityManager->getRepository(Contest::class)->find($submission->getCid());
-                $team    = $this->entityManager->getRepository(Team::class)->find($submission->getTeamid());
-                $problem = $this->entityManager->getRepository(Problem::class)->find($submission->getProbid());
+                $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
+                $team    = $this->em->getRepository(Team::class)->find($submission->getTeamid());
+                $problem = $this->em->getRepository(Problem::class)->find($submission->getProbid());
                 $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
             }
         } else {
@@ -1256,7 +1256,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                 }
 
                 // Submit the solution
-                $contest    = $this->entityManager->getRepository(Contest::class)->find($this->contestId);
+                $contest    = $this->em->getRepository(Contest::class)->find($this->contestId);
                 $submission = $this->submissionService->submitSolution(
                     $team, $contestProblem, $contest, $language, $filesToSubmit, null, $entryPoint, $submissionId,
                     $submitTime
@@ -1290,7 +1290,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         // First, find the submission for this judgement as we need it in all cases
         $submissionId = $event['data']['submission_id'] ?? null;
         /** @var Submission $submission */
-        $submission = $this->entityManager->getRepository(Submission::class)->findOneBy(['externalid' => $submissionId]);
+        $submission = $this->em->getRepository(Submission::class)->findOneBy(['externalid' => $submissionId]);
         if (!$submission) {
             $this->addPendingEvent('submission', $submissionId, $event);
             return;
@@ -1301,7 +1301,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($event['op'] === EventLogService::ACTION_DELETE || $verdict === null) {
             // We need to delete the judgement. We do this by setting the external result of the submission back to null
             $submission->setExternalresult(null);
-            $this->entityManager->flush();
+            $this->em->flush();
             return;
         }
 
@@ -1314,7 +1314,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // Update the external result of the submission
         $submission->setExternalresult($verdictsFlipped[$verdict]);
-        $this->entityManager->flush();
+        $this->em->flush();
     }
 
     /**

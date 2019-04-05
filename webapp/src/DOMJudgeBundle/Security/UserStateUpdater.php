@@ -18,12 +18,12 @@ class UserStateUpdater
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
-    public function __construct(DOMJudgeService $dj, EntityManagerInterface $entityManager)
+    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
     {
-        $this->dj            = $dj;
-        $this->entityManager = $entityManager;
+        $this->dj = $dj;
+        $this->em = $em;
     }
 
     public function updateUserState(AuthenticationEvent $event)
@@ -36,7 +36,7 @@ class UserStateUpdater
                 $user->getTeam()->setTeampageFirstVisited(Utils::now());
             }
 
-            $this->entityManager->flush();
+            $this->em->flush();
         }
     }
 }

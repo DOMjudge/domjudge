@@ -13,7 +13,7 @@ class BalloonService
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -22,14 +22,14 @@ class BalloonService
 
     /**
      * BalloonService constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em = $em;
         $this->dj = $dj;
     }
 
@@ -62,7 +62,7 @@ class BalloonService
         }
 
         // prevent duplicate balloons in case of multiple correct submissions
-        $numCorrect = $this->entityManager->createQueryBuilder()
+        $numCorrect = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Balloon', 'b')
             ->select('COUNT(b.submitid) AS numBallons')
             ->join('b.submission', 's')
@@ -80,9 +80,9 @@ class BalloonService
             if ($contest->getProcessBalloons()) {
                 $balloon = new Balloon();
                 $balloon->setSubmission(
-                    $this->entityManager->getReference(Submission::class, $submission->getSubmitid()));
-                $this->entityManager->persist($balloon);
-                $this->entityManager->flush();
+                    $this->em->getReference(Submission::class, $submission->getSubmitid()));
+                $this->em->persist($balloon);
+                $this->em->flush();
             }
         }
     }

@@ -32,7 +32,7 @@ class ContestController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -46,16 +46,16 @@ class ContestController extends BaseController
 
     /**
      * TeamCategoryController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
@@ -69,7 +69,7 @@ class ContestController extends BaseController
      */
     public function indexAction(Request $request, KernelInterface $kernel)
     {
-        $em = $this->entityManager;
+        $em = $this->em;
 
         if ($doNow = (array)$request->request->get('donow')) {
             $times         = ['activate', 'start', 'freeze', 'end', 'unfreeze', 'finalize', 'deactivate'];
@@ -315,7 +315,7 @@ class ContestController extends BaseController
     public function viewAction(Request $request, int $contestId)
     {
         /** @var Contest $contest */
-        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -329,14 +329,14 @@ class ContestController extends BaseController
         $form = $this->createForm(RemovedIntervalType::class, $newRemovedInterval);
         $form->handleRequest($request);
         if ($this->isGranted('ROLE_ADMIN') && $form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($newRemovedInterval);
-            $this->entityManager->flush();
+            $this->em->persist($newRemovedInterval);
+            $this->em->flush();
 
             return $this->redirectToRoute('jury_contest', ['contestId' => $contestId]);
         }
 
         /** @var RemovedInterval[] $removedIntervals */
-        $removedIntervals = $this->entityManager->createQueryBuilder()
+        $removedIntervals = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:RemovedInterval', 'i')
             ->select('i')
             ->andWhere('i.contest = :contest')
@@ -346,7 +346,7 @@ class ContestController extends BaseController
             ->getResult();
 
         /** @var ContestProblem[] $problems */
-        $problems = $this->entityManager->createQueryBuilder()
+        $problems = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:ContestProblem', 'cp')
             ->join('cp.problem', 'p')
             ->select('cp', 'p')
@@ -377,13 +377,13 @@ class ContestController extends BaseController
     public function removeIntervalAction(int $contestId, int $intervalId)
     {
         /** @var Contest $contest */
-        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
         /** @var RemovedInterval $removedInterval */
-        $removedInterval = $this->entityManager->getRepository(RemovedInterval::class)->find($intervalId);
+        $removedInterval = $this->em->getRepository(RemovedInterval::class)->find($intervalId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Removed interval with ID %s not found', $intervalId));
         }
@@ -393,10 +393,10 @@ class ContestController extends BaseController
         }
 
         $contest->removeRemovedInterval($removedInterval);
-        $this->entityManager->remove($removedInterval);
+        $this->em->remove($removedInterval);
         // Recalculate timing
         $contest->setStarttimeString($contest->getStarttimeString());
-        $this->entityManager->flush();
+        $this->em->flush();
 
         return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);
     }
@@ -412,7 +412,7 @@ class ContestController extends BaseController
     public function editAction(Request $request, int $contestId)
     {
         /** @var Contest $contest */
-        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
@@ -422,7 +422,7 @@ class ContestController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $contest,
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
                               $contest->getCid(), false);
             return $this->redirect($this->generateUrl('jury_contest',
                                                       ['contestId' => $contest->getcid()]));
@@ -445,12 +445,12 @@ class ContestController extends BaseController
     public function deleteAction(Request $request, int $contestId)
     {
         /** @var Contest $contest */
-        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
         if (!$contest) {
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $contest,
+        return $this->deleteEntity($request, $this->em, $this->dj, $contest,
                                    $contest->getName(), $this->generateUrl('jury_contests'));
     }
 
@@ -466,7 +466,7 @@ class ContestController extends BaseController
     public function deleteProblemAction(Request $request, int $contestId, int $probId)
     {
         /** @var ContestProblem $contestProblem */
-        $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
                                                                                                'cid' => $contestId,
                                                                                                'probid' => $probId
                                                                                            ]);
@@ -474,7 +474,7 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest problem with contest ID %s and problem ID %s not found', $contestId, $probId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $contestProblem,
+        return $this->deleteEntity($request, $this->em, $this->dj, $contestProblem,
                                    $contestProblem->getShortname(), $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 
@@ -495,7 +495,7 @@ class ContestController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->transactional(function () use ($contest) {
+            $this->em->transactional(function () use ($contest) {
                 // A little 'hack': we need to first persist and save the contest, before we can persist and
                 // save the problem, because we need a contest ID
                 /** @var ContestProblem[] $problems */
@@ -503,17 +503,17 @@ class ContestController extends BaseController
                 foreach ($contest->getProblems() as $problem) {
                     $contest->removeProblem($problem);
                 }
-                $this->entityManager->persist($contest);
-                $this->entityManager->flush();
+                $this->em->persist($contest);
+                $this->em->flush();
 
                 // Now we can assign the problems to the contest and persist them
                 foreach ($problems as $problem) {
                     $problem
                         ->setContest($contest)
                         ->setCid($contest->getCid());
-                    $this->entityManager->persist($problem);
+                    $this->em->persist($problem);
                 }
-                $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $contest,
+                $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
                                   $contest->getCid(), true);
             });
             return $this->redirect($this->generateUrl('jury_contest',
@@ -535,7 +535,7 @@ class ContestController extends BaseController
     public function finalizeAction(Request $request, int $contestId)
     {
         /** @var Contest $contest */
-        $contest  = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        $contest  = $this->em->getRepository(Contest::class)->find($contestId);
         $blockers = [];
         if (Utils::difftime((float)$contest->getEndtime(), Utils::now()) > 0) {
             $blockers[] = sprintf('Contest not ended yet (will end at %s)',
@@ -545,7 +545,7 @@ class ContestController extends BaseController
         /** @var int[] $submissionIds */
         $submissionIds = array_map(function (array $data) {
             return $data['submitid'];
-        }, $this->entityManager->createQueryBuilder()
+        }, $this->em->createQueryBuilder()
                ->from('DOMJudgeBundle:Submission', 's')
                ->join('s.judgings', 'j', Join::WITH, 'j.valid = 1')
                ->select('s.submitid')
@@ -565,7 +565,7 @@ class ContestController extends BaseController
         /** @var int[] $clarificationIds */
         $clarificationIds = array_map(function (array $data) {
             return $data['clarid'];
-        }, $this->entityManager->createQueryBuilder()
+        }, $this->em->createQueryBuilder()
                ->from('DOMJudgeBundle:Clarification', 'c')
                ->select('c.clarid')
                ->andWhere('c.contest = :contest')
@@ -588,7 +588,7 @@ class ContestController extends BaseController
 
             if ($form->isSubmitted() && $form->isValid()) {
                 $contest->setFinalizetime(Utils::now());
-                $this->entityManager->flush();
+                $this->em->flush();
                 $this->dj->auditlog('contest', $contest->getCid(), 'finalized',
                                                  $contest->getFinalizecomment());
                 return $this->redirectToRoute('jury_contest', ['contestId' => $contest->getCid()]);

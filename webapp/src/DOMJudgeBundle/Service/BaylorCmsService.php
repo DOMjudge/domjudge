@@ -25,7 +25,7 @@ class BaylorCmsService
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var Client
@@ -35,17 +35,17 @@ class BaylorCmsService
     /**
      * BaylorCmsService constructor.
      * @param DOMJudgeService        $dj
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param                        $domjudgeVersion
      */
     public function __construct(
         DOMJudgeService $dj,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         $domjudgeVersion
     ) {
-        $this->dj = $dj;
-        $this->entityManager   = $entityManager;
-        $this->client          = new Client(
+        $this->dj     = $dj;
+        $this->em     = $em;
+        $this->client = new Client(
             [
                 'http_errors' => false,
                 'base_uri' => self::BASE_URI,
@@ -95,15 +95,15 @@ class BaylorCmsService
             return false;
         }
 
-        $participants = $this->entityManager->getRepository(TeamCategory::class)->findOneBy(['name' => 'Participants']);
-        $teamRole     = $this->entityManager->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
+        $participants = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Participants']);
+        $teamRole     = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
 
         foreach ($json['contest']['group'] as $group) {
             $siteName = $group['groupName'];
             foreach ($group['team'] as $teamData) {
                 $institutionName = $teamData['institutionName'];
                 // Note: affiliations are not updated and not deleted even if all teams have canceled
-                $affiliation = $this->entityManager->getRepository(TeamAffiliation::class)->findOneBy(['name' => $institutionName]);
+                $affiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['name' => $institutionName]);
                 if ($affiliation === null) {
                     $shortName   = isset($teamData['institutionShortName']) ? $teamData['institutionShortName'] : $institutionName;
                     $affiliation = new TeamAffiliation();
@@ -111,15 +111,15 @@ class BaylorCmsService
                         ->setName($institutionName)
                         ->setShortname($shortName)
                         ->setCountry($teamData['country']);
-                    $this->entityManager->persist($affiliation);
-                    $this->entityManager->flush();
+                    $this->em->persist($affiliation);
+                    $this->em->flush();
                 }
 
                 /*
                  * FIXME: team members are behind a different API call and not important for now
                  */
 
-                $team = $this->entityManager->getRepository(Team::class)->findOneBy(['externalid' => $teamData['teamId']]);
+                $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamData['teamId']]);
                 // Note: teams are not deleted but disabled depending on their status
                 $enabled = $teamData['status'] === 'ACCEPTED';
                 if ($team === null) {
@@ -132,8 +132,8 @@ class BaylorCmsService
                         ->setComments('Status: ' . $teamData['status'])
                         ->setExternalid($teamData['teamId'])
                         ->setRoom($siteName);
-                    $this->entityManager->persist($team);
-                    $this->entityManager->flush();
+                    $this->em->persist($team);
+                    $this->em->flush();
                     $username = sprintf("team%04d", $team->getTeamid());
                     $user     = new User();
                     $user
@@ -142,8 +142,8 @@ class BaylorCmsService
                         ->setTeam($team)
                         ->addRole($teamRole);
 
-                    $this->entityManager->persist($user);
-                    $this->entityManager->flush();
+                    $this->em->persist($user);
+                    $this->em->flush();
                 } else {
                     $username = sprintf("team%04d", $team->getTeamid());
                     $team
@@ -155,12 +155,12 @@ class BaylorCmsService
                         ->setExternalid($teamData['teamId'])
                         ->setRoom($siteName);
 
-                    $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $username]);
+                    $user = $this->em->getRepository(User::class)->findOneBy(['username' => $username]);
                     if ($user !== null) {
                         $user->setName($teamData['teamName']);
                     }
 
-                    $this->entityManager->flush();
+                    $this->em->flush();
                 }
             }
         }

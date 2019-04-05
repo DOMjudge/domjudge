@@ -111,7 +111,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
             ->select('j, c, s, MAX(jr.runtime) AS maxruntime')
             ->leftJoin('j.contest', 'c')

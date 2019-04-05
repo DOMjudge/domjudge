@@ -36,7 +36,7 @@ class EventDaemonCommand extends ContainerAwareCommand
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -64,14 +64,14 @@ class EventDaemonCommand extends ContainerAwareCommand
     protected $logger;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         TokenStorageInterface $tokenStorage,
         string $name = null
     ) {
         parent::__construct($name);
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
         $this->tokenStorage    = $tokenStorage;
@@ -145,7 +145,7 @@ class EventDaemonCommand extends ContainerAwareCommand
 
         // Find an admin user
         /** @var User $user */
-        $user = $this->entityManager->createQueryBuilder()
+        $user = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:User', 'u')
             ->select('u')
             ->join('u.roles', 'r')
@@ -162,10 +162,10 @@ class EventDaemonCommand extends ContainerAwareCommand
 
         while (true) {
             // Make sure we clear the entity manager class, to make sure we have fresh objects
-            $this->entityManager->clear();
+            $this->em->clear();
 
             // Reload the contest to get the new data
-            $selectedContest = $this->entityManager->getRepository(Contest::class)->find($selectedContestId);
+            $selectedContest = $this->em->getRepository(Contest::class)->find($selectedContestId);
 
             // Check whether we have received an exit signal
             if (function_exists('pcntl_signal_dispatch')) {
@@ -187,7 +187,7 @@ class EventDaemonCommand extends ContainerAwareCommand
             $contestStart        = $selectedContest->getStarttime();
             $contestStartEnabled = $selectedContest->getStarttimeEnabled();
             if ($contestStartOld !== $contestStart || $contestStartEnabledOld !== $contestStartEnabled) {
-                $contestId = $selectedContest->getApiId($this->eventLogService, $this->entityManager);
+                $contestId = $selectedContest->getApiId($this->eventLogService, $this->em);
                 $url       = sprintf('/contests/%s', $contestId);
                 $this->dj->withAllRoles(function () use ($url, $selectedContest) {
                     $this->insertEvent($selectedContest, 'contests',
@@ -241,7 +241,7 @@ class EventDaemonCommand extends ContainerAwareCommand
     protected function insertEvent(Contest $contest, string $endpoint, $data)
     {
         /** @var Event $event */
-        $event = $this->entityManager->createQueryBuilder()
+        $event = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Event', 'e')
             ->select('e')
             ->andWhere('e.cid = :cid')
@@ -284,7 +284,7 @@ class EventDaemonCommand extends ContainerAwareCommand
         foreach ($this->eventLogService->apiEndpoints as $endpoint => $endpointData) {
             if ($endpointData[EventLogService::KEY_TYPE] === EventLogService::TYPE_CONFIGURATION &&
                 isset($endpointData[EventLogService::KEY_URL])) {
-                $contestId = $contest->getApiId($this->eventLogService, $this->entityManager);
+                $contestId = $contest->getApiId($this->eventLogService, $this->em);
 
                 $url = sprintf('/contests/%s%s', $contestId, $endpointData[EventLogService::KEY_URL]);
                 $this->dj->withAllRoles(function () use ($url, &$data) {

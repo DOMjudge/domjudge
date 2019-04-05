@@ -42,7 +42,7 @@ class ProblemController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -65,13 +65,13 @@ class ProblemController extends BaseController
     protected $importProblemService;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         SubmissionService $submissionService,
         ImportProblemService $importProblemService
     ) {
-        $this->entityManager        = $entityManager;
+        $this->em                   = $em;
         $this->dj                   = $dj;
         $this->eventLogService      = $eventLogService;
         $this->submissionService    = $submissionService;
@@ -115,7 +115,7 @@ class ProblemController extends BaseController
                     if ($contestId === null) {
                         $contest = null;
                     } else {
-                        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+                        $contest = $this->em->getRepository(Contest::class)->find($contestId);
                     }
                     $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest,
                                                                                     $messages, $errorMessage);
@@ -147,7 +147,7 @@ class ProblemController extends BaseController
             }
         }
 
-        $problems = $this->entityManager->createQueryBuilder()
+        $problems = $this->em->createQueryBuilder()
             ->select('p', 'COUNT(tc.testcaseid) AS testdatacount')
             ->from('DOMJudgeBundle:Problem', 'p')
             ->leftJoin('p.testcases', 'tc')
@@ -262,7 +262,7 @@ class ProblemController extends BaseController
 
         if ($this->isGranted('ROLE_ADMIN')) {
             /** @var Contest[] $contests */
-            $contests                = $this->entityManager->getRepository(Contest::class)->findAll();
+            $contests                = $this->em->getRepository(Contest::class)->findAll();
             $data['contests']        = $contests;
             $data['current_contest'] = $this->dj->getCurrentContest();
         }
@@ -282,7 +282,7 @@ class ProblemController extends BaseController
         // This might take a while
         ini_set('max_execution_time', '300');
         /** @var Problem $problem */
-        $problem = $this->entityManager->createQueryBuilder()
+        $problem = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Problem', 'p')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
             ->select('p', 'cp')
@@ -346,7 +346,7 @@ class ProblemController extends BaseController
         }
 
         /** @var TestcaseWithContent[] $testcases */
-        $testcases = $this->entityManager->createQueryBuilder()
+        $testcases = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TestcaseWithContent', 't')
             ->select('t')
             ->andWhere('t.problem = :problem')
@@ -374,7 +374,7 @@ class ProblemController extends BaseController
         }
 
         /** @var Submission[] $solutions */
-        $solutions = $this->entityManager->createQueryBuilder()
+        $solutions = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->select('s')
             ->andWhere('s.problem = :problem')
@@ -456,7 +456,7 @@ class ProblemController extends BaseController
     public function viewAction(Request $request, SubmissionService $submissionService, int $probId)
     {
         /** @var Problem $problem */
-        $problem = $this->entityManager->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
@@ -501,7 +501,7 @@ class ProblemController extends BaseController
     public function viewTextAction(int $probId)
     {
         /** @var Problem $problem */
-        $problem = $this->entityManager->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
@@ -544,12 +544,12 @@ class ProblemController extends BaseController
     public function testcasesAction(Request $request, int $probId)
     {
         /** @var Problem $problem */
-        $problem = $this->entityManager->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
-        $testcaseData = $this->entityManager->createQueryBuilder()
+        $testcaseData = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Testcase', 'tc', 'tc.rank')
             ->join('tc.testcase_content', 'content')
             ->select('tc', 'LENGTH(content.input) AS input_size', 'LENGTH(content.output) AS output_size',
@@ -674,7 +674,7 @@ class ProblemController extends BaseController
                         ->setImageType($imageType);
                 }
 
-                $this->entityManager->persist($newTestcase);
+                $this->em->persist($newTestcase);
                 $this->dj->auditlog('testcase', $probId, 'added', sprintf("rank %d", $maxrank));
 
                 $inFile  = $request->files->get('add_input');
@@ -695,7 +695,7 @@ class ProblemController extends BaseController
                 $messages[] = $message;
             }
 
-            $this->entityManager->flush();
+            $this->em->flush();
 
             if (!empty($messages)) {
                 $message = '<ul>' . implode('', array_map(function (string $message) {
@@ -730,13 +730,13 @@ class ProblemController extends BaseController
     public function moveTestcaseAction(int $probId, int $rank, string $direction)
     {
         /** @var Problem $problem */
-        $problem = $this->entityManager->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
         /** @var Testcase[] $testcases */
-        $testcases = $this->entityManager->createQueryBuilder()
+        $testcases = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Testcase', 'tc', 'tc.rank')
             ->select('tc')
             ->andWhere('tc.problem = :problem')
@@ -770,12 +770,12 @@ class ProblemController extends BaseController
 
         if ($current !== null && $other !== null) {
             // (probid, rank) is a unique key, so we must switch via a temporary rank, and use a transaction.
-            $this->entityManager->transactional(function () use ($current, $other) {
+            $this->em->transactional(function () use ($current, $other) {
                 $otherRank   = $other->getRank();
                 $currentRank = $current->getRank();
                 $other->setRank(-1);
                 $current->setRank(-2);
-                $this->entityManager->flush();
+                $this->em->flush();
                 $current->setRank($otherRank);
                 $other->setRank($currentRank);
             });
@@ -802,7 +802,7 @@ class ProblemController extends BaseController
     public function fetchTestcaseAction(int $probId, int $rank, string $type)
     {
         /** @var TestcaseWithContent $testcase */
-        $testcase = $this->entityManager->createQueryBuilder()
+        $testcase = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TestcaseWithContent', 'tc')
             ->select('tc')
             ->andWhere('tc.probid = :problem')
@@ -860,7 +860,7 @@ class ProblemController extends BaseController
     public function editAction(Request $request, int $probId)
     {
         /** @var Problem $problem */
-        $problem = $this->entityManager->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
@@ -870,7 +870,7 @@ class ProblemController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $problem,
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $problem,
                               $problem->getProbid(), false);
             return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
         }
@@ -938,12 +938,12 @@ class ProblemController extends BaseController
     public function deleteAction(Request $request, int $probId)
     {
         /** @var Problem $problem */
-        $problem = $this->entityManager->getRepository(Problem::class)->find($probId);
+        $problem = $this->em->getRepository(Problem::class)->find($probId);
         if (!$problem) {
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $problem,
+        return $this->deleteEntity($request, $this->em, $this->dj, $problem,
                                    $problem->getName(), $this->generateUrl('jury_problems'));
     }
 
@@ -963,8 +963,8 @@ class ProblemController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($problem);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $problem,
+            $this->em->persist($problem);
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $problem,
                               $problem->getProbid(), true);
             return $this->redirect($this->generateUrl('jury_problem',
                                                       ['probId' => $problem->getProbid()]));

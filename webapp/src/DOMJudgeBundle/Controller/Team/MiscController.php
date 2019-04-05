@@ -38,7 +38,7 @@ class MiscController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var ScoreboardService
@@ -53,18 +53,18 @@ class MiscController extends BaseController
     /**
      * MiscController constructor.
      * @param DOMJudgeService        $dj
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param ScoreboardService      $scoreboardService
      * @param SubmissionService      $submissionService
      */
     public function __construct(
         DOMJudgeService $dj,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         ScoreboardService $scoreboardService,
         SubmissionService $submissionService
     ) {
         $this->dj                = $dj;
-        $this->entityManager     = $entityManager;
+        $this->em                = $em;
         $this->scoreboardService = $scoreboardService;
         $this->submissionService = $submissionService;
     }
@@ -104,12 +104,12 @@ class MiscController extends BaseController
             $data['limitToTeams']         = [$team];
             // We need to clear the entity manager, because loading the team scoreboard seems to break getting submission
             // contestproblems for the contest we get the scoreboard for
-            $this->entityManager->clear();
+            $this->em->clear();
             $data['submissions'] = $this->submissionService->getSubmissionList([$contest->getCid() => $contest],
                                                                                ['teamid' => $teamId], 0)[0];
 
             /** @var Clarification[] $clarifications */
-            $clarifications = $this->entityManager->createQueryBuilder()
+            $clarifications = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Clarification', 'c')
                 ->leftJoin('c.problem', 'p')
                 ->leftJoin('c.sender', 's')
@@ -126,7 +126,7 @@ class MiscController extends BaseController
                 ->getResult();
 
             /** @var Clarification[] $clarificationRequests */
-            $clarificationRequests = $this->entityManager->createQueryBuilder()
+            $clarificationRequests = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Clarification', 'c')
                 ->leftJoin('c.problem', 'p')
                 ->leftJoin('c.sender', 's')
@@ -209,7 +209,7 @@ class MiscController extends BaseController
         }
 
         /** @var Language[] $languages */
-        $languages = $this->entityManager->createQueryBuilder()
+        $languages = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Language', 'l')
             ->select('l')
             ->andWhere('l.allowSubmit = 1')

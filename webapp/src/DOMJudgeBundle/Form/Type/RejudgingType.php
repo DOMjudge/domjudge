@@ -24,15 +24,15 @@ class RejudgingType extends AbstractType
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * RejudgingType constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      */
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $em)
     {
-        $this->entityManager = $entityManager;
+        $this->em = $em;
     }
 
     /**
@@ -126,7 +126,7 @@ class RejudgingType extends AbstractType
 
         $formProblemModifier = function (FormInterface $form, $contests = []) {
             /** @var Contest[] $contests */
-            $problems = $this->entityManager->createQueryBuilder()
+            $problems = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Problem', 'p')
                 ->join('p.contest_problems', 'cp')
                 ->select('p')
@@ -145,7 +145,7 @@ class RejudgingType extends AbstractType
                 'choices' => $problems,
             ]);
 
-            $teamsQueryBuilder = $this->entityManager->createQueryBuilder()
+            $teamsQueryBuilder = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Team', 't')
                 ->select('t')
                 ->andWhere('t.enabled = 1')

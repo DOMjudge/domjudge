@@ -26,7 +26,7 @@ class LanguageController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -40,16 +40,16 @@ class LanguageController extends BaseController
 
     /**
      * LanguageController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
@@ -59,7 +59,7 @@ class LanguageController extends BaseController
      */
     public function indexAction(Request $request, Packages $assetPackage)
     {
-        $em = $this->entityManager;
+        $em = $this->em;
         /** @var Language[] $languages */
         $languages    = $em->createQueryBuilder()
             ->select('lang')
@@ -156,8 +156,8 @@ class LanguageController extends BaseController
             if ($language->getExtensions()) {
                 $language->setExtensions(array_values($language->getExtensions()));
             }
-            $this->entityManager->persist($language);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $language,
+            $this->em->persist($language);
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $language,
                               $language->getLangid(), true);
             return $this->redirect($this->generateUrl('jury_language',
                                                       ['langId' => $language->getLangid()]));
@@ -180,7 +180,7 @@ class LanguageController extends BaseController
     public function viewAction(Request $request, SubmissionService $submissionService, string $langId)
     {
         /** @var Language $language */
-        $language = $this->entityManager->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
@@ -222,13 +222,13 @@ class LanguageController extends BaseController
     public function toggleSubmitAction(Request $request, string $langId)
     {
         /** @var Language $language */
-        $language = $this->entityManager->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
         $language->setAllowSubmit($request->request->getBoolean('allow_submit'));
-        $this->entityManager->flush();
+        $this->em->flush();
 
         $this->dj->auditlog('language', $langId, 'set allow submit',
                                          $request->request->getBoolean('allow_submit'));
@@ -244,13 +244,13 @@ class LanguageController extends BaseController
     public function toggleJudgeAction(Request $request, string $langId)
     {
         /** @var Language $language */
-        $language = $this->entityManager->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
         $language->setAllowJudge($request->request->getBoolean('allow_judge'));
-        $this->entityManager->flush();
+        $this->em->flush();
 
         $this->dj->auditlog('language', $langId, 'set allow judge',
                                          $request->request->getBoolean('allow_judge'));
@@ -268,7 +268,7 @@ class LanguageController extends BaseController
     public function editAction(Request $request, string $langId)
     {
         /** @var Language $language */
-        $language = $this->entityManager->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
@@ -282,7 +282,7 @@ class LanguageController extends BaseController
             if ($language->getExtensions()) {
                 $language->setExtensions(array_values($language->getExtensions()));
             }
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $language,
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $language,
                               $language->getLangid(), false);
             return $this->redirect($this->generateUrl('jury_language',
                                                       ['langId' => $language->getLangid()]));
@@ -305,11 +305,11 @@ class LanguageController extends BaseController
     public function deleteAction(Request $request, string $langId)
     {
         /** @var Language $language */
-        $language = $this->entityManager->getRepository(Language::class)->find($langId);
+        $language = $this->em->getRepository(Language::class)->find($langId);
         if (!$language) {
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $language, $language->getName(), $this->generateUrl('jury_languages'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $language, $language->getName(), $this->generateUrl('jury_languages'));
     }
 }

@@ -25,7 +25,7 @@ class AuditLogController extends Controller
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -39,16 +39,16 @@ class AuditLogController extends Controller
 
     /**
      * AuditLogController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
@@ -64,7 +64,7 @@ class AuditLogController extends Controller
         $page = $request->query->get('page', 1);
         $limit = 1000;
 
-        $em = $this->entityManager;
+        $em = $this->em;
         $query = $em->createQueryBuilder()
                     ->select('a')
                     ->from('DOMJudgeBundle:AuditLog', 'a')
@@ -173,12 +173,12 @@ class AuditLogController extends Controller
             case 'user':
                 // Pre 6.1, usernames were stored instead of numeric ids
                 if (!is_numeric($id)) {
-                    $user = $this->entityManager->getRepository(User::class)->findOneBy(['username'=>$id]);
+                    $user = $this->em->getRepository(User::class)->findOneBy(['username'=>$id]);
                     $id = $user->getUserId();
                 }
                 return $this->generateUrl('jury_user', ['userId' => $id]);
             case 'testcase':
-                $testcase = $this->entityManager->getRepository(Testcase::class)->find($id);
+                $testcase = $this->em->getRepository(Testcase::class)->find($id);
                 if ($testcase) {
                     return $this->generateUrl('jury_problem_testcases', ['probId' => $testcase->getProbid()]);
                 }

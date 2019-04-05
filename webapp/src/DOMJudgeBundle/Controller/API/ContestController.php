@@ -120,7 +120,7 @@ class ContestController extends AbstractRestController
             $response = new JsonResponse('Missing "id" in request.', Response::HTTP_BAD_REQUEST);
         } elseif (!$request->request->has('start_time')) {
             $response = new JsonResponse('Missing "start_time" in request.', Response::HTTP_BAD_REQUEST);
-        } elseif ($request->request->get('id') != $contest->getApiId($this->eventLogService, $this->entityManager)) {
+        } elseif ($request->request->get('id') != $contest->getApiId($this->eventLogService, $this->em)) {
             $response = new JsonResponse('Invalid "id" in request.', Response::HTTP_BAD_REQUEST);
         } elseif (!$request->request->has('force') &&
             $contest->getStarttime() != null &&
@@ -128,10 +128,10 @@ class ContestController extends AbstractRestController
             $response = new JsonResponse('Current contest already started or about to start.',
                                          Response::HTTP_FORBIDDEN);
         } elseif ($request->request->get('start_time') === null) {
-            $this->entityManager->persist($contest);
+            $this->em->persist($contest);
             $contest->setStarttimeEnabled(false);
             $response = new JsonResponse('Contest paused :-/.', Response::HTTP_OK);
-            $this->entityManager->flush();
+            $this->em->flush();
         } else {
             $date = date_create($request->request->get('start_time'));
             if ($date === false) {
@@ -142,14 +142,14 @@ class ContestController extends AbstractRestController
                     $response = new JsonResponse('New start_time not far enough in the future.',
                                                  Response::HTTP_FORBIDDEN);
                 } else {
-                    $this->entityManager->persist($contest);
+                    $this->em->persist($contest);
                     $newStartTimeString = date('Y-m-d H:i:s e', $new_start_time);
                     $contest->setStarttimeEnabled(true);
                     $contest->setStarttime($new_start_time);
                     $contest->setStarttimeString($newStartTimeString);
                     $response = new JsonResponse('Contest start time changed to ' . $newStartTimeString,
                                                  Response::HTTP_OK);
-                    $this->entityManager->flush();
+                    $this->em->flush();
                 }
             }
         }
@@ -280,7 +280,7 @@ class ContestController extends AbstractRestController
         set_time_limit(0);
         if ($request->query->has('since_id')) {
             $since_id = $request->query->getInt('since_id');
-            $event    = $this->entityManager->getRepository(Event::class)->findOneBy([
+            $event    = $this->em->getRepository(Event::class)->findOneBy([
                                                                                          'eventid' => $since_id,
                                                                                          'cid' => $contest->getCid(),
                                                                                      ]);
@@ -310,7 +310,7 @@ class ContestController extends AbstractRestController
             }
             $canViewAll = $this->isGranted('ROLE_API_READER');
             while (true) {
-                $qb = $this->entityManager->createQueryBuilder()
+                $qb = $this->em->createQueryBuilder()
                     ->from('DOMJudgeBundle:Event', 'e')
                     ->select('e')
                     ->andWhere('e.eventid > :lastIdSent')
@@ -414,14 +414,14 @@ class ContestController extends AbstractRestController
         $contest = $this->getContestWithId($request, $id);
 
         $result                    = [];
-        $result['num_submissions'] = (int)$this->entityManager
+        $result['num_submissions'] = (int)$this->em
             ->createQuery(
                 'SELECT COUNT(s)
                 FROM DOMJudgeBundle:Submission s
                 WHERE s.cid = :cid')
             ->setParameter(':cid', $contest->getCid())
             ->getSingleScalarResult();
-        $result['num_queued']      = (int)$this->entityManager
+        $result['num_queued']      = (int)$this->em
             ->createQuery(
                 'SELECT COUNT(s)
                 FROM DOMJudgeBundle:Submission s
@@ -431,7 +431,7 @@ class ContestController extends AbstractRestController
                 AND s.valid = 1')
             ->setParameter(':cid', $contest->getCid())
             ->getSingleScalarResult();
-        $result['num_judging']     = (int)$this->entityManager
+        $result['num_judging']     = (int)$this->em
             ->createQuery(
                 'SELECT COUNT(s)
                 FROM DOMJudgeBundle:Submission s

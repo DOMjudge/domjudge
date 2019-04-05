@@ -66,7 +66,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     public function listAction(Request $request)
     {
         // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
-        $this->entityManager->clear();
+        $this->em->clear();
         // This method is overwritten, because we need to add ordinal values
         $queryBuilder = $this->getQueryBuilder($request);
 
@@ -149,7 +149,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         $files     = $request->files->get('zip') ?: [];
         $contestId = $this->getContestId($request);
         /** @var Contest $contest */
-        $contest     = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        $contest     = $this->em->getRepository(Contest::class)->find($contestId);
         $allMessages = [];
         $probIds     = [];
 
@@ -159,7 +159,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             if (sizeof($files) != 1) {
                 throw new BadRequestHttpException('Can only take one problem zip if \'problem\' is set.');
             }
-            $problem = $this->entityManager->createQueryBuilder()
+            $problem = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Problem', 'p')
                 ->select('p')
                 ->andWhere(sprintf('%s = :id', $this->getIdField()))
@@ -214,7 +214,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     public function singleAction(Request $request, string $id)
     {
         // Make sure we clear the entity manager class, for when this method is called multiple times by internal requests
-        $this->entityManager->clear();
+        $this->em->clear();
         // This method is overwritten, because we need to add ordinal values
         $queryBuilder = $this->getQueryBuilder($request);
 
@@ -269,9 +269,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     {
         $contestId = $this->getContestId($request);
         /** @var Contest $contest */
-        $contest = $this->entityManager->getRepository(Contest::class)->find($contestId);
+        $contest = $this->em->getRepository(Contest::class)->find($contestId);
 
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:ContestProblem', 'cp')
             ->join('cp.problem', 'p')
             ->leftJoin('p.testcases', 'tc')

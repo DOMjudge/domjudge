@@ -169,7 +169,7 @@ class SubmissionController extends AbstractRestController
 
         // Load the problem
         /** @var ContestProblem $problem */
-        $problem = $this->entityManager->createQueryBuilder()
+        $problem = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:ContestProblem', 'cp')
             ->join('cp.problem', 'p')
             ->join('cp.contest', 'c')
@@ -190,7 +190,7 @@ class SubmissionController extends AbstractRestController
 
         // Load the language
         /** @var Language $language */
-        $language = $this->entityManager->createQueryBuilder()
+        $language = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Language', 'lang')
             ->select('lang')
             ->andWhere(sprintf('lang.%s = :language',
@@ -317,7 +317,7 @@ class SubmissionController extends AbstractRestController
      */
     public function getSubmissionSourceCodeAction(Request $request, string $id)
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:SubmissionFile', 'f')
             ->join('f.submission_file_source_code', 'sc')
             ->join('f.submission', 's')
@@ -357,7 +357,7 @@ class SubmissionController extends AbstractRestController
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
         $cid          = $this->getContestId($request);
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->join('s.contest', 'c')
             ->select('s')

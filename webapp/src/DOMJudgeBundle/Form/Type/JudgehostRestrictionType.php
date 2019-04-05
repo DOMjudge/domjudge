@@ -20,11 +20,11 @@ class JudgehostRestrictionType extends AbstractType
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $em)
     {
-        $this->entityManager = $entityManager;
+        $this->em = $em;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -35,7 +35,7 @@ class JudgehostRestrictionType extends AbstractType
 
         // Note that we can not use the normal EntityType form type, because these are not Doctrine associations
 
-        $contests       = $this->entityManager->getRepository(Contest::class)->findAll();
+        $contests       = $this->em->getRepository(Contest::class)->findAll();
         $contestChoices = [];
         foreach ($contests as $contest) {
             $contestChoices[$contest->getName()] = $contest->getCid();
@@ -46,7 +46,7 @@ class JudgehostRestrictionType extends AbstractType
             'choices' => $contestChoices,
         ]);
 
-        $problems       = $this->entityManager->getRepository(Problem::class)->findAll();
+        $problems       = $this->em->getRepository(Problem::class)->findAll();
         $problemChoices = [];
         foreach ($problems as $problem) {
             $problemChoices[$problem->getName()] = $problem->getProbid();
@@ -57,7 +57,7 @@ class JudgehostRestrictionType extends AbstractType
             'choices' => $problemChoices,
         ]);
 
-        $languages       = $this->entityManager->getRepository(Language::class)->findAll();
+        $languages       = $this->em->getRepository(Language::class)->findAll();
         $languageChoices = [];
         foreach ($languages as $language) {
             $languageChoices[$language->getName()] = $language->getLangid();

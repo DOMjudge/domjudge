@@ -26,7 +26,7 @@ class TeamAffiliationController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -40,16 +40,16 @@ class TeamAffiliationController extends BaseController
 
     /**
      * TeamCategoryController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
@@ -59,7 +59,7 @@ class TeamAffiliationController extends BaseController
      */
     public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
     {
-        $em               = $this->entityManager;
+        $em               = $this->em;
         $teamAffiliations = $em->createQueryBuilder()
             ->select('a', 'COUNT(t.teamid) AS num_teams')
             ->from('DOMJudgeBundle:TeamAffiliation', 'a')
@@ -164,7 +164,7 @@ class TeamAffiliationController extends BaseController
     public function viewAction(Request $request, ScoreboardService $scoreboardService, int $affilId)
     {
         /** @var TeamAffiliation $teamAffiliation */
-        $teamAffiliation = $this->entityManager->getRepository(TeamAffiliation::class)->find($affilId);
+        $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
         if (!$teamAffiliation) {
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
@@ -211,7 +211,7 @@ class TeamAffiliationController extends BaseController
     public function editAction(Request $request, int $affilId)
     {
         /** @var TeamAffiliation $teamAffiliation */
-        $teamAffiliation = $this->entityManager->getRepository(TeamAffiliation::class)->find($affilId);
+        $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
         if (!$teamAffiliation) {
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
@@ -221,7 +221,7 @@ class TeamAffiliationController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $teamAffiliation,
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation,
                               $teamAffiliation->getAffilid(), false);
             return $this->redirect($this->generateUrl('jury_team_affiliation',
                                                       ['affilId' => $teamAffiliation->getAffilid()]));
@@ -244,12 +244,12 @@ class TeamAffiliationController extends BaseController
     public function deleteAction(Request $request, int $affilId)
     {
         /** @var TeamAffiliation $teamAffiliation */
-        $teamAffiliation = $this->entityManager->getRepository(TeamAffiliation::class)->find($affilId);
+        $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->find($affilId);
         if (!$teamAffiliation) {
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $teamAffiliation,
+        return $this->deleteEntity($request, $this->em, $this->dj, $teamAffiliation,
                                    $teamAffiliation->getName(), $this->generateUrl('jury_team_affiliations'));
     }
 
@@ -269,8 +269,8 @@ class TeamAffiliationController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($teamAffiliation);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $teamAffiliation,
+            $this->em->persist($teamAffiliation);
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation,
                               $teamAffiliation->getAffilid(), true);
             return $this->redirect($this->generateUrl('jury_team_affiliation',
                                                       ['affilId' => $teamAffiliation->getAffilid()]));
