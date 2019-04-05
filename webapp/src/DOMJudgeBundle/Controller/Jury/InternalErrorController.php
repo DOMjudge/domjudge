@@ -22,17 +22,17 @@ class InternalErrorController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
      */
     protected $dj;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
+    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
     {
-        $this->entityManager = $entityManager;
-        $this->dj            = $dj;
+        $this->em = $em;
+        $this->dj = $dj;
     }
 
     /**
@@ -41,7 +41,7 @@ class InternalErrorController extends BaseController
     public function indexAction()
     {
         /** @var InternalError[] $internalErrors */
-        $internalErrors = $this->entityManager->createQueryBuilder()
+        $internalErrors = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:InternalError', 'e')
             ->select('e')
             ->orderBy('e.status')
@@ -96,7 +96,7 @@ class InternalErrorController extends BaseController
     public function viewAction(int $errorId)
     {
         /** @var InternalError $internalError */
-        $internalError = $this->entityManager->getRepository(InternalError::class)->find($errorId);
+        $internalError = $this->em->getRepository(InternalError::class)->find($errorId);
         if (!$internalError) {
             throw new NotFoundHttpException(sprintf('Internal Error with ID %s not found', $errorId));
         }
@@ -108,7 +108,7 @@ class InternalErrorController extends BaseController
                 $affectedLink = $this->generateUrl('jury_problem', ['probId' => $disabled['probid']]);
                 $idData       = ['cid' => $internalError->getCid(), 'probid' => $disabled['probid']];
                 /** @var ContestProblem $problem */
-                $problem      = $this->entityManager->getRepository(ContestProblem::class)->find($idData);
+                $problem      = $this->em->getRepository(ContestProblem::class)->find($idData);
                 $affectedText = sprintf('%s - %s', $problem->getShortname(), $problem->getProblem()->getName());
                 break;
             case 'judgehost':
@@ -146,9 +146,9 @@ class InternalErrorController extends BaseController
     public function handleAction(int $errorId, string $action)
     {
         /** @var InternalError $internalError */
-        $internalError = $this->entityManager->getRepository(InternalError::class)->find($errorId);
+        $internalError = $this->em->getRepository(InternalError::class)->find($errorId);
         $status        = $action === 'ignore' ? InternalError::STATUS_IGNROED : InternalError::STATUS_RESOLVED;
-        $this->entityManager->transactional(function () use ($internalError, $status) {
+        $this->em->transactional(function () use ($internalError, $status) {
             $internalError->setStatus($status);
             if ($status === InternalError::STATUS_RESOLVED) {
                 $this->dj->setInternalError($internalError->getDisabled(), $internalError->getContest(),

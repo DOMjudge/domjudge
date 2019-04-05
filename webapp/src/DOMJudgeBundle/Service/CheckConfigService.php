@@ -29,7 +29,7 @@ class CheckConfigService
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -64,7 +64,7 @@ class CheckConfigService
     public function __construct(
         bool $debug,
         string $project_dir,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         RouterInterface $router,
@@ -72,7 +72,7 @@ class CheckConfigService
     ) {
         $this->debug           = $debug;
         $this->project_dir     = $project_dir;
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
         $this->router          = $router;
@@ -214,7 +214,7 @@ class CheckConfigService
 
     public function checkMysqlVersion()
     {
-        $r = $this->entityManager->getConnection()->fetchAll('SHOW VARIABLES WHERE variable_name = "version"');
+        $r = $this->em->getConnection()->fetchAll('SHOW VARIABLES WHERE variable_name = "version"');
         $my = $r[0]['Value'];
         $req = '5.5.3';
         $result = version_compare($my, $req, '>=');
@@ -225,13 +225,13 @@ class CheckConfigService
 
     public function checkMysqlSettings()
     {
-        $r = $this->entityManager->getConnection()->fetchAll('SHOW variables WHERE Variable_name IN
+        $r = $this->em->getConnection()->fetchAll('SHOW variables WHERE Variable_name IN
                         ("innodb_log_file_size", "max_connections", "max_allowed_packet", "tx_isolation")');
         $vars = [];
         foreach ($r as $row) {
             $vars[$row['Variable_name']] = $row['Value'];
         }
-        $max_inout_r = $this->entityManager->getConnection()->fetchAll('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase');
+        $max_inout_r = $this->em->getConnection()->fetchAll('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase');
         $max_inout = (int)reset($max_inout_r)['max'];
 
         $result = 'O';
@@ -272,7 +272,7 @@ class CheckConfigService
         $desc = 'Password for "admin" has been changed from the default.';
 
         /** @var User $user */
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => 'admin']);
+        $user = $this->em->getRepository(User::class)->findOneBy(['username' => 'admin']);
         if ($user && password_verify('admin', $user->getPassword())) {
             $res = 'E';
             $desc = 'The "admin" user still has the default password. You should change it immediately.';
@@ -291,7 +291,7 @@ class CheckConfigService
         $scripts = ['compare', 'run'];
         foreach ($scripts as $type) {
             $scriptid = $this->dj->dbconfig_get('default_' . $type);
-            if (!$this->entityManager->getRepository(Executable::class)->find($scriptid)) {
+            if (!$this->em->getRepository(Executable::class)->find($scriptid)) {
                 $res = 'E';
                 $desc .= sprintf("The default %s script '%s' does not exist.\n", $type, $scriptid);
             } else {
@@ -420,7 +420,7 @@ class CheckConfigService
 
     public function checkProblemsValidate()
     {
-        $problems = $this->entityManager->getRepository(Problem::class)->findAll();
+        $problems = $this->em->getRepository(Problem::class)->findAll();
         $script_filesize_limit = $this->dj->dbconfig_get('script_filesize_limit');
         $output_limit = $this->dj->dbconfig_get('output_limit');
 
@@ -436,7 +436,7 @@ class CheckConfigService
 
             $moreproblemerrors[$probid] = '';
             if ($special_compare = $problem->getSpecialCompare()) {
-                $exec = $this->entityManager->getRepository(Executable::class)->findOneBy(['execid' => $special_compare]);
+                $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $special_compare]);
                 if (!$exec) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special compare script %s not found for p%s\n", $special_compare, $probid);
@@ -446,7 +446,7 @@ class CheckConfigService
                 }
             }
             if ($special_run = $problem->getSpecialRun()) {
-                $exec = $this->entityManager->getRepository(Executable::class)->findOneBy(['execid' => $special_run]);
+                $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $special_run]);
                 if (!$exec) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special run script %s not found for p%s\n", $special_run, $probid);
@@ -468,7 +468,7 @@ class CheckConfigService
                 $moreproblemerrors[$probid] .= sprintf("No testcases for p%s\n", $probid);
             } else {
                 $problem_output_limit = 1024 * ($problem->getOutputLimit() ?: $output_limit);
-                $tcsizequery = $this->entityManager->createQueryBuilder()
+                $tcsizequery = $this->em->createQueryBuilder()
                      ->select('tc.testcaseid')
                      ->from('DOMJudgeBundle:TestcaseWithContent', 'tc')
                      ->where('length(tc.output) > :maxoutput')
@@ -504,7 +504,7 @@ class CheckConfigService
 
     public function checkLanguagesValidate()
     {
-        $languages = $this->entityManager->getRepository(Language::class)->findAll();
+        $languages = $this->em->getRepository(Language::class)->findAll();
         $script_filesize_limit = $this->dj->dbconfig_get('script_filesize_limit');
 
         $languageerrors = $scripterrors = [];
@@ -519,7 +519,7 @@ class CheckConfigService
 
             $morelanguageerrors[$langid] = '';
             if ($compile = $language->getCompileScript()) {
-               $exec = $this->entityManager->getRepository(Executable::class)->findOneBy(['execid' => $compile]);
+               $exec = $this->em->getRepository(Executable::class)->findOneBy(['execid' => $compile]);
                if (!$exec) {
                    $result = 'E';
                    $morelanguageerrors[$langid] .= sprintf("Compile script %s not found for %s\n", $compile, $langid);
@@ -549,7 +549,7 @@ class CheckConfigService
 
     public function checkProblemLanguageJudgability()
     {
-        $judgehosts = $this->entityManager->getRepository(Judgehost::class)->findBy(['active' => 1]);
+        $judgehosts = $this->em->getRepository(Judgehost::class)->findBy(['active' => 1]);
 
         foreach ($judgehosts as $judgehost) {
             if ($judgehost->getRestrictionid() === null) {
@@ -559,7 +559,7 @@ class CheckConfigService
             }
         }
 
-        $languages = $this->entityManager->getRepository(Language::class)->findAll();
+        $languages = $this->em->getRepository(Language::class)->findAll();
         $contests = $this->dj->getCurrentContests(null, true);
 
         $desc = '';
@@ -609,7 +609,7 @@ class CheckConfigService
                 'desc' => 'Affiliations display disabled, skipping checks'];
         }
 
-        $affils = $this->entityManager->getRepository(TeamAffiliation::class)->findAll();
+        $affils = $this->em->getRepository(TeamAffiliation::class)->findAll();
 
         $result = 'O';
         $desc = '';
@@ -668,7 +668,7 @@ class CheckConfigService
 
     public function checkTeamDuplicateNames()
     {
-        $teams = $this->entityManager->getRepository(Team::class)->findAll();
+        $teams = $this->em->getRepository(Team::class)->findAll();
 
         $result = 'O';
         $desc = '';
@@ -692,7 +692,7 @@ class CheckConfigService
 
     public function checkSubmissionsValidate()
     {
-        $submissions = $this->entityManager->getRepository(Submission::class)->findAll();
+        $submissions = $this->em->getRepository(Submission::class)->findAll();
 
         $submissionerrors = [];
         $result = 'O';
@@ -782,7 +782,7 @@ class CheckConfigService
         $entityType = $parts[count($parts) - 1];
         $result     = 'O';
 
-        $rowsWithoutExternalId = $this->entityManager->createQueryBuilder()
+        $rowsWithoutExternalId = $this->em->createQueryBuilder()
             ->from($class, 'e')
             ->select('e')
             ->andWhere(sprintf('e.%s IS NULL or e.%s = :empty', $externalIdField, $externalIdField))
@@ -793,7 +793,7 @@ class CheckConfigService
         if (!empty($rowsWithoutExternalId)) {
             $result      = 'E';
             $description = '';
-            $metadata    = $this->entityManager->getClassMetadata($class);
+            $metadata    = $this->em->getClassMetadata($class);
             foreach ($rowsWithoutExternalId as $entity) {
                 $route       = sprintf('jury_%s', Inflector::tableize($entityType));
                 $routeParams = [];

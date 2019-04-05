@@ -21,7 +21,7 @@ class ConfigController extends Controller
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -35,16 +35,16 @@ class ConfigController extends Controller
 
     /**
      * TeamCategoryController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param CheckConfigService     $checkConfigService
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         CheckConfigService $checkConfigService
     ) {
-        $this->entityManager      = $entityManager;
+        $this->em                 = $em;
         $this->dj                 = $dj;
         $this->checkConfigService = $checkConfigService;
     }
@@ -55,7 +55,7 @@ class ConfigController extends Controller
     public function indexAction(Request $request)
     {
         /** @var Configuration[] */
-        $options = $this->entityManager->getRepository('DOMJudgeBundle:Configuration')->findAll();
+        $options = $this->em->getRepository('DOMJudgeBundle:Configuration')->findAll();
         if ($request->getMethod() == 'POST' && $request->request->has('save')) {
             $this->addFlash('scoreboard_refresh', 'After changing specific settings, you might need to refresh the scoreboard.');
             foreach ($options as $option) {
@@ -90,11 +90,11 @@ class ConfigController extends Controller
                 }
             }
 
-            $this->entityManager->flush();
+            $this->em->flush();
             return $this->redirectToRoute('jury_config');
         }
         /** @var Configuration[] */
-        $options = $this->entityManager->getRepository('DOMJudgeBundle:Configuration')->findAll();
+        $options = $this->em->getRepository('DOMJudgeBundle:Configuration')->findAll();
         $categories = array();
         foreach ($options as $option) {
             if (!in_array($option->getCategory(), $categories)) {

@@ -26,12 +26,12 @@ class SubmitProblemType extends AbstractType
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
-    public function __construct(DOMJudgeService $dj, EntityManagerInterface $entityManager)
+    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
     {
-        $this->dj            = $dj;
-        $this->entityManager = $entityManager;
+        $this->dj = $dj;
+        $this->em = $em;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)

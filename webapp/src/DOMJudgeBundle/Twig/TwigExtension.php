@@ -25,7 +25,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var SubmissionService
@@ -44,13 +44,13 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
 
     public function __construct(
         DOMJudgeService $dj,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         SubmissionService $submissionService,
         EventLogService $eventLogService,
         KernelInterface $kernel
     ) {
         $this->dj                = $dj;
-        $this->entityManager     = $entityManager;
+        $this->em                = $em;
         $this->submissionService = $submissionService;
         $this->eventLogService   = $eventLogService;
         $this->kernel            = $kernel;
@@ -120,7 +120,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
             'ext_ccs_url' => defined('EXT_CCS_URL') ? EXT_CCS_URL : null,
             'current_team_contest' => $team ? $this->dj->getCurrentContest($user->getTeamid()) : null,
             'current_team_contests' => $team ? $this->dj->getCurrentContests($user->getTeamid()) : null,
-            'submission_languages' => $this->entityManager->createQueryBuilder()
+            'submission_languages' => $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Language', 'l')
                 ->select('l')
                 ->andWhere('l.allowSubmit = 1')
@@ -297,7 +297,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
         $judging   = $submission->getJudgings()->first();
         $judgingId = $judging ? $judging->getJudgingid() : null;
         $probId    = $submission->getProbid();
-        $testcases = $this->entityManager->getConnection()->fetchAll(
+        $testcases = $this->em->getConnection()->fetchAll(
             'SELECT r.runresult, t.rank, t.description
                   FROM testcase t
                   LEFT JOIN judging_run r ON (r.testcaseid = t.testcaseid

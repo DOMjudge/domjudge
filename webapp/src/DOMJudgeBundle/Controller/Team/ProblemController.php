@@ -33,17 +33,17 @@ class ProblemController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * ProblemController constructor.
      * @param DOMJudgeService        $dj
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      */
-    public function __construct(DOMJudgeService $dj, EntityManagerInterface $entityManager)
+    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
     {
-        $this->dj            = $dj;
-        $this->entityManager = $entityManager;
+        $this->dj = $dj;
+        $this->em = $em;
     }
 
     /**
@@ -60,7 +60,7 @@ class ProblemController extends BaseController
         $defaultMemoryLimit = (int)$this->dj->dbconfig_get('memory_limit', 0);
         $timeFactorDiffers  = false;
         if ($showLimits) {
-            $timeFactorDiffers = $this->entityManager->createQueryBuilder()
+            $timeFactorDiffers = $this->em->createQueryBuilder()
                     ->from('DOMJudgeBundle:Language', 'l')
                     ->select('COUNT(l)')
                     ->andWhere('l.allowSubmit = true')
@@ -71,7 +71,7 @@ class ProblemController extends BaseController
 
         $problems = [];
         if ($contest && $contest->getFreezeData()->started()) {
-            $problems = $this->entityManager->createQueryBuilder()
+            $problems = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:ContestProblem', 'cp')
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.testcases', 'tc')
@@ -107,7 +107,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
         /** @var ContestProblem $contestProblem */
-        $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
                                                                                                'probid' => $probId,
                                                                                                'cid' => $contest->getCid(),
                                                                                            ]);
@@ -166,7 +166,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
         /** @var ContestProblem $contestProblem */
-        $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
                                                                                                'probid' => $probId,
                                                                                                'cid' => $contest->getCid(),
                                                                                            ]);
@@ -175,7 +175,7 @@ class ProblemController extends BaseController
         }
 
         /** @var TestcaseWithContent $testcase */
-        $testcase = $this->entityManager->createQueryBuilder()
+        $testcase = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TestcaseWithContent', 'tc')
             ->join('tc.problem', 'p')
             ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
@@ -237,7 +237,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
         /** @var ContestProblem $contestProblem */
-        $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
+        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
                                                                                                'probid' => $probId,
                                                                                                'cid' => $contest->getCid(),
                                                                                            ]);

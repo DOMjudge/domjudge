@@ -49,7 +49,7 @@ class ImportExportController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var ScoreboardService
@@ -73,7 +73,7 @@ class ImportExportController extends BaseController
      * ImportExportController constructor.
      * @param BaylorCmsService       $baylorCmsService
      * @param ImportExportService    $importExportService
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param ScoreboardService      $scoreboardService
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
@@ -82,7 +82,7 @@ class ImportExportController extends BaseController
     public function __construct(
         BaylorCmsService $baylorCmsService,
         ImportExportService $importExportService,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         ScoreboardService $scoreboardService,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
@@ -90,7 +90,7 @@ class ImportExportController extends BaseController
     ) {
         $this->baylorCmsService    = $baylorCmsService;
         $this->importExportService = $importExportService;
-        $this->entityManager       = $entityManager;
+        $this->em                  = $em;
         $this->scoreboardService   = $scoreboardService;
         $this->dj                  = $dj;
         $this->eventLogService     = $eventLogService;
@@ -145,7 +145,7 @@ class ImportExportController extends BaseController
         }
 
         /** @var TeamCategory[] $teamCategories */
-        $teamCategories = $this->entityManager->createQueryBuilder()
+        $teamCategories = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'c', 'c.categoryid')
             ->select('c')
             ->where('c.visible = 1')
@@ -286,7 +286,7 @@ class ImportExportController extends BaseController
     protected function getResultsHtml(Request $request, bool $useIcpcLayout)
     {
         /** @var TeamCategory[] $categories */
-        $categories  = $this->entityManager->createQueryBuilder()
+        $categories  = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'c', 'c.categoryid')
             ->select('c')
             ->where('c.visible = 1')
@@ -310,7 +310,7 @@ class ImportExportController extends BaseController
 
         $teamNames = [];
         foreach ($teams as $team) {
-            $teamNames[$team->getApiId($this->eventLogService, $this->entityManager)] = $team->getName();
+            $teamNames[$team->getApiId($this->eventLogService, $this->em)] = $team->getName();
         }
 
         $awarded       = [];
@@ -381,7 +381,7 @@ class ImportExportController extends BaseController
                     $firstToSolve[$problem->getProbid()] = [
                         'problem' => $problem->getShortname(),
                         'problem_name' => $problem->getProblem()->getName(),
-                        'team' => $teamNames[$team->getApiId($this->eventLogService, $this->entityManager)],
+                        'team' => $teamNames[$team->getApiId($this->eventLogService, $this->em)],
                         'time' => Utils::scoretime($matrixItem->getTime(), $scoreIsInSeconds),
                     ];
                 }
@@ -451,7 +451,7 @@ class ImportExportController extends BaseController
         }
 
         /** @var Clarification[] $clarifications */
-        $clarifications = $this->entityManager->createQueryBuilder()
+        $clarifications = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Clarification', 'c')
             ->select('c')
             ->andWhere('c.contest = :contest')
@@ -477,7 +477,7 @@ class ImportExportController extends BaseController
         }
 
         /** @var ContestProblem[] $contestProblems */
-        $contestProblems = $this->entityManager->createQueryBuilder()
+        $contestProblems = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:ContestProblem', 'cp', 'cp.probid')
             ->select('cp')
             ->andWhere('cp.contest = :contest')

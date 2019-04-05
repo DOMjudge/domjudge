@@ -38,7 +38,7 @@ class RejudgingController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -56,15 +56,15 @@ class RejudgingController extends BaseController
     protected $session;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         RouterInterface $router,
         SessionInterface $session
     ) {
-        $this->entityManager   = $entityManager;
-        $this->dj              = $dj;
-        $this->router          = $router;
-        $this->session         = $session;
+        $this->em      = $em;
+        $this->dj      = $dj;
+        $this->router  = $router;
+        $this->session = $session;
     }
 
     /**
@@ -73,7 +73,7 @@ class RejudgingController extends BaseController
     public function indexAction(Request $request)
     {
         /** @var Rejudging[] $rejudgings */
-        $rejudgings = $this->entityManager->createQueryBuilder()
+        $rejudgings = $this->em->createQueryBuilder()
             ->select('r')
             ->from('DOMJudgeBundle:Rejudging', 'r')
             ->leftJoin('r.start_user', 's')
@@ -115,7 +115,7 @@ class RejudgingController extends BaseController
                 $rejudgingdata['finishuser']['value'] = $rejudging->getFinishUser()->getName();
             }
 
-            $todo = $this->entityManager->createQueryBuilder()
+            $todo = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Submission', 's')
                 ->select('COUNT(s)')
                 ->andWhere('s.rejudging = :rejudging')
@@ -123,7 +123,7 @@ class RejudgingController extends BaseController
                 ->getQuery()
                 ->getSingleScalarResult();
 
-            $done = $this->entityManager->createQueryBuilder()
+            $done = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Judging', 'j')
                 ->select('COUNT(j)')
                 ->andWhere('j.rejudging = :rejudging')
@@ -192,7 +192,7 @@ class RejudgingController extends BaseController
         $this->session->save();
 
         /** @var Rejudging $rejudging */
-        $rejudging = $this->entityManager->createQueryBuilder()
+        $rejudging = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Rejudging', 'r')
             ->leftJoin('r.start_user', 's')
             ->leftJoin('r.finish_user', 'f')
@@ -205,7 +205,7 @@ class RejudgingController extends BaseController
         if (!$rejudging) {
             throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $rejudgingId));
         }
-        $todo = $this->entityManager->createQueryBuilder()
+        $todo = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->select('COUNT(s)')
             ->andWhere('s.rejudging = :rejudging')
@@ -213,7 +213,7 @@ class RejudgingController extends BaseController
             ->getQuery()
             ->getSingleScalarResult();
 
-        $done = $this->entityManager->createQueryBuilder()
+        $done = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
             ->select('COUNT(j)')
             ->andWhere('j.rejudging = :rejudging')
@@ -241,14 +241,14 @@ class RejudgingController extends BaseController
         $originalVerdicts = [];
         $newVerdicts      = [];
 
-        $this->entityManager->transactional(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
-            $expr             = $this->entityManager->getExpressionBuilder();
-            $originalVerdicts = $this->entityManager->createQueryBuilder()
+        $this->em->transactional(function () use ($rejudging, &$originalVerdicts, &$newVerdicts) {
+            $expr             = $this->em->getExpressionBuilder();
+            $originalVerdicts = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Judging', 'j', 'j.submitid')
                 ->select('j')
                 ->where(
                     $expr->in('j.judgingid',
-                              $this->entityManager->createQueryBuilder()
+                              $this->em->createQueryBuilder()
                                   ->from('DOMJudgeBundle:Judging', 'j2')
                                   ->select('j2.prevjudgingid')
                                   ->andWhere('j2.rejudging = :rejudging')
@@ -260,7 +260,7 @@ class RejudgingController extends BaseController
                 ->getQuery()
                 ->getResult();
 
-            $newVerdicts = $this->entityManager->createQueryBuilder()
+            $newVerdicts = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Judging', 'j', 'j.submitid')
                 ->select('j')
                 ->andWhere('j.rejudging = :rejudging')
@@ -385,7 +385,7 @@ class RejudgingController extends BaseController
         }
 
         /** @var Rejudging $rejudging */
-        $rejudging = $this->entityManager->createQueryBuilder()
+        $rejudging = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Rejudging', 'r')
             ->select('r')
             ->andWhere('r.rejudgingid = :rejudgingid')
@@ -461,7 +461,7 @@ class RejudgingController extends BaseController
             $formData = $form->getData();
             $reason   = $formData['reason'];
 
-            $queryBuilder = $this->entityManager->createQueryBuilder()
+            $queryBuilder = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Judging', 'j')
                 ->leftJoin('j.submission', 's')
                 ->select('j', 's')
@@ -573,7 +573,7 @@ class RejudgingController extends BaseController
         if ($this->dj->checkrole('admin') && ($table == 'submission')) {
             $includeAll = true;
         } elseif ($table === 'rejudging') {
-            $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($id);
+            $rejudging = $this->em->getRepository(Rejudging::class)->find($id);
             if ($rejudging === null) {
                 throw new NotFoundHttpException(sprintf('Rejudging with ID %s not found', $id));
             }
@@ -597,7 +597,7 @@ class RejudgingController extends BaseController
             throw new BadRequestHttpException(sprintf('unknown table %s in rejudging', $table));
         }
 
-        $em = $this->entityManager;
+        $em = $this->em;
 
         // Only rejudge submissions in active contests.
         $contests = $this->dj->getCurrentContests();
@@ -665,7 +665,7 @@ class RejudgingController extends BaseController
         bool $fullRejudge,
         ScoreboardService $scoreboardService
     ) {
-        $em = $this->entityManager;
+        $em = $this->em;
 
         /** @var Rejudging|null $rejudging */
         $rejudging = null;

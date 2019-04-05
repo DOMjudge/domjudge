@@ -27,17 +27,17 @@ class JudgehostController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
      */
     protected $dj;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
+    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
     {
-        $this->entityManager = $entityManager;
-        $this->dj            = $dj;
+        $this->em = $em;
+        $this->dj = $dj;
     }
 
     /**
@@ -46,7 +46,7 @@ class JudgehostController extends BaseController
     public function indexAction(Request $request)
     {
         /** @var Judgehost[] $judgehosts */
-        $judgehosts = $this->entityManager->createQueryBuilder()
+        $judgehosts = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judgehost', 'j')
             ->leftJoin('j.restriction', 'r')
             ->select('j', 'r')
@@ -70,11 +70,11 @@ class JudgehostController extends BaseController
         $params        = [':now' => $now];
 
         $params[':from'] = $now - 2 * 60;
-        $work2min        = $this->entityManager->getConnection()->fetchAll($query, $params);
+        $work2min        = $this->em->getConnection()->fetchAll($query, $params);
         $params[':from'] = $now - 10 * 60;
-        $work10min       = $this->entityManager->getConnection()->fetchAll($query, $params);
+        $work10min       = $this->em->getConnection()->fetchAll($query, $params);
         $params[':from'] = $contest ? $contest->getStarttime() : 0;
-        $workcontest     = $this->entityManager->getConnection()->fetchAll($query, $params);
+        $workcontest     = $this->em->getConnection()->fetchAll($query, $params);
 
         $map = function ($work) {
             $result = [];
@@ -221,7 +221,7 @@ class JudgehostController extends BaseController
     public function viewAction(Request $request, string $hostname)
     {
         /** @var Judgehost $judgehost */
-        $judgehost = $this->entityManager->createQueryBuilder()
+        $judgehost = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judgehost', 'j')
             ->leftJoin('j.restriction', 'r')
             ->select('j', 'r')
@@ -246,7 +246,7 @@ class JudgehostController extends BaseController
         /** @var Judging[] $judgings */
         $judgings = [];
         if ($contests = $this->dj->getCurrentContest()) {
-            $judgings = $this->entityManager->createQueryBuilder()
+            $judgings = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Judging', 'j')
                 ->select('j', 'r')
                 ->leftJoin('j.rejudging', 'r')
@@ -290,7 +290,7 @@ class JudgehostController extends BaseController
     public function deleteAction(Request $request, string $hostname)
     {
         /** @var Judgehost $judgehost */
-        $judgehost = $this->entityManager->createQueryBuilder()
+        $judgehost = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judgehost', 'j')
             ->leftJoin('j.restriction', 'r')
             ->select('j', 'r')
@@ -299,7 +299,7 @@ class JudgehostController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $judgehost, $judgehost->getHostname(), $this->generateUrl('jury_judgehosts'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $judgehost, $judgehost->getHostname(), $this->generateUrl('jury_judgehosts'));
     }
 
     /**
@@ -312,9 +312,9 @@ class JudgehostController extends BaseController
      */
     public function activateAction(RouterInterface $router, Request $request, string $hostname)
     {
-        $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
+        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
         $judgehost->setActive(true);
-        $this->entityManager->flush();
+        $this->em->flush();
         $this->dj->auditlog('judgehost', $hostname, 'marked active');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
@@ -329,9 +329,9 @@ class JudgehostController extends BaseController
      */
     public function deactivateAction(RouterInterface $router, Request $request, string $hostname)
     {
-        $judgehost = $this->entityManager->getRepository(Judgehost::class)->find($hostname);
+        $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
         $judgehost->setActive(false);
-        $this->entityManager->flush();
+        $this->em->flush();
         $this->dj->auditlog('judgehost', $hostname, 'marked inactive');
         return $this->redirectToLocalReferrer($router, $request, $this->generateUrl('jury_judgehosts'));
     }
@@ -343,7 +343,7 @@ class JudgehostController extends BaseController
      */
     public function activateAllAction()
     {
-        $this->entityManager->createQuery('UPDATE DOMJudgeBundle:Judgehost j set j.active = true')->execute();
+        $this->em->createQuery('UPDATE DOMJudgeBundle:Judgehost j set j.active = true')->execute();
         $this->dj->auditlog('judgehost', null, 'marked all active');
         return $this->redirectToRoute('jury_judgehosts');
     }
@@ -355,7 +355,7 @@ class JudgehostController extends BaseController
      */
     public function deactivateAllAction()
     {
-        $this->entityManager->createQuery('UPDATE DOMJudgeBundle:Judgehost j set j.active = false')->execute();
+        $this->em->createQuery('UPDATE DOMJudgeBundle:Judgehost j set j.active = false')->execute();
         $this->dj->auditlog('judgehost', null, 'marked all inactive');
         return $this->redirectToRoute('jury_judgehosts');
     }
@@ -375,10 +375,10 @@ class JudgehostController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var Judgehost $judgehost */
             foreach ($form->getData()['judgehosts'] as $judgehost) {
-                $this->entityManager->persist($judgehost);
+                $this->em->persist($judgehost);
                 $this->dj->auditlog('judgehost', $judgehost->getHostname(), 'added');
             }
-            $this->entityManager->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('jury_judgehosts');
         }
@@ -396,7 +396,7 @@ class JudgehostController extends BaseController
      */
     public function editMultipleAction(Request $request)
     {
-        $querybuilder = $this->entityManager->createQueryBuilder()
+        $querybuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judgehost', 'j')
             ->select('j')
             ->orderBy('j.hostname');
@@ -406,7 +406,7 @@ class JudgehostController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->dj->auditlog('judgehosts', null, 'updated');
-            $this->entityManager->flush();
+            $this->em->flush();
 
             return $this->redirectToRoute('jury_judgehosts');
         }

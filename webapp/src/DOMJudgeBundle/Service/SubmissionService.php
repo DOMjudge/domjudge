@@ -36,7 +36,7 @@ class SubmissionService
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var LoggerInterface
@@ -59,13 +59,13 @@ class SubmissionService
     protected $scoreboardService;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         LoggerInterface $logger,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService
     ) {
-        $this->entityManager     = $entityManager;
+        $this->em                = $em;
         $this->logger            = $logger;
         $this->dj                = $dj;
         $this->eventLogService   = $eventLogService;
@@ -103,7 +103,7 @@ class SubmissionService
             return [[], []];
         }
 
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->select('s', 'j')
             ->join('s.team', 't')
@@ -311,19 +311,19 @@ class SubmissionService
         string &$message = null
     ) {
         if (!$team instanceof Team) {
-            $team = $this->entityManager->getRepository(Team::class)->find($team);
+            $team = $this->em->getRepository(Team::class)->find($team);
         }
         if (!$contest instanceof Contest) {
-            $contest = $this->entityManager->getRepository(Contest::class)->find($contest);
+            $contest = $this->em->getRepository(Contest::class)->find($contest);
         }
         if (!$problem instanceof ContestProblem) {
-            $problem = $this->entityManager->getRepository(ContestProblem::class)->find([
+            $problem = $this->em->getRepository(ContestProblem::class)->find([
                                                                                             'cid' => $contest->getCid(),
                                                                                             'probid' => $problem
                                                                                         ]);
         }
         if (!$language instanceof Language) {
-            $language = $this->entityManager->getRepository(Language::class)->find($language);
+            $language = $this->em->getRepository(Language::class)->find($language);
         }
 
         if (empty($team)) {
@@ -449,7 +449,7 @@ class SubmissionService
         if ($this->dj->checkrole('jury') && !empty($results)) {
             $submission->setExpectedResults($results);
         }
-        $this->entityManager->persist($submission);
+        $this->em->persist($submission);
 
         foreach ($files as $rank => $file) {
             $submissionFile = new SubmissionFileWithSourceCode();
@@ -458,19 +458,19 @@ class SubmissionService
                 ->setRank($rank)
                 ->setSourcecode(file_get_contents($file->getRealPath()));
             $submissionFile->setSubmission($submission);
-            $this->entityManager->persist($submissionFile);
+            $this->em->persist($submissionFile);
         }
 
-        $this->entityManager->transactional(function () use ($contest, $submission) {
-            $this->entityManager->flush();
+        $this->em->transactional(function () use ($contest, $submission) {
+            $this->em->flush();
             $this->eventLogService->log('submission', $submission->getSubmitid(),
                                         EventLogService::ACTION_CREATE, $contest->getCid());
         });
 
         // Reload contest, team and contestproblem for now, as EventLogService::log will clear the Doctrine entity manager
-        $contest = $this->entityManager->getRepository(Contest::class)->find($contest->getCid());
-        $team    = $this->entityManager->getRepository(Team::class)->find($team->getTeamid());
-        $problem = $this->entityManager->getRepository(ContestProblem::class)->find([
+        $contest = $this->em->getRepository(Contest::class)->find($contest->getCid());
+        $team    = $this->em->getRepository(Team::class)->find($team->getTeamid());
+        $problem = $this->em->getRepository(ContestProblem::class)->find([
                                                                                         'probid' => $problem->getProbid(),
                                                                                         'cid' => $problem->getCid()
                                                                                     ]);

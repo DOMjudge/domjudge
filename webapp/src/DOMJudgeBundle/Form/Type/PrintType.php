@@ -14,16 +14,16 @@ class PrintType extends AbstractType
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $em)
     {
-        $this->entityManager = $entityManager;
+        $this->em = $em;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $languages       = $this->entityManager->getRepository(Language::class)->findAll();
+        $languages       = $this->em->getRepository(Language::class)->findAll();
         $languageChoices = [];
         foreach ($languages as $language) {
             $languageChoices[$language->getName()] = $language->getLangid();

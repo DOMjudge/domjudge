@@ -30,7 +30,7 @@ class ImportProblemService
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var LoggerInterface
@@ -58,14 +58,14 @@ class ImportProblemService
     protected $validator;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         LoggerInterface $logger,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         SubmissionService $submissionService,
         ValidatorInterface $validator
     ) {
-        $this->entityManager     = $entityManager;
+        $this->em                = $em;
         $this->logger            = $logger;
         $this->dj                = $dj;
         $this->eventLogService   = $eventLogService;
@@ -146,11 +146,11 @@ class ImportProblemService
         }
 
         if (isset($problemProperties['special_compare'])) {
-            $problemProperties['compare_executable'] = $this->entityManager->getRepository(Executable::class)->find($problemProperties['special_compare']);
+            $problemProperties['compare_executable'] = $this->em->getRepository(Executable::class)->find($problemProperties['special_compare']);
             unset($problemProperties['special_compare']);
         }
         if (isset($problemProperties['special_run'])) {
-            $problemProperties['run_executable'] = $this->entityManager->getRepository(Executable::class)->find($problemProperties['special_run']);
+            $problemProperties['run_executable'] = $this->em->getRepository(Executable::class)->find($problemProperties['special_run']);
             unset($problemProperties['special_run']);
         }
 
@@ -306,10 +306,10 @@ class ImportProblemService
 
                             $outputValidatorZip  = file_get_contents(sprintf('%s/outputvalidator.zip', $tmpzipfiledir));
                             $outputValidatorName = $externalId . '_cmp';
-                            if ($this->entityManager->getRepository(Executable::class)->find($outputValidatorName)) {
+                            if ($this->em->getRepository(Executable::class)->find($outputValidatorName)) {
                                 // avoid name clash
                                 $clashCount = 2;
-                                while ($this->entityManager->getRepository(Executable::class)->find($outputValidatorName . '_' . $clashCount)) {
+                                while ($this->em->getRepository(Executable::class)->find($outputValidatorName . '_' . $clashCount)) {
                                     $clashCount++;
                                 }
                                 $outputValidatorName = $outputValidatorName . "_" . $clashCount;
@@ -323,7 +323,7 @@ class ImportProblemService
                                 ->setZipfile($outputValidatorZip)
                                 ->setDescription(sprintf('output validator for %s', $problem->getName()))
                                 ->setType($combinedRunCompare ? 'run' : 'compare');
-                            $this->entityManager->persist($executable);
+                            $this->em->persist($executable);
 
                             if ($combinedRunCompare) {
                                 $problem->setCombinedRunCompare(true);
@@ -370,7 +370,7 @@ class ImportProblemService
         // Insert/update testcases
         if ($problem->getProbid()) {
             // Find the current max rank
-            $maxRank = (int)$this->entityManager->createQueryBuilder()
+            $maxRank = (int)$this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Testcase', 't')
                 ->select('MAX(t.rank)')
                 ->andWhere('t.problem = :problem')
@@ -440,7 +440,7 @@ class ImportProblemService
 
                 if ($problem->getProbid()) {
                     // Skip testcases that already exist identically
-                    $existingTestcase = $this->entityManager
+                    $existingTestcase = $this->em
                         ->createQueryBuilder()
                         ->from('DOMJudgeBundle:Testcase', 't')
                         ->select('t')
@@ -479,7 +479,7 @@ class ImportProblemService
                         ->setImageThumb($imageThumb)
                         ->setImageType($imageType);
                 }
-                $this->entityManager->persist($testcase);
+                $this->em->persist($testcase);
 
                 $rank++;
                 $numCases++;
@@ -491,15 +491,15 @@ class ImportProblemService
             $messages[] = sprintf("Added %d %s testcase(s).", $numCases, $type);
         }
 
-        $this->entityManager->persist($problem);
-        $this->entityManager->flush();
+        $this->em->persist($problem);
+        $this->em->flush();
         if ($contestProblem) {
             $contestProblem->setProbid($problem->getProbid());
             $contestProblem->setCid($contest->getCid());
-            $this->entityManager->persist($contestProblem);
+            $this->em->persist($contestProblem);
         }
 
-        $this->entityManager->flush();
+        $this->em->flush();
 
         $cid = $contest ? $contest->getCid() : null;
         $this->eventLogService->log('problem', $problem->getProbid(), $problemIsNew ? 'create' : 'update', $cid);
@@ -516,7 +516,7 @@ class ImportProblemService
         } elseif ($contestProblem->getAllowSubmit()) {
             // First find all submittable languages:
             /** @var Language[] $allowedLanguages */
-            $allowedLanguages = $this->entityManager->createQueryBuilder()
+            $allowedLanguages = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Language', 'l', 'l.langid')
                 ->select('l')
                 ->andWhere('l.allowSubmit = true')
@@ -612,9 +612,9 @@ class ImportProblemService
                         $results = [$expectedResult];
                     }
                     if ($totalSize <= $this->dj->dbconfig_get('sourcesize_limit') * 1024) {
-                        $contest        = $this->entityManager->getRepository(Contest::class)->find($contest->getCid());
-                        $team           = $this->entityManager->getRepository(Team::class)->find($this->dj->getUser()->getTeamid());
-                        $contestProblem = $this->entityManager->getRepository(ContestProblem::class)->find([
+                        $contest        = $this->em->getRepository(Contest::class)->find($contest->getCid());
+                        $team           = $this->em->getRepository(Team::class)->find($this->dj->getUser()->getTeamid());
+                        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
                                                                                                                'probid' => $problem->getProbid(),
                                                                                                                'cid' => $contest->getCid()
                                                                                                            ]);
@@ -626,10 +626,10 @@ class ImportProblemService
                             $errorMessage = $submissionMessage;
                             return null;
                         }
-                        $submission = $this->entityManager->getRepository(Submission::class)->find($submission->getSubmitid());
+                        $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
                         $submission->setExpectedResults($results);
                         // Flush changes to submission
-                        $this->entityManager->flush();
+                        $this->em->flush();
 
                         $messages[] = sprintf('Added jury solution from: <tt>%s</tt></li>', $path);
                         $numJurySolutions++;

@@ -135,7 +135,7 @@ class EventLogService implements ContainerAwareInterface
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var LoggerInterface
@@ -144,12 +144,12 @@ class EventLogService implements ContainerAwareInterface
 
     public function __construct(
         DOMJudgeService $dj,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         LoggerInterface $logger
     ) {
-        $this->dj            = $dj;
-        $this->entityManager = $entityManager;
-        $this->logger        = $logger;
+        $this->dj     = $dj;
+        $this->em     = $em;
+        $this->logger = $logger;
 
         foreach ($this->apiEndpoints as $endpoint => $data) {
             if (!array_key_exists(self::KEY_URL, $data)) {
@@ -290,7 +290,7 @@ class EventLogService implements ContainerAwareInterface
             if ($type === 'problems') {
                 $expectedEvents = 0;
                 foreach ($dataIds as $dataId) {
-                    $contestIdData   = $this->entityManager->createQueryBuilder()
+                    $contestIdData   = $this->em->createQueryBuilder()
                         ->from('DOMJudgeBundle:ContestProblem', 'cp')
                         ->select('DISTINCT(cp.cid) AS contestId')
                         ->andWhere('cp.probid = :probid')
@@ -372,7 +372,7 @@ class EventLogService implements ContainerAwareInterface
 
         // First acquire an advisory lock to prevent other event logging,
         // so that we can obtain a unique timestamp.
-        if ($this->entityManager->getConnection()->fetchColumn("SELECT GET_LOCK('domjudge.eventlog',1)") != 1) {
+        if ($this->em->getConnection()->fetchColumn("SELECT GET_LOCK('domjudge.eventlog',1)") != 1) {
             throw new \Exception('EventLogService::log failed to obtain lock');
         }
 
@@ -398,22 +398,22 @@ class EventLogService implements ContainerAwareInterface
                 $event = new Event();
                 $event
                     ->setEventtime($now)
-                    ->setContest($this->entityManager->getRepository(Contest::class)->find($contestId))
+                    ->setContest($this->em->getRepository(Contest::class)->find($contestId))
                     ->setEndpointtype($type)
                     ->setEndpointid($ids[$idx])
                     ->setDatatype($table)
                     ->setDataid($dataId)
                     ->setAction($action)
                     ->setContent($jsonElement);
-                $this->entityManager->persist($event);
+                $this->em->persist($event);
                 $events[] = $event;
             }
         }
 
         // Now flush the entity manager, inserting all events
-        $this->entityManager->flush();
+        $this->em->flush();
 
-        if ($this->entityManager->getConnection()->fetchColumn("SELECT RELEASE_LOCK('domjudge.eventlog')") != 1) {
+        if ($this->em->getConnection()->fetchColumn("SELECT RELEASE_LOCK('domjudge.eventlog')") != 1) {
             throw new \Exception('EventLogService::log failed to release lock');
         }
 
@@ -453,7 +453,7 @@ class EventLogService implements ContainerAwareInterface
             return $ids;
         }
 
-        $metadata = $this->entityManager->getClassMetadata($entity);
+        $metadata = $this->em->getClassMetadata($entity);
         try {
             $primaryKeyField = $metadata->getSingleIdentifierColumnName();
         } catch (MappingException $e) {
@@ -462,7 +462,7 @@ class EventLogService implements ContainerAwareInterface
 
         return array_map(function (array $item) use ($endpointData) {
             return $item[$endpointData[self::KEY_EXTERNAL_ID]];
-        }, $this->entityManager->createQueryBuilder()
+        }, $this->em->createQueryBuilder()
                ->from($entity, 'e')
                ->select(sprintf('e.%s', $endpointData[self::KEY_EXTERNAL_ID]))
                ->andWhere(sprintf('e.%s IN (:ids)', $primaryKeyField))

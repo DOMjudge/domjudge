@@ -29,7 +29,7 @@ class ClarificationController extends Controller
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -43,16 +43,16 @@ class ClarificationController extends Controller
 
     /**
      * ClarificationController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
@@ -74,7 +74,7 @@ class ClarificationController extends Controller
             $currentQueue = null;
         }
 
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Clarification', 'clar')
             ->leftJoin('clar.problem', 'p')
             ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'cp.contest = clar.contest')
@@ -143,7 +143,7 @@ class ClarificationController extends Controller
     public function viewAction(Request $request, int $id)
     {
         /** @var Clarification $clarification */
-        $clarification = $this->entityManager->getRepository(Clarification::class)->find($id);
+        $clarification = $this->em->getRepository(Clarification::class)->find($id);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %s not found', $id));
         }
@@ -173,7 +173,7 @@ class ClarificationController extends Controller
 
             $jurymember = $clar->getJuryMember();
             if ( !empty($jurymember) ) {
-                $juryuser = $this->entityManager->getRepository(User::class)->findBy(['username'=>$jurymember]);
+                $juryuser = $this->em->getRepository(User::class)->findBy(['username'=>$jurymember]);
                 $data['from_jurymember'] = $juryuser[0]->getName();
                 $data['jurymember_is_me'] = $juryuser[0] == $this->getUser();
             }
@@ -231,7 +231,7 @@ class ClarificationController extends Controller
 
     protected function getProblemShortName(int $probid, int $cid) : string
     {
-        $cp = $this->entityManager->getRepository(ContestProblem::class)->findBy(['probid'=>$probid, 'cid' => $cid]);
+        $cp = $this->em->getRepository(ContestProblem::class)->findBy(['probid'=>$probid, 'cid' => $cid]);
         if ( isset($cp[0]) ) {
             return "problem " . $cp[0]->getShortName();
         }
@@ -264,7 +264,7 @@ class ClarificationController extends Controller
                 $subject_options[$cshort]["$cid-$name"] = "$cshort - $desc";
             }
 
-            $queryBuilder = $this->entityManager->createQueryBuilder()
+            $queryBuilder = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:ContestProblem', 'cp', 'cp.probid')
                 ->select('cp, p')
                 ->innerJoin('cp.problem', 'p')
@@ -309,18 +309,18 @@ class ClarificationController extends Controller
     public function toggleClaimAction(Request $request, int $clarId)
     {
         /** @var Clarification $clarification */
-        $clarification = $this->entityManager->getReference(Clarification::class, $clarId);
+        $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
         }
 
         if($request->request->getBoolean('claimed')) {
             $clarification->setJuryMember($this->getUser()->getUsername());
-            $this->entityManager->flush();
+            $this->em->flush();
             return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
         } else {
             $clarification->setJuryMember(null);
-            $this->entityManager->flush();
+            $this->em->flush();
             return $this->redirectToRoute('jury_clarifications');
         }
     }
@@ -334,14 +334,14 @@ class ClarificationController extends Controller
     public function toggleAnsweredAction(Request $request, int $clarId)
     {
         /** @var Clarification $clarification */
-        $clarification = $this->entityManager->getReference(Clarification::class, $clarId);
+        $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
         }
 
         $answered = $request->request->getBoolean('answered');
         $clarification->setAnswered($answered);
-        $this->entityManager->flush();
+        $this->em->flush();
 
         if ( $answered ) {
             return $this->redirectToRoute('jury_clarifications');
@@ -359,7 +359,7 @@ class ClarificationController extends Controller
     public function changeSubjectAction(Request $request, int $clarId)
     {
         /** @var Clarification $clarification */
-        $clarification = $this->entityManager->getReference(Clarification::class, $clarId);
+        $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
         }
@@ -367,11 +367,11 @@ class ClarificationController extends Controller
         $subject = $request->request->get('subject');
         list($cid, $probid) = explode('-', $subject);
 
-        $contest = $this->entityManager->getReference(Contest::class, $cid);
+        $contest = $this->em->getReference(Contest::class, $cid);
         $clarification->setContest($contest);
 
         if (ctype_digit($probid)) {
-            $problem = $this->entityManager->getReference(Problem::class, $probid);
+            $problem = $this->em->getReference(Problem::class, $probid);
             $clarification->setProblem($problem);
             $clarification->setCategory(null);
         } else {
@@ -379,7 +379,7 @@ class ClarificationController extends Controller
             $clarification->setCategory($probid);
         }
 
-        $this->entityManager->flush();
+        $this->em->flush();
 
         return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
     }
@@ -393,7 +393,7 @@ class ClarificationController extends Controller
     public function changeQueueAction(Request $request, int $clarId)
     {
         /** @var Clarification $clarification */
-        $clarification = $this->entityManager->getReference(Clarification::class, $clarId);
+        $clarification = $this->em->getReference(Clarification::class, $clarId);
         if (!$clarification) {
             throw new NotFoundHttpException(sprintf('Clarification with ID %i not found', $clarId));
         }
@@ -403,7 +403,7 @@ class ClarificationController extends Controller
             $queue = null;
         }
         $clarification->setQueue($queue);
-        $this->entityManager->flush();
+        $this->em->flush();
 
         if($request->isXmlHttpRequest()) {
             return $this->json(true);
@@ -421,7 +421,7 @@ class ClarificationController extends Controller
         $clarification = new Clarification();
 
         if($respid = $request->request->get('id')) {
-            $respclar = $this->entityManager->getRepository(Clarification::class)->find($respid);
+            $respclar = $this->em->getRepository(Clarification::class)->find($respid);
             $clarification->setInReplyTo($respclar);
         }
 
@@ -432,18 +432,18 @@ class ClarificationController extends Controller
             throw new InvalidArgumentException('You must select somewhere to send the clarification to.');
         } else {
             $clarification->setRecipientId($sendto);
-            $team = $this->entityManager->getReference(Team::class, $sendto);
+            $team = $this->em->getReference(Team::class, $sendto);
             $clarification->setRecipient($team);
         }
 
         $problem = $request->request->get('problem');
         list($cid, $probid) = explode('-', $problem);
 
-        $contest = $this->entityManager->getReference(Contest::class, $cid);
+        $contest = $this->em->getReference(Contest::class, $cid);
         $clarification->setContest($contest);
 
         if (ctype_digit($probid)) {
-            $problem = $this->entityManager->getReference(Problem::class, $probid);
+            $problem = $this->em->getReference(Problem::class, $probid);
             $clarification->setProblem($problem);
             $clarification->setCategory(null);
         } else {
@@ -470,30 +470,30 @@ class ClarificationController extends Controller
         $clarification->setBody($request->request->get('bodytext'));
         $clarification->setSubmittime(Utils::now());
 
-        $this->entityManager->persist($clarification);
+        $this->em->persist($clarification);
         if ($respid) {
             $respclar->setAnswered(true);
             $respclar->setJuryMember($this->getUser()->getUsername());
-            $this->entityManager->persist($respclar);
+            $this->em->persist($respclar);
         }
-        $this->entityManager->flush();
+        $this->em->flush();
 
         $clarId = $clarification->getClarId();
         $this->dj->auditlog('clarification', $clarId, 'added', null, null, $cid);
         $this->eventLogService->log('clarification', $clarId, 'create', $cid);
         // Reload clarification to make sure we have a fresh one after calling the event log service
-        $clarification = $this->entityManager->getRepository(Clarification::class)->find($clarId);
+        $clarification = $this->em->getRepository(Clarification::class)->find($clarId);
 
         if($sendto) {
-            $team = $this->entityManager->getRepository(Team::class)->find($sendto);
+            $team = $this->em->getRepository(Team::class)->find($sendto);
             $team->addUnreadClarification($clarification);
         } else {
-            $teams = $this->entityManager->getRepository(Team::class)->findAll();
+            $teams = $this->em->getRepository(Team::class)->findAll();
             foreach($teams as $team) {
                 $team->addUnreadClarification($clarification);
             }
         }
-        $this->entityManager->flush();
+        $this->em->flush();
 
         return $this->redirectToRoute('jury_clarification', ['id' => $clarId]);
     }

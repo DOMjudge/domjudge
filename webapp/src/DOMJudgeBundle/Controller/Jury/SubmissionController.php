@@ -45,7 +45,7 @@ class SubmissionController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -64,18 +64,18 @@ class SubmissionController extends BaseController
 
     /**
      * SubmissionController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param SubmissionService      $submissionService
      * @param RouterInterface        $router
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         SubmissionService $submissionService,
         RouterInterface $router
     ) {
-        $this->entityManager     = $entityManager;
+        $this->em                = $em;
         $this->dj                = $dj;
         $this->submissionService = $submissionService;
         $this->router            = $router;
@@ -132,7 +132,7 @@ class SubmissionController extends BaseController
         $filteredProblems = $filteredLanguages = $filteredTeams = [];
         if (isset($filters['problem-id'])) {
             /** @var Problem[] $filteredProblems */
-            $filteredProblems = $this->entityManager->createQueryBuilder()
+            $filteredProblems = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Problem', 'p')
                 ->select('p')
                 ->where('p.probid IN (:problemIds)')
@@ -142,7 +142,7 @@ class SubmissionController extends BaseController
         }
         if (isset($filters['language-id'])) {
             /** @var Language[] $filteredLanguages */
-            $filteredLanguages = $this->entityManager->createQueryBuilder()
+            $filteredLanguages = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Language', 'lang')
                 ->select('lang')
                 ->where('lang.langid IN (:langIds)')
@@ -152,7 +152,7 @@ class SubmissionController extends BaseController
         }
         if (isset($filters['team-id'])) {
             /** @var Team[] $filteredTeams */
-            $filteredTeams = $this->entityManager->createQueryBuilder()
+            $filteredTeams = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Team', 't')
                 ->select('t')
                 ->where('t.teamid IN (:teamIds)')
@@ -199,7 +199,7 @@ class SubmissionController extends BaseController
 
         // If judging ID is not set but rejudging ID is, try to deduce the judging ID from the database.
         if (!isset($judgingId) && isset($rejudgingId)) {
-            $judging = $this->entityManager->getRepository(Judging::class)
+            $judging = $this->em->getRepository(Judging::class)
                 ->findOneBy([
                                 'submitid' => $submitId,
                                 'rejudgingid' => $rejudgingId
@@ -210,7 +210,7 @@ class SubmissionController extends BaseController
         }
 
         /** @var Submission|null $submission */
-        $submission = $this->entityManager->createQueryBuilder()
+        $submission = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Submission', 's')
             ->join('s.team', 't')
             ->join('s.problem', 'p')
@@ -227,7 +227,7 @@ class SubmissionController extends BaseController
             throw new NotFoundHttpException(sprintf('No submission found with ID %d', $submitId));
         }
 
-        $judgingData = $this->entityManager->createQueryBuilder()
+        $judgingData = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j', 'j.judgingid')
             ->leftJoin('j.runs', 'jr')
             ->leftJoin('j.rejudging', 'r')
@@ -282,7 +282,7 @@ class SubmissionController extends BaseController
                                             $selectedJudging->getJuryMember());
                 } else {
                     $selectedJudging->setJuryMember($action === 'claim' ? $user->getUsername() : null);
-                    $this->entityManager->flush();
+                    $this->em->flush();
                     $this->dj->auditlog('judging', $selectedJudging->getJudgingid(), $action . 'ed');
 
                     if ($action === 'claim') {
@@ -300,7 +300,7 @@ class SubmissionController extends BaseController
 
             // First, check if there is an active judgehost that can judge this submission.
             /** @var Judgehost[] $judgehosts */
-            $judgehosts  = $this->entityManager->createQueryBuilder()
+            $judgehosts  = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Judgehost', 'j')
                 ->leftJoin('j.restriction', 'r')
                 ->select('j', 'r')
@@ -314,7 +314,7 @@ class SubmissionController extends BaseController
                     break;
                 }
 
-                $queryBuilder = $this->entityManager->createQueryBuilder()
+                $queryBuilder = $this->em->createQueryBuilder()
                     ->from('DOMJudgeBundle:Submission', 's')
                     ->select('s')
                     ->join('s.language', 'lang')
@@ -369,7 +369,7 @@ class SubmissionController extends BaseController
         $runs       = [];
         $runsOutput = [];
         if ($selectedJudging) {
-            $queryBuilder = $this->entityManager->createQueryBuilder()
+            $queryBuilder = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Testcase', 't')
                 ->join('t.testcase_content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
@@ -411,10 +411,10 @@ class SubmissionController extends BaseController
         }
 
         if ($submission->getOrigsubmitid()) {
-            $lastSubmission = $this->entityManager->getRepository(Submission::class)->find($submission->getOrigsubmitid());
+            $lastSubmission = $this->em->getRepository(Submission::class)->find($submission->getOrigsubmitid());
         } else {
             /** @var Submission|null $lastSubmission */
-            $lastSubmission = $this->entityManager->createQueryBuilder()
+            $lastSubmission = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Submission', 's')
                 ->select('s')
                 ->andWhere('s.team = :team')
@@ -434,7 +434,7 @@ class SubmissionController extends BaseController
         /** @var Testcase[] $lastRuns */
         $lastRuns = [];
         if ($lastSubmission !== null) {
-            $lastJudging = $this->entityManager->createQueryBuilder()
+            $lastJudging = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Judging', 'j')
                 ->select('j')
                 ->andWhere('j.submission = :submission')
@@ -447,8 +447,8 @@ class SubmissionController extends BaseController
 
             if ($lastJudging !== null) {
                 // Clear the testcases, otherwise Doctrine will use the previous data
-                $this->entityManager->clear(Testcase::class);
-                $lastRuns = $this->entityManager->createQueryBuilder()
+                $this->em->clear(Testcase::class);
+                $lastRuns = $this->em->createQueryBuilder()
                     ->from('DOMJudgeBundle:Testcase', 't')
                     ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                     ->select('t', 'jr')
@@ -508,7 +508,7 @@ class SubmissionController extends BaseController
             throw new BadRequestHttpException("Cannot determine submission from external ID without selecting a contest.");
         }
 
-        $submission = $this->entityManager->getRepository(Submission::class)
+        $submission = $this->em->getRepository(Submission::class)
             ->findOneBy([
                             'cid' => $this->dj->getCurrentContest()->getCid(),
                             'externalid' => $externalId
@@ -563,7 +563,7 @@ class SubmissionController extends BaseController
     {
         if ($request->query->has('fetch')) {
             /** @var SubmissionFileWithSourceCode $file */
-            $file = $this->entityManager->createQueryBuilder()
+            $file = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:SubmissionFileWithSourceCode', 'file')
                 ->select('file')
                 ->andWhere('file.rank = :rank')
@@ -588,7 +588,7 @@ class SubmissionController extends BaseController
         }
 
         /** @var SubmissionFileWithSourceCode[] $files */
-        $files = $this->entityManager->createQueryBuilder()
+        $files = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:SubmissionFileWithSourceCode', 'file')
             ->select('file')
             ->andWhere('file.submission = :submission')
@@ -601,10 +601,10 @@ class SubmissionController extends BaseController
 
         if ($submission->getOrigsubmitid()) {
             /** @var Submission $originalSubmission */
-            $originalSubmission = $this->entityManager->getRepository(Submission::class)->find($submission->getOrigsubmitid());
+            $originalSubmission = $this->em->getRepository(Submission::class)->find($submission->getOrigsubmitid());
 
             /** @var SubmissionFileWithSourceCode[] $files */
-            $originallFiles = $this->entityManager->createQueryBuilder()
+            $originallFiles = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:SubmissionFileWithSourceCode', 'file')
                 ->select('file')
                 ->andWhere('file.submission = :submission')
@@ -614,7 +614,7 @@ class SubmissionController extends BaseController
                 ->getResult();
 
             /** @var Submission $oldSubmission */
-            $oldSubmission = $this->entityManager->createQueryBuilder()
+            $oldSubmission = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Submission', 's')
                 ->select('s')
                 ->andWhere('s.probid = :probid')
@@ -630,7 +630,7 @@ class SubmissionController extends BaseController
                 ->getQuery()
                 ->getOneOrNullResult();
         } else {
-            $oldSubmission = $this->entityManager->createQueryBuilder()
+            $oldSubmission = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Submission', 's')
                 ->select('s')
                 ->andWhere('s.teamid = :teamid')
@@ -648,7 +648,7 @@ class SubmissionController extends BaseController
         }
 
         /** @var SubmissionFileWithSourceCode[] $files */
-        $oldFiles = $this->entityManager->createQueryBuilder()
+        $oldFiles = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:SubmissionFileWithSourceCode', 'file')
             ->select('file')
             ->andWhere('file.submission = :submission')
@@ -688,7 +688,7 @@ class SubmissionController extends BaseController
         }
 
         /** @var SubmissionFileWithSourceCode[] $files */
-        $files = $this->entityManager->createQueryBuilder()
+        $files = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:SubmissionFileWithSourceCode', 'file')
             ->select('file')
             ->andWhere('file.submission = :submission')
@@ -815,10 +815,10 @@ class SubmissionController extends BaseController
         Request $request,
         int $submitId
     ) {
-        $submission = $this->entityManager->getRepository(Submission::class)->find($submitId);
+        $submission = $this->em->getRepository(Submission::class)->find($submitId);
         $valid      = $request->request->getBoolean('valid');
         $submission->setValid($valid);
-        $this->entityManager->flush();
+        $this->em->flush();
 
         // KLUDGE: We can't log an "undelete", so we re-"create".
         // FIXME: We should also delete/recreate any dependent judging(runs).
@@ -826,9 +826,9 @@ class SubmissionController extends BaseController
                               $submission->getCid());
         $this->dj->auditlog('submission', $submission->getSubmitid(),
                                          'marked ' . ($valid ? 'valid' : 'invalid'));
-        $contest = $this->entityManager->getRepository(Contest::class)->find($submission->getCid());
-        $team    = $this->entityManager->getRepository(Team::class)->find($submission->getTeamid());
-        $problem = $this->entityManager->getRepository(Problem::class)->find($submission->getProbid());
+        $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
+        $team    = $this->em->getRepository(Team::class)->find($submission->getTeamid());
+        $problem = $this->em->getRepository(Problem::class)->find($submission->getProbid());
         $scoreboardService->calculateScoreRow($contest, $team, $problem);
 
         return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getSubmitid()]);
@@ -854,9 +854,9 @@ class SubmissionController extends BaseController
         Request $request,
         int $judgingId
     ) {
-        $this->entityManager->transactional(function () use ($eventLogService, $request, $judgingId) {
+        $this->em->transactional(function () use ($eventLogService, $request, $judgingId) {
             /** @var Judging $judging */
-            $judging  = $this->entityManager->getRepository(Judging::class)->find($judgingId);
+            $judging  = $this->em->getRepository(Judging::class)->find($judgingId);
             $verified = $request->request->getBoolean('verified');
             $comment  = $request->request->get('comment');
             $judging
@@ -864,7 +864,7 @@ class SubmissionController extends BaseController
                 ->setJuryMember($verified ? $this->dj->getUser()->getUsername() : null)
                 ->setVerifyComment($comment);
 
-            $this->entityManager->flush();
+            $this->em->flush();
             $this->dj->auditlog('judging', $judging->getJudgingid(),
                                              $verified ? 'set verified' : 'set unverified');
 
@@ -876,9 +876,9 @@ class SubmissionController extends BaseController
         });
 
         if ((bool)$this->dj->dbconfig_get('verification_required', false)) {
-            $this->entityManager->clear();
+            $this->em->clear();
             /** @var Judging $judging */
-            $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);
+            $judging = $this->em->getRepository(Judging::class)->find($judgingId);
             $scoreboardService->calculateScoreRow($judging->getContest(), $judging->getSubmission()->getTeam(),
                                                   $judging->getSubmission()->getProblem());
             $balloonService->updateBalloons($judging->getContest(), $judging->getSubmission(), $judging);

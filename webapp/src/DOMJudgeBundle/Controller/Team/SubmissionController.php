@@ -31,7 +31,7 @@ class SubmissionController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var SubmissionService
@@ -49,12 +49,12 @@ class SubmissionController extends BaseController
     protected $formFactory;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         SubmissionService $submissionService,
         DOMJudgeService $dj,
         FormFactoryInterface $formFactory
     ) {
-        $this->entityManager     = $entityManager;
+        $this->em                = $em;
         $this->submissionService = $submissionService;
         $this->dj                = $dj;
         $this->formFactory       = $formFactory;
@@ -132,7 +132,7 @@ class SubmissionController extends BaseController
         $team             = $user->getTeam();
         $contest          = $this->dj->getCurrentContest($team->getTeamid());
         /** @var Judging $judging */
-        $judging = $this->entityManager->createQueryBuilder()
+        $judging = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
             ->join('j.submission', 's')
             ->join('s.contest_problem', 'cp')
@@ -150,13 +150,13 @@ class SubmissionController extends BaseController
         // Update seen status when viewing submission
         if ($judging && $judging->getSubmission()->getSubmittime() < $contest->getEndtime() && (!$verificationRequired || $judging->getVerified())) {
             $judging->setSeen(true);
-            $this->entityManager->flush();
+            $this->em->flush();
         }
 
         /** @var Testcase[] $runs */
         $runs = [];
         if ($showSampleOutput && $judging && $judging->getResult() !== 'compiler-error') {
-            $runs = $this->entityManager->createQueryBuilder()
+            $runs = $this->em->createQueryBuilder()
                 ->from('DOMJudgeBundle:Testcase', 't')
                 ->join('t.testcase_content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')

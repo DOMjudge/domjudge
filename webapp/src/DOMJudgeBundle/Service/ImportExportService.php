@@ -32,7 +32,7 @@ class ImportExportService
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var ScoreboardService
@@ -55,13 +55,13 @@ class ImportExportService
     protected $validator;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         ScoreboardService $scoreboardService,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         ValidatorInterface $validator
     ) {
-        $this->entityManager     = $entityManager;
+        $this->em                = $em;
         $this->scoreboardService = $scoreboardService;
         $this->dj                = $dj;
         $this->eventLogService   = $eventLogService;
@@ -98,7 +98,7 @@ class ImportExportService
         ]);
 
         /** @var Language[] $languages */
-        $languages = $this->entityManager->getRepository(Language::class)->findAll();
+        $languages = $this->em->getRepository(Language::class)->findAll();
         foreach ($languages as $language) {
             // TODO: compiler, -flags, runner, -flags?
             $data['languages'][] = [
@@ -175,22 +175,22 @@ class ImportExportService
             return false;
         }
 
-        $this->entityManager->persist($contest);
-        $this->entityManager->flush();
+        $this->em->persist($contest);
+        $this->em->flush();
 
         $penaltyTime = $data['penalty-time'] ?? $data['penalty'] ?? null;
         if ($penaltyTime !== null) {
-            $penaltyTimeConfiguration = $this->entityManager->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
+            $penaltyTimeConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'penalty_time']);
             $penaltyTimeConfiguration->setValue((int)$penaltyTime);
         }
 
         if (isset($data['default-clars'])) {
-            $clarificationAnswersConfiguration = $this->entityManager->getRepository(Configuration::class)->findOneBy(['name' => 'clar_answers']);
+            $clarificationAnswersConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'clar_answers']);
             $clarificationAnswersConfiguration->setValue($data['default-clars']);
         }
 
         if (is_array($data['clar-categories'] ?? null)) {
-            $clarificationCategoriesConfiguration = $this->entityManager->getRepository(Configuration::class)->findOneBy(['name' => 'clar_categories']);
+            $clarificationCategoriesConfiguration = $this->em->getRepository(Configuration::class)->findOneBy(['name' => 'clar_categories']);
             $categories                           = [];
             foreach ($data['clar-categories'] as $category) {
                 $categoryKey              = substr(
@@ -218,8 +218,8 @@ class ImportExportService
                     ->setTimelimit(10);
                 // TODO: ask Fredrik about configuration of timelimit
 
-                $this->entityManager->persist($problem);
-                $this->entityManager->flush();
+                $this->em->persist($problem);
+                $this->em->flush();
 
                 $contestProblem = new ContestProblem();
                 $contestProblem
@@ -230,11 +230,11 @@ class ImportExportService
                     ->setProbid($problem->getProbid())
                     ->setContest($contest)
                     ->setCid($contest->getCid());
-                $this->entityManager->persist($contestProblem);
+                $this->em->persist($contestProblem);
             }
         }
 
-        $this->entityManager->flush();
+        $this->em->flush();
         return true;
     }
 
@@ -245,7 +245,7 @@ class ImportExportService
     public function getGroupData(): array
     {
         /** @var TeamCategory[] $categories */
-        $categories = $this->entityManager->createQueryBuilder()
+        $categories = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'c')
             ->select('c')
             ->where('c.visible = 1')
@@ -267,7 +267,7 @@ class ImportExportService
     public function getTeamData(): array
     {
         /** @var Team[] $teams */
-        $teams = $this->entityManager->createQueryBuilder()
+        $teams = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Team', 't')
             ->join('t.category', 'c')
             ->select('t')
@@ -370,7 +370,7 @@ class ImportExportService
         }
 
         /** @var TeamCategory[] $categories */
-        $categories  = $this->entityManager->createQueryBuilder()
+        $categories  = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'c', 'c.categoryid')
             ->select('c')
             ->where('c.visible = 1')
@@ -387,7 +387,7 @@ class ImportExportService
         $scoreboard = $this->scoreboardService->getScoreboard($contest, true, $filter);
 
         /** @var Team[] $teams */
-        $teams = $this->entityManager->createQueryBuilder()
+        $teams = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Team', 't', 't.externalid')
             ->select('t')
             ->where('t.externalid IS NOT NULL')
@@ -450,7 +450,7 @@ class ImportExportService
             }
 
             $data[] = [
-                $teamScore->getTeam()->getApiId($this->eventLogService, $this->entityManager),
+                $teamScore->getTeam()->getApiId($this->eventLogService, $this->em),
                 $rank,
                 $awardString,
                 $teamScore->getNumberOfPoints(),
@@ -554,22 +554,22 @@ class ImportExportService
         }
 
         // We want to overwrite the ID so change the ID generator
-        $metadata = $this->entityManager->getClassMetaData(TeamCategory::class);
+        $metadata = $this->em->getClassMetaData(TeamCategory::class);
         $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new AssignedGenerator());
 
         foreach ($groupData as $groupItem) {
-            $teamCategory = $this->entityManager->getRepository(TeamCategory::class)->find($groupItem['categoryid']);
+            $teamCategory = $this->em->getRepository(TeamCategory::class)->find($groupItem['categoryid']);
             if (!$teamCategory) {
                 $teamCategory = new TeamCategory();
                 $teamCategory->setCategoryid($groupItem['categoryid']);
-                $this->entityManager->persist($teamCategory);
+                $this->em->persist($teamCategory);
                 $action = EventLogService::ACTION_CREATE;
             } else {
                 $action = EventLogService::ACTION_UPDATE;
             }
             $teamCategory->setName($groupItem['name']);
-            $this->entityManager->flush();
+            $this->em->flush();
             if ($contest = $this->dj->getCurrentContest()) {
                 $this->eventLogService->log('team_category', $teamCategory->getCategoryid(), $action,
                                             $contest->getCid());
@@ -637,11 +637,11 @@ class ImportExportService
         }
 
         // We want to overwrite the ID so change the ID generator
-        $metadata = $this->entityManager->getClassMetaData(TeamCategory::class);
+        $metadata = $this->em->getClassMetaData(TeamCategory::class);
         $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new AssignedGenerator());
 
-        $metadata = $this->entityManager->getClassMetaData(Team::class);
+        $metadata = $this->em->getClassMetaData(Team::class);
         $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new AssignedGenerator());
 
@@ -655,7 +655,7 @@ class ImportExportService
             if (!empty($teamItem['team_affiliation']['shortname'])) {
                 // First look up if the affiliation already exists.
                 /** @var TeamAffiliation $teamAffiliation */
-                $teamAffiliation = $this->entityManager->createQueryBuilder()
+                $teamAffiliation = $this->em->createQueryBuilder()
                     ->from('DOMJudgeBundle:TeamAffiliation', 'a')
                     ->select('a')
                     ->andWhere('a.externalid = :externalid')
@@ -669,8 +669,8 @@ class ImportExportService
                         $propertyAccessor->setValue($teamAffiliation, $field, $value);
                     }
 
-                    $this->entityManager->persist($teamAffiliation);
-                    $this->entityManager->flush();
+                    $this->em->persist($teamAffiliation);
+                    $this->em->flush();
                     $createdAffiliations[] = $teamAffiliation->getAffilid();
                     $this->dj->auditlog('team_affiliation', $teamAffiliation->getAffilid(), 'added',
                                                      'imported from tsv');
@@ -680,13 +680,13 @@ class ImportExportService
             unset($teamItem['team']['affilid']);
 
             if (!empty($teamItem['team']['categoryid'])) {
-                $teamCategory = $this->entityManager->getRepository(TeamCategory::class)->find($teamItem['team']['categoryid']);
+                $teamCategory = $this->em->getRepository(TeamCategory::class)->find($teamItem['team']['categoryid']);
                 if (!$teamCategory) {
                     $teamCategory = new TeamCategory();
                     $teamCategory
                         ->setCategoryid($teamItem['categoryid'])
                         ->setName($teamItem['categoryid'] . ' - auto-create during import');
-                    $this->entityManager->persist($teamCategory);
+                    $this->em->persist($teamCategory);
                     $this->dj->auditlog('team_category', $teamCategory->getCategoryid(), 'added',
                                                      'imported from tsv');
                 }
@@ -694,7 +694,7 @@ class ImportExportService
             $teamItem['team']['category'] = $teamCategory;
             unset($teamItem['team']['categoryid']);
 
-            $team = $this->entityManager->getRepository(Team::class)->find($teamItem['team']['teamid']);
+            $team = $this->em->getRepository(Team::class)->find($teamItem['team']['teamid']);
             if (!$team) {
                 $team  = new Team();
                 $added = true;
@@ -708,9 +708,9 @@ class ImportExportService
             }
 
             if ($added) {
-                $this->entityManager->persist($team);
+                $this->em->persist($team);
             }
-            $this->entityManager->flush();
+            $this->em->flush();
 
             if ($added) {
                 $createdTeams[] = $team->getTeamid();
@@ -747,19 +747,19 @@ class ImportExportService
     {
         $accountData = [];
         $l           = 1;
-        $teamRole    = $this->entityManager->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
-        $juryRole    = $this->entityManager->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
-        $adminRole   = $this->entityManager->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
+        $teamRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'team']);
+        $juryRole    = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'jury']);
+        $adminRole   = $this->em->getRepository(Role::class)->findOneBy(['dj_role' => 'admin']);
 
-        $juryCategory = $this->entityManager->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
+        $juryCategory = $this->em->getRepository(TeamCategory::class)->findOneBy(['name' => 'Jury']);
         if (!$juryCategory) {
             $juryCategory = new TeamCategory();
             $juryCategory
                 ->setName('Jury')
                 ->setSortorder(100)
                 ->setVisible(false);
-            $this->entityManager->persist($juryCategory);
-            $this->entityManager->flush();
+            $this->em->persist($juryCategory);
+            $this->em->flush();
         }
 
         foreach ($content as $line) {
@@ -790,7 +790,7 @@ class ImportExportService
                                            $line[2]);
                         return -1;
                     }
-                    $team = $this->entityManager->getRepository(Team::class)->find($teamId);
+                    $team = $this->em->getRepository(Team::class)->find($teamId);
                     if ($team === null) {
                         $message = sprintf('unknown team id %s on line %d', $teamId, $l);
                         return -1;
@@ -821,7 +821,7 @@ class ImportExportService
 
         foreach ($accountData as $accountItem) {
             if (!empty($accountItem['team'])) {
-                $team = $this->entityManager->getRepository(Team::class)->findOneBy([
+                $team = $this->em->getRepository(Team::class)->findOneBy([
                                                                                         'name' => $accountItem['team']['name'],
                                                                                         'category' => $accountItem['team']['category']
                                                                                     ]);
@@ -830,21 +830,21 @@ class ImportExportService
                     $team
                         ->setName($accountItem['team']['name'])
                         ->setCategory($accountItem['team']['category']);
-                    $this->entityManager->persist($team);
+                    $this->em->persist($team);
                     $action = EventLogService::ACTION_CREATE;
                 } else {
                     $action = EventLogService::ACTION_UPDATE;
                 }
-                $this->entityManager->flush();
+                $this->em->flush();
                 $this->eventLogService->log('team', $team->getTeamid(), $action);
                 // Reload team as eventlog will have cleared it
-                $team = $this->entityManager->getRepository(Team::class)->find($team->getTeamid());
+                $team = $this->em->getRepository(Team::class)->find($team->getTeamid());
                 $this->dj->auditlog('team', $team->getTeamid(), 'replaced',
                                                  'imported from tsv, autocreated for judge');
                 $accountItem['user']['team'] = $team;
             }
 
-            $user = $this->entityManager->getRepository(User::class)->findOneBy(['username' => $accountItem['user']['username']]);
+            $user = $this->em->getRepository(User::class)->findOneBy(['username' => $accountItem['user']['username']]);
             if (!$user) {
                 $user  = new User();
                 $added = true;
@@ -858,9 +858,9 @@ class ImportExportService
             }
 
             if ($added) {
-                $this->entityManager->persist($user);
+                $this->em->persist($user);
             }
-            $this->entityManager->flush();
+            $this->em->flush();
 
             $this->dj->auditlog('user', $user->getUserid(), 'replaced', 'imported from tsv');
         }

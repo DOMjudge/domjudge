@@ -33,7 +33,7 @@ class ExecutableController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -47,16 +47,16 @@ class ExecutableController extends BaseController
 
     /**
      * ExecutableController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
@@ -107,14 +107,14 @@ class ExecutableController extends BaseController
                     ->setType($type)
                     ->setMd5sum(md5_file($archive->getRealPath()))
                     ->setZipfile(file_get_contents($archive->getRealPath()));
-                $this->entityManager->persist($executable);
+                $this->em->persist($executable);
 
                 $zip->close();
 
                 $this->dj->auditlog('executable', $id, 'upload zip', $archive->getClientOriginalName());
             }
 
-            $this->entityManager->flush();
+            $this->em->flush();
 
             if (count($archives) === 1) {
                 return $this->redirectToRoute('jury_executable', ['execId' => $id]);
@@ -123,7 +123,7 @@ class ExecutableController extends BaseController
             }
         }
 
-        $em = $this->entityManager;
+        $em = $this->em;
         /** @var Executable[] $executables */
         $executables      = $em->createQueryBuilder()
             ->select('e as executable, e.execid as execid, length(e.zipfile) as size')
@@ -203,7 +203,7 @@ class ExecutableController extends BaseController
     public function viewAction(Request $request, string $execId)
     {
         /** @var Executable $executable */
-        $executable = $this->entityManager->getRepository(Executable::class)->find($execId);
+        $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
@@ -224,7 +224,7 @@ class ExecutableController extends BaseController
     public function contentAction(string $execId)
     {
         /** @var Executable $executable */
-        $executable = $this->entityManager->getRepository(Executable::class)->find($execId);
+        $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
@@ -241,7 +241,7 @@ class ExecutableController extends BaseController
     public function downloadAction(string $execId)
     {
         /** @var Executable $executable */
-        $executable = $this->entityManager->getRepository(Executable::class)->find($execId);
+        $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
@@ -274,7 +274,7 @@ class ExecutableController extends BaseController
     public function downloadSingleAction(string $execId, int $index)
     {
         /** @var Executable $executable */
-        $executable = $this->entityManager->getRepository(Executable::class)->find($execId);
+        $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
@@ -324,7 +324,7 @@ class ExecutableController extends BaseController
     public function editAction(Request $request, string $execId)
     {
         /** @var Executable $executable */
-        $executable = $this->entityManager->getRepository(Executable::class)->find($execId);
+        $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
@@ -334,7 +334,7 @@ class ExecutableController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $executable,
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $executable,
                               $executable->getExecid(), false);
             return $this->redirect($this->generateUrl('jury_executable',
                                                       ['execId' => $executable->getExecid()]));
@@ -362,7 +362,7 @@ class ExecutableController extends BaseController
             $executable
                 ->setMd5sum(md5_file($archive->getRealPath()))
                 ->setZipfile(file_get_contents($archive->getRealPath()));
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $executable,
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $executable,
                               $executable->getExecid(), false);
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
@@ -385,12 +385,12 @@ class ExecutableController extends BaseController
     public function deleteAction(Request $request, string $execId)
     {
         /** @var Executable $executable */
-        $executable = $this->entityManager->getRepository(Executable::class)->find($execId);
+        $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $executable,
+        return $this->deleteEntity($request, $this->em, $this->dj, $executable,
                                    $executable->getDescription(), $this->generateUrl('jury_executables'));
     }
 
@@ -404,7 +404,7 @@ class ExecutableController extends BaseController
     public function editFilesAction(Request $request, string $execId)
     {
         /** @var Executable $executable */
-        $executable = $this->entityManager->getRepository(Executable::class)->find($execId);
+        $executable = $this->em->getRepository(Executable::class)->find($execId);
         if (!$executable) {
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
@@ -456,7 +456,7 @@ class ExecutableController extends BaseController
             $executable
                 ->setMd5sum(md5_file($tempzipFile))
                 ->setZipfile(file_get_contents($tempzipFile));
-            $this->entityManager->flush();
+            $this->em->flush();
             $this->dj->auditlog('executable', $executable->getExecid(), 'updated');
 
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);

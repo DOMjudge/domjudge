@@ -31,7 +31,7 @@ class TeamController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -44,11 +44,11 @@ class TeamController extends BaseController
     protected $eventLogService;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
@@ -59,7 +59,7 @@ class TeamController extends BaseController
     public function indexAction(Request $request, Packages $assetPackage)
     {
         /** @var Team[] $teams */
-        $teams = $this->entityManager->createQueryBuilder()
+        $teams = $this->em->createQueryBuilder()
             ->select('t', 'c', 'a', 'cat')
             ->from('DOMJudgeBundle:Team', 't')
             ->leftJoin('t.contests', 'c')
@@ -70,12 +70,12 @@ class TeamController extends BaseController
             ->getQuery()->getResult();
 
         $contests             = $this->dj->getCurrentContests();
-        $num_public_contests  = $this->entityManager->createQueryBuilder()
+        $num_public_contests  = $this->em->createQueryBuilder()
             ->select('count(c.cid) as num_contests')
             ->from('DOMJudgeBundle:Contest', 'c')
             ->andWhere('c.public = 1')
             ->getQuery()->getSingleResult()['num_contests'];
-        $teams_that_submitted = $this->entityManager->createQueryBuilder()
+        $teams_that_submitted = $this->em->createQueryBuilder()
             ->select('t.teamid as teamid, count(t.teamid) as num_submitted')
             ->from('DOMJudgeBundle:Team', 't')
             ->join('t.submissions', 's')
@@ -85,7 +85,7 @@ class TeamController extends BaseController
             ->getQuery()->getResult();
         $teams_that_submitted = array_column($teams_that_submitted, 'num_submitted', 'teamid');
 
-        $teams_that_solved = $this->entityManager->createQueryBuilder()
+        $teams_that_solved = $this->em->createQueryBuilder()
             ->select('t.teamid as teamid, count(t.teamid) as num_correct')
             ->from('DOMJudgeBundle:Team', 't')
             ->join('t.submissions', 's')
@@ -234,7 +234,7 @@ class TeamController extends BaseController
         SubmissionService $submissionService
     ) {
         /** @var Team $team */
-        $team = $this->entityManager->getRepository(Team::class)->find($teamId);
+        $team = $this->em->getRepository(Team::class)->find($teamId);
         if (!$team) {
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
@@ -271,7 +271,7 @@ class TeamController extends BaseController
 
         // We need to clear the entity manager, because loading the team scoreboard seems to break getting submission
         // contestproblems for the contest we get the scoreboard for
-        $this->entityManager->clear();
+        $this->em->clear();
 
         $restrictions    = [];
         $restrictionText = null;
@@ -323,7 +323,7 @@ class TeamController extends BaseController
     public function editAction(Request $request, int $teamId)
     {
         /** @var Team $team */
-        $team = $this->entityManager->getRepository(Team::class)->find($teamId);
+        $team = $this->em->getRepository(Team::class)->find($teamId);
         if (!$team) {
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
@@ -333,7 +333,7 @@ class TeamController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $team,
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team,
                               $team->getTeamid(), false);
             return $this->redirect($this->generateUrl('jury_team',
                                                       ['teamId' => $team->getTeamid()]));
@@ -356,12 +356,12 @@ class TeamController extends BaseController
     public function deleteAction(Request $request, int $teamId)
     {
         /** @var Team $team */
-        $team = $this->entityManager->getRepository(Team::class)->find($teamId);
+        $team = $this->em->getRepository(Team::class)->find($teamId);
         if (!$team) {
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $team, $team->getName(),
+        return $this->deleteEntity($request, $this->em, $this->dj, $team, $team->getName(),
                                    $this->generateUrl('jury_teams'));
     }
 
@@ -391,7 +391,7 @@ class TeamController extends BaseController
             } else {
                 // Otherwise, add the team role to it
                 /** @var Role $role */
-                $role = $this->entityManager->createQueryBuilder()
+                $role = $this->em->createQueryBuilder()
                     ->from('DOMJudgeBundle:Role', 'r')
                     ->select('r')
                     ->andWhere('r.dj_role = :team')
@@ -402,10 +402,10 @@ class TeamController extends BaseController
                 $user->setTeam($team);
                 // Also set the user's name to the team name
                 $user->setName($team->getName());
-                $this->entityManager->persist($user);
+                $this->em->persist($user);
             }
-            $this->entityManager->persist($team);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $team,
+            $this->em->persist($team);
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team,
                               $team->getTeamid(), true);
             return $this->redirect($this->generateUrl('jury_team',
                                                       ['teamId' => $team->getTeamid()]));

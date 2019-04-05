@@ -84,7 +84,7 @@ class TeamController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Team', 't')
             ->leftJoin('t.affiliation', 'ta')
             ->leftJoin('t.category', 'tc')
@@ -107,7 +107,7 @@ class TeamController extends AbstractRestController
             $queryBuilder->andWhere('tc.visible = 1');
         }
 
-        $contest = $this->entityManager->getRepository(Contest::class)->find($this->getContestId($request));
+        $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
         if (!$contest->getPublic()) {
             $queryBuilder
                 ->andWhere('c.cid = :cid')

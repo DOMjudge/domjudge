@@ -71,7 +71,7 @@ class ClarificationController extends AbstractRestController
      */
     protected function getQueryBuilder(Request $request): QueryBuilder
     {
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Clarification', 'clar')
             ->join('clar.contest', 'c')
             ->leftJoin('clar.in_reply_to', 'reply')

@@ -31,7 +31,7 @@ class GeneralInfoController extends FOSRestController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -55,20 +55,20 @@ class GeneralInfoController extends FOSRestController
 
     /**
      * GeneralInfoController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      * @param CheckConfigService     $checkConfigService
      * @param RouterInterface        $router
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         CheckConfigService $checkConfigService,
         RouterInterface $router
     ) {
-        $this->entityManager      = $entityManager;
+        $this->em                 = $em;
         $this->dj                 = $dj;
         $this->eventLogService    = $eventLogService;
         $this->checkConfigService = $checkConfigService;
@@ -159,14 +159,14 @@ class GeneralInfoController extends FOSRestController
         $result = [];
         foreach ($contests as $contest) {
             $resultItem                    = ['cid' => $contest->getCid()];
-            $resultItem['num_submissions'] = (int)$this->entityManager
+            $resultItem['num_submissions'] = (int)$this->em
                 ->createQuery(
                     'SELECT COUNT(s)
                 FROM DOMJudgeBundle:Submission s
                 WHERE s.cid = :cid')
                 ->setParameter(':cid', $contest->getCid())
                 ->getSingleScalarResult();
-            $resultItem['num_queued']      = (int)$this->entityManager
+            $resultItem['num_queued']      = (int)$this->em
                 ->createQuery(
                     'SELECT COUNT(s)
                 FROM DOMJudgeBundle:Submission s
@@ -176,7 +176,7 @@ class GeneralInfoController extends FOSRestController
                 AND s.valid = 1')
                 ->setParameter(':cid', $contest->getCid())
                 ->getSingleScalarResult();
-            $resultItem['num_judging']     = (int)$this->entityManager
+            $resultItem['num_judging']     = (int)$this->em
                 ->createQuery(
                     'SELECT COUNT(s)
                 FROM DOMJudgeBundle:Submission s

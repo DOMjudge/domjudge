@@ -26,7 +26,7 @@ class TeamCategoryController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -40,16 +40,16 @@ class TeamCategoryController extends BaseController
 
     /**
      * TeamCategoryController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
@@ -59,7 +59,7 @@ class TeamCategoryController extends BaseController
      */
     public function indexAction(Request $request, Packages $assetPackage)
     {
-        $em             = $this->entityManager;
+        $em             = $this->em;
         $teamCategories = $em->createQueryBuilder()
             ->select('c', 'COUNT(t.teamid) AS num_teams')
             ->from('DOMJudgeBundle:TeamCategory', 'c')
@@ -144,7 +144,7 @@ class TeamCategoryController extends BaseController
     public function viewAction(Request $request, SubmissionService $submissionService, int $categoryId)
     {
         /** @var TeamCategory $teamCategory */
-        $teamCategory = $this->entityManager->getRepository(TeamCategory::class)->find($categoryId);
+        $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
@@ -188,7 +188,7 @@ class TeamCategoryController extends BaseController
     public function editAction(Request $request, int $categoryId)
     {
         /** @var TeamCategory $teamCategory */
-        $teamCategory = $this->entityManager->getRepository(TeamCategory::class)->find($categoryId);
+        $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
@@ -198,7 +198,7 @@ class TeamCategoryController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $teamCategory,
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamCategory,
                               $teamCategory->getCategoryid(), false);
             $this->addFlash('scoreboard_refresh', 'If the category sort order was changed, it may be necessary to recalculate any cached scoreboards.');
             return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
@@ -221,12 +221,12 @@ class TeamCategoryController extends BaseController
     public function deleteAction(Request $request, int $categoryId)
     {
         /** @var TeamCategory $teamCategory */
-        $teamCategory = $this->entityManager->getRepository(TeamCategory::class)->find($categoryId);
+        $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
         if (!$teamCategory) {
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $teamCategory,
+        return $this->deleteEntity($request, $this->em, $this->dj, $teamCategory,
                                    $teamCategory->getName(), $this->generateUrl('jury_team_categories'));
     }
 
@@ -246,8 +246,8 @@ class TeamCategoryController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($teamCategory);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $teamCategory,
+            $this->em->persist($teamCategory);
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamCategory,
                               $teamCategory->getCategoryid(), true);
             return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
         }

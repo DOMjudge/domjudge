@@ -25,7 +25,7 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -34,8 +34,8 @@ class JudgehostRestrictionController extends BaseController
 
     public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
     {
-        $this->entityManager = $entityManager;
-        $this->dj            = $dj;
+        $this->em = $entityManager;
+        $this->dj = $dj;
     }
 
     /**
@@ -44,7 +44,7 @@ class JudgehostRestrictionController extends BaseController
     public function indexAction(Request $request)
     {
         /** @var JudgehostRestriction[] $judgehostRestrictions */
-        $judgehostRestrictions = $this->entityManager->createQueryBuilder()
+        $judgehostRestrictions = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:JudgehostRestriction', 'jr')
             ->select('jr')
             ->orderBy('jr.restrictionid')
@@ -124,7 +124,7 @@ class JudgehostRestrictionController extends BaseController
     public function viewAction(int $restrictionId)
     {
         /** @var JudgehostRestriction $judgehostRestriction */
-        $judgehostRestriction = $this->entityManager->createQueryBuilder()
+        $judgehostRestriction = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:JudgehostRestriction', 'jr')
             ->leftJoin('jr.judgehosts', 'j')
             ->select('jr', 'j')
@@ -137,21 +137,21 @@ class JudgehostRestrictionController extends BaseController
         }
 
         /** @var Contest[] $contests */
-        $contests = $this->entityManager->createQueryBuilder()
+        $contests = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Contest', 'c', 'c.cid')
             ->select('c')
             ->getQuery()
             ->getResult();
 
         /** @var Problem[] $problems */
-        $problems = $this->entityManager->createQueryBuilder()
+        $problems = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Problem', 'p', 'p.probid')
             ->select('p')
             ->getQuery()
             ->getResult();
 
         /** @var Language[] $languages */
-        $languages = $this->entityManager->createQueryBuilder()
+        $languages = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Language', 'l', 'l.langid')
             ->select('l')
             ->getQuery()
@@ -175,14 +175,14 @@ class JudgehostRestrictionController extends BaseController
     public function editAction(Request $request, int $restrictionId)
     {
         /** @var JudgehostRestriction $judgehostRestriction */
-        $judgehostRestriction = $this->entityManager->getRepository(JudgehostRestriction::class)->find($restrictionId);
+        $judgehostRestriction = $this->em->getRepository(JudgehostRestriction::class)->find($restrictionId);
 
         $form = $this->createForm(JudgehostRestrictionType::class, $judgehostRestriction);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
+            $this->em->flush();
             $this->dj->auditlog('judgehost_restriction', $judgehostRestriction->getRestrictionid(),
                                              'updated');
             return $this->redirect($this->generateUrl('jury_judgehost_restriction',
@@ -208,9 +208,9 @@ class JudgehostRestrictionController extends BaseController
     public function deleteAction(Request $request, int $restrictionId)
     {
         /** @var JudgehostRestriction $judgehostRestriction */
-        $judgehostRestriction = $this->entityManager->getRepository(JudgehostRestriction::class)->find($restrictionId);
+        $judgehostRestriction = $this->em->getRepository(JudgehostRestriction::class)->find($restrictionId);
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $judgehostRestriction, $judgehostRestriction->getName(), $this->generateUrl('jury_judgehost_restrictions'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $judgehostRestriction, $judgehostRestriction->getName(), $this->generateUrl('jury_judgehost_restrictions'));
     }
 
     /**
@@ -228,8 +228,8 @@ class JudgehostRestrictionController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($judgehostRestriction);
-            $this->entityManager->flush();
+            $this->em->persist($judgehostRestriction);
+            $this->em->flush();
             $this->dj->auditlog('judgehost_restriction', $judgehostRestriction->getRestrictionid(),
                                              'added');
             return $this->redirect($this->generateUrl('jury_judgehost_restriction',

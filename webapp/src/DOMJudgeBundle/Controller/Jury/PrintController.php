@@ -27,7 +27,7 @@ class PrintController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -36,13 +36,13 @@ class PrintController extends BaseController
 
     /**
      * PrintController constructor.
-     * @param EntityManagerInterface $entityManager
+     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
+    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
     {
-        $this->entityManager = $entityManager;
-        $this->dj            = $dj;
+        $this->em = $em;
+        $this->dj = $dj;
     }
 
     /**
@@ -82,7 +82,7 @@ class PrintController extends BaseController
         }
 
         /** @var Language[] $languages */
-        $languages = $this->entityManager->createQueryBuilder()
+        $languages = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:Language', 'l')
             ->select('l')
             ->andWhere('l.allowSubmit = 1')

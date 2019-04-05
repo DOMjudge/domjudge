@@ -30,7 +30,7 @@ class UserController extends BaseController
     /**
      * @var EntityManagerInterface
      */
-    protected $entityManager;
+    protected $em;
 
     /**
      * @var DOMJudgeService
@@ -48,12 +48,12 @@ class UserController extends BaseController
     protected $tokenStorage;
 
     public function __construct(
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         TokenStorageInterface $tokenStorage
     ) {
-        $this->entityManager   = $entityManager;
+        $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
         $this->tokenStorage    = $tokenStorage;
@@ -67,7 +67,7 @@ class UserController extends BaseController
     public function indexAction()
     {
         /** @var User[] $users */
-        $users = $this->entityManager->createQueryBuilder()
+        $users = $this->em->createQueryBuilder()
             ->select('u', 'r', 't')
             ->from('DOMJudgeBundle:User', 'u')
             ->leftJoin('u.roles', 'r')
@@ -173,7 +173,7 @@ class UserController extends BaseController
     public function viewAction(Request $request, int $userId)
     {
         /** @var User $user */
-        $user = $this->entityManager->getRepository(User::class)->find($userId);
+        $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
@@ -192,7 +192,7 @@ class UserController extends BaseController
     public function editAction(Request $request, int $userId)
     {
         /** @var User $user */
-        $user = $this->entityManager->getRepository(User::class)->find($userId);
+        $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
@@ -202,7 +202,7 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $user,
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user,
                               $user->getUserid(),
                               false);
 
@@ -239,12 +239,12 @@ class UserController extends BaseController
     public function deleteAction(Request $request, int $userId)
     {
         /** @var User $user */
-        $user = $this->entityManager->getRepository(User::class)->find($userId);
+        $user = $this->em->getRepository(User::class)->find($userId);
         if (!$user) {
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->dj, $user, $user->getName(),
+        return $this->deleteEntity($request, $this->em, $this->dj, $user, $user->getName(),
                                    $this->generateUrl('jury_users'));
     }
 
@@ -259,7 +259,7 @@ class UserController extends BaseController
     {
         $user = new User();
         if ($request->query->has('team')) {
-            $user->setTeam($this->entityManager->getRepository(Team::class)->find($request->query->get('team')));
+            $user->setTeam($this->em->getRepository(Team::class)->find($request->query->get('team')));
         }
 
         $form = $this->createForm(UserType::class, $user);
@@ -267,8 +267,8 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($user);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $user,
+            $this->em->persist($user);
+            $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user,
                               $user->getUserid(),
                               true);
             return $this->redirect($this->generateUrl('jury_user',
@@ -294,7 +294,7 @@ class UserController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $groups = $form->get('group')->getData();
 
-            $users = $this->entityManager->getRepository(User::class)->findAll();
+            $users = $this->em->getRepository(User::class)->findAll();
 
             $changes = [];
             foreach ($users as $user) {
@@ -333,7 +333,7 @@ class UserController extends BaseController
                     ];
                 }
             }
-            $this->entityManager->flush();
+            $this->em->flush();
             $response = $this->render('@DOMJudge/jury/tsv/userdata.tsv.twig', [
                 'data' => $changes,
             ]);

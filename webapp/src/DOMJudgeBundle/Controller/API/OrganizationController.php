@@ -73,7 +73,7 @@ class OrganizationController extends AbstractRestController
     {
         // Call getContestId to make sure we have an active contest
         $this->getContestId($request);
-        $queryBuilder = $this->entityManager->createQueryBuilder()
+        $queryBuilder = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamAffiliation', 'ta')
             ->select('ta')
             ->orderBy('ta.name');
