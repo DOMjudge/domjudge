@@ -35,7 +35,7 @@ class UserController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    private $DOMJudgeService;
+    private $dj;
 
     /**
      * @var EventLogService
@@ -49,12 +49,12 @@ class UserController extends BaseController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         TokenStorageInterface $tokenStorage
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
         $this->tokenStorage    = $tokenStorage;
     }
@@ -86,7 +86,7 @@ class UserController extends BaseController
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $users_table      = [];
-        $timeFormat  = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
+        $timeFormat  = (string)$this->dj->dbconfig_get('time_format', '%H:%M');
         foreach ($users as $u) {
             $userdata    = [];
             $useractions = [];
@@ -202,12 +202,12 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $user,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $user,
                               $user->getUserid(),
                               false);
 
             // If we save the currently logged in used, update the login token
-            if ($user->getUserid() === $this->DOMJudgeService->getUser()->getUserid()) {
+            if ($user->getUserid() === $this->dj->getUser()->getUserid()) {
                 $token = new UsernamePasswordToken(
                     $user,
                     null,
@@ -244,7 +244,7 @@ class UserController extends BaseController
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $user, $user->getName(),
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $user, $user->getName(),
                                    $this->generateUrl('jury_users'));
     }
 
@@ -268,7 +268,7 @@ class UserController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($user);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $user,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $user,
                               $user->getUserid(),
                               true);
             return $this->redirect($this->generateUrl('jury_user',
@@ -323,7 +323,7 @@ class UserController extends BaseController
                 if ( $doit ) {
                     $newpass = Utils::generatePassword();
                     $user->setPlainPassword($newpass);
-                    $this->DOMJudgeService->auditlog('user', $user->getUserid(), 'set password');
+                    $this->dj->auditlog('user', $user->getUserid(), 'set password');
                     $changes[] = [
                             'type' => $role,
                             'id' => $user->getUserid(),

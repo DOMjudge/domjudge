@@ -26,7 +26,7 @@ class ScoreboardController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var ScoreboardService
@@ -40,16 +40,16 @@ class ScoreboardController extends BaseController
 
     /**
      * ScoreboardController constructor.
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param ScoreboardService      $scoreboardService
      * @param EntityManagerInterface $entityManager
      */
     public function __construct(
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         ScoreboardService $scoreboardService,
         EntityManagerInterface $entityManager
     ) {
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->scoreboardService = $scoreboardService;
         $this->entityManager     = $entityManager;
     }
@@ -62,9 +62,9 @@ class ScoreboardController extends BaseController
      */
     public function scoreboardAction(Request $request)
     {
-        $user       = $this->DOMJudgeService->getUser();
+        $user       = $this->dj->getUser();
         $response   = new Response();
-        $contest    = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
+        $contest    = $this->dj->getCurrentContest($user->getTeamid());
         $refreshUrl = $this->generateUrl('team_scoreboard');
         $data       = $this->scoreboardService->getScoreboardTwigData($request, $response, $refreshUrl, false, false,
                                                                       false, $contest);
@@ -85,8 +85,8 @@ class ScoreboardController extends BaseController
     public function teamAction(Request $request, int $teamId)
     {
         $team             = $this->entityManager->getRepository(Team::class)->find($teamId);
-        $showFlags        = (bool)$this->DOMJudgeService->dbconfig_get('show_flags', true);
-        $showAffiliations = (bool)$this->DOMJudgeService->dbconfig_get('show_affiliations', true);
+        $showFlags        = (bool)$this->dj->dbconfig_get('show_flags', true);
+        $showAffiliations = (bool)$this->dj->dbconfig_get('show_affiliations', true);
         $data             = [
             'team' => $team,
             'showFlags' => $showFlags,

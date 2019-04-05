@@ -78,7 +78,7 @@ class GroupController extends AbstractRestController
             ->select('c')
             ->orderBy('c.sortorder');
 
-        if (!$this->DOMJudgeService->checkrole('api_reader') || $request->query->get('public')) {
+        if (!$this->dj->checkrole('api_reader') || $request->query->get('public')) {
             $queryBuilder
                 ->andWhere('c.visible = 1');
         }

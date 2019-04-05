@@ -130,7 +130,7 @@ class EventLogService implements ContainerAwareInterface
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EntityManagerInterface
@@ -143,13 +143,13 @@ class EventLogService implements ContainerAwareInterface
     protected $logger;
 
     public function __construct(
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EntityManagerInterface $entityManager,
         LoggerInterface $logger
     ) {
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->entityManager   = $entityManager;
-        $this->logger          = $logger;
+        $this->dj            = $dj;
+        $this->entityManager = $entityManager;
+        $this->logger        = $logger;
 
         foreach ($this->apiEndpoints as $endpoint => $data) {
             if (!array_key_exists(self::KEY_URL, $data)) {
@@ -256,7 +256,7 @@ class EventLogService implements ContainerAwareInterface
         }
 
         if ($ids === [null] && $json !== null) {
-            $data = $this->DOMJudgeService->jsonDecode($json);
+            $data = $this->dj->jsonDecode($json);
             if (!empty($data['id'])) {
                 $ids = [$data['id']];
             }
@@ -306,7 +306,7 @@ class EventLogService implements ContainerAwareInterface
             } elseif ($type === 'teams') {
                 $expectedEvents = 0;
                 foreach ($dataIds as $dataId) {
-                    $contests        = $this->DOMJudgeService->getCurrentContests($dataId);
+                    $contests        = $this->dj->getCurrentContests($dataId);
                     $contestIdsForId = array_map(function (Contest $contest) {
                         return $contest->getCid();
                     }, $contests);
@@ -322,7 +322,7 @@ class EventLogService implements ContainerAwareInterface
                 }
                 $contestId = $contestIds[0];
             } else {
-                $contests       = $this->DOMJudgeService->getCurrentContests();
+                $contests       = $this->dj->getCurrentContests();
                 $contestIds     = array_map(function (Contest $contest) {
                     return $contest->getCid();
                 }, $contests);
@@ -355,8 +355,8 @@ class EventLogService implements ContainerAwareInterface
                 $query = ['ids' => $ids];
             }
 
-            $this->DOMJudgeService->withAllRoles(function () use ($query, $url, &$json) {
-                $json = $this->DOMJudgeService->internalApiRequest($url, Request::METHOD_GET, $query);
+            $this->dj->withAllRoles(function () use ($query, $url, &$json) {
+                $json = $this->dj->internalApiRequest($url, Request::METHOD_GET, $query);
             });
 
             if ($json === null) {
@@ -381,7 +381,7 @@ class EventLogService implements ContainerAwareInterface
         $now = sprintf('%.3f', microtime(true));
 
         if ($jsonPassed) {
-            $json = $this->DOMJudgeService->jsonDecode($json);
+            $json = $this->dj->jsonDecode($json);
         }
 
         // TODO: can this be wrapped into a single query?
@@ -503,7 +503,7 @@ class EventLogService implements ContainerAwareInterface
         if ($endpointData[self::KEY_ALWAYS_USE_EXTERNAL_ID] ?? false) {
             $lookupExternalid = true;
         } else {
-            $dataSource = $this->DOMJudgeService->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL);
+            $dataSource = $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL);
 
             if ($dataSource !== DOMJudgeService::DATA_SOURCE_LOCAL) {
                 $endpointType = $endpointData[self::KEY_TYPE];

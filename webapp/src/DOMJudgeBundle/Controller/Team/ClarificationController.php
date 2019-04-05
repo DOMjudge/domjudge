@@ -33,7 +33,7 @@ class ClarificationController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EntityManagerInterface
@@ -51,12 +51,12 @@ class ClarificationController extends BaseController
     protected $formFactory;
 
     public function __construct(
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EntityManagerInterface $entityManager,
         EventLogService $eventLogService,
         FormFactoryInterface $formFactory
     ) {
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->entityManager   = $entityManager;
         $this->eventLogService = $eventLogService;
         $this->formFactory     = $formFactory;
@@ -72,10 +72,10 @@ class ClarificationController extends BaseController
      */
     public function viewAction(Request $request, int $clarId)
     {
-        $categories = $this->DOMJudgeService->dbconfig_get('clar_categories');
-        $user       = $this->DOMJudgeService->getUser();
+        $categories = $this->dj->dbconfig_get('clar_categories');
+        $user       = $this->dj->getUser();
         $team       = $user->getTeam();
-        $contest    = $this->DOMJudgeService->getCurrentContest($team->getTeamid());
+        $contest    = $this->dj->getCurrentContest($team->getTeamid());
         /** @var Clarification|null $clarification */
         $clarification = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Clarification', 'c')
@@ -123,7 +123,7 @@ class ClarificationController extends BaseController
                 $category = $problemId;
             } else {
                 $problem = $this->entityManager->getRepository(Problem::class)->find($problemId);
-                $queue   = $this->DOMJudgeService->dbconfig_get('clar_default_problem_queue');
+                $queue   = $this->dj->dbconfig_get('clar_default_problem_queue');
                 if ($queue === "") {
                     $queue = null;
                 }
@@ -142,7 +142,7 @@ class ClarificationController extends BaseController
             $this->entityManager->persist($newClarification);
             $this->entityManager->flush();
 
-            $this->DOMJudgeService->auditlog('clarification', $newClarification->getClarid(), 'added', null, null,
+            $this->dj->auditlog('clarification', $newClarification->getClarid(), 'added', null, null,
                                              $contest->getCid());
             $this->eventLogService->log('clarification', $newClarification->getClarid(), 'create', $contest->getCid());
 
@@ -192,10 +192,10 @@ class ClarificationController extends BaseController
      */
     public function addAction(Request $request)
     {
-        $categories = $this->DOMJudgeService->dbconfig_get('clar_categories');
-        $user       = $this->DOMJudgeService->getUser();
+        $categories = $this->dj->dbconfig_get('clar_categories');
+        $user       = $this->dj->getUser();
         $team       = $user->getTeam();
-        $contest    = $this->DOMJudgeService->getCurrentContest($team->getTeamid());
+        $contest    = $this->dj->getCurrentContest($team->getTeamid());
 
         $formData = [];
         $form     = $this->formFactory
@@ -216,7 +216,7 @@ class ClarificationController extends BaseController
                 $category = $problemId;
             } else {
                 $problem = $this->entityManager->getRepository(Problem::class)->find($problemId);
-                $queue   = $this->DOMJudgeService->dbconfig_get('clar_default_problem_queue');
+                $queue   = $this->dj->dbconfig_get('clar_default_problem_queue');
                 if ($queue === "") {
                     $queue = null;
                 }
@@ -235,7 +235,7 @@ class ClarificationController extends BaseController
             $this->entityManager->persist($newClarification);
             $this->entityManager->flush();
 
-            $this->DOMJudgeService->auditlog('clarification', $newClarification->getClarid(), 'added', null, null,
+            $this->dj->auditlog('clarification', $newClarification->getClarid(), 'added', null, null,
                                              $contest->getCid());
             $this->eventLogService->log('clarification', $newClarification->getClarid(), 'create', $contest->getCid());
 

@@ -31,7 +31,7 @@ class TeamCategoryController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -41,16 +41,16 @@ class TeamCategoryController extends BaseController
     /**
      * TeamCategoryController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
 
@@ -152,7 +152,7 @@ class TeamCategoryController extends BaseController
         $restrictions = ['categoryid' => $teamCategory->getCategoryid()];
         /** @var Submission[] $submissions */
         list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
-            $this->DOMJudgeService->getCurrentContests(),
+            $this->dj->getCurrentContests(),
             $restrictions
         );
 
@@ -160,7 +160,7 @@ class TeamCategoryController extends BaseController
             'teamCategory' => $teamCategory,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
-            'showContest' => count($this->DOMJudgeService->getCurrentContests()) > 1,
+            'showContest' => count($this->dj->getCurrentContests()) > 1,
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]),
@@ -198,7 +198,7 @@ class TeamCategoryController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $teamCategory,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $teamCategory,
                               $teamCategory->getCategoryid(), false);
             $this->addFlash('scoreboard_refresh', 'If the category sort order was changed, it may be necessary to recalculate any cached scoreboards.');
             return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
@@ -226,7 +226,7 @@ class TeamCategoryController extends BaseController
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $teamCategory,
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $teamCategory,
                                    $teamCategory->getName(), $this->generateUrl('jury_team_categories'));
     }
 
@@ -247,7 +247,7 @@ class TeamCategoryController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($teamCategory);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $teamCategory,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $teamCategory,
                               $teamCategory->getCategoryid(), true);
             return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
         }

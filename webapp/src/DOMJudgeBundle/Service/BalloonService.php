@@ -18,19 +18,19 @@ class BalloonService
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * BalloonService constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService
+        DOMJudgeService $dj
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj = $dj;
     }
 
     /**
@@ -57,7 +57,7 @@ class BalloonService
 
         // Also make sure it is verified if this is required
         if (!$judging->getVerified() &&
-            $this->DOMJudgeService->dbconfig_get('verification_required', false)) {
+            $this->dj->dbconfig_get('verification_required', false)) {
             return;
         }
 

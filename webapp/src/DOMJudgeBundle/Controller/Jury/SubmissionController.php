@@ -50,7 +50,7 @@ class SubmissionController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var SubmissionService
@@ -65,18 +65,18 @@ class SubmissionController extends BaseController
     /**
      * SubmissionController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param SubmissionService      $submissionService
      * @param RouterInterface        $router
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         SubmissionService $submissionService,
         RouterInterface $router
     ) {
         $this->entityManager     = $entityManager;
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->submissionService = $submissionService;
         $this->router            = $router;
     }
@@ -88,7 +88,7 @@ class SubmissionController extends BaseController
     {
         $viewTypes = [0 => 'newest', 1 => 'unverified', 2 => 'unjudged', 3 => 'all'];
         $view      = 0;
-        if (($submissionViewCookie = $this->DOMJudgeService->getCookie('domjudge_submissionview')) &&
+        if (($submissionViewCookie = $this->dj->getCookie('domjudge_submissionview')) &&
             isset($viewTypes[$submissionViewCookie])) {
             $view = $submissionViewCookie;
         }
@@ -100,7 +100,7 @@ class SubmissionController extends BaseController
             }
         }
 
-        $response = $this->DOMJudgeService->setCookie('domjudge_submissionview', (string)$view);
+        $response = $this->dj->setCookie('domjudge_submissionview', (string)$view);
 
         $refresh = [
             'after' => 15,
@@ -116,8 +116,8 @@ class SubmissionController extends BaseController
             $restrictions['judged'] = 0;
         }
 
-        $contests = $this->DOMJudgeService->getCurrentContests();
-        if ($contest = $this->DOMJudgeService->getCurrentContest()) {
+        $contests = $this->dj->getCurrentContests();
+        if ($contest = $this->dj->getCurrentContest()) {
             $contests = [$contest->getCid() => $contest];
         }
 
@@ -128,7 +128,7 @@ class SubmissionController extends BaseController
                                                                                             $limit);
 
         // Load preselected filters
-        $filters          = $this->DOMJudgeService->jsonDecode((string)$this->DOMJudgeService->getCookie('domjudge_submissionsfilter') ?: '[]');
+        $filters          = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
         $filteredProblems = $filteredLanguages = $filteredTeams = [];
         if (isset($filters['problem-id'])) {
             /** @var Problem[] $filteredProblems */
@@ -265,7 +265,7 @@ class SubmissionController extends BaseController
         $claimWarning = null;
 
         if ($request->get('claim') || $request->get('unclaim')) {
-            $user   = $this->DOMJudgeService->getUser();
+            $user   = $this->dj->getUser();
             $action = $request->get('claim') ? 'claim' : 'unclaim';
 
             if ($selectedJudging === null) {
@@ -283,7 +283,7 @@ class SubmissionController extends BaseController
                 } else {
                     $selectedJudging->setJuryMember($action === 'claim' ? $user->getUsername() : null);
                     $this->entityManager->flush();
-                    $this->DOMJudgeService->auditlog('judging', $selectedJudging->getJudgingid(), $action . 'ed');
+                    $this->dj->auditlog('judging', $selectedJudging->getJudgingid(), $action . 'ed');
 
                     if ($action === 'claim') {
                         return $this->redirectToRoute('jury_submission', ['submitId' => $submission->getSubmitid()]);
@@ -363,7 +363,7 @@ class SubmissionController extends BaseController
             }
         }
 
-        $outputDisplayLimit    = (int)$this->DOMJudgeService->dbconfig_get('output_display_limit', 2000);
+        $outputDisplayLimit    = (int)$this->dj->dbconfig_get('output_display_limit', 2000);
         $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
 
         $runs       = [];
@@ -472,7 +472,7 @@ class SubmissionController extends BaseController
             'runsOutput' => $runsOutput,
             'lastRuns' => $lastRuns,
             'unjudgableReasons' => $unjudgableReasons,
-            'verificationRequired' => (bool)$this->DOMJudgeService->dbconfig_get('verification_required', false),
+            'verificationRequired' => (bool)$this->dj->dbconfig_get('verification_required', false),
             'claimWarning' => $claimWarning,
             'combinedRunCompare' => $submission->getProblem()->getCombinedRunCompare(),
         ];
@@ -504,13 +504,13 @@ class SubmissionController extends BaseController
      */
     public function viewForExternalIdAction(string $externalId)
     {
-        if (!$this->DOMJudgeService->getCurrentContest()) {
+        if (!$this->dj->getCurrentContest()) {
             throw new BadRequestHttpException("Cannot determine submission from external ID without selecting a contest.");
         }
 
         $submission = $this->entityManager->getRepository(Submission::class)
             ->findOneBy([
-                            'cid' => $this->DOMJudgeService->getCurrentContest()->getCid(),
+                            'cid' => $this->dj->getCurrentContest()->getCid(),
                             'externalid' => $externalId
                         ]);
 
@@ -681,7 +681,7 @@ class SubmissionController extends BaseController
      */
     public function editSourceAction(Request $request, Submission $submission)
     {
-        if (!$this->DOMJudgeService->getUser()->getTeam() || !$this->DOMJudgeService->checkrole('team')) {
+        if (!$this->dj->getUser()->getTeam() || !$this->dj->checkrole('team')) {
             $this->addFlash('danger', 'You cannot re-submit code without being a team.');
             return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_submission',
                                                                                               ['submitId' => $submission->getSubmitid()]));
@@ -748,7 +748,7 @@ class SubmissionController extends BaseController
 
             /** @var UploadedFile[] $filesToSubmit */
             $filesToSubmit = [];
-            $tmpdir        = $this->DOMJudgeService->getDomjudgeTmpDir();
+            $tmpdir        = $this->dj->getDomjudgeTmpDir();
             foreach ($files as $file) {
                 if (!($tmpfname = tempnam($tmpdir, "edit_source-"))) {
                     throw new ServiceUnavailableHttpException(null, "Could not create temporary file.");
@@ -757,7 +757,7 @@ class SubmissionController extends BaseController
                 $filesToSubmit[] = new UploadedFile($tmpfname, $file->getFilename(), null, null, null, true);
             }
 
-            $team = $this->DOMJudgeService->getUser()->getTeam();
+            $team = $this->dj->getUser()->getTeam();
             /** @var Language $language */
             $language   = $submittedData['language'];
             $entryPoint = $submittedData['entry_point'];
@@ -824,7 +824,7 @@ class SubmissionController extends BaseController
         // FIXME: We should also delete/recreate any dependent judging(runs).
         $eventLogService->log('submission', $submission->getSubmitid(), ($valid ? 'create' : 'delete'),
                               $submission->getCid());
-        $this->DOMJudgeService->auditlog('submission', $submission->getSubmitid(),
+        $this->dj->auditlog('submission', $submission->getSubmitid(),
                                          'marked ' . ($valid ? 'valid' : 'invalid'));
         $contest = $this->entityManager->getRepository(Contest::class)->find($submission->getCid());
         $team    = $this->entityManager->getRepository(Team::class)->find($submission->getTeamid());
@@ -861,21 +861,21 @@ class SubmissionController extends BaseController
             $comment  = $request->request->get('comment');
             $judging
                 ->setVerified($verified)
-                ->setJuryMember($verified ? $this->DOMJudgeService->getUser()->getUsername() : null)
+                ->setJuryMember($verified ? $this->dj->getUser()->getUsername() : null)
                 ->setVerifyComment($comment);
 
             $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('judging', $judging->getJudgingid(),
+            $this->dj->auditlog('judging', $judging->getJudgingid(),
                                              $verified ? 'set verified' : 'set unverified');
 
-            if ((bool)$this->DOMJudgeService->dbconfig_get('verification_required', false)) {
+            if ((bool)$this->dj->dbconfig_get('verification_required', false)) {
                 // Log to event table (case of no verification required is handled
                 // in the REST API API/JudgehostController::addJudgingRunAction
                 $eventLogService->log('judging', $judging->getJudgingid(), 'update', $judging->getCid());
             }
         });
 
-        if ((bool)$this->DOMJudgeService->dbconfig_get('verification_required', false)) {
+        if ((bool)$this->dj->dbconfig_get('verification_required', false)) {
             $this->entityManager->clear();
             /** @var Judging $judging */
             $judging = $this->entityManager->getRepository(Judging::class)->find($judgingId);

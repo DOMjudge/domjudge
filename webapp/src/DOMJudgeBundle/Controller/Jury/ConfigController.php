@@ -26,7 +26,7 @@ class ConfigController extends Controller
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var CheckConfigService
@@ -36,16 +36,16 @@ class ConfigController extends Controller
     /**
      * TeamCategoryController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param CheckConfigService     $checkConfigService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         CheckConfigService $checkConfigService
     ) {
         $this->entityManager      = $entityManager;
-        $this->DOMJudgeService    = $DOMJudgeService;
+        $this->dj                 = $dj;
         $this->checkConfigService = $checkConfigService;
     }
 

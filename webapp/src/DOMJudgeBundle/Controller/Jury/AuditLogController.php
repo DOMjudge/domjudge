@@ -30,7 +30,7 @@ class AuditLogController extends Controller
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -40,16 +40,16 @@ class AuditLogController extends Controller
     /**
      * AuditLogController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
 
@@ -58,7 +58,7 @@ class AuditLogController extends Controller
      */
     public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
     {
-        $timeFormat = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
+        $timeFormat = (string)$this->dj->dbconfig_get('time_format', '%H:%M');
 
         $showAll = $request->query->get('showAll', false);
         $page = $request->query->get('page', 1);

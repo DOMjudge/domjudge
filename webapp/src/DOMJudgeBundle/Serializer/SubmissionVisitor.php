@@ -20,7 +20,7 @@ class SubmissionVisitor implements EventSubscriberInterface
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -39,17 +39,17 @@ class SubmissionVisitor implements EventSubscriberInterface
 
     /**
      * SubmissionVisitor constructor.
-     * @param DOMJudgeService $DOMJudgeService
+     * @param DOMJudgeService $dj
      * @param EventLogService $eventLogService
      * @param RouterInterface $router
      */
     public function __construct(
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         RouterInterface $router,
         EntityManagerInterface $entityManager
     ) {
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
         $this->router          = $router;
         $this->entityManager   = $entityManager;
@@ -76,7 +76,7 @@ class SubmissionVisitor implements EventSubscriberInterface
      */
     public function onPostSerialize(ObjectEvent $event)
     {
-        if ($this->DOMJudgeService->checkrole('jury')) {
+        if ($this->dj->checkrole('jury')) {
             /** @var JsonSerializationVisitor $visitor */
             $visitor = $event->getVisitor();
             /** @var Submission $submission */

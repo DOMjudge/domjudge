@@ -36,7 +36,7 @@ class TeamController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    private $DOMJudgeService;
+    private $dj;
 
     /**
      * @var EventLogService
@@ -45,11 +45,11 @@ class TeamController extends BaseController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
 
@@ -69,7 +69,7 @@ class TeamController extends BaseController
             ->addOrderBy('t.name', 'ASC')
             ->getQuery()->getResult();
 
-        $contests             = $this->DOMJudgeService->getCurrentContests();
+        $contests             = $this->dj->getCurrentContests();
         $num_public_contests  = $this->entityManager->createQueryBuilder()
             ->select('count(c.cid) as num_contests')
             ->from('DOMJudgeBundle:Contest', 'c')
@@ -246,26 +246,26 @@ class TeamController extends BaseController
                 'ajax' => true,
             ],
             'team' => $team,
-            'showAffiliations' => (bool)$this->DOMJudgeService->dbconfig_get('show_affiliations', true),
-            'showFlags' => (bool)$this->DOMJudgeService->dbconfig_get('show_flags', true),
-            'showContest' => count($this->DOMJudgeService->getCurrentContests()) > 1,
+            'showAffiliations' => (bool)$this->dj->dbconfig_get('show_affiliations', true),
+            'showFlags' => (bool)$this->dj->dbconfig_get('show_flags', true),
+            'showContest' => count($this->dj->getCurrentContests()) > 1,
         ];
 
-        $currentContest = $this->DOMJudgeService->getCurrentContest();
+        $currentContest = $this->dj->getCurrentContest();
         if ($request->query->has('cid')) {
-            if (isset($this->DOMJudgeService->getCurrentContests()[$request->query->get('cid')])) {
-                $currentContest = $this->DOMJudgeService->getCurrentContests()[$request->query->get('cid')];
+            if (isset($this->dj->getCurrentContests()[$request->query->get('cid')])) {
+                $currentContest = $this->dj->getCurrentContests()[$request->query->get('cid')];
             }
         }
 
         if ($currentContest) {
             $data['scoreboard']           = $scoreboardService->getTeamScoreboard($currentContest, $teamId, true);
-            $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
-            $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
-            $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
-            $data['showPending']          = $this->DOMJudgeService->dbconfig_get('show_pending', false);
-            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', true);
-            $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+            $data['showFlags']            = $this->dj->dbconfig_get('show_flags', true);
+            $data['showAffiliationLogos'] = $this->dj->dbconfig_get('show_affiliation_logos', false);
+            $data['showAffiliations']     = $this->dj->dbconfig_get('show_affiliations', true);
+            $data['showPending']          = $this->dj->dbconfig_get('show_pending', false);
+            $data['showTeamSubmissions']  = $this->dj->dbconfig_get('show_teams_submissions', true);
+            $data['scoreInSeconds']       = $this->dj->dbconfig_get('score_in_seconds', false);
             $data['limitToTeams']         = [$team];
         }
 
@@ -297,7 +297,7 @@ class TeamController extends BaseController
             $restrictionText = implode(', ', $restrictionTexts);
         }
         $restrictions['teamid'] = $teamId;
-        list($submissions, $submissionCounts) = $submissionService->getSubmissionList($this->DOMJudgeService->getCurrentContests(),
+        list($submissions, $submissionCounts) = $submissionService->getSubmissionList($this->dj->getCurrentContests(),
                                                                                       $restrictions);
         $data['restrictionText']  = $restrictionText;
         $data['submissions']      = $submissions;
@@ -333,7 +333,7 @@ class TeamController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $team,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $team,
                               $team->getTeamid(), false);
             return $this->redirect($this->generateUrl('jury_team',
                                                       ['teamId' => $team->getTeamid()]));
@@ -361,7 +361,7 @@ class TeamController extends BaseController
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $team, $team->getName(),
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $team, $team->getName(),
                                    $this->generateUrl('jury_teams'));
     }
 
@@ -405,7 +405,7 @@ class TeamController extends BaseController
                 $this->entityManager->persist($user);
             }
             $this->entityManager->persist($team);
-            $this->saveEntity($this->entityManager, $this->eventLogService, $this->DOMJudgeService, $team,
+            $this->saveEntity($this->entityManager, $this->eventLogService, $this->dj, $team,
                               $team->getTeamid(), true);
             return $this->redirect($this->generateUrl('jury_team',
                                                       ['teamId' => $team->getTeamid()]));

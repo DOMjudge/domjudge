@@ -174,14 +174,14 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         foreach ($files as $file) {
             $zip = null;
             try {
-                $zip         = $this->DOMJudgeService->openZipFile($file->getRealPath());
+                $zip         = $this->dj->openZipFile($file->getRealPath());
                 $clientName  = $file->getClientOriginalName();
                 $messages    = [];
                 $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest,
                                                                                 $messages);
                 $allMessages = array_merge($allMessages, $messages);
                 if ($newProblem) {
-                    $this->DOMJudgeService->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
+                    $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
                     $probIds[] = $newProblem->getProbid();
                 }
             } catch (\Exception $e) {
@@ -283,7 +283,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->groupBy('cp.probid');
 
         // For non-API-reader users, only expose the problems after the contest has started
-        if (!$this->DOMJudgeService->checkrole('api_reader') && $contest->getStartTimeObject()->getTimestamp() > time()) {
+        if (!$this->dj->checkrole('api_reader') && $contest->getStartTimeObject()->getTimestamp() > time()) {
             $queryBuilder->andWhere('1 = 0');
         }
 

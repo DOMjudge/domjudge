@@ -41,7 +41,7 @@ class SubmissionController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var FormFactoryInterface
@@ -51,12 +51,12 @@ class SubmissionController extends BaseController
     public function __construct(
         EntityManagerInterface $entityManager,
         SubmissionService $submissionService,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         FormFactoryInterface $formFactory
     ) {
         $this->entityManager     = $entityManager;
         $this->submissionService = $submissionService;
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->formFactory       = $formFactory;
     }
 
@@ -68,9 +68,9 @@ class SubmissionController extends BaseController
      */
     public function createAction(Request $request)
     {
-        $user    = $this->DOMJudgeService->getUser();
+        $user    = $this->dj->getUser();
         $team    = $user->getTeam();
-        $contest = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
+        $contest = $this->dj->getCurrentContest($user->getTeamid());
         $form    = $this->formFactory
             ->createBuilder(SubmitProblemType::class)
             ->setAction($this->generateUrl('team_submit'))
@@ -81,7 +81,7 @@ class SubmissionController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($contest === null) {
                 $this->addFlash('danger', 'No active contest');
-            } elseif (!$this->DOMJudgeService->checkrole('jury') && !$contest->getFreezeData()->started()) {
+            } elseif (!$this->dj->checkrole('jury') && !$contest->getFreezeData()->started()) {
                 $this->addFlash('danger', 'Contest has not yet started');
             } else {
                 /** @var Problem $problem */
@@ -96,7 +96,7 @@ class SubmissionController extends BaseController
                                                                        null, $message);
 
                 if ($submission) {
-                    $this->DOMJudgeService->auditlog('submission', $submission->getSubmitid(), 'added', 'via teampage',
+                    $this->dj->auditlog('submission', $submission->getSubmitid(), 'added', 'via teampage',
                                                      null, $contest->getCid());
                     $this->addFlash('success',
                                     '<strong>Submission done!</strong> Watch for the verdict in the list below.');
@@ -125,12 +125,12 @@ class SubmissionController extends BaseController
      */
     public function viewAction(Request $request, int $submitId)
     {
-        $verificationRequired = (bool)$this->DOMJudgeService->dbconfig_get('verification_required', false);;
-        $showCompile      = $this->DOMJudgeService->dbconfig_get('show_compile', 2);
-        $showSampleOutput = $this->DOMJudgeService->dbconfig_get('show_sample_output', 0);
-        $user             = $this->DOMJudgeService->getUser();
+        $verificationRequired = (bool)$this->dj->dbconfig_get('verification_required', false);;
+        $showCompile      = $this->dj->dbconfig_get('show_compile', 2);
+        $showSampleOutput = $this->dj->dbconfig_get('show_sample_output', 0);
+        $user             = $this->dj->getUser();
         $team             = $user->getTeam();
-        $contest          = $this->DOMJudgeService->getCurrentContest($team->getTeamid());
+        $contest          = $this->dj->getCurrentContest($team->getTeamid());
         /** @var Judging $judging */
         $judging = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')

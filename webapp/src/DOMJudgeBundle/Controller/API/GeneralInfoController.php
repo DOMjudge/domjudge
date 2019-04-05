@@ -36,7 +36,7 @@ class GeneralInfoController extends FOSRestController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -56,20 +56,20 @@ class GeneralInfoController extends FOSRestController
     /**
      * GeneralInfoController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      * @param CheckConfigService     $checkConfigService
      * @param RouterInterface        $router
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         CheckConfigService $checkConfigService,
         RouterInterface $router
     ) {
         $this->entityManager      = $entityManager;
-        $this->DOMJudgeService    = $DOMJudgeService;
+        $this->dj                 = $dj;
         $this->eventLogService    = $eventLogService;
         $this->checkConfigService = $checkConfigService;
         $this->router             = $router;
@@ -144,14 +144,14 @@ class GeneralInfoController extends FOSRestController
      */
     public function getStatusAction()
     {
-        if ($this->DOMJudgeService->checkrole('jury')) {
+        if ($this->dj->checkrole('jury')) {
             $onlyOfTeam = null;
-        } elseif ($this->DOMJudgeService->checkrole('team') && $this->DOMJudgeService->getUser()->getTeamid()) {
-            $onlyOfTeam = $this->DOMJudgeService->getUser()->getTeamid();
+        } elseif ($this->dj->checkrole('team') && $this->dj->getUser()->getTeamid()) {
+            $onlyOfTeam = $this->dj->getUser()->getTeamid();
         } else {
             $onlyOfTeam = -1;
         }
-        $contests = $this->DOMJudgeService->getCurrentContests($onlyOfTeam);
+        $contests = $this->dj->getCurrentContests($onlyOfTeam);
         if (empty($contests)) {
             throw new BadRequestHttpException('No active contest');
         }
@@ -205,7 +205,7 @@ class GeneralInfoController extends FOSRestController
      */
     public function getUserAction()
     {
-        $user = $this->DOMJudgeService->getUser();
+        $user = $this->dj->getUser();
         if ($user === null) {
             throw new HttpException(401, 'Permission denied');
         }
@@ -234,10 +234,10 @@ class GeneralInfoController extends FOSRestController
      */
     public function getDatabaseConfigurationAction(Request $request)
     {
-        $onlypublic = !($this->DOMJudgeService->checkrole('jury') || $this->DOMJudgeService->checkrole('judgehost'));
+        $onlypublic = !($this->dj->checkrole('jury') || $this->dj->checkrole('judgehost'));
         $name       = $request->query->get('name');
 
-        $result = $this->DOMJudgeService->dbconfig_get($name, null, $onlypublic);
+        $result = $this->dj->dbconfig_get($name, null, $onlypublic);
 
         if ($name !== null) {
             return [$name => $result];

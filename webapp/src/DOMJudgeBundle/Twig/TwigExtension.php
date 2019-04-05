@@ -20,7 +20,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
     /**
      * @var DOMJudgeService
      */
-    protected $domjudge;
+    protected $dj;
 
     /**
      * @var EntityManagerInterface
@@ -43,13 +43,13 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
     protected $kernel;
 
     public function __construct(
-        DOMJudgeService $domjudge,
+        DOMJudgeService $dj,
         EntityManagerInterface $entityManager,
         SubmissionService $submissionService,
         EventLogService $eventLogService,
         KernelInterface $kernel
     ) {
-        $this->domjudge          = $domjudge;
+        $this->dj                = $dj;
         $this->entityManager     = $entityManager;
         $this->submissionService = $submissionService;
         $this->eventLogService   = $eventLogService;
@@ -100,26 +100,26 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
 
     public function getGlobals()
     {
-        $refresh_cookie = $this->domjudge->getCookie("domjudge_refresh");
+        $refresh_cookie = $this->dj->getCookie("domjudge_refresh");
         $refresh_flag   = ($refresh_cookie == null || (bool)$refresh_cookie);
 
         require_once $this->domjudge->getDomjudgeEtcDir() . '/domserver-config.php';
 
-        $user = $this->domjudge->getUser();
+        $user = $this->dj->getUser();
         $team = $user ? $user->getTeam() : null;
 
         // These variables mostly exist for the header template
         return [
-            'current_contest' => $this->domjudge->getCurrentContest(),
-            'current_contests' => $this->domjudge->getCurrentContests(),
-            'current_public_contest' => $this->domjudge->getCurrentContest(-1),
-            'current_public_contests' => $this->domjudge->getCurrentContests(-1),
-            'have_printing' => $this->domjudge->dbconfig_get('enable_printing', 0),
+            'current_contest' => $this->dj->getCurrentContest(),
+            'current_contests' => $this->dj->getCurrentContests(),
+            'current_public_contest' => $this->dj->getCurrentContest(-1),
+            'current_public_contests' => $this->dj->getCurrentContests(-1),
+            'have_printing' => $this->dj->dbconfig_get('enable_printing', 0),
             'refresh_flag' => $refresh_flag,
             'icat_url' => defined('ICAT_URL') ? ICAT_URL : null,
             'ext_ccs_url' => defined('EXT_CCS_URL') ? EXT_CCS_URL : null,
-            'current_team_contest' => $team ? $this->domjudge->getCurrentContest($user->getTeamid()) : null,
-            'current_team_contests' => $team ? $this->domjudge->getCurrentContests($user->getTeamid()) : null,
+            'current_team_contest' => $team ? $this->dj->getCurrentContest($user->getTeamid()) : null,
+            'current_team_contests' => $team ? $this->dj->getCurrentContests($user->getTeamid()) : null,
             'submission_languages' => $this->entityManager->createQueryBuilder()
                 ->from('DOMJudgeBundle:Language', 'l')
                 ->select('l')
@@ -153,7 +153,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
         if ($datetime === null) {
             $datetime = Utils::now();
         }
-        if ($contest !== null && $this->domjudge->dbconfig_get('show_relative_time', false)) {
+        if ($contest !== null && $this->dj->dbconfig_get('show_relative_time', false)) {
             $relativeTime = $contest->getContestTime((float)$datetime);
             $sign         = ($relativeTime < 0 ? -1 : 1);
             $relativeTime *= $sign;
@@ -176,7 +176,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
             }
         } else {
             if ($format === null) {
-                $format = $this->domjudge->dbconfig_get('time_format', '%H:%M');
+                $format = $this->dj->dbconfig_get('time_format', '%H:%M');
             }
             return Utils::printtime($datetime, $format);
         }
@@ -724,7 +724,7 @@ JS;
             SUBMITDIR . '/' . $newsourcefile,
             $oldFile,
             SUBMITDIR . '/' . $oldsourcefile,
-            $this->domjudge->getDomjudgeTmpDir()
+            $this->dj->getDomjudgeTmpDir()
         );
 
         return $this->parseSourceDiff($difftext);
@@ -807,7 +807,7 @@ JS;
      */
     public function scoreTime($time)
     {
-        return Utils::scoretime($time, (bool)$this->domjudge->dbconfig_get('score_in_seconds', false));
+        return Utils::scoretime($time, (bool)$this->dj->dbconfig_get('score_in_seconds', false));
     }
 
     /**
@@ -819,8 +819,8 @@ JS;
      */
     public function calculatePenaltyTime(bool $solved, int $num_submissions)
     {
-        return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->domjudge->dbconfig_get('penalty_time', 20),
-                                      (bool)$this->domjudge->dbconfig_get('score_in_seconds', false));
+        return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->dj->dbconfig_get('penalty_time', 20),
+                                      (bool)$this->dj->dbconfig_get('score_in_seconds', false));
     }
 
     /**

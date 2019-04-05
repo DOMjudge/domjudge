@@ -17,15 +17,15 @@ class ContestVisitor implements EventSubscriberInterface
     /**
      * @var DOMJudgeService
      */
-    private $DOMJudgeService;
+    private $dj;
 
     /**
      * ContestVisitor constructor.
-     * @param DOMJudgeService $DOMJudgeService
+     * @param DOMJudgeService $dj
      */
-    public function __construct(DOMJudgeService $DOMJudgeService)
+    public function __construct(DOMJudgeService $dj)
     {
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj = $dj;
     }
 
     /**
@@ -51,6 +51,6 @@ class ContestVisitor implements EventSubscriberInterface
     {
         /** @var JsonSerializationVisitor $visitor */
         $visitor = $event->getVisitor();
-        $visitor->setData('penalty_time', (int)$this->DOMJudgeService->dbconfig_get('penalty_time',20));
+        $visitor->setData('penalty_time', (int)$this->dj->dbconfig_get('penalty_time',20));
     }
 }

@@ -20,7 +20,7 @@ class AnalysisController extends Controller
     /**
      * @var DOMJudgeService
      */
-    private $DOMJudgeService;
+    private $dj;
 
     const FILTERS = [
         'visiblecat' => 'Teams from visible categories',
@@ -35,9 +35,9 @@ class AnalysisController extends Controller
       $array[$index] = $array[$index] +1;
     }
 
-    public function __construct(DOMJudgeService $DOMJudgeService)
+    public function __construct(DOMJudgeService $dj)
     {
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj = $dj;
     }
 
     /**
@@ -66,7 +66,7 @@ class AnalysisController extends Controller
     public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $contest = $this->DOMJudgeService->getCurrentContest();
+        $contest = $this->dj->getCurrentContest();
 
         if ($contest == null) {
           return $this->render('@DOMJudge/jury/error.html.twig', [
@@ -260,7 +260,7 @@ class AnalysisController extends Controller
     public function teamAction(Request $request, Team $team)
     {
         $em = $this->getDoctrine()->getManager();
-        $contest = $this->DOMJudgeService->getCurrentContest();
+        $contest = $this->dj->getCurrentContest();
 
         if ($contest == null) {
           return $this->render('@DOMJudge/jury/error.html.twig', [
@@ -359,7 +359,7 @@ class AnalysisController extends Controller
     public function problemAction(Request $request, Problem $problem)
     {
         $em = $this->getDoctrine()->getManager();
-        $contest = $this->DOMJudgeService->getCurrentContest();
+        $contest = $this->dj->getCurrentContest();
 
         $filterKeys = array_keys(self::FILTERS);
         $view = $request->query->get('view') ?: reset($filterKeys);

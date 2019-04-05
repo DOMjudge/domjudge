@@ -43,7 +43,7 @@ class RejudgingController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var RouterInterface
@@ -57,12 +57,12 @@ class RejudgingController extends BaseController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         RouterInterface $router,
         SessionInterface $session
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->router          = $router;
         $this->session         = $session;
     }
@@ -96,7 +96,7 @@ class RejudgingController extends BaseController
             'status' => ['title' => 'status', 'sort' => true],
         ];
 
-        $timeFormat       = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
+        $timeFormat       = (string)$this->dj->dbconfig_get('time_format', '%H:%M');
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $rejudgings_table = [];
         foreach ($rejudgings as $rejudging) {
@@ -224,7 +224,7 @@ class RejudgingController extends BaseController
 
         $todo -= $done;
 
-        $verdictsConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $verdicts       = include $verdictsConfig;
 
         $used         = [];
@@ -332,7 +332,7 @@ class RejudgingController extends BaseController
 
         /** @var Submission[] $submissions */
         list($submissions, $submissionCounts) = $submissionService->getSubmissionList(
-            $this->DOMJudgeService->getCurrentContests(),
+            $this->dj->getCurrentContests(),
             $restrictions
         );
 
@@ -444,7 +444,7 @@ class RejudgingController extends BaseController
         $formBuilder = $formFactory->createBuilder(RejudgingType::class);
         $formData    = [];
         if (!$request->isXmlHttpRequest()) {
-            $currentContest = $this->DOMJudgeService->getCurrentContest();
+            $currentContest = $this->dj->getCurrentContest();
             $formData['contests'] = is_null($currentContest) ? [] : [$currentContest];
         }
         $verdicts             = $formBuilder->get('verdicts')->getOption('choices');
@@ -565,12 +565,12 @@ class RejudgingController extends BaseController
             throw new BadRequestHttpException('No table or id passed for selection in rejudging');
         }
 
-        if ($includeAll && !$this->DOMJudgeService->checkrole('admin')) {
+        if ($includeAll && !$this->dj->checkrole('admin')) {
             throw new BadRequestHttpException('Rejudging pending/correct submissions requires admin rights');
         }
 
         // Special case 'submission' for admin overrides
-        if ($this->DOMJudgeService->checkrole('admin') && ($table == 'submission')) {
+        if ($this->dj->checkrole('admin') && ($table == 'submission')) {
             $includeAll = true;
         } elseif ($table === 'rejudging') {
             $rejudging = $this->entityManager->getRepository(Rejudging::class)->find($id);
@@ -600,7 +600,7 @@ class RejudgingController extends BaseController
         $em = $this->entityManager;
 
         // Only rejudge submissions in active contests.
-        $contests = $this->DOMJudgeService->getCurrentContests();
+        $contests = $this->dj->getCurrentContests();
 
         $queryBuilder = $em->createQueryBuilder()
             ->from('DOMJudgeBundle:Judging', 'j')
@@ -672,7 +672,7 @@ class RejudgingController extends BaseController
         if ($fullRejudge) {
             $rejudging = new Rejudging();
             $rejudging
-                ->setStartUser($this->DOMJudgeService->getUser())
+                ->setStartUser($this->dj->getUser())
                 ->setStarttime(Utils::now())
                 ->setReason($reason);
             $em->persist($rejudging);
@@ -751,7 +751,7 @@ class RejudgingController extends BaseController
             });
 
             if (!$fullRejudge) {
-                $this->DOMJudgeService->auditlog('judging', $judging['judgingid'], 'mark invalid', '(rejudge)');
+                $this->dj->auditlog('judging', $judging['judgingid'], 'mark invalid', '(rejudge)');
             }
         }
         return $rejudging;

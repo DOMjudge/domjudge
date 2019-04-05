@@ -29,7 +29,7 @@ class BalloonController extends Controller
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -39,16 +39,16 @@ class BalloonController extends Controller
     /**
      * BalloonController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService
     ) {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
 
@@ -57,12 +57,12 @@ class BalloonController extends Controller
      */
     public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
     {
-        $timeFormat = (string)$this->DOMJudgeService->dbconfig_get('time_format', '%H:%M');
-        $showPostFreeze = (bool)$this->DOMJudgeService->dbconfig_get('show_balloons_postfreeze', false);
+        $timeFormat = (string)$this->dj->dbconfig_get('time_format', '%H:%M');
+        $showPostFreeze = (bool)$this->dj->dbconfig_get('show_balloons_postfreeze', false);
 
         $em = $this->entityManager;
         $query = $em->createQueryBuilder()
-            ->select('b', 's.submittime', 'p.probid', 
+            ->select('b', 's.submittime', 'p.probid',
                 't.teamid', 't.name AS teamname', 't.room', 'c.name AS catname',
                 's.cid', 'co.shortname', 'cp.shortname AS probshortname', 'cp.color')
             ->from('DOMJudgeBundle:Balloon', 'b')
@@ -74,7 +74,7 @@ class BalloonController extends Controller
             ->leftJoin('t.category', 'c')
             ->orderBy('b.balloonid', 'DESC');
 
-        $contests = $this->DOMJudgeService->getCurrentContests();
+        $contests = $this->dj->getCurrentContests();
         $frozen_contests = [];
         $freezetimes = [];
         foreach($contests as $cid => $contest) {
@@ -180,7 +180,7 @@ class BalloonController extends Controller
                 'actions' => $balloonactions,
                 'cssclass' => $balloon->getDone() ? 'disabled' : null,
             ];
-        } 
+        }
 
         return $this->render('@DOMJudge/jury/balloons.html.twig', [
             'refresh' => ['after' => 60, 'url' => $this->generateUrl('jury_balloons')],

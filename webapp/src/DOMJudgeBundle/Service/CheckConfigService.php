@@ -34,7 +34,7 @@ class CheckConfigService
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -65,7 +65,7 @@ class CheckConfigService
         bool $debug,
         string $project_dir,
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         RouterInterface $router,
         ValidatorInterface $validator
@@ -73,7 +73,7 @@ class CheckConfigService
         $this->debug           = $debug;
         $this->project_dir     = $project_dir;
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
         $this->router          = $router;
         $this->validator       = $validator;
@@ -175,7 +175,7 @@ class CheckConfigService
 
     public function checkPhpSettings()
     {
-        $sourcefiles_limit = $this->DOMJudgeService->dbconfig_get('sourcefiles_limit', 100);
+        $sourcefiles_limit = $this->dj->dbconfig_get('sourcefiles_limit', 100);
         $max_files = ini_get('max_file_uploads');
 
         $result = 'O';
@@ -203,7 +203,7 @@ class CheckConfigService
         $desc .= "\n\n" . sprintf('PHP POST/upload filesize is limited to %s.', Utils::printsize(min($sizes)));
         $desc .= "\n\nThis limit needs to be larger than the testcases you want to upload and than the amount of program output you expect the judgedaemons to post back to DOMjudge. We recommend at least 50 MB.\n\nNote that you need to ensure that all of the following php.ini parameters are at minimum the desired size:\n";
         foreach ($postmaxvars as $var) {
-            $desc .= sprintf("%s (now set to %s)\n", $var, 
+            $desc .= sprintf("%s (now set to %s)\n", $var,
                     (isset($sizes[$var]) ? Utils::printsize($sizes[$var]) : "unlimited"));
         }
 
@@ -214,7 +214,7 @@ class CheckConfigService
 
     public function checkMysqlVersion()
     {
-        $r = $this->entityManager->getConnection()->fetchAll('SHOW VARIABLES WHERE variable_name = "version"'); 
+        $r = $this->entityManager->getConnection()->fetchAll('SHOW VARIABLES WHERE variable_name = "version"');
         $my = $r[0]['Value'];
         $req = '5.5.3';
         $result = version_compare($my, $req, '>=');
@@ -226,7 +226,7 @@ class CheckConfigService
     public function checkMysqlSettings()
     {
         $r = $this->entityManager->getConnection()->fetchAll('SHOW variables WHERE Variable_name IN
-                        ("innodb_log_file_size", "max_connections", "max_allowed_packet", "tx_isolation")'); 
+                        ("innodb_log_file_size", "max_connections", "max_allowed_packet", "tx_isolation")');
         $vars = [];
         foreach ($r as $row) {
             $vars[$row['Variable_name']] = $row['Value'];
@@ -290,7 +290,7 @@ class CheckConfigService
 
         $scripts = ['compare', 'run'];
         foreach ($scripts as $type) {
-            $scriptid = $this->DOMJudgeService->dbconfig_get('default_' . $type);
+            $scriptid = $this->dj->dbconfig_get('default_' . $type);
             if (!$this->entityManager->getRepository(Executable::class)->find($scriptid)) {
                 $res = 'E';
                 $desc .= sprintf("The default %s script '%s' does not exist.\n", $type, $scriptid);
@@ -306,8 +306,8 @@ class CheckConfigService
 
     public function checkScriptFilesizevsMemoryLimit()
     {
-        if ($this->DOMJudgeService->dbconfig_get('script_filesize_limit') < 
-            $this->DOMJudgeService->dbconfig_get('memory_limit')) {
+        if ($this->dj->dbconfig_get('script_filesize_limit') <
+            $this->dj->dbconfig_get('memory_limit')) {
              $result = 'W';
         } else {
              $result = 'O';
@@ -332,7 +332,7 @@ class CheckConfigService
 
     public function checkTmpdirWritable()
     {
-        $tmpdir = $this->DOMJudgeService->getDomjudgeTmpDir();
+        $tmpdir = $this->dj->getDomjudgeTmpDir();
         if (is_writable($tmpdir)) {
             return ['caption' => 'TMPDIR writable',
                     'result' => 'O',
@@ -349,7 +349,7 @@ class CheckConfigService
 
     public function checkSubmitdirWritable()
     {
-        $submitdir = $this->DOMJudgeService->getDomjudgeSubmitdir();
+        $submitdir = $this->dj->getDomjudgeSubmitdir();
         if (is_writable($submitdir)) {
             return ['caption' => 'Submitdir writable',
                     'result' => 'O',
@@ -366,7 +366,7 @@ class CheckConfigService
 
     public function checkContestActive()
     {
-        $contests = $this->DOMJudgeService->getCurrentContests();
+        $contests = $this->dj->getCurrentContests();
         if (empty($contests)) {
             return ['caption' => 'Active contests',
                     'result' => 'E',
@@ -374,7 +374,7 @@ class CheckConfigService
         }
         return ['caption' => 'Active contests',
                 'result' => 'O',
-                'desc' => 'Currently active contests: ' .  
+                'desc' => 'Currently active contests: ' .
                     implode(', ', array_map(function ($contest) {
                         return 'c'.$contest->getCid() . ' (' . $contest->getShortname() . ')';
                     }, $contests))];
@@ -384,7 +384,7 @@ class CheckConfigService
     public function checkContestsValidate()
     {
         // Fetch all active and future contests
-        $contests = $this->DOMJudgeService->getCurrentContests(null, true);
+        $contests = $this->dj->getCurrentContests(null, true);
 
         $contesterrors = $cperrors = [];
         $result = 'O';
@@ -421,8 +421,8 @@ class CheckConfigService
     public function checkProblemsValidate()
     {
         $problems = $this->entityManager->getRepository(Problem::class)->findAll();
-        $script_filesize_limit = $this->DOMJudgeService->dbconfig_get('script_filesize_limit');
-        $output_limit = $this->DOMJudgeService->dbconfig_get('output_limit');
+        $script_filesize_limit = $this->dj->dbconfig_get('script_filesize_limit');
+        $output_limit = $this->dj->dbconfig_get('output_limit');
 
         $problemerrors = $scripterrors = [];
         $result = 'O';
@@ -440,7 +440,7 @@ class CheckConfigService
                 if (!$exec) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special compare script %s not found for p%s\n", $special_compare, $probid);
-                } elseif ($exec->getType() !== "compare") { 
+                } elseif ($exec->getType() !== "compare") {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special compare script %s exists but is of wrong type (%s instead of compare) for p%s\n", $special_compare, $exec->getType(), $probid);
                 }
@@ -450,7 +450,7 @@ class CheckConfigService
                 if (!$exec) {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special run script %s not found for p%s\n", $special_run, $probid);
-                } elseif ($exec->getType() !== "run") { 
+                } elseif ($exec->getType() !== "run") {
                     $result = 'E';
                     $moreproblemerrors[$probid] .= sprintf("Special run script %s exists but is of wrong type (%s instead of run) for p%s\n", $special_run, $exec->getType(), $probid);
                 }
@@ -505,7 +505,7 @@ class CheckConfigService
     public function checkLanguagesValidate()
     {
         $languages = $this->entityManager->getRepository(Language::class)->findAll();
-        $script_filesize_limit = $this->DOMJudgeService->dbconfig_get('script_filesize_limit');
+        $script_filesize_limit = $this->dj->dbconfig_get('script_filesize_limit');
 
         $languageerrors = $scripterrors = [];
         $result = 'O';
@@ -523,7 +523,7 @@ class CheckConfigService
                if (!$exec) {
                    $result = 'E';
                    $morelanguageerrors[$langid] .= sprintf("Compile script %s not found for %s\n", $compile, $langid);
-               } elseif ($exec->getType() !== "compile") { 
+               } elseif ($exec->getType() !== "compile") {
                    $result = 'E';
                    $morelanguageerrors[$langid] .= sprintf("Compile script %s exists but is of wrong type (%s instead of compile) for %s\n", $compile, $exec->getType(), $langid);
                }
@@ -560,7 +560,7 @@ class CheckConfigService
         }
 
         $languages = $this->entityManager->getRepository(Language::class)->findAll();
-        $contests = $this->DOMJudgeService->getCurrentContests(null, true);
+        $contests = $this->dj->getCurrentContests(null, true);
 
         $desc = '';
         $result = 'O';
@@ -600,8 +600,8 @@ class CheckConfigService
 
     public function checkAffiliations()
     {
-        $show_logos = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos');
-        $show_flags = $this->DOMJudgeService->dbconfig_get('show_flags');
+        $show_logos = $this->dj->dbconfig_get('show_affiliation_logos');
+        $show_flags = $this->dj->dbconfig_get('show_flags');
 
         if (!$show_logos && !$show_flags) {
             return ['caption' => 'Team affiliations',

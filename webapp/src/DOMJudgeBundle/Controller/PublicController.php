@@ -29,7 +29,7 @@ class PublicController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var ScoreboardService
@@ -42,11 +42,11 @@ class PublicController extends BaseController
     protected $entityManager;
 
     public function __construct(
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         ScoreboardService $scoreboardService,
         EntityManagerInterface $entityManager
     ) {
-        $this->DOMJudgeService   = $DOMJudgeService;
+        $this->dj                = $dj;
         $this->scoreboardService = $scoreboardService;
         $this->entityManager     = $entityManager;
     }
@@ -63,7 +63,7 @@ class PublicController extends BaseController
         $static     = $request->query->getBoolean('static');
         $refreshUrl = $this->generateUrl('public_index');
         // Determine contest to use
-        $contest = $this->DOMJudgeService->getCurrentContest(-1);
+        $contest = $this->dj->getCurrentContest(-1);
 
         if ($static) {
             $refreshParams = [
@@ -75,7 +75,7 @@ class PublicController extends BaseController
                     // Automatically detect the contest that is activated the latest
                     $contest      = null;
                     $activateTime = null;
-                    foreach ($this->DOMJudgeService->getCurrentContests(-1) as $possibleContest) {
+                    foreach ($this->dj->getCurrentContests(-1) as $possibleContest) {
                         if (!$possibleContest->getPublic() || !$possibleContest->getEnabled()) {
                             continue;
                         }
@@ -87,7 +87,7 @@ class PublicController extends BaseController
                 } else {
                     // Find the contest with the given ID
                     $contest = null;
-                    foreach ($this->DOMJudgeService->getCurrentContests(-1) as $possibleContest) {
+                    foreach ($this->dj->getCurrentContests(-1) as $possibleContest) {
                         if ($possibleContest->getCid() == $contestId || $possibleContest->getExternalid() == $contestId) {
                             $contest = $possibleContest;
                             break;
@@ -132,7 +132,7 @@ class PublicController extends BaseController
         } else {
             $response = $this->redirectToRoute('public_index');
         }
-        return $this->DOMJudgeService->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
+        return $this->dj->setCookie('domjudge_cid', (string)$contestId, 0, null, '', false, false,
                                                  $response);
     }
 
@@ -146,8 +146,8 @@ class PublicController extends BaseController
     public function teamAction(Request $request, int $teamId)
     {
         $team             = $this->entityManager->getRepository(Team::class)->find($teamId);
-        $showFlags        = (bool)$this->DOMJudgeService->dbconfig_get('show_flags', true);
-        $showAffiliations = (bool)$this->DOMJudgeService->dbconfig_get('show_affiliations', true);
+        $showFlags        = (bool)$this->dj->dbconfig_get('show_flags', true);
+        $showAffiliations = (bool)$this->dj->dbconfig_get('show_affiliations', true);
         $data             = [
             'team' => $team,
             'showFlags' => $showFlags,
@@ -169,9 +169,9 @@ class PublicController extends BaseController
      */
     public function problemsAction()
     {
-        $contest            = $this->DOMJudgeService->getCurrentContest(-1);
-        $showLimits         = (bool)$this->DOMJudgeService->dbconfig_get('show_limits_on_team_page');
-        $defaultMemoryLimit = (int)$this->DOMJudgeService->dbconfig_get('memory_limit', 0);
+        $contest            = $this->dj->getCurrentContest(-1);
+        $showLimits         = (bool)$this->dj->dbconfig_get('show_limits_on_team_page');
+        $defaultMemoryLimit = (int)$this->dj->dbconfig_get('memory_limit', 0);
         $timeFactorDiffers  = false;
         if ($showLimits) {
             $timeFactorDiffers = $this->entityManager->createQueryBuilder()
@@ -215,7 +215,7 @@ class PublicController extends BaseController
      */
     public function problemTextAction(int $probId)
     {
-        $contest = $this->DOMJudgeService->getCurrentContest(-1);
+        $contest = $this->dj->getCurrentContest(-1);
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -273,7 +273,7 @@ class PublicController extends BaseController
      */
     public function sampleTestcaseAction(int $probId, int $index, string $type)
     {
-        $contest = $this->DOMJudgeService->getCurrentContest(-1);
+        $contest = $this->dj->getCurrentContest(-1);
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -343,7 +343,7 @@ class PublicController extends BaseController
      */
     public function sampleZipAction(int $probId)
     {
-        $contest = $this->DOMJudgeService->getCurrentContest(-1);
+        $contest = $this->dj->getCurrentContest(-1);
         if (!$contest || !$contest->getFreezeData()->started()) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -356,7 +356,7 @@ class PublicController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
 
-        $zipFilename    = $this->DOMJudgeService->getSamplesZip($contestProblem);
+        $zipFilename    = $this->dj->getSamplesZip($contestProblem);
         $outputFilename = sprintf('samples-%s.zip', $contestProblem->getShortname());
 
         $response = new StreamedResponse();

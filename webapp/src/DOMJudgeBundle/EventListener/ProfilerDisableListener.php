@@ -21,7 +21,7 @@ class ProfilerDisableListener
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var Profiler
@@ -31,22 +31,22 @@ class ProfilerDisableListener
     /**
      * ProfilerDisableListener constructor.
      * @param KernelInterface $kernel
-     * @param DOMJudgeService $DOMJudgeService
+     * @param DOMJudgeService $dj
      * @param Profiler        $profiler
      */
-    public function __construct(KernelInterface $kernel, DOMJudgeService $DOMJudgeService, Profiler $profiler)
+    public function __construct(KernelInterface $kernel, DOMJudgeService $dj, Profiler $profiler)
     {
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->profiler        = $profiler;
-        $this->kernel          = $kernel;
+        $this->dj       = $dj;
+        $this->profiler = $profiler;
+        $this->kernel   = $kernel;
     }
 
     public function onKernelRequest()
     {
-        // Disable the profiler for users with the judgehost permission but not the admin one, unless DEBUG contains DEBUG_JUDGE
-        if ($this->DOMJudgeService->checkrole('judgehost') && !$this->DOMJudgeService->checkrole('admin')) {
-            require_once $this->DOMJudgeService->getDomjudgeEtcDir() . '/common-config.php';
-
+        // Disable the profiler for users with the judgehost permission but not the admin one,
+        // unless DEBUG contains DEBUG_JUDGE.
+        if ($this->dj->checkrole('judgehost') && !$this->dj->checkrole('admin')) {
+            require_once $this->dj->getDomjudgeEtcDir() . '/common-config.php';
             if (!(DEBUG & DEBUG_JUDGE)) {
                 $this->profiler->disable();
             }

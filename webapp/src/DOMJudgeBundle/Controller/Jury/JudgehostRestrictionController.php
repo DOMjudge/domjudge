@@ -30,12 +30,12 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
     {
-        $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->entityManager = $entityManager;
+        $this->dj            = $dj;
     }
 
     /**
@@ -183,7 +183,7 @@ class JudgehostRestrictionController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('judgehost_restriction', $judgehostRestriction->getRestrictionid(),
+            $this->dj->auditlog('judgehost_restriction', $judgehostRestriction->getRestrictionid(),
                                              'updated');
             return $this->redirect($this->generateUrl('jury_judgehost_restriction',
                                                       ['restrictionId' => $judgehostRestriction->getRestrictionid()]));
@@ -210,7 +210,7 @@ class JudgehostRestrictionController extends BaseController
         /** @var JudgehostRestriction $judgehostRestriction */
         $judgehostRestriction = $this->entityManager->getRepository(JudgehostRestriction::class)->find($restrictionId);
 
-        return $this->deleteEntity($request, $this->entityManager, $this->DOMJudgeService, $judgehostRestriction, $judgehostRestriction->getName(), $this->generateUrl('jury_judgehost_restrictions'));
+        return $this->deleteEntity($request, $this->entityManager, $this->dj, $judgehostRestriction, $judgehostRestriction->getName(), $this->generateUrl('jury_judgehost_restrictions'));
     }
 
     /**
@@ -230,7 +230,7 @@ class JudgehostRestrictionController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($judgehostRestriction);
             $this->entityManager->flush();
-            $this->DOMJudgeService->auditlog('judgehost_restriction', $judgehostRestriction->getRestrictionid(),
+            $this->dj->auditlog('judgehost_restriction', $judgehostRestriction->getRestrictionid(),
                                              'added');
             return $this->redirect($this->generateUrl('jury_judgehost_restriction',
                                                       ['restrictionId' => $judgehostRestriction->getRestrictionid()]));

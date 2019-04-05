@@ -29,7 +29,7 @@ abstract class AbstractRestController extends FOSRestController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var EventLogService
@@ -39,12 +39,12 @@ abstract class AbstractRestController extends FOSRestController
     /**
      * AbstractRestController constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService $DOMJudgeService
+     * @param DOMJudgeService $dj
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService)
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj, EventLogService $eventLogService)
     {
         $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
     }
 
@@ -129,7 +129,7 @@ abstract class AbstractRestController extends FOSRestController
         $view = $this->view($data);
 
         // Set the DOMjudge service on the context, so we can use it for permissions
-        $view->getContext()->setAttribute('domjudge_service', $this->DOMJudgeService);
+        $view->getContext()->setAttribute('domjudge_service', $this->dj);
 
         $groups = ['Default'];
         if (!$request->query->has('strict')) {
@@ -162,11 +162,11 @@ abstract class AbstractRestController extends FOSRestController
             ->orderBy('c.activatetime');
 
         // Filter on contests this user has access to
-        if (!$this->DOMJudgeService->checkrole('api_reader') && !$this->DOMJudgeService->checkrole('judgehost')) {
-            if ($this->DOMJudgeService->checkrole('team') && $this->DOMJudgeService->getUser()->getTeamid()) {
+        if (!$this->dj->checkrole('api_reader') && !$this->dj->checkrole('judgehost')) {
+            if ($this->dj->checkrole('team') && $this->dj->getUser()->getTeamid()) {
                 $qb->leftJoin('c.teams', 'ct')
                     ->andWhere('ct.teamid = :teamid OR c.public = 1')
-                    ->setParameter(':teamid', $this->DOMJudgeService->getUser()->getTeamid());
+                    ->setParameter(':teamid', $this->dj->getUser()->getTeamid());
             } else {
                 $qb->andWhere('c.public = 1');
             }

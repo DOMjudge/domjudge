@@ -37,7 +37,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     ) {
         parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
 
-        $verdictsConfig = $this->DOMJudgeService->getDomjudgeEtcDir() . '/verdicts.php';
+        $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $this->verdicts = include $verdictsConfig;
     }
 
@@ -123,8 +123,8 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             ->groupBy('j.judgingid')
             ->orderBy('j.judgingid');
 
-        $roleAllowsVisibility = $this->DOMJudgeService->checkrole('api_reader')
-            || $this->DOMJudgeService->checkrole('judgehost');
+        $roleAllowsVisibility = $this->dj->checkrole('api_reader')
+            || $this->dj->checkrole('judgehost');
         if ($request->query->has('result')) {
             $queryBuilder
                 ->andWhere('j.result = :result')
@@ -136,7 +136,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
         if (!$roleAllowsVisibility) {
             $queryBuilder
                 ->andWhere('s.teamid = :team')
-                ->setParameter(':team', $this->DOMJudgeService->getUser()->getTeamid());
+                ->setParameter(':team', $this->dj->getUser()->getTeamid());
         }
 
         if ($request->query->has('submission_id')) {
@@ -153,7 +153,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             $queryBuilder
                 ->andWhere('s.submittime < c.endtime')
                 ->andWhere('j.valid = 1');
-            if ($this->DOMJudgeService->dbconfig_get('verification_required', false)) {
+            if ($this->dj->dbconfig_get('verification_required', false)) {
                 $queryBuilder->andWhere('j.verified = 1');
             }
         }

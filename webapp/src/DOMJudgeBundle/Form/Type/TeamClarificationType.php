@@ -14,11 +14,11 @@ class TeamClarificationType extends AbstractType
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
-    public function __construct(DOMJudgeService $DOMJudgeService)
+    public function __construct(DOMJudgeService $dj)
     {
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj = $dj;
     }
 
     /**
@@ -36,9 +36,9 @@ class TeamClarificationType extends AbstractType
 
         $subjects = [];
         /** @var string[] $categories */
-        $categories = $this->DOMJudgeService->dbconfig_get('clar_categories');
-        $user       = $this->DOMJudgeService->getUser();
-        $contest    = $this->DOMJudgeService->getCurrentContest($user->getTeamid());
+        $categories = $this->dj->dbconfig_get('clar_categories');
+        $user       = $this->dj->getUser();
+        $contest    = $this->dj->getCurrentContest($user->getTeamid());
         foreach ($categories as $categoryId => $categoryName) {
             $subjects[$categoryName] = sprintf('%d-%s', $contest->getCid(), $categoryId);
         }

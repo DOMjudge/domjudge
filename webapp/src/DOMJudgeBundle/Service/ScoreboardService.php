@@ -41,7 +41,7 @@ class ScoreboardService
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * @var LoggerInterface
@@ -51,16 +51,16 @@ class ScoreboardService
     /**
      * ScoreboardService constructor.
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         LoggerInterface $logger
     ) {
-        $this->entityManager   = $entityManager;
-        $this->DOMJudgeService = $DOMJudgeService;
-        $this->logger          = $logger;
+        $this->entityManager = $entityManager;
+        $this->dj            = $dj;
+        $this->logger        = $logger;
     }
 
     /**
@@ -93,8 +93,8 @@ class ScoreboardService
         $scoreCache = $this->getScorecache($contest);
 
         return new Scoreboard($contest, $teams, $categories, $problems, $scoreCache, $freezeData, $jury,
-                              (int)$this->DOMJudgeService->dbconfig_get('penalty_time', 20),
-                              (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false));
+                              (int)$this->dj->dbconfig_get('penalty_time', 20),
+                              (bool)$this->dj->dbconfig_get('score_in_seconds', false));
     }
 
     /**
@@ -132,8 +132,8 @@ class ScoreboardService
 
         return new SingleTeamScoreboard($contest, $team, $teamRank, $problems, $rankCache, $scoreCache, $freezeData,
                                         $jury,
-                                        (int)$this->DOMJudgeService->dbconfig_get('penalty_time', 20),
-                                        (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false));
+                                        (int)$this->dj->dbconfig_get('penalty_time', 20),
+                                        (bool)$this->dj->dbconfig_get('score_in_seconds', false));
     }
 
     /**
@@ -239,7 +239,7 @@ class ScoreboardService
                 foreach ($tiedScores as $tiedScore) {
                     $teamScores[$tiedScore->getTeam()->getTeamid()]->addSolveTime(Utils::scoretime(
                         $tiedScore->getSolveTime($restricted),
-                        (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false)
+                        (bool)$this->dj->dbconfig_get('score_in_seconds', false)
                     ));
                 }
 
@@ -306,7 +306,7 @@ class ScoreboardService
             ->setParameter(':cid', $contest->getCid())
             ->orderBy('s.submittime');
 
-        if (!$this->DOMJudgeService->dbconfig_get('compile_penalty', true)) {
+        if (!$this->dj->dbconfig_get('compile_penalty', true)) {
             $queryBuilder
                 ->andWhere('j.result IS NULL or j.result != :compileError')
                 ->setParameter(':compileError', Judging::RESULT_COMPILER_ERROR);
@@ -315,7 +315,7 @@ class ScoreboardService
         /** @var Submission[] $submissions */
         $submissions = $queryBuilder->getQuery()->getResult();
 
-        $verificationRequired = $this->DOMJudgeService->dbconfig_get('verification_required', false);
+        $verificationRequired = $this->dj->dbconfig_get('verification_required', false);
 
         // Initialize variables
         $submissionsJury = $pendingJury = $timeJury = 0;
@@ -469,8 +469,8 @@ class ScoreboardService
             $totalTime[$variant] = $team->getPenalty();
         }
 
-        $penaltyTime      = (int)$this->DOMJudgeService->dbconfig_get('penalty_time', 20);
-        $scoreIsInSeconds = (bool)$this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+        $penaltyTime      = (int)$this->dj->dbconfig_get('penalty_time', 20);
+        $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
 
         // Now fetch the ScoreCache entries
         /** @var ScoreCache[] $scoreCacheRows */
@@ -529,8 +529,8 @@ class ScoreboardService
     public function initializeScoreboardFilter(Request $request, Response $response)
     {
         $scoreFilter = [];
-        if ($this->DOMJudgeService->getCookie('domjudge_scorefilter')) {
-            $scoreFilter = $this->DOMJudgeService->jsonDecode((string)$this->DOMJudgeService->getCookie('domjudge_scorefilter'));
+        if ($this->dj->getCookie('domjudge_scorefilter')) {
+            $scoreFilter = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_scorefilter'));
         }
 
         if ($request->query->has('clear')) {
@@ -546,8 +546,8 @@ class ScoreboardService
             }
         }
 
-        $this->DOMJudgeService->setCookie('domjudge_scorefilter',
-                                          $this->DOMJudgeService->jsonEncode($scoreFilter), 0, null, '', false,
+        $this->dj->setCookie('domjudge_scorefilter',
+                                          $this->dj->jsonEncode($scoreFilter), 0, null, '', false,
                                           false, $response);
 
         return new Filter($scoreFilter['affiliations'] ?? [], $scoreFilter['countries'] ?? [],
@@ -612,8 +612,8 @@ class ScoreboardService
             'countries' => [],
             'categories' => [],
         ];
-        $showFlags        = $this->DOMJudgeService->dbconfig_get('show_flags', true);
-        $showAffiliations = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
+        $showFlags        = $this->dj->dbconfig_get('show_flags', true);
+        $showAffiliations = $this->dj->dbconfig_get('show_affiliations', true);
 
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'c')
@@ -700,12 +700,12 @@ class ScoreboardService
             $data['scoreboard']           = $scoreboard;
             $data['filterValues']         = $this->getFilterValues($contest, $jury);
             $data['groupedAffiliations']  = empty($scoreboard) ? $this->getGroupedAffiliations($contest) : null;
-            $data['showFlags']            = $this->DOMJudgeService->dbconfig_get('show_flags', true);
-            $data['showAffiliationLogos'] = $this->DOMJudgeService->dbconfig_get('show_affiliation_logos', false);
-            $data['showAffiliations']     = $this->DOMJudgeService->dbconfig_get('show_affiliations', true);
-            $data['showPending']          = $this->DOMJudgeService->dbconfig_get('show_pending', false);
-            $data['showTeamSubmissions']  = $this->DOMJudgeService->dbconfig_get('show_teams_submissions', true);
-            $data['scoreInSeconds']       = $this->DOMJudgeService->dbconfig_get('score_in_seconds', false);
+            $data['showFlags']            = $this->dj->dbconfig_get('show_flags', true);
+            $data['showAffiliationLogos'] = $this->dj->dbconfig_get('show_affiliation_logos', false);
+            $data['showAffiliations']     = $this->dj->dbconfig_get('show_affiliations', true);
+            $data['showPending']          = $this->dj->dbconfig_get('show_pending', false);
+            $data['showTeamSubmissions']  = $this->dj->dbconfig_get('show_teams_submissions', true);
+            $data['scoreInSeconds']       = $this->dj->dbconfig_get('score_in_seconds', false);
         }
 
         if ($request->isXmlHttpRequest()) {

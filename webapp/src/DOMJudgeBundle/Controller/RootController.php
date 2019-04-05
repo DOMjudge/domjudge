@@ -20,15 +20,15 @@ class RootController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    protected $DOMJudgeService;
+    protected $dj;
 
     /**
      * RootController constructor.
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      */
-    public function __construct(DOMJudgeService $DOMJudgeService)
+    public function __construct(DOMJudgeService $dj)
     {
-        $this->DOMJudgeService = $DOMJudgeService;
+        $this->dj = $dj;
     }
 
     /**
@@ -39,13 +39,13 @@ class RootController extends BaseController
     public function redirectAction(Request $request)
     {
         if ( $this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY') ) {
-            if ( $this->DOMJudgeService->checkrole('jury') ) {
+            if ( $this->dj->checkrole('jury') ) {
                 return $this->redirectToRoute('jury_index');
             }
-            if ( $this->DOMJudgeService->checkrole('team', false) ) {
+            if ( $this->dj->checkrole('team', false) ) {
                 return $this->redirectToRoute('team_index');
             }
-            if ( $this->DOMJudgeService->checkrole('balloon') ) {
+            if ( $this->dj->checkrole('balloon') ) {
                 return $this->redirectToRoute('jury_balloons');
             }
         }

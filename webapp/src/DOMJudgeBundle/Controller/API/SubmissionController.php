@@ -41,11 +41,11 @@ class SubmissionController extends AbstractRestController
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        DOMJudgeService $DOMJudgeService,
+        DOMJudgeService $dj,
         EventLogService $eventLogService,
         SubmissionService $submissionService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
+        parent::__construct($entityManager, $dj, $eventLogService);
         $this->submissionService = $submissionService;
     }
 
@@ -163,7 +163,7 @@ class SubmissionController extends AbstractRestController
             }
         }
 
-        if (!$this->DOMJudgeService->getUser()->getTeam()) {
+        if (!$this->dj->getUser()->getTeam()) {
             throw new BadRequestHttpException(sprintf('User does not belong to a team'));
         }
 
@@ -219,7 +219,7 @@ class SubmissionController extends AbstractRestController
         $files = $request->files->get('code') ?: [];
 
         // Now submit the solution
-        $team       = $this->DOMJudgeService->getUser()->getTeam();
+        $team       = $this->dj->getUser()->getTeam();
         $submission = $this->submissionService->submitSolution($team, $problem, $problem->getContest(), $language,
                                                                $files, null, $entryPoint, null, null, null, $message);
 
@@ -269,7 +269,7 @@ class SubmissionController extends AbstractRestController
         /** @var SubmissionFileWithSourceCode[] $files */
         $files = $submission->getFilesWithSourceCode();
         $zip   = new \ZipArchive;
-        if (!($tmpfname = tempnam($this->DOMJudgeService->getDomjudgeTmpDir(), "submission_file-"))) {
+        if (!($tmpfname = tempnam($this->dj->getDomjudgeTmpDir(), "submission_file-"))) {
             return new Response("Could not create temporary file.", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
