@@ -1495,4 +1495,26 @@ class Contest extends BaseApiEnttiy
             }
         }
     }
+
+    /**
+     * Get a countdown string for this contest to display in the UI
+     * @return string
+     */
+    public function getCountdown(): string
+    {
+        $now = Utils::now();
+        if ($this->getActivatetime() < $now) {
+            if (!$this->getStarttimeEnabled()) {
+                return 'start delayed';
+            }
+
+            if ($this->getStarttime() < $now && $this->getEndtime() >= $now) {
+                return Utils::timediff($now, $this->getEndtime());
+            } elseif ($this->getStarttime() >= $now) {
+                return 'time to start: ' . Utils::timediff($now, $this->getStarttime());
+            }
+        }
+
+        return '';
+    }
 }

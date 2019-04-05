@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use DOMJudgeBundle\Utils\Utils;
 use JMS\Serializer\Annotation as Serializer;
@@ -199,6 +200,21 @@ class Submission extends BaseApiEnttiy implements ExternalRelationshipEntityInte
      * @Serializer\Exclude()
      */
     private $rejudging;
+
+    /**
+     * @var Submission|null
+     * @ORM\ManyToOne(targetEntity="DOMJudgeBundle\Entity\Submission", inversedBy="resubmissions")
+     * @ORM\JoinColumn(name="origsubmitid", referencedColumnName="submitid", onDelete="CASCADE")
+     * @Serializer\Exclude()
+     */
+    private $originalSubmission;
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="DOMJudgeBundle\Entity\Submission", mappedBy="originalSubmission")
+     * @Serializer\Exclude()
+     */
+    private $resubmissions;
 
     /**
      * @var string Holds the old result in the case this submission is displayed in a rejudging table
@@ -608,6 +624,7 @@ class Submission extends BaseApiEnttiy implements ExternalRelationshipEntityInte
         $this->judgings               = new ArrayCollection();
         $this->files                  = new ArrayCollection();
         $this->files_with_source_code = new ArrayCollection();
+        $this->resubmissions          = new ArrayCollection();
     }
 
     /**
@@ -637,7 +654,7 @@ class Submission extends BaseApiEnttiy implements ExternalRelationshipEntityInte
     /**
      * Get judgings
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getJudgings()
     {
@@ -695,7 +712,7 @@ class Submission extends BaseApiEnttiy implements ExternalRelationshipEntityInte
     /**
      * Get files
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getFiles()
     {
@@ -729,7 +746,7 @@ class Submission extends BaseApiEnttiy implements ExternalRelationshipEntityInte
     /**
      * Get files with source code
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getFilesWithSourceCode()
     {
@@ -763,7 +780,7 @@ class Submission extends BaseApiEnttiy implements ExternalRelationshipEntityInte
     /**
      * Get balloons
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getBalloons()
     {
@@ -907,6 +924,62 @@ class Submission extends BaseApiEnttiy implements ExternalRelationshipEntityInte
     {
         $this->old_result = $old_result;
         return $this;
+    }
+
+    /**
+     * Get original submission
+     * @return Submission|null
+     */
+    public function getOriginalSubmission()
+    {
+        return $this->originalSubmission;
+    }
+
+    /**
+     * Set original submission
+     * @param Submission|null $originalSubmission
+     * @return Submission
+     */
+    public function setOriginalSubmission($originalSubmission): Submission
+    {
+        $this->originalSubmission = $originalSubmission;
+        return $this;
+    }
+
+    /**
+     * Add resubmission
+     *
+     * @param Submission $submission
+     * @return Submission
+     */
+    public function addResubmission(Submission $submission)
+    {
+        $this->resubmissions->add($submission);
+
+        return $this;
+    }
+
+    /**
+     * Remove resubmission
+     *
+     * @param Submission $submission
+     * @return Submission
+     */
+    public function removeResubmission(Submission $submission)
+    {
+        $this->resubmissions->removeElement($submission);
+
+        return $this;
+    }
+
+    /**
+     * Get resubmissions
+     *
+     * @return Collection|Submission[]
+     */
+    public function getResubmissions()
+    {
+        return $this->resubmissions;
     }
 
     /**
