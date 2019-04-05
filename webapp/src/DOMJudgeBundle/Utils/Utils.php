@@ -838,36 +838,4 @@ class Utils
             default: return $size_str;
         }
     }
-
-    /**
-     * Calculate the time difference between two times
-     * @param float      $start
-     * @param float|null $end
-     * @return string
-     */
-    public static function timediff($start, $end = null): string
-    {
-        if (is_null($end)) {
-            $end = Utils::now();
-        }
-        $ret  = '';
-        $diff = floor($end - $start);
-
-        if ($diff >= 24 * 60 * 60) {
-            $d    = floor($diff / (24 * 60 * 60));
-            $ret  .= $d . "d ";
-            $diff -= $d * 24 * 60 * 60;
-        }
-        if ($diff >= 60 * 60 || isset($d)) {
-            $h    = floor($diff / (60 * 60));
-            $ret  .= $h . ":";
-            $diff -= $h * 60 * 60;
-        }
-        $m    = floor($diff / 60);
-        $ret  .= sprintf('%02d:', $m);
-        $diff -= $m * 60;
-        $ret  .= sprintf('%02d', $diff);
-
-        return $ret;
-    }
 }

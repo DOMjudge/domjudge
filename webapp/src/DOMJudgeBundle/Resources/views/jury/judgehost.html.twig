@@ -42,7 +42,7 @@
                         {% if not judgehost.polltime %}
                             Judgehost never checked in.
                         {% else %}
-                            {{ status }}, last checked in {{ judgehost.polltime | timediff }}s ago.
+                            {{ status }}, last checked in {{ judgehost.polltime | printtimediff }}s ago.
                         {% endif %}
                     </td>
                 </tr>

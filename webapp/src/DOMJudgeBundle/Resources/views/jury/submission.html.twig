@@ -284,9 +284,9 @@
                 <a href="{{ judgehostLink }}">{{ selectedJudging.judgehost.hostname | printHost }}</a>,
                 <span class="judgetime">Judging started: {{ selectedJudging.starttime | printtime('%H:%M:%S') }}
                     {%- if selectedJudging.endtime -%}
-                        , finished in {{ selectedJudging.starttime | timediff(selectedJudging.endtime) }}s
+                        , finished in {{ selectedJudging.starttime | printtimediff(selectedJudging.endtime) }}s
                     {%- elseif selectedJudging.valid or selectedJudging.rejudging -%}
-                        &nbsp;[still judging - busy {{ selectedJudging.starttime | timediff }}]
+                        &nbsp;[still judging - busy {{ selectedJudging.starttime | printtimediff }}]
                     {%- else -%}
                         &nbsp;[aborted]
                     {%- endif -%}

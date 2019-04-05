@@ -23,7 +23,7 @@
                         {% if judging.aborted %}
                             [aborted]
                         {% else %}
-                            {{ judging.starttime | timediff(judging.endtime) }}
+                            {{ judging.starttime | printtimediff(judging.endtime) }}
                         {% endif %}
                     </a>
                 </td>

@@ -171,7 +171,7 @@
                                 <td>{{ removedInterval.starttimeString }}</td>
                                 <td><i class="fas fa-arrow-right"></i></td>
                                 <td>{{ removedInterval.endtimeString }}</td>
-                                <td>{{ removedInterval.starttime | timediff(removedInterval.endtime) }}</td>
+                                <td>{{ removedInterval.starttime | printtimediff(removedInterval.endtime) }}</td>
                                 <td>
                                     <button class="btn btn-sm btn-danger remove-interval-button" type="button"
                                             data-submit-url="{{ path('jury_contest_remove_interval', {'contestId': contest.cid, 'intervalId': removedInterval.intervalid}) }}">

@@ -1497,21 +1497,30 @@ class Contest extends BaseApiEnttiy
     }
 
     /**
+     * Return whether a (wall clock) time falls within the contest.
+     * @return bool
+     */
+    public function isTimeInContest(float $time): bool
+    {
+        return Utils::difftime((float)$this->getStarttime(), $time) <= 0 &&
+               Utils::difftime((float)$this->getEndtime(), $time) > 0;
+    }
+
+    /**
      * Get a countdown string for this contest to display in the UI
      * @return string
      */
     public function getCountdown(): string
     {
         $now = Utils::now();
-        if ($this->getActivatetime() < $now) {
+        if (Utils::difftime((float)$this->getActivatetime(),$now) <= 0) {
             if (!$this->getStarttimeEnabled()) {
                 return 'start delayed';
             }
-
-            if ($this->getStarttime() < $now && $this->getEndtime() >= $now) {
-                return Utils::timediff($now, $this->getEndtime());
-            } elseif ($this->getStarttime() >= $now) {
-                return 'time to start: ' . Utils::timediff($now, $this->getStarttime());
+            if ($this->isTimeInContest($now)) {
+                return Utils::printtimediff($now, (float)$this->getEndtime());
+            } elseif (Utils::difftime((float)$this->getStarttime(), $now) >= 0) {
+                return 'time to start: ' . Utils::printtimediff($now, (float)$this->getStarttime());
             }
         }
 

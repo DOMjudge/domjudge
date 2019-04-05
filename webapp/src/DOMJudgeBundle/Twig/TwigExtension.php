@@ -68,7 +68,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
     public function getFilters()
     {
         return [
-            new \Twig_SimpleFilter('timediff', [$this, 'timediff']),
+            new \Twig_SimpleFilter('printtimediff', [$this, 'printtimediff']),
             new \Twig_SimpleFilter('printtime', [$this, 'printtime']),
             new \Twig_SimpleFilter('printtimeHover', [$this, 'printtimeHover'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printResult', [$this, 'printResult'], ['is_safe' => ['html']]),
@@ -132,14 +132,14 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
     }
 
     /**
-     * Calculate the time difference between two times
+     * Print the time difference between two times
      * @param float      $start
      * @param float|null $end
      * @return string
      */
-    public function timediff($start, $end = null): string
+    public function printtimediff($start, $end = null): string
     {
-        return Utils::timediff($start, $end);
+        return Utils::printtimediff($start, $end);
     }
 
     /**
