@@ -14,6 +14,7 @@ use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -154,7 +155,7 @@ class ClarificationController extends BaseController
         }
 
         if (!$team->canViewClarification($clarification)) {
-            throw new UnauthorizedHttpException('Permission denied');
+            throw new HttpException(401, 'Permission denied');
         }
 
         // Get the "parent" message if we have one

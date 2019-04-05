@@ -14,6 +14,8 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -132,7 +134,7 @@ class GeneralInfoController extends FOSRestController
     {
         $user = $this->DOMJudgeService->getUser();
         if ($user === null) {
-            return null;
+            throw new HttpException(401, 'Permission denied');
         }
 
         return $user;
