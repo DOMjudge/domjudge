@@ -35,12 +35,13 @@ class SecurityController extends Controller
         if ($this->container->hasParameter('domjudge.authmethods')) {
             $authmethods = $this->container->getParameter('domjudge.authmethods');
         }
+
         if (in_array('ipaddress', $authmethods)) {
             $allowIPAuth = true;
         }
 
-        $clientIP = $this->DOMJudgeService->getClientIp();
-        if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+        $ipAutologin = $this->DOMJudgeService->dbconfig_get('ip_autologin', false);
+        if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY') && !$ipAutologin) {
             return $this->redirect($this->generateUrl('root'));
         }
 
@@ -54,6 +55,7 @@ class SecurityController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
+        $clientIP = $this->DOMJudgeService->getClientIp();
         $auth_ipaddress_users = [];
         if ($allowIPAuth) {
             $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipAddress' => $clientIP]);
