@@ -1,11 +1,11 @@
 <?php
+
 namespace DOMJudgeBundle\Security;
 
 use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Service\DOMJudgeService;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
-
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
@@ -23,13 +23,16 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     private $security;
     private $container;
     private $em;
+    private $dj;
 
-    public function __construct(CsrfTokenManagerInterface $csrfTokenManager, Container $container, Security $security, EntityManagerInterface $em) {
+    public function __construct(CsrfTokenManagerInterface $csrfTokenManager, Container $container, Security $security, EntityManagerInterface $em, DOMJudgeService $dj) {
         $this->csrfTokenManager = $csrfTokenManager;
         $this->container = $container;
         $this->security = $security;
         $this->em = $em;
+        $this->dj = $dj;
     }
+
     /**
      * Called on every request to decide if this authenticator should be
      * used for the request. Returning false will cause this authenticator
@@ -41,7 +44,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         $authmethods = $this->container->getParameter('domjudge.authmethods');
         $auth_allow_ipaddress = in_array('ipaddress', $authmethods);
         if (!$auth_allow_ipaddress) {
-          return false;
+            return false;
         }
 
         // if there is already an authenticated user (likely due to the session)
@@ -52,23 +55,19 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
 
         // If it's stateless, we provide auth support every time
         $stateless_fw_contexts = [
-          'security.firewall.map.context.api',
-          'security.firewall.map.context.feed',
+            'security.firewall.map.context.api',
+            'security.firewall.map.context.feed',
         ];
         $fwcontext = $request->attributes->get('_firewall_context', '');
-        if (in_array($fwcontext, $stateless_fw_contexts)) {
-          return true;
-        }
-
-        // We also support authenticating if it's a POST to the login route and loginmethod is set correctly
-        if (   $request->attributes->get('_route') === 'login'
-            && $request->isMethod('POST')
-            && $request->request->get('loginmethod') === 'ipaddress') {
+        $ipAutologin = $this->dj->dbconfig_get('ip_autologin', false);
+        if (in_array($fwcontext, $stateless_fw_contexts) || $ipAutologin) {
             return true;
         }
 
-        // Only operate if this is a POST to the login route
-        return false;
+        // We also support authenticating if it's a POST to the login route and loginmethod is set correctly
+        return $request->attributes->get('_route') === 'login'
+            && $request->isMethod('POST')
+            && $request->request->get('loginmethod') === 'ipaddress';
     }
 
     /**
@@ -78,21 +77,19 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     public function getCredentials(Request $request)
     {
         // Check if we're coming from the auth form
-        $form_present = false;
-        if ( $request->attributes->get('_route') === 'login' && $request->isMethod('POST')) {
+        if ($request->attributes->get('_route') === 'login' && $request->isMethod('POST')) {
             // Check CSRF token if it's coming from the login form
             $csrfToken = $request->request->get('_csrf_token');
             if (false === $this->csrfTokenManager->isTokenValid(new CsrfToken('authenticate', $csrfToken))) {
                 throw new InvalidCsrfTokenException('Invalid CSRF token.');
             }
-            $form_present = true;
         }
 
         // Get the client IP address to use
         $clientIP = $this->container->get('request_stack')->getMasterRequest()->getClientIp();
         return [
-            'username'  => $request->request->get('_username'),
-            'authbasic_username'  => $request->headers->get('php-auth-user'),
+            'username' => $request->request->get('_username'),
+            'authbasic_username' => $request->headers->get('php-auth-user'),
             'ipaddress' => $clientIP,
         ];
     }
@@ -101,19 +98,22 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     {
         $userRepo = $this->em->getRepository('DOMJudgeBundle:User');
         $filters = [
-          'ipAddress' => $credentials['ipaddress']
+            'ipAddress' => $credentials['ipaddress']
         ];
+
         if ($credentials['authbasic_username']) {
-          $filters['username'] = $credentials['authbasic_username'];
+            $filters['username'] = $credentials['authbasic_username'];
         }
+
         if ($credentials['username']) {
-          $filters['username'] = $credentials['username'];
+            $filters['username'] = $credentials['username'];
         }
+
         $user = $userRepo->findOneBy($filters);
 
         // Fail if we didn't find a user with a matching ip address
         if ($user == null) {
-          return null;
+            return null;
         }
 
         // if a User object, checkCredentials() is called
