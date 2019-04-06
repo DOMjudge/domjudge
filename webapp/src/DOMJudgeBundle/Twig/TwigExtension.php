@@ -103,7 +103,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
         $refresh_cookie = $this->dj->getCookie("domjudge_refresh");
         $refresh_flag   = ($refresh_cookie == null || (bool)$refresh_cookie);
 
-        require_once $this->domjudge->getDomjudgeEtcDir() . '/domserver-config.php';
+        require_once $this->dj->getDomjudgeEtcDir() . '/domserver-config.php';
 
         $user = $this->dj->getUser();
         $team = $user ? $user->getTeam() : null;
@@ -419,7 +419,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
      */
     public function externalCcsUrl(Submission $submission)
     {
-        require_once $this->domjudge->getDomjudgeEtcDir() . '/domserver-config.php';
+        require_once $this->dj->getDomjudgeEtcDir() . '/domserver-config.php';
 
         if (defined('EXT_CCS_URL')) {
             if ($submission->getExternalid()) {
@@ -717,7 +717,7 @@ JS;
                                                                          'filename' => $oldFile->getFilename()
                                                                      ]);
 
-        require_once $this->domjudge->getDomjudgeEtcDir() . '/domserver-static.php';
+        require_once $this->dj->getDomjudgeEtcDir() . '/domserver-static.php';
 
         $difftext = Utils::createDiff(
             $newFile,
