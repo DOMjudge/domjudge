@@ -17,7 +17,7 @@ define fix_composer_paths
 	for file in autoload_psr4.php autoload_classmap.php autoload_files.php autoload_namespaces.php ; do \
 		sed -i "s#^\$$baseDir = .*#\$$baseDir = dirname('$(DESTDIR)$(domserver_webappdir)');#" $(1)/composer/$$file ; \
 	done
-	sed -i "s#__DIR__ . '/../../..'#'$(DESTDIR)$(domserver_webappdir)' . '/..'#" $(1)/composer/autoload_static.php
+	sed -i "s#__DIR__ \. '/\.\./\.\./\.\.' \. '/webapp#'$(DESTDIR)$(domserver_webappdir)#" $(1)/composer/autoload_static.php
 endef
 
 install-domserver:
