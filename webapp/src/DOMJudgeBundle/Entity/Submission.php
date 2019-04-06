@@ -204,7 +204,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * @var Submission|null
      * @ORM\ManyToOne(targetEntity="DOMJudgeBundle\Entity\Submission", inversedBy="resubmissions")
-     * @ORM\JoinColumn(name="origsubmitid", referencedColumnName="submitid", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="origsubmitid", referencedColumnName="submitid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $originalSubmission;
