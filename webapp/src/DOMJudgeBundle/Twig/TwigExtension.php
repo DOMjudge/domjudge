@@ -135,7 +135,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
      * @param float|null $end
      * @return string
      */
-    public function printtimediff($start, $end = null): string
+    public function printtimediff(float $start, $end = null): string
     {
         return Utils::printtimediff($start, $end);
     }
