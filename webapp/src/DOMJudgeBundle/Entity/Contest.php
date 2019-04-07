@@ -1241,10 +1241,10 @@ class Contest extends BaseApiEntity
         if (false/*ALLOW_REMOVED_INTERVALS*/) { // TODO: use constant when we have access to it in Symfony
             /** @var RemovedInterval $removedInterval */
             foreach ($this->getRemovedIntervals() as $removedInterval) {
-                if (Utils::difftime((float)$removedInterval->getStarttime(false), $wallTime) < 0) {
+                if (Utils::difftime((float)$removedInterval->getStarttime(), $wallTime) < 0) {
                     $contestTime -= min(
-                        Utils::difftime($wallTime, (float)$removedInterval->getStarttime(false)),
-                        Utils::difftime((float)$removedInterval->getEndtime(), (float)$removedInterval->getStarttime(false))
+                        Utils::difftime($wallTime, (float)$removedInterval->getStarttime()),
+                        Utils::difftime((float)$removedInterval->getEndtime(), (float)$removedInterval->getStarttime())
                     );
                 }
             }
