@@ -5,17 +5,19 @@ namespace DOMJudgeBundle\Security;
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
 class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
 {
@@ -24,24 +26,40 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     private $container;
     private $em;
     private $dj;
+    private $router;
 
-    public function __construct(CsrfTokenManagerInterface $csrfTokenManager, Container $container, Security $security, EntityManagerInterface $em, DOMJudgeService $dj) {
+    /**
+     * DOMJudgeIPAuthenticator constructor.
+     * @param CsrfTokenManagerInterface $csrfTokenManager
+     * @param Container                 $container
+     * @param Security                  $security
+     * @param EntityManagerInterface    $em
+     * @param DOMJudgeService           $dj
+     * @param RouterInterface           $router
+     */
+    public function __construct(
+        CsrfTokenManagerInterface $csrfTokenManager,
+        Container $container,
+        Security $security,
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
+        RouterInterface $router
+    ) {
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->container = $container;
-        $this->security = $security;
-        $this->em = $em;
-        $this->dj = $dj;
+        $this->container        = $container;
+        $this->security         = $security;
+        $this->em               = $em;
+        $this->dj               = $dj;
+        $this->router           = $router;
     }
 
     /**
-     * Called on every request to decide if this authenticator should be
-     * used for the request. Returning false will cause this authenticator
-     * to be skipped.
+     * @inheritDoc
      */
     public function supports(Request $request)
     {
         // Make sure ipaddress auth is enabled?
-        $authmethods = $this->container->getParameter('domjudge.authmethods');
+        $authmethods          = $this->container->getParameter('domjudge.authmethods');
         $auth_allow_ipaddress = in_array('ipaddress', $authmethods);
         if (!$auth_allow_ipaddress) {
             return false;
@@ -49,7 +67,8 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
 
         // if there is already an authenticated user (likely due to the session)
         // then return null and skip authentication: there is no need.
-        if ($this->security->getUser()) {
+        // However, on the login page we might need it when IP auto login is enabled
+        if ($this->security->getUser() && $request->attributes->get('_route') !== 'login') {
             return false;
         }
 
@@ -58,8 +77,8 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
             'security.firewall.map.context.api',
             'security.firewall.map.context.feed',
         ];
-        $fwcontext = $request->attributes->get('_firewall_context', '');
-        $ipAutologin = $this->dj->dbconfig_get('ip_autologin', false);
+        $fwcontext             = $request->attributes->get('_firewall_context', '');
+        $ipAutologin           = $this->dj->dbconfig_get('ip_autologin', false);
         if (in_array($fwcontext, $stateless_fw_contexts) || $ipAutologin) {
             return true;
         }
@@ -71,8 +90,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     }
 
     /**
-     * Called on every request. Return whatever credentials you want to
-     * be passed to getUser() as $credentials.
+     * @inheritDoc
      */
     public function getCredentials(Request $request)
     {
@@ -94,10 +112,13 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         ];
     }
 
+    /**
+     * @inheritDoc
+     */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         $userRepo = $this->em->getRepository('DOMJudgeBundle:User');
-        $filters = [
+        $filters  = [
             'ipAddress' => $credentials['ipaddress']
         ];
 
@@ -109,7 +130,12 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
             $filters['username'] = $credentials['username'];
         }
 
-        $user = $userRepo->findOneBy($filters);
+        $ipAutologin = $this->dj->dbconfig_get('ip_autologin', false);
+        $user        = null;
+        $users       = $userRepo->findBy($filters);
+        if (count($users) === 1 || !$ipAutologin) {
+            $user = $users[0];
+        }
 
         // Fail if we didn't find a user with a matching ip address
         if ($user == null) {
@@ -120,6 +146,9 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         return $userProvider->loadUserByUsername($user->getUsername());
     }
 
+    /**
+     * @inheritDoc
+     */
     public function checkCredentials($credentials, UserInterface $user)
     {
         // check credentials - e.g. make sure the password is valid
@@ -130,12 +159,23 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         return true;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
-        // on success, let the request continue
+        // on success, redirect to the homepage if it was a user triggered action
+        if ($request->attributes->get('_route') === 'login'
+            && $request->isMethod('POST')
+            && $request->request->get('loginmethod') === 'ipaddress') {
+            return new RedirectResponse($this->router->generate('root'));
+        }
         return null;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
         // We never fail the authentication request, something else might handle it
@@ -143,7 +183,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     }
 
     /**
-     * Called when authentication is needed, but it's not sent
+     * @inheritDoc
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
@@ -154,6 +194,9 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         return $resp;
     }
 
+    /**
+     * @inheritDoc
+     */
     public function supportsRememberMe()
     {
         return false;
