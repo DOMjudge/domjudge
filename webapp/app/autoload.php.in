@@ -11,7 +11,7 @@
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Composer\Autoload\ClassLoader;
 
-require('@domserver_etcdir@/domserver-static.php');
+require_once('@domserver_etcdir@/domserver-static.php');
 
 /** @var ClassLoader $loader */
 $loader = require LIBVENDORDIR.'/autoload.php';
