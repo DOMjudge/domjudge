@@ -528,6 +528,26 @@ class EventLogService implements ContainerAwareInterface
     }
 
     /**
+     * Get the API ID field for a given entity type.
+     * @param object $entity
+     * @return string
+     * @throws Exception
+     */
+    public function apiIdFieldForEntity($entity)
+    {
+        if ($field = $this->externalIdFieldForEntity($entity)) {
+            return $field;
+        }
+        $class = get_class($entity);
+        $metadata = $this->em->getClassMetadata($class);
+        try {
+            return $metadata->getSingleIdentifierFieldName();
+        } catch (MappingException $e) {
+            throw new \BadMethodCallException("Entity '$class' has a composite primary key");
+        }
+    }
+
+    /**
      * Get the endpoint to use for the given entity
      * @param object|string $entity
      * @return string|null

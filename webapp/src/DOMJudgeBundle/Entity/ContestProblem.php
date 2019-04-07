@@ -438,8 +438,8 @@ class ContestProblem
      * @return mixed
      * @throws Exception
      */
-    public function getApiId(EventLogService $eventLogService, EntityManagerInterface $entityManager)
+    public function getApiId(EventLogService $eventLogService)
     {
-        return $this->getProblem()->getApiId($eventLogService, $entityManager);
+        return $this->getProblem()->getApiId($eventLogService);
     }
 }

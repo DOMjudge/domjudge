@@ -450,7 +450,7 @@ class ImportExportService
             }
 
             $data[] = [
-                $teamScore->getTeam()->getApiId($this->eventLogService, $this->em),
+                $teamScore->getTeam()->getApiId($this->eventLogService),
                 $rank,
                 $awardString,
                 $teamScore->getNumberOfPoints(),

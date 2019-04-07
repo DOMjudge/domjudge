@@ -205,7 +205,7 @@ class JudgehostController extends FOSRestController
             return [
                 'judgingid' => $judging->getJudgingid(),
                 'submitid' => $judging->getSubmitid(),
-                'cid' => $judging->getContest()->getApiId($this->eventLogService, $this->em),
+                'cid' => $judging->getContest()->getApiId($this->eventLogService),
             ];
         }, $judgings);
     }
@@ -380,7 +380,7 @@ class JudgehostController extends FOSRestController
         $maxRunTime = $submission->getProblem()->getTimelimit() * $submission->getLanguage()->getTimeFactor();
         $result     = [
             'submitid' => $submission->getSubmitid(),
-            'cid' => $submission->getContest()->getApiId($this->eventLogService, $this->em),
+            'cid' => $submission->getContest()->getApiId($this->eventLogService),
             'teamid' => $submission->getTeamid(),
             'probid' => $submission->getProbid(),
             'langid' => $submission->getLangid(),

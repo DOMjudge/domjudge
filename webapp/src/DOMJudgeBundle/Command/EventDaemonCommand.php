@@ -187,7 +187,7 @@ class EventDaemonCommand extends ContainerAwareCommand
             $contestStart        = $selectedContest->getStarttime();
             $contestStartEnabled = $selectedContest->getStarttimeEnabled();
             if ($contestStartOld !== $contestStart || $contestStartEnabledOld !== $contestStartEnabled) {
-                $contestId = $selectedContest->getApiId($this->eventLogService, $this->em);
+                $contestId = $selectedContest->getApiId($this->eventLogService);
                 $url       = sprintf('/contests/%s', $contestId);
                 $this->dj->withAllRoles(function () use ($url, $selectedContest) {
                     $this->insertEvent($selectedContest, 'contests',
@@ -284,7 +284,7 @@ class EventDaemonCommand extends ContainerAwareCommand
         foreach ($this->eventLogService->apiEndpoints as $endpoint => $endpointData) {
             if ($endpointData[EventLogService::KEY_TYPE] === EventLogService::TYPE_CONFIGURATION &&
                 isset($endpointData[EventLogService::KEY_URL])) {
-                $contestId = $contest->getApiId($this->eventLogService, $this->em);
+                $contestId = $contest->getApiId($this->eventLogService);
 
                 $url = sprintf('/contests/%s%s', $contestId, $endpointData[EventLogService::KEY_URL]);
                 $this->dj->withAllRoles(function () use ($url, &$data) {

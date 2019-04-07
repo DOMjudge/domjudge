@@ -10,31 +10,33 @@ use Exception;
 /**
  * Class BaseApiEntity
  *
- * Base entity class API entities should use to support getting the API ID
+ * Base entity class that entities should use to support getting their API ID.
  *
  * @package DOMJudgeBundle\Entity
  */
 abstract class BaseApiEntity
 {
     /**
+     * Get the API ID field name for this entity
+     * @param EventLogService $eventLogService
+     * @return string
+     * @throws Exception
+     */
+    public function getApiIdField(EventLogService $eventLogService)
+    {
+        return $eventLogService->apiIdFieldForEntity($this);
+    }
+
+    /**
      * Get the API ID for this entity
-     * @param EventLogService        $eventLogService
-     * @param EntityManagerInterface $entityManager
+     * @param EventLogService $eventLogService
      * @return mixed
      * @throws Exception
      */
-    public function getApiId(EventLogService $eventLogService, EntityManagerInterface $entityManager)
+    public function getApiId(EventLogService $eventLogService)
     {
-        if ($field = $eventLogService->externalIdFieldForEntity($this)) {
-            return $this->{$field};
-        } else {
-            $metadata = $entityManager->getClassMetadata(get_class($this));
-            try {
-                return $this->{$metadata->getSingleIdentifierFieldName()};
-            } catch (MappingException $e) {
-                throw new \BadMethodCallException(sprintf('Entity \'%s\' as a composite primary key',
-                                                          get_class($this)));
-            }
-        }
+        $field = $eventLogService->apiIdFieldForEntity($this);
+        $method = 'get'.ucfirst($field);
+        return $this->{$method}();
     }
 }

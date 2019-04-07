@@ -120,7 +120,7 @@ class ContestController extends AbstractRestController
             $response = new JsonResponse('Missing "id" in request.', Response::HTTP_BAD_REQUEST);
         } elseif (!$request->request->has('start_time')) {
             $response = new JsonResponse('Missing "start_time" in request.', Response::HTTP_BAD_REQUEST);
-        } elseif ($request->request->get('id') != $contest->getApiId($this->eventLogService, $this->em)) {
+        } elseif ($request->request->get('id') != $contest->getApiId($this->eventLogService)) {
             $response = new JsonResponse('Invalid "id" in request.', Response::HTTP_BAD_REQUEST);
         } elseif (!$request->request->has('force') &&
             $contest->getStarttime() != null &&

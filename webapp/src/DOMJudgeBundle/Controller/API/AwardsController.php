@@ -118,12 +118,12 @@ class AwardsController extends AbstractRestController
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, null, true);
         $group_winners = $problem_winners = [];
         foreach ($scoreboard->getTeams() as $team) {
-            $teamid = (string)$team->getApiId($this->eventLogService, $this->em);
+            $teamid = (string)$team->getApiId($this->eventLogService);
             if ($scoreboard->isBestInCategory($team)) {
                 $group_winners[$team->getCategoryId()][] = $teamid;
             }
             foreach($scoreboard->getProblems() as $problem) {
-                $probid = (string)$problem->getApiId($this->eventLogService, $this->em);
+                $probid = (string)$problem->getApiId($this->eventLogService);
                 if ($scoreboard->solvedFirst($team, $problem)) {
                     $problem_winners[$probid][] = $teamid;
                 }
@@ -154,7 +154,7 @@ class AwardsController extends AbstractRestController
         // can we assume this is ordered just walk the first 12+B entries?
         foreach ($scoreboard->getScores() as $teamScore) {
             $rank = $teamScore->getRank();
-            $teamid = (string)$teamScore->getTeam()->getApiId($this->eventLogService, $this->em);
+            $teamid = (string)$teamScore->getTeam()->getApiId($this->eventLogService);
             if ($rank === 1) {
                 $overall_winners[] = $teamid;
             }
