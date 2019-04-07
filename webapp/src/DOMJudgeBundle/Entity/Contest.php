@@ -1229,14 +1229,10 @@ class Contest extends BaseApiEntity
     /**
      * Get the contest time for a given wall time
      * @param float $wallTime
-     * @param bool  $zeroWhenStartPaused
      * @return float
      */
-    public function getContestTime(float $wallTime, bool $zeroWhenStartPaused = false): float
+    public function getContestTime(float $wallTime): float
     {
-        if ($zeroWhenStartPaused && !$this->getStarttimeEnabled()) {
-            return 0;
-        }
         $contestTime = Utils::difftime($wallTime, (float)$this->getStarttime(false));
         if (false/*ALLOW_REMOVED_INTERVALS*/) { // TODO: use constant when we have access to it in Symfony
             /** @var RemovedInterval $removedInterval */
