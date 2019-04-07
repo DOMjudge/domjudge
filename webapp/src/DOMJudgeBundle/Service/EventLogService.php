@@ -191,7 +191,7 @@ class EventLogService implements ContainerAwareInterface
      *                               passed as argument. Must be specified when deleting an
      *                               entry or if no DB table is associated to $type.
      *                               Can be null, one ID or an array of ID's.
-     * @throws \Exception
+     * @throws Exception
      */
     public function log(string $type, $dataIds, string $action, $contestId = null, $json = null, $ids = null)
     {
@@ -431,7 +431,7 @@ class EventLogService implements ContainerAwareInterface
      * @param string $type
      * @param array  $ids
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     protected function getExternalIds(string $type, array $ids): array
     {
@@ -476,7 +476,7 @@ class EventLogService implements ContainerAwareInterface
      * no external ID field should be used
      * @param object|string $entity
      * @return string|null
-     * @throws \Exception
+     * @throws Exception
      */
     public function externalIdFieldForEntity($entity)
     {
