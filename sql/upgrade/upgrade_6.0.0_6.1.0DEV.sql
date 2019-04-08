@@ -62,7 +62,8 @@ UPDATE `configuration` SET `category` = 'Misc' WHERE `name` IN (
 INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `description`) VALUES
 ('data_source', '0', 'int', '0', 'Misc', 'Source of data. Choices: 0 = all local, 1 = configuration data external, 2 = configuration and live data external'),
 ('update_judging_seconds', '0', 'int', '0', 'Judging', 'Post updates to a judging every X seconds. Set to 0 to update after each judging_run.'),
-('ip_autologin', '0', 'bool', '0', 'Misc', 'Enable to skip the login page when using IP authentication.');
+('ip_autologin', '0', 'bool', '0', 'Misc', 'Enable to skip the login page when using IP authentication.'),
+('team_column_width', '0', 'int', '0', 'Misc', 'Maximum width of team column on scoreboard. Leave 0 for no maximum.');
 
 UPDATE `configuration` SET `name` = 'registration_category_name',
   `value` = IF(`value` = '0', '""', '"Self-Registered"'),

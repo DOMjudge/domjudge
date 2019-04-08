@@ -706,6 +706,7 @@ class ScoreboardService
             $data['showPending']          = $this->dj->dbconfig_get('show_pending', false);
             $data['showTeamSubmissions']  = $this->dj->dbconfig_get('show_teams_submissions', true);
             $data['scoreInSeconds']       = $this->dj->dbconfig_get('score_in_seconds', false);
+            $data['maxWidth']             = $this->dj->dbconfig_get('team_column_width', 0);
         }
 
         if ($request->isXmlHttpRequest()) {

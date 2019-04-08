@@ -95,6 +95,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
             new \Twig_SimpleFilter('statusIcon', [$this, 'statusIcon']),
             new \Twig_SimpleFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
+            new \Twig_SimpleFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
         ];
     }
 
@@ -892,5 +893,33 @@ EOF;
         $result .= wordwrap(rtrim($unquoted), $width);
 
         return $result;
+    }
+
+    /**
+     * Convert a hex color to RGBA
+     * @param string $text
+     * @param float  $opacity
+     * @return string
+     */
+    public function hexColorToRGBA(string $text, float $opacity = 1): string
+    {
+        $col = Utils::convertToHex($text);
+        preg_match_all("/[0-9A-Fa-f]{2}/", $col,$m);
+        if (!count($m)) {
+            return $text;
+        }
+
+        $m = current($m);
+        switch (count($m)){
+            case 4:
+                // We also have opacity; load that
+                $opacity = hexdec(array_pop($m));
+            case 3:
+                $vals = array_map("hexdec", $m);
+                $vals[] = $opacity;
+                return "rgba(" . implode(",", $vals).")";
+        }
+
+        return $text;
     }
 }
