@@ -1,6 +1,6 @@
 DOMjudge
 --------
-[![Build Status](https://travis-ci.org/DOMjudge/domjudge.svg?branch=master)](https://travis-ci.org/DOMjudge/domjudge)
+[![pipeline status](https://gitlab.com/DOMjudge/domjudge/badges/master/pipeline.svg)](https://gitlab.com/DOMjudge/domjudge/commits/master)
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
 [![Code Climate](https://codeclimate.com/github/DOMjudge/domjudge/badges/gpa.svg)](https://codeclimate.com/github/DOMjudge/domjudge)
 
