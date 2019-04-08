@@ -2,7 +2,8 @@ stages:
   - test
 
 include:
-  template: Dependency-Scanning.gitlab-ci.yml
+  - template: Dependency-Scanning.gitlab-ci.yml
+  - template: SAST.gitlab-ci.yml
 
 integration:
   stage: test
