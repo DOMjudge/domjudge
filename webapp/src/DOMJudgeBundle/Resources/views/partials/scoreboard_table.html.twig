@@ -377,7 +377,7 @@
     {% endfor %}
 </style>
 <script>
-    document.querySelectorAll(".forceWidth:not(.toolong").forEach(el => {
+    document.querySelectorAll(".forceWidth:not(.toolong)").forEach(el => {
         if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
             el.classList.add("toolong");
         }
