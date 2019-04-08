@@ -904,20 +904,21 @@ EOF;
     public function hexColorToRGBA(string $text, float $opacity = 1): string
     {
         $col = Utils::convertToHex($text);
-        preg_match_all("/[0-9A-Fa-f]{2}/", $col,$m);
+        preg_match_all("/[0-9A-Fa-f]{2}/", $col, $m);
         if (!count($m)) {
             return $text;
         }
 
         $m = current($m);
-        switch (count($m)){
+        switch (count($m)) {
             case 4:
                 // We also have opacity; load that
                 $opacity = hexdec(array_pop($m));
             case 3:
                 $vals = array_map("hexdec", $m);
                 $vals[] = $opacity;
-                return "rgba(" . implode(",", $vals).")";
+
+                return "rgba(" . implode(",", $vals) . ")";
         }
 
         return $text;

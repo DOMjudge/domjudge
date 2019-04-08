@@ -340,40 +340,39 @@
 
 <style>
     {% for color,i in backgroundColors %}
-    {% set cssColor = "#"~color %}
+        {% set cssColor = "#"~color %}
 
-    .cl{{ color }} {
-        background-color: {{ cssColor }}
-    }
+        .cl{{ color }} {
+            background-color: {{ cssColor }}
+        }
 
-    {% set cMin = cssColor|hexColorToRGBA(0) %}
-    {% set cMid = cssColor|hexColorToRGBA(0.7) %}
-    {% set cMax = cssColor|hexColorToRGBA(1) %}
+        {% set cMin = cssColor|hexColorToRGBA(0) %}
+        {% set cMax = cssColor|hexColorToRGBA(1) %}
 
-    .cl{{ color }} .forceWidth.toolong:after {
-        background: -moz-linear-gradient(left,
-            {{ cMin }} 0%,
-            {{ cMax }} 96%);
-        background: -webkit-gradient(linear, left top, right top,
-            color-stop(0%, {{ cMin }}),
-            color-stop(96%, {{ cMax }}));
-        background: -webkit-linear-gradient(left,
-            {{ cMin }} 0%,
-            {{ cMax }} 96%);
-        background: -o-linear-gradient(left,
-            {{ cMin }} 0%,
-            {{ cMax }} 96%);
-        background: -ms-linear-gradient(left,
-            {{ cMin }} 0%,
-            {{ cMax }} 96%);
-        background: linear-gradient(left,
-            {{ cMin }} 0%,
-            {{ cMax }} 96%);
-            filter: progid:DXImageTransform.Microsoft.gradient(
-                startColorstr='#00{{ color }}',
-                endColorstr='#FF{{ color }}',
-                GradientType=1);
-    }
+        .cl{{ color }} .forceWidth.toolong:after {
+            background: -moz-linear-gradient(left,
+                {{ cMin }} 0%,
+                {{ cMax }} 96%);
+            background: -webkit-gradient(linear, left top, right top,
+                color-stop(0%, {{ cMin }}),
+                color-stop(96%, {{ cMax }}));
+            background: -webkit-linear-gradient(left,
+                {{ cMin }} 0%,
+                {{ cMax }} 96%);
+            background: -o-linear-gradient(left,
+                {{ cMin }} 0%,
+                {{ cMax }} 96%);
+            background: -ms-linear-gradient(left,
+                {{ cMin }} 0%,
+                {{ cMax }} 96%);
+            background: linear-gradient(left,
+                {{ cMin }} 0%,
+                {{ cMax }} 96%);
+                filter: progid:DXImageTransform.Microsoft.gradient(
+                    startColorstr='#00{{ color }}',
+                    endColorstr='#FF{{ color }}',
+                    GradientType=1);
+        }
     {% endfor %}
 </style>
 <script>

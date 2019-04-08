@@ -177,7 +177,7 @@ del {
 }
 .toolong:after {
     content: "";
-    width: calc(100% * 0.3);
+    width: 30%;
     position: absolute;
     top: 0;
     right: 0;
