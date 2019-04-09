@@ -104,22 +104,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     private $judging_last_started;
 
     /**
-     * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="teampage_first_visited", options={"comment"="Time of
-     *                             first teampage view", "unsigned"=true}, nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $teampage_first_visited;
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", length=255, name="hostname", options={"comment"="Teampage first visited from this
-     *                            address"}, nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $hostname;
-
-    /**
      * @var int
      * @ORM\Column(type="integer", name="penalty", options={"comment"="Additional penalty time in minutes"},
      *                             nullable=false)
@@ -438,54 +422,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     public function getJudgingLastStarted()
     {
         return $this->judging_last_started;
-    }
-
-    /**
-     * Set teampageFirstVisited
-     *
-     * @param string $teampageFirstVisited
-     *
-     * @return Team
-     */
-    public function setTeampageFirstVisited($teampageFirstVisited)
-    {
-        $this->teampage_first_visited = $teampageFirstVisited;
-
-        return $this;
-    }
-
-    /**
-     * Get teampageFirstVisited
-     *
-     * @return string
-     */
-    public function getTeampageFirstVisited()
-    {
-        return $this->teampage_first_visited;
-    }
-
-    /**
-     * Set hostname
-     *
-     * @param string $hostname
-     *
-     * @return Team
-     */
-    public function setHostname($hostname)
-    {
-        $this->hostname = $hostname;
-
-        return $this;
-    }
-
-    /**
-     * Get hostname
-     *
-     * @return string
-     */
-    public function getHostname()
-    {
-        return $this->hostname;
     }
 
     /**

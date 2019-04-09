@@ -25,6 +25,9 @@ ALTER TABLE `scorecache`
 
 ALTER TABLE `testcase` ADD INDEX `sample` (`sample`);
 
+ALTER TABLE `user`
+  ADD COLUMN `first_login` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time of first login' AFTER `last_login`;
+
 --
 -- Transfer data from old to new structure
 --
@@ -54,6 +57,8 @@ UPDATE `configuration` SET `category` = 'Misc' WHERE `name` IN (
   'openid_autocreate_team', 'openid_provider', 'openid_clientid',
   'openid_clientsecret'
 );
+
+UPDATE `user` INNER JOIN `team` USING (`teamid`) SET `user`.`first_login` = `team`.`teampage_first_visited`;
 
 --
 -- Add/remove sample/initial contents
@@ -98,3 +103,7 @@ INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_e
 -- Finally remove obsolete structures after moving data
 --
 
+
+ALTER TABLE `team`
+  DROP COLUMN `teampage_first_visited`,
+  DROP COLUMN `hostname`;

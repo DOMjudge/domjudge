@@ -87,6 +87,16 @@
                     {% endif %}
                 </tr>
                 <tr>
+                    <th>First login</th>
+                    <td>
+                        {% if user.firstLogin %}
+                            {{ user.firstLogin | printtime('%a %d %b %Y %T %Z') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
                     <th>Last login</th>
                     <td>
                         {% if user.lastLogin %}

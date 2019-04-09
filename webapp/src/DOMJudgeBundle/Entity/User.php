@@ -54,6 +54,13 @@ class User implements UserInterface, \Serializable
     private $last_login;
 
     /**
+     * @var double
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="first_login", options={"comment"="Time of first login", "unsigned"=true}, nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $first_login;
+
+    /**
      * @var string
      * @ORM\Column(type="string", name="last_ip_address", length=255, options={"comment"="Last IP address of successful login"}, nullable=true)
      * @Serializer\SerializedName("lastip")
@@ -244,6 +251,29 @@ class User implements UserInterface, \Serializable
     public function getLastLogin()
     {
         return $this->last_login;
+    }
+
+    /**
+     * Set firstLogin
+     *
+     * @param $firstLogin
+     * @return User
+     */
+    public function setFirstLogin($firstLogin)
+    {
+        $this->first_login = $firstLogin;
+
+        return $this;
+    }
+
+    /**
+     * Get firstLogin
+     *
+     * @return string
+     */
+    public function getFirstLogin()
+    {
+        return $this->first_login;
     }
 
     /**
