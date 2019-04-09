@@ -661,7 +661,10 @@ function read_metadata(string $filename)
     return spyc_load($contents);
 }
 
-function send_unsent_judging_runs($unsent_judging_runs, $myhost, $judgingid) {
+function send_unsent_judging_runs($unsent_judging_runs, $judgingid)
+{
+    global $myhost;
+
     request(
         sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
                 urlencode((string)$judgingid)),
@@ -982,7 +985,7 @@ function judge(array $row)
         if (!$lastcase_correct
             || ($now - $last_sent) >= $update_every_X_seconds
             || $outstanding_data > $row['outputlimit']) {
-           send_unsent_judging_runs($unsent_judging_runs, $myhost, $row['judgingid']);
+           send_unsent_judging_runs($unsent_judging_runs, $row['judgingid']);
            $unsent_judging_runs = array();
            $last_sent = $now;
            $outstanding_data = 0;
@@ -990,7 +993,7 @@ function judge(array $row)
         logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
     } // end: for each testcase
     if (!empty($unsent_judging_runs)) {
-        send_unsent_judging_runs($unsent_judging_runs, $myhost, $row['judgingid']);
+        send_unsent_judging_runs($unsent_judging_runs, $row['judgingid']);
     }
 
     // revoke readablity for domjudge-run user to this workdir
