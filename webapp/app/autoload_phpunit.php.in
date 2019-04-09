@@ -1,0 +1,12 @@
+<?php
+/**
+ * @configure_input@
+ *
+ * Autoload setup file for PHPUnit
+ *
+ * Part of the DOMjudge Programming Contest Jury System and licensed
+ * under the GNU GPL. See README and COPYING for details.
+ */
+
+require('@domserver_etcdir@/domserver-static.php');
+require __DIR__ . '/autoload.php';

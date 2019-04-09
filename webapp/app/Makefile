@@ -3,6 +3,8 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
+SUBST_FILES = autoload_phpunit.php
+
 TARGETS =
 OBJECTS =
 
@@ -10,6 +12,11 @@ PARAMS = config/parameters.yml
 STATIC = config/static.yml
 
 build: $(TARGETS)
+
+$(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
+	$(substconfigvars)
+
+domserver: $(SUBST_FILES)
 
 # Don't try to create dbpasswords.secret here if it doesn't exist:
 $(TOPDIR)/etc/dbpasswords.secret:
@@ -31,6 +38,9 @@ static-from-stub: $(STATIC).stub
 		cp $< $(STATIC) ; \
 		touch -d '1971-01-01 00:00:00' $(STATIC) ; \
 	fi
+
+distclean-l:
+	-rm -f $(SUBST_FILES)
 
 clean-l:
 	-rm -f $(TARGETS) $(OBJECTS)
