@@ -178,7 +178,7 @@
                 {% set color = color|trim("#") %}
                 {% set backgroundColors = backgroundColors|merge({(''~color): 1}) %}
             {% endif %}
-            <td class="scoretn cl{{ color }}" {% if jury %}title="{{ score.team.name }}"{% endif %}>
+            <td class="scoretn cl{{ color }}" title="{{ score.team.name }}">
                 {% set link = null %}
                 {% set extra = null %}
                 {% if not static %}
