@@ -127,6 +127,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
                 ->andWhere('l.allowSubmit = 1')
                 ->getQuery()
                 ->getResult(),
+            'alpha3_countries' => Utils::ALPHA3_COUNTRIES,
         ];
     }
 

@@ -3,7 +3,9 @@
 namespace DOMJudgeBundle\Form\Type;
 
 use DOMJudgeBundle\Entity\TeamAffiliation;
+use DOMJudgeBundle\Utils\Utils;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -19,11 +21,18 @@ class TeamAffiliationType extends AbstractExternalIdEntityType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $countries = [];
+        foreach (Utils::ALPHA3_COUNTRIES as $alpha3 => $country) {
+            $countries["$country ($alpha3)"] = $alpha3;
+        }
+
         $this->addExternalIdField($builder, TeamAffiliation::class);
         $builder->add('shortname');
         $builder->add('name');
-        $builder->add('country', TextType::class, [
+        $builder->add('country', ChoiceType::class, [
             'required' => false,
+            'choices'  => $countries,
+            'placeholder' => 'No country',
         ]);
         $builder->add('comments', TextareaType::class, [
             'required' => false,

@@ -103,7 +103,7 @@
                             <select class="form-control mr-2" multiple size="8" name="countries[]">
                                 {% for country in filterValues.countries %}
                                     <option {% if country in scoreFilter.countries %}selected{% endif %}
-                                            value="{{ country }}">{{ country }}</option>
+                                            value="{{ country }}">{{ alpha3_countries[country] }}</option>
                                 {% endfor %}
                             </select>
                         {% endif %}
