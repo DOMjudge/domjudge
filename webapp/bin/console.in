@@ -10,6 +10,8 @@ use Symfony\Component\Debug\Debug;
 // for more information
 //umask(0000);
 
+require('@domserver_etcdir@/domserver-static.php');
+
 set_time_limit(0);
 
 /** @var Composer\Autoload\ClassLoader $loader */

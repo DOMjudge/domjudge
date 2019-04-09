@@ -1,6 +1,6 @@
 <?php
 /**
- * @configure_input@
+ * Generated from 'autoload.php.in' on Tue Apr  9 12:41:46 CEST 2019.
  *
  * Autoload setup file for the Symfony application
  *
@@ -10,8 +10,6 @@
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Composer\Autoload\ClassLoader;
-
-require_once('@domserver_etcdir@/domserver-static.php');
 
 /** @var ClassLoader $loader */
 $loader = require LIBVENDORDIR.'/autoload.php';

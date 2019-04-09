@@ -21,7 +21,7 @@ $def_teamprefix = 'Simulated: ';
 $def_categ = 1;
 $def_lang = 'c';
 
-require_once('@domserver_etcdir@/domserver-static.php');
+require('@domserver_etcdir@/domserver-static.php');
 require(ETCDIR . '/domserver-config.php');
 
 define('SCRIPT_ID', 'simulate_contest');

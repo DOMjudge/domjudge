@@ -24,7 +24,7 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
 $CATID = 4;  // 4 = Organisation in default db scheme
 $ROLES = array(2,3); // Judge and Team role in default db scheme
 
-require_once('@domserver_etcdir@/domserver-static.php');
+require('@domserver_etcdir@/domserver-static.php');
 require(ETCDIR . '/domserver-config.php');
 
 require(LIBDIR . '/init.php');

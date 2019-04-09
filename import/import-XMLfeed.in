@@ -14,7 +14,7 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
     die("Commandline use only");
 }
 
-require_once('@domserver_etcdir@/domserver-static.php');
+require('@domserver_etcdir@/domserver-static.php');
 require(ETCDIR . '/domserver-config.php');
 
 define('SCRIPT_ID', 'import-XMLfeed');

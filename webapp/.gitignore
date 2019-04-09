@@ -1,5 +1,8 @@
 /app/config/parameters.yml
 /app/config/static.yml
+/bin/console
+/web/app.php
+/web/app_dev.php
 /build/
 /phpunit.xml
 /var/*

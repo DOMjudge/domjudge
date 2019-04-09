@@ -9,14 +9,7 @@ OBJECTS =
 PARAMS = config/parameters.yml
 STATIC = config/static.yml
 
-SUBST_FILES = autoload.php $(STATIC)
-
-$(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
-	$(substconfigvars)
-
-build: $(TARGETS) $(SUBST_FILES)
-
-domserver: $(SUBST_FILES)
+build: $(TARGETS)
 
 # Don't try to create dbpasswords.secret here if it doesn't exist:
 $(TOPDIR)/etc/dbpasswords.secret:
@@ -41,8 +34,5 @@ static-from-stub: $(STATIC).stub
 
 clean-l:
 	-rm -f $(TARGETS) $(OBJECTS)
-
-distclean-l:
-	-rm -f $(SUBST_FILES)
 
 .PHONY: params-from-stub static-from-stub

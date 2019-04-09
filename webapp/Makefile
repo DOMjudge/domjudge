@@ -7,7 +7,7 @@ REC_TARGETS = domserver
 include $(TOPDIR)/Makefile.global
 
 # Subdirectories to recurse into for REC_TARGETS
-SUBDIRS = app
+SUBDIRS = web bin
 
 # Clear Symfony cache for maintainer-mode operation:
 clear-cache:

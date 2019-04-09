@@ -18,6 +18,8 @@ use Symfony\Component\HttpFoundation\Request;
 //    exit('You are not allowed to access this file. Check '.basename(__FILE__).' for more information.');
 //}
 
+require('@domserver_etcdir@/domserver-static.php');
+
 require __DIR__.'/../app/autoload.php';
 Debug::enable();
 
