@@ -88,8 +88,8 @@ INSERT INTO `team_category` (`categoryid`, `name`, `sortorder`, `color`, `visibl
 -- Dumping data for table `team`
 --
 
-INSERT INTO `team` (`teamid`, `externalid`, `name`, `categoryid`, `affilid`, `hostname`, `room`, `comments`, `teampage_first_visited`) VALUES
-(2, 'exteam', 'Example teamname', 3, 1, NULL, NULL, NULL, NULL);
+INSERT INTO `team` (`teamid`, `externalid`, `name`, `categoryid`, `affilid`, `room`, `comments`) VALUES
+(2, 'exteam', 'Example teamname', 3, 1, NULL, NULL);
 
 --
 -- Dumping data for table `testcase`

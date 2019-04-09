@@ -35,10 +35,20 @@
                     <td>{{ team.name }}</td>
                 </tr>
                 <tr>
-                    <th>Host</th>
+                    <th>First login</th>
                     <td>
-                        {% if team.hostname %}
-                            {{ team.hostname | printHost(true) }}
+                        {% if team.users is not empty and team.users.first.firstLogin %}
+                            {{ team.users.first.firstLogin | printtime('%a %d %b %Y %T %Z') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>IP</th>
+                    <td>
+                        {% if team.users is not empty and team.users.first.lastIpAddress %}
+                            {{ team.users.first.lastIpAddress | printHost(true) }}
                         {% else %}
                             -
                         {% endif %}

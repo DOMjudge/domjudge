@@ -107,7 +107,7 @@ class TeamController extends BaseController
             'category' => ['title' => 'category', 'sort' => true,],
             'affiliation' => ['title' => 'affiliation', 'sort' => true,],
             'num_contests' => ['title' => '# contests', 'sort' => true,],
-            'hostname' => ['title' => 'host', 'sort' => true,],
+            'ip_address' => ['title' => 'ip', 'sort' => true,],
             'room' => ['title' => 'room', 'sort' => true,],
             'status' => ['title' => '', 'sort' => false,],
             'stats' => ['title' => 'stats', 'sort' => true,],
@@ -130,7 +130,7 @@ class TeamController extends BaseController
             $num_submitted = 0;
             $status = 'noconn';
             $statustitle = "no connections made";
-            if ($t->getTeampageFirstVisited()) {
+            if (!$t->getUsers()->isEmpty() && $t->getUsers()->first()->getFirstLogin()) {
                 $status = 'crit';
                 $statustitle = "teampage viewed, no submissions";
             }
@@ -183,12 +183,12 @@ class TeamController extends BaseController
                 $teamdata['affiliation'] = ['value' => '&nbsp;'];
             }
 
-            // render hostname nicely
-            if ($teamdata['hostname']['value']) {
-                $teamdata['hostname']['value'] = Utils::printhost($teamdata['hostname']['value']);
+            // render IP address nicely
+            if (!$t->getUsers()->isEmpty() && $t->getUsers()->first()->getLastIpAddress()) {
+                $teamdata['ip_address']['value'] = Utils::printhost($t->getUsers()->first()->getLastIpAddress());
             }
-            $teamdata['hostname']['default']  = '-';
-            $teamdata['hostname']['cssclass'] = 'text-monospace small';
+            $teamdata['ip_address']['default']  = '-';
+            $teamdata['ip_address']['cssclass'] = 'text-monospace small';
 
             // merge in the rest of the data
             $teamdata = array_merge($teamdata, [

@@ -32,8 +32,8 @@ class UserStateUpdater
             $user->setLastLogin(Utils::now());
             $user->setLastIpAddress($this->dj->getClientIp());
 
-            if ($user->getTeam() && !$user->getTeam()->getTeampageFirstVisited()) {
-                $user->getTeam()->setTeampageFirstVisited(Utils::now());
+            if (!$user->getFirstLogin()) {
+                $user->setFirstLogin(Utils::now());
             }
 
             $this->em->flush();
