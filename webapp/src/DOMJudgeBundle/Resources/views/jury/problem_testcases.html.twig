@@ -72,7 +72,11 @@
                         </div></td>
                     {% endif %}
                     <td class="testdesc">
-                        {{ testcase.description(true) | descriptionExpand }}
+                        <span class="testcase-description">{{ testcase.description(true) | descriptionExpand }}</span>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <textarea class="d-none form-control testcase-description-field" name="description[{{ testcase.rank }}]">{{ testcase.description(true) }}</textarea>
+                            <button type="button" class="float-right testcase-edit-description btn btn-secondary btn-sm">Edit</button>
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
@@ -170,5 +174,26 @@
         {% set formEnd = '</form>' %}
         {{ formEnd | raw }}
     {% endif %}
+
+    <script>
+        $(function() {
+            $('.testcase-edit-description').on('click', function() {
+                var $button = $(this);
+                var $description = $button.parent().find('.testcase-description');
+                var $descriptionInput = $button.parent().find('.testcase-description-field');
+
+                if ($description.hasClass('d-none')) {
+                    $description.removeClass('d-none');
+                    $descriptionInput.addClass('d-none');
+                    $button.text('Edit');
+                    $descriptionInput.val($description.text());
+                } else {
+                    $description.addClass('d-none');
+                    $descriptionInput.removeClass('d-none');
+                    $button.text('Cancel');
+                }
+            });
+        });
+    </script>
 
 {% endblock %}

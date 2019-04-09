@@ -577,6 +577,12 @@ class ProblemController extends BaseController
                     $messages[] = sprintf('Set testcase %d to %sbe a sample testcase', $rank, $newSample ? '' : 'not ');
                 }
 
+                $newDescription = $request->request->get('description')[$rank];
+                if ($newDescription !== $testcase->getDescription(true)) {
+                    $testcase->setDescription($newDescription);
+                    $messages[] = sprintf('Updated description of testcase %d ', $rank);
+                }
+
                 foreach (['input', 'output', 'image'] as $type) {
                     /** @var UploadedFile $file */
                     if ($file = $request->files->get('update_' . $type)[$rank]) {
