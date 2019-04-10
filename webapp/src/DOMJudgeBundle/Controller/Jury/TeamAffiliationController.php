@@ -177,6 +177,7 @@ class TeamAffiliationController extends BaseController
                 'url' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
                 'ajax' => true,
             ],
+            'maxWidth' => $this->dj->dbconfig_get('team_column_width', 0),
         ];
 
         if ($currentContest = $this->dj->getCurrentContest()) {

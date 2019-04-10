@@ -14,6 +14,14 @@
     {% set static = false %}
 {% endif %}
 
+{% if maxWidth > 0 %}
+    <style>
+        .forceWidth {
+            max-width: {{ maxWidth }}px;
+        }
+    </style>
+{% endif %}
+
 <table class="scoreboard center {% if jury %}scoreboard_jury{% endif %}">
 
     {# output table column groups (for the styles) #}
@@ -89,6 +97,7 @@
     <tbody>
     {% set previousSortOrder = -1 %}
     {% set previousTeam = null %}
+    {% set backgroundColors = {"FFFFFF": 1} %}
     {% for score in scoreboard.scores if (limitToTeams is null or score.team.teamid in limitToTeamIds) %}
         {% set classes = [] %}
         {% if score.team.category.sortorder != previousSortOrder %}
@@ -163,8 +172,13 @@
                     {% endif %}
                 </td>
             {% endif %}
-            <td class="scoretn"
-                {% if color is not null %}style="background: {{ color }};"{% endif %} {% if jury %}title="{{ score.team.name }}"{% endif %}>
+            {% if color is null %}
+                {% set color = "FFFFFF" %}
+            {% else %}
+                {% set color = color|trim("#") %}
+                {% set backgroundColors = backgroundColors|merge({(''~color): 1}) %}
+            {% endif %}
+            <td class="scoretn cl{{ color }}" title="{{ score.team.name }}">
                 {% set link = null %}
                 {% set extra = null %}
                 {% if not static %}
@@ -184,10 +198,11 @@
                             {{ score.team.category.name }}
                         </span>
                     {% endif %}
-                    {{ score.team.name }}
+                    <span class="forceWidth">
+                        {{ score.team.name }}
+                    </span>
                     {% if showAffiliations %}
-                        <br/>
-                        <span class="univ">
+                        <span class="univ forceWidth">
                             {% if score.team.affiliation %}
                                 {{ score.team.affiliation.name }}
                             {% endif %}
@@ -300,7 +315,6 @@
             {% endfor %}
             </tbody>
         </table>
-        &nbsp;
     {% endif %}
 
     {% if showTeamSubmissions or jury %}
@@ -323,3 +337,48 @@
         </table>
     {% endif %}
 {% endif %}
+
+<style>
+    {% for color,i in backgroundColors %}
+        {% set cssColor = "#"~color %}
+
+        .cl{{ color }} {
+            background-color: {{ cssColor }}
+        }
+
+        {% set cMin = cssColor|hexColorToRGBA(0) %}
+        {% set cMax = cssColor|hexColorToRGBA(1) %}
+
+        .cl{{ color }} .forceWidth.toolong:after {
+            background: -moz-linear-gradient(left,
+                {{ cMin }} 0%,
+                {{ cMax }} 96%);
+            background: -webkit-gradient(linear, left top, right top,
+                color-stop(0%, {{ cMin }}),
+                color-stop(96%, {{ cMax }}));
+            background: -webkit-linear-gradient(left,
+                {{ cMin }} 0%,
+                {{ cMax }} 96%);
+            background: -o-linear-gradient(left,
+                {{ cMin }} 0%,
+                {{ cMax }} 96%);
+            background: -ms-linear-gradient(left,
+                {{ cMin }} 0%,
+                {{ cMax }} 96%);
+            background: linear-gradient(left,
+                {{ cMin }} 0%,
+                {{ cMax }} 96%);
+                filter: progid:DXImageTransform.Microsoft.gradient(
+                    startColorstr='#00{{ color }}',
+                    endColorstr='#FF{{ color }}',
+                    GradientType=1);
+        }
+    {% endfor %}
+</style>
+<script>
+    document.querySelectorAll(".forceWidth:not(.toolong)").forEach(el => {
+        if (el instanceof Element && el.scrollWidth > el.offsetWidth) {
+            el.classList.add("toolong");
+        }
+    });
+</script>
