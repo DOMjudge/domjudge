@@ -104,6 +104,6 @@ domjudge-devel@domjudge.org. You need to be subscribed before
 you can post. Information, subscription and archives are available at:
 https://www.domjudge.org/mailman/listinfo/domjudge-devel
 
-Some developers and users of DOMjudge linger on the IRC channel
-dedicated to DOMjudge on the Freenode network:
-server irc.freenode.net, channel #domjudge
+DOMjudge has a Slack workspace where a number of developers and
+users of DOMjudge linger. More information can be found at
+https://www.domjudge.org/chat
