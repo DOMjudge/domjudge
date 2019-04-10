@@ -22,10 +22,10 @@ Please ask any questions on the
 Also if you have a problem and you are not 100% sure this is a bug,
 please first ask/discuss it on the mailinglist.
 
-We also have an [IRC channel](https://webchat.freenode.net/?channels=domjudge)
-on the Freenode network: server irc.freenode.net, channel #domjudge. You're
+We also have a [Slack Workspace](https://domjudge.org/chat). You're
 welcome to join here and ask questions, provide feedback, or just have a chat.
-Note that response times may range from a few minutes to hours.
+Note that response times may range from a few minutes to hours,
+partly because people might be in different timezones.
 
 ## Patches / pull requests
 
