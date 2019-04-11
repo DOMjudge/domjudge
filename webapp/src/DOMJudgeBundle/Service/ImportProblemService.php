@@ -189,6 +189,9 @@ class ImportProblemService
                     $contestProblem
                         ->setProblem($problem)
                         ->setContest($contest);
+                } else {
+                    // Don't overwrite the shortname for a contestproblem when it already exists
+                    unset($contestProblemProperties['shortname']);
                 }
             }
         }
