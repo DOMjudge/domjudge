@@ -50,7 +50,7 @@ DOMjudge discerns the following kinds of hosts:
 <tag>DOMjudge server</tag>
        A host that receives the submissions, runs the
        database and serves the web pages. This host will run the
-       Apache webserver and MySQL database.
+       nginx or Apache webserver and MySQL or MariaDB database.
        Also called <em>domserver</em> for brevity.
 <tag>Judgehosts</tag>
        A number of hosts, at least one, that will retrieve
@@ -146,13 +146,12 @@ The following software is required for running DOMjudge.
        preferably one that can generate statically linked stand-alone
        executables.
 
-<item> Apache web server with mod_rewrite and support for PHP &gt;= 7.0
-       and the mysqli, GD, curl, json, mbstring, intl, zip and XML extensions
-       for PHP. We also recommend the posix extension for extra debugging
-       information.
-       A configuration file for the Nginx webserver is also included,
-       and may be used instead of Apache. However, this setup is less
-       well tested and documented.
+<item> nginx web server with PHP FPM or Apache web server with mod_rewrite.
+
+<item> PHP &gt;= 7.0, either using FPM or Apache's mod_php.
+       The the mysqli, GD, curl, json, mbstring, intl, zip and XML extensions
+       for PHP should be enabled. We also recommend the posix extension for
+       extra debugging information.
 
 <item> MySQL or MariaDB &gt;= 5.5.3 database and client software.
 
@@ -244,8 +243,8 @@ consult the full installation instruction.
 
 External software:
 <itemize>
-<item> Install the MySQL-server and set a root password for it.
-<item> Install Apache, PHP and (recommended) phpMyAdmin.
+<item> Install the MySQL- or MariaDB-server and set a root password for it.
+<item> Install either nginx or Apache, PHP and (recommended) phpMyAdmin.
 <item> Make sure PHP works for the web server and command line scripts.
 <item> Install necessary compilers on the judgehosts.
 <item> See also <ref id="install_config:package-install"
@@ -265,13 +264,20 @@ On the domserver host:
 <itemize>
 <item> Install the MySQL database using e.g. <tt>bin/dj_setup_database -u root -r
        install</tt> on the domserver host.
-<item> Add <tt>etc/apache.conf</tt> to your Apache configuration, edit
+<item> For Apache: add <tt>etc/apache.conf</tt> to your Apache configuration, edit
        it to your needs, reload web server:<newline>
        <tt>
        sudo ln -s &lt;INSTALL_PATH&gt;/domserver/etc/apache.conf /etc/apache2/conf-available/domjudge.conf &&
        sudo a2enmod rewrite &&
        sudo a2enconf domjudge &&
        sudo apache2ctl graceful
+       </tt>
+<item> For nginx: add <tt>etc/nginx-conf</tt> to your nginx configuration and add <tt>etc/domjudge-fpm.conf</tt>
+       to your PHP FPM pool directory, edit it to your needs, reload web server:<newline>
+       <tt>
+       sudo ln -s &lt;INSTALL_PATH&gt;/domserver/etc/nginx-conf /etc/nginx/sites-enabled/domjudge &&
+       sudo ln -s &lt;INSTALL_PATH&gt;/domserver/etc/domjudge-fpm.conf /etc/php/7.0/fpm/pool.d/domjudge.conf &&
+       sudo service nginx reload
        </tt>
 
 <item> Check that the web interface works (/team, /public and /jury).
@@ -356,6 +362,8 @@ sudo apt install gcc g++ make zip unzip mariadb-server \
 	texlive-fonts-recommended texlive-lang-european
 # To enable the command-line submit client, also add:
 sudo apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
+# Replace apache2 and libapache2-mod-php with nginx, php-fpm and
+# apache2-utils for nginx
 </code>
 Note that PHP modules may need to be enabled depending on your distribution.
 E.g. on Ubuntu run <code>sudo phpenmod json</code> to enable the JSON module.
@@ -581,26 +589,37 @@ to/from these files.
 <sect>Web server configuration
 <p>
 
-For the web interface, you need to have a web server (e.g. Apache)
+For the web interface, you need to have a web server (e.g. nginx or Apache)
 installed on the domserver and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
 details.
 
-To configure the web server for DOMjudge, use the Apache configuration
-snippet from <tt>etc/apache.conf</tt>. It contains examples for
-configuring the DOMjudge pages with an alias directive, or as a
-virtualhost, optionally with SSL; it also contains PHP and security
+To configure the Apache web server for DOMjudge, use the Apache
+configuration snippet from <tt>etc/apache.conf</tt>. It contains
+examples for configuring the DOMjudge pages with an alias directive,
+or as a virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
 <verb>
 ln -s etc/apache.conf /etc/apache2/conf-available/domjudge.conf
 a2enmod rewrite
 a2enconf domjudge
+# Edit the file /etc/apache2/conf-available/domjudge.conf to your needs
 service apache2 reload
 </verb>
 
-An Nginx webserver configuration snippet is also provided
-in <tt>etc/nginx-conf</tt>. You still need <tt>htpasswd</tt>
-from <tt>apache2-utils</tt> though.
+An nginx webserver configuration snippet is also provided
+in <tt>etc/nginx-conf</tt>. Furthermore the file <tt>etc/domjudge-fpm.conf</tt>
+contains the PHP FPM configuration you can use. You still need <tt>htpasswd</tt>
+from <tt>apache2-utils</tt> though. To use this configuration
+file, perform the following steps
+<verb>
+ln -s etc/nginx-conf /etc/nginx/sites-enabled/domjudge
+ln -s etc/domjudge-fpm.conf /etc/php/7.0/fpm/pool.d/domjudge.conf
+# Edit the files /etc/nginx/sites-enabled/domjudge and
+# /etc/php/7.0/fpm/pool.d/domjudge.conf to your needs
+service php7.0-fpm reload
+service nginx reload
+</verb>
 
 The judgehosts connect to DOMjudge via the DOMjudge API so need
 to be able to access at least this part of the web interface.
