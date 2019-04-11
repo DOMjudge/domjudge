@@ -124,18 +124,6 @@ function collapse2(x)
 	$(x).toggleClass('d-none');
 }
 
-function addFileUpload()
-{
-	'use strict';
-	var input = document.createElement('input');
-	input.type = 'file';
-	input.name = 'code[]';
-	var br = document.createElement('br');
-
-	document.getElementById('auxfiles').appendChild( input );
-	document.getElementById('auxfiles').appendChild( br );
-}
-
 function togglelastruns()
 {
 	'use strict';
@@ -461,37 +449,6 @@ function clarificationAppendAnswer() {
 function confirmLogout() {
 	'use strict';
 	return confirm("Really log out?");
-}
-
-function addRow(templateid, tableid) {
-    var $template = $('#' + templateid);
-    var $table = $('#' + tableid);
-    var maxId = $table.data('max-id');
-
-    if ( maxId === undefined ) {
-        // If not set on the table yet, we start at 0
-        maxId = 0;
-    } else {
-        // Oterwise we should add 1 to the old value
-        maxId++;
-    }
-
-    // Set it back on the table
-    $table.data('max-id', maxId);
-
-    var templateContents = $template.text().replace(/\{id\}/g, maxId);
-
-    $('tbody', $table).append(templateContents);
-}
-
-// Add the first row of a table if none exist yet
-function addFirstRow(templateid, tableid) {
-    var $table = $('#' + tableid);
-    var maxId = $table.data('max-id');
-
-    if ( maxId === undefined || maxId === 0 ) {
-        addRow(templateid, tableid);
-    }
 }
 
 function processAjaxResponse(jqXHR, data) {
