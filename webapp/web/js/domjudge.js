@@ -91,57 +91,6 @@ function sendNotification(title, options)
     }
 }
 
-// make corresponding testcase description editable
-function editTcDesc(descid)
-{
-	'use strict';
-	var node = document.getElementById('tcdesc_' + descid);
-	node.parentNode.setAttribute('onclick', '');
-	node.parentNode.removeChild(node.nextSibling);
-	node.style.display = 'block';
-	node.setAttribute('name', 'description[' + descid + ']');
-}
-
-// hides edit field if javascript is enabled
-function hideTcDescEdit(descid)
-{
-	'use strict';
-	var node = document.getElementById('tcdesc_' + descid);
-	node.style.display = 'none';
-	node.setAttribute('name', 'invalid');
-
-	var span = document.createElement('span');
-	span.innerHTML = node.innerHTML;
-	node.parentNode.appendChild(span);
-}
-
-// make corresponding testcase sample dropdown editable
-function editTcSample(tcid)
-{
-	'use strict';
-	var node = document.getElementById('sample_' + tcid + '_');
-	node.parentNode.setAttribute('onclick', '');
-	var remove = node.nextSibling;
-	while (remove.nodeName === '#text')
-		remove = remove.nextSibling;
-	node.parentNode.removeChild(remove);
-	node.style.display = 'block';
-	node.setAttribute('name', 'sample[' + tcid + ']');
-}
-
-// hides sample dropdown field if javascript is enabled
-function hideTcSample(tcid, str)
-{
-	'use strict';
-	var node = document.getElementById('sample_' + tcid + '_');
-	node.style.display = 'none';
-	node.setAttribute('name', 'invalid');
-
-	var span = document.createElement('span');
-	span.innerHTML = str;
-	node.parentNode.appendChild(span);
-}
-
 var doReload = true;
 
 function reloadPage()
