@@ -57,7 +57,7 @@ EXITCODE=$?
 # -Xmx: maximum size of memory allocation pool
 # -Xms: initial size of memory, improves runtime stability
 # -XX:+UseSerialGC: Serialized garbage collector improves runtime stability
-# -Xss${MEMSTACK}k: stack size as configured abve
+# -Xss${MEMSTACK}k: stack size as configured above
 # -Dfile.encoding=UTF-8: set file encoding to UTF-8
 cat > "$DEST" <<EOF
 #!/bin/sh
