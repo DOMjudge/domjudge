@@ -215,7 +215,8 @@ class ImportExportService
                 $problem = new Problem();
                 $problem
                     ->setName($problemName)
-                    ->setTimelimit(10);
+                    ->setTimelimit(10)
+                    ->setExternalid($problemData['short-name'] ?? null);
                 // TODO: ask Fredrik about configuration of timelimit
 
                 $this->em->persist($problem);
