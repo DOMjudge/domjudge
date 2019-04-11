@@ -178,6 +178,11 @@ class CheckConfigService
         $sourcefiles_limit = $this->dj->dbconfig_get('sourcefiles_limit', 100);
         $max_files = ini_get('max_file_uploads');
 
+        /* PHP will silently discard any files above the max_file_uploads limit,
+         * so it must be at least one larger than our sourcefiles_limit so we
+         * can detect this and present a proper error to the team instead of
+         * just accepting it with files missing.
+         */
         $result = 'O';
         if ($max_files <= $sourcefiles_limit) {
             $result = 'E';

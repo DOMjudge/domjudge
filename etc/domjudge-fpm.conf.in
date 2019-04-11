@@ -23,8 +23,13 @@ php_flag[display_errors] = off
 php_admin_flag[log_errors] = on
 php_admin_value[error_log] = /var/log/fpm-php.domjudge.log
 
+; Set these three to be at least the size of your largest testcase and
+; largest expected program output.
 php_admin_value[memory_limit] = 512M
 php_admin_value[upload_max_filesize] = 256M
 php_admin_value[post_max_size] = 256M
+; This must be strictly larger than the configured max number of source
+; files a team can submit.
 php_admin_value[max_file_uploads] = 101
+
 ;php_admin_value[date.timezone] = America/Denver
