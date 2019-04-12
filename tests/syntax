@@ -1,32 +1,46 @@
-#!/bin/sh
+#!/bin/bash
+# Run some syntax checking tests on PHP and Shell scripts.
 
-# Run some Syntax checking tests on PHP and Shell scripts
-PHP=$(which php)
+set -euo pipefail
+cd "$(dirname "$0")" || exit -1
 
-if [ -x $PHP ]; then
-	find .. -path ../lib/vendor -prune -o -path ../webapp/var -prune -o -name '*.php' | \
-	while read -r i ; do
-		$PHP -l "$i" | grep -v "^No syntax errors detected in "
-	done
-
-	grep -rsl "^#\!.*php" .. | grep -vE '/\.(svn|git)/' | grep -v '\.php' | \
-	while read -r i ; do
-		$PHP -l "$i" | grep -v "^No syntax errors detected in "
-	done
-else
-	echo "PHP not found"
+PHP=$(command -v php)
+if [ ! -x "$PHP" ]; then
+	echo "PHP ($PHP) not found or not executable"
+	exit -1
 fi
 
-if [ -x /usr/bin/checkbashisms ]; then
-	grep -rsl "^#\!.*/bin/sh" .. | grep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|judge/judgedaemon))' | \
-	while read -r i ; do
-		if [ "${i##*.}" != "zip" ]; then
-			checkbashisms "$i"
-		fi
-	done
-else
-	echo "checkbashisms not found in /usr/bin/checkbashisms"
+echo "Checking .php scripts:"
+echo "---------------------"
+find .. -path ../lib/vendor -prune -o -path ../webapp/var -prune -o -name '*.php' | \
+while read -r i ; do
+	$PHP -l "$i" | sed -e 's|No syntax errors detected in ../||'
+done
+
+echo
+echo "Checking scripts with php shebang:"
+echo "---------------------------------"
+grep -rsl "^#\\!.*php" .. | grep -vE '/\.(svn|git)/' | grep -v '\.php' | \
+while read -r i ; do
+	$PHP -l "$i" | sed -e 's|No syntax errors detected in ../||'
+done
+
+
+if [ ! -x /usr/bin/checkbashisms ]; then
+	echo "/usr/bin/checkbashisms not found or not executable"
+	exit -1
 fi
+
+echo
+echo "Checking shell scripts for bashisms:"
+echo "-----------------------------------"
+grep -rsl "^#\\!.*/bin/sh" .. | grep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|judge/judgedaemon))' | \
+while read -r i ; do
+	if [ "${i##*.}" != "zip" ]; then
+		echo "$i" | sed -e 's|^../||'
+		checkbashisms "$i"
+	fi
+done
 
 # We ignore the following shellcheck warnings, for more details see:
 # https://github.com/koalaman/shellcheck/wiki/<code>
@@ -35,13 +49,18 @@ fi
 # SC2034: many "unused variables" are actually used, or in compile scripts declared on purpose
 # SC2086: there are too many cases where quoting is not necessary and tedious
 
-if [ -x /usr/bin/shellcheck ]; then
-	grep -rslE "^#\!.*/bin/(ba)?sh" .. | grep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|import|judge/judgedaemon))' | \
-	while read -r i ; do
-		if [ "${i##*.}" != "zip" ]; then
-			shellcheck -f gcc -e 1072,2034,2086 "$i"
-		fi
-	done
-else
-	echo "shellcheck not found in /usr/bin/shellcheck"
+if [ ! -x /usr/bin/shellcheck ]; then
+	echo "/usr/bin/shellcheck not found or not executable"
+	exit -1
 fi
+
+echo
+echo "Checking shell scripts with shellcheck:"
+echo "--------------------------------------"
+grep -rslE "^#\!.*/bin/(ba)?sh" .. | grep -vE '(\.(svn|git)/|^\.\./(config|autom4te|install-sh|sql/files/defaultdata/hs/run|lib/vendor/|output|import|judge/judgedaemon))' | \
+while read -r i ; do
+	if [ "${i##*.}" != "zip" ]; then
+		echo "$i"
+		shellcheck -f gcc -e 1072,2034,2086 "$i" | sed -e 's|^../||'
+	fi
+done
