@@ -83,7 +83,8 @@ echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
 cd /tmp
 git clone --depth=1 https://github.com/Kattis/problemtools.git
 cd problemtools/examples
-for i in hello different guess; do
+mv hello hello_kattis
+for i in hello_kattis different guess; do
 	(
 		cd "$i"
 		zip -r "../${i}.zip" -- *
