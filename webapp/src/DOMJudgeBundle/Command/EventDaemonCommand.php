@@ -99,6 +99,13 @@ class EventDaemonCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // Disable SQL logging if we do not run explicitly in debug mode.
+        // This would cause a serious memory leak otherwise since this is a
+        // long runnning process.
+        if (!$this->getContainer()->getParameter('kernel.debug')) {
+            $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
+        }
+
         // Set up logger
         $verbosityLevelMap = [
             LogLevel::NOTICE => OutputInterface::VERBOSITY_NORMAL,
