@@ -170,6 +170,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
                 throw new BadRequestHttpException('Specified \'problem\' does not exist.');
             }
         }
+        $errors = [];
         /** @var UploadedFile $file */
         foreach ($files as $file) {
             $zip = null;
@@ -183,6 +184,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
                 if ($newProblem) {
                     $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
                     $probIds[] = $newProblem->getProbid();
+                } else {
+                    $errors = array_merge($errors, $messages);
                 }
             } catch (\Exception $e) {
                 dump($e);
@@ -193,6 +196,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             }
         }
         dump($allMessages);
+        if (!empty($errors)) {
+            throw new BadRequestHttpException(json_encode($errors));
+        }
         return $probIds;
     }
 
