@@ -895,7 +895,7 @@ class ProblemController extends BaseController
             $contest = $data['contest'] ?? null;
             /** @var ContestProblem $contestProblem */
             foreach ($problem->getContestProblems() as $contestProblem) {
-                if (($currentContest = $this->DOMJudgeService->getCurrentContest()) !== null &&
+                if (($currentContest = $this->dj->getCurrentContest()) !== null &&
                     $contestProblem->getCid() === $currentContest->getCid()) {
                     $contest = $currentContest;
                     break;

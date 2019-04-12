@@ -590,7 +590,7 @@ class ImportProblemService
                     for ($k = 0; $k < count($files); $k++) {
                         $source = $zip->getFromIndex($indices[$k]);
                         if ($results === null) {
-                            $results = SubmissionService::getExpectedResults($source, $this->DOMJudgeService->dbconfig_get('results_remap', []));
+                            $results = SubmissionService::getExpectedResults($source, $this->dj->dbconfig_get('results_remap', []));
                         }
                         if (!($tempFileName = tempnam($tmpDir, 'ref_solution-'))) {
                             throw new ServiceUnavailableHttpException(null,
