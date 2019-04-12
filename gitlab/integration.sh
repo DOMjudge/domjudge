@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash
+
+set -euxo pipefail
 
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
