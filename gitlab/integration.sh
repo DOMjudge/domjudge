@@ -89,14 +89,14 @@ for i in hello_kattis different guess; do
 		cd "$i"
 		zip -r "../${i}.zip" -- *
 	)
-	curl -X POST -n -N -F zip[]=@${i}.zip http://localhost/domjudge/api/contests/2/problems
+	curl --fail -X POST -n -N -F zip[]=@${i}.zip http://localhost/domjudge/api/contests/2/problems
 done
 
 # wait for and check results
-NUMSUBS=$(curl http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python -mjson.tool | grep -c '"id":')
+NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python -mjson.tool | grep -c '"id":')
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
-export CURLOPTS="-sq -m 30 -b $COOKIEJAR"
+export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
 
 # Make an initial request which will get us a session id, and grab the csrf token from it
 CSRFTOKEN=$(curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge/login" 2>/dev/null | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')
