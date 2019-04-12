@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -euxo pipefail
-
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
 DIR=$(pwd)
@@ -9,6 +8,16 @@ GITSHA=$(git rev-parse HEAD || true)
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
+
+function log_on_err() {
+	echo -e "\\n\\n=======================================================\\n"
+	echo "Symfony log:"
+	if sudo test -f /opt/domjudge/domserver/webapp/var/logs/prod.log; then
+		sudo cat /opt/domjudge/domserver/webapp/var/logs/prod.log
+	fi
+}
+
+trap log_on_err ERR
 
 cd /opt/domjudge/domserver
 
