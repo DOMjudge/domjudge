@@ -5,6 +5,11 @@ include:
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: SAST.gitlab-ci.yml
 
+check syntax:
+  stage: test
+  script:
+    - ./tests/syntax
+
 run unit tests:
   stage: test
   image: domjudge/gitlabci:1.0

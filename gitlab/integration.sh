@@ -85,7 +85,7 @@ fi
 
 # submit test programs
 cd ${DIR}/tests
-make check-syntax check test-stress
+make check test-stress
 
 # Prepare to load example problems from Kattis/problemtools
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
