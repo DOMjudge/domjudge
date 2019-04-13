@@ -68,6 +68,10 @@ while getopts "n:" opt; do
 		:)
 			echo "Option -$OPTARG requires an argument." >&2
 			;;
+		*)
+			echo "Invalid option specified." >&2
+			exit 1
+			;;
 	esac
 done
 # Shift any of the arguments out of the way

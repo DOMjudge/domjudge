@@ -48,7 +48,7 @@ while getopts ':c:l:p:u:' OPT ; do
 		u)
 			BASEURL=$OPTARG
 			;;
-		?)
+		\?)
 			error "unknown option '$OPTARG' found."
 			;;
 		:)

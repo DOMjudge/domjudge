@@ -90,6 +90,10 @@ while getopts "n:" opt; do
 		:)
 			echo "Option -$OPTARG requires an argument." >&2
 			;;
+		*)
+			echo "Invalid option specified." >&2
+			exit 1
+			;;
 	esac
 done
 # Shift any of the arguments out of the way
@@ -225,7 +229,7 @@ runcheck "$RUN_SCRIPT" $RUNARGS \
 # Check for still running processes:
 output=$(ps -u "$RUNUSER" -o pid= -o comm= || true)
 if [ -n "$output" ] ; then
-	error "found processes still running as '$RUNUSER', check manually:\n$output"
+	error "found processes still running as '$RUNUSER', check manually:\\n$output"
 fi
 
 if [ $COMBINED_RUN_COMPARE -eq 0 ]; then
@@ -264,22 +268,22 @@ fi
 # Append output validator error messages
 # TODO: display extra
 if [ -s feedback/judgeerror.txt ]; then
-	printf "\n---------- output validator (error) messages ----------\n" >> feedback/judgemessage.txt
+	printf "\\n---------- output validator (error) messages ----------\\n" >> feedback/judgemessage.txt
 	cat feedback/judgeerror.txt >> feedback/judgemessage.txt
 fi
 
 logmsg $LOG_DEBUG "checking compare script exit-status: $exitcode"
 if grep '^time-result: .*timelimit' compare.meta >/dev/null 2>&1 ; then
-	logmsg $LOG_ERR "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:\n$(cat compare.tmp)"
+	logmsg $LOG_ERR "Comparing aborted after $SCRIPTTIMELIMIT seconds, compare script output:\\n$(cat compare.tmp)"
 	cleanexit ${E_COMPARE_ERROR:-1}
 fi
 # Append output validator stdin/stderr - display extra?
 if [ -s compare.tmp ]; then
-	printf "\n---------- output validator stdout/stderr messages ----------\n" >> feedback/judgemessage.txt
+	printf "\\n---------- output validator stdout/stderr messages ----------\\n" >> feedback/judgemessage.txt
 	cat compare.tmp >> feedback/judgemessage.txt
 fi
 if [ $exitcode -ne 42 ] && [ $exitcode -ne 43 ]; then
-	logmsg $LOG_ERR "Comparing failed with exitcode $exitcode, compare script output:\n$(cat feedback/judgemessage.txt)"
+	logmsg $LOG_ERR "Comparing failed with exitcode $exitcode, compare script output:\\n$(cat feedback/judgemessage.txt)"
 	cleanexit ${E_COMPARE_ERROR:-1}
 fi
 

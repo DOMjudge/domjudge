@@ -74,6 +74,7 @@ SECRET=$(head -c20 /dev/urandom | base64 | head -c20 | tr '/+' 'Aa')
 echo "# Generated from '$PARAMS' on $(hostname), $(date)."
 echo
 
+# shellcheck disable=SC1117
 sed -e "s/\(database_host:\) .*\$/\1 $DBHOST/" \
     -e "s/\(database_name:\) .*\$/\1 $DBNAME/" \
     -e "s/\(database_user:\) .*\$/\1 $DBUSER/" \

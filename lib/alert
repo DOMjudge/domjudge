@@ -16,6 +16,7 @@ fi
 shift
 DESCRIPTION="$*"
 
+# shellcheck disable=SC2230
 BEEPCMD=$(which beep)
 
 beep()
