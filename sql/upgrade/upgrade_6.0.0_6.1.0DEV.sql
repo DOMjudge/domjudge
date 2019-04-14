@@ -111,3 +111,7 @@ INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_e
 ALTER TABLE `team`
   DROP COLUMN `teampage_first_visited`,
   DROP COLUMN `hostname`;
+
+ALTER TABLE `event`
+  DROP COLUMN `datatype`,
+  DROP COLUMN `dataid`;
