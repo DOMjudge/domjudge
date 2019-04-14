@@ -20,9 +20,6 @@ CCS_URL="${DOMJUDGE_URL}/api/contests/$DOMJUDGE_CID"
 CCS_USER="admin"
 CCS_PASS=$(cat ../etc/initial_admin_password.secret)
 
-# Whether to launch the eventdaemon or not
-RUN_EVENTDAEMON=0
-
 
 
 # ----------------------------------------------------------------------------
@@ -136,17 +133,6 @@ EOF
 
 cd $BASEDIR/icpctools # cd so the logs directory ends up in a less annoying place
 
-if [ $RUN_EVENTDAEMON -ne 0 ]; then
-  echo "Start the eventdaemon"
-  EVENTDAEMON="$BASEDIR/../bin/eventdaemon --contest $DOMJUDGE_CID"
-  $EVENTDAEMON >eventdaemon.log 2>&1 &
-  EVENTDAEMON_PID=$!
-
-  # Wait for the log file to be quiet for 5 seconds
-  wait_for_quiet eventdaemon.log
-  echo "Eventdaemon initialized"
-fi
-
 echo "Start the cds"
 CDS="$CDS_DIR/bin/server run cds"
 $CDS >cds.log 2>&1 &
@@ -184,13 +170,6 @@ echo "Get the scoreboard from domjudge"
 curl -s -k --connect-timeout 5 --no-buffer -u $CCS_USER:$CCS_PASS $CCS_URL/scoreboard > dj-scoreboard.json 2>/dev/null
 
 
-
-if [ $RUN_EVENTDAEMON -ne 0 ]; then
-  echo "Stopping eventdaemon"
-  # shellcheck disable=SC2015
-  { kill $EVENTDAEMON_PID && wait $EVENTDAEMON_PID || true; } >/dev/null 2>&1
-  echo "    stopped"
-fi
 
 echo "Stopping cds"
 # shellcheck disable=SC2015

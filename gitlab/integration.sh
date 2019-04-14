@@ -65,11 +65,6 @@ UPDATE contest SET endtime = UNIX_TIMESTAMP()+$TIMEHELP WHERE cid = 2;
 UPDATE team_category SET visible = 1;
 EOF
 
-# start eventdaemon
-cd /opt/domjudge/domserver/
-bin/eventdaemon -C 2 &
-sleep 5
-
 # start judgedaemon
 cd /opt/domjudge/judgehost/
 bin/judgedaemon -n 0 &

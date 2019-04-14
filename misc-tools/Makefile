@@ -8,8 +8,7 @@ OBJECTS =
 
 SUBST_DOMSERVER = save_sources2file restore_sources2db \
                   judging_statistics balloons \
-                  simulate_contest create_accounts multi_rejudge \
-                  eventdaemon
+                  simulate_contest create_accounts multi_rejudge
 
 SUBST_JUDGEHOST = create_cgroups dj_make_chroot dj_run_chroot dj_make_chroot_docker
 

@@ -20,6 +20,8 @@ Version 6.1.0 - DEV
  - Add support for creating a writable tempdirectory for submissions.
  - Add option to download all sample files of a problem in a single zip.
  - Add etc/initial_admin_password.secret during install.
+ - Removed eventdaemon again and moved its logic to the event feed API
+   action and just before inserting other events.
 
 Version 6.0.3 - 15 December 2018
 --------------------------------
