@@ -1257,7 +1257,6 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
     // TODO: can this be wrapped into a single query?
     $eventids = [];
     foreach ($cids as $cid) {
-        $table = ($endpoint['tables'] ? $endpoint['tables'][0] : null);
         foreach ($dataids as $idx => $dataid) {
             if (in_array($type, ['contests','state']) || $jsonPassed) {
                 // Contest and state endpoint are singular
@@ -1267,10 +1266,10 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
             }
             $eventid = $DB->q('RETURNID INSERT INTO event
                               (eventtime, cid, endpointtype, endpointid,
-                               datatype, dataid, action, content)
-                               VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
-                              $now, $cid, $type, (string)$ids[$idx], $table,
-                              (string)$dataid, $action, $jsonElement);
+                               action, content)
+                               VALUES (%s, %i, %s, %s, %s, %s)',
+                              $now, $cid, $type, (string)$ids[$idx],
+                              $action, $jsonElement);
             $eventids[] = $eventid;
         }
     }

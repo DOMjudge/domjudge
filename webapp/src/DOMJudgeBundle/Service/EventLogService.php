@@ -390,7 +390,6 @@ class EventLogService implements ContainerAwareInterface
         // TODO: can this be wrapped into a single query?
         $events = [];
         foreach ($contestIds as $contestId) {
-            $table = ($endpoint[self::KEY_TABLES] ? $endpoint[self::KEY_TABLES][0] : null);
             foreach ($dataIds as $idx => $dataId) {
                 $contest = $this->em->getRepository(Contest::class)->find($contestId);
 
@@ -419,8 +418,6 @@ class EventLogService implements ContainerAwareInterface
                     ->setContest($contest)
                     ->setEndpointtype($type)
                     ->setEndpointid($ids[$idx])
-                    ->setDatatype($table)
-                    ->setDataid($dataId)
                     ->setAction($action)
                     ->setContent($jsonElement);
                 $this->em->persist($event);

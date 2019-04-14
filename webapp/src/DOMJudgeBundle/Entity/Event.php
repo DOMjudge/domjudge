@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Log of all events during a contest
  *
- * @ORM\Table(name="event", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"}, uniqueConstraints={@ORM\UniqueConstraint(name="eventtime", columns={"eventtime"})}, indexes={@ORM\Index(name="cid", columns={"cid"}), @ORM\Index(name="datatype", columns={"datatype"})})
+ * @ORM\Table(name="event", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"}, uniqueConstraints={@ORM\UniqueConstraint(name="eventtime", columns={"eventtime"})}, indexes={@ORM\Index(name="cid", columns={"cid"})})
  * @ORM\Entity
  */
 class Event
@@ -41,20 +41,6 @@ class Event
      * @ORM\Column(name="endpointid", type="string", length=64, nullable=false)
      */
     private $endpointid;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="datatype", type="string", length=32, nullable=true)
-     */
-    private $datatype;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="dataid", type="string", length=64, nullable=true)
-     */
-    private $dataid;
 
     /**
      * @var string
@@ -203,54 +189,6 @@ class Event
     public function getEndpointid()
     {
         return $this->endpointid;
-    }
-
-    /**
-     * Set datatype
-     *
-     * @param string $datatype
-     *
-     * @return Event
-     */
-    public function setDatatype($datatype)
-    {
-        $this->datatype = $datatype;
-
-        return $this;
-    }
-
-    /**
-     * Get datatype
-     *
-     * @return string
-     */
-    public function getDatatype()
-    {
-        return $this->datatype;
-    }
-
-    /**
-     * Set dataid
-     *
-     * @param string $dataid
-     *
-     * @return Event
-     */
-    public function setDataid($dataid)
-    {
-        $this->dataid = $dataid;
-
-        return $this;
-    }
-
-    /**
-     * Get dataid
-     *
-     * @return string
-     */
-    public function getDataid()
-    {
-        return $this->dataid;
     }
 
     /**

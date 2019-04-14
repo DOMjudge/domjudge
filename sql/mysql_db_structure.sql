@@ -157,8 +157,6 @@ CREATE TABLE `event` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `endpointtype` varchar(32) NOT NULL COMMENT 'API endpoint associated to this entry',
   `endpointid` varchar(64) NOT NULL COMMENT 'API endpoint (external) ID',
-  `datatype` varchar(32) DEFAULT NULL COMMENT 'DB table associated to this entry',
-  `dataid` varchar(64) DEFAULT NULL COMMENT 'Identifier in reference DB table',
   `action` varchar(32) NOT NULL COMMENT 'Description of action performed',
   `content` longblob NOT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed',
   PRIMARY KEY (`eventid`),
