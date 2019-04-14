@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Service;
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\MappingException;
+use Doctrine\ORM\NonUniqueResultException;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\Event;
@@ -12,6 +13,8 @@ use DOMJudgeBundle\Entity\Judging;
 use DOMJudgeBundle\Entity\JudgingRun;
 use DOMJudgeBundle\Entity\TeamAffiliation;
 use DOMJudgeBundle\Entity\TeamCategory;
+use DOMJudgeBundle\Utils\Utils;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
@@ -373,7 +376,7 @@ class EventLogService implements ContainerAwareInterface
         // First acquire an advisory lock to prevent other event logging,
         // so that we can obtain a unique timestamp.
         if ($this->em->getConnection()->fetchColumn("SELECT GET_LOCK('domjudge.eventlog',1)") != 1) {
-            throw new \Exception('EventLogService::log failed to obtain lock');
+            throw new Exception('EventLogService::log failed to obtain lock');
         }
 
         // Explicitly construct the time as string to prevent float
@@ -389,6 +392,11 @@ class EventLogService implements ContainerAwareInterface
         foreach ($contestIds as $contestId) {
             $table = ($endpoint[self::KEY_TABLES] ? $endpoint[self::KEY_TABLES][0] : null);
             foreach ($dataIds as $idx => $dataId) {
+                $contest = $this->em->getRepository(Contest::class)->find($contestId);
+
+                // Add missing state events that should have happened already
+                $this->addMissingStateEvents($contest);
+
                 if (in_array($type, ['contests', 'state']) || $jsonPassed) {
                     // Contest and state endpoint are singular
                     $jsonElement = $json;
@@ -398,7 +406,7 @@ class EventLogService implements ContainerAwareInterface
                 $event = new Event();
                 $event
                     ->setEventtime($now)
-                    ->setContest($this->em->getRepository(Contest::class)->find($contestId))
+                    ->setContest($contest)
                     ->setEndpointtype($type)
                     ->setEndpointid($ids[$idx])
                     ->setDatatype($table)
@@ -414,16 +422,180 @@ class EventLogService implements ContainerAwareInterface
         $this->em->flush();
 
         if ($this->em->getConnection()->fetchColumn("SELECT RELEASE_LOCK('domjudge.eventlog')") != 1) {
-            throw new \Exception('EventLogService::log failed to release lock');
+            throw new Exception('EventLogService::log failed to release lock');
         }
 
         if (count($events) !== $expectedEvents) {
-            throw new \Exception(sprintf("EventLogService::log failed to %s %s with ID's %s (%d/%d events done)",
-                                         $action, $type, $idsCombined, count($events), $expectedEvents));
+            throw new Exception(sprintf("EventLogService::log failed to %s %s with ID's %s (%d/%d events done)",
+                                        $action, $type, $idsCombined, count($events), $expectedEvents));
         }
 
         $this->logger->debug(sprintf("EventLogService::log %sd %s with ID's %s for %d contest(s)",
                                      $action, $type, $idsCombined, count($contestIds)));
+    }
+
+    /**
+     * Add all state events for the given contest that are not added yet but should have happened already
+     * @param Contest $contest
+     * @throws Exception
+     */
+    public function addMissingStateEvents(Contest $contest)
+    {
+        // Make sure we get a fresh contest
+        $this->em->refresh($contest);
+
+        // Because some states can happen in multiple different orders, we need to check per field to see if we have
+        // a state event where that field matches the current value.
+        $states = [
+            'started' => $contest->getStarttime(),
+            'ended' => $contest->getEndtime(),
+            'frozen' => $contest->getFreezetime(),
+            'thawed' => $contest->getUnfreezetime(),
+            'finalized' => $contest->getFinalizetime(),
+        ];
+
+        // Because we have the events in order now, we can keep 'growing' the data to insert, because every next state
+        // event will have the data from the previous one, together with the new data
+        $dataToInsert = [];
+
+        foreach ($states as $state => $time) {
+            $dataToInsert[$state] = null;
+        }
+
+        $dataToInsert['end_of_updates'] = null;
+
+        // First, remove all times that are still null or will happen in the future, as we do not need to check them
+        $states = array_filter($states, function ($time) {
+            return $time !== null && Utils::now() >= $time;
+        });
+
+        // Now sort the remaining times in increasing order, as that is the order in which we want to add the events
+        asort($states);
+
+        // Get all state events
+        /** @var Event[] $stateEvents */
+        $stateEvents = $this->em->createQueryBuilder()
+            ->from('DOMJudgeBundle:Event', 'e')
+            ->select('e')
+            ->andWhere('e.contest = :contest')
+            ->andWhere('e.endpointtype = :state')
+            ->setParameter(':contest', $contest)
+            ->setParameter(':state', 'state')
+            ->orderBy('e.eventid')
+            ->getQuery()
+            ->getResult();
+
+        // Now loop over the states and check if we already have an event for them
+        foreach ($states as $field => $time) {
+            $dataToInsert[$field] = Utils::absTime($time);
+
+            // Special case, if both thawed and finalized are non-null or finalized is non-null but frozen is,
+            // we also need to set end_of_updates
+            if ($dataToInsert['finalized'] !== null &&
+                ($dataToInsert['thawed'] !== null || $dataToInsert['frozen'] === null)) {
+                if ($dataToInsert['thawed'] !== null) {
+                    $dataToInsert['end_of_updates'] = $dataToInsert['thawed'];
+                } else {
+                    $dataToInsert['end_of_updates'] = $dataToInsert['finalized'];
+                }
+            }
+
+            // Check if we have an existing state event with this value
+            foreach ($stateEvents as $stateEvent) {
+                $stateData = $stateEvent->getContent();
+                // If we have a state event with this field and it matches, we do not need to insert this event again
+                if (isset($stateData[$field]) && $stateData[$field] === $dataToInsert[$field]) {
+                    // Continue the other $states loop
+                    continue 2;
+                }
+            }
+
+            // Insert the event
+            $this->insertEvent($contest, 'state', '', null, '', self::ACTION_UPDATE, $dataToInsert);
+        }
+    }
+
+    /**
+     * Insert the given event, if it doesn't exist yet
+     * @param Contest     $contest
+     * @param string      $endpointType
+     * @param string      $endpointId
+     * @param string|null $dataType
+     * @param string      $dataId
+     * @param string      $action
+     * @param mixed       $content
+     * @throws NonUniqueResultException
+     * @throws Exception
+     */
+    protected function insertEvent(
+        Contest $contest,
+        string $endpointType,
+        string $endpointId,
+        $dataType,
+        string $dataId,
+        string $action,
+        $content
+    ) {
+        $event = new Event();
+        $event
+            ->setEventtime(Utils::now())
+            ->setContest($contest)
+            ->setEndpointtype($endpointType)
+            ->setEndpointid($endpointId)
+            ->setDatatype($dataType)
+            ->setDataid($dataId)
+            ->setAction($action)
+            ->setContent($content);
+
+        // Now we can insert the event. However, before doing so, get an advisory lock to make sure
+        // no one else is doing the same
+        $lockString = sprintf('domjudge.eventlog.state.%d', $event->getContest()->getCid());
+        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
+                                                    [':lock' => $lockString]) != 1) {
+            throw new Exception('EventLogService::addMissingStateEvents failed to obtain lock');
+        }
+
+        if (!$this->hasEvent($event)) {
+            $this->em->persist($event);
+            $this->em->flush();
+        }
+
+        // Make sure to release the lock again
+        if ($this->em->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
+                                                    [':lock' => $lockString]) != 1) {
+            throw new Exception('EventLogService::addMissingStateEvents failed to release lock');
+        }
+    }
+
+    /**
+     * Return whether the given event already exists
+     * @param Event $event
+     * @return bool
+     * @throws NonUniqueResultException
+     */
+    protected function hasEvent(Event $event)
+    {
+        /** @var Event $existingEvent */
+        $existingEvent = $this->em->createQueryBuilder()
+            ->from('DOMJudgeBundle:Event', 'e')
+            ->select('e')
+            ->andWhere('e.contest = :contest')
+            ->andWhere('e.endpointtype = :endpoint')
+            ->andWhere('e.endpointid = :endpointid')
+            ->setParameter(':contest', $event->getContest())
+            ->setParameter(':endpoint', $event->getEndpointtype())
+            ->setParameter(':endpointid', $event->getEndpointid())
+            ->setMaxResults(1)
+            ->orderBy('e.eventid', 'DESC')
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        if (!$existingEvent || $existingEvent->getAction() === self::ACTION_DELETE) {
+            return false;
+        }
+
+        return !empty($existingEvent->getContent()) &&
+            $this->dj->jsonEncode($existingEvent->getContent()) === $this->dj->jsonEncode($event->getContent());
     }
 
     /**
@@ -538,7 +710,7 @@ class EventLogService implements ContainerAwareInterface
         if ($field = $this->externalIdFieldForEntity($entity)) {
             return $field;
         }
-        $class = get_class($entity);
+        $class    = get_class($entity);
         $metadata = $this->em->getClassMetadata($class);
         try {
             return $metadata->getSingleIdentifierFieldName();
