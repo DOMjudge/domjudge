@@ -303,7 +303,7 @@ class ContestController extends AbstractRestController
         $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
         $response->headers->set('Content-Type', 'application/x-ndjson');
-        $response->setCallback(function () use ($contest, $request, $since_id) {
+        $response->setCallback(function () use ($id, $contest, $request, $since_id) {
             $lastUpdate = 0;
             $lastIdSent = $since_id;
             $typeFilter = false;
@@ -319,6 +319,12 @@ class ContestController extends AbstractRestController
                 $stream = $request->query->getBoolean('stream');
             }
             $canViewAll = $this->isGranted('ROLE_API_READER');
+
+            // Initialize all static events
+            $this->eventLogService->initStaticEvents($contest);
+            // Reload the contest as the above method will clear the entity manager
+            $contest = $this->getContestWithId($request, $id);
+
             while (true) {
                 // Add missing state events that should have happened already
                 $this->eventLogService->addMissingStateEvents($contest);
