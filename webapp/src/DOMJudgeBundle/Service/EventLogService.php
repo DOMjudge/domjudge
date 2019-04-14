@@ -394,15 +394,25 @@ class EventLogService implements ContainerAwareInterface
             foreach ($dataIds as $idx => $dataId) {
                 $contest = $this->em->getRepository(Contest::class)->find($contestId);
 
-                // Add missing state events that should have happened already
-                $this->addMissingStateEvents($contest);
-
                 if (in_array($type, ['contests', 'state']) || $jsonPassed) {
                     // Contest and state endpoint are singular
                     $jsonElement = $json;
                 } else {
                     $jsonElement = $json[$idx];
                 }
+
+                // Check if all references for this event are present; if not, add all static data
+                if (!$this->hasAllDependentObjectEvents($contest, $type, $jsonElement)) {
+                    // Not all dependent objects are present, so insert all static events
+                    $this->initStaticEvents($contest);
+                    // If new references are added, we need to reload the contest,
+                    // because the entity manager has been cleared
+                    $contest = $this->em->getRepository(Contest::class)->find($contest->getCid());
+                }
+
+                // Add missing state events that should have happened already
+                $this->addMissingStateEvents($contest);
+
                 $event = new Event();
                 $event
                     ->setEventtime($now)
@@ -435,7 +445,8 @@ class EventLogService implements ContainerAwareInterface
     }
 
     /**
-     * Add all state events for the given contest that are not added yet but should have happened already
+     * Add all state events for the given contest that are not added yet but
+     * should have happened already
      * @param Contest $contest
      * @throws Exception
      */
@@ -444,8 +455,8 @@ class EventLogService implements ContainerAwareInterface
         // Make sure we get a fresh contest
         $this->em->refresh($contest);
 
-        // Because some states can happen in multiple different orders, we need to check per field to see if we have
-        // a state event where that field matches the current value.
+        // Because some states can happen in multiple different orders, we need to check per
+        // field to see if we have a state event where that field matches the current value.
         $states = [
             'started' => $contest->getStarttime(),
             'ended' => $contest->getEndtime(),
@@ -454,8 +465,9 @@ class EventLogService implements ContainerAwareInterface
             'finalized' => $contest->getFinalizetime(),
         ];
 
-        // Because we have the events in order now, we can keep 'growing' the data to insert, because every next state
-        // event will have the data from the previous one, together with the new data
+        // Because we have the events in order now, we can keep 'growing' the data to insert,
+        // because every next state event will have the data from the previous one, together with
+        // the new data
         $dataToInsert = [];
 
         foreach ($states as $state => $time) {
@@ -464,12 +476,14 @@ class EventLogService implements ContainerAwareInterface
 
         $dataToInsert['end_of_updates'] = null;
 
-        // First, remove all times that are still null or will happen in the future, as we do not need to check them
+        // First, remove all times that are still null or will happen in the future,
+        // as we do not need to check them
         $states = array_filter($states, function ($time) {
             return $time !== null && Utils::now() >= $time;
         });
 
-        // Now sort the remaining times in increasing order, as that is the order in which we want to add the events
+        // Now sort the remaining times in increasing order,
+        // as that is the order in which we want to add the events
         asort($states);
 
         // Get all state events
@@ -485,45 +499,57 @@ class EventLogService implements ContainerAwareInterface
             ->getQuery()
             ->getResult();
 
+        $dataPresent = [];
+        foreach ($stateEvents as $stateEvent) {
+            foreach ($stateEvent->getContent() as $field => $value) {
+                if ($value !== null) {
+                    $dataPresent[$field] = true;
+                }
+            }
+        }
+
         // Now loop over the states and check if we already have an event for them
         foreach ($states as $field => $time) {
             $dataToInsert[$field] = Utils::absTime($time);
 
-            // Special case, if both thawed and finalized are non-null or finalized is non-null but frozen is,
-            // we also need to set end_of_updates
-            if ($dataToInsert['finalized'] !== null &&
-                ($dataToInsert['thawed'] !== null || $dataToInsert['frozen'] === null)) {
-                if ($dataToInsert['thawed'] !== null) {
-                    $dataToInsert['end_of_updates'] = $dataToInsert['thawed'];
-                } else {
-                    $dataToInsert['end_of_updates'] = $dataToInsert['finalized'];
-                }
-            }
-
-            // Check if we have an existing state event with this value
-            foreach ($stateEvents as $stateEvent) {
-                $stateData = $stateEvent->getContent();
-                // If we have a state event with this field and it matches, we do not need to insert this event again
-                if (isset($stateData[$field]) && $stateData[$field] === $dataToInsert[$field]) {
-                    // Continue the other $states loop
-                    continue 2;
-                }
+            // If we already have an event with this field, continue
+            if (isset($dataPresent[$field])) {
+                continue;
             }
 
             // Insert the event
-            $this->insertEvent($contest, 'state', '', null, '', self::ACTION_UPDATE, $dataToInsert);
+            $this->insertEvent($contest, 'state', '', $dataToInsert);
         }
+
+        // If we already have an event with end_of_updates, we are done
+        if (isset($dataPresent['end_of_updates'])) {
+            return;
+        }
+
+        // Special case, if both thawed and finalized are non-null or finalized is
+        // non-null but frozen is, we also need to add an end_of_updates event
+        if ($dataToInsert['finalized'] !== null &&
+            ($dataToInsert['thawed'] !== null || $dataToInsert['frozen'] === null)) {
+            $dataToInsert['end_of_updates'] = max(
+                $dataToInsert['thawed'] ?? Utils::absTime(0),
+                $dataToInsert['finalized']
+            );
+        }
+
+        // Insert the end_of_updates event
+        $this->insertEvent($contest, 'state', '', $dataToInsert);
     }
 
     /**
-     * Insert the given event, if it doesn't exist yet
-     * @param Contest     $contest
-     * @param string      $endpointType
-     * @param string      $endpointId
-     * @param string|null $dataType
-     * @param string      $dataId
-     * @param string      $action
-     * @param mixed       $content
+     * Insert the given event, if it doesn't exist yet.
+     *
+     * This method will make sure that the event is only inserted once,
+     * even if called simultaneously from different processes.
+     *
+     * @param Contest $contest
+     * @param string  $endpointType
+     * @param string  $endpointId
+     * @param mixed   $content
      * @throws NonUniqueResultException
      * @throws Exception
      */
@@ -531,9 +557,6 @@ class EventLogService implements ContainerAwareInterface
         Contest $contest,
         string $endpointType,
         string $endpointId,
-        $dataType,
-        string $dataId,
-        string $action,
         $content
     ) {
         $event = new Event();
@@ -542,20 +565,39 @@ class EventLogService implements ContainerAwareInterface
             ->setContest($contest)
             ->setEndpointtype($endpointType)
             ->setEndpointid($endpointId)
-            ->setDatatype($dataType)
-            ->setDataid($dataId)
-            ->setAction($action)
             ->setContent($content);
 
-        // Now we can insert the event. However, before doing so, get an advisory lock to make sure
-        // no one else is doing the same
+        // Now we can insert the event. However, before doing so,
+        // get an advisory lock to make sure no one else is doing the same
         $lockString = sprintf('domjudge.eventlog.state.%d', $event->getContest()->getCid());
-        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
+        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 1)',
                                                     [':lock' => $lockString]) != 1) {
             throw new Exception('EventLogService::addMissingStateEvents failed to obtain lock');
         }
 
-        if (!$this->hasEvent($event)) {
+        // Note that for events without an ID (i.e. state), the endpointid
+        // is set to ''. This means this call will also work for these
+        // kinds of events
+        $existingEvent = $this->getExistingEvent($event);
+
+        // If we have no event or the data is different, add it
+        $existingData = $existingEvent === null ?
+            null :
+            $this->dj->jsonEncode($existingEvent->getContent());
+        $data         = $this->dj->jsonEncode($event->getContent());
+        if ($existingEvent === null || $existingData !== $data) {
+            // Special case for state: this is always an update event
+            if ($endpointType === 'state') {
+                $event->setAction(self::ACTION_UPDATE);
+            } else {
+                // Set the action basd on whether there was already an event
+                // for the same endpoint and ID
+                $event->setAction(
+                    $existingEvent === null ?
+                        self::ACTION_CREATE :
+                        self::ACTION_UPDATE
+                );
+            }
             $this->em->persist($event);
             $this->em->flush();
         }
@@ -568,12 +610,165 @@ class EventLogService implements ContainerAwareInterface
     }
 
     /**
-     * Return whether the given event already exists
+     * Add all static events that are still missing. Static events are events for endpoints that
+     * are marked as 'Configuration' on
+     * https://clics.ecs.baylor.edu/index.php?title=Contest_API#Types_of_endpoints
+     *
+     * @param Contest $contest
+     * @throws NonUniqueResultException
+     * @throws Exception
+     */
+    public function initStaticEvents(Contest $contest)
+    {
+        // Loop over all configuration endpoints with an URL and check if we have all data
+        foreach ($this->apiEndpoints as $endpoint => $endpointData) {
+            if ($endpointData[EventLogService::KEY_TYPE] === EventLogService::TYPE_CONFIGURATION &&
+                isset($endpointData[EventLogService::KEY_URL])) {
+                $contestId = $contest->getApiId($this);
+
+                // Do an internal API request to the overview URL
+                // of the endpoint to get current data
+                $url = sprintf('/contests/%s%s', $contestId,
+                               $endpointData[EventLogService::KEY_URL]);
+                $this->dj->withAllRoles(function () use ($url, &$data) {
+                    $data = $this->dj->internalApiRequest($url);
+                });
+
+                // Get a partial reference to the contest,
+                // because calling internalApiRequest above will clear the entity manager
+                /** @var Contest $contest */
+                $contest = $this->em->getPartialReference(Contest::class, $contest->getCid());
+
+                if ($data === null) {
+                    throw new Exception(sprintf("EventLogService::initializeStaticEvents no response data for endpoint '%s'.",
+                                                $endpoint));
+                }
+
+                // Special case 'contests' since it is a single object:
+                if ($endpoint === 'contests') {
+                    if (!is_array($data) || is_numeric(array_keys($data)[0])) {
+                        throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON object.",
+                                                    $endpoint));
+                    }
+
+                    $this->insertEvent($contest, $endpoint, $data['id'], $data);
+                    continue;
+                }
+
+                if (!is_array($data) || !is_numeric(array_keys($data)[0])) {
+                    throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON list.",
+                                                $endpoint));
+                }
+
+                foreach ($data as $i => $row) {
+                    if (!is_array($row) || is_numeric(array_keys($row)[0])) {
+                        throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON object for index %d.",
+                                                    $endpoint, $i));
+                    }
+
+                    if (!isset($row['id'])) {
+                        throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return an `id` field for index %d.",
+                                                    $endpoint, $i));
+                    }
+                }
+
+                // Sort the data on ID to get a consistent order
+                usort($data, function ($a, $b) {
+                    if (is_int($a['id']) && is_int($b['id'])) {
+                        return $a['id'] <=> $b['id'];
+                    }
+                    return strcmp((string)$a['id'], (string)$b['id']);
+                });
+
+                // Insert the events
+                foreach ($data as $i => $row) {
+                    $this->insertEvent($contest, $endpoint, $row['id'], $row);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if all events for dependent objects are present for the given type and data
+     * @param Contest $contest
+     * @param string  $type
+     * @param array   $data
+     * @return bool True if and only if all references are present
+     * @throws Exception
+     */
+    protected function hasAllDependentObjectEvents(Contest $contest, string $type, array $data)
+    {
+        // Build up the referenced data to check for
+        $toCheck = [
+            'contests' => $contest->getApiId($this),
+        ];
+        switch ($type) {
+            case 'teams':
+                $toCheck = array_merge($toCheck, [
+                    'organizations' => $data['organization_id'],
+                    'groups' => $data['group_ids'],
+                ]);
+                break;
+            case 'submissions':
+                $toCheck = array_merge($toCheck, [
+                    'languages' => $data['language_id'],
+                    'problems' => $data['problem_id'],
+                    'teams' => $data['team_id'],
+                ]);
+                break;
+            case 'judgements':
+            case 'runs':
+                $toCheck = array_merge($toCheck, [
+                    'judgement-types' => $data['judgement_type_id'],
+                ]);
+                break;
+            case 'clarifications':
+                $toCheck = array_merge($toCheck, [
+                    'teams' => [$data['from_team_id'], $data['to_team_id']],
+                    'problems' => $data['problem_id'],
+                ]);
+                break;
+        }
+
+        // Now check every rerefence to see if we have an event for it
+        foreach ($toCheck as $endpointType => $endpointIds) {
+            // Make sure we always use arrays to check, even if we have a single value
+            $endpointIds = (array)$endpointIds;
+            foreach ($endpointIds as $endpointId) {
+                if ($endpointId === null) {
+                    continue;
+                }
+
+                // Now check if we have at least one event for the given
+                // endpoint type and ID for the current contest.
+                $numExistingEvents = (int)$this->em->createQueryBuilder()
+                    ->from('DOMJudgeBundle:Event', 'e')
+                    ->select('COUNT(e)')
+                    ->andWhere('e.contest = :contest')
+                    ->andWhere('e.endpointtype = :endpoint')
+                    ->andWhere('e.endpointid = :endpointid')
+                    ->setParameter(':contest', $contest)
+                    ->setParameter(':endpoint', $endpointType)
+                    ->setParameter(':endpointid', $endpointId)
+                    ->getQuery()
+                    ->getSingleScalarResult();
+
+                if ($numExistingEvents === 0) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get the existing event with the same API data as this event
      * @param Event $event
-     * @return bool
+     * @return Event|null
      * @throws NonUniqueResultException
      */
-    protected function hasEvent(Event $event)
+    protected function getExistingEvent(Event $event)
     {
         /** @var Event $existingEvent */
         $existingEvent = $this->em->createQueryBuilder()
@@ -591,11 +786,10 @@ class EventLogService implements ContainerAwareInterface
             ->getOneOrNullResult();
 
         if (!$existingEvent || $existingEvent->getAction() === self::ACTION_DELETE) {
-            return false;
+            return null;
         }
 
-        return !empty($existingEvent->getContent()) &&
-            $this->dj->jsonEncode($existingEvent->getContent()) === $this->dj->jsonEncode($event->getContent());
+        return $existingEvent;
     }
 
     /**
