@@ -28,7 +28,7 @@
   {% if hasaltmethods %}
   <div class="additional-logins mr-2">
     <a class="float-right text-muted" href="#" title="more auth methods"
-        onclick="collapse2('.regularLoginform'); return false;" role="button"><i class="fas fa-user-ninja"></i></a>
+        onclick="collapse('.regularLoginform'); return false;" role="button"><i class="fas fa-user-ninja"></i></a>
     {% if "xheaders" in allowed_authmethods and auth_xheaders_present %}
     <h1 class="h3 mb-3 font-weight-normal">Preconfigured Sign In</h1>
     <form action="{{ path('login') }}" method="post">

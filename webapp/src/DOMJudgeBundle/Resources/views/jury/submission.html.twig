@@ -416,7 +416,7 @@
         {% set header = 'Compilation <span style="color: ' ~ color ~ ';">' ~ message ~ '</span>' %}
         <h3>
             {% if output is not empty %}
-                <a class="collapse-link" href="javascript:collapse('compile')">
+                <a class="collapse-link" href="javascript:collapse('#detailcompile')">
                     {{ header | raw }}
                 </a>
             {% else %}
@@ -424,19 +424,14 @@
             {% endif %}
         </h3>
         {% if output is empty %}
-            <p class="nodata" id="detailcompile">There were no compiler errors or warnings.</p>
+            <p class="nodata{% if selectedJudging.result != 'compiler-error' %} d-none{% endif %}"
+                id="detailcompile">There were no compiler errors or warnings.</p>
         {% else %}
-            <pre class="output_text" id="detailcompile">{{ output }}</pre>
+            <pre class="output_text {% if selectedJudging.result != 'compiler-error' %} d-none{% endif %}"
+                id="detailcompile">{{ output }}</pre>
         {% endif %}
 
         {% if selectedJudging.result != 'compiler-error' %}
-            {# Hide compiler output by default if compilation was succesful #}
-            <script>
-                $(function () {
-                    collapse('compile');
-                });
-            </script>
-
             {# Show run info. Only when compilation was successful #}
             {% for runIdx, run in runs %}
                 <div class="run {% if run.firstJudgingRun and run.firstJudgingRun.runresult == 'correct' %}run_correct{% endif %}">

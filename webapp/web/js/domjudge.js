@@ -110,17 +110,6 @@ function initReload(refreshtime)
 function collapse(x)
 {
 	'use strict';
-	var oTemp=document.getElementById("detail"+x);
-	if (oTemp.style.display==="none") {
-		oTemp.style.display="block";
-	} else {
-		oTemp.style.display="none";
-	}
-}
-
-function collapse2(x)
-{
-	'use strict';
 	$(x).toggleClass('d-none');
 }
 
