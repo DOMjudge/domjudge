@@ -1,7 +1,7 @@
+'use strict';
+
 function enableNotifications()
 {
-    'use strict';
-
     if ( !('Notification' in window) ) {
         alert('Your browser does not support desktop notifications.');
         return false;
@@ -42,7 +42,6 @@ function enableNotifications()
 
 function disableNotifications()
 {
-    'use strict';
     setCookie('domjudge_notify', 0);
     $("#notify_enable").removeClass('d-none');
     $("#notify_enable").show();
@@ -60,7 +59,6 @@ function disableNotifications()
 // client has already received to display each notification only once.
 function sendNotification(title, options)
 {
-    'use strict';
     if ( getCookie('domjudge_notify')!=1 ) return;
 
     // Check if we already sent this notification:
@@ -95,7 +93,6 @@ var doReload = true;
 
 function reloadPage()
 {
-	'use strict';
 	if (doReload) {
 		location.reload();
 	}
@@ -109,13 +106,11 @@ function initReload(refreshtime)
 
 function collapse(x)
 {
-	'use strict';
 	$(x).toggleClass('d-none');
 }
 
 function togglelastruns()
 {
-	'use strict';
 	var names = {'lastruntime':0, 'lastresult':1, 'lasttcruns':2};
 	for (var name in names) {
 		var cells = document.getElementsByClassName(name);
@@ -133,7 +128,6 @@ function togglelastruns()
 // start (and end?).
 function updateClock()
 {
-	'use strict';
 	var curtime = initial+offset;
 	date.setTime(curtime*1000);
 
@@ -177,7 +171,6 @@ function updateClock()
 
 function setCookie(name, value)
 {
-	'use strict';
 	var expire = new Date();
 	expire.setDate(expire.getDate() + 3); // three days valid
 	document.cookie = name + "=" + escape(value) + "; expires=" + expire.toUTCString();
@@ -185,7 +178,6 @@ function setCookie(name, value)
 
 function getCookie(name)
 {
-	'use strict';
 	var cookies = document.cookie.split(";");
 	for (var i = 0; i < cookies.length; i++) {
 		var idx = cookies[i].indexOf("=");
@@ -201,7 +193,6 @@ function getCookie(name)
 
 function getSelectedTeams()
 {
-	'use strict';
 	var cookieVal = getCookie("domjudge_teamselection");
 	if (cookieVal === null || cookieVal === "") {
 		return new Array();
@@ -211,7 +202,6 @@ function getSelectedTeams()
 
 function getScoreboard()
 {
-	'use strict';
 	var scoreboard = document.getElementsByClassName("scoreboard");
 	if (scoreboard === null || scoreboard[0] === null) {
 		return null;
@@ -221,12 +211,10 @@ function getScoreboard()
 
 function getRank(row)
 {
-	'use strict';
 	return row.getElementsByTagName("td")[0];
 }
 
 function getHeartCol(row) {
-	'use strict';
 	var tds = row.getElementsByTagName("td");
 	var td = null;
 	// search for td before the team name
@@ -251,7 +239,6 @@ function getHeartCol(row) {
 
 function getTeamname(row)
 {
-	'use strict';
 	var res = row.getAttribute("id");
 	if ( res === null ) return res;
 	return res.replace(/^team:/, '');
@@ -259,7 +246,6 @@ function getTeamname(row)
 
 function toggle(id, show)
 {
-	'use strict';
 	var scoreboard = getScoreboard();
 	if (scoreboard === null) return;
 
@@ -307,7 +293,6 @@ function toggle(id, show)
 
 function addHeart(rank, row, id, isFav)
 {
-	'use strict';
 	var heartCol = getHeartCol(row);
 	var iconClass = isFav ? "fas fa-heart" : "far fa-heart";
 	return heartCol.innerHTML + "<span class=\"heart " + iconClass + "\" onclick=\"toggle(" + id + "," + (isFav ? "false" : "true") + ")\"></span>";
@@ -315,7 +300,6 @@ function addHeart(rank, row, id, isFav)
 
 function initFavouriteTeams()
 {
-	'use strict';
 	var scoreboard = getScoreboard();
 	if (scoreboard === null) {
 		return;
@@ -380,7 +364,6 @@ function initFavouriteTeams()
 // Note that team,prob,submission IDs are as expected by iCAT.
 function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
 {
-	'use strict';
 	var form = document.createElement("form");
 	form.setAttribute("method", "post");
 	form.setAttribute("action", url);
@@ -427,7 +410,6 @@ function toggleExpand(event)
 }
 
 function clarificationAppendAnswer() {
-    'use strict';
     if ( $('#clar_answers').val() == '_default' ) { return; }
     var selected = $("#clar_answers option:selected").text();
     var textbox = $('#bodytext');
@@ -436,7 +418,6 @@ function clarificationAppendAnswer() {
 }
 
 function confirmLogout() {
-	'use strict';
 	return confirm("Really log out?");
 }
 
@@ -530,7 +511,6 @@ function toggleRefresh($url, $after, usingAjax) {
 
 function updateMenuAlerts()
 {
-    'use strict';
     $.ajax({
         url: $('#menuDefault').data('update-url')
     }).done(function(json, status, jqXHR) {
@@ -547,7 +527,6 @@ function updateMenuAlerts()
 
 function updateMenuClarifications(data)
 {
-    'use strict';
     var num = data.length;
     if ( num == 0 ) {
         $("#num-alerts-clarifications").hide();
@@ -567,7 +546,6 @@ function updateMenuClarifications(data)
 
 function updateMenuRejudgings(data)
 {
-    'use strict';
     var num = data.length;
     if ( num == 0 ) {
         $("#num-alerts-rejudgings").hide();
@@ -581,7 +559,6 @@ function updateMenuRejudgings(data)
 
 function updateMenuJudgehosts(data)
 {
-    'use strict';
     var num = data.length;
     if ( num == 0 ) {
         $("#num-alerts-judgehosts").hide();
@@ -604,7 +581,6 @@ function updateMenuJudgehosts(data)
 
 function updateMenuInternalErrors(data)
 {
-    'use strict';
     var num = data.length;
     if ( num == 0 ) {
         $("#num-alerts-internalerrors").hide();
