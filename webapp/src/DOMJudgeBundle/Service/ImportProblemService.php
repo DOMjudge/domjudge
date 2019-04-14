@@ -308,7 +308,7 @@ class ImportProblemService
                             }
 
                             $outputValidatorZip  = file_get_contents(sprintf('%s/outputvalidator.zip', $tmpzipfiledir));
-                            $outputValidatorName = $externalId . '_cmp';
+                            $outputValidatorName = substr($externalId, 0, 20) . '_cmp';
                             if ($this->em->getRepository(Executable::class)->find($outputValidatorName)) {
                                 // avoid name clash
                                 $clashCount = 2;
