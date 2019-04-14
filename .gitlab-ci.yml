@@ -48,3 +48,9 @@ integration:
       --net=host \
       -e "TERM=xterm-256color" -e "HOME=$HOME" -e "USER=$USER" -e "MARIADB_PORT_3306_TCP_ADDR=$MARIADB_PORT_3306_TCP_ADDR" -e "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" \
       domjudge/gitlabci:1.0 /bin/bash -eo pipefail -c "umask 0002; cd $CI_PROJECT_DIR; script --return -qfc \"./gitlab/integration.sh\" /dev/null | ts \"[%F %T]\" "
+  artifacts:
+    paths:
+      - misc-tools/dj-events.json
+      - misc-tools/dj-scoreboard.json
+      - misc-tools/cds-events.json
+      - misc-tools/cds-scoreboard.json
