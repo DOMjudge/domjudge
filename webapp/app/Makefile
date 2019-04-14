@@ -3,7 +3,7 @@ TOPDIR=../..
 endif
 include $(TOPDIR)/Makefile.global
 
-SUBST_FILES = autoload_phpunit.php config/static.yml
+SUBST_FILES = autoload.php config/static.yml
 
 TARGETS =
 OBJECTS =
