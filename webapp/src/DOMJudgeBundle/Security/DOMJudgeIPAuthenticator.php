@@ -58,16 +58,16 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
-        // Make sure ipaddress auth is enabled?
+        // Make sure ipaddress auth is enabled.
         $authmethods          = $this->container->getParameter('domjudge.authmethods');
         $auth_allow_ipaddress = in_array('ipaddress', $authmethods);
         if (!$auth_allow_ipaddress) {
             return false;
         }
 
-        // if there is already an authenticated user (likely due to the session)
+        // If there is already an authenticated user (likely due to the session)
         // then return null and skip authentication: there is no need.
-        // However, on the login page we might need it when IP auto login is enabled
+        // However, on the login page we might need it when IP auto login is enabled.
         if ($this->security->getUser() && $request->attributes->get('_route') !== 'login') {
             return false;
         }
@@ -83,7 +83,8 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
             return true;
         }
 
-        // We also support authenticating if it's a POST to the login route and loginmethod is set correctly
+        // We also support authenticating if this is a POST to the login route
+        // and loginmethod is set correctly.
         return $request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'ipaddress';
@@ -94,7 +95,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
      */
     public function getCredentials(Request $request)
     {
-        // Check if we're coming from the auth form
+        // Check if we're coming from the auth form.
         if ($request->attributes->get('_route') === 'login' && $request->isMethod('POST')) {
             // Check CSRF token if it's coming from the login form
             $csrfToken = $request->request->get('_csrf_token');
