@@ -310,6 +310,9 @@ class ContestController extends AbstractRestController
             }
             $canViewAll = $this->isGranted('ROLE_API_READER');
             while (true) {
+                // Add missing state events that should have happened already
+                $this->eventLogService->addMissingStateEvents($contest);
+
                 $qb = $this->em->createQueryBuilder()
                     ->from('DOMJudgeBundle:Event', 'e')
                     ->select('e')
