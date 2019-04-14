@@ -40,10 +40,6 @@ parameters:
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt
 
-    # Additional auth methods can be enabled here. This is an array.
-    # Supported values are 'ipaddress', and 'xheaders' currently.
-    domjudge.authmethods: []
-
     # Needs a version number
     domjudge.version: 0.0.dummy
     domjudge.tmpdir: /tmp

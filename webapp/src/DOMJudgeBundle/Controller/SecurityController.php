@@ -31,10 +31,7 @@ class SecurityController extends Controller
     public function loginAction(Request $request)
     {
         $allowIPAuth = false;
-        $authmethods = [];
-        if ($this->container->hasParameter('domjudge.authmethods')) {
-            $authmethods = $this->container->getParameter('domjudge.authmethods');
-        }
+        $authmethods = $this->dj->dbconfig_get('auth_methods', []);
 
         if (in_array('ipaddress', $authmethods)) {
             $allowIPAuth = true;

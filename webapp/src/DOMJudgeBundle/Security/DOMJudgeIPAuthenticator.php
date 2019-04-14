@@ -59,7 +59,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     public function supports(Request $request)
     {
         // Make sure ipaddress auth is enabled.
-        $authmethods          = $this->container->getParameter('domjudge.authmethods');
+        $authmethods          = $this->dj->dbconfig_get('auth_methods', []);
         $auth_allow_ipaddress = in_array('ipaddress', $authmethods);
         if (!$auth_allow_ipaddress) {
             return false;

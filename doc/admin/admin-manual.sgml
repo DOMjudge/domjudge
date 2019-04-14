@@ -910,8 +910,7 @@ the system from
 
 <sect1>IP Address
 <p>To enable the IP Address authentication method, you will need to edit
-<tt>webapp/app/config/parameters.yml</tt> and adjust the value of
-the <tt>domjudge.authmethods</tt> array to include <tt>ipaddress</tt>.
+the database configuration option <tt>auth_methods</tt> to include <tt>ipaddress</tt>.
 <p>Once this is done, when a user first logs in their IP Address will be
 associated with their account, and subsequent logins will allow them to log
 in without authenticating.
@@ -920,8 +919,7 @@ Users page in the jury interface.
 
 <sect1>X-Headers
 <p><p>To enable the IP Address authentication method, you will need to edit
-<tt>webapp/app/config/parameters.yml</tt> and adjust the value of
-the <tt>domjudge.authmethods</tt> array to include <tt>xheaders</tt>.
+the database configuration option <tt>auth_methods</tt> to include <tt>xheaders</tt>.
 
 <p>To use this method, the following headers need to be sent to the
 <tt>/login</tt> URL. This can be done using the squid proxy for example, to
