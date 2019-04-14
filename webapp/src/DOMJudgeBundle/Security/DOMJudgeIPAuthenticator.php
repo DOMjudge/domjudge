@@ -131,10 +131,9 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
             $filters['username'] = $credentials['username'];
         }
 
-        $ipAutologin = $this->dj->dbconfig_get('ip_autologin', false);
         $user        = null;
         $users       = $userRepo->findBy($filters);
-        if (count($users) === 1 || !$ipAutologin) {
+        if (count($users) === 1) {
             $user = $users[0];
         }
 
