@@ -5,6 +5,7 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\Event;
+use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -116,6 +117,7 @@ class ContestController extends AbstractRestController
         $contest  = $this->getContestWithId($request, $id);
         $response = null;
         $now      = Utils::now();
+        $changed  = false;
         if (!$request->request->has('id')) {
             $response = new JsonResponse('Missing "id" in request.', Response::HTTP_BAD_REQUEST);
         } elseif (!$request->request->has('start_time')) {
@@ -132,6 +134,7 @@ class ContestController extends AbstractRestController
             $contest->setStarttimeEnabled(false);
             $response = new JsonResponse('Contest paused :-/.', Response::HTTP_OK);
             $this->em->flush();
+            $changed = true;
         } else {
             $date = date_create($request->request->get('start_time'));
             if ($date === false) {
@@ -150,9 +153,16 @@ class ContestController extends AbstractRestController
                     $response = new JsonResponse('Contest start time changed to ' . $newStartTimeString,
                                                  Response::HTTP_OK);
                     $this->em->flush();
+                    $changed = true;
                 }
             }
         }
+
+        if ($changed) {
+            $this->eventLogService->log('contests', $contest->getCid(), EventLogService::ACTION_UPDATE,
+                                        $contest->getCid());
+        }
+
         return $response;
     }
 
@@ -281,9 +291,9 @@ class ContestController extends AbstractRestController
         if ($request->query->has('since_id')) {
             $since_id = $request->query->getInt('since_id');
             $event    = $this->em->getRepository(Event::class)->findOneBy([
-                                                                                         'eventid' => $since_id,
-                                                                                         'cid' => $contest->getCid(),
-                                                                                     ]);
+                                                                              'eventid' => $since_id,
+                                                                              'cid' => $contest->getCid(),
+                                                                          ]);
             if ($event === null) {
                 return new Response('Invalid parameter "since_id" requested.', Response::HTTP_BAD_REQUEST);
             }
