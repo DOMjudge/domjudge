@@ -164,12 +164,15 @@ class EventLogService implements ContainerAwareInterface
                 $entity    = Inflector::classify($singular);
                 $fullClass = sprintf('DOMJudgeBundle\Entity\%s', $entity);
                 if (!class_exists($fullClass)) {
-                    throw new \BadMethodCallException(sprintf('Class \'%s\' does not exist', $fullClass));
+                    throw new \BadMethodCallException(sprintf('Class \'%s\' does not exist',
+                                                              $fullClass));
                 }
                 $this->apiEndpoints[$endpoint][self::KEY_ENTITY] = $fullClass;
             }
             if (!array_key_exists(self::KEY_TABLES, $data)) {
-                $this->apiEndpoints[$endpoint][self::KEY_TABLES] = [preg_replace('/s$/', '', $endpoint)];
+                $this->apiEndpoints[$endpoint][self::KEY_TABLES] = [
+                    preg_replace('/s$/', '', $endpoint)
+                ];
             }
 
             // Make sure we have a fast way to look up endpoints for entities
@@ -196,8 +199,14 @@ class EventLogService implements ContainerAwareInterface
      *                               Can be null, one ID or an array of ID's.
      * @throws Exception
      */
-    public function log(string $type, $dataIds, string $action, $contestId = null, $json = null, $ids = null)
-    {
+    public function log(
+        string $type,
+        $dataIds,
+        string $action,
+        $contestId = null,
+        $json = null,
+        $ids = null
+    ) {
         // Sanitize and check input
         if (!is_array($dataIds)) {
             $dataIds = [$dataIds];
@@ -223,7 +232,8 @@ class EventLogService implements ContainerAwareInterface
         $idsCombined     = $ids === null ? null : is_array($ids) ? json_encode($ids) : $ids;
 
         $this->logger->debug(sprintf("EventLogService::log arguments: '%s' '%s' '%s' '%s' '%s' '%s'",
-                                     $type, $dataidsCombined, $action, $contestId, $json, $idsCombined));
+                                     $type, $dataidsCombined, $action, $contestId, $json,
+                                     $idsCombined));
 
 
         // Gracefully fail since we may call this from the generic
@@ -241,15 +251,18 @@ class EventLogService implements ContainerAwareInterface
         }
 
         if (!isset($endpoint)) {
-            $this->logger->warning(sprintf("EventLogService::log: invalid endpoint '%s' specified", $type));
+            $this->logger->warning(sprintf("EventLogService::log: invalid endpoint '%s' specified",
+                                           $type));
             return;
         }
         if (!in_array($action, [self::ACTION_CREATE, self::ACTION_UPDATE, self::ACTION_DELETE])) {
-            $this->logger->warning(sprintf("EventLogService::log: invalid action '%s' specified", $action));
+            $this->logger->warning(sprintf("EventLogService::log: invalid action '%s' specified",
+                                           $action));
             return;
         }
         if ($endpoint[self::KEY_URL] === null) {
-            $this->logger->warning(sprintf("EventLogService::log: no endpoint for '%s', ignoring", $type));
+            $this->logger->warning(sprintf("EventLogService::log: no endpoint for '%s', ignoring",
+                                           $type));
             return;
         }
 
@@ -363,7 +376,8 @@ class EventLogService implements ContainerAwareInterface
             });
 
             if ($json === null) {
-                $this->logger->warning(sprintf("EventLogService::log got no JSON data from '%s'", $url));
+                $this->logger->warning(sprintf("EventLogService::log got no JSON data from '%s'",
+                                               $url));
                 // If we didn't get data from the API, then that is probably
                 // because this particular data is not visible, for example
                 // because it belongs to an invisible jury team. If we don't
@@ -434,7 +448,8 @@ class EventLogService implements ContainerAwareInterface
 
         if (count($events) !== $expectedEvents) {
             throw new Exception(sprintf("EventLogService::log failed to %s %s with ID's %s (%d/%d events done)",
-                                        $action, $type, $idsCombined, count($events), $expectedEvents));
+                                        $action, $type, $idsCombined, count($events),
+                                        $expectedEvents));
         }
 
         $this->logger->debug(sprintf("EventLogService::log %sd %s with ID's %s for %d contest(s)",
@@ -820,7 +835,8 @@ class EventLogService implements ContainerAwareInterface
         try {
             $primaryKeyField = $metadata->getSingleIdentifierColumnName();
         } catch (MappingException $e) {
-            throw new \BadMethodCallException(sprintf('Entity \'%s\' as a composite primary key', $type));
+            throw new \BadMethodCallException(sprintf('Entity \'%s\' as a composite primary key',
+                                                      $type));
         }
 
         return array_map(function (array $item) use ($endpointData) {
@@ -853,7 +869,8 @@ class EventLogService implements ContainerAwareInterface
         }
 
         if (!isset($this->entityToEndpoint[$entity])) {
-            throw new \BadMethodCallException(sprintf('Entity \'%s\' does not have a corresponding endpoint', $entity));
+            throw new \BadMethodCallException(sprintf('Entity \'%s\' does not have a corresponding endpoint',
+                                                      $entity));
         }
 
         $endpointData = $this->apiEndpoints[$this->entityToEndpoint[$entity]];
@@ -866,7 +883,8 @@ class EventLogService implements ContainerAwareInterface
         if ($endpointData[self::KEY_ALWAYS_USE_EXTERNAL_ID] ?? false) {
             $lookupExternalid = true;
         } else {
-            $dataSource = $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL);
+            $dataSource = $this->dj->dbconfig_get('data_source',
+                                                  DOMJudgeService::DATA_SOURCE_LOCAL);
 
             if ($dataSource !== DOMJudgeService::DATA_SOURCE_LOCAL) {
                 $endpointType = $endpointData[self::KEY_TYPE];
