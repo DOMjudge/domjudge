@@ -1,8 +1,8 @@
 DOMjudge Programming Contest Judging System
 
-Version 6.1.0 - DEV
+Version 7.0.0 - DEV
 -------------------
- - Rewrite the jury interface in Symfony and Bootstrap. Add many UI
+ - Rewrite the interface in Symfony and Bootstrap. Add many UI
    improvements in the process.
  - Rewrite API in Symfony, expose Swagger docs.
  - Initial admin password is now generated on database creation.
