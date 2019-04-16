@@ -4,6 +4,7 @@ namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Balloon;
+use DOMJudgeBundle\Entity\ScoreCache;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
@@ -61,18 +62,6 @@ class BalloonController extends Controller
         $showPostFreeze = (bool)$this->dj->dbconfig_get('show_balloons_postfreeze', false);
 
         $em = $this->em;
-        $query = $em->createQueryBuilder()
-            ->select('b', 's.submittime', 'p.probid',
-                't.teamid', 't.name AS teamname', 't.room', 'c.name AS catname',
-                's.cid', 'co.shortname', 'cp.shortname AS probshortname', 'cp.color')
-            ->from('DOMJudgeBundle:Balloon', 'b')
-            ->leftJoin('b.submission', 's')
-            ->leftJoin('s.problem', 'p')
-            ->leftJoin('s.contest', 'co')
-            ->leftJoin('p.contest_problems', 'cp', 'co.cid = cp.cid AND p.probid = cp.probid')
-            ->leftJoin('s.team', 't')
-            ->leftJoin('t.category', 'c')
-            ->orderBy('b.balloonid', 'DESC');
 
         $contests = $this->dj->getCurrentContests();
         $frozen_contests = [];
@@ -86,6 +75,26 @@ class BalloonController extends Controller
             }
         }
 
+        // Build a list of teams and the problems they solved first
+        $firstSolved = $em->getRepository(ScoreCache::class)->findBy(['is_first_to_solve'=>1]);
+        $firstSolvers = [];
+        foreach($firstSolved as $scoreCache) {
+            $firstSolvers[$scoreCache->getTeam()->getTeamId()][] = $scoreCache->getProblem()->getProbid();
+        }
+
+        $query = $em->createQueryBuilder()
+            ->select('b', 's.submittime', 'p.probid',
+                't.teamid', 't.name AS teamname', 't.room', 'c.name AS catname',
+                's.cid', 'co.shortname', 'cp.shortname AS probshortname', 'cp.color')
+            ->from('DOMJudgeBundle:Balloon', 'b')
+            ->leftJoin('b.submission', 's')
+            ->leftJoin('s.problem', 'p')
+            ->leftJoin('s.contest', 'co')
+            ->leftJoin('p.contest_problems', 'cp', 'co.cid = cp.cid AND p.probid = cp.probid')
+            ->leftJoin('s.team', 't')
+            ->leftJoin('t.category', 'c')
+            ->orderBy('s.submittime', 'DESC');
+
         $balloons = $query->getQuery()->getResult();
         // Loop once over the results to get totals and awards
         $TOTAL_BALLOONS = $AWARD_BALLOONS = [];
@@ -97,9 +106,15 @@ class BalloonController extends Controller
             $TOTAL_BALLOONS[$balloonsData['teamid']][$balloonsData['cid']."-".$balloonsData['probshortname']] =
                 Utils::balloonSym($balloonsData['color']);
 
-            // keep overwriting these variables - in the end they'll
-            // contain the ids of the first balloon in each type
-            $AWARD_BALLOONS['contest'][$balloonsData['cid']] = $AWARD_BALLOONS['problem'][$balloonsData['probid']] = $AWARD_BALLOONS['team'][$balloonsData['teamid']] = $balloonsData[0]->getBalloonId();
+            // Keep a list of balloons that were first to solve this problem;
+            // can be multiple, one for each sortorder.
+            if (in_array($balloonsData['probid'], $firstSolvers[$balloonsData['teamid']]??[], true) ) {
+                $AWARD_BALLOONS['problem'][$balloonsData['probid']][] = $balloonsData[0]->getBalloonId();
+            }
+            // Keep overwriting the other ones - in the end they'll
+            // contain the ids of the first balloon in each type.
+            $AWARD_BALLOONS['contest'][$balloonsData['cid']] =
+                $AWARD_BALLOONS['team'][$balloonsData['teamid']] = $balloonsData[0]->getBalloonId();
         }
 
         $table_fields = [
@@ -151,7 +166,7 @@ class BalloonController extends Controller
                 if ($AWARD_BALLOONS['team'][$balloonsData['teamid']] == $balloonId) {
                     $comments[] = 'first for team';
                 }
-                if ($AWARD_BALLOONS['problem'][$balloonsData['probid']] == $balloonId) {
+                if (in_array($balloonId, $AWARD_BALLOONS['problem'][$balloonsData['probid']], true)) {
                     $comments[] = 'first for problem';
                 }
             }
