@@ -111,10 +111,9 @@ class BalloonController extends Controller
             if (in_array($balloonsData['probid'], $firstSolvers[$balloonsData['teamid']]??[], true) ) {
                 $AWARD_BALLOONS['problem'][$balloonsData['probid']][] = $balloonsData[0]->getBalloonId();
             }
-            // Keep overwriting the other ones - in the end they'll
-            // contain the ids of the first balloon in each type.
-            $AWARD_BALLOONS['contest'][$balloonsData['cid']] =
-                $AWARD_BALLOONS['team'][$balloonsData['teamid']] = $balloonsData[0]->getBalloonId();
+            // Keep overwriting this - in the end it'll
+            // contain the id of the first balloon in this contest.
+            $AWARD_BALLOONS['contest'][$balloonsData['cid']] = $balloonsData[0]->getBalloonId();
         }
 
         $table_fields = [
@@ -162,13 +161,8 @@ class BalloonController extends Controller
             $comments = [];
             if ($AWARD_BALLOONS['contest'][$contest] == $balloonId) {
                 $comments[] = 'first in contest';
-            } else {
-                if ($AWARD_BALLOONS['team'][$balloonsData['teamid']] == $balloonId) {
-                    $comments[] = 'first for team';
-                }
-                if (in_array($balloonId, $AWARD_BALLOONS['problem'][$balloonsData['probid']], true)) {
-                    $comments[] = 'first for problem';
-                }
+            } elseif (in_array($balloonId, $AWARD_BALLOONS['problem'][$balloonsData['probid']], true)) {
+                $comments[] = 'first for problem';
             }
 
             $balloondata['awards']['value'] = implode('; ', $comments);
