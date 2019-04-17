@@ -24,7 +24,7 @@ run unit tests:
     reports:
       junit: unit-tests.xml
   cache:
-    key: ${CI_COMMIT_REF_SLUG}
+    key: unit-tests
     paths:
       - lib/vendor/
 
@@ -44,7 +44,7 @@ integration:
   script:
   - |
     docker run --privileged \
-      -v $CI_PROJECT_DIR:$CI_PROJECT_DIR\
+      -v $CI_PROJECT_DIR:$CI_PROJECT_DIR \
       --net=host \
       -e "TERM=xterm-256color" -e "HOME=$HOME" -e "USER=$USER" -e "MARIADB_PORT_3306_TCP_ADDR=$MARIADB_PORT_3306_TCP_ADDR" -e "MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD" \
       domjudge/gitlabci:1.0 /bin/bash -eo pipefail -c "umask 0002; cd $CI_PROJECT_DIR; script --return -qfc \"./gitlab/integration.sh\" /dev/null | ts \"[%F %T]\" "
@@ -54,3 +54,8 @@ integration:
       - misc-tools/icpctools/dj-scoreboard.json
       - misc-tools/icpctools/cds-events.json
       - misc-tools/icpctools/cds-scoreboard.json
+  cache:
+    key: integration
+    paths:
+      - lib/vendor/
+      - chroot

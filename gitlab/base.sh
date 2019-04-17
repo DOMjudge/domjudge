@@ -71,7 +71,7 @@ composer install --no-scripts
 
 # configure, make and install (but skip documentation)
 make configure
-./configure --disable-doc-build --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge
+./configure --disable-doc-build --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge
 make build-scripts domserver judgehost
 sudo make install-domserver install-judgehost
 
