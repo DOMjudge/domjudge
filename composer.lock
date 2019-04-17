@@ -3485,16 +3485,16 @@
         },
         {
             "name": "symfony/symfony",
-            "version": "v3.4.23",
+            "version": "v3.4.25",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "336cf12e5e82d71874e8522e0879794340351b56"
+                "reference": "24454234816e061b4b9c5787eaa2bb6326ead1da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/336cf12e5e82d71874e8522e0879794340351b56",
-                "reference": "336cf12e5e82d71874e8522e0879794340351b56",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/24454234816e061b4b9c5787eaa2bb6326ead1da",
+                "reference": "24454234816e061b4b9c5787eaa2bb6326ead1da",
                 "shasum": ""
             },
             "require": {
@@ -3636,7 +3636,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2019-03-03T18:52:48+00:00"
+            "time": "2019-04-16T06:02:31+00:00"
         },
         {
             "name": "twbs/bootstrap",
