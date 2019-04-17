@@ -14,8 +14,6 @@ clear-cache:
 	bin/console --env=dev cache:clear
 	bin/console --env=prod cache:clear
 
-domserver: $(PARAMS) $(SUBST_CONFIGS)
-
 install-domserver:
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
 # KLUDGE: how to install a tree of files with correct permissions?
@@ -45,9 +43,6 @@ install-domserver:
 install-docs:
 	$(INSTALL_DATA) -T web/images/countries/README    $(DESTDIR)$(domjudge_docdir)/README.country_flags
 	$(INSTALL_DATA) -T web/images/countries/codes.txt $(DESTDIR)$(domjudge_docdir)/country_codes.txt
-
-distclean-l:
-	-rm -f $(SUBST_CONFIGS) $(PARAMS)
 
 maintainer-clean-l:
 	-for d in cache logs sessions ; do \
