@@ -16,7 +16,7 @@ build: $(TARGETS)
 $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
-domserver: $(SUBST_FILES)
+domserver: $(PARAMS) $(SUBST_FILES)
 
 # Don't try to create dbpasswords.secret here if it doesn't exist:
 $(TOPDIR)/etc/dbpasswords.secret:
@@ -40,7 +40,7 @@ static-from-stub: $(STATIC).stub
 	fi
 
 distclean-l:
-	-rm -f $(SUBST_FILES)
+	-rm -f $(SUBST_FILES) $(PARAMS)
 
 clean-l:
 	-rm -f $(TARGETS) $(OBJECTS)
