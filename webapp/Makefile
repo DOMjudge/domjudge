@@ -41,12 +41,6 @@ install-domserver:
 	-$(INSTALL_WEBSITE) -t $(DESTDIR)$(domserver_webappdir)/var var/*.php var/*.cache
 	cp        -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist
 	chmod a+r    $(DESTDIR)$(domserver_webappdir)/phpunit.xml.dist
-	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(DESTDIR)$(domserver_webappdir)/var
-	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(DESTDIR)$(domserver_webappdir)/var
-	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(DESTDIR)$(domserver_webappdir)/var
-	setfacl -R -m   u:$(DOMJUDGE_USER):rwx    $(DESTDIR)$(domserver_webappdir)/var
-	setfacl -R -m d:m::rwx                    $(DESTDIR)$(domserver_webappdir)/var
-	setfacl -R -m   m::rwx                    $(DESTDIR)$(domserver_webappdir)/var
 
 install-docs:
 	$(INSTALL_DATA) -T web/images/countries/README    $(DESTDIR)$(domjudge_docdir)/README.country_flags
