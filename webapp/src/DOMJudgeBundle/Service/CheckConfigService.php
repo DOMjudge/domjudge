@@ -126,12 +126,6 @@ class CheckConfigService
 
         $results['Teams'] = $teams;
 
-        $submissions = [
-            'submission' => $this->checkSubmissionsValidate(),
-        ];
-
-        $results['Submissions'] = $submissions;
-
         $results['External identifiers'] = $this->checkAllExternalIdentifiers();
 
         return $results;
@@ -693,60 +687,6 @@ class CheckConfigService
         return ['caption' => 'Team name uniqueness',
             'result' => $result,
             'desc' => $desc];
-    }
-
-    public function checkSubmissionsValidate()
-    {
-        $submissions = $this->em->getRepository(Submission::class)->findAll();
-
-        $submissionerrors = [];
-        $result = 'O';
-        foreach ($submissions as $submission) {
-            $submitid = $submission->getSubmitid();
-            $errors = $this->validator->validate($submission);
-            if (count($errors)) {
-                $result = 'E';
-            }
-            $submissionerrors[$submitid] = $errors;
-
-            $moresubmissionerrors[$submitid] = '';
-            if (count($submission->getFiles()) === 0) {
-                $result = 'E';
-                $moresubmissionerrors[$submitid] .= sprintf("has no associated files\n", $submitid);
-            }
-            if ($submission->getJudgehost() !== null && count($submission->getJudgings()) === 0) {
-                $result = 'E';
-                $moresubmissionerrors[$submitid] .= sprintf("has a judgehost but no judgings\n", $submitid);
-            }
-            $valids = 0;
-            foreach ($submission->getJudgings() as $judging) {
-                $valids += (int)$judging->getValid();
-
-                if ($judging->getValid() && $judging->getEndtime() === null &&
-                    Utils::difftime((float) $judging->getStarttime(), Utils::now()) > 300) {
-                    $result = ($result == 'E') ? 'E' : 'W';
-                    $moresubmissionerrors[$submitid] .= sprintf("has been running for more than 5 minutes without a result\n", $submitid);
-                }
-            }
-            if ($valids > 1) {
-                $result = 'E';
-                $moresubmissionerrors[$submitid] .= sprintf("has more than 1 valid judging\n", $submitid);
-            }
-        }
-
-        $desc = '';
-        foreach ($submissionerrors as $sid => $errors) {
-            if (count($errors) > 0 || !empty($moresubmissionerrors[$sid])) {
-                $desc .= "Submission s$sid: ";
-                $desc .= (string)$errors . " " .
-                    $moresubmissionerrors[$sid] . "\n";
-            }
-        }
-
-        return ['caption' => 'Submissions validation',
-            'result' => $result,
-            'desc' => "Validated all submissions:\n\n" .
-                    ($desc ?: 'No submissions with problems found.')];
     }
 
     public function checkAllExternalIdentifiers()
