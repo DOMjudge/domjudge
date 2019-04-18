@@ -14,7 +14,10 @@ clear-cache:
 	bin/console --env=dev cache:clear
 	bin/console --env=prod cache:clear
 
-install-domserver:
+install-bundle-assets:
+	bin/console assets:install web/
+
+install-domserver: install-bundle-assets
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
 # KLUDGE: how to install a tree of files with correct permissions?
 	for d in app bin src web tests ; do \
