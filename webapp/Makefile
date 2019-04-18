@@ -14,10 +14,15 @@ clear-cache:
 	bin/console --env=dev cache:clear
 	bin/console --env=prod cache:clear
 
-install-bundle-assets:
-	bin/console assets:install web/
+copy-bundle-assets:
+# We can not use bin/console here, as when using a fakeroot,
+# the include paths are broken. We just copy in the data we need
+	mkdir -p web/bundles/nelmioapidoc
+	cp -R ../lib/vendor/nelmio/api-doc-bundle/Resources/public/* web/bundles/nelmioapidoc/
 
-install-domserver: install-bundle-assets
+domserver: copy-bundle-assets
+
+install-domserver:
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
 # KLUDGE: how to install a tree of files with correct permissions?
 	for d in app bin src web tests ; do \

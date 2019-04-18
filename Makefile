@@ -227,8 +227,6 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 	else \
 		echo "Database not installed and accessible yet, fix this manually and rerun." ; \
 	fi
-# Install assets for bundles
-	$(MAKE) -C webapp install-bundle-assets
 	@echo ""
 	@echo "========== Maintainer Install Completed =========="
 	@echo ""
