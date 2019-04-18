@@ -65,7 +65,8 @@
 		"select2/select2": "4.*",
 		"angel-vladov/select2-bootstrap-theme": "0.2.0-beta.2",
 		"twig/extensions": "^1.5",
-		"guzzlehttp/guzzle": "^6.3"
+		"guzzlehttp/guzzle": "^6.3",
+		"sgomez/ssp-guard-bundle": "^0.10.0"
 	},
 	"require-dev": {
 		"sensio/generator-bundle": "^3.0",

@@ -2910,6 +2910,52 @@
             "time": "2018-02-28T22:10:01+00:00"
         },
         {
+            "name": "sgomez/ssp-guard-bundle",
+            "version": "0.10.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sgomez/SSPGuardBundle.git",
+                "reference": "7d507f5d88df46319cf3543a58350935b108f750"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sgomez/SSPGuardBundle/zipball/7d507f5d88df46319cf3543a58350935b108f750",
+                "reference": "7d507f5d88df46319cf3543a58350935b108f750",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5.9",
+                "symfony/config": "~2.8|~3.0|^4.0",
+                "symfony/framework-bundle": "~2.8|~3.0|^4.0",
+                "symfony/routing": "~2.8|~3.0|^4.0",
+                "symfony/security-guard": "~2.8|~3.0|^4.0",
+                "twig/twig": "~1.14,>=1.14.2|~2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Sgomez\\Bundle\\SSPGuardBundle\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sergio Gómez",
+                    "email": "sergio@uco.es"
+                }
+            ],
+            "description": "SimpleSAMLphp Integration for Symfony",
+            "keywords": [
+                "Authentication",
+                "guard",
+                "simplesamlphp"
+            ],
+            "time": "2018-10-15T06:29:21+00:00"
+        },
+        {
             "name": "symfony/monolog-bundle",
             "version": "v3.3.0",
             "source": {
