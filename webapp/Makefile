@@ -59,4 +59,4 @@ maintainer-clean-l:
 		done ; \
 	done
 
-.PHONY: clear-cache
+.PHONY: clear-cache copy-bundle-assets
