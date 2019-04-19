@@ -600,7 +600,7 @@ examples for configuring the DOMjudge pages with an alias directive,
 or as a virtualhost, optionally with SSL; it also contains PHP and security
 settings. Reload the web server for changes to take effect.
 <verb>
-ln -s etc/apache.conf /etc/apache2/conf-available/domjudge.conf
+ln -s &lt;DOMSERVER_INSTALL_PATH&gt;/etc/apache.conf /etc/apache2/conf-available/domjudge.conf
 a2enmod rewrite
 a2enconf domjudge
 # Edit the file /etc/apache2/conf-available/domjudge.conf to your needs
@@ -613,8 +613,8 @@ contains the PHP FPM configuration you can use. You still need <tt>htpasswd</tt>
 from <tt>apache2-utils</tt> though. To use this configuration
 file, perform the following steps
 <verb>
-ln -s etc/nginx-conf /etc/nginx/sites-enabled/domjudge
-ln -s etc/domjudge-fpm.conf /etc/php/7.0/fpm/pool.d/domjudge.conf
+ln -s &lt;DOMSERVER_INSTALL_PATH&gt;/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
+ln -s &lt;DOMSERVER_INSTALL_PATH&gt;/etc/domjudge-fpm.conf /etc/php/7.0/fpm/pool.d/domjudge.conf
 # Edit the files /etc/nginx/sites-enabled/domjudge and
 # /etc/php/7.0/fpm/pool.d/domjudge.conf to your needs
 service php7.0-fpm reload
