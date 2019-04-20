@@ -667,7 +667,7 @@ class EventLogService implements ContainerAwareInterface
                     continue;
                 }
 
-                if (!is_array($data) || !is_numeric(array_keys($data)[0])) {
+                if (!is_array($data) || (!empty($data) && !is_numeric(array_keys($data)[0]))) {
                     throw new Exception(sprintf("EventLogService::initializeStaticEvents Endpoint '%s' did not return a JSON list.",
                                                 $endpoint));
                 }
