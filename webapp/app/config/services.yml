@@ -31,10 +31,6 @@ services:
             -   name: nelmio_api_doc.describer
                 priority: -999
 
-    DOMJudgeBundle\Validator\Constraints\UserRegistrationValidator:
-        tags:
-            -   name: validator.constraint_validator
-
     DOMJudgeBundle\EventListener\ApiHeadersListener:
         tags:
             -   name: kernel.event_listener

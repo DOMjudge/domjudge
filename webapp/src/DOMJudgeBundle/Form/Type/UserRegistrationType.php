@@ -2,6 +2,9 @@
 
 namespace DOMJudgeBundle\Form\Type;
 
+use Doctrine\ORM\EntityManagerInterface;
+use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Validator\Constraints;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -10,18 +13,51 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Context\ExecutionContext;
 
 class UserRegistrationType extends AbstractType
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $em;
+
+    /**
+     * UserRegistrationType constructor.
+     * @param EntityManagerInterface $em
+     */
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
             ->add('username', TextType::class, [
                 'label' => false,
-                'constraints' => new Constraints\UserRegistration(),
                 'attr' => [
                     'placeholder' => 'Username',
                 ],
+            ])
+            ->add('teamName', TextType::class, [
+                'label' => false,
+                'attr' => [
+                    'placeholder' => 'Team name',
+                ],
+                'constraints' => [
+                    new NotBlank(),
+                    new Callback(function ($teamName, ExecutionContext $context) {
+                        if ($this->em->getRepository(Team::class)->findOneBy(['name' => $teamName])) {
+                            $context->buildViolation('This team name is already in use.')
+                                ->atPath('teamName')
+                                ->addViolation();
+                        }
+                    }),
+                ],
+                'mapped' => false,
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
@@ -41,8 +77,7 @@ class UserRegistrationType extends AbstractType
                     ],
                 ],
                 'mapped' => false,
-            ]);
-        $builder
+            ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Register',
                 'attr' => [
@@ -53,8 +88,6 @@ class UserRegistrationType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-                                   'data_class' => 'DOMJudgeBundle\Entity\User',
-                               ));
+        $resolver->setDefaults(['data_class' => User::class]);
     }
 }

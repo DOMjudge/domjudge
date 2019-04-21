@@ -105,14 +105,16 @@ class SecurityController extends Controller
             $user->setName($user->getUsername());
             $user->addRole($team_role);
 
+            $teamName = $registration_form->get('teamName')->getData();
 
             // Create a team to go with the user, then set some team attributes
             $team = new Team();
             $user->setTeam($team);
-            $team->addUser($user);
-            $team->setName($user->getUsername());
-            $team->setCategory($registrationCategory);
-            $team->setComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
+            $team
+                ->addUser($user)
+                ->setName($teamName)
+                ->setCategory($registrationCategory)
+                ->setComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
 
             $em->persist($user);
             $em->persist($team);
