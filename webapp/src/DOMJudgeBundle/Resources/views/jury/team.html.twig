@@ -123,6 +123,14 @@
                         </td>
                     </tr>
                 {% endif %}
+                {% if team.comments is not empty %}
+                <tr>
+                    <th>Comments</th>
+                    <td>
+                        {{ team.comments | nl2br }}
+                    </td>
+                </tr>
+                {% endif %}
                 {% if team.members is not empty %}
                     <tr>
                         <th>Members</th>
