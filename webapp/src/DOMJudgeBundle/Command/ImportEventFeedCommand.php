@@ -2,6 +2,7 @@
 
 namespace DOMJudgeBundle\Command;
 
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -9,12 +10,15 @@ use DOMJudgeBundle\Entity\Clarification;
 use DOMJudgeBundle\Entity\Configuration;
 use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
+use DOMJudgeBundle\Entity\ExternalJudgement;
+use DOMJudgeBundle\Entity\ExternalRun;
 use DOMJudgeBundle\Entity\Language;
 use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Submission;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TeamAffiliation;
 use DOMJudgeBundle\Entity\TeamCategory;
+use DOMJudgeBundle\Entity\Testcase;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
@@ -94,9 +98,10 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     protected $verdicts = [];
 
     /**
-     * This array will hold all events that are waiting on a dependant event because it has an ID that does not exist
-     * yet. According to the official spec this can not happen, but in practice it does happen. We handle this by
-     * storing these events here and checking whether there are any after saving any dependant event.
+     * This array will hold all events that are waiting on a dependant event because it has an ID
+     * that does not exist yet. According to the official spec this can not happen, but in practice
+     * it does happen. We handle this by storing these events here and checking whether there are
+     * any after saving any dependant event.
      *
      * This array is three dimensional:
      * - The first dimension is the type of the dependant event type
@@ -158,8 +163,6 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                 '- Judgement types will not be imported, but only verified' . PHP_EOL .
                 '- Languages will not be imported, but only verified' . PHP_EOL .
                 '- Team members will not be imported' . PHP_EOL .
-                '- Judgements will not be imported' . PHP_EOL .
-                '- Runs will not be imported, but their verdict will be stored on the submission' . PHP_EOL .
                 '- Awards will not be imported' . PHP_EOL .
                 '- State will not be imported'
             )
@@ -226,7 +229,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         $contest = $this->em->getRepository(Contest::class)->find($input->getArgument('contest-id'));
         if (!$contest) {
-            $this->logger->error(sprintf('Contest with ID %s not found, exiting.', $input->getArgument('contest-id')));
+            $this->logger->error(sprintf('Contest with ID %s not found, exiting.',
+                                         $input->getArgument('contest-id')));
             return 1;
         } else {
             $this->logger->notice(sprintf('Starting event feed import into contest with ID %d [DOMjudge/%s]',
@@ -446,10 +450,10 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             return;
         }
 
-        $this->logger->debug(sprintf("Importing event with ID %s and type %s...", $event['id'], $event['type']));
+        $this->logger->debug(sprintf("Importing event with ID %s and type %s...", $event['id'],
+                                     $event['type']));
 
         switch ($event['type']) {
-            case 'runs':
             case 'awards':
             case 'team-members':
             case 'state':
@@ -485,6 +489,9 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             case 'judgements':
                 $this->importJudgement($event);
                 break;
+            case 'runs':
+                $this->importRun($event);
+                break;
         }
     }
 
@@ -496,7 +503,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     protected function importContest(array $event)
     {
         if ($event['op'] === EventLogService::ACTION_DELETE) {
-            $this->logger->error(sprintf('Event %s contains a delete for contests, not supported', $event['id']));
+            $this->logger->error(sprintf('Event %s contains a delete for contests, not supported',
+                                         $event['id']));
             return;
         }
 
@@ -519,10 +527,10 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $freezeHourModifier   = $freezeNegative ? -1 : 1;
         $fullDuration         = $durationNegative ? $duration : ('+' . $duration);
 
-        $durationInSeconds = $durationHourModifier * $durationData[2] * 3600
+        $durationInSeconds  = $durationHourModifier * $durationData[2] * 3600
             + 60 * $durationData[3]
             + (double)sprintf('%d.%d', $durationData[4], $durationData[5]);
-        $freezeInSeconds = $freezeHourModifier * $freezeData[2] * 3600
+        $freezeInSeconds    = $freezeHourModifier * $freezeData[2] * 3600
             + 60 * $freezeData[3]
             + (double)sprintf('%d.%d', $freezeData[4], $freezeData[5]);
         $freezeStartSeconds = $durationInSeconds - $freezeInSeconds;
@@ -543,13 +551,14 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // The timezones are given in ISO 8601 and we only support names.
         // This is why we will use the platform default timezone and just verify it matches
-        $startTime       = $event['data']['start_time'] === null ? null : new \DateTime($event['data']['start_time']);
+        $startTime = $event['data']['start_time'] === null ? null : new DateTime($event['data']['start_time']);
         if ($startTime !== null) {
-            $timezone = new \DateTimeZone($startTime->format('e'));
+            $timezone        = new \DateTimeZone($startTime->format('e'));
             $defaultTimezone = new \DateTimeZone(date_default_timezone_get());
             if ($timezone->getOffset($startTime) !== $defaultTimezone->getOffset($startTime)) {
                 $this->logger->warning(sprintf('Time zone offset (%s) of start time does not match system time zone %s',
-                    $startTime->format('e'), date_default_timezone_get()));
+                                               $startTime->format('e'),
+                                               date_default_timezone_get()));
             }
             // Now set the data
             $contest
@@ -574,7 +583,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         // Save data and emit event
         $this->em->flush();
         // For contests we know we always do an update action as the contest must exist for this script to run
-        $this->eventLogService->log('contest', $contest->getCid(), EventLogService::ACTION_UPDATE, $contest->getCid());
+        $this->eventLogService->log('contest', $contest->getCid(), EventLogService::ACTION_UPDATE,
+                                    $contest->getCid());
     }
 
     /**
@@ -585,12 +595,14 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     protected function validateJudgementType(array $event)
     {
         if ($event['op'] !== EventLogService::ACTION_CREATE) {
-            $this->logger->error(sprintf('Event %s contains a %s for judgement-types, not supported', $event['id'],
+            $this->logger->error(sprintf('Event %s contains a %s for judgement-types, not supported',
+                                         $event['id'],
                                          $event['op']));
             return;
         }
 
-        $this->logger->info(sprintf('Validating judgement-types %s event %s', $event['op'], $event['id']));
+        $this->logger->info(sprintf('Validating judgement-types %s event %s', $event['op'],
+                                    $event['id']));
 
         $verdict         = $event['data']['id'];
         $verdictsFlipped = array_flip($this->verdicts);
@@ -612,7 +624,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                                              $event['data']['penalty'], $penalty));
             }
             if ($solved !== $event['data']['solved']) {
-                $this->logger->error(sprintf('Judgement type %s has mismatching solved: %d (feed) vs %d (us)', $verdict,
+                $this->logger->error(sprintf('Judgement type %s has mismatching solved: %d (feed) vs %d (us)',
+                                             $verdict,
                                              $event['data']['solved'], $solved));
             }
         }
@@ -626,21 +639,25 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     protected function validateLanguage(array $event)
     {
         if ($event['op'] !== EventLogService::ACTION_CREATE) {
-            $this->logger->error(sprintf('Event %s contains a %s for languages, not supported', $event['id'],
+            $this->logger->error(sprintf('Event %s contains a %s for languages, not supported',
+                                         $event['id'],
                                          $event['op']));
             return;
         }
 
-        $this->logger->info(sprintf('Validating languages %s event %s', $event['op'], $event['id']));
+        $this->logger->info(sprintf('Validating languages %s event %s', $event['op'],
+                                    $event['id']));
 
         $extId = $event['data']['id'];
         /** @var Language $language */
         $language = $this->em->getRepository(Language::class)->findOneBy(['externalid' => $extId]);
         if (!$language) {
-            $this->logger->error(sprintf('Can not find language with external ID %s in DOMjudge', $extId));
+            $this->logger->error(sprintf('Can not find language with external ID %s in DOMjudge',
+                                         $extId));
         } else {
             if (!$language->getAllowSubmit()) {
-                $this->logger->error(sprintf('Language with external ID %s not submittable in DOMjudge', $extId));
+                $this->logger->error(sprintf('Language with external ID %s not submittable in DOMjudge',
+                                             $extId));
             }
         }
     }
@@ -667,7 +684,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             if ($category) {
                 $this->em->remove($category);
                 $this->em->flush();
-                $this->eventLogService->log('groups', $category->getCategoryid(), EventLogService::ACTION_DELETE,
+                $this->eventLogService->log('groups', $category->getCategoryid(),
+                                            EventLogService::ACTION_DELETE,
                                             $this->contestId, null, $category->getCategoryid());
                 return;
             } else {
@@ -697,7 +715,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             $this->em->persist($category);
         }
         $this->em->flush();
-        $this->eventLogService->log('groups', $category->getCategoryid(), $action, $this->contestId);
+        $this->eventLogService->log('groups', $category->getCategoryid(), $action,
+                                    $this->contestId);
 
         $this->processPendingEvents('group', $category->getCategoryid());
     }
@@ -709,7 +728,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
      */
     protected function importOrganization(array $event)
     {
-        $this->logger->info(sprintf('Importing organization %s event %s', $event['op'], $event['id']));
+        $this->logger->info(sprintf('Importing organization %s event %s', $event['op'],
+                                    $event['id']));
 
         $organizationId = $event['data']['id'];
 
@@ -720,7 +740,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             if ($affiliation) {
                 $this->em->remove($affiliation);
                 $this->em->flush();
-                $this->eventLogService->log('organizations', $affiliation->getAffilid(), EventLogService::ACTION_DELETE,
+                $this->eventLogService->log('organizations', $affiliation->getAffilid(),
+                                            EventLogService::ACTION_DELETE,
                                             $this->contestId, null, $affiliation->getExternalid());
                 return;
             } else {
@@ -753,7 +774,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             $this->em->persist($affiliation);
         }
         $this->em->flush();
-        $this->eventLogService->log('organizations', $affiliation->getAffilid(), $action, $this->contestId);
+        $this->eventLogService->log('organizations', $affiliation->getAffilid(), $action,
+                                    $this->contestId);
 
         $this->processPendingEvents('organization', $affiliation->getExternalid());
     }
@@ -766,7 +788,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     protected function importProblem(array $event)
     {
         if ($event['op'] === EventLogService::ACTION_DELETE) {
-            $this->logger->error(sprintf('Event %s contains a delete for problems, not supported', $event['id']));
+            $this->logger->error(sprintf('Event %s contains a delete for problems, not supported',
+                                         $event['id']));
             return;
         }
 
@@ -778,16 +801,17 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         /** @var Problem $problem */
         $problem = $this->em->getRepository(Problem::class)->findOneBy(['externalid' => $problemId]);
         if (!$problem) {
-            $this->logger->error(sprintf('Problem %s not found in DOMjudge. Can not import', $problemId));
+            $this->logger->error(sprintf('Problem %s not found in DOMjudge. Can not import',
+                                         $problemId));
             return;
         }
 
         // Now find the contest problem
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'cid' => $this->contestId,
-                                                                                               'probid' => $problem->getProbid()
-                                                                                           ]);
+                                                                                    'cid' => $this->contestId,
+                                                                                    'probid' => $problem->getProbid()
+                                                                                ]);
         if ($contestProblem) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
@@ -834,7 +858,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             if ($team) {
                 $this->em->remove($team);
                 $this->em->flush();
-                $this->eventLogService->log('teams', $team->getTeamid(), EventLogService::ACTION_DELETE,
+                $this->eventLogService->log('teams', $team->getTeamid(),
+                                            EventLogService::ACTION_DELETE,
                                             $this->contestId, null, $team->getExternalid());
                 return;
             } else {
@@ -921,7 +946,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
      */
     protected function importClarification(array $event)
     {
-        $this->logger->info(sprintf('Importing clarification %s event %s', $event['op'], $event['id']));
+        $this->logger->info(sprintf('Importing clarification %s event %s', $event['op'],
+                                    $event['id']));
 
         $clarificationId = $event['data']['id'];
 
@@ -934,7 +960,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                 $this->em->flush();
                 $this->eventLogService->log('clarifications', $clarification->getClarid(),
                                             EventLogService::ACTION_DELETE,
-                                            $this->contestId, null, $clarification->getExternalid());
+                                            $this->contestId, null,
+                                            $clarification->getExternalid());
                 return;
             } else {
                 $this->logger->error(sprintf('Can not delete clarification %s, because it does not exist in DOMjudge',
@@ -1002,7 +1029,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
 
-        $time       = new \DateTime($event['data']['time']);
+        $time       = new DateTime($event['data']['time']);
         $submitTime = sprintf('%d.%d', $time->getTimestamp(), $time->format('u'));
 
         $clarification
@@ -1023,7 +1050,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             $this->em->persist($clarification);
         }
         $this->em->flush();
-        $this->eventLogService->log('clarifications', $clarification->getClarid(), $action, $this->contestId);
+        $this->eventLogService->log('clarifications', $clarification->getClarid(), $action,
+                                    $this->contestId);
 
         $this->processPendingEvents('clarification', $clarification->getExternalid());
     }
@@ -1035,7 +1063,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
      */
     protected function importSubmission(array $event)
     {
-        $this->logger->info(sprintf('Importing submission %s event %s', $event['op'], $event['id']));
+        $this->logger->info(sprintf('Importing submission %s event %s', $event['op'],
+                                    $event['id']));
 
         $submissionId = $event['data']['id'];
 
@@ -1046,7 +1075,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             if ($submission) {
                 $submission->setValid(false);
                 $this->em->flush();
-                $this->eventLogService->log('submissions', $submission->getSubmitid(), EventLogService::ACTION_DELETE,
+                $this->eventLogService->log('submissions', $submission->getSubmitid(),
+                                            EventLogService::ACTION_DELETE,
                                             $this->contestId);
 
                 $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
@@ -1086,9 +1116,9 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         // Find the contest problem
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'cid' => $this->contestId,
-                                                                                               'probid' => $problem->getProbid()
-                                                                                           ]);
+                                                                                    'cid' => $this->contestId,
+                                                                                    'probid' => $problem->getProbid()
+                                                                                ]);
 
         if (!$contestProblem) {
             $this->logger->error(sprintf('Can not import submission %s because problem %s is not part of contest',
@@ -1105,7 +1135,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             return;
         }
 
-        $time       = new \DateTime($event['data']['time']);
+        $time       = new DateTime($event['data']['time']);
         $submitTime = (float)sprintf('%d.%d', $time->getTimestamp(), $time->format('u'));
 
         $entryPoint = $event['data']['entry_point'] ?? null;
@@ -1125,13 +1155,15 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             }
             if ($submission->getProblem()->getExternalid() !== $problem->getExternalid()) {
                 $this->logger->error(sprintf('Got new event for submission %s with different problem ID (%s instead of %s)',
-                                             $submission->getExternalid(), $problem->getExternalid(),
+                                             $submission->getExternalid(),
+                                             $problem->getExternalid(),
                                              $submission->getProblem()->getExternalid()));
                 $matches = false;
             }
             if ($submission->getLanguage()->getExternalid() !== $language->getExternalid()) {
                 $this->logger->error(sprintf('Got new event for submission %s with different language ID (%s instead of %s)',
-                                             $submission->getExternalid(), $language->getExternalid(),
+                                             $submission->getExternalid(),
+                                             $language->getExternalid(),
                                              $submission->getLanguage()->getExternalid()));
                 $matches = false;
             }
@@ -1156,7 +1188,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                     // Special case number two: if we get a null entry point but we have one already,
                     // ignore this and do not log any error
                     $this->logger->debug(sprintf('Received null entrypoint for submission %s, but we already have %s',
-                                                 $submission->getExternalid(), $submission->getEntryPoint()));
+                                                 $submission->getExternalid(),
+                                                 $submission->getEntryPoint()));
                 } else {
                     $this->logger->error(sprintf('Got new event for submission %s with different entrypoint (%s instead of %s)',
                                                  $submission->getExternalid(), $entryPoint,
@@ -1173,7 +1206,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                 $submission->setValid(true);
 
                 $this->em->flush();
-                $this->eventLogService->log('submissions', $submission->getSubmitid(), EventLogService::ACTION_CREATE,
+                $this->eventLogService->log('submissions', $submission->getSubmitid(),
+                                            EventLogService::ACTION_CREATE,
                                             $this->contestId);
 
                 $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
@@ -1184,10 +1218,12 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         } else {
             // First, check if we actually have the source for this submission in the data
             if (empty($event['data']['files'][0]['href'])) {
-                $this->logger->error(sprintf('Submission %s does not have source files in event', $submissionId));
+                $this->logger->error(sprintf('Submission %s does not have source files in event',
+                                             $submissionId));
                 return;
             } elseif (($event['data']['files'][0]['mime'] ?? null) !== 'application/zip') {
-                $this->logger->error(sprintf('Submission %s has non-ZIP source files in event', $submissionId));
+                $this->logger->error(sprintf('Submission %s has non-ZIP source files in event',
+                                             $submissionId));
                 return;
             } else {
                 $zipUrl = $event['data']['files'][0]['href'];
@@ -1220,7 +1256,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                     $client   = new Client();
                     $response = $client->get($zipUrl, ['sink' => $zipFile]);
                     if ($response->getStatusCode() !== 200) {
-                        $this->logger->error(sprintf('Can not download ZIP for submission %s', $submissionId));
+                        $this->logger->error(sprintf('Can not download ZIP for submission %s',
+                                                     $submissionId));
                         unlink($zipFile);
                         return;
                     }
@@ -1247,7 +1284,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                         return;
                     }
                     file_put_contents($tmpSubmissionFile, $content);
-                    $filesToSubmit[] = new UploadedFile($tmpSubmissionFile, $filename, null, null, null, true);
+                    $filesToSubmit[] = new UploadedFile($tmpSubmissionFile, $filename, null, null,
+                                                        null, true);
                 }
 
                 // If the language requires an entry point but we do not have one, use automatic entry point detection
@@ -1258,7 +1296,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                 // Submit the solution
                 $contest    = $this->em->getRepository(Contest::class)->find($this->contestId);
                 $submission = $this->submissionService->submitSolution(
-                    $team, $contestProblem, $contest, $language, $filesToSubmit, null, $entryPoint, $submissionId,
+                    $team, $contestProblem, $contest, $language, $filesToSubmit, null, $entryPoint,
+                    $submissionId,
                     $submitTime
                 );
 
@@ -1285,9 +1324,38 @@ class ImportEventFeedCommand extends ContainerAwareCommand
      */
     protected function importJudgement(array $event)
     {
+        // Note that we do not emit events for imported judgements, as we will generate our own
         $this->logger->info(sprintf('Importing judgement %s event %s', $event['op'], $event['id']));
 
-        // First, find the submission for this judgement as we need it in all cases
+        $judgementId = $event['data']['id'];
+
+        if ($event['op'] === EventLogService::ACTION_DELETE) {
+            // We need to delete the judgement
+
+            $judgement = $this->em->getRepository(ExternalJudgement::class)->findOneBy(['extjudgementid' => $judgementId]);
+            if ($judgement) {
+                $this->em->remove($judgement);
+                $this->em->flush();
+                return;
+            } else {
+                $this->logger->error(sprintf('Can not delete judgement %s, because it does not exist in DOMjudge',
+                                             $judgementId));
+            }
+            return;
+        }
+
+        // First, load the external judgement
+        /** @var ExternalJudgement $judgement */
+        $judgement = $this->em->getRepository(ExternalJudgement::class)->findOneBy(['extjudgementid' => $judgementId]);
+        $persist   = false;
+        if (!$judgement) {
+            $judgement = new ExternalJudgement();
+            $judgement->setExtjudgementid($judgementId);
+            $persist = true;
+        }
+
+        // Now check if we have all dependant data
+
         $submissionId = $event['data']['submission_id'] ?? null;
         /** @var Submission $submission */
         $submission = $this->em->getRepository(Submission::class)->findOneBy(['externalid' => $submissionId]);
@@ -1296,24 +1364,130 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             return;
         }
 
-        $verdict = $event['data']['judgement_type_id'] ?? null;
 
-        if ($event['op'] === EventLogService::ACTION_DELETE || $verdict === null) {
-            // We need to delete the judgement. We do this by setting the external result of the submission back to null
-            $submission->setExternalresult(null);
-            $this->em->flush();
+        $startTimeObject = new DateTime($event['data']['start_time']);
+        $startTime       = sprintf('%d.%d', $startTimeObject->getTimestamp(),
+                                   $startTimeObject->format('u'));
+        $endTime         = null;
+        if (isset($event['data']['end_time'])) {
+            $endTimeObject = new DateTime($event['data']['end_time']);
+            $endTime       = sprintf('%d.%d', $endTimeObject->getTimestamp(),
+                                     $endTimeObject->format('u'));
+        }
+
+        $judgementTypeId = $event['data']['judgement_type_id'] ?? null;
+        $verdictsFlipped = array_flip($this->verdicts);
+        // Set the result based on the judgement type ID
+        if ($judgementTypeId !== null && !isset($verdictsFlipped[$judgementTypeId])) {
+            $this->logger->error(sprintf('Can not import judgement %s, because judgement type %s does not exist in DOMjudge',
+                                         $event['data']['id'], $judgementTypeId));
+        }
+
+        $judgement
+            ->setSubmission($submission)
+            ->setStarttime($startTime)
+            ->setEndtime($endTime)
+            ->setResult($judgementTypeId === null ? null : $verdictsFlipped[$judgementTypeId]);
+
+        if ($persist) {
+            $this->em->persist($judgement);
+        }
+        $this->em->flush();
+
+        $this->processPendingEvents('judgement', $judgement->getExtjudgementid());
+    }
+
+    /**
+     * Import the given run event
+     * @param array $event
+     * @throws \Exception
+     */
+    protected function importRun(array $event)
+    {
+        // Note that we do not emit events for imported runs, as we will generate our own
+        $this->logger->info(sprintf('Importing run %s event %s', $event['op'], $event['id']));
+
+        $runId = $event['data']['id'];
+
+        if ($event['op'] === EventLogService::ACTION_DELETE) {
+            // We need to delete the run
+
+            $run = $this->em->getRepository(ExternalRun::class)->findOneBy(['extrunid' => $runId]);
+            if ($run) {
+                $this->em->remove($run);
+                $this->em->flush();
+                return;
+            } else {
+                $this->logger->error(sprintf('Can not delete run %s, because it does not exist in DOMjudge',
+                                             $runId));
+            }
             return;
         }
 
-        // For create and update actions, check if the judgement exists
-        $verdictsFlipped = array_flip($this->verdicts);
-        if (!isset($verdictsFlipped[$verdict])) {
-            $this->logger->error(sprintf('Can not import judgement %s, because judgement type %s does not exist in DOMjudge',
-                                         $event['data']['id'], $verdict));
+        // First, load the external run
+        /** @var ExternalRun $run */
+        $run     = $this->em->getRepository(ExternalRun::class)->findOneBy(['extrunid' => $runId]);
+        $persist = false;
+        if (!$run) {
+            $run = new ExternalRun();
+            $run->setExtrunid($runId);
+            $persist = true;
         }
 
-        // Update the external result of the submission
-        $submission->setExternalresult($verdictsFlipped[$verdict]);
+        // Now check if we have all dependant data
+
+        $judgementId = $event['data']['judgement_id'] ?? null;
+        /** @var ExternalJudgement $externalJudgement */
+        $externalJudgement = $this->em->getRepository(ExternalJudgement::class)->findOneBy(['extjudgementid' => $judgementId]);
+        if (!$externalJudgement) {
+            $this->addPendingEvent('judgement', $judgementId, $event);
+            return;
+        }
+
+
+        $timeObject = new DateTime($event['data']['time']);
+        $time       = sprintf('%d.%d', $timeObject->getTimestamp(), $timeObject->format('u'));
+
+        $runTime = $event['data']['run_time'] ?? null;
+
+        $judgementTypeId = $event['data']['judgement_type_id'] ?? null;
+        $verdictsFlipped = array_flip($this->verdicts);
+        // Set the result based on the judgement type ID
+        if (!isset($verdictsFlipped[$judgementTypeId])) {
+            $this->logger->error(sprintf('Can not import run %s, because judgement type %s does not exist in DOMjudge',
+                                         $event['data']['id'], $judgementTypeId));
+        }
+
+        $rank    = $event['data']['ordinal'];
+        $problem = $externalJudgement->getSubmission()->getContestProblem();
+
+        // Find the testcase belonging to this this run
+        /** @var Testcase|null $testcase */
+        $testcase = $this->em->createQueryBuilder()
+            ->from('DOMJudgeBundle:Testcase', 't')
+            ->select('t')
+            ->andWhere('t.probid = :probid')
+            ->andWhere('t.rank = :rank')
+            ->setParameter(':probid', $problem->getProbid())
+            ->setParameter(':rank', $rank)
+            ->getQuery()
+            ->getSingleResult();
+
+        if ($testcase === null) {
+            $this->logger->error(sprintf('Can not import run %s, because the testcase with rank %s does not exist in DOMjudge for problem %s',
+                                         $event['data']['id'], $rank, $problem->getShortname()));
+        }
+
+        $run
+            ->setExternalJudgement($externalJudgement)
+            ->setTestcase($testcase)
+            ->setEndtime($time)
+            ->setRuntime($runTime)
+            ->setResult($judgementTypeId === null ? null : $verdictsFlipped[$judgementTypeId]);
+
+        if ($persist) {
+            $this->em->persist($run);
+        }
         $this->em->flush();
     }
 
@@ -1333,7 +1507,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             // but then they'll be readded automatically in the correct place
             unset($this->pendingEvents[$type][$id]);
             foreach ($pending as $event) {
-                $this->logger->debug(sprintf("Processing pending event with ID %s and type %s...", $event['id'],
+                $this->logger->debug(sprintf("Processing pending event with ID %s and type %s...",
+                                             $event['id'],
                                              $event['type']));
                 $this->importEvent($event);
             }
