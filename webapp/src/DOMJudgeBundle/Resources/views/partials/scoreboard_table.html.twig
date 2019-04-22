@@ -97,7 +97,7 @@
     <tbody>
     {% set previousSortOrder = -1 %}
     {% set previousTeam = null %}
-    {% set backgroundColors = {"FFFFFF": 1} %}
+    {% set backgroundColors = {"#FFFFFF": 1} %}
     {% for score in scoreboard.scores if (limitToTeams is null or score.team.teamid in limitToTeamIds) %}
         {% set classes = [] %}
         {% if score.team.category.sortorder != previousSortOrder %}
@@ -173,12 +173,13 @@
                 </td>
             {% endif %}
             {% if color is null %}
-                {% set color = "FFFFFF" %}
+                {% set color = "#FFFFFF" %}
+                {% set colorClass = "_FFFFFF" %}
             {% else %}
-                {% set color = color|trim("#") %}
-                {% set backgroundColors = backgroundColors|merge({(''~color): 1}) %}
+                {% set colorClass = color | replace({"#": "_"}) %}
+                {% set backgroundColors = backgroundColors | merge({(color): 1}) %}
             {% endif %}
-            <td class="scoretn cl{{ color }}" title="{{ score.team.name }}">
+            <td class="scoretn cl{{ colorClass }}" title="{{ score.team.name }}">
                 {% set link = null %}
                 {% set extra = null %}
                 {% if not static %}
@@ -340,16 +341,17 @@
 
 <style>
     {% for color,i in backgroundColors %}
-        {% set cssColor = "#"~color %}
+        {% set colorClass = color | replace({"#": "_"}) %}
+        {% set hexColor = color | colorToHex | trim('#') %}
 
-        .cl{{ color }} {
-            background-color: {{ cssColor }}
+        .cl{{ colorClass }} {
+            background-color: {{ color }}
         }
 
-        {% set cMin = cssColor|hexColorToRGBA(0) %}
-        {% set cMax = cssColor|hexColorToRGBA(1) %}
+        {% set cMin = color|hexColorToRGBA(0) %}
+        {% set cMax = color|hexColorToRGBA(1) %}
 
-        .cl{{ color }} .forceWidth.toolong:after {
+        .cl{{ colorClass }} .forceWidth.toolong:after {
             background: -moz-linear-gradient(left,
                 {{ cMin }} 0%,
                 {{ cMax }} 96%);
@@ -369,8 +371,8 @@
                 {{ cMin }} 0%,
                 {{ cMax }} 96%);
                 filter: progid:DXImageTransform.Microsoft.gradient(
-                    startColorstr='#00{{ color }}',
-                    endColorstr='#FF{{ color }}',
+                    startColorstr='#00{{ hexColor }}',
+                    endColorstr='#FF{{ hexColor }}',
                     GradientType=1);
         }
     {% endfor %}
