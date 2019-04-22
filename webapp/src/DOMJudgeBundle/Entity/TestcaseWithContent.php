@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -107,6 +108,12 @@ class TestcaseWithContent
      * @Serializer\Exclude()
      */
     private $judging_runs;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ExternalRun", mappedBy="testcase")
+     * @Serializer\Exclude()
+     */
+    private $external_runs;
 
     /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="testcases")
@@ -472,5 +479,39 @@ class TestcaseWithContent
     public function getProblem()
     {
         return $this->problem;
+    }
+
+    /**
+     * Add externalRun
+     *
+     * @param ExternalRun $externalRun
+     *
+     * @return Testcase
+     */
+    public function addExternalRun(ExternalRun $externalRun)
+    {
+        $this->external_runs[] = $externalRun;
+
+        return $this;
+    }
+
+    /**
+     * Remove externalRun
+     *
+     * @param ExternalRun $externalRun
+     */
+    public function removeExternalRun(ExternalRun $externalRun)
+    {
+        $this->external_runs->removeElement($externalRun);
+    }
+
+    /**
+     * Get externalRuns
+     *
+     * @return Collection
+     */
+    public function getExternalRuns()
+    {
+        return $this->external_runs;
     }
 }

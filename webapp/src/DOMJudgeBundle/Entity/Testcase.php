@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 namespace DOMJudgeBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
@@ -75,6 +77,12 @@ class Testcase
     private $judging_runs;
 
     /**
+     * @ORM\OneToMany(targetEntity="ExternalRun", mappedBy="testcase")
+     * @Serializer\Exclude()
+     */
+    private $external_runs;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="testcases")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Exclude()
@@ -94,7 +102,8 @@ class Testcase
      */
     public function __construct()
     {
-        $this->judging_runs = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->judging_runs = new ArrayCollection();
+        $this->external_runs = new ArrayCollection();
     }
 
     /**
@@ -308,7 +317,7 @@ class Testcase
     /**
      * Get judgingRuns
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getJudgingRuns()
     {
@@ -372,5 +381,39 @@ class Testcase
     public function getTestcaseContent()
     {
         return $this->testcase_content;
+    }
+
+    /**
+     * Add externalRun
+     *
+     * @param ExternalRun $externalRun
+     *
+     * @return Testcase
+     */
+    public function addExternalRun(ExternalRun $externalRun)
+    {
+        $this->external_runs[] = $externalRun;
+
+        return $this;
+    }
+
+    /**
+     * Remove externalRun
+     *
+     * @param ExternalRun $externalRun
+     */
+    public function removeExternalRun(ExternalRun $externalRun)
+    {
+        $this->external_runs->removeElement($externalRun);
+    }
+
+    /**
+     * Get externalRuns
+     *
+     * @return Collection
+     */
+    public function getExternalRuns()
+    {
+        return $this->external_runs;
     }
 }
