@@ -407,7 +407,6 @@ class ImportProblemService
             }
             asort($dataFiles);
 
-            echo "<ul>\n";
             foreach ($dataFiles as $dataFile) {
                 $testIn      = $zip->getFromName(sprintf('data/%s/%s.in', $type, $dataFile));
                 $testOut     = $zip->getFromName(sprintf('data/%s/%s.ans', $type, $dataFile));
