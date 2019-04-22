@@ -61,7 +61,6 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
         // If it's stateless, we provide auth support every time
         $stateless_fw_contexts = [
           'security.firewall.map.context.api',
-          'security.firewall.map.context.feed',
         ];
         $fwcontext = $request->attributes->get('_firewall_context', '');
         if (in_array($fwcontext, $stateless_fw_contexts)) {

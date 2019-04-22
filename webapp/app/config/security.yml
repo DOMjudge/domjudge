@@ -43,20 +43,6 @@ security:
                 - DOMJudgeBundle\Security\DOMJudgeBasicAuthenticator
               entry_point: DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
 
-        # SEE NOTE ABOVE IF CHANGING ANYTHING IN THIS SECTION
-        # Feed does the same auth methods as api
-        feed:
-            pattern: ^/feed
-            provider: domjudge_db_provider
-            user_checker: DOMJudgeBundle\Security\UserChecker
-            stateless: true
-            anonymous: ~
-            guard:
-              authenticators:
-                - DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
-                - DOMJudgeBundle\Security\DOMJudgeBasicAuthenticator
-              entry_point: DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
-
         # rest of app does form_login
         main:
             pattern: ^/
