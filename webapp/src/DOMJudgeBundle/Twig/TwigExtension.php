@@ -95,7 +95,6 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
             new \Twig_SimpleFilter('statusIcon', [$this, 'statusIcon']),
             new \Twig_SimpleFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
-            new \Twig_SimpleFilter('colorToHex', [Utils::class, 'convertToHex']),
             new \Twig_SimpleFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
         ];
     }
