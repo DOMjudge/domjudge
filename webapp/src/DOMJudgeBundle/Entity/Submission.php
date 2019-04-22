@@ -174,6 +174,12 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     private $judgings;
 
     /**
+     * @ORM\OneToMany(targetEntity="DOMJudgeBundle\Entity\ExternalJudgement", mappedBy="submission")
+     * @Serializer\Exclude()
+     */
+    private $external_judgements;
+
+    /**
      * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="SubmissionFile", mappedBy="submission")
      * @Serializer\Exclude()
@@ -625,6 +631,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         $this->files                  = new ArrayCollection();
         $this->files_with_source_code = new ArrayCollection();
         $this->resubmissions          = new ArrayCollection();
+        $this->external_judgements    = new ArrayCollection();
     }
 
     /**
@@ -1013,5 +1020,39 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         }
 
         return !empty($judging->getResult()) && empty($judging->getEndtime()) && !$this->isAborted();
+    }
+
+    /**
+     * Add externalJudgement
+     *
+     * @param ExternalJudgement $externalJudgement
+     *
+     * @return Submission
+     */
+    public function addExternalJudgement(ExternalJudgement $externalJudgement)
+    {
+        $this->external_judgements[] = $externalJudgement;
+
+        return $this;
+    }
+
+    /**
+     * Remove externalJudgement
+     *
+     * @param ExternalJudgement $externalJudgement
+     */
+    public function removeExternalJudgement(ExternalJudgement $externalJudgement)
+    {
+        $this->external_judgements->removeElement($externalJudgement);
+    }
+
+    /**
+     * Get externalJudgements
+     *
+     * @return Collection
+     */
+    public function getExternalJudgements()
+    {
+        return $this->external_judgements;
     }
 }
