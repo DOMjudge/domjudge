@@ -342,38 +342,18 @@
 <style>
     {% for color,i in backgroundColors %}
         {% set colorClass = color | replace({"#": "_"}) %}
-        {% set hexColor = color | colorToHex | trim('#') %}
 
         .cl{{ colorClass }} {
-            background-color: {{ color }}
+            background-color: {{ color }};
         }
 
         {% set cMin = color|hexColorToRGBA(0) %}
         {% set cMax = color|hexColorToRGBA(1) %}
 
         .cl{{ colorClass }} .forceWidth.toolong:after {
-            background: -moz-linear-gradient(left,
+            background: linear-gradient(to right,
                 {{ cMin }} 0%,
                 {{ cMax }} 96%);
-            background: -webkit-gradient(linear, left top, right top,
-                color-stop(0%, {{ cMin }}),
-                color-stop(96%, {{ cMax }}));
-            background: -webkit-linear-gradient(left,
-                {{ cMin }} 0%,
-                {{ cMax }} 96%);
-            background: -o-linear-gradient(left,
-                {{ cMin }} 0%,
-                {{ cMax }} 96%);
-            background: -ms-linear-gradient(left,
-                {{ cMin }} 0%,
-                {{ cMax }} 96%);
-            background: linear-gradient(left,
-                {{ cMin }} 0%,
-                {{ cMax }} 96%);
-                filter: progid:DXImageTransform.Microsoft.gradient(
-                    startColorstr='#00{{ hexColor }}',
-                    endColorstr='#FF{{ hexColor }}',
-                    GradientType=1);
         }
     {% endfor %}
 </style>
