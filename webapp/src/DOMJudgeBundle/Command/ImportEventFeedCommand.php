@@ -26,6 +26,7 @@ use DOMJudgeBundle\Service\ScoreboardService;
 use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -1253,11 +1254,19 @@ class ImportEventFeedCommand extends ContainerAwareCommand
                         return;
                     }
 
-                    $client   = new Client();
-                    $response = $client->get($zipUrl, ['sink' => $zipFile]);
-                    if ($response->getStatusCode() !== 200) {
-                        $this->logger->error(sprintf('Can not download ZIP for submission %s',
-                                                     $submissionId));
+                    $client = new Client();
+                    try {
+                        $response = $client->get($zipUrl, ['sink' => $zipFile]);
+                        if ($response->getStatusCode() !== 200) {
+                            // TODO: retry a couple of times
+                            $this->logger->error(sprintf('Can not download ZIP for submission %s',
+                                                         $submissionId));
+                            unlink($zipFile);
+                            return;
+                        }
+                    } catch (RequestException $e) {
+                        $this->logger->error(sprintf('Can not download ZIP for submission %s: %s',
+                                                     $submissionId, $e->getMessage()));
                         unlink($zipFile);
                         return;
                     }
