@@ -1,3 +1,6 @@
+ssp_bundle:
+    resource: "@SSPGuardBundle/Resources/config/routing/connect.xml"
+
 domjudge:
     resource: '@DOMJudgeBundle/Controller/'
     type: annotation
