@@ -283,17 +283,17 @@ class SubmissionService
      * This function takes a (set of) temporary file(s) of a submission,
      * validates it and puts it into the database. Additionally it
      * moves it to a backup storage.
-     * @param Team|int           $team
-     * @param ContestProblem|int $problem
-     * @param Contest|int        $contest
-     * @param Language|string    $language
-     * @param UploadedFile[]     $files
-     * @param int|null           $originalSubmitId
-     * @param string|null        $entryPoint
-     * @param string|null        $externalId
-     * @param float|null         $submitTime
-     * @param string|null        $externalResult
-     * @param string|null        $message
+     * @param Team|int            $team
+     * @param ContestProblem|int  $problem
+     * @param Contest|int         $contest
+     * @param Language|string     $language
+     * @param UploadedFile[]      $files
+     * @param Submission|int|null $originalSubmission
+     * @param string|null         $entryPoint
+     * @param string|null         $externalId
+     * @param float|null          $submitTime
+     * @param string|null         $externalResult
+     * @param string|null         $message
      * @return Submission|null
      * @throws \Doctrine\DBAL\DBALException
      */
@@ -303,7 +303,7 @@ class SubmissionService
         $contest,
         $language,
         array $files,
-        $originalSubmitId,
+        $originalSubmission = null,
         string $entryPoint = null,
         $externalId = null,
         float $submitTime = null,
@@ -324,6 +324,9 @@ class SubmissionService
         }
         if (!$language instanceof Language) {
             $language = $this->em->getRepository(Language::class)->find($language);
+        }
+        if ($originalSubmission !== null && !$originalSubmission instanceof Submission) {
+            $originalSubmission = $this->em->getRepository(Submission::class)->find($originalSubmission);
         }
 
         if (empty($team)) {
@@ -439,7 +442,7 @@ class SubmissionService
             ->setContestProblem($problem)
             ->setLanguage($language)
             ->setSubmittime($submitTime)
-            ->setOrigsubmitid($originalSubmitId)
+            ->setOriginalSubmission($originalSubmission)
             ->setEntryPoint($entryPoint)
             ->setExternalid($externalId)
             ->setExternalresult($externalResult);

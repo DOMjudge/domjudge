@@ -770,7 +770,7 @@ class SubmissionController extends BaseController
                 $submission->getContest(),
                 $language,
                 $filesToSubmit,
-                $submission->getOrigsubmitid() ?? $submission->getSubmitid(),
+                $submission->getOriginalSubmission() ?? $submission,
                 $entryPoint,
                 null,
                 null,
