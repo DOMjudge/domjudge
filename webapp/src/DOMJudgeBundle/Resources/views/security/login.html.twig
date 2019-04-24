@@ -85,7 +85,8 @@
           <label for="username" class="sr-only">Username</label>
           <input type="text" id="username" name="_username" class="form-control" placeholder="Username" required autofocus>
           <label for="inputPassword" class="sr-only">Password</label>
-          <input type="password" id="inputPassword" name="_password" class="form-control" placeholder="Password" required>
+          <input type="password" id="inputPassword" name="_password" class="form-control"
+              placeholder="Password" required autocomplete="current-password">
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
         {% if allow_registration %}

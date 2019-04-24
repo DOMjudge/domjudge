@@ -30,12 +30,14 @@ class UserRegistrationType extends AbstractType
                     'label' => false,
                     'attr' => [
                         'placeholder' => 'Password',
+                        'autocomplete' => 'new-password',
                     ],
                 ],
                 'second_options' => [
                     'label' => false,
                     'attr' => [
                         'placeholder' => 'Repeat Password',
+                        'autocomplete' => 'new-password',
                     ],
                 ],
                 'mapped' => false,
