@@ -74,7 +74,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `des
 UPDATE `configuration` SET `name` = 'registration_category_name',
   `value` = IF(`value` = '0', '""', '"Self-Registered"'),
   `type` = 'string',
-  `description` = 'Team category for users that register themselves with the system. Disabled if empty.'
+  `description` = 'Team category for users that register themselves with the system. Self-registration is disabled if this field is left empty.'
   WHERE `name` = 'allow_registration';
 
 UPDATE `configuration` SET `category` = 'Authentication'
