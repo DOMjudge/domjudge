@@ -2,7 +2,7 @@
 namespace DOMJudgeBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use DOMJudgeBundle\Validator\Constraints\Identifier;
+use FOS\RestBundle\Validator\Constraints\Regex;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -29,7 +29,7 @@ class User implements UserInterface, \Serializable
     /**
      * @var string
      * @ORM\Column(type="string", name="username", length=255, options={"comment"="User login name"}, nullable=false)
-     * @Identifier()
+     * @Assert\Regex("/^[a-z0-9@._-]+$/i", message="Only alphanumeric characters and _-@. are allowed")
      */
     private $username;
 
