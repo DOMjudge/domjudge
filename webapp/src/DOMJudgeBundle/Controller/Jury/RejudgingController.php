@@ -539,8 +539,11 @@ class RejudgingController extends BaseController
                     'form' => $form->createView(),
                 ]);
             }
-            $rejudging = $this->createRejudging($request, $reason, $judgings, true, $scoreboardService);
-            return $this->redirectToRoute('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]);
+            $rejudgingOrResponse = $this->createRejudging($request, $reason, $judgings, true, $scoreboardService);
+            if ($rejudgingOrResponse instanceof Response) {
+                return $rejudgingOrResponse;
+            }
+            return $this->redirectToRoute('jury_rejudging', ['rejudgingId' => $rejudgingOrResponse->getRejudgingid()]);
         }
         return $this->render('@DOMJudge/jury/rejudging_form.html.twig', [
             'form' => $form->createView(),
@@ -636,10 +639,13 @@ class RejudgingController extends BaseController
             return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_index'));
         }
 
-        $rejudging = $this->createRejudging($request, $reason, $judgings, $fullRejudge, $scoreboardService);
+        $rejudgingOrResponse = $this->createRejudging($request, $reason, $judgings, $fullRejudge, $scoreboardService);
+        if ($rejudgingOrResponse instanceof Response) {
+            return $rejudgingOrResponse;
+        }
 
-        if ($rejudging) {
-            return $this->redirectToRoute('jury_rejudging', ['rejudgingId' => $rejudging->getRejudgingid()]);
+        if ($rejudgingOrResponse) {
+            return $this->redirectToRoute('jury_rejudging', ['rejudgingId' => $rejudgingOrResponse->getRejudgingid()]);
         } else {
             switch ($table) {
                 case 'contest':
