@@ -1,5 +1,1 @@
-/import.php
-/import-RESTfeed
-/import-XMLfeed
-/run-import-XMLfeed.sh
-/import-event-feed
+import-event-feed
