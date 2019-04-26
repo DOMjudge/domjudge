@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 // Mapping of DOMjudge verdict strings to those defined in the CLICS
 // CCS specification (and a few more common ones) at:
