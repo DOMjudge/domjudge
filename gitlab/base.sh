@@ -55,7 +55,6 @@ parameters:
     domjudge.libdir: /lib
     domjudge.sqldir: /sql
     domjudge.libvendordir: /lib/vendor
-    domjudge.libwwwdir: /lib/www
     domjudge.libsubmitdir: /lib/submit
     domjudge.logdir: /output/log
     domjudge.rundir: /output/run

@@ -22,7 +22,6 @@ endef
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libdir)    *.php
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libwwwdir) www/*.php
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libdir)    alert
 # KLUDGE: how to install a tree of files with correct permissions?
 	cp -R           -t $(DESTDIR)$(domserver_libvendordir) vendor/*

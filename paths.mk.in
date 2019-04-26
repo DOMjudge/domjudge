@@ -98,7 +98,6 @@ domserver_webappdir    = @domserver_webappdir@
 domserver_sqldir       = @domserver_sqldir@
 domserver_libdir       = @domserver_libdir@
 domserver_libvendordir = @domserver_libvendordir@
-domserver_libwwwdir    = @domserver_libwwwdir@
 domserver_libsubmitdir = @domserver_libsubmitdir@
 domserver_logdir       = @domserver_logdir@
 domserver_rundir       = @domserver_rundir@
@@ -123,7 +122,7 @@ domjudge_docdir        = @domjudge_docdir@
 # their permissions overwritten in FHS install mode.
 domserver_dirs = $(domserver_bindir) $(domserver_etcdir) \
                  $(domserver_libdir) $(domserver_libsubmitdir) $(domserver_libvendordir) \
-                 $(domserver_libwwwdir) $(domserver_logdir) $(domserver_rundir) \
+                 $(domserver_logdir) $(domserver_rundir) \
                  $(domserver_submitdir) $(domserver_sqldir)/upgrade \
                  $(addprefix $(domserver_webappdir)/web/images/,affiliations countries teams)
 
@@ -148,7 +147,6 @@ define substconfigvars
 	-e 's,@domserver_sqldir[@],@domserver_sqldir@,g' \
 	-e 's,@domserver_libdir[@],@domserver_libdir@,g' \
 	-e 's,@domserver_libvendordir[@],@domserver_libvendordir@,g' \
-	-e 's,@domserver_libwwwdir[@],@domserver_libwwwdir@,g' \
 	-e 's,@domserver_libsubmitdir[@],@domserver_libsubmitdir@,g' \
 	-e 's,@domserver_logdir[@],@domserver_logdir@,g' \
 	-e 's,@domserver_rundir[@],@domserver_rundir@,g' \
