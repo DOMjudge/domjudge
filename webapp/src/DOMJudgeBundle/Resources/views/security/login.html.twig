@@ -9,10 +9,13 @@
 {% block messages %}{% endblock %}
 {% block body %}
 
-    {% set hasaltmethods =
-        ("xheaders" in allowed_authmethods and auth_xheaders_present) or
-        ("ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0) %}
-    {% set showregular = not hasaltmethods or error %}
+{% set hasfederated = ssp_auth_sources()|length > 0 %}
+{% set hasaltmethods =
+    ("xheaders" in allowed_authmethods and auth_xheaders_present) or
+    ("ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0) or
+    hasfederated
+%}
+{% set showregular = not hasaltmethods or hasfederated or error %}
 
     <div class="form-signin" id="loginform">
         <img class="mb-4" src="{{ asset('images/DOMjudgelogo.png') }}" alt="DOMjudge" width="72">
@@ -81,7 +84,20 @@
                         });
                     </script>
                 {% endif %}
-            </div>
+
+                {% if hasfederated %}
+                    <div class="login-content">
+                    You can log in with the following external identity provider.</div>
+                    {% for source in ssp_auth_sources() %}
+
+                        {% set item = ssp_auth_source(source) %}
+                        <a class="btn btn-lg btn-success btn-block"
+                            href="{{ path('ssp_guard_connect', {'authSource': source}) }}">
+                            {{ item.title }}
+                        </a>
+                    {% endfor %}
+                {% endif %}
+  </div>
 
             <div class="vertical-line regularLoginform{% if not showregular %} d-none{% endif %}"></div>
         {% endif %}

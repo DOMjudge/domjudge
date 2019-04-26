@@ -270,3 +270,10 @@ nelmio_api_doc:
                 items:
                     type: string
                     description: A single ID
+
+ssp_guard:
+    installation_path: /srv/simplesamlphp
+    auth_sources:
+        surfconext:
+            title: "Log in at your university"
+            user_id: eduPersonPrincipalName

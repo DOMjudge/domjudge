@@ -64,3 +64,6 @@ services:
     DOMJudgeBundle\Controller\Jury\ImportExportController:
         arguments:
             $domjudgeVersion: '%domjudge.version%'
+
+    DOMJudgeBundle\Security\SimpleSAMLAuthenticator:
+        arguments: ["@router", "@ssp.guard.registry", "surfconext"]

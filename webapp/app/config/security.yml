@@ -53,6 +53,7 @@ security:
               authenticators:
                 - DOMJudgeBundle\Security\DOMJudgeXHeadersAuthenticator
                 - DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
+                - DOMJudgeBundle\Security\SimpleSAMLAuthenticator
               entry_point: DOMJudgeBundle\Security\DOMJudgeXHeadersAuthenticator
             anonymous: ~
             form_login:
@@ -68,6 +69,7 @@ security:
     access_control:
       - { path: ^/$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+      - { path: ^/connect, roles: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/public, roles: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY }
