@@ -590,6 +590,12 @@ class ScoreboardService
                 }
             }
 
+            if (empty($affiliations)) {
+                /** @var Team $team */
+                foreach ($category->getTeams() as $team) {
+                    $affiliations[$team->getName()] = $team->getName();
+                }
+            }
             if (!empty($affiliations)) {
                 $groupedAffiliations[$category->getName()] = array_values($affiliations);
             }
