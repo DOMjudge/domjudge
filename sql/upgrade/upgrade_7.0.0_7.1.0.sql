@@ -51,7 +51,8 @@ CREATE TABLE `external_run` (
 -- Add/remove sample/initial contents
 --
 
-
+INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `description`) VALUES
+('external_ccs_submission_url', '""', 'string', '0', 'Misc', 'URL of a submission detail page on the external CCS. Placeholder :id: will be replaced by submission ID. Leave empty to not display links to external CCS');
 
 --
 -- Finally remove obsolete structures after moving data

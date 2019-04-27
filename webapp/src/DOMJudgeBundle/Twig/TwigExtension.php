@@ -118,7 +118,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
             'have_printing' => $this->dj->dbconfig_get('enable_printing', 0),
             'refresh_flag' => $refresh_flag,
             'icat_url' => defined('ICAT_URL') ? ICAT_URL : null,
-            'ext_ccs_url' => defined('EXT_CCS_URL') ? EXT_CCS_URL : null,
+            'external_ccs_submission_url' => $this->dj->dbconfig_get('external_ccs_submission_url', ''),
             'current_team_contest' => $team ? $this->dj->getCurrentContest($user->getTeamid()) : null,
             'current_team_contests' => $team ? $this->dj->getCurrentContests($user->getTeamid()) : null,
             'submission_languages' => $this->em->createQueryBuilder()
@@ -424,12 +424,13 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
     {
         require_once $this->dj->getDomjudgeEtcDir() . '/domserver-config.php';
 
-        if (defined('EXT_CCS_URL')) {
+        $extCcsUrl = $this->dj->dbconfig_get('external_ccs_submission_url', '');
+        if (!empty($extCcsUrl)) {
             $dataSource = $this->dj->dbconfig_get('data_source', 0);
             if ($dataSource == 2) {
-                return sprintf('%s%s', EXT_CCS_URL, $submission->getExternalid());
+                return str_replace(':id:', $submission->getExternalid(), $extCcsUrl);
             } elseif ($dataSource == 1) {
-                return sprintf('%s%s', EXT_CCS_URL, $submission->getSubmitid());
+                return str_replace(':id:', $submission->getSubmitid(), $extCcsUrl);
             }
         }
 

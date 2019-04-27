@@ -55,6 +55,7 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `des
 ('enable_printing', '0', 'bool', '1', 'Misc', 'Enable teams and jury to send source code to a printer via the DOMjudge web interface.'),
 ('registration_category_name', '""', 'string', '1', 'Misc', 'Team category for users that register themselves with the system. Self-registration is disabled if this field is left empty.'),
 ('data_source', '0', 'int', '0', 'Misc', 'Source of data. Choices: 0 = all local, 1 = configuration data external, 2 = configuration and live data external'),
+('external_ccs_submission_url', '""', 'string', '0', 'Misc', 'URL of a submission detail page on the external CCS. Placeholder :id: will be replaced by submission ID. Leave empty to not display links to external CCS'),
 ('auth_methods', '[]', 'array_val', '0', 'Authentication', 'List of allowed additional authentication methods. Supported values are \'ipaddress\', and \'xheaders\''),
 ('allow_openid_auth', '0', 'bool', '1', 'Authentication', 'Allow users to log in using OpenID'),
 ('openid_autocreate_team', '1', 'bool', '1', 'Authentication', 'Create a team for each user that logs in with OpenID'),
