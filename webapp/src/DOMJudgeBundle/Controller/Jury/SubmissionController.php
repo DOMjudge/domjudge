@@ -172,6 +172,7 @@ class SubmissionController extends BaseController
             'filteredProblems' => $filteredProblems,
             'filteredLanguages' => $filteredLanguages,
             'filteredTeams' => $filteredTeams,
+            'showExternalResult' => $this->dj->dbconfig_get('data_source', 0) == 2,
         ];
 
         // For ajax requests, only return the submission list partial

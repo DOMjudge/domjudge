@@ -300,9 +300,10 @@ class TeamController extends BaseController
         $restrictions['teamid'] = $teamId;
         list($submissions, $submissionCounts) = $submissionService->getSubmissionList($this->dj->getCurrentContests(),
                                                                                       $restrictions);
-        $data['restrictionText']  = $restrictionText;
-        $data['submissions']      = $submissions;
-        $data['submissionCounts'] = $submissionCounts;
+        $data['restrictionText']    = $restrictionText;
+        $data['submissions']        = $submissions;
+        $data['submissionCounts']   = $submissionCounts;
+        $data['showExternalResult'] = $this->dj->dbconfig_get('data_source', 0) == 2;
 
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;

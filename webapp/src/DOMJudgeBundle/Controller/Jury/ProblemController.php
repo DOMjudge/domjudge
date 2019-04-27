@@ -477,6 +477,7 @@ class ProblemController extends BaseController
             'defaultRunExecutable' => (string)$this->dj->dbconfig_get('default_run'),
             'defaultCompareExecutable' => (string)$this->dj->dbconfig_get('default_compare'),
             'showContest' => count($this->dj->getCurrentContests()) > 1,
+            'showExternalResult' => $this->dj->dbconfig_get('data_source', 0) == 2,
             'refresh' => [
                 'after' => 15,
                 'url' => $this->generateUrl('jury_problem', ['probId' => $problem->getProbid()]),

@@ -38,7 +38,7 @@
         {% if judging.result != 'compiler-error' %}
             <div class="d-flex flex-row">
                 <div class="p-2">
-                    Run result: {{ judging.result | printResult(true) }}
+                    Run result: {{ judging.result | printResult }}
                 </div>
             </div>
         {% endif %}

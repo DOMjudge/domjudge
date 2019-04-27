@@ -72,6 +72,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
             new \Twig_SimpleFilter('printtime', [$this, 'printtime']),
             new \Twig_SimpleFilter('printtimeHover', [$this, 'printtimeHover'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printResult', [$this, 'printResult'], ['is_safe' => ['html']]),
+            new \Twig_SimpleFilter('printValidJuryResult', [$this, 'printValidJuryResult'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
             new \Twig_SimpleFilter('printYesNo', [$this, 'printYesNo']),
             new \Twig_SimpleFilter('printSize', [Utils::class, 'printSize'], ['is_safe' => ['html']]),
@@ -399,6 +400,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
             // no break
             case 'judging':
             case 'queued':
+            case 'pending':
                 if (!$jury) {
                     $result = 'pending';
                 }
@@ -412,6 +414,16 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
         }
 
         return sprintf('<span class="sol %s">%s</span>', $valid ? $style : 'disabled', $result);
+    }
+
+    /**
+     * Print the given result for the jury, assuming it is valid
+     * @param string $result
+     * @return string
+     */
+    public function printValidJuryResult($result): string
+    {
+        return $this->printResult($result, true, true);
     }
 
     /**
