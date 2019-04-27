@@ -1,3 +1,4 @@
+{# @var \DOMJudgeBundle\Entity\ExternalJudgement externalJudgement #}
 {% extends "@DOMJudge/jury/base.html.twig" %}
 {% import _self as self %}
 
@@ -22,6 +23,12 @@
 {% endblock %}
 
 {% block content %}
+
+    {% if submission.externalJudgements.empty %}
+        {% set externalJudgement = null %}
+    {% else %}
+        {% set externalJudgement = submission.externalJudgements.first %}
+    {% endif %}
 
     {% if claimWarning %}
         <div class="alert alert-warning">
@@ -142,24 +149,34 @@
         {% endif %}
     </div>
 
-    {% if ext_ccs_url is not null and submission.externalid %}
+    {% if submission.externalid %}
         <div class="mb-2">
             External ID:
-            <a href="{{ submission | externalCcsUrl }}" target="_blank">
+            {% if ext_ccs_url is null %}
                 {{- submission.externalid -}}
-            </a>, {{ submission.externalresult | printResult(true, true) }}
+            {% else %}
+                <a href="{{ submission | externalCcsUrl }}" target="_blank">
+                    {{- submission.externalid -}}
+                </a>
+            {% endif -%}
+            , {{ externalJudgement.result | printResult(true, true) }}
         </div>
     {% endif %}
 
-    {% if submission.externalresult is not empty and selectedJudging is not null and submission.externalresult != selectedJudging.result and ext_ccs_url is not null %}
+    {% if externalJudgement is not null and externalJudgement.result is not empty and selectedJudging is not null and externalJudgement.result != selectedJudging.result %}
         <div class="alert alert-danger">
             <strong>Results differ!</strong>
             <hr>
             <p>
                 This submission was judged as
-                <a href="{{ submission | externalCcsUrl }}" target="_blank">
-                    {{ submission.externalresult | printResult(true, true) }}
-                    by the external CCS</a>, but as {{ selectedJudging.result | printResult(true, true) }}
+                {% if ext_ccs_url is null %}
+                    {{ externalJudgement.result | printResult(true, true) }} by the external CCS
+                {% else %}
+                    <a href="{{ submission | externalCcsUrl }}" target="_blank">
+                        {{ externalJudgement.result | printResult(true, true) }} by the external CCS
+                    </a>
+                {% endif -%}
+                , but as {{ selectedJudging.result | printResult(true, true) }}
                 by DOMjudge.
             </p>
         </div>

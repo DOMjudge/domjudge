@@ -292,7 +292,6 @@ class SubmissionService
      * @param string|null         $entryPoint
      * @param string|null         $externalId
      * @param float|null          $submitTime
-     * @param string|null         $externalResult
      * @param string|null         $message
      * @return Submission|null
      * @throws \Doctrine\DBAL\DBALException
@@ -307,7 +306,6 @@ class SubmissionService
         string $entryPoint = null,
         $externalId = null,
         float $submitTime = null,
-        $externalResult = null,
         string &$message = null
     ) {
         if (!$team instanceof Team) {
@@ -444,8 +442,7 @@ class SubmissionService
             ->setSubmittime($submitTime)
             ->setOriginalSubmission($originalSubmission)
             ->setEntryPoint($entryPoint)
-            ->setExternalid($externalId)
-            ->setExternalresult($externalResult);
+            ->setExternalid($externalId);
 
         // Add expected results from source. We only do this for jury submissions
         // to prevent accidental auto-verification of team submissions.
