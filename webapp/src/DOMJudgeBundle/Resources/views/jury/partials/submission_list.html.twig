@@ -1,4 +1,5 @@
 {# Render a list of submissions for a jury page #}
+{# @var \DOMJudgeBundle\Entity\ExternalJudgement externalJudgement #}
 
 {% if submissions is empty %}
     <div class="alert alert-warning">No submissions</div>
@@ -17,6 +18,9 @@
             <th scope="col">problem</th>
             <th scope="col">lang</th>
             <th scope="col">result</th>
+            {% if showExternalResult | default(false) %}
+                <th scope="col">external result</th>
+            {% endif %}
             <th scope="col">verified</th>
             <th scope="col">by</th>
             {%- if rejudging is defined %}
@@ -58,23 +62,37 @@
                                       title="{{ submission.language.name }}">{{ submission.langid }}</a></td>
                 <td><a href="{{ link }}">
                         {%- if submission.submittime > submission.contest.endtime %}
-                            {{ 'too-late' | printResult(true, true) }}
+                            {{ 'too-late' | printValidJuryResult }}
                             {%- if submission.judgings.first is not empty and submission.judgings.first.result is not empty %}
-                                ({{ submission.judgings.first.result | printResult(true, true) }})
+                                ({{ submission.judgings.first.result | printValidJuryResult }})
                             {%- endif %}
                         {%- elseif submission.judgings.first is empty or submission.judgings.first.result is empty %}
                             {%- if submission.judgehost %}
-                                {{- '' | printResult(true, true) -}}
+                                {{- '' | printValidJuryResult -}}
                             {%- else %}
-                                {{- 'queued' | printResult(true, true) -}}
+                                {{- 'queued' | printValidJuryResult -}}
                             {%- endif %}
                         {%- else %}
-                            {{- submission.judgings.first.result | printResult(true, true) -}}
+                            {{- submission.judgings.first.result | printValidJuryResult -}}
                         {%- endif %}
                         {%- if submission.stillBusy -%}
                             (&hellip;)
                         {%- endif -%}
                 </a></td>
+                {% if showExternalResult | default(false) %}
+                    {% if submission.externalJudgements.empty %}
+                        {% set externalJudgement = null %}
+                    {% else %}
+                        {% set externalJudgement = submission.externalJudgements.first %}
+                    {% endif %}
+                    <td><a href="{{ link }}">
+                            {% if externalJudgement is null or externalJudgement.result is empty %}
+                                {{- 'pending' | printValidJuryResult -}}
+                            {% else %}
+                                {{- externalJudgement.result | printValidJuryResult -}}
+                            {% endif %}
+                    </a></td>
+                {% endif %}
                 {%- set claim = false %}
                 {%- if submission.judgings.first is empty or submission.judgings.first.result is empty -%}
                     {%- set verified = '' %}
@@ -116,7 +134,7 @@
                 {%- if rejudging is defined %}
 
                     <td><a href="{{ path('jury_submission', {submitId: submission.submitid}) }}">
-                            {{ submission.oldResult | printResult(true, true) }}
+                            {{ submission.oldResult | printValidJuryResult }}
                     </a></td>
                 {%- endif %}
                 {%- if showTestcases is defined and showTestcases %}

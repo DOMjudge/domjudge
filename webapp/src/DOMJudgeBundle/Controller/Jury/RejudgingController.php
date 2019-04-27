@@ -348,6 +348,7 @@ class RejudgingController extends BaseController
             'submissionCounts' => $submissionCounts,
             'oldverdict' => $request->query->get('oldverdict', 'all'),
             'newverdict' => $request->query->get('newverdict', 'all'),
+            'showExternalResult' => $this->dj->dbconfig_get('data_source', 0) == 2,
             'refresh' => [
                 'after' => 15,
                 'url' => $request->getRequestUri(),

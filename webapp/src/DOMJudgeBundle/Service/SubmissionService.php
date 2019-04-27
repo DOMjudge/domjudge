@@ -197,6 +197,18 @@ class SubmissionService
                 ->setParameter(':result', $restrictions['result']);
         }
 
+        if ($this->dj->dbconfig_get('data_source', 0) == 2) {
+            // When we are shadow, also load the external results
+            $queryBuilder
+                ->leftJoin('s.external_judgements', 'ej')
+                // We want the external judgement that was started the latest, because that is the
+                // current valid one. We do this by left-joining on external judgements again, bot
+                // only for ones that started later. This should then give no result, hence we add
+                // a andWhere below for ej2.extjudgementid IS NULL
+                ->leftJoin('s.external_judgements', 'ej2', Join::WITH, 'ej2.starttime > ej.starttime')
+                ->andWhere('ej2.extjudgementid IS NULL');
+        }
+
         $submissions = $queryBuilder->getQuery()->getResult();
         if (isset($restrictions['rejudgingid'])) {
             // Doctrine will return an array for each item. At index '0' will be the submission and at

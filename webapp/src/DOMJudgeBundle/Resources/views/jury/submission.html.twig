@@ -159,7 +159,7 @@
                     {{- submission.externalid -}}
                 </a>
             {% endif -%}
-            , {{ externalJudgement.result | printResult(true, true) }}
+            , {{ externalJudgement.result | printValidJuryResult }}
         </div>
     {% endif %}
 
@@ -170,13 +170,13 @@
             <p>
                 This submission was judged as
                 {% if external_ccs_submission_url is empty %}
-                    {{ externalJudgement.result | printResult(true, true) }} by the external CCS
+                    {{ externalJudgement.result | printValidJuryResult }} by the external CCS
                 {% else %}
                     <a href="{{ submission | externalCcsUrl }}" target="_blank">
-                        {{ externalJudgement.result | printResult(true, true) }} by the external CCS
+                        {{ externalJudgement.result | printValidJuryResult }} by the external CCS
                     </a>
                 {% endif -%}
-                , but as {{ selectedJudging.result | printResult(true, true) }}
+                , but as {{ selectedJudging.result | printValidJuryResult }}
                 by DOMjudge.
             </p>
         </div>
