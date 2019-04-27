@@ -18,9 +18,12 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
 {
+    use TargetPathTrait;
+
     private $csrfTokenManager;
     private $security;
     private $container;
@@ -163,10 +166,18 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
-        // on success, redirect to the homepage if it was a user triggered action
+        // on success, redirect to the last page or the homepage if it was a user triggered action
         if ($request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'ipaddress') {
+
+            // Use target URL from session if set
+            if ($providerKey !== null &&
+                $targetUrl = $this->getTargetPath($request->getSession(), $providerKey)) {
+                $this->removeTargetPath($request->getSession(), $providerKey);
+                return new RedirectResponse($targetUrl);
+            }
+
             return new RedirectResponse($this->router->generate('root'));
         }
         return null;
