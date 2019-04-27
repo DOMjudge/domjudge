@@ -203,7 +203,7 @@ function getSelectedTeams()
 function getScoreboard()
 {
 	var scoreboard = document.getElementsByClassName("scoreboard");
-	if (scoreboard === null || scoreboard[0] === null) {
+	if (scoreboard === null || scoreboard[0] === null || scoreboard[0] === undefined) {
 		return null;
 	}
 	return scoreboard[0].rows;
