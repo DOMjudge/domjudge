@@ -626,7 +626,7 @@ class ImportProblemService
                             ]);
                         $submission     = $this->submissionService->submitSolution($team, $contestProblem, $contest,
                                                                                    $languageToUse, $filesToSubmit, null,
-                                                                                   '__auto__', null, null, null,
+                                                                                   '__auto__', null, null,
                                                                                    $submissionMessage);
                         if (!$submission) {
                             $messages[] = $submissionMessage;

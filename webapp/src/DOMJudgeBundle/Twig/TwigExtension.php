@@ -418,15 +418,17 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
      * Return the URL to an external CCS for the given submission if available
      * @param Submission $submission
      * @return string|null
+     * @throws \Exception
      */
     public function externalCcsUrl(Submission $submission)
     {
         require_once $this->dj->getDomjudgeEtcDir() . '/domserver-config.php';
 
         if (defined('EXT_CCS_URL')) {
-            if ($submission->getExternalid()) {
+            $dataSource = $this->dj->dbconfig_get('data_source', 0);
+            if ($dataSource == 2) {
                 return sprintf('%s%s', EXT_CCS_URL, $submission->getExternalid());
-            } else {
+            } elseif ($dataSource == 1) {
                 return sprintf('%s%s', EXT_CCS_URL, $submission->getSubmitid());
             }
         }

@@ -451,7 +451,6 @@ CREATE TABLE `submission` (
   `rejudgingid` int(4) unsigned DEFAULT NULL COMMENT 'Rejudging ID (if rejudge)',
   `expected_results` varchar(255) DEFAULT NULL COMMENT 'JSON encoded list of expected results - used to validate jury submissions',
   `externalid` varchar(255) DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
-  `externalresult` varchar(32) DEFAULT NULL COMMENT 'Result string as returned from external CCS, e.g. Kattis',
   `entry_point` varchar(255) DEFAULT NULL COMMENT 'Optional entry point. Can be used e.g. for java main class.',
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `externalid` (`cid`,`externalid`(190)),

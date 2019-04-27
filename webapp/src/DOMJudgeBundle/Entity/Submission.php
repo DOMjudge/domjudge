@@ -35,13 +35,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     protected $externalid;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", name="externalresult", length=255, options={"comment"="Result string as returned from external CCS, e.g. Kattis"}, nullable=true)
-     * @Serializer\Exclude()
-     */
-    private $externalresult;
-
-    /**
      * @var int
      *
      * @ORM\Column(type="integer", name="origsubmitid", options={"comment"="If set, specifies original submission in case of edit/resubmit"}, nullable=true)
@@ -270,30 +263,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getExternalid()
     {
         return $this->externalid;
-    }
-
-    /**
-     * Set externalresult
-     *
-     * @param string $externalresult
-     *
-     * @return Submission
-     */
-    public function setExternalresult($externalresult)
-    {
-        $this->externalresult = $externalresult;
-
-        return $this;
-    }
-
-    /**
-     * Get externalresult
-     *
-     * @return string
-     */
-    public function getExternalresult()
-    {
-        return $this->externalresult;
     }
 
     /**

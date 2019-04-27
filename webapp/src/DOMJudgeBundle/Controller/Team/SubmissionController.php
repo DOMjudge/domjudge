@@ -96,7 +96,7 @@ class SubmissionController extends BaseController
                 $entryPoint = $form->get('entry_point')->getData() ?: null;
                 $submission = $this->submissionService->submitSolution($team, $problem->getProbid(), $contest,
                                                                        $language, $files, null, $entryPoint, null, null,
-                                                                       null, $message);
+                                                                       $message);
 
                 if ($submission) {
                     $this->dj->auditlog('submission', $submission->getSubmitid(), 'added', 'via teampage',

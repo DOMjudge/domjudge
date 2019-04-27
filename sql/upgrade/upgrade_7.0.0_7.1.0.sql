@@ -58,3 +58,5 @@ CREATE TABLE `external_run` (
 --
 
 
+ALTER TABLE `submission`
+    DROP COLUMN `externalresult`;
