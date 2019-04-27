@@ -2911,16 +2911,16 @@
         },
         {
             "name": "sgomez/ssp-guard-bundle",
-            "version": "0.10.0",
+            "version": "0.11.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sgomez/SSPGuardBundle.git",
-                "reference": "7d507f5d88df46319cf3543a58350935b108f750"
+                "reference": "9655bfdb62e0321b9929209587f5eaab8cc6a38b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sgomez/SSPGuardBundle/zipball/7d507f5d88df46319cf3543a58350935b108f750",
-                "reference": "7d507f5d88df46319cf3543a58350935b108f750",
+                "url": "https://api.github.com/repos/sgomez/SSPGuardBundle/zipball/9655bfdb62e0321b9929209587f5eaab8cc6a38b",
+                "reference": "9655bfdb62e0321b9929209587f5eaab8cc6a38b",
                 "shasum": ""
             },
             "require": {
@@ -2953,7 +2953,7 @@
                 "guard",
                 "simplesamlphp"
             ],
-            "time": "2018-10-15T06:29:21+00:00"
+            "time": "2019-04-25T20:58:58+00:00"
         },
         {
             "name": "symfony/monolog-bundle",
