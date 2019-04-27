@@ -7,6 +7,7 @@ use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TeamAffiliation;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use DOMJudgeBundle\Utils\Utils;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -85,6 +86,11 @@ class UserRegistrationType extends AbstractType
             ]);
 
         if ($this->dj->dbconfig_get('show_affiliations', true)) {
+            $countries = [];
+            foreach (Utils::ALPHA3_COUNTRIES as $alpha3 => $country) {
+                $countries["$country ($alpha3)"] = $alpha3;
+            }
+            
             $builder
                 ->add('affiliation', ChoiceType::class, [
                     'choices' => [
@@ -113,14 +119,12 @@ class UserRegistrationType extends AbstractType
                     ],
                     'mapped' => false,
                 ])
-                // TODO: after #544 is merged, improve this
-                ->add('affiliationCountry', TextType::class, [
+                ->add('affiliationCountry', ChoiceType::class, [
                     'label' => false,
                     'required' => false,
                     'mapped' => false,
-                    'attr' => [
-                        'placeholder' => 'Affiliation country',
-                    ],
+                    'choices' => $countries,
+                    'placeholder' => 'No country',
                 ])
                 ->add('existingAffiliation', EntityType::class, [
                     'class' => TeamAffiliation::class,

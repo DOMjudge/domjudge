@@ -82,11 +82,15 @@
           <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
           {% endif %}
 
-          <label for="username" class="sr-only">Username</label>
-          <input type="text" id="username" name="_username" class="form-control" placeholder="Username" required autofocus>
-          <label for="inputPassword" class="sr-only">Password</label>
-          <input type="password" id="inputPassword" name="_password" class="form-control"
-              placeholder="Password" required autocomplete="current-password">
+          <div class="form-group">
+            <label for="username" class="sr-only">Username</label>
+            <input type="text" id="username" name="_username" class="form-control" placeholder="Username" required autofocus>
+          </div>
+          <div class="form-group">
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input type="password" id="inputPassword" name="_password" class="form-control"
+                placeholder="Password" required autocomplete="current-password">
+          </div>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
         {% if allow_registration %}
