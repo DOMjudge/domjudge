@@ -139,11 +139,11 @@
             </a>
         </span>
 
-        {% if ext_ccs_url is not null and submission.externalid is null %}
+        {% if external_ccs_submission_url is not empty %}
             <span>
                 <i class="fas fa-link"></i>
                 <a href="{{ submission | externalCcsUrl }}" target="_blank">
-                    View in Kattis
+                    View in external CCS
                 </a>
             </span>
         {% endif %}
@@ -152,7 +152,7 @@
     {% if submission.externalid %}
         <div class="mb-2">
             External ID:
-            {% if ext_ccs_url is null %}
+            {% if external_ccs_submission_url is empty %}
                 {{- submission.externalid -}}
             {% else %}
                 <a href="{{ submission | externalCcsUrl }}" target="_blank">
@@ -169,7 +169,7 @@
             <hr>
             <p>
                 This submission was judged as
-                {% if ext_ccs_url is null %}
+                {% if external_ccs_submission_url is empty %}
                     {{ externalJudgement.result | printResult(true, true) }} by the external CCS
                 {% else %}
                     <a href="{{ submission | externalCcsUrl }}" target="_blank">

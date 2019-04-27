@@ -37,7 +37,3 @@ define('ALLOW_REMOVED_INTERVALS', false);
 // Specify URL of the iCAT webinterface. Uncommenting this will enable
 // the ICPC Analytics iCAT integration for jury members.
 //define('ICAT_URL', 'http://icat.example.com/icat/');
-
-// Specify URL to external CCS's submission page for linking external
-// submission IDs. The external ID is appended to the URL below.
-//define('EXT_CCS_URL', 'https://ccs.example.com/submissions/');
