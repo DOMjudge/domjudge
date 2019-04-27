@@ -2,6 +2,12 @@
 
 {% block title %}Add affiliation - {{ parent() }}{% endblock %}
 
+{% import "@DOMJudge/jury/jury_macros.twig" as macros %}
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
 {% block content %}
 
     <h1>Add affiliation</h1>
