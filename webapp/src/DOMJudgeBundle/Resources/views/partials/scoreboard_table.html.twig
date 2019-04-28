@@ -29,6 +29,8 @@
         <col id="scorerank"/>
         {% if showFlags %}
             <col id="scoreflags"/>
+        {% else %}
+            <col/>
         {% endif %}
         {% if showAffiliationLogos %}
             <col id="scorelogos"/>
@@ -47,10 +49,7 @@
         {% endif %}
     </colgroup>
 
-    {% set teamColspan = 1 %}
-    {% if showFlags %}
-        {% set teamColspan = teamColspan + 1 %}
-    {% endif %}
+    {% set teamColspan = 2 %}
     {% if showAffiliationLogos %}
         {% set teamColspan = teamColspan + 1 %}
     {% endif %}
@@ -128,8 +127,8 @@
                 {% endif %}
                 {% set previousTeam = score.team %}
             </td>
-            {% if showFlags %}
-                <td class="scoreaf">
+            <td class="scoreaf">
+                {% if showFlags %}
                     {% if score.team.affiliation %}
                         {% set link = null %}
                         {% if jury %}
@@ -147,8 +146,8 @@
                             {% endif %}
                         </a>
                     {% endif %}
-                </td>
-            {% endif %}
+                {% endif %}
+            </td>
             {% if showAffiliationLogos %}
                 <td class="scoreaf">
                     {% if score.team.affiliation %}
