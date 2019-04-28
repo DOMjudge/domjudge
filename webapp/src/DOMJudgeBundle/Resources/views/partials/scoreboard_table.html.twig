@@ -265,7 +265,7 @@
                                 <div class="{{ scoreCssClass }}">
                                     {{ time | raw }}
                                     <span>
-                                        {% if numberOfSubmissions == 1 %}
+                                        {% if numberOfSubmissions is same as(1) %}
                                             1 try
                                         {% else %}
                                             {{ numberOfSubmissions }} tries
