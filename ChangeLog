@@ -1,5 +1,8 @@
 DOMjudge Programming Contest Judging System
 
+Version 7.1.0
+-------------------
+
 Version 7.0.0
 -------------------
  - Initial admin password is now generated on database creation, and written
