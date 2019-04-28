@@ -39,7 +39,7 @@
             $entryPointInput.attr('required', null);
         }
 
-        if (filename) {
+        if (entryPointDescription && filename) {
             switch (langid) {
                 case 'java':
                     $entryPointInput.val(entryPointDetectJava(filename));
@@ -50,6 +50,8 @@
                 default:
                     $entryPointInput.val(filename);
             }
+        } else {
+            $entryPointInput.val('');
         }
     }
 
