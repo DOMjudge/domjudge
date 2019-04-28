@@ -57,7 +57,7 @@ function disableNotifications()
 //
 // We use HTML5 localStorage to keep track of which notifications the
 // client has already received to display each notification only once.
-function sendNotification(title, options)
+function sendNotification(title, options = {})
 {
     if ( getCookie('domjudge_notify')!=1 ) return;
 
