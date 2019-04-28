@@ -70,7 +70,10 @@ endif
 # because at this point the autoload.php file is not generated yet, which
 # is needed to run the post-install scripts.
 	$(MAKE) -C webapp/app params-from-stub static-from-stub
-	composer $(subst 1,-q,$(QUIET)) install --no-scripts
+	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o --no-scripts
+
+composer-dependencies-dev:
+	composer $(subst 1,-q,$(QUIET)) install --prefer-dist --no-scripts
 
 # Generate documentation for distribution. Remove this dependency from
 # dist above for quicker building from git sources.
@@ -179,7 +182,7 @@ paths.mk:
 MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -D_FORTIFY_SOURCE=2 \
               -fPIE -Wformat -Wformat-security -ansi -pedantic
 MAINT_LDFLAGS=-fPIE -pie -Wl,-z,relro -Wl,-z,now
-maintainer-conf: dist
+maintainer-conf: dist composer-dependencies-dev
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
 	            --with-domserver_root=$(CURDIR) \
 	            --with-judgehost_root=$(CURDIR) \
@@ -324,4 +327,5 @@ clean-autoconf:
 .PHONY: $(addsuffix -create-dirs,domserver judgehost docs) check-root \
         clean-autoconf $(addprefix maintainer-,conf install uninstall) \
         config submitclient distdocs composer-dependencies \
+        composer-dependencies-dev \
         coverity-conf coverity-build
