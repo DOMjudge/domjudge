@@ -1,6 +1,6 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.0.0 - DEV
+Version 7.0.0
 -------------------
  - Initial admin password is now generated on database creation, and written
    to etc/initial_admin_password.secret.
