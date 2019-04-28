@@ -571,8 +571,12 @@ class EventLogService implements ContainerAwareInterface
 
         // Now we can insert the event. However, before doing so,
         // get an advisory lock to make sure no one else is doing the same
-        $lockString = sprintf('domjudge.eventlog.state.%d', $event->getContest()->getCid());
-        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
+        $lockString = sprintf('domjudge.eventlog.state.%d.%s.%s',
+            $event->getContest()->getCid(),
+            $endpointType,
+            $endpointId
+        );
+        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 1)',
                                                     [':lock' => $lockString]) != 1) {
             throw new Exception('EventLogService::addMissingStateEvents failed to obtain lock');
         }
