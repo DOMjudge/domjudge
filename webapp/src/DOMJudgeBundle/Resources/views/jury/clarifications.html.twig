@@ -87,7 +87,7 @@
                 var parenttd = $(this).closest('td');
                 var parenttr = $(this).closest('tr');
                 var newname = $(this).closest('label').text().trim();
-                $.post("{{ path('jury_clarification_change_queue', {'clarId': 'replaceme'}) }}".replace('replaceme', $(this).attr('data-clarid')),
+                $.post("{{ path('jury_clarification_change_queue', {'clarId': 12345}) }}".replace('12345', $(this).attr('data-clarid')),
                     {'queue': $(this).val()})
                     .done(function( data ) {
                         if ( data ) {
