@@ -56,14 +56,8 @@ class CheckConfigService
      */
     protected $debug;
 
-    /**
-     * @var string
-     */
-    protected $project_dir;
-
     public function __construct(
         bool $debug,
-        string $project_dir,
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
@@ -71,7 +65,6 @@ class CheckConfigService
         ValidatorInterface $validator
     ) {
         $this->debug           = $debug;
-        $this->project_dir     = $project_dir;
         $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
@@ -612,7 +605,7 @@ class CheckConfigService
 
         $result = 'O';
         $desc = '';
-        $webDir = sprintf('%s/webapp/web/', $this->project_dir);
+        $webDir = sprintf('%s/web/', $this->dj->getDomjudgeWebappDir());
         foreach ($affils as $affiliation) {
             // don't care about unused affiliations
             if (count($affiliation->getTeams()) === 0) {
@@ -692,7 +685,7 @@ class CheckConfigService
     public function checkAllExternalIdentifiers()
     {
         // Get all entity classes
-        $dir   = realpath(sprintf('%s/webapp/src/DOMJudgeBundle/Entity', $this->project_dir));
+        $dir   = realpath(sprintf('%s/src/DOMJudgeBundle/Entity', $this->dj->getDomjudgeWebappDir()));
         $files = glob($dir . '/*.php');
 
         $result = [];

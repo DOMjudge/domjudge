@@ -578,6 +578,15 @@ class DOMJudgeService
     }
 
     /**
+     * Get the webapp directory of this DOMjudge installation
+     * @return string
+     */
+    public function getDomjudgeWebappDir(): string
+    {
+        return $this->container->getParameter('domjudge.webappdir');
+    }
+
+    /**
      * Open the given ZIP file
      * @param string $filename
      * @return ZipArchive
