@@ -271,7 +271,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/{problemId}/export", name="jury_export_problem")
+     * @Route("/{problemId}/export", name="jury_export_problem", requirements={"problemId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param int $problemId
      * @return StreamedResponse

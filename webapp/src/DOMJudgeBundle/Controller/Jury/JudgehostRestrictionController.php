@@ -166,7 +166,8 @@ class JudgehostRestrictionController extends BaseController
     }
 
     /**
-     * @Route("/{restrictionId}/edit", name="jury_judgehost_restriction_edit")
+     * @Route("/{restrictionId}/edit", name="jury_judgehost_restriction_edit",
+     *                                 requirements={"restrictionId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $restrictionId
@@ -196,7 +197,8 @@ class JudgehostRestrictionController extends BaseController
     }
 
     /**
-     * @Route("/{restrictionId}/delete", name="jury_judgehost_restriction_delete")
+     * @Route("/{restrictionId}/delete", name="jury_judgehost_restriction_delete",
+     *                                   requirements={"restrictionId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $restrictionId

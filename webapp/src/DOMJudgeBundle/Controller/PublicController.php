@@ -119,7 +119,8 @@ class PublicController extends BaseController
     }
 
     /**
-     * @Route("/change-contest/{contestId}", name="public_change_contest")
+     * @Route("/change-contest/{contestId}", name="public_change_contest",
+     *                                       requirements={"contestId": "-?\d+"})
      * @param Request         $request
      * @param RouterInterface $router
      * @param int             $contestId
@@ -137,7 +138,7 @@ class PublicController extends BaseController
     }
 
     /**
-     * @Route("/team/{teamId}", name="public_team")
+     * @Route("/team/{teamId}", name="public_team", requirements={"teamId": "\d+"})
      * @param Request $request
      * @param int     $teamId
      * @return Response

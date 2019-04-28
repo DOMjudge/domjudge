@@ -366,7 +366,7 @@ class RejudgingController extends BaseController
      * @Route(
      *     "/{rejudgingId}/{action}",
      *     name="jury_rejudging_finish",
-     *     requirements={"action": "cancel|apply"}
+     *     requirements={"rejudgingId": "\d+", "action": "cancel|apply"}
      * )
      * @param Request          $request
      * @param RejudgingService $rejudgingService

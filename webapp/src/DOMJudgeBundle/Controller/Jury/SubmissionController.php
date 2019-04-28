@@ -184,7 +184,7 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/{submitId}", name="jury_submission")
+     * @Route("/{submitId}", name="jury_submission", requirements={"submitId": "\d+"})
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      */
@@ -799,7 +799,8 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/{submitId}/update-status", name="jury_submission_update_status", methods={"POST"})
+     * @Route("/{submitId}/update-status", name="jury_submission_update_status", methods={"POST"},
+     *                                     requirements={"submitId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param EventLogService   $eventLogService
      * @param ScoreboardService $scoreboardService
@@ -835,7 +836,8 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/{judgingId}/verify", name="jury_judging_verify", methods={"POST"})
+     * @Route("/{judgingId}/verify", name="jury_judging_verify", methods={"POST"},
+     *                               requirements={"judgingId": "\d+"})
      * @param EventLogService   $eventLogService
      * @param ScoreboardService $scoreboardService
      * @param BalloonService    $balloonService

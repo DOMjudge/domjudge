@@ -526,7 +526,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/{contestId}/finalize", name="jury_contest_finalize")
+     * @Route("/{contestId}/finalize", name="jury_contest_finalize", requirements={"contestId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $contestId
