@@ -22,9 +22,6 @@ app.swagger:
 logout:
     path: /logout
 
-overriden_routes:
-    resource: "@DOMJudgeBundle/Resources/config/routing.yml"
-
 # Add this route manually at the bottom, as it must be the last
 remove_trailing_slash:
     path: /{path}
