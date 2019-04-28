@@ -387,12 +387,6 @@ class EventLogService implements ContainerAwareInterface
             }
         }
 
-        // First acquire an advisory lock to prevent other event logging,
-        // so that we can obtain a unique timestamp.
-        if ($this->em->getConnection()->fetchColumn("SELECT GET_LOCK('domjudge.eventlog',1)") != 1) {
-            throw new Exception('EventLogService::log failed to obtain lock');
-        }
-
         // Explicitly construct the time as string to prevent float
         // representation issues.
         $now = sprintf('%.3f', microtime(true));
@@ -441,10 +435,6 @@ class EventLogService implements ContainerAwareInterface
 
         // Now flush the entity manager, inserting all events
         $this->em->flush();
-
-        if ($this->em->getConnection()->fetchColumn("SELECT RELEASE_LOCK('domjudge.eventlog')") != 1) {
-            throw new Exception('EventLogService::log failed to release lock');
-        }
 
         if (count($events) !== $expectedEvents) {
             throw new Exception(sprintf("EventLogService::log failed to %s %s with ID's %s (%d/%d events done)",
@@ -582,7 +572,7 @@ class EventLogService implements ContainerAwareInterface
         // Now we can insert the event. However, before doing so,
         // get an advisory lock to make sure no one else is doing the same
         $lockString = sprintf('domjudge.eventlog.state.%d', $event->getContest()->getCid());
-        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 1)',
+        if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
                                                     [':lock' => $lockString]) != 1) {
             throw new Exception('EventLogService::addMissingStateEvents failed to obtain lock');
         }
