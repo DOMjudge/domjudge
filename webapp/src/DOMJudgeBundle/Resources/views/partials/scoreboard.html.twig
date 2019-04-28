@@ -76,7 +76,10 @@
             </div>
         {% endif %}
 
-        {% if not static %}
+        {% if not static and
+            (filterValues.affiliations | length > 1 or
+             filterValues.countries | length > 1 or
+             filterValues.categories | length > 1) %}
 	<div class="dropdown">
             <button class="btn btn-outline-secondary btn-sm m-2 dropdown-toggle" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false" id="filter-toggle">
@@ -121,9 +124,9 @@
                 </form>
             </div>
         </div>
-        {% else %} {# not static #}
+        {% else %} {# not static and filterValues*length>1 #}
             <br/>
-        {% endif %} {# not static #}
+        {% endif %} {# not static and filterValues*length>1 #}
 
         {% include '@DOMJudge/partials/scoreboard_table.html.twig' with {displayRank: true, showLegends: true} %}
 
