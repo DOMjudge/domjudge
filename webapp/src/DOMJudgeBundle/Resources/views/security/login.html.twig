@@ -28,7 +28,7 @@
   {% if hasaltmethods %}
   <div class="additional-logins mr-2">
     <a class="float-right text-muted" href="#" title="more auth methods"
-        onclick="collapse2('.regularLoginform'); return false;" role="button"><i class="fas fa-user-ninja"></i></a>
+        onclick="collapse('.regularLoginform'); return false;" role="button"><i class="fas fa-user-ninja"></i></a>
     {% if "xheaders" in allowed_authmethods and auth_xheaders_present %}
     <h1 class="h3 mb-3 font-weight-normal">Preconfigured Sign In</h1>
     <form action="{{ path('login') }}" method="post">
@@ -85,7 +85,8 @@
           <label for="username" class="sr-only">Username</label>
           <input type="text" id="username" name="_username" class="form-control" placeholder="Username" required autofocus>
           <label for="inputPassword" class="sr-only">Password</label>
-          <input type="password" id="inputPassword" name="_password" class="form-control" placeholder="Password" required>
+          <input type="password" id="inputPassword" name="_password" class="form-control"
+              placeholder="Password" required autocomplete="current-password">
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
         {% if allow_registration %}

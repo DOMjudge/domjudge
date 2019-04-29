@@ -146,11 +146,13 @@ class ImportProblemService
         }
 
         if (isset($problemProperties['special_compare'])) {
-            $problemProperties['compare_executable'] = $this->em->getRepository(Executable::class)->find($problemProperties['special_compare']);
+            $problemProperties['compare_executable'] =
+                $this->em->getRepository(Executable::class)->find($problemProperties['special_compare']);
             unset($problemProperties['special_compare']);
         }
         if (isset($problemProperties['special_run'])) {
-            $problemProperties['run_executable'] = $this->em->getRepository(Executable::class)->find($problemProperties['special_run']);
+            $problemProperties['run_executable'] =
+                $this->em->getRepository(Executable::class)->find($problemProperties['special_run']);
             unset($problemProperties['special_run']);
         }
 
@@ -189,6 +191,9 @@ class ImportProblemService
                     $contestProblem
                         ->setProblem($problem)
                         ->setContest($contest);
+                } else {
+                    // Don't overwrite the shortname for a contestproblem when it already exists
+                    unset($contestProblemProperties['shortname']);
                 }
             }
         }
@@ -301,15 +306,16 @@ class ImportProblemService
                             exec("zip -r -j '$tmpzipfiledir/outputvalidator.zip' '$tmpzipfiledir'", $dontcare, $retval);
                             if ($retval != 0) {
                                 throw new ServiceUnavailableHttpException(null,
-                                                                          'failed to create zip file for output validator.');
+                                    'failed to create zip file for output validator.');
                             }
 
                             $outputValidatorZip  = file_get_contents(sprintf('%s/outputvalidator.zip', $tmpzipfiledir));
-                            $outputValidatorName = $externalId . '_cmp';
+                            $outputValidatorName = substr($externalId, 0, 20) . '_cmp';
                             if ($this->em->getRepository(Executable::class)->find($outputValidatorName)) {
                                 // avoid name clash
                                 $clashCount = 2;
-                                while ($this->em->getRepository(Executable::class)->find($outputValidatorName . '_' . $clashCount)) {
+                                while ($this->em->getRepository(Executable::class)->find(
+                                    $outputValidatorName . '_' . $clashCount)) {
                                     $clashCount++;
                                 }
                                 $outputValidatorName = $outputValidatorName . "_" . $clashCount;
@@ -401,7 +407,6 @@ class ImportProblemService
             }
             asort($dataFiles);
 
-            echo "<ul>\n";
             foreach ($dataFiles as $dataFile) {
                 $testIn      = $zip->getFromName(sprintf('data/%s/%s.in', $type, $dataFile));
                 $testOut     = $zip->getFromName(sprintf('data/%s/%s.ans', $type, $dataFile));
@@ -587,12 +592,12 @@ class ImportProblemService
                     for ($k = 0; $k < count($files); $k++) {
                         $source = $zip->getFromIndex($indices[$k]);
                         if ($results === null) {
-                            $results = SubmissionService::getExpectedResults($source, $this->DOMJudgeService->dbconfig_get('results_remap', []));
+                            $results = SubmissionService::getExpectedResults($source,
+                                $this->dj->dbconfig_get('results_remap', []));
                         }
                         if (!($tempFileName = tempnam($tmpDir, 'ref_solution-'))) {
                             throw new ServiceUnavailableHttpException(null,
-                                                                      sprintf('Could not create temporary file in directory %s',
-                                                                              $tmpDir));
+                                sprintf('Could not create temporary file in directory %s', $tmpDir));
                         }
                         if (file_put_contents($tempFileName, $source) === false) {
                             throw new ServiceUnavailableHttpException(null,
@@ -612,12 +617,15 @@ class ImportProblemService
                         $results = [$expectedResult];
                     }
                     if ($totalSize <= $this->dj->dbconfig_get('sourcesize_limit') * 1024) {
-                        $contest        = $this->em->getRepository(Contest::class)->find($contest->getCid());
-                        $team           = $this->em->getRepository(Team::class)->find($this->dj->getUser()->getTeamid());
-                        $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                                               'probid' => $problem->getProbid(),
-                                                                                                               'cid' => $contest->getCid()
-                                                                                                           ]);
+                        $contest        = $this->em->getRepository(Contest::class)->find(
+                            $contest->getCid());
+                        $team           = $this->em->getRepository(Team::class)->find(
+                            $this->dj->getUser()->getTeamid());
+                        $contestProblem = $this->em->getRepository(ContestProblem::class)->find(
+                            [
+                                'probid' => $problem->getProbid(),
+                                'cid' => $contest->getCid()
+                            ]);
                         $submission     = $this->submissionService->submitSolution($team, $contestProblem, $contest,
                                                                                    $languageToUse, $filesToSubmit, null,
                                                                                    '__auto__', null, null, null,

@@ -17,7 +17,3 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret: STUB_NO_SECRET
-
-    # Additional auth methods can be enabled here. This is an array.
-    # Supported values are 'ipaddress', and 'xheaders' currently.
-    domjudge.authmethods: []

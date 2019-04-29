@@ -30,17 +30,12 @@
 
     {% macro verifyResults(id, header, results, collapse) %}
         {% if results is not empty %}
-            <h2><a class="collapse-link" href="javascript:collapse('{{ id }}')">{{ header }}</a></h2>
-            <ul id="detail{{ id }}">
+            <h2><a class="collapse-link" href="javascript:collapse('#detail{{ id }}')">{{ header }}</a></h2>
+            <ul id="detail{{ id }}"{% if collapse | default(false) %} class="d-none"{% endif %}>
                 {% for result in results %}
                     <li>{{ result | raw }}</li>
                 {% endfor %}
             </ul>
-            {% if collapse | default(false) %}
-                <script type="text/javascript">
-                    collapse('{{ id }}');
-                </script>
-            {% endif %}
         {% endif %}
     {% endmacro %}
 

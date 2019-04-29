@@ -136,10 +136,15 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * )
      * @SWG\Response(
      *     response="200",
-     *     description="Returns the IDs of the just imported problems",
+     *     description="Returns the IDs of the just imported problems and produced messages",
      *     @SWG\Schema(
-     *         type="array",
-     *         @SWG\Items(type="integer", description="The IDs of the imported problems")
+     *         type="object",
+     *         @SWG\Property(property="problem_ids", type="array",
+     *             @SWG\Items(type="integer", description="The IDs of the imported problems")
+     *         ),
+     *         @SWG\Property(property="messages", type="array",
+     *             @SWG\Items(type="string", description="Messages produced whiel adding problems")
+     *         )
      *     )
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -170,6 +175,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
                 throw new BadRequestHttpException('Specified \'problem\' does not exist.');
             }
         }
+        $errors = [];
         /** @var UploadedFile $file */
         foreach ($files as $file) {
             $zip = null;
@@ -177,23 +183,30 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
                 $zip         = $this->dj->openZipFile($file->getRealPath());
                 $clientName  = $file->getClientOriginalName();
                 $messages    = [];
-                $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest,
+                $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, $problem, $contest,
                                                                                 $messages);
                 $allMessages = array_merge($allMessages, $messages);
                 if ($newProblem) {
                     $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip', $clientName);
                     $probIds[] = $newProblem->getProbid();
+                } else {
+                    $errors = array_merge($errors, $messages);
                 }
             } catch (\Exception $e) {
-                dump($e);
+                $allMessages[] = $e->getMessage();
             } finally {
                 if ($zip) {
                     $zip->close();
                 }
             }
         }
-        dump($allMessages);
-        return $probIds;
+        if (!empty($errors)) {
+            throw new BadRequestHttpException(json_encode($errors));
+        }
+        return [
+            'problem_ids' => $probIds,
+            'messages' => $allMessages,
+        ];
     }
 
     /**

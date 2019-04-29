@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace DOMJudgeBundle\Security;
 
@@ -18,9 +18,12 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
 {
+    use TargetPathTrait;
+
     private $csrfTokenManager;
     private $security;
     private $container;
@@ -58,16 +61,16 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
-        // Make sure ipaddress auth is enabled?
-        $authmethods          = $this->container->getParameter('domjudge.authmethods');
+        // Make sure ipaddress auth is enabled.
+        $authmethods          = $this->dj->dbconfig_get('auth_methods', []);
         $auth_allow_ipaddress = in_array('ipaddress', $authmethods);
         if (!$auth_allow_ipaddress) {
             return false;
         }
 
-        // if there is already an authenticated user (likely due to the session)
+        // If there is already an authenticated user (likely due to the session)
         // then return null and skip authentication: there is no need.
-        // However, on the login page we might need it when IP auto login is enabled
+        // However, on the login page we might need it when IP auto login is enabled.
         if ($this->security->getUser() && $request->attributes->get('_route') !== 'login') {
             return false;
         }
@@ -75,7 +78,6 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         // If it's stateless, we provide auth support every time
         $stateless_fw_contexts = [
             'security.firewall.map.context.api',
-            'security.firewall.map.context.feed',
         ];
         $fwcontext             = $request->attributes->get('_firewall_context', '');
         $ipAutologin           = $this->dj->dbconfig_get('ip_autologin', false);
@@ -83,7 +85,8 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
             return true;
         }
 
-        // We also support authenticating if it's a POST to the login route and loginmethod is set correctly
+        // We also support authenticating if this is a POST to the login route
+        // and loginmethod is set correctly.
         return $request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'ipaddress';
@@ -94,7 +97,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
      */
     public function getCredentials(Request $request)
     {
-        // Check if we're coming from the auth form
+        // Check if we're coming from the auth form.
         if ($request->attributes->get('_route') === 'login' && $request->isMethod('POST')) {
             // Check CSRF token if it's coming from the login form
             $csrfToken = $request->request->get('_csrf_token');
@@ -130,10 +133,9 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
             $filters['username'] = $credentials['username'];
         }
 
-        $ipAutologin = $this->dj->dbconfig_get('ip_autologin', false);
         $user        = null;
         $users       = $userRepo->findBy($filters);
-        if (count($users) === 1 || !$ipAutologin) {
+        if (count($users) === 1) {
             $user = $users[0];
         }
 
@@ -164,10 +166,18 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
      */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
-        // on success, redirect to the homepage if it was a user triggered action
+        // on success, redirect to the last page or the homepage if it was a user triggered action
         if ($request->attributes->get('_route') === 'login'
             && $request->isMethod('POST')
             && $request->request->get('loginmethod') === 'ipaddress') {
+
+            // Use target URL from session if set
+            if ($providerKey !== null &&
+                $targetUrl = $this->getTargetPath($request->getSession(), $providerKey)) {
+                $this->removeTargetPath($request->getSession(), $providerKey);
+                return new RedirectResponse($targetUrl);
+            }
+
             return new RedirectResponse($this->router->generate('root'));
         }
         return null;

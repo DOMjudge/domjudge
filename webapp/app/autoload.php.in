@@ -1,5 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 /**
+ * @configure_input@
+ *
  * Autoload setup file for the Symfony application
  *
  * Part of the DOMjudge Programming Contest Jury System and licensed
@@ -8,6 +10,11 @@
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Composer\Autoload\ClassLoader;
+
+// Load the static domserver file if we don't have the constants from it yet
+if (!defined('LIBVENDORDIR')) {
+    require('@domserver_etcdir@/domserver-static.php');
+}
 
 /** @var ClassLoader $loader */
 $loader = require LIBVENDORDIR.'/autoload.php';

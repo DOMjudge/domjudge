@@ -6,9 +6,6 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
-/** Perl regex of allowed filenames. */
-define('FILENAME_REGEX', '/^[a-zA-Z0-9][a-zA-Z0-9+_\.-]*$/');
-
 require_once('lib.wrappers.php');
 
 /**
@@ -86,50 +83,6 @@ function getContest(int $cid) : array
     }
 
     return $contest;
-}
-
-/**
- * Given an array of contest data, calculates whether the contest
- * has already started, stopped, andd if scoreboard is currently
- * frozen or final (i.e. finished and unfrozen, *not* finalized).
- *
- * This code is similar to webapp/src/DOMJudgeBundle/Utils/FreezeData.php
- */
-function calcFreezeData(array $cdata = null, bool $isjury = false) : array
-{
-    $fdata = array();
-
-    if (empty($cdata) || !$cdata['starttime_enabled']) {
-        return array(
-            'started' => false,
-            'running' => false,
-            'stopped' => false,
-            'showfrozen' => false, // Whether the public scoreboard is frozen.
-            'showfinal' => false, // Whether this scoreboard is showing final results.
-        );
-    }
-
-    $now = now();
-
-    $fdata['started'] = difftime((float)$cdata['starttime'], $now) <= 0;
-    $fdata['stopped'] = difftime((float)$cdata['endtime'], $now) <= 0;
-    $fdata['running'] = ($fdata['started'] && !$fdata['stopped']);
-
-    if ($isjury) {
-        $fdata['showfinal'] = difftime((float)$cdata['endtime'],$now) <= 0;
-    } else {
-        // Show final scores if contest is over and unfreezetime has been
-        // reached, or if contest is over and no freezetime had been set.
-        $fdata['showfinal'] =
-            ( !isset($cdata['freezetime']) && difftime((float)$cdata['endtime'],$now) <= 0 ) ||
-            ( isset($cdata['unfreezetime']) && difftime((float)$cdata['unfreezetime'], $now) <= 0 );
-    }
-
-    $fdata['showfrozen'] =
-        ( isset($cdata['freezetime']) && difftime((float)$cdata['freezetime'], $now) <= 0 ) &&
-        ( !isset($cdata['unfreezetime']) || difftime($now, (float)$cdata['unfreezetime']) <= 0 );
-
-    return $fdata;
 }
 
 /**
@@ -353,30 +306,6 @@ function updateRankCache(int $cid, int $team)
 }
 
 /**
- * Update the balloons table after a correct submission.
- *
- * This function double checks that the judging is correct and
- * confirmed.
- */
-function updateBalloons(int $submitid)
-{
-    /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
-    /** @var \DOMJudgeBundle\Service\BalloonService $G_BALLOON_SERVICE */
-    global $DB, $G_SYMFONY, $G_BALLOON_SERVICE;
-
-    $subm = $DB->q('TUPLE SELECT s.cid, j.judgingid
-                    FROM submission s
-                    LEFT JOIN judging j ON (j.submitid=s.submitid AND j.valid=1)
-                    WHERE s.submitid = %i', $submitid);
-
-    $entityManager = $G_SYMFONY->getEntityManager();
-    $contest       = $entityManager->getRepository(\DOMJudgeBundle\Entity\Contest::class)->find($subm['cid']);
-    $submission    = $entityManager->getRepository(\DOMJudgeBundle\Entity\Submission::class)->find($submitid);
-    $judging       = $entityManager->getRepository(\DOMJudgeBundle\Entity\Judging::class)->find($subm['judgingid']);
-    $G_BALLOON_SERVICE->updateBalloons($contest, $submission, $judging);
-}
-
-/**
  * Time as used on the scoreboard (i.e. truncated minutes or seconds,
  * depending on the scoreboard resolution setting).
  */
@@ -424,60 +353,6 @@ function calcPenaltyTime(bool $solved, int $num_submissions) : int
     }
 
     return $result;
-}
-
-// From http://www.problemarchive.org/wiki/index.php/Problem_Format
-
-// Expected result tag in (jury) submissions:
-$problem_result_matchstrings = array('@EXPECTED_RESULTS@: ',
-                                     '@EXPECTED_SCORE@: ');
-
-// Remap from Kattis problem package format to DOMjudge internal strings:
-$problem_result_remap = array('ACCEPTED' => 'CORRECT',
-                              'WRONG_ANSWER' => 'WRONG-ANSWER',
-                              'TIME_LIMIT_EXCEEDED' => 'TIMELIMIT',
-                              'RUN_TIME_ERROR' => 'RUN-ERROR');
-
-function normalizeExpectedResult(string $result) : string
-{
-    global $problem_result_remap;
-
-    $result = trim(mb_strtoupper($result));
-    if (in_array($result, array_keys($problem_result_remap))) {
-        return $problem_result_remap[$result];
-    }
-    return $result;
-}
-
-/**
- * checks given source file for expected results string
- * returns NULL if no such string exists
- * returns array of expected results otherwise
- */
-function getExpectedResults(string $source)
-{
-    global $problem_result_matchstrings;
-    $pos = false;
-    foreach ($problem_result_matchstrings as $matchstring) {
-        if (($pos = mb_stripos($source, $matchstring)) !== false) {
-            break;
-        }
-    }
-
-    if ($pos === false) {
-        return null;
-    }
-
-    $beginpos = $pos + mb_strlen($matchstring);
-    $endpos = mb_strpos($source, "\n", $beginpos);
-    $str = mb_substr($source, $beginpos, $endpos-$beginpos);
-    $results = explode(',', trim(mb_strtoupper($str)));
-
-    foreach ($results as $key => $val) {
-        $results[$key] = normalizeExpectedResult($val);
-    }
-
-    return $results;
 }
 
 /**
@@ -652,216 +527,6 @@ function daemonize($pidfile = null)
     if (posix_setsid()<0) {
         error("cannot set daemon process group");
     }
-}
-
-/**
- * This function takes a (set of) temporary file(s) of a submission,
- * validates it and puts it into the database. Additionally it
- * moves it to a backup storage.
- */
-function submit_solution(
-    int $team,
-    int $prob,
-    int $contest,
-    string $lang,
-    array $files,
-    array $filenames,
-    $origsubmitid = null,
-    string $entry_point = null,
-    $extid = null,
-    float $submittime = null,
-    $extresult = null,
-    bool $allowLocalFiles = false
-) {
-    /** @var \DOMJudgeBundle\Service\SubmissionService $G_SUBMISSION_SERVICE */
-    global $G_SUBMISSION_SERVICE;
-    if (isset($G_SUBMISSION_SERVICE)) {
-        $uploadedFiles = [];
-        // Reindex arrays numerically to allow simultaneously iterating
-        // over both $files and $filenames.
-        $files     = array_values($files);
-        $filenames = array_values($filenames);
-
-        foreach ($files as $index => $file) {
-            $uploadedFiles[] = new \Symfony\Component\HttpFoundation\File\UploadedFile($file, $filenames[$index], null, null, null, $allowLocalFiles);
-        }
-
-        $submission = $G_SUBMISSION_SERVICE->submitSolution($team, $prob, $contest, $lang, $uploadedFiles, $origsubmitid, $entry_point, $extid, $submittime, $extresult, $message);
-        if (!$submission) {
-            error($message);
-        }
-        return $submission->getSubmitid();
-    }
-
-    // Fallback to non-Symfony code if Symfony is not available (i.e. in CLI tools)
-
-    global $DB;
-
-    if (empty($team)) {
-        error("No value for Team.");
-    }
-    if (empty($prob)) {
-        error("No value for Problem.");
-    }
-    if (empty($contest)) {
-        error("No value for Contest.");
-    }
-    if (empty($lang)) {
-        error("No value for Language.");
-    }
-
-    if (empty($submittime)) {
-        $submittime = now();
-    }
-
-    if (!is_array($files) || count($files)==0) {
-        error("No files specified.");
-    }
-    if (count($files) > dbconfig_get('sourcefiles_limit', 100)) {
-        error("Tried to submit more than the allowed number of source files.");
-    }
-    if (!is_array($filenames) || count($filenames)!=count($files)) {
-        error("Nonmatching (number of) filenames specified: " .
-              count($filenames) . " vs. " . count($files));
-    }
-
-    if (count($filenames)!=count(array_unique($filenames))) {
-        error("Duplicate filenames detected.");
-    }
-
-    $sourcesize = dbconfig_get('sourcesize_limit');
-
-    // If no contest has started yet, refuse submissions.
-    $now = now();
-
-    $contestdata = $DB->q('MAYBETUPLE SELECT * FROM contest WHERE cid = %i', $contest);
-    if (! isset($contestdata)) {
-        error("Contest c$contest not found.");
-    }
-    $fdata = calcFreezeData($contestdata);
-    if (!checkrole('jury') && !$fdata['started']) {
-        error("The contest is closed, no submissions accepted. [c$contest]");
-    }
-
-    // Check 2: valid parameters?
-    if (! $langdata = $DB->q('MAYBETUPLE SELECT langid, require_entry_point FROM language
-                              WHERE langid = %s AND allow_submit = 1', $lang)) {
-        error("Language '$lang' not found in database or not submittable.");
-    }
-    $langid = $langdata['langid'];
-    if ($langdata['require_entry_point'] && empty($entry_point)) {
-        error("Entry point required for '$langid' but none given.");
-    }
-    if (checkrole('jury') && $entry_point == '__auto__') {
-        // Fall back to auto detection when we're importing jury submissions.
-        $entry_point = NULL;
-    }
-    if (!empty($entry_point) && !preg_match(FILENAME_REGEX, $entry_point)) {
-        error("Entry point '$entry_point' contains illegal characters.");
-    }
-    if (! $teamid = $DB->q('MAYBEVALUE SELECT teamid FROM team
-                            WHERE teamid = %i' .
-                           (checkrole('jury') ? '' : ' AND enabled = 1'), $team)) {
-        error("Team '$team' not found in database or not enabled.");
-    }
-    $teamid = (int)$teamid;
-    $probdata = $DB->q('MAYBETUPLE SELECT probid, points FROM problem
-                        INNER JOIN contestproblem USING (probid)
-                        WHERE probid = %i AND cid = %i AND allow_submit = 1',
-                       $prob, $contest);
-
-    if (empty($probdata)) {
-        error("Problem p$prob not found in database or not submittable [c$contest].");
-    } else {
-        $points = (int)$probdata['points'];
-        $probid = (int)$probdata['probid'];
-    }
-
-    // Reindex arrays numerically to allow simultaneously iterating
-    // over both $files and $filenames.
-    $files     = array_values($files);
-    $filenames = array_values($filenames);
-
-    $totalsize = 0;
-    for ($i=0; $i<count($files); $i++) {
-        if (! is_readable($files[$i])) {
-            error("File '".$files[$i]."' not found (or not readable).");
-        }
-        if (! preg_match(FILENAME_REGEX, $filenames[$i])) {
-            error("Illegal filename '".$filenames[$i]."'.");
-        }
-        $totalsize += filesize($files[$i]);
-    }
-    if ($totalsize > $sourcesize*1024) {
-        error("Submission file(s) are larger than $sourcesize kB.");
-    }
-
-    logmsg(LOG_INFO, "input verified");
-
-    // First look up any expected results in file, so as to minimize
-    // the SQL transaction time below.
-    if (checkrole('jury')) {
-        $results = getExpectedResults(dj_file_get_contents($files[0]));
-    }
-
-    // Insert submission into the database
-    $DB->q('START TRANSACTION');
-    $id = $DB->q('RETURNID INSERT INTO submission
-                  (cid, teamid, probid, langid, submittime, origsubmitid, entry_point,
-                   externalid, externalresult)
-                  VALUES (%i, %i, %i, %s, %f, %i, %s, %s, %s)',
-                 $contest, (int)$teamid, (int)$probid, $langid, $submittime,
-                 $origsubmitid, $entry_point, $extid, $extresult);
-
-    for ($rank=0; $rank<count($files); $rank++) {
-        $DB->q('INSERT INTO submission_file
-                (submitid, filename, rank, sourcecode) VALUES (%i, %s, %i, %s)',
-               (int)$id, $filenames[$rank], (int)$rank, dj_file_get_contents($files[$rank]));
-    }
-
-    // Add expected results from source. We only do this for jury
-    // submissions to prevent accidental auto-verification of team
-    // submissions.
-    if (checkrole('jury') && !empty($results)) {
-        $DB->q('UPDATE submission SET expected_results=%s
-                WHERE submitid=%i', dj_json_encode($results), $id);
-    }
-    $DB->q('COMMIT');
-    // Only log the submission after commiting the transaction, as the submission API uses Doctrine, so it doesn't share the same transaction
-    // TODO: move this back to before the DB commit once it is moved to Symfony and uses Doctrine
-    eventlog('submission', $id, 'create', $contest);
-
-    // Recalculate scoreboard cache for pending submissions
-    calcScoreRow($contest, $teamid, $probid);
-
-    alert('submit', "submission $id: team $teamid, language $langid, problem $probid");
-
-    if (is_writable(SUBMITDIR)) {
-        // Copy the submission to SUBMITDIR for safe-keeping
-        for ($rank=0; $rank<count($files); $rank++) {
-            $fdata = array(
-                'cid' => $contest,
-                'submitid' => $id,
-                'teamid' => $teamid,
-                'probid' => $probid,
-                'langid' => $langid,
-                'rank' => $rank,
-                'filename' => $filenames[$rank]
-            );
-            $tofile = SUBMITDIR . '/' . getSourceFilename($fdata);
-            if (! @copy($files[$rank], $tofile)) {
-                warning("Could not copy '" . $files[$rank] . "' to '" . $tofile . "'");
-            }
-        }
-    } else {
-        logmsg(LOG_DEBUG, "SUBMITDIR not writable, skipping");
-    }
-
-    if (difftime((float)$contestdata['endtime'], $submittime) <= 0) {
-        logmsg(LOG_INFO, "The contest is closed, submission stored but not processed. [c$contest]");
-    }
-
-    return $id;
 }
 
 /**
@@ -1257,7 +922,6 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
     // TODO: can this be wrapped into a single query?
     $eventids = [];
     foreach ($cids as $cid) {
-        $table = ($endpoint['tables'] ? $endpoint['tables'][0] : null);
         foreach ($dataids as $idx => $dataid) {
             if (in_array($type, ['contests','state']) || $jsonPassed) {
                 // Contest and state endpoint are singular
@@ -1267,10 +931,10 @@ function eventlog(string $type, $dataids, string $action, $cid = null, $json = n
             }
             $eventid = $DB->q('RETURNID INSERT INTO event
                               (eventtime, cid, endpointtype, endpointid,
-                               datatype, dataid, action, content)
-                               VALUES (%s, %i, %s, %s, %s, %s, %s, %s)',
-                              $now, $cid, $type, (string)$ids[$idx], $table,
-                              (string)$dataid, $action, $jsonElement);
+                               action, content)
+                               VALUES (%s, %i, %s, %s, %s, %s)',
+                              $now, $cid, $type, (string)$ids[$idx],
+                              $action, $jsonElement);
             $eventids[] = $eventid;
         }
     }

@@ -4,28 +4,18 @@
 {% block title %}Register Account{% endblock %}
 
 {% block extrahead %}
-<link rel="stylesheet" href="{{asset('style_login.css')}}">
+    <link rel="stylesheet" href="{{ asset('style_login.css') }}">
 {% endblock %}
 
 {% block body %}
-<div class="additional-logins">
+    <div class="additional-logins">
 
-  {{form_start(registration_form, { 'attr': {'class': 'form-signin'} })}}
-    {{ form_widget(registration_form._token) }}
-
-    <h1 class="h3 mb-3 font-weight-normal">Register Account</h1>
-    <div class="mb-2">Enter the following information to register your account with DOMjudge.</div>
-
-    <div>
-      {{form_errors(registration_form)}}
+        {{ form_start(registration_form, { 'attr': {'class': 'form-signin'} }) }}
+        <h1 class="h3 mb-3 font-weight-normal">Register Account</h1>
+        <div class="mb-2">
+            Enter the following information to register your account with DOMjudge.
+        </div>
+        {# Form elements will be renderd automatically #}
+        {{ form_end(registration_form) }}
     </div>
-        {{form_label(registration_form.username, null, { 'label_attr': {'class': 'sr-only'} })}}
-        {{form_widget(registration_form.username, { 'attr': {'placeholder': registration_form.username.vars.label, 'autofocus': true } })}}
-        {{form_label(registration_form.plainPassword.first, null, { 'label_attr': {'class': 'sr-only'} })}}
-        {{form_widget(registration_form.plainPassword.first, { 'attr': {'placeholder': registration_form.plainPassword.first.vars.label} })}}
-        {{form_label(registration_form.plainPassword.second, null, { 'label_attr': {'class': 'sr-only'} })}}
-        {{form_widget(registration_form.plainPassword.second, { 'attr': {'placeholder': registration_form.plainPassword.second.vars.label} })}}
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
-  {{form_end(registration_form)}}
-</div>
 {% endblock %}

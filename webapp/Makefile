@@ -14,7 +14,13 @@ clear-cache:
 	bin/console --env=dev cache:clear
 	bin/console --env=prod cache:clear
 
-domserver: $(PARAMS) $(SUBST_CONFIGS)
+copy-bundle-assets:
+# We can not use bin/console here, as when using a fakeroot,
+# the include paths are broken. We just copy in the data we need
+	mkdir -p web/bundles/nelmioapidoc
+	cp -R ../lib/vendor/nelmio/api-doc-bundle/Resources/public/* web/bundles/nelmioapidoc/
+
+domserver: copy-bundle-assets
 
 install-domserver:
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
@@ -25,13 +31,13 @@ install-domserver:
 	done
 # Change webapp/web/doc symlink
 	rm $(DESTDIR)$(domserver_webappdir)/web/doc
-	ln -s $(DESTDIR)$(domjudge_docdir) $(DESTDIR)$(domserver_webappdir)/web/doc
+	ln -s $(domjudge_docdir) $(DESTDIR)$(domserver_webappdir)/web/doc
 # Now change all relative symlinks in webapp/web to their correct paths
 	for link in $$(find $(DESTDIR)$(domserver_webappdir)/web/$$dir -maxdepth 2 -type l); do \
 		target=$$(readlink $$link) ; \
 		if echo $${target} | grep -q '\.\./\.\./lib/vendor' ; then \
 			rm $$link ; \
-			realtarget=$(DESTDIR)$(domserver_libvendordir)$$(echo $${target} | sed 's!^.*\.\./\.\./lib/vendor!!') ; \
+			realtarget=$(domserver_libvendordir)$$(echo $${target} | sed 's!^.*\.\./\.\./lib/vendor!!') ; \
 			ln -s $$realtarget $$link ; \
 		fi \
 	done
@@ -41,19 +47,10 @@ install-domserver:
 	-$(INSTALL_WEBSITE) -t $(DESTDIR)$(domserver_webappdir)/var var/*.php var/*.cache
 	cp        -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist
 	chmod a+r    $(DESTDIR)$(domserver_webappdir)/phpunit.xml.dist
-	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(DESTDIR)$(domserver_webappdir)/var
-	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(DESTDIR)$(domserver_webappdir)/var
-	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(DESTDIR)$(domserver_webappdir)/var
-	setfacl -R -m   u:$(DOMJUDGE_USER):rwx    $(DESTDIR)$(domserver_webappdir)/var
-	setfacl -R -m d:m::rwx                    $(DESTDIR)$(domserver_webappdir)/var
-	setfacl -R -m   m::rwx                    $(DESTDIR)$(domserver_webappdir)/var
 
 install-docs:
 	$(INSTALL_DATA) -T web/images/countries/README    $(DESTDIR)$(domjudge_docdir)/README.country_flags
 	$(INSTALL_DATA) -T web/images/countries/codes.txt $(DESTDIR)$(domjudge_docdir)/country_codes.txt
-
-distclean-l:
-	-rm -f $(SUBST_CONFIGS) $(PARAMS)
 
 maintainer-clean-l:
 	-for d in cache logs sessions ; do \
@@ -62,4 +59,4 @@ maintainer-clean-l:
 		done ; \
 	done
 
-.PHONY: clear-cache
+.PHONY: clear-cache copy-bundle-assets

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace DOMJudgeBundle\Controller\Jury;
 
@@ -380,6 +380,7 @@ class AnalysisController extends Controller
                                            ->join('s.team', 'team')
                                            ->join('team.category', 'tc')
                                            ->andWhere('j.valid = true')
+                                           ->andWhere('j.result IS NOT NULL')
                                            ->andWhere('s.contest = :contest')
                                            ->andWhere('s.problem = :problem'), $view)
             ->setParameter('problem', $problem)

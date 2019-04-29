@@ -271,7 +271,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/{problemId}/export", name="jury_export_problem")
+     * @Route("/{problemId}/export", name="jury_export_problem", requirements={"problemId": "\d+"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param int $problemId
      * @return StreamedResponse
@@ -895,7 +895,7 @@ class ProblemController extends BaseController
             $contest = $data['contest'] ?? null;
             /** @var ContestProblem $contestProblem */
             foreach ($problem->getContestProblems() as $contestProblem) {
-                if (($currentContest = $this->DOMJudgeService->getCurrentContest()) !== null &&
+                if (($currentContest = $this->dj->getCurrentContest()) !== null &&
                     $contestProblem->getCid() === $currentContest->getCid()) {
                     $contest = $currentContest;
                     break;

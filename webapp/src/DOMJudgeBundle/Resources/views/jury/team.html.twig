@@ -116,12 +116,20 @@
                         <td>
                             {% set countryFlag = 'images/countries/' ~ team.affiliation.country ~ '.png' %}
                             {% if countryFlag | assetExists %}
-                                <img src="{{ asset(countryFlag) }}" alt="{{ team.affiliation.country }}"
-                                     title="{{ team.affiliation.country }}" class="countryflag"/>
+                                <img src="{{ asset(countryFlag) }}" alt="{{ alpha3_countries[team.affiliation.country] }}"
+                                     title="{{ alpha3_countries[team.affiliation.country] }}" class="countryflag"/>
                             {% endif %}
-                            {{ team.affiliation.country }}
+                            {{ alpha3_countries[team.affiliation.country] }}
                         </td>
                     </tr>
+                {% endif %}
+                {% if team.comments is not empty %}
+                <tr>
+                    <th>Comments</th>
+                    <td>
+                        {{ team.comments | nl2br }}
+                    </td>
+                </tr>
                 {% endif %}
                 {% if team.members is not empty %}
                     <tr>

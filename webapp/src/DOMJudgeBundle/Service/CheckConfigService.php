@@ -56,14 +56,8 @@ class CheckConfigService
      */
     protected $debug;
 
-    /**
-     * @var string
-     */
-    protected $project_dir;
-
     public function __construct(
         bool $debug,
-        string $project_dir,
         EntityManagerInterface $em,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
@@ -71,7 +65,6 @@ class CheckConfigService
         ValidatorInterface $validator
     ) {
         $this->debug           = $debug;
-        $this->project_dir     = $project_dir;
         $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
@@ -125,12 +118,6 @@ class CheckConfigService
         ];
 
         $results['Teams'] = $teams;
-
-        $submissions = [
-            'submission' => $this->checkSubmissionsValidate(),
-        ];
-
-        $results['Submissions'] = $submissions;
 
         $results['External identifiers'] = $this->checkAllExternalIdentifiers();
 
@@ -618,7 +605,7 @@ class CheckConfigService
 
         $result = 'O';
         $desc = '';
-        $webDir = sprintf('%s/webapp/web/', $this->project_dir);
+        $webDir = sprintf('%s/web/', $this->dj->getDomjudgeWebappDir());
         foreach ($affils as $affiliation) {
             // don't care about unused affiliations
             if (count($affiliation->getTeams()) === 0) {
@@ -695,64 +682,10 @@ class CheckConfigService
             'desc' => $desc];
     }
 
-    public function checkSubmissionsValidate()
-    {
-        $submissions = $this->em->getRepository(Submission::class)->findAll();
-
-        $submissionerrors = [];
-        $result = 'O';
-        foreach ($submissions as $submission) {
-            $submitid = $submission->getSubmitid();
-            $errors = $this->validator->validate($submission);
-            if (count($errors)) {
-                $result = 'E';
-            }
-            $submissionerrors[$submitid] = $errors;
-
-            $moresubmissionerrors[$submitid] = '';
-            if (count($submission->getFiles()) === 0) {
-                $result = 'E';
-                $moresubmissionerrors[$submitid] .= sprintf("has no associated files\n", $submitid);
-            }
-            if ($submission->getJudgehost() !== null && count($submission->getJudgings()) === 0) {
-                $result = 'E';
-                $moresubmissionerrors[$submitid] .= sprintf("has a judgehost but no judgings\n", $submitid);
-            }
-            $valids = 0;
-            foreach ($submission->getJudgings() as $judging) {
-                $valids += (int)$judging->getValid();
-
-                if ($judging->getValid() && $judging->getEndtime() === null &&
-                    Utils::difftime((float) $judging->getStarttime(), Utils::now()) > 300) {
-                    $result = ($result == 'E') ? 'E' : 'W';
-                    $moresubmissionerrors[$submitid] .= sprintf("has been running for more than 5 minutes without a result\n", $submitid);
-                }
-            }
-            if ($valids > 1) {
-                $result = 'E';
-                $moresubmissionerrors[$submitid] .= sprintf("has more than 1 valid judging\n", $submitid);
-            }
-        }
-
-        $desc = '';
-        foreach ($submissionerrors as $sid => $errors) {
-            if (count($errors) > 0 || !empty($moresubmissionerrors[$sid])) {
-                $desc .= "Submission s$sid: ";
-                $desc .= (string)$errors . " " .
-                    $moresubmissionerrors[$sid] . "\n";
-            }
-        }
-
-        return ['caption' => 'Submissions validation',
-            'result' => $result,
-            'desc' => "Validated all submissions:\n\n" .
-                    ($desc ?: 'No submissions with problems found.')];
-    }
-
     public function checkAllExternalIdentifiers()
     {
         // Get all entity classes
-        $dir   = realpath(sprintf('%s/webapp/src/DOMJudgeBundle/Entity', $this->project_dir));
+        $dir   = realpath(sprintf('%s/src/DOMJudgeBundle/Entity', $this->dj->getDomjudgeWebappDir()));
         $files = glob($dir . '/*.php');
 
         $result = [];

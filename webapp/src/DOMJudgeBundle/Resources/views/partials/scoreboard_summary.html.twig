@@ -1,10 +1,7 @@
 {% if limitToTeamIds is null %}
     {% if showTeamSubmissions or jury %}
         <tr style="border-top: 2px solid black;">
-            {% set summaryColspan = 2 %}
-            {% if showFlags %}
-                {% set summaryColspan = summaryColspan + 1 %}
-            {% endif %}
+            {% set summaryColspan = 3 %}
             {% if showAffiliationLogos %}
                 {% set summaryColspan = summaryColspan + 1 %}
             {% endif %}

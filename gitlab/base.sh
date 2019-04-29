@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash
+
+set -euxo pipefail
 
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
@@ -38,10 +40,6 @@ parameters:
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt
 
-    # Additional auth methods can be enabled here. This is an array.
-    # Supported values are 'ipaddress', and 'xheaders' currently.
-    domjudge.authmethods: []
-
     # Needs a version number
     domjudge.version: 0.0.dummy
     domjudge.tmpdir: /tmp
@@ -57,7 +55,6 @@ parameters:
     domjudge.libdir: /lib
     domjudge.sqldir: /sql
     domjudge.libvendordir: /lib/vendor
-    domjudge.libwwwdir: /lib/www
     domjudge.libsubmitdir: /lib/submit
     domjudge.logdir: /output/log
     domjudge.rundir: /output/run
@@ -73,7 +70,7 @@ composer install --no-scripts
 
 # configure, make and install (but skip documentation)
 make configure
-./configure --disable-doc-build --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge
+./configure --disable-doc-build --with-baseurl='http://localhost/domjudge/' --with-domjudge-user=domjudge --with-judgehost_chrootdir=${DIR}/chroot/domjudge
 make build-scripts domserver judgehost
 sudo make install-domserver install-judgehost
 

@@ -1,5 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash
 
+set -euxo pipefail
 export PS4='(${BASH_SOURCE}:${LINENO}): - [$?] $ '
 
 DIR=$(pwd)
@@ -7,6 +8,16 @@ GITSHA=$(git rev-parse HEAD || true)
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh
+
+function log_on_err() {
+	echo -e "\\n\\n=======================================================\\n"
+	echo "Symfony log:"
+	if sudo test -f /opt/domjudge/domserver/webapp/var/logs/prod.log; then
+		sudo cat /opt/domjudge/domserver/webapp/var/logs/prod.log
+	fi
+}
+
+trap log_on_err ERR
 
 cd /opt/domjudge/domserver
 
@@ -22,18 +33,9 @@ sudo cp /opt/domjudge/judgehost/etc/sudoers-domjudge /etc/sudoers.d/
 sudo chmod 400 /etc/sudoers.d/sudoers-domjudge
 sudo bin/create_cgroups
 
-# build chroot (randomly pick which script to use, try to use commit
-# hash for reproducibility)
-if [ -n "$GITSHA" ]; then
-	FLIP=$(( $(printf '%d' "0x${GITSHA:0:2}") % 2 ))
-else
-	FLIP=$((RANDOM % 2))
-fi
-cd ${DIR}/misc-tools
-if [ $FLIP -eq 1 ]; then
-  time sudo ./dj_make_chroot -a amd64
-else
-  time sudo ./dj_make_chroot_docker -i domjudge/default-judgehost-chroot:latest
+if [ ! -d ${DIR}/chroot/domjudge/ ]; then
+	cd ${DIR}/misc-tools
+	time sudo ./dj_make_chroot -a amd64
 fi
 
 # download domjudge-scripts for API check
@@ -54,11 +56,6 @@ UPDATE contest SET endtime = UNIX_TIMESTAMP()+$TIMEHELP WHERE cid = 2;
 UPDATE team_category SET visible = 1;
 EOF
 
-# start eventdaemon
-cd /opt/domjudge/domserver/
-bin/eventdaemon -C 2 &
-sleep 5
-
 # start judgedaemon
 cd /opt/domjudge/judgehost/
 bin/judgedaemon -n 0 &
@@ -74,26 +71,27 @@ fi
 
 # submit test programs
 cd ${DIR}/tests
-make check-syntax check test-stress
+make check test-stress
 
 # Prepare to load example problems from Kattis/problemtools
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 1);" | mysql domjudge
 cd /tmp
 git clone --depth=1 https://github.com/Kattis/problemtools.git
 cd problemtools/examples
-for i in hello different guess; do
+mv hello hello_kattis
+for i in hello_kattis different guess; do
 	(
 		cd "$i"
 		zip -r "../${i}.zip" -- *
 	)
-	curl -X POST -n -N -F zip[]=@${i}.zip http://localhost/domjudge/api/contests/2/problems
+	curl --fail -X POST -n -N -F zip[]=@${i}.zip http://localhost/domjudge/api/contests/2/problems
 done
 
 # wait for and check results
-NUMSUBS=$(curl http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python -mjson.tool | grep -c '"id":')
+NUMSUBS=$(curl --fail http://admin:$ADMINPASS@localhost/domjudge/api/contests/2/submissions | python -mjson.tool | grep -c '"id":')
 export COOKIEJAR
 COOKIEJAR=$(mktemp --tmpdir)
-export CURLOPTS="-sq -m 30 -b $COOKIEJAR"
+export CURLOPTS="--fail -sq -m 30 -b $COOKIEJAR"
 
 # Make an initial request which will get us a session id, and grab the csrf token from it
 CSRFTOKEN=$(curl $CURLOPTS -c $COOKIEJAR "http://localhost/domjudge/login" 2>/dev/null | sed -n 's/.*_csrf_token.*value="\(.*\)".*/\1/p')

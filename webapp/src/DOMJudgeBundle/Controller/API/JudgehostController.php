@@ -511,7 +511,7 @@ class JudgehostController extends FOSRestController
 
     /**
      * Update the given judging for the given judgehost
-     * @Rest\Put("/update-judging/{hostname}/{judgingId}")
+     * @Rest\Put("/update-judging/{hostname}/{judgingId}", requirements={"judgingId": "\d+"})
      * @Security("has_role('ROLE_JUDGEHOST')")
      * @SWG\Response(
      *     response="200",
@@ -627,7 +627,7 @@ class JudgehostController extends FOSRestController
 
     /**
      * Add an array of JudgingRuns. When relevant, finalize the judging.
-     * @Rest\Post("/add-judging-run/{hostname}/{judgingId}")
+     * @Rest\Post("/add-judging-run/{hostname}/{judgingId}", requirements={"judgingId": "\d+"})
      * @Security("has_role('ROLE_JUDGEHOST')")
      * @SWG\Response(
      *     response="200",

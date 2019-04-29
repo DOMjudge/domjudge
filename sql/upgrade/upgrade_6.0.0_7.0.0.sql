@@ -67,14 +67,18 @@ UPDATE `user` INNER JOIN `team` USING (`teamid`) SET `user`.`first_login` = `tea
 INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `description`) VALUES
 ('data_source', '0', 'int', '0', 'Misc', 'Source of data. Choices: 0 = all local, 1 = configuration data external, 2 = configuration and live data external'),
 ('update_judging_seconds', '0', 'int', '0', 'Judging', 'Post updates to a judging every X seconds. Set to 0 to update after each judging_run.'),
-('ip_autologin', '0', 'bool', '0', 'Misc', 'Enable to skip the login page when using IP authentication.'),
-('team_column_width', '0', 'int', '0', 'Display', 'Maximum width of team column on scoreboard. Leave 0 for no maximum.');
+('ip_autologin', '0', 'bool', '0', 'Authentication', 'Enable to skip the login page when using IP authentication.'),
+('team_column_width', '0', 'int', '0', 'Display', 'Maximum width of team column on scoreboard. Leave 0 for no maximum.'),
+('auth_methods', '[]', 'array_val', '0', 'Authentication', 'List of allowed additional authentication methods. Supported values are \'ipaddress\', and \'xheaders\'');
 
 UPDATE `configuration` SET `name` = 'registration_category_name',
   `value` = IF(`value` = '0', '""', '"Self-Registered"'),
   `type` = 'string',
-  `description` = 'Team category for users that register themselves with the system. Disabled if empty.'
+  `description` = 'Team category for users that register themselves with the system. Self-registration is disabled if this field is left empty.'
   WHERE `name` = 'allow_registration';
+
+UPDATE `configuration` SET `category` = 'Authentication'
+  WHERE `name` IN ('allow_openid_auth', 'openid_autocreate_team', 'openid_provider', 'openid_clientid', 'openid_clientsecret');
 
 INSERT INTO `role` (`role`, `description`) VALUES
 ('api_reader', 'API reader'),
@@ -107,3 +111,7 @@ INSERT INTO `language` (`langid`, `externalid`, `name`, `extensions`, `require_e
 ALTER TABLE `team`
   DROP COLUMN `teampage_first_visited`,
   DROP COLUMN `hostname`;
+
+ALTER TABLE `event`
+  DROP COLUMN `datatype`,
+  DROP COLUMN `dataid`;

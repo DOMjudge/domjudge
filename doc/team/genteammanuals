@@ -51,14 +51,14 @@ for f in $SOURCES ; do
 		# shellcheck disable=SC2086
 		if ! ( cat "$TEXCONFIG" ; echo \\"input{$f}" ) | \
 			$LATEX $LATEXFLAGS -jobname "${f%.tex}" -output-directory "$OUTPUTDIR" >/dev/null ; then
-			printf "\nTeX-ing failed in run $run, see '%s' for details.\n" "${f%tex}log$"
+			printf "\\nTeX-ing failed in run $run, see '%s' for details.\\n" "${f%tex}log$"
 			exit 1
 		else
 			[ "$QUIET" ] || printf " $run"
 		fi
 		run=$((run+1))
 	done
-	[ "$QUIET" ] || printf "\n" ;
+	[ "$QUIET" ] || printf "\\n" ;
 done
 } # end shellcheck disable
 

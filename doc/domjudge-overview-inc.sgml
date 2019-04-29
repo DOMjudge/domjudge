@@ -45,7 +45,7 @@ This is a (rough) list of the requirements for DOMjudge.
 
 <itemize>
 <item>At least one machine running Linux, with (sudo) root access
-<item>Apache web server with PHP 5.3.3 or newer and PHP-command line interface
+<item>nginx or Apache web server with PHP 7.0.0 or newer and PHP-command line interface
 <item>MySQL or MariaDB database server version 5.3.3 or newer
 <item>Compilers for the languages you want to support
 </itemize>
@@ -180,9 +180,8 @@ to be subscribed before you can post. See
 url="https://www.domjudge.org/mailman/listinfo/domjudge-devel">
 for subscription and more details.
 
-Some developers and users of DOMjudge linger on the IRC channel
-dedicated to DOMjudge on the Freenode network:
-server <tt>irc.freenode.net</tt>, channel <tt>#domjudge</tt>.
-Feel free to drop by with your questions and comments, but note that
-it may sometimes take a bit longer than a few minutes to get a
-response.
+DOMjudge has a <htmlurl url="https://www.domjudge.org/chat"
+name="Slack workspace"> where a number of developers and users of
+DOMjudge linger. Feel free to drop by with your questions and comments,
+but note that it may sometimes take a bit longer than a few minutes to
+get a response, partly because people might be in different timezones.

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace DOMJudgeBundle\Security;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,12 +28,18 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
     private $encoder;
     private $container;
 
-    public function __construct(CsrfTokenManagerInterface $csrfTokenManager, Container $container, Security $security, UserPasswordEncoderInterface $encoder) {
+    public function __construct(
+        CsrfTokenManagerInterface $csrfTokenManager,
+        Container $container,
+        Security $security,
+        UserPasswordEncoderInterface $encoder
+    ) {
         $this->csrfTokenManager = $csrfTokenManager;
         $this->container = $container;
         $this->security = $security;
         $this->encoder = $encoder;
     }
+
     /**
      * Called on every request to decide if this authenticator should be
      * used for the request. Returning false will cause this authenticator
@@ -48,14 +54,13 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
         }
 
         // No credentials provided, so we can't try to auth anything
-        if ($request->headers->get('php-auth-user', null) == null) {
+        if ($request->headers->get('php-auth-user', null) === null) {
           return false;
         }
 
         // If it's stateless, we provide auth support every time
         $stateless_fw_contexts = [
           'security.firewall.map.context.api',
-          'security.firewall.map.context.feed',
         ];
         $fwcontext = $request->attributes->get('_firewall_context', '');
         if (in_array($fwcontext, $stateless_fw_contexts)) {
@@ -71,7 +76,6 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
      */
     public function getCredentials(Request $request)
     {
-
         return [
             'username'  => $request->headers->get('php-auth-user'),
             'password'  => $request->headers->get('php-auth-pw'),
@@ -80,8 +84,8 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
 
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
-        if ($credentials['username'] == null) {
-          return null;
+        if ($credentials['username'] === null) {
+            return null;
         }
         return $userProvider->loadUserByUsername($credentials['username']);
     }

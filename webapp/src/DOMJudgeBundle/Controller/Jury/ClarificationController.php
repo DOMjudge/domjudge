@@ -301,7 +301,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/{clarId}/claim", name="jury_clarification_claim")
+     * @Route("/{clarId}/claim", name="jury_clarification_claim", requirements={"clarId": "\d+"})
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -326,7 +326,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/{clarId}/set-answered", name="jury_clarification_set_answered")
+     * @Route("/{clarId}/set-answered", name="jury_clarification_set_answered", requirements={"clarId": "\d+"})
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -351,7 +351,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/{clarId}/change-subject", name="jury_clarification_change_subject")
+     * @Route("/{clarId}/change-subject", name="jury_clarification_change_subject", requirements={"clarId": "\d+"})
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -385,7 +385,7 @@ class ClarificationController extends Controller
     }
 
     /**
-     * @Route("/{clarId}/change-queue", name="jury_clarification_change_queue")
+     * @Route("/{clarId}/change-queue", name="jury_clarification_change_queue", requirements={"clarId": "\d+"})
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response

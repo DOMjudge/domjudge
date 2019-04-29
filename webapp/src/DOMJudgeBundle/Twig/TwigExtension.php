@@ -127,6 +127,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
                 ->andWhere('l.allowSubmit = 1')
                 ->getQuery()
                 ->getResult(),
+            'alpha3_countries' => Utils::ALPHA3_COUNTRIES,
         ];
     }
 
@@ -904,6 +905,9 @@ EOF;
     public function hexColorToRGBA(string $text, float $opacity = 1): string
     {
         $col = Utils::convertToHex($text);
+        if (is_null($col)) {
+            return $text;
+        }
         preg_match_all("/[0-9A-Fa-f]{2}/", $col, $m);
         if (!count($m)) {
             return $text;

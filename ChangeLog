@@ -1,25 +1,37 @@
 DOMjudge Programming Contest Judging System
 
-Version 6.1.0 - DEV
+Version 7.1.0 - DEV
 -------------------
- - Rewrite the jury interface in Symfony and Bootstrap. Add many UI
+
+Version 7.0.0 - 28 April 2019
+-----------------------------
+ - Initial admin password is now generated on database creation, and written
+   to etc/initial_admin_password.secret.
+ - Rewrite the interface in Symfony and Bootstrap. Add many UI
    improvements in the process.
  - Rewrite API in Symfony, expose Swagger docs.
- - Initial admin password is now generated on database creation.
+ - Rewrite jury analysis page.
  - Make interactive problem support more robust.
- - Show testcase index and description on submissions page.
+ - Fix first-to-solve check and make it consistent across UI and API.
+ - Change judging directory layout to be hierarchical, i.e. to
+   output/judgings/$judgehost-0/endpoint-default/$cid/$sid/$jid/.
  - Add explicit config check for max test case size and max_allowed_packet.
+ - Add API endpoint to import problems to an existing contest.
  - Improve judgedaemon performance. New setting update_judging_seconds that
-   allows to control how often updates are sent back; more often is slower.
- - Upgrade to Symfony 3.4.
- - Remove old v3 API.
- - Remove combined_scoreboard tool.
- - Upgrade jQuery to 3.3, Bootstrap to 4.1.
+   allows to control how often updates are sent back; less often is faster.
+ - Improve IP authentication and add X-headers based auth method.
+ - Improve submit client usability.
  - Add support for the R programming language (#516 thanks Michał Kaczanowicz).
  - Add support for the Swift programming language.
  - Add support for creating a writable tempdirectory for submissions.
  - Add option to download all sample files of a problem in a single zip.
- - Add etc/initial_admin_password.secret during install.
+ - Upgrade Symfony to 3.4.
+ - Upgrade jQuery to 3.3.
+ - Upgrade Bootstrap to 4.1.
+ - Remove old v3 API.
+ - Remove combined_scoreboard tool.
+ - Removed eventdaemon again and moved its logic to the event feed API
+   action and just before inserting other events.
 
 Version 6.0.3 - 15 December 2018
 --------------------------------

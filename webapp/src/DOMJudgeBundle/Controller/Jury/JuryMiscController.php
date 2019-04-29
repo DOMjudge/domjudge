@@ -421,7 +421,7 @@ class JuryMiscController extends BaseController
     }
 
     /**
-     * @Route("/change-contest/{contestId}", name="jury_change_contest")
+     * @Route("/change-contest/{contestId}", name="jury_change_contest", requirements={"contestId": "-?\d+"})
      * @param Request         $request
      * @param RouterInterface $router
      * @param int             $contestId

@@ -27,10 +27,7 @@ $(SUBST_FILES): %: %.in $(TOPDIR)/paths.mk
 	$(substconfigvars)
 
 check-syntax:
-	@output=`./syntax` ; \
-	if [ -n "$$output" ]; then \
-		echo "$$output" ; exit 1 ; \
-	fi
+	$(TOPDIR)/tests/syntax
 
 check-client: $(SUBMITCMD)
 	$(SUBMITCMD) --something 2>&1 | grep -a "unknown option or missing argument"

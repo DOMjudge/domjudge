@@ -38,7 +38,7 @@
         </div>
 
         <div class="card-text">
-            <pre class="output-text bg-light p-3">{{ clarification.body }}</pre>
+            <pre class="output-text bg-light p-3">{{ clarification.body|wrapUnquoted(78) }}</pre>
         </div>
     </div>
 </div>

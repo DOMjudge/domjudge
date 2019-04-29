@@ -4,7 +4,7 @@ DOMjudge
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
 [![Code Climate](https://codeclimate.com/github/DOMjudge/domjudge/badges/gpa.svg)](https://codeclimate.com/github/DOMjudge/domjudge)
 
-This is the Programming Contest Jury System "DOMjudge" version 6.1.0DEV
+This is the Programming Contest Jury System "DOMjudge" version 7.1.0DEV
 
 DOMjudge is a system for running a programming contest, like the
 ICPC regional and world championship programming contests.
@@ -104,6 +104,6 @@ domjudge-devel@domjudge.org. You need to be subscribed before
 you can post. Information, subscription and archives are available at:
 https://www.domjudge.org/mailman/listinfo/domjudge-devel
 
-Some developers and users of DOMjudge linger on the IRC channel
-dedicated to DOMjudge on the Freenode network:
-server irc.freenode.net, channel #domjudge
+DOMjudge has a Slack workspace where a number of developers and
+users of DOMjudge linger. More information can be found at
+https://www.domjudge.org/chat

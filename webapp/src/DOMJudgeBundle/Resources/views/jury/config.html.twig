@@ -7,6 +7,11 @@
 {% block extrahead %}
     {{ parent() }}
     {{ macros.toggle_extrahead() }}
+    <style>
+        .btn.toggle-on {
+            right: initial;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}

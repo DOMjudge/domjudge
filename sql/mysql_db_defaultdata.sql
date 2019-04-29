@@ -53,14 +53,15 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `des
 ('show_limits_on_team_page', '0', 'bool', '1', 'Display', 'Show time and memory limit on the team problems page'),
 ('team_column_width', '0', 'int', '0', 'Display', 'Maximum width of team column on scoreboard. Leave 0 for no maximum.'),
 ('enable_printing', '0', 'bool', '1', 'Misc', 'Enable teams and jury to send source code to a printer via the DOMjudge web interface.'),
-('registration_category_name', '""', 'string', '1', 'Misc', 'Team category for users that register themselves with the system. Disabled if empty.'),
-('allow_openid_auth', '0', 'bool', '1', 'Misc', 'Allow users to log in using OpenID'),
-('openid_autocreate_team', '1', 'bool', '1', 'Misc', 'Create a team for each user that logs in with OpenID'),
-('openid_provider', '"https://accounts.google.com"', 'string', '1', 'Misc', 'OpenID Provider URL'),
-('openid_clientid', '""', 'string', '0','Misc', 'OpenID Connect client id'),
-('openid_clientsecret', '""', 'string', '0', 'Misc', 'OpenID Connect client secret'),
+('registration_category_name', '""', 'string', '1', 'Misc', 'Team category for users that register themselves with the system. Self-registration is disabled if this field is left empty.'),
 ('data_source', '0', 'int', '0', 'Misc', 'Source of data. Choices: 0 = all local, 1 = configuration data external, 2 = configuration and live data external'),
-('ip_autologin', '0', 'bool', '0', 'Misc', 'Enable to skip the login page when using IP authentication.');
+('auth_methods', '[]', 'array_val', '0', 'Authentication', 'List of allowed additional authentication methods. Supported values are \'ipaddress\', and \'xheaders\''),
+('allow_openid_auth', '0', 'bool', '1', 'Authentication', 'Allow users to log in using OpenID'),
+('openid_autocreate_team', '1', 'bool', '1', 'Authentication', 'Create a team for each user that logs in with OpenID'),
+('openid_provider', '"https://accounts.google.com"', 'string', '1', 'Authentication', 'OpenID Provider URL'),
+('openid_clientid', '""', 'string', '0','Authentication', 'OpenID Connect client id'),
+('openid_clientsecret', '""', 'string', '0', 'Authentication', 'OpenID Connect client secret'),
+('ip_autologin', '0', 'bool', '0', 'Authentication', 'Enable to skip the login page when using IP authentication.');
 
 
 --

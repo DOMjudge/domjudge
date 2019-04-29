@@ -4,6 +4,8 @@ namespace DOMJudgeBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use DOMJudgeBundle\Validator\Constraints\Country;
+
 
 /**
  * Affilitations for teams (e.g.: university, company)
@@ -59,6 +61,7 @@ class TeamAffiliation extends BaseApiEntity
      * @var string
      * @ORM\Column(type="string", length=3, name="country", options={"comment"="ISO 3166-1 alpha-3 country code"}, nullable=true)
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').dbconfig_get('show_flags', true)")
+     * @Country()
      */
     private $country;
 

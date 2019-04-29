@@ -1,4 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash
+
+set -euxo pipefail
 
 # Set up
 "$( dirname "${BASH_SOURCE[0]}" )"/base.sh

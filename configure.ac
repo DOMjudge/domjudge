@@ -145,7 +145,6 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(domserver_sqldir,      $datadir/${PACKAGE_TARNAME}/sql)
 	AC_SUBST(domserver_libdir,      $libdir/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_libvendordir,$libdir/${PACKAGE_TARNAME}/vendor)
-	AC_SUBST(domserver_libwwwdir,   $libdir/${PACKAGE_TARNAME}/www)
 	AC_SUBST(domserver_libsubmitdir,$libdir/${PACKAGE_TARNAME}/submit)
 	AC_SUBST(domserver_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
 	AC_SUBST(domserver_rundir,      $localstatedir/run/${PACKAGE_TARNAME})
@@ -192,7 +191,6 @@ AX_PATH(domserver_webappdir,    [$domserver_root/webapp])
 AX_PATH(domserver_sqldir,       [$domserver_root/sql])
 AX_PATH(domserver_libdir,       [$domserver_root/lib])
 AX_PATH(domserver_libvendordir, [$domserver_root/lib/vendor])
-AX_PATH(domserver_libwwwdir,    [$domserver_root/lib/www])
 AX_PATH(domserver_libsubmitdir, [$domserver_root/lib/submit])
 AX_PATH(domserver_logdir,       [$domserver_root/log])
 AX_PATH(domserver_rundir,       [$domserver_root/run])
@@ -378,7 +376,6 @@ echo "    - bin..............: $domserver_bindir"
 echo "    - etc..............: $domserver_etcdir"
 echo "    - lib..............: $domserver_libdir"
 echo "    - libvendor........: $domserver_libvendordir"
-echo "    - libwww...........: $domserver_libwwwdir"
 echo "    - libsubmit........: $domserver_libsubmitdir"
 echo "    - log..............: $domserver_logdir"
 echo "    - run..............: $domserver_rundir"
