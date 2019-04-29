@@ -2043,11 +2043,6 @@ the judgehosts which restricts outgoing network access.
 <chapt>Common problems and their solutions <label id="problems">
 <p>
 
-
-<sect>Java compilers
-<p>
-Specific considerations for using Java in DOMjudge.
-
 <sect>The Java virtual machine (jvm) and memory limits
 <p>
 
