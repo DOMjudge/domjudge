@@ -1,7 +1,10 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.0.0
+Version 7.0.1 - DEV
 -------------------
+
+Version 7.0.0 - 28 April 2019
+-----------------------------
  - Initial admin password is now generated on database creation, and written
    to etc/initial_admin_password.secret.
  - Rewrite the interface in Symfony and Bootstrap. Add many UI
