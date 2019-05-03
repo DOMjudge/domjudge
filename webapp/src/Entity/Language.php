@@ -63,6 +63,15 @@ class Language extends BaseApiEntity
     private $extensions;
 
     /**
+     * @var bool
+     * @ORM\Column(type="boolean", name="filter_compiler_files",
+     *     options={"comment"="Whether to filter the files passed to the compiler by the extension list",
+     *              "default"="1","unsigned"=true}, nullable=false)
+     * @Serializer\Groups({"Nonstrict"})
+     */
+    private $filterCompilerFiles = true;
+
+    /**
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_submit",
      *     options={"comment"="Are submissions accepted in this language?","default"="1","unsigned"="true"},
@@ -226,6 +235,30 @@ class Language extends BaseApiEntity
     public function getExtensions()
     {
         return $this->extensions;
+    }
+
+    /**
+     * Set filterCompilerFiles
+     *
+     * @param bool $filterCompilerFiles
+     *
+     * @return Language
+     */
+    public function setFilterCompilerFiles(bool $filterCompilerFiles)
+    {
+        $this->filterCompilerFiles = $filterCompilerFiles;
+
+        return $this;
+    }
+
+    /**
+     * Get filterCompilerFiles
+     *
+     * @return bool
+     */
+    public function getFilterCompilerFiles()
+    {
+        return $this->filterCompilerFiles;
     }
 
     /**

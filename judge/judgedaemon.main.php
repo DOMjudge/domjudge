@@ -770,7 +770,18 @@ function judge(array $row)
     $files = array();
     foreach ($sources as $source) {
         $srcfile = "$workdir/compile/$source[filename]";
-        $files[] = "'$source[filename]'";
+        $file = $source['filename'];
+        if ($row['filter_compiler_files']) {
+            foreach ($row['language_extensions'] as $extension) {
+                $extensionLength = strlen($extension);
+                if (substr($file, -$extensionLength) === $extension) {
+                    $files[] = "'$file'";
+                    break;
+                }
+            }
+        } else {
+            $files[] = "'$file'";
+        }
         if (file_put_contents($srcfile, base64_decode($source['source'])) === false) {
             error("Could not create $srcfile");
         }
