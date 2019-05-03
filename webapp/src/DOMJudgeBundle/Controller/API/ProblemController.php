@@ -183,7 +183,8 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
                 $zip         = $this->dj->openZipFile($file->getRealPath());
                 $clientName  = $file->getClientOriginalName();
                 $messages    = [];
-                $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, $problem, $contest,
+                $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName,
+                                                                                $problem, $contest,
                                                                                 $messages);
                 $allMessages = array_merge($allMessages, $messages);
                 if ($newProblem) {

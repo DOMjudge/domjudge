@@ -120,13 +120,16 @@ class ProblemController extends BaseController
                     }
                     $newProblem = $this->importProblemService->importZippedProblem($zip, $clientName,
                                                                           null, $contest,
-                                                                          $messages, $errorMessage);
+                                                                          $messages);
                     $allMessages = array_merge($allMessages, $messages);
                     if ($newProblem) {
                         $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
                                             $clientName);
                     } else {
-                        $this->addFlash('danger', $errorMessage);
+                        $message = '<ul>' . implode('', array_map(function (string $message) {
+                                return sprintf('<li>%s</li>', $message);
+                            }, $allMessages)) . '</ul>';
+                        $this->addFlash('danger', $message);
                         return $this->redirectToRoute('jury_problems');
                     }
                 } catch (Exception $e) {
@@ -910,11 +913,14 @@ class ProblemController extends BaseController
             try {
                 $zip        = $this->dj->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
-                if ($this->importProblemService->importZippedProblem($zip, $clientName, $problem, $contest, $messages,
-                                                            $errorMessage)) {
+                if ($this->importProblemService->importZippedProblem($zip, $clientName, $problem,
+                                                                     $contest, $messages)) {
                     $this->dj->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
                 } else {
-                    $this->addFlash('danger', $errorMessage);
+                    $message = '<ul>' . implode('', array_map(function (string $message) {
+                            return sprintf('<li>%s</li>', $message);
+                        }, $messages)) . '</ul>';
+                    $this->addFlash('danger', $message);
                     return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
                 }
             } catch (Exception $e) {
