@@ -80,7 +80,6 @@ class ImportProblemService
      * @param Problem|null $problem
      * @param Contest|null $contest
      * @param array        $messages
-     * @param string|null  $errorMessage
      * @return Problem|null
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\NoResultException
@@ -91,8 +90,7 @@ class ImportProblemService
         $clientName,
         Problem $problem = null,
         Contest $contest = null,
-        array &$messages = [],
-        string &$errorMessage = null
+        array &$messages = []
     ) {
         // This might take a while
         ini_set('max_execution_time', '300');
@@ -631,7 +629,7 @@ class ImportProblemService
                                                                                    '__auto__', null, null, null,
                                                                                    $submissionMessage);
                         if (!$submission) {
-                            $errorMessage = $submissionMessage;
+                            $messages[] = $submissionMessage;
                             return null;
                         }
                         $submission = $this->em->getRepository(Submission::class)->find($submission->getSubmitid());
