@@ -19,7 +19,7 @@ class GeneralAvailabilityTest extends WebTestCase
 
     public function urlProvider()
     {
-        yield ['/public/problems', 200];
+        yield ['/public/problems', 500];
         yield ['/public', 200];
         yield ['/login', 200];
 
