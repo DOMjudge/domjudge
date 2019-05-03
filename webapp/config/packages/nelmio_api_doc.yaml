@@ -107,6 +107,10 @@ nelmio_api_doc:
                     teamid: { type: integer }
                     probid: { type: integer }
                     langid: { type: string }
+                    language_extensions:
+                        type: array
+                        items: { type: string }
+                    filter_compiler_files: { type: boolean }
                     rejudgingid: { type: integer }
                     entry_point: { type: string }
                     origsubmitid: { type: integer }

@@ -75,6 +75,14 @@ class LanguageType extends AbstractExternalIdEntityType
             'allow_add' => true,
             'allow_delete' => true,
         ]);
+        $builder->add('filterCompilerFiles', ChoiceType::class, [
+            'label' => 'Filter files passed to compiler by extension list',
+            'expanded' => true,
+            'choices' => [
+                'Yes' => true,
+                'No' => false,
+            ],
+        ]);
         $builder->add('save', SubmitType::class);
 
         // Remove ID field when doing an edit

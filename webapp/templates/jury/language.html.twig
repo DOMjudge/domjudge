@@ -76,6 +76,12 @@
                     <th>Extensions</th>
                     <td>{{ language.extensions | join(', ') }}</td>
                 </tr>
+                <tr>
+                    <th>Filter files passed to compiler by extension list</th>
+                    <td>
+                        {{ language.filterCompilerFiles | printYesNo }}
+                    </td>
+                </tr>
             </table>
         </div>
     </div>

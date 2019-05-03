@@ -384,6 +384,8 @@ class JudgehostController extends AbstractFOSRestController
             'teamid' => $submission->getTeamid(),
             'probid' => $submission->getProbid(),
             'langid' => $submission->getLangid(),
+            'language_extensions' => $submission->getLanguage()->getExtensions(),
+            'filter_compiler_files' => $submission->getLanguage()->getFilterCompilerFiles(),
             'rejudgingid' => $submission->getRejudgingid(),
             'entry_point' => $submission->getEntryPoint(),
             'origsubmitid' => $submission->getOrigsubmitid(),
