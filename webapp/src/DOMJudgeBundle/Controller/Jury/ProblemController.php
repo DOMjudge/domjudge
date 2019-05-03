@@ -20,6 +20,7 @@ use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ImportProblemService;
 use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -82,7 +83,7 @@ class ProblemController extends BaseController
      * @Route("", name="jury_problems")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function indexAction(Request $request)
     {
@@ -117,22 +118,27 @@ class ProblemController extends BaseController
                     } else {
                         $contest = $this->em->getRepository(Contest::class)->find($contestId);
                     }
-                    $newProblem  = $this->importProblemService->importZippedProblem($zip, $clientName, null, $contest,
-                                                                                    $messages, $errorMessage);
+                    $newProblem = $this->importProblemService->importZippedProblem($zip, $clientName,
+                                                                          null, $contest,
+                                                                          $messages, $errorMessage);
                     $allMessages = array_merge($allMessages, $messages);
                     if ($newProblem) {
                         $this->dj->auditlog('problem', $newProblem->getProbid(), 'upload zip',
-                                                         $clientName);
+                                            $clientName);
                     } else {
                         $this->addFlash('danger', $errorMessage);
                         return $this->redirectToRoute('jury_problems');
                     }
+                } catch (Exception $e) {
+                    $allMessages[] = $e->getMessage();
                 } finally {
-                    $zip->close();
+                    if (isset($zip)) {
+                        $zip->close();
+                    }
                 }
             }
 
-            if (!empty($messages)) {
+            if (!empty($allMessages)) {
                 $message = '<ul>' . implode('', array_map(function (string $message) {
                         return sprintf('<li>%s</li>', $message);
                     }, $allMessages)) . '</ul>';
@@ -451,7 +457,7 @@ class ProblemController extends BaseController
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Exception
+     * @throws Exception
      */
     public function viewAction(Request $request, SubmissionService $submissionService, int $probId)
     {
@@ -539,7 +545,7 @@ class ProblemController extends BaseController
      * @param Request $request
      * @param int     $probId
      * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function testcasesAction(Request $request, int $probId)
     {
@@ -861,7 +867,7 @@ class ProblemController extends BaseController
      * @param Request $request
      * @param int     $probId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function editAction(Request $request, int $probId)
     {
@@ -905,14 +911,18 @@ class ProblemController extends BaseController
                 $zip        = $this->dj->openZipFile($archive->getRealPath());
                 $clientName = $archive->getClientOriginalName();
                 if ($this->importProblemService->importZippedProblem($zip, $clientName, $problem, $contest, $messages,
-                                                                     $errorMessage)) {
+                                                            $errorMessage)) {
                     $this->dj->auditlog('problem', $problem->getProbid(), 'upload zip', $clientName);
                 } else {
                     $this->addFlash('danger', $errorMessage);
                     return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
                 }
+            } catch (Exception $e) {
+                $messages[] = $e->getMessage();
             } finally {
-                $zip->close();
+                if (isset($zip)) {
+                    $zip->close();
+                }
             }
 
             if (!empty($messages)) {
@@ -939,7 +949,7 @@ class ProblemController extends BaseController
      * @param Request $request
      * @param int     $probId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function deleteAction(Request $request, int $probId)
     {
@@ -958,7 +968,7 @@ class ProblemController extends BaseController
      * @Security("has_role('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function addAction(Request $request)
     {
