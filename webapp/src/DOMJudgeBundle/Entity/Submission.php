@@ -469,7 +469,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      */
     public function getRelativeSubmitTime()
     {
-        return Utils::relTime($this->getSubmittime() - $this->getContest()->getStarttime());
+        return Utils::relTime($this->getContest()->getContestTime((float)$this->getSubmittime()));
     }
 
     /**
