@@ -306,18 +306,15 @@ class ScoreboardService
             ->setParameter(':cid', $contest->getCid())
             ->orderBy('s.submittime');
 
-        if (!$this->dj->dbconfig_get('compile_penalty', true)) {
-            $queryBuilder
-                ->andWhere('j.result IS NULL or j.result != :compileError')
-                ->setParameter(':compileError', Judging::RESULT_COMPILER_ERROR);
-        }
+        // Check if we need to count compile error as a penalty.
+        $compilePenalty = $this->dj->dbconfig_get('compile_penalty', true);
 
         /** @var Submission[] $submissions */
         $submissions = $queryBuilder->getQuery()->getResult();
 
         $verificationRequired = $this->dj->dbconfig_get('verification_required', false);
 
-        // Initialize variables
+        // Initialize variables.
         $submissionsJury = $pendingJury = $timeJury = 0;
         $submissionsPubl = $pendingPubl = $timePubl = 0;
         $correctJury     = false;
@@ -325,41 +322,66 @@ class ScoreboardService
 
         foreach ($submissions as $submission) {
             /** @var Judging|null $judging */
-            $judging    = $submission->getJudgings()->first() ?: null;
-            $absSubmitTime = (float)$submission->getSubmittime();
-            $submitTime = $contest->getContestTime($absSubmitTime);
+            $judging = $submission->getJudgings()->first() ?: null;
 
             // Check if this submission has a publicly visible judging result:
             if ($judging === null || ($verificationRequired && !$judging->getVerified()) || empty($judging->getResult())) {
-                $pendingJury++;
+                // For the jury: only consider it pending if we don't have a correct one yet.
+                // This is needed because during the freeze we consider submissions after the
+                // correct one for the public to not leak any info.
+                if (!$correctJury) {
+                    $pendingJury++;
+                }
                 $pendingPubl++;
                 // Don't do any more counting for this submission.
                 continue;
             }
 
-            $submissionsJury++;
+            // We need to count the submission always, except when we don't want to count compiler
+            // penalties and the judging is a compiler error
+            $countSubmission = $compilePenalty || $judging->getResult() != Judging::RESULT_COMPILER_ERROR;
+
+            if (!$correctJury && $countSubmission) {
+                // For the jury: only consider it as a submission if we don't have a correct one yet.
+                // This is needed because during the freeze we consider submissions after the
+                // correct one for the public to not leak any info.
+                $submissionsJury++;
+            }
             if ($submission->isAfterFreeze()) {
-                // Show submissions after freeze as pending to the public (if SHOW_PENDING is enabled):
+                // Show submissions after freeze as pending to the public (if SHOW_PENDING is
+                // enabled). Note that we even show these submissions if they are a compiler-error
+                // and compile_penalty is set to false, to not leak any info.
                 $pendingPubl++;
-            } else {
+            } elseif ($countSubmission) {
                 $submissionsPubl++;
             }
 
-            // if correct, don't look at any more submissions after this one
+            // If we encountered a correct submission during the whole contest, do not consider
+            // the submissions after that one for correctness.
+            if ($correctJury) {
+                continue;
+            }
+
+            $absSubmitTime = (float)$submission->getSubmittime();
+            $submitTime    = $contest->getContestTime($absSubmitTime);
+
+            // if correct, don't look at any more submissions after this one.
             if ($judging->getResult() == Judging::RESULT_CORRECT) {
                 $correctJury = true;
                 $timeJury    = $submitTime;
                 if (!$submission->isAfterFreeze()) {
                     $correctPubl = true;
                     $timePubl    = $submitTime;
+                    // Stop counting after a first correct submission, but only before the freeze.
+                    // We need to consider all the submissions during the freeze, because we need
+                    // to show them all to the public.
+                    break;
                 }
-                // stop counting after a first correct submission
-                break;
             }
         }
 
-        // See if this submission was the first to solve this problem
-        // (only relevant if it was correct in the first place)
+        // See if this submission was the first to solve this problem.
+        // Only relevant if it was correct in the first place.
         $firstToSolve = false;
         if ($correctJury) {
             $params = [
@@ -373,13 +395,13 @@ class ScoreboardService
             // Find out how many valid submissions were submitted earlier
             // that have a valid judging that is correct, or are awaiting judgement.
             // Only if there are 0 found, we are definitely the first to solve this problem.
-	    // To find relevant submissions/judgings:
-	    // - submission needs to be valid (not invalidated)
-	    // - a judging is present, but
-	    //   - it's not part of a rejudging
-	    //   - either it's still ongoing (pending judgement, could be correct)
-	    //   - or already judged to be correct (if it's judged but != correct, it's not a first to solve)
-	    // - or the submission is still queued for judgement (judgehost is NULL).
+            // To find relevant submissions/judgings:
+            // - submission needs to be valid (not invalidated)
+            // - a judging is present, but
+            //   - it's not part of a rejudging
+            //   - either it's still ongoing (pending judgement, could be correct)
+            //   - or already judged to be correct (if it's judged but != correct, it's not a first to solve)
+            // - or the submission is still queued for judgement (judgehost is NULL).
             $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j USING (submitid)
