@@ -69,4 +69,7 @@ $(SUBMITCMD):
 clean-l:
 	rm -f test-file\ name*
 
+distclean-l:
+	-rm -f $(SUBST_FILES)
+
 .PHONY: check check-syntax test-normal test-fltcmp test-stress
