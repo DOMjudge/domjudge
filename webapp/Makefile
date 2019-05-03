@@ -20,6 +20,9 @@ copy-bundle-assets:
 	mkdir -p web/bundles/nelmioapidoc
 	cp -R ../lib/vendor/nelmio/api-doc-bundle/Resources/public/* web/bundles/nelmioapidoc/
 
+clean-l:
+	-rm -r web/bundles/nelmioapidoc
+
 domserver: copy-bundle-assets
 
 install-domserver:
