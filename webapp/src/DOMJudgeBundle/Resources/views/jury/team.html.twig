@@ -73,7 +73,7 @@
                             <a href="{{ path('jury_user', {'userId': user.userid}) }}">{{ user.username }}</a>
                         {% else %}
                             <a href="{{ path('jury_user_add', {'team': team.teamid}) }}">
-                                <small>(add)</small>
+                                <i class="fas fa-user-plus"></i> add user
                             </a>
                         {% endfor %}
                     </td>
@@ -122,6 +122,16 @@
                             {{ alpha3_countries[team.affiliation.country] }}
                         </td>
                     </tr>
+                {% endif %}
+                {% if team.contests|length > 0 %}
+                <tr>
+                    <th>Contests</th>
+                    <td>
+                        {% for ucontest in team.contests %}
+                            <a href="{{ path('jury_contest', {'contestId': ucontest.cid}) }}">{{ ucontest.shortname }}</a>
+                        {% endfor %}
+                    </td>
+                </tr>
                 {% endif %}
                 {% if team.comments is not empty %}
                 <tr>
