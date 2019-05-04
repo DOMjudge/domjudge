@@ -32,7 +32,7 @@ function getCurContests(
     if ($onlyofteam !== null && $onlyofteam > 0) {
         $contests = $DB->q("SELECT * FROM contest
                             LEFT JOIN contestteam USING (cid)
-                            WHERE (contestteam.teamid = %i OR contest.public = 1)
+                            WHERE (contestteam.teamid = %i OR contest.open_to_all_teams = 1)
                             AND enabled = 1 ${extra}
                             AND ( deactivatetime IS NULL OR
                                   deactivatetime > UNIX_TIMESTAMP() )

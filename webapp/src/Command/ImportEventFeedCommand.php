@@ -978,7 +978,7 @@ class ImportEventFeedCommand extends Command
         // Also check if this is a private contest. If so, we need to add the team to the contest
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
-        if (!$contest->getPublic()) {
+        if (!$contest->isOpenToAllTeams()) {
             if (!$contest->getTeams()->contains($team)) {
                 $contest->addTeam($team);
             }

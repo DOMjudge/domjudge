@@ -8,12 +8,16 @@
 --
 
 -- @UPGRADE-CHECK@
-CREATE TABLE `external_judgement` (`extjudgementid` varchar (255));
-DROP TABLE `external_judgement`;
+ALTER TABLE `contest` ADD  COLUMN `open_to_all_teams` tinyint(1);
+ALTER TABLE `contest` DROP COLUMN `open_to_all_teams`;
 
 --
 -- Create additional structures
 --
+
+ALTER TABLE `contest`
+  CHANGE COLUMN `public` `public` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Is this contest visible for the public?',
+  ADD    COLUMN `open_to_all_teams` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Is this contest open to all teams?' AFTER `public`;
 
 -- Create external judgement/run tables
 CREATE TABLE `external_judgement` (
@@ -81,6 +85,8 @@ INSERT INTO `testcase_content` (`testcaseid`, `input`, `output`, `image`, `image
 INSERT INTO `judging_run_output` (`runid`, `output_run`, `output_diff`, `output_error`, `output_system`)
     SELECT `runid`, `output_run`, `output_diff`, `output_error`, `output_system` FROM `judging_run`;
 
+UPDATE `contest` SET `open_to_all_teams` = `public`;
+
 --
 -- Add/remove sample/initial contents
 --
@@ -91,7 +97,6 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `des
 --
 -- Finally remove obsolete structures after moving data
 --
-
 
 ALTER TABLE `submission`
     DROP COLUMN `externalresult`;

@@ -225,11 +225,17 @@ class Contest extends BaseApiEntity
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="public", options={"comment"="Is this contest visible for the public and
-     *                             non-associated teams?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="public", options={"comment"="Is this contest visible for the public?"}, nullable=false)
      * @Serializer\Exclude()
      */
     private $public = true;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean", name="open_to_all_teams", options={"comment"="Are all teams automatically part of this contest?"}, nullable=false)
+     * @Serializer\Exclude()
+     */
+    private $openToAllTeams = true;
 
     /**
      * @ORM\ManyToMany(targetEntity="Team", inversedBy="contests")
@@ -856,9 +862,6 @@ class Contest extends BaseApiEntity
     public function setPublic($public)
     {
         $this->public = $public;
-        if ($this->public) {
-            $this->teams->clear();
-        }
 
         return $this;
     }
@@ -871,6 +874,33 @@ class Contest extends BaseApiEntity
     public function getPublic()
     {
         return $this->public;
+    }
+
+    /**
+     * Set open to all teams
+     *
+     * @param boolean $openToAllTeams
+     *
+     * @return Contest
+     */
+    public function setOpenToAllTeams($openToAllTeams)
+    {
+        $this->openToAllTeams = $openToAllTeams;
+        if ($this->openToAllTeams) {
+            $this->teams->clear();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get open to all teams
+     *
+     * @return boolean
+     */
+    public function isOpenToAllTeams()
+    {
+        return $this->openToAllTeams;
     }
 
     /**

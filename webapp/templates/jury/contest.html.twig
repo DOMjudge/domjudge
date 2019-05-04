@@ -84,13 +84,17 @@
                     <td>{{ contest.processBalloons | printYesNo }}</td>
                 </tr>
                 <tr>
-                    <th>Public</th>
+                    <th>Publicly visible</th>
                     <td>{{ contest.public | printYesNo }}</td>
+                </tr>
+                <tr>
+                    <th>Open to all teams</th>
+                    <td>{{ contest.openToAllTeams | printYesNo }}</td>
                 </tr>
                 <tr>
                     <th>Teams</th>
                     <td>
-                        {% if contest.public %}
+                        {% if contest.openToAllTeams %}
                             <em>all teams</em>
                         {% else %}
                             {% for team in contest.teams %}

@@ -108,7 +108,7 @@ class TeamController extends AbstractRestController
         }
 
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
-        if (!$contest->getPublic()) {
+        if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
                 ->andWhere('c.cid = :cid')
                 ->setParameter(':cid', $contest->getCid());

@@ -151,15 +151,15 @@ class RejudgingType extends AbstractType
                 ->andWhere('t.enabled = 1')
                 ->addOrderBy('t.name');
 
-            $anyPublic = false;
+            $selectAllTeams = false;
             foreach ($contests as $contest) {
-                if ($contest->getPublic()) {
-                    $anyPublic = true;
+                if ($contest->isOpenToAllTeams()) {
+                    $selectAllTeams = true;
                     break;
                 }
             }
 
-            if (!$anyPublic) {
+            if (!$selectAllTeams) {
                 $teamsQueryBuilder
                     ->join('t.contests', 'c')
                     ->andWhere('c IN (:contests)')

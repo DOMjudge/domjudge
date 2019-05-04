@@ -611,7 +611,7 @@ class ScoreboardService
             ->orderBy('cat.name')
             ->addOrderBy('affil.name');
 
-        if (!$contest->getPublic()) {
+        if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
                 ->join('t.contests', 'c')
                 ->andWhere('c = :contest')
@@ -685,7 +685,7 @@ class ScoreboardService
                 ->join('a.teams', 't')
                 ->andWhere('t.category IN (:categories)')
                 ->setParameter(':categories', $categories);
-            if (!$contest->getPublic()) {
+            if (!$contest->isOpenToAllTeams()) {
                 $queryBuilder
                     ->join('t.contests', 'c')
                     ->andWhere('c = :contest')
@@ -783,7 +783,7 @@ class ScoreboardService
             ->select('t, tc, ta')
             ->andWhere('t.enabled = 1');
 
-        if (!$contest->getPublic()) {
+        if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
                 ->join('t.contests', 'c')
                 ->andWhere('c.cid = :cid')

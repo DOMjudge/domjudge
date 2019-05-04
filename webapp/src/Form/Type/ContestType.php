@@ -63,6 +63,15 @@ class ContestType extends AbstractExternalIdEntityType
         ]);
         $builder->add('public', ChoiceType::class, [
             'expanded' => true,
+            'label' => 'Contest visible on public scoreboard',
+            'choices' => [
+                'Yes' => true,
+                'No' => false,
+            ],
+        ]);
+        $builder->add('openToAllTeams', ChoiceType::class, [
+            'expanded' => true,
+            'label' => 'Contest open to all teams',
             'choices' => [
                 'Yes' => true,
                 'No' => false,

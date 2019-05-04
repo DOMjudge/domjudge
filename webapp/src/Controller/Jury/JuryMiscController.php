@@ -224,7 +224,7 @@ class JuryMiscController extends BaseController
                         ->from(Team::class, 't')
                         ->select('t')
                         ->orderBy('t.teamid');
-                    if (!$contest->getPublic()) {
+                    if (!$contest->isOpenToAllTeams()) {
                         $queryBuilder
                             ->join('t.contests', 'c')
                             ->andWhere('c.cid = :cid')
