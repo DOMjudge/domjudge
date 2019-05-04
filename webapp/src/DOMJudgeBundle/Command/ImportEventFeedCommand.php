@@ -222,7 +222,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         pcntl_signal(SIGTERM, [$this, 'stopCommand']);
         pcntl_signal(SIGINT, [$this, 'stopCommand']);
 
-        $dataSource = (int)$this->dj->dbconfig_get('data_source');
+        $dataSource = (int)$this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL);
         if ($dataSource !== DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
             if ($input->getOption('force')) {
                 $this->logger->warning(sprintf('data_source configuration setting is set to %d; --force given so continuing...',

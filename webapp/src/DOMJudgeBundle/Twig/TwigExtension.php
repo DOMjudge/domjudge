@@ -438,7 +438,7 @@ class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\E
 
         $extCcsUrl = $this->dj->dbconfig_get('external_ccs_submission_url', '');
         if (!empty($extCcsUrl)) {
-            $dataSource = $this->dj->dbconfig_get('data_source', 0);
+            $dataSource = $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL);
             if ($dataSource == 2) {
                 return str_replace(':id:', $submission->getExternalid(), $extCcsUrl);
             } elseif ($dataSource == 1) {

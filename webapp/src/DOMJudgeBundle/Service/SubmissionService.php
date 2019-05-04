@@ -197,7 +197,8 @@ class SubmissionService
                 ->setParameter(':result', $restrictions['result']);
         }
 
-        if ($this->dj->dbconfig_get('data_source', 0) == 2) {
+        if ($this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) ==
+            DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
             // When we are shadow, also load the external results
             $queryBuilder
                 ->leftJoin('s.external_judgements', 'ej')
