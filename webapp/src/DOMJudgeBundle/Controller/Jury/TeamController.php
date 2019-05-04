@@ -303,7 +303,8 @@ class TeamController extends BaseController
         $data['restrictionText']    = $restrictionText;
         $data['submissions']        = $submissions;
         $data['submissionCounts']   = $submissionCounts;
-        $data['showExternalResult'] = $this->dj->dbconfig_get('data_source', 0) == 2;
+        $data['showExternalResult'] = $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) ==
+            DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
 
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;
