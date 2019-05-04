@@ -536,6 +536,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     {
         $this->contests[] = $contest;
 
+        $contest->addTeam($this);
+
         return $this;
     }
 
@@ -547,6 +549,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     public function removeContest(\DOMJudgeBundle\Entity\Contest $contest)
     {
         $this->contests->removeElement($contest);
+
+        $contest->removeTeam($this);
     }
 
     /**

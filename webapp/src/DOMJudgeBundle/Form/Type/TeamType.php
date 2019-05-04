@@ -78,6 +78,7 @@ class TeamType extends AbstractExternalIdEntityType
             'required' => false,
             'choice_label' => 'name',
             'multiple' => true,
+            'by_reference' => false,
             'query_builder' => function (EntityRepository $er) {
                 return $er->createQueryBuilder('c')->where('c.public = false')->orderBy('c.name');
             },
