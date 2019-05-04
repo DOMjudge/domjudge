@@ -44,6 +44,7 @@ function read_credentials()
             "pass" => $restpass,
             "waiting" => false,
             "errorred" => false,
+            "last_attempt" => -1,
         ];
     }
     if (count($endpoints) <= 0) {
@@ -504,35 +505,14 @@ if ($retval!=0) {
     error("chroot sanity check exited with exitcode $retval");
 }
 
-// Perform setup work for each endpoint we are communicating with
-foreach ($endpoints as $endpointID => $endpoint) {
-    logmsg(LOG_NOTICE, "Registering judgehost on endpoint $endpointID: " . $endpoint['url']);
-    $endpoints[$endpointID]['ch'] = setup_curl_handle($endpoint['user'], $endpoint['pass']);
-
-    // Create directory where to test submissions
-    $workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
-    system("mkdir -p $workdirpath/testcase", $retval);
-    if ($retval != 0) {
-        error("Could not create $workdirpath");
-    }
-    chmod("$workdirpath/testcase", 0700);
-
-    // Auto-register judgehost via REST
-    // If there are any unfinished judgings in the queue in my name,
-    // they will not be finished. Give them back.
-    $unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost));
-    $unfinished = dj_json_decode($unfinished);
-    foreach ($unfinished as $jud) {
-        $workdir = judging_directory($workdirpath, $jud);
-        @chmod($workdir, 0700);
-        logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] .
-               " in my name; given back");
-    }
-}
-
 // If all startup done, daemonize
 if (isset($options['daemon'])) {
     daemonize(PIDFILE);
+}
+
+foreach ($endpoints as $id=>$endpoint) {
+    $endpointID = $id;
+    registerJudgehost($myhost);
 }
 
 // Constantly check API for unjudged submissions
@@ -543,7 +523,11 @@ while (true) {
     // If all endpoints are waiting, sleep for a bit
     $dosleep = true;
     foreach ($endpoints as $id=>$endpoint) {
-        if ($endpoint["waiting"] == false) {
+        if ($endpoint['errorred']) {
+            $endpointID = $id;
+            registerJudgehost($myhost);
+        }
+        if (!$endpoint['waiting']) {
             $dosleep = false;
             break;
         }
@@ -558,6 +542,10 @@ while (true) {
     $endpointID = $endpointIDs[$currentEndpoint];
     $workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
 
+    if ($endpoints[$endpointID]['errorred']) {
+        continue;
+    }
+
     // Check whether we have received an exit signal
     if (function_exists('pcntl_signal_dispatch')) {
         pcntl_signal_dispatch();
@@ -568,7 +556,7 @@ while (true) {
         exit;
     }
 
-    if ($endpoints[$endpointID]["waiting"] === false) {
+    if ($endpoints[$endpointID]['waiting'] === false) {
         // Check for available disk space
         $free_space = disk_free_space(JUDGEDIR);
         $allowed_free_space  = dbconfig_get_rest('diskspace_error'); // in kB
@@ -586,7 +574,8 @@ while (true) {
                 'POST',
                 'description=' . urlencode("low on disk space on $myhost") .
                 '&judgehostlog=' . urlencode(base64_encode($judgehostlog)) .
-                '&disabled=' . urlencode($disabled)
+                '&disabled=' . urlencode($disabled),
+                false
             );
             logmsg(LOG_ERR, "=> internal error " . $error_id);
         }
@@ -626,6 +615,46 @@ while (true) {
     }
 
     // restart the judging loop
+}
+
+function registerJudgehost($myhost) {
+    global $endpoints, $endpointID;
+    $endpoint = &$endpoints[$endpointID];
+
+    // Only try to register every 30s.
+    $now = now();
+    if ($now - $endpoint['last_attempt'] < 30) {
+        $endpoint['waiting'] = true;
+        return;
+    }
+    $endpoint['last_attempt'] = $now;
+
+    logmsg(LOG_NOTICE, "Registering judgehost on endpoint $endpointID: " . $endpoint['url']);
+    $endpoints[$endpointID]['ch'] = setup_curl_handle($endpoint['user'], $endpoint['pass']);
+
+    // Create directory where to test submissions
+    $workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
+    system("mkdir -p $workdirpath/testcase", $retval);
+    if ($retval != 0) {
+        error("Could not create $workdirpath");
+    }
+    chmod("$workdirpath/testcase", 0700);
+
+    // Auto-register judgehost.
+    // If there are any unfinished judgings in the queue in my name,
+    // they will not be finished. Give them back.
+    $unfinished = request('judgehosts', 'POST', 'hostname=' . urlencode($myhost), false);
+    if ($unfinished === NULL) {
+        logmsg(LOG_WARNING, "Registering judgehost on endpoint $endpointID failed.");
+    } else {
+        $unfinished = dj_json_decode($unfinished);
+        foreach ($unfinished as $jud) {
+            $workdir = judging_directory($workdirpath, $jud);
+            @chmod($workdir, 0700);
+            logmsg(LOG_WARNING, "Found unfinished judging j" . $jud['judgingid'] .
+                " in my name; given back");
+        }
+    }
 }
 
 function disable(string $kind, string $idcolumn, $id, string $description, int $judgingid, string $cid, $extra_log = null)
