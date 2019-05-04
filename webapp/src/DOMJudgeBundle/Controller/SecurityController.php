@@ -3,14 +3,15 @@
 namespace DOMJudgeBundle\Controller;
 
 use DOMJudgeBundle\Entity\Team;
+use DOMJudgeBundle\Entity\TeamAffiliation;
 use DOMJudgeBundle\Entity\TeamCategory;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Form\Type\UserRegistrationType;
 use DOMJudgeBundle\Service\DOMJudgeService;
-use DOMJudgeBundle\Utils\Utils;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class SecurityController extends Controller
@@ -52,7 +53,7 @@ class SecurityController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $clientIP = $this->dj->getClientIp();
+        $clientIP             = $this->dj->getClientIp();
         $auth_ipaddress_users = [];
         if ($allowIPAuth) {
             $auth_ipaddress_users = $em->getRepository('DOMJudgeBundle:User')->findBy(['ipAddress' => $clientIP]);
@@ -90,7 +91,7 @@ class SecurityController extends Controller
         $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
 
         if ($registrationCategory === null) {
-            throw new \Symfony\Component\HttpKernel\Exception\HttpException(400, "Registration not enabled");
+            throw new HttpException(400, "Registration not enabled");
         }
 
         $user              = new User();
@@ -105,14 +106,33 @@ class SecurityController extends Controller
             $user->setName($user->getUsername());
             $user->addRole($team_role);
 
+            $teamName = $registration_form->get('teamName')->getData();
 
             // Create a team to go with the user, then set some team attributes
             $team = new Team();
             $user->setTeam($team);
-            $team->addUser($user);
-            $team->setName($user->getUsername());
-            $team->setCategory($registrationCategory);
-            $team->setComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
+            $team
+                ->addUser($user)
+                ->setName($teamName)
+                ->setCategory($registrationCategory)
+                ->setComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
+
+            if ($this->dj->dbconfig_get('show_affiliations', true)) {
+                switch ($registration_form->get('affiliation')->getData()) {
+                    case 'new':
+                        $affiliation = new TeamAffiliation();
+                        $affiliation
+                            ->setName($registration_form->get('affiliationName')->getData())
+                            ->setShortname($registration_form->get('affiliationName')->getData())
+                            ->setCountry($registration_form->get('affiliationCountry')->getData());
+                        $team->setAffiliation($affiliation);
+                        $em->persist($affiliation);
+                        break;
+                    case 'existing':
+                        $team->setAffiliation($registration_form->get('existingAffiliation')->getData());
+                        break;
+                }
+            }
 
             $em->persist($user);
             $em->persist($team);
