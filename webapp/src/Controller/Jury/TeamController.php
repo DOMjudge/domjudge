@@ -85,13 +85,13 @@ class TeamController extends BaseController
             ->addOrderBy('t.name', 'ASC')
             ->getQuery()->getResult();
 
-        $contests             = $this->dj->getCurrentContests();
-        $num_public_contests  = $this->em->createQueryBuilder()
+        $contests                       = $this->dj->getCurrentContests();
+        $num_open_to_all_teams_contests = $this->em->createQueryBuilder()
             ->select('count(c.cid) as num_contests')
             ->from(Contest::class, 'c')
-            ->andWhere('c.public = 1')
+            ->andWhere('c.openToAllTeams = 1')
             ->getQuery()->getSingleResult()['num_contests'];
-        $teams_that_submitted = $this->em->createQueryBuilder()
+        $teams_that_submitted   = $this->em->createQueryBuilder()
             ->select('t.teamid as teamid, count(t.teamid) as num_submitted')
             ->from(Team::class, 't')
             ->join('t.submissions', 's')
@@ -99,7 +99,7 @@ class TeamController extends BaseController
             ->andWhere('s.contest in (:contests)')
             ->setParameter('contests', $contests)
             ->getQuery()->getResult();
-        $teams_that_submitted = array_column($teams_that_submitted, 'num_submitted', 'teamid');
+        $teams_that_submitted   = array_column($teams_that_submitted, 'num_submitted', 'teamid');
 
         $teams_that_solved = $this->em->createQueryBuilder()
             ->select('t.teamid as teamid, count(t.teamid) as num_correct')
@@ -208,7 +208,7 @@ class TeamController extends BaseController
 
             // merge in the rest of the data
             $teamdata = array_merge($teamdata, [
-                'num_contests' => ['value' => (int)($t->getContests()->count()) + $num_public_contests],
+                'num_contests' => ['value' => (int)($t->getContests()->count()) + $num_open_to_all_teams_contests],
                 'status' => [
                     'value' => $status,
                     'title' => $statustitle,

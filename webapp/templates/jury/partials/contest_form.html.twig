@@ -19,6 +19,7 @@
         {{ form_row(form.deactivatetimeString) }}
         {{ form_row(form.processBalloons) }}
         {{ form_row(form.public) }}
+        {{ form_row(form.openToAllTeams) }}
         <div data-teams-field>
             {{ form_row(form.teams) }}
         </div>
@@ -120,14 +121,14 @@
 
     $(function () {
         function showHideTeams() {
-            if ($('#contest_public_1').is(':checked')) {
+            if ($('#contest_openToAllTeams_1').is(':checked')) {
                 $('[data-teams-field]').show();
             } else {
                 $('[data-teams-field]').hide();
             }
         }
 
-        $('#contest_public_1, #contest_public_0').on('change', showHideTeams);
+        $('#contest_openToAllTeams_1, #contest_openToAllTeams_0').on('change', showHideTeams);
         showHideTeams();
     })
 </script>

@@ -209,6 +209,7 @@ class ContestController extends BaseController
 
         $table_fields = array_merge($table_fields, [
             'process_balloons' => ['title' => 'process<br/>balloons?', 'sort' => true],
+            'public' => ['title' => 'public?', 'sort' => true],
             'num_teams' => ['title' => '# teams', 'sort' => true],
             'num_problems' => ['title' => '# problems', 'sort' => true],
         ]);
@@ -253,7 +254,8 @@ class ContestController extends BaseController
             }
 
             $contestdata['process_balloons'] = ['value' => $contest->getProcessBalloons() ? 'yes' : 'no'];
-            if ($contest->getPublic()) {
+            $contestdata['public'] = ['value' => $contest->getPublic() ? 'yes' : 'no'];
+            if ($contest->isOpenToAllTeams()) {
                 $contestdata['num_teams'] = ['value' => '<i>all</i>'];
             } else {
                 $contestdata['num_teams'] = ['value' => $contestData['num_teams']];

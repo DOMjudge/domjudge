@@ -106,6 +106,7 @@ CREATE TABLE `contest` (
   `starttime_enabled` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'If disabled, starttime is not used, e.g. to delay contest start',
   `process_balloons` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?',
   `public` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Is this contest visible for the public and non-associated teams?',
+  `open_to_all_teams` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Is this contest open to all teams?',
   PRIMARY KEY (`cid`),
   UNIQUE KEY `externalid` (`externalid`(190)),
   UNIQUE KEY `shortname` (`shortname`(190)),
