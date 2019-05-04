@@ -8,4 +8,4 @@ set -euxo pipefail
 cd /opt/domjudge/domserver
 
 # run phpunit tests
-lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --coverage-text --colors=never || true
+lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --coverage-text --colors=never
