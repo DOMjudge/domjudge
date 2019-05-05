@@ -7,19 +7,19 @@ assignees: ''
 
 ---
 
-**NOTE**: If this is a _discussion starter_, you need any _installation help_ or have a _question_ on how to accomplish something,
-rather send an email to our 
+NOTE: If this is a _discussion starter_, you need any _installation help_ or have a _question_ on how to accomplish something,
+rather send an email to our
 [DOMjudge-devel mailinglist](https://www.domjudge.org/mailman/listinfo/domjudge-devel)
 instead of filing an issue here.
 
-### Description of the problem / feature request
+### Description of the problem
 > Replace this line with a short description.
 
 ### Your environment
-> Include details about your installation here. 
-> - DOMjudge version (e.g. 5.3.1 or a github commit hash)
-> - Operating system / Linux distribution and version (e.g. Ubuntu 16.04)
-> - Webserver (e.g. Apache)
+> Include details about your installation here.
+> - DOMjudge version (e.g. 7.0.0 or a github commit hash)
+> - Operating system / Linux distribution and version (e.g. Ubuntu 18.04)
+> - Webserver (e.g. Apache or nginx)
 
 ### Steps to reproduce
 > Replace this with a description how we can reproduce your bug.
