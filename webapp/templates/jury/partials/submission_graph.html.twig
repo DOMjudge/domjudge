@@ -6,10 +6,18 @@
             <svg style="width:500px; height:250px;"></svg>
         </div>
     {% endif %}
-    <div style="display: inline-block" id="testcaseruntime">
-        <h3 id="graphs">Testcase Runtimes</h3>
-        <svg style="width:500px; height:250px;"></svg>
-    </div>
+    {% if selectedJudging is not null %}
+        <div style="display: inline-block" id="testcaseruntime">
+            <h3 id="graphs">Testcase Runtimes</h3>
+            <svg style="width:500px; height:250px;"></svg>
+        </div>
+    {% endif %}
+    {% if externalJudgement is not null and externalJudgement.result is not null %}
+        <div style="display: inline-block" id="externalruntime">
+            <h3 id="graphs">External Testcase Runtimes</h3>
+            <svg style="width:500px; height:250px;"></svg>
+        </div>
+    {% endif %}
 </div>
 
 <script type="text/javascript">
@@ -95,6 +103,7 @@
         });
         {% endif %}
 
+        {% if selectedJudging is not null %}
         var testcase_times = [
             {
                 key: "Runtime",
@@ -133,5 +142,48 @@
             nv.utils.windowResize(chart.update);
             return chart;
         });
+        {% endif %}
+
+        {# TODO: merge this in the above graph? #}
+        {% if externalJudgement is not null and externalJudgement.result is not null %}
+        var external_times = [
+            {
+                key: "Runtime",
+                values: [
+                    {% for run in externalRuns %}
+                    {
+                        "label": "{{ run.rank }}",
+                        "value": {% if run.firstExternalRun %}{{ run.firstExternalRun.runtime|default(0) }}{% else %}0{% endif %},
+                        "color": "{% if run.firstExternalRun %}{{ colors[run.firstExternalRun.result]|default('grey') }}{% else %}grey{% endif %}",
+                        "description": "{{ run.description|default(run.rank) }}",
+                    },
+                    {% endfor %}
+                ]
+            }
+        ];
+        nv.addGraph(function () {
+            var chart = create_chart(external_times, maxY);
+            chart.tooltip.contentGenerator(function (obj) {
+                var format = d3.format(".3f");
+                return "<b>Testcase " + obj.data.description + "</b><br><b>Runtime:</b> " + format(obj.data.value) + "s";
+            });
+            chart.xAxis.axisLabel("Testcase Rank");
+            d3.select('#externalruntime svg')
+                .datum(external_times)
+                .call(chart);
+            var svgsize = chart.container.clientWidth || chart.container.parentNode.clientWidth;
+            var line = d3.select('#externalruntime svg')
+                .append('line')
+                .attr({
+                    x1: chart.margin().left,
+                    y1: chart.yAxis.scale()({{ timelimit }}) + chart.margin().top,
+                    x2: +svgsize - chart.margin().right,
+                    y2: chart.yAxis.scale()({{ timelimit }}) + chart.margin().top,
+                })
+                .style("stroke", "#F00");
+            nv.utils.windowResize(chart.update);
+            return chart;
+        });
+        {% endif %}
     })
 </script>

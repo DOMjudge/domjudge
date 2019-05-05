@@ -336,6 +336,18 @@ class Testcase
     }
 
     /**
+     * Gets the first external run for this testcase.
+     *
+     * This is useful when this testcase is joined to a single external run to get code completion in Twig templates
+     *
+     * @return ExternalRun|null
+     */
+    public function getFirstExternalRun()
+    {
+        return $this->external_runs->first() ?: null;
+    }
+
+    /**
      * Set content
      *
      * @param TestcaseContent $content
