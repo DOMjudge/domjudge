@@ -73,14 +73,17 @@ class SubmissionService
     }
 
     /**
-     * Get a list of submissions that can be displayed in the interface using the submission_list partial
+     * Get a list of submissions that can be displayed in the interface using
+     * the submission_list partial.
      *
      * Restrictions can contain the following keys;
      * - rejudgingid: ID of a rejudging to filter on
-     * - verified: if true, only return verified submissions. If false, only return unverified or unjudged submissions
-     * - judged: if true, only return judged submissions. If false, only return unjudged submissions
-     * - rejudgingdiff: if true, only return judgings that differ from their original result. If false, only return
-     *                  judgings that do not differ from their original result
+     * - verified: If true, only return verified submissions.
+     *             If false, only return unverified or unjudged submissions.
+     * - judged: If true, only return judged submissions.
+     *           If false, only return unjudged submissions.
+     * - rejudgingdiff: If true, only return judgings that differ from their
+     *                  original result in final verdict. Vice versa if false.
      * - teamid: ID of a team to filter on
      * - categoryid: ID of a team category to filter on
      * - probid: ID of a problem to filter on
@@ -92,8 +95,8 @@ class SubmissionService
      * @param array $contests
      * @param array $restrictions
      * @param int   $limit
-     * @return array An array with two elements: the first one is the list of submissions and the second one is an
-     *              array with counts
+     * @return array An array with two elements: the first one is the list of
+     *               submissions and the second one is an array with counts.
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
