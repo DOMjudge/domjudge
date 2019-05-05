@@ -34,7 +34,7 @@ CREATE TABLE `external_run` (
   `result` varchar(32) NOT NULL COMMENT 'Result string as obtained from external system',
   `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run ended',
   `runtime` float NOT NULL COMMENT 'Running time on this testcase',
-  PRIMARY KEY  (`extjudgementid`),
+  PRIMARY KEY  (`extrunid`),
   KEY `extjudgementid` (`extjudgementid`),
   KEY `testcaseid` (`testcaseid`),
   CONSTRAINT `external_run_ibfk_1` FOREIGN KEY (`extjudgementid`) REFERENCES `external_judgement` (`extjudgementid`) ON DELETE CASCADE,
