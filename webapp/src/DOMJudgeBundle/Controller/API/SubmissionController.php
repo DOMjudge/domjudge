@@ -217,6 +217,9 @@ class SubmissionController extends AbstractRestController
 
         // Get the files we want to submit
         $files = $request->files->get('code') ?: [];
+        if (!is_array($files)) {
+            $files = [$files];
+        }
 
         // Now submit the solution
         $team       = $this->dj->getUser()->getTeam();
