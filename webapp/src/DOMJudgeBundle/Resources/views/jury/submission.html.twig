@@ -159,7 +159,9 @@
                     {{- submission.externalid -}}
                 </a>
             {% endif -%}
-            , {{ externalJudgement.result | printValidJuryResult }}
+            {%- if externalJudgement is not null -%}
+                , {{ externalJudgement.result | printValidJuryResult }}
+            {% endif %}
         </div>
     {% endif %}
 
