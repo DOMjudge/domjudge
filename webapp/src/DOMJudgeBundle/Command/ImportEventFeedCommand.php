@@ -1050,8 +1050,16 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             ->setSubmittime($submitTime);
 
         if ($inReplyTo) {
+            // Mark both the original message as well as the reply as answered
             $inReplyTo->setAnswered(true);
+            $clarification->setAnswered(true);
+        } elseif ($fromTeam === null) {
+            // Clarifications from jury are automatically answered
+            $clarification->setAnswered(true);
         }
+        // Note: when a team sends a clarification and the jury never responds, but does click
+        // 'set answered', it will not be marked as answered during import. These clarifications
+        // need to be handled manually.
 
         // Save data and emit event
         if ($action === EventLogService::ACTION_CREATE) {
