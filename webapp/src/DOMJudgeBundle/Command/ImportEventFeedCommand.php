@@ -603,7 +603,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     protected function validateJudgementType(array $event)
     {
         if ($event['op'] !== EventLogService::ACTION_CREATE) {
-            $this->logger->error(sprintf('Event %s contains a %s for judgement-types, not supported',
+            $this->logger->error(sprintf('Event %s contains a(n) %s for judgement-types, not supported',
                                          $event['id'],
                                          $event['op']));
             return;
@@ -647,7 +647,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     protected function validateLanguage(array $event)
     {
         if ($event['op'] !== EventLogService::ACTION_CREATE) {
-            $this->logger->error(sprintf('Event %s contains a %s for languages, not supported',
+            $this->logger->error(sprintf('Event %s contains a(n) %s for languages, not supported',
                                          $event['id'],
                                          $event['op']));
             return;
