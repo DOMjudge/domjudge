@@ -242,6 +242,10 @@ abstract class BaseController extends Controller
                     // via submission -> judging -> judging_run.
                     $entityManager->getConnection()->executeQuery('DELETE FROM submission WHERE probid = :probid',
                                                                   [':probid' => $entity->getProbid()]);
+                    // Also delete internal errors that are "connected" to this problem.
+                    $disabledJson = '{"kind":"problem","probid":' . $entity->getProbid() . '}';
+                    $entityManager->getConnection()->executeQuery('DELETE FROM internal_error WHERE disabled = :disabled',
+                        [':disabled' => $disabledJson]);
                     $entityManager->clear();
                     $entity = $entityManager->getRepository(Problem::class)->find($entity->getProbid());
                 }
