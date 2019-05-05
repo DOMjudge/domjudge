@@ -1152,7 +1152,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         }
 
         $time       = new DateTime($event['data']['time']);
-        $submitTime = (float)sprintf('%d.%d', $time->getTimestamp(), $time->format('u'));
+        $submitTime = (float)sprintf('%d.%06d', $time->getTimestamp(), $time->format('u'));
 
         $entryPoint = $event['data']['entry_point'] ?? null;
         if (empty($entryPoint)) {
@@ -1390,12 +1390,12 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
 
         $startTimeObject = new DateTime($event['data']['start_time']);
-        $startTime       = sprintf('%d.%d', $startTimeObject->getTimestamp(),
+        $startTime       = sprintf('%d.%06d', $startTimeObject->getTimestamp(),
                                    $startTimeObject->format('u'));
         $endTime         = null;
         if (isset($event['data']['end_time'])) {
             $endTimeObject = new DateTime($event['data']['end_time']);
-            $endTime       = sprintf('%d.%d', $endTimeObject->getTimestamp(),
+            $endTime       = sprintf('%d.%06d', $endTimeObject->getTimestamp(),
                                      $endTimeObject->format('u'));
         }
 
@@ -1470,7 +1470,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
 
         $timeObject = new DateTime($event['data']['time']);
-        $time       = sprintf('%d.%d', $timeObject->getTimestamp(), $timeObject->format('u'));
+        $time       = sprintf('%d.%06d', $timeObject->getTimestamp(), $timeObject->format('u'));
 
         $runTime = $event['data']['run_time'] ?? null;
 
