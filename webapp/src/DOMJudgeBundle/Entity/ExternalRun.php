@@ -15,13 +15,19 @@ use Doctrine\ORM\Mapping as ORM;
 class ExternalRun
 {
     /**
-     * @var string
+     * @var int
      *
-     * @ORM\Column(name="extrunid", type="string", length=255, nullable=false,
-     *              options={"comment": "Unique external run ID"})
      * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer", name="extrunid", options={"comment"="Unique ID"}, nullable=false)
      */
     private $extrunid;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Run ID in external system, should be unique inside a single contest", "collation"="utf8mb4_bin"}, nullable=true)
+     */
+    protected $externalid;
 
     /**
      * @var string
@@ -66,27 +72,45 @@ class ExternalRun
     private $testcase;
 
     /**
-     * Set extrunid
+     * @var Contest
      *
-     * @param string $extrunid
+     * @ORM\ManyToOne(targetEntity="DOMJudgeBundle\Entity\Contest")
+     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
+     */
+    private $contest;
+
+    /**
+     * Get extrunid
+     *
+     * @return int
+     */
+    public function getExtrunid()
+    {
+        return $this->extrunid;
+    }
+
+    /**
+     * Set externalid
+     *
+     * @param string $externalid
      *
      * @return ExternalRun
      */
-    public function setExtrunid($extrunid)
+    public function setExternalid($externalid)
     {
-        $this->extrunid = $extrunid;
+        $this->externalid = $externalid;
 
         return $this;
     }
 
     /**
-     * Get extrunid
+     * Get externalid
      *
      * @return string
      */
-    public function getExtrunid()
+    public function getExternalid()
     {
-        return $this->extrunid;
+        return $this->externalid;
     }
 
     /**
@@ -207,5 +231,29 @@ class ExternalRun
     public function getTestcase()
     {
         return $this->testcase;
+    }
+
+    /**
+     * Set contest
+     *
+     * @param Contest $contest
+     *
+     * @return ExternalRun
+     */
+    public function setContest(Contest $contest = null)
+    {
+        $this->contest = $contest;
+
+        return $this;
+    }
+
+    /**
+     * Get contest
+     *
+     * @return Contest
+     */
+    public function getContest()
+    {
+        return $this->contest;
     }
 }

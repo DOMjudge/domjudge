@@ -1356,7 +1356,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the judgement
 
-            $judgement = $this->em->getRepository(ExternalJudgement::class)->findOneBy(['extjudgementid' => $judgementId]);
+            $judgement = $this->em->getRepository(ExternalJudgement::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $judgementId]);
             if ($judgement) {
                 $this->em->remove($judgement);
                 $this->em->flush();
@@ -1370,11 +1370,13 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the external judgement
         /** @var ExternalJudgement $judgement */
-        $judgement = $this->em->getRepository(ExternalJudgement::class)->findOneBy(['extjudgementid' => $judgementId]);
+        $judgement = $this->em->getRepository(ExternalJudgement::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $judgementId]);
         $persist   = false;
         if (!$judgement) {
             $judgement = new ExternalJudgement();
-            $judgement->setExtjudgementid($judgementId);
+            $judgement
+                ->setExternalid($judgementId)
+                ->setContest($this->em->getRepository(Contest::class)->find($this->contestId));
             $persist = true;
         }
 
@@ -1438,7 +1440,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         $this->em->flush();
 
-        $this->processPendingEvents('judgement', $judgement->getExtjudgementid());
+        $this->processPendingEvents('judgement', $judgement->getExternalid());
     }
 
     /**
@@ -1456,7 +1458,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the run
 
-            $run = $this->em->getRepository(ExternalRun::class)->findOneBy(['extrunid' => $runId]);
+            $run = $this->em->getRepository(ExternalRun::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $runId]);
             if ($run) {
                 $this->em->remove($run);
                 $this->em->flush();
@@ -1470,11 +1472,13 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the external run
         /** @var ExternalRun $run */
-        $run     = $this->em->getRepository(ExternalRun::class)->findOneBy(['extrunid' => $runId]);
+        $run     = $this->em->getRepository(ExternalRun::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $runId]);
         $persist = false;
         if (!$run) {
             $run = new ExternalRun();
-            $run->setExtrunid($runId);
+            $run
+                ->setExternalid($runId)
+                ->setContest($this->em->getRepository(Contest::class)->find($this->contestId));
             $persist = true;
         }
 
@@ -1482,7 +1486,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         $judgementId = $event['data']['judgement_id'] ?? null;
         /** @var ExternalJudgement $externalJudgement */
-        $externalJudgement = $this->em->getRepository(ExternalJudgement::class)->findOneBy(['extjudgementid' => $judgementId]);
+        $externalJudgement = $this->em->getRepository(ExternalJudgement::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $judgementId]);
         if (!$externalJudgement) {
             $this->addPendingEvent('judgement', $judgementId, $event);
             return;

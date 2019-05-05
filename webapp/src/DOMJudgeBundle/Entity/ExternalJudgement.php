@@ -16,13 +16,19 @@ use Doctrine\ORM\Mapping as ORM;
 class ExternalJudgement
 {
     /**
-     * @var string
+     * @var int
      *
-     * @ORM\Column(name="extjudgementid", type="string", length=255, nullable=false,
-     *              options={"comment": "Unique external judgement ID"})
      * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer", name="extjudgementid", options={"comment"="Unique ID"}, nullable=false)
      */
     private $extjudgementid;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Judgement ID in external system, should be unique inside a single contest", "collation"="utf8mb4_bin"}, nullable=true)
+     */
+    protected $externalid;
 
     /**
      * @var string|null
@@ -56,6 +62,14 @@ class ExternalJudgement
     private $valid = true;
 
     /**
+     * @var Contest
+     *
+     * @ORM\ManyToOne(targetEntity="DOMJudgeBundle\Entity\Contest")
+     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
+     */
+    private $contest;
+
+    /**
      * @var Submission
      *
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="external_judgements")
@@ -77,27 +91,37 @@ class ExternalJudgement
     }
 
     /**
-     * Set extjudgementid
+     * Get extjudgementid
      *
-     * @param string $extjudgementid
+     * @return int
+     */
+    public function getExtjudgementid()
+    {
+        return $this->extjudgementid;
+    }
+
+    /**
+     * Set externalid
+     *
+     * @param string $externalid
      *
      * @return ExternalJudgement
      */
-    public function setExtjudgementid($extjudgementid): ExternalJudgement
+    public function setExternalid($externalid)
     {
-        $this->extjudgementid = $extjudgementid;
+        $this->externalid = $externalid;
 
         return $this;
     }
 
     /**
-     * Get extjudgementid
+     * Get externalid
      *
      * @return string
      */
-    public function getExtjudgementid()
+    public function getExternalid()
     {
-        return $this->extjudgementid;
+        return $this->externalid;
     }
 
     /**
@@ -194,6 +218,30 @@ class ExternalJudgement
     public function getValid()
     {
         return $this->valid;
+    }
+
+    /**
+     * Set contest
+     *
+     * @param Contest $contest
+     *
+     * @return ExternalJudgement
+     */
+    public function setContest(Contest $contest = null)
+    {
+        $this->contest = $contest;
+
+        return $this;
+    }
+
+    /**
+     * Get contest
+     *
+     * @return Contest
+     */
+    public function getContest()
+    {
+        return $this->contest;
     }
 
     /**

@@ -17,29 +17,37 @@ DROP TABLE `external_judgement`;
 
 -- Create external judgement/run tables
 CREATE TABLE `external_judgement` (
-  `extjudgementid` varchar (255) NOT NULL COMMENT 'Unique external judgement ID',
+  `extjudgementid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Judgement ID in external system, should be unique inside a single contest',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `submitid` int(4) unsigned NOT NULL COMMENT 'Submission ID being judged by external system',
   `result` varchar(32) DEFAULT NULL COMMENT 'Result string as obtained from external system. null if not finished yet',
   `starttime` decimal(32,9) unsigned NOT NULL COMMENT 'Time judging started',
   `endtime` decimal(32,9) unsigned DEFAULT NULL COMMENT 'Time judging ended, null = still busy',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT '1' COMMENT 'Old external judgement is marked as invalid when receiving a new one',
   PRIMARY KEY  (`extjudgementid`),
+  UNIQUE KEY `externalid` (`cid`,`externalid`(190)),
   KEY `submitid` (`submitid`),
-  CONSTRAINT `external_judgement_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE
+  CONSTRAINT `external_judgement_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
+  CONSTRAINT `external_judgement_ibfk_2` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Judgement in external system';
 
 CREATE TABLE `external_run` (
-  `extrunid` varchar (255) NOT NULL COMMENT 'Unique external run ID',
-  `extjudgementid` varchar(255) NOT NULL COMMENT 'Judging ID this run belongs to',
+  `extrunid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `extjudgementid` int(4) unsigned NOT NULL COMMENT 'Judging ID this run belongs to',
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
+  `externalid` varchar(255) DEFAULT NULL COMMENT 'Run ID in external system, should be unique inside a single contest',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `result` varchar(32) NOT NULL COMMENT 'Result string as obtained from external system',
   `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run ended',
   `runtime` float NOT NULL COMMENT 'Running time on this testcase',
   PRIMARY KEY  (`extrunid`),
   KEY `extjudgementid` (`extjudgementid`),
   KEY `testcaseid` (`testcaseid`),
+  UNIQUE KEY `externalid` (`cid`,`externalid`(190)),
   CONSTRAINT `external_run_ibfk_1` FOREIGN KEY (`extjudgementid`) REFERENCES `external_judgement` (`extjudgementid`) ON DELETE CASCADE,
-  CONSTRAINT `external_run_ibfk_2` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`) ON DELETE CASCADE
+  CONSTRAINT `external_run_ibfk_2` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`) ON DELETE CASCADE,
+  CONSTRAINT `external_run_ibfk_3` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Run in external system';
 
 --
