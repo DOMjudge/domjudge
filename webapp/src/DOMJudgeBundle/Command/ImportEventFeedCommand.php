@@ -962,7 +962,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to delete the team
 
-            $clarification = $this->em->getRepository(Clarification::class)->findOneBy(['externalid' => $clarificationId]);
+            $clarification = $this->em->getRepository(Clarification::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $clarificationId]);
             if ($clarification) {
                 $this->em->remove($clarification);
                 $this->em->flush();
@@ -980,7 +980,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the clarification
         /** @var Clarification $clarification */
-        $clarification = $this->em->getRepository(Clarification::class)->findOneBy(['externalid' => $clarificationId]);
+        $clarification = $this->em->getRepository(Clarification::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $clarificationId]);
         if ($clarification) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
@@ -1017,7 +1017,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $inReplyTo   = null;
         if ($inReplyToId !== null) {
             /** @var Clarification $inReplyTo */
-            $inReplyTo = $this->em->getRepository(Clarification::class)->findOneBy(['externalid' => $inReplyToId]);
+            $inReplyTo = $this->em->getRepository(Clarification::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $inReplyToId]);
             if (!$inReplyTo) {
                 $this->addPendingEvent('clarification', $inReplyToId, $event);
                 return;
@@ -1087,7 +1087,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($event['op'] === EventLogService::ACTION_DELETE) {
             // We need to mark the submission as not valid and then emit a delete event
 
-            $submission = $this->em->getRepository(Submission::class)->findOneBy(['externalid' => $submissionId]);
+            $submission = $this->em->getRepository(Submission::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $submissionId]);
             if ($submission) {
                 $submission->setValid(false);
                 $this->em->flush();
@@ -1109,7 +1109,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         // First, load the submission
         /** @var Submission $submission */
-        $submission = $this->em->getRepository(Submission::class)->findOneBy(['externalid' => $submissionId]);
+        $submission = $this->em->getRepository(Submission::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $submissionId]);
 
         $languageId = $event['data']['language_id'];
         /** @var Language $language */
@@ -1384,7 +1384,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
 
         $submissionId = $event['data']['submission_id'] ?? null;
         /** @var Submission $submission */
-        $submission = $this->em->getRepository(Submission::class)->findOneBy(['externalid' => $submissionId]);
+        $submission = $this->em->getRepository(Submission::class)->findOneBy(['contest' => $this->contestId, 'externalid' => $submissionId]);
         if (!$submission) {
             $this->addPendingEvent('submission', $submissionId, $event);
             return;
