@@ -1487,6 +1487,13 @@ class ImportEventFeedCommand extends Command
 
         $this->em->flush();
 
+        // Now we need to update the scoreboard cache for this cell to get this judgement result in
+        $this->em->clear();
+        $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
+        $team    = $this->em->getRepository(Team::class)->find($submission->getTeamid());
+        $problem = $this->em->getRepository(Problem::class)->find($submission->getProbid());
+        $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
+
         $this->processPendingEvents('judgement', $judgement->getExternalid());
     }
 

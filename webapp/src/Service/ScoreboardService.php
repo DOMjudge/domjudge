@@ -15,11 +15,12 @@ use App\Entity\TeamCategory;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Filter;
 use App\Utils\Scoreboard\Scoreboard;
-use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use App\Entity\ExternalJudgement;
+use App\Utils\Scoreboard\SingleTeamScoreboard;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -293,6 +294,11 @@ class ScoreboardService
                                          $lockString));
         }
 
+        // Determine whether we will use external judgements instead of judgings
+        $localSource           = DOMJudgeService::DATA_SOURCE_LOCAL;
+        $shadow                = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
+        $useExternalJudgements = $this->dj->dbconfig_get('data_source', $localSource) == $shadow;
+
         // Note the clause 's.submittime < c.endtime': this is used to
         // filter out TOO-LATE submissions from pending, but it also means
         // that these will not count as solved. Correct submissions with
@@ -300,9 +306,8 @@ class ScoreboardService
         // resets the contest time after successful judging.
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
-            ->select('s, j, c')
+            ->select('s, c')
             ->leftJoin('s.contest', 'c')
-            ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1')
             ->andWhere('s.teamid = :teamid')
             ->andWhere('s.probid = :probid')
             ->andWhere('s.cid = :cid')
@@ -312,6 +317,16 @@ class ScoreboardService
             ->setParameter(':probid', $problem->getProbid())
             ->setParameter(':cid', $contest->getCid())
             ->orderBy('s.submittime');
+
+        if ($useExternalJudgements) {
+            $queryBuilder
+                ->addSelect('ej')
+                ->leftJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1');
+        } else {
+            $queryBuilder
+                ->addSelect('j')
+                ->leftJoin('s.judgings', 'j', Join::WITH, 'j.valid = 1');
+        }
 
         // Check if we need to count compile error as a penalty.
         $compilePenalty = $this->dj->dbconfig_get('compile_penalty', true);
@@ -328,11 +343,17 @@ class ScoreboardService
         $correctPubl     = false;
 
         foreach ($submissions as $submission) {
-            /** @var Judging|null $judging */
-            $judging = $submission->getJudgings()->first() ?: null;
+            /** @var Judging|ExternalJudgement|null $judging */
+            if ($useExternalJudgements) {
+                $judging = $submission->getExternalJudgements()->first() ?: null;
+            } else {
+                $judging = $submission->getJudgings()->first() ?: null;
+            }
 
             // Check if this submission has a publicly visible judging result:
-            if ($judging === null || ($verificationRequired && !$judging->getVerified()) || empty($judging->getResult())) {
+            if ($judging === null ||
+                (!$useExternalJudgements && $verificationRequired && !$judging->getVerified()) ||
+                empty($judging->getResult())) {
                 // For the jury: only consider it pending if we don't have a
                 // correct one yet. This is needed because during the freeze
                 // we consider submissions after the correct one for the
@@ -412,18 +433,31 @@ class ScoreboardService
             //   - either it's still ongoing (pending judgement, could be correct)
             //   - or already judged to be correct (if it's judged but != correct, it's not a first to solve)
             // - or the submission is still queued for judgement (judgehost is NULL).
-            $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
+            if ($useExternalJudgements) {
+                $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
+                SELECT count(*) FROM submission s
+                    LEFT JOIN external_judgement ej USING (submitid)
+                    LEFT JOIN external_judgement ej2 ON ej2.submitid = s.submitid AND ej2.starttime > ej.starttime
+                    LEFT JOIN team t USING(teamid)
+                    LEFT JOIN team_category tc USING (categoryid)
+                WHERE s.valid = 1 AND
+                    (ej.result IS NULL OR ej.result = :correctResult) AND
+                    s.cid = :cid AND s.probid = :probid AND
+                    tc.sortorder = :teamSortOrder AND
+                    round(s.submittime,4) < :submitTime', $params);
+            } else {
+                $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j USING (submitid)
                     LEFT JOIN team t USING(teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
-                    ((j.valid = 1 AND (j.result IS NULL OR j.result = :correctResult)) OR
+                    ((j.valid = 1 AND ( j.rejudgingid IS NULL AND (j.result IS NULL OR j.result = :correctResult))) OR
                       s.judgehost IS NULL) AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
-                    round(s.submittime,4) < :submitTime',
-                $params);
+                    round(s.submittime,4) < :submitTime', $params);
+            }
         }
 
         // Use a direct REPLACE INTO query to drastically speed this up
