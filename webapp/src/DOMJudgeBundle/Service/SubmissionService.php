@@ -157,7 +157,7 @@ class SubmissionService
             if ($restrictions['judged']) {
                 $queryBuilder->andWhere('j.result IS NOT NULL');
             } else {
-                $queryBuilder->andWhere('j.result IS NULL');
+                $queryBuilder->andWhere('j.result IS NULL OR j.endtime IS NULL');
             }
         }
 
