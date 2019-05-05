@@ -90,6 +90,9 @@ class SubmissionController extends BaseController
                 $language = $form->get('language')->getData();
                 /** @var UploadedFile[] $files */
                 $files      = $form->get('code')->getData();
+                if (!is_array($files)) {
+                    $files = [$files];
+                }
                 $entryPoint = $form->get('entry_point')->getData() ?: null;
                 $submission = $this->submissionService->submitSolution($team, $problem->getProbid(), $contest,
                                                                        $language, $files, null, $entryPoint, null, null,
