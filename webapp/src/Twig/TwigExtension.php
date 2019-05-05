@@ -347,21 +347,27 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      *
      * @param Testcase[] $testcases
      * @param bool       $submissionDone
+     * @param bool       $isExternal
      * @return string
      */
-    public function displayTestcaseResults(array $testcases, bool $submissionDone)
+    public function displayTestcaseResults(array $testcases, bool $submissionDone, bool $isExternal = false)
     {
         $results = '';
         foreach ($testcases as $testcase) {
             $class     = $submissionDone ? 'secondary' : 'primary';
             $text      = '?';
             $isCorrect = false;
-            $run       = $testcase->getFirstJudgingRun();
+            $run       = $isExternal ? $testcase->getFirstExternalRun() : $testcase->getFirstJudgingRun();
+            if ($isExternal) {
+                $runResult = $run ? $run->getResult() : null;
+            } else {
+                $runResult = $run ? $run->getRunresult() : null;
+            }
 
-            if ($run && $run->getRunresult() !== null) {
-                $text  = substr($run->getRunresult(), 0, 1);
+            if ($run && $runResult !== null) {
+                $text  = substr($runResult, 0, 1);
                 $class = 'danger';
-                if ($run->getRunresult() === Judging::RESULT_CORRECT) {
+                if ($runResult === Judging::RESULT_CORRECT) {
                     $isCorrect = true;
                     $text      = '✓';
                     $class     = 'success';
@@ -372,8 +378,8 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
 
             $extraTitle = '';
-            if ($run && $run->getRunresult() !== null) {
-                $extraTitle = sprintf(', runtime: %ss, result: %s', $run->getRuntime(), $run->getRunresult());
+            if ($run && $runResult !== null) {
+                $extraTitle = sprintf(', runtime: %ss, result: %s', $run->getRuntime(), $runResult);
             }
             $icon    = sprintf('<span class="badge badge-%s badge-testcase">%s</span>', $class, $text);
             $results .= sprintf('<a title="#%d, desc: %s%s" href="#run-%d" %s>%s</a>', $testcase->getRank(),

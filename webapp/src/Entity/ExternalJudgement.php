@@ -301,4 +301,30 @@ class ExternalJudgement
     {
         return $this->external_runs;
     }
+
+    /**
+     * Get the max runtime for this external judgement
+     * @return float
+     */
+    public function getMaxRuntime()
+    {
+        $max = 0;
+        foreach ($this->external_runs as $run) {
+            $max = max($run->getRuntime(), $max);
+        }
+        return $max;
+    }
+
+    /**
+     * Get the sum runtime for this external judgement
+     * @return float
+     */
+    public function getSumRuntime()
+    {
+        $sum = 0;
+        foreach ($this->external_runs as $run) {
+            $sum += $run->getRuntime();
+        }
+        return $sum;
+    }
 }

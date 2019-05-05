@@ -369,9 +369,29 @@ class SubmissionController extends BaseController
         $outputDisplayLimit    = (int)$this->dj->dbconfig_get('output_display_limit', 2000);
         $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
 
+        $externalRuns = [];
+        if ($externalJudgement = $submission->getExternalJudgements()->first()) {
+            $queryBuilder = $this->em->createQueryBuilder()
+                ->from(Testcase::class, 't')
+                ->leftJoin('t.external_runs', 'er', Join::WITH, 'er.external_judgement = :judging')
+                ->select('t', 'er')
+                ->andWhere('t.problem = :problem')
+                ->setParameter(':judging', $externalJudgement)
+                ->setParameter(':problem', $submission->getProblem())
+                ->orderBy('t.rank');
+
+            $externalRunResults = $queryBuilder
+                ->getQuery()
+                ->getResult();
+
+            foreach ($externalRunResults as $externalRunResult) {
+                $externalRuns[] = $externalRunResult;
+            }
+        }
+
         $runs       = [];
         $runsOutput = [];
-        if ($selectedJudging) {
+        if ($selectedJudging || $externalJudgement) {
             $queryBuilder = $this->em->createQueryBuilder()
                 ->from(Testcase::class, 't')
                 ->join('t.content', 'tc')
@@ -472,6 +492,7 @@ class SubmissionController extends BaseController
             'selectedJudging' => $selectedJudging,
             'lastJudging' => $lastJudging,
             'runs' => $runs,
+            'externalRuns' => $externalRuns,
             'runsOutput' => $runsOutput,
             'lastRuns' => $lastRuns,
             'unjudgableReasons' => $unjudgableReasons,
