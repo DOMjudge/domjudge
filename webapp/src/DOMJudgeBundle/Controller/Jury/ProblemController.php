@@ -354,32 +354,19 @@ class ProblemController extends BaseController
                                 stream_get_contents($problem->getProblemtext()));
         }
 
-        /** @var TestcaseWithContent[] $testcases */
-        $testcases = $this->em->createQueryBuilder()
-            ->from('DOMJudgeBundle:TestcaseWithContent', 't')
-            ->select('t')
-            ->andWhere('t.problem = :problem')
-            ->setParameter(':problem', $problem)
-            ->orderBy('t.rank')
-            ->getQuery()
-            ->getResult();
-
-        foreach ($testcases as $testcase) {
-            $filename = sprintf('data/%s/%d', $testcase->getSample() ? 'sample' : 'secret', $testcase->getRank());
-            $zip->addFromString($filename . '.in', $testcase->getInput());
-            $zip->addFromString($filename . '.ans', $testcase->getOutput());
-
-            if (!empty($testcase->getDescription(true))) {
-                $description = $testcase->getDescription(true);
-                if (strstr($description, "\n") === false) {
-                    $description .= "\n";
-                }
-                $zip->addFromString($filename . '.desc', $description);
-            }
-
-            if (!empty($testcase->getImageType())) {
-                $zip->addFromString($filename . '.' . $testcase->getImageType(), $testcase->getImage());
-            }
+        foreach ([true, false] as $isSample) {
+            /** @var TestcaseWithContent[] $testcases */
+            $testcases = $this->em->createQueryBuilder()
+                ->from('DOMJudgeBundle:TestcaseWithContent', 't')
+                ->select('t')
+                ->andWhere('t.problem = :problem')
+                ->andWhere('t.sample = :sample')
+                ->setParameter(':problem', $problem)
+                ->setParameter(':sample', $isSample)
+                ->orderBy('t.rank')
+                ->getQuery()
+                ->getResult();
+            $this->addTestcasesToZip($testcases, $zip, $isSample);
         }
 
         /** @var Submission[] $solutions */
@@ -997,5 +984,33 @@ class ProblemController extends BaseController
         return $this->render('@DOMJudge/jury/problem_add.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @param array $testcases
+     * @param ZipArchive $zip
+     */
+    public function addTestcasesToZip(array $testcases, ZipArchive $zip, bool $isSample)
+    {
+        $formatString = sprintf('data/%%s/%%0%dd', ceil(log10(count($testcases) + 1)));
+        $rankInGroup = 0;
+        foreach ($testcases as $testcase) {
+            $rankInGroup++;
+            $filename = sprintf($formatString, $isSample ? 'sample' : 'secret', $rankInGroup);
+            $zip->addFromString($filename . '.in', $testcase->getInput());
+            $zip->addFromString($filename . '.ans', $testcase->getOutput());
+
+            if (!empty($testcase->getDescription(true))) {
+                $description = $testcase->getDescription(true);
+                if (strstr($description, "\n") === false) {
+                    $description .= "\n";
+                }
+                $zip->addFromString($filename . '.desc', $description);
+            }
+
+            if (!empty($testcase->getImageType())) {
+                $zip->addFromString($filename . '.' . $testcase->getImageType(), $testcase->getImage());
+            }
+        }
     }
 }
