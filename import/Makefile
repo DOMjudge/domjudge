@@ -16,7 +16,7 @@ $(SUBST_FILES): %: %.in ../paths.mk
 	chmod a+x $@
 
 install-domserver:
-	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libsubmitdir) \
+	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_bindir) \
 		$(SUBST_FILES)
 
 distclean-l:
