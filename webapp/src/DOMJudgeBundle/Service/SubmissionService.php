@@ -205,6 +205,7 @@ class SubmissionService
             // When we are shadow, also load the external results
             $queryBuilder
                 ->leftJoin('s.external_judgements', 'ej')
+                ->addSelect('ej')
                 // We want the external judgement that was started the latest, because that is the
                 // current valid one. We do this by left-joining on external judgements again, bot
                 // only for ones that started later. This should then give no result, hence we add
