@@ -50,6 +50,12 @@ class ExternalJudgement
     private $endtime = null;
 
     /**
+     * @var boolean
+     * @ORM\Column(type="boolean", name="valid", options={"comment"="Old external judgement is marked as invalid when receiving a new one"}, nullable=false)
+     */
+    private $valid = true;
+
+    /**
      * @var Submission
      *
      * @ORM\ManyToOne(targetEntity="Submission", inversedBy="external_judgements")
@@ -164,6 +170,30 @@ class ExternalJudgement
     public function getEndtime()
     {
         return $this->endtime;
+    }
+
+    /**
+     * Set valid
+     *
+     * @param boolean $valid
+     *
+     * @return ExternalJudgement
+     */
+    public function setValid($valid)
+    {
+        $this->valid = $valid;
+
+        return $this;
+    }
+
+    /**
+     * Get valid
+     *
+     * @return boolean
+     */
+    public function getValid()
+    {
+        return $this->valid;
     }
 
     /**

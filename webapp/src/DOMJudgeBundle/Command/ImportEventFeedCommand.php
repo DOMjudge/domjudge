@@ -1416,6 +1416,26 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         if ($persist) {
             $this->em->persist($judgement);
         }
+
+        $this->em->flush();
+
+        // Now we need to update the validness of the judgements: the newest one is valid and the
+        // others are invalid. So we load all judgements for this submission order by decreasing
+        // starttime and update them.
+        /** @var ExternalJudgement[] $externalJudgements */
+        $externalJudgements = $this->em->createQueryBuilder()
+            ->from('DOMJudgeBundle:ExternalJudgement', 'ej')
+            ->select('ej')
+            ->andWhere('ej.submission = :submission')
+            ->setParameter(':submission', $submission)
+            ->orderBy('ej.starttime', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        foreach ($externalJudgements as $idx => $externalJudgement) {
+            $externalJudgement->setValid($idx === 0);
+        }
+
         $this->em->flush();
 
         $this->processPendingEvents('judgement', $judgement->getExtjudgementid());

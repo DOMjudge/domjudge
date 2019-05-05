@@ -204,14 +204,8 @@ class SubmissionService
             DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
             // When we are shadow, also load the external results
             $queryBuilder
-                ->leftJoin('s.external_judgements', 'ej')
-                ->addSelect('ej')
-                // We want the external judgement that was started the latest, because that is the
-                // current valid one. We do this by left-joining on external judgements again, bot
-                // only for ones that started later. This should then give no result, hence we add
-                // a andWhere below for ej2.extjudgementid IS NULL
-                ->leftJoin('s.external_judgements', 'ej2', Join::WITH, 'ej2.starttime > ej.starttime')
-                ->andWhere('ej2.extjudgementid IS NULL');
+                ->leftJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')
+                ->addSelect('ej');
         }
 
         $submissions = $queryBuilder->getQuery()->getResult();

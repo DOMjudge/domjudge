@@ -218,16 +218,10 @@ class SubmissionController extends BaseController
             ->join('s.problem', 'p')
             ->join('s.language', 'l')
             ->join('s.contest', 'c')
-            ->leftJoin('s.external_judgements', 'ej')
-            // We want the external judgement that was started the latest, because that is the
-            // current valid one. We do this by left-joining on external judgements again, but
-            // only for ones that started later. This should then give no result, hence we add
-            // a andWhere below for ej2.extjudgementid IS NULL.
-            ->leftJoin('s.external_judgements', 'ej2', Join::WITH, 'ej2.starttime > ej.starttime')
+            ->leftJoin('s.external_judgements', 'ej', Join::WITH, 'ej.valid = 1')
             ->leftJoin('s.contest_problem', 'cp')
             ->select('s', 't', 'p', 'l', 'c', 'cp', 'ej')
             ->andWhere('s.submitid = :submitid')
-            ->andWhere('ej2.extjudgementid IS NULL')
             ->setParameter(':submitid', $submitId)
             ->getQuery()
             ->getOneOrNullResult();
