@@ -8,7 +8,6 @@ parameters:
     domjudge.libdir: @domserver_libdir@
     domjudge.sqldir: @domserver_sqldir@
     domjudge.libvendordir: @domserver_libvendordir@
-    domjudge.libsubmitdir: @domserver_libsubmitdir@
     domjudge.logdir: @domserver_logdir@
     domjudge.rundir: @domserver_rundir@
     domjudge.tmpdir: @domserver_tmpdir@

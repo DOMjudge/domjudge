@@ -205,11 +205,10 @@ maintainer-conf: dist composer-dependencies-dev
 # symlinks where necessary to let it work from the source tree.
 # This stuff is a hack!
 maintainer-install: build domserver-create-dirs judgehost-create-dirs
-# Replace lib{judge,submit}dir with symlink to prevent lots of symlinks:
-	-rmdir $(judgehost_libjudgedir) $(domserver_libsubmitdir)
-	-rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)
+# Replace libjudgedir with symlink to prevent lots of symlinks:
+	-rmdir $(judgehost_libjudgedir)
+	-rm -f $(judgehost_libjudgedir)
 	ln -sf $(CURDIR)/judge  $(judgehost_libjudgedir)
-	ln -sf $(CURDIR)/submit $(domserver_libsubmitdir)
 # Add symlinks to binaries:
 	$(MKDIR_P) $(judgehost_bindir) $(domserver_bindir)
 	ln -sf $(CURDIR)/judge/judgedaemon $(judgehost_bindir)
@@ -292,7 +291,7 @@ maintainer-postinstall-nginx: maintainer-postinstall-permissions
 
 # Removes created symlinks; generated logs, submissions, etc. remain in output subdir.
 maintainer-uninstall:
-	rm -f $(judgehost_libjudgedir) $(domserver_libsubmitdir)
+	rm -f $(judgehost_libjudgedir)
 	rm -rf $(judgehost_bindir)
 
 # Rules to configure and build for a Coverity scan.

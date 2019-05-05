@@ -13,7 +13,6 @@ define('WEBAPPDIR',   '@domserver_webappdir@');
 define('LIBDIR',      '@domserver_libdir@');
 define('SQLDIR',      '@domserver_sqldir@');
 define('LIBVENDORDIR','@domserver_libvendordir@');
-define('LIBSUBMITDIR','@domserver_libsubmitdir@');
 define('LOGDIR',      '@domserver_logdir@');
 define('RUNDIR',      '@domserver_rundir@');
 define('TMPDIR',      '@domserver_tmpdir@');
