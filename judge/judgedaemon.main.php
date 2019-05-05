@@ -542,10 +542,6 @@ while (true) {
     $endpointID = $endpointIDs[$currentEndpoint];
     $workdirpath = JUDGEDIR . "/$myhost/endpoint-$endpointID";
 
-    if ($endpoints[$endpointID]['errorred']) {
-        continue;
-    }
-
     // Check whether we have received an exit signal
     if (function_exists('pcntl_signal_dispatch')) {
         pcntl_signal_dispatch();
@@ -554,6 +550,10 @@ while (true) {
         logmsg(LOG_NOTICE, "Received signal, exiting.");
         close_curl_handles();
         exit;
+    }
+
+    if ($endpoints[$endpointID]['errorred']) {
+        continue;
     }
 
     if ($endpoints[$endpointID]['waiting'] === false) {
