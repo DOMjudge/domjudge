@@ -24,8 +24,3 @@ error_reporting(E_ALL & ~E_NOTICE);
 if (DEBUG & DEBUG_PHP_NOTICE) {
     error_reporting(E_ALL);
 }
-
-// Mapping of DOMjudge verdict strings to those defined in the CLICS
-// CCS specification (and a few more common ones) at:
-// https://clics.ecs.baylor.edu/index.php/Contest_Control_System#Judge_Responses
-$VERDICTS = include __DIR__ . '/verdicts.php';
