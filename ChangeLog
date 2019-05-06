@@ -1,7 +1,11 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.0.1 - DEV
--------------------
+Version 7.0.1 - 6 May 2019
+--------------------------
+ - Fix affiliation checking in Configration Checker.
+ - Improve feedback on errors when uploading problem zip files.
+ - Fix adding a team to a contest by editing the team.
+ - Fix submitting when sourcefiles_limit is set to 1.
 
 Version 7.0.0 - 28 April 2019
 -----------------------------
