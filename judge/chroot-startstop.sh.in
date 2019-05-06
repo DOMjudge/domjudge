@@ -54,19 +54,19 @@ dj_umount() {
 case "$1" in
 	check)
 		if [ ! -d "$CHROOTORIGINAL" ]; then
-			>&2 echo "chroot dir '$CHROOTORIGINAL' does not exist, run dj_create_chroot"
+			>&2 echo "chroot dir '$CHROOTORIGINAL' does not exist, run dj_make_chroot"
 			exit 2
 		fi
 		for i in $SUBDIRMOUNTS ; do
 			if [ ! -e "$CHROOTORIGINAL/$i" ]; then
-				>&2 echo "chroot subdir '$CHROOTORIGINAL/$i' not found, rerun dj_create_chroot"
+				>&2 echo "chroot subdir '$CHROOTORIGINAL/$i' not found, rerun dj_make_chroot"
 				exit 2
 			fi
 		done
 		# This directory is removed at the very end of the debootstrap run, if it's
 		# still present, building the chroot did not complete.
 		if [ -d "$CHROOTORIGINAL/debootstrap" ]; then
-			>&2 echo "chroot dir '$CHROOTORIGINAL' incomplete, rerun dj_create_chroot"
+			>&2 echo "chroot dir '$CHROOTORIGINAL' incomplete, rerun dj_make_chroot"
 			exit 2
 		fi
 		;;
