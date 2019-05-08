@@ -984,7 +984,7 @@ function judge(array $row)
         $now = now();
         if (!$lastcase_correct
             || ($now - $last_sent) >= $update_every_X_seconds
-            || $outstanding_data > $row['outputlimit']) {
+            || $outstanding_data > $row['outputlimit'] * 1024) {
            send_unsent_judging_runs($unsent_judging_runs, $row['judgingid']);
            $unsent_judging_runs = array();
            $last_sent = $now;
