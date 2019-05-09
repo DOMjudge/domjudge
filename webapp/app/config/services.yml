@@ -66,4 +66,4 @@ services:
             $domjudgeVersion: '%domjudge.version%'
 
     DOMJudgeBundle\Security\SimpleSAMLAuthenticator:
-        arguments: ["@router", "@ssp.guard.registry", "surfconext"]
+        arguments: ["@router", "@ssp.guard.registry", "dummy"]

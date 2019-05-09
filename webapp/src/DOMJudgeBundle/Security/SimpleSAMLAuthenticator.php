@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 class SimpleSAMLAuthenticator extends SSPGuardAuthenticator
@@ -38,5 +39,20 @@ class SimpleSAMLAuthenticator extends SSPGuardAuthenticator
         }
 
         return new RedirectResponse($targetPath);
+    }
+
+    // override supports() not to require a fixed authsource id
+    public function supports(Request $request)
+    {
+        $match = $this->router->match($request->getPathInfo());
+        return 'ssp_guard_check' === $match['_route'];
+    }
+
+    // override getCredentials() not to require a fixed authsource id
+    public function getCredentials(Request $request)
+    {
+        $match = $this->router->match($request->getPathInfo());
+        $this->authSource = $this->authSourceRegistry->getAuthSource($match['authSource']);
+        return $this->authSource->getCredentials();
     }
 }
