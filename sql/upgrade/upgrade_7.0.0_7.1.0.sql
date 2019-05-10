@@ -42,9 +42,9 @@ CREATE TABLE `external_run` (
   `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run ended',
   `runtime` float NOT NULL COMMENT 'Running time on this testcase',
   PRIMARY KEY  (`extrunid`),
+  UNIQUE KEY `externalid` (`cid`,`externalid`(190)),
   KEY `extjudgementid` (`extjudgementid`),
   KEY `testcaseid` (`testcaseid`),
-  UNIQUE KEY `externalid` (`cid`,`externalid`(190)),
   CONSTRAINT `external_run_ibfk_1` FOREIGN KEY (`extjudgementid`) REFERENCES `external_judgement` (`extjudgementid`) ON DELETE CASCADE,
   CONSTRAINT `external_run_ibfk_2` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`) ON DELETE CASCADE,
   CONSTRAINT `external_run_ibfk_3` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
