@@ -98,14 +98,6 @@ fos_rest:
                 Symfony\Component\HttpKernel\Exception\NotFoundHttpException: true
                 Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException: true
 
-# Swiftmailer Configuration
-swiftmailer:
-    transport: '%mailer_transport%'
-    host: '%mailer_host%'
-    username: '%mailer_user%'
-    password: '%mailer_password%'
-    spool: { type: memory }
-
 nelmio_api_doc:
     areas:
         path_patterns: [ ^/api/v4 ]
