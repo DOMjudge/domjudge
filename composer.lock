@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "d04e33cbd281abf76731921ccab49542",
+    "content-hash": "d019aa656d766b50310cbed41f958c8e",
     "packages": [
         {
             "name": "angel-vladov/select2-bootstrap-theme",
