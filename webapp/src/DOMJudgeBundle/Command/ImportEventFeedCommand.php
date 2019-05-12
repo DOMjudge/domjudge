@@ -94,18 +94,18 @@ class ImportEventFeedCommand extends ContainerAwareCommand
     protected $verdicts = [];
 
     /**
-     * This array will hold all events that are waiting on a dependant event because it has an ID that does not exist
+     * This array will hold all events that are waiting on a dependent event because it has an ID that does not exist
      * yet. According to the official spec this can not happen, but in practice it does happen. We handle this by
-     * storing these events here and checking whether there are any after saving any dependant event.
+     * storing these events here and checking whether there are any after saving any dependent event.
      *
      * This array is three dimensional:
-     * - The first dimension is the type of the dependant event type
-     * - The second dimension is the (external) ID of the dependant event
+     * - The first dimension is the type of the dependent event type
+     * - The second dimension is the (external) ID of the dependent event
      * - The third dimension contains an array of all events that should be processed
      * @var array
      */
     protected $pendingEvents = [
-        // Initialize it with all types that can be a dependant event. Note that Language is not here, as they should exist already
+        // Initialize it with all types that can be a dependent event. Note that Language is not here, as they should exist already
         'team' => [],
         'group' => [],
         'organization' => [],
@@ -292,12 +292,12 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         }
 
         if (!empty(array_filter($this->pendingEvents))) {
-            $this->logger->warning(sprintf('Some events could not be processed, because they still have missing dependant events:'));
+            $this->logger->warning(sprintf('Some events could not be processed, because they still have missing dependent events:'));
         }
         foreach ($this->pendingEvents as $type => $eventData) {
             foreach ($eventData as $id => $events) {
                 foreach ($events as $event) {
-                    $this->logger->warning(sprintf('Could not process %s event %s, because it is dependant on missing %s event %s',
+                    $this->logger->warning(sprintf('Could not process %s event %s, because it is dependent on missing %s event %s',
                                                    $event['type'], $event['id'], $type, $id));
                 }
             }
@@ -857,7 +857,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             $action = EventLogService::ACTION_CREATE;
         }
 
-        // Now check if we have all dependant data
+        // Now check if we have all dependent data
 
         $groupIds = $event['data']['group_ids'] ?? [];
         $category = null;
@@ -954,7 +954,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
             $action = EventLogService::ACTION_CREATE;
         }
 
-        // Now check if we have all dependant data
+        // Now check if we have all dependent data
 
         $fromTeamId = $event['data']['from_team_id'] ?? null;
         $fromTeam   = null;
@@ -1348,7 +1348,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
      */
     protected function addPendingEvent(string $type, $id, array $event)
     {
-        $this->logger->warning(sprintf('Can not currently import %s event %s, because it is dependant on %s %s',
+        $this->logger->warning(sprintf('Can not currently import %s event %s, because it is dependent on %s %s',
                                        $event['type'], $event['id'], $type, $id));
         if (!isset($this->pendingEvents[$type][$id])) {
             $this->pendingEvents[$type][$id] = [];

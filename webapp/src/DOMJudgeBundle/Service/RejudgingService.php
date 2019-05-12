@@ -138,6 +138,18 @@ class RejudgingService
 
         $this->dj->auditlog('rejudging', $rejudgingId, $action . 'ing rejudge', '(start)');
 
+        // Add missing state events for this contest. We do this here and disable doing it in the
+        // loop when calling EventLogService::log, because then we would do the same check a lot of
+        // times, which is really inefficient and slow. Note that it might be the case that a state
+        // change event will happen exactly during applying a rejudging *and* that no client is
+        // listening. Given that applying a rejudging will only create judgement and run events and
+        // that for these events contest state change events don't really matter, we will only check
+        // it once, here.
+        // We will also not check dependent object events in the loop, because if we apply a
+        // rejudging, the original judgings will already have triggered all dependent events.
+        $contest = $this->dj->getCurrentContest();
+        $this->eventLogService->addMissingStateEvents($contest);
+
         // This loop uses direct queries instead of Doctrine classes to speed it up drastically
 
         foreach ($submissions as $submission) {
@@ -172,8 +184,9 @@ class RejudgingService
                     $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
                     // Update event log
-                    $this->eventLogService->log('judging', $submission['judgingid'], EventLogService::ACTION_CREATE,
-                                                $submission['cid']);
+                    $this->eventLogService->log('judging', $submission['judgingid'],
+                                                EventLogService::ACTION_CREATE,
+                                                $submission['cid'], null, null, false);
 
                     $runData = $this->em->createQueryBuilder()
                         ->from('DOMJudgeBundle:JudgingRun', 'r')
@@ -186,7 +199,9 @@ class RejudgingService
                         return $data['runid'];
                     }, $runData);
                     if (!empty($runIds)) {
-                        $this->eventLogService->log('judging_run', $runIds, 'create', $submission['cid']);
+                        $this->eventLogService->log('judging_run', $runIds,
+                                                    EventLogService::ACTION_CREATE,
+                                                    $submission['cid'], null, null, false);
                     }
 
                     // Update ballons
