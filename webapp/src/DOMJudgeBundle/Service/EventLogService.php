@@ -185,19 +185,21 @@ class EventLogService implements ContainerAwareInterface
     /**
      * Log an event
      *
-     * @param string      $type      Either an API endpoint or a DB table
-     * @param mixed       $dataIds   Identifier(s) of the row in the associated
-     *                               DB table as either one ID or an array of ID's.
-     * @param string      $action    One of the self::ACTION_* constants
-     * @param int|null    $contestId Contest ID to log this event for. If null,
-     *                               log it for all currently active contests.
-     * @param string|null $json      JSON content after the change. Generated if null.
-     * @param mixed|null  $ids       Identifier(s) as shown in the REST API. If null it is
-     *                               inferred from the content in the database or $json
-     *                               passed as argument. Must be specified when deleting an
-     *                               entry or if no DB table is associated to $type.
-     *                               Can be null, one ID or an array of ID's.
-     * @throws Exception
+     * @param string      $type        Either an API endpoint or a DB table
+     * @param mixed       $dataIds     Identifier(s) of the row in the associated
+     *                                 DB table as either one ID or an array of ID's.
+     * @param string      $action      One of the self::ACTION_* constants
+     * @param int|null    $contestId   Contest ID to log this event for. If null,
+     *                                 log it for all currently active contests.
+     * @param string|null $json        JSON content after the change. Generated if null.
+     * @param mixed|null  $ids         Identifier(s) as shown in the REST API. If null it is
+     *                                 inferred from the content in the database or $json
+     *                                 passed as argument. Must be specified when deleting an
+     *                                 entry or if no DB table is associated to $type.
+     *                                 Can be null, one ID or an array of ID's.
+     * @param bool        $checkEvents If true, check for missing dependent and contest
+     *                                 state events and insert them
+     * @throws NonUniqueResultException
      */
     public function log(
         string $type,
@@ -205,7 +207,8 @@ class EventLogService implements ContainerAwareInterface
         string $action,
         $contestId = null,
         $json = null,
-        $ids = null
+        $ids = null,
+        bool $checkEvents = true
     ) {
         // Sanitize and check input
         if (!is_array($dataIds)) {
@@ -408,17 +411,19 @@ class EventLogService implements ContainerAwareInterface
                     $jsonElement = $json[$idx];
                 }
 
-                // Check if all references for this event are present; if not, add all static data
-                if (!$this->hasAllDependentObjectEvents($contest, $type, $jsonElement)) {
-                    // Not all dependent objects are present, so insert all static events
-                    $this->initStaticEvents($contest);
-                    // If new references are added, we need to reload the contest,
-                    // because the entity manager has been cleared
-                    $contest = $this->em->getRepository(Contest::class)->find($contest->getCid());
-                }
+                if ($checkEvents) {
+                    // Check if all references for this event are present; if not, add all static data
+                    if (!$this->hasAllDependentObjectEvents($contest, $type, $jsonElement)) {
+                        // Not all dependent objects are present, so insert all static events
+                        $this->initStaticEvents($contest);
+                        // If new references are added, we need to reload the contest,
+                        // because the entity manager has been cleared
+                        $contest = $this->em->getRepository(Contest::class)->find($contest->getCid());
+                    }
 
-                // Add missing state events that should have happened already
-                $this->addMissingStateEvents($contest);
+                    // Add missing state events that should have happened already
+                    $this->addMissingStateEvents($contest);
+                }
 
                 $event = new Event();
                 $event
