@@ -373,20 +373,18 @@ class ScoreboardService
             // Find out how many valid submissions were submitted earlier
             // that have a valid judging that is correct, or are awaiting judgement.
             // Only if there are 0 found, we are definitely the first to solve this problem.
-	    // To find relevant submissions/judgings:
-	    // - submission needs to be valid (not invalidated)
-	    // - a judging is present, but
-	    //   - it's not part of a rejudging
-	    //   - either it's still ongoing (pending judgement, could be correct)
-	    //   - or already judged to be correct (if it's judged but != correct, it's not a first to solve)
-	    // - or the submission is still queued for judgement (judgehost is NULL).
+            // To find relevant submissions/judgings:
+            // - submission needs to be valid (not invalidated)
+            // - a valid judging is present, but
+            //   - either it's still ongoing (pending judgement, could be correct)
+            //   - or already judged to be correct (if it's judged but != correct, it's not a first to solve)            // - or the submission is still queued for judgement (judgehost is NULL).
             $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j USING (submitid)
                     LEFT JOIN team t USING(teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
-                    ((j.valid = 1 AND ( j.rejudgingid IS NULL AND (j.result IS NULL OR j.result = :correctResult))) OR
+                    ((j.valid = 1 AND (j.result IS NULL OR j.result = :correctResult)) OR
                       s.judgehost IS NULL) AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
