@@ -377,7 +377,8 @@ class ScoreboardService
             // - submission needs to be valid (not invalidated)
             // - a valid judging is present, but
             //   - either it's still ongoing (pending judgement, could be correct)
-            //   - or already judged to be correct (if it's judged but != correct, it's not a first to solve)            // - or the submission is still queued for judgement (judgehost is NULL).
+            //   - or already judged to be correct (if it's judged but != correct, it's not a first to solve)
+            // - or the submission is still queued for judgement (judgehost is NULL).
             $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j USING (submitid)
