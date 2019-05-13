@@ -41,6 +41,12 @@
                     <a class="nav-link" href="{{ path('jury_submissions') }}"><i class="fas fa-file-code"></i> submissions</a>
                 </li>
 
+                {% if is_granted('ROLE_ADMIN') and data_source == constant('App\\Service\\DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL') %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('jury_shadow_differences') }}"><i class="fas fa-not-equal"></i> shadow differences</a>
+                    </li>
+                {% endif %}
+
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('jury_rejudgings') }}" id="menu_rejudgings"><i class="fas fa-sync"></i> rejudgings <span class="badge badge-info" id="num-alerts-rejudgings"></span></a>
                 </li>

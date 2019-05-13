@@ -165,6 +165,32 @@ class SubmissionService
             }
         }
 
+        if (isset($restrictions['externally_judged'])) {
+            if ($restrictions['externally_judged']) {
+                $queryBuilder->andWhere('ej.result IS NOT NULL');
+            } else {
+                $queryBuilder->andWhere('ej.result IS NULL OR ej.endtime IS NULL');
+            }
+        }
+
+        if (isset($restrictions['external_diff'])) {
+            if ($restrictions['external_diff']) {
+                $queryBuilder->andWhere('j.result != ej.result');
+            } else {
+                $queryBuilder->andWhere('j.result = ej.result');
+            }
+        }
+
+        if (isset($restrictions['external_result'])) {
+            if ($restrictions['external_result'] === 'judging') {
+                $queryBuilder->andWhere('ej.result IS NULL or ej.endtime IS NULL');
+            } else {
+                $queryBuilder
+                    ->andWhere('ej.result = :externalresult')
+                    ->setParameter(':externalresult', $restrictions['external_result']);
+            }
+        }
+
         if (isset($restrictions['teamid'])) {
             $queryBuilder
                 ->andWhere('s.teamid = :teamid')
@@ -196,9 +222,13 @@ class SubmissionService
         }
 
         if (isset($restrictions['result'])) {
-            $queryBuilder
-                ->andWhere('j.result = :result')
-                ->setParameter(':result', $restrictions['result']);
+            if ($restrictions['result'] === 'judging') {
+                $queryBuilder->andWhere('j.result IS NULL OR j.endtime IS NULL');
+            } else {
+                $queryBuilder
+                    ->andWhere('j.result = :result')
+                    ->setParameter(':result', $restrictions['result']);
+            }
         }
 
         if ($this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) ==
