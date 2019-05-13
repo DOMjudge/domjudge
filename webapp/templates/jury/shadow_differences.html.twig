@@ -1,0 +1,96 @@
+{% extends "jury/base.html.twig" %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Shadow differences - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Shadow differences</h1>
+
+    <div data-shadow-matrix>
+        {% include 'jury/partials/shadow_matrix.html.twig' %}
+    </div>
+
+    <h2 class="mt-4">Details</h2>
+
+    Show submissions:
+    <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+        {%- for idx, type in viewTypes %}
+
+            <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
+                <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
+                       {% if idx == view %}checked{% endif %}> {{ type }}
+            </label>
+        {%- endfor %}
+    </div>
+
+    <form action="{{ path('jury_shadow_differences') }}" method="get">
+        <input type="hidden" name="view" value="{{ viewTypes[view] }}"/>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="oldverdict">External verdict</label>
+                <select style="width: 100%" class="select2 form-control" name="external"
+                        id="external">
+                    <option value="all" {% if external == 'all' %}selected{% endif %}>all</option>
+                    {%- for verdict, abbreviation in verdicts %}
+                        <option value="{{ verdict }}"
+                                {% if external == verdict %}selected{% endif %}>
+                            {{ verdict }}
+                        </option>
+                    {%- endfor %}
+
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="newverdict">Local verdict</label>
+                <select style="width: 100%" class="select2 form-control" name="local" id="local">
+                    <option value="all" {% if local == 'all' %}selected{% endif %}>all</option>
+                    {%- for verdict, abbreviation in verdicts %}
+                        <option value="{{ verdict }}" {% if local == verdict %}selected{% endif %}>
+                            {{ verdict }}
+                        </option>
+                    {%- endfor %}
+
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <label>&nbsp;</label>
+                <input class="btn btn-primary form-control" type="submit" value="Filter"/>
+            </div>
+            <div class="form-group col-md-2">
+                <label>&nbsp;</label>
+                <a href="{{ path('jury_shadow_differences', {view: viewTypes[view]}) }}"
+                   class="btn btn-secondary form-control">Clear</a>
+            </div>
+        </div>
+    </form>
+
+    <div data-ajax-refresh-target data-ajax-refresh-after="updateMatrix">
+        {% include 'jury/partials/shadow_submissions.html.twig' %}
+    </div>
+
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function () {
+            $('input[name=viewtype]').on('change', function () {
+                window.location = '{{ path('jury_shadow_differences', {view: 'REPLACE_ME', external: external, local: local}) }}'.replace('REPLACE_ME', $(this).val());
+            });
+
+            $('.select2').select2();
+
+            window.updateMatrix = function () {
+                var $matrixData = $('[data-new-shadow-matrix]');
+                var $matrix = $('[data-shadow-matrix]');
+                $matrix.html($matrixData.children());
+            }
+        });
+    </script>
+{% endblock %}

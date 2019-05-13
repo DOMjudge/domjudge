@@ -1,0 +1,7 @@
+{% if ajax is defined and ajax %}
+    <div class="d-none" data-new-shadow-matrix>
+        {% include 'jury/partials/shadow_matrix.html.twig' %}
+    </div>
+{% endif %}
+
+{%- include 'jury/partials/submission_list.html.twig' %}

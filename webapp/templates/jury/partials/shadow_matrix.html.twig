@@ -1,0 +1,41 @@
+<div class="mt-2">
+    <table class="rejudgetable">
+        <tr>
+            <th title="external vs. local verdicts">e\l</th>
+            {% for verdict, abbreviation in verdicts %}
+                {% if used[verdict] is defined %}
+                    <th title="{{ verdict }} (local)">{{ abbreviation }}</th>
+                {% endif %}
+            {% endfor %}
+        </tr>
+
+        {% for externalVerdict, localVerdicts in verdictTable %}
+            {% if used[externalVerdict] is defined %}
+                <tr>
+                    <th title="{{ externalVerdict }} (external)">{{ verdicts[externalVerdict] }}</th>
+                    {% for localVerdict, submitIds in localVerdicts %}
+                        {% if used[localVerdict] is defined %}
+                            {% set numSubmissions = submitIds | length %}
+                            {% set link = null %}
+                            {% if externalVerdict == localVerdict %}
+                                {% set class = 'identical' %}
+                            {% elseif numSubmissions == 0 %}
+                                {% set class = 'zero' %}
+                            {% else %}
+                                {% set class = 'changed' %}
+                                {% set link = path('jury_shadow_differences', {view: 'all', external: externalVerdict, local: localVerdict}) %}
+                            {% endif %}
+                            <td class="{{ class }}">
+                                {% if link is not null %}
+                                    <a href="{{ link }}">{{ numSubmissions }}</a>
+                                {% else %}
+                                    {{ numSubmissions }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+</div>

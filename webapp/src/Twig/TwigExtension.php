@@ -3,6 +3,7 @@
 namespace App\Twig;
 
 use App\Entity\Contest;
+use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Submission;
@@ -132,6 +133,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 ->getQuery()
                 ->getResult(),
             'alpha3_countries' => Utils::ALPHA3_COUNTRIES,
+            'data_source' => $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL),
         ];
     }
 
@@ -295,22 +297,41 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     /**
      * Output the testcase results for the given submissions
      * @param Submission $submission
+     * @param bool       $external If true, show external testcase results
      * @return string
      */
-    public function testcaseResults(Submission $submission)
+    public function testcaseResults(Submission $submission, bool $external = false)
     {
         // We use a direct SQL query here for performance reasons
-        $judging   = $submission->getJudgings()->first();
-        $judgingId = $judging ? $judging->getJudgingid() : null;
-        $probId    = $submission->getProbid();
-        $testcases = $this->em->getConnection()->fetchAll(
-            'SELECT r.runresult, t.rank, t.description
+        if ($external) {
+            /** @var ExternalJudgement|null $externalJudgement */
+            $externalJudgement   = $submission->getExternalJudgements()->first();
+            $externalJudgementId = $externalJudgement ? $externalJudgement->getExtjudgementid() : null;
+            $probId              = $submission->getProbid();
+            $testcases           = $this->em->getConnection()->fetchAll(
+                'SELECT er.result as runresult, t.rank, t.description
+                  FROM testcase t
+                  LEFT JOIN external_run er ON (er.testcaseid = t.testcaseid
+                                              AND er.extjudgementid = :extjudgementid)
+                  WHERE t.probid = :probid ORDER BY rank',
+                [':extjudgementid' => $externalJudgementId, ':probid' => $probId]);
+
+            $submissionDone = $externalJudgement ? !empty($externalJudgement->getEndtime()) : false;
+        } else {
+            /** @var Judging|null $judging */
+            $judging   = $submission->getJudgings()->first();
+            $judgingId = $judging ? $judging->getJudgingid() : null;
+            $probId    = $submission->getProbid();
+            $testcases = $this->em->getConnection()->fetchAll(
+                'SELECT r.runresult, t.rank, t.description
                   FROM testcase t
                   LEFT JOIN judging_run r ON (r.testcaseid = t.testcaseid
                                               AND r.judgingid = :judgingid)
-                  WHERE t.probid = :probid ORDER BY rank', [':judgingid' => $judgingId, ':probid' => $probId]);
+                  WHERE t.probid = :probid ORDER BY rank',
+                [':judgingid' => $judgingId, ':probid' => $probId]);
 
-        $submissionDone = $judging ? !empty($judging->getEndtime()) : false;
+            $submissionDone = $judging ? !empty($judging->getEndtime()) : false;
+        }
 
         $results = '';
         foreach ($testcases as $key => $testcase) {
