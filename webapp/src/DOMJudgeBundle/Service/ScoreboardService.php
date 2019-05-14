@@ -688,19 +688,21 @@ class ScoreboardService
         bool $static,
         Contest $contest = null
     ) {
-        $data = [];
-        if ($contest) {
-            $data['refresh'] = [
+        $data = [
+            'refresh' => [
                 'after' => 30,
                 'url' => $refreshUrl,
                 'ajax' => true,
-            ];
+             ],
+             'static' => $static,
+        ];
+
+        if ($contest) {
 
             $scoreFilter = $this->initializeScoreboardFilter($request, $response);
             $scoreboard  = $this->getScoreboard($contest, $jury, $scoreFilter);
 
             $data['contest']              = $contest;
-            $data['static']               = $static;
             $data['scoreFilter']          = $scoreFilter;
             $data['scoreboard']           = $scoreboard;
             $data['filterValues']         = $this->getFilterValues($contest, $jury);
