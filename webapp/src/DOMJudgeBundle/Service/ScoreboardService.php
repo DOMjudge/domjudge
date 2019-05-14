@@ -64,13 +64,14 @@ class ScoreboardService
     }
 
     /**
-     * Get scoreboard data based on the cached data in the scorecache table
+     * Get scoreboard data based on the cached data in the scorecache table.
      *
-     * @param Contest     $contest     The contest to get the scoreboard for
-     * @param bool        $jury        If true, the scoreboard will always be current. If false, frozen results will
-     *                                 not be returned
-     * @param Filter|null $filter      Filter to use for the scoreboard
-     * @param bool        $visibleOnly Iff $jury is true, determines whether to show non-publicly visible teams
+     * @param Contest     $contest     The contest to get the scoreboard for.
+     * @param bool        $jury        If true, the scoreboard will always be current.
+     *                                 If false, frozen results will not be returned.
+     * @param Filter|null $filter      Filter to use for the scoreboard.
+     * @param bool        $visibleOnly Iff $jury is true, determines whether
+     *                                 to show non-publicly visible teams.
      * @return Scoreboard|null
      * @throws \Exception
      */
@@ -98,12 +99,13 @@ class ScoreboardService
     }
 
     /**
-     * Get scoreboard data for a single team based on the cached data in the scorecache table
+     * Get scoreboard data for a single team based on the cached data in the
+     * scorecache table.
      *
-     * @param Contest $contest The contest to get the scoreboard for
-     * @param int     $teamId  The ID of the team to get the scoreboard for
-     * @param bool    $jury    If true, the scoreboard will always be current. If false, frozen results will not be
-     *                         returned
+     * @param Contest $contest The contest to get the scoreboard for.
+     * @param int     $teamId  The ID of the team to get the scoreboard for.
+     * @param bool    $jury    If true, the scoreboard will always be current.
+     *                         If false, frozen results will not be returned.
      * @return Scoreboard|null
      * @throws \Exception
      */
@@ -137,7 +139,7 @@ class ScoreboardService
     }
 
     /**
-     * Calculate the rank for a single team based on the cache tables
+     * Calculate the rank for a single team based on the cache tables.
      *
      * @param Contest         $contest
      * @param Team            $team
@@ -208,10 +210,11 @@ class ScoreboardService
                 ->getQuery()
                 ->getResult();
 
-            // All teams that are tied for this position, in most cases this will only be the team we are finding the rank for,
-            // only retrieve rest of the data when there are actual ties
+            // All teams that are tied for this position. In most cases this
+            // will only be the team we are finding the rank for, only
+            // retrieve rest of the data when there are actual ties.
             if (count($tied) > 1) {
-                // Initialize team scores for each team
+                // Initialize team scores for each team.
                 /** @var TeamScore[] $teamScores */
                 $teamScores = [];
                 $teams      = [];
@@ -220,7 +223,7 @@ class ScoreboardService
                     $teams[]                                        = $rankCache->getTeam();
                 }
 
-                // Get submission times for each of the teams
+                // Get submission times for each of the teams.
                 /** @var ScoreCache[] $tiedScores */
                 $tiedScores = $this->em->createQueryBuilder()
                     ->from('DOMJudgeBundle:ScoreCache', 's')
@@ -243,7 +246,7 @@ class ScoreboardService
                     ));
                 }
 
-                // Now check for each team if it is ranked higher than $teamid
+                // Now check for each team if it is ranked higher than $teamid.
                 foreach ($tied as $rankCache) {
                     if ($rankCache->getTeam()->getTeamid() == $team->getTeamid()) {
                         continue;
@@ -262,13 +265,16 @@ class ScoreboardService
     /**
      * Scoreboard calculation
      *
-     * Given a contest, team and a problem (re)calculate the values for one row in the scoreboard.
+     * Given a contest, team and a problem (re)calculate the values for one
+     * row in the scoreboard.
      *
-     * Due to current transactions usage, this function MUST NOT do anything inside a transaction
+     * Due to current transactions usage, this function MUST NOT do anything
+     * inside a transaction.
+     *
      * @param Contest $contest
      * @param Team    $team
      * @param Problem $problem
-     * @param bool    $updateRankCache If set to false, do not update the rankcache
+     * @param bool    $updateRankCache If set to false, do not update the rankcache.
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
@@ -278,10 +284,11 @@ class ScoreboardService
                                      $team->getTeamid(),
                                      $problem->getProbid()));
 
-        // First acquire an advisory lock to prevent other calls to this method from interfering with our update.
+        // First acquire an advisory lock to prevent other calls to this
+        // method from interfering with our update.
         $lockString = sprintf('domjudge.%d.%d.%d', $contest->getCid(), $team->getTeamid(), $problem->getProbid());
         if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
-                                                               [':lock' => $lockString]) != 1) {
+                                                    [':lock' => $lockString]) != 1) {
             throw new \Exception(sprintf("ScoreboardService::calculateScoreRow failed to obtain lock '%s'",
                                          $lockString));
         }
@@ -326,9 +333,10 @@ class ScoreboardService
 
             // Check if this submission has a publicly visible judging result:
             if ($judging === null || ($verificationRequired && !$judging->getVerified()) || empty($judging->getResult())) {
-                // For the jury: only consider it pending if we don't have a correct one yet.
-                // This is needed because during the freeze we consider submissions after the
-                // correct one for the public to not leak any info.
+                // For the jury: only consider it pending if we don't have a
+                // correct one yet. This is needed because during the freeze
+                // we consider submissions after the correct one for the
+                // public to not leak any info.
                 if (!$correctJury) {
                     $pendingJury++;
                 }
@@ -337,27 +345,29 @@ class ScoreboardService
                 continue;
             }
 
-            // We need to count the submission always, except when we don't want to count compiler
-            // penalties and the judging is a compiler error
+            // We need to count the submission always, except when we don't want
+            // to count compiler penalties and the judging is a compiler error.
             $countSubmission = $compilePenalty || $judging->getResult() != Judging::RESULT_COMPILER_ERROR;
 
             if (!$correctJury && $countSubmission) {
-                // For the jury: only consider it as a submission if we don't have a correct one yet.
-                // This is needed because during the freeze we consider submissions after the
-                // correct one for the public to not leak any info.
+                // For the jury: only consider it as a submission if we don't
+                // have a correct one yet. This is needed because during the
+                // freeze we consider submissions after the correct one for
+                // the public to not leak any info.
                 $submissionsJury++;
             }
             if ($submission->isAfterFreeze()) {
-                // Show submissions after freeze as pending to the public (if SHOW_PENDING is
-                // enabled). Note that we even show these submissions if they are a compiler-error
-                // and compile_penalty is set to false, to not leak any info.
+                // Show submissions after freeze as pending to the public (if
+                // SHOW_PENDING is enabled). Note that we even show these
+                // submissions if they are a compiler-error and
+                // compile_penalty is set to false, to not leak any info.
                 $pendingPubl++;
             } elseif ($countSubmission) {
                 $submissionsPubl++;
             }
 
-            // If we encountered a correct submission during the whole contest, do not consider
-            // the submissions after that one for correctness.
+            // If we encountered a correct submission during the whole contest,
+            // do not consider the submissions after that one for correctness.
             if ($correctJury) {
                 continue;
             }
@@ -372,9 +382,10 @@ class ScoreboardService
                 if (!$submission->isAfterFreeze()) {
                     $correctPubl = true;
                     $timePubl    = $submitTime;
-                    // Stop counting after a first correct submission, but only before the freeze.
-                    // We need to consider all the submissions during the freeze, because we need
-                    // to show them all to the public.
+                    // Stop counting after a first correct submission, but
+                    // only before the freeze. We need to consider all the
+                    // submissions during the freeze, because we need to show
+                    // them all to the public.
                     break;
                 }
             }
@@ -449,11 +460,13 @@ class ScoreboardService
     }
 
     /**
-     * Update tables used for efficiently computing team ranks
+     * Update tables used for efficiently computing team ranks.
      *
      * Given a contest and team (re)calculate the time and solved problems for a team.
      *
-     * Due to current transactions usage, this function MUST NOT do anything inside a transaction
+     * Due to current transactions usage, this function MUST NOT do anything
+     * inside a transaction.
+     *
      * @param Contest $contest
      * @param Team    $team
      * @throws \Exception
@@ -463,15 +476,17 @@ class ScoreboardService
         $this->logger->debug(sprintf("ScoreboardService::updateRankCache '%d' '%d'", $contest->getCid(),
                                      $team->getTeamid()));
 
-        // First acquire an advisory lock to prevent other calls to this method from interfering with our update.
+        // First acquire an advisory lock to prevent other calls to this
+        // method from interfering with our update.
         $lockString = sprintf('domjudge.%d.%d', $contest->getCid(), $team->getTeamid());
         if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
                                                                [':lock' => $lockString]) != 1) {
             throw new \Exception(sprintf("ScoreboardService::updateRankCache failed to obtain lock '%s'", $lockString));
         }
 
-        // Fetch contest problems. We can not add it as a relation on ScoreCache as Doctrine doesn't seem to like that its keys
-        // are part of the primary key
+        // Fetch contest problems. We can not add it as a relation on
+        // ScoreCache as Doctrine doesn't seem to like that its keys are part
+        // of the primary key.
         /** @var ContestProblem[] $contestProblems */
         $contestProblems = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:ContestProblem', 'cp', 'cp.probid')
@@ -493,7 +508,7 @@ class ScoreboardService
         $penaltyTime      = (int)$this->dj->dbconfig_get('penalty_time', 20);
         $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
 
-        // Now fetch the ScoreCache entries
+        // Now fetch the ScoreCache entries.
         /** @var ScoreCache[] $scoreCacheRows */
         $scoreCacheRows = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:ScoreCache', 's')
@@ -521,7 +536,7 @@ class ScoreboardService
             }
         }
 
-        // Use a direct REPLACE INTO query to drastically speed this up
+        // Use a direct REPLACE INTO query to drastically speed this up.
         $params = [
             ':cid' => $contest->getCid(),
             ':teamid' => $team->getTeamid(),
