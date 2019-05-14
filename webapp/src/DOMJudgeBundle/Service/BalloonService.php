@@ -50,6 +50,11 @@ class BalloonService
         Submission $submission,
         Judging $judging = null
     ) {
+        // Balloon processing disabled for contest
+        if (!$contest->getProcessBalloons()) {
+            return;
+        }
+
         // Make sure judging is correct
         if (!$judging || $judging->getResult() !== Judging::RESULT_CORRECT) {
             return;
@@ -77,13 +82,11 @@ class BalloonService
             ->getSingleScalarResult();
 
         if ($numCorrect == 0) {
-            if ($contest->getProcessBalloons()) {
-                $balloon = new Balloon();
-                $balloon->setSubmission(
-                    $this->em->getReference(Submission::class, $submission->getSubmitid()));
-                $this->em->persist($balloon);
-                $this->em->flush();
-            }
+            $balloon = new Balloon();
+            $balloon->setSubmission(
+                $this->em->getReference(Submission::class, $submission->getSubmitid()));
+            $this->em->persist($balloon);
+            $this->em->flush();
         }
     }
 }
