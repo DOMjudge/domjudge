@@ -52,7 +52,7 @@ install-domserver:
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
-		judgehost-static.php sudoers-domjudge
+		judgehost-static.php sudoers-domjudge genrestapicredentials
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_etcdir) \
 		judgehost-config.php common-config.php
 # Password files are installed from root Makefile.
