@@ -2,7 +2,7 @@ DOMjudge
 --------
 [![pipeline status](https://gitlab.com/DOMjudge/domjudge/badges/master/pipeline.svg)](https://gitlab.com/DOMjudge/domjudge/commits/master)
 [![Coverity Scan Status](https://img.shields.io/coverity/scan/671.svg)](https://scan.coverity.com/projects/domjudge)
-[![Code Climate](https://codeclimate.com/github/DOMjudge/domjudge/badges/gpa.svg)](https://codeclimate.com/github/DOMjudge/domjudge)
+[![LGTM alerts](https://img.shields.io/lgtm/alerts/g/DOMjudge/domjudge.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/DOMjudge/domjudge/alerts/)
 
 This is the Programming Contest Jury System "DOMjudge" version 7.1.0DEV
 

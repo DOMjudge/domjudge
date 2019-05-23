@@ -1,0 +1,28 @@
+path_classifiers:
+  test:
+    - tests
+  library:
+    - lib/vendor
+  docs:
+    - doc
+queries:
+  - exclude: cpp/fixme-comment
+extraction:
+  cpp:
+    prepare:
+      packages:
+        - composer
+        - php-curl
+        - php-gd
+        - php-intl
+        - php-mbstring
+        - php-mysql
+        - php-xml
+        - php-zip
+    configure:
+      command:
+        - make dist DOC_BUILD_ENABLED=no
+        - ./configure --disable-doc-build
+    index:
+      build_command:
+        - make build
