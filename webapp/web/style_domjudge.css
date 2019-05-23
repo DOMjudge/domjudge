@@ -263,6 +263,10 @@ td.scorenc { border-color: silver; border-right: 0; }
     cursor: pointer;
 }
 
+.heart.fas {
+    color: red;
+}
+
 .countryflag {
     height: 30px;
     width: 40px;
