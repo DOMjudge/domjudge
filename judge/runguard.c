@@ -858,7 +858,7 @@ void setrestrictions()
 	}
 }
 
-void pump_pipes(fd_set readfds, size_t data_read[], size_t data_passed[])
+void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 {
 	ssize_t nread, nwritten;
 	size_t to_read, to_write;
@@ -867,7 +867,7 @@ void pump_pipes(fd_set readfds, size_t data_read[], size_t data_passed[])
 	/* Check to see if data is available and pass it on */
 	for(i=1; i<=2; i++) {
 		if ( child_pipefd[i][PIPE_OUT] != -1 &&
-		     FD_ISSET(child_pipefd[i][PIPE_OUT],&readfds) ) {
+		     FD_ISSET(child_pipefd[i][PIPE_OUT], readfds) ) {
 
 			if (limit_streamsize && data_passed[i] == streamsize) {
 				/* Throw away data if we're at the output limit, but
@@ -1326,7 +1326,7 @@ int main(int argc, char **argv)
 				if ( pid==child_pid ) break;
 			}
 
-			pump_pipes(readfds, data_read, data_passed);
+			pump_pipes(&readfds, data_read, data_passed);
 		}
 
 		/* Reset pipe filedescriptors to use blocking I/O. */
@@ -1347,7 +1347,7 @@ int main(int argc, char **argv)
 
 		do {
 			total_data = data_passed[1] + data_passed[2];
-			pump_pipes(readfds, data_read, data_passed);
+			pump_pipes(&readfds, data_read, data_passed);
 		} while ( data_passed[1] + data_passed[2] > total_data );
 
 		/* Close the output files */
