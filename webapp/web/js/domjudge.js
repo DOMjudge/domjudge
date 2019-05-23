@@ -80,7 +80,7 @@ function sendNotification(title, options = {})
     var not = new Notification(title, options);
 
     if ( link!==null ) {
-        not.onclick = function() { window.open(link); }
+        not.onclick = function() { window.open(link); };
     }
 
     if ( options.tag!==null ) {
@@ -343,8 +343,6 @@ function initFavouriteTeams()
 	// copy favourite teams to the top of the scoreboard
 	for (var i = 0; i < cntFound; i++) {
 		var copy = toAdd[i];
-		var firstCol = getRank(copy);
-		var color = "red";
 		var style = "";
 		if (i === 0) {
 			style += "border-top: 2px solid black;";
@@ -378,7 +376,7 @@ function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
 		field.setAttribute("id",   name);
 		field.setAttribute("value", value);
 		form.appendChild(field);
-	}
+	};
 
 	var msg = document.getElementById("comment").value;
 
