@@ -362,6 +362,11 @@ function initFavouriteTeams()
 // Note that team,prob,submission IDs are as expected by iCAT.
 function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
 {
+	var msg = document.getElementById("comment");
+	if (msg === null) {
+		return;
+	}
+
 	var form = document.createElement("form");
 	form.setAttribute("method", "post");
 	form.setAttribute("action", url);
@@ -378,12 +383,10 @@ function postVerifyCommentToICAT(url, user, teamid, probid, submissionid)
 		form.appendChild(field);
 	};
 
-	var msg = document.getElementById("comment").value;
-
 	addField("user", user);
 	addField("priority", 1);
 	addField("submission", submissionid);
-	addField("text", "Team #t"+teamid+" on problem #p"+probid+": "+msg);
+	addField("text", "Team #t"+teamid+" on problem #p"+probid+": "+msg.value);
 
 	document.body.appendChild(form);
 
