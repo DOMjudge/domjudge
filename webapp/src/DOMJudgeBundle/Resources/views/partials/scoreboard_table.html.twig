@@ -110,9 +110,9 @@
         {% endif %}
 
         {# check whether this is us, otherwise use category colour #}
-        {% if myTeam is defined and myTeam.teamid == score.team.teamid %}
+        {% if myTeamId is defined and myTeamId == score.team.teamid %}
             {% set classes = classes | merge(['scorethisisme']) %}
-            {% set color = null %}
+            {% set color = '#FFFF99' %}
         {% else %}
             {% set color = score.team.category.color %}
         {% endif %}

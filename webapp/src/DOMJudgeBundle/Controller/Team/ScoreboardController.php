@@ -68,6 +68,7 @@ class ScoreboardController extends BaseController
         $refreshUrl = $this->generateUrl('team_scoreboard');
         $data       = $this->scoreboardService->getScoreboardTwigData($request, $response, $refreshUrl, false, false,
                                                                       false, $contest);
+        $data['myTeamId'] = $user->getTeamid();
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('@DOMJudge/partials/scoreboard.html.twig', $data, $response);
