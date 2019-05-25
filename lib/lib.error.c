@@ -55,8 +55,9 @@ int  syslog_open  = 0;
 /* Main function that contains logging code */
 void vlogmsg(int msglevel, const char *mesg, va_list ap)
 {
-    struct timeval currtime;
-    char timestring[128];
+	struct timeval currtime;
+	struct tm tm_buf;
+	char timestring[128];
 	char *buffer;
 	int bufferlen;
 	va_list aq;
@@ -80,8 +81,9 @@ void vlogmsg(int msglevel, const char *mesg, va_list ap)
 		}
 	}
 
-	gettimeofday(&currtime,NULL);
-	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", localtime(&currtime.tv_sec));
+	gettimeofday(&currtime, NULL);
+	localtime_r(&currtime.tv_sec, &tm_buf);
+	strftime(timestring, sizeof(timestring), "%b %d %H:%M:%S", &tm_buf);
 	sprintf(timestring+strlen(timestring), ".%03d", (int)(currtime.tv_usec/1000));
 
 	bufferlen = strlen(timestring)+strlen(progname)+strlen(mesg)+20;
