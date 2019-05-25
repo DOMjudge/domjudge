@@ -20,10 +20,9 @@
 			"package": {
 				"name": "angel-vladov/select2-bootstrap-theme",
 				"version": "0.2.0-beta.2",
-				"source": {
-					"url": "https://github.com/angel-vladov/select2-bootstrap-theme.git",
-					"type": "git",
-					"reference": "0.2.0-beta.2"
+				"dist": {
+					"url": "https://github.com/angel-vladov/select2-bootstrap-theme/archive/0.2.0-beta.2.zip",
+					"type": "zip"
 				}
 			}
 		},

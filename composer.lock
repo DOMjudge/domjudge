@@ -1,18 +1,17 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d04e33cbd281abf76731921ccab49542",
+    "content-hash": "e4c0b5eb6d73b250902f24bebec5d0b1",
     "packages": [
         {
             "name": "angel-vladov/select2-bootstrap-theme",
             "version": "0.2.0-beta.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/angel-vladov/select2-bootstrap-theme.git",
-                "reference": "0.2.0-beta.2"
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/angel-vladov/select2-bootstrap-theme/archive/0.2.0-beta.2.zip"
             },
             "type": "library"
         },
@@ -1030,9 +1029,7 @@
             "version": "5.5.0",
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/5.5.0/fontawesome-free-5.5.0-web.zip",
-                "reference": null,
-                "shasum": null
+                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/5.5.0/fontawesome-free-5.5.0-web.zip"
             },
             "type": "library"
         },
@@ -3073,7 +3070,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "backendtea@gmail.com"
+                    "email": "BackEndTea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",
