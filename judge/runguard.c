@@ -78,7 +78,6 @@
 #define PIPE_OUT 0
 
 #define BUF_SIZE 4*1024
-char buf[BUF_SIZE];
 
 /* Types of time for writing to file. */
 #define WALL_TIME_TYPE 0
@@ -860,6 +859,7 @@ void setrestrictions()
 
 void pump_pipes(fd_set* readfds, size_t data_read[], size_t data_passed[])
 {
+	char buf[BUF_SIZE];
 	ssize_t nread, nwritten;
 	size_t to_read, to_write;
 	int i;
