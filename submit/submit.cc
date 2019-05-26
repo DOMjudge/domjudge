@@ -469,8 +469,7 @@ void curl_setup()
 {
 	handle = curl_easy_init();
 	if ( handle == NULL ) {
-		warning(0,"curl_easy_init() error");
-		return;
+		error(0,"curl_easy_init() error");
 	}
 
 	curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, writesstream);
@@ -695,7 +694,7 @@ magicerror:
 #endif /* HAVE_MAGIC_H */
 
 /*
- * Make an API call 'funcname'. A NULL value is returned when the call fails.
+ * Make an API call 'funcname'. An error is thrown when the call fails.
  */
 Json::Value doAPIrequest(const char *funcname)
 {
@@ -704,6 +703,8 @@ Json::Value doAPIrequest(const char *funcname)
 	stringstream curloutput;
 	Json::Reader reader;
 	Json::Value result;
+	long http_code;
+	string line;
 
 	url = strdup((baseurl+"api/"+API_VERSION+string(funcname)).c_str());
 
@@ -715,17 +716,28 @@ Json::Value doAPIrequest(const char *funcname)
 	logmsg(LOG_INFO,"connecting to %s",url);
 
 	if ( (res=curl_easy_perform(handle))!=CURLE_OK ) {
-		warning(0,"downloading '%s': %s",url,curlerrormsg);
-		free(url);
-		return result;
+		error(0,"'%s': %s",url,curlerrormsg);
 	}
 
 	free(url);
 
+	// The connection worked, but we may have received an HTTP error
+	curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
+	if ( http_code >= 300 ) {
+		while ( getline(curloutput,line) ) {
+			printf("%s\n", decode_HTML_entities(line).c_str());
+		}
+		if ( http_code == 401 ) {
+			error(0, "Authentication failed. Please check your DOMjudge credentials.");
+		} else {
+			error(0, "API request %s failed (code %li)", funcname, http_code);
+		}
+	}
+
 	logmsg(LOG_DEBUG,"API call '%s' returned:\n%s\n",funcname,curloutput.str().c_str());
 
 	if ( !reader.parse(curloutput, result) ) {
-		warning(0,"parsing REST API output: %s",
+		error(0,"parsing REST API output: %s",
 		        reader.getFormattedErrorMessages().c_str());
 	}
 
@@ -739,7 +751,7 @@ bool readlanguages()
 	string endpoint = "contests/" + mycontest.id + "/languages";
 	res = doAPIrequest(endpoint.c_str());
 
-	if ( res.isNull() || !res.isArray() ) return false;
+	if (!res.isArray()) return false;
 
 	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		language lang;
@@ -776,7 +788,7 @@ bool readproblems()
 	string endpoint = "contests/" + mycontest.id + "/problems";
 	res = doAPIrequest(endpoint.c_str());
 
-	if ( res.isNull() || !res.isArray() ) return false;
+	if(!res.isArray()) return false;
 
 	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		problem prob;
@@ -803,7 +815,7 @@ bool readcontests()
 
 	res = doAPIrequest("contests");
 
-	if ( res.isNull() || !res.isArray() ) return false;
+	if(!res.isArray()) return false;
 
 	for(Json::ArrayIndex i=0; i<res.size(); i++) {
 		contest cont;
