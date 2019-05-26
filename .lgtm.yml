@@ -3,6 +3,9 @@ path_classifiers:
     - tests
   library:
     - lib/vendor
+    - webapp/web/js/ace
+    - "webapp/web/js/bootstrap-toggle.*"
+    - webapp/web/js/jscolor.js
   docs:
     - doc
 queries:
