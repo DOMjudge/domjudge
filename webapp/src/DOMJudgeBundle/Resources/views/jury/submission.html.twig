@@ -120,13 +120,11 @@
 
         <span>
             <i class="fas fa-stopwatch" title="Allowed runtime:"></i>
-            <span title="{{ submission.submittime | printtime('%Y-%m-%d %H:%M:%S (%Z)') }}">
-                {{ submission.problem.timelimit * submission.language.timeFactor }}s
-            </span>
+            {{ submission.problem.timelimit * submission.language.timeFactor }}s
         </span>
 
         <span>
-            <i class="fas fa-code"></i>
+            <i class="fas fa-code" title="Source code:"></i>
             <a href="{{ path('jury_submission_source', {submission: submission.submitid}) }}">
                 View source code
             </a>
@@ -134,7 +132,7 @@
 
         {% if ext_ccs_url is not null and submission.externalid is null %}
             <span>
-                <i class="fas fa-link"></i>
+                <i class="fas fa-link" title="External link:"></i>
                 <a href="{{ submission | externalCcsUrl }}" target="_blank">
                     View in Kattis
                 </a>
