@@ -9,6 +9,7 @@ Version 7.0.2 - DEV
  - Fix judgedaemon error message on missing chroot.
  - Fix highlighting of own team row in team scoreboard.
  - Fix some title elements on jury submission page.
+ - Fix type error on jury Analysis page.
 
 Version 7.0.1 - 6 May 2019
 --------------------------
