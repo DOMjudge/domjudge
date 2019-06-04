@@ -3,6 +3,24 @@ DOMjudge Programming Contest Judging System
 Version 7.1.0 - DEV
 -------------------
 
+Version 7.0.2 - 4 June 2019
+---------------------------
+ - Fix first-to-solve indicators after applying a rejudging.
+ - Fix the public interface when there are no active contests.
+ - Fix performance when using the update_judging_seconds option.
+ - Fix performance of applying a rejudging.
+ - Fix judgedaemon error message on missing chroot.
+ - Fix highlighting of own team row in team scoreboard.
+ - Fix some title elements on jury submission page.
+ - Fix type error on jury Analysis page.
+
+Version 7.0.1 - 6 May 2019
+--------------------------
+ - Fix affiliation checking in Configration Checker.
+ - Improve feedback on errors when uploading problem zip files.
+ - Fix adding a team to a contest by editing the team.
+ - Fix submitting when sourcefiles_limit is set to 1.
+
 Version 7.0.0 - 28 April 2019
 -----------------------------
  - Initial admin password is now generated on database creation, and written
