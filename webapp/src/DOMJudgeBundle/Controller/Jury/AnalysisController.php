@@ -28,7 +28,7 @@ class AnalysisController extends Controller
         'all' => 'All teams',
     ];
 
-    private static function set_or_increment(array &$array, string $index) {
+    private static function set_or_increment(array &$array, $index) {
       if (!array_key_exists($index, $array)) {
         $array[$index] = 0;
       }
