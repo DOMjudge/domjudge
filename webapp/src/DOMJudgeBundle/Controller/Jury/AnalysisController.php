@@ -28,11 +28,12 @@ class AnalysisController extends Controller
         'all' => 'All teams',
     ];
 
-    private static function set_or_increment(array &$array, $index) {
-      if (!array_key_exists($index, $array)) {
-        $array[$index] = 0;
-      }
-      $array[$index] = $array[$index] +1;
+    private static function set_or_increment(array &$array, $index)
+    {
+        if (!array_key_exists($index, $array)) {
+            $array[$index] = 0;
+        }
+        $array[$index]++;
     }
 
     public function __construct(DOMJudgeService $dj)
