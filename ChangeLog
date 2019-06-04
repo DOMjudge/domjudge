@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.0.2 - DEV
--------------------
+Version 7.0.2 - 4 June 2019
+---------------------------
  - Fix first-to-solve indicators after applying a rejudging.
  - Fix the public interface when there are no active contests.
  - Fix performance when using the update_judging_seconds option.
