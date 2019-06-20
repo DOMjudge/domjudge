@@ -44,10 +44,6 @@ install-domserver:
 			ln -s $$realtarget $$link ; \
 		fi \
 	done
-	-for d in cache logs sessions ; do \
-		$(INSTALL_WEBSITE) -m 0775 -d $(DESTDIR)$(domserver_webappdir)/var/$$d ; \
-	done
-	-$(INSTALL_WEBSITE) -t $(DESTDIR)$(domserver_webappdir)/var var/*.php var/*.cache
 	cp        -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist
 	chmod a+r    $(DESTDIR)$(domserver_webappdir)/phpunit.xml.dist
 
