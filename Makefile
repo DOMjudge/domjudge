@@ -130,10 +130,12 @@ endif
 # Fix permissions and ownership for password files:
 	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(domserver_etcdir) \
 		etc/restapi.secret
+	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(domserver_etcdir) \
+		etc/initial_admin_password.secret
 	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
 		etc/dbpasswords.secret
-	-$(INSTALL_WEBSITE) -m 0600 -t $(DESTDIR)$(domserver_etcdir) \
-		etc/initial_admin_password.secret
+	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_webappdir)/app/config \
+		webapp/app/config/parameters.yml
 	@echo ""
 	@echo "Domserver install complete. Admin web interface password can be found in:"
 	@echo "$(DESTDIR)$(domserver_etcdir)/initial_admin_password.secret"
