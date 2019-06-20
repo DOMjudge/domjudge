@@ -44,8 +44,7 @@ install-domserver:
 			ln -s $$realtarget $$link ; \
 		fi \
 	done
-	cp        -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist
-	chmod a+r    $(DESTDIR)$(domserver_webappdir)/phpunit.xml.dist
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist
 
 install-docs:
 	$(INSTALL_DATA) -T web/images/countries/README    $(DESTDIR)$(domjudge_docdir)/README.country_flags
