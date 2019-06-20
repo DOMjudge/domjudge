@@ -128,9 +128,7 @@ ifneq "$(FHS_ENABLED)" "yes"
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
 endif
 # Fix permissions and ownership for password files:
-# FIXME: installing restapi.secret with website group is a quick hack
-# to fix eventlog() to query the REST API, see issue #283.
-	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
+	-$(INSTALL_USER) -m 0600 -t $(DESTDIR)$(domserver_etcdir) \
 		etc/restapi.secret
 	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
 		etc/dbpasswords.secret
@@ -265,9 +263,6 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 
 maintainer-postinstall-permissions:
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret
-# FIXME: this is a quick hack to fix eventlog() to query the REST API,
-# see issue #283.
-	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/restapi.secret
 	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
 	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
