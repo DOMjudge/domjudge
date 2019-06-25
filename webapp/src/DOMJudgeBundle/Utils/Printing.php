@@ -60,21 +60,21 @@ class Printing
     
         // For debugging or spooling to a different host.
         // Also uncomment '-p $tmp' below.
-        $tmp = tempnam('/tmp', 'print_'.$username.'_');
+        //$tmp = tempnam('/tmp', 'print_'.$username.'_');
     
         $cmd = "enscript -C " . $highlight
              . " -b " . escapeshellarg($header)
              . " -a 0-10 "
              . " -f Courier9 "
-             . " -p $tmp "
+             //. " -p $tmp "
              . escapeshellarg($filename) . " 2>&1";
     
         exec($cmd, $output, $retval);
     
         // Make file readable for others than webserver user,
         // and give it an extension:
-        chmod($tmp, 0644);
-        rename($tmp, $tmp.'.ps');
+        //chmod($tmp, 0644);
+        //rename($tmp, $tmp.'.ps');
     
         return [$retval == 0, implode("\n", $output)];
     }
