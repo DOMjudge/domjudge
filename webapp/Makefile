@@ -22,7 +22,7 @@ copy-bundle-assets:
 	cp -R ../lib/vendor/nelmio/api-doc-bundle/Resources/public/* web/bundles/nelmioapidoc/
 
 clean-l:
-	-rm -r web/bundles/nelmioapidoc
+	-rm -rf web/bundles/nelmioapidoc
 
 install-domserver:
 # This must be done first to install with the rest.
