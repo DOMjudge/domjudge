@@ -68,9 +68,6 @@ Various JavaScript libraries/snippets are included under www/js/:
 - jQuery: licensed under the MIT licence, see COPYING.MIT.
 - jQuery TokenInput: dual licensed under GPL and MIT licences, see COPYING and COPYING.MIT.
 
-The Spyc PHP YAML parser is included, licensed under the MIT licence,
-see COPYING.MIT.
-
 Font Awesome is copyright FortAwesome.
 Icons License: CC BY 4.0 License
 Font License: SIL OFL 1.1 (http://scripts.sil.org/OFL)

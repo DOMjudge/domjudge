@@ -10,8 +10,6 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
     die("Commandline use only");
 }
 
-require(LIBVENDORDIR . '/autoload.php');
-
 require(ETCDIR . '/judgehost-config.php');
 
 $endpoints = [];
@@ -685,9 +683,16 @@ function read_metadata(string $filename)
     if (!is_readable($filename)) return null;
 
     // Don't quite treat it as YAML, but simply key/value pairs.
-    $contents = preg_replace('/: (.*)$/m', ': "$1"', dj_file_get_contents($filename));
+    $contents = explode("\n", dj_file_get_contents($filename));
+    $res = [];
+    foreach($contents as $line) {
+        if (strpos($line, ":") !== false) {
+            list($key, $value) = explode(":", $line);
+            $res[$key] = trim($value);
+        }
+    }
 
-    return spyc_load($contents);
+    return $res;
 }
 
 function send_unsent_judging_runs($unsent_judging_runs, $judgingid)
@@ -804,15 +809,9 @@ function judge(array $row)
     $metadata = read_metadata($workdir . '/compile.meta');
     if (isset($metadata['internal-error'])) {
         alert('error');
-        if (is_array($metadata['internal-error'])) {
-            $internalError = reset($metadata['internal-error']);
-            $internalErrors = implode("\n", $metadata['internal-error']);
-        } else {
-            $internalError = $metadata['internal-error'];
-            $internalErrors = $metadata['internal-error'];
-        }
+        $internalError = $metadata['internal-error'];
         $compile_output .= "\n--------------------------------------------------------------------------------\n\n".
-            "Internal errors reported:\n".$internalErrors;
+            "Internal errors reported:\n".$internalError;
 
         if (preg_match('/^compile script: /', $internalError)) {
             $internalError = preg_replace('/^compile script: /', '', $internalError);

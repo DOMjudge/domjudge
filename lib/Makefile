@@ -31,7 +31,3 @@ install-domserver:
 install-judgehost:
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libdir)    *.php *.sh
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libdir)    alert
-# KLUDGE: how to install a tree of files with correct permissions?
-	cp -R           -t $(DESTDIR)$(judgehost_libvendordir) vendor/*
-	$(call fix_composer_paths,$(DESTDIR)$(judgehost_libvendordir))
-	chmod -R a+rX      $(DESTDIR)$(judgehost_libvendordir)

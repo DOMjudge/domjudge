@@ -40,7 +40,6 @@
 		"ext-pcntl": "*",
 		"ext-intl": "*",
 		"ext-gd": "*",
-		"mustangostang/spyc": "0.5.*",
 		"php": ">= 7.0",
 		"ircmaxell/password-compat": "*",
 		"doctrine/doctrine-bundle": "^1.9",
