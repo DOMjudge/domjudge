@@ -687,7 +687,7 @@ function read_metadata(string $filename)
     $res = [];
     foreach($contents as $line) {
         if (strpos($line, ":") !== false) {
-            list($key, $value) = explode(":", $line);
+            list($key, $value) = explode(":", $line, 2);
             $res[$key] = trim($value);
         }
     }
