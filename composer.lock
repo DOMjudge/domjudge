@@ -1,7 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
     "content-hash": "e4c0b5eb6d73b250902f24bebec5d0b1",
@@ -9,10 +9,6 @@
         {
             "name": "angel-vladov/select2-bootstrap-theme",
             "version": "0.2.0-beta.2",
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/angel-vladov/select2-bootstrap-theme/archive/0.2.0-beta.2.zip"
-            },
             "type": "library"
         },
         {
@@ -1029,7 +1025,9 @@
             "version": "5.5.0",
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/5.5.0/fontawesome-free-5.5.0-web.zip"
+                "url": "https://github.com/FortAwesome/Font-Awesome/releases/download/5.5.0/fontawesome-free-5.5.0-web.zip",
+                "reference": null,
+                "shasum": null
             },
             "type": "library"
         },
@@ -1582,16 +1580,16 @@
         },
         {
             "name": "jms/serializer-bundle",
-            "version": "2.4.2",
+            "version": "2.4.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/JMSSerializerBundle.git",
-                "reference": "22eb9a2f7983394b0770237ca91e879eb2a4b4a6"
+                "reference": "92ee808c64c1c180775a0e57d00e3be0674668fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/JMSSerializerBundle/zipball/22eb9a2f7983394b0770237ca91e879eb2a4b4a6",
-                "reference": "22eb9a2f7983394b0770237ca91e879eb2a4b4a6",
+                "url": "https://api.github.com/repos/schmittjoh/JMSSerializerBundle/zipball/92ee808c64c1c180775a0e57d00e3be0674668fb",
+                "reference": "92ee808c64c1c180775a0e57d00e3be0674668fb",
                 "shasum": ""
             },
             "require": {
@@ -1652,7 +1650,7 @@
                 "serialization",
                 "xml"
             ],
-            "time": "2018-06-19T13:39:25+00:00"
+            "time": "2019-03-30T10:26:09+00:00"
         },
         {
             "name": "kriswallsmith/assetic",
@@ -3070,7 +3068,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "BackEndTea@gmail.com"
+                    "email": "backendtea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",
