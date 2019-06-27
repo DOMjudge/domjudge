@@ -147,14 +147,14 @@ class ImportExportController extends BaseController
         /** @var TeamCategory[] $teamCategories */
         $teamCategories = $this->em->createQueryBuilder()
             ->from('DOMJudgeBundle:TeamCategory', 'c', 'c.categoryid')
-            ->select('c')
+            ->select('c.sortorder')
             ->where('c.visible = 1')
             ->groupBy('c.sortorder')
             ->orderBy('c.sortorder')
             ->getQuery()
             ->getResult();
         $sortOrders     = array_map(function ($teamCategory) {
-            return $teamCategory->getSortorder();
+            return $teamCategory["sortorder"];
         }, $teamCategories);
 
         return $this->render('@DOMJudge/jury/import_export.html.twig', [
