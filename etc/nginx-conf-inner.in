@@ -5,13 +5,13 @@
 
 server_name _default_;
 
-# set max upload size. Make sure the PHP values also high enough
+# set max upload size. Make sure the PHP values are also high enough
 client_max_body_size 128M;
 
 # Variables used in the nginx configuration
 set $domjudgeRoot @domserver_webappdir@/web;
 set $frontController app.php;
-# Set this to '' instead of /domjudge when running in the roof of your system
+# Set this to '' instead of /domjudge when running in the root of your system
 set $prefix /domjudge;
 
 # Uncomment to run it out of the root of your system
@@ -42,7 +42,7 @@ location @domjudgeFront {
 }
 
 # The X-Frame-Options header defends against so-called 'clickjacking' attacks.
-# Should you want to load part of ODMjudge (e.g. the public scoreboard) in
+# Should you want to load part of DOMjudge (e.g. the public scoreboard) in
 # a HTML frame or iframe, disable this header for that part of DOMjudge only.
 add_header X-Frame-Options "DENY";
 
