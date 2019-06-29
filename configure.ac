@@ -154,7 +154,6 @@ if test "x$FHS_ENABLED" = xyes ; then
 	AC_SUBST(judgehost_bindir,      $bindir)
 	AC_SUBST(judgehost_etcdir,      $sysconfdir/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_libdir,      $libdir/${PACKAGE_TARNAME})
-	AC_SUBST(judgehost_libvendordir,$libdir/${PACKAGE_TARNAME}/vendor)
 	AC_SUBST(judgehost_libjudgedir, $libdir/${PACKAGE_TARNAME}/judge)
 	AC_SUBST(judgehost_logdir,      $localstatedir/log/${PACKAGE_TARNAME})
 	AC_SUBST(judgehost_rundir,      $localstatedir/run/${PACKAGE_TARNAME})
