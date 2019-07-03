@@ -1,0 +1,67 @@
+{# Render a list of balloons for a jury page #}
+{# @var \DOMJudgeBundle\Entity\Balloon balloonfoo #}
+
+{% if balloons is empty %}
+    <div class="alert alert-warning">No balloons</div>
+{% else %}
+    <table class="data-table table table-hover table-striped table-sm balloons-table" style="width:auto">
+        <thead class="thead-light">
+        <tr>
+            {%- if showContest %}
+                <th scope="col">contest</th>
+            {%- endif %}
+            <th scope="col">status</th>
+            <th scope="col">balloonid</th>
+            <th scope="col">time</th>
+            <th scope="col">solved</th>
+            <th scope="col">team</th>
+            <th scope="col">Affiliation</th>
+            <th scope="col">location</th>
+            <th scope="col">category</th>
+            <th scope="col">total</th>
+            <th scope="col">awards</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {%- for balloon in balloons %}
+            <tr class="{% if balloon.data.done.value %}disabled{% endif %}"
+                data-affiliation-id="{{ balloon.data.affiliation.value }}"
+                data-location-str="{{ balloon.data.location.value }}">
+                {%- if showContest %}
+                    <td><a href="{{ link }}">c{{ balloon.cid }}</a></td>
+                {%- endif %}
+                <td>
+                {%- if balloon.data.done.value -%}
+                    <i class="far fa-check-circle"></i>
+                {%- else -%}
+                    <i class="far fa-hourglass"></i>
+                {%- endif -%}
+                <td>{{ balloon.data.balloonid.value }}</td>
+                <td>{{ balloon.data.time.value | printtime(null, balloon.data.contest) }}</td>
+                <td><i style="color: {{ balloon.data.color.value }}" class="fas fa-golf-ball"></i> {{ balloon.data.problem.value }}</td>
+                <td>{{ balloon.data.team.value }}</td>
+                <td>{{ balloon.data.affiliation.value }}</td>
+                <td>{{ balloon.data.location.value }}</td>
+                <td>{{ balloon.data.category.value }}</td>
+                <td>
+                {%- for totalballoon in balloon.data.total.value -%}
+                    <i style="color: {{ totalballoon }}" class="fas fa-golf-ball"></i>
+                {%- endfor -%}
+                </td>
+                <td>{{ balloon.data.awards.value }}</td>
+                <td>
+                    {%- if not balloon.data.done.value -%}
+                    {%- set link = path('jury_balloons_setdone', {balloonId: balloon.data.balloonid.value}) %}
+                    <a href="{{ link }}" title="mark balloon as done">
+                    <i class="fas fa-running"></i>
+                    </a>
+                </td>
+                {%- endif -%}
+            </tr>
+        {%- endfor %}
+
+        </tbody>
+    </table>
+
+{% endif %}

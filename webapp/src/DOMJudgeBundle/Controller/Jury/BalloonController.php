@@ -85,7 +85,7 @@ class BalloonController extends Controller
         $query = $em->createQueryBuilder()
             ->select('b', 's.submittime', 'p.probid',
                 't.teamid', 't.name AS teamname', 't.room', 'c.name AS catname',
-                's.cid', 'co.shortname', 'cp.shortname AS probshortname', 'cp.color')
+                's.cid', 'co.shortname', 'cp.shortname AS probshortname', 'cp.color', 'a.affilid AS affilid' )
             ->from('DOMJudgeBundle:Balloon', 'b')
             ->leftJoin('b.submission', 's')
             ->leftJoin('s.problem', 'p')
@@ -93,18 +93,20 @@ class BalloonController extends Controller
             ->leftJoin('p.contest_problems', 'cp', 'co.cid = cp.cid AND p.probid = cp.probid')
             ->leftJoin('s.team', 't')
             ->leftJoin('t.category', 'c')
-            ->orderBy('s.submittime', 'DESC');
+            ->leftJoin('t.affiliation', 'a')
+            ->orderBy('s.submittime', 'DESC')
+            ->orderBy('b.done', 'ASC');
 
         $balloons = $query->getQuery()->getResult();
         // Loop once over the results to get totals and awards
         $TOTAL_BALLOONS = $AWARD_BALLOONS = [];
         foreach ($balloons as $balloonsData) {
+		#var_dump($balloonsData);
             if ( $balloonsData['color'] === null ) {
                 continue;
             }
 
-            $TOTAL_BALLOONS[$balloonsData['teamid']][$balloonsData['cid']."-".$balloonsData['probshortname']] =
-                Utils::balloonSym($balloonsData['color']);
+            $TOTAL_BALLOONS[$balloonsData['teamid']][$balloonsData['cid']."-".$balloonsData['probshortname']] = $balloonsData['color'];
 
             // Keep a list of balloons that were first to solve this problem;
             // can be multiple, one for each sortorder.
@@ -149,14 +151,18 @@ class BalloonController extends Controller
             }
 
             $balloondata['balloonid']['value'] = $balloonId;
-            $balloondata['time']['value'] = Utils::printtime($stime, $timeFormat);
+            $balloondata['time']['value'] = $stime; #Utils::printtime($stime, $timeFormat);
             $balloondata['solved']['value'] = Utils::balloonSym($color) . " " . $balloonsData['probshortname'];
+            $balloondata['color']['value'] = $color;
+            $balloondata['problem']['value'] = $balloonData['probshortname'];
             $balloondata['team']['value'] = "t" . $balloonsData['teamid'] . ": " . $balloonsData['teamname'];
+            $balloondata['teamid']['value'] = $balloonsData['teamid'];
             $balloondata['location']['value'] = $balloonsData['room'];
+            $balloondata['affiliation']['value'] = $balloonsData['affilid'];
             $balloondata['category']['value'] = $balloonsData['catname'];
 
             ksort($TOTAL_BALLOONS[$balloonsData['teamid']]);
-            $balloondata['total']['value'] = implode(' ', $TOTAL_BALLOONS[$balloonsData['teamid']]);
+            $balloondata['total']['value'] = $TOTAL_BALLOONS[$balloonsData['teamid']];
 
             $comments = [];
             if ($AWARD_BALLOONS['contest'][$contest] == $balloonId) {
@@ -170,12 +176,12 @@ class BalloonController extends Controller
             if ( $balloon->getDone() ) {
                 $cssclass = 'disabled';
                 $balloonactions = [[]];
-                $balloondata['status']['value'] = '<i class="far fa-check-circle"></i>';
-                $balloondata['status']['sortvalue'] = '1';
+                $balloondata['done']['value'] = True; #'<i class="far fa-check-circle"></i>';
+                $balloondata['done']['sortvalue'] = '1';
             } else {
                 $cssclass = null;
-                $balloondata['status']['value'] = '<i class="far fa-hourglass"></i>';
-                $balloondata['status']['sortvalue'] = '0';
+                $balloondata['done']['value'] = False; #'<i class="far fa-hourglass"></i>';
+                $balloondata['done']['sortvalue'] = '0';
                 $balloonactions = [[
                     'icon' => 'running',
                     'title' => 'mark balloon as done',
@@ -184,6 +190,7 @@ class BalloonController extends Controller
                     ])]];
             }
 
+        
             $balloons_table[] = [
                 'data' => $balloondata,
                 'actions' => $balloonactions,
@@ -191,9 +198,26 @@ class BalloonController extends Controller
             ];
         }
 
+        // Load preselected filters
+        $filters              = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_balloonsfilter') ?: '[]');
+        $filteredAffiliations = [];
+        if (isset($filters['affiliation-id'])) {
+            /** @var TeamAffiliation[] $filteredAffiliations */
+            $filteredAffiliations = $this->em->createQueryBuilder()
+                ->from('DOMJudgeBundle:TeamAffiliation', 'a')
+                ->select('a')
+                ->where('a.affilid IN (:affilIds)')
+                ->setParameter(':affilIds', $filters['affiliation-id'])
+                ->getQuery()
+                ->getResult();
+        }
+
         return $this->render('@DOMJudge/jury/balloons.html.twig', [
             'refresh' => ['after' => 60, 'url' => $this->generateUrl('jury_balloons')],
+            'showContest' => count($contests) > 1,
             'frozen_contests' => $frozen_contests,
+            'hasFilters' => !empty($filters),
+            'filteredAffiliations' => $filteredAffiliations,
             'balloons' => $balloons_table,
             'table_fields' => $table_fields,
             'num_actions' => 1,
