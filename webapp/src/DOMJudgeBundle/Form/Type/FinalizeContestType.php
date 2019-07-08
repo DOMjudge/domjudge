@@ -14,7 +14,9 @@ class FinalizeContestType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('b', IntegerType::class);
+        $builder->add('b', IntegerType::class, [
+            'label' => 'Additional Bronze Medals'
+        ]);
         $builder->add('finalizecomment', TextareaType::class, [
             'label' => 'Comment',
             'required' => false,
