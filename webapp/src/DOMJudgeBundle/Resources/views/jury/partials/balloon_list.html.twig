@@ -40,7 +40,7 @@
                 <td>{{ balloon.data.balloonid.value }}</td>
                 <td>{{ balloon.data.time.value | printtime(null, balloon.data.contest) }}</td>
                 <td><i style="color: {{ balloon.data.color.value }}" class="fas fa-golf-ball"></i> {{ balloon.data.problem.value }}</td>
-                <td>{{ balloon.data.team.value }}</td>
+                <td>{{ balloon.data.team.value | truncate(30) }}</td>
                 <td>{{ balloon.data.affiliation.value }}</td>
                 <td>{{ balloon.data.location.value }}</td>
                 <td>{{ balloon.data.category.value }}</td>
