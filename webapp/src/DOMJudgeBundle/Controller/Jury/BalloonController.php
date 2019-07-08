@@ -94,8 +94,8 @@ class BalloonController extends Controller
             ->leftJoin('s.team', 't')
             ->leftJoin('t.category', 'c')
             ->leftJoin('t.affiliation', 'a')
-            ->orderBy('s.submittime', 'DESC')
-            ->orderBy('b.done', 'ASC');
+            ->orderBy('b.done', 'ASC')
+            ->addOrderBy('s.submittime', 'DESC');
 
         $balloons = $query->getQuery()->getResult();
         // Loop once over the results to get totals and awards
@@ -154,7 +154,7 @@ class BalloonController extends Controller
             $balloondata['time']['value'] = $stime; #Utils::printtime($stime, $timeFormat);
             $balloondata['solved']['value'] = Utils::balloonSym($color) . " " . $balloonsData['probshortname'];
             $balloondata['color']['value'] = $color;
-            $balloondata['problem']['value'] = $balloonData['probshortname'];
+            $balloondata['problem']['value'] = $balloonsData['probshortname'];
             $balloondata['team']['value'] = "t" . $balloonsData['teamid'] . ": " . $balloonsData['teamname'];
             $balloondata['teamid']['value'] = $balloonsData['teamid'];
             $balloondata['location']['value'] = $balloonsData['room'];
