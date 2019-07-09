@@ -92,7 +92,7 @@
             </button>
 
             <div class="dropdown-menu" aria-labelledby="filter-toggle">
-                <form action="{{ app.request.uri }}" method="get">
+                <form method="get">
                     <div class="m-2 p-2 form-inline">
                         {% if filterValues.affiliations | length > 1 %}
                             <select class="form-control mr-2" multiple size="8" name="affiliations[]">
