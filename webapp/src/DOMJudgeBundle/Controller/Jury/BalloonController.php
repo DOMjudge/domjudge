@@ -168,11 +168,10 @@ class BalloonController extends Controller
             if ( $balloon->getDone() ) {
                 $cssclass = 'disabled';
                 $balloonactions = [[]];
-                $balloondata['done'] = True;
+                $balloondata['done'] = true;
             } else {
                 $cssclass = null;
-                $balloondata['done'] = False;
-                $balloondata['done'];
+                $balloondata['done'] = false;
                 $balloonactions = [[
                     'icon' => 'running',
                     'title' => 'mark balloon as done',
