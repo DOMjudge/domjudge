@@ -203,7 +203,11 @@ class BalloonController extends Controller
         }
 
         return $this->render('@DOMJudge/jury/balloons.html.twig', [
-            'refresh' => ['after' => 60, 'url' => $this->generateUrl('jury_balloons')],
+            'refresh' => [
+                'after' => 60,
+                'url' => $this->generateUrl('jury_balloons'),
+                'ajax' => true
+            ],
             'showContest' => count($contests) > 1,
             'frozen_contests' => $frozen_contests,
             'hasFilters' => !empty($filters),
