@@ -32,6 +32,7 @@ location @domjudgeFront {
 	fastcgi_split_path_info ^(.+\.php)(/.*)$;
 	fastcgi_pass domjudge;
 	include fastcgi_params;
+	fastcgi_param SERVER_NAME $host;
 	fastcgi_param SCRIPT_FILENAME $domjudgeRoot/$frontController;
 	fastcgi_param SCRIPT_NAME $prefix/$frontController;
 	fastcgi_param REQUEST_URI $prefix$uri?$args;
