@@ -428,6 +428,8 @@ class ContestController extends BaseController
                                                       ['contestId' => $contest->getcid()]));
         }
 
+        $this->em->refresh($contest);
+
         return $this->render('@DOMJudge/jury/contest_edit.html.twig', [
             'contest' => $contest,
             'form' => $form->createView(),
