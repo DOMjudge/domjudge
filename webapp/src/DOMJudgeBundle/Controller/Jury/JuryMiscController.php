@@ -157,6 +157,24 @@ class JuryMiscController extends BaseController
                     'text' => $displayname,
                 ];
             }, $contests);
+        } elseif ($datatype === 'affiliations') {
+            $affiliations = $qb->from('DOMJudgeBundle:TeamAffiliation', 'a')
+                ->select('a.affilid', 'a.name', 'a.shortname')
+                ->where($qb->expr()->like('a.name', '?1'))
+                ->orWhere($qb->expr()->like('a.shortname', '?1'))
+                ->orWhere($qb->expr()->eq('a.affilid', '?2'))
+                ->orderBy('a.name', 'ASC')
+                ->getQuery()->setParameter(1, '%' . $q . '%')
+                ->setParameter(2, $q)
+                ->getResult();
+
+            $results = array_map(function (array $affiliation) {
+                $displayname = $affiliation['name'] . " (" . $affiliation['affilid'] . ")";
+                return [
+                    'id' => $affiliation['affilid'],
+                    'text' => $displayname,
+                ];
+            }, $affiliations);
         } else {
             throw new NotFoundHttpException("Unknown AJAX data type: " . $datatype);
         }
