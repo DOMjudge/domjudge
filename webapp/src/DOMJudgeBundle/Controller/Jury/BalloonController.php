@@ -3,6 +3,7 @@
 namespace DOMJudgeBundle\Controller\Jury;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
 use DOMJudgeBundle\Entity\Balloon;
 use DOMJudgeBundle\Entity\ScoreCache;
 use DOMJudgeBundle\Service\DOMJudgeService;
@@ -90,7 +91,7 @@ class BalloonController extends Controller
             ->leftJoin('b.submission', 's')
             ->leftJoin('s.problem', 'p')
             ->leftJoin('s.contest', 'co')
-            ->leftJoin('p.contest_problems', 'cp', 'co.cid = cp.cid AND p.probid = cp.probid')
+            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.cid AND p.probid = cp.probid')
             ->leftJoin('s.team', 't')
             ->leftJoin('t.category', 'c')
             ->orderBy('s.submittime', 'DESC');
