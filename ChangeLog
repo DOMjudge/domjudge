@@ -2,6 +2,10 @@ DOMjudge Programming Contest Judging System
 
 Version 7.0.3 - DEV
 -------------------
+ - Fix printing: disable debugging code.
+ - Fix import/export SQL query to run with recent MySQL versions.
+ - Make forms more robust against misconfigured application hostname.
+ - Fix balloons page showing random balloon results.
 
 Version 7.0.2 - 4 June 2019
 ---------------------------
