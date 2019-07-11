@@ -2,6 +2,15 @@ DOMjudge Programming Contest Judging System
 
 Version 7.1.0 - DEV
 -------------------
+ - Use optimized composer autoloader.
+ - During self-registration team name and affiliation can now be specified.
+ - Judgedaemon will now keep retrying when an endpoint is unavailable.
+ - Store external judgements and runs.
+ - Move external CCS submission detail URL to database configuration. 
+ - Reduce dependencies of Judgedaemon.
+ - Also install genrestapicredentials on judgehost. 
+ - Submit client will error early and explicitly when API calls fail. 
+ - Improve balloons page and make filtering persist when reloading.
 
 Version 7.0.3 - 11 July 2019
 ----------------------------
