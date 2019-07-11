@@ -3,6 +3,15 @@ DOMjudge Programming Contest Judging System
 Version 7.1.0 - DEV
 -------------------
 
+Version 7.0.3 - 11 July 2019
+----------------------------
+ - Fix printing: disable debugging code.
+ - Fix import/export SQL query to run with recent MySQL versions.
+ - Make forms more robust against misconfigured application hostname.
+ - Fix balloons page showing random balloon results.
+ - Fix results.tsv export to always use externalId of team.
+ - Fix contest edit form interfering with countdown clock on same page.
+
 Version 7.0.2 - 4 June 2019
 ---------------------------
  - Fix first-to-solve indicators after applying a rejudging.
