@@ -20,38 +20,38 @@ services:
         tags:
             - { name: twig.extension }
 
-    DOMJudgeBundle\:
-        resource: '../../src/DOMJudgeBundle/*'
-        exclude: '../../src/DOMJudgeBundle/{Entity,Repository,Tests}'
+    App\:
+        resource: '../../src/*'
+        exclude: '../../src/{Entity,Repository,Tests}'
 
-    DOMJudgeBundle\Serializer\:
-        resource: '../../src/DOMJudgeBundle/Serializer/*'
+    App\Serializer\:
+        resource: '../../src/Serializer/*'
         tags:
             -   name: jms_serializer.event_subscriber
 
-    DOMJudgeBundle\ApiDescriber\ParameterRefMergeDescriber:
+    App\ApiDescriber\ParameterRefMergeDescriber:
         tags:
             -   name: nelmio_api_doc.describer
                 priority: -999
 
-    DOMJudgeBundle\EventListener\ApiHeadersListener:
+    App\EventListener\ApiHeadersListener:
         tags:
             -   name: kernel.event_listener
                 event: kernel.response
                 method: onKernelResponse
 
-    DOMJudgeBundle\EventListener\BodyTooBigListener:
+    App\EventListener\BodyTooBigListener:
         tags:
             -   name: kernel.event_listener
                 event: kernel.controller
                 method: onKernelController
 
-    DOMJudgeBundle\Security\UserStateUpdater:
+    App\Security\UserStateUpdater:
         tags:
             -   name: kernel.event_listener
                 event: security.authentication.success
                 method: updateUserState
 
-    DOMJudgeBundle\Doctrine\HashPasswordSubscriber:
+    App\Doctrine\HashPasswordSubscriber:
         tags:
             - { name: doctrine.event_subscriber, connection: default }

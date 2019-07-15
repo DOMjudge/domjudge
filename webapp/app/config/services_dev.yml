@@ -4,7 +4,7 @@ services:
         autoconfigure: true
         public: false
 
-    DOMJudgeBundle\EventListener\ProfilerDisableListener:
+    App\EventListener\ProfilerDisableListener:
         arguments:
             $profiler: "@profiler"
         tags:

@@ -14,7 +14,7 @@ framework:
     #translator: { fallbacks: ['%locale%'] }
     secret: '%secret%'
     router:
-        resource: '%kernel.root_dir%/config/routing.yml'
+        resource: '%kernel.project_dir%/app/config/routing.yml'
         strict_requirements: ~
     form: ~
     csrf_protection: ~
@@ -25,7 +25,7 @@ framework:
     session:
         # https://symfony.com/doc/current/reference/configuration/framework.html#handler-id
         handler_id: session.handler.native_file
-        save_path: '%kernel.root_dir%/../var/sessions/%kernel.environment%'
+        save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
     fragments: ~
     http_method_override: true
     assets:
@@ -54,7 +54,7 @@ doctrine:
         charset: utf8mb4
         # if using pdo_sqlite as your database driver:
         #   1. add the path in parameters.yml
-        #     e.g. database_path: '%kernel.root_dir%/../var/data/data.sqlite'
+        #     e.g. database_path: '%kernel.project_dir%/var/data/data.sqlite'
         #   2. Uncomment database_path in parameters.yml.dist
         #   3. Uncomment next line:
         #path: '%database_path%'
@@ -64,10 +64,15 @@ doctrine:
         naming_strategy: doctrine.orm.naming_strategy.underscore
         auto_mapping: true
         mappings:
-            DOMJudgeBundle: ~
+            App:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
         dql:
             string_functions:
-                truncate: DOMJudgeBundle\Doctrine\ORM\Query\AST\Functions\TruncateFunction
+                truncate: App\Doctrine\ORM\Query\AST\Functions\TruncateFunction
 
 # We need this to make our @View annotations work for FOSRest
 sensio_framework_extra:
@@ -92,15 +97,15 @@ fos_rest:
         view_response_listener: force
     serializer:
         serialize_null: true
-    exception:
-        enabled: true
-        exception_controller: 'fos_rest.exception.controller:showAction'
-        messages:
-                Symfony\Component\HttpKernel\Exception\BadRequestHttpException: true
-                Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException: true
-                Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException: true
-                Symfony\Component\HttpKernel\Exception\NotFoundHttpException: true
-                Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException: true
+#    exception:
+#        enabled: true
+#        exception_controller: 'fos_rest.exception.controller:showAction'
+#        messages:
+#                Symfony\Component\HttpKernel\Exception\BadRequestHttpException: true
+#                Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException: true
+#                Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException: true
+#                Symfony\Component\HttpKernel\Exception\NotFoundHttpException: true
+#                Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException: true
 
 nelmio_api_doc:
     areas:

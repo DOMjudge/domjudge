@@ -9,7 +9,7 @@
 >
 
     <php>
-	    <server name="KERNEL_CLASS" value="AppKernel" />
+	    <server name="KERNEL_CLASS" value="App\AppKernel" />
     </php>
     <testsuites>
         <testsuite name="Test Suite">
