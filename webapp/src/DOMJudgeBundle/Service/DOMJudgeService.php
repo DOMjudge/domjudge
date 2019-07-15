@@ -14,7 +14,7 @@ use DOMJudgeBundle\Entity\TestcaseWithContent;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Utils\Utils;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface as Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -22,17 +22,42 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use ZipArchive;
 
 class DOMJudgeService
 {
     protected $em;
     protected $logger;
-    protected $request;
-    protected $container;
     protected $hasAllRoles = false;
     /** @var Configuration[] */
     protected $configCache = [];
+
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
+
+    /**
+     * @var AuthorizationCheckerInterface
+     */
+    protected $authorizationChecker;
+
+    /**
+     * @var TokenStorageInterface
+     */
+    protected $tokenStorage;
+
+    /**
+     * @var HttpKernelInterface
+     */
+    protected $httpKernel;
 
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
@@ -40,16 +65,32 @@ class DOMJudgeService
 
     const CONFIGURATION_DEFAULT_PENALTY_TIME = 20;
 
+    /**
+     * DOMJudgeService constructor.
+     * @param EntityManagerInterface        $em
+     * @param LoggerInterface               $logger
+     * @param RequestStack                  $requestStack
+     * @param ContainerInterface            $container
+     * @param AuthorizationCheckerInterface $authorizationChecker
+     * @param TokenStorageInterface         $tokenStorage
+     * @param HttpKernelInterface           $httpKernel
+     */
     public function __construct(
         EntityManagerInterface $em,
         LoggerInterface $logger,
         RequestStack $requestStack,
-        Container $container
+        ContainerInterface $container,
+        AuthorizationCheckerInterface $authorizationChecker,
+        TokenStorageInterface $tokenStorage,
+        HttpKernelInterface $httpKernel
     ) {
-        $this->em        = $em;
-        $this->logger    = $logger;
-        $this->request   = $requestStack->getCurrentRequest();
-        $this->container = $container;
+        $this->em                   = $em;
+        $this->logger               = $logger;
+        $this->requestStack         = $requestStack;
+        $this->container            = $container;
+        $this->authorizationChecker = $authorizationChecker;
+        $this->tokenStorage         = $tokenStorage;
+        $this->httpKernel           = $httpKernel;
     }
 
     /**
@@ -157,7 +198,7 @@ class DOMJudgeService
      */
     public function getCurrentContest($onlyofteam = null, bool $alsofuture = false)
     {
-        $selected_cid = $this->request->cookies->get('domjudge_cid');
+        $selected_cid = $this->requestStack->getCurrentRequest()->cookies->get('domjudge_cid');
         if ($selected_cid == -1) {
             return null;
         }
@@ -215,19 +256,18 @@ class DOMJudgeService
             return false;
         }
 
-        $authchecker = $this->container->get('security.authorization_checker');
         if ($check_superset) {
-            if ($authchecker->isGranted('ROLE_ADMIN') &&
+            if ($this->authorizationChecker->isGranted('ROLE_ADMIN') &&
                 ($rolename == 'team' && $user->getTeam() != null)) {
                 return true;
             }
         }
-        return $authchecker->isGranted('ROLE_' . strtoupper($rolename));
+        return $this->authorizationChecker->isGranted('ROLE_' . strtoupper($rolename));
     }
 
     public function getClientIp()
     {
-        $clientIP = $this->container->get('request_stack')->getMasterRequest()->getClientIp();
+        $clientIP = $this->requestStack->getMasterRequest()->getClientIp();
         return $clientIP;
     }
 
@@ -237,7 +277,7 @@ class DOMJudgeService
      */
     public function getUser()
     {
-        $token = $this->container->get('security.token_storage')->getToken();
+        $token = $this->tokenStorage->getToken();
         if ($token == null) {
             return null;
         }
@@ -260,10 +300,10 @@ class DOMJudgeService
      */
     public function getCookie(string $cookieName)
     {
-        if (!$this->request->cookies) {
+        if (!$this->requestStack->getCurrentRequest()->cookies) {
             return null;
         }
-        return $this->request->cookies->get($cookieName);
+        return $this->requestStack->getCurrentRequest()->cookies->get($cookieName);
     }
 
     /**
@@ -292,7 +332,7 @@ class DOMJudgeService
             $response = new Response();
         }
         if ($path === null) {
-            $path = $this->request->getBasePath();
+            $path = $this->requestStack->getCurrentRequest()->getBasePath();
         }
 
         $response->headers->setCookie(new Cookie($cookieName, $value, $expire, $path, $domain, $secure, $httponly));
@@ -322,7 +362,7 @@ class DOMJudgeService
             $response = new Response();
         }
         if ($path === null) {
-            $path = $this->request->getBasePath();
+            $path = $this->requestStack->getCurrentRequest()->getBasePath();
         }
 
         $response->headers->clearCookie($cookieName, $path, $domain, $secure, $httponly);
@@ -374,9 +414,9 @@ class DOMJudgeService
         ];
     }
 
-    public function getHttpKernel()
+    public function getHttpKernel(): HttpKernelInterface
     {
-        return $this->container->get('http_kernel');
+        return $this->httpKernel;
     }
 
     /**

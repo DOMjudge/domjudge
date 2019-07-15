@@ -18,6 +18,7 @@ use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -36,21 +37,35 @@ class TeamController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    private $dj;
+    protected $dj;
+
+    /**
+     * @var KernelInterface
+     */
+    protected $kernel;
 
     /**
      * @var EventLogService
      */
     protected $eventLogService;
 
+    /**
+     * TeamController constructor.
+     * @param EntityManagerInterface $em
+     * @param DOMJudgeService        $dj
+     * @param KernelInterface        $kernel
+     * @param EventLogService        $eventLogService
+     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
+        $this->kernel          = $kernel;
     }
 
     /**
@@ -364,7 +379,7 @@ class TeamController extends BaseController
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $team, $team->getName(),
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $team, $team->getName(),
                                    $this->generateUrl('jury_teams'));
     }
 

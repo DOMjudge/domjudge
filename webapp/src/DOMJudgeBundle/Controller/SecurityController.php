@@ -8,11 +8,17 @@ use DOMJudgeBundle\Entity\TeamCategory;
 use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Form\Type\UserRegistrationType;
 use DOMJudgeBundle\Service\DOMJudgeService;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends Controller
 {
@@ -28,8 +34,17 @@ class SecurityController extends Controller
 
     /**
      * @Route("/login", name="login")
+     * @param Request                       $request
+     * @param AuthorizationCheckerInterface $authorizationChecker
+     * @param AuthenticationUtils           $authUtils
+     * @return RedirectResponse|Response
+     * @throws Exception
      */
-    public function loginAction(Request $request)
+    public function loginAction(
+        Request $request,
+        AuthorizationCheckerInterface $authorizationChecker,
+        AuthenticationUtils $authUtils
+    )
     {
         $allowIPAuth = false;
         $authmethods = $this->dj->dbconfig_get('auth_methods', []);
@@ -39,11 +54,9 @@ class SecurityController extends Controller
         }
 
         $ipAutologin = $this->dj->dbconfig_get('ip_autologin', false);
-        if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY') && !$ipAutologin) {
+        if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY') && !$ipAutologin) {
             return $this->redirect($this->generateUrl('root'));
         }
-
-        $authUtils = $this->get('security.authentication_utils');
 
         // get the login error if there is one
         $error = $authUtils->getLastAuthenticationError();
@@ -78,11 +91,20 @@ class SecurityController extends Controller
 
     /**
      * @Route("/register", name="register")
+     * @param Request                      $request
+     * @param AuthorizationChecker         $authorizationChecker
+     * @param UserPasswordEncoderInterface $passwordEncoder
+     * @return RedirectResponse|Response
+     * @throws Exception
      */
-    public function registerAction(Request $request)
+    public function registerAction(
+        Request $request,
+        AuthorizationChecker $authorizationChecker,
+        UserPasswordEncoderInterface $passwordEncoder
+    )
     {
         // Redirect if already logged in
-        if ($this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirect($this->generateUrl('root'));
         }
 
@@ -101,7 +123,7 @@ class SecurityController extends Controller
             $team_role = $em->getRepository('DOMJudgeBundle:Role')->findOneBy(['dj_role' => 'team']);
 
             $plainPass = $registration_form->get('plainPassword')->getData();
-            $password  = $this->get('security.password_encoder')->encodePassword($user, $plainPass);
+            $password  = $passwordEncoder->encodePassword($user, $plainPass);
             $user->setPassword($password);
             $user->setName($user->getUsername());
             $user->addRole($team_role);

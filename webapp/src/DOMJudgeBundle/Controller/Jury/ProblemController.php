@@ -28,6 +28,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Yaml\Yaml;
@@ -48,7 +49,12 @@ class ProblemController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    private $dj;
+    protected $dj;
+
+    /**
+     * @var KernelInterface
+     */
+    protected $kernel;
 
     /**
      * @var EventLogService
@@ -65,15 +71,26 @@ class ProblemController extends BaseController
      */
     protected $importProblemService;
 
+    /**
+     * ProblemController constructor.
+     * @param EntityManagerInterface $em
+     * @param DOMJudgeService        $dj
+     * @param KernelInterface        $kernel
+     * @param EventLogService        $eventLogService
+     * @param SubmissionService      $submissionService
+     * @param ImportProblemService   $importProblemService
+     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        KernelInterface $kernel,
         EventLogService $eventLogService,
         SubmissionService $submissionService,
         ImportProblemService $importProblemService
     ) {
         $this->em                   = $em;
         $this->dj                   = $dj;
+        $this->kernel               = $kernel;
         $this->eventLogService      = $eventLogService;
         $this->submissionService    = $submissionService;
         $this->importProblemService = $importProblemService;
@@ -954,7 +971,7 @@ class ProblemController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem with ID %s not found', $probId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $problem,
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $problem,
                                    $problem->getName(), $this->generateUrl('jury_problems'));
     }
 

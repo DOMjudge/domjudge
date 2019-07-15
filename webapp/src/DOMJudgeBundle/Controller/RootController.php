@@ -2,11 +2,10 @@
 
 namespace DOMJudgeBundle\Controller;
 
-use DOMJudgeBundle\Controller\BaseController;
 use DOMJudgeBundle\Service\DOMJudgeService;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 /**
  * Class RootController
@@ -33,19 +32,18 @@ class RootController extends BaseController
 
     /**
      * @Route("", name="root")
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @param AuthorizationCheckerInterface $authorizationChecker
+     * @return RedirectResponse
      */
-    public function redirectAction(Request $request)
-    {
-        if ( $this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY') ) {
-            if ( $this->dj->checkrole('jury') ) {
+    public function redirectAction(AuthorizationCheckerInterface $authorizationChecker) {
+        if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
+            if ($this->dj->checkrole('jury')) {
                 return $this->redirectToRoute('jury_index');
             }
-            if ( $this->dj->checkrole('team', false) ) {
+            if ($this->dj->checkrole('team', false)) {
                 return $this->redirectToRoute('team_index');
             }
-            if ( $this->dj->checkrole('balloon') ) {
+            if ($this->dj->checkrole('balloon')) {
                 return $this->redirectToRoute('jury_balloons');
             }
         }
