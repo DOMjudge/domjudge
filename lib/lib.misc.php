@@ -122,8 +122,8 @@ function calcContestTime(float $walltime, int $cid) : float
  */
 function calcScoreRow(int $cid, int $team, int $prob, bool $updateRankCache = true)
 {
-    /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
-    /** @var \DOMJudgeBundle\Service\ScoreboardService $G_SCOREBOARD_SERVICE */
+    /** @var \App\Service\DOMJudgeService $G_SYMFONY */
+    /** @var \App\Service\ScoreboardService $G_SCOREBOARD_SERVICE */
     global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
 
     if (isset($G_SCOREBOARD_SERVICE)) {
@@ -240,8 +240,8 @@ function calcScoreRow(int $cid, int $team, int $prob, bool $updateRankCache = tr
  */
 function updateRankCache(int $cid, int $team)
 {
-    /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
-    /** @var \DOMJudgeBundle\Service\ScoreboardService $G_SCOREBOARD_SERVICE */
+    /** @var \App\Service\DOMJudgeService $G_SYMFONY */
+    /** @var \App\Service\ScoreboardService $G_SCOREBOARD_SERVICE */
     global $G_SYMFONY, $G_SCOREBOARD_SERVICE;
 
     if (isset($G_SCOREBOARD_SERVICE)) {
@@ -564,7 +564,7 @@ function auditlog(
     $force_username = null,
     $cid = null
 ) {
-    /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
+    /** @var \App\Service\DOMJudgeService $G_SYMFONY */
     global $G_SYMFONY;
 
     if (isset($G_SYMFONY)) {
@@ -743,7 +743,7 @@ function rest_extid(string $endpoint, $intid)
 // TODO: we should probably integrate this function with auditlog().
 function eventlog(string $type, $dataids, string $action, $cid = null, $json = null, $ids = null)
 {
-    /** @var \DOMJudgeBundle\Service\EventLogService $G_EVENT_LOG */
+    /** @var \App\Service\EventLogService $G_EVENT_LOG */
     global $G_EVENT_LOG;
 
     if (isset($G_EVENT_LOG)) {
@@ -994,7 +994,7 @@ function API_request(string $url, string $verb = 'GET', string $data = '', bool 
 {
     global $resturl, $restuser, $restpass, $lastrequest, $G_SYMFONY, $apiFromInternal;
     if (isset($G_SYMFONY)) {
-        /** @var \DOMJudgeBundle\Service\DOMJudgeService $G_SYMFONY */
+        /** @var \App\Service\DOMJudgeService $G_SYMFONY */
         // Perform an internal Symfony request to the API
         logmsg(LOG_DEBUG, "API internal request $verb $url");
 

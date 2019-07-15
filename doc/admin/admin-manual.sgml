@@ -1240,7 +1240,7 @@ the administrator interface. By default printouts are formatted with
 <tt>enscript</tt> and and printed with local <tt>lpr</tt>.
 The exact command used to send the files to a printer can be
 changed by overriding the <tt>send</tt> method of the
-<tt>\DOMJudgeBundle\Utils\Printing</tt> class.
+<tt>\App\Utils\Printing</tt> class.
 
 <sect1>Judging consistency
 <p>

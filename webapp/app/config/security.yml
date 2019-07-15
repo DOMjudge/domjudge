@@ -8,13 +8,13 @@ security:
 
 
     encoders:
-        DOMJudgeBundle\Entity\User:
+      App\Entity\User:
             algorithm: auto
             cost: 10
     providers:
         domjudge_db_provider:
           entity:
-            class: DOMJudgeBundle:User
+            class: App\Entity\User
             property: username
 
 
@@ -34,25 +34,25 @@ security:
             pattern: ^/api
             provider: domjudge_db_provider
             stateless: true
-            user_checker: DOMJudgeBundle\Security\UserChecker
+            user_checker: App\Security\UserChecker
             anonymous: ~
             guard:
               # SEE NOTE ABOVE IF CHANGING ANYTHING HERE
               authenticators:
-                - DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
-                - DOMJudgeBundle\Security\DOMJudgeBasicAuthenticator
-              entry_point: DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
+                - App\Security\DOMJudgeIPAuthenticator
+                - App\Security\DOMJudgeBasicAuthenticator
+              entry_point: App\Security\DOMJudgeIPAuthenticator
 
         # rest of app does form_login
         main:
             pattern: ^/
             provider: domjudge_db_provider
-            user_checker: DOMJudgeBundle\Security\UserChecker
+            user_checker: App\Security\UserChecker
             guard:
               authenticators:
-                - DOMJudgeBundle\Security\DOMJudgeXHeadersAuthenticator
-                - DOMJudgeBundle\Security\DOMJudgeIPAuthenticator
-              entry_point: DOMJudgeBundle\Security\DOMJudgeXHeadersAuthenticator
+                - App\Security\DOMJudgeXHeadersAuthenticator
+                - App\Security\DOMJudgeIPAuthenticator
+              entry_point: App\Security\DOMJudgeXHeadersAuthenticator
             anonymous: ~
             form_login:
               login_path: login

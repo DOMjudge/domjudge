@@ -8,6 +8,7 @@
  * under the GNU GPL. See README and COPYING for details.
  */
 
+use App\Kernel;
 use Symfony\Component\Debug\Debug;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -31,7 +32,7 @@ require('@domserver_etcdir@/domserver-static.php');
 require __DIR__.'/../app/autoload.php';
 Debug::enable();
 
-$kernel = new AppKernel('dev', true);
+$kernel = new Kernel('dev', true);
 // Uncomment this if using proxies and you need the real client ip address
 // 10.0.0.0/8 should be set to the ip address of your trusted proxies
 // Request::setTrustedProxies(['10.0.0.0/8'], Request::HEADER_X_FORWARDED_ALL);
