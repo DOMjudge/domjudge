@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/categories")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class TeamCategoryController extends BaseController
 {
@@ -134,7 +134,7 @@ class TeamCategoryController extends BaseController
                 'style' => $teamCategory->getColor() ? sprintf('background-color: %s;', $teamCategory->getColor()) : '',
             ];
         }
-        return $this->render('@DOMJudge/jury/team_categories.html.twig', [
+        return $this->render('jury/team_categories.html.twig', [
             'team_categories' => $team_categories_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
@@ -182,15 +182,15 @@ class TeamCategoryController extends BaseController
         // For ajax requests, only return the submission list partial
         if ($request->isXmlHttpRequest()) {
             $data['showTestcases'] = false;
-            return $this->render('@DOMJudge/jury/partials/submission_list.html.twig', $data);
+            return $this->render('jury/partials/submission_list.html.twig', $data);
         }
 
-        return $this->render('@DOMJudge/jury/team_category.html.twig', $data);
+        return $this->render('jury/team_category.html.twig', $data);
     }
 
     /**
      * @Route("/{categoryId}/edit", name="jury_team_category_edit", requirements={"categoryId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $categoryId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -215,7 +215,7 @@ class TeamCategoryController extends BaseController
             return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
         }
 
-        return $this->render('@DOMJudge/jury/team_category_edit.html.twig', [
+        return $this->render('jury/team_category_edit.html.twig', [
             'teamCategory' => $teamCategory,
             'form' => $form->createView(),
         ]);
@@ -223,7 +223,7 @@ class TeamCategoryController extends BaseController
 
     /**
      * @Route("/{categoryId}/delete", name="jury_team_category_delete", requirements={"categoryId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $categoryId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -243,7 +243,7 @@ class TeamCategoryController extends BaseController
 
     /**
      * @Route("/add", name="jury_team_category_add")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
@@ -263,7 +263,7 @@ class TeamCategoryController extends BaseController
             return $this->redirectToRoute('jury_team_category', ['categoryId' => $teamCategory->getCategoryid()]);
         }
 
-        return $this->render('@DOMJudge/jury/team_category_add.html.twig', [
+        return $this->render('jury/team_category_add.html.twig', [
             'form' => $form->createView(),
         ]);
     }

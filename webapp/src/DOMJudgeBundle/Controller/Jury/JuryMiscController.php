@@ -53,17 +53,17 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("", name="jury_index")
-     * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      */
     public function indexAction(Request $request)
     {
         $errors = [];
-        return $this->render('DOMJudgeBundle:jury:index.html.twig', ['errors' => $errors]);
+        return $this->render('jury/index.html.twig', ['errors' => $errors]);
     }
 
     /**
      * @Route("/updates", methods={"GET"}, name="jury_ajax_updates")
-     * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
      */
     public function updatesAction(Request $request)
     {
@@ -73,7 +73,7 @@ class JuryMiscController extends BaseController
     /**
      * @Route("/ajax/{datatype}", methods={"GET"}, name="jury_ajax_data")
      * @param string $datatype
-     * @Security("has_role('ROLE_JURY')")
+     * @Security("is_granted('ROLE_JURY')")
      */
     public function ajaxDataAction(Request $request, string $datatype)
     {
@@ -184,7 +184,7 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("/refresh-cache", name="jury_refresh_cache")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request           $request
      * @param ScoreboardService $scoreboardService
      * @return \Symfony\Component\HttpFoundation\Response|StreamedResponse
@@ -323,7 +323,7 @@ class JuryMiscController extends BaseController
             return $response;
         }
 
-        return $this->render('@DOMJudge/jury/refresh_cache.html.twig', [
+        return $this->render('jury/refresh_cache.html.twig', [
             'contests' => $contests,
             'contest' => count($contests) === 1 ? reset($contests) : null,
             'doRefresh' => $request->request->has('refresh'),
@@ -332,7 +332,7 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("/judging-verifier", name="jury_judging_verifier")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response|StreamedResponse
      */
@@ -426,7 +426,7 @@ class JuryMiscController extends BaseController
 
         $this->em->flush();
 
-        return $this->render('@DOMJudge/jury/check_judgings.html.twig', [
+        return $this->render('jury/check_judgings.html.twig', [
             'numChecked' => $numChecked,
             'numUnchecked' => $numUnchecked,
             'unexpected' => $unexpected,

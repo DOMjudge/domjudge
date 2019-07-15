@@ -21,10 +21,3 @@ app.swagger:
 
 logout:
     path: /logout
-
-# Add this route manually at the bottom, as it must be the last
-remove_trailing_slash:
-    path: /{path}
-    defaults: { _controller: DOMJudgeBundle:Redirecting:removeTrailingSlash }
-    requirements:
-        path: .*\/$

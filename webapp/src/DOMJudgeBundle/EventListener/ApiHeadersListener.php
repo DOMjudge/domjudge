@@ -2,11 +2,11 @@
 
 namespace DOMJudgeBundle\EventListener;
 
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class ApiHeadersListener
 {
-    public function onKernelResponse(FilterResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event)
     {
         $request = $event->getRequest();
         // Check if this is an API request

@@ -1,0 +1,55 @@
+{% extends 'team/base.html.twig' %}
+
+{% block title %}{{ team.name }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    <style>
+        .data-table td a, .data-table td a:hover {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            padding: 3px 5px;
+        }
+
+        .data-table tr {
+            border-bottom: 1px solid silver;
+        }
+
+        .data-table tr:hover {
+            background: #ffffcc !important;
+        }
+    </style>
+{% endblock %}
+
+{% block messages %}{% endblock %}
+{% block content %}
+    <div data-ajax-refresh-target data-ajax-refresh-after="setFlashAndProgress" data-ajax-refresh-before="saveFlash">
+        {% include 'team/partials/index_content.html.twig' %}
+    </div>
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        var $flash = null;
+
+        function saveFlash() {
+            $flash = $('[data-flash-messages]').children();
+        }
+
+        function setFlashAndProgress() {
+            var $newProgress = $('[data-ajax-refresh-target] > [data-progress-bar]');
+            if ($newProgress.length) {
+                var $oldProgress = $('body > [data-progress-bar]');
+                $oldProgress.html($newProgress.children());
+                $newProgress.remove();
+            }
+
+            $('[data-flash-messages]').html($flash);
+        }
+
+        function markSeen($elem) {
+            $elem.closest('tr').removeClass('unseen');
+        }
+    </script>
+{% endblock %}

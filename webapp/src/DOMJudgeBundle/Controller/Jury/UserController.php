@@ -24,7 +24,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
  * @Route("/jury/users")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class UserController extends BaseController
 {
@@ -173,7 +173,7 @@ class UserController extends BaseController
             ];
         }
 
-        return $this->render('@DOMJudge/jury/users.html.twig', [
+        return $this->render('jury/users.html.twig', [
             'users' => $users_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
@@ -194,12 +194,12 @@ class UserController extends BaseController
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
 
-        return $this->render('@DOMJudge/jury/user.html.twig', ['user' => $user]);
+        return $this->render('jury/user.html.twig', ['user' => $user]);
     }
 
     /**
      * @Route("/{userId}/edit", name="jury_user_edit", requirements={"userId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $userId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -238,7 +238,7 @@ class UserController extends BaseController
                                                       ['userId' => $user->getUserid()]));
         }
 
-        return $this->render('@DOMJudge/jury/user_edit.html.twig', [
+        return $this->render('jury/user_edit.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
         ]);
@@ -246,7 +246,7 @@ class UserController extends BaseController
 
     /**
      * @Route("/{userId}/delete", name="jury_user_delete", requirements={"userId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $userId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -266,7 +266,7 @@ class UserController extends BaseController
 
     /**
      * @Route("/add", name="jury_user_add")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
@@ -291,7 +291,7 @@ class UserController extends BaseController
                                                       ['userId' => $user->getUserid()]));
         }
 
-        return $this->render('@DOMJudge/jury/user_add.html.twig', [
+        return $this->render('jury/user_add.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
         ]);
@@ -299,7 +299,7 @@ class UserController extends BaseController
 
     /**
      * @Route("/generate-passwords", name="jury_generate_passwords")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -350,7 +350,7 @@ class UserController extends BaseController
                 }
             }
             $this->em->flush();
-            $response = $this->render('@DOMJudge/jury/tsv/userdata.tsv.twig', [
+            $response = $this->render('jury/tsv/userdata.tsv.twig', [
                 'data' => $changes,
             ]);
             $disposition = $response->headers->makeDisposition(
@@ -361,7 +361,7 @@ class UserController extends BaseController
             return $response;
         }
 
-        return $this->render('@DOMJudge/jury/user_generate_passwords.html.twig', [
+        return $this->render('jury/user_generate_passwords.html.twig', [
             'form' => $form->createView(),
         ]);
     }

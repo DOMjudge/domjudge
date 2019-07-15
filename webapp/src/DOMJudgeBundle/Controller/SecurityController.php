@@ -9,7 +9,7 @@ use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Form\Type\UserRegistrationType;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use Exception;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +20,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-class SecurityController extends Controller
+class SecurityController extends AbstractController
 {
     /**
      * @var DOMJudgeService
@@ -79,7 +79,7 @@ class SecurityController extends Controller
         $registrationCategoryName = $this->dj->dbconfig_get('registration_category_name', '');
         $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
 
-        return $this->render('DOMJudgeBundle:security:login.html.twig', array(
+        return $this->render('security/login.html.twig', array(
             'last_username' => $lastUsername,
             'error' => $error,
             'allow_registration' => $registrationCategory !== null,
@@ -165,7 +165,7 @@ class SecurityController extends Controller
             return $this->redirect($this->generateUrl('login'));
         }
 
-        return $this->render('DOMJudgeBundle:security:register.html.twig', array(
+        return $this->render(':security:register.html.twig', array(
             'registration_form' => $registration_form->createView(),
         ));
     }

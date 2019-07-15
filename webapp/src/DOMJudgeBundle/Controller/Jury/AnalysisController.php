@@ -7,15 +7,15 @@ use DOMJudgeBundle\Entity\Problem;
 use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/analysis")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
-class AnalysisController extends Controller
+class AnalysisController extends AbstractController
 {
     /**
      * @var DOMJudgeService
@@ -70,7 +70,7 @@ class AnalysisController extends Controller
         $contest = $this->dj->getCurrentContest();
 
         if ($contest == null) {
-          return $this->render('@DOMJudge/jury/error.html.twig', [
+          return $this->render('jury/error.html.twig', [
               'error' => 'No contest selected',
           ]);
         }
@@ -245,7 +245,7 @@ class AnalysisController extends Controller
         });
 
 
-        return $this->render('@DOMJudge/jury/analysis/contest_overview.html.twig', [
+        return $this->render('jury/analysis/contest_overview.html.twig', [
             'contest' => $contest,
             'problems' => $problems,
             'teams' => $teams,
@@ -264,7 +264,7 @@ class AnalysisController extends Controller
         $contest = $this->dj->getCurrentContest();
 
         if ($contest == null) {
-          return $this->render('@DOMJudge/jury/error.html.twig', [
+          return $this->render('jury/error.html.twig', [
               'error' => 'No contest selected',
           ]);
         }
@@ -344,7 +344,7 @@ class AnalysisController extends Controller
         $misc = array();
         $misc['correct_percentage'] = array_key_exists('correct', $results) ? ($results['correct'] / count($judgings) )* 100.0 : 0;
 
-        return $this->render('@DOMJudge/jury/analysis/team.html.twig', [
+        return $this->render('jury/analysis/team.html.twig', [
             'contest' => $contest,
             'team' => $team,
             'submissions' => $submissions,
@@ -430,7 +430,7 @@ class AnalysisController extends Controller
         $misc['correct_percentage'] = array_key_exists('correct', $results) ? ($results['correct'] / count($judgings) )* 100.0 : 0;
         $misc['teams_correct_percentage'] = count($teams_attempted) > 0 ? (count($teams_correct) / count($teams_attempted) )* 100.0 : 0;
 
-        return $this->render('@DOMJudge/jury/analysis/problem.html.twig', [
+        return $this->render('jury/analysis/problem.html.twig', [
             'contest' => $contest,
             'problem' => $problem,
             'timelimit' => $problem->getTimelimit(),

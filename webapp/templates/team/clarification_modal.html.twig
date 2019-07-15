@@ -1,0 +1,19 @@
+{% extends "partials/modal.html.twig" %}
+
+{% block title %}
+{% if clarification.senderId == team.teamid %}
+Clarification Request
+{% else %}
+View clarification
+{% endif %}
+{% endblock %}
+
+{% block content %}
+    {% include 'team/partials/clarification_content.html.twig' %}
+{% endblock %}
+{% block extraButton %}
+        <button class="btn btn-secondary" data-toggle="collapse" data-target="#collapsereplyform"
+                aria-expanded="false" aria-controls="collapsereplyform">
+            <i class="fa fa-reply"></i> reply to this clarification
+        </button>
+{% endblock %}

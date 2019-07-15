@@ -1,0 +1,25 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Problems - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Problems</h1>
+
+    {{ macros.table(problems, table_fields, num_actions) }}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <p>
+            {{ button(path('jury_problem_add'), 'Add new problem', 'primary', 'plus') }}
+        </p>
+
+        {{ form(form) }}
+    {% endif %}
+{% endblock %}

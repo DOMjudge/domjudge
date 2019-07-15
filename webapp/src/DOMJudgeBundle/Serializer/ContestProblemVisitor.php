@@ -2,11 +2,13 @@
 
 namespace DOMJudgeBundle\Serializer;
 
+use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Utils\Utils;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
+use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 class ContestProblemVisitor implements EventSubscriberInterface
 {
@@ -36,10 +38,20 @@ class ContestProblemVisitor implements EventSubscriberInterface
         /** @var ContestProblem $contestProblem */
         $contestProblem = $event->getObject();
         if ($contestProblem->getColor() && ($hex = Utils::convertToHex($contestProblem->getColor()))) {
-            $visitor->setData('rgb', $hex);
+            $property = new StaticPropertyMetadata(
+                ContestProblem::class,
+                'rgb',
+                null
+            );
+            $visitor->visitProperty($property, $hex);
         }
         if ($contestProblem->getColor() && ($color = Utils::convertToColor($contestProblem->getColor()))) {
-            $visitor->setData('color', $color);
+            $property = new StaticPropertyMetadata(
+                ContestProblem::class,
+                'color',
+                null
+            );
+            $visitor->visitProperty($property, $color);
         }
     }
 }

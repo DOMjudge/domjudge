@@ -1,0 +1,21 @@
+<div class="container clarificationform">
+    {% include 'team/partials/clarification.html.twig' with {clarification: clarification } %}
+    {% for reply in clarification.replies | filter(reply => team.canViewClarification(reply)) %}
+        {% include 'team/partials/clarification.html.twig' with {clarification: reply } %}
+    {% endfor %}
+</div>
+
+<div class="collapse mt-3 container clarificationform" id="collapsereplyform">
+    <div class="card card-body">
+        {{ form_start(form) }}
+        {{ form_row(form.recipient) }}
+        {{ form_row(form.subject) }}
+        {{ form_row(form.message) }}
+        <div class="form-group">
+            <button type="submit" name="submit" class="btn btn-primary">
+                <i class="fas fa-envelope"></i> Send
+            </button>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>

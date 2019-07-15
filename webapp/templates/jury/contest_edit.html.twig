@@ -1,0 +1,32 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Edit contest {{ contest.cid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.select2_extrahead() }}
+    {{ macros.jscolor_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Edit contest {{ contest.cid }}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>Contest ID/ext</th>
+                    <td>{{ contest.cid }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {% include 'jury/partials/contest_form.html.twig' %}
+
+    {{ macros.collection_scripts() }}
+
+{% endblock %}

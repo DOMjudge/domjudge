@@ -1,0 +1,18 @@
+{% extends 'team/base.html.twig' %}
+
+{% block title %}View clarification - {{ parent() }}{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mt-4">Clarification
+    {% if clarification.senderId == team.teamid %}Request{% endif%}</h1>
+
+    {% include 'team/partials/clarification_content.html.twig' %}
+
+    <div class="container clarificationform mt-3">
+    <button class="btn btn-secondary btn-sm" data-toggle="collapse" data-target="#collapsereplyform"
+            aria-expanded="false" aria-controls="collapsereplyform">
+        <i class="fa fa-reply"></i> reply to this clarification
+    </button>
+    </div>
+
+{% endblock %}

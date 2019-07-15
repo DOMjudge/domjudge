@@ -1,0 +1,11 @@
+{% extends "public/base.html.twig" %}
+
+{% block title %}Contest problems - {{ parent() }}{% endblock %}
+
+{% block content %}
+    {% include 'partials/problem_list.html.twig' with {
+        problem_text_path: 'public_problem_text',
+        problem_sample_testcase_path: 'public_problem_sample_testcase',
+        problem_sample_zip_path: 'public_problem_sample_zip'
+    } %}
+{% endblock %}

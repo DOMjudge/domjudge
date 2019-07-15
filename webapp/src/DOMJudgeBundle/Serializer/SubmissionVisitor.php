@@ -9,6 +9,7 @@ use DOMJudgeBundle\Service\EventLogService;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
+use JMS\Serializer\Metadata\StaticPropertyMetadata;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -39,9 +40,10 @@ class SubmissionVisitor implements EventSubscriberInterface
 
     /**
      * SubmissionVisitor constructor.
-     * @param DOMJudgeService $dj
-     * @param EventLogService $eventLogService
-     * @param RouterInterface $router
+     * @param DOMJudgeService        $dj
+     * @param EventLogService        $eventLogService
+     * @param RouterInterface        $router
+     * @param EntityManagerInterface $em
      */
     public function __construct(
         DOMJudgeService $dj,
@@ -93,7 +95,12 @@ class SubmissionVisitor implements EventSubscriberInterface
                 $filesRoute,
                 strlen($apiRootRoute) + 1 // +1 because api_root does not contain final /
             );
-            $visitor->setData('files', [['href' => $relativeFilesRoute, 'mime' => 'application/zip']]);
+            $property = new StaticPropertyMetadata(
+                Submission::class,
+                'files',
+                null
+            );
+            $visitor->visitProperty($property, [['href' => $relativeFilesRoute, 'mime' => 'application/zip']]);
         }
     }
 }

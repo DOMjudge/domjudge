@@ -1,0 +1,16 @@
+{% extends "jury/base.html.twig" %}
+
+{% block title %}Print - {{ parent() }}{% endblock %}
+
+{% block content %}
+
+    <div class="container submitform">
+        <h1 class="text-center">Print source</h1>
+        {{ form(form) }}
+    </div>
+
+{% endblock %}
+
+{% block extrafooter %}
+    {% include 'partials/javascript_print.html.twig' %}
+{% endblock %}

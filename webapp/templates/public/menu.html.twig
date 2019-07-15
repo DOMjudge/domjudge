@@ -1,0 +1,56 @@
+<nav class="navbar navbar-expand-md navbar-light bg-light fixed-top">
+    <a class="navbar-brand hidden-sm-down" href="{{ path('public_index') }}">DOMjudge</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menuDefault"
+            aria-controls="menuDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    {% set current_route = app.request.attributes.get('_route') %}
+
+    <div class="collapse navbar-collapse" id="menuDefault">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item {% if current_route in ['public_index', 'public_team'] %}active{% endif %}">
+                <a class="nav-link" href="{{ path('public_index') }}"><i class="fas fa-list-ol"></i> Scoreboard</a>
+            </li>
+            <li class="nav-item {% if current_route == 'public_problems' %}active{% endif %}">
+                {% if is_granted('ROLE_JURY') or current_public_contest.freezeData.started %}
+                    <a class="nav-link" href="{{ path('public_problems') }}">
+                        <i class="fas fa-book-open"></i> Problemset
+                    </a>
+                {% else %}
+                    <a class="nav-link disabled"><i class="fas fa-book-open"></i> Problemset</a>
+                {% endif %}
+            </li>
+
+            {% if is_granted('ROLE_TEAM') %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('team_index') }}">
+                        <i class="fas fa-arrow-right"></i> Team
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON') %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('jury_index') }}"><i class="fas fa-arrow-right"></i> Jury</a>
+                </li>
+            {% endif %}
+        </ul>
+
+        {% include 'partials/menu_login_logout_button.html.twig' %}
+
+        <ul class="navbar-nav">
+            <li class="ajax-loader-container">
+                <div class="spinner-border spinner-border-sm ajax-loader" style="display: none;" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </li>
+            {% if current_public_contests | length > 1 %}
+                {% include 'partials/menu_change_contest.html.twig' with {contest: current_public_contest, contests: current_public_contests, change_path: 'public_change_contest', show_no_contest: false} %}
+            {% endif %}
+        </ul>
+
+        {% include 'partials/menu_countdown.html.twig' with {contest: current_public_contest} %}
+    </div>
+</nav>
+{% include 'partials/scoreboard_progress_bar.html.twig' with {margin: -9, contest: current_public_contest} %}

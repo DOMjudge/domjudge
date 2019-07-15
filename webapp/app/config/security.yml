@@ -9,7 +9,7 @@ security:
 
     encoders:
         DOMJudgeBundle\Entity\User:
-            algorithm: bcrypt
+            algorithm: auto
             cost: 10
     providers:
         domjudge_db_provider:
@@ -48,7 +48,6 @@ security:
             pattern: ^/
             provider: domjudge_db_provider
             user_checker: DOMJudgeBundle\Security\UserChecker
-            logout_on_user_change: true
             guard:
               authenticators:
                 - DOMJudgeBundle\Security\DOMJudgeXHeadersAuthenticator

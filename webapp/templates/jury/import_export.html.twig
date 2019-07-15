@@ -1,0 +1,89 @@
+{% extends "jury/base.html.twig" %}
+
+{% block title %}Import and export - {{ parent() }}{% endblock %}
+
+{% block content %}
+
+    <h1>Import and export</h1>
+
+    <h3>Import / export via file down/upload</h3>
+
+    <ul>
+        <li><a href="{{ path('jury_import_export_yaml') }}">Contest data (<code>contest.yaml</code>)</a></li>
+        <li><a href="{{ path('jury_problems') }}">Problem archive</a></li>
+        <li>
+            Tab separated, export:
+            <ul>
+                {% for type in ['groups', 'teams', 'scoreboard'] %}
+                    <li>
+                        <a href="{{ path('jury_tsv_export', {'type': type}) }}"><code>{{ type }}.tsv</code></a>
+                    </li>
+                {% endfor %}
+                <li><code>results.tsv</code> for sort order
+                    <ul>
+                        {% for sort_order in sort_orders %}
+                            <li>
+                                <a href="{{ path('jury_tsv_export', {'type': 'results'}) }}?sort_order={{ sort_order }}">{{ sort_order }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>
+            HTML, export:
+            <ul>
+                <li><code>results.html</code> for sort order
+                    <ul>
+                        {% for sort_order in sort_orders %}
+                            <li>
+                                <a href="{{ path('jury_html_export', {'type': 'results'}) }}?sort_order={{ sort_order }}">{{ sort_order }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li><code>results.html</code> for on ICPC site for sort order
+                    <ul>
+                        {% for sort_order in sort_orders %}
+                            <li>
+                                <a href="{{ path('jury_html_export', {'type': 'results-icpc'}) }}?sort_order={{ sort_order }}">{{ sort_order }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li>
+                    <a href="{{ path('jury_html_export', {'type': 'clarifications'}) }}" target="_blank"><code>clarifications.html</code></a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4>Tab-separated import</h4>
+    <div class="row">
+        <div class="col-md-6">
+            {{ form(tsv_form) }}
+        </div>
+    </div>
+
+    <h3>Import teams / upload standings from / to icpc.baylor.edu</h3>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="alert alert-info">
+                Create a "Web Services Token" with appropriate rights in the "Export" section for your contest at <a
+                        href="https://icpc.baylor.edu/login" target="_blank">https://icpc.baylor.edu/login</a>.
+                You can find the Contest ID (e.g. <code>Southwestern-Europe-2014</code>) in the URL.
+            </div>
+
+            {{ form_start(baylor_form) }}
+            {{ form_row(baylor_form.contest_id) }}
+            {{ form_row(baylor_form.access_token) }}
+            <div class="form-group">
+                {{ form_widget(baylor_form.fetch_teams) }}
+                {{ form_widget(baylor_form.upload_standings) }}
+            </div>
+            {{ form_end(baylor_form) }}
+        </div>
+    </div>
+
+{% endblock %}

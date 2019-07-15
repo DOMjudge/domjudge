@@ -25,7 +25,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/contests")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class ContestController extends BaseController
 {
@@ -306,7 +306,7 @@ class ContestController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
-        return $this->render('@DOMJudge/jury/contests.html.twig', [
+        return $this->render('jury/contests.html.twig', [
             'upcoming_contest' => $upcomingContest,
             'contests_table' => $contests_table,
             'table_fields' => $table_fields,
@@ -364,7 +364,7 @@ class ContestController extends BaseController
             ->getQuery()
             ->getResult();
 
-        return $this->render('@DOMJudge/jury/contest.html.twig', [
+        return $this->render('jury/contest.html.twig', [
             'contest' => $contest,
             'isActive' => isset($this->dj->getCurrentContests()[$contest->getCid()]),
             'allowRemovedIntervals' => ALLOW_REMOVED_INTERVALS,
@@ -411,7 +411,7 @@ class ContestController extends BaseController
 
     /**
      * @Route("/{contestId}/edit", name="jury_contest_edit", requirements={"contestId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -438,7 +438,7 @@ class ContestController extends BaseController
 
         $this->em->refresh($contest);
 
-        return $this->render('@DOMJudge/jury/contest_edit.html.twig', [
+        return $this->render('jury/contest_edit.html.twig', [
             'contest' => $contest,
             'form' => $form->createView(),
         ]);
@@ -446,7 +446,7 @@ class ContestController extends BaseController
 
     /**
      * @Route("/{contestId}/delete", name="jury_contest_delete", requirements={"contestId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -467,7 +467,7 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId}/problems/{probId}/delete", name="jury_contest_problem_delete", requirements={"contestId":
      *                                                          "\d+", "probId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -490,7 +490,7 @@ class ContestController extends BaseController
 
     /**
      * @Route("/add", name="jury_contest_add")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -530,14 +530,14 @@ class ContestController extends BaseController
                                                       ['contestId' => $contest->getcid()]));
         }
 
-        return $this->render('@DOMJudge/jury/contest_add.html.twig', [
+        return $this->render('jury/contest_add.html.twig', [
             'form' => $form->createView(),
         ]);
     }
 
     /**
      * @Route("/{contestId}/finalize", name="jury_contest_finalize", requirements={"contestId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -605,7 +605,7 @@ class ContestController extends BaseController
             }
         }
 
-        return $this->render('@DOMJudge/jury/contest_finalize.html.twig', [
+        return $this->render('jury/contest_finalize.html.twig', [
             'contest' => $contest,
             'blockers' => $blockers,
             'form' => $form->createView(),

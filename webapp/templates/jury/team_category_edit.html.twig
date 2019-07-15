@@ -1,0 +1,18 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Edit category {{ teamCategory.categoryid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.jscolor_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Edit category {{ teamCategory.categoryid }}</h1>
+
+    {% include 'jury/partials/team_category_form.html.twig' %}
+
+{% endblock %}

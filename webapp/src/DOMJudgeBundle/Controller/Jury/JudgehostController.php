@@ -19,7 +19,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @Route("/jury/judgehosts")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class JudgehostController extends BaseController
 {
@@ -221,9 +221,9 @@ class JudgehostController extends BaseController
             ]
         ];
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/jury/partials/judgehost_list.html.twig', $data);
+            return $this->render('jury/partials/judgehost_list.html.twig', $data);
         } else {
-            return $this->render('@DOMJudge/jury/judgehosts.html.twig', $data);
+            return $this->render('jury/judgehosts.html.twig', $data);
         }
     }
 
@@ -287,15 +287,15 @@ class JudgehostController extends BaseController
             ],
         ];
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/jury/partials/judgehost_judgings.html.twig', $data);
+            return $this->render('jury/partials/judgehost_judgings.html.twig', $data);
         } else {
-            return $this->render('@DOMJudge/jury/judgehost.html.twig', $data);
+            return $this->render('jury/judgehost.html.twig', $data);
         }
     }
 
     /**
      * @Route("/{hostname}/delete", name="jury_judgehost_delete")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $hostname
      * @return \Symfony\Component\HttpFoundation\Response
@@ -320,7 +320,7 @@ class JudgehostController extends BaseController
 
     /**
      * @Route("/{hostname}/activate", name="jury_judgehost_activate")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param RouterInterface $router
      * @param Request         $request
      * @param string          $hostname
@@ -337,7 +337,7 @@ class JudgehostController extends BaseController
 
     /**
      * @Route("/{hostname}/deactivate", name="jury_judgehost_deactivate")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param RouterInterface $router
      * @param Request         $request
      * @param string          $hostname
@@ -354,7 +354,7 @@ class JudgehostController extends BaseController
 
     /**
      * @Route("/activate-all", methods={"POST"}, name="jury_judgehost_activate_all")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function activateAllAction()
@@ -366,7 +366,7 @@ class JudgehostController extends BaseController
 
     /**
      * @Route("/deactivate-all", methods={"POST"}, name="jury_judgehost_deactivate_all")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function deactivateAllAction()
@@ -378,7 +378,7 @@ class JudgehostController extends BaseController
 
     /**
      * @Route("/add/multiple", name="jury_judgehost_add")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -399,14 +399,14 @@ class JudgehostController extends BaseController
             return $this->redirectToRoute('jury_judgehosts');
         }
 
-        return $this->render('@DOMJudge/jury/judgehosts_add_multiple.html.twig', [
+        return $this->render('jury/judgehosts_add_multiple.html.twig', [
             'form' => $form->createView(),
         ]);
     }
 
     /**
      * @Route("/edit/multiple", name="jury_judgehost_edit")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -427,7 +427,7 @@ class JudgehostController extends BaseController
             return $this->redirectToRoute('jury_judgehosts');
         }
 
-        return $this->render('@DOMJudge/jury/judgehosts_edit_multiple.html.twig', [
+        return $this->render('jury/judgehosts_edit_multiple.html.twig', [
             'form' => $form->createView(),
         ]);
     }

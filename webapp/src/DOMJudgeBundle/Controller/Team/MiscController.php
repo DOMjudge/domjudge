@@ -149,10 +149,10 @@ class MiscController extends BaseController
 
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
-            return $this->render('@DOMJudge/team/partials/index_content.html.twig', $data);
+            return $this->render('team/partials/index_content.html.twig', $data);
         }
 
-        return $this->render('@DOMJudge/team/index.html.twig', $data);
+        return $this->render('team/index.html.twig', $data);
     }
 
     /**
@@ -204,7 +204,7 @@ class MiscController extends BaseController
             $ret  = Printing::send($realfile, $originalfilename, $langid, $username, $team->getName(),
                                    $team->getRoom());
 
-            return $this->render('@DOMJudge/team/print_result.html.twig', [
+            return $this->render('team/print_result.html.twig', [
                 'success' => $ret[0],
                 'output' => $ret[1],
             ]);
@@ -218,7 +218,7 @@ class MiscController extends BaseController
             ->getQuery()
             ->getResult();
 
-        return $this->render('@DOMJudge/team/print.html.twig', [
+        return $this->render('team/print.html.twig', [
             'form' => $form->createView(),
             'languages' => $languages,
         ]);

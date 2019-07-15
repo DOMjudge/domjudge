@@ -31,7 +31,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @Route("/jury/rejudgings")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class RejudgingController extends BaseController
 {
@@ -171,7 +171,7 @@ class RejudgingController extends BaseController
             ],
         ];
 
-        return $this->render('@DOMJudge/jury/rejudgings.html.twig', $twigData);
+        return $this->render('jury/rejudgings.html.twig', $twigData);
     }
 
     /**
@@ -358,9 +358,9 @@ class RejudgingController extends BaseController
         ];
         if ($request->isXmlHttpRequest()) {
             $data['ajax'] = true;
-            return $this->render('@DOMJudge/jury/partials/rejudging_submissions.html.twig', $data);
+            return $this->render('jury/partials/rejudging_submissions.html.twig', $data);
         } else {
-            return $this->render('@DOMJudge/jury/rejudging.html.twig', $data);
+            return $this->render('jury/rejudging.html.twig', $data);
         }
     }
 
@@ -426,7 +426,7 @@ class RejudgingController extends BaseController
 
             return $response;
         } else {
-            return $this->render('@DOMJudge/jury/rejudging_finish.html.twig', [
+            return $this->render('jury/rejudging_finish.html.twig', [
                 'action' => $action,
                 'rejudging' => $rejudging,
             ]);
@@ -511,7 +511,7 @@ class RejudgingController extends BaseController
                 if (count($contests) != 1) {
                     $this->addFlash('danger',
                                     'Only allowed to set before/after restrictions with exactly one selected contest.');
-                    return $this->render('@DOMJudge/jury/rejudging_form.html.twig', [
+                    return $this->render('jury/rejudging_form.html.twig', [
                         'form' => $form->createView(),
                     ]);
                 }
@@ -537,7 +537,7 @@ class RejudgingController extends BaseController
                 ->getResult(Query::HYDRATE_ARRAY);
             if (empty($judgings)) {
                 $this->addFlash('danger', 'No judgings matched.');
-                return $this->render('@DOMJudge/jury/rejudging_form.html.twig', [
+                return $this->render('jury/rejudging_form.html.twig', [
                     'form' => $form->createView(),
                 ]);
             }
@@ -547,7 +547,7 @@ class RejudgingController extends BaseController
             }
             return $this->redirectToRoute('jury_rejudging', ['rejudgingId' => $rejudgingOrResponse->getRejudgingid()]);
         }
-        return $this->render('@DOMJudge/jury/rejudging_form.html.twig', [
+        return $this->render('jury/rejudging_form.html.twig', [
             'form' => $form->createView(),
         ]);
     }

@@ -1,0 +1,69 @@
+{% extends "base.html.twig" %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Register Account{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.select2_extrahead() }}
+    <link rel="stylesheet" href="{{ asset('style_login.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="additional-logins">
+
+        {{ form_start(registration_form, { 'attr': {'class': 'form-signin'} }) }}
+        <h1 class="h3 mb-3 font-weight-normal">Register Account</h1>
+        <div class="mb-2">
+            Enter the following information to register your account with DOMjudge.
+        </div>
+        {# Form elements will be renderd automatically #}
+        {{ form_end(registration_form) }}
+    </div>
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function () {
+            $('#user_registration_existingAffiliation').select2();
+
+            var $affiliationRadios = $('[name="user_registration[affiliation]"]');
+
+            if ($affiliationRadios.length) {
+                $affiliationRadios.on('change', function () {
+                    var $affiliationNameGroup = $('#user_registration_affiliationName').closest('.form-group');
+                    var $affiliationCountryGroup = $('#user_registration_affiliationCountry').closest('.form-group');
+                    var $existingAffiliationGroup = $('#user_registration_existingAffiliation').closest('.form-group');
+                    var value = $affiliationRadios.filter(':checked').val();
+
+                    switch (value) {
+                        case 'none':
+                            $affiliationNameGroup.hide();
+                            $affiliationCountryGroup.hide();
+                            $existingAffiliationGroup.hide();
+                            break;
+                        case 'new':
+                            $affiliationNameGroup.show();
+                            $affiliationCountryGroup.show();
+                            $existingAffiliationGroup.hide();
+                            break;
+                        case 'existing':
+                            $affiliationNameGroup.hide();
+                            $affiliationCountryGroup.hide();
+                            $existingAffiliationGroup.show();
+                            break;
+                    }
+                });
+
+                var $checkedRadio = $affiliationRadios.filter(':checked');
+                if ($checkedRadio.length === 0) {
+                    $affiliationRadios.first().prop('checked', true);
+                }
+
+                $affiliationRadios.change();
+            }
+        });
+    </script>
+
+    {% include 'jury/partials/country_select.html.twig' with {field: '#user_registration_affiliationCountry'} %}
+{% endblock %}

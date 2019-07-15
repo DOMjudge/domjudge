@@ -2,7 +2,7 @@
 
 namespace DOMJudgeBundle\EventListener;
 
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 class BodyTooBigListener
 {
-    public function onKernelController(FilterControllerEvent $event)
+    public function onKernelController(ControllerEvent $event)
     {
         // When we have a POST, PUT or PATCH but no request or file attributes but we do have a non-zero content-length
         // header, the caller (probably) exceeded PHP's post_max_size, so make sure to report this.

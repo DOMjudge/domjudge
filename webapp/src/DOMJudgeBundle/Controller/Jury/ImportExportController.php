@@ -32,7 +32,7 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * @Route("/jury/import-export")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  */
 class ImportExportController extends BaseController
 {
@@ -157,7 +157,7 @@ class ImportExportController extends BaseController
             return $teamCategory["sortorder"];
         }, $teamCategories);
 
-        return $this->render('@DOMJudge/jury/import_export.html.twig', [
+        return $this->render('jury/import_export.html.twig', [
             'tsv_form' => $tsvForm->createView(),
             'baylor_form' => $baylorForm->createView(),
             'sort_orders' => $sortOrders,
@@ -209,7 +209,7 @@ class ImportExportController extends BaseController
             return $this->redirectToRoute('jury_import_export_yaml');
         }
 
-        return $this->render('@DOMJudge/jury/import_export_contest_yaml.html.twig', [
+        return $this->render('jury/import_export_contest_yaml.html.twig', [
             'export_form' => $exportForm->createView(),
             'import_form' => $importForm->createView(),
         ]);
@@ -413,9 +413,9 @@ class ImportExportController extends BaseController
             'sortOrder' => $sortOrder,
         ];
         if ($useIcpcLayout) {
-            $response = $this->render('@DOMJudge/jury/export/results_icpc.html.twig', $data);
+            $response = $this->render('jury/export/results_icpc.html.twig', $data);
         } else {
-            $response = $this->render('@DOMJudge/jury/export/results.html.twig', $data);
+            $response = $this->render('jury/export/results.html.twig', $data);
         }
 
         if ($request->query->getBoolean('download')) {
@@ -485,7 +485,7 @@ class ImportExportController extends BaseController
             ->getQuery()
             ->getResult();
 
-        return $this->render('@DOMJudge/jury/export/clarifications.html.twig', [
+        return $this->render('jury/export/clarifications.html.twig', [
             'domjudgeVersion' => $this->domjudgeVersion,
             'title' => sprintf('Clarifications for %s', $contest->getName()),
             'grouped' => $grouped,

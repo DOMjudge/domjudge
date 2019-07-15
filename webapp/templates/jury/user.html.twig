@@ -1,0 +1,135 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}User {{ user.userid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>User {{ user.name }}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>ID</th>
+                    <td>{{ user.userid }}</td>
+                </tr>
+                <tr>
+                    <th>Login</th>
+                    <td class="teamid">{{ user.username }}</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>{{ user.name }}</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>
+                        {% if user.email %}
+                            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Password</th>
+                    <td>
+                        {% if user.password %}
+                            Set
+                        {% else %}
+                            Not set
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>IP address</th>
+                    <td>
+                        {% if user.ipAddress %}
+                            {{ user.ipAddress }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Enabled</th>
+                    <td>
+                        {{ user.enabled | printYesNo }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Roles</th>
+                    <td>
+                        {% for role in user.roles %}
+                            {{ role.description }}<br>
+                        {% else %}
+                            No roles assigned
+                        {% endfor %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Team</th>
+                    {% if user.team %}
+                        <td class="teamid">
+                            <a href="{{ path('jury_team', {'teamId': user.team.teamid}) }}">
+                                {{ user.team.name }} (t{{ user.team.teamid }})
+                            </a>
+                        </td>
+                    {% else %}
+                        <td>-</td>
+                    {% endif %}
+                </tr>
+            </table>
+        </div>
+
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>First login</th>
+                    <td>
+                        {% if user.firstLogin %}
+                            {{ user.firstLogin | printtime('%a %d %b %Y %T %Z') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Last login</th>
+                    <td>
+                        {% if user.lastLogin %}
+                            {{ user.lastLogin | printtime('%a %d %b %Y %T %Z') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Last IP</th>
+                    <td>
+                        {% if user.lastIpAddress %}
+                            {{ user.lastIpAddress | printHost(true) }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {%- if is_granted('ROLE_ADMIN') -%}
+        <p>
+            {{ button(path('jury_user_edit', {'userId': user.userid}), 'Edit', 'primary', 'edit') }}
+            {{ button(path('jury_user_delete', {'userId': user.userid}), 'Delete', 'danger', 'trash-alt', true) }}
+        </p>
+    {% endif %}
+
+{% endblock %}

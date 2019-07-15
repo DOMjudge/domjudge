@@ -113,9 +113,9 @@ class PublicController extends BaseController
         }
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/partials/scoreboard.html.twig', $data, $response);
+            return $this->render('partials/scoreboard.html.twig', $data, $response);
         }
-        return $this->render('@DOMJudge/public/scoreboard.html.twig', $data, $response);
+        return $this->render('public/scoreboard.html.twig', $data, $response);
     }
 
     /**
@@ -156,9 +156,9 @@ class PublicController extends BaseController
         ];
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/public/team_modal.html.twig', $data);
+            return $this->render('public/team_modal.html.twig', $data);
         } else {
-            return $this->render('@DOMJudge/public/team.html.twig', $data);
+            return $this->render('public/team.html.twig', $data);
         }
     }
 
@@ -200,7 +200,7 @@ class PublicController extends BaseController
                 ->getResult();
         }
 
-        return $this->render('@DOMJudge/public/problems.html.twig', [
+        return $this->render('public/problems.html.twig', [
             'problems' => $problems,
             'showLimits' => $showLimits,
             'defaultMemoryLimit' => $defaultMemoryLimit,

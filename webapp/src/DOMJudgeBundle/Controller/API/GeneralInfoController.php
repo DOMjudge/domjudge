@@ -8,14 +8,13 @@ use DOMJudgeBundle\Entity\User;
 use DOMJudgeBundle\Service\CheckConfigService;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -24,7 +23,7 @@ use Symfony\Component\Routing\RouterInterface;
  * @Rest\NamePrefix("general_")
  * @SWG\Tag(name="General")
  */
-class GeneralInfoController extends FOSRestController
+class GeneralInfoController extends AbstractFOSRestController
 {
     protected $apiVersion = 4;
 
@@ -114,7 +113,7 @@ class GeneralInfoController extends FOSRestController
         $data = [
             'api_version' => $this->apiVersion,
             'domjudge_version' => $this->getParameter('domjudge.version'),
-            'environment' => $this->container->getParameter('kernel.environment'),
+            'environment' => $this->getParameter('kernel.environment'),
             'doc_url' => $this->router->generate('app.swagger_ui', [], RouterInterface::ABSOLUTE_URL),
         ];
         return $data;
@@ -123,7 +122,7 @@ class GeneralInfoController extends FOSRestController
     /**
      * Get general status information
      * @Rest\Get("/status")
-     * @Security("has_role('ROLE_API_READER')")
+     * @Security("is_granted('ROLE_API_READER')")
      * @SWG\Response(
      *     response="200",
      *     description="General status information for the currently active contests",
@@ -249,7 +248,7 @@ class GeneralInfoController extends FOSRestController
     /**
      * Check the DOMjudge configuration
      * @Rest\Get("/config/check")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @SWG\Response(
      *     response="200",
      *     description="Result of the various checks performed",

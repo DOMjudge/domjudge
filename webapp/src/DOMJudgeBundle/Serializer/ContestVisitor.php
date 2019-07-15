@@ -7,6 +7,8 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
+use JMS\Serializer\Metadata\PropertyMetadata;
+use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 /**
  * Class ContestVisitor
@@ -50,7 +52,12 @@ class ContestVisitor implements EventSubscriberInterface
     public function onPostSerialize(ObjectEvent $event)
     {
         /** @var JsonSerializationVisitor $visitor */
-        $visitor = $event->getVisitor();
-        $visitor->setData('penalty_time', (int)$this->dj->dbconfig_get('penalty_time',20));
+        $visitor  = $event->getVisitor();
+        $property = new StaticPropertyMetadata(
+            Contest::class,
+            'penalty_time',
+            null
+        );
+        $visitor->visitProperty($property, (int)$this->dj->dbconfig_get('penalty_time'));
     }
 }

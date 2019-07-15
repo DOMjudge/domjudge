@@ -24,6 +24,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  * )
  * @Serializer\VirtualProperty(
  *     "penaltyTime",
+ *     exp="0",
  *     options={@Serializer\Type("int")}
  * )
  * @ORM\HasLifecycleCallbacks()

@@ -1,0 +1,104 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Configuration - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.toggle_extrahead() }}
+    <style>
+        .btn.toggle-on {
+            right: initial;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1>Configuration</h1>
+
+    <form method="post">
+        {% for category in options %}
+            <div class="card">
+                <div class="card-header">
+                    {{ category.name }} Options
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for option in category.data %}
+                            <li class="list-group-item" style="padding:0;padding-top:10px;">
+                                <div class="form-group">
+                                    {{ option.name }}
+                                    {% if option.type == 'bool' %}
+                                        <input type="checkbox" data-toggle="toggle" data-size="mini" data-on="Yes"
+                                               data-off="No"
+                                               name="config_{{ option.name }}" id="config_{{ option.name }}"
+                                            {% if option.value == 1 %} checked="checked"{% endif %}>
+                                        <br/>
+                                    {% elseif option.type == 'int' %}
+                                        <input class="form-control form-control-sm"
+                                               style="margin-left:5px;width:7em;text-align:right;display:inline-block;"
+                                               type="number"
+                                               name="config_{{ option.name }}" id="config_{{ option.name }}"
+                                               value="{{ option.value }}">
+                                        <br/>
+                                    {% elseif option.type == 'string' %}
+                                        <input class="form-control form-control-sm" style="width:30em;" type="text"
+                                               name="config_{{ option.name }}" id="config_{{ option.name }}"
+                                               value="{{ option.value }}">
+                                    {% elseif option.type == 'array_keyval' %}
+                                        <br/>
+                                        {% set counter = 0 %}
+                                        {% for key,val in option.value %}
+                                            <input class="form-control form-control-sm"
+                                                   style="width:10em;text-align:right;display:inline-block;" type="text"
+                                                   value="{{ key }}"
+                                                   name="config_{{ option.name }}[{{ counter }}][key]"
+                                                   id="config_{{ option.name }}_{{ counter }}__key_">
+                                            <input class="form-control form-control-sm"
+                                                   style="width:30em;display:inline-block;" type="text"
+                                                   value="{{ val }}"
+                                                   name="config_{{ option.name }}[{{ counter }}][val]"
+                                                   id="config_{{ option.name }}_{{ counter }}__val">
+                                            <br/>
+                                            {% set counter = counter + 1 %}
+                                        {% endfor %}
+                                        <input class="form-control form-control-sm"
+                                               style="width:10em;text-align:right;display:inline-block;" type="text"
+                                               name="config_{{ option.name }}[{{ counter }}][key]"
+                                               id="config_{{ option.name }}_{{ counter }}__key_">
+                                        <input class="form-control form-control-sm"
+                                               style="width:30em;display:inline-block;" type="text"
+                                               name="config_{{ option.name }}[{{ counter }}][val]"
+                                               id="config_{{ option.name }}_{{ counter }}__val">
+                                        <br/>
+                                    {% elseif option.type == 'array_val' %}
+                                        <br/>
+                                        {% set counter = 0 %}
+                                        {% for val in option.value %}
+                                            <input class="form-control form-control-sm"
+                                                   style="width:30em;display:inline-block;" type="text"
+                                                   value="{{ val }}"
+                                                   name="config_{{ option.name }}[{{ counter }}]"
+                                                   id="config_{{ option.name }}_{{ counter }}_">
+                                            <br/>
+                                            {% set counter = counter + 1 %}
+                                        {% endfor %}
+                                        <input class="form-control form-control-sm"
+                                               style="width:30em;display:inline-block;" type="text"
+                                               name="config_{{ option.name }}[{{ counter }}]"
+                                               id="config_{{ option.name }}_{{ counter }}_">
+                                        <br/>
+                                    {% endif %}
+                                    <small class="text-muted">{{ option.description }}</small>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <br/>
+        {% endfor %}
+        <input class="btn btn-primary" type="submit" value="Submit" id="save" name="save">
+    </form>
+{% endblock %}

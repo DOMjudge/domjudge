@@ -1,0 +1,17 @@
+{% extends "jury/base.html.twig" %}
+
+{% block title %}Add affiliation - {{ parent() }}{% endblock %}
+
+{% import "jury/jury_macros.twig" as macros %}
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Add affiliation</h1>
+
+    {% include 'jury/partials/team_affiliation_form.html.twig' %}
+
+{% endblock %}

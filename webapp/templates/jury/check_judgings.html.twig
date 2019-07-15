@@ -1,0 +1,61 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as checkJudgings %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Judging verifier - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Judging verifier</h1>
+
+    <p>
+        {{ numChecked }} submissions checked:
+        {{ unexpected | length }} unexpected results,
+        {% if verifyMultiple %}
+            {{ multiple | length }} automatically verified (multiple outcomes),
+        {% else %}
+            {{ multiple | length }} to check manually,
+        {% endif %}
+        {{ verified | length }} automatically verified
+        <br>
+        {{ numUnchecked }} submissions not checked:
+        {{ earlier | length }} verified earlier,
+        {{ nomatch | length }} without magic string
+    </p>
+
+    {% macro verifyResults(id, header, results, collapse) %}
+        {% if results is not empty %}
+            <h2><a class="collapse-link" href="javascript:collapse('#detail{{ id }}')">{{ header }}</a></h2>
+            <ul id="detail{{ id }}"{% if collapse | default(false) %} class="d-none"{% endif %}>
+                {% for result in results %}
+                    <li>{{ result | raw }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endmacro %}
+
+    {{ checkJudgings.verifyResults('unexpected', 'Unexpected results', unexpected) }}
+    {% if verifyMultiple %}
+        {{ checkJudgings.verifyResults('multiple', 'Automatically verified (multiple outcomes)', multiple, true) }}
+    {% else %}
+        {{ checkJudgings.verifyResults('multiple', 'Check manually', multiple) }}
+        {% if multiple is not empty %}
+            <form action="{{ path('jury_judging_verifier') }}" method="post">
+                <input type="hidden" name="verify_multiple" value="1">
+                <p>
+                    Verify all multiple outcome submissions:
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Verify</button>
+                </p>
+            </form>
+        {% endif %}
+    {% endif %}
+    {{ checkJudgings.verifyResults('verified', 'Automatically verified', verified, true) }}
+    {{ checkJudgings.verifyResults('earlier', 'Verified earlier', earlier, true) }}
+    {{ checkJudgings.verifyResults('nomatch', 'Without magic string', nomatch, true) }}
+
+{% endblock %}

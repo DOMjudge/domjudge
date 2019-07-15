@@ -1,0 +1,99 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Executable {{ executable.execid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Executable {{ executable.execid }}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>ID</th>
+                    <td>{{ executable.execid }}</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>{{ executable.description }}</td>
+                </tr>
+                <tr>
+                    <th>MD5sum</th>
+                    <td>{{ executable.md5sum }}</td>
+                </tr>
+                <tr>
+                    <th>Type</th>
+                    <td>{{ executable.type }}</td>
+                </tr>
+                <tr>
+                    <th>Size</th>
+                    <td>{{ executable.zipFileSize }} bytes</td>
+                </tr>
+                <tr>
+                    <th>Content</th>
+                    <td>
+                        <a href="{{ path('jury_executable_content', {'execId': executable.execid}) }}">
+                            View file contents
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Used as {{ executable.type }} script</th>
+                    <td>
+                        {% set used = false %}
+                        {% if executable.type == 'compare' and default_compare == executable.execid %}
+                            <em>default compare</em>
+                            {% set used = true %}
+                        {% elseif executable.type == 'run' and default_run == executable.execid %}
+                            <em>default run</em>
+                            {% set used = true %}
+                        {% endif %}
+                        {% if executable.type == 'compare' %}
+                            {% for problem in executable.problemsCompare %}
+                                <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
+                                    p{{ problem.probid }}
+                                </a>
+                                {% set used = true %}
+                            {% endfor %}
+                        {% elseif executable.type == 'run' %}
+                            {% for problem in executable.problemsRun %}
+                                <a href="{{ path('jury_problem', {'probId': problem.probid}) }}">
+                                    p{{ problem.probid }}
+                                </a>
+                                {% set used = true %}
+                            {% endfor %}
+                        {% elseif executable.type == 'compile' %}
+                            {% for language in executable.languages %}
+                                <a href="{{ path('jury_language', {'langId': language.langid}) }}">
+                                    {{ language.langid }}
+                                </a>
+                                {% set used = true %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if not used %}
+                            <span class="nodata">none</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        {%- if is_granted('ROLE_ADMIN') -%}
+            <p>
+                {{ button(path('jury_executable_download', {'execId': executable.execid}), 'Download', 'secondary', 'file-download') }}
+                {{ button(path('jury_executable_edit', {'execId': executable.execid}), 'Edit', 'primary', 'edit') }}
+                {{ button(path('jury_executable_delete', {'execId': executable.execid}), 'Delete', 'danger', 'trash-alt', true) }}
+            </p>
+        {% endif %}
+    </div>
+
+{% endblock %}

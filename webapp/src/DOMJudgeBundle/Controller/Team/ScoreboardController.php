@@ -71,9 +71,9 @@ class ScoreboardController extends BaseController
         $data['myTeamId'] = $user->getTeamid();
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/partials/scoreboard.html.twig', $data, $response);
+            return $this->render('partials/scoreboard.html.twig', $data, $response);
         }
-        return $this->render('@DOMJudge/team/scoreboard.html.twig', $data, $response);
+        return $this->render('team/scoreboard.html.twig', $data, $response);
     }
 
     /**
@@ -95,9 +95,9 @@ class ScoreboardController extends BaseController
         ];
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/team/team_modal.html.twig', $data);
+            return $this->render('team/team_modal.html.twig', $data);
         } else {
-            return $this->render('@DOMJudge/team/team.html.twig', $data);
+            return $this->render('team/team.html.twig', $data);
         }
     }
 }

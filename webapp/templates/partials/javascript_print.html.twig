@@ -1,0 +1,21 @@
+<script>
+    function detectLanguage(filename) {
+        var parts = filename.toLowerCase().split('.').reverse();
+        if (parts.length < 2) return;
+
+        // language ID
+
+        var elt = document.getElementById('print_langid');
+        // the 'autodetect' option has empty value
+        if (elt.value !== '') return;
+
+        var langid = getMainExtension(parts[0]);
+        for (var i = 0; i < elt.length; i++) {
+            if (elt.options[i].value === langid) {
+                elt.selectedIndex = i;
+            }
+        }
+
+    }
+</script>
+{% include 'partials/javascript_language_detect.html.twig' %}

@@ -37,7 +37,7 @@ use ZipArchive;
 
 /**
  * @Route("/jury/problems")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class ProblemController extends BaseController
 {
@@ -293,12 +293,12 @@ class ProblemController extends BaseController
             $data['current_contest'] = $this->dj->getCurrentContest();
         }
 
-        return $this->render('@DOMJudge/jury/problems.html.twig', $data);
+        return $this->render('jury/problems.html.twig', $data);
     }
 
     /**
      * @Route("/{problemId}/export", name="jury_export_problem", requirements={"problemId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param int $problemId
      * @return StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -502,10 +502,10 @@ class ProblemController extends BaseController
         // For ajax requests, only return the submission list partial
         if ($request->isXmlHttpRequest()) {
             $data['showTestcases'] = false;
-            return $this->render('@DOMJudge/jury/partials/submission_list.html.twig', $data);
+            return $this->render('jury/partials/submission_list.html.twig', $data);
         }
 
-        return $this->render('@DOMJudge/jury/problem.html.twig', $data);
+        return $this->render('jury/problem.html.twig', $data);
     }
 
     /**
@@ -734,7 +734,7 @@ class ProblemController extends BaseController
             'testcaseData' => $testcaseData,
         ];
 
-        return $this->render('@DOMJudge/jury/problem_testcases.html.twig', $data);
+        return $this->render('jury/problem_testcases.html.twig', $data);
     }
 
     /**
@@ -872,7 +872,7 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{probId}/edit", name="jury_problem_edit", requirements={"probId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $probId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -948,7 +948,7 @@ class ProblemController extends BaseController
             return $this->redirectToRoute('jury_problem', ['probId' => $problem->getProbid()]);
         }
 
-        return $this->render('@DOMJudge/jury/problem_edit.html.twig', [
+        return $this->render('jury/problem_edit.html.twig', [
             'problem' => $problem,
             'form' => $form->createView(),
             'uploadForm' => $uploadForm->createView(),
@@ -957,7 +957,7 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{probId}/delete", name="jury_problem_delete", requirements={"probId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $probId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -977,7 +977,7 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/add", name="jury_problem_add")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws Exception
@@ -998,7 +998,7 @@ class ProblemController extends BaseController
                                                       ['probId' => $problem->getProbid()]));
         }
 
-        return $this->render('@DOMJudge/jury/problem_add.html.twig', [
+        return $this->render('jury/problem_add.html.twig', [
             'form' => $form->createView(),
         ]);
     }

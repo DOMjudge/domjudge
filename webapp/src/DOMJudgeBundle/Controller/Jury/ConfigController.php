@@ -7,16 +7,16 @@ use DOMJudgeBundle\Entity\Configuration;
 use DOMJudgeBundle\Service\CheckConfigService;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/config")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  */
-class ConfigController extends Controller
+class ConfigController extends AbstractController
 {
     /**
      * @var EntityManagerInterface
@@ -120,7 +120,7 @@ class ConfigController extends Controller
                 'data' => $data
             );
         }
-        return $this->render('@DOMJudge/jury/config.html.twig', [
+        return $this->render('jury/config.html.twig', [
             'options' => $all_data,
         ]);
     }
@@ -131,7 +131,7 @@ class ConfigController extends Controller
     public function checkAction(Request $request)
     {
         $results = $this->checkConfigService->runAll();
-        return $this->render('@DOMJudge/jury/config_check.html.twig', [
+        return $this->render('jury/config_check.html.twig', [
             'results' => $results
         ]);
     }

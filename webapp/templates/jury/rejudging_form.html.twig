@@ -1,0 +1,58 @@
+{% extends "jury/base.html.twig" %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
+{% block title %}Add rejudging - {{ parent() }}{% endblock %}
+
+{% block content %}
+
+    <h1>Add rejudging</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            {{ form(form) }}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function () {
+            var $contests = $('#rejudging_contests');
+            $contests.on('change', function () {
+                var $problems = $('#rejudging_problems');
+                var $teams = $('#rejudging_teams');
+                var $form = $(this).closest('form');
+                var data = {};
+                data[$contests.attr('name')] = $contests.val();
+                data[$problems.attr('name')] = $problems.val();
+                data[$teams.attr('name')] = $teams.val();
+                $.ajax({
+                    url: $form.attr('action'),
+                    type: $form.attr('method'),
+                    data: data,
+                    success: function (html) {
+                        var $newProblems = $(html).find('#rejudging_problems');
+                        $newProblems.closest('.form-group').find('.invalid-feedback').remove();
+                        $('#rejudging_problems').closest('.form-group').replaceWith(
+                            $newProblems.closest('.form-group')
+                        );
+                        $newProblems.select2();
+
+                        var $newTeams = $(html).find('#rejudging_teams');
+                        $newTeams.closest('.form-group').find('.invalid-feedback').remove();
+                        $('#rejudging_teams').closest('.form-group').replaceWith(
+                            $newTeams.closest('.form-group')
+                        );
+                        $newTeams.select2();
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

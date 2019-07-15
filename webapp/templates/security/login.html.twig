@@ -1,0 +1,123 @@
+{% extends "base.html.twig" %}
+
+{% block title %}DOMjudge Login{% endblock %}
+
+{% block extrahead %}
+    <link rel="stylesheet" href="{{ asset('style_login.css') }}">
+{% endblock %}
+
+{% block messages %}{% endblock %}
+{% block body %}
+
+    {% set hasaltmethods =
+        ("xheaders" in allowed_authmethods and auth_xheaders_present) or
+        ("ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0) %}
+    {% set showregular = not hasaltmethods or error %}
+
+    <div class="form-signin" id="loginform">
+        <img class="mb-4" src="{{ asset('images/DOMjudgelogo.png') }}" alt="DOMjudge" width="72">
+        {% include 'partials/messages.html.twig' %}
+        {% if app.user is not null %}
+            {% set message = 'You are currently automatically logged in as ' ~ app.user.username ~ '.<br />Use the form below to change login.' %}
+            {% include 'partials/alert.html.twig' with {type: 'success'} %}
+        {% endif %}
+
+        <br class="clearfix">
+
+        {% if hasaltmethods %}
+            <div class="additional-logins mr-2">
+                <a class="float-right text-muted" href="#" title="more auth methods"
+                   onclick="collapse('.regularLoginform'); return false;" role="button">
+                    <i class="fas fa-user-ninja"></i>
+                </a>
+                {% if "xheaders" in allowed_authmethods and auth_xheaders_present %}
+                    <h1 class="h3 mb-3 font-weight-normal">Preconfigured Sign In</h1>
+                    <form action="{{ path('login') }}" method="post">
+                        <input type="hidden" name="_csrf_token"
+                               value="{{ csrf_token('authenticate') }}">
+                        <input type="hidden" name="_username" value="__INVALID__">
+                        <div class="login-content">
+                            <p>
+                                You can log in using credentials that have been configured by your
+                                administrator.
+                            </p>
+                        </div>
+                        <button class="mt-auto btn btn-lg btn-success btn-block" type="submit"
+                                name="loginmethod" value="xheaders">
+                            Log in using computer credentials
+                        </button>
+                    </form>
+                    <script>
+                        $(function () {
+                            $('button[name=loginmethod]').focus();
+                        });
+                    </script>
+                {% endif %}
+
+                {% if "ipaddress" in allowed_authmethods and auth_ipaddress_users|length > 0 %}
+                    <h1 class="h3 mb-3 font-weight-normal">Sign in with IP</h1>
+                    <form action="{{ path('login') }}" method="post">
+                        <input type="hidden" name="_csrf_token"
+                               value="{{ csrf_token('authenticate') }}">
+                        <input type="hidden" name="loginmethod" value="ipaddress">
+                        <div class="login-content">
+                            <p>
+                                You can log in automatically to an account based on your IP Address.
+                                {% if auth_ipaddress_users == 1 %}The accounts associated with your IP are shown below.
+                                {% else %}The account associated with your IP is shown below.{% endif %}
+                            </p>
+                        </div>
+
+                        {% for u in auth_ipaddress_users %}
+                            <button class="btn btn-lg btn-success btn-block" type="submit"
+                                    name="_username" value="{{ u.username }}">
+                                Log in as {{ u.username }}
+                            </button>
+                        {% endfor %}
+                    </form>
+                    <script>
+                        $(function () {
+                            $('button[name=_username]:first').focus();
+                        });
+                    </script>
+                {% endif %}
+            </div>
+
+            <div class="vertical-line regularLoginform{% if not showregular %} d-none{% endif %}"></div>
+        {% endif %}
+
+        <div class="main-login ml-2 regularLoginform {% if not showregular %} d-none{% endif %}">
+            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+            <form action="{{ path('login') }}" method="post">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                <div class="login-content">
+                    {% if error %}
+                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="username" class="sr-only">Username</label>
+                        <input type="text" id="username" name="_username" class="form-control"
+                               placeholder="Username" required autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputPassword" class="sr-only">Password</label>
+                        <input type="password" id="inputPassword" name="_password"
+                               class="form-control"
+                               placeholder="Password" required autocomplete="current-password">
+                    </div>
+                </div>
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                {% if allow_registration %}
+                    <div class="mt-3">
+                        Don't have an account?<br/>
+                        <a href="{{ url('register', {}, true) }}">Register now</a>.
+                    </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <p class="mt-5 mb-3 small text-muted">DOMjudge {{ DOMJUDGE_VERSION }}</p>
+    </div>
+
+{% endblock %}

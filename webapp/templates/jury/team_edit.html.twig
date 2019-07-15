@@ -1,0 +1,29 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Edit team {{ team.teamid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Edit team {{ team.teamid }}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>Team ID</th>
+                    <td>{{ team.teamid }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {% include 'jury/partials/team_form.html.twig' %}
+
+{% endblock %}

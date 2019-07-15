@@ -1,0 +1,88 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Category {{ teamCategory.categoryid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Category {{ teamCategory.categoryid }}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>ID</th>
+                    <td>{{ teamCategory.categoryid }}</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>{{ teamCategory.name }}</td>
+                </tr>
+                <tr>
+                    <th>Sortorder</th>
+                    <td>{{ teamCategory.sortorder }}</td>
+                </tr>
+                {% if teamCategory.color %}
+                    <tr>
+                        <th>Color</th>
+                        <td style="background-color: {{ teamCategory.color }};">{{ teamCategory.color }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Visible</th>
+                    <td>{{ teamCategory.visible | printYesNo }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {%- if is_granted('ROLE_ADMIN') -%}
+        <p>
+            {{ button(path('jury_team_category_edit', {'categoryId': teamCategory.categoryid}), 'Edit', 'primary', 'edit') }}
+            {{ button(path('jury_team_category_delete', {'categoryId': teamCategory.categoryid}), 'Delete', 'danger', 'trash-alt', true) }}
+        </p>
+    {% endif %}
+
+    <h2>Teams in {{ teamCategory.name }}</h2>
+    {% if teamCategory.teams is empty %}
+        <p class="nodata">no teams</p>
+    {% else %}
+        <div class="row">
+            <div class="col-lg-4">
+                <table class="data-table table table-sm table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Teamname</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for team in teamCategory.teams %}
+                        <tr>
+                            <td>
+                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team.teamid }}</a>
+                            </td>
+                            <td>
+                                <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">{{ team.name }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h2>Submissions for {{ teamCategory.name }}</h2>
+
+        <div data-ajax-refresh-target>
+            {%- include 'jury/partials/submission_list.html.twig' with {showTestcases: false} %}
+        </div>
+    {% endif %}
+
+{% endblock %}

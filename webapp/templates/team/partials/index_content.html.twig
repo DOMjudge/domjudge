@@ -1,0 +1,52 @@
+{% if contest is empty %}
+    <h1 id="teamwelcome" class="text-center">Welcome team <span id="teamwelcometeam">{{ team.name }}</span>!</h1>
+    <h2 id="contestnotstarted" class="text-center">There's no active contest for you (yet).</h2>
+{% elseif not contest.freezeData.started %}
+    <h1 id="teamwelcome" class="text-center">Welcome team <span id="teamwelcometeam">{{ team.name }}</span>!</h1>
+    <h2 id="contestnotstarted" class="text-center">
+        Contest {{ contest | printContestStart }}
+    </h2>
+{% else %}
+
+    <div id="teamscoresummary">
+        {% set displayRank = not contest.freezeData.showFrozen %}
+        {% include 'partials/scoreboard_table.html.twig' with {displayRank: displayRank, jury: false, public: false} %}
+    </div>
+
+    <div class="mt-4" data-flash-messages>
+        {% include 'partials/messages.html.twig' %}
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h3 class="teamoverview">Submissions</h3>
+
+            {% include 'team/partials/submission_list.html.twig' %}
+        </div>
+        <div class="col">
+            <h3 class="teamoverview">Clarifications</h3>
+            {% if clarifications is empty %}
+                <p class="nodata">No clarifications.</p>
+            {% else %}
+                {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarifications} %}
+            {% endif %}
+
+            <h3 class="teamoverview">Clarification Requests</h3>
+            {% if clarificationRequests is empty %}
+                <p class="nodata">No clarification request.</p>
+            {% else %}
+                {% include 'team/partials/clarification_list.html.twig' with {clarifications: clarificationRequests} %}
+            {% endif %}
+
+            <div class="m-1">
+                <a href="{{ path('team_clarification_add') }}" class="btn btn-secondary btn-sm" data-ajax-modal>
+                    request clarification
+                </a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% if ajax is defined and ajax %}
+    {% include 'partials/scoreboard_progress_bar.html.twig' with {margin: -9, contest: current_team_contest} %}
+{% endif %}

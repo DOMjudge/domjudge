@@ -1,0 +1,177 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Submissions - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Submissions</h1>
+
+    Show submissions:
+    <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+        {%- for idx, type in viewTypes %}
+
+            <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
+                <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
+                       {% if idx == view %}checked{% endif %}> {{ type }}
+            </label>
+        {%- endfor %}
+
+    </div>
+
+    <div class="mb-3">
+        <div class="btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-outline-secondary {% if hasFilters %}active{% endif %}">
+                <input type="checkbox" id="filter-toggle" {% if hasFilters %}checked{% endif %} autocomplete="off">
+                <i class="fas fa-filter"></i> Filter
+            </label>
+        </div>
+        <div class="card mt-3{% if not hasFilters %} d-none{% endif %}" id="filter-card">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group col-sm-6">
+                        <label for="problems-filter">Filter on problem(s)</label>
+                        <select class="select2 form-control" multiple data-filter-field="problem-id"
+                                data-ajax-url="{{ path('jury_ajax_data', {datatype: 'problems', select2: true}) }}">
+                            {%- for problem in filteredProblems %}
+
+                                <option value="{{ problem.probid }}" selected>
+                                    {{ problem.name }} (p{{ problem.probid }})
+                                </option>
+                            {%- endfor %}
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-sm-6">
+                        <label for="problems-filter">Filter on language(s)</label>
+                        <select class="select2 form-control" multiple data-filter-field="language-id"
+                                data-ajax-url="{{ path('jury_ajax_data', {datatype: 'languages', select2: true}) }}">
+                            {%- for language in filteredLanguages %}
+
+                                <option value="{{ language.langid }}" selected>
+                                    {{ language.name }} ({{ language.langid }})
+                                </option>
+                            {%- endfor %}
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-sm-6">
+                        <label for="problems-filter">Filter on team(s)</label>
+                        <select class="select2 form-control" multiple data-filter-field="team-id"
+                                data-ajax-url="{{ path('jury_ajax_data', {datatype: 'teams', select2: true}) }}">
+                            {%- for team in filteredTeams %}
+
+                                <option value="{{ team.teamid }}" selected>
+                                    {{ team.name }} (t{{ team.teamid }})
+                                </option>
+                            {%- endfor %}
+
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" id="clear-filters"><i class="fas fa-times-circle"></i> Clear all
+                    filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div data-ajax-refresh-target data-ajax-refresh-after="process_submissions_filter">
+        {%- include 'jury/partials/submission_list.html.twig' with {showTestcases: true} %}
+    </div>
+
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function () {
+            $('input[name=viewtype]').on('change', function () {
+                window.location = '{{ path('jury_submissions', {'view': 'REPLACE_ME'}) }}'.replace('REPLACE_ME', $(this).val());
+            });
+
+            $('#filter-toggle').on('change', function () {
+                if ($(this).is(':checked')) {
+                    $('#filter-card').removeClass('d-none');
+                } else {
+                    $('#filter-card').addClass('d-none');
+                }
+            });
+
+            $('.select2').each(function () {
+                var $elem = $(this);
+                $elem.select2({
+                    minimumInputLength: 1,
+                    ajax: {
+                        url: $elem.data('ajax-url'),
+                        dataType: 'json',
+                        delay: 250
+                    }
+                })
+            });
+
+            $('#clear-filters').on('click', function () {
+                $('select[data-filter-field]').val([]).trigger('change');
+            });
+
+            window.process_submissions_filter = function () {
+                var $trs = $('table.submissions-table > tbody tr');
+
+                var filters = [];
+
+                $('select[data-filter-field]').each(function () {
+                    var $filterField = $(this);
+                    if ($filterField.val().length) {
+                        filters.push({
+                            field: $filterField.data('filter-field'),
+                            values: $filterField.val()
+                        });
+                    }
+                });
+
+                var submissions_filter = {};
+                for (var i = 0; i < filters.length; i++) {
+                    submissions_filter[filters[i].field] = filters[i].values;
+                }
+
+                setCookie('domjudge_submissionsfilter', JSON.stringify(submissions_filter));
+
+                if (filters.length === 0) {
+                    $trs.show();
+                } else {
+                    $trs
+                        .hide()
+                        .filter(function () {
+                            var $tr = $(this);
+
+                            for (var i = 0; i < filters.length; i++) {
+                                var value = "" + $tr.data(filters[i].field);
+                                if (filters[i].values.indexOf(value) === -1) {
+                                    return false;
+                                }
+                            }
+
+                            return true;
+                        })
+                        .show();
+                }
+            };
+
+            $('select[data-filter-field]').on('change', process_submissions_filter);
+            window.process_submissions_filter();
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,17 @@
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownContests" role="button" data-toggle="dropdown"
+       aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-trophy"></i> {{ contest.shortname|default('no contest') }}
+    </a>
+    <div class="dropdown-menu scrollable-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item disabled" href="#">Change Contest</a>
+        {% if show_no_contest and contest is not empty %}
+            <a class="dropdown-item" href="{{ path(change_path, {'contestId': -1}) }}">No contest</a>
+            <div class="dropdown-divider"></div>
+        {% endif %}
+        {% for c in contests | filter(c => c != contest) %}
+            <a class="dropdown-item"
+               href="{{ path(change_path, {'contestId': c.cid}) }}">{{ c.shortname }}</a>
+        {% endfor %}
+    </div>
+</li>

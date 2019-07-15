@@ -85,7 +85,7 @@ class ProblemController extends BaseController
                 ->getResult();
         }
 
-        return $this->render('@DOMJudge/team/problems.html.twig', [
+        return $this->render('team/problems.html.twig', [
             'problems' => $problems,
             'showLimits' => $showLimits,
             'defaultMemoryLimit' => $defaultMemoryLimit,

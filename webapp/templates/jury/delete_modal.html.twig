@@ -1,0 +1,34 @@
+{% extends "partials/modal.html.twig" %}
+
+{% block title %}Delete {{ type }} {{ primaryKey }} - "{{ description }}"{% endblock %}
+
+{% block content %}
+
+    {% if isError %}
+        <div class="alert alert-danger">
+            <strong>Error: {{ messages.0 }}</strong>
+        </div>
+    {% else %}
+        <p>You're about to delete {{ type }} {{ primaryKey }} "{{ description }}".</p>
+
+        {% if messages is not empty %}
+            <p>
+                <strong>Warning, this will:</strong>
+            </p>
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <p>Are you sure?</p>
+    {% endif %}
+
+{% endblock %}
+
+{% block closeButtonText %}
+    {% if isError %}OK{% else %}Cancel{% endif %}
+{% endblock %}
+
+{% block buttonText %}Delete{% endblock %}

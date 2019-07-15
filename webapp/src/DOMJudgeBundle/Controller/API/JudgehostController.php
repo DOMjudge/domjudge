@@ -20,8 +20,8 @@ use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ScoreboardService;
 use DOMJudgeBundle\Service\SubmissionService;
 use DOMJudgeBundle\Utils\Utils;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\Controller\FOSRestController;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -35,7 +35,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * @Rest\NamePrefix("judgehost_")
  * @SWG\Tag(name="Judgehosts")
  */
-class JudgehostController extends FOSRestController
+class JudgehostController extends AbstractFOSRestController
 {
     /**
      * @var EntityManagerInterface
@@ -103,7 +103,7 @@ class JudgehostController extends FOSRestController
     /**
      * Get judgehosts
      * @Rest\Get("")
-     * @Security("has_role('ROLE_JURY')")
+     * @Security("is_granted('ROLE_JURY')")
      * @SWG\Response(
      *     response="200",
      *     description="The judgehosts",
@@ -137,7 +137,7 @@ class JudgehostController extends FOSRestController
      * Add a new judgehost to the list of judgehosts.
      * Also restarts (and returns) unfinished judgings.
      * @Rest\Post("")
-     * @Security("has_role('ROLE_JUDGEHOST')")
+     * @Security("is_granted('ROLE_JUDGEHOST')")
      * @SWG\Response(
      *     response="200",
      *     description="The returned unfinished judgings",
@@ -213,7 +213,7 @@ class JudgehostController extends FOSRestController
     /**
      * Update the configuration of the given judgehost
      * @Rest\Put("/{hostname}")
-     * @Security("has_role('ROLE_JUDGEHOST')")
+     * @Security("is_granted('ROLE_JUDGEHOST')")
      * @SWG\Response(
      *     response="200",
      *     description="The modified judgehost",
@@ -253,7 +253,7 @@ class JudgehostController extends FOSRestController
     /**
      * Get the next judging for the given judgehost
      * @Rest\Post("/next-judging/{hostname}")
-     * @Security("has_role('ROLE_JUDGEHOST')")
+     * @Security("is_granted('ROLE_JUDGEHOST')")
      * @SWG\Response(
      *     response="200",
      *     description="The next judging to judge",
@@ -512,7 +512,7 @@ class JudgehostController extends FOSRestController
     /**
      * Update the given judging for the given judgehost
      * @Rest\Put("/update-judging/{hostname}/{judgingId}", requirements={"judgingId": "\d+"})
-     * @Security("has_role('ROLE_JUDGEHOST')")
+     * @Security("is_granted('ROLE_JUDGEHOST')")
      * @SWG\Response(
      *     response="200",
      *     description="When the judging has been updated"
@@ -628,7 +628,7 @@ class JudgehostController extends FOSRestController
     /**
      * Add an array of JudgingRuns. When relevant, finalize the judging.
      * @Rest\Post("/add-judging-run/{hostname}/{judgingId}", requirements={"judgingId": "\d+"})
-     * @Security("has_role('ROLE_JUDGEHOST')")
+     * @Security("is_granted('ROLE_JUDGEHOST')")
      * @SWG\Response(
      *     response="200",
      *     description="When the judging run has been added"
@@ -811,7 +811,7 @@ class JudgehostController extends FOSRestController
      * Internal error reporting (back from judgehost)
      *
      * @Rest\Post("/internal-error")
-     * @Security("has_role('ROLE_JUDGEHOST')")
+     * @Security("is_granted('ROLE_JUDGEHOST')")
      * @SWG\Response(
      *     response="200",
      *     description="The ID of the created internal error",

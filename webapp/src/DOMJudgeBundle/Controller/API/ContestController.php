@@ -71,7 +71,7 @@ class ContestController extends AbstractRestController
     /**
      * Change the start time of the given contest
      * @Rest\Patch("/{id}")
-     * @Security("has_role('ROLE_API_WRITER')")
+     * @Security("is_granted('ROLE_API_WRITER')")
      * @param Request $request
      * @param string  $id
      * @return Response
@@ -234,7 +234,7 @@ class ContestController extends AbstractRestController
      * Get the event feed for the given contest
      * @Rest\Get("/{id}/event-feed")
      * @SWG\Get(produces={"application/x-ndjson"})
-     * @Security("has_role('ROLE_JURY') or has_role('ROLE_API_READER')")
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
      * @param Request $request
      * @param string  $id
      * @return Response|StreamedResponse
@@ -410,7 +410,7 @@ class ContestController extends AbstractRestController
     /**
      * Get general status information
      * @Rest\Get("/{id}/status")
-     * @Security("has_role('ROLE_API_READER')")
+     * @Security("is_granted('ROLE_API_READER')")
      * @SWG\Parameter(ref="#/parameters/id")
      * @SWG\Response(
      *     response="200",

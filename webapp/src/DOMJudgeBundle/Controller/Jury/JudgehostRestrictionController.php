@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/judgehost-restrictions")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class JudgehostRestrictionController extends BaseController
 {
@@ -123,7 +123,7 @@ class JudgehostRestrictionController extends BaseController
         }
 
 
-        return $this->render('@DOMJudge/jury/judgehost_restrictions.html.twig', [
+        return $this->render('jury/judgehost_restrictions.html.twig', [
             'judgehost_restrictions' => $judgehost_restrictions_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
@@ -173,7 +173,7 @@ class JudgehostRestrictionController extends BaseController
             ->getQuery()
             ->getResult();
 
-        return $this->render('@DOMJudge/jury/judgehost_restriction.html.twig', [
+        return $this->render('jury/judgehost_restriction.html.twig', [
             'judgehostRestriction' => $judgehostRestriction,
             'contests' => $contests,
             'problems' => $problems,
@@ -184,7 +184,7 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @Route("/{restrictionId}/edit", name="jury_judgehost_restriction_edit",
      *                                 requirements={"restrictionId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $restrictionId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -206,7 +206,7 @@ class JudgehostRestrictionController extends BaseController
                                                       ['restrictionId' => $judgehostRestriction->getRestrictionid()]));
         }
 
-        return $this->render('@DOMJudge/jury/judgehost_restriction_edit.html.twig', [
+        return $this->render('jury/judgehost_restriction_edit.html.twig', [
             'judgehostRestriction' => $judgehostRestriction,
             'form' => $form->createView(),
         ]);
@@ -215,7 +215,7 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @Route("/{restrictionId}/delete", name="jury_judgehost_restriction_delete",
      *                                   requirements={"restrictionId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $restrictionId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -233,7 +233,7 @@ class JudgehostRestrictionController extends BaseController
 
     /**
      * @Route("/add", name="jury_judgehost_restriction_add")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -254,7 +254,7 @@ class JudgehostRestrictionController extends BaseController
                                                       ['restrictionId' => $judgehostRestriction->getRestrictionid()]));
         }
 
-        return $this->render('@DOMJudge/jury/judgehost_restriction_add.html.twig', [
+        return $this->render('jury/judgehost_restriction_add.html.twig', [
             'form' => $form->createView(),
         ]);
     }

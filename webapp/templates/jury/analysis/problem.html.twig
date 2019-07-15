@@ -1,0 +1,286 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+
+{% block title %}Analysis - Problem {{ problem.probid }}{% endblock %}
+
+{% block extrahead %}
+<link rel="stylesheet" href="{{asset('css/nv.d3.min.css')}}" type="text/css"/>
+<script type="text/javascript" src="{{asset('js/d3.min.js')}}"></script>
+<script type="text/javascript" src="{{asset('js/nv.d3.min.js')}}"></script>
+<style>
+.row.equal {
+  display: flex;
+  flex-wrap: wrap;
+}
+.card {
+  height: 100%;
+}
+
+/* Don't show x-axis ticks/ticklines for max runtimes chart*/
+#maxruntime .nv-x.nv-axis .tick {
+  display: none;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+{% include 'jury/menu.html.twig' %}
+<div class="container-fluid">
+  <div class="row equal mt-3">
+    <div class="col-12">
+      <h1>Problem {{ problem.probid }}: {{ problem.name }}</h1>
+        {% include 'jury/partials/analysis_filter.html.twig' %}
+    </div>
+    <div class="col-lg-3 col-sm-6 mt-3">
+      <div class="card">
+        <div class="card-header">
+          Misc Statistics
+        </div>
+        <div class="card-body">
+          <dl class="row">
+            <dt class="col-sm-6"># Submissions</dt>
+            <dd class="col-sm-6">{{ submissions|length }}</dd>
+
+            <dt class="col-sm-6"># Correct</dt>
+            <dd class="col-sm-6">{{ results['correct']|default(0) }} <span class="text-muted">({{ misc.correct_percentage|number_format(2) }}%)</span></dd>
+
+            <dt class="col-sm-6"># Teams Attempted</dt>
+            <dd class="col-sm-6">{{ misc.num_teams_attempted }}</dd>
+
+            <dt class="col-sm-6"># Teams Correct</dt>
+            <dd class="col-sm-6">{{misc.num_teams_correct}} <span class="text-muted">({{  misc.teams_correct_percentage|number_format(2) }}%)</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 col-sm-6 mt-3" id="judging_results">
+      <div class="card">
+        <div class="card-header">
+          Judging Results
+        </div>
+        <div class="card-body">
+          <svg style="height: 275px"></svg>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5 col-sm-12 mt-3" id="submission_times">
+      <div class="card">
+        <div class="card-header">
+          Submissions over Time
+        </div>
+        <div class="card-body">
+            <svg style="height: 275px"></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row equal mt-3">
+    <div class="col-12" id="maxruntime">
+      <div class="card">
+        <div class="card-header">
+          Max Runtimes
+        </div>
+        <div class="card-body">
+          <svg style="height: 600px"></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script type="text/javascript">
+{%
+set colors = {
+  'correct':        '#01df01',
+  'wrong-answer':   'red',
+  'timelimit':      'orange',
+  'run-error':      '#ff3399',
+  'compiler-error': 'grey',
+  'no-output':      'purple',
+  'frozen':         'blue',
+  'output-limit':   'black',
+}
+%}
+$(function(){
+    var run_max_times = [
+      {
+        key: "Max Runtimes",
+        values: [
+          {% for j in judgings %}
+            {
+              "id"    : {{ j.judgingid }},
+              "label" : "j{{ j.judgingid }}",
+              "value" : {{ j.maxRuntime() }},
+              "team"  : "{{ j.submission.team.name }}",
+              "submittime"  : "{{ j.submission.submittime | printtime(null, j.submission.contest) }}",
+              "color" : "{{ colors[j.result] }}",
+              "firstfile" : "{{ j.submission.files[0].filename }}",
+            },
+          {% endfor %}
+        ]
+      }
+    ];
+    nv.addGraph(function() {
+      var chart = nv.models.discreteBarChart()
+          .x(function(d) { return d.label })
+          .y(function(d) { return d.value })
+          .valueFormat(d3.format('.3f'))
+          .staggerLabels(run_max_times[0].values.length > 10)
+          .forceY([0, {{ timelimit*1.20 }}])
+          .showValues(false)
+          .margin({bottom: 90})
+          .duration(250)
+        ;
+
+
+      chart.yAxis
+        .tickFormat(d3.format('.3f'))
+        .axisLabel('Runtime(in s)');
+      chart.xAxis.axisLabel("Judgings");
+      d3.select('#maxruntime svg')
+          .datum(run_max_times)
+          .call(chart);
+      // Clicking on one of the bars takes you to the judgment
+      chart.discretebar.dispatch.on('elementClick', function(e) {
+        window.location = "{{ path('jury_submission_by_judging', {'jid': '_JUDGING_ID_' }) }}".replace('_JUDGING_ID_', e.data.id);
+      });
+      // More useful tooltip
+      chart.tooltip.contentGenerator(function (obj) {
+        var format = d3.format(".3f");
+        return '<div style="background: LightCyan;">'
+	  + '<b>Team:</b> ' + obj.data.team + '<br/>'
+          + '<b>Submitted:</b> ' + obj.data.submittime + '<br/>'
+          + '<b>First file:</b> <tt>' + obj.data.firstfile + '</tt><br/>'
+          + '<b>max. Runtime:</b> ' + format(obj.data.value) + 's</b><br/>'
+          + '<small>click to view judging</small>'
+          + '</div>';
+      });
+
+      // Create our timelimit line
+      d3.select('#maxruntime svg')
+        .append('line')
+        .attr({id: 'maxline'})
+        .style("stroke", "#F00");
+
+      // update the line in case the chart dimensions have changed
+      var svgsize = chart.container.clientWidth || chart.container.parentNode.clientWidth;
+      updateline = function(){
+        line = d3.select('#maxruntime svg #maxline')
+        .attr({
+          x1: chart.margin().left,
+          y1: chart.yAxis.scale()({{timelimit}})+ chart.margin().top,
+          x2: +svgsize - chart.margin().right,
+          y2: chart.yAxis.scale()({{timelimit}}) + chart.margin().top,
+        })
+      }
+      updateline();
+      nv.utils.windowResize(function() {
+        updateline();
+        chart.update()
+      });
+      return chart;
+    });
+
+    //////////////////////////////////////
+    // Results by type
+    var judging_results = [
+      {
+        key: "Judging Results",
+        values: [
+          {% for result,count in results %}
+            {
+              "label" : "{{result}}",
+              "value" : {{ count }},
+              "color" : "{{ colors[result] }}",
+            },
+          {% endfor %}
+        ]
+      }
+    ];
+    nv.addGraph(function() {
+      var chart = nv.models.discreteBarChart()
+          .x(function(d) { return d.label })
+          .y(function(d) { return d.value })
+          .valueFormat(d3.format('.0f'))
+          .staggerLabels(run_max_times[0].values.length > 2)
+          .margin({bottom: 90})
+          .duration(250)
+          ;
+      chart.yAxis
+        .tickFormat(d3.format('.0f'))
+        .axisLabel('Number of submissions');
+      chart.xAxis.axisLabel("Judgement");
+      d3.select('#judging_results svg')
+          .datum(judging_results)
+          .call(chart);
+      nv.utils.windowResize(chart.update);
+      return chart;
+    });
+
+
+    //////////////////////////////////////
+    // Submissions over time
+    // stacked graph of correct, runtime-error, wrong-answer, compiler-error, timelimit, etc
+    // x-axis is contest time
+    // y axis is # of submissions
+
+    var submission_stats = [
+      {% for result in ['correct', 'wrong-answer', 'timelimit', 'run-error', 'compiler-error', 'no-output'] %}
+      {
+        key: "{{result}}",
+        color: "{{colors[result]}}",
+        values: [
+          {# TODO: make sure these are actually ordered by submittime #}
+          {# TODO: also make sure these submissions are in the same contest #}
+          [0,0],
+          {% set count = 0 %}
+          {% for submission in submissions | filter(submission => submission.result) %}
+            {% if submission.result == result %}{% set count = count +1 %}{% endif %}
+            [ {{ (submission.submittime - current_contest.starttime)/60.0 }},
+              {{ count }}
+            ],
+            {% endfor %}
+        ]
+      },
+      {% endfor %}
+    ];
+    nv.addGraph(function() {
+      var chart = nv.models.stackedAreaChart()
+          // .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
+          // .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+          // .transitionDuration(350)  //how fast do you want the lines to transition?
+          // .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+          .showControls(false)
+          .x(function(d) { return d[0] })   //We can modify the data accessor functions...
+          .y(function(d) { return d[1] })   //...in case your data is formatted differently.
+          .showYAxis(true)        //Show the y-axis
+          .showXAxis(true)        //Show the x-axis
+          .forceX([0, {{ (current_contest.endtime - current_contest.starttime) / 60 }}])
+          .forceY([0, {{ submissions|length *1.10 }}])
+          ;
+      chart.xAxis     //Chart x-axis settings
+          .axisLabel('Contest Time(minutes)')
+          .tickFormat(d3.format('d'));
+
+      chart.yAxis     //Chart y-axis settings
+          .axisLabel('Total Submissions')
+          .tickFormat(d3.format('d'));
+
+      d3.select('#submission_times svg')
+          .datum(submission_stats)
+          .call(chart);
+      nv.utils.windowResize(chart.update);
+      return chart;
+    });
+
+
+
+
+
+
+
+})
+</script>
+
+{% endblock %}

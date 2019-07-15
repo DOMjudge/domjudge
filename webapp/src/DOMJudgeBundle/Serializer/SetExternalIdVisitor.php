@@ -2,11 +2,13 @@
 
 namespace DOMJudgeBundle\Serializer;
 
+use DOMJudgeBundle\Entity\ContestProblem;
 use DOMJudgeBundle\Entity\ExternalRelationshipEntityInterface;
 use DOMJudgeBundle\Service\EventLogService;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
+use JMS\Serializer\Metadata\StaticPropertyMetadata;
 
 /**
  * Class SetExternalIdVisitor
@@ -56,7 +58,12 @@ class SetExternalIdVisitor implements EventSubscriberInterface
             if ($externalIdField = $this->eventLogService->externalIdFieldForEntity(get_class($object))) {
                 $method = sprintf('get%s', ucfirst($externalIdField));
                 if (method_exists($object, $method)) {
-                    $visitor->setData('id', $object->{$method}());
+                    $property = new StaticPropertyMetadata(
+                        get_class($object),
+                        'id',
+                        null
+                    );
+                    $visitor->visitProperty($property, $object->{$method}());
                 }
             }
         } catch (\BadMethodCallException $e) {
@@ -69,7 +76,12 @@ class SetExternalIdVisitor implements EventSubscriberInterface
                     if ($entity && $externalIdField = $this->eventLogService->externalIdFieldForEntity(get_class($entity))) {
                         $method = sprintf('get%s', ucfirst($externalIdField));
                         if (method_exists($entity, $method)) {
-                            $visitor->setData($field, $entity->{$method}());
+                            $property = new StaticPropertyMetadata(
+                                get_class($object),
+                                $field,
+                                null
+                            );
+                            $visitor->visitProperty($property, $entity->{$method}());
                         }
                     }
                 } catch (\BadMethodCallException $e) {
