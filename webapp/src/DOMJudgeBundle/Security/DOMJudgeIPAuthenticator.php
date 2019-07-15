@@ -7,6 +7,7 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -30,6 +31,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     private $em;
     private $dj;
     private $router;
+    private $requestStack;
 
     /**
      * DOMJudgeIPAuthenticator constructor.
@@ -39,6 +41,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
      * @param EntityManagerInterface    $em
      * @param DOMJudgeService           $dj
      * @param RouterInterface           $router
+     * @param RequestStack              $requestStack
      */
     public function __construct(
         CsrfTokenManagerInterface $csrfTokenManager,
@@ -46,7 +49,8 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         Security $security,
         EntityManagerInterface $em,
         DOMJudgeService $dj,
-        RouterInterface $router
+        RouterInterface $router,
+        RequestStack $requestStack
     ) {
         $this->csrfTokenManager = $csrfTokenManager;
         $this->container        = $container;
@@ -54,6 +58,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         $this->em               = $em;
         $this->dj               = $dj;
         $this->router           = $router;
+        $this->requestStack     = $requestStack;
     }
 
     /**
@@ -107,7 +112,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         }
 
         // Get the client IP address to use
-        $clientIP = $this->container->get('request_stack')->getMasterRequest()->getClientIp();
+        $clientIP = $this->requestStack->getMasterRequest()->getClientIp();
         return [
             'username' => $request->request->get('_username'),
             'authbasic_username' => $request->headers->get('php-auth-user'),

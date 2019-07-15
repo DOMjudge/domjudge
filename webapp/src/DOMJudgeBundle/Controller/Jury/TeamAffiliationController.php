@@ -34,6 +34,11 @@ class TeamAffiliationController extends BaseController
     protected $dj;
 
     /**
+     * @var KernelInterface
+     */
+    protected $kernel;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -42,15 +47,18 @@ class TeamAffiliationController extends BaseController
      * TeamCategoryController constructor.
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->kernel          = $kernel;
         $this->eventLogService = $eventLogService;
     }
 
@@ -250,7 +258,7 @@ class TeamAffiliationController extends BaseController
             throw new NotFoundHttpException(sprintf('Team affiliation with ID %s not found', $affilId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $teamAffiliation,
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $teamAffiliation,
                                    $teamAffiliation->getName(), $this->generateUrl('jury_team_affiliations'));
     }
 

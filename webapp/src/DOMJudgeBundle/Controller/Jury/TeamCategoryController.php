@@ -14,6 +14,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -34,6 +35,11 @@ class TeamCategoryController extends BaseController
     protected $dj;
 
     /**
+     * @var KernelInterface
+     */
+    protected $kernel;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -42,16 +48,19 @@ class TeamCategoryController extends BaseController
      * TeamCategoryController constructor.
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
+        $this->kernel          = $kernel;
     }
 
     /**
@@ -228,7 +237,7 @@ class TeamCategoryController extends BaseController
             throw new NotFoundHttpException(sprintf('Team category with ID %s not found', $categoryId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $teamCategory,
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $teamCategory,
                                    $teamCategory->getName(), $this->generateUrl('jury_team_categories'));
     }
 

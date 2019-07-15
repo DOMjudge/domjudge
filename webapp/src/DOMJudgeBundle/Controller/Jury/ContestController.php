@@ -40,6 +40,11 @@ class ContestController extends BaseController
     protected $dj;
 
     /**
+     * @var KernelInterface
+     */
+    protected $kernel;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -48,16 +53,19 @@ class ContestController extends BaseController
      * TeamCategoryController constructor.
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
+        $this->kernel          = $kernel;
     }
 
     /**
@@ -452,7 +460,7 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest with ID %s not found', $contestId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $contest,
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $contest,
                                    $contest->getName(), $this->generateUrl('jury_contests'));
     }
 
@@ -476,7 +484,7 @@ class ContestController extends BaseController
             throw new NotFoundHttpException(sprintf('Contest problem with contest ID %s and problem ID %s not found', $contestId, $probId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $contestProblem,
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $contestProblem,
                                    $contestProblem->getShortname(), $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 

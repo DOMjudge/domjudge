@@ -16,6 +16,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -35,7 +36,12 @@ class UserController extends BaseController
     /**
      * @var DOMJudgeService
      */
-    private $dj;
+    protected $dj;
+
+    /**
+     * @var KernelInterface
+     */
+    protected $kernel;
 
     /**
      * @var EventLogService
@@ -47,9 +53,18 @@ class UserController extends BaseController
      */
     protected $tokenStorage;
 
+    /**
+     * UserController constructor.
+     * @param EntityManagerInterface $em
+     * @param DOMJudgeService        $dj
+     * @param KernelInterface        $kernel
+     * @param EventLogService        $eventLogService
+     * @param TokenStorageInterface  $tokenStorage
+     */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        KernelInterface $kernel,
         EventLogService $eventLogService,
         TokenStorageInterface $tokenStorage
     ) {
@@ -57,6 +72,7 @@ class UserController extends BaseController
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
         $this->tokenStorage    = $tokenStorage;
+        $this->kernel          = $kernel;
     }
 
     /**
@@ -244,7 +260,7 @@ class UserController extends BaseController
             throw new NotFoundHttpException(sprintf('User with ID %s not found', $userId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $user, $user->getName(),
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $user, $user->getName(),
                                    $this->generateUrl('jury_users'));
     }
 

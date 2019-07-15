@@ -14,6 +14,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -34,6 +35,11 @@ class LanguageController extends BaseController
     protected $dj;
 
     /**
+     * @var KernelInterface
+     */
+    protected $kernel;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -41,16 +47,19 @@ class LanguageController extends BaseController
     /**
      * LanguageController constructor.
      * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $dj
-     * @param EventLogService        $eventLogService
+     * @param DOMJudgeService $dj
+     * @param KernelInterface $kernel
+     * @param EventLogService $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->kernel          = $kernel;
         $this->eventLogService = $eventLogService;
     }
 
@@ -312,6 +321,6 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $language, $language->getName(), $this->generateUrl('jury_languages'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $language, $language->getName(), $this->generateUrl('jury_languages'));
     }
 }

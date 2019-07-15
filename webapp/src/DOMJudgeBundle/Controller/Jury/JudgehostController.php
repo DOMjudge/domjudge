@@ -12,6 +12,7 @@ use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
@@ -34,10 +35,25 @@ class JudgehostController extends BaseController
      */
     protected $dj;
 
-    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
-    {
+    /**
+     * @var KernelInterface
+     */
+    protected $kernel;
+
+    /**
+     * JudgehostController constructor.
+     * @param EntityManagerInterface $em
+     * @param DOMJudgeService $dj
+     * @param KernelInterface $kernel
+     */
+    public function __construct(
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
+        KernelInterface $kernel
+    ) {
         $this->em = $em;
         $this->dj = $dj;
+        $this->kernel = $kernel;
     }
 
     /**
@@ -299,7 +315,7 @@ class JudgehostController extends BaseController
             ->getQuery()
             ->getOneOrNullResult();
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $judgehost, $judgehost->getHostname(), $this->generateUrl('jury_judgehosts'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $judgehost, $judgehost->getHostname(), $this->generateUrl('jury_judgehosts'));
     }
 
     /**

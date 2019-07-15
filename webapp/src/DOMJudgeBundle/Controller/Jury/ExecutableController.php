@@ -11,6 +11,7 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -20,7 +21,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
-use Symfony\Component\Form\Exception\InvalidArgumentException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -41,6 +42,11 @@ class ExecutableController extends BaseController
     protected $dj;
 
     /**
+     * @var KernelInterface
+     */
+    protected $kernel;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -49,15 +55,18 @@ class ExecutableController extends BaseController
      * ExecutableController constructor.
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->kernel          = $kernel;
         $this->eventLogService = $eventLogService;
     }
 
@@ -390,7 +399,7 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $executable,
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $executable,
                                    $executable->getDescription(), $this->generateUrl('jury_executables'));
     }
 

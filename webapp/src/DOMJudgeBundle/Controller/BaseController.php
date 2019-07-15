@@ -18,6 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
@@ -110,24 +111,25 @@ abstract class BaseController extends Controller
      * @param Request                $request
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
+     * @param KernelInterface        $kernel
      * @param                        $entity
      * @param string                 $description
      * @param string                 $redirectUrl
      * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     protected function deleteEntity(
         Request $request,
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
+        KernelInterface $kernel,
         $entity,
         string $description,
         string $redirectUrl
     ) {
         // Determine all the relationships between all tables using Doctrine cache
-        $dir       = realpath(sprintf('%s/../src/DOMJudgeBundle/Entity', $this->get('kernel')->getRootDir()));
+        $dir       = realpath(sprintf('%s/../src/DOMJudgeBundle/Entity', $kernel->getRootDir()));
         $files     = glob($dir . '/*.php');
         $relations = [];
         foreach ($files as $file) {

@@ -13,6 +13,7 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -32,10 +33,25 @@ class JudgehostRestrictionController extends BaseController
      */
     protected $dj;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj)
-    {
+    /**
+     * @var KernelInterface
+     */
+    protected $kernel;
+
+    /**
+     * JudgehostRestrictionController constructor.
+     * @param EntityManagerInterface $entityManager
+     * @param DOMJudgeService        $dj
+     * @param KernelInterface        $kernel
+     */
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $dj,
+        KernelInterface $kernel
+    ) {
         $this->em = $entityManager;
         $this->dj = $dj;
+        $this->kernel = $kernel;
     }
 
     /**
@@ -212,7 +228,7 @@ class JudgehostRestrictionController extends BaseController
         /** @var JudgehostRestriction $judgehostRestriction */
         $judgehostRestriction = $this->em->getRepository(JudgehostRestriction::class)->find($restrictionId);
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $judgehostRestriction, $judgehostRestriction->getName(), $this->generateUrl('jury_judgehost_restrictions'));
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $judgehostRestriction, $judgehostRestriction->getName(), $this->generateUrl('jury_judgehost_restrictions'));
     }
 
     /**
