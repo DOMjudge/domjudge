@@ -25,7 +25,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/teams")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class TeamController extends BaseController
 {
@@ -227,7 +227,7 @@ class TeamController extends BaseController
                     ($t->getEnabled() ? '' : ' disabled'),
             ];
         }
-        return $this->render('@DOMJudge/jury/teams.html.twig', [
+        return $this->render('jury/teams.html.twig', [
             'teams' => $teams_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 1,
@@ -324,15 +324,15 @@ class TeamController extends BaseController
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;
             $data['jury']        = true;
-            return $this->render('@DOMJudge/jury/partials/team_score_and_submissions.html.twig', $data);
+            return $this->render('jury/partials/team_score_and_submissions.html.twig', $data);
         }
 
-        return $this->render('@DOMJudge/jury/team.html.twig', $data);
+        return $this->render('jury/team.html.twig', $data);
     }
 
     /**
      * @Route("/{teamId}/edit", name="jury_team_edit", requirements={"teamId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $teamId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -357,7 +357,7 @@ class TeamController extends BaseController
                                                       ['teamId' => $team->getTeamid()]));
         }
 
-        return $this->render('@DOMJudge/jury/team_edit.html.twig', [
+        return $this->render('jury/team_edit.html.twig', [
             'team' => $team,
             'form' => $form->createView(),
         ]);
@@ -365,7 +365,7 @@ class TeamController extends BaseController
 
     /**
      * @Route("/{teamId}/delete", name="jury_team_delete", requirements={"teamId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $teamId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -385,7 +385,7 @@ class TeamController extends BaseController
 
     /**
      * @Route("/add", name="jury_team_add")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -429,7 +429,7 @@ class TeamController extends BaseController
                                                       ['teamId' => $team->getTeamid()]));
         }
 
-        return $this->render('@DOMJudge/jury/team_add.html.twig', [
+        return $this->render('jury/team_add.html.twig', [
             'team' => $team,
             'form' => $form->createView(),
         ]);

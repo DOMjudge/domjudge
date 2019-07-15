@@ -1,0 +1,34 @@
+{% extends "public/base.html.twig" %}
+
+{% block title %}Scoreboard - {{ parent() }}{% endblock %}
+{% block content %}
+    {% set banner = 'images/banner.png' %}
+    {% if static and banner | assetExists %}
+        <img class="banner" src="{{ asset('images/banner.png') }}" alt="Banner"/>
+    {% endif %}
+
+    <div data-ajax-refresh-target data-ajax-refresh-after="initializeScoreboard" class="mt-3">
+        {% include 'partials/scoreboard.html.twig' with {jury: false, public: true} %}
+    </div>
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        initFavouriteTeams();
+
+        var scoreboardUrl = '{{ refresh.url }}';
+
+        $(function () {
+            window.initializeScoreboard = function () {
+                var $newProgress = $('[data-ajax-refresh-target] > .d-none > [data-progress-bar]');
+                if ($newProgress.length) {
+                    var $oldProgress = $('body > [data-progress-bar]');
+                    $oldProgress.html($newProgress.children());
+                    $newProgress.parent().remove();
+                }
+
+                initFavouriteTeams();
+            };
+        });
+    </script>
+{% endblock %}

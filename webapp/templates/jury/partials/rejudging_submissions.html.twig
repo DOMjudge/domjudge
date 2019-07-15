@@ -1,0 +1,13 @@
+{% if ajax is defined and ajax %}
+    <span class="d-none" data-new-todo>
+        {{ todo }}
+    </span>
+    <div class="d-none" data-new-rejudging-buttons>
+        {% include 'jury/partials/rejudging_buttons.html.twig' %}
+    </div>
+    <div class="d-none" data-new-rejudging-matrix>
+        {% include 'jury/partials/rejudging_matrix.html.twig' %}
+    </div>
+{% endif %}
+
+{%- include 'jury/partials/submission_list.html.twig' with {showContest: true} %}

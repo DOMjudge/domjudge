@@ -10,7 +10,7 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -19,9 +19,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Route("/jury/balloons")
- * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
+ * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
  */
-class BalloonController extends Controller
+class BalloonController extends AbstractController
 {
     /**
      * @var EntityManagerInterface
@@ -202,7 +202,7 @@ class BalloonController extends Controller
                 ->getResult();
         }
 
-        return $this->render('@DOMJudge/jury/balloons.html.twig', [
+        return $this->render('jury/balloons.html.twig', [
             'refresh' => [
                 'after' => 60,
                 'url' => $this->generateUrl('jury_balloons'),

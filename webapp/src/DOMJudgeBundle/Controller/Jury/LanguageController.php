@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/languages")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class LanguageController extends BaseController
 {
@@ -137,7 +137,7 @@ class LanguageController extends BaseController
                 'cssclass' => $lang->getAllowSubmit() ? '' : 'disabled',
             ];
         }
-        return $this->render('@DOMJudge/jury/languages.html.twig', [
+        return $this->render('jury/languages.html.twig', [
             'languages' => $languages_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
@@ -147,7 +147,7 @@ class LanguageController extends BaseController
     // Note that the add action appears before the view action to make sure /add is not seen as a language
     /**
      * @Route("/add", name="jury_language_add")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
@@ -172,7 +172,7 @@ class LanguageController extends BaseController
                                                       ['langId' => $language->getLangid()]));
         }
 
-        return $this->render('@DOMJudge/jury/language_add.html.twig', [
+        return $this->render('jury/language_add.html.twig', [
             'form' => $form->createView(),
         ]);
     }
@@ -218,10 +218,10 @@ class LanguageController extends BaseController
         // For ajax requests, only return the submission list partial
         if ($request->isXmlHttpRequest()) {
             $data['showTestcases'] = false;
-            return $this->render('@DOMJudge/jury/partials/submission_list.html.twig', $data);
+            return $this->render('jury/partials/submission_list.html.twig', $data);
         }
 
-        return $this->render('@DOMJudge/jury/language.html.twig', $data);
+        return $this->render('jury/language.html.twig', $data);
     }
 
     /**
@@ -270,7 +270,7 @@ class LanguageController extends BaseController
 
     /**
      * @Route("/{langId}/edit", name="jury_language_edit")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $langId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -299,7 +299,7 @@ class LanguageController extends BaseController
                                                       ['langId' => $language->getLangid()]));
         }
 
-        return $this->render('@DOMJudge/jury/language_edit.html.twig', [
+        return $this->render('jury/language_edit.html.twig', [
             'language' => $language,
             'form' => $form->createView(),
         ]);
@@ -307,7 +307,7 @@ class LanguageController extends BaseController
 
     /**
      * @Route("/{langId}/delete", name="jury_language_delete")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $langId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response

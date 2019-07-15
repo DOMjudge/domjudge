@@ -1,0 +1,28 @@
+{% extends "team/base.html.twig" %}
+{% import _self as self %}
+
+{% block title %}{{ parent() }} - Print{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="container pt-5">
+        <h1 class="text-center">Print source</h1>
+
+        <pre class="output_text m-3">
+{{ output }}
+</pre>
+
+        {% if success %}
+            <div class="alert alert-success">File has been printed</div>
+        {% else %}
+            <div class="alert alert-danger">Error while printing. Contact staff.</div>
+        {% endif %}
+
+        <a href="./" class="btn btn-secondary mt-3">Close</a>
+    </div>
+
+{% endblock %}

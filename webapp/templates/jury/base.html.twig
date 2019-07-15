@@ -1,0 +1,41 @@
+{% extends "base.html.twig" %}
+
+{% block title %}{{ title|default('DOMjudge') }}{% endblock %}
+
+{% block messages %}
+    {{ parent() }}
+
+    {% if app.session.flashBag.has('scoreboard_refresh') %}
+        {% for message in app.session.flashBag.get('scoreboard_refresh') %}
+            {% include 'jury/refresh_scoreboard.html.twig' %}
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('style_jury.css') }}">
+{% endblock %}
+
+{% block menu %}
+    {% include 'jury/menu.html.twig' %}
+{% endblock %}
+{% block footer %}
+    <script>
+        $(function () {
+            /* Show the notification options if the browser supports it */
+            if ('Notification' in window) {
+                $('#notify_disable').click(disableNotifications);
+                $('#notify_enable').click(enableNotifications);
+                if (getCookie('domjudge_notify') != 1) {
+                    $('#notify_enable').removeClass('d-none');
+                } else {
+                    $('#notify_disable').removeClass('d-none');
+                }
+            }
+
+            updateMenuAlerts();
+            setInterval(updateMenuAlerts, 20000);
+        });
+    </script>
+{% endblock %}

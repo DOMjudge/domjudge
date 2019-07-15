@@ -119,7 +119,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @param Request $request
      * @return array
      * @Rest\Post("")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @SWG\Post(consumes={"multipart/form-data"})
      * @SWG\Parameter(
      *     name="zip[]",

@@ -20,8 +20,6 @@ framework:
     csrf_protection: ~
     validation: { enable_annotations: true }
     #serializer: { enable_annotations: true }
-    templating:
-        engines: ['twig']
     default_locale: '%locale%'
     trusted_hosts: ~
     session:
@@ -39,10 +37,11 @@ framework:
 twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
+    auto_reload: true
     form_themes: ['form_theme.html.twig']
     globals:
-      DOMJUDGE_VERSION: '%domjudge.version%'
-      DJ_CHARACTER_SET: 'utf-8'
+        DOMJUDGE_VERSION: '%domjudge.version%'
+        DJ_CHARACTER_SET: 'utf-8'
 # Doctrine Configuration
 doctrine:
     dbal:
@@ -80,9 +79,13 @@ sensio_framework_extra:
 # Pretty print json please!
 jms_serializer:
     visitors:
-        json:
+        json_serialization:
+            options: JSON_PRETTY_PRINT
+        json_deserialization:
             options: JSON_PRETTY_PRINT
 fos_rest:
+    zone:
+        - { path: ^/api/* }
     disable_csrf_role: ROLE_API
     view:
         # Lets us return data directly, instead of wrapping in a view
@@ -91,6 +94,7 @@ fos_rest:
         serialize_null: true
     exception:
         enabled: true
+        exception_controller: 'fos_rest.exception.controller:showAction'
         messages:
                 Symfony\Component\HttpKernel\Exception\BadRequestHttpException: true
                 Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException: true

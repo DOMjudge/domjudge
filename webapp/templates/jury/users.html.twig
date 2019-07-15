@@ -1,0 +1,23 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Users - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Users</h1>
+
+    {{ macros.table(users, table_fields, num_actions) }}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <p>
+            {{ button(path('jury_user_add'), 'Add new user', 'primary', 'plus') }}
+        </p>
+    {% endif %}
+{% endblock %}

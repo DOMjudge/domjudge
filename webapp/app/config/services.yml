@@ -12,6 +12,9 @@ services:
         # this means you cannot fetch services directly from the container via $container->get()
         # if you need to do this, you can override this setting on individual services
         public: false
+        bind:
+            $debug: '%kernel.debug%'
+            $domjudgeVersion: '%domjudge.version%'
 
     Twig\Extensions\TextExtension:
         tags:
@@ -52,15 +55,3 @@ services:
     DOMJudgeBundle\Doctrine\HashPasswordSubscriber:
         tags:
             - { name: doctrine.event_subscriber, connection: default }
-
-    DOMJudgeBundle\Service\CheckConfigService:
-        arguments:
-            $debug: '%kernel.debug%'
-
-    DOMJudgeBundle\Service\BaylorCmsService:
-        arguments:
-            $domjudgeVersion: '%domjudge.version%'
-
-    DOMJudgeBundle\Controller\Jury\ImportExportController:
-        arguments:
-            $domjudgeVersion: '%domjudge.version%'

@@ -14,7 +14,7 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -22,9 +22,9 @@ use Symfony\Component\Form\Exception\InvalidArgumentException;
 
 /**
  * @Route("/jury/clarifications")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
-class ClarificationController extends Controller
+class ClarificationController extends AbstractController
 {
     /**
      * @var EntityManagerInterface
@@ -126,7 +126,7 @@ class ClarificationController extends Controller
 
         $queues = $this->dj->dbconfig_get('clar_queues');
 
-        return $this->render('@DOMJudge/jury/clarifications.html.twig', [
+        return $this->render('jury/clarifications.html.twig', [
             'newClarifications' => $newClarifications,
             'oldClarifications' => $oldClarifications,
             'generalClarifications' => $generalClarifications,
@@ -224,7 +224,7 @@ class ClarificationController extends Controller
         $clardata['clarform']['queues'] = $queues;
         $clardata['clarform']['answers'] = $clar_answers;
 
-        return $this->render('@DOMJudge/jury/clarification.html.twig',
+        return $this->render('jury/clarification.html.twig',
             $clardata
         );
     }
@@ -297,7 +297,7 @@ class ClarificationController extends Controller
             $data['toteam'] = $toteam;
         }
 
-        return $this->render('@DOMJudge/jury/clarification_new.html.twig', ['clarform' => $data]);
+        return $this->render('jury/clarification_new.html.twig', ['clarform' => $data]);
     }
 
     /**

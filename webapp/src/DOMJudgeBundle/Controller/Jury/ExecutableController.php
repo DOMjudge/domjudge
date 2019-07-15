@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/executables")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class ExecutableController extends BaseController
 {
@@ -194,7 +194,7 @@ class ExecutableController extends BaseController
                 'link' => $this->generateUrl('jury_executable', ['execId' => $e->getExecid()]),
             ];
         }
-        return $this->render('@DOMJudge/jury/executables.html.twig', [
+        return $this->render('jury/executables.html.twig', [
             'executables' => $executables_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 3 : 0,
@@ -217,7 +217,7 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        return $this->render('@DOMJudge/jury/executable.html.twig', [
+        return $this->render('jury/executable.html.twig', [
             'executable' => $executable,
             'default_compare' => (string)$this->dj->dbconfig_get('default_compare'),
             'default_run' => (string)$this->dj->dbconfig_get('default_run'),
@@ -226,7 +226,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/content", name="jury_executable_content")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param string $execId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -238,12 +238,12 @@ class ExecutableController extends BaseController
             throw new NotFoundHttpException(sprintf('Executable with ID %s not found', $execId));
         }
 
-        return $this->render('@DOMJudge/jury/executable_content.html.twig', $this->dataForEditor($executable));
+        return $this->render('jury/executable_content.html.twig', $this->dataForEditor($executable));
     }
 
     /**
      * @Route("/{execId}/download", name="jury_executable_download")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param string $execId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -275,7 +275,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/download/{index}", name="jury_executable_download_single")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param string $execId
      * @param int    $index
      * @return \Symfony\Component\HttpFoundation\Response
@@ -324,7 +324,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/edit", name="jury_executable_edit")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $execId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -376,7 +376,7 @@ class ExecutableController extends BaseController
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
 
-        return $this->render('@DOMJudge/jury/executable_edit.html.twig', [
+        return $this->render('jury/executable_edit.html.twig', [
             'executable' => $executable,
             'form' => $form->createView(),
             'uploadForm' => $uploadForm->createView(),
@@ -385,7 +385,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/delete", name="jury_executable_delete")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $execId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -405,7 +405,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/edit-files", name="jury_executable_edit_files")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param string  $execId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -471,7 +471,7 @@ class ExecutableController extends BaseController
             return $this->redirectToRoute('jury_executable', ['execId' => $executable->getExecid()]);
         }
 
-        return $this->render('@DOMJudge/jury/executable_edit_content.html.twig', array_merge($editorData, [
+        return $this->render('jury/executable_edit_content.html.twig', array_merge($editorData, [
             'form' => $form->createView(),
             'selected' => $request->query->get('index'),
         ]));

@@ -178,9 +178,9 @@ class ClarificationController extends BaseController
         ];
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/team/clarification_modal.html.twig', $data);
+            return $this->render('team/clarification_modal.html.twig', $data);
         } else {
-            return $this->render('@DOMJudge/team/clarification.html.twig', $data);
+            return $this->render('team/clarification.html.twig', $data);
         }
     }
 
@@ -249,9 +249,9 @@ class ClarificationController extends BaseController
         ];
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/team/clarification_add_modal.html.twig', $data);
+            return $this->render('team/clarification_add_modal.html.twig', $data);
         } else {
-            return $this->render('@DOMJudge/team/clarification_add.html.twig', $data);
+            return $this->render('team/clarification_add.html.twig', $data);
         }
     }
 }

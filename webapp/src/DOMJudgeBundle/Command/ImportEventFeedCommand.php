@@ -29,7 +29,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -43,7 +43,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
  * Class ImportEventFeedCommand
  * @package DOMJudgeBundle\Command
  */
-class ImportEventFeedCommand extends ContainerAwareCommand
+class ImportEventFeedCommand extends Command
 {
     /**
      * @var EntityManagerInterface
@@ -74,6 +74,16 @@ class ImportEventFeedCommand extends ContainerAwareCommand
      * @var TokenStorageInterface
      */
     protected $tokenStorage;
+
+    /**
+     * @var bool
+     */
+    protected $debug;
+
+    /**
+     * @var string
+     */
+    protected $domjudgeVersion;
 
     /**
      * @var LoggerInterface
@@ -128,6 +138,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
      * @param ScoreboardService      $scoreboardService
      * @param SubmissionService      $submissionService
      * @param TokenStorageInterface  $tokenStorage
+     * @param bool                   $debug
+     * @param string                 $domjudgeVersion
      * @param string|null            $name
      */
     public function __construct(
@@ -137,6 +149,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         ScoreboardService $scoreboardService,
         SubmissionService $submissionService,
         TokenStorageInterface $tokenStorage,
+        bool $debug,
+        string $domjudgeVersion,
         string $name = null
     ) {
         parent::__construct($name);
@@ -146,6 +160,8 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         $this->scoreboardService = $scoreboardService;
         $this->submissionService = $submissionService;
         $this->tokenStorage      = $tokenStorage;
+        $this->debug             = $debug;
+        $this->domjudgeVersion   = $domjudgeVersion;
     }
 
     /**
@@ -208,7 +224,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         // Disable SQL logging if we do not run explicitly in debug mode.
         // This would cause a serious memory leak otherwise since this is a
         // long runnning process.
-        if (!$this->getContainer()->getParameter('kernel.debug')) {
+        if (!$this->debug) {
             $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
         }
 
@@ -243,7 +259,7 @@ class ImportEventFeedCommand extends ContainerAwareCommand
         } else {
             $this->logger->notice(sprintf('Starting event feed import into contest with ID %d [DOMjudge/%s]',
                                           $contest->getCid(),
-                                          $this->getContainer()->getParameter('domjudge.version')));
+                                          $this->domjudgeVersion));
         }
 
         // For teams and team categories we want to overwrite the ID so change the ID generator

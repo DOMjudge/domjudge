@@ -10,7 +10,7 @@ use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -18,9 +18,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/auditlog")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  */
-class AuditLogController extends Controller
+class AuditLogController extends AbstractController
 {
     /**
      * @var EntityManagerInterface
@@ -125,7 +125,7 @@ class AuditLogController extends Controller
         $maxPages = ceil($paginator->count() / $limit);
         $thisPage = $page;
 
-        return $this->render('@DOMJudge/jury/auditlog.html.twig', [
+        return $this->render('jury/auditlog.html.twig', [
             'auditlog' => $auditlog_table,
             'table_fields' => $table_fields,
             'table_options' => ['ordering' => 'false', 'searching' => 'false'],

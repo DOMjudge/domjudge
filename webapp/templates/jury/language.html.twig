@@ -1,0 +1,98 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Language {{ language.langid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Language {{ language.name }}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>ID/extension</th>
+                    <td>{{ language.langid }}</td>
+                </tr>
+                {% if showExternalId(language) %}
+                    <tr>
+                        <th>External ID</th>
+                        <td>{{ language.externalid }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Name</th>
+                    <td>{{ language.name }}</td>
+                </tr>
+                <tr>
+                    <th>Entry point</th>
+                    <td>
+                        {{ language.requireEntryPoint | printYesNo }}
+                        {% if language.requireEntryPoint and language.entryPointDescription %}
+                            ({{ language.entryPointDescription }})
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Allow submit</th>
+                    <td>
+                        {{ language.allowSubmit | printYesNo }}
+                        <form action="{{ path('jury_language_toggle_submit', {'langId': language.langid}) }}" method="post" class="d-inline">
+                            <input type="hidden" name="allow_submit" value="{{ not language.allowSubmit }}" />
+                            <input type="submit" class="btn btn-sm btn-outline-secondary" value="toggle"/>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Allow judge</th>
+                    <td>
+                        {{ language.allowJudge | printYesNo }}
+                        <form action="{{ path('jury_language_toggle_judge', {'langId': language.langid}) }}" method="post" class="d-inline">
+                            <input type="hidden" name="allow_judge" value="{{ not language.allowJudge }}" />
+                            <input type="submit" class="btn btn-sm btn-outline-secondary" value="toggle"/>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Time factor</th>
+                    <td>{{ language.timeFactor }} &times;</td>
+                </tr>
+                <tr>
+                    <th>Compile script</th>
+                    <td>
+                        {% if language.compileExecutable %}
+                            <a href="{{ path('jury_executable', {'execId': language.compileExecutable.execid}) }}">{{ language.compileExecutable.execid }}</a>
+                        {% else %}
+                            <span class="nodata">none specified</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Extensions</th>
+                    <td>{{ language.extensions | join(', ') }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <p>
+        {%- if is_granted('ROLE_ADMIN') -%}
+            {{ button(path('jury_language_edit', {'langId': language.langid}), 'Edit', 'primary', 'edit') }}
+            {{ button(path('jury_language_delete', {'langId': language.langid}), 'Delete', 'danger', 'trash-alt', true) }}
+        {% endif %}
+        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'language', id: language.langid, buttonClass: 'btn-secondary'} %}
+    </p>
+
+    <h2>Submissions in {{ language.name }}</h2>
+
+    <div data-ajax-refresh-target>
+        {%- include 'jury/partials/submission_list.html.twig' with {showTestcases: false} %}
+    </div>
+
+{% endblock %}

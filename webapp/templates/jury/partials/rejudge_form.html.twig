@@ -1,0 +1,98 @@
+{# Output a rejudge form #}
+
+{% apply spaceless %}
+    {% set buttonText = 'Rejudge all for ' ~ table ~ ' ' ~ id %}
+    {% set questionText = 'Rejudge all submissions for this ' ~ table ~ '?' %}
+    {% set buttonDisabled = false %}
+    {% if is_granted('ROLE_ADMIN') %}
+        {% set includeAllButton = true %}
+    {% else %}
+        {% set includeAllButton = false %}
+    {% endif %}
+    {% if buttonClass is not defined %}
+        {% set buttonClass = 'btn-outline-primary btn-sm' %}
+    {% endif %}
+
+    {% if table == 'submission' and submission is defined and judgings is defined %}
+        {% set buttonText = 'Rejudge this submission' %}
+        {% set questionText = 'Rejudge submission s' ~ id ~ '?' %}
+        {% set includeAllButton = false %}
+        {# Check if we have a valid result #}
+        {% set validResult = false %}
+        {% for judging in judgings %}
+            {% if judging.valid %}
+                {% set validResult = judging.result %}
+            {% endif %}
+        {% endfor %}
+
+        {% if is_granted('ROLE_ADMIN') %}
+            {% if not validResult %}
+                {% set questionText = 'Restart judging of PENDING submission s' ~ id ~ ', are you sure?' %}
+                {% set buttonText = 'Restart judging' %}
+            {% elseif validResult == 'correct' %}
+                {% set questionText = 'Rejudge CORRECT submission s' ~ id ~ ', are you sure?' %}
+            {% endif %}
+        {% else %}
+            {% if not validResult or validResult == 'correct' %}
+                {% set buttonDisabled = true %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endapply %}
+
+<button type="button" class="btn {{ buttonClass }}" data-toggle="modal" data-target="#rejudge-modal">
+    <i class="fas fa-sync"></i> Rejudge
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="rejudge-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ buttonText }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ path('jury_create_rejudge') }}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="table" value="{{ table }}"/>
+                    <input type="hidden" name="id" value="{{ id }}"/>
+                    {%- if includeAllButton %}
+
+                        <div class="custom-control custom-checkbox form-group">
+                            <input type="checkbox" class="custom-control-input" id="include_all" name="include_all">
+                            <label class="custom-control-label" for="include_all">Include pending/correct
+                                submissions</label>
+                        </div>
+                    {%- endif %}
+
+                    <div class="custom-control custom-checkbox form-group">
+                        <input type="checkbox" class="custom-control-input" id="full_rejudge" name="full_rejudge" checked>
+                        <label class="custom-control-label" for="full_rejudge">Create rejudging</label>
+                    </div>
+                    <div id="rejudge-reason" class="form-group">
+                        <label for="reason">Reason</label>
+                        <input type="text" class="form-control" name="reason" id="reason" maxlength="255"/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <input type="submit" value="{{ buttonText }}" class="btn btn-primary"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#full_rejudge').on('change', function () {
+            if ($(this).is(':checked')) {
+                $('#rejudge-reason').removeClass('d-none');
+            } else {
+                $('#rejudge-reason').addClass('d-none');
+            }
+        });
+    });
+</script>

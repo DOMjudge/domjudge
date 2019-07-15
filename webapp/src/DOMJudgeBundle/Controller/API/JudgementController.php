@@ -45,7 +45,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * Get all the judgements for this contest
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
-     * @Security("has_role('ROLE_JURY') or has_role('ROLE_TEAM') or has_role('ROLE_JUDGEHOST') or has_role('ROLE_API_READER')")
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("")
      * @SWG\Response(
      *     response="200",
@@ -86,7 +86,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      * @param string $id
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @Security("has_role('ROLE_JURY') or has_role('ROLE_TEAM') or has_role('ROLE_JUDGEHOST') or has_role('ROLE_API_READER')")
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_TEAM') or is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_API_READER')")
      * @Rest\Get("/{id}")
      * @SWG\Response(
      *     response="200",

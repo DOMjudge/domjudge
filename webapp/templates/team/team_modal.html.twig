@@ -1,0 +1,9 @@
+{% extends "partials/modal.html.twig" %}
+
+{% block title %}
+    {% if team is not empty %}{{ team.name }}{% endif %}
+{% endblock %}
+
+{% block content %}
+    {% include 'partials/team.html.twig' with {size: 6} %}
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "team/base.html.twig" %}
+
+{% block title %}Contest problems - {{ parent() }}{% endblock %}
+
+{% block content %}
+    {% include 'partials/problem_list.html.twig' with {
+        problem_text_path: 'team_problem_text',
+        problem_sample_testcase_path: 'team_problem_sample_testcase',
+        problem_sample_zip_path: 'team_problem_sample_zip'
+    } %}
+{% endblock %}

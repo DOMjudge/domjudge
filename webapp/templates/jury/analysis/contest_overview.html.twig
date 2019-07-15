@@ -1,0 +1,369 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+
+{% block title %}Analysis - Contest{% endblock %}
+
+{% block extrahead %}
+<link rel="stylesheet" href="{{asset('css/nv.d3.min.css')}}" type="text/css"/>
+<script type="text/javascript" src="{{asset('js/d3.min.js')}}"></script>
+<script type="text/javascript" src="{{asset('js/nv.d3.min.js')}}"></script>
+<style>
+.clickable-row:hover {
+  cursor: pointer;
+}
+.card-body.tablecard{
+  overflow-y: auto;
+  height: 500px;
+  max-height: 500px;
+}
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
+<script>
+$(function() {
+    $(".clickable-row").click(function() {
+        window.location = $(this).data("href");
+    });
+    $('[data-toggle="popover"]').popover({
+      trigger: 'hover',
+      html: true
+    })
+})
+</script>
+{% endblock %}
+
+{% block body %}
+{% include 'jury/menu.html.twig' %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12 mt-3">
+      <h1>{{ current_contest.name }}</h1>
+      {% include 'jury/partials/analysis_filter.html.twig' %}
+    </div>
+    <div class="col-md-3 mt-3">
+      <div class="card">
+        <div class="card-header">
+          Contest Stats
+        </div>
+        <div class="card-body">
+          <abbr data-toggle="popover" data-placement="bottom" title="Misery Index" data-content="
+            This is a measure of how 'bored' contestants are. It is the average number of
+            people-minutes spent fruitlessly trying to solve problems at the end of the contest.
+            <br>
+            Calculated as:<br>
+            average across all teams of [3 people x (number of minutes elapsed - minute last problem solved by team t)]
+          ">Misery index</abbr>: {{misc.misery_index|number_format(0)}} minutes<br>
+          # Submissions: {{ misc.total_submissions }}<br>
+          # Accepted Submissions: {{ misc.total_accepted }} <span class="text-muted">(~{{ (misc.total_submissions>0 ? (misc.total_accepted/misc.total_submissions)*100:0)|number_format(0) }}%)</span><br>
+          # of Teams: {{ misc.num_teams }}<br>
+
+<!--
+          # of Teams solving n problems<br>
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                {% for x in range(0, problems|length) %}
+                <th>{{x}}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                {% for n in range(0, problems|length ) %}
+                <td>{{ misc['teams_solved_n_problems'][n]|default(' ') }}</td>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+-->
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mt-3" id="graph_languages">
+      <div class="card">
+        <div class="card-header">
+          Language Stats
+        </div>
+        <div class="card-body">
+          <svg style="height: 300px"></svg>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-5 mt-3" id="graph_problems">
+      <div class="card">
+        <div class="card-header">
+          Problems Attempted/Solved
+        </div>
+        <div class="card-body">
+          <svg style="height: 300px"></svg>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 mt-3" id="graph_submissions">
+      <div class="card">
+        <div class="card-header">
+          Submissions Over Time
+        </div>
+        <div class="card-body">
+        <svg style="height: 400px"></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6 mt-3 mb-3">
+      <div class="card">
+        <div class="card-header">
+          Problems
+        </div>
+        <div class="card-body tablecard">
+          <table class="table table-sm table-striped table-hover">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">name</th>
+                <th scope="col">time<br>limit</th>
+                <th scope="col">memory<br>limit</th>
+                <th scope="col">test<br>cases</th>
+                <th scope="col"># <br>attempts/solutions</th>
+                <th scope="col"># teams<br>attempted/solved</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for p in problems %}
+              {% set id=p.probid %}
+              <tr class='clickable-row' data-href="{{path('analysis_problem', {'probid': id, 'view': view}) }}">
+                <th scope="row">{{ id }}</th>
+                <td>{{ p.shortname ~ " - " ~ p.problem.name }}</td>
+                <td>{{ p.problem.timelimit }}</td>
+                <td>{{ p.problem.memlimit|default('default') }}</td>
+                <td>{{ misc.problem_num_testcases[id] }}</td>
+                <td>{{ misc.problem_attempts[id]|default(0) }} / {{ misc.problem_solutions[id]|default(0) }}</td>
+                <td>{{ misc.problem_stats.teams_attempted[id]|default([])|length }} / {{ misc.problem_stats.teams_solved[id]|default([])|length }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mt-3 mb-3">
+      <div class="card">
+        <div class="card-header">
+          Teams
+        </div>
+        <div class="card-body tablecard">
+          <table class="table table-sm table-striped table-hover">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">affiliation</th>
+                <th scope="col" style="max-width: 200px">name</th>
+                <th scope="col">#<br>submitted/correct</th>
+                <th scope="col"># problems<br>attempted/solved</th>
+                <th scope="col">Misery<br>Index</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for t in teams %}
+              {% set id=t.teamid %}
+              <tr class="clickable-row" data-href="{{ path('analysis_team', {'teamid':id}) }}">
+                <th scope="row">{{ id }}</th>
+                <td>{{ t.affiliation.name }}</td>
+                <td class="truncate" style="max-width: 200px">{{ t.name }}</td>
+                <td>{{ misc.team_stats[id].total_submitted }} / {{ misc.team_stats[id].total_accepted }}</td>
+                <td>{{ misc.team_stats[id].problems_submitted|length }} / {{ misc.team_stats[id].problems_accepted|length }}</td>
+                <td>{{ misc.team_stats[id].misery_index|number_format(0) }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+{%
+set colors = {
+  'correct':        '#01df01',
+  'wrong-answer':   'red',
+  'timelimit':      'orange',
+  'run-error':      '#ff3399',
+  'compiler-error': 'grey',
+  'no-output':      'purple',
+  'frozen':         'blue',
+  'output-limit':   'black',
+}
+%}
+
+
+//////////////////////////////////////
+// Results by language
+// bar graph, x axis is language, y axis is # of solutions
+// mutlibar, one for attempts, one for solutions
+var language_stats = [
+  {
+    key: "Attempted",
+    color: 'red',
+    values: [
+      {% for lang,count in misc.language_stats.total_submissions %}
+        {
+          "label" : "{{lang}}",
+          "value" : {{ count }},
+        },
+      {% endfor %}
+    ]
+  },
+  {
+    key: "Accepted",
+    color: 'green',
+    values: [
+      {% for lang,count in misc.language_stats.total_solutions %}
+        {
+          "label" : "{{lang}}",
+          "value" : {{ count }},
+        },
+      {% endfor %}
+    ]
+  }
+];
+nv.addGraph(function() {
+  var chart = nv.models.multiBarChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      // .valueFormat(d3.format('.0f'))
+      // .staggerLabels(run_max_times[0].values.length > 2)
+      .showControls(false)
+      .reduceXTicks(false)
+      .margin({bottom: 90})
+      .duration(250)
+      ;
+  chart.yAxis
+    .tickFormat(d3.format('.0f'))
+    .axisLabel('# of Submissions');
+  chart.xAxis.axisLabel("Language");
+  d3.select('#graph_languages svg')
+      .datum(language_stats)
+      .call(chart);
+  nv.utils.windowResize(chart.update);
+  return chart;
+});
+
+
+//////////////////////////////////////
+// Results by problem
+// Graph, multibar chart, x axis is problem id/shortname, y axis is # of teams
+// one bar for #teams attempted(red), second bar for solved(green)
+var problem_stats = [
+  {
+    key: "Attempted",
+    color: 'red',
+    values: [
+      {% for prob in problems %}
+        {
+          "label" : "{{prob.shortname}}",
+          "value" : {{ misc.problem_stats.teams_attempted[prob.probid]|default([])|length }},
+        },
+      {% endfor %}
+    ]
+  },
+  {
+    key: "Accepted",
+    color: 'green',
+    values: [
+      {% for prob in problems %}
+        {
+          "label" : "{{prob.shortname}}",
+          "value" : {{ misc.problem_stats.teams_solved[prob.probid]|default([])|length }},
+        },
+      {% endfor %}
+    ]
+  }
+];
+nv.addGraph(function() {
+  var chart = nv.models.multiBarChart()
+      .x(function(d) { return d.label })
+      .y(function(d) { return d.value })
+      // .valueFormat(d3.format('.0f'))
+      // .staggerLabels(run_max_times[0].values.length > 2)
+      .showControls(false)
+      .reduceXTicks(false)
+      .margin({bottom: 90})
+      .duration(250)
+      ;
+  chart.yAxis
+    .tickFormat(d3.format('.0f'))
+    .axisLabel('# of Teams');
+  chart.xAxis.axisLabel("Problem");
+  d3.select('#graph_problems svg')
+      .datum(problem_stats)
+      .call(chart);
+  nv.utils.windowResize(chart.update);
+  return chart;
+});
+
+
+//////////////////////////////////////
+// Submissions over time
+// stacked graph of correct, runtime-error, wrong-answer, compiler-error, timelimit, etc
+// x-axis is contest time
+// y axis is # of submissions
+
+var submission_stats = [
+  {% for result in ['correct', 'wrong-answer', 'timelimit', 'run-error', 'compiler-error', 'no-output'] %}
+  {
+    key: "{{result}}",
+    color: "{{colors[result]}}",
+    values: [
+      {# TODO: make sure these are actually ordered by submittime #}
+      {# TODO: also make sure these submissions are in the same contest #}
+      [0,0],
+      {% set count = 0 %}
+      {% for submission in submissions | filter(submission => submission.result) %}
+        {% if submission.result == result %}{% set count = count +1 %}{% endif %}
+        [ {{ (submission.submittime - current_contest.starttime)/60.0 }},
+          {{ count }}
+        ],
+        {% endfor %}
+    ]
+  },
+  {% endfor %}
+];
+nv.addGraph(function() {
+  var chart = nv.models.stackedAreaChart()
+      // .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
+      // .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+      // .transitionDuration(350)  //how fast do you want the lines to transition?
+      // .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+      .showControls(false)
+      .x(function(d) { return d[0] })   //We can modify the data accessor functions...
+      .y(function(d) { return d[1] })   //...in case your data is formatted differently.
+      .showYAxis(true)        //Show the y-axis
+      .showXAxis(true)        //Show the x-axis
+      .forceX([0, {{ (current_contest.endtime - current_contest.starttime) / 60 }}])
+      .forceY([0, {{ submissions|length *1.10 }}])
+      ;
+  chart.xAxis     //Chart x-axis settings
+      .axisLabel('Contest Time(minutes)')
+      .tickFormat(d3.format('d'));
+
+  chart.yAxis     //Chart y-axis settings
+      .axisLabel('Total Submissions')
+      .tickFormat(d3.format('d'));
+
+  d3.select('#graph_submissions svg')
+      .datum(submission_stats)
+      .call(chart);
+  nv.utils.windowResize(chart.update);
+  return chart;
+});
+
+
+</script>
+{% endblock %}

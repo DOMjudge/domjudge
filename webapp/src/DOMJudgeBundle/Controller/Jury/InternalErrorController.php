@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/internal-errors")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class InternalErrorController extends BaseController
 {
@@ -78,7 +78,7 @@ class InternalErrorController extends BaseController
             ];
         }
 
-        return $this->render('@DOMJudge/jury/internal_errors.html.twig', [
+        return $this->render('jury/internal_errors.html.twig', [
             'internal_errors' => $internal_errors_table,
             'table_fields' => $table_fields,
             'refresh' => [
@@ -121,7 +121,7 @@ class InternalErrorController extends BaseController
                 break;
         }
 
-        return $this->render('@DOMJudge/jury/internal_error.html.twig', [
+        return $this->render('jury/internal_error.html.twig', [
             'internalError' => $internalError,
             'affectedLink' => $affectedLink,
             'affectedText' => $affectedText,

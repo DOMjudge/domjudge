@@ -1,0 +1,28 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Executables - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Executables</h1>
+
+    {{ macros.table(executables, table_fields, num_actions) }}
+
+    {%- if is_granted('ROLE_ADMIN') %}
+
+        <h3>Upload new executable</h3>
+        <div class="row">
+            <div class="col-lg-4">
+                {{ form(form) }}
+            </div>
+        </div>
+    {%- endif %}
+
+{% endblock %}

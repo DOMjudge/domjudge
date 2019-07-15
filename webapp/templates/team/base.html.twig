@@ -1,0 +1,19 @@
+{% extends "base.html.twig" %}
+
+{% block title %}{{ title|default('DOMjudge') }}{% endblock %}
+
+{% block menu %}
+    {% include 'team/menu.html.twig' %}
+{% endblock %}
+
+{% block footer %}
+    {% include 'team/partials/submit_scripts.html.twig' %}
+
+    <script>
+        $(function () {
+            $('body').on('submit', 'form[name=team_clarification]', function () {
+                return confirm("Send clarification request to Jury?");
+            });
+        });
+    </script>
+{% endblock %}

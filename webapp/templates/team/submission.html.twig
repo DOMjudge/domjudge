@@ -1,0 +1,11 @@
+{% extends 'team/base.html.twig' %}
+
+{# @var judgingRun \DOMJudgeBundle\Entity\JudgingRun #}
+
+{% block title %}Submission details - {{ parent() }}{% endblock %}
+
+{% block content %}
+    <h1 class="text-center mt-4">Submission details</h1>
+
+    {% include 'team/partials/submission.html.twig' %}
+{% endblock %}

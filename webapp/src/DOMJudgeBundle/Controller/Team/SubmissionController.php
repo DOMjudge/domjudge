@@ -113,9 +113,9 @@ class SubmissionController extends BaseController
         $data = ['form' => $form->createView()];
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/team/submit_modal.html.twig', $data);
+            return $this->render('team/submit_modal.html.twig', $data);
         } else {
-            return $this->render('@DOMJudge/team/submit.html.twig', $data);
+            return $this->render('team/submit.html.twig', $data);
         }
     }
 
@@ -183,9 +183,9 @@ class SubmissionController extends BaseController
         ];
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@DOMJudge/team/submission_modal.html.twig', $data);
+            return $this->render('team/submission_modal.html.twig', $data);
         } else {
-            return $this->render('@DOMJudge/team/submission.html.twig', $data);
+            return $this->render('team/submission.html.twig', $data);
         }
     }
 }

@@ -1,0 +1,78 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Judgehost {{ judgehost.hostname }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Judgehost {{ judgehost.hostname | printHost }}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>Name</th>
+                    <td>{{ judgehost.hostname | printHost }}</td>
+                </tr>
+                <tr>
+                    <th>Active</th>
+                    <td>{{ judgehost.active | printYesNo }}</td>
+                </tr>
+                <tr>
+                    <th>Restriction</th>
+                    <td>
+                        {% if not judgehost.restriction %}
+                            <i>None</i>
+                        {% else %}
+                            <a href="{{ path('jury_judgehost_restriction', {restrictionId: judgehost.restrictionid}) }}">
+                                {{ judgehost.restriction.name }}
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>
+                        {% if not judgehost.polltime %}
+                            Judgehost never checked in.
+                        {% else %}
+                            {{ status }}, last checked in {{ judgehost.polltime | printtimediff }}s ago.
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        {%- if is_granted('ROLE_ADMIN') -%}
+            {%- if judgehost.active -%}
+                {% set url = path('jury_judgehost_deactivate', {hostname: judgehost.hostname}) %}
+                {% set icon = 'pause' %}
+                {% set action = 'Deactivate' %}
+                {% set class = 'warning' %}
+            {%- else -%}
+                {% set url = path('jury_judgehost_activate', {hostname: judgehost.hostname}) %}
+                {% set icon = 'play' %}
+                {% set action = 'Activate' %}
+                {% set class = 'success' %}
+            {%- endif -%}
+            {{ button(url, action, class, icon) }}
+            {{ button(path('jury_judgehost_delete', {'hostname': judgehost.hostname}), 'Delete judgehost', 'danger', 'trash-alt', true) }}
+        {% endif %}
+        {% include 'jury/partials/rejudge_form.html.twig' with {table: 'judgehost', id: judgehost.hostname, buttonClass: 'btn-primary'} %}
+    </div>
+
+    <h3>Judgings by {{ judgehost.hostname | printHost }}</h3>
+
+    <div data-ajax-refresh-target>
+        {% include 'jury/partials/judgehost_judgings.html.twig' %}
+    </div>
+
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Rejudging r{{ rejudging.rejudgingid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+    {{ macros.select2_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Rejudging r{{ rejudging.rejudgingid }} {% if not rejudging.valid %}(canceled){% endif %}</h1>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>Reason</th>
+                    <td>
+                        {% if rejudging.reason is empty %}
+                            <span class="nodata">none</span>
+                        {% else %}
+                            {{ rejudging.reason }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if rejudging.startUser %}
+                    <tr>
+                        <th>Issued by</th>
+                        <td>
+                            <a href="{{ path('jury_user', {'userId': rejudging.startUser.userid}) }}">
+                                {{ rejudging.startUser.name }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if rejudging.finishUser %}
+                    <tr>
+                        <th>{% if rejudging.valid %}Accepted{% else %}Canceled{% endif %} by</th>
+                        <td>
+                            <a href="{{ path('jury_user', {'userId': rejudging.finishUser.userid}) }}">
+                                {{ rejudging.finishUser.name }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Start time</th>
+                    <td>
+                        {% if rejudging.starttime %}
+                            <span title="{{ rejudging.starttime | printtime('%Y-%m-%d %H:%M:%S (%Z)') }}">
+                                {{ rejudging.starttime | printtime }}
+                            </span>
+                        {% else %}
+                            <span class="nodata">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Apply time</th>
+                    <td>
+                        {% if rejudging.endtime %}
+                            <span title="{{ rejudging.endtime | printtime('%Y-%m-%d %H:%M:%S (%Z)') }}">
+                                {{ rejudging.endtime | printtime }}
+                            </span>
+                        {% else %}
+                            <span class="nodata">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr {% if todo <= 0 %}class="d-none"{% endif %}>
+                    <th>Queued</th>
+                    <td><span data-todo>{{ todo }}</span> unfinished judgings</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div data-rejudging-buttons>
+        {% include 'jury/partials/rejudging_buttons.html.twig' %}
+    </div>
+
+    <div data-rejudging-matrix>
+        {% include 'jury/partials/rejudging_matrix.html.twig' %}
+    </div>
+
+    <h2 class="mt-4">Details</h2>
+
+    Show submissions:
+    <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+        {%- for idx, type in viewTypes %}
+
+            <label class="btn btn-secondary {% if idx == view %}active{% endif %}">
+                <input type="radio" name="viewtype" autocomplete="off" value="{{ type }}"
+                       {% if idx == view %}checked{% endif %}> {{ type }}
+            </label>
+        {%- endfor %}
+    </div>
+
+    <form action="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid}) }}" method="get">
+        <input type="hidden" name="view" value="{{ viewTypes[view] }}"/>
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="oldverdict">Old verdict</label>
+                <select style="width: 100%" class="select2 form-control" name="oldverdict" id="oldverdict">
+                    <option value="all" {% if oldverdict == 'all' %}selected{% endif %}>all</option>
+                    {%- for verdict, abbreviation in verdicts %}
+                        <option value="{{ verdict }}" {% if oldverdict == verdict %}selected{% endif %}>
+                            {{ verdict }}
+                        </option>
+                    {%- endfor %}
+
+                </select>
+            </div>
+            <div class="form-group col-md-4">
+                <label for="newverdict">New verdict</label>
+                <select style="width: 100%" class="select2 form-control" name="newverdict" id="newverdict">
+                    <option value="all" {% if newverdict == 'all' %}selected{% endif %}>all</option>
+                    {%- for verdict, abbreviation in verdicts %}
+                        <option value="{{ verdict }}" {% if newverdict == verdict %}selected{% endif %}>
+                            {{ verdict }}
+                        </option>
+                    {%- endfor %}
+
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <label>&nbsp;</label>
+                <input class="btn btn-primary form-control" type="submit" value="Filter"/>
+            </div>
+            <div class="form-group col-md-2">
+                <label>&nbsp;</label>
+                <a href="{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: viewTypes[view]}) }}"
+                   class="btn btn-secondary form-control">Clear</a>
+            </div>
+        </div>
+    </form>
+
+    <div data-ajax-refresh-target data-ajax-refresh-after="updateMatrix">
+        {% include 'jury/partials/rejudging_submissions.html.twig' %}
+    </div>
+
+{% endblock %}
+
+{% block extrafooter %}
+    <script>
+        $(function () {
+            $('input[name=viewtype]').on('change', function () {
+                window.location = '{{ path('jury_rejudging', {rejudgingId: rejudging.rejudgingid, view: 'REPLACE_ME', oldverdict: oldverdict, newverdict: newverdict}) }}'.replace('REPLACE_ME', $(this).val());
+            });
+
+            $('.select2').select2();
+
+            window.updateMatrix = function () {
+                var $matrixData = $('[data-new-rejudging-matrix]');
+                var $matrix = $('[data-rejudging-matrix]');
+                $matrix.html($matrixData.children());
+
+                var $buttonData = $('[data-new-rejudging-buttons]');
+                var $button = $('[data-rejudging-buttons]');
+                $button.html($buttonData.children());
+
+                var todo = $('[data-new-todo]').text();
+                var $todo = $('[data-todo]');
+                $todo.text(todo);
+                if (parseInt(todo) <= 0) {
+                    $todo.closest('tr').addClass('d-none');
+                } else {
+                    $todo.closest('tr').removeClass('d-none');
+                }
+            }
+        });
+    </script>
+{% endblock %}

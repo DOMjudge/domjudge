@@ -1,0 +1,93 @@
+{% extends 'jury/export/layout.html.twig' %}
+
+{% block body %}
+    <style>
+        td:first-child {
+            padding-right: 10px;
+        }
+
+        tr.top-line {
+            border-top: 4px solid #ccc;
+        }
+
+        tr.top-line td {
+            padding-top: 8px;
+        }
+    </style>
+
+    {% for queue, clarifications in grouped %}
+        <h2>{{ queues[queue] }}</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Contest time</th>
+                <th scope="col">From</th>
+                <th scope="col">To</th>
+                <th scope="col">Subject</th>
+                <th scope="col">Answered?</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for clarification in clarifications %}
+                <tr class="top-line">
+                    <td>{{ clarification.clarId }}</td>
+                    <td>{{ clarification.submitTime | printtime(null, contest) }}</td>
+                    <td>
+                        {% if clarification.sender %}
+                            {{ clarification.sender.name }}
+                        {% else %}
+                            Jury ({{ clarification.juryMember }})
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if clarification.recipient and clarification.sender is empty %}
+                            {{ clarification.recipient.name }}
+                        {% elseif clarification.sender %}
+                            Jury
+                        {% else %}
+                            All
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if clarification.problem %}
+                            {{ problems[clarification.probid].shortName }}: {{ clarification.problem.name }}
+                        {% elseif clarification.category and categories[clarification.category] is defined %}
+                            {{ categories[clarification.category] }}
+                        {% else %}
+                            General
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ clarification.answered | printYesNo }}
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>Content</b></td>
+                    <td colspan="5">
+                        <pre>{{ clarification.body | wrapUnquoted(80) }}</pre>
+                    </td>
+                </tr>
+                {% if clarification.replies is not empty %}
+                    {% for idx, reply in clarification.replies %}
+                        <tr>
+                            <td>
+                                <b>
+                                    {% if clarification.replies.count > 1 %}
+                                        Reply #{{ idx + 1 }}
+                                    {% else %}
+                                        Reply
+                                    {% endif %}
+                                </b>
+                            </td>
+                            <td colspan="5">
+                                <pre>{{ reply.body | wrapUnquoted(80) }}</pre>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+{% endblock %}

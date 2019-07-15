@@ -1,0 +1,112 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Judgehost restriction {{ judgehostRestriction.name }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Judgehost restriction {{ judgehostRestriction.name }}</h1>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>ID</th>
+                    <td>{{ judgehostRestriction.restrictionid }}</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td>{{ judgehostRestriction.name }}</td>
+                </tr>
+                <tr>
+                    <th>Restrict to contests</th>
+                    {% if judgehostRestriction.contests is empty %}
+                        <td class="nodata">none</td>
+                    {% else %}
+                        <td>
+                            {% for contest in judgehostRestriction.contests %}
+                                {{ contests[contest].name }} ({{ contests[contest].shortname }} - c{{ contest }})<br/>
+                            {% endfor %}
+                        </td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th>Restrict to problems</th>
+                    {% if judgehostRestriction.problems is empty %}
+                        <td class="nodata">none</td>
+                    {% else %}
+                        <td>
+                            {% for problem in judgehostRestriction.problems %}
+                                {{ problems[problem].name }} (p{{ problem }})<br/>
+                            {% endfor %}
+                        </td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th>Restrict to languages</th>
+                    {% if judgehostRestriction.languages is empty %}
+                        <td class="nodata">none</td>
+                    {% else %}
+                        <td>
+                            {% for language in judgehostRestriction.languages %}
+                                {{ languages[language].name }} ({{ language }})<br/>
+                            {% endfor %}
+                        </td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th>Rejudge by same judgehost</th>
+                    <td>{{ judgehostRestriction.rejudgeOwn | printYesNo }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        {%- if is_granted('ROLE_ADMIN') -%}
+            {{ button(path('jury_judgehost_restriction_edit', {'restrictionId': judgehostRestriction.restrictionid}), 'Edit', 'primary', 'edit') }}
+            {{ button(path('jury_judgehost_restriction_delete', {'restrictionId': judgehostRestriction.restrictionid}), 'Delete', 'danger', 'trash-alt', true) }}
+        {% endif %}
+    </div>
+
+    <h2>Judgehosts having restriction {{ judgehostRestriction.name }}</h2>
+    {% if judgehostRestriction.judgehosts is empty %}
+        <p class="nodata">no judgehosts</p>
+    {% else %}
+        <div class="row">
+            <div class="col-lg-6">
+                <table class="data-table table table-sm table-striped">
+                    <thead>
+                    <tr>
+                        <th>hostname</th>
+                        <th>active</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for judgehost in judgehostRestriction.judgehosts %}
+                        <tr>
+                            <td {% if not judgehost.active %}class="disabled"{% endif %}>
+                                <a href="{{ path('jury_judgehost', {'hostname': judgehost.hostname}) }}">
+                                    {{ judgehost.hostname }}
+                                </a>
+                            </td>
+                            <td {% if not judgehost.active %}class="disabled"{% endif %}>
+                                <a href="{{ path('jury_judgehost', {'hostname': judgehost.hostname}) }}">
+                                    {{ judgehost.active | printYesNo }}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}

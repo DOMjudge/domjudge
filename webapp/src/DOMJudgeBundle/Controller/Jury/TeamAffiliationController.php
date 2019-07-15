@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/affiliations")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class TeamAffiliationController extends BaseController
 {
@@ -154,7 +154,7 @@ class TeamAffiliationController extends BaseController
             ];
         }
 
-        return $this->render('@DOMJudge/jury/team_affiliations.html.twig', [
+        return $this->render('jury/team_affiliations.html.twig', [
             'team_affiliations' => $team_affiliations_table,
             'table_fields' => $table_fields,
             'num_actions' => $this->isGranted('ROLE_ADMIN') ? 2 : 0,
@@ -203,15 +203,15 @@ class TeamAffiliationController extends BaseController
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;
             $data['jury']        = true;
-            return $this->render('@DOMJudge/partials/scoreboard_table.html.twig', $data);
+            return $this->render('partials/scoreboard_table.html.twig', $data);
         }
 
-        return $this->render('@DOMJudge/jury/team_affiliation.html.twig', $data);
+        return $this->render('jury/team_affiliation.html.twig', $data);
     }
 
     /**
      * @Route("/{affilId}/edit", name="jury_team_affiliation_edit", requirements={"affilId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $affilId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -236,7 +236,7 @@ class TeamAffiliationController extends BaseController
                                                       ['affilId' => $teamAffiliation->getAffilid()]));
         }
 
-        return $this->render('@DOMJudge/jury/team_affiliation_edit.html.twig', [
+        return $this->render('jury/team_affiliation_edit.html.twig', [
             'teamAffiliation' => $teamAffiliation,
             'form' => $form->createView(),
         ]);
@@ -244,7 +244,7 @@ class TeamAffiliationController extends BaseController
 
     /**
      * @Route("/{affilId}/delete", name="jury_team_affiliation_delete", requirements={"affilId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @param int     $affilId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -264,7 +264,7 @@ class TeamAffiliationController extends BaseController
 
     /**
      * @Route("/add", name="jury_team_affiliation_add")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
@@ -285,7 +285,7 @@ class TeamAffiliationController extends BaseController
                                                       ['affilId' => $teamAffiliation->getAffilid()]));
         }
 
-        return $this->render('@DOMJudge/jury/team_affiliation_add.html.twig', [
+        return $this->render('jury/team_affiliation_add.html.twig', [
             'form' => $form->createView(),
         ]);
     }

@@ -4,8 +4,8 @@ namespace DOMJudgeBundle\Controller\API;
 
 use Doctrine\ORM\EntityManagerInterface;
 use DOMJudgeBundle\Entity\Executable;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\Controller\FOSRestController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * @Rest\NamePrefix("executable_")
  * @SWG\Tag(name="Executables")
  */
-class ExecutableController extends FOSRestController
+class ExecutableController extends AbstractFOSRestController
 {
     /**
      * @var EntityManagerInterface
@@ -37,7 +37,7 @@ class ExecutableController extends FOSRestController
      * @param string $id
      * @return array|string|null
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @Security("has_role('ROLE_JURY') or has_role('ROLE_JUDGEHOST')")
+     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
      * @Rest\Get("/{id}")
      * @SWG\Parameter(ref="#/parameters/id")
      * @SWG\Response(

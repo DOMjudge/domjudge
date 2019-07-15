@@ -14,7 +14,7 @@ use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Entity\TestcaseWithContent;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -30,7 +30,7 @@ use Symfony\Component\Routing\RouterInterface;
  *
  * @package DOMJudgeBundle\Controller
  */
-abstract class BaseController extends Controller
+abstract class BaseController extends AbstractController
 {
     /**
      * Check whether the referrer in the request is of the current application
@@ -288,9 +288,9 @@ abstract class BaseController extends Controller
                 'redirectUrl' => $redirectUrl,
             ];
             if ($request->isXmlHttpRequest()) {
-                return $this->render('@DOMJudge/jury/delete_modal.html.twig', $data);
+                return $this->render('jury/delete_modal.html.twig', $data);
             } else {
-                return $this->render('@DOMJudge/jury/delete.html.twig', $data);
+                return $this->render('jury/delete.html.twig', $data);
             }
         }
     }

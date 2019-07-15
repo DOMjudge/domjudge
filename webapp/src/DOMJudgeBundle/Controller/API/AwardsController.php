@@ -5,8 +5,6 @@ namespace DOMJudgeBundle\Controller\API;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use DOMJudgeBundle\Entity\Contest;
-use DOMJudgeBundle\Entity\Problem;
-use DOMJudgeBundle\Entity\Team;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Service\ScoreboardService;

@@ -111,7 +111,7 @@ class SubmissionController extends AbstractRestController
      * @return int
      * @Rest\Post("")
      * @SWG\Post(consumes={"multipart/form-data"})
-     * @Security("has_role('ROLE_TEAM')")
+     * @Security("is_granted('ROLE_TEAM')")
      * @SWG\Parameter(
      *     name="problem",
      *     in="formData",
@@ -237,7 +237,7 @@ class SubmissionController extends AbstractRestController
      * Get the files for the given submission as a ZIP archive
      * @Rest\Get("/{id}/files", name="submission_files")
      * @SWG\Get(produces={"application/zip"})
-     * @Security("has_role('ROLE_API_SOURCE_READER')")
+     * @Security("is_granted('ROLE_API_SOURCE_READER')")
      * @param Request $request
      * @param string  $id
      * @return Response|StreamedResponse
@@ -306,7 +306,7 @@ class SubmissionController extends AbstractRestController
     /**
      * Get the source code of all the files for the given submission
      * @Rest\Get("/{id}/source-code")
-     * @Security("has_role('ROLE_JUDGEHOST') or has_role('ROLE_JURY')")
+     * @Security("is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_JURY')")
      * @param Request $request
      * @param string  $id
      * @return array

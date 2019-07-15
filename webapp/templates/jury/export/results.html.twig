@@ -1,0 +1,112 @@
+{% extends 'jury/export/layout.html.twig' %}
+
+{% block body %}
+    <h2>Awards</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Place</th>
+            <th scope="col">Team</th>
+            <th scope="col">Award</th>
+            <th scope="col">Solved problems</th>
+            <th scope="col">Total time</th>
+            <th scope="col">Time of last submission</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in awarded %}
+            <tr>
+                <th scope="row">{{ row.rank }}</th>
+                <th scope="row">{{ row.team }}</th>
+                <td>{{ row.award }}</td>
+                <td>{{ row.solved }}</td>
+                <td>{{ row.total_time }}</td>
+                <td>{{ row.max_time }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Other ranked teams</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Rank</th>
+            <th scope="col">Team</th>
+            <th scope="col">Solved problems</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in ranked %}
+            <tr>
+                <th scope="row">{{ row.rank }}</th>
+                <th scope="row">{{ row.team }}</th>
+                <td>{{ row.solved }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Honorable mentions</h2>
+    <table class="table">
+        <tbody>
+        {% for row in honorable|batch(2) %}
+            <tr>
+                {% for team in row %}
+                    <td>{{ team }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Region winners</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Region</th>
+            <th scope="col">Team</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in regionWinners %}
+            <tr>
+                <th scope="row">{{ row.group }}</th>
+                <td>{{ row.team }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>First to solve</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Problem</th>
+            <th scope="col">Team</th>
+            <th scope="col">Time</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in firstToSolve %}
+            <tr>
+                <th scope="row">{{ row.problem }}: {{ row.problem_name }}</th>
+                <td>
+                    {% if row.team is not null %}
+                        {{ row.team }}
+                    {% else %}
+                        <i>Not solved</i>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if row.time is not null %}
+                        {{ row.time }}
+                    {% else %}
+                        <i>-</i>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -9,7 +9,7 @@ use DOMJudgeBundle\Entity\Contest;
 use DOMJudgeBundle\Service\DOMJudgeService;
 use DOMJudgeBundle\Service\EventLogService;
 use DOMJudgeBundle\Utils\Utils;
-use FOS\RestBundle\Controller\FOSRestController;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -19,7 +19,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * Class AbstractRestController
  * @package DOMJudgeBundle\Controller\API
  */
-abstract class AbstractRestController extends FOSRestController
+abstract class AbstractRestController extends AbstractFOSRestController
 {
     /**
      * @var EntityManagerInterface

@@ -1,0 +1,22 @@
+{% extends 'team/base.html.twig' %}
+
+{% block title %}Send clarification request - {{ parent() }}{% endblock %}
+
+{% block content %}
+    <div class="mt-3 container">
+        <div class="card card-body">
+            <h1 class="text-center">Send Clarification Request</h1>
+
+            {{ form_start(form) }}
+            {{ form_row(form.recipient) }}
+            {{ form_row(form.subject) }}
+            {{ form_row(form.message) }}
+            <div class="form-group">
+                <button type="submit" name="submit" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Send
+                </button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}

@@ -38,7 +38,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @Route("/jury/submissions")
- * @Security("has_role('ROLE_JURY')")
+ * @Security("is_granted('ROLE_JURY')")
  */
 class SubmissionController extends BaseController
 {
@@ -179,10 +179,10 @@ class SubmissionController extends BaseController
         // For ajax requests, only return the submission list partial
         if ($request->isXmlHttpRequest()) {
             $data['showTestcases'] = true;
-            return $this->render('@DOMJudge/jury/partials/submission_list.html.twig', $data);
+            return $this->render('jury/partials/submission_list.html.twig', $data);
         }
 
-        return $this->render('@DOMJudge/jury/submissions.html.twig', $data, $response);
+        return $this->render('jury/submissions.html.twig', $data, $response);
     }
 
     /**
@@ -488,7 +488,7 @@ class SubmissionController extends BaseController
             ];
         }
 
-        return $this->render('@DOMJudge/jury/submission.html.twig', $twigData);
+        return $this->render('jury/submission.html.twig', $twigData);
     }
 
     /**
@@ -663,7 +663,7 @@ class SubmissionController extends BaseController
         $oldFileStats      = $oldFiles !== null ? $this->determineFileChanged($files, $oldFiles) : [];
         $originalFileStats = $originallFiles !== null ? $this->determineFileChanged($files, $originallFiles) : [];
 
-        return $this->render('@DOMJudge/jury/submission_source.html.twig', [
+        return $this->render('jury/submission_source.html.twig', [
             'submission' => $submission,
             'files' => $files,
             'oldSubmission' => $oldSubmission,
@@ -792,7 +792,7 @@ class SubmissionController extends BaseController
             return $this->redirectToRoute('jury_submission', ['submitId' => $submittedSubmission->getSubmitid()]);
         }
 
-        return $this->render('@DOMJudge/jury/submission_edit_source.html.twig', [
+        return $this->render('jury/submission_edit_source.html.twig', [
             'submission' => $submission,
             'files' => $files,
             'form' => $form->createView(),
@@ -803,7 +803,7 @@ class SubmissionController extends BaseController
     /**
      * @Route("/{submitId}/update-status", name="jury_submission_update_status", methods={"POST"},
      *                                     requirements={"submitId": "\d+"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param EventLogService   $eventLogService
      * @param ScoreboardService $scoreboardService
      * @param Request           $request

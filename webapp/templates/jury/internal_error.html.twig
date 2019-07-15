@@ -1,0 +1,89 @@
+{% extends "jury/base.html.twig" %}
+{% import _self as self %}
+{% import "jury/jury_macros.twig" as macros %}
+
+{% block title %}Internal error e{{ internalError.errorid }} - {{ parent() }}{% endblock %}
+
+{% block extrahead %}
+    {{ parent() }}
+    {{ macros.table_extrahead() }}
+{% endblock %}
+
+{% block content %}
+
+    <h1>Internal error e{{ internalError.errorid }}</h1>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <table class="table table-sm table-striped">
+                <tr>
+                    <th>Description</th>
+                    <td>
+                        {% if internalError.description is empty %}
+                            <span class="nodata">None</span>
+                        {% else %}
+                            {{ internalError.description }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Time</th>
+                    <td>{{ internalError.time | printtime('%F %T') }}</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>{{ internalError.status | capitalize }}</td>
+                </tr>
+                {% if internalError.judgingid is not null %}
+                    <tr>
+                        <th>Related judging</th>
+                        <td>
+                            <a href="{{ path('jury_submission_by_judging', {jid: internalError.judgingid}) }}">
+                                j{{ internalError.judgingid }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if internalError.cid is not null %}
+                    <tr>
+                        <th>Related contest</th>
+                        <td>
+                            <a href="{{ path('jury_contest', {'contestId': internalError.cid}) }}">
+                                c{{ internalError.cid }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if affectedText is not null %}
+                    <tr>
+                        <th>Affected {{ internalError.disabled.kind }}</th>
+                        <td><a href="{{ affectedLink }}">{{ affectedText }}</a></td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Judgehost log snippet</th>
+                    <td>
+                        <pre class="output_text">{{ internalError.judgehostlog | base64_decode }}</pre>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    {% if internalError.status == 'open' %}
+        <form action="{{ path('jury_internal_error_handle', {errorId: internalError.errorid, action: 'ignore'}) }}"
+              method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-times"></i> Ignore error
+            </button>
+        </form>
+
+        <form action="{{ path('jury_internal_error_handle', {errorId: internalError.errorid, action: 'resolve'}) }}"
+              method="post" class="d-inline">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-check"></i> Mark as resolved and re-enable {{ internalError.disabled.kind }}
+            </button>
+        </form>
+    {% endif %}
+
+{% endblock %}

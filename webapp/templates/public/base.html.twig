@@ -1,0 +1,9 @@
+{% extends "base.html.twig" %}
+
+{% block title %}{{ title|default('DOMjudge') }}{% endblock %}
+
+{% block menu %}
+    {% if hide_menu is not defined %}
+        {% include 'public/menu.html.twig' %}
+    {% endif %}
+{% endblock %}

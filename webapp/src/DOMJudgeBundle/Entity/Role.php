@@ -139,4 +139,13 @@ class Role extends BaseRole
     {
         return $this->users;
     }
+
+    /**
+     * Get the string representation of this role
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getRole();
+    }
 }

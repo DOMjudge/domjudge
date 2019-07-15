@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * Class PrintController
  *
  * @Route("/jury/print")
- * @Security("has_role('ROLE_JURY') or has_role('ROLE_BALLOON')")
+ * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
  *
  * @package DOMJudgeBundle\Controller\Jury
  */
@@ -75,7 +75,7 @@ class PrintController extends BaseController
             // team involved; do not set a teamname or location.
             $ret = Printing::send($realfile, $originalfilename, $langid, $username, "");
 
-            return $this->render('@DOMJudge/jury/print_result.html.twig', [
+            return $this->render('jury/print_result.html.twig', [
                 'success' => $ret[0],
                 'output' => $ret[1],
             ]);
@@ -89,7 +89,7 @@ class PrintController extends BaseController
             ->getQuery()
             ->getResult();
 
-        return $this->render('@DOMJudge/jury/print.html.twig', [
+        return $this->render('jury/print.html.twig', [
             'form' => $form->createView(),
             'languages' => $languages,
         ]);
