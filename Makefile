@@ -123,7 +123,7 @@ install-domserver-l:
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_rundir)
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
-	-for d in cache logs sessions ; do \
+	-for d in cache log sessions ; do \
 		$(INSTALL_WEBSITE) -m 0775 -d $(DESTDIR)$(domserver_webappdir)/var/$$d ; \
 	done
 	-$(INSTALL_WEBSITE) -t $(DESTDIR)$(domserver_webappdir)/var var/*.php var/*.cache
