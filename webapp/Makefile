@@ -29,7 +29,7 @@ install-domserver:
 	$(MAKE) copy-bundle-assets
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
 # KLUDGE: how to install a tree of files with correct permissions?
-	for d in app bin src web tests ; do \
+	for d in app bin src templates web tests ; do \
 		cp -R           -t $(DESTDIR)$(domserver_webappdir) $$d ; \
 		chmod -R a+rX      $(DESTDIR)$(domserver_webappdir)/$$d ; \
 	done
@@ -52,7 +52,7 @@ install-docs:
 	$(INSTALL_DATA) -T web/images/countries/codes.txt $(DESTDIR)$(domjudge_docdir)/country_codes.txt
 
 maintainer-clean-l:
-	-for d in cache logs sessions ; do \
+	-for d in cache log sessions ; do \
 		for t in dev prod ; do \
 			rm -rf var/$$d/$$t ; \
 		done ; \
