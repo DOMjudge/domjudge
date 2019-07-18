@@ -1,0 +1,5 @@
+These flags are generated using the ISO country SVG collection
+originally from https://github.com/koppi/iso-country-flags-svg-collection
+
+The generated images are PNG files with 80x60 pixels and named after the
+3-letter ISO 3166 code of the country/region, see the file codes.txt.

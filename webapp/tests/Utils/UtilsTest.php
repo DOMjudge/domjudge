@@ -8,26 +8,34 @@ class UtilsTest extends TestCase
 {
     public function testAbsTime()
     {
+        $tz = date_default_timezone_get();
         date_default_timezone_set('Asia/Kathmandu');
         $this->assertEquals('2009-02-14T05:16:30.000+05:45', Utils::absTime(1234567890));
+        date_default_timezone_set($tz);
     }
 
     public function testAbsTimeWithMillis()
     {
+        $tz = date_default_timezone_get();
         date_default_timezone_set('Asia/Kathmandu');
         $this->assertEquals('2009-02-14T05:16:30.987+05:45', Utils::absTime(1234567890.98765));
+        date_default_timezone_set($tz);
     }
 
     public function testAbsTimeWithMillisFloored()
     {
+        $tz = date_default_timezone_get();
         date_default_timezone_set('Asia/Kathmandu');
         $this->assertEquals('2009-02-14T05:16:30+05:45', Utils::absTime(1234567890.98765, true));
+        date_default_timezone_set($tz);
     }
 
     public function testAbsTimeWithMillis9999()
     {
+        $tz = date_default_timezone_get();
         date_default_timezone_set('Asia/Kathmandu');
         $this->assertEquals('1970-01-01T06:48:31.999+05:30', Utils::absTime(4711.9999));
+        date_default_timezone_set($tz);
     }
 
     public function testRelTime()
@@ -72,9 +80,12 @@ class UtilsTest extends TestCase
 
     public function testPrinttime()
     {
+        $tz = date_default_timezone_get();
+        date_default_timezone_set('UTC');
         $timestamp = 1544964581.3604;
         $expected = '2018-12-16 12:49';
         $this->assertEquals($expected, Utils::printtime($timestamp, '%Y-%m-%d %H:%M'));
+        date_default_timezone_set($tz);
     }
 
     public function testPrinttimediff()

@@ -157,7 +157,8 @@ class Judgehost
      *
      * @return Judgehost
      */
-    public function setRestriction(\App\Entity\JudgehostRestriction $restriction = null)
+    public function setRestriction(
+        \App\Entity\JudgehostRestriction $restriction = null)
     {
         $this->restriction = $restriction;
 

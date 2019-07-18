@@ -1,0 +1,147 @@
+body {
+    padding-top: .5rem;
+}
+h1,h2,h3,h4,h5,h6 {
+    text-align: left;
+}
+h1 {
+    font-size: 2em;
+    padding-top: .5rem;
+}
+.frozen { font-style: italic; }
+
+.teamstatus { text-align: center; }
+.teamstatus img { vertical-align: middle; }
+
+.highlight { background-color: yellow !important; }
+
+.highlight.roweven, .highlight.even { background-color: yellow !important; }
+.highlight.rowodd, .highlight.odd { background-color: #ffffaa !important; }
+
+.size {
+	text-align: right;
+	font-family: monospace;
+}
+
+.md5 { font-family: monospace; }
+
+.testcases td {
+	vertical-align: middle;
+	padding: 3px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+.testcases_prev { font-size: xx-small; }
+tr.summary td { border-top: 1px solid black; }
+
+.testrank {
+	text-align: center;
+}
+
+.testsample {
+	text-align: center;
+	max-width: 200px;
+}
+
+.testdesc {
+	max-width: 400px;
+}
+
+/* set cell padding to 0 and <a> tag to 3 to make all of cell
+   clickable in the jury scoreboard and for all team cells */
+.scoreboard_jury td, .scoreboard_jury th { padding: 0px; }
+
+#submission_layout { width: 100%; }
+
+#djlogo {
+	position: absolute; right: 1ex;
+	width: 93px; height: 196px;
+}
+
+a.collapse { color: black; text-decoration: none; }
+
+.judgetime { font-size: smaller; font-style: italic; }
+
+.config_input { width: 9em; }
+
+/* configchecker */
+.O { background-color: #ccfbcc; }
+.W { background-color: #f0e68c; }
+.E { background-color: #fa9972; }
+
+/* diff colors for source contents and filenames */
+.diff-add        { color: green; }
+.diff-del        { color: red; }
+.diff-changed    { color: darkorange; }
+.file-diff-table { width: auto; }
+.file-diff-table tr th { padding-right: 10px; }
+
+.col1 { float: left;  width: 30%; }
+.col2 { float: right; width: 70%; }
+.nomorecol { clear: left; }
+
+.thleft { text-align: left; }
+.tdcenter { text-align: center; }
+.tdcenter img {  vertical-align: text-top; }
+.tdright { text-align: right; }
+.teamstat { text-align: right; }
+
+div.submissions-filter > p {
+	position: relative;
+}
+
+div.submissions-filter > p > span {
+	position: absolute;
+	top: 3px;
+}
+
+div.submissions-filter ul.token-input-list {
+	display: inline-block;
+	position: relative;
+	left: 100px;
+}
+
+.tc_box_small {
+	text-align: center;
+	font-size: 65%;
+	width: 1.0em;
+	display: inline-block;
+	padding: 1px;
+	margin: 1px;
+	color: black;
+}
+.tc_list_small {
+	max-width:500px;
+}
+
+.data-table  td.testcase-results {
+	white-space: normal;
+	word-wrap: break-word;
+}
+
+.has_tooltip {
+	text-decoration: dotted underline;
+}
+
+div.submission-summary > span {
+	margin-right: 10px;
+}
+
+/* fixes for bootstrap-toggle and bootstrap4 */
+.toggle-off {
+	box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+}
+.toggle.off {
+	border-color: rgba(0, 0, 0, .25);
+}
+.toggle-handle {
+	background-color: white;
+	border: thin rgba(0, 0, 0, .25) solid;
+}
+.btn-xs,
+.btn-group-xs > .btn {
+	padding: 1px 5px;
+	font-size: 12px;
+	line-height: 1.5;
+	border-radius: 3px;
+}

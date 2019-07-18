@@ -604,7 +604,7 @@ class CheckConfigService
 
         $result = 'O';
         $desc = '';
-        $webDir = sprintf('%s/web/', $this->dj->getDomjudgeWebappDir());
+        $webDir = sprintf('%s/public/', $this->dj->getDomjudgeWebappDir());
         foreach ($affils as $affiliation) {
             // don't care about unused affiliations
             if (count($affiliation->getTeams()) === 0) {

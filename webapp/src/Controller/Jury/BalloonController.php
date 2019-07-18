@@ -181,7 +181,7 @@ class BalloonController extends AbstractController
                     ])]];
             }
 
-        
+
             $balloons_table[] = [
                 'data' => $balloondata,
                 'actions' => $balloonactions,

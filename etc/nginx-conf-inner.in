@@ -9,8 +9,7 @@ server_name _default_;
 client_max_body_size 128M;
 
 # Variables used in the nginx configuration
-set $domjudgeRoot @domserver_webappdir@/web;
-set $frontController app.php;
+set $domjudgeRoot @domserver_webappdir@/public;
 # Set this to '' instead of /domjudge when running in the root of your system
 set $prefix /domjudge;
 
@@ -33,8 +32,8 @@ location @domjudgeFront {
 	fastcgi_pass domjudge;
 	include fastcgi_params;
 	fastcgi_param SERVER_NAME $host;
-	fastcgi_param SCRIPT_FILENAME $domjudgeRoot/$frontController;
-	fastcgi_param SCRIPT_NAME $prefix/$frontController;
+	fastcgi_param SCRIPT_FILENAME $domjudgeRoot/index.php;
+	fastcgi_param SCRIPT_NAME $prefix/index.php;
 	fastcgi_param REQUEST_URI $prefix$uri?$args;
 	fastcgi_param DOCUMENT_ROOT $domjudgeRoot;
 	# Prevents URIs that include the front controller. This will 404:

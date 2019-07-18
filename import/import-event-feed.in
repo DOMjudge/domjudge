@@ -27,26 +27,40 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Debug\Debug;
 
-if (isset($_SERVER['REMOTE_ADDR'])) {
-    die("Commandline use only");
+if (false === in_array(\PHP_SAPI, ['cli', 'phpdbg', 'embed'], true)) {
+    echo 'Warning: The console should be invoked via the CLI version of PHP, not the '.\PHP_SAPI.' SAPI'.\PHP_EOL;
 }
-
-require('@domserver_etcdir@/domserver-static.php');
 
 set_time_limit(0);
 
-/** @var Composer\Autoload\ClassLoader $loader */
-$loader = require WEBAPPDIR.'/app/autoload.php';
+require('@domserver_etcdir@/domserver-static.php');
 
-$input = new ArgvInput();
-$env = $input->getParameterOption(['--env', '-e'], getenv('SYMFONY_ENV') ?: 'prod');
-$debug = getenv('SYMFONY_DEBUG') !== '0' && !$input->hasParameterOption(['--no-debug', '']) && $env !== 'prod';
+require WEBAPPDIR.'/config/autoload.php';
 
-if ($debug) {
-    Debug::enable();
+if (!class_exists(Application::class)) {
+    throw new RuntimeException('You need to add "symfony/framework-bundle" as a Composer dependency.');
 }
 
-$kernel = new Kernel($env, $debug);
+$input = new ArgvInput();
+if (null !== $env = $input->getParameterOption(['--env', '-e'], null, true)) {
+    putenv('APP_ENV='.$_SERVER['APP_ENV'] = $_ENV['APP_ENV'] = $env);
+}
+
+if ($input->hasParameterOption('--no-debug', true)) {
+    putenv('APP_DEBUG='.$_SERVER['APP_DEBUG'] = $_ENV['APP_DEBUG'] = '0');
+}
+
+require WEBAPPDIR.'/config/bootstrap.php';
+
+if ($_SERVER['APP_DEBUG']) {
+    umask(0000);
+
+    if (class_exists(Debug::class)) {
+        Debug::enable();
+    }
+}
+
+$kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
 $application = new Application($kernel);
 $application->setDefaultCommand('import:eventfeed', true);
 $application->run($input);

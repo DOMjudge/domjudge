@@ -12,8 +12,8 @@ GITSHA=$(git rev-parse HEAD || true)
 function log_on_err() {
 	echo -e "\\n\\n=======================================================\\n"
 	echo "Symfony log:"
-	if sudo test -f /opt/domjudge/domserver/webapp/var/logs/prod.log; then
-		sudo cat /opt/domjudge/domserver/webapp/var/logs/prod.log
+	if sudo test -f /opt/domjudge/domserver/webapp/var/log/prod.log; then
+		sudo cat /opt/domjudge/domserver/webapp/var/log/prod.log
 	fi
 }
 
@@ -65,8 +65,8 @@ sleep 5
 cat /var/log/nginx/domjudge.log
 
 # Print the symfony log if it exists
-if sudo test -f /opt/domjudge/domserver/webapp/var/logs/prod.log; then
-  sudo cat /opt/domjudge/domserver/webapp/var/logs/prod.log
+if sudo test -f /opt/domjudge/domserver/webapp/var/log/prod.log; then
+  sudo cat /opt/domjudge/domserver/webapp/var/log/prod.log
 fi
 
 # submit test programs

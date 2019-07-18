@@ -14,7 +14,7 @@
 #NameVirtualHost *
 #<VirtualHost *>
 #ServerName _default_
-#DocumentRoot @domserver_webappdir@/web
+#DocumentRoot @domserver_webappdir@/public
 #</VirtualHost>
 
 # Alternatively, use HTTPS and redirect HTTP to HTTPS:
@@ -28,7 +28,7 @@
 #
 #<VirtualHost *:443>
 #ServerName _default_
-#DocumentRoot @domserver_webappdir@/web
+#DocumentRoot @domserver_webappdir@/public
 #
 #SSLEngine on
 #SSLCertificateFile    /path/to/your/SSL-certificate.crt
@@ -42,20 +42,19 @@
 # Alternatively, use this instead of the VirtualHost above when you don't
 # want DOMjudge in the root, but only occupy a subdir, like this:
 # www.example.com/domjudge
-Alias /domjudge @domserver_webappdir@/web
+Alias /domjudge @domserver_webappdir@/public
 
 ### General options ###
 #
 # This section applies to both options above.
 
-<Directory @domserver_webappdir@/web>
+<Directory @domserver_webappdir@/public>
 Require all granted
 
 Options -MultiViews
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
-# On the line below change "app.php" to "app_dev.php" to run Symfony in debug mode.
-RewriteRule ^(.*)$ app.php [QSA,L]
+RewriteRule ^(.*)$ index.php [QSA,L]
 
 RewriteRule .svn/ - [F]
 RewriteRule .git/ - [F]
@@ -97,7 +96,7 @@ RewriteRule Makefile$ - [F]
 
 </Directory>
 
-<Directory @domserver_webappdir@/web/bundles>
+<Directory @domserver_webappdir@/public/bundles>
     RewriteEngine Off
 </Directory>
 

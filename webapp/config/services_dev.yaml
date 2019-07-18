@@ -1,0 +1,12 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\EventListener\ProfilerDisableListener:
+        arguments:
+            $profiler: "@profiler"
+        tags:
+            -   name: kernel.event_listener
+                event: kernel.request
+                method: onKernelRequest

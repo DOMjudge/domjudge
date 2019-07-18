@@ -62,14 +62,8 @@ composer-dependencies:
 ifeq (, $(shell which composer))
 	$(error "'composer' command not found in $(PATH), install it via your package manager or https://getcomposer.org/download/")
 endif
-# To install Symfony we need a parameters.yml file, but to generate
-# that properly, we need a configured system with dbpasswords.secret
-# generated. To circumvent this, we install a stub parameters.yml
-# file, and set its modification time in the past so that it will get
-# updated later during build with 'make domserver'. We use --no-scripts
-# because at this point the autoload.php file is not generated yet, which
-# is needed to run the post-install scripts.
-	$(MAKE) -C webapp/app params-from-stub static-from-stub
+# We use --no-scripts here because at this point the autoload.php file is
+# not generated yet, which is needed to run the post-install scripts.
 	composer $(subst 1,-q,$(QUIET)) install --prefer-dist -o --no-scripts
 
 composer-dependencies-dev:
@@ -102,6 +96,10 @@ clean:             SUBDIRS=etc doc lib sql     judge submit        tests misc-to
 distclean:         SUBDIRS=etc doc lib sql     judge submit import tests misc-tools webapp
 maintainer-clean:  SUBDIRS=etc doc lib sql     judge submit import tests misc-tools webapp
 
+# Dump the environment into a .php file for improved speed
+domserver-l:
+	composer symfony:dump-env prod
+
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
 
@@ -123,10 +121,9 @@ install-domserver-l:
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_rundir)
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
-	-for d in cache log sessions ; do \
+	-for d in cache log ; do \
 		$(INSTALL_WEBSITE) -m 0775 -d $(DESTDIR)$(domserver_webappdir)/var/$$d ; \
 	done
-	-$(INSTALL_WEBSITE) -t $(DESTDIR)$(domserver_webappdir)/var var/*.php var/*.cache
 # Special case create tmpdir here, only when FHS not enabled:
 ifneq "$(FHS_ENABLED)" "yes"
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
@@ -138,8 +135,10 @@ endif
 		etc/initial_admin_password.secret
 	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
 		etc/dbpasswords.secret
-	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_webappdir)/app/config \
-		webapp/app/config/parameters.yml
+	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_webappdir) \
+		webapp/.env.local
+	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_webappdir) \
+		webapp/.env.local.php
 	@echo ""
 	@echo "Domserver install complete. Admin web interface password can be found in:"
 	@echo "$(DESTDIR)$(domserver_etcdir)/initial_admin_password.secret"
@@ -225,7 +224,10 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 	mkdir -p $(domserver_tmpdir)
 	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
 # Run Symfony in DEV mode under Apache:
-	sed -i 's/^\(RewriteRule .*\) app\.php /\1 app_dev.php /' $(CURDIR)/etc/apache.conf
+# Run Symfony in dev mode:
+	sed -i 's/^#APP_ENV=dev/APP_ENV=dev/' $(CURDIR)/webapp/.env.local
+# Remove cached environment file as we don't want this in production
+	rm $(CURDIR)/webapp/.env.local.php
 # Make sure we're running from a clean state:
 	@echo "Checking whether the database is set up..."
 	@if sql/dj_setup_database status ; then \

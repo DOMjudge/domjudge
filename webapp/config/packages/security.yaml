@@ -1,0 +1,73 @@
+# To get started with security, check out the documentation:
+# https://symfony.com/doc/current/security.html
+security:
+    role_hierarchy:
+        ROLE_JURY: [ROLE_BALLOON, ROLE_API, ROLE_API_READER, ROLE_API_SOURCE_READER]
+        ROLE_ADMIN: [ROLE_JURY, ROLE_API, ROLE_JUDGEHOST, ROLE_API_READER, ROLE_API_WRITER, ROLE_API_SOURCE_READER]
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+
+
+    encoders:
+        App\Entity\User:
+            algorithm: auto
+            cost: 10
+    providers:
+        domjudge_db_provider:
+            entity:
+                class: App\Entity\User
+                property: username
+
+
+    firewalls:
+        # NOTE: If you change anything in this section, or move the guard authenticators around
+        # NOTE: make sure to update the $stateless_fw_contexts variables in each guard authenticator
+        # NOTE: Otherwise they may not be enabled.
+
+        # disables authentication for assets and the profiler, adapt it according to your needs
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        # SEE NOTE ABOVE IF CHANGING ANYTHING IN THIS SECTION
+        # API does Basic Auth and IP address auth
+        api:
+            pattern: ^/api
+            provider: domjudge_db_provider
+            stateless: true
+            user_checker: App\Security\UserChecker
+            anonymous: ~
+            guard:
+                # SEE NOTE ABOVE IF CHANGING ANYTHING HERE
+                authenticators:
+                    - App\Security\DOMJudgeIPAuthenticator
+                    - App\Security\DOMJudgeBasicAuthenticator
+                entry_point: App\Security\DOMJudgeIPAuthenticator
+
+        # rest of app does form_login
+        main:
+            pattern: ^/
+            provider: domjudge_db_provider
+            user_checker: App\Security\UserChecker
+            guard:
+                authenticators:
+                    - App\Security\DOMJudgeXHeadersAuthenticator
+                    - App\Security\DOMJudgeIPAuthenticator
+                entry_point: App\Security\DOMJudgeXHeadersAuthenticator
+            anonymous: ~
+            form_login:
+                login_path: login
+                check_path: login
+                csrf_token_generator: security.csrf.token_manager
+                use_referer: true
+
+            logout:
+                path:   logout
+                target: /public
+
+    access_control:
+        - { path: ^/$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/public, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

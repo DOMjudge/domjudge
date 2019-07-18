@@ -3,11 +3,11 @@
 namespace App\Controller\API;
 
 use App\Entity\Contest;
+use App\Entity\Executable;
 use App\Entity\InternalError;
 use App\Entity\Judgehost;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
-use App\Entity\JudgingRunWithOutput;
 use App\Entity\Submission;
 use App\Entity\Testcase;
 use App\Entity\User;
@@ -19,7 +19,7 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use App\Entity\Executable;
+use App\Entity\JudgingRunWithOutput;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;

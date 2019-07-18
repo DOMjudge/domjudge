@@ -1,0 +1,173 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: DOMjudge
+            description: DOMjudge API v4
+            version: "%domjudge.version%"
+        securityDefinitions:
+            BasicAuth:
+                type: basic
+            consumes:
+                - application/x-www-form-urlencoded
+            security:
+                - {}
+                - BasicAuth: []
+        definitions:
+            # General responses
+            NotFound:
+                description: The specified resource was not found
+            Unauthorized:
+                description: Unauthorized
+            # Models that can not be exposed using normal entities
+            ContestProblem: # ContestProblem can not be exposed normally, because it inlines the problem
+                properties:
+                    id: { type: string }
+                    label: { type: string }
+                    short_name: { type: string }
+                    name: { type: string }
+                    ordinal: { type: integer }
+                    rgb: { type: string }
+                    color: { type: string }
+                    time_limit: { type: number, format: float }
+                    test_data_count: { type: integer }
+            # Files and ArchiveList are used for defining the 'files' property of submissions
+            Files:
+                properties:
+                    files:
+                        $ref: "#/definitions/ArchiveList"
+            ArchiveList:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        href: { type: string }
+            SourceCodeList:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        id: { type: string }
+                        submission_id: { type: string }
+                        filename: { type: string, description: 'Original file name' }
+                        source: { type: string, description: 'Base64-encoded source code' }
+            # Judgement type does not have an entity
+            JudgementType:
+                type: object
+                properties:
+                    id: { type: string }
+                    name: { type: string }
+                    penalty: { type: boolean }
+                    solved: { type: boolean }
+            # Fields for judgements that are added by the JudgingWrapper class
+            JudgementExtraFields:
+                properties:
+                    judgement_type_id: { type: string }
+                    judgehost: { type: string }
+                    max_run_time: { type: number, format: float }
+            # Fields for runs that are added by the JudgingRunWrapper class
+            RunExtraFields:
+                properties:
+                    judgement_type_id: { type: string }
+            Scoreboard:
+                type: object
+                properties:
+                    event_id: { type: string }
+                    time: { type: string }
+                    contest_time: { type: string }
+                    state: { $ref: "#/definitions/ContestState" }
+                    rows:
+                        type: array
+                        items:
+                            type: object
+                            properties:
+                                rank: { type: integer }
+                                team_id: { type: string }
+                                score:
+                                    type: object
+                                    properties:
+                                        num_solved: { type: integer }
+                                        total_time: { type: integer }
+                                problems:
+                                    type: array
+                                    items:
+                                        type: object
+                                        properties:
+                                            label: { type: string }
+                                            problem_id: { type: string }
+                                            num_judged: { type: integer }
+                                            num_pending: { type: integer }
+                                            solved: { type: boolean }
+                                            time: { type: integer }
+            NextJudging:
+                type: object
+                properties:
+                    judgingid: { type: integer }
+                    submitid: { type: integer }
+                    cid: { type: integer }
+                    teamid: { type: integer }
+                    probid: { type: integer }
+                    langid: { type: string }
+                    rejudgingid: { type: integer }
+                    entry_point: { type: string }
+                    origsubmitid: { type: integer }
+                    maxruntime: { type: number, format: float }
+                    memlimit: { type: integer }
+                    outputlimit: { type: integer }
+                    run: { type: string }
+                    compare: { type: string }
+                    compare_args: { type: string }
+                    compile_script: { type: string }
+                    compare_md5sum: { type: string }
+                    run_md5sum: { type: string }
+                    compile_script_md5sum: { type: string }
+                    testcases:
+                        type: array
+                        items:
+                            type: object
+                            properties:
+                                md5sum_input: { type: string }
+                                md5sum_output: { type: string }
+                                testcaseid: { type: integer}
+                                rank: { type: integer }
+            ContestState:
+                type: object
+                properties:
+                    started: { type: string, format: date-time }
+                    ended: { type: string, format: date-time }
+                    frozen: { type: string, format: date-time }
+                    thawed: { type: string, format: date-time }
+                    finalized: { type: string, format: date-time }
+                    end_of_updates: { type: string, format: date-time }
+            Award:
+                type: object
+                properties:
+                    id: { type: string }
+                    citation: { type: string }
+                    team_ids:
+                        type: array
+                        items: { type: string }
+        parameters:
+            cid:
+                name: cid
+                in: path
+                type: string
+                description: The contest ID
+                required: true
+            id:
+                name: id
+                in: path
+                type: string
+                description: The ID of the entity to get
+                required: true
+            idlist:
+                name: ids[]
+                in: query
+                type: array
+                description: Filter the objects to get on this list of ID's
+                collectionFormat: multi
+                items:
+                    type: string
+                    description: A single ID
+
+    areas:
+        path_patterns: [ ^/api/v4 ]

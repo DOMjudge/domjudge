@@ -25,27 +25,12 @@ echo "GRANT SELECT, INSERT, UPDATE, DELETE ON \`domjudge\`.* TO 'domjudge'@'%' I
 echo "dummy:${MARIADB_PORT_3306_TCP_ADDR}:domjudge:domjudge:domjudge" > etc/dbpasswords.secret
 
 # Generate a parameters yml file for symfony
-cat > webapp/app/config/parameters.yml <<EOF
-parameters:
-    database_host: ${MARIADB_PORT_3306_TCP_ADDR}
-    database_port: ~
-    database_name: domjudge
-    database_user: domjudge
-    database_password: domjudge
-    mailer_transport: smtp
-    mailer_host: 127.0.0.1
-    mailer_user: ~
-    mailer_password: ~
-
-    # A secret key that's used to generate certain security-related tokens
-    secret: ThisTokenIsNotSoSecretChangeIt
-
-    # Needs a version number
-    domjudge.version: 0.0.dummy
-    domjudge.tmpdir: /tmp
+cat > webapp/.env.local <<EOF
+APP_SECRET=ThisTokenIsNotSoSecretChangeIt
+DATABASE_URL=mysql://domjudge:domjudge@${MARIADB_PORT_3306_TCP_ADDR}:3306/domjudge
 EOF
 
-cat > webapp/app/config/static.yml <<EOF
+cat > webapp/config/static.yaml <<EOF
 parameters:
     domjudge.version: unconfigured
     domjudge.bindir: /bin
@@ -64,7 +49,7 @@ parameters:
 EOF
 
 # install all php dependencies
-export SYMFONY_ENV="prod"
+export APP_ENV="prod"
 composer install --no-scripts
 
 # configure, make and install (but skip documentation)

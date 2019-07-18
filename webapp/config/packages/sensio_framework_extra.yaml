@@ -1,0 +1,6 @@
+# We need this to make our @View annotations work for FOSRest
+sensio_framework_extra:
+    view:
+        annotations: true
+    router:
+        annotations: false

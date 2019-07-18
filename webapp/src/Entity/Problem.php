@@ -607,7 +607,8 @@ class Problem extends BaseApiEntity
      *
      * @param \App\Entity\ContestProblem $contestProblem
      */
-    public function removeContestProblem(\App\Entity\ContestProblem $contestProblem)
+    public function removeContestProblem(
+        \App\Entity\ContestProblem $contestProblem)
     {
         $this->contest_problems->removeElement($contestProblem);
     }

@@ -1,20 +1,29 @@
-/app/config/parameters.yml
-/app/config/static.yml
-/bin/console
-/web/app.php
-/web/app_dev.php
+/config/autoload.php
+/config/static.yaml
 /build/
-/phpunit.xml
-/var/*
 !/var/cache
 /var/cache/*
 !var/cache/.gitkeep
-!/var/logs
-/var/logs/*
-!var/logs/.gitkeep
-!/var/sessions
-/var/sessions/*
-!var/sessions/.gitkeep
-!var/SymfonyRequirements.php
+!/var/log
+/var/log/*
+!var/log/.gitkeep
 /vendor/
-/web/bundles/
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> symfony/phpunit-bridge ###
+.phpunit
+/phpunit.xml
+###< symfony/phpunit-bridge ###

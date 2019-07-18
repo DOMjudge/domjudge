@@ -90,7 +90,7 @@ class UserRegistrationType extends AbstractType
             foreach (Utils::ALPHA3_COUNTRIES as $alpha3 => $country) {
                 $countries["$country ($alpha3)"] = $alpha3;
             }
-            
+
             $builder
                 ->add('affiliation', ChoiceType::class, [
                     'choices' => [

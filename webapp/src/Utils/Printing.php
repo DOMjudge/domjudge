@@ -53,29 +53,29 @@ class Printing
         if (! empty($language)) {
             $highlight = "-E" . escapeshellarg($language);
         }
-    
+
         $header = sprintf("Team: %s %s ", $username, $teamname) .
                   (!empty($location) ? "[".$location."]":"") .
                   " File: $origname||Page $% of $=";
-    
+
         // For debugging or spooling to a different host.
         // Also uncomment '-p $tmp' below.
         //$tmp = tempnam('/tmp', 'print_'.$username.'_');
-    
+
         $cmd = "enscript -C " . $highlight
              . " -b " . escapeshellarg($header)
              . " -a 0-10 "
              . " -f Courier9 "
              //. " -p $tmp "
              . escapeshellarg($filename) . " 2>&1";
-    
+
         exec($cmd, $output, $retval);
-    
+
         // Make file readable for others than webserver user,
         // and give it an extension:
         //chmod($tmp, 0644);
         //rename($tmp, $tmp.'.ps');
-    
+
         return [$retval == 0, implode("\n", $output)];
     }
 }

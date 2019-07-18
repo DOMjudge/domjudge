@@ -638,7 +638,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      *
      * @return Team
      */
-    public function addSentClarification(\App\Entity\Clarification $sentClarification)
+    public function addSentClarification(
+        \App\Entity\Clarification $sentClarification)
     {
         $this->sent_clarifications[] = $sentClarification;
 
@@ -650,7 +651,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      *
      * @param \App\Entity\Clarification $sentClarification
      */
-    public function removeSentClarification(\App\Entity\Clarification $sentClarification)
+    public function removeSentClarification(
+        \App\Entity\Clarification $sentClarification)
     {
         $this->sent_clarifications->removeElement($sentClarification);
     }
@@ -672,7 +674,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      *
      * @return Team
      */
-    public function addReceivedClarification(\App\Entity\Clarification $receivedClarification)
+    public function addReceivedClarification(
+        \App\Entity\Clarification $receivedClarification)
     {
         $this->received_clarifications[] = $receivedClarification;
 
@@ -684,7 +687,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      *
      * @param \App\Entity\Clarification $receivedClarification
      */
-    public function removeReceivedClarification(\App\Entity\Clarification $receivedClarification)
+    public function removeReceivedClarification(
+        \App\Entity\Clarification $receivedClarification)
     {
         $this->received_clarifications->removeElement($receivedClarification);
     }
@@ -706,7 +710,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      *
      * @return Team
      */
-    public function addUnreadClarification(\App\Entity\Clarification $unreadClarification)
+    public function addUnreadClarification(
+        \App\Entity\Clarification $unreadClarification)
     {
         $this->unread_clarifications[] = $unreadClarification;
 
@@ -718,7 +723,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      *
      * @param \App\Entity\Clarification $unreadClarification
      */
-    public function removeUnreadClarification(\App\Entity\Clarification $unreadClarification)
+    public function removeUnreadClarification(
+        \App\Entity\Clarification $unreadClarification)
     {
         $this->unread_clarifications->removeElement($unreadClarification);
     }

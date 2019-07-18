@@ -1,0 +1,53 @@
+#!/bin/sh
+
+# Script to fill symfony .env.local file with database passwords.
+# One argument is expected:
+# 2. a file dbpasswords.secret with database credentials
+# The generated file is written to stdout.
+
+# Exit on any error:
+set -e
+
+error()
+{
+	echo "Error: $*" >&2
+	exit 1
+}
+
+if [ $# -ne 1 ]; then
+	error "exactly one arguments expected."
+fi
+
+DBPASSWORDS=$1
+
+if [ ! -r "$DBPASSWORDS" ]; then
+	error "database passwords file '$DBPASSWORDS' not readable."
+fi
+
+OLDIFS="$IFS"
+IFS=":"
+# Don't pipe $PASSWDFILE into this while loop as that spawns a
+# subshell and then variables are not retained in the original shell.
+while read -r role host db user passwd; do
+	# Skip lines beginning with a '#'
+	[ "x$role" != "x${role###}" ] && continue
+	DBHOST=$host
+	DBNAME=$db
+	DBUSER=$user
+	PASSWD=$passwd
+done < "$DBPASSWORDS"
+IFS="$OLDIFS"
+
+if [ -z "$PASSWD" ]; then
+	error "no credentials found in '$DBPASSWORDS
+'."
+fi
+
+SECRET=$(head -c20 /dev/urandom | base64 | head -c20 | tr '/+' 'Aa')
+
+echo "# Generated from '$DBPASSWORDS' on $(hostname), $(date)."
+echo
+echo "# Uncomment the following line to run the application in development mode"
+echo "#APP_ENV=dev"
+echo "APP_SECRET=$SECRET"
+echo "DATABASE_URL=mysql://$DBUSER:$PASSWD@$DBHOST:3306/$DBNAME"

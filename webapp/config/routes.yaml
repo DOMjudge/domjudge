@@ -1,0 +1,8 @@
+# Add the new API controllers here as well, to load them without the /v4/ prefix
+domjudge_api_new:
+    type: rest
+    resource: '../src/Controller/API/'
+    defaults: { _format: "json" }
+
+logout:
+    path: /logout

@@ -1,0 +1,18 @@
+fos_rest:
+    zone:
+        - { path: ^/api/* }
+    disable_csrf_role: ROLE_API
+    view:
+        # Lets us return data directly, instead of wrapping in a view
+        view_response_listener: force
+    serializer:
+        serialize_null: true
+    exception:
+        enabled: true
+        exception_controller: 'fos_rest.exception.controller:showAction'
+        messages:
+            Symfony\Component\HttpKernel\Exception\BadRequestHttpException: true
+            Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException: true
+            Symfony\Component\HttpKernel\Exception\NotAcceptableHttpException: true
+            Symfony\Component\HttpKernel\Exception\NotFoundHttpException: true
+            Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException: true

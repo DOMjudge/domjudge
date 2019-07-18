@@ -1,0 +1,15 @@
+framework:
+    secret: '%env(APP_SECRET)%'
+    csrf_protection: ~
+    fragments: ~
+
+    session:
+        handler_id: ~
+        cookie_secure: auto
+        cookie_samesite: lax
+
+    php_errors:
+        log: true
+
+    assets:
+        version: "v=%domjudge.version%"

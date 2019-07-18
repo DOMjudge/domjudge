@@ -14,9 +14,11 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Twig\Extension\AbstractExtension;
+use Twig\Extension\GlobalsInterface;
 use Twig\TwigFunction;
 
-class TwigExtension extends \Twig\Extension\AbstractExtension implements \Twig\Extension\GlobalsInterface
+class TwigExtension extends AbstractExtension implements GlobalsInterface
 {
     /**
      * @var DOMJudgeService
@@ -777,7 +779,7 @@ JS;
      */
     public function assetExists(string $asset): bool
     {
-        $webDir = realpath(sprintf('%s/../web', $this->kernel->getRootDir()));
+        $webDir = realpath(sprintf('%s/../public', $this->kernel->getRootDir()));
         return is_readable($webDir . '/' . $asset);
     }
 
