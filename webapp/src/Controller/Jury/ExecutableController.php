@@ -10,7 +10,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/executables")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class ExecutableController extends BaseController
 {
@@ -226,7 +226,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/content", name="jury_executable_content")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param string $execId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -243,7 +243,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/download", name="jury_executable_download")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param string $execId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -275,7 +275,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/download/{index}", name="jury_executable_download_single")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param string $execId
      * @param int    $index
      * @return \Symfony\Component\HttpFoundation\Response
@@ -324,7 +324,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/edit", name="jury_executable_edit")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param string  $execId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -385,7 +385,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/delete", name="jury_executable_delete")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param string  $execId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -405,7 +405,7 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/edit-files", name="jury_executable_edit_files")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param string  $execId
      * @return \Symfony\Component\HttpFoundation\Response

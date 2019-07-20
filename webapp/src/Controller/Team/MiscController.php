@@ -11,6 +11,7 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Printing;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -23,7 +24,7 @@ use Symfony\Component\Routing\RouterInterface;
  * Class MiscController
  *
  * @Route("/team")
- * @Security("is_granted('ROLE_TEAM')")
+ * @IsGranted("ROLE_TEAM")
  * @Security("user.getTeam() !== null", message="You do not have a team associated with your account. ")
  *
  * @package App\Controller\Team

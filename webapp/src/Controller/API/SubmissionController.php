@@ -15,7 +15,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -111,7 +111,7 @@ class SubmissionController extends AbstractRestController
      * @return int
      * @Rest\Post("")
      * @SWG\Post(consumes={"multipart/form-data"})
-     * @Security("is_granted('ROLE_TEAM')")
+     * @IsGranted("ROLE_TEAM")
      * @SWG\Parameter(
      *     name="problem",
      *     in="formData",
@@ -237,7 +237,7 @@ class SubmissionController extends AbstractRestController
      * Get the files for the given submission as a ZIP archive
      * @Rest\Get("/{id}/files", name="submission_files")
      * @SWG\Get(produces={"application/zip"})
-     * @Security("is_granted('ROLE_API_SOURCE_READER')")
+     * @IsGranted("ROLE_API_SOURCE_READER")
      * @param Request $request
      * @param string  $id
      * @return Response|StreamedResponse
@@ -306,7 +306,7 @@ class SubmissionController extends AbstractRestController
     /**
      * Get the source code of all the files for the given submission
      * @Rest\Get("/{id}/source-code")
-     * @Security("is_granted('ROLE_JUDGEHOST') or is_granted('ROLE_JURY')")
+     * @IsGranted({"ROLE_JUDGEHOST", "ROLE_JURY"})
      * @param Request $request
      * @param string  $id
      * @return array

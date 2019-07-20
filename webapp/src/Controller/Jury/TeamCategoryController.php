@@ -10,7 +10,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/categories")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class TeamCategoryController extends BaseController
 {
@@ -190,7 +190,7 @@ class TeamCategoryController extends BaseController
 
     /**
      * @Route("/{categoryId}/edit", name="jury_team_category_edit", requirements={"categoryId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $categoryId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -223,7 +223,7 @@ class TeamCategoryController extends BaseController
 
     /**
      * @Route("/{categoryId}/delete", name="jury_team_category_delete", requirements={"categoryId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $categoryId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -243,7 +243,7 @@ class TeamCategoryController extends BaseController
 
     /**
      * @Route("/add", name="jury_team_category_add")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception

@@ -10,7 +10,7 @@ use App\Entity\Problem;
 use App\Form\Type\JudgehostRestrictionType;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/judgehost-restrictions")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class JudgehostRestrictionController extends BaseController
 {
@@ -184,7 +184,7 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @Route("/{restrictionId}/edit", name="jury_judgehost_restriction_edit",
      *                                 requirements={"restrictionId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $restrictionId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -215,7 +215,7 @@ class JudgehostRestrictionController extends BaseController
     /**
      * @Route("/{restrictionId}/delete", name="jury_judgehost_restriction_delete",
      *                                   requirements={"restrictionId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $restrictionId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -233,7 +233,7 @@ class JudgehostRestrictionController extends BaseController
 
     /**
      * @Route("/add", name="jury_judgehost_restriction_add")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */

@@ -13,7 +13,7 @@ use App\Service\ImportProblemService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -119,7 +119,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * @param Request $request
      * @return array
      * @Rest\Post("")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @SWG\Post(consumes={"multipart/form-data"})
      * @SWG\Parameter(
      *     name="zip[]",

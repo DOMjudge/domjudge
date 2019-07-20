@@ -21,7 +21,7 @@ use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Utils;
 use Collator;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -31,7 +31,7 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * @Route("/jury/import-export")
- * @Security("is_granted('ROLE_ADMIN')")
+ * @IsGranted("ROLE_ADMIN")
  */
 class ImportExportController extends BaseController
 {

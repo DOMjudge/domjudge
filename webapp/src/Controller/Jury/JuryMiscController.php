@@ -15,7 +15,7 @@ use App\Service\ScoreboardService;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -56,7 +56,7 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("", name="jury_index")
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
+     * @IsGranted({"ROLE_JURY", "ROLE_BALLOON"})
      */
     public function indexAction(Request $request)
     {
@@ -66,7 +66,7 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("/updates", methods={"GET"}, name="jury_ajax_updates")
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
+     * @IsGranted({"ROLE_JURY", "ROLE_BALLOON"})
      */
     public function updatesAction(Request $request)
     {
@@ -76,7 +76,7 @@ class JuryMiscController extends BaseController
     /**
      * @Route("/ajax/{datatype}", methods={"GET"}, name="jury_ajax_data")
      * @param string $datatype
-     * @Security("is_granted('ROLE_JURY')")
+     * @IsGranted("ROLE_JURY")
      */
     public function ajaxDataAction(Request $request, string $datatype)
     {
@@ -187,7 +187,7 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("/refresh-cache", name="jury_refresh_cache")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request           $request
      * @param ScoreboardService $scoreboardService
      * @return \Symfony\Component\HttpFoundation\Response|StreamedResponse
@@ -335,7 +335,7 @@ class JuryMiscController extends BaseController
 
     /**
      * @Route("/judging-verifier", name="jury_judging_verifier")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response|StreamedResponse
      */

@@ -21,7 +21,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Exception;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -37,7 +37,7 @@ use ZipArchive;
 
 /**
  * @Route("/jury/problems")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class ProblemController extends BaseController
 {
@@ -298,7 +298,7 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{problemId}/export", name="jury_export_problem", requirements={"problemId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param int $problemId
      * @return StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -872,7 +872,7 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{probId}/edit", name="jury_problem_edit", requirements={"probId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $probId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -957,7 +957,7 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/{probId}/delete", name="jury_problem_delete", requirements={"probId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $probId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -977,7 +977,7 @@ class ProblemController extends BaseController
 
     /**
      * @Route("/add", name="jury_problem_add")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws Exception

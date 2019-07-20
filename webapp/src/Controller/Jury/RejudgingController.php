@@ -17,7 +17,7 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,7 +31,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @Route("/jury/rejudgings")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class RejudgingController extends BaseController
 {

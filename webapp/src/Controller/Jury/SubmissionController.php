@@ -21,7 +21,7 @@ use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -38,7 +38,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 /**
  * @Route("/jury/submissions")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class SubmissionController extends BaseController
 {
@@ -803,7 +803,7 @@ class SubmissionController extends BaseController
     /**
      * @Route("/{submitId}/update-status", name="jury_submission_update_status", methods={"POST"},
      *                                     requirements={"submitId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param EventLogService   $eventLogService
      * @param ScoreboardService $scoreboardService
      * @param Request           $request

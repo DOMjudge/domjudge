@@ -11,7 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -123,7 +123,7 @@ class GeneralInfoController extends AbstractFOSRestController
     /**
      * Get general status information
      * @Rest\Get("/status")
-     * @Security("is_granted('ROLE_API_READER')")
+     * @IsGranted("ROLE_API_READER")
      * @SWG\Response(
      *     response="200",
      *     description="General status information for the currently active contests",
@@ -249,7 +249,7 @@ class GeneralInfoController extends AbstractFOSRestController
     /**
      * Check the DOMjudge configuration
      * @Rest\Get("/config/check")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @SWG\Response(
      *     response="200",
      *     description="Result of the various checks performed",

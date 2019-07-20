@@ -14,7 +14,7 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -26,7 +26,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/teams")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class TeamController extends BaseController
 {
@@ -333,7 +333,7 @@ class TeamController extends BaseController
 
     /**
      * @Route("/{teamId}/edit", name="jury_team_edit", requirements={"teamId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $teamId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -366,7 +366,7 @@ class TeamController extends BaseController
 
     /**
      * @Route("/{teamId}/delete", name="jury_team_delete", requirements={"teamId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $teamId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -386,7 +386,7 @@ class TeamController extends BaseController
 
     /**
      * @Route("/add", name="jury_team_add")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException

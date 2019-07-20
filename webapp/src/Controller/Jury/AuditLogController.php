@@ -10,7 +10,7 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/auditlog")
- * @Security("is_granted('ROLE_ADMIN')")
+ * @IsGranted("ROLE_ADMIN")
  */
 class AuditLogController extends AbstractController
 {

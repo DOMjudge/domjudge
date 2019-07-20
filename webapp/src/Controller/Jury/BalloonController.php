@@ -10,7 +10,7 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/balloons")
- * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_BALLOON')")
+ * @IsGranted({"ROLE_JURY", "ROLE_BALLOON"})
  */
 class BalloonController extends AbstractController
 {

@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -42,7 +42,7 @@ class TestcaseController extends AbstractFOSRestController
      * @param string $id
      * @return array|string|null
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
+     * @IsGranted({"ROLE_JURY", "ROLE_JUDGEHOST"})
      * @Rest\Get("/next-to-judge/{id}")
      * @SWG\Parameter(ref="#/parameters/id")
      * @SWG\Response(
@@ -111,7 +111,7 @@ class TestcaseController extends AbstractFOSRestController
      * @param string $type
      * @return string
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_JUDGEHOST')")
+     * @IsGranted({"ROLE_JURY", "ROLE_JUDGEHOST"})
      * @Rest\Get("/{id}/file/{type}")
      * @SWG\Parameter(ref="#/parameters/id")
      * @SWG\Parameter(

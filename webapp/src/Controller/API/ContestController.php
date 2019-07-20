@@ -9,7 +9,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Swagger\Annotations as SWG;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -71,7 +71,7 @@ class ContestController extends AbstractRestController
     /**
      * Change the start time of the given contest
      * @Rest\Patch("/{id}")
-     * @Security("is_granted('ROLE_API_WRITER')")
+     * @IsGranted("ROLE_API_WRITER")
      * @param Request $request
      * @param string  $id
      * @return Response
@@ -234,7 +234,7 @@ class ContestController extends AbstractRestController
      * Get the event feed for the given contest
      * @Rest\Get("/{id}/event-feed")
      * @SWG\Get(produces={"application/x-ndjson"})
-     * @Security("is_granted('ROLE_JURY') or is_granted('ROLE_API_READER')")
+     * @IsGranted({"ROLE_JURY", "ROLE_API_READER"})
      * @param Request $request
      * @param string  $id
      * @return Response|StreamedResponse
@@ -410,7 +410,7 @@ class ContestController extends AbstractRestController
     /**
      * Get general status information
      * @Rest\Get("/{id}/status")
-     * @Security("is_granted('ROLE_API_READER')")
+     * @IsGranted("ROLE_API_READER")
      * @SWG\Parameter(ref="#/parameters/id")
      * @SWG\Response(
      *     response="200",

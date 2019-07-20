@@ -10,14 +10,14 @@ use App\Entity\Submission;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\QueryBuilder;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/analysis")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class AnalysisController extends AbstractController
 {

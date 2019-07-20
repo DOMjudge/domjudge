@@ -9,7 +9,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/affiliations")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class TeamAffiliationController extends BaseController
 {
@@ -211,7 +211,7 @@ class TeamAffiliationController extends BaseController
 
     /**
      * @Route("/{affilId}/edit", name="jury_team_affiliation_edit", requirements={"affilId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $affilId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -244,7 +244,7 @@ class TeamAffiliationController extends BaseController
 
     /**
      * @Route("/{affilId}/delete", name="jury_team_affiliation_delete", requirements={"affilId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $affilId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -264,7 +264,7 @@ class TeamAffiliationController extends BaseController
 
     /**
      * @Route("/add", name="jury_team_affiliation_add")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception

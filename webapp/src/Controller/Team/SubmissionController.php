@@ -11,6 +11,7 @@ use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -22,7 +23,7 @@ use Symfony\Component\Validator\Constraints\Language;
  * Class SubmissionController
  *
  * @Route("/team")
- * @Security("is_granted('ROLE_TEAM')")
+ * @IsGranted("ROLE_TEAM")
  * @Security("user.getTeam() !== null", message="You do not have a team associated with your account.")
  * @package App\Controller\Team
  */

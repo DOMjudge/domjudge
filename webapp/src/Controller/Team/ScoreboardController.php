@@ -7,6 +7,7 @@ use App\Entity\Team;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * Class ScoreboardController
  *
  * @Route("/team")
- * @Security("is_granted('ROLE_TEAM')")
+ * @IsGranted("ROLE_TEAM")
  * @Security("user.getTeam() !== null", message="You do not have a team associated with your account.")
  *
  * @package App\Controller\Team

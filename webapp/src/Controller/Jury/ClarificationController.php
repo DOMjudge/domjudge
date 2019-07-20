@@ -13,7 +13,7 @@ use Doctrine\ORM\Query\Expr\Join;
 use App\Entity\Clarification;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/clarifications")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class ClarificationController extends AbstractController
 {

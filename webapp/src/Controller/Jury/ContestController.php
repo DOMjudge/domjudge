@@ -16,7 +16,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use App\Form\Type\RemovedIntervalType;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/contests")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class ContestController extends BaseController
 {
@@ -413,7 +413,7 @@ class ContestController extends BaseController
 
     /**
      * @Route("/{contestId}/edit", name="jury_contest_edit", requirements={"contestId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -448,7 +448,7 @@ class ContestController extends BaseController
 
     /**
      * @Route("/{contestId}/delete", name="jury_contest_delete", requirements={"contestId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -469,7 +469,7 @@ class ContestController extends BaseController
     /**
      * @Route("/{contestId}/problems/{probId}/delete", name="jury_contest_problem_delete", requirements={"contestId":
      *                                                          "\d+", "probId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -492,7 +492,7 @@ class ContestController extends BaseController
 
     /**
      * @Route("/add", name="jury_contest_add")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -539,7 +539,7 @@ class ContestController extends BaseController
 
     /**
      * @Route("/{contestId}/finalize", name="jury_contest_finalize", requirements={"contestId": "\d+"})
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response

@@ -11,6 +11,7 @@ use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,7 +23,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * Class ClarificationController
  *
  * @Route("/team")
- * @Security("is_granted('ROLE_TEAM')")
+ * @IsGranted("ROLE_TEAM")
  * @Security("user.getTeam() !== null", message="You do not have a team associated with your account. ")
  *
  * @package App\Controller\Team

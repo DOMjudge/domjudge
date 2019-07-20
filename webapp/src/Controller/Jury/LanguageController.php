@@ -10,7 +10,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/jury/languages")
- * @Security("is_granted('ROLE_JURY')")
+ * @IsGranted("ROLE_JURY")
  */
 class LanguageController extends BaseController
 {
@@ -147,7 +147,7 @@ class LanguageController extends BaseController
     // Note that the add action appears before the view action to make sure /add is not seen as a language
     /**
      * @Route("/add", name="jury_language_add")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
@@ -270,7 +270,7 @@ class LanguageController extends BaseController
 
     /**
      * @Route("/{langId}/edit", name="jury_language_edit")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param string  $langId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -307,7 +307,7 @@ class LanguageController extends BaseController
 
     /**
      * @Route("/{langId}/delete", name="jury_language_delete")
-     * @Security("is_granted('ROLE_ADMIN')")
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param string  $langId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
