@@ -26,7 +26,7 @@ class JudgehostRestriction
 
     /**
      * @var array
-     * @ORM\Column(type="json_array", length=4294967295, name="restrictions", options={"comment"="JSON-encoded restrictions"}, nullable=false)
+     * @ORM\Column(type="json", length=4294967295, name="restrictions", options={"comment"="JSON-encoded restrictions"}, nullable=false)
      */
     private $restrictions;
 

@@ -27,7 +27,7 @@ class Configuration
 
     /**
      * @var string
-     * @ORM\Column(type="json_array", length=4294967295, name="value", options={"comment"="Content of the configuration variable (JSON encoded)"}, nullable=true)
+     * @ORM\Column(type="json", length=4294967295, name="value", options={"comment"="Content of the configuration variable (JSON encoded)"}, nullable=true)
      */
     private $value;
 

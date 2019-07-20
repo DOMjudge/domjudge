@@ -54,7 +54,7 @@ class InternalError
 
     /**
      * @var array
-     * @ORM\Column(type="json_array", length=4294967295, name="disabled", options={"comment"="Disabled stuff, JSON-encoded"}, nullable=false)
+     * @ORM\Column(type="json", length=4294967295, name="disabled", options={"comment"="Disabled stuff, JSON-encoded"}, nullable=false)
      */
     private $disabled;
 

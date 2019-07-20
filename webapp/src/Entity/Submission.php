@@ -101,7 +101,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
 
     /**
      * @var array
-     * @ORM\Column(type="json_array", name="expected_results", length=255, options={"comment"="JSON encoded list of expected results - used to validate jury submissions", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="json", name="expected_results", length=255, options={"comment"="JSON encoded list of expected results - used to validate jury submissions", "collation"="utf8mb4_bin"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $expected_results;

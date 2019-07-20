@@ -46,7 +46,7 @@ class Language extends BaseApiEntity
 
     /**
      * @var string[]
-     * @ORM\Column(type="json_array", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
+     * @ORM\Column(type="json", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("array<string>")
      * @Assert\NotBlank()

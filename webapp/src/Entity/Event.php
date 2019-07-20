@@ -52,7 +52,7 @@ class Event
     /**
      * @var resource
      *
-     * @ORM\Column(name="content", type="json_array", nullable=true)
+     * @ORM\Column(name="content", type="json", nullable=true)
      */
     private $content;
 
