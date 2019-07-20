@@ -13,7 +13,6 @@ use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\TwigFunction;
@@ -41,22 +40,22 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     protected $eventLogService;
 
     /**
-     * @var KernelInterface
+     * @var string
      */
-    protected $kernel;
+    protected $projectDir;
 
     public function __construct(
         DOMJudgeService $dj,
         EntityManagerInterface $em,
         SubmissionService $submissionService,
         EventLogService $eventLogService,
-        KernelInterface $kernel
+        string $projectDir
     ) {
         $this->dj                = $dj;
         $this->em                = $em;
         $this->submissionService = $submissionService;
         $this->eventLogService   = $eventLogService;
-        $this->kernel            = $kernel;
+        $this->projectDir        = $projectDir;
     }
 
     public function getFunctions()
@@ -779,7 +778,7 @@ JS;
      */
     public function assetExists(string $asset): bool
     {
-        $webDir = realpath(sprintf('%s/../public', $this->kernel->getRootDir()));
+        $webDir = realpath(sprintf('%s/public', $this->projectDir));
         return is_readable($webDir . '/' . $asset);
     }
 

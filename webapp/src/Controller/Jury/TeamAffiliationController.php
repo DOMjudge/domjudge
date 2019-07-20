@@ -65,7 +65,7 @@ class TeamAffiliationController extends BaseController
     /**
      * @Route("", name="jury_team_affiliations")
      */
-    public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
+    public function indexAction(Request $request, Packages $assetPackage, string $projectDir)
     {
         $em               = $this->em;
         $teamAffiliations = $em->createQueryBuilder()
@@ -97,7 +97,7 @@ class TeamAffiliationController extends BaseController
                 array_slice($table_fields, 1, null, true);
         }
 
-        $webDir = realpath(sprintf('%s/../public', $kernel->getRootDir()));
+        $webDir = realpath(sprintf('%s/public', $projectDir));
 
         $propertyAccessor        = PropertyAccess::createPropertyAccessor();
         $team_affiliations_table = [];
