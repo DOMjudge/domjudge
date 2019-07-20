@@ -1,5 +1,4 @@
 {% extends "jury/base.html.twig" %}
-{% import _self as self %}
 
 {% set origclar = list|first %}
 {% set claimed = not origclar.answered and origclar.from_jurymember is defined %}
