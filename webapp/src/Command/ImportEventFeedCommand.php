@@ -276,7 +276,7 @@ class ImportEventFeedCommand extends Command
         $user = $this->em->createQueryBuilder()
             ->from(User::class, 'u')
             ->select('u')
-            ->join('u.roles', 'r')
+            ->join('u.user_roles', 'r')
             ->andWhere('r.dj_role = :role')
             ->setParameter(':role', 'admin')
             ->setMaxResults(1)

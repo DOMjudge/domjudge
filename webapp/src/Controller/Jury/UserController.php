@@ -86,7 +86,7 @@ class UserController extends BaseController
         $users = $this->em->createQueryBuilder()
             ->select('u', 'r', 't')
             ->from(User::class, 'u')
-            ->leftJoin('u.roles', 'r')
+            ->leftJoin('u.user_roles', 'r')
             ->leftJoin('u.team', 't')
             ->orderBy('u.username', 'ASC')
             ->getQuery()->getResult();
@@ -95,7 +95,7 @@ class UserController extends BaseController
             'username' => ['title' => 'username', 'sort' => true, 'default_sort' => true],
             'name' => ['title' => 'name', 'sort' => true],
             'email' => ['title' => 'email', 'sort' => true],
-            'roles' => ['title' => 'roles', 'sort' => true],
+            'user_roles' => ['title' => 'roles', 'sort' => true],
             'team' => ['title' => 'team', 'sort' => true],
             'status' => ['title' => '', 'sort' => true],
         ];
@@ -131,10 +131,10 @@ class UserController extends BaseController
                 ];
             }
 
-            $userdata['roles'] = [
+            $userdata['user_roles'] = [
                 'value' => implode(', ', array_map(function (Role $role) {
                     return $role->getDjRole();
-                }, $u->getRoles()))
+                }, $u->getUserRoles()))
             ];
 
             // Create action links

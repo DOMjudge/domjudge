@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -115,8 +116,11 @@ class User implements UserInterface, \Serializable
      *                inverseJoinColumns={@ORM\JoinColumn(name="roleid", referencedColumnName="roleid")}
      *               )
      * @Serializer\Exclude()
+     *
+     * Note that this property is called `user_roles` and not `roles` because the
+     * UserInterface expects roles/getRoles to return a string list of roles, not objects.
      */
-    private $roles;
+    private $user_roles;
 
 
     public function getSalt()
@@ -422,11 +426,11 @@ class User implements UserInterface, \Serializable
     /**
      * Set team
      *
-     * @param \App\Entity\Team $team
+     * @param Team $team
      *
      * @return User
      */
-    public function setTeam(\App\Entity\Team $team = null)
+    public function setTeam(Team $team = null)
     {
         $this->team = $team;
 
@@ -436,7 +440,7 @@ class User implements UserInterface, \Serializable
     /**
      * Get team
      *
-     * @return \App\Entity\Team
+     * @return Team
      */
     public function getTeam()
     {
@@ -447,19 +451,19 @@ class User implements UserInterface, \Serializable
      */
     public function __construct()
     {
-        $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->user_roles = new ArrayCollection();
     }
 
     /**
      * Add role
      *
-     * @param \App\Entity\Role $role
+     * @param Role $role
      *
      * @return User
      */
-    public function addRole(\App\Entity\Role $role)
+    public function addUserRole(Role $role)
     {
-        $this->roles[] = $role;
+        $this->user_roles[] = $role;
 
         return $this;
     }
@@ -467,21 +471,21 @@ class User implements UserInterface, \Serializable
     /**
      * Remove role
      *
-     * @param \App\Entity\Role $role
+     * @param Role $role
      */
-    public function removeRole(\App\Entity\Role $role)
+    public function removeUserRole(Role $role)
     {
-        $this->roles->removeElement($role);
+        $this->user_roles->removeElement($role);
     }
 
     /**
      * Get roles
      *
-     * @return array
+     * @return Role[]
      */
-    public function getRoles()
+    public function getUserRoles()
     {
-        return $this->roles->toArray();
+        return $this->user_roles->toArray();
     }
 
     /**
@@ -494,9 +498,21 @@ class User implements UserInterface, \Serializable
     public function getRoleList(): array
     {
         $result = [];
-        /** @var Role $role */
-        foreach ($this->getRoles() as $role) {
+        foreach ($this->getUserRoles() as $role) {
             $result[] = $role->getDjRole();
+        }
+
+        return $result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getRoles(): array
+    {
+        $result = [];
+        foreach ($this->getUserRoles() as $role) {
+            $result[] = $role->getRole();
         }
 
         return $result;

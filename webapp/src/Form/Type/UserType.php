@@ -53,7 +53,8 @@ class UserType extends AbstractType
                 return $er->createQueryBuilder('t')->orderBy('t.name');
             },
         ]);
-        $builder->add('roles', EntityType::class, [
+        $builder->add('user_roles', EntityType::class, [
+            'label' => 'Roles',
             'class' => Role::class,
             'choice_label' => 'description',
             'required' => false,

@@ -2,14 +2,13 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\Role\Role as BaseRole;
 
 /**
  * Possible user roles
  * @ORM\Entity()
  * @ORM\Table(name="role", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  */
-class Role extends BaseRole
+class Role
 {
     /**
      * @var int
@@ -32,7 +31,7 @@ class Role extends BaseRole
     private $description;
 
     /**
-     * @ORM\ManyToMany(targetEntity="User", mappedBy="roles")
+     * @ORM\ManyToMany(targetEntity="User", mappedBy="user_roles")
      */
     private $users;
 
@@ -138,14 +137,5 @@ class Role extends BaseRole
     public function getUsers()
     {
         return $this->users;
-    }
-
-    /**
-     * Get the string representation of this role
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->getRole();
     }
 }
