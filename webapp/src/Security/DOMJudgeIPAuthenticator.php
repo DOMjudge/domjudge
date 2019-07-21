@@ -5,7 +5,6 @@ namespace App\Security;
 use App\Entity\User;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -28,7 +27,6 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
 
     private $csrfTokenManager;
     private $security;
-    private $container;
     private $em;
     private $dj;
     private $router;
@@ -37,7 +35,6 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     /**
      * DOMJudgeIPAuthenticator constructor.
      * @param CsrfTokenManagerInterface $csrfTokenManager
-     * @param Container                 $container
      * @param Security                  $security
      * @param EntityManagerInterface    $em
      * @param DOMJudgeService           $dj
@@ -46,7 +43,6 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
      */
     public function __construct(
         CsrfTokenManagerInterface $csrfTokenManager,
-        Container $container,
         Security $security,
         EntityManagerInterface $em,
         DOMJudgeService $dj,
@@ -54,7 +50,6 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         RequestStack $requestStack
     ) {
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->container        = $container;
         $this->security         = $security;
         $this->em               = $em;
         $this->dj               = $dj;

@@ -3,7 +3,6 @@
 namespace App\Security;
 
 use App\Service\DOMJudgeService;
-use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,26 +23,22 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
 
     private $security;
     private $encoder;
-    private $container;
     private $dj;
     private $router;
 
     /**
      * DOMJudgeXHeadersAuthenticator constructor.
-     * @param Container                    $container
      * @param Security                     $security
      * @param UserPasswordEncoderInterface $encoder
      * @param DOMJudgeService              $dj
      * @param RouterInterface              $router
      */
     public function __construct(
-        Container $container,
         Security $security,
         UserPasswordEncoderInterface $encoder,
         DOMJudgeService $dj,
         RouterInterface $router
     ) {
-        $this->container = $container;
         $this->security  = $security;
         $this->encoder   = $encoder;
         $this->dj        = $dj;

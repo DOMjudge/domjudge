@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace App\Security;
 
-use Symfony\Component\DependencyInjection\ContainerInterface as Container;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -20,16 +19,13 @@ class DOMJudgeBasicAuthenticator extends AbstractGuardAuthenticator
     private $csrfTokenManager;
     private $security;
     private $encoder;
-    private $container;
 
     public function __construct(
         CsrfTokenManagerInterface $csrfTokenManager,
-        Container $container,
         Security $security,
         UserPasswordEncoderInterface $encoder
     ) {
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->container = $container;
         $this->security = $security;
         $this->encoder = $encoder;
     }
