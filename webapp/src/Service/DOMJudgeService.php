@@ -19,7 +19,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -45,9 +45,9 @@ class DOMJudgeService
     protected $requestStack;
 
     /**
-     * @var ContainerInterface
+     * @var ParameterBagInterface
      */
-    protected $container;
+    protected $params;
 
     /**
      * @var AuthorizationCheckerInterface
@@ -75,7 +75,7 @@ class DOMJudgeService
      * @param EntityManagerInterface        $em
      * @param LoggerInterface               $logger
      * @param RequestStack                  $requestStack
-     * @param ContainerInterface            $container
+     * @param ParameterBagInterface         $params
      * @param AuthorizationCheckerInterface $authorizationChecker
      * @param TokenStorageInterface         $tokenStorage
      * @param HttpKernelInterface           $httpKernel
@@ -84,7 +84,7 @@ class DOMJudgeService
         EntityManagerInterface $em,
         LoggerInterface $logger,
         RequestStack $requestStack,
-        ContainerInterface $container,
+        ParameterBagInterface $params,
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         HttpKernelInterface $httpKernel
@@ -92,7 +92,7 @@ class DOMJudgeService
         $this->em                   = $em;
         $this->logger               = $logger;
         $this->requestStack         = $requestStack;
-        $this->container            = $container;
+        $this->params               = $params;
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage         = $tokenStorage;
         $this->httpKernel           = $httpKernel;
@@ -493,7 +493,7 @@ class DOMJudgeService
      */
     public function alert(string $messageType, string $description = '')
     {
-        $alert = $this->container->getParameter('domjudge.libdir') . '/alert';
+        $alert = $this->params->get('domjudge.libdir') . '/alert';
         system(sprintf('%s %s %s &', $alert, escapeshellarg($messageType), escapeshellarg($description)));
     }
 
@@ -601,7 +601,7 @@ class DOMJudgeService
      */
     public function getDomjudgeEtcDir(): string
     {
-        return $this->container->getParameter('domjudge.etcdir');
+        return $this->params->get('domjudge.etcdir');
     }
 
     /**
@@ -610,7 +610,7 @@ class DOMJudgeService
      */
     public function getDomjudgeTmpDir(): string
     {
-        return $this->container->getParameter('domjudge.tmpdir');
+        return $this->params->get('domjudge.tmpdir');
     }
 
     /**
@@ -619,7 +619,7 @@ class DOMJudgeService
      */
     public function getDomjudgeSubmitDir(): string
     {
-        return $this->container->getParameter('domjudge.submitdir');
+        return $this->params->get('domjudge.submitdir');
     }
 
     /**
@@ -628,7 +628,7 @@ class DOMJudgeService
      */
     public function getDomjudgeWebappDir(): string
     {
-        return $this->container->getParameter('domjudge.webappdir');
+        return $this->params->get('domjudge.webappdir');
     }
 
     /**
