@@ -172,7 +172,8 @@ class ImportEventFeedCommand extends Command
     {
         $this
             ->setName('import:eventfeed')
-            ->setDescription(
+            ->setDescription('Import contest data from an event feed following the Contest API specification')
+            ->setHelp(
                 'Import contest data from an event feed following the Contest API specification (https://clics.ecs.baylor.edu/index.php?title=Contest_API)' . PHP_EOL . PHP_EOL .
                 'The following assumptions and caveats are of note:' . PHP_EOL .
                 '- The contest that will be imported to should already contain the problems,' . PHP_EOL .
