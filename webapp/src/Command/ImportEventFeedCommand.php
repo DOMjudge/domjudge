@@ -543,35 +543,38 @@ class ImportEventFeedCommand extends Command
         $freeze       = $event['data']['scoreboard_freeze_duration'];
         $reltimeRegex = '/^(-)?(\d+):(\d{2}):(\d{2})(?:\.(\d{3}))?$/';
         preg_match($reltimeRegex, $duration, $durationData);
-        preg_match($reltimeRegex, $freeze, $freezeData);
 
         $durationNegative     = ($durationData[1] === '-');
-        $freezeNegative       = ($freezeData[1] === '-');
-        $durationHourModifier = $durationNegative ? -1 : 1;
-        $freezeHourModifier   = $freezeNegative ? -1 : 1;
         $fullDuration         = $durationNegative ? $duration : ('+' . $duration);
 
-        $durationInSeconds  = $durationHourModifier * $durationData[2] * 3600
-            + 60 * $durationData[3]
-            + (double)sprintf('%d.%d', $durationData[4], $durationData[5]);
-        $freezeInSeconds    = $freezeHourModifier * $freezeData[2] * 3600
-            + 60 * $freezeData[3]
-            + (double)sprintf('%d.%d', $freezeData[4], $freezeData[5]);
-        $freezeStartSeconds = $durationInSeconds - $freezeInSeconds;
+        if ($freeze !== null) {
+            preg_match($reltimeRegex, $freeze, $freezeData);
+            $freezeNegative       = ($freezeData[1] === '-');
+            $freezeHourModifier   = $freezeNegative ? -1 : 1;
+            $freezeInSeconds    = $freezeHourModifier * $freezeData[2] * 3600
+                                  + 60 * $freezeData[3]
+                                  + (double)sprintf('%d.%d', $freezeData[4], $freezeData[5]);
+            $durationHourModifier = $durationNegative ? -1 : 1;
+            $durationInSeconds  = $durationHourModifier * $durationData[2] * 3600
+                                  + 60 * $durationData[3]
+                                  + (double)sprintf('%d.%d', $durationData[4], $durationData[5]);
+            $freezeStartSeconds = $durationInSeconds - $freezeInSeconds;
+            $freezeHour         = floor($freezeStartSeconds / 3600);
+            $freezeMinutes      = floor(($freezeStartSeconds % 3600) / 60);
+            $freezeSeconds      = floor(($freezeStartSeconds % 60) / 60);
+            $freezeMilliseconds = $freezeStartSeconds - floor($freezeStartSeconds);
 
-        $freezeHour         = floor($freezeStartSeconds / 3600);
-        $freezeMinutes      = floor(($freezeStartSeconds % 3600) / 60);
-        $freezeSeconds      = floor(($freezeStartSeconds % 60) / 60);
-        $freezeMilliseconds = $freezeStartSeconds - floor($freezeStartSeconds);
-
-        $fullFreeze = sprintf(
-            '%s%d:%02d:%02d.%03d',
-            $freezeHour < 0 ? '' : '+',
-            $freezeHour,
-            $freezeMinutes,
-            $freezeSeconds,
-            $freezeMilliseconds
-        );
+            $fullFreeze = sprintf(
+                '%s%d:%02d:%02d.%03d',
+                $freezeHour < 0 ? '' : '+',
+                $freezeHour,
+                $freezeMinutes,
+                $freezeSeconds,
+                $freezeMilliseconds
+            );
+        } else {
+            $fullFreeze = null;
+        }
 
         // The timezones are given in ISO 8601 and we only support names.
         // This is why we will use the platform default timezone and just verify it matches
@@ -851,7 +854,7 @@ class ImportEventFeedCommand extends Command
 
         $contestProblem
             ->setShortname($event['data']['label'])
-            ->setColor($event['data']['rgb']);
+            ->setColor($event['data']['rgb'] ?? null);
 
         // Save data and emit event
         if ($action === EventLogService::ACTION_CREATE) {
