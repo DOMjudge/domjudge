@@ -176,7 +176,7 @@ class RejudgingController extends BaseController
     }
 
     /**
-     * @Route("/{rejudgingId}", name="jury_rejudging", requirements={"rejudgingId": "\d+"})
+     * @Route("/{rejudgingId<\d+>}", name="jury_rejudging")
      * @param Request           $request
      * @param SubmissionService $submissionService
      * @param int               $rejudgingId
@@ -367,9 +367,8 @@ class RejudgingController extends BaseController
 
     /**
      * @Route(
-     *     "/{rejudgingId}/{action}",
-     *     name="jury_rejudging_finish",
-     *     requirements={"rejudgingId": "\d+", "action": "cancel|apply"}
+     *     "/{rejudgingId<\d+>}/{action<cancel|apply>}",
+     *     name="jury_rejudging_finish"
      * )
      * @param Request          $request
      * @param RejudgingService $rejudgingService

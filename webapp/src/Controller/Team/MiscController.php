@@ -157,8 +157,7 @@ class MiscController extends BaseController
     }
 
     /**
-     * @Route("/change-contest/{contestId}", name="team_change_contest",
-     *         requirements={"contestId": "-?\d+"})
+     * @Route("/change-contest/{contestId<-?\d+>}", name="team_change_contest")
      * @param Request         $request
      * @param RouterInterface $router
      * @param int             $contestId

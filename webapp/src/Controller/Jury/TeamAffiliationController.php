@@ -162,7 +162,7 @@ class TeamAffiliationController extends BaseController
     }
 
     /**
-     * @Route("/{affilId}", name="jury_team_affiliation", requirements={"affilId": "\d+"})
+     * @Route("/{affilId<\d+>}", name="jury_team_affiliation")
      * @param Request           $request
      * @param ScoreboardService $scoreboardService
      * @param int               $affilId
@@ -210,7 +210,7 @@ class TeamAffiliationController extends BaseController
     }
 
     /**
-     * @Route("/{affilId}/edit", name="jury_team_affiliation_edit", requirements={"affilId": "\d+"})
+     * @Route("/{affilId<\d+>}/edit", name="jury_team_affiliation_edit")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $affilId
@@ -243,7 +243,7 @@ class TeamAffiliationController extends BaseController
     }
 
     /**
-     * @Route("/{affilId}/delete", name="jury_team_affiliation_delete", requirements={"affilId": "\d+"})
+     * @Route("/{affilId<\d+>}/delete", name="jury_team_affiliation_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $affilId

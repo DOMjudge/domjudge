@@ -181,7 +181,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/{userId}", name="jury_user", requirements={"userId": "\d+"})
+     * @Route("/{userId<\d+>}", name="jury_user")
      * @param Request $request
      * @param int     $userId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -198,7 +198,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/{userId}/edit", name="jury_user_edit", requirements={"userId": "\d+"})
+     * @Route("/{userId<\d+>}/edit", name="jury_user_edit")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $userId
@@ -245,7 +245,7 @@ class UserController extends BaseController
     }
 
     /**
-     * @Route("/{userId}/delete", name="jury_user_delete", requirements={"userId": "\d+"})
+     * @Route("/{userId<\d+>}/delete", name="jury_user_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $userId

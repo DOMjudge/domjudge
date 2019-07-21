@@ -236,7 +236,7 @@ class TeamController extends BaseController
     }
 
     /**
-     * @Route("/{teamId}", name="jury_team", requirements={"teamId": "\d+"})
+     * @Route("/{teamId<\d+>}", name="jury_team")
      * @param int               $teamId
      * @param ScoreboardService $scoreboardService
      * @param SubmissionService $submissionService
@@ -332,7 +332,7 @@ class TeamController extends BaseController
     }
 
     /**
-     * @Route("/{teamId}/edit", name="jury_team_edit", requirements={"teamId": "\d+"})
+     * @Route("/{teamId<\d+>}/edit", name="jury_team_edit")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $teamId
@@ -365,7 +365,7 @@ class TeamController extends BaseController
     }
 
     /**
-     * @Route("/{teamId}/delete", name="jury_team_delete", requirements={"teamId": "\d+"})
+     * @Route("/{teamId<\d+>}/delete", name="jury_team_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $teamId

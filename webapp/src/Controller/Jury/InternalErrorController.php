@@ -89,7 +89,7 @@ class InternalErrorController extends BaseController
     }
 
     /**
-     * @Route("/{errorId}", methods={"GET"}, name="jury_internal_error", requirements={"errorId": "\d+"})
+     * @Route("/{errorId<\d+>}", methods={"GET"}, name="jury_internal_error")
      * @param int $errorId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -134,10 +134,9 @@ class InternalErrorController extends BaseController
 
     /**
      * @Route(
-     *     "/{errorId}/{action}",
+     *     "/{errorId<\d+>}/{action<ignore|resolve>}",
      *     name="jury_internal_error_handle",
-     *     methods={"POST"},
-     *     requirements={"errorId": "\d+", "action": "ignore|resolve"}
+     *     methods={"POST"}
      * )
      * @param int    $errorId
      * @param string $action

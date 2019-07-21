@@ -63,7 +63,7 @@ class ClarificationController extends BaseController
     }
 
     /**
-     * @Route("/clarifications/{clarId}", name="team_clarification", requirements={"clarId": "\d+"})
+     * @Route("/clarifications/{clarId<\d+>}", name="team_clarification")
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\Response

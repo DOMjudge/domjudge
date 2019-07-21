@@ -137,7 +137,7 @@ class ClarificationController extends AbstractController
     }
 
     /**
-     * @Route("/{id}", name="jury_clarification", requirements={"id": "\d+"})
+     * @Route("/{id<\d+>}", name="jury_clarification")
      * @throws \Exception
      */
     public function viewAction(Request $request, int $id)
@@ -301,7 +301,7 @@ class ClarificationController extends AbstractController
     }
 
     /**
-     * @Route("/{clarId}/claim", name="jury_clarification_claim", requirements={"clarId": "\d+"})
+     * @Route("/{clarId<\d+>}/claim", name="jury_clarification_claim")
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -326,7 +326,7 @@ class ClarificationController extends AbstractController
     }
 
     /**
-     * @Route("/{clarId}/set-answered", name="jury_clarification_set_answered", requirements={"clarId": "\d+"})
+     * @Route("/{clarId<\d+>}/set-answered", name="jury_clarification_set_answered")
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -351,7 +351,7 @@ class ClarificationController extends AbstractController
     }
 
     /**
-     * @Route("/{clarId}/change-subject", name="jury_clarification_change_subject", requirements={"clarId": "\d+"})
+     * @Route("/{clarId<\d+>}/change-subject", name="jury_clarification_change_subject")
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -385,7 +385,7 @@ class ClarificationController extends AbstractController
     }
 
     /**
-     * @Route("/{clarId}/change-queue", name="jury_clarification_change_queue", requirements={"clarId": "\d+"})
+     * @Route("/{clarId<\d+>}/change-queue", name="jury_clarification_change_queue")
      * @param Request $request
      * @param int     $clarId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response

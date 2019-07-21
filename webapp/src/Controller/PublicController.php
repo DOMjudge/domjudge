@@ -120,8 +120,7 @@ class PublicController extends BaseController
     }
 
     /**
-     * @Route("/change-contest/{contestId}", name="public_change_contest",
-     *                                       requirements={"contestId": "-?\d+"})
+     * @Route("/change-contest/{contestId<-?\d+>}", name="public_change_contest")
      * @param Request         $request
      * @param RouterInterface $router
      * @param int             $contestId
@@ -139,7 +138,7 @@ class PublicController extends BaseController
     }
 
     /**
-     * @Route("/team/{teamId}", name="public_team", requirements={"teamId": "\d+"})
+     * @Route("/team/{teamId<\d+>}", name="public_team")
      * @param Request $request
      * @param int     $teamId
      * @return Response
@@ -211,7 +210,7 @@ class PublicController extends BaseController
 
 
     /**
-     * @Route("/problems/{probId}/text", name="public_problem_text", requirements={"probId": "\d+"})
+     * @Route("/problems/{probId<\d+>}/text", name="public_problem_text")
      * @param int $probId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -263,9 +262,8 @@ class PublicController extends BaseController
 
     /**
      * @Route(
-     *     "/{probId}/sample/{index}/{type}",
-     *     name="public_problem_sample_testcase",
-     *     requirements={"probId": "\d+", "index": "\d+", "type": "input|output"}
+     *     "/{probId<\d+>}/sample/{index<\d+>}/{type<input|output>}",
+     *     name="public_problem_sample_testcase"
      *     )
      * @param int    $probId
      * @param int    $index
@@ -335,11 +333,7 @@ class PublicController extends BaseController
     }
 
     /**
-     * @Route(
-     *     "/{probId}/samples.zip",
-     *     name="public_problem_sample_zip",
-     *     requirements={"probId": "\d+"}
-     *     )
+     * @Route("/{probId<\d+>}/samples.zip", name="public_problem_sample_zip")
      * @param int $probId
      * @return \Symfony\Component\HttpFoundation\Response
      */

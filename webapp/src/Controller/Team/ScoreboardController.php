@@ -78,7 +78,7 @@ class ScoreboardController extends BaseController
     }
 
     /**
-     * @Route("/team/{teamId}", name="team_team", requirements={"teamId": "\d+"})
+     * @Route("/team/{teamId<\d+>}", name="team_team")
      * @param Request $request
      * @param int     $teamId
      * @return Response

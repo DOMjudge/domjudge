@@ -215,7 +215,7 @@ class ImportExportController extends BaseController
     }
 
     /**
-     * @Route("/export/{type}.tsv", name="jury_tsv_export", requirements={"type": "(groups|teams|scoreboard|results)"})
+     * @Route("/export/{type<groups|teams|scoreboard|results>}.tsv", name="jury_tsv_export")
      * @param Request $request
      * @param string  $type
      * @return StreamedResponse
@@ -257,8 +257,7 @@ class ImportExportController extends BaseController
     }
 
     /**
-     * @Route("/export/{type}.html", name="jury_html_export", requirements={"type":
-     *                               "(results|results-icpc|clarifications)"})
+     * @Route("/export/{type<results|results-icpc|clarifications>}.html", name="jury_html_export")
      * @param Request $request
      * @param string  $type
      * @return \Symfony\Component\HttpFoundation\Response

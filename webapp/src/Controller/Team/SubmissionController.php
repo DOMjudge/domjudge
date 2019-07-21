@@ -121,7 +121,7 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @Route("/submission/{submitId}", name="team_submission", requirements={"submitId": "\d+"})
+     * @Route("/submission/{submitId<\d+>}", name="team_submission")
      * @param Request $request
      * @param int     $submitId
      * @return \Symfony\Component\HttpFoundation\Response

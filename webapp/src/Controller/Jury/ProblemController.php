@@ -297,7 +297,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/{problemId}/export", name="jury_export_problem", requirements={"problemId": "\d+"})
+     * @Route("/{problemId<\d+>}/export", name="jury_export_problem")
      * @IsGranted("ROLE_ADMIN")
      * @param int $problemId
      * @return StreamedResponse
@@ -457,7 +457,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/{probId}", name="jury_problem", requirements={"probId": "\d+"})
+     * @Route("/{probId<\d+>}", name="jury_problem")
      * @param Request           $request
      * @param SubmissionService $submissionService
      * @param int               $probId
@@ -509,7 +509,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/{probId}/text", name="jury_problem_text", requirements={"probId": "\d+"})
+     * @Route("/{probId<\d+>}/text", name="jury_problem_text")
      * @param int $probId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -550,7 +550,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/{probId}/testcases", name="jury_problem_testcases", requirements={"probId": "\d+"})
+     * @Route("/{probId<\d+>}/testcases", name="jury_problem_testcases")
      * @param Request $request
      * @param int     $probId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -739,9 +739,8 @@ class ProblemController extends BaseController
 
     /**
      * @Route(
-     *     "/{probId}/testcases/{rank}/move/{direction}",
-     *     name="jury_problem_testcase_move",
-     *     requirements={"probId": "\d+", "rank": "\d+", "direction": "up|down"}
+     *     "/{probId<\d+>}/testcases/{rank<\d+>}/move/{direction<up|down>}",
+     *     name="jury_problem_testcase_move"
      *     )
      * @param int    $probId
      * @param int    $rank
@@ -810,9 +809,8 @@ class ProblemController extends BaseController
 
     /**
      * @Route(
-     *     "/{probId}/testcases/{rank}/fetch/{type}",
-     *     name="jury_problem_testcase_fetch",
-     *     requirements={"probId": "\d+", "rank": "\d+", "type": "input|output|image"}
+     *     "/{probId<\d+>}/testcases/{rank<\d+>}/fetch/{type<input|output|image>}",
+     *     name="jury_problem_testcase_fetch"
      *     )
      * @param int    $probId
      * @param int    $rank
@@ -871,7 +869,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/{probId}/edit", name="jury_problem_edit", requirements={"probId": "\d+"})
+     * @Route("/{probId<\d+>}/edit", name="jury_problem_edit")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $probId
@@ -956,7 +954,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route("/{probId}/delete", name="jury_problem_delete", requirements={"probId": "\d+"})
+     * @Route("/{probId<\d+>}/delete", name="jury_problem_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $probId

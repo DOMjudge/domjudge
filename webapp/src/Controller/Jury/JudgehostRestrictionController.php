@@ -131,8 +131,7 @@ class JudgehostRestrictionController extends BaseController
     }
 
     /**
-     * @Route("/{restrictionId}", name="jury_judgehost_restriction",
-     *                                                   requirements={"restrictionId": "\d+"})
+     * @Route("/{restrictionId<\d+>}", name="jury_judgehost_restriction")
      * @param int $restrictionId
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -182,8 +181,7 @@ class JudgehostRestrictionController extends BaseController
     }
 
     /**
-     * @Route("/{restrictionId}/edit", name="jury_judgehost_restriction_edit",
-     *                                 requirements={"restrictionId": "\d+"})
+     * @Route("/{restrictionId<\d+>}/edit", name="jury_judgehost_restriction_edit")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $restrictionId
@@ -213,8 +211,7 @@ class JudgehostRestrictionController extends BaseController
     }
 
     /**
-     * @Route("/{restrictionId}/delete", name="jury_judgehost_restriction_delete",
-     *                                   requirements={"restrictionId": "\d+"})
+     * @Route("/{restrictionId<\d+>}/delete", name="jury_judgehost_restriction_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $restrictionId

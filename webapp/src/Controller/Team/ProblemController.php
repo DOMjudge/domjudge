@@ -97,7 +97,7 @@ class ProblemController extends BaseController
 
 
     /**
-     * @Route("/problems/{probId}/text", name="team_problem_text", requirements={"probId": "\d+"})
+     * @Route("/problems/{probId<\d+>}/text", name="team_problem_text")
      * @param int $probId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -150,9 +150,8 @@ class ProblemController extends BaseController
 
     /**
      * @Route(
-     *     "/{probId}/sample/{index}/{type}",
-     *     name="team_problem_sample_testcase",
-     *     requirements={"probId": "\d+", "index": "\d+", "type": "input|output"}
+     *     "/{probId<\d+>}/sample/{index<\d+>}/{type<input|output>}",
+     *     name="team_problem_sample_testcase"
      *     )
      * @param int    $probId
      * @param int    $index
@@ -223,11 +222,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @Route(
-     *     "/{probId}/samples.zip",
-     *     name="team_problem_sample_zip",
-     *     requirements={"probId": "\d+"}
-     *     )
+     * @Route("/{probId<\d+>}/samples.zip", name="team_problem_sample_zip")
      * @param int $probId
      * @return \Symfony\Component\HttpFoundation\Response
      */

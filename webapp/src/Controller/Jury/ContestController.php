@@ -317,7 +317,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/{contestId}", name="jury_contest", requirements={"contestId": "\d+"})
+     * @Route("/{contestId<\d+>}", name="jury_contest")
      * @param Request $request
      * @param int     $contestId
      * @return \Symfony\Component\HttpFoundation\Response
@@ -377,8 +377,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/{contestId}/remove-interval/{intervalId}", name="jury_contest_remove_interval",
-     *                                                              requirements={"contestId": "\d+"},
+     * @Route("/{contestId<\d+>}/remove-interval/{intervalId}", name="jury_contest_remove_interval",
      *                                                              methods={"POST"})
      * @param int $contestId
      * @param int $intervalId
@@ -412,7 +411,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/{contestId}/edit", name="jury_contest_edit", requirements={"contestId": "\d+"})
+     * @Route("/{contestId<\d+>}/edit", name="jury_contest_edit")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
@@ -447,7 +446,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/{contestId}/delete", name="jury_contest_delete", requirements={"contestId": "\d+"})
+     * @Route("/{contestId<\d+>}/delete", name="jury_contest_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
@@ -467,8 +466,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/{contestId}/problems/{probId}/delete", name="jury_contest_problem_delete", requirements={"contestId":
-     *                                                          "\d+", "probId": "\d+"})
+     * @Route("/{contestId<\d+>}/problems/{probId<\d+>}/delete", name="jury_contest_problem_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId
@@ -538,7 +536,7 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/{contestId}/finalize", name="jury_contest_finalize", requirements={"contestId": "\d+"})
+     * @Route("/{contestId<\d+>}/finalize", name="jury_contest_finalize")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $contestId

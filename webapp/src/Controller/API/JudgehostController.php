@@ -511,7 +511,7 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Update the given judging for the given judgehost
-     * @Rest\Put("/update-judging/{hostname}/{judgingId}", requirements={"judgingId": "\d+"})
+     * @Rest\Put("/update-judging/{hostname}/{judgingId<\d+>}")
      * @IsGranted("ROLE_JUDGEHOST")
      * @SWG\Response(
      *     response="200",
@@ -627,7 +627,7 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * Add an array of JudgingRuns. When relevant, finalize the judging.
-     * @Rest\Post("/add-judging-run/{hostname}/{judgingId}", requirements={"judgingId": "\d+"})
+     * @Rest\Post("/add-judging-run/{hostname}/{judgingId<\d+>}")
      * @IsGranted("ROLE_JUDGEHOST")
      * @SWG\Response(
      *     response="200",

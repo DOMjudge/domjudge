@@ -142,7 +142,7 @@ class TeamCategoryController extends BaseController
     }
 
     /**
-     * @Route("/{categoryId}", name="jury_team_category", requirements={"categoryId": "\d+"})
+     * @Route("/{categoryId<\d+>}", name="jury_team_category")
      * @param Request           $request
      * @param SubmissionService $submissionService
      * @param int               $categoryId
@@ -189,7 +189,7 @@ class TeamCategoryController extends BaseController
     }
 
     /**
-     * @Route("/{categoryId}/edit", name="jury_team_category_edit", requirements={"categoryId": "\d+"})
+     * @Route("/{categoryId<\d+>}/edit", name="jury_team_category_edit")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $categoryId
@@ -222,7 +222,7 @@ class TeamCategoryController extends BaseController
     }
 
     /**
-     * @Route("/{categoryId}/delete", name="jury_team_category_delete", requirements={"categoryId": "\d+"})
+     * @Route("/{categoryId<\d+>}/delete", name="jury_team_category_delete")
      * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param int     $categoryId
