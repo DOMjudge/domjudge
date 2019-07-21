@@ -15,6 +15,7 @@ use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
+use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension implements GlobalsInterface
@@ -70,35 +71,35 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     public function getFilters()
     {
         return [
-            new \Twig_SimpleFilter('printtimediff', [$this, 'printtimediff']),
-            new \Twig_SimpleFilter('printtime', [$this, 'printtime']),
-            new \Twig_SimpleFilter('printtimeHover', [$this, 'printtimeHover'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('printResult', [$this, 'printResult'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('printValidJuryResult', [$this, 'printValidJuryResult'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('printYesNo', [$this, 'printYesNo']),
-            new \Twig_SimpleFilter('printSize', [Utils::class, 'printSize'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('testcaseResults', [$this, 'testcaseResults'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('displayTestcaseResults', [$this, 'displayTestcaseResults'],
+            new TwigFilter('printtimediff', [$this, 'printtimediff']),
+            new TwigFilter('printtime', [$this, 'printtime']),
+            new TwigFilter('printtimeHover', [$this, 'printtimeHover'], ['is_safe' => ['html']]),
+            new TwigFilter('printResult', [$this, 'printResult'], ['is_safe' => ['html']]),
+            new TwigFilter('printValidJuryResult', [$this, 'printValidJuryResult'], ['is_safe' => ['html']]),
+            new TwigFilter('printHost', [$this, 'printHost'], ['is_safe' => ['html']]),
+            new TwigFilter('printYesNo', [$this, 'printYesNo']),
+            new TwigFilter('printSize', [Utils::class, 'printSize'], ['is_safe' => ['html']]),
+            new TwigFilter('testcaseResults', [$this, 'testcaseResults'], ['is_safe' => ['html']]),
+            new TwigFilter('displayTestcaseResults', [$this, 'displayTestcaseResults'],
                                    ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('externalCcsUrl', [$this, 'externalCcsUrl']),
-            new \Twig_SimpleFilter('lineCount', [$this, 'lineCount']),
-            new \Twig_SimpleFilter('base64', 'base64_encode'),
-            new \Twig_SimpleFilter('base64_decode', 'base64_decode'),
-            new \Twig_SimpleFilter('parseRunDiff', [$this, 'parseRunDiff'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('runDiff', [$this, 'runDiff'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('interactiveLog', [$this, 'interactiveLog'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('codeEditor', [$this, 'codeEditor'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('showDiff', [$this, 'showDiff'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('printContestStart', [$this, 'printContestStart']),
-            new \Twig_SimpleFilter('assetExists', [$this, 'assetExists']),
-            new \Twig_SimpleFilter('printTimeRelative', [$this, 'printTimeRelative']),
-            new \Twig_SimpleFilter('scoreTime', [$this, 'scoreTime']),
-            new \Twig_SimpleFilter('statusClass', [$this, 'statusClass']),
-            new \Twig_SimpleFilter('statusIcon', [$this, 'statusIcon']),
-            new \Twig_SimpleFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
-            new \Twig_SimpleFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
-            new \Twig_SimpleFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
+            new TwigFilter('externalCcsUrl', [$this, 'externalCcsUrl']),
+            new TwigFilter('lineCount', [$this, 'lineCount']),
+            new TwigFilter('base64', 'base64_encode'),
+            new TwigFilter('base64_decode', 'base64_decode'),
+            new TwigFilter('parseRunDiff', [$this, 'parseRunDiff'], ['is_safe' => ['html']]),
+            new TwigFilter('runDiff', [$this, 'runDiff'], ['is_safe' => ['html']]),
+            new TwigFilter('interactiveLog', [$this, 'interactiveLog'], ['is_safe' => ['html']]),
+            new TwigFilter('codeEditor', [$this, 'codeEditor'], ['is_safe' => ['html']]),
+            new TwigFilter('showDiff', [$this, 'showDiff'], ['is_safe' => ['html']]),
+            new TwigFilter('printContestStart', [$this, 'printContestStart']),
+            new TwigFilter('assetExists', [$this, 'assetExists']),
+            new TwigFilter('printTimeRelative', [$this, 'printTimeRelative']),
+            new TwigFilter('scoreTime', [$this, 'scoreTime']),
+            new TwigFilter('statusClass', [$this, 'statusClass']),
+            new TwigFilter('statusIcon', [$this, 'statusIcon']),
+            new TwigFilter('descriptionExpand', [$this, 'descriptionExpand'], ['is_safe' => ['html']]),
+            new TwigFilter('wrapUnquoted', [$this, 'wrapUnquoted']),
+            new TwigFilter('hexColorToRGBA', [$this, 'hexColorToRGBA']),
         ];
     }
 
