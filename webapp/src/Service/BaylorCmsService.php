@@ -8,8 +8,13 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\RequestOptions;
+use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class BaylorCmsService
 {
@@ -28,7 +33,7 @@ class BaylorCmsService
     protected $em;
 
     /**
-     * @var Client
+     * @var HttpClientInterface
      */
     protected $client;
 
@@ -45,9 +50,8 @@ class BaylorCmsService
     ) {
         $this->dj     = $dj;
         $this->em     = $em;
-        $this->client = new Client(
+        $this->client = HttpClient::create(
             [
-                'http_errors' => false,
                 'base_uri' => self::BASE_URI,
                 'headers' => [
                     'User-Agent' => 'DOMjudge/' . $domjudgeVersion,
@@ -63,6 +67,11 @@ class BaylorCmsService
      * @param string      $contest
      * @param string|null $message
      * @return bool
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws DecodingExceptionInterface
      */
     public function importTeams(string $token, string $contest, string &$message = null): bool
     {
@@ -70,7 +79,7 @@ class BaylorCmsService
         if ($bearerToken === null) {
             return false;
         }
-        $response = $this->client->get(self::WS_CLICS . $contest, [
+        $response = $this->client->request('GET', self::WS_CLICS . $contest, [
             'headers' => [
                 'Authorization' => 'bearer ' . $bearerToken
             ],
@@ -78,20 +87,19 @@ class BaylorCmsService
 
         if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500) {
             $message = sprintf('Access forbidden, is your token valid? Did you specify the correct contest ID? %s',
-                               $response->getBody());
+                               $response->getContent(false));
             return false;
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
             $message = sprintf('Unknown error while retrieving data from icpc.baylor.edu, status code: %d, %s',
-                               $response->getStatusCode(), $response->getBody());
+                               $response->getStatusCode(), $response->getContent(false));
             return false;
         }
 
-        $body = (string)$response->getBody();
-        $json = $this->dj->jsonDecode((string)$body);
+        $json = $response->toArray();
 
         if ($json === null) {
-            $message = sprintf('Error retrieving API data. API gave us: %s', $body);
+            $message = sprintf('Error retrieving API data. API gave us: %s', $response->getContent());
             return false;
         }
 
@@ -188,11 +196,16 @@ class BaylorCmsService
      * @param string      $token
      * @param string|null $message
      * @return string|null
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws DecodingExceptionInterface
      */
     protected function getBearerToken(string $token, string &$message = null)
     {
-        $response = $this->client->post(self::WS_TOKEN_URL, [
-            RequestOptions::FORM_PARAMS => [
+        $response = $this->client->request('POST', self::WS_TOKEN_URL, [
+            'body' => [
                 'client_id' => 'cm5-token',
                 'username' => 'token:' . $token,
                 'password' => '',
@@ -202,16 +215,16 @@ class BaylorCmsService
 
         if ($response->getStatusCode() >= 400 && $response->getStatusCode() < 500) {
             $message = sprintf('Access forbidden, is your token valid? %s',
-                               $response->getBody());
+                               $response->getContent(false));
             return null;
         }
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
             $message = sprintf('Unknown error while retrieving data from icpc.baylor.edu, status code: %d, %s',
-                               $response->getStatusCode(), $response->getBody());
+                               $response->getStatusCode(), $response->getContent(false));
             return null;
         }
 
-        $body = $this->dj->jsonDecode((string)$response->getBody());
+        $body = $response->toArray();
         return $body['access_token'];
     }
 }

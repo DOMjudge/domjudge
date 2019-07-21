@@ -25,8 +25,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\Command;
@@ -35,9 +34,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 /**
  * Class ImportEventFeedCommand
@@ -217,7 +218,7 @@ class ImportEventFeedCommand extends Command
 
     /**
      * @inheritdoc
-     * @throws \Exception
+     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -346,7 +347,7 @@ class ImportEventFeedCommand extends Command
      * Import events from the given local file
      * @param string $path
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importFromFile(string $path)
     {
@@ -392,13 +393,14 @@ class ImportEventFeedCommand extends Command
      * Import events from the given URL
      * @param string $url
      * @return void
-     * @throws \Exception
+     * @throws TransportExceptionInterface
+     * @throws Exception
      */
     protected function importFromUrl(string $url)
     {
-        $this->logger->info(sprintf('Importing from URL %s', $url));
+        $this->logger->info(sprintf('Importing from URL %s. Press ^C to quit (might take a bit to be detected).', $url));
 
-        $client = new Client(['stream' => true]);
+        $client = HttpClient::create();
 
         while (true) {
             // Check whether we have received an exit signal
@@ -416,44 +418,69 @@ class ImportEventFeedCommand extends Command
             } elseif ($this->sinceEventId !== null) {
                 $fullUrl .= '?since_id=' . $this->sinceEventId;
             }
-            $response = $client->get($fullUrl);
+            $response = $client->request('GET', $fullUrl, ['buffer' => false]);
             if ($response->getStatusCode() !== 200) {
-                $this->logger->warning(sprintf('Received non-200 response code %d, waiting for five seconds and trying again',
+                $this->logger->warning(sprintf('Received non-200 response code %d, waiting for five seconds and trying again. Press ^C to quit.',
                                                $response->getStatusCode()));
                 sleep(5);
+                continue;
             }
 
-            $body   = $response->getBody();
             $buffer = '';
-            while (!$body->eof() || !empty($buffer)) {
-                // Read the stream until we find a newline or the end of the stream
-                while (!$body->eof() && ($newlinePos = strpos($buffer, "\n")) === false) {
-                    // Read 1 byte at a time to make sure we are also getting the last few events when the server
-                    // keeps open the connection
-                    $buffer .= $body->read(1);
-                }
-                $newlinePos = strpos($buffer, "\n");
-                if ($newlinePos === false) {
-                    $line   = $buffer;
-                    $buffer = '';
-                } else {
+
+            $processBuffer = function() use (&$buffer) {
+                while (($newlinePos = strpos($buffer, "\n")) !== false) {
                     $line   = substr($buffer, 0, $newlinePos);
                     $buffer = substr($buffer, $newlinePos + 1);
-                }
-                if (!empty($line)) {
-                    $event = $this->dj->jsonDecode($line);
-                    $this->importEvent($event);
 
-                    $this->lastEventId = $event['id'];
+                    if (!empty($line)) {
+                        $event = $this->dj->jsonDecode($line);
+                        $this->importEvent($event);
+
+                        $this->lastEventId = $event['id'];
+                    }
+
+                    if (function_exists('pcntl_signal_dispatch')) {
+                        pcntl_signal_dispatch();
+                    }
+                    if ($this->shouldStop) {
+                        return false;
+                    }
                 }
 
-                if ($this->shouldStop) {
-                    return;
+                if (function_exists('pcntl_signal_dispatch')) {
+                    pcntl_signal_dispatch();
+                }
+                return !$this->shouldStop;
+            };
+
+            while (true) {
+                // A timeout of 0.0 means we get chunks immediately and the user
+                // can cancel at any time.
+                foreach ($client->stream($response, 0.0) as $chunk) {
+                    // We first need to check for timeouts, as we can not call
+                    // ->isLast() or ->getContent() on them
+                    if (!$chunk->isTimeout()) {
+                        if ($chunk->isLast()) {
+                            // Last chunk received, exit out of the inner while(true)
+                            break 2;
+                        } else {
+                            $buffer .= $chunk->getContent();
+                        }
+                    }
+                    if (!$processBuffer()) {
+                        return;
+                    }
                 }
             }
 
-            $this->logger->info(sprintf('End of stream reached, waiting for five seconds before rereading stream after event %s...',
-                                        $this->lastEventId));
+            // We still need to finish everything that is still in the buffer
+            if (!$processBuffer()) {
+                return;
+            }
+
+            $this->logger->info(sprintf('End of stream reached, waiting for five seconds before rereading stream after event %s. Press ^C to quit.',
+                                        $this->lastEventId ?? 'none'));
             sleep(5);
         }
     }
@@ -461,7 +488,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importEvent(array $event)
     {
@@ -522,7 +549,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given contest event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importContest(array $event)
     {
@@ -617,7 +644,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Validate the given judgement type event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function validateJudgementType(array $event)
     {
@@ -661,7 +688,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Validate the given language event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function validateLanguage(array $event)
     {
@@ -692,7 +719,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given group event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importGroup(array $event)
     {
@@ -751,7 +778,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given organization event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importOrganization(array $event)
     {
@@ -810,7 +837,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given problem event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importProblem(array $event)
     {
@@ -869,7 +896,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given team event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importTeam(array $event)
     {
@@ -969,7 +996,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given clarification event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importClarification(array $event)
     {
@@ -1094,7 +1121,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given submission event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importSubmission(array $event)
     {
@@ -1363,7 +1390,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given judgement event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importJudgement(array $event)
     {
@@ -1465,7 +1492,7 @@ class ImportEventFeedCommand extends Command
     /**
      * Import the given run event
      * @param array $event
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importRun(array $event)
     {
@@ -1562,7 +1589,7 @@ class ImportEventFeedCommand extends Command
      * Process all pending events for the given type and (external) ID
      * @param string $type
      * @param mixed  $id
-     * @throws \Exception
+     * @throws Exception
      */
     protected function processPendingEvents(string $type, $id)
     {
