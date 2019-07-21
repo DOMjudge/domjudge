@@ -74,6 +74,7 @@ class SubmitProblemType extends AbstractType
         $builder->add('entry_point', TextType::class, [
             'label' => 'Entry point',
             'required' => false,
+            'help' => 'The entry point for your code.',
             'constraints' => [
                 new Callback(function ($value, ExecutionContextInterface $context) {
                     /** @var Form $form */

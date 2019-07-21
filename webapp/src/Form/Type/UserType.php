@@ -72,6 +72,13 @@ class UserType extends AbstractType
             if ($user && $user->getUserid() !== null) {
                 $form->remove('username');
             }
+
+            $set = $user->getPassword() ? 'set' : 'not set';
+            $form->add('plainPassword', PasswordType::class, [
+                'required' => false,
+                'label' => 'Password',
+                'help' => sprintf('Currently %s - fill to change', $set),
+            ]);
         });
     }
 

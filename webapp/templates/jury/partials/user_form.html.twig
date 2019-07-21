@@ -9,9 +9,7 @@
         <div class="form-group">
             {{ form_label(form.plainPassword) }}
             {{ form_widget(form.plainPassword, { 'attr': {'autocomplete': 'new-password'} }) }}
-            <small class="form-text text-muted">
-                Currently {% if user.password %}set{% else %}not set{% endif %} - fill to change
-            </small>
+            {{ form_help(form.plainPassword) }}
         </div>
         {{ form_row(form.ipAddress) }}
         {{ form_row(form.enabled) }}

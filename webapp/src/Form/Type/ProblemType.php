@@ -31,9 +31,11 @@ class ProblemType extends AbstractExternalIdEntityType
         $builder->add('timelimit', NumberType::class);
         $builder->add('memlimit', IntegerType::class, [
             'required' => false,
+            'help' => 'leave empty for default',
         ]);
         $builder->add('outputlimit', IntegerType::class, [
             'required' => false,
+            'help' => 'leave empty for default',
         ]);
         $builder->add('problemtextFile', FileType::class, [
             'label' => 'Problem text',
