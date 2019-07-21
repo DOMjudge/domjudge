@@ -310,7 +310,7 @@ class ImportExportController extends BaseController
 
         $teamNames = [];
         foreach ($teams as $team) {
-            $teamNames[$team->getApiId($this->eventLogService)] = $team->getName();
+            $teamNames[$team->getExternalid() ?? $team->getTeamid()] = $team->getName();
         }
 
         $awarded       = [];
