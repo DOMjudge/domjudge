@@ -6,6 +6,7 @@ use App\Entity\Submission;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
@@ -64,7 +65,7 @@ class SubmissionVisitor implements EventSubscriberInterface
     {
         return [
             [
-                'event' => 'serializer.post_serialize',
+                'event' => Events::POST_SERIALIZE,
                 'class' => Submission::class,
                 'format' => 'json',
                 'method' => 'onPostSerialize'

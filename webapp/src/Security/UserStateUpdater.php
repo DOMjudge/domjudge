@@ -6,9 +6,10 @@ use App\Entity\User;
 use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Event\AuthenticationEvent;
 
-class UserStateUpdater
+class UserStateUpdater implements EventSubscriberInterface
 {
     /**
      * @var DOMJudgeService
@@ -24,6 +25,14 @@ class UserStateUpdater
     {
         $this->dj = $dj;
         $this->em = $em;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getSubscribedEvents()
+    {
+        return [AuthenticationEvent::class => 'updateUserState'];
     }
 
     public function updateUserState(AuthenticationEvent $event)

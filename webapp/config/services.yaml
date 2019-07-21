@@ -28,35 +28,10 @@ services:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
-    App\Serializer\:
-        resource: '../src/Serializer/*'
-        tags:
-            -   name: jms_serializer.event_subscriber
-
     App\ApiDescriber\ParameterRefMergeDescriber:
         tags:
             -   name: nelmio_api_doc.describer
                 priority: -999
-
-    App\EventListener\ApiHeadersListener:
-        tags:
-            -   name: kernel.event_listener
-                event: kernel.response
-                method: onKernelResponse
-
-    App\EventListener\BodyTooBigListener:
-        tags:
-            -   name: kernel.event_listener
-                event: kernel.controller
-                method: onKernelController
-
-    App\Security\UserStateUpdater:
-        tags:
-            -   name: kernel.event_listener
-                event: security.authentication.success
-                method: updateUserState
 
     App\Doctrine\HashPasswordSubscriber:
         tags:

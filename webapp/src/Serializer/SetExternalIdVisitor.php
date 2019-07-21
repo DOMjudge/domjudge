@@ -4,6 +4,7 @@ namespace App\Serializer;
 
 use App\Entity\ExternalRelationshipEntityInterface;
 use App\Service\EventLogService;
+use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
@@ -36,7 +37,7 @@ class SetExternalIdVisitor implements EventSubscriberInterface
     {
         return [
             [
-                'event' => 'serializer.post_serialize',
+                'event' => Events::POST_SERIALIZE,
                 'format' => 'json',
                 'method' => 'onPostSerialize'
             ],

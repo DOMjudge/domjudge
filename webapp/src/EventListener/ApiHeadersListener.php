@@ -2,10 +2,19 @@
 
 namespace App\EventListener;
 
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
-class ApiHeadersListener
+class ApiHeadersListener implements EventSubscriberInterface
 {
+    /**
+     * @inheritDoc
+     */
+    public static function getSubscribedEvents()
+    {
+        return [ResponseEvent::class => 'onKernelResponse',];
+    }
+
     public function onKernelResponse(ResponseEvent $event)
     {
         $request = $event->getRequest();

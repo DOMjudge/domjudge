@@ -4,6 +4,7 @@ namespace App\Serializer;
 
 use App\Entity\ContestProblem;
 use App\Utils\Utils;
+use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
 use JMS\Serializer\EventDispatcher\ObjectEvent;
 use JMS\Serializer\JsonSerializationVisitor;
@@ -18,7 +19,7 @@ class ContestProblemVisitor implements EventSubscriberInterface
     {
         return [
             [
-                'event' => 'serializer.post_serialize',
+                'event' => Events::POST_SERIALIZE,
                 'class' => ContestProblem::class,
                 'format' => 'json',
                 'method' => 'onPostSerialize'

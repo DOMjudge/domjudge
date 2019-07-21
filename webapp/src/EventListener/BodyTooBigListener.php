@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -9,8 +10,16 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * Class BodyTooBigListener
  * @package App\EventListener
  */
-class BodyTooBigListener
+class BodyTooBigListener implements EventSubscriberInterface
 {
+    /**
+     * @inheritDoc
+     */
+    public static function getSubscribedEvents()
+    {
+        return [ControllerEvent::class => 'onKernelController',];
+    }
+
     public function onKernelController(ControllerEvent $event)
     {
         // When we have a POST, PUT or PATCH but no request or file attributes but we do have a non-zero content-length
