@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
@@ -372,18 +373,19 @@ class RejudgingController extends BaseController
      * )
      * @param Request          $request
      * @param RejudgingService $rejudgingService
+     * @param Profiler|null    $profiler
      * @param int              $rejudgingId
      * @param string           $action
      * @return Response|StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function finishAction(Request $request, RejudgingService $rejudgingService, int $rejudgingId, string $action)
+    public function finishAction(Request $request, RejudgingService $rejudgingService, ?Profiler $profiler, int $rejudgingId, string $action)
     {
         // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig outpit
 
         // Disable the profiler toolbar to avoid OOMs.
-        if ($this->container->has('profiler')) {
-            $this->container->get('profiler')->disable();
+        if ($profiler) {
+            $profiler->disable();
         }
 
         /** @var Rejudging $rejudging */

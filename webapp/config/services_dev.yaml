@@ -3,6 +3,8 @@ services:
         autowire: true
         autoconfigure: true
 
+    Symfony\Component\HttpKernel\Profiler\Profiler: '@profiler'
+
     App\EventListener\ProfilerDisableListener:
         arguments:
             $profiler: "@profiler"
