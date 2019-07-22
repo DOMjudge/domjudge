@@ -476,12 +476,17 @@ class ImportExportController extends BaseController
 
         /** @var ContestProblem[] $contestProblems */
         $contestProblems = $this->em->createQueryBuilder()
-            ->from(ContestProblem::class, 'cp', 'cp.probid')
+            ->from(ContestProblem::class, 'cp')
             ->select('cp')
             ->andWhere('cp.contest = :contest')
             ->setParameter(':contest', $contest)
             ->getQuery()
             ->getResult();
+        $contestProblemsIndexed = [];
+        foreach ($contestProblems as $cp) {
+            $contestProblemsIndexed[$cp->getProblem()->getProbid()] = $cp;
+        }
+        $contestProblems = $contestProblemsIndexed;
 
         return $this->render('jury/export/clarifications.html.twig', [
             'domjudgeVersion' => $this->domjudgeVersion,

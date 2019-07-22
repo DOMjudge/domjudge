@@ -107,7 +107,7 @@ class InternalErrorController extends BaseController
         switch ($disabled['kind']) {
             case 'problem':
                 $affectedLink = $this->generateUrl('jury_problem', ['probId' => $disabled['probid']]);
-                $idData       = ['cid' => $internalError->getCid(), 'probid' => $disabled['probid']];
+                $idData       = ['contest' => $internalError->getCid(), 'problem' => $disabled['probid']];
                 /** @var ContestProblem $problem */
                 $problem      = $this->em->getRepository(ContestProblem::class)->find($idData);
                 $affectedText = sprintf('%s - %s', $problem->getShortname(), $problem->getProblem()->getName());

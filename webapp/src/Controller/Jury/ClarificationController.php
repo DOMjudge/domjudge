@@ -265,13 +265,14 @@ class ClarificationController extends AbstractController
             }
 
             $queryBuilder = $this->em->createQueryBuilder()
-                ->from(ContestProblem::class, 'cp', 'cp.probid')
+                ->from(ContestProblem::class, 'cp')
                 ->select('cp, p')
                 ->innerJoin('cp.problem', 'p')
-                ->where('cp.cid = :cid')
-                ->setParameter(':cid', $cdata->getCid())
+                ->where('cp.contest = :contest')
+                ->setParameter(':contest', $cdata)
                 ->orderBy('cp.shortname');
 
+            /** @var ContestProblem[] $contestproblems */
             $contestproblems = $queryBuilder->getQuery()->getResult();
             foreach($contestproblems as $cp) {
                 $subject_options[$cshort]["$cid-" . $cp->getProbid() ] = $cshort . ' - ' .$cp->getShortname() . ': ' . $cp->getProblem()->getName();

@@ -864,8 +864,8 @@ class ImportEventFeedCommand extends Command
         // Now find the contest problem
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                    'cid' => $this->contestId,
-                                                                                    'probid' => $problem->getProbid()
+                                                                                    'contest' => $this->contestId,
+                                                                                    'problem' => $problem,
                                                                                 ]);
         if ($contestProblem) {
             $action = EventLogService::ACTION_UPDATE;
@@ -1179,8 +1179,8 @@ class ImportEventFeedCommand extends Command
         // Find the contest problem
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                    'cid' => $this->contestId,
-                                                                                    'probid' => $problem->getProbid()
+                                                                                    'contest' => $this->contestId,
+                                                                                    'problem' => $problem,
                                                                                 ]);
 
         if (!$contestProblem) {
@@ -1561,9 +1561,9 @@ class ImportEventFeedCommand extends Command
         $testcase = $this->em->createQueryBuilder()
             ->from(Testcase::class, 't')
             ->select('t')
-            ->andWhere('t.probid = :probid')
+            ->andWhere('t.problem = :problem')
             ->andWhere('t.rank = :rank')
-            ->setParameter(':probid', $problem->getProbid())
+            ->setParameter(':problem', $problem)
             ->setParameter(':rank', $rank)
             ->getQuery()
             ->getSingleResult();

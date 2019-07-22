@@ -14,6 +14,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity()
  * @ORM\Table(name="contestproblem", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
  * @Serializer\VirtualProperty(
+ *     "id",
+ *     exp="object.getProblem().getProbid()",
+ *     options={@Serializer\Type("string")}
+ * )
+ * @Serializer\VirtualProperty(
  *     "short_name",
  *     exp="object.getShortname()",
  *     options={@Serializer\Groups("Nonstrict"), @Serializer\Type("string")}
@@ -21,25 +26,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class ContestProblem
 {
-    /**
-     * @var int
-     *
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
-     * @Serializer\Exclude()
-     */
-    private $cid;
-
-    /**
-     * @var int
-     *
-     * @ORM\Id
-     * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID"}, nullable=false)
-     * @Serializer\SerializedName("id")
-     * @Serializer\Type("string")
-     */
-    private $probid;
-
     /**
      * @var string
      * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Unique problem ID within contest (string)"}, nullable=false)
@@ -85,6 +71,7 @@ class ContestProblem
     private $lazyEvalResults;
 
     /**
+     * @ORM\Id()
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems", fetch="EAGER")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Inline()
@@ -92,6 +79,7 @@ class ContestProblem
     private $problem;
 
     /**
+     * @ORM\Id()
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="problems")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      * @Serializer\Exclude()
@@ -113,41 +101,13 @@ class ContestProblem
     private $submissions;
 
     /**
-     * Set cid
-     *
-     * @param integer $cid
-     *
-     * @return ContestProblem
-     */
-    public function setCid($cid)
-    {
-        $this->cid = $cid;
-
-        return $this;
-    }
-
-    /**
      * Get cid
      *
      * @return integer
      */
     public function getCid()
     {
-        return $this->cid;
-    }
-
-    /**
-     * Set probid
-     *
-     * @param integer $probid
-     *
-     * @return ContestProblem
-     */
-    public function setProbid($probid)
-    {
-        $this->probid = $probid;
-
-        return $this;
+        return $this->getContest()->getCid();
     }
 
     /**
@@ -157,7 +117,7 @@ class ContestProblem
      */
     public function getProbid()
     {
-        return $this->probid;
+        return $this->getProblem()->getProbid();
     }
 
     /**

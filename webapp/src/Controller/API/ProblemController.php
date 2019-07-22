@@ -290,11 +290,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
             ->join('cp.problem', 'p')
             ->leftJoin('p.testcases', 'tc')
             ->select('cp, p, COUNT(tc.testcaseid) AS testdatacount')
-            ->andWhere('cp.cid = :cid')
+            ->andWhere('cp.contest = :cid')
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter(':cid', $contestId)
             ->orderBy('cp.shortname')
-            ->groupBy('cp.probid');
+            ->groupBy('cp.problem');
 
         // For non-API-reader users, only expose the problems after the contest has started
         if (!$this->dj->checkrole('api_reader') && $contest->getStartTimeObject()->getTimestamp() > time()) {

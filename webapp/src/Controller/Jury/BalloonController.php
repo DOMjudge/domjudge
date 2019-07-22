@@ -95,7 +95,7 @@ class BalloonController extends AbstractController
             ->leftJoin('b.submission', 's')
             ->leftJoin('s.problem', 'p')
             ->leftJoin('s.contest', 'co')
-            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.cid AND p.probid = cp.probid')
+            ->leftJoin('p.contest_problems', 'cp', Join::WITH, 'co.cid = cp.contest AND p.probid = cp.contest')
             ->leftJoin('s.team', 't')
             ->leftJoin('t.category', 'c')
             ->leftJoin('t.affiliation', 'a')

@@ -311,9 +311,9 @@ class EventLogService implements ContainerAwareInterface
                 foreach ($dataIds as $dataId) {
                     $contestIdData   = $this->em->createQueryBuilder()
                         ->from(ContestProblem::class, 'cp')
-                        ->select('DISTINCT(cp.cid) AS contestId')
-                        ->andWhere('cp.probid = :probid')
-                        ->setParameter(':probid', $dataId)
+                        ->select('DISTINCT(cp.contest) AS contestId')
+                        ->andWhere('cp.problem = :problem')
+                        ->setParameter(':problem', $dataId)
                         ->getQuery()
                         ->getScalarResult();
                     $contestIdsForId = array_map(function (array $data) {

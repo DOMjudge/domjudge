@@ -176,10 +176,10 @@ class SubmissionController extends AbstractRestController
             ->select('cp, c')
             ->andWhere(sprintf('p.%s = :problem',
                                $this->eventLogService->externalIdFieldForEntity(Problem::class) ?? 'probid'))
-            ->andWhere('cp.cid = :cid')
+            ->andWhere('cp.contest = :contest')
             ->andWhere('cp.allowSubmit = 1')
             ->setParameter(':problem', $request->request->get('problem'))
-            ->setParameter(':cid', $this->getContestId($request))
+            ->setParameter(':contest', $this->getContestId($request))
             ->getQuery()
             ->getOneOrNullResult();
 

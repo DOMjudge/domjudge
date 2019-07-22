@@ -328,8 +328,8 @@ class SubmissionService
         }
         if (!$problem instanceof ContestProblem) {
             $problem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                            'cid' => $contest->getCid(),
-                                                                                            'probid' => $problem
+                                                                                            'contest' => $contest,
+                                                                                            'problem' => $problem
                                                                                         ]);
         }
         if (!$language instanceof Language) {
@@ -480,18 +480,21 @@ class SubmissionService
         });
 
         // Reload contest, team and contestproblem for now, as EventLogService::log will clear the Doctrine entity manager
+        /** @var Contest $contest */
+        /** @var Team $team */
+        /** @var ContestProblem $problem */
         $contest = $this->em->getRepository(Contest::class)->find($contest->getCid());
         $team    = $this->em->getRepository(Team::class)->find($team->getTeamid());
         $problem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                        'probid' => $problem->getProbid(),
-                                                                                        'cid' => $problem->getCid()
+                                                                                        'problem' => $problem->getProblem(),
+                                                                                        'contest' => $problem->getContest(),
                                                                                     ]);
 
         $this->scoreboardService->calculateScoreRow($contest, $team, $problem->getProblem());
 
         $this->dj->alert('submit', sprintf('submission %d: team %d, language %s, problem %d',
                                                         $submission->getSubmitid(), $team->getTeamid(),
-                                                        $language->getLangid(), $problem->getProbid()));
+                                                        $language->getLangid(), $problem->getProblem()->getProbid()));
 
         if (is_writable($this->dj->getDomjudgeSubmitDir())) {
             // Copy the submission to the submission directory for safe-keeping
@@ -500,7 +503,6 @@ class SubmissionService
                     'cid' => $contest->getCid(),
                     'submitid' => $submission->getSubmitid(),
                     'teamid' => $team->getTeamid(),
-                    'probid' => $problem->getProbid(),
                     'langid' => $language->getLangid(),
                     'rank' => $rank,
                     'filename' => $file->getClientOriginalName()

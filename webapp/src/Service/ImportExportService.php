@@ -228,9 +228,7 @@ class ImportExportService
                     ->setColor($problemData['rgb'])
                     // We need to set both the entities as well as the ID's because of the composite primary key
                     ->setProblem($problem)
-                    ->setProbid($problem->getProbid())
-                    ->setContest($contest)
-                    ->setCid($contest->getCid());
+                    ->setContest($contest);
                 $this->em->persist($contestProblem);
             }
         }

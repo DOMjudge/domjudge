@@ -10,12 +10,12 @@ use App\Entity\RemovedInterval;
 use App\Entity\Submission;
 use App\Form\Type\ContestType;
 use App\Form\Type\FinalizeContestType;
+use App\Form\Type\RemovedIntervalType;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use App\Form\Type\RemovedIntervalType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -194,12 +194,18 @@ class ContestController extends BaseController
             $removedIntervals = [];
         }
 
-        $problems = $em->createQueryBuilder()
-            ->from(ContestProblem::class, 'cp', 'cp.cid')
-            ->select('COUNT(cp.probid) AS num_problems', 'cp.cid')
-            ->groupBy('cp.cid')
+        $problemData = $em->createQueryBuilder()
+            ->from(ContestProblem::class, 'cp')
+            ->select('COUNT(cp.problem) AS num_problems', 'c.cid')
+            ->join('cp.contest', 'c')
+            ->groupBy('cp.contest')
             ->getQuery()
             ->getResult();
+
+        $problems = [];
+        foreach ($problemData as $data) {
+            $problems[$data['cid']] = $data['num_problems'];
+        }
 
         $table_fields = array_merge($table_fields, [
             'process_balloons' => ['title' => 'process<br/>balloons?', 'sort' => true],
@@ -256,7 +262,7 @@ class ContestController extends BaseController
             if (ALLOW_REMOVED_INTERVALS) {
                 $contestdata['num_removed_intervals'] = ['value' => $removedIntervals[$contest->getCid()]['num_removed_intervals'] ?? 0];
             }
-            $contestdata['num_problems'] = ['value' => $problems[$contest->getCid()]['num_problems'] ?? 0];
+            $contestdata['num_problems'] = ['value' => $problems[$contest->getCid()] ?? 0];
 
             $timeFields = [
                 'activate',
@@ -477,8 +483,8 @@ class ContestController extends BaseController
     {
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'cid' => $contestId,
-                                                                                               'probid' => $probId
+                                                                                               'contest' => $contestId,
+                                                                                               'problem' => $probId
                                                                                            ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Contest problem with contest ID %s and problem ID %s not found', $contestId, $probId));
@@ -518,9 +524,7 @@ class ContestController extends BaseController
 
                 // Now we can assign the problems to the contest and persist them
                 foreach ($problems as $problem) {
-                    $problem
-                        ->setContest($contest)
-                        ->setCid($contest->getCid());
+                    $problem->setContest($contest);
                     $this->em->persist($problem);
                 }
                 $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,

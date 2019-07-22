@@ -82,7 +82,7 @@ class ProblemController extends BaseController
                 ->andWhere('cp.allowSubmit = 1')
                 ->setParameter(':contest', $contest)
                 ->addOrderBy('cp.shortname')
-                ->groupBy('cp.probid')
+                ->groupBy('p.probid')
                 ->getQuery()
                 ->getResult();
         }
@@ -110,8 +110,8 @@ class ProblemController extends BaseController
         }
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'probid' => $probId,
-                                                                                               'cid' => $contest->getCid(),
+                                                                                               'problem' => $probId,
+                                                                                               'contest' => $contest,
                                                                                            ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
@@ -168,8 +168,8 @@ class ProblemController extends BaseController
         }
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'probid' => $probId,
-                                                                                               'cid' => $contest->getCid(),
+                                                                                               'problem' => $probId,
+                                                                                               'contest' => $contest,
                                                                                            ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
@@ -235,8 +235,8 @@ class ProblemController extends BaseController
         }
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'probid' => $probId,
-                                                                                               'cid' => $contest->getCid(),
+                                                                                               'problem' => $probId,
+                                                                                               'contest' => $contest,
                                                                                            ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));

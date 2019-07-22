@@ -1461,12 +1461,6 @@ class Contest extends BaseApiEntity
 
         /** @var ContestProblem $problem */
         foreach ($this->problems as $idx => $problem) {
-            // Set cid and probid explicitly, as Doctrine doesn't understand our primary key
-            // that is also a foreign key
-            $problem->setContest($this);
-            $problem->setCid($this->getCid());
-            $problem->setProbid($problem->getProblem()->getProbid());
-
             // Check if the problem ID is unique
             $otherProblemIds = $this->problems->filter(function (ContestProblem $otherProblem) use ($problem) {
                 return $otherProblem !== $problem;

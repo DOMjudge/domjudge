@@ -489,12 +489,17 @@ class ScoreboardService
         // of the primary key.
         /** @var ContestProblem[] $contestProblems */
         $contestProblems = $this->em->createQueryBuilder()
-            ->from(ContestProblem::class, 'cp', 'cp.probid')
+            ->from(ContestProblem::class, 'cp')
             ->select('cp')
             ->andWhere('cp.contest = :contest')
             ->setParameter(':contest', $contest)
             ->getQuery()
             ->getResult();
+        $contestProblemsIndexed = [];
+        foreach ($contestProblems as $cp) {
+            $contestProblemsIndexed[$cp->getProblem()->getProbid()] = $cp;
+        }
+        $contestProblems = $contestProblemsIndexed;
 
         // Intialize our data
         $variants  = ['public' => false, 'restricted' => true];
@@ -826,15 +831,23 @@ class ScoreboardService
     protected function getProblems(Contest $contest)
     {
         $queryBuilder = $this->em->createQueryBuilder()
-            ->from(ContestProblem::class, 'cp', 'cp.probid')
+            ->from(ContestProblem::class, 'cp')
             ->select('cp, p')
             ->innerJoin('cp.problem', 'p')
             ->andWhere('cp.allowSubmit = 1')
-            ->andWhere('cp.cid = :cid')
-            ->setParameter(':cid', $contest->getCid())
+            ->andWhere('cp.contest = :contest')
+            ->setParameter(':contest', $contest)
             ->orderBy('cp.shortname');
 
-        return $queryBuilder->getQuery()->getResult();
+        /** @var ContestProblem[] $contestProblems */
+        $contestProblems = $queryBuilder->getQuery()->getResult();
+        $contestProblemsIndexed = [];
+        foreach ($contestProblems as $cp) {
+            $contestProblemsIndexed[$cp->getProblem()->getProbid()] = $cp;
+        }
+        $contestProblems = $contestProblemsIndexed;
+
+        return $contestProblems;
     }
 
     /**

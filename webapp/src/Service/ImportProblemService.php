@@ -498,8 +498,8 @@ class ImportProblemService
         $this->em->persist($problem);
         $this->em->flush();
         if ($contestProblem) {
-            $contestProblem->setProbid($problem->getProbid());
-            $contestProblem->setCid($contest->getCid());
+            $contestProblem->setProblem($problem);
+            $contestProblem->setContest($contest);
             $this->em->persist($contestProblem);
         }
 
@@ -622,8 +622,8 @@ class ImportProblemService
                             $this->dj->getUser()->getTeamid());
                         $contestProblem = $this->em->getRepository(ContestProblem::class)->find(
                             [
-                                'probid' => $problem->getProbid(),
-                                'cid' => $contest->getCid()
+                                'problem' => $problem,
+                                'contest' => $contest,
                             ]);
                         $submission     = $this->submissionService->submitSolution($team, $contestProblem, $contest,
                                                                                    $languageToUse, $filesToSubmit, null,
