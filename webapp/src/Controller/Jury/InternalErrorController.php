@@ -3,6 +3,7 @@
 namespace App\Controller\Jury;
 
 use App\Controller\BaseController;
+use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use App\Entity\ContestProblem;
 use App\Entity\InternalError;
 use App\Service\DOMJudgeService;
@@ -146,10 +147,10 @@ class InternalErrorController extends BaseController
     {
         /** @var InternalError $internalError */
         $internalError = $this->em->getRepository(InternalError::class)->find($errorId);
-        $status        = $action === 'ignore' ? InternalError::STATUS_IGNROED : InternalError::STATUS_RESOLVED;
+        $status        = $action === 'ignore' ? InternalErrorStatusType::STATUS_IGNROED : InternalErrorStatusType::STATUS_RESOLVED;
         $this->em->transactional(function () use ($internalError, $status) {
             $internalError->setStatus($status);
-            if ($status === InternalError::STATUS_RESOLVED) {
+            if ($status === InternalErrorStatusType::STATUS_RESOLVED) {
                 $this->dj->setInternalError($internalError->getDisabled(), $internalError->getContest(),
                                                          true);
                 $this->dj->auditlog('internal_error', $internalError->getErrorid(),

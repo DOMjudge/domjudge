@@ -11,6 +11,9 @@ doctrine:
         url: '%env(resolve:DATABASE_URL)%'
         types:
             json: App\Doctrine\DBAL\Types\JsonType
+            internal_error_status: App\Doctrine\DBAL\Types\InternalErrorStatusType
+        mapping_types:
+            enum: string
     orm:
         auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore

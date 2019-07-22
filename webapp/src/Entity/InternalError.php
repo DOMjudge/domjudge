@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -10,10 +11,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class InternalError
 {
-    const STATUS_OPEN = 'open';
-    const STATUS_RESOLVED = 'resolved';
-    const STATUS_IGNROED = 'ignored';
-
     /**
      * @var int
      * @ORM\Id
@@ -60,9 +57,9 @@ class InternalError
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=128, name="status", options={"comment"="Status of internal error"}, nullable=false)
+     * @ORM\Column(type="internal_error_status", length=128, name="status", options={"comment"="Status of internal error"}, nullable=false)
      */
-    private $status = self::STATUS_OPEN;
+    private $status = InternalErrorStatusType::STATUS_OPEN;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="internal_errors")
