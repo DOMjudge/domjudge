@@ -98,7 +98,7 @@ maintainer-clean:  SUBDIRS=etc doc lib sql     judge submit import tests misc-to
 
 # Dump the environment into a .php file for improved speed
 domserver-l:
-	composer symfony:dump-env prod
+	composer $(subst 1,-q,$(QUIET)) symfony:dump-env prod
 
 domserver-create-dirs:
 	$(INSTALL_DIR) $(addprefix $(DESTDIR),$(domserver_dirs))
@@ -223,7 +223,6 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 # because judgehost-create-dirs sets wrong permissions:
 	mkdir -p $(domserver_tmpdir)
 	chmod a+rwx $(domserver_tmpdir) $(domserver_submitdir)
-# Run Symfony in DEV mode under Apache:
 # Run Symfony in dev mode:
 	sed -i 's/^#APP_ENV=dev/APP_ENV=dev/' $(CURDIR)/webapp/.env.local
 # Remove cached environment file as we don't want this in production

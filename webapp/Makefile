@@ -33,7 +33,7 @@ copy-bundle-assets:
 	cp -R ../lib/vendor/nelmio/api-doc-bundle/Resources/public/* public/bundles/nelmioapidoc/
 
 clean-l:
-	-rm -rf public/bundles/nelmioapidoc .env.local .env.local.php
+	-rm -rf public/bundles/nelmioapidoc $(LOCALENV) $(LOCALENV).php
 
 install-domserver:
 # This must be done first to install with the rest.
