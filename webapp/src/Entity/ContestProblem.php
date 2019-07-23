@@ -88,13 +88,6 @@ class ContestProblem
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="ScoreCache", mappedBy="problem")
-     * @Serializer\Exclude()
-     */
-    private $scorecache;
-
-    /**
-     * @var ArrayCollection
      * @ORM\OneToMany(targetEntity="App\Entity\Submission", mappedBy="contest_problem")
      * @Serializer\Exclude()
      */
@@ -310,40 +303,6 @@ class ContestProblem
     public function getContest()
     {
         return $this->contest;
-    }
-
-    /**
-     * Add scorecache
-     *
-     * @param \App\Entity\ScoreCache $scorecache
-     *
-     * @return ContestProblem
-     */
-    public function addScorecache(\App\Entity\ScoreCache $scorecache)
-    {
-        $this->scorecache->add($scorecache);
-
-        return $this;
-    }
-
-    /**
-     * Remove scorecache
-     *
-     * @param \App\Entity\ScoreCache $scorecache
-     */
-    public function removeScorecache(\App\Entity\ScoreCache $scorecache)
-    {
-        $this->scorecache->removeElement($scorecache);
-    }
-
-    /**
-     * Get scorecache
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getScorecache()
-    {
-        return $this->scorecache;
     }
 
     /**
