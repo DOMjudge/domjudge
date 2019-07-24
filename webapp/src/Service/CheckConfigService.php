@@ -126,7 +126,7 @@ class CheckConfigService
     public function checkPhpVersion()
     {
         $my = PHP_VERSION;
-        $req = '7.0';
+        $req = '7.1.3';
         $result = version_compare($my, $req, '>=');
         return ['caption' => 'PHP version',
                 'result' => ($result ? 'O' : 'E'),
