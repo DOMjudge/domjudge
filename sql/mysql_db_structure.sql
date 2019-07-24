@@ -257,7 +257,7 @@ CREATE TABLE `judgehost` (
 CREATE TABLE `judgehost_restriction` (
   `restrictionid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
-  `restrictions` longtext COMMENT 'JSON-encoded restrictions',
+  `restrictions` longtext DEFAULT NULL COMMENT 'JSON-encoded restrictions',
   PRIMARY KEY  (`restrictionid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Restrictions for judgehosts';
 
@@ -277,7 +277,7 @@ CREATE TABLE `judging` (
   `jury_member` varchar(255) DEFAULT NULL COMMENT 'Name of jury member who verified this',
   `verify_comment` varchar(255) DEFAULT NULL COMMENT 'Optional additional information provided by the verifier',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'Old judging is marked as invalid when rejudging',
-  `output_compile` longblob COMMENT 'Output of the compiling the program',
+  `output_compile` longblob DEFAULT NULL COMMENT 'Output of the compiling the program',
   `seen` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT 'Whether the team has seen this judging',
   `rejudgingid` int(4) unsigned DEFAULT NULL COMMENT 'Rejudging ID (if rejudge)',
   `prevjudgingid` int(4) unsigned DEFAULT NULL COMMENT 'Previous valid judging (if rejudge)',
@@ -305,10 +305,10 @@ CREATE TABLE `judging_run` (
   `runresult` varchar(32) DEFAULT NULL COMMENT 'Result of this run, NULL if not finished yet',
   `runtime` float DEFAULT NULL COMMENT 'Submission running time on this testcase',
   `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run judging ended',
-  `output_run` longblob COMMENT 'Output of running the program',
-  `output_diff` longblob COMMENT 'Diffing the program output and testcase output',
-  `output_error` longblob COMMENT 'Standard error output of the program',
-  `output_system` longblob COMMENT 'Judging system output',
+  `output_run` longblob DEFAULT NULL COMMENT 'Output of running the program',
+  `output_diff` longblob DEFAULT NULL COMMENT 'Diffing the program output and testcase output',
+  `output_error` longblob DEFAULT NULL COMMENT 'Standard error output of the program',
+  `output_system` longblob DEFAULT NULL COMMENT 'Judging system output',
   PRIMARY KEY  (`runid`),
   UNIQUE KEY `testcaseid` (`judgingid`, `testcaseid`),
   KEY `judgingid` (`judgingid`),
@@ -325,7 +325,7 @@ CREATE TABLE `language` (
   `langid` varchar(32) NOT NULL COMMENT 'Unique ID (string)',
   `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
-  `extensions` longtext COMMENT 'List of recognized extensions (JSON encoded)',
+  `extensions` longtext DEFAULT NULL COMMENT 'List of recognized extensions (JSON encoded)',
   `require_entry_point` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Whether submissions require a code entry point to be specified.',
   `entry_point_description` varchar(255) DEFAULT NULL COMMENT 'The description used in the UI for the entry point field.',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'Are submissions accepted in this language?',
