@@ -5,7 +5,7 @@ namespace App\Controller\API;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Testcase;
-use App\Entity\TestcaseWithContent;
+use App\Entity\TestcaseContent;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -134,23 +134,23 @@ class TestcaseController extends AbstractFOSRestController
             throw new BadRequestHttpException('Only \'input\' or \'output\' file allowed');
         }
 
-        /** @var TestcaseWithContent|null $testcaseWithContent */
-        $testcaseWithContent = $this->em->createQueryBuilder()
-            ->from(TestcaseWithContent::class, 'tcc')
+        /** @var TestcaseContent|null $testcaseContent */
+        $testcaseContent = $this->em->createQueryBuilder()
+            ->from(TestcaseContent::class, 'tcc')
             ->select('tcc')
-            ->andWhere('tcc.testcaseid = :id')
+            ->andWhere('tcc.testcase = :id')
             ->setParameter(':id', $id)
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
 
-        if ($testcaseWithContent === null) {
+        if ($testcaseContent === null) {
             throw new NotFoundHttpException(sprintf('Cannot find testcase \'%s\'', $id));
         }
 
         $contents = $type === 'input'
-            ? $testcaseWithContent->getInput()
-            : $testcaseWithContent->getOutput();
+            ? $testcaseContent->getInput()
+            : $testcaseContent->getOutput();
 
         if ($contents === null) {
             throw new NotFoundHttpException(sprintf('Cannot find the ' . $type . ' of testcase \'%s\'', $id));

@@ -83,19 +83,18 @@ class Testcase
     private $external_runs;
 
     /**
+     * @var TestcaseContent
+     * @ORM\OneToOne(targetEntity="TestcaseContent", mappedBy="testcase", cascade={"persist"})
+     * @Serializer\Exclude()
+     */
+    private $content;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Problem", inversedBy="testcases")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $problem;
-
-    /**
-     * @var TestcaseWithContent
-     * @ORM\OneToOne(targetEntity="TestcaseWithContent")
-     * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid")
-     * @Serializer\Exclude()
-     */
-    private $testcase_content;
 
     /**
      * Constructor
@@ -337,6 +336,31 @@ class Testcase
     }
 
     /**
+     * Set content
+     *
+     * @param TestcaseContent $content
+     *
+     * @return Testcase
+     */
+    public function setContent(?TestcaseContent $content)
+    {
+        $this->content = $content;
+        $this->content->setTestcase($this);
+
+        return $this;
+    }
+
+    /**
+     * Get content
+     *
+     * @return TestcaseContent
+     */
+    public function getContent(): ?TestcaseContent
+    {
+        return $this->content;
+    }
+
+    /**
      * Set problem
      *
      * @param \App\Entity\Problem $problem
@@ -358,29 +382,6 @@ class Testcase
     public function getProblem()
     {
         return $this->problem;
-    }
-
-    /**
-     * Set testcaseContent
-     *
-     * @param TestcaseWithContent|null $testcaseContent
-     * @return Testcase
-     */
-    public function setTestcaseContent(TestcaseWithContent $testcaseContent = null)
-    {
-        $this->testcase_content = $testcaseContent;
-
-        return $this;
-    }
-
-    /**
-     * Get testcaseContent
-     *
-     * @return TestcaseWithContent
-     */
-    public function getTestcaseContent()
-    {
-        return $this->testcase_content;
     }
 
     /**

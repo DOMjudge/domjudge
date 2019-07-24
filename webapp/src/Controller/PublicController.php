@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\ContestProblem;
 use App\Entity\Language;
 use App\Entity\Team;
-use App\Entity\TestcaseWithContent;
+use App\Entity\Testcase;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -286,12 +286,13 @@ class PublicController extends BaseController
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
 
-        /** @var TestcaseWithContent $testcase */
+        /** @var Testcase $testcase */
         $testcase = $this->em->createQueryBuilder()
-            ->from(TestcaseWithContent::class, 'tc')
+            ->from(Testcase::class, 'tc')
             ->join('tc.problem', 'p')
             ->join('p.contest_problems', 'cp', Join::WITH, 'cp.contest = :contest')
-            ->select('tc')
+            ->join('tc.content', 'tcc')
+            ->select('tc', 'tcc')
             ->andWhere('tc.probid = :problem')
             ->andWhere('tc.sample = 1')
             ->andWhere('cp.allowSubmit = 1')
@@ -314,10 +315,10 @@ class PublicController extends BaseController
 
         switch ($type) {
             case 'input':
-                $content = $testcase->getInput();
+                $content = $testcase->getContent()->getInput();
                 break;
             case 'output':
-                $content = $testcase->getOutput();
+                $content = $testcase->getContent()->getOutput();
                 break;
         }
 

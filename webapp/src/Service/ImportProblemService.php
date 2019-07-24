@@ -10,7 +10,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\Testcase;
-use App\Entity\TestcaseWithContent;
+use App\Entity\TestcaseContent;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -387,7 +387,7 @@ class ImportProblemService
             $rank = 1;
         }
 
-        /** @var TestcaseWithContent[] $testcases */
+        /** @var Testcase[] $testcases */
         $testcases = [];
 
         // first insert sample, then secret data in alphabetical order
@@ -467,21 +467,24 @@ class ImportProblemService
                     }
                 }
 
-                $testcase = new TestcaseWithContent();
+                $testcase        = new Testcase();
+                $testcaseContent = new TestcaseContent();
                 $testcase
+                    ->setContent($testcaseContent)
                     ->setProblem($problem)
                     ->setRank($rank)
                     ->setSample($type === 'sample')
                     ->setMd5sumInput($md5in)
                     ->setMd5sumOutput($md5out)
-                    ->setInput($testIn)
-                    ->setOutput($testOut)
                     ->setDescription($description);
+                $testcaseContent
+                    ->setInput($testIn)
+                    ->setOutput($testOut);
                 if ($imageFile !== false) {
-                    $testcase
+                    $testcase->setImageType($imageType);
+                    $testcaseContent
                         ->setImage($imageFile)
-                        ->setImageThumb($imageThumb)
-                        ->setImageType($imageType);
+                        ->setImageThumb($imageThumb);
                 }
                 $this->em->persist($testcase);
 

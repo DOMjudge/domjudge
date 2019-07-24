@@ -50,10 +50,23 @@ CREATE TABLE `external_run` (
   CONSTRAINT `external_run_ibfk_3` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Run in external system';
 
+-- Move fields with lots of data to separate tables
+CREATE TABLE `testcase_content` (
+  `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
+  `input` longblob DEFAULT NULL COMMENT 'Input data',
+  `output` longblob DEFAULT NULL COMMENT 'Output data',
+  `image` longblob DEFAULT NULL COMMENT 'A graphical representation of the testcase',
+  `image_thumb` longblob DEFAULT NULL COMMENT 'Aumatically created thumbnail of the image',
+  PRIMARY KEY  (`testcaseid`),
+  CONSTRAINT `testcase_contest_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores contents of testcase';
+
 --
 -- Transfer data from old to new structure
 --
 
+INSERT INTO `testcase_content` (`testcaseid`, `input`, `output`, `image`, `image_thumb`)
+    SELECT `testcaseid`, `input`, `output`, `image`, `image_thumb` FROM `testcase`;
 
 
 --
@@ -70,3 +83,9 @@ INSERT INTO `configuration` (`name`, `value`, `type`, `public`, `category`, `des
 
 ALTER TABLE `submission`
     DROP COLUMN `externalresult`;
+
+ALTER TABLE `testcase`
+    DROP COLUMN `input`,
+    DROP COLUMN `output`,
+    DROP COLUMN `image`,
+    DROP COLUMN `image_thumb`;

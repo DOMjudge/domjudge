@@ -374,7 +374,7 @@ class SubmissionController extends BaseController
         if ($selectedJudging) {
             $queryBuilder = $this->em->createQueryBuilder()
                 ->from(Testcase::class, 't')
-                ->join('t.testcase_content', 'tc')
+                ->join('t.content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
                 ->leftJoin('jr.judging_run_output', 'jro')
                 ->select('t', 'jr', 'tc.image_thumb AS image_thumb')

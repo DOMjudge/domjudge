@@ -95,11 +95,18 @@ INSERT INTO `team` (`teamid`, `externalid`, `name`, `categoryid`, `affilid`, `ro
 -- Dumping data for table `testcase`
 --
 
-INSERT INTO `testcase` (`testcaseid`, `md5sum_input`, `md5sum_output`, `input`, `output`, `probid`, `rank`, `description`) VALUES
-(1, 'b026324c6904b2a9cb4b88d6d61c81d1', '59ca0efa9f5633cb0371bbc0355478d8', 0x310a, 0x48656c6c6f20776f726c64210a, 1, 1, NULL),
-(2, '9b05c566cf4d373cd23ffe75787c1f6d', '0b93bf53346750cc7e04c02f31443721', 0x330a312e300a3245300a330a, 0x312e300a302e35303030303030303030310a332e333333333333333333452d310a, 2, 1, 'Different floating formats'),
-(3, 'a94c7fc1f4dac435f6fc5d5d4c7ba173', '2c266fa701a6034e02d928331d5bd4ef', 0x320a342e303030303030303030303030300a352e303030303030303030303030310a, 0x302e32350a32452d310a, 2, 2, 'High precision inputs'),
-(4, 'fc157fa74267ba846e8ddc9c0747ad53', 'd38340056cc41e311beae85f906d7f24', 0x330a2b300a496e660a6e616e0a, 0x696e660a300a4e614e0a, 2, 3, 'Inf/NaN checks'),
-(5, '90864a8759427d63b40f1f5f75e32308', '6267776644f5bd2bf0edccf5a210e087', 0x310a350a310a310a300a310a300a, 0x4f555450555420310a, 3, 1, NULL);
+INSERT INTO `testcase` (`testcaseid`, `md5sum_input`, `md5sum_output`, `probid`, `rank`, `description`) VALUES
+(1, 'b026324c6904b2a9cb4b88d6d61c81d1', '59ca0efa9f5633cb0371bbc0355478d8', 1, 1, NULL),
+(2, '9b05c566cf4d373cd23ffe75787c1f6d', '0b93bf53346750cc7e04c02f31443721', 2, 1, 'Different floating formats'),
+(3, 'a94c7fc1f4dac435f6fc5d5d4c7ba173', '2c266fa701a6034e02d928331d5bd4ef', 2, 2, 'High precision inputs'),
+(4, 'fc157fa74267ba846e8ddc9c0747ad53', 'd38340056cc41e311beae85f906d7f24', 2, 3, 'Inf/NaN checks'),
+(5, '90864a8759427d63b40f1f5f75e32308', '6267776644f5bd2bf0edccf5a210e087', 3, 1, NULL);
+
+INSERT INTO `testcase_content` (`testcaseid`, `input`, `output`) VALUES
+(1, 0x310a, 0x48656c6c6f20776f726c64210a),
+(2, 0x330a312e300a3245300a330a, 0x312e300a302e35303030303030303030310a332e333333333333333333452d310a),
+(3, 0x320a342e303030303030303030303030300a352e303030303030303030303030310a, 0x302e32350a32452d310a),
+(4, 0x330a2b300a496e660a6e616e0a, 0x696e660a300a4e614e0a),
+(5, 0x310a350a310a310a300a310a300a, 0x4f555450555420310a);
 
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

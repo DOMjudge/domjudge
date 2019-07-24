@@ -11,7 +11,7 @@ use App\Entity\Problem;
 use App\Entity\SubmissionFileWithSourceCode;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
-use App\Entity\TestcaseWithContent;
+use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\Utils;
 use Doctrine\Common\Util\Inflector;
@@ -222,7 +222,7 @@ class CheckConfigService
         foreach ($r as $row) {
             $vars[$row['Variable_name']] = $row['Value'];
         }
-        $max_inout_r = $this->em->getConnection()->fetchAll('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase');
+        $max_inout_r = $this->em->getConnection()->fetchAll('SELECT GREATEST(MAX(LENGTH(input)),MAX(LENGTH(output))) as max FROM testcase_content');
         $max_inout = (int)reset($max_inout_r)['max'];
 
         $result = 'O';
@@ -461,8 +461,9 @@ class CheckConfigService
                 $problem_output_limit = 1024 * ($problem->getOutputLimit() ?: $output_limit);
                 $tcsizequery = $this->em->createQueryBuilder()
                      ->select('tc.testcaseid')
-                     ->from(TestcaseWithContent::class, 'tc')
-                     ->where('length(tc.output) > :maxoutput')
+                     ->from(Testcase::class, 'tc')
+                     ->join('tc.content', 'tcc')
+                     ->where('length(tcc.output) > :maxoutput')
                      ->andWhere('tc.probid = :probid')
                      ->setParameter(':probid', $probid)
                      ->setParameter(':maxoutput', $problem_output_limit)
@@ -695,10 +696,9 @@ class CheckConfigService
             $class      = sprintf('App\\Entity\\%s', $shortClass);
             try {
                 if (class_exists($class) && !in_array($class, [
-                        // These three entities are already checked in other classes
+                        // These entities are already checked in other classes
                         SubmissionFileWithSourceCode::class,
                         JudgingRunWithOutput::class,
-                        TestcaseWithContent::class,
                         // Contestproblem is checked using Problem
                         ContestProblem::class,
                     ]) && ($externalIdField = $this->eventLogService->externalIdFieldForEntity($class))) {

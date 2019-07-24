@@ -567,13 +567,9 @@ CREATE TABLE `testcase` (
   `testcaseid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `md5sum_input` char(32) DEFAULT NULL COMMENT 'Checksum of input data',
   `md5sum_output` char(32) DEFAULT NULL COMMENT 'Checksum of output data',
-  `input` longblob DEFAULT NULL COMMENT 'Input data',
-  `output` longblob DEFAULT NULL COMMENT 'Output data',
   `probid` int(4) unsigned NOT NULL COMMENT 'Corresponding problem ID',
   `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` longblob DEFAULT NULL COMMENT 'Description of this testcase',
-  `image` longblob DEFAULT NULL COMMENT 'A graphical representation of this testcase',
-  `image_thumb` longblob DEFAULT NULL COMMENT 'Aumatically created thumbnail of the image',
   `image_type` varchar(4) DEFAULT NULL COMMENT 'File type of the image and thumbnail',
   `sample` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT 'Sample testcases that can be shared with teams',
   PRIMARY KEY  (`testcaseid`),
@@ -582,6 +578,16 @@ CREATE TABLE `testcase` (
   KEY `sample` (`sample`),
   CONSTRAINT `testcase_ibfk_1` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores testcases per problem';
+
+CREATE TABLE `testcase_content` (
+  `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
+  `input` longblob DEFAULT NULL COMMENT 'Input data',
+  `output` longblob DEFAULT NULL COMMENT 'Output data',
+  `image` longblob DEFAULT NULL COMMENT 'A graphical representation of the testcase',
+  `image_thumb` longblob DEFAULT NULL COMMENT 'Aumatically created thumbnail of the image',
+  PRIMARY KEY  (`testcaseid`),
+  CONSTRAINT `testcase_content_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores contents of testcase';
 
 --
 -- Table structure for table `user`

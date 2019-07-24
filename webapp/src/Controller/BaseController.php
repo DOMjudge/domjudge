@@ -9,7 +9,6 @@ use App\Entity\RankCache;
 use App\Entity\ScoreCache;
 use App\Entity\SubmissionFileWithSourceCode;
 use App\Entity\Team;
-use App\Entity\TestcaseWithContent;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\Common\Util\Inflector;
@@ -310,7 +309,6 @@ abstract class BaseController extends AbstractController
             if ($currentEntity != $entityClass && !in_array($currentEntity, [
                     SubmissionFileWithSourceCode::class,
                     JudgingRunWithOutput::class,
-                    TestcaseWithContent::class
                 ])) {
                 $result[] = $currentEntity;
             }

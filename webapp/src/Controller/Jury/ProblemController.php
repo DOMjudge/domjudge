@@ -9,7 +9,7 @@ use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFileWithSourceCode;
 use App\Entity\Testcase;
-use App\Entity\TestcaseWithContent;
+use App\Entity\TestcaseContent;
 use App\Form\Type\ProblemType;
 use App\Form\Type\ProblemUploadMultipleType;
 use App\Form\Type\ProblemUploadType;
@@ -372,10 +372,11 @@ class ProblemController extends BaseController
         }
 
         foreach ([true, false] as $isSample) {
-            /** @var TestcaseWithContent[] $testcases */
+            /** @var Testcase[] $testcases */
             $testcases = $this->em->createQueryBuilder()
-                ->from(TestcaseWithContent::class, 't')
-                ->select('t')
+                ->from(Testcase::class, 't')
+                ->join('t.content', 'c')
+                ->select('t', 'c')
                 ->andWhere('t.problem = :problem')
                 ->andWhere('t.sample = :sample')
                 ->setParameter(':problem', $problem)
@@ -566,7 +567,7 @@ class ProblemController extends BaseController
 
         $testcaseData = $this->em->createQueryBuilder()
             ->from(Testcase::class, 'tc', 'tc.rank')
-            ->join('tc.testcase_content', 'content')
+            ->join('tc.content', 'content')
             ->select('tc', 'LENGTH(content.input) AS input_size', 'LENGTH(content.output) AS output_size',
                      'LENGTH(content.image) AS image_size', 'tc.image_type')
             ->andWhere('tc.problem = :problem')
@@ -616,15 +617,15 @@ class ProblemController extends BaseController
                                 return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                             }
 
-                            $testcase->getTestcaseContent()
+                            $testcase->setImageType($imageType);
+                            $testcase->getContent()
                                 ->setImageThumb($thumb)
-                                ->setimage($content)
-                                ->setImageType($imageType);
+                                ->setimage($content);
                         } else {
                             $contentMethod = sprintf('set%s', ucfirst($type));
                             $md5Method     = sprintf('setMd5sum%s', ucfirst($type));
-                            $testcase->getTestcaseContent()->{$contentMethod}($content);
-                            $testcase->getTestcaseContent()->{$md5Method}(md5($content));
+                            $testcase->getContent()->{$contentMethod}($content);
+                            $testcase->{$md5Method}(md5($content));
                         }
 
                         $this->dj->auditlog('testcase', $probId, 'updated',
@@ -659,8 +660,10 @@ class ProblemController extends BaseController
             }
 
             if ($allOk) {
-                $newTestcase = new TestcaseWithContent();
+                $newTestcase        = new Testcase();
+                $newTestcaseContent = new TestcaseContent();
                 $newTestcase
+                    ->setContent($newTestcaseContent)
                     ->setRank($maxrank)
                     ->setProblem($problem)
                     ->setDescription($request->request->get('add_desc'))
@@ -670,7 +673,7 @@ class ProblemController extends BaseController
                     $content       = file_get_contents($file->getRealPath());
                     $contentMethod = sprintf('set%s', ucfirst($type));
                     $md5Method     = sprintf('setMd5sum%s', ucfirst($type));
-                    $newTestcase->{$contentMethod}($content);
+                    $newTestcaseContent->{$contentMethod}($content);
                     $newTestcase->{$md5Method}(md5($content));
                 }
 
@@ -689,10 +692,10 @@ class ProblemController extends BaseController
                         return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                     }
 
-                    $newTestcase
+                    $newTestcase->setImageType($imageType);
+                    $newTestcaseContent
                         ->setImageThumb($thumb)
-                        ->setimage($content)
-                        ->setImageType($imageType);
+                        ->setimage($content);
                 }
 
                 $this->em->persist($newTestcase);
@@ -704,12 +707,12 @@ class ProblemController extends BaseController
                                    $inFile->getClientOriginalName(), Utils::printsize($inFile->getSize()),
                                    $outFile->getClientOriginalName(), Utils::printsize($outFile->getSize()));
 
-                if ($newTestcase->getOutput() > $outputLimit * 1024) {
+                if ($newTestcaseContent->getOutput() > $outputLimit * 1024) {
                     $message .= sprintf('<br><b>Warning: file size exceeds <code>output_limit</code> of %s kB. This will always result in wrong answers!</b>',
                                         $outputLimit);
                 }
 
-                if (empty($newTestcase->getInput()) || empty($newTestcase->getOutput())) {
+                if (empty($newTestcaseContent->getInput()) || empty($newTestcaseContent->getOutput())) {
                     $message .= '<br /><b>Warning: empty testcase file(s)!</b>';
                 }
 
@@ -820,10 +823,11 @@ class ProblemController extends BaseController
      */
     public function fetchTestcaseAction(int $probId, int $rank, string $type)
     {
-        /** @var TestcaseWithContent $testcase */
+        /** @var Testcase $testcase */
         $testcase = $this->em->createQueryBuilder()
-            ->from(TestcaseWithContent::class, 'tc')
-            ->select('tc')
+            ->from(Testcase::class, 'tc')
+            ->join('tc.content', 'tcc')
+            ->select('tc', 'tcc')
             ->andWhere('tc.probid = :problem')
             ->andWhere('tc.rank = :rank')
             ->setParameter(':problem', $probId)
@@ -847,13 +851,13 @@ class ProblemController extends BaseController
 
         switch ($type) {
             case 'input':
-                $content = $testcase->getInput();
+                $content = $testcase->getContent()->getInput();
                 break;
             case 'output':
-                $content = $testcase->getOutput();
+                $content = $testcase->getContent()->getOutput();
                 break;
             case 'image':
-                $content = $testcase->getImage();
+                $content = $testcase->getContent()->getImage();
                 break;
         }
 
@@ -1002,7 +1006,7 @@ class ProblemController extends BaseController
     }
 
     /**
-     * @param array $testcases
+     * @param Testcase[] $testcases
      * @param ZipArchive $zip
      */
     public function addTestcasesToZip(array $testcases, ZipArchive $zip, bool $isSample)
@@ -1012,8 +1016,8 @@ class ProblemController extends BaseController
         foreach ($testcases as $testcase) {
             $rankInGroup++;
             $filename = sprintf($formatString, $isSample ? 'sample' : 'secret', $rankInGroup);
-            $zip->addFromString($filename . '.in', $testcase->getInput());
-            $zip->addFromString($filename . '.ans', $testcase->getOutput());
+            $zip->addFromString($filename . '.in', $testcase->getContent()->getInput());
+            $zip->addFromString($filename . '.ans', $testcase->getContent()->getOutput());
 
             if (!empty($testcase->getDescription(true))) {
                 $description = $testcase->getDescription(true);
@@ -1024,7 +1028,7 @@ class ProblemController extends BaseController
             }
 
             if (!empty($testcase->getImageType())) {
-                $zip->addFromString($filename . '.' . $testcase->getImageType(), $testcase->getImage());
+                $zip->addFromString($filename . '.' . $testcase->getImageType(), $testcase->getContent()->getImage());
             }
         }
     }
