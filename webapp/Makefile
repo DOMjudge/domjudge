@@ -20,11 +20,6 @@ $(LOCALENV): %: $(TOPDIR)/etc/dbpasswords.secret
 	@[ -n "$(QUIET)" ] || echo "Generating '$@'..."
 	$(TOPDIR)/etc/gensymfonyenv $^ > $@
 
-# Clear Symfony cache for maintainer-mode operation:
-clear-cache:
-	bin/console --env=dev cache:clear
-	bin/console --env=prod cache:clear
-
 copy-bundle-assets:
 # We can not use bin/console here, as when using a fakeroot,
 # the include paths are broken. We just copy in the data we need
@@ -69,4 +64,4 @@ maintainer-clean-l:
 		done ; \
 	done
 
-.PHONY: clear-cache copy-bundle-assets
+.PHONY: copy-bundle-assets

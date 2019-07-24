@@ -230,9 +230,10 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 # Make sure we're running from a clean state:
 	@echo "Checking whether the database is set up..."
 	@if sql/dj_setup_database status ; then \
-		$(MAKE) -C webapp clear-cache ; \
+		composer auto-scripts ; \
 	else \
 		echo "Database not installed and accessible yet, fix this manually and rerun." ; \
+		exit 1; \
 	fi
 	@echo ""
 	@echo "========== Maintainer Install Completed =========="
