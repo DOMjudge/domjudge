@@ -83,7 +83,7 @@ CREATE TABLE `configuration` (
 --
 
 CREATE TABLE `contest` (
-  `cid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `cid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique contest ID',
   `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Contest ID in an external system',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `shortname` varchar(255) NOT NULL COMMENT 'Short name for this contest',
@@ -99,13 +99,13 @@ CREATE TABLE `contest` (
   `endtime_string` varchar(64) NOT NULL COMMENT 'Authoritative absolute or relative string representation of endtime',
   `unfreezetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of unfreezetime',
   `deactivatetime_string` varchar(64) DEFAULT NULL COMMENT 'Authoritative absolute or relative string representation of deactivatetime',
-  `finalizetime` decimal(32,9) DEFAULT NULL COMMENT 'Time when contest was finalized, null if not yet',
+  `finalizetime` decimal(32,9) UNSIGNED DEFAULT NULL COMMENT 'Time when contest was finalized, null if not yet',
   `finalizecomment` text DEFAULT NULL COMMENT 'Comments by the finalizer',
   `b` smallint(3) unsigned NOT NULL default 0 COMMENT 'Number of extra bronze medals',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'Whether this contest can be active',
   `starttime_enabled` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'If disabled, starttime is not used, e.g. to delay contest start',
-  `process_balloons` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Will balloons be processed for this contest?',
-  `public` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Is this contest visible for the public and non-associated teams?',
+  `process_balloons` tinyint(1) UNSIGNED DEFAULT 1 NOT NULL COMMENT 'Will balloons be processed for this contest?',
+  `public` tinyint(1) UNSIGNED DEFAULT 1 NOT NULL COMMENT 'Is this contest visible for the public?',
   `open_to_all_teams` tinyint(1) UNSIGNED DEFAULT 1 COMMENT 'Is this contest open to all teams?',
   PRIMARY KEY (`cid`),
   UNIQUE KEY `externalid` (`externalid`(190)),
