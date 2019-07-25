@@ -11,7 +11,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class SubmissionFile
 {
-
     /**
      * @var int
      *
@@ -46,11 +45,10 @@ class SubmissionFile
     private $submission;
 
     /**
-     * @var SubmissionFileWithSourceCode
-     * @ORM\OneToOne(targetEntity="SubmissionFileWithSourceCode")
-     * @ORM\JoinColumn(name="submitfileid", referencedColumnName="submitfileid")
+     * @var string
+     * @ORM\Column(type="text", name="sourcecode", options={"comment"="Full source code"}, nullable=false)
      */
-    private $submission_file_source_code;
+    private $sourcecode;
 
     /**
      * Get submitfileid
@@ -159,26 +157,26 @@ class SubmissionFile
     }
 
     /**
-     * Set submissionFileSourceCode
+     * Set sourcecode
      *
-     * @param SubmissionFileWithSourceCode $submissionFileSourceCode
+     * @param string $sourcecode
      *
      * @return SubmissionFile
      */
-    public function setSubmissionFileSourceCode(SubmissionFileWithSourceCode $submissionFileSourceCode = null)
+    public function setSourcecode($sourcecode)
     {
-        $this->submission_file_source_code = $submissionFileSourceCode;
+        $this->sourcecode = $sourcecode;
 
         return $this;
     }
 
     /**
-     * Get submissionFileSourceCode
+     * Get sourcecode
      *
-     * @return SubmissionFileWithSourceCode
+     * @return string
      */
-    public function getSubmissionFileSourceCode()
+    public function getSourcecode()
     {
-        return $this->submission_file_source_code;
+        return $this->sourcecode;
     }
 }

@@ -7,7 +7,7 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Entity\Submission;
-use App\Entity\SubmissionFileWithSourceCode;
+use App\Entity\SubmissionFile;
 use App\Entity\Testcase;
 use App\Entity\TestcaseContent;
 use App\Form\Type\ProblemType;
@@ -427,7 +427,7 @@ class ProblemController extends BaseController
             // that could break e.g. Java sources, even if _we_ support this
             // by default.
             $directory = sprintf('submissions/%s/s%d/', $problemResult, $solution->getSubmitid());
-            /** @var SubmissionFileWithSourceCode $source */
+            /** @var SubmissionFile $source */
             foreach ($solution->getFilesWithSourceCode() as $source) {
                 $zip->addFromString($directory . $source->getFilename(), $source->getSourcecode());
             }

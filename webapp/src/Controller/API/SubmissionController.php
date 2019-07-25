@@ -7,7 +7,6 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
-use App\Entity\SubmissionFileWithSourceCode;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
@@ -255,7 +254,7 @@ class SubmissionController extends AbstractRestController
     public function getSubmissionFilesAction(Request $request, string $id)
     {
         $queryBuilder = $this->getQueryBuilder($request)
-            ->join('s.files_with_source_code', 'f')
+            ->join('s.files', 'f')
             ->select('s, f')
             ->andWhere(sprintf('%s = :id', $this->getIdField()))
             ->setParameter(':id', $id);
@@ -269,7 +268,7 @@ class SubmissionController extends AbstractRestController
 
         $submission = reset($submissions);
 
-        /** @var SubmissionFileWithSourceCode[] $files */
+        /** @var SubmissionFile[] $files */
         $files = $submission->getFilesWithSourceCode();
         $zip   = new \ZipArchive;
         if (!($tmpfname = tempnam($this->dj->getDomjudgeTmpDir(), "submission_file-"))) {
@@ -322,9 +321,8 @@ class SubmissionController extends AbstractRestController
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(SubmissionFile::class, 'f')
-            ->join('f.submission_file_source_code', 'sc')
             ->join('f.submission', 's')
-            ->select('f, sc, s')
+            ->select('f, s')
             ->andWhere('s.cid = :cid')
             ->andWhere('s.submitid = :submitid')
             ->setParameter(':cid', $this->getContestId($request))
@@ -340,12 +338,11 @@ class SubmissionController extends AbstractRestController
 
         $result = [];
         foreach ($files as $file) {
-            $sourceCode = $file->getSubmissionFileSourceCode();
             $result[]   = [
                 'id' => (string)$file->getSubmitfileid(),
                 'submission_id' => (string)$file->getSubmitid(),
                 'filename' => $file->getFilename(),
-                'source' => base64_encode($sourceCode->getSourcecode()),
+                'source' => base64_encode($file->getSourcecode()),
             ];
         }
         return $result;

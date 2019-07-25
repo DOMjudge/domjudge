@@ -7,7 +7,7 @@ use App\Entity\JudgingRunWithOutput;
 use App\Entity\Problem;
 use App\Entity\RankCache;
 use App\Entity\ScoreCache;
-use App\Entity\SubmissionFileWithSourceCode;
+use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -307,7 +307,6 @@ abstract class BaseController extends AbstractController
                 continue;
             }
             if ($currentEntity != $entityClass && !in_array($currentEntity, [
-                    SubmissionFileWithSourceCode::class,
                     JudgingRunWithOutput::class,
                 ])) {
                 $result[] = $currentEntity;

@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 namespace App\Utils;
 
-use App\Entity\SubmissionFileWithSourceCode;
+use App\Entity\SubmissionFile;
 
 /**
  * Generic utility class.
@@ -841,17 +841,17 @@ class Utils
 
     /**
      * Create a diff for the given two sources
-     * @param SubmissionFileWithSourceCode $newSource
-     * @param string                       $newFile
-     * @param SubmissionFileWithSourceCode $oldSource
-     * @param string                       $oldFile
-     * @param string                       $tmpdir
+     * @param SubmissionFile $newSource
+     * @param string         $newFile
+     * @param SubmissionFile $oldSource
+     * @param string         $oldFile
+     * @param string         $tmpdir
      * @return string
      */
     public static function createDiff(
-        SubmissionFileWithSourceCode $newSource,
+        SubmissionFile $newSource,
         string $newFile,
-        SubmissionFileWithSourceCode $oldSource,
+        SubmissionFile $oldSource,
         string $oldFile,
         string $tmpdir
     ): string {

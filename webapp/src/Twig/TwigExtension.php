@@ -6,7 +6,7 @@ use App\Entity\Contest;
 use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Submission;
-use App\Entity\SubmissionFileWithSourceCode;
+use App\Entity\SubmissionFile;
 use App\Entity\Testcase;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -712,11 +712,11 @@ JS;
 
     /**
      * Show a diff between two files
-     * @param SubmissionFileWithSourceCode $newFile
-     * @param SubmissionFileWithSourceCode $oldFile
+     * @param SubmissionFile $newFile
+     * @param SubmissionFile $oldFile
      * @return string
      */
-    public function showDiff(SubmissionFileWithSourceCode $newFile, SubmissionFileWithSourceCode $oldFile)
+    public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile)
     {
         $newsourcefile = $this->submissionService->getSourceFilename([
                                                                          'cid' => $newFile->getSubmission()->getCid(),

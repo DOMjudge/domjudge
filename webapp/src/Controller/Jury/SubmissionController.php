@@ -10,7 +10,7 @@ use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
-use App\Entity\SubmissionFileWithSourceCode;
+use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Service\BalloonService;
@@ -565,9 +565,9 @@ class SubmissionController extends BaseController
     public function sourceAction(Request $request, Submission $submission)
     {
         if ($request->query->has('fetch')) {
-            /** @var SubmissionFileWithSourceCode $file */
+            /** @var SubmissionFile $file */
             $file = $this->em->createQueryBuilder()
-                ->from(SubmissionFileWithSourceCode::class, 'file')
+                ->from(SubmissionFile::class, 'file')
                 ->select('file')
                 ->andWhere('file.rank = :rank')
                 ->andWhere('file.submission = :submission')
@@ -590,9 +590,9 @@ class SubmissionController extends BaseController
             return $response;
         }
 
-        /** @var SubmissionFileWithSourceCode[] $files */
+        /** @var SubmissionFile[] $files */
         $files = $this->em->createQueryBuilder()
-            ->from(SubmissionFileWithSourceCode::class, 'file')
+            ->from(SubmissionFile::class, 'file')
             ->select('file')
             ->andWhere('file.submission = :submission')
             ->setParameter(':submission', $submission)
@@ -606,9 +606,9 @@ class SubmissionController extends BaseController
             /** @var Submission $originalSubmission */
             $originalSubmission = $this->em->getRepository(Submission::class)->find($submission->getOrigsubmitid());
 
-            /** @var SubmissionFileWithSourceCode[] $files */
+            /** @var SubmissionFile[] $files */
             $originallFiles = $this->em->createQueryBuilder()
-                ->from(SubmissionFileWithSourceCode::class, 'file')
+                ->from(SubmissionFile::class, 'file')
                 ->select('file')
                 ->andWhere('file.submission = :submission')
                 ->setParameter(':submission', $originalSubmission)
@@ -650,9 +650,9 @@ class SubmissionController extends BaseController
                 ->getOneOrNullResult();
         }
 
-        /** @var SubmissionFileWithSourceCode[] $files */
+        /** @var SubmissionFile[] $files */
         $oldFiles = $this->em->createQueryBuilder()
-            ->from(SubmissionFileWithSourceCode::class, 'file')
+            ->from(SubmissionFile::class, 'file')
             ->select('file')
             ->andWhere('file.submission = :submission')
             ->setParameter(':submission', $oldSubmission)
@@ -690,9 +690,9 @@ class SubmissionController extends BaseController
                                                                                               ['submitId' => $submission->getSubmitid()]));
         }
 
-        /** @var SubmissionFileWithSourceCode[] $files */
+        /** @var SubmissionFile[] $files */
         $files = $this->em->createQueryBuilder()
-            ->from(SubmissionFileWithSourceCode::class, 'file')
+            ->from(SubmissionFile::class, 'file')
             ->select('file')
             ->andWhere('file.submission = :submission')
             ->setParameter(':submission', $submission)
@@ -897,8 +897,8 @@ class SubmissionController extends BaseController
     }
 
     /**
-     * @param SubmissionFileWithSourceCode[] $files
-     * @param SubmissionFileWithSourceCode[] $oldFiles
+     * @param SubmissionFile[] $files
+     * @param SubmissionFile[] $oldFiles
      * @return array
      */
     protected function determineFileChanged(array $files, array $oldFiles)

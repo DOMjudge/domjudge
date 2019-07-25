@@ -180,13 +180,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     private $files;
 
     /**
-     * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="App\Entity\SubmissionFileWithSourceCode", mappedBy="submission")
-     * @Serializer\Exclude()
-     */
-    private $files_with_source_code;
-
-    /**
      * @ORM\OneToMany(targetEntity="Balloon", mappedBy="submission")
      * @Serializer\Exclude()
      */
@@ -596,11 +589,10 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      */
     public function __construct()
     {
-        $this->judgings               = new ArrayCollection();
-        $this->files                  = new ArrayCollection();
-        $this->files_with_source_code = new ArrayCollection();
-        $this->resubmissions          = new ArrayCollection();
-        $this->external_judgements    = new ArrayCollection();
+        $this->judgings            = new ArrayCollection();
+        $this->files               = new ArrayCollection();
+        $this->resubmissions       = new ArrayCollection();
+        $this->external_judgements = new ArrayCollection();
     }
 
     /**
@@ -693,40 +685,6 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getFiles()
     {
         return $this->files;
-    }
-
-    /**
-     * Add file with source code
-     *
-     * @param SubmissionFileWithSourceCode $file
-     *
-     * @return Submission
-     */
-    public function addFileWithSourceCode(SubmissionFileWithSourceCode $file)
-    {
-        $this->files_with_source_code->add($file);
-
-        return $this;
-    }
-
-    /**
-     * Remove file with source code
-     *
-     * @param SubmissionFileWithSourceCode $file
-     */
-    public function removeFileWithSourceCode(SubmissionFileWithSourceCode $file)
-    {
-        $this->files_with_source_code->removeElement($file);
-    }
-
-    /**
-     * Get files with source code
-     *
-     * @return Collection
-     */
-    public function getFilesWithSourceCode()
-    {
-        return $this->files_with_source_code;
     }
 
     /**

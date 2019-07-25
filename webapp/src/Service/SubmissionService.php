@@ -8,7 +8,7 @@ use App\Entity\Judging;
 use App\Entity\JudgingRun;
 use App\Entity\Language;
 use App\Entity\Submission;
-use App\Entity\SubmissionFileWithSourceCode;
+use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Utils\FreezeData;
 use App\Utils\Utils;
@@ -464,7 +464,7 @@ class SubmissionService
         $this->em->persist($submission);
 
         foreach ($files as $rank => $file) {
-            $submissionFile = new SubmissionFileWithSourceCode();
+            $submissionFile = new SubmissionFile();
             $submissionFile
                 ->setFilename($file->getClientOriginalName())
                 ->setRank($rank)
