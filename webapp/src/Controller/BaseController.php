@@ -145,7 +145,7 @@ abstract class BaseController extends AbstractController
 
                         foreach ($associationMapping['joinColumns'] as $joinColumn) {
                             $type                                = $joinColumn['onDelete'] ?? null;
-                            $tableRelations[$joinColumn['name']] = [
+                            $tableRelations[$associationMapping['fieldName']] = [
                                 'target' => $associationMapping['targetEntity'],
                                 'targetColumn' => $joinColumn['referencedColumnName'],
                                 'type' => $type,
