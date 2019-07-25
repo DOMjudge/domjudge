@@ -75,6 +75,12 @@ CREATE TABLE `judging_run_output` (
   CONSTRAINT `judging_run_output_ibfk_1` FOREIGN KEY (`runid`) REFERENCES `judging_run` (`runid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores output of judging run';
 
+-- Change table structure to reflect Doctrine entities when appropriate
+ALTER TABLE `contest`
+    CHANGE COLUMN `cid` `cid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique contest ID',
+    CHANGE COLUMN `finalizetime` `finalizetime` decimal(32, 9) UNSIGNED DEFAULT NULL COMMENT 'Time when contest was finalized, null if not yet',
+    CHANGE COLUMN `process_balloons` `process_balloons` tinyint(1) UNSIGNED DEFAULT 1 NOT NULL COMMENT 'Will balloons be processed for this contest?';
+
 --
 -- Transfer data from old to new structure
 --
