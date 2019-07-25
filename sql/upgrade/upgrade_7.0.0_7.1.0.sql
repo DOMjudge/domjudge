@@ -61,6 +61,16 @@ CREATE TABLE `testcase_content` (
   CONSTRAINT `testcase_contest_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores contents of testcase';
 
+CREATE TABLE `judging_run_output` (
+  `runid` int(4) unsigned NOT NULL COMMENT 'Run ID',
+  `output_run` longblob DEFAULT NULL COMMENT 'Output of running the program',
+  `output_diff` longblob DEFAULT NULL COMMENT 'Diffing the program output and testcase output',
+  `output_error` longblob DEFAULT NULL COMMENT 'Standard error output of the program',
+  `output_system` longblob DEFAULT NULL COMMENT 'Judging system output',
+  PRIMARY KEY  (`runid`),
+  CONSTRAINT `judging_run_output_ibfk_1` FOREIGN KEY (`runid`) REFERENCES `judging_run` (`runid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores output of judging run';
+
 --
 -- Transfer data from old to new structure
 --
@@ -68,6 +78,8 @@ CREATE TABLE `testcase_content` (
 INSERT INTO `testcase_content` (`testcaseid`, `input`, `output`, `image`, `image_thumb`)
     SELECT `testcaseid`, `input`, `output`, `image`, `image_thumb` FROM `testcase`;
 
+INSERT INTO `judging_run_output` (`runid`, `output_run`, `output_diff`, `output_error`, `output_system`)
+    SELECT `runid`, `output_run`, `output_diff`, `output_error`, `output_system` FROM `judging_run`;
 
 --
 -- Add/remove sample/initial contents
@@ -89,3 +101,9 @@ ALTER TABLE `testcase`
     DROP COLUMN `output`,
     DROP COLUMN `image`,
     DROP COLUMN `image_thumb`;
+
+ALTER TABLE `judging_run`
+    DROP COLUMN `output_run`,
+    DROP COLUMN `output_diff`,
+    DROP COLUMN `output_error`,
+    DROP COLUMN `output_system`;

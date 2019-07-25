@@ -3,11 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\BaseApiEntity;
-use App\Entity\JudgingRunWithOutput;
 use App\Entity\Problem;
 use App\Entity\RankCache;
 use App\Entity\ScoreCache;
-use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
@@ -306,9 +304,7 @@ abstract class BaseController extends AbstractController
             if (in_array($currentEntity, $result)) {
                 continue;
             }
-            if ($currentEntity != $entityClass && !in_array($currentEntity, [
-                    JudgingRunWithOutput::class,
-                ])) {
+            if ($currentEntity != $entityClass) {
                 $result[] = $currentEntity;
             }
 

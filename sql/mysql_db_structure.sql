@@ -305,10 +305,6 @@ CREATE TABLE `judging_run` (
   `runresult` varchar(32) DEFAULT NULL COMMENT 'Result of this run, NULL if not finished yet',
   `runtime` float DEFAULT NULL COMMENT 'Submission running time on this testcase',
   `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run judging ended',
-  `output_run` longblob DEFAULT NULL COMMENT 'Output of running the program',
-  `output_diff` longblob DEFAULT NULL COMMENT 'Diffing the program output and testcase output',
-  `output_error` longblob DEFAULT NULL COMMENT 'Standard error output of the program',
-  `output_system` longblob DEFAULT NULL COMMENT 'Judging system output',
   PRIMARY KEY  (`runid`),
   UNIQUE KEY `testcaseid` (`judgingid`, `testcaseid`),
   KEY `judgingid` (`judgingid`),
@@ -316,6 +312,20 @@ CREATE TABLE `judging_run` (
   CONSTRAINT `judging_run_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`),
   CONSTRAINT `judging_run_ibfk_2` FOREIGN KEY (`judgingid`) REFERENCES `judging` (`judgingid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Result of a testcase run within a judging';
+
+--
+-- Table structure for table `judging_run_output`
+--
+
+CREATE TABLE `judging_run_output` (
+  `runid` int(4) unsigned NOT NULL COMMENT 'Run ID',
+  `output_run` longblob DEFAULT NULL COMMENT 'Output of running the program',
+  `output_diff` longblob DEFAULT NULL COMMENT 'Diffing the program output and testcase output',
+  `output_error` longblob DEFAULT NULL COMMENT 'Standard error output of the program',
+  `output_system` longblob DEFAULT NULL COMMENT 'Judging system output',
+  PRIMARY KEY  (`runid`),
+  CONSTRAINT `judging_run_output_ibfk_1` FOREIGN KEY (`runid`) REFERENCES `judging_run` (`runid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores content of judging run';
 
 --
 -- Table structure for table `language`

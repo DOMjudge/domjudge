@@ -8,6 +8,7 @@ use App\Entity\InternalError;
 use App\Entity\Judgehost;
 use App\Entity\Judging;
 use App\Entity\JudgingRun;
+use App\Entity\JudgingRunOutput;
 use App\Entity\Submission;
 use App\Entity\Testcase;
 use App\Entity\User;
@@ -19,7 +20,6 @@ use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use App\Entity\JudgingRunWithOutput;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -1005,13 +1005,16 @@ class JudgehostController extends AbstractFOSRestController
             $outputDiff,
             $outputRun
         ) {
-            $judgingRun = new JudgingRunWithOutput();
+            $judgingRun = new JudgingRun();
+            $judgingRunOutput = new JudgingRunOutput();
+            $judgingRun->setOutput($judgingRunOutput);
             $judgingRun
                 ->setJudging($judging)
                 ->setTestcase($testCase)
                 ->setRunresult($runResult)
                 ->setRuntime($runTime)
-                ->setEndtime(Utils::now())
+                ->setEndtime(Utils::now());
+            $judgingRunOutput
                 ->setOutputRun(base64_decode($outputRun))
                 ->setOutputDiff(base64_decode($outputDiff))
                 ->setOutputError(base64_decode($outputError))

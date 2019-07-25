@@ -75,12 +75,11 @@ class JudgingRun extends BaseApiEntity
     private $testcase;
 
     /**
-     * @var JudgingRunWithOutput
-     * @ORM\OneToOne(targetEntity="JudgingRunWithOutput")
-     * @ORM\JoinColumn(name="runid", referencedColumnName="runid")
+     * @var JudgingRunOutput
+     * @ORM\OneToOne(targetEntity="App\Entity\JudgingRunOutput", mappedBy="run", cascade={"persist"})
      * @Serializer\Exclude()
      */
-    private $judging_run_output;
+    private $output;
 
 
     /**
@@ -303,26 +302,27 @@ class JudgingRun extends BaseApiEntity
     }
 
     /**
-     * Set judgingRunOutput
+     * Set output
      *
-     * @param JudgingRunWithOutput $judgingRunOutput
+     * @param JudgingRunOutput $output
      *
      * @return JudgingRun
      */
-    public function setJudgingRunOutput(JudgingRunWithOutput $judgingRunOutput)
+    public function setOutput(JudgingRunOutput $output)
     {
-        $this->judging_run_output = $judgingRunOutput;
+        $this->output = $output;
+        $this->output->setRun($this);
 
         return $this;
     }
 
     /**
-     * Get judgingRunOutput
+     * Get output
      *
-     * @return JudgingRunWithOutput
+     * @return JudgingRunOutput
      */
-    public function getJudgingRunOutput()
+    public function getOutput()
     {
-        return $this->judging_run_output;
+        return $this->output;
     }
 }

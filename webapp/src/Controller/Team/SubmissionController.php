@@ -164,7 +164,7 @@ class SubmissionController extends BaseController
                 ->from(Testcase::class, 't')
                 ->join('t.content', 'tc')
                 ->leftJoin('t.judging_runs', 'jr', Join::WITH, 'jr.judging = :judging')
-                ->leftJoin('jr.judging_run_output', 'jro')
+                ->leftJoin('jr.output', 'jro')
                 ->select('t', 'jr', 'tc', 'jro')
                 ->andWhere('t.problem = :problem')
                 ->andWhere('t.sample = 1')

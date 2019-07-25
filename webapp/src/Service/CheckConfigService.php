@@ -5,10 +5,8 @@ namespace App\Service;
 use App\Entity\ContestProblem;
 use App\Entity\Executable;
 use App\Entity\Judgehost;
-use App\Entity\JudgingRunWithOutput;
 use App\Entity\Language;
 use App\Entity\Problem;
-use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\Testcase;
@@ -696,8 +694,6 @@ class CheckConfigService
             $class      = sprintf('App\\Entity\\%s', $shortClass);
             try {
                 if (class_exists($class) && !in_array($class, [
-                        // These entities are already checked in other classes
-                        JudgingRunWithOutput::class,
                         // Contestproblem is checked using Problem
                         ContestProblem::class,
                     ]) && ($externalIdField = $this->eventLogService->externalIdFieldForEntity($class))) {
