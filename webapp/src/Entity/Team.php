@@ -11,7 +11,16 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * All teams participating in the contest
  * @ORM\Entity()
- * @ORM\Table(name="team", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="team",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"},
+ *     indexes={
+ *         @ORM\Index(name="affilid", columns={"affilid"}),
+ *         @ORM\Index(name="categoryid", columns={"categoryid"})
+ *     },
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {"190"}}),
+ *     })
  * @Serializer\VirtualProperty(
  *     "externalid_nonstrict",
  *     exp="object.getExternalId()",
@@ -26,7 +35,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="teamid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="teamid", length=4, options={"comment"="Unique team ID", "unsigned"=true}, nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
@@ -34,30 +43,29 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 
     /**
      * @var string
-     * TODO: ORM\Unique on first 190 characters
      * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Team ID in an external system",
-     *                            "collation"="utf8mb4_bin"}, nullable=true)
+     *                            "collation"="utf8mb4_bin","default"="NULL"}, nullable=true)
      * @Serializer\SerializedName("icpc_id")
      */
     protected $externalid;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="name", length=255, options={"comment"="Team Name", "collation"="utf8mb4_bin"},
+     * @ORM\Column(type="string", name="name", length=255, options={"comment"="Team name", "collation"="utf8mb4_bin"},
      *                            nullable=false)
      */
     private $name;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="categoryid", options={"comment"="Team category ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="categoryid", options={"comment"="Team category ID","unsigned"="true","default"=0}, nullable=false)
      * @Serializer\Exclude()
      */
     private $categoryid = 0;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="affilid", options={"comment"="Team affiliation ID"}, nullable=true)
+     * @ORM\Column(type="integer", name="affilid", options={"comment"="Team affiliation ID","unsigned"="true","default"="NULL"}, nullable=true)
      * @Serializer\SerializedName("organization_id")
      * @Serializer\Type("string")
      */
@@ -65,15 +73,17 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="enabled", options={"comment"="Whether the team is visible and operational"},
-     *                             nullable=true)
+     * @ORM\Column(type="boolean", name="enabled",
+     *     options={"comment"="Whether the team is visible and operational",
+     *              "unsigned"="true","default"=1},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $enabled = true;
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="members", options={"comment"="Team member names (freeform)"},
+     * @ORM\Column(type="text", length=4294967295, name="members", options={"comment"="Team member names (freeform)","default"="NULL"},
      *                          nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
@@ -81,7 +91,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team"},
+     * @ORM\Column(type="string", length=255, name="room", options={"comment"="Physical location of team","default"="NULL"},
      *                            nullable=true)
      * @Serializer\Exclude()
      */
@@ -89,7 +99,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team"},
+     * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team","default"="NULL"},
      *                          nullable=true)
      * @Serializer\Exclude()
      */
@@ -97,16 +107,18 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started", options={"comment"="Start time
-     *                             of last judging for priorization", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="judging_last_started",
+     *     options={"comment"="Start time of last judging for priorization",
+     *              "unsigned"=true,"default"="NULL"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $judging_last_started;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="penalty", options={"comment"="Additional penalty time in minutes"},
-     *                             nullable=false)
+     * @ORM\Column(type="integer", name="penalty",
+     *     options={"comment"="Additional penalty time in minutes","default"=0},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $penalty = 0;
@@ -165,8 +177,8 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     /**
      * @ORM\ManyToMany(targetEntity="Clarification")
      * @ORM\JoinTable(name="team_unread",
-     *                joinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid")},
-     *                inverseJoinColumns={@ORM\JoinColumn(name="mesgid", referencedColumnName="clarid")}
+     *                joinColumns={@ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")},
+     *                inverseJoinColumns={@ORM\JoinColumn(name="mesgid", referencedColumnName="clarid", onDelete="CASCADE")}
      * )
      * @Serializer\Exclude()
      */

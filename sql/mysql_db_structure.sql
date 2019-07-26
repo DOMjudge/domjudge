@@ -139,11 +139,11 @@ CREATE TABLE `contestproblem` (
 --
 
 CREATE TABLE `contestteam` (
-  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Unique contest ID',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Unique team ID',
   PRIMARY KEY (`cid`,`teamid`),
-  KEY `cid` (`cid`),
-  KEY `teamid` (`teamid`),
+  KEY `IDX_8328F8554B30D9C4` (`cid`),
+  KEY `IDX_8328F8554DD6ABF3` (`teamid`),
   CONSTRAINT `contestteam_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `contestteam_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Many-to-Many mapping of contests and teams';
@@ -509,8 +509,8 @@ CREATE TABLE `submission_file` (
 --
 
 CREATE TABLE `team` (
-  `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Team ID in an external system',
+  `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique team ID',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Team affiliation ID in an external system',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Team name',
   `categoryid` int(4) unsigned NOT NULL DEFAULT 0 COMMENT 'Team category ID',
   `affilid` int(4) unsigned DEFAULT NULL COMMENT 'Team affiliation ID',
@@ -550,7 +550,7 @@ CREATE TABLE `team_affiliation` (
 CREATE TABLE `team_category` (
   `categoryid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
-  `sortorder` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT 'Where to sort this category on the scoreboard',
+  `sortorder` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT 'Where to sort this category on the scoreboard(DC2Type:tinyint)',
   `color` varchar(32) DEFAULT NULL COMMENT 'Background colour on the scoreboard',
   `visible` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'Are teams in this category visible?',
   PRIMARY KEY  (`categoryid`),
@@ -562,10 +562,11 @@ CREATE TABLE `team_category` (
 --
 
 CREATE TABLE `team_unread` (
-  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
-  `mesgid` int(4) unsigned NOT NULL COMMENT 'Clarification ID',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Unique team ID',
+  `mesgid` int(4) unsigned NOT NULL COMMENT 'Unique clarification ID',
   PRIMARY KEY (`teamid`,`mesgid`),
-  KEY `mesgid` (`mesgid`),
+  KEY `IDX_3272D5F4DD6ABF3` (`teamid`),
+  KEY `IDX_3272D5F9E88E262` (`mesgid`),
   CONSTRAINT `team_unread_ibfk_1` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
   CONSTRAINT `team_unread_ibfk_2` FOREIGN KEY (`mesgid`) REFERENCES `clarification` (`clarid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='List of items a team has not viewed yet';
