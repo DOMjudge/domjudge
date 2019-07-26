@@ -325,7 +325,7 @@ CREATE TABLE `judging_run_output` (
   `output_system` longblob DEFAULT NULL COMMENT 'Judging system output',
   PRIMARY KEY  (`runid`),
   CONSTRAINT `judging_run_output_ibfk_1` FOREIGN KEY (`runid`) REFERENCES `judging_run` (`runid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores content of judging run';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores output of judging run';
 
 --
 -- Table structure for table `language`

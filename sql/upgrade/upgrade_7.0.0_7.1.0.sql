@@ -58,7 +58,7 @@ CREATE TABLE `testcase_content` (
   `image` longblob DEFAULT NULL COMMENT 'A graphical representation of the testcase',
   `image_thumb` longblob DEFAULT NULL COMMENT 'Aumatically created thumbnail of the image',
   PRIMARY KEY  (`testcaseid`),
-  CONSTRAINT `testcase_contest_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`) ON DELETE CASCADE
+  CONSTRAINT `testcase_content_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores contents of testcase';
 
 CREATE TABLE `judging_run_output` (
