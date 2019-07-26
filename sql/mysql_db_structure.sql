@@ -471,8 +471,8 @@ CREATE TABLE `submission` (
   `judgehost` varchar(64) DEFAULT NULL COMMENT 'Current/last judgehost judging this submission',
   `valid` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'If false ignore this submission in all scoreboard calculations',
   `rejudgingid` int(4) unsigned DEFAULT NULL COMMENT 'Rejudging ID (if rejudge)',
-  `expected_results` varchar(255) DEFAULT NULL COMMENT 'JSON encoded list of expected results - used to validate jury submissions',
-  `externalid` varchar(255) DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
+  `expected_results` varchar(255) DEFAULT NULL COMMENT 'JSON encoded list of expected results - used to validate jury submissions(DC2Type:json)',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
   `entry_point` varchar(255) DEFAULT NULL COMMENT 'Optional entry point. Can be used e.g. for java main class.',
   PRIMARY KEY  (`submitid`),
   UNIQUE KEY `externalid` (`cid`,`externalid`(190)),
@@ -484,13 +484,15 @@ CREATE TABLE `submission` (
   KEY `judgehost_2` (`judgehost`),
   KEY `origsubmitid` (`origsubmitid`),
   KEY `rejudgingid` (`rejudgingid`),
+  KEY `probid_2` (`cid`,`probid`),
   CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_4` FOREIGN KEY (`langid`) REFERENCES `language` (`langid`) ON DELETE CASCADE,
   CONSTRAINT `submission_ibfk_5` FOREIGN KEY (`judgehost`) REFERENCES `judgehost` (`hostname`) ON DELETE SET NULL,
   CONSTRAINT `submission_ibfk_6` FOREIGN KEY (`origsubmitid`) REFERENCES `submission` (`submitid`) ON DELETE SET NULL,
-  CONSTRAINT `submission_ibfk_7` FOREIGN KEY (`rejudgingid`) REFERENCES `rejudging` (`rejudgingid`) ON DELETE SET NULL
+  CONSTRAINT `submission_ibfk_7` FOREIGN KEY (`rejudgingid`) REFERENCES `rejudging` (`rejudgingid`) ON DELETE SET NULL,
+  CONSTRAINT `submission_ibfk_8` FOREIGN KEY (`cid`,`probid`) REFERENCES `contestproblem` (`cid`,`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='All incoming submissions';
 
 --

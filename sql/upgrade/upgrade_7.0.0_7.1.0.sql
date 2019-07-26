@@ -122,6 +122,12 @@ ALTER TABLE `contestproblem`
     CHANGE COLUMN `cid` `cid` INT UNSIGNED NOT NULL COMMENT 'Unique contest ID',
     CHANGE COLUMN `probid` `probid` INT UNSIGNED NOT NULL COMMENT 'Unique problem ID';
 
+ALTER TABLE `submission`
+    CHANGE COLUMN `externalid` `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Specifies ID of submission if imported from external CCS, e.g. Kattis',
+    CHANGE COLUMN `expected_results` `expected_results` varchar(255) DEFAULT NULL COMMENT 'JSON encoded list of expected results - used to validate jury submissions(DC2Type:json)',
+    ADD KEY `probid_2` (`cid`,`probid`),
+    ADD CONSTRAINT `submission_ibfk_8` FOREIGN KEY (`cid`,`probid`) REFERENCES `contestproblem` (`cid`,`probid`) ON DELETE CASCADE;
+
 --
 -- Transfer data from old to new structure
 --
