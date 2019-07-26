@@ -10,7 +10,12 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * Affilitations for teams (e.g.: university, company)
  * @ORM\Entity()
- * @ORM\Table(name="team_affiliation", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="team_affiliation",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Affilitations for teams (e.g.: university, company)"},
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {"190"}}),
+ *     })
  * @Serializer\VirtualProperty(
  *     "icpcId",
  *     exp="object.getAffilid()",
@@ -29,7 +34,9 @@ class TeamAffiliation extends BaseApiEntity
      * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="affilid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="affilid", length=4,
+     *             options={"comment"="Unique ID","unsigned"=true},
+     *     nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
@@ -37,29 +44,36 @@ class TeamAffiliation extends BaseApiEntity
 
     /**
      * @var string
-     * TODO: ORM\Unique on first 190 characters
-     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Team affiliation ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="string", name="externalid", length=255,
+     *     options={"comment"="Team affiliation ID in an external system",
+     *              "collation"="utf8mb4_bin","default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     protected $externalid;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="shortname", length=32, options={"comment"="Short descriptive name"}, nullable=false)
+     * @ORM\Column(type="string", name="shortname", length=32,
+     *     options={"comment"="Short descriptive name"}, nullable=false)
      * @Serializer\SerializedName("name")
      */
     private $shortname;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
+     * @ORM\Column(type="string", name="name", length=255,
+     *     options={"comment"="Descriptive name"}, nullable=false)
      * @Serializer\SerializedName("formal_name")
      */
     private $name;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=3, name="country", options={"comment"="ISO 3166-1 alpha-3 country code"}, nullable=true)
+     * @ORM\Column(type="string", length=3, name="country",
+     *     options={"comment"="ISO 3166-1 alpha-3 country code","default"="NULL",
+     *              "fixed"=true},
+     *     nullable=true)
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').dbconfig_get('show_flags', true)")
      * @Country()
      */
@@ -67,7 +81,9 @@ class TeamAffiliation extends BaseApiEntity
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="comments", options={"comment"="Comments about this team"}, nullable=true)
+     * @ORM\Column(type="text", length=4294967295, name="comments",
+     *     options={"comment"="Comments","default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $comments;

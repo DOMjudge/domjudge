@@ -10,6 +10,7 @@ doctrine:
 
         url: '%env(resolve:DATABASE_URL)%'
         types:
+            tinyint: App\Doctrine\DBAL\Types\TinyIntType
             json: App\Doctrine\DBAL\Types\JsonType
             internal_error_status: App\Doctrine\DBAL\Types\InternalErrorStatusType
         mapping_types:

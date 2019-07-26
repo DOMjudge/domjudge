@@ -81,6 +81,31 @@ ALTER TABLE `contest`
     CHANGE COLUMN `finalizetime` `finalizetime` decimal(32, 9) UNSIGNED DEFAULT NULL COMMENT 'Time when contest was finalized, null if not yet',
     CHANGE COLUMN `process_balloons` `process_balloons` tinyint(1) UNSIGNED DEFAULT 1 NOT NULL COMMENT 'Will balloons be processed for this contest?';
 
+ALTER TABLE `team`
+    CHANGE COLUMN `teamid` `teamid` int(4) UNSIGNED AUTO_INCREMENT NOT NULL COMMENT 'Unique team ID';
+
+ALTER TABLE `contestteam`
+    CHANGE COLUMN `cid` `cid` int(4) unsigned NOT NULL COMMENT 'Unique contest ID',
+    CHANGE COLUMN `teamid` `teamid` int(4) unsigned NOT NULL COMMENT 'Unique team ID',
+    DROP INDEX `cid`,
+    DROP INDEX `teamid`,
+    ADD INDEX `IDX_8328F8554B30D9C4` (`cid`),
+    ADD INDEX `IDX_8328F8554DD6ABF3` (`teamid`);
+
+ALTER TABLE `team_unread`
+    CHANGE COLUMN `teamid` `teamid` int(4) unsigned NOT NULL COMMENT 'Unique team ID',
+    CHANGE COLUMN `mesgid` `mesgid` int(4) unsigned NOT NULL COMMENT 'Unique clarification ID',
+    DROP INDEX `mesgid`,
+    ADD INDEX `IDX_3272D5F4DD6ABF3` (`teamid`),
+    ADD INDEX `IDX_3272D5F9E88E262` (`mesgid`);
+
+ALTER TABLE `team_affiliation`
+    CHANGE COLUMN `externalid` `externalid` VARCHAR(255) DEFAULT NULL COLLATE utf8mb4_bin COMMENT 'Team affiliation ID in an external system';
+
+ALTER TABLE `team_category`
+    CHANGE COLUMN `sortorder` `sortorder` TINYINT(1) UNSIGNED DEFAULT 0 NOT NULL COMMENT 'Where to sort this category on the scoreboard(DC2Type:tinyint)';
+
+
 --
 -- Transfer data from old to new structure
 --

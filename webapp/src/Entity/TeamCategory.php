@@ -8,7 +8,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Categories for teams (e.g.: participants, observers, ...)
  * @ORM\Entity()
- * @ORM\Table(name="team_category", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="team_category",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Categories for teams (e.g.: participants, observers, ...)"},
+ *     indexes={@ORM\Index(name="sortorder", columns={"sortorder"})})
  * @Serializer\VirtualProperty(
  *     "hidden",
  *     exp="!object.getVisible()",
@@ -26,7 +29,8 @@ class TeamCategory extends BaseApiEntity
      * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="categoryid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="categoryid", length=4,
+     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
@@ -34,14 +38,18 @@ class TeamCategory extends BaseApiEntity
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="name", length=255, options={"comment"="Descriptive name"}, nullable=false)
+     * @ORM\Column(type="string", name="name", length=255,
+     *     options={"comment"="Descriptive name"}, nullable=false)
      * @Assert\NotBlank()
      */
     private $name;
 
     /**
      * @var int
-     * @ORM\Column(type="smallint", name="sortorder", options={"comment"="Where to sort this category on the scoreboard"}, nullable=false)
+     * @ORM\Column(type="tinyint", name="sortorder", length=1,
+     *     options={"comment"="Where to sort this category on the scoreboard",
+     *              "unsigned"=true,"default"="0"},
+     *     nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      * @Assert\GreaterThanOrEqual(0, message="Only non-negative sortorders are supported")
      */
@@ -49,14 +57,20 @@ class TeamCategory extends BaseApiEntity
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=32, name="color", options={"comment"="Background colour on the scoreboard"}, nullable=true)
+     * @ORM\Column(type="string", length=32, name="color",
+     *     options={"comment"="Background colour on the scoreboard",
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
     private $color;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="visible", options={"comment"="Are teams in this category visible?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="visible",
+     *     options={"comment"="Are teams in this category visible?",
+     *              "unsigned"=true,"default"="1"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $visible = true;
