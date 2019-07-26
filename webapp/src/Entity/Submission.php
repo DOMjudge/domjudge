@@ -12,7 +12,23 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * All incoming submissions
  * @ORM\Entity()
- * @ORM\Table(name="submission", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="submission",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="All incoming submissions"},
+ *     indexes={
+ *         @ORM\Index(name="teamid", columns={"cid","teamid"}),
+ *         @ORM\Index(name="judgehost", columns={"cid","judgehost"}),
+ *         @ORM\Index(name="teamid_2", columns={"teamid"}),
+ *         @ORM\Index(name="probid", columns={"probid"}),
+ *         @ORM\Index(name="langid", columns={"langid"}),
+ *         @ORM\Index(name="judgehost_2", columns={"judgehost"}),
+ *         @ORM\Index(name="origsubmitid", columns={"origsubmitid"}),
+ *         @ORM\Index(name="rejudgingid", columns={"rejudgingid"}),
+ *         @ORM\Index(name="probid_2", columns={"cid","probid"})
+ *     },
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, "190"}}),
+ *     })
  * @UniqueEntity("externalid")
  */
 class Submission extends BaseApiEntity implements ExternalRelationshipEntityInterface
@@ -22,7 +38,9 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="submitid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", length=4, name="submitid",
+     *     options={"comment"="Unique ID","unsigned"=true},
+     *     nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
@@ -30,14 +48,20 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Submission ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="string", name="externalid", length=255,
+     *     options={"comment"="Specifies ID of submission if imported from external CCS, e.g. Kattis",
+     *              "collation"="utf8mb4_bin", "default"="NULL"},
+     *     nullable=true)
      */
     protected $externalid;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="origsubmitid", options={"comment"="If set, specifies original submission in case of edit/resubmit"}, nullable=true)
+     * @ORM\Column(type="integer", name="origsubmitid",
+     *     options={"comment"="If set, specifies original submission in case of edit/resubmit",
+     *              "default"="NULL","unsigned"=true},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $origsubmitid;
@@ -45,7 +69,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="cid",
+     *     options={"comment"="Contest ID","unsigned"=true}, nullable=false)
      * @Serializer\Exclude()
      */
     private $cid;
@@ -53,7 +78,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="teamid", options={"comment"="Team ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="teamid",
+     *     options={"comment"="Team ID","unsigned"=true}, nullable=false)
      * @Serializer\SerializedName("team_id")
      * @Serializer\Type("string")
      */
@@ -62,7 +88,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="probid",
+     *     options={"comment"="Problem ID","unsigned"=true}, nullable=false)
      * @Serializer\SerializedName("problem_id")
      * @Serializer\Type("string")
      */
@@ -71,7 +98,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * @var int
      *
-     * @ORM\Column(type="string", name="langid", options={"comment"="Language ID"}, nullable=false)
+     * @ORM\Column(type="string", length=32, name="langid",
+     *     options={"comment"="Language ID"}, nullable=false)
      * @Serializer\Exclude()
      */
     private $langid;
@@ -86,7 +114,10 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="valid", options={"comment"="If false ignore this submission in all scoreboard calculations"}, nullable=false)
+     * @ORM\Column(type="boolean", name="valid",
+     *     options={"comment"="If false ignore this submission in all scoreboard calculations",
+     *              "unsigned"=true,"default"="1"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $valid = true;
@@ -94,24 +125,42 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="rejudgingid", options={"comment"="Rejudging ID (if rejudge)"}, nullable=true)
+     * @ORM\Column(type="integer", name="rejudgingid",
+     *     options={"comment"="Rejudging ID (if rejudge)","unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $rejudgingid;
 
     /**
      * @var array
-     * @ORM\Column(type="json", name="expected_results", length=255, options={"comment"="JSON encoded list of expected results - used to validate jury submissions", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="json", name="expected_results", length=255,
+     *     options={"comment"="JSON encoded list of expected results - used to validate jury submissions",
+     *              "default":"NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $expected_results;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="entry_point", length=255, options={"comment"="Optional entry point. Can be used e.g. for java main class.", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="string", name="entry_point", length=255,
+     *     options={"comment"="Optional entry point. Can be used e.g. for java main class.",
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
      */
     private $entry_point;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(type="string", name="judgehost", length=64,
+     *     options={"comment"="Current/last judgehost judging this submission",
+     *              "default":"NULL"}, nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $judgehost_as_string;
 
     /**
      * @var Judgehost|null
@@ -153,8 +202,8 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\ContestProblem", inversedBy="submissions")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="probid", referencedColumnName="probid"),
-     *   @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     *   @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE"),
+     *   @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      * })
      * @Serializer\Exclude()
      */
@@ -438,6 +487,30 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
     public function getRelativeSubmitTime()
     {
         return Utils::relTime($this->getContest()->getContestTime((float)$this->getSubmittime()));
+    }
+
+    /**
+     * Set judgehost as string
+     *
+     * @param string|null $judgehost
+     *
+     * @return Submission
+     */
+    public function setJudgehostAsString(?string $judgehost)
+    {
+        $this->judgehost_as_string = $judgehost;
+
+        return $this;
+    }
+
+    /**
+     * Get judgehost as string
+     *
+     * @return string|null
+     */
+    public function getJudgehostAsString(): ?string
+    {
+        return $this->judgehost_as_string;
     }
 
     /**

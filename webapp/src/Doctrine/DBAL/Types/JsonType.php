@@ -3,6 +3,7 @@
 namespace App\Doctrine\DBAL\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Platforms\MySqlPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\JsonType as BaseJsonType;
 
@@ -25,6 +26,13 @@ class JsonType extends BaseJsonType
      */
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
+        if (! empty($fieldDeclaration['length']) && is_numeric($fieldDeclaration['length'])) {
+            $length = $fieldDeclaration['length'];
+
+            if ($length <= MySqlPlatform::LENGTH_LIMIT_TINYTEXT) {
+                return $platform->getVarcharTypeDeclarationSQL($fieldDeclaration);
+            }
+        }
         return 'LONGTEXT';
     }
 
