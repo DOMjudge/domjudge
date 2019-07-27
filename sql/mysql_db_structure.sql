@@ -37,7 +37,7 @@ CREATE TABLE `balloon` (
 -- Table structure for table `clarification`
 --
 CREATE TABLE `clarification` (
-  `clarid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `clarid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique clarification ID',
   `externalid` varchar(255) DEFAULT NULL COMMENT 'Clarification ID in an external system, should be unique inside a single contest',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `respid` int(4) unsigned DEFAULT NULL COMMENT 'In reply to clarification ID',
@@ -56,9 +56,13 @@ CREATE TABLE `clarification` (
   KEY `probid` (`probid`),
   KEY `cid` (`cid`),
   KEY `cid_2` (`cid`,`answered`,`submittime`),
+  KEY `sender` (`sender`),
+  KEY `recipient` (`recipient`),
   CONSTRAINT `clarification_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
   CONSTRAINT `clarification_ibfk_2` FOREIGN KEY (`respid`) REFERENCES `clarification` (`clarid`) ON DELETE SET NULL,
-  CONSTRAINT `clarification_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE SET NULL
+  CONSTRAINT `clarification_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE SET NULL,
+  CONSTRAINT `clarification_ibfk_4` FOREIGN KEY (`sender`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
+  CONSTRAINT `clarification_ibfk_5` FOREIGN KEY (`recipient`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Clarification requests by teams and responses by the jury';
 
 --
