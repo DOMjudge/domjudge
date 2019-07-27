@@ -6,7 +6,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Possible user roles
  * @ORM\Entity()
- * @ORM\Table(name="role", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="role",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Possible user roles"},
+ *     uniqueConstraints={@ORM\UniqueConstraint(name="role", columns={"role"})})
  */
 class Role
 {
@@ -14,7 +17,8 @@ class Role
      * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="roleid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="roleid", length=4,
+     *     options={"comment"="Unique role ID","unsigned"=true}, nullable=false)
      */
     private $roleid;
 
@@ -26,7 +30,7 @@ class Role
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="description", length=255, options={"comment"="Role name"}, nullable=false)
+     * @ORM\Column(type="string", name="description", length=255, options={"comment"="Description for the web interface"}, nullable=false)
      */
     private $description;
 

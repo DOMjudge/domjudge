@@ -433,7 +433,7 @@ CREATE TABLE `removed_interval` (
 --
 
 CREATE TABLE `role` (
-  `roleid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `roleid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique role ID',
   `role` varchar(32) NOT NULL COMMENT 'Role name',
   `description` varchar(255) NOT NULL COMMENT 'Description for the web interface',
   PRIMARY KEY (`roleid`),
