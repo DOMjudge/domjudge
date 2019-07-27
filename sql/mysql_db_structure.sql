@@ -189,7 +189,7 @@ CREATE TABLE `executable` (
 
 CREATE TABLE `external_judgement` (
   `extjudgementid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `externalid` varchar(255) DEFAULT NULL COMMENT 'Judgement ID in external system, should be unique inside a single contest',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Judgement ID in external system, should be unique inside a single contest',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `submitid` int(4) unsigned NOT NULL COMMENT 'Submission ID being judged by external system',
   `result` varchar(32) DEFAULT NULL COMMENT 'Result string as obtained from external system. null if not finished yet',
@@ -199,6 +199,7 @@ CREATE TABLE `external_judgement` (
   PRIMARY KEY  (`extjudgementid`),
   UNIQUE KEY `externalid` (`cid`,`externalid`(190)),
   KEY `submitid` (`submitid`),
+  KEY `cid` (`cid`),
   CONSTRAINT `external_judgement_ibfk_1` FOREIGN KEY (`submitid`) REFERENCES `submission` (`submitid`) ON DELETE CASCADE,
   CONSTRAINT `external_judgement_ibfk_2` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Judgement in external system';
@@ -207,7 +208,7 @@ CREATE TABLE `external_run` (
   `extrunid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `extjudgementid` int(4) unsigned NOT NULL COMMENT 'Judging ID this run belongs to',
   `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
-  `externalid` varchar(255) DEFAULT NULL COMMENT 'Run ID in external system, should be unique inside a single contest',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Run ID in external system, should be unique inside a single contest',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `result` varchar(32) NOT NULL COMMENT 'Result string as obtained from external system',
   `endtime` decimal(32,9) unsigned NOT NULL COMMENT 'Time run ended',
