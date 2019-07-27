@@ -7,57 +7,79 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Log of judgehost internal errors
  * @ORM\Entity()
- * @ORM\Table(name="internal_error", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="internal_error",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of judgehost internal errors"},
+ *     indexes={
+ *         @ORM\Index(name="judgingid", columns={"judgingid"}),
+ *         @ORM\Index(name="cid", columns={"cid"})
+ *     })
  */
 class InternalError
 {
     /**
      * @var int
      * @ORM\Id
-     * @ORM\Column(type="integer", name="errorid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="errorid", length=4,
+     *     options={"comment"="Unique ID","unsigned"=true},
+     *     nullable=false)
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $errorid;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="judgingid", options={"comment"="Judging ID"}, nullable=true)
+     * @ORM\Column(type="integer", name="judgingid",
+     *     options={"comment"="Judging ID","unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      */
     private $judgingid;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=true)
+     * @ORM\Column(type="integer", name="cid",
+     *     options={"comment"="Contest ID","unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      */
     private $cid;
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=255, name="description", options={"comment"="Description of the error"}, nullable=false)
+     * @ORM\Column(type="string", length=255, name="description",
+     *     options={"comment"="Description of the error"},
+     *     nullable=false)
      */
     private $description;
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="judgehostlog", options={"comment"="Last N lines of the judgehost log"}, nullable=false)
+     * @ORM\Column(type="text", length=65535, name="judgehostlog",
+     *     options={"comment"="Last N lines of the judgehost log"},
+     *     nullable=false)
      */
     private $judgehostlog;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="time", options={"comment"="When the event occurred", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="time",
+     *     options={"comment"="Timestamp of the internal error", "unsigned"=true},
+     *     nullable=false)
      */
     private $time;
 
     /**
      * @var array
-     * @ORM\Column(type="json", length=4294967295, name="disabled", options={"comment"="Disabled stuff, JSON-encoded"}, nullable=false)
+     * @ORM\Column(type="json", length=65535, name="disabled",
+     *     options={"comment"="Disabled stuff, JSON-encoded"},
+     *     nullable=false)
      */
     private $disabled;
 
     /**
      * @var string
-     * @ORM\Column(type="internal_error_status", length=128, name="status", options={"comment"="Status of internal error"}, nullable=false)
+     * @ORM\Column(type="internal_error_status", name="status",
+     *     options={"comment"="Status of internal error","default"="'open'"},
+     *     nullable=false)
      */
     private $status = InternalErrorStatusType::STATUS_OPEN;
 

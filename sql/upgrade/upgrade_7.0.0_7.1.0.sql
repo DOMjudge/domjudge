@@ -153,6 +153,10 @@ ALTER TABLE `judgehost_restriction`
 ALTER TABLE `role`
     CHANGE COLUMN `roleid` `roleid` INT(4) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique role ID';
 
+ALTER TABLE `internal_error`
+    CHANGE COLUMN `disabled` `disabled` TEXT NOT NULL COMMENT 'Disabled stuff, JSON-encoded(DC2Type:json)',
+    CHANGE COLUMN `status` `status` ENUM('open', 'resolved', 'ignored') DEFAULT 'open' NOT NULL COMMENT 'Status of internal error(DC2Type:internal_error_status)';
+
 --
 -- Transfer data from old to new structure
 --

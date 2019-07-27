@@ -26,11 +26,11 @@ class JsonType extends BaseJsonType
      */
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        if (! empty($fieldDeclaration['length']) && is_numeric($fieldDeclaration['length'])) {
-            $length = $fieldDeclaration['length'];
-
-            if ($length <= MySqlPlatform::LENGTH_LIMIT_TINYTEXT) {
+        if (!empty($fieldDeclaration['length'])) {
+            if ($fieldDeclaration['length'] <= 255) {
                 return $platform->getVarcharTypeDeclarationSQL($fieldDeclaration);
+            } else {
+                return $platform->getClobTypeDeclarationSQL($fieldDeclaration);
             }
         }
         return 'LONGTEXT';
