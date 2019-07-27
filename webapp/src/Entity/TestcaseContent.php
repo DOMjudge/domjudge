@@ -8,7 +8,9 @@ use Doctrine\ORM\Mapping as ORM;
  * Contents of a testcase
  *
  * @ORM\Entity
- * @ORM\Table(name="testcase_content", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="testcase_content",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Stores contents of testcase"})
  */
 class TestcaseContent
 {
@@ -22,26 +24,31 @@ class TestcaseContent
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="input", options={"comment"="Input data"}, nullable=false)
+     * @ORM\Column(type="blobtext", length=4294967295, name="input",
+     *     options={"comment"="Input data","default"="NULL"}, nullable=true)
      */
     private $input;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="output", options={"comment"="Output data"}, nullable=false)
+     * @ORM\Column(type="blobtext", length=4294967295, name="output",
+     *     options={"comment"="Output data","default"="NULL"}, nullable=true)
      */
     private $output;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="image", options={"comment"="A graphical representation of the testcase"},
-     *                            nullable=true)
+     * @ORM\Column(type="blobtext", length=4294967295, name="image",
+     *     options={"comment"="A graphical representation of the testcase","default"="NULL"},
+     *     nullable=true)
      */
     private $image;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="image_thumb", options={"comment"="Automatically created thumbnail of the image"}, nullable=true)
+     * @ORM\Column(type="blobtext", length=4294967295, name="image_thumb",
+     *     options={"comment"="Automatically created thumbnail of the image","default"="NULL"},
+     *     nullable=true)
      */
     private $image_thumb;
 

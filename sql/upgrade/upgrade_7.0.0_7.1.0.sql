@@ -56,11 +56,11 @@ CREATE TABLE `external_run` (
 
 -- Move fields with lots of data to separate tables
 CREATE TABLE `testcase_content` (
-  `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
-  `input` longblob DEFAULT NULL COMMENT 'Input data',
-  `output` longblob DEFAULT NULL COMMENT 'Output data',
-  `image` longblob DEFAULT NULL COMMENT 'A graphical representation of the testcase',
-  `image_thumb` longblob DEFAULT NULL COMMENT 'Aumatically created thumbnail of the image',
+  `testcaseid` int(4) unsigned NOT NULL COMMENT 'Unique testcase ID',
+  `input` longblob DEFAULT NULL COMMENT 'Input data(DC2Type:blobtext)',
+  `output` longblob DEFAULT NULL COMMENT 'Output data(DC2Type:blobtext)',
+  `image` longblob DEFAULT NULL COMMENT 'A graphical representation of the testcase(DC2Type:blobtext)',
+  `image_thumb` longblob DEFAULT NULL COMMENT 'Automatically created thumbnail of the image(DC2Type:blobtext)',
   PRIMARY KEY  (`testcaseid`),
   CONSTRAINT `testcase_content_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores contents of testcase';
@@ -141,6 +141,10 @@ ALTER TABLE `submission_file`
 
 ALTER TABLE `configuration`
     CHANGE COLUMN `value` `value` LONGTEXT NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)(DC2Type:json)';
+
+ALTER TABLE `testcase`
+    CHANGE COLUMN `testcaseid` `testcaseid` INT(4) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique testcase ID',
+    CHANGE COLUMN `rank` `rank` INT(4) UNSIGNED NOT NULL COMMENT 'Determines order of the testcases in judging';
 
 --
 -- Transfer data from old to new structure
