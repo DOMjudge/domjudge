@@ -11,6 +11,7 @@ doctrine:
         url: '%env(resolve:DATABASE_URL)%'
         types:
             tinyint: App\Doctrine\DBAL\Types\TinyIntType
+            blobtext: App\Doctrine\DBAL\Types\BlobTextType
             json: App\Doctrine\DBAL\Types\JsonType
             binaryjson: App\Doctrine\DBAL\Types\BinaryJsonType
             internal_error_status: App\Doctrine\DBAL\Types\InternalErrorStatusType

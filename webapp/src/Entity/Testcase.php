@@ -9,7 +9,14 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Stores testcases per problem
  * @ORM\Entity()
- * @ORM\Table(name="testcase", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="testcase",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Stores testcases per problem"},
+ *     indexes={
+ *         @ORM\Index(name="probid", columns={"probid"}),
+ *         @ORM\Index(name="sample", columns={"sample"})
+ *     },
+ *     uniqueConstraints={@ORM\UniqueConstraint(name="rank", columns={"probid","rank"})})
  */
 class Testcase
 {
@@ -19,37 +26,50 @@ class Testcase
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="testcaseid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="testcaseid", length=4,
+     *     options={"comment"="Unique testcase ID","unsigned"=true},
+     *     nullable=false)
      */
     private $testcaseid;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="md5sum_input", length=32, options={"comment"="Checksum of input data"}, nullable=true)
+     * @ORM\Column(type="string", name="md5sum_input", length=32,
+     *     options={"comment"="Checksum of input data","default"="NULL","fixed"=true},
+     *     nullable=true)
      */
     private $md5sum_input;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="md5sum_output", length=32, options={"comment"="Checksum of output data"}, nullable=true)
+     * @ORM\Column(type="string", name="md5sum_output", length=32,
+     *     options={"comment"="Checksum of output data","default"="NULL","fixed"=true},
+     *     nullable=true)
      */
     private $md5sum_output;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="probid", options={"comment"="Corresponding problem ID", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="integer", name="probid", length=4,
+     *     options={"comment"="Corresponding problem ID", "unsigned"=true},
+     *     nullable=false)
      */
     private $probid;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="rank", options={"comment"="Determines order of the testcases in judging", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="integer", name="rank", length=4,
+     *     options={"comment"="Determines order of the testcases in judging",
+     *              "unsigned"=true},
+     *     nullable=false)
      */
     private $rank;
 
     /**
      * @var resource
-     * @ORM\Column(type="blob", name="description", options={"comment"="Description of this testcase"}, nullable=true)
+     * @ORM\Column(type="blob", length=4294967295, name="description",
+     *     options={"comment"="Description of this testcase","default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $description;
@@ -58,14 +78,19 @@ class Testcase
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="image_type", length=32, options={"comment"="File type of the image and thumbnail"}, nullable=true)
+     * @ORM\Column(type="string", name="image_type", length=4,
+     *     options={"comment"="File type of the image and thumbnail","default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $image_type;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="sample", options={"comment"="Sample testcases that can be shared with teams"}, nullable=false)
+     * @ORM\Column(type="boolean", name="sample",
+     *     options={"comment"="Sample testcases that can be shared with teams",
+     *              "unsigned"=true,"default"="0"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $sample = false;

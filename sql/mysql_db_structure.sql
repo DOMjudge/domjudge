@@ -588,11 +588,11 @@ CREATE TABLE `team_unread` (
 --
 
 CREATE TABLE `testcase` (
-  `testcaseid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `testcaseid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique testcase ID',
   `md5sum_input` char(32) DEFAULT NULL COMMENT 'Checksum of input data',
   `md5sum_output` char(32) DEFAULT NULL COMMENT 'Checksum of output data',
   `probid` int(4) unsigned NOT NULL COMMENT 'Corresponding problem ID',
-  `rank` int(4) NOT NULL COMMENT 'Determines order of the testcases in judging',
+  `rank` int(4) unsigned NOT NULL COMMENT 'Determines order of the testcases in judging',
   `description` longblob DEFAULT NULL COMMENT 'Description of this testcase',
   `image_type` varchar(4) DEFAULT NULL COMMENT 'File type of the image and thumbnail',
   `sample` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT 'Sample testcases that can be shared with teams',
@@ -604,11 +604,11 @@ CREATE TABLE `testcase` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores testcases per problem';
 
 CREATE TABLE `testcase_content` (
-  `testcaseid` int(4) unsigned NOT NULL COMMENT 'Testcase ID',
-  `input` longblob DEFAULT NULL COMMENT 'Input data',
-  `output` longblob DEFAULT NULL COMMENT 'Output data',
-  `image` longblob DEFAULT NULL COMMENT 'A graphical representation of the testcase',
-  `image_thumb` longblob DEFAULT NULL COMMENT 'Aumatically created thumbnail of the image',
+  `testcaseid` int(4) unsigned NOT NULL COMMENT 'Unique testcase ID',
+  `input` longblob DEFAULT NULL COMMENT 'Input data(DC2Type:blobtext)',
+  `output` longblob DEFAULT NULL COMMENT 'Output data(DC2Type:blobtext)',
+  `image` longblob DEFAULT NULL COMMENT 'A graphical representation of the testcase(DC2Type:blobtext)',
+  `image_thumb` longblob DEFAULT NULL COMMENT 'Automatically created thumbnail of the image(DC2Type:blobtext)',
   PRIMARY KEY  (`testcaseid`),
   CONSTRAINT `testcase_content_ibfk_1` FOREIGN KEY (`testcaseid`) REFERENCES `testcase` (`testcaseid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores contents of testcase';
