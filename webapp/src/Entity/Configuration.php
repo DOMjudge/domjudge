@@ -6,7 +6,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Compile, compare, and run script executable bundles
  * @ORM\Entity()
- * @ORM\Table(name="configuration", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(name="configuration",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Global configuration variables"},
+ *     indexes={@ORM\Index(name="public", columns={"public"})},
+ *     uniqueConstraints={@ORM\UniqueConstraint(name="name", columns={"name"})})
  */
 class Configuration
 {
@@ -15,7 +18,8 @@ class Configuration
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="configid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="configid", length=4,
+     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
      */
     private $configid;
 
@@ -27,31 +31,43 @@ class Configuration
 
     /**
      * @var string
-     * @ORM\Column(type="json", length=4294967295, name="value", options={"comment"="Content of the configuration variable (JSON encoded)"}, nullable=true)
+     * @ORM\Column(type="json", length=4294967295, name="value",
+     *     options={"comment"="Content of the configuration variable (JSON encoded)"},
+     *     nullable=false)
      */
     private $value;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="type", length=32, options={"comment"="Type of the value (metatype for use in the webinterface)"}, nullable=true)
+     * @ORM\Column(type="string", name="type", length=32,
+     *     options={"comment"="Type of the value (metatype for use in the webinterface)",
+     *              "default"="NULL"},
+     *     nullable=true)
      */
     private $type;
 
     /**
      * @var bool
-     * @ORM\Column(type="boolean", name="public", options={"comment"="Is this variable publicly visible?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="public",
+     *     options={"comment"="Is this variable publicly visible?","unsigned"=true,"default"="0"},
+     *     nullable=false)
      */
     private $public = false;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="category", length=32, options={"comment"="Category of the option value"}, nullable=true)
+     * @ORM\Column(type="string", name="category", length=32,
+     *     options={"comment"="Option category of the configuration variable",
+     *              "default"="'Uncategorized'"},
+     *     nullable=false)
      */
-    private $category;
+    private $category = 'Uncategorized';
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="description", length=255, options={"comment"="Description of this executable"}, nullable=true)
+     * @ORM\Column(type="string", name="description", length=255,
+     *     options={"comment"="Description for in the webinterface","default"="NULL"},
+     *     nullable=true)
      */
     private $description;
 
