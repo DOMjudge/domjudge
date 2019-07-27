@@ -9,7 +9,20 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * Clarification requests by teams and responses by the jury
  * @ORM\Entity()
- * @ORM\Table(name="clarification", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="clarification",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Clarification requests by teams and responses by the jury"},
+ *     indexes={
+ *         @ORM\Index(name="respid", columns={"respid"}),
+ *         @ORM\Index(name="probid", columns={"probid"}),
+ *         @ORM\Index(name="cid", columns={"cid"}),
+ *         @ORM\Index(name="cid_2", columns={"cid","answered","submittime"}),
+ *         @ORM\Index(name="sender", columns={"sender"}),
+ *         @ORM\Index(name="recipient", columns={"recipient"})
+ *     },
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, "190"}})
+ *     })
  * @UniqueEntity("externalid")
  */
 class Clarification extends BaseApiEntity implements ExternalRelationshipEntityInterface
@@ -18,7 +31,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @var int
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", length=4, name="clarid", options={"comment"="Unique clarification ID","unsigned"=true}, nullable=false)
+     * @ORM\Column(type="integer", length=4, name="clarid",
+     *     options={"comment"="Unique clarification ID","unsigned"=true},
+     *     nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
@@ -26,20 +41,27 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Clarification ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="string", name="externalid", length=255,
+     *     options={"comment"="Clarification ID in an external system, should be unique inside a single contest",
+     *              "collation"="utf8mb4_bin","default"="NULL"},
+     *     nullable=true)
      */
     protected $externalid;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="cid",
+     *     options={"comment"="Contest ID","unsigned"=true},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $cid;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="respid", options={"comment"="In reply to clarification ID"}, nullable=true)
+     * @ORM\Column(type="integer", name="respid",
+     *     options={"comment"="In reply to clarification ID","unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      * @Serializer\SerializedName("reply_to_id")
      * @Serializer\Type("string")
      */
@@ -54,7 +76,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="sender", options={"comment"="Team ID, null means jury"}, nullable=true)
+     * @ORM\Column(type="integer", name="sender",
+     *     options={"comment"="Team ID, null means jury","unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      * @Serializer\SerializedName("from_team_id")
      * @Serializer\Type("string")
      */
@@ -62,7 +86,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="recipient", options={"comment"="Team ID, null means to jury or to all"}, nullable=true)
+     * @ORM\Column(type="integer", name="recipient",
+     *     options={"comment"="Team ID, null means to jury or to all","unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      * @Serializer\SerializedName("to_team_id")
      * @Serializer\Type("string")
      */
@@ -70,7 +96,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="jury_member", length=255, options={"comment"="Name of jury member who answered this"}, nullable=true)
+     * @ORM\Column(type="string", name="jury_member", length=255,
+     *     options={"comment"="Name of jury member who answered this","default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $jury_member;
@@ -78,7 +106,9 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="probid", options={"comment"="Problem associated to this clarification"}, nullable=true)
+     * @ORM\Column(type="integer", name="probid",
+     *     options={"comment"="Problem associated to this clarification","unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      * @Serializer\SerializedName("problem_id")
      * @Serializer\Type("string")
      */
@@ -86,28 +116,37 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="category", length=255, options={"comment"="Category associated to this clarification; only set for non-problem clars"}, nullable=true)
+     * @ORM\Column(type="string", name="category", length=255,
+     *     options={"comment"="Category associated to this clarification; only set for non problem clars",
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $category;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="queue", length=255, options={"comment"="Queue associated to this clarification"}, nullable=true)
+     * @ORM\Column(type="string", name="queue", length=255,
+     *     options={"comment"="Queue associated to this clarification","default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $queue;
 
     /**
      * @var string
-     * @ORM\Column(type="text", length=4294967295, name="body", options={"comment"="Team member names (freeform)"}, nullable=true)
+     * @ORM\Column(type="text", length=4294967295, name="body",
+     *     options={"comment"="Clarification text"},
+     *     nullable=false)
      * @Serializer\SerializedName("text")
      */
     private $body;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="answered", options={"comment"="Has been answered by jury?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="answered",
+     *     options={"comment"="Has been answered by jury?","unsigned"=true,"default":"0"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $answered = false;
@@ -141,14 +180,14 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="sent_clarifications")
-     * @ORM\JoinColumn(name="sender", referencedColumnName="teamid", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="sender", referencedColumnName="teamid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $sender;
 
     /**
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="received_clarifications")
-     * @ORM\JoinColumn(name="recipient", referencedColumnName="teamid", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="recipient", referencedColumnName="teamid", onDelete="CASCADE")
      * @Serializer\Exclude()
      */
     private $recipient;

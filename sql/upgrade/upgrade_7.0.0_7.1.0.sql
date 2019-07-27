@@ -128,6 +128,14 @@ ALTER TABLE `submission`
     ADD KEY `probid_2` (`cid`,`probid`),
     ADD CONSTRAINT `submission_ibfk_8` FOREIGN KEY (`cid`,`probid`) REFERENCES `contestproblem` (`cid`,`probid`) ON DELETE CASCADE;
 
+ALTER TABLE `clarification`
+    CHANGE COLUMN `clarid` `clarid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique clarification ID',
+    CHANGE COLUMN `externalid` `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Clarification ID in an external system, should be unique inside a single contest',
+    ADD KEY `sender` (`sender`),
+    ADD KEY `recipient` (`recipient`),
+    ADD CONSTRAINT `clarification_ibfk_4` FOREIGN KEY (`sender`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
+    ADD CONSTRAINT `clarification_ibfk_5` FOREIGN KEY (`recipient`) REFERENCES `team` (`teamid`) ON DELETE CASCADE;
+
 --
 -- Transfer data from old to new structure
 --
