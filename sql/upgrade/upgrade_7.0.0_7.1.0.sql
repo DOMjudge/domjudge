@@ -149,6 +149,9 @@ ALTER TABLE `testcase`
 ALTER TABLE `judgehost_restriction`
     CHANGE COLUMN `restrictions` `restrictions` LONGTEXT DEFAULT NULL COMMENT 'JSON-encoded restrictions(DC2Type:json)';
 
+ALTER TABLE `role`
+    CHANGE COLUMN `roleid` `roleid` INT(4) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique role ID';
+
 --
 -- Transfer data from old to new structure
 --
