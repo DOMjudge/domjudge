@@ -7,7 +7,14 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Files associated to a submission
  * @ORM\Entity()
- * @ORM\Table(name="submission_file", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="submission_file",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Files associated to a submission"},
+ *     indexes={@ORM\Index(name="submitid", columns={"submitid"})},
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="rank", columns={"submitid", "rank"}),
+ *         @ORM\UniqueConstraint(name="filename", columns={"submitid", "filename"}, options={"lengths": {NULL, "190"}})
+ *     })
  */
 class SubmissionFile
 {
@@ -16,13 +23,17 @@ class SubmissionFile
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="submitfileid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="submitfileid", length=4,
+     *     options={"comment"="Unique ID","unsigned"=true},
+     *     nullable=false)
      */
     private $submitfileid;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="submitid", options={"comment"="Submission this file belongs to"}, nullable=false)
+     * @ORM\Column(type="integer", name="submitid", length=4,
+     *     options={"comment"="Submission this file belongs to","unsigned"=true},
+     *     nullable=false)
      */
     private $submitid;
 
@@ -34,7 +45,9 @@ class SubmissionFile
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="rank", options={"comment"="Order of the submission files, zero-indexed", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="integer", name="rank",
+     *     options={"comment"="Order of the submission files, zero-indexed", "unsigned"=true},
+     *     nullable=false)
      */
     private $rank;
 
@@ -46,7 +59,8 @@ class SubmissionFile
 
     /**
      * @var string
-     * @ORM\Column(type="text", name="sourcecode", options={"comment"="Full source code"}, nullable=false)
+     * @ORM\Column(type="blobtext", name="sourcecode", length=4294967295,
+     *     options={"comment"="Full source code"}, nullable=false)
      */
     private $sourcecode;
 

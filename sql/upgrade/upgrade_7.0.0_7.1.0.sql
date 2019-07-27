@@ -136,6 +136,9 @@ ALTER TABLE `clarification`
     ADD CONSTRAINT `clarification_ibfk_4` FOREIGN KEY (`sender`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
     ADD CONSTRAINT `clarification_ibfk_5` FOREIGN KEY (`recipient`) REFERENCES `team` (`teamid`) ON DELETE CASCADE;
 
+ALTER TABLE `submission_file`
+    CHANGE COLUMN `sourcecode` `sourcecode` LONGBLOB NOT NULL COMMENT 'Full source code(DC2Type:blobtext)';
+
 --
 -- Transfer data from old to new structure
 --

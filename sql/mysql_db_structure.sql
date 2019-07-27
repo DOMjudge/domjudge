@@ -506,7 +506,7 @@ CREATE TABLE `submission` (
 CREATE TABLE `submission_file` (
   `submitfileid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `submitid` int(4) unsigned NOT NULL COMMENT 'Submission this file belongs to',
-  `sourcecode` longblob NOT NULL COMMENT 'Full source code',
+  `sourcecode` longblob NOT NULL COMMENT 'Full source code(DC2Type:blobtext)',
   `filename` varchar(255) NOT NULL COMMENT 'Filename as submitted',
   `rank` int(4) unsigned NOT NULL COMMENT 'Order of the submission files, zero-indexed',
   PRIMARY KEY (`submitfileid`),
