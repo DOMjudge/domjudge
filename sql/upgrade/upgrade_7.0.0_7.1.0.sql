@@ -139,6 +139,9 @@ ALTER TABLE `clarification`
 ALTER TABLE `submission_file`
     CHANGE COLUMN `sourcecode` `sourcecode` LONGBLOB NOT NULL COMMENT 'Full source code(DC2Type:blobtext)';
 
+ALTER TABLE `configuration`
+    CHANGE COLUMN `value` `value` LONGTEXT NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)(DC2Type:json)';
+
 --
 -- Transfer data from old to new structure
 --

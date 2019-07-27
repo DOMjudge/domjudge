@@ -72,7 +72,7 @@ CREATE TABLE `clarification` (
 CREATE TABLE `configuration` (
   `configid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(32) NOT NULL COMMENT 'Name of the configuration variable',
-  `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)',
+  `value` longtext NOT NULL COMMENT 'Content of the configuration variable (JSON encoded)(DC2Type:json)',
   `type` varchar(32) DEFAULT NULL COMMENT 'Type of the value (metatype for use in the webinterface)',
   `public` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT 'Is this variable publicly visible?',
   `category` varchar(32) NOT NULL DEFAULT 'Uncategorized' COMMENT 'Option category of the configuration variable',
