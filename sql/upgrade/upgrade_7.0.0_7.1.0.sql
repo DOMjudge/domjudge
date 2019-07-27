@@ -146,6 +146,9 @@ ALTER TABLE `testcase`
     CHANGE COLUMN `testcaseid` `testcaseid` INT(4) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Unique testcase ID',
     CHANGE COLUMN `rank` `rank` INT(4) UNSIGNED NOT NULL COMMENT 'Determines order of the testcases in judging';
 
+ALTER TABLE `judgehost_restriction`
+    CHANGE COLUMN `restrictions` `restrictions` LONGTEXT DEFAULT NULL COMMENT 'JSON-encoded restrictions(DC2Type:json)';
+
 --
 -- Transfer data from old to new structure
 --

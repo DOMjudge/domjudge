@@ -262,7 +262,7 @@ CREATE TABLE `judgehost` (
 CREATE TABLE `judgehost_restriction` (
   `restrictionid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
-  `restrictions` longtext DEFAULT NULL COMMENT 'JSON-encoded restrictions',
+  `restrictions` longtext DEFAULT NULL COMMENT 'JSON-encoded restrictions(DC2Type:json)',
   PRIMARY KEY  (`restrictionid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Restrictions for judgehosts';
 
