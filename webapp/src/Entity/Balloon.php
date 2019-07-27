@@ -6,7 +6,11 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Balloons to be handed out
  * @ORM\Entity()
- * @ORM\Table(name="balloon", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="balloon",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Unique ID"},
+ *     indexes={@ORM\Index(name="submitid", columns={"submitid"})}
+ *     )
  */
 class Balloon
 {
@@ -15,19 +19,24 @@ class Balloon
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="balloonid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", length=4, name="balloonid",
+     *     options={"comment"="Unique ID", "unsigned"=true}, nullable=false)
      */
     private $balloonid;
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="submitid", options={"comment"="Submission for which balloon was earned"}, nullable=false)
+     * @ORM\Column(type="integer", name="submitid",
+     *     options={"comment"="Submission for which balloon was earned","unsigned"=true},
+     *     nullable=false)
      */
     private $submitid;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="done", options={"comment"="Has been handed out yet?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="done",
+     *     options={"comment"="Has been handed out yet?","unsigned"=true,"default"="0"},
+     *     nullable=false)
      */
     private $done = false;
 
