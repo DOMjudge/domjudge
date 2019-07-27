@@ -8,9 +8,16 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Judgement in external system
- * @ORM\Table(name="external_judgement",
- *             indexes={@ORM\Index(name="submitid", columns={"submitid"})},
- *             options={"comment":"Judgement in external system"})
+ * @ORM\Table(
+ *     name="external_judgement",
+ *     options={"comment":"Judgement in external system"},
+ *     indexes={
+ *         @ORM\Index(name="submitid", columns={"submitid"}),
+ *         @ORM\Index(name="cid", columns={"cid"}),
+ *     },
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, "190"}}),
+ *     })
  * @ORM\Entity
  */
 class ExternalJudgement
@@ -20,20 +27,28 @@ class ExternalJudgement
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="extjudgementid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="extjudgementid",
+     *     options={"comment"="Unique ID","unsigned"=true},
+     *     nullable=false)
      */
     private $extjudgementid;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Judgement ID in external system, should be unique inside a single contest", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="string", name="externalid", length=255,
+     *     options={"comment"="Judgement ID in external system, should be unique inside a single contest",
+     *              "collation"="utf8mb4_bin","default"="NULL"},
+     *     nullable=true)
      */
     protected $externalid;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="result", type="string", length=32, nullable=true)
+     * @ORM\Column(name="result", type="string", length=32,
+     *     options={"comment"="Result string as obtained from external system. null if not finished yet",
+     *              "default"="NULL"},
+     *     nullable=true)
      */
     private $result = null;
 
@@ -50,16 +65,29 @@ class ExternalJudgement
      * @var double
      *
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
-     *              options={"comment"="Time judging ended, null = stil busy", "unsigned"=true},
-     *              nullable=true)
+     *     options={"comment"="Time judging ended, null = still busy",
+     *              "unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      */
     private $endtime = null;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="valid", options={"comment"="Old external judgement is marked as invalid when receiving a new one"}, nullable=false)
+     * @ORM\Column(type="boolean", name="valid",
+     *     options={"comment"="Old external judgement is marked as invalid when receiving a new one",
+     *              "unsigned"=true,"default"="1"},
+     *     nullable=false)
      */
     private $valid = true;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(type="integer", name="cid",
+     *     options={"comment"="Contest ID", "unsigned"=true},
+     *     nullable=false, length=4)
+     */
+    private $cid;
 
     /**
      * @var Contest
@@ -68,6 +96,16 @@ class ExternalJudgement
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
     private $contest;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(type="integer", length=4, name="submitid",
+     *     options={"comment"="Submission ID being judged by external system",
+     *              "unsigned"=true},
+     *     nullable=false)
+     */
+    private $submitid;
 
     /**
      * @var Submission
@@ -221,6 +259,30 @@ class ExternalJudgement
     }
 
     /**
+     * Set cid
+     *
+     * @param int $cid
+     *
+     * @return ExternalJudgement
+     */
+    public function setCid(int $cid)
+    {
+        $this->cid = $cid;
+
+        return $this;
+    }
+
+    /**
+     * Get cid
+     *
+     * @return int
+     */
+    public function getCid()
+    {
+        return $this->cid;
+    }
+
+    /**
      * Set contest
      *
      * @param Contest $contest
@@ -242,6 +304,30 @@ class ExternalJudgement
     public function getContest()
     {
         return $this->contest;
+    }
+
+    /**
+     * Set submitid
+     *
+     * @param int $submitid
+     *
+     * @return ExternalJudgement
+     */
+    public function setSubmitid(int $submitid)
+    {
+        $this->submitid = $submitid;
+
+        return $this;
+    }
+
+    /**
+     * Get submitid
+     *
+     * @return int
+     */
+    public function getSubmitid()
+    {
+        return $this->submitid;
     }
 
     /**

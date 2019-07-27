@@ -6,10 +6,16 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Run in external system
- * @ORM\Table(name="external_run",
- *             indexes={@ORM\Index(name="extjudgementid", columns={"extjudgementid"}),
- *                      @ORM\Index(name="testcaseid", columns={"testcaseid"})},
- *             options={"comment":"Run in external system"})
+ * @ORM\Table(
+ *     name="external_run",
+ *     options={"comment":"Run in external system"},
+ *     indexes={
+ *         @ORM\Index(name="extjudgementid", columns={"extjudgementid"}),
+ *         @ORM\Index(name="testcaseid", columns={"testcaseid"})
+ *     },
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="externalid", columns={"cid", "externalid"}, options={"lengths": {null, "190"}}),
+ *     })
  * @ORM\Entity
  */
 class ExternalRun
@@ -19,13 +25,17 @@ class ExternalRun
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="extrunid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="extrunid", length=4,
+     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
      */
     private $extrunid;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Run ID in external system, should be unique inside a single contest", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="string", name="externalid", length=255,
+     *     options={"comment"="Run ID in external system, should be unique inside a single contest",
+     *              "collation"="utf8mb4_bin","default"="NULL"},
+     *     nullable=true)
      */
     protected $externalid;
 
@@ -42,7 +52,7 @@ class ExternalRun
      * @var double
      *
      * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
-     *              options={"comment"="Time run ende", "unsigned"=true},
+     *              options={"comment"="Time run ended", "unsigned"=true},
      *              nullable=false)
      */
     private $endtime;
@@ -56,20 +66,46 @@ class ExternalRun
     private $runtime;
 
     /**
+     * @var int
+     * @ORM\Column(type="integer", name="extjudgementid", length=4,
+     *     options={"comment"="Judging ID this run belongs to","unsigned"=true},
+     *     nullable=false)
+     */
+    private $extjudgementid;
+
+    /**
      * @var ExternalJudgement
      *
      * @ORM\ManyToOne(targetEntity="ExternalJudgement", inversedBy="external_runs")
-     * @ORM\JoinColumn(name="extjudgementid", referencedColumnName="extjudgementid")
+     * @ORM\JoinColumn(name="extjudgementid", referencedColumnName="extjudgementid", onDelete="CASCADE")
      */
     private $external_judgement;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(type="integer", name="testcaseid", length=4,
+     *     options={"comment"="Testcase ID","unsigned"=true},
+     *     nullable=false)
+     */
+    private $testcaseid;
 
     /**
      * @var Testcase
      *
      * @ORM\ManyToOne(targetEntity="Testcase", inversedBy="external_runs")
-     * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid")
+     * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid", onDelete="CASCADE")
      */
     private $testcase;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(type="integer", name="cid",
+     *     options={"comment"="Contest ID", "unsigned"=true},
+     *     nullable=false, length=4)
+     */
+    protected $cid;
 
     /**
      * @var Contest
@@ -186,6 +222,30 @@ class ExternalRun
     }
 
     /**
+     * Set externalJudgementId
+     *
+     * @param int $extjudgementid
+     *
+     * @return ExternalRun
+     */
+    public function setExtjudgementid(int $extjudgementid)
+    {
+        $this->extjudgementid = $extjudgementid;
+
+        return $this;
+    }
+
+    /**
+     * Get externalJudgementId
+     *
+     * @return int
+     */
+    public function getExtjudgementid()
+    {
+        return $this->extjudgementid;
+    }
+
+    /**
      * Set externalJudgement
      *
      * @param ExternalJudgement $externalJudgement
@@ -210,6 +270,30 @@ class ExternalRun
     }
 
     /**
+     * Set testcase ID
+     *
+     * @param int $testcaseid
+     *
+     * @return ExternalRun
+     */
+    public function setTestcaseid(int $testcaseid)
+    {
+        $this->testcaseid = $testcaseid;
+
+        return $this;
+    }
+
+    /**
+     * Get testcase ID
+     *
+     * @return int
+     */
+    public function getTestcaseid()
+    {
+        return $this->testcaseid;
+    }
+
+    /**
      * Set testcase
      *
      * @param Testcase $testcase
@@ -231,6 +315,30 @@ class ExternalRun
     public function getTestcase()
     {
         return $this->testcase;
+    }
+
+    /**
+     * Set cid
+     *
+     * @param int $cid
+     *
+     * @return ExternalRun
+     */
+    public function setCid(int $cid)
+    {
+        $this->cid = $cid;
+
+        return $this;
+    }
+
+    /**
+     * Get cid
+     *
+     * @return int
+     */
+    public function getCid()
+    {
+        return $this->cid;
     }
 
     /**
