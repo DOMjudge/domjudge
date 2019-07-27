@@ -384,15 +384,19 @@ CREATE TABLE `problem` (
 --
 
 CREATE TABLE `rankcache` (
-  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Unique contest ID',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Unique team ID',
   `points_restricted` int(4) unsigned NOT NULL DEFAULT 0 COMMENT 'Total correctness points (restricted audience)',
   `totaltime_restricted` int(4) NOT NULL DEFAULT 0 COMMENT 'Total penalty time in minutes (restricted audience)',
   `points_public` int(4) unsigned NOT NULL DEFAULT 0 COMMENT 'Total correctness points (public)',
   `totaltime_public` int(4) NOT NULL DEFAULT 0 COMMENT 'Total penalty time in minutes (public)',
   PRIMARY KEY (`cid`,`teamid`),
   KEY `order_restricted` (`cid`,`points_restricted`,`totaltime_restricted`) USING BTREE,
-  KEY `order_public` (`cid`,`points_public`,`totaltime_public`) USING BTREE
+  KEY `order_public` (`cid`,`points_public`,`totaltime_public`) USING BTREE,
+  KEY `cid` (`cid`),
+  KEY `teamid` (`teamid`),
+  CONSTRAINT `rankcache_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  CONSTRAINT `rankcache_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard rank cache';
 
 --
@@ -446,9 +450,9 @@ CREATE TABLE `role` (
 --
 
 CREATE TABLE `scorecache` (
-  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
-  `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Unique contest ID',
+  `teamid` int(4) unsigned NOT NULL COMMENT 'Unique team ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Unique problem ID',
   `submissions_restricted` int(4) unsigned NOT NULL DEFAULT 0 COMMENT 'Number of submissions made (restricted audiences)',
   `pending_restricted` int(4) unsigned NOT NULL DEFAULT 0 COMMENT 'Number of submissions pending judgement (restricted audience)',
   `solvetime_restricted`  decimal(32,9) NOT NULL DEFAULT 0.000000000 COMMENT 'Seconds into contest when problem solved (restricted audience)',
@@ -458,7 +462,13 @@ CREATE TABLE `scorecache` (
   `solvetime_public` decimal(32,9) NOT NULL DEFAULT 0.000000000 COMMENT 'Seconds into contest when problem solved (public)',
   `is_correct_public` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT 'Has there been a correct submission? (public)',
   `is_first_to_solve` tinyint(1) unsigned NOT NULL DEFAULT 0 COMMENT 'Is this the first solution to this problem?',
-  PRIMARY KEY (`cid`,`teamid`,`probid`)
+  PRIMARY KEY (`cid`,`teamid`,`probid`),
+  KEY `cid` (`cid`),
+  KEY `teamid` (`teamid`),
+  KEY `probid` (`probid`),
+  CONSTRAINT `scorecache_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+  CONSTRAINT `scorecache_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
+  CONSTRAINT `scorecache_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Scoreboard cache';
 
 --

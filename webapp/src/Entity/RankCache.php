@@ -6,50 +6,70 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Scoreboard cache rank
  * @ORM\Entity()
- * @ORM\Table(name="rankcache", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="rankcache",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Scoreboard rank cache"},
+ *     indexes={
+ *         @ORM\Index(name="order_restricted", columns={"cid","points_restricted","totaltime_restricted"}),
+ *         @ORM\Index(name="order_public", columns={"cid","points_public","totaltime_public"}),
+ *         @ORM\Index(name="cid", columns={"cid"}),
+ *         @ORM\Index(name="teamid", columns={"teamid"})
+ *     })
  */
 class RankCache
 {
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="points_restricted", options={"comment"="Total correctness points (restricted audiences)"}, nullable=false)
+     * @ORM\Column(type="integer", name="points_restricted", length=4,
+     *     options={"comment"="Total correctness points (restricted audience)",
+     *              "unsigned"=true,"default"="0"},
+     *     nullable=false)
      */
-    private $points_restricted;
+    private $points_restricted = 0;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="totaltime_restricted", options={"comment"="Total penalty points (restricted audiences)"}, nullable=false)
+     * @ORM\Column(type="integer", name="totaltime_restricted", length=4,
+     *     options={"comment"="Total penalty time in minutes (restricted audience)",
+     *              "default"="0"},
+     *     nullable=false)
      */
-    private $totaltime_restricted;
+    private $totaltime_restricted = 0;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="points_public", options={"comment"="Total correctness points (public)"}, nullable=false)
+     * @ORM\Column(type="integer", name="points_public", length=4,
+     *     options={"comment"="Total correctness points (public)",
+     *              "unsigned"=true,"default"="0"},
+     *     nullable=false)
      */
-    private $points_public;
+    private $points_public = 0;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="totaltime_public", options={"comment"="Total penalty points (public)"}, nullable=false)
+     * @ORM\Column(type="integer", name="totaltime_public", length=4,
+     *     options={"comment"="Total penalty time in minutes (public)",
+     *              "default"="0"},
+     *     nullable=false)
      */
-    private $totaltime_public;
+    private $totaltime_public = 0;
 
 
     /**
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="rankcache")
-     * @ORM\JoinColumn(name="cid", referencedColumnName="cid")
+     * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
     private $contest;
 
     /**
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Team", inversedBy="rankcache")
-     * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid")
+     * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
      */
     private $team;
 

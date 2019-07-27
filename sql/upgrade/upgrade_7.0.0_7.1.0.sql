@@ -157,6 +157,25 @@ ALTER TABLE `internal_error`
     CHANGE COLUMN `disabled` `disabled` TEXT NOT NULL COMMENT 'Disabled stuff, JSON-encoded(DC2Type:json)',
     CHANGE COLUMN `status` `status` ENUM('open', 'resolved', 'ignored') DEFAULT 'open' NOT NULL COMMENT 'Status of internal error(DC2Type:internal_error_status)';
 
+ALTER TABLE `scorecache`
+    CHANGE COLUMN `cid` `cid` int(4) unsigned NOT NULL COMMENT 'Unique contest ID',
+    CHANGE COLUMN `teamid` `teamid` int(4) unsigned NOT NULL COMMENT 'Unique team ID',
+    CHANGE COLUMN `probid` `probid` int(4) unsigned NOT NULL COMMENT 'Unique problem ID',
+    ADD KEY `cid` (`cid`),
+    ADD KEY `teamid` (`teamid`),
+    ADD KEY `probid` (`probid`),
+    ADD CONSTRAINT `scorecache_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+    ADD CONSTRAINT `scorecache_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE,
+    ADD CONSTRAINT `scorecache_ibfk_3` FOREIGN KEY (`probid`) REFERENCES `problem` (`probid`) ON DELETE CASCADE;
+
+ALTER TABLE `rankcache`
+    CHANGE COLUMN `cid` `cid` int(4) unsigned NOT NULL COMMENT 'Unique contest ID',
+    CHANGE COLUMN `teamid` `teamid` int(4) unsigned NOT NULL COMMENT 'Unique team ID',
+    ADD KEY `cid` (`cid`),
+    ADD KEY `teamid` (`teamid`),
+    ADD CONSTRAINT `rankcache_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
+    ADD CONSTRAINT `rankcache_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE;
+
 --
 -- Transfer data from old to new structure
 --
