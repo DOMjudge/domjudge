@@ -11,7 +11,10 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * Time intervals removed from the contest for scoring
  * @ORM\Entity()
- * @ORM\Table(name="removed_interval", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="removed_interval",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Time intervals removed from the contest for scoring"},
+ *     indexes={@ORM\Index(name="cid", columns={"cid"})})
  */
 class RemovedInterval
 {
@@ -20,39 +23,49 @@ class RemovedInterval
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="intervalid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="intervalid", length=4,
+     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
      */
     private $intervalid;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="cid", length=4,
+     *     options={"comment"="Contest ID","unsigned"=true}, nullable=false)
      */
     private $cid;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Initial time of removed interval", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
+     *     options={"comment"="Initial time of removed interval", "unsigned"=true},
+     *     nullable=false)
      */
     private $starttime;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Final time of removed interval", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
+     *     options={"comment"="Final time of removed interval", "unsigned"=true},
+     *     nullable=false)
      */
     private $endtime;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=64, name="starttime_string", options={"comment"="Authoritative (absolute only) string representation of starttime"}, nullable=false)
+     * @ORM\Column(type="string", length=64, name="starttime_string",
+     *     options={"comment"="Authoritative (absolute only) string representation of starttime"},
+     *     nullable=false)
      * @TimeString(allowRelative=false)
      */
     private $starttimeString;
 
     /**
      * @var string
-     * @ORM\Column(type="string", length=64, name="endtime_string", options={"comment"="Authoritative (absolute only) string representation of endtime"}, nullable=false)
+     * @ORM\Column(type="string", length=64, name="endtime_string",
+     *     options={"comment"="Authoritative (absolute only) string representation of endtime"},
+     *     nullable=false)
      * @TimeString(allowRelative=false)
      */
     private $endtimeString;
