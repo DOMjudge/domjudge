@@ -118,8 +118,8 @@ CREATE TABLE `contest` (
 --
 
 CREATE TABLE `contestproblem` (
-  `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
-  `probid` int(4) unsigned NOT NULL COMMENT 'Problem ID',
+  `cid` int(4) unsigned NOT NULL COMMENT 'Unique contest ID',
+  `probid` int(4) unsigned NOT NULL COMMENT 'Unique problem ID',
   `shortname` varchar(255) NOT NULL COMMENT 'Unique problem ID within contest, used to sort problems in the scoreboard and typically a single letter',
   `points` int(4) unsigned NOT NULL DEFAULT 1 COMMENT 'Number of points earned by solving this problem',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'Are submissions accepted for this problem?',
@@ -354,8 +354,8 @@ CREATE TABLE `language` (
 --
 
 CREATE TABLE `problem` (
-  `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
-  `externalid` varchar(255) DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest',
+  `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique problem ID',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `timelimit` float unsigned NOT NULL DEFAULT 0 COMMENT 'Maximum run time (in seconds) for this problem',
   `memlimit` int(4) unsigned DEFAULT NULL COMMENT 'Maximum memory available (in kB) for this problem',
@@ -367,7 +367,11 @@ CREATE TABLE `problem` (
   `problemtext` longblob DEFAULT NULL COMMENT 'Problem text in HTML/PDF/ASCII',
   `problemtext_type` varchar(4) DEFAULT NULL COMMENT 'File type of problem text',
   PRIMARY KEY  (`probid`),
-  KEY `externalid` (`externalid`(190))
+  KEY `externalid` (`externalid`(190)),
+  KEY `special_run` (`special_run`),
+  KEY `special_compare` (`special_compare`),
+  CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`special_run`) REFERENCES `executable` (`execid`) ON DELETE SET NULL,
+  CONSTRAINT `problem_ibfk_2` FOREIGN KEY (`special_compare`) REFERENCES `executable` (`execid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Problems the teams can submit solutions for';
 
 --

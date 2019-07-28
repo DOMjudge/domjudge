@@ -110,6 +110,18 @@ ALTER TABLE `language`
     ADD KEY `compile_script` (`compile_script`),
     ADD CONSTRAINT `language_ibfk_1` FOREIGN KEY (`compile_script`) REFERENCES `executable` (`execid`) ON DELETE SET NULL;
 
+ALTER TABLE `problem`
+    CHANGE COLUMN `probid` `probid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique problem ID',
+    CHANGE COLUMN `externalid` `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Problem ID in an external system, should be unique inside a single contest',
+    ADD KEY `special_run` (`special_run`),
+    ADD KEY `special_compare` (`special_compare`),
+    ADD CONSTRAINT `problem_ibfk_1` FOREIGN KEY (`special_run`) REFERENCES `executable` (`execid`) ON DELETE SET NULL,
+    ADD CONSTRAINT `problem_ibfk_2` FOREIGN KEY (`special_compare`) REFERENCES `executable` (`execid`) ON DELETE SET NULL;
+
+ALTER TABLE `contestproblem`
+    CHANGE COLUMN `cid` `cid` INT UNSIGNED NOT NULL COMMENT 'Unique contest ID',
+    CHANGE COLUMN `probid` `probid` INT UNSIGNED NOT NULL COMMENT 'Unique problem ID';
+
 --
 -- Transfer data from old to new structure
 --

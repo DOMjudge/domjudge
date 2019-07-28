@@ -12,7 +12,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Many-to-Many mapping of contests and problems
  * @ORM\Entity()
- * @ORM\Table(name="contestproblem", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="contestproblem",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Many-to-Many mapping of contests and problems"},
+ *     indexes={
+ *         @ORM\Index(name="cid", columns={"cid"}),
+ *         @ORM\Index(name="probid", columns={"probid"})
+ *     },
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="shortname", columns={"cid", "shortname"}, options={"lengths"={NULL,"190"}})
+ *     })
  * @Serializer\VirtualProperty(
  *     "id",
  *     exp="object.getProblem().getProbid()",
@@ -28,7 +37,9 @@ class ContestProblem
 {
     /**
      * @var string
-     * @ORM\Column(type="string", name="shortname", length=255, options={"comment"="Unique problem ID within contest (string)"}, nullable=false)
+     * @ORM\Column(type="string", name="shortname", length=255,
+     *     options={"comment"="Unique problem ID within contest, used to sort problems in the scoreboard and typically a single letter"},
+     *     nullable=false)
      * @Serializer\SerializedName("label")
      */
     private $shortname;
@@ -36,7 +47,10 @@ class ContestProblem
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="points", options={"comment"="Number of points earned by solving this problem"}, nullable=false)
+     * @ORM\Column(type="integer", name="points", length=4,
+     *     options={"comment"="Number of points earned by solving this problem",
+     *              "unsigned"=true,"default"="1"},
+     *     nullable=false)
      * @Serializer\Exclude()
      * @Assert\GreaterThanOrEqual(0)
      */
@@ -44,39 +58,43 @@ class ContestProblem
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="allow_submit", options={"comment"="Are submissions accepted for this problem?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="allow_submit",
+     *     options={"comment"="Are submissions accepted for this problem?",
+     *              "unsigned"=true,"default"="1"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $allowSubmit = true;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="allow_judge", options={"comment"="Are submissions for this problem judged?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="allow_judge",
+     *     options={"comment"="Are submissions for this problem judged?",
+     *              "unsigned"=true,"default"="1"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $allowJudge = true;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="color", length=32, options={"comment"="Balloon colour to display on the scoreboard"}, nullable=true)
+     * @ORM\Column(type="string", name="color", length=32,
+     *     options={"comment"="Balloon colour to display on the scoreboard",
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $color;
 
     /**
      * @var boolean|null
-     * @ORM\Column(type="boolean", name="lazy_eval_results", options={"comment"="Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting"}, nullable=true)
+     * @ORM\Column(type="boolean", name="lazy_eval_results",
+     *     options={"comment"="Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting",
+     *              "unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $lazyEvalResults;
-
-    /**
-     * @ORM\Id()
-     * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems", fetch="EAGER")
-     * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
-     * @Serializer\Inline()
-     */
-    private $problem;
 
     /**
      * @ORM\Id()
@@ -85,6 +103,14 @@ class ContestProblem
      * @Serializer\Exclude()
      */
     private $contest;
+
+    /**
+     * @ORM\Id()
+     * @ORM\ManyToOne(targetEntity="Problem", inversedBy="contest_problems", fetch="EAGER")
+     * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
+     * @Serializer\Inline()
+     */
+    private $problem;
 
     /**
      * @var ArrayCollection
@@ -258,30 +284,6 @@ class ContestProblem
     }
 
     /**
-     * Set problem
-     *
-     * @param \App\Entity\Problem $problem
-     *
-     * @return ContestProblem
-     */
-    public function setProblem(\App\Entity\Problem $problem = null)
-    {
-        $this->problem = $problem;
-
-        return $this;
-    }
-
-    /**
-     * Get problem
-     *
-     * @return \App\Entity\Problem
-     */
-    public function getProblem()
-    {
-        return $this->problem;
-    }
-
-    /**
      * Set contest
      *
      * @param \App\Entity\Contest $contest
@@ -303,6 +305,30 @@ class ContestProblem
     public function getContest()
     {
         return $this->contest;
+    }
+
+    /**
+     * Set problem
+     *
+     * @param \App\Entity\Problem $problem
+     *
+     * @return ContestProblem
+     */
+    public function setProblem(\App\Entity\Problem $problem = null)
+    {
+        $this->problem = $problem;
+
+        return $this;
+    }
+
+    /**
+     * Get problem
+     *
+     * @return \App\Entity\Problem
+     */
+    public function getProblem()
+    {
+        return $this->problem;
     }
 
     /**
