@@ -8,7 +8,16 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Result of judging a submission
  * @ORM\Entity()
- * @ORM\Table(name="judging", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="judging",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Result of judging a submission"},
+ *     indexes={
+ *         @ORM\Index(name="submitid", columns={"submitid"}),
+ *         @ORM\Index(name="judgehost", columns={"judgehost"}),
+ *         @ORM\Index(name="cid", columns={"cid"}),
+ *         @ORM\Index(name="rejudgingid", columns={"rejudgingid"}),
+ *         @ORM\Index(name="prevjudgingid", columns={"prevjudgingid"})
+ *     })
  */
 class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
@@ -21,7 +30,8 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="judgingid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="judgingid", length=4,
+     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
@@ -30,7 +40,9 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="cid", length=4,
+     *     options={"comment"="Contest ID","unsigned"=true,"default"="0"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $cid;
@@ -38,7 +50,9 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="submitid", options={"comment"="Submission ID being judged"}, nullable=false)
+     * @ORM\Column(type="integer", name="submitid", length=4,
+     *     options={"comment"="Submission ID being judged","unsigned"=true},
+     *     nullable=false)
      * @Serializer\SerializedName("submission_id")
      * @Serializer\Type("string")
      */
@@ -46,55 +60,78 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time judging started", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
+     *     options={"comment"="Time judging started", "unsigned"=true},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $starttime;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time judging ended, null = stil busy", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
+     *     options={"comment"="Time judging ended, null = still busy",
+     *              "unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $endtime;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="result", length=32, options={"comment"="Result string as defined in config.php"}, nullable=true)
+     * @ORM\Column(type="string", name="result", length=32,
+     *     options={"comment"="Result string as defined in config.php",
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $result;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="verified", options={"comment"="Result verified by jury member?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="verified",
+     *     options={"comment"="Result verified by jury member?","unsigned"=true,
+     *              "default"="0"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $verified = false;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="jury_member", length=255, options={"comment"="Name of jury member who verified this"}, nullable=true)
+     * @ORM\Column(type="string", name="jury_member", length=255,
+     *     options={"comment"="Name of jury member who verified this",
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $jury_member;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="verify_comment", length=255, options={"comment"="Optional additional information provided by the verifier"}, nullable=true)
+     * @ORM\Column(type="string", name="verify_comment", length=255,
+     *     options={"comment"="Optional additional information provided by the verifier",
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $verify_comment;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="valid", options={"comment"="Old judging is marked as invalid when rejudging"}, nullable=false)
+     * @ORM\Column(type="boolean", name="valid",
+     *     options={"comment"="Old judging is marked as invalid when rejudging",
+     *              "unsigned"=true,"default"="1"},
+     *     nullable=false)
      */
     private $valid = true;
 
     /**
      * @var resource
-     * @ORM\Column(type="blob", name="output_compile", options={"comment"="Output of the compiling the program"}, nullable=true)
+     * @ORM\Column(type="blob", name="output_compile",
+     *     options={"comment"="Output of the compiling the program",
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $output_compile;
@@ -106,7 +143,10 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="seen", options={"comment"="Whether the team has seen this judging"}, nullable=false)
+     * @ORM\Column(type="boolean", name="seen",
+     *     options={"comment"="Whether the team has seen this judging",
+     *              "unsigned"=true,"default"="0"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $seen = false;
@@ -114,7 +154,10 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="rejudgingid", options={"comment"="Rejudging ID (if rejudge)"}, nullable=true)
+     * @ORM\Column(type="integer", name="rejudgingid", length=4,
+     *     options={"comment"="Rejudging ID (if rejudge)","unsigned"=true,
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $rejudgingid;
@@ -122,14 +165,19 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="prevjudgingid", options={"comment"="Previous valid judging ID (if rejudge)"}, nullable=true)
+     * @ORM\Column(type="integer", name="prevjudgingid",
+     *     options={"comment"="Previous valid judging (if rejudge)",
+     *              "unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $prevjudgingid;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="judgehost", length=64, options={"comment"="Judgehost that performed the judging"}, nullable=true)
+     * @ORM\Column(type="string", name="judgehost", length=64,
+     *     options={"comment"="Judgehost that performed the judging"},
+     *     nullable=false)
      * @Serializer\Expose(if="context.getAttribute('domjudge_service').checkrole('jury')")
      * @Serializer\SerializedName("judgehost")
      */
