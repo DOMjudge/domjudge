@@ -8,7 +8,16 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * Result of a testcase run.
  * @ORM\Entity()
- * @ORM\Table(name="judging_run", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="judging_run",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Result of a testcase run within a judging"},
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="testcaseid", columns={"judgingid", "testcaseid"})
+ *     },
+ *     indexes={
+ *         @ORM\Index(name="judgingid", columns={"judgingid"}),
+ *         @ORM\Index(name="testcaseid_2", columns={"testcaseid"})
+ *     })
  */
 class JudgingRun extends BaseApiEntity
 {
@@ -18,7 +27,9 @@ class JudgingRun extends BaseApiEntity
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="runid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="runid", length=4,
+     *     options={"comment"="Unique ID","unsigned"=true},
+     *     nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */
@@ -26,7 +37,9 @@ class JudgingRun extends BaseApiEntity
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="judgingid", options={"comment"="Judging ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="judgingid", length=4,
+     *     options={"comment"="Judging ID","unsigned"=true},
+     *     nullable=false)
      * @Serializer\SerializedName("judgement_id")
      * @Serializer\Type("string")
      */
@@ -34,28 +47,38 @@ class JudgingRun extends BaseApiEntity
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="testcaseid", options={"comment"="Testcase ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="testcaseid", length=4,
+     *     options={"comment"="Testcase ID","unsigned"=true},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $testcaseid;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="runresult", length=32, options={"comment"="Result of this run, NULL if not finished yet"}, nullable=true)
+     * @ORM\Column(type="string", name="runresult", length=32,
+     *     options={"comment"="Result of this run, NULL if not finished yet",
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $runresult;
 
     /**
      * @var double
-     * @ORM\Column(type="float", name="runtime", options={"comment"="Submission running time on this testcase"}, nullable=true)
+     * @ORM\Column(type="float", name="runtime",
+     *     options={"comment"="Submission running time on this testcase",
+     *              "default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
-    private $runtime = 1;
+    private $runtime;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time run judging finished", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
+     *     options={"comment"="Time run judging ended", "unsigned"=true},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $endtime;

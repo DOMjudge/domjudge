@@ -325,12 +325,13 @@ CREATE TABLE `judging_run` (
 
 CREATE TABLE `judging_run_output` (
   `runid` int(4) unsigned NOT NULL COMMENT 'Run ID',
-  `output_run` longblob DEFAULT NULL COMMENT 'Output of running the program',
-  `output_diff` longblob DEFAULT NULL COMMENT 'Diffing the program output and testcase output',
-  `output_error` longblob DEFAULT NULL COMMENT 'Standard error output of the program',
-  `output_system` longblob DEFAULT NULL COMMENT 'Judging system output',
+  `output_run` longblob DEFAULT NULL COMMENT 'Output of running the program(DC2Type:blobtext)',
+  `output_diff` longblob DEFAULT NULL COMMENT 'Diffing the program output and testcase output(DC2Type:blobtext)',
+  `output_error` longblob DEFAULT NULL COMMENT 'Standard error output of the program(DC2Type:blobtext)',
+  `output_system` longblob DEFAULT NULL COMMENT 'Judging system output(DC2Type:blobtext)',
   PRIMARY KEY  (`runid`),
-  CONSTRAINT `judging_run_output_ibfk_1` FOREIGN KEY (`runid`) REFERENCES `judging_run` (`runid`)
+  KEY `runid` (`runid`),
+  CONSTRAINT `judging_run_output_ibfk_1` FOREIGN KEY (`runid`) REFERENCES `judging_run` (`runid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores output of judging run';
 
 --
