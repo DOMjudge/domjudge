@@ -8,10 +8,22 @@ use Doctrine\ORM\Mapping as ORM;
  * Output of a judging run
  *
  * @ORM\Entity
- * @ORM\Table(name="judging_run_output", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="judging_run_output",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Stores output of judging run"},
+ *     indexes={@ORM\Index(name="runid", columns={"runid"})})
  */
 class JudgingRunOutput
 {
+    /**
+     * @var int
+     *
+     * @ORM\Column(type="integer", name="runid", length=4,
+     *     options={"comment"="Run ID","unsigned"=true},
+     *     nullable=false)
+     */
+    private $runid;
+
     /**
      * @var JudgingRun
      * @ORM\Id
@@ -22,27 +34,46 @@ class JudgingRunOutput
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="output_run", options={"comment"="Output of running the program"}, nullable=true)
+     * @ORM\Column(type="blobtext", length=4294967295, name="output_run",
+     *     options={"comment"="Output of running the program", "default"="NULL"},
+     *     nullable=true)
      */
     private $output_run;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="output_diff", options={"comment"="Diffing the program output and testcase output"}, nullable=true)
+     * @ORM\Column(type="blobtext", length=4294967295, name="output_diff",
+     *     options={"comment"="Diffing the program output and testcase output",
+     *              "default"="NULL"},
+     *     nullable=true)
      */
     private $output_diff;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="output_error", options={"comment"="Standard error output of the program"}, nullable=true)
+     * @ORM\Column(type="blobtext", length=4294967295, name="output_error",
+     *     options={"comment"="Standard error output of the program", "default"="NULL"},
+     *     nullable=true)
      */
     private $output_error;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="output_system", options={"comment"="Judging system output"}, nullable=true)
+     * @ORM\Column(type="blobtext", length=4294967295, name="output_system",
+     *     options={"comment"="Judging system output", "default"="NULL"},
+     *     nullable=true)
      */
     private $output_system;
+
+    /**
+     * Get runid
+     *
+     * @return integer
+     */
+    public function getRunid()
+    {
+        return $this->runid;
+    }
 
     /**
      * @param JudgingRun $run
