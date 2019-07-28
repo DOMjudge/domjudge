@@ -48,14 +48,14 @@ class RemovedInterval
      * @ORM\Column(type="string", length=64, name="starttime_string", options={"comment"="Authoritative (absolute only) string representation of starttime"}, nullable=false)
      * @TimeString(allowRelative=false)
      */
-    private $starttime_string;
+    private $starttimeString;
 
     /**
      * @var string
      * @ORM\Column(type="string", length=64, name="endtime_string", options={"comment"="Authoritative (absolute only) string representation of endtime"}, nullable=false)
      * @TimeString(allowRelative=false)
      */
-    private $endtime_string;
+    private $endtimeString;
 
     /**
      * @ORM\ManyToOne(targetEntity="Contest", inversedBy="removedIntervals")
@@ -155,9 +155,9 @@ class RemovedInterval
      */
     public function setStarttimeString($starttimeString)
     {
-        $this->starttime_string = $starttimeString;
-        $date                   = new \DateTime($starttimeString);
-        $this->starttime        = $date->format('U.v');
+        $this->starttimeString = $starttimeString;
+        $date                  = new \DateTime($starttimeString);
+        $this->starttime       = $date->format('U.v');
 
         return $this;
     }
@@ -169,7 +169,7 @@ class RemovedInterval
      */
     public function getStarttimeString()
     {
-        return $this->starttime_string;
+        return $this->starttimeString;
     }
 
     /**
@@ -182,9 +182,9 @@ class RemovedInterval
      */
     public function setEndtimeString($endtimeString)
     {
-        $this->endtime_string = $endtimeString;
-        $date                 = new \DateTime($endtimeString);
-        $this->endtime        = $date->format('U.v');
+        $this->endtimeString = $endtimeString;
+        $date                = new \DateTime($endtimeString);
+        $this->endtime       = $date->format('U.v');
 
         return $this;
     }
@@ -196,7 +196,7 @@ class RemovedInterval
      */
     public function getEndtimeString()
     {
-        return $this->endtime_string;
+        return $this->endtimeString;
     }
 
     /**
