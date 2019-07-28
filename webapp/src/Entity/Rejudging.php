@@ -6,7 +6,13 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Rejudge group
  * @ORM\Entity()
- * @ORM\Table(name="rejudging", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="rejudging",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Rejudge group"},
+ *     indexes={
+ *         @ORM\Index(name="userid_start", columns={"userid_start"}),
+ *         @ORM\Index(name="userid_finish", columns={"userid_finish"})
+ *     })
  */
 class Rejudging
 {
@@ -15,46 +21,63 @@ class Rejudging
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="rejudgingid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="rejudgingid", length=4,
+     *     options={"comment"="Unique ID","unsigned"=true},
+     *     nullable=false)
      */
     private $rejudgingid;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="userid_start", options={"comment"="User ID of user who started the rejudge"}, nullable=true)
+     * @ORM\Column(type="integer", name="userid_start", length=4,
+     *     options={"comment"="User ID of user who started the rejudge",
+     *              "unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      */
     private $userid_start;
 
     /**
      * @var int
      *
-     * @ORM\Column(type="integer", name="userid_finish", options={"comment"="User ID of user who accepted or canceled the rejudge"}, nullable=true)
+     * @ORM\Column(type="integer", name="userid_finish",
+     *     options={"comment"="User ID of user who accepted or canceled the rejudge",
+     *              "unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      */
     private $userid_finish;
 
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime", options={"comment"="Time rejudging started", "unsigned"=true}, nullable=false)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="starttime",
+     *     options={"comment"="Time rejudging started", "unsigned"=true},
+     *     nullable=false)
      */
     private $starttime;
 
     /**
      * @var double
-     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime", options={"comment"="Time rejudging ended, null = stil busy", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="decimal", precision=32, scale=9, name="endtime",
+     *     options={"comment"="Time rejudging ended, null = still busy",
+     *              "unsigned"=true,"default"="NULL"},
+     *     nullable=true)
      */
     private $endtime;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="reason", length=255, options={"comment"="Reason to start this rejudge"}, nullable=false)
+     * @ORM\Column(type="string", name="reason", length=255,
+     *     options={"comment"="Reason to start this rejudge"}, nullable=false)
      */
     private $reason;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="valid", options={"comment"="Rejudging is marked as invalid if canceled"}, nullable=false)
+     * @ORM\Column(type="boolean", name="valid",
+     *     options={"comment"="Rejudging is marked as invalid if canceled",
+     *              "unsigned"=true,"default"="1"},
+     *     nullable=false)
      */
     private $valid = true;
 
