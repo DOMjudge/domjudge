@@ -12,7 +12,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Stores testcases per problem
  * @ORM\Entity()
- * @ORM\Table(name="problem", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="problem",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4","comment"="Problems the teams can submit solutions for"},
+ *     indexes={
+ *         @ORM\Index(name="externalid", columns={"externalid"}, options={"lengths": {"190"}}),
+ *         @ORM\Index(name="special_run", columns={"special_run"}),
+ *         @ORM\Index(name="special_compare", columns={"special_compare"})
+ *     })
  * @ORM\HasLifecycleCallbacks()
  * @UniqueEntity("externalid")
  */
@@ -24,14 +31,17 @@ class Problem extends BaseApiEntity
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="probid", options={"comment"="Unique ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="probid", options={"comment"="Unique problem ID","unsigned"="true"}, nullable=false)
      * @Serializer\Exclude()
      */
     protected $probid;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="External ID in an external system", "collation"="utf8mb4_bin"}, nullable=true)
+     * @ORM\Column(type="string", name="externalid", length=255,
+     *     options={"comment"="Problem ID in an external system, should be unique inside a single contest",
+     *              "collation"="utf8mb4_bin","default":"NULL"},
+     *     nullable=true)
      */
     protected $externalid;
 
@@ -43,7 +53,10 @@ class Problem extends BaseApiEntity
 
     /**
      * @var double
-     * @ORM\Column(type="float", name="timelimit", options={"comment"="Maximum run time (in seconds) for this problem"}, nullable=false)
+     * @ORM\Column(type="float", name="timelimit",
+     *     options={"comment"="Maximum run time (in seconds) for this problem",
+     *              "default"="0","unsigned"="true"},
+     *     nullable=false)
      * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
      */
@@ -51,7 +64,10 @@ class Problem extends BaseApiEntity
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="memlimit", options={"comment"="Maximum memory available (in kB) for this problem", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="integer", name="memlimit",
+     *     options={"comment"="Maximum memory available (in kB) for this problem",
+     *              "unsigned"=true,"default":"NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
      */
@@ -59,7 +75,10 @@ class Problem extends BaseApiEntity
 
     /**
      * @var int
-     * @ORM\Column(type="integer", name="outputlimit", options={"comment"="Maximum output size (in kB) for this problem", "unsigned"=true}, nullable=true)
+     * @ORM\Column(type="integer", name="outputlimit",
+     *     options={"comment"="Maximum output size (in kB) for this problem",
+     *              "unsigned"=true,"default":"NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      * @Assert\GreaterThan(0)
      */
@@ -68,35 +87,42 @@ class Problem extends BaseApiEntity
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="special_run", length=32, options={"comment"="Script to run submissions for this problem"}, nullable=true)
+     * @ORM\Column(type="string", name="special_run", length=32, options={"comment"="Script to run submissions for this problem","default"="NULL"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $special_run;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="special_compare", length=32, options={"comment"="Script to compare problem and jury output for this problem"}, nullable=true)
+     * @ORM\Column(type="string", name="special_compare", length=32, options={"comment"="Script to compare problem and jury output for this problem","default"="NULL"}, nullable=true)
      * @Serializer\Exclude()
      */
     private $special_compare;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="special_compare_args", length=32, options={"comment"="Optional arguments to special_compare script"}, nullable=true)
+     * @ORM\Column(type="string", name="special_compare_args", length=255,
+     *     options={"comment"="Optional arguments to special_compare script","default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $special_compare_args;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="combined_run_compare", options={"comment"="Use the exit code of the run script to compute the verdict"}, nullable=false)
+     * @ORM\Column(type="boolean", name="combined_run_compare",
+     *     options={"comment"="Use the exit code of the run script to compute the verdict",
+     *              "unsigned"=true,"default":"0"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
-    private $combined_run_compare = FALSE;
+    private $combined_run_compare = false;
 
     /**
      * @var resource
-     * @ORM\Column(type="blob", name="problemtext", options={"comment"="Problem text in HTML/PDF/ASCII"}, nullable=true)
+     * @ORM\Column(type="blob", name="problemtext",
+     *     options={"comment"="Problem text in HTML/PDF/ASCII","default":"NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $problemtext;
@@ -116,7 +142,9 @@ class Problem extends BaseApiEntity
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="problemtext_type", options={"comment"="File type of problem text"}, nullable=true)
+     * @ORM\Column(type="string", length=4, name="problemtext_type",
+     *     options={"comment"="File type of problem text","default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $problemtext_type;
@@ -141,14 +169,14 @@ class Problem extends BaseApiEntity
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="problems_compare")
-     * @ORM\JoinColumn(name="special_compare", referencedColumnName="execid")
+     * @ORM\JoinColumn(name="special_compare", referencedColumnName="execid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $compare_executable;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="problems_run")
-     * @ORM\JoinColumn(name="special_run", referencedColumnName="execid")
+     * @ORM\JoinColumn(name="special_run", referencedColumnName="execid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $run_executable;
