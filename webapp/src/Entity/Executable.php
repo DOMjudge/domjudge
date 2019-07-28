@@ -8,14 +8,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Compile, compare, and run script executable bundles
  * @ORM\Entity()
- * @ORM\Table(name="executable", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="executable",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Compile, compare, and run script executable bundles"})
  */
 class Executable
 {
     /**
      * @var string
      * @ORM\Id
-     * @ORM\Column(type="string", name="execid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
+     * @ORM\Column(type="string", name="execid", length=32,
+     *     options={"comment"="Unique ID (string)"}, nullable=false)
      * @Assert\NotBlank()
      * @Identifier()
      */
@@ -23,13 +26,16 @@ class Executable
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="md5sum", length=32, options={"comment"="Md5sum of zip file"}, nullable=true)
+     * @ORM\Column(type="string", name="md5sum", length=32,
+     *     options={"comment"="Md5sum of zip file","default"="NULL","fixed"=true},
+     *     nullable=true)
      */
     private $md5sum;
 
     /**
      * @var resource|string
-     * @ORM\Column(type="blob", name="zipfile", options={"comment"="Zip file"}, nullable=false)
+     * @ORM\Column(type="blob", name="zipfile",
+     *     options={"comment"="Zip file","default"="NULL"}, nullable=true)
      */
     private $zipfile;
 
@@ -37,14 +43,17 @@ class Executable
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="description", length=255, options={"comment"="Description of this executable"}, nullable=true)
+     * @ORM\Column(type="string", name="description", length=255,
+     *     options={"comment"="Description of this executable","default"="NULL"},
+     *     nullable=true)
      * @Assert\NotBlank()
      */
     private $description;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="type", length=32, options={"comment"="Type of executable"}, nullable=false)
+     * @ORM\Column(type="string", name="type", length=32,
+     *     options={"comment"="Type of executable"}, nullable=false)
      * @Assert\Choice({"compare", "compile", "run"})
      */
     private $type;
