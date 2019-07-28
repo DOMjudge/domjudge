@@ -180,6 +180,17 @@ ALTER TABLE `rankcache`
 ALTER TABLE `event`
     CHANGE COLUMN `content` `content` LONGBLOB NOT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed(DC2Type:binaryjson)';
 
+ALTER TABLE `user`
+    CHANGE COLUMN `userid` `userid` INT(4) UNSIGNED AUTO_INCREMENT NOT NULL COMMENT 'Unique user ID';
+
+ALTER TABLE `userrole`
+    CHANGE COLUMN `userid` `userid` int(4) unsigned NOT NULL COMMENT 'Unique user ID',
+    CHANGE COLUMN `roleid` `roleid` int(4) unsigned NOT NULL COMMENT 'Unique role ID',
+    DROP INDEX `userid`,
+    DROP INDEX `roleid`,
+    ADD INDEX `IDX_F114F21BF132696E` (`userid`),
+    ADD INDEX `IDX_F114F21B2D46D92A` (`roleid`);
+
 --
 -- Transfer data from old to new structure
 --
