@@ -428,7 +428,7 @@ class ProblemController extends BaseController
             // by default.
             $directory = sprintf('submissions/%s/s%d/', $problemResult, $solution->getSubmitid());
             /** @var SubmissionFile $source */
-            foreach ($solution->getFilesWithSourceCode() as $source) {
+            foreach ($solution->getFiles() as $source) {
                 $zip->addFromString($directory . $source->getFilename(), $source->getSourcecode());
             }
         }
