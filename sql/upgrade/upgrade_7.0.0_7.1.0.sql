@@ -105,6 +105,10 @@ ALTER TABLE `team_affiliation`
 ALTER TABLE `team_category`
     CHANGE COLUMN `sortorder` `sortorder` TINYINT(1) UNSIGNED DEFAULT 0 NOT NULL COMMENT 'Where to sort this category on the scoreboard(DC2Type:tinyint)';
 
+ALTER TABLE `language`
+    CHANGE COLUMN `extensions` `extensions` LONGTEXT DEFAULT NULL COMMENT 'List of recognized extensions (JSON encoded)(DC2Type:json)',
+    ADD KEY `compile_script` (`compile_script`),
+    ADD CONSTRAINT `language_ibfk_1` FOREIGN KEY (`compile_script`) REFERENCES `executable` (`execid`) ON DELETE SET NULL;
 
 --
 -- Transfer data from old to new structure

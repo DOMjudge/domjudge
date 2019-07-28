@@ -10,7 +10,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * Programming languages in which teams can submit solutions
  * @ORM\Entity()
- * @ORM\Table(name="language", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\Table(
+ *     name="language",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Programming languages in which teams can submit solutions"},
+ *     indexes={@ORM\Index(name="compile_script", columns={"compile_script"})},
+ *     uniqueConstraints={
+ *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {"190"}}),
+ *     })
  * @UniqueEntity("langid")
  * @UniqueEntity("externalid")
  */
@@ -30,7 +36,8 @@ class Language extends BaseApiEntity
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="externalid", length=255, nullable=true)
+     * @ORM\Column(type="string", name="externalid", length=255, nullable=true,
+     *     options={"default"="NULL","comment"="Language ID to expose in the REST API"})
      * @Serializer\SerializedName("id")
      * @Serializer\Groups({"Default", "Nonstrict"})
      */
@@ -46,7 +53,9 @@ class Language extends BaseApiEntity
 
     /**
      * @var string[]
-     * @ORM\Column(type="json", length=4294967295, name="extensions", options={"comment"="List of recognized extensions (JSON encoded)"}, nullable=false)
+     * @ORM\Column(type="json", length=4294967295, name="extensions",
+     *     options={"comment"="List of recognized extensions (JSON encoded)","default":"NULL"},
+     *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      * @Serializer\Type("array<string>")
      * @Assert\NotBlank()
@@ -55,21 +64,27 @@ class Language extends BaseApiEntity
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="allow_submit", options={"comment"="Are submissions accepted in this language?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="allow_submit",
+     *     options={"comment"="Are submissions accepted in this language?","default"="1","unsigned"="true"},
+     *     nullable=false)
      * @Serializer\Exclude()
      */
     private $allowSubmit = true;
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean", name="allow_judge", options={"comment"="Are submissions in this language judged?"}, nullable=false)
+     * @ORM\Column(type="boolean", name="allow_judge",
+     *     options={"comment"="Are submissions in this language judged?","default"="1","unsigned"="true"},
+     *     nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      */
     private $allowJudge = true;
 
     /**
      * @var double
-     * @ORM\Column(type="float", name="time_factor", options={"comment"="Language-specific factor multiplied by problem run times"}, nullable=false)
+     * @ORM\Column(type="float", name="time_factor",
+     *     options={"comment"="Language-specific factor multiplied by problem run times","default"="1"},
+     *     nullable=false)
      * @Serializer\Type("double")
      * @Serializer\Groups({"Nonstrict"})
      * @Assert\GreaterThan(0)
@@ -79,28 +94,34 @@ class Language extends BaseApiEntity
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="compile_script", length=32, options={"comment"="Script to compile source code for this language"}, nullable=true)
+     * @ORM\Column(type="string", name="compile_script", length=32,
+     *     options={"comment"="Script to compile source code for this language","default"="NULL"},
+     *     nullable=true)
      * @Serializer\Exclude()
      */
     private $compile_script;
 
     /**
      * @var bool
-     * @ORM\Column(type="boolean", name="require_entry_point", options={"comment"="Whether submissions require a code entry point to be specified."}, nullable=false)
+     * @ORM\Column(type="boolean", name="require_entry_point",
+     *     options={"comment"="Whether submissions require a code entry point to be specified.","default":"0"},
+     *     nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      */
     private $require_entry_point = false;
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="entry_point_description", options={"comment"="The description used in the UI for the entry point field."}, nullable=true)
+     * @ORM\Column(type="string", name="entry_point_description",
+     *     options={"comment"="The description used in the UI for the entry point field.","default"="NULL"},
+     *     nullable=true)
      * @Serializer\Groups({"Nonstrict"})
      */
     private $entry_point_description;
 
     /**
      * @ORM\ManyToOne(targetEntity="Executable", inversedBy="languages")
-     * @ORM\JoinColumn(name="compile_script", referencedColumnName="execid")
+     * @ORM\JoinColumn(name="compile_script", referencedColumnName="execid", onDelete="SET NULL")
      * @Serializer\Exclude()
      */
     private $compile_executable;

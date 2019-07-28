@@ -13,10 +13,21 @@ use Doctrine\DBAL\Types\JsonType as BaseJsonType;
  * storing JSON data in the database. Otherwise "5.0" will be converted to "5",
  * which gives some inconsistencies between the API and event feed.
  *
+ * Also we always want a LONGTEXT field and not a JSON field, as that is only
+ * supported by MySQL 5.7+
+ *
  * @package App\Doctrine\DBAL\Types
  */
 class JsonType extends BaseJsonType
 {
+    /**
+     * @inheritDoc
+     */
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    {
+        return 'LONGTEXT';
+    }
+
     /**
      * @inheritdoc
      */

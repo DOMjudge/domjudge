@@ -12,6 +12,7 @@ doctrine:
         types:
             tinyint: App\Doctrine\DBAL\Types\TinyIntType
             json: App\Doctrine\DBAL\Types\JsonType
+            binaryjson: App\Doctrine\DBAL\Types\BinaryJsonType
             internal_error_status: App\Doctrine\DBAL\Types\InternalErrorStatusType
         mapping_types:
             enum: string
