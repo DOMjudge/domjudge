@@ -630,7 +630,7 @@ CREATE TABLE `testcase_content` (
 --
 
 CREATE TABLE `user` (
-  `userid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique ID',
+  `userid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique user ID',
   `username` varchar(255) NOT NULL COMMENT 'User login name',
   `name` varchar(255) NOT NULL COMMENT 'Name',
   `email` varchar(255) DEFAULT NULL COMMENT 'Email address',
@@ -652,11 +652,11 @@ CREATE TABLE `user` (
 -- Table structure for table `userrole`
 --
 CREATE TABLE `userrole` (
-  `userid` int(4) unsigned NOT NULL COMMENT 'User ID',
-  `roleid` int(4) unsigned NOT NULL COMMENT 'Role ID',
+  `userid` int(4) unsigned NOT NULL COMMENT 'Unique user ID',
+  `roleid` int(4) unsigned NOT NULL COMMENT 'Unique role ID',
   PRIMARY KEY (`userid`, `roleid`),
-  KEY `userid` (`userid`),
-  KEY `roleid` (`roleid`),
+  KEY `IDX_F114F21BF132696E` (`userid`),
+  KEY `IDX_F114F21B2D46D92A` (`roleid`),
   CONSTRAINT `userrole_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `user` (`userid`) ON DELETE CASCADE,
   CONSTRAINT `userrole_ibfk_2` FOREIGN KEY (`roleid`) REFERENCES `role` (`roleid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Many-to-Many mapping of users and roles';
