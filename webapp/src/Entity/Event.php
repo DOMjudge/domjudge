@@ -7,7 +7,13 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Log of all events during a contest
  *
- * @ORM\Table(name="event", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"}, uniqueConstraints={@ORM\UniqueConstraint(name="eventtime", columns={"eventtime"})}, indexes={@ORM\Index(name="cid", columns={"cid"})})
+ * @ORM\Table(
+ *     name="event",
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of all events during a contest"},
+ *     indexes={
+ *         @ORM\Index(name="eventtime", columns={"cid","eventtime"}),
+ *         @ORM\Index(name="cid", columns={"cid"})
+ *     })
  * @ORM\Entity
  */
 class Event
@@ -16,7 +22,8 @@ class Event
      * @var integer
      *
      * @ORM\Id
-     * @ORM\Column(name="eventid", type="integer", nullable=false, options={"comment"="Unique ID"})
+     * @ORM\Column(name="eventid", type="integer", nullable=false, length=4,
+     *     options={"comment"="Unique ID","unsigned"=true})
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $eventid;
@@ -24,42 +31,48 @@ class Event
     /**
      * @var double
      *
-     * @ORM\Column(name="eventtime", type="decimal", precision=32, scale=9, nullable=false)
+     * @ORM\Column(name="eventtime", type="decimal", precision=32, scale=9,
+     *     nullable=false, options={"comment"="When the event occurred","unsigned"=true})
      */
     private $eventtime;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="endpointtype", type="string", length=32, nullable=false)
+     * @ORM\Column(name="endpointtype", type="string", length=32, nullable=false,
+     *     options={"comment"="API endpoint associated to this entry"})
      */
     private $endpointtype;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="endpointid", type="string", length=64, nullable=false)
+     * @ORM\Column(name="endpointid", type="string", length=64, nullable=false,
+     *     options={"comment"="API endpoint (external) ID"})
      */
     private $endpointid;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="action", type="string", length=32, nullable=false)
+     * @ORM\Column(name="action", type="string", length=32, nullable=false,
+     *     options={"comment"="Description of action performed"})
      */
     private $action;
 
     /**
      * @var resource
      *
-     * @ORM\Column(name="content", type="binaryjson", nullable=true)
+     * @ORM\Column(name="content", type="binaryjson",
+     *     options={"comment"="JSON encoded content of the change, as provided in the event feed"})
      */
     private $content;
 
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID"}, nullable=false)
+     * @ORM\Column(type="integer", name="cid", length=4,
+     *     options={"comment"="Contest ID","unsigned"=true}, nullable=false)
      */
     private $cid;
 

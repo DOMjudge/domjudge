@@ -163,7 +163,7 @@ CREATE TABLE `event` (
   `endpointtype` varchar(32) NOT NULL COMMENT 'API endpoint associated to this entry',
   `endpointid` varchar(64) NOT NULL COMMENT 'API endpoint (external) ID',
   `action` varchar(32) NOT NULL COMMENT 'Description of action performed',
-  `content` longblob NOT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed',
+  `content` longblob NOT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed(DC2Type:binaryjson)',
   PRIMARY KEY (`eventid`),
   KEY `eventtime` (`cid`,`eventtime`),
   KEY `cid` (`cid`),
