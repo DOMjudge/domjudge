@@ -336,7 +336,7 @@ CREATE TABLE `language` (
   `langid` varchar(32) NOT NULL COMMENT 'Unique ID (string)',
   `externalid` varchar(255) DEFAULT NULL COMMENT 'Language ID to expose in the REST API',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive language name',
-  `extensions` longtext DEFAULT NULL COMMENT 'List of recognized extensions (JSON encoded)',
+  `extensions` longtext DEFAULT NULL COMMENT 'List of recognized extensions (JSON encoded)(DC2Type:json)',
   `require_entry_point` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Whether submissions require a code entry point to be specified.',
   `entry_point_description` varchar(255) DEFAULT NULL COMMENT 'The description used in the UI for the entry point field.',
   `allow_submit` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'Are submissions accepted in this language?',
@@ -344,7 +344,9 @@ CREATE TABLE `language` (
   `time_factor` float NOT NULL DEFAULT 1 COMMENT 'Language-specific factor multiplied by problem run times',
   `compile_script` varchar(32) DEFAULT NULL COMMENT 'Script to compile source code for this language',
   PRIMARY KEY  (`langid`),
-  UNIQUE KEY `externalid` (`externalid`(190))
+  UNIQUE KEY `externalid` (`externalid`(190)),
+  KEY `compile_script` (`compile_script`),
+  CONSTRAINT `language_ibfk_1` FOREIGN KEY (`compile_script`) REFERENCES `executable` (`execid`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Programming languages in which teams can submit solutions';
 
 --
