@@ -177,6 +177,9 @@ ALTER TABLE `rankcache`
     ADD CONSTRAINT `rankcache_ibfk_1` FOREIGN KEY (`cid`) REFERENCES `contest` (`cid`) ON DELETE CASCADE,
     ADD CONSTRAINT `rankcache_ibfk_2` FOREIGN KEY (`teamid`) REFERENCES `team` (`teamid`) ON DELETE CASCADE;
 
+ALTER TABLE `event`
+    CHANGE COLUMN `content` `content` LONGBLOB NOT NULL COMMENT 'JSON encoded content of the change, as provided in the event feed(DC2Type:binaryjson)';
+
 --
 -- Transfer data from old to new structure
 --
