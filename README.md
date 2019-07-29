@@ -61,17 +61,9 @@ are covered by other copyrights. This will be noted in the files
 themselves and these copyrights/attributions can also be found in the
 administrator manual.
 
-Various JavaScript libraries/snippets are included under www/js/:
+The following JavaScript libraries/snippets are included:
 - jscolor.js: copyright Jan Odvarko, licensed under the GNU LGPL.
-- tabber.js: copyright Patrick Fitzgerald, licensed under the MIT licence.
 - Ace editor: licensed under the BSD licence, see COPYING.BSD.
-- jQuery: licensed under the MIT licence, see COPYING.MIT.
-- jQuery TokenInput: dual licensed under GPL and MIT licences, see COPYING and COPYING.MIT.
-
-Font Awesome is copyright FortAwesome.
-Icons License: CC BY 4.0 License
-Font License: SIL OFL 1.1 (http://scripts.sil.org/OFL)
-Code License: the MIT licence, see COPYING.MIT
 
 The default validator from the Kattis problemtools package is
 included, licensed under the MIT licence, see COPYING.MIT.
@@ -85,6 +77,9 @@ people under the BSD licence and a part under the GNU GPL version 2,
 see doc/dash.copyright for more details.
 Sources can be downloaded from: https://www.domjudge.org/sources/
 
+The DOMjudge tarball ships external library dependencies in the
+lib/vendor directory. These are covered by their individual licenses
+as specified in the file composer.lock.
 
 Contact
 -------
