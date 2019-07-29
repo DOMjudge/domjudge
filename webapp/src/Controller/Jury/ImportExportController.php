@@ -23,6 +23,7 @@ use Collator;
 use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -218,27 +219,32 @@ class ImportExportController extends BaseController
      * @Route("/export/{type<groups|teams|scoreboard|results>}.tsv", name="jury_tsv_export")
      * @param Request $request
      * @param string  $type
-     * @return StreamedResponse
+     * @return RedirectResponse|StreamedResponse
      * @throws \Exception
      */
     public function exportTsvAction(Request $request, string $type)
     {
         $data    = [];
         $version = 1;
-        switch ($type) {
-            case 'groups':
-                $data = $this->importExportService->getGroupData();
-                break;
-            case 'teams':
-                $data = $this->importExportService->getTeamData();
-                break;
-            case 'scoreboard':
-                $data = $this->importExportService->getScoreboardData();
-                break;
-            case 'results':
-                $sortOrder = $request->query->getInt('sort_order');
-                $data      = $this->importExportService->getResultsData($sortOrder);
-                break;
+        try {
+            switch ($type) {
+                case 'groups':
+                    $data = $this->importExportService->getGroupData();
+                    break;
+                case 'teams':
+                    $data = $this->importExportService->getTeamData();
+                    break;
+                case 'scoreboard':
+                    $data = $this->importExportService->getScoreboardData();
+                    break;
+                case 'results':
+                    $sortOrder = $request->query->getInt('sort_order');
+                    $data      = $this->importExportService->getResultsData($sortOrder);
+                    break;
+            }
+        } catch (BadRequestHttpException $e) {
+            $this->addFlash('danger', $e->getMessage());
+            return $this->redirectToRoute('jury_import_export');
         }
 
         $response = new StreamedResponse();
@@ -265,12 +271,17 @@ class ImportExportController extends BaseController
      */
     public function exportHtmlAction(Request $request, string $type)
     {
-        switch ($type) {
-            case 'results':
-            case 'results-icpc':
-                return $this->getResultsHtml($request, $type === 'results-icpc');
-            case 'clarifications':
-                return $this->getClarificationsHtml();
+        try {
+            switch ($type) {
+                case 'results':
+                case 'results-icpc':
+                    return $this->getResultsHtml($request, $type === 'results-icpc');
+                case 'clarifications':
+                    return $this->getClarificationsHtml();
+            }
+        } catch (BadRequestHttpException $e) {
+            $this->addFlash('danger', $e->getMessage());
+            return $this->redirectToRoute('jury_import_export');
         }
     }
 
