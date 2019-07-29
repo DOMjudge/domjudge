@@ -662,6 +662,7 @@ class ImportEventFeedCommand extends Command
         $verdict         = $event['data']['id'];
         $verdictsFlipped = array_flip($this->verdicts);
         if (!isset($verdictsFlipped[$verdict])) {
+            // TODO: we should handle this. Kattis has JE (judge error) which we do not have but want to show
             $this->logger->error(sprintf('Judgement type %s does not exist in DOMjudge', $verdict));
         } else {
             $penalty = true;
