@@ -14,6 +14,8 @@ use App\Service\EventLogService;
 use App\Service\SubmissionService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
 use Twig\TwigFilter;
@@ -42,6 +44,16 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     protected $eventLogService;
 
     /**
+     * @var TokenStorageInterface
+     */
+    protected $tokenStorage;
+
+    /**
+     * @var AuthorizationCheckerInterface
+     */
+    protected $authorizationChecker;
+
+    /**
      * @var string
      */
     protected $projectDir;
@@ -51,13 +63,17 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         EntityManagerInterface $em,
         SubmissionService $submissionService,
         EventLogService $eventLogService,
+        TokenStorageInterface $tokenStorage,
+        AuthorizationCheckerInterface $authorizationChecker,
         string $projectDir
     ) {
-        $this->dj                = $dj;
-        $this->em                = $em;
-        $this->submissionService = $submissionService;
-        $this->eventLogService   = $eventLogService;
-        $this->projectDir        = $projectDir;
+        $this->dj                   = $dj;
+        $this->em                   = $em;
+        $this->submissionService    = $submissionService;
+        $this->eventLogService      = $eventLogService;
+        $this->tokenStorage         = $tokenStorage;
+        $this->authorizationChecker = $authorizationChecker;
+        $this->projectDir           = $projectDir;
     }
 
     public function getFunctions()
@@ -133,7 +149,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 ->getQuery()
                 ->getResult(),
             'alpha3_countries' => Utils::ALPHA3_COUNTRIES,
-            'data_source' => $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL),
+            'show_shadow_differences' => $this->tokenStorage->getToken() &&
+                                         $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
+                                         $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
         ];
     }
 
