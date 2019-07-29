@@ -41,7 +41,7 @@
                     <a class="nav-link" href="{{ path('jury_submissions') }}"><i class="fas fa-file-code"></i> submissions</a>
                 </li>
 
-                {% if is_granted('ROLE_ADMIN') and data_source == constant('App\\Service\\DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL') %}
+                {% if show_shadow_differences %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('jury_shadow_differences') }}"><i class="fas fa-not-equal"></i> shadow differences</a>
                     </li>
