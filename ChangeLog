@@ -7,10 +7,15 @@ Version 7.1.0 - DEV
  - Judgedaemon will now keep retrying when an endpoint is unavailable.
  - Store external judgements and runs.
  - Move external CCS submission detail URL to database configuration. 
+ - Add support for showing shadow differences and external judgements.
  - Reduce dependencies of Judgedaemon.
  - Also install genrestapicredentials on judgehost. 
  - Submit client will error early and explicitly when API calls fail. 
  - Improve balloons page and make filtering persist when reloading.
+ - Split up contest.public into contest.public and contest.open_to_all_teams,
+   allow public contests with a limited set of teams and private contests
+   with all teams.
+ - Upgrade Symfony and dependencies to the latest version.
 
 Version 7.0.3 - 11 July 2019
 ----------------------------
