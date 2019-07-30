@@ -16,8 +16,8 @@ ALTER TABLE `contest` DROP COLUMN `open_to_all_teams`;
 --
 
 ALTER TABLE `contest`
-  CHANGE COLUMN `public` `public` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Is this contest visible for the public?',
-  ADD    COLUMN `open_to_all_teams` tinyint(1) UNSIGNED DEFAULT '1' COMMENT 'Is this contest open to all teams?' AFTER `public`;
+  CHANGE COLUMN `public` `public` tinyint(1) UNSIGNED DEFAULT 1 NOT NULL COMMENT 'Is this contest visible for the public?',
+  ADD    COLUMN `open_to_all_teams` tinyint(1) UNSIGNED DEFAULT 1 NOT NULL COMMENT 'Is this contest open to all teams?' AFTER `public`;
 
 -- Create external judgement/run tables
 CREATE TABLE `external_judgement` (

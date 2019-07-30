@@ -270,7 +270,7 @@ class Contest extends BaseApiEntity
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="open_to_all_teams",
-     *     options={"comment"="Are all teams automatically part of this contest?",
+     *     options={"comment"="Is this contest open to all teams?",
      *              "unsigned"=true,"default"=1},
      *     nullable=false)
      * @Serializer\Exclude()
