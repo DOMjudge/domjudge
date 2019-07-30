@@ -384,6 +384,8 @@ CREATE TABLE `problem` (
 -- Table structure for table `rankcache`
 --
 
+
+-- Note that we explicitly use BTREE's for the foreign keys here to make sure we can sort efficiently.
 CREATE TABLE `rankcache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
