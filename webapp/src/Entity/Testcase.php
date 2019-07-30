@@ -27,7 +27,7 @@ class Testcase
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="testcaseid", length=4,
-     *     options={"comment"="Unique testcase ID","unsigned"=true},
+     *     options={"comment"="Testcase ID","unsigned"=true},
      *     nullable=false)
      */
     private $testcaseid;

@@ -22,7 +22,7 @@ class Rejudging
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="rejudgingid", length=4,
-     *     options={"comment"="Unique ID","unsigned"=true},
+     *     options={"comment"="Rejudging ID","unsigned"=true},
      *     nullable=false)
      */
     private $rejudgingid;

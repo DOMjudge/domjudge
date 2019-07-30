@@ -28,7 +28,7 @@ class ExternalJudgement
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="extjudgementid",
-     *     options={"comment"="Unique ID","unsigned"=true},
+     *     options={"comment"="External judgement ID","unsigned"=true},
      *     nullable=false)
      */
     private $extjudgementid;

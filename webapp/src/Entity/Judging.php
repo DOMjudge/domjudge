@@ -31,7 +31,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="judgingid", length=4,
-     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
+     *     options={"comment"="Judging ID","unsigned"=true}, nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */

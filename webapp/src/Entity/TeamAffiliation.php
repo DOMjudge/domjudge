@@ -35,7 +35,7 @@ class TeamAffiliation extends BaseApiEntity
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="affilid", length=4,
-     *             options={"comment"="Unique ID","unsigned"=true},
+     *             options={"comment"="Team affiliation ID","unsigned"=true},
      *     nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")

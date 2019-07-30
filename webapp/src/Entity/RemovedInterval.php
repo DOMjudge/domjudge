@@ -24,7 +24,7 @@ class RemovedInterval
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="intervalid", length=4,
-     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
+     *     options={"comment"="Removed interval ID","unsigned"=true}, nullable=false)
      */
     private $intervalid;
 

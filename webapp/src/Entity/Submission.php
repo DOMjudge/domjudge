@@ -39,7 +39,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", length=4, name="submitid",
-     *     options={"comment"="Unique ID","unsigned"=true},
+     *     options={"comment"="Submission ID","unsigned"=true},
      *     nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")

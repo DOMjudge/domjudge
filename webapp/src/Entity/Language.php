@@ -26,7 +26,7 @@ class Language extends BaseApiEntity
     /**
      * @var string
      * @ORM\Id
-     * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Unique ID (string)"}, nullable=false)
+     * @ORM\Column(type="string", name="langid", length=32, options={"comment"="Language ID (string)"}, nullable=false)
      * @Serializer\Exclude()
      * @Assert\NotBlank()
      * @Assert\NotEqualTo("add")

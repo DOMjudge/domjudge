@@ -19,7 +19,7 @@ class AuditLog
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="logid", length=4,
-     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
+     *     options={"comment"="Audit log ID","unsigned"=true}, nullable=false)
      */
     private $logid;
 
