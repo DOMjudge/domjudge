@@ -17,7 +17,7 @@ class JudgehostRestriction
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="restrictionid", length=4,
-     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
+     *     options={"comment"="Judgehost restriction ID","unsigned"=true}, nullable=false)
      */
     private $restrictionid;
 

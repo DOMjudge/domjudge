@@ -24,7 +24,7 @@ class SubmissionFile
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="submitfileid", length=4,
-     *     options={"comment"="Unique ID","unsigned"=true},
+     *     options={"comment"="Submission file ID","unsigned"=true},
      *     nullable=false)
      */
     private $submitfileid;

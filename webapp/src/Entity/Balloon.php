@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity()
  * @ORM\Table(
  *     name="balloon",
- *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Unique ID"},
+ *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Balloons to be handed out"},
  *     indexes={@ORM\Index(name="submitid", columns={"submitid"})}
  *     )
  */
@@ -20,7 +20,7 @@ class Balloon
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", length=4, name="balloonid",
-     *     options={"comment"="Unique ID", "unsigned"=true}, nullable=false)
+     *     options={"comment"="Balloon ID", "unsigned"=true}, nullable=false)
      */
     private $balloonid;
 

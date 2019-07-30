@@ -19,7 +19,7 @@ class Configuration
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="configid", length=4,
-     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
+     *     options={"comment"="Configuration ID","unsigned"=true}, nullable=false)
      */
     private $configid;
 

@@ -26,7 +26,7 @@ class ExternalRun
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="extrunid", length=4,
-     *     options={"comment"="Unique ID","unsigned"=true}, nullable=false)
+     *     options={"comment"="External run ID","unsigned"=true}, nullable=false)
      */
     private $extrunid;
 

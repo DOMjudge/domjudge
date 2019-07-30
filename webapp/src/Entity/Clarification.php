@@ -32,7 +32,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", length=4, name="clarid",
-     *     options={"comment"="Unique clarification ID","unsigned"=true},
+     *     options={"comment"="Clarification ID","unsigned"=true},
      *     nullable=false)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")

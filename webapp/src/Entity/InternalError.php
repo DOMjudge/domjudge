@@ -21,7 +21,7 @@ class InternalError
      * @var int
      * @ORM\Id
      * @ORM\Column(type="integer", name="errorid", length=4,
-     *     options={"comment"="Unique ID","unsigned"=true},
+     *     options={"comment"="Internal error ID","unsigned"=true},
      *     nullable=false)
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */

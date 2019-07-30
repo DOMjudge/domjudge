@@ -48,7 +48,7 @@ class Contest extends BaseApiEntity
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="cid", options={"comment"="Unique contest ID", "unsigned"=true}, nullable=false, length=4)
+     * @ORM\Column(type="integer", name="cid", options={"comment"="Contest ID", "unsigned"=true}, nullable=false, length=4)
      * @Serializer\SerializedName("id")
      * @Serializer\Type("string")
      */

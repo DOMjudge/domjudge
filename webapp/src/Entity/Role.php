@@ -18,7 +18,7 @@ class Role
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="roleid", length=4,
-     *     options={"comment"="Unique role ID","unsigned"=true}, nullable=false)
+     *     options={"comment"="Role ID","unsigned"=true}, nullable=false)
      */
     private $roleid;
 

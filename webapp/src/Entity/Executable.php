@@ -18,7 +18,7 @@ class Executable
      * @var string
      * @ORM\Id
      * @ORM\Column(type="string", name="execid", length=32,
-     *     options={"comment"="Unique ID (string)"}, nullable=false)
+     *     options={"comment"="Executable ID (string)"}, nullable=false)
      * @Assert\NotBlank()
      * @Identifier()
      */

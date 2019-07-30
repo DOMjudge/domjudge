@@ -23,7 +23,7 @@ class Event
      *
      * @ORM\Id
      * @ORM\Column(name="eventid", type="integer", nullable=false, length=4,
-     *     options={"comment"="Unique ID","unsigned"=true})
+     *     options={"comment"="Event ID","unsigned"=true})
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $eventid;

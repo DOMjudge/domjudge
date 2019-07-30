@@ -31,7 +31,7 @@ class Problem extends BaseApiEntity
      *
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer", name="probid", options={"comment"="Unique problem ID","unsigned"="true"}, nullable=false)
+     * @ORM\Column(type="integer", name="probid", options={"comment"="Problem ID","unsigned"="true"}, nullable=false)
      * @Serializer\Exclude()
      */
     protected $probid;

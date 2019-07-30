@@ -26,7 +26,7 @@ class User implements UserInterface, \Serializable
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer", name="userid", length=4,
-     *     options={"comment"="Unique user ID","unsigned"=true}, nullable=false)
+     *     options={"comment"="User ID","unsigned"=true}, nullable=false)
      * @Serializer\SerializedName("id")
      */
     private $userid;
