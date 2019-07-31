@@ -139,7 +139,7 @@ class RejudgingService
 
         $this->dj->auditlog('rejudging', $rejudgingId, $action . 'ing rejudge', '(start)');
 
-        // Add missing state events for this contest. We do this here and disable doing it in the
+        // Add missing state events for all active contests. We do this here and disable doing it in the
         // loop when calling EventLogService::log, because then we would do the same check a lot of
         // times, which is really inefficient and slow. Note that it might be the case that a state
         // change event will happen exactly during applying a rejudging *and* that no client is
@@ -148,8 +148,9 @@ class RejudgingService
         // it once, here.
         // We will also not check dependent object events in the loop, because if we apply a
         // rejudging, the original judgings will already have triggered all dependent events.
-        $contest = $this->dj->getCurrentContest();
-        $this->eventLogService->addMissingStateEvents($contest);
+        foreach ($this->dj->getCurrentContests() as $contest) {
+            $this->eventLogService->addMissingStateEvents($contest);
+        }
 
         // This loop uses direct queries instead of Doctrine classes to speed it up drastically
 
