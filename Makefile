@@ -228,13 +228,7 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 # Remove cached environment file as we don't want this in production
 	rm $(CURDIR)/webapp/.env.local.php
 # Make sure we're running from a clean state:
-	@echo "Checking whether the database is set up..."
-	@if sql/dj_setup_database status ; then \
-		composer auto-scripts ; \
-	else \
-		echo "Database not installed and accessible yet, fix this manually and rerun." ; \
-		exit 1; \
-	fi
+	composer auto-scripts 
 	@echo ""
 	@echo "========== Maintainer Install Completed =========="
 	@echo ""
