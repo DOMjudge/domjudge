@@ -509,9 +509,9 @@
                     <h4 id="run-{{ run.rank }}">Run {{ run.rank }}</h4>
 
                     {% set runDone = false %}
-                    {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
+                    {% if run is not null and run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
                         {% set runDone = true %}
-                    {% elseif externalRun.firstExternalRun is not null and run.firstExternalRun.result is not null %}
+                    {% elseif externalRun is not null and externalRun.firstExternalRun is not null and run.firstExternalRun.result is not null %}
                         {% set runDone = true %}
                     {% endif %}
                     {% if not runDone %}
