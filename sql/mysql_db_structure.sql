@@ -10,7 +10,7 @@
 -- Table structure for table `auditlog`
 --
 CREATE TABLE `auditlog` (
-  `logid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Audit log ID',
+  `logid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Audit log ID',
   `logtime` decimal(32,9) unsigned NOT NULL COMMENT 'Timestamp of the logentry',
   `cid` int(4) unsigned DEFAULT NULL COMMENT 'Contest ID associated to this entry',
   `user` varchar(255) DEFAULT NULL COMMENT 'User who performed this action',
@@ -38,7 +38,7 @@ CREATE TABLE `balloon` (
 --
 CREATE TABLE `clarification` (
   `clarid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Clarification ID',
-  `externalid` varchar(255) DEFAULT NULL COMMENT 'Clarification ID in an external system, should be unique inside a single contest',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Clarification ID in an external system, should be unique inside a single contest',
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `respid` int(4) unsigned DEFAULT NULL COMMENT 'In reply to clarification ID',
   `submittime` decimal(32,9) unsigned NOT NULL COMMENT 'Time sent',
@@ -108,9 +108,9 @@ CREATE TABLE `contest` (
   `b` smallint(3) unsigned NOT NULL default 0 COMMENT 'Number of extra bronze medals',
   `enabled` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'Whether this contest can be active',
   `starttime_enabled` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'If disabled, starttime is not used, e.g. to delay contest start',
-  `process_balloons` tinyint(1) UNSIGNED DEFAULT 1 NOT NULL COMMENT 'Will balloons be processed for this contest?',
-  `public` tinyint(1) UNSIGNED DEFAULT 1 NOT NULL COMMENT 'Is this contest visible for the public?',
-  `open_to_all_teams` tinyint(1) UNSIGNED DEFAULT 1 NOT NULL COMMENT 'Is this contest open to all teams?',
+  `process_balloons` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'Will balloons be processed for this contest?',
+  `public` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'Is this contest visible for the public?',
+  `open_to_all_teams` tinyint(1) unsigned NOT NULL DEFAULT 1 COMMENT 'Is this contest open to all teams?',
   PRIMARY KEY (`cid`),
   UNIQUE KEY `externalid` (`externalid`(190)),
   UNIQUE KEY `shortname` (`shortname`(190)),
@@ -536,7 +536,7 @@ CREATE TABLE `submission_file` (
 
 CREATE TABLE `team` (
   `teamid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Team ID',
-  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Team affiliation ID in an external system',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Team ID in an external system',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT 'Team name',
   `categoryid` int(4) unsigned NOT NULL DEFAULT 0 COMMENT 'Team category ID',
   `affilid` int(4) unsigned DEFAULT NULL COMMENT 'Team affiliation ID',
@@ -560,7 +560,7 @@ CREATE TABLE `team` (
 
 CREATE TABLE `team_affiliation` (
   `affilid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Team affiliation ID',
-  `externalid` varchar(255) DEFAULT NULL COMMENT 'Team affiliation ID in an external system',
+  `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Team affiliation ID in an external system',
   `shortname` varchar(32) NOT NULL COMMENT 'Short descriptive name',
   `name` varchar(255) NOT NULL COMMENT 'Descriptive name',
   `country` char(3) DEFAULT NULL COMMENT 'ISO 3166-1 alpha-3 country code',

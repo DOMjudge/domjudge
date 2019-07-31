@@ -103,7 +103,7 @@ ALTER TABLE `team_unread`
 
 ALTER TABLE `team_affiliation`
     CHANGE COLUMN `affilid` `affilid` int(4) UNSIGNED AUTO_INCREMENT NOT NULL COMMENT 'Team affiliation ID',
-    CHANGE COLUMN `externalid` `externalid` VARCHAR(255) DEFAULT NULL COLLATE utf8mb4_bin COMMENT 'Team affiliation ID in an external system';
+    CHANGE COLUMN `externalid` `externalid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Team affiliation ID in an external system';
 
 ALTER TABLE `team_category`
     CHANGE COLUMN `categoryid` `categoryid` int(4) UNSIGNED AUTO_INCREMENT NOT NULL COMMENT 'Team category ID',
