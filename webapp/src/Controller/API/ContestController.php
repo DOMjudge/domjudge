@@ -52,33 +52,33 @@ class ContestController extends AbstractRestController
     /**
      * Get the given contest
      * @param Request $request
-     * @param string  $id
+     * @param string  $cid
      * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @Rest\Get("/{id}")
+     * @Rest\Get("/{cid}")
      * @SWG\Response(
      *     response="200",
      *     description="Returns the given contest",
      *     @Model(type=Contest::class)
      * )
-     * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/cid")
      */
-    public function singleAction(Request $request, string $id)
+    public function singleAction(Request $request, string $cid)
     {
-        return parent::performSingleAction($request, $id);
+        return parent::performSingleAction($request, $cid);
     }
 
     /**
      * Change the start time of the given contest
-     * @Rest\Patch("/{id}")
+     * @Rest\Patch("/{cid}")
      * @IsGranted("ROLE_API_WRITER")
      * @param Request $request
-     * @param string  $id
+     * @param string  $cid
      * @return Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      * @SWG\Parameter(
-     *     name="id",
+     *     name="cid",
      *     in="path",
      *     type="string",
      *     description="The ID of the contest to change the start time for"
@@ -112,9 +112,9 @@ class ContestController extends AbstractRestController
      *     description="Changing start time not allowed"
      * )
      */
-    public function changeStartTimeAction(Request $request, string $id)
+    public function changeStartTimeAction(Request $request, string $cid)
     {
-        $contest  = $this->getContestWithId($request, $id);
+        $contest  = $this->getContestWithId($request, $cid);
         $response = null;
         $now      = Utils::now();
         $changed  = false;
@@ -168,22 +168,22 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the contest in YAML format
-     * @Rest\Get("/{id}/contest-yaml")
+     * @Rest\Get("/{cid}/contest-yaml")
      * @SWG\Get(produces={"application/x-yaml"})
      * @param Request $request
-     * @param string  $id
+     * @param string  $cid
      * @return StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
-     * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/cid")
      * @SWG\Response(
      *     response="200",
      *     description="The contest in YAML format"
      * )
      */
-    public function getContestYamlAction(Request $request, string $id)
+    public function getContestYamlAction(Request $request, string $cid)
     {
-        $contest      = $this->getContestWithId($request, $id);
+        $contest      = $this->getContestWithId($request, $cid);
         $penalty_time = $this->dj->dbconfig_get('penalty_time', 20);
         $response     = new StreamedResponse();
         $response->setCallback(function () use ($contest, $penalty_time) {
@@ -207,21 +207,21 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the current contest state
-     * @Rest\Get("/{id}/state")
+     * @Rest\Get("/{cid}/state")
      * @param Request $request
-     * @param string  $id
+     * @param string  $cid
      * @return array|null
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/cid")
      * @SWG\Response(
      *     response="200",
      *     description="The contest state",
      *     @SWG\Schema(ref="#/definitions/ContestState")
      * )
      */
-    public function getContestStateAction(Request $request, string $id)
+    public function getContestStateAction(Request $request, string $cid)
     {
-        $contest         = $this->getContestWithId($request, $id);
+        $contest         = $this->getContestWithId($request, $cid);
         $inactiveAllowed = $this->isGranted('ROLE_API_READER');
         if (($inactiveAllowed && $contest->getEnabled()) || (!$inactiveAllowed && $contest->isActive())) {
             return $contest->getState();
@@ -232,14 +232,14 @@ class ContestController extends AbstractRestController
 
     /**
      * Get the event feed for the given contest
-     * @Rest\Get("/{id}/event-feed")
+     * @Rest\Get("/{cid}/event-feed")
      * @SWG\Get(produces={"application/x-ndjson"})
      * @IsGranted({"ROLE_JURY", "ROLE_API_READER"})
      * @param Request $request
-     * @param string  $id
+     * @param string  $cid
      * @return Response|StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/cid")
      * @SWG\Parameter(
      *     name="since_id",
      *     in="query",
@@ -283,9 +283,9 @@ class ContestController extends AbstractRestController
      *     )
      * )
      */
-    public function getEventFeedAction(Request $request, string $id)
+    public function getEventFeedAction(Request $request, string $cid)
     {
-        $contest = $this->getContestWithId($request, $id);
+        $contest = $this->getContestWithId($request, $cid);
         // Make sure this script doesn't hit the PHP maximum execution timeout.
         set_time_limit(0);
         if ($request->query->has('since_id')) {
@@ -303,7 +303,7 @@ class ContestController extends AbstractRestController
         $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
         $response->headers->set('Content-Type', 'application/x-ndjson');
-        $response->setCallback(function () use ($id, $contest, $request, $since_id) {
+        $response->setCallback(function () use ($cid, $contest, $request, $since_id) {
             $lastUpdate = 0;
             $lastIdSent = $since_id;
             $typeFilter = false;
@@ -323,7 +323,7 @@ class ContestController extends AbstractRestController
             // Initialize all static events
             $this->eventLogService->initStaticEvents($contest);
             // Reload the contest as the above method will clear the entity manager
-            $contest = $this->getContestWithId($request, $id);
+            $contest = $this->getContestWithId($request, $cid);
 
             while (true) {
                 // Add missing state events that should have happened already
@@ -409,9 +409,9 @@ class ContestController extends AbstractRestController
 
     /**
      * Get general status information
-     * @Rest\Get("/{id}/status")
+     * @Rest\Get("/{cid}/status")
      * @IsGranted("ROLE_API_READER")
-     * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/cid")
      * @SWG\Response(
      *     response="200",
      *     description="General status information for the given contest",
@@ -423,14 +423,14 @@ class ContestController extends AbstractRestController
      *     )
      * )
      * @param Request $request
-     * @param string  $id
+     * @param string  $cid
      * @return array
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getStatusAction(Request $request, string $id)
+    public function getStatusAction(Request $request, string $cid)
     {
-        $contest = $this->getContestWithId($request, $id);
+        $contest = $this->getContestWithId($request, $cid);
 
         $result                    = [];
         $result['num_submissions'] = (int)$this->em
