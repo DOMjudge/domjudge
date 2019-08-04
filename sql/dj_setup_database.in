@@ -75,9 +75,9 @@ symfony_console()
 	fi
 	if [ -n "$DBA_USER" ] && [ -n "$DBA_PASSWD" ]; then
 		DATABASE_URL=mysql://${DBA_USER}:${DBA_PASSWD}@${domjudge_DBHOST}:3306/${domjudge_DBNAME} \
-			${WEBAPPDIR}/bin/console $ARG "$@"
+			${WEBAPPDIR}/bin/console -v $ARG "$@"
 	else
-		${WEBAPPDIR}/bin/console $ARG "$@"
+		${WEBAPPDIR}/bin/console -v $ARG "$@"
 	fi
 }
 
