@@ -7,18 +7,15 @@
 set -e
 
 ETCDIR="@domserver_etcdir@"
-SQLDIR="@domserver_sqldir@"
+WEBAPPDIR="@domserver_webappdir@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
-RESTPWFILE="$ETCDIR/restapi.secret"
-ADMINPWFILE="$ETCDIR/initial_admin_password.secret"
-
-DEFAULTDATA_FILES="$SQLDIR/mysql_db_defaultdata.sql $SQLDIR/mysql_db_files_defaultdata.sql"
-EXAMPLES_FILES="$SQLDIR/mysql_db_examples.sql $SQLDIR/mysql_db_files_examples.sql"
 
 verbose()
 {
-	[ -z "$QUIET" ] && echo "$@"
+	if [ -z "$QUIET" ]; then
+		echo "$@"
+	fi
 }
 
 usage() {
@@ -32,17 +29,15 @@ Commands:
   install          create database, example contest and users if not existing
   bare-install     create database, setup defaults if not existing
   uninstall        remove database users and database, INCLUDING ALL DATA!
-  install-defaults install default data only
   install-examples install examples only
   upgrade          upgrade MySQL database schema to current version
 
 Options:
   -u <user>  connect to MySQL with DB admin <user>
   -p <pass>  use password <pass> for DB admin user
-  -r         read DB admin password from prompt
 
-Note: you may want to store your credentials in ~/.my.cnf in order to
-not have to pass any of the options above.
+Note: if you don't supply a username or password, the credentials from
+${PASSWDFILE} will be used
 
 EOF
 }
@@ -61,13 +56,28 @@ mysql()
 		pass="-p$PASSWD"
 	else
 		pass=""
-		[ -n "$PROMPT_PASSWD" ] && pass="-p"
 		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
 	fi
 	if [ -n "$pass" ]; then
 		command mysql $user "$pass" -h "$DBHOST" --silent --skip-column-names "$@"
 	else
 		command mysql $user -h "$DBHOST" --silent --skip-column-names "$@"
+	fi
+}
+
+# Wrapper around the Symfony console to allow setting the connection and passing options
+symfony_console()
+{
+	if [ -n "$QUIET" ]; then
+		ARG="-q"
+	else
+		ARG=""
+	fi
+	if [ -n "$DBA_USER" ] && [ -n "$DBA_PASSWD" ]; then
+		DATABASE_URL=mysql://${DBA_USER}:${DBA_PASSWD}@${domjudge_DBHOST}:3306/${domjudge_DBNAME} \
+			${WEBAPPDIR}/bin/console $ARG "$@"
+	else
+		${WEBAPPDIR}/bin/console $ARG "$@"
 	fi
 }
 
@@ -167,9 +177,6 @@ while getopts ':u:p:qr' OPT ; do
 		q)
 			QUIET=1
 			;;
-		r)
-			PROMPT_PASSWD=1
-			;;
 		:)
 			echo "Error: option '$OPTARG' requires an argument."
 			usage
@@ -222,16 +229,9 @@ uninstall)
 	remove_db_users
 	;;
 
-install-defaults)
-	read_dbpasswords
-	# shellcheck disable=SC2002
-	cat $DEFAULTDATA_FILES | mysql -D "$DBNAME"
-	;;
-
 install-examples)
 	read_dbpasswords
-	# shellcheck disable=SC2002
-	cat $EXAMPLES_FILES | mysql -D "$DBNAME"
+	symfony_console domjudge:load-example-data
 	;;
 
 create-db-users)
@@ -243,20 +243,10 @@ create-db-users)
 bare-install|install)
 	read_dbpasswords
 	create_db_users
-	FILES="$SQLDIR/mysql_db_structure.sql $DEFAULTDATA_FILES"
-
+	symfony_console doctrine:migrations:migrate -n
 	if [ "$1" = "install" ]; then
-		FILES="$FILES $EXAMPLES_FILES"
+		symfony_console domjudge:load-example-data
 	fi
-	RESTPW=$(grep -v ^# $RESTPWFILE | cut -f4)
-	RESTPWHASH=$(htpasswd -nbB -C 10 foouser "$RESTPW" | sed 's/^foouser://')
-	ADMINPW=$(cat $ADMINPWFILE)
-	ADMINPWHASH=$(htpasswd -nbB -C 10 foouser "$ADMINPW" | sed 's/^foouser://')
-	(
-		cat $FILES
-		echo "UPDATE user SET password = '$RESTPWHASH' WHERE username='judgehost';"
-		echo "UPDATE user SET password = '$ADMINPWHASH' WHERE username='admin';"
-	) | mysql -D "$DBNAME"
 	if [ "$1" = "install" ]; then
 		verbose "SQL structure and default/example data installed."
 	else
@@ -264,41 +254,14 @@ bare-install|install)
 	fi
 	;;
 
-# Upgrades the DB structure and permissions to current version
-# using SQL upgrade files under sql/upgrade.
 upgrade)
 	# check for legacy dbpasswords.secret content
 	if grep -Eq ^team: $PASSWDFILE >/dev/null 2>&1 ; then
 		echo "Warning: please remove all non-jury users from $PASSWDFILE"
 		echo "You may also remove those users from MySQL."
 	fi
-	TMPOUT=$(mktemp --tmpdir domjudge-sql.XXXXXX)
 	read_dbpasswords
-	# Make sure we're in the SQL directory, for relative path 'source'
-	# statements to work.
-	cd "$SQLDIR"
-	for i in "$SQLDIR"/upgrade/upgrade_*.sql ; do
-		if [ ! -r "$i" ]; then
-			echo "Error: cannot read upgrade script '$i'."
-			exit 1
-		fi
-		# First find the line where the upgrade check is performed to
-		# filter possible error messages later.
-		UPGRADELINE=$(grep -n '@UPGRADE-CHECK@' "$i" | cut -d : -f 1)
-		UPGRADELINE=$((UPGRADELINE+1))
-		if mysql -D "$DBNAME" < "$i" >$TMPOUT 2>&1 ; then
-			echo "Upgraded script '$i'."
-		else
-			if grep -E "^ERROR .* at line ${UPGRADELINE}: " $TMPOUT >/dev/null 2>&1 ; then
-				echo "Skipped script '$i': already applied."
-			else
-				echo "Error upgrading script '$i':"
-				cat $TMPOUT
-				rm -f $TMPOUT
-				exit 1
-			fi
-		fi
-	done
+	symfony_console doctrine:migrations:migrate -n
 	verbose "DOMjudge database upgrade completed."
 	rm -f $TMPOUT
 	;;
