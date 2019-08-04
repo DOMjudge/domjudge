@@ -51,6 +51,7 @@ EOF
 # install all php dependencies
 export APP_ENV="prod"
 composer install --no-scripts
+composer run-script package-versions-dump
 
 # configure, make and install (but skip documentation)
 make configure
@@ -60,7 +61,8 @@ sudo make install-domserver install-judgehost
 
 # setup database and add special user
 cd /opt/domjudge/domserver
-sudo bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} install
+setfacl -m u:www-data:r etc/restapi.secret etc/initial_admin_password.secret
+sudo -u www-data bin/dj_setup_database -uroot -p${MYSQL_ROOT_PASSWORD} -q install
 ADMINPASS=$(cat etc/initial_admin_password.secret)
 echo "INSERT INTO user (userid, username, name, password, teamid) VALUES (3, 'dummy', 'dummy user for example team', '\$2y\$10\$0d0sPmeAYTJ/Ya7rvA.kk.zvHu758ScyuHAjps0A6n9nm3eFmxW2K', 2)" | mysql domjudge
 echo "INSERT INTO userrole (userid, roleid) VALUES (3, 2);" | mysql domjudge
