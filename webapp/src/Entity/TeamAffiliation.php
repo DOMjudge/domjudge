@@ -117,7 +117,7 @@ class TeamAffiliation extends BaseApiEntity
      *
      * @param string $externalid
      *
-     * @return Team
+     * @return TeamAffiliation
      */
     public function setExternalid($externalid)
     {
