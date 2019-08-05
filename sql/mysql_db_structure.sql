@@ -384,8 +384,7 @@ CREATE TABLE `problem` (
 -- Table structure for table `rankcache`
 --
 
-
--- Note that we explicitly use BTREE's for the foreign keys here to make sure we can sort efficiently.
+-- Note that we explicitly use BTREEs for some indices here to make sure we can sort efficiently.
 CREATE TABLE `rankcache` (
   `cid` int(4) unsigned NOT NULL COMMENT 'Contest ID',
   `teamid` int(4) unsigned NOT NULL COMMENT 'Team ID',
@@ -405,6 +404,7 @@ CREATE TABLE `rankcache` (
 --
 -- Table structure for table `rejudging`
 --
+
 CREATE TABLE `rejudging` (
   `rejudgingid` int(4) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Rejudging ID',
   `userid_start` int(4) unsigned DEFAULT NULL COMMENT 'User ID of user who started the rejudge',
