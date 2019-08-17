@@ -228,7 +228,7 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs
 # Remove cached environment file as we don't want this in production
 	rm $(CURDIR)/webapp/.env.local.php
 # Make sure we're running from a clean state:
-	composer auto-scripts 
+	composer auto-scripts
 	@echo ""
 	@echo "========== Maintainer Install Completed =========="
 	@echo ""
