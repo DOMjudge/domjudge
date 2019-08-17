@@ -2,6 +2,7 @@ DOMjudge Programming Contest Judging System
 
 Version 7.1.0 - DEV
 -------------------
+ - Minimum PHP version is now 7.1.3.
  - Use optimized composer autoloader.
  - During self-registration team name and affiliation can now be specified.
  - Judgedaemon will now keep retrying when an endpoint is unavailable.
