@@ -534,6 +534,7 @@ class SubmissionService
                     'submitid' => $submission->getSubmitid(),
                     'teamid' => $team->getTeamid(),
                     'langid' => $language->getLangid(),
+                    'probid' => $problem->getProbid(),
                     'rank' => $rank,
                     'filename' => $file->getClientOriginalName()
                 ];
