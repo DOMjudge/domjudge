@@ -12,7 +12,7 @@
 #include <time.h>
 #include <unistd.h>
 
-const struct timespec delay = { 0, 1000000 }; /* 1 millisec. */
+const struct timespec delay = { 0, 100000 }; /* 0.1 millisec. */
 
 #define maxn 1000000
 
