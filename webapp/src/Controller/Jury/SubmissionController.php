@@ -846,7 +846,7 @@ class SubmissionController extends BaseController
         // KLUDGE: We can't log an "undelete", so we re-"create".
         // FIXME: We should also delete/recreate any dependent judging(runs).
         $eventLogService->log('submission', $submission->getSubmitid(), ($valid ? 'create' : 'delete'),
-                              $submission->getCid());
+                              $submission->getCid(), null, null, $valid);
         $this->dj->auditlog('submission', $submission->getSubmitid(),
                                          'marked ' . ($valid ? 'valid' : 'invalid'));
         $contest = $this->em->getRepository(Contest::class)->find($submission->getCid());
