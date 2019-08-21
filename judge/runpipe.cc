@@ -133,6 +133,13 @@ int execute(string cmd, vector<string> args, int stdio_fd[3], int err2out)
 	return execute(cmd.c_str(), argv, args.size(), stdio_fd, err2out);
 }
 
+string join(char separator, vector<string> strings)
+{
+	string res = strings[0];
+	for(size_t i=1; i<strings.size(); i++) res += separator + strings[i];
+	return res;
+}
+
 void write_meta(const char *key, const char *format, ...)
 {
 	va_list ap;
@@ -462,7 +469,8 @@ int main(int argc, char **argv)
 		cmd_exit[i] = -1;
 		cmd_pid[i] = execute(cmd_name[i], cmd_args[i], cmd_fds[i], 0);
 		if ( cmd_pid[i]==-1 ) error(errno,"failed to execute command #%d",i+1);
-		verb("started #%d, pid %d: %s",i+1,cmd_pid[i],cmd_name[i].c_str());
+		string args_str = join(' ', cmd_args[i]);
+		verb("started #%d, pid %d: %s %s",i+1,cmd_pid[i],cmd_name[i].c_str(),args_str.c_str());
 
 		set_fd_close_exec(pipe_fd[i][0], 1);
 		set_fd_close_exec(fd_out, 1);
