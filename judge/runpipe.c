@@ -440,7 +440,7 @@ int main(int argc, char **argv)
 			resize_pipe(progout_pipe_fd[i][1]);
 #endif
 			verb("writing program #%d output via pipe %d -> %d",
-			     i, progout_pipe_fd[i][1], progout_pipe_fd[i][0]);
+			     i+1, progout_pipe_fd[i][1], progout_pipe_fd[i][0]);
 		}
 	}
 
@@ -450,7 +450,7 @@ int main(int argc, char **argv)
 		cmd_fds[i][0] = pipe_fd[i][0];
 		cmd_fds[i][1] = fd_out;
 		cmd_fds[i][2] = FDREDIR_NONE;
-		verb("pipes for command #%d are %d and %d", i, cmd_fds[i][0], cmd_fds[i][1]);
+		verb("pipes for command #%d are %d and %d", i+1, cmd_fds[i][0], cmd_fds[i][1]);
 
 		set_fd_close_exec(pipe_fd[i][0], 0);
 		set_fd_close_exec(fd_out, 0);
