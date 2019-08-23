@@ -22,7 +22,6 @@
 
 /* For Linux specific fcntl F_SETPIPE_SZ command. */
 #if __gnu_linux__
-#define _GNU_SOURCE
 #define PROC_MAX_PIPE_SIZE "/proc/sys/fs/pipe-max-size"
 #endif
 
@@ -40,11 +39,16 @@
 #include <stdio.h>
 #include <getopt.h>
 
+#include <string>
+#include <vector>
+
 #define PROGRAM "runpipe"
 #define VERSION DOMJUDGE_VERSION "/" REVISION
 
 #include "lib.error.h"
 #include "lib.misc.h"
+
+using namespace std;
 
 /* Use the POSIX minimum for PIPE_BUF. */
 #define BUF_SIZE 512
@@ -57,15 +61,13 @@ int be_verbose;
 int show_help;
 int show_version;
 
-#define MAX_CMDS 2
+const int num_cmds = 2;
 
-int ncmds;
-char  *cmd_name[MAX_CMDS];
-int    cmd_nargs[MAX_CMDS];
-char **cmd_args[MAX_CMDS];
-pid_t  cmd_pid[MAX_CMDS];
-int    cmd_fds[MAX_CMDS][3];
-int    cmd_exit[MAX_CMDS];
+string cmd_name[num_cmds];
+vector<string> cmd_args[num_cmds];
+pid_t  cmd_pid[num_cmds];
+int    cmd_fds[num_cmds][3];
+int    cmd_exit[num_cmds];
 
 int write_progout;
 char *progoutfilename;
@@ -119,6 +121,16 @@ void verb(const char *format, ...)
 	}
 
 	va_end(ap);
+}
+
+int execute(string cmd, vector<string> args, int stdio_fd[3], int err2out)
+{
+	const char **argv;
+
+	argv = (const char **)calloc(args.size(), sizeof(char *));
+	for(size_t i=0; i<args.size(); i++) argv[i] = args[i].c_str();
+
+	return execute(cmd.c_str(), argv, args.size(), stdio_fd, err2out);
 }
 
 void write_meta(const char *key, const char *format, ...)
@@ -314,10 +326,9 @@ int main(int argc, char **argv)
 	int   status;
 	int   exitcode, myexitcode;
 	int   opt;
-	char *arg;
-	int   i, r, fd_out, newcmd, argsize = 0;
-	int   pipe_fd[MAX_CMDS][2];
-	int   progout_pipe_fd[MAX_CMDS][2];
+	int   i, r, fd_out = 0;
+	int   pipe_fd[num_cmds][2];
+	int   progout_pipe_fd[num_cmds][2];
 
 	progname = argv[0];
 
@@ -357,45 +368,38 @@ int main(int argc, char **argv)
 	if ( argc<=optind ) error(0,"no command specified");
 
 	/* Parse commands to be executed */
-	ncmds = 0; /* Zero-based index to current command in loop,
-	              contains #commands specified after loop */
-	newcmd = 1; /* Is current command newly started? */
+	int ncmds = 0; /* Zero-based index to current command in loop,
+	                  contains #commands specified after loop */
+	int newcmd = 1; /* Is current command newly started? */
 	for(i=optind; i<argc; i++) {
+		string arg(argv[i]);
+
 		/* Check for commands separator */
-		if ( strcmp(argv[i],"=")==0 ) {
+		if ( arg=="=" ) {
 			ncmds++;
 			if ( newcmd ) error(0,"empty command #%d specified", ncmds);
 			newcmd = 1;
-			if ( ncmds+1>MAX_CMDS ) {
-				error(0,"too many commands specified: %d > %d", ncmds+1, MAX_CMDS);
+			if ( ncmds+1>num_cmds ) {
+				error(0,"too many commands specified: %d > %d", ncmds+1, num_cmds);
 			}
 			continue;
 		}
 
 		/* Un-escape multiple = at start of argument */
-		arg = argv[i];
-		if ( strncmp(arg,"==",2)==0 ) arg++;
+		if ( arg.substr(0,2)=="==" ) arg = arg.substr(1);
 
 		if ( newcmd ) {
 			newcmd = 0;
 			cmd_name[ncmds] = arg;
-			cmd_nargs[ncmds] = 0;
-			argsize = 5;
-			cmd_args[ncmds] = malloc(argsize*sizeof(void *));
-			if ( cmd_args[ncmds]==NULL ) error(0,"cannot allocate memory");
+			cmd_args[ncmds] = vector<string>();
 		} else {
-			if ( cmd_nargs[ncmds]+1>argsize ) {
-				argsize += 10;
-				cmd_args[ncmds] = realloc(cmd_args[ncmds],argsize*sizeof(void *));
-				if ( cmd_args[ncmds]==NULL ) error(0,"cannot allocate memory");
-			}
-			cmd_args[ncmds][cmd_nargs[ncmds]++] = arg;
+			cmd_args[ncmds].push_back(arg);
 		}
 	}
 	ncmds++;
 	if ( newcmd ) error(0,"empty command #%d specified", ncmds);
-	if ( ncmds!=2 ) {
-		error(0,"%d commands specified, 2 required", ncmds);
+	if ( ncmds!=num_cmds ) {
+		error(0,"%d commands specified, %d required", ncmds, num_cmds);
 	}
 
 	/* Install TERM signal handler */
@@ -417,7 +421,7 @@ int main(int argc, char **argv)
 
 	/* Create pipes and by default close all file descriptors when
 	   executing a forked subcommand, required ones are reset below. */
-	for(i=0; i<ncmds; i++) {
+	for(i=0; i<num_cmds; i++) {
 		if ( pipe(pipe_fd[i])!=0 ) error(errno,"creating pipes");
 		verb("command #%d: read fd=%d, write fd=%d", i, pipe_fd[i][0], pipe_fd[i][1]);
 		set_fd_close_exec(pipe_fd[i][0], 1);
@@ -432,7 +436,7 @@ int main(int argc, char **argv)
 		if ( (progoutfile = fopen(progoutfilename,"w"))==NULL ) {
 			error(errno,"cannot open `%s'",progoutfilename);
 		}
-		for(i=0; i<ncmds; i++) {
+		for(i=0; i<num_cmds; i++) {
 			if ( pipe(progout_pipe_fd[i])!=0 ) error(errno,"creating pipes");
 			set_fd_close_exec(progout_pipe_fd[i][0], 1);
 			set_fd_close_exec(progout_pipe_fd[i][1], 1);
@@ -445,7 +449,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Execute commands as subprocesses and connect pipes as required. */
-	for(i=0; i<ncmds; i++) {
+	for(i=0; i<num_cmds; i++) {
 		fd_out = write_progout ? progout_pipe_fd[i][1] : pipe_fd[1-i][1];
 		cmd_fds[i][0] = pipe_fd[i][0];
 		cmd_fds[i][1] = fd_out;
@@ -456,10 +460,9 @@ int main(int argc, char **argv)
 		set_fd_close_exec(fd_out, 0);
 
 		cmd_exit[i] = -1;
-		cmd_pid[i] = execute(cmd_name[i], (const char **)cmd_args[i],
-		                     cmd_nargs[i], cmd_fds[i], 0);
+		cmd_pid[i] = execute(cmd_name[i], cmd_args[i], cmd_fds[i], 0);
 		if ( cmd_pid[i]==-1 ) error(errno,"failed to execute command #%d",i+1);
-		verb("started #%d, pid %d: %s",i+1,cmd_pid[i],cmd_name[i]);
+		verb("started #%d, pid %d: %s",i+1,cmd_pid[i],cmd_name[i].c_str());
 
 		set_fd_close_exec(pipe_fd[i][0], 1);
 		set_fd_close_exec(fd_out, 1);
@@ -472,7 +475,7 @@ int main(int argc, char **argv)
 		if ( close(progout_pipe_fd[0][1])!=0 ) error(errno,"closing pipe write end");
 		if ( close(progout_pipe_fd[1][1])!=0 ) error(errno,"closing pipe write end");
 	} else {
-		for(i=0; i<ncmds; i++) {
+		for(i=0; i<num_cmds; i++) {
 			if ( close(pipe_fd[i][0])!=0 ) error(errno,"closing pipe read end");
 			if ( close(pipe_fd[i][1])!=0 ) error(errno,"closing pipe write end");
 		}
@@ -482,12 +485,12 @@ int main(int argc, char **argv)
 	while ( 1 ) {
 
 		if ( write_progout ) {
-			for(i=0; i<ncmds; i++) {
+			for(i=0; i<num_cmds; i++) {
 				pump_pipes(&progout_pipe_fd[i][0], &pipe_fd[1-i][1], 1-i);
 			}
 
 			pid = 0;
-			for(i=0; i<ncmds; i++) {
+			for(i=0; i<num_cmds; i++) {
 				if ( cmd_exit[i]==-1 ) {
 					pid = waitpid(cmd_pid[i], &status, WNOHANG);
 					if ( pid != 0 ) break;
@@ -506,19 +509,19 @@ int main(int argc, char **argv)
 
 		/* Pump pipes one more time to improve detection which program exited first. */
 		if ( write_progout ) {
-			for(i=0; i<ncmds; i++) {
+			for(i=0; i<num_cmds; i++) {
 				pump_pipes(&progout_pipe_fd[i][0], &pipe_fd[1-i][1], 1-i);
 			}
 		}
 
-		for(i=0; i<ncmds; i++) if ( cmd_pid[i]==pid ) {
+		for(i=0; i<num_cmds; i++) if ( cmd_pid[i]==pid ) {
 			if (i == 1) {
 				submission_still_alive = 0;
 			}
 			warning(0, "command #%d, pid %d has exited (with status %d)",i+1,pid,status);
 			break;
 		}
-		if ( i>=ncmds ) error(0, "waited for unknown child");
+		if ( i>=num_cmds ) error(0, "waited for unknown child");
 
 		cmd_exit[i] = status;
 		verb("command #%d, pid %d has exited (with status %d)",i+1,pid,status);
@@ -540,7 +543,7 @@ int main(int argc, char **argv)
 	};
 
 	/* Reset pipe filedescriptors to use blocking I/O. */
-	for(i=0; i<ncmds; i++) {
+	for(i=0; i<num_cmds; i++) {
 		if ( write_progout && progout_pipe_fd[i][0]>=0 ) {
 			r = fcntl(progout_pipe_fd[i][0], F_GETFL);
 			if (r == -1) error(errno, "fcntl, getting flags");
@@ -556,7 +559,7 @@ int main(int argc, char **argv)
 
 	/* Check exit status of commands and report back the exit code of the first. */
 	myexitcode = exitcode = 0;
-	for(i=0; i<ncmds; i++) {
+	for(i=0; i<num_cmds; i++) {
 		if ( cmd_exit[i]!=0 ) {
 			status = cmd_exit[i];
 			/* Test whether command has finished abnormally */
