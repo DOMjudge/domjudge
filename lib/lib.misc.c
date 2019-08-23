@@ -210,7 +210,7 @@ void daemonize(const char *_pidfile)
 			error(errno, "cannot create pidfile '%s'", pidfile);
 		}
 		sprintf(str, "%d\n", pid);
-		if ( write(fd, str, strlen(str))<strlen(str) ) {
+		if ( write(fd, str, strlen(str))<(ssize_t)strlen(str) ) {
 			error(errno, "failed writing PID to file");
 		}
 		if ( close(fd)!=0 ) error(errno, "closing pidfile '%s'", pidfile);
