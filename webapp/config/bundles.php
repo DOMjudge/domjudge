@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 
 return [
     Doctrine\Bundle\DoctrineCacheBundle\DoctrineCacheBundle::class => ['all' => true],

@@ -27,7 +27,7 @@ find .. \( -path ../lib/vendor -prune \
 while read -r i ; do
 	if [[ "$i" == *\.php ]] || grep -q "^#\\!.*php" "$i"; then
 		$PHP -l "$i" | sed -e 's|No syntax errors detected in ../|check PHP syntax: |'
-		if [[ "$i" == *\.php ]] && ! head -1 $i|grep -q "strict_types"; then
+		if [[ "$i" == *\.php ]] && [ "$i" != "../webapp/config/bundles.php" ] && ! head -1 $i|grep -q "strict_types"; then
 			echo "PHP file missing strict types declaration: $i"
 			exit 1
 		fi
