@@ -533,16 +533,13 @@ For this, you need an installed and configured MySQL server and
 administrator access to it. Run
 <code>
 dj_setup_database genpass
-dj_setup_database [-u <mysql admin user>] [-p <password>|-r] install
+dj_setup_database [-u <mysql admin user>] [-p <password>] install
 </code>
 This first creates the DOMjudge database credentials file
 <tt>etc/dbpasswords.secret</tt> (optionally change the random
 generated password, although it is not needed for normal operation).
 Then it creates the database and user and inserts some
-default/example data into the domjudge database. The option
-<tt>-r</tt> will prompt for a password for mysql; when no user is
-specified, the mysql client will try to read
-credentials from <tt>$HOME/.my.cnf</tt> as usual. The command
+default/example data into the domjudge database. The command
 <tt>uninstall</tt> can be passed to <tt>dj_setup_database</tt> to
 remove the DOMjudge database and users; <em>this deletes all data!</em>
 
@@ -1279,17 +1276,11 @@ Upgrading the filesystem installation is probably best done by
 installing the new version of DOMjudge in a separate place and
 transferring the configuration settings from the old version.
 
-There are SQL upgrade scripts to transform the database including its
-data to the layout of a newer version. The scripts can be found under
-<tt>sql/upgrade</tt> and each script applies changes between two
-consecutive DOMjudge versions. At the beginning of each script, a check
-is performed which will let MySQL bail out with an error if it should
-not be applied anymore. Note that the scripts must be applied in order
-(sorted by release). These scripts can be applied by running
-<tt>dj_setup_database upgrade</tt>. Be aware that these scripts are
-conservative in adding and upgrading SQL data, so check that e.g. new
-compile scripts are present or add them manually, and check the
-upgrade scripts manually for any other data upgraded.
+Since DOMjudge used Doctrine migrations, it is possible to upgrade
+from one version to another. Do note that this is only supported
+from DOMjudge 7.0 onwards. This means that if you run a DOMjudge
+version before 7.0, you first need to upgrade to 7.0 before upgrading
+to a newer version.
 
 If you have any active contests, it may be advisable to run
 "Refresh scoreboard cache" from the DOMjudge web interface after

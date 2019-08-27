@@ -17,6 +17,9 @@ Version 7.1.0 - DEV
    allow public contests with a limited set of teams and private contests
    with all teams.
  - Upgrade Symfony and dependencies to the latest version.
+ - Use Doctrine for migrations and initial data.
+ - Add option (enabled by default) to limit files passed to
+   language compilers by langauge extension list.
 
 Version 7.0.3 - 11 July 2019
 ----------------------------
