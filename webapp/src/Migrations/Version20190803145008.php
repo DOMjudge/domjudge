@@ -41,7 +41,7 @@ CREATE TABLE `judging_run_output` (
 SQL
         );
 
-        $this->addSql("INSERT INTO testcase_content (testcaseid, input, output, image, image_thumb) SELECT testcaseid, input, output, image, image_thumb FROM testcase`");
+        $this->addSql("INSERT INTO testcase_content (testcaseid, input, output, image, image_thumb) SELECT testcaseid, input, output, image, image_thumb FROM testcase");
         $this->addSql("INSERT INTO judging_run_output (runid, output_run, output_diff, output_error, output_system) SELECT runid, output_run, output_diff, output_error, output_system FROM judging_run");
 
         $this->addSql(<<<SQL
