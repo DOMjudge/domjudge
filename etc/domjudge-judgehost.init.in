@@ -44,6 +44,17 @@ if [ ! -d $CGROUPDIR/memory/domjudge ]; then
 	$BINDIR/create_cgroups
 fi
 
+# Check for required cgroup feature
+if [ ! -f $CGROUPDIR/memory/domjudge/memory.memsw.limit_in_bytes ]; then
+	echo "Error: Swapaccounting support missing from cgroups. Unable to continue.
+
+To fix this (on a Debian-like system), please make the following changes:
+1. In /etc/default/grub, add 'swapaccount=1' to GRUB_CMDLINE_LINUX_DEFAULT
+2. Run update-grub
+3. Reboot" >&2
+	exit 1
+fi
+
 # Check that the chroot is created/set up properly
 if [ ! -d $CHROOTDIR ]; then
 	echo "Warning: chroot $CHROOTDIR not created. Run dj_make_chroot to create it."
