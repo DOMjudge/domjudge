@@ -134,6 +134,7 @@ class RejudgingService
         $submissions = $queryBuilder
             ->setParameter(':rejudging', $rejudging)
             ->groupBy('s.submitid')
+            ->groupBy('j.judgingid')
             ->getQuery()
             ->getResult();
 
