@@ -91,22 +91,22 @@
                         </div>
 
                         <h6 class="text-center">Program output</h6>
-                        {% if judgingRun.judgingRunOutput.outputRun is not empty %}
-                            <pre class="output_text">{{ judgingRun.judgingRunOutput.outputRun }}</pre>
+                        {% if judgingRun.output.outputRun is not empty %}
+                            <pre class="output_text">{{ judgingRun.output.outputRun }}</pre>
                         {% else %}
                             <p class="nodata">There was no program output.</p>
                         {% endif %}
 
                         <h6 class="text-center">Diff output</h6>
-                        {% if judgingRun.judgingRunOutput.outputDiff is not empty %}
-                            <pre class="output_text">{{ judgingRun.judgingRunOutput.outputDiff }}</pre>
+                        {% if judgingRun.output.outputDiff is not empty %}
+                            <pre class="output_text">{{ judgingRun.output.outputDiff }}</pre>
                         {% else %}
                             <p class="nodata">There was no diff output.</p>
                         {% endif %}
 
                         <h6 class="text-center">Error output (info/debug/errors)</h6>
-                        {% if judgingRun.judgingRunOutput.outputError is not empty %}
-                            <pre class="output_text">{{ judgingRun.judgingRunOutput.outputError }}</pre>
+                        {% if judgingRun.output.outputError is not empty %}
+                            <pre class="output_text">{{ judgingRun.output.outputError }}</pre>
                         {% else %}
                             <p class="nodata">There was no stderr output.</p>
                         {% endif %}

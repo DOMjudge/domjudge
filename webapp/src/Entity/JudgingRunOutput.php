@@ -16,15 +16,6 @@ use Doctrine\ORM\Mapping as ORM;
 class JudgingRunOutput
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(type="integer", name="runid", length=4,
-     *     options={"comment"="Run ID","unsigned"=true},
-     *     nullable=false)
-     */
-    private $runid;
-
-    /**
      * @var JudgingRun
      * @ORM\Id
      * @ORM\OneToOne(targetEntity="App\Entity\JudgingRun", inversedBy="output")
@@ -64,16 +55,6 @@ class JudgingRunOutput
      *     nullable=true)
      */
     private $output_system;
-
-    /**
-     * Get runid
-     *
-     * @return integer
-     */
-    public function getRunid()
-    {
-        return $this->runid;
-    }
 
     /**
      * @param JudgingRun $run
