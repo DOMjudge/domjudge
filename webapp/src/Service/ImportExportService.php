@@ -558,10 +558,11 @@ class ImportExportService
         $metadata->setIdGenerator(new AssignedGenerator());
 
         foreach ($groupData as $groupItem) {
-            $teamCategory = $this->em->getRepository(TeamCategory::class)->find($groupItem['categoryid']);
+            $categoryId = (int) $groupItem['categoryid'];
+            $teamCategory = $this->em->getRepository(TeamCategory::class)->find($categoryId);
             if (!$teamCategory) {
                 $teamCategory = new TeamCategory();
-                $teamCategory->setCategoryid($groupItem['categoryid']);
+                $teamCategory->setCategoryid($categoryId);
                 $this->em->persist($teamCategory);
                 $action = EventLogService::ACTION_CREATE;
             } else {
