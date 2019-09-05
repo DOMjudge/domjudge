@@ -142,4 +142,9 @@ class Role
     {
         return $this->users;
     }
+
+    public function __toString()
+    {
+        return $this->getRole() . ": " . $this->getDescription();
+    }
 }
