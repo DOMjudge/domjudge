@@ -14,9 +14,10 @@ check syntax:
 run unit tests:
   stage: test
   image: domjudge/gitlabci:1.0
-  before_script:
-    - apt-get update -yqq
-    - apt-get install php-xdebug -yqq
+  # Disabled for now as it drastically speeds up running unit tests and we don't use it yet
+  # before_script:
+  #   - apt-get update -yqq
+  #   - apt-get install php-xdebug -yqq
   services:
     - mariadb
   variables:
