@@ -362,7 +362,7 @@ sudo apt install gcc g++ make zip unzip mariadb-server \
 	texlive-fonts-recommended texlive-lang-european
 # To enable the command-line submit client, also add:
 sudo apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
-# Replace apache2 and libapache2-mod-php with nginx, php-fpm and
+# Replace apache2, php and libapache2-mod-php with nginx, php-fpm and
 # apache2-utils for nginx
 </code>
 Note that PHP modules may need to be enabled depending on your distribution.
