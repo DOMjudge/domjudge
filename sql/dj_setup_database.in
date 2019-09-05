@@ -35,9 +35,10 @@ Commands:
 Options:
   -u <user>  connect to MySQL with DB admin <user>
   -p <pass>  use password <pass> for DB admin user
+  -r         read DB admin password from prompt
 
-Note: if you don't supply a username or password, the credentials from
-${PASSWDFILE} will be used
+Note: you may want to store your credentials in ~/.my.cnf in order to
+not have to pass any of the options above.
 
 EOF
 }
@@ -56,6 +57,7 @@ mysql()
 		pass="-p$PASSWD"
 	else
 		pass=""
+		[ -n "$PROMPT_PASSWD" ] && pass="-p"
 		[ -n "$DBA_PASSWD" ]    && pass="-p$DBA_PASSWD"
 	fi
 	if [ -n "$pass" ]; then
@@ -73,9 +75,45 @@ symfony_console()
 	else
 		ARG=""
 	fi
-	if [ -n "$DBA_USER" ] && [ -n "$DBA_PASSWD" ]; then
-		DATABASE_URL=mysql://${DBA_USER}:${DBA_PASSWD}@${domjudge_DBHOST}:3306/${domjudge_DBNAME} \
-			${WEBAPPDIR}/bin/console -v $ARG "$@"
+	DATABASE_URL=
+
+	# If we do not have an explicit user and password set, determine them from passed arguments,
+	# ~/.my.cnf or the current user
+
+	if [ -z "$DBUSER" ]; then
+		if [ -n "$DBA_USER" ]; then
+			if [ -n "$PROMPT_PASSWD" ]; then
+				stty -echo
+				printf "Enter password: "
+				read DBA_PASSWD
+				stty echo
+				printf "\n"
+			fi
+		fi
+
+		# If we do not have a user or password yet, try to read it from ~/.my.cnf
+		if [ -z "$DBA_USER" ] && [ -f ~/.my.cnf ] && grep -q '^user=' ~/.my.cnf; then
+				DBA_USER=$(grep '^user=' ~/.my.cnf  | sed 's/^user=//')
+		fi
+		if [ -z "$DBA_PASSWD" ] && [ -f ~/.my.cnf ] && grep -q '^password=' ~/.my.cnf; then
+			DBA_PASSWD=$(grep '^password=' ~/.my.cnf  | sed 's/^password=//')
+		fi
+
+		if [ -z "$DBA_USER" ]; then
+			DBA_USER=$(whoami)
+		fi
+
+		if [ -n "$DBA_USER" ]; then
+			if [ -n "$DBA_PASSWD" ]; then
+				DATABASE_URL=mysql://${DBA_USER}:${DBA_PASSWD}@${domjudge_DBHOST}:3306/${domjudge_DBNAME}
+			else
+				DATABASE_URL=mysql://${DBA_USER}@${domjudge_DBHOST}:3306/${domjudge_DBNAME}
+			fi
+		fi
+	fi
+
+	if [ -n "$DATABASE_URL" ]; then
+		DATABASE_URL=$DATABASE_URL ${WEBAPPDIR}/bin/console -v $ARG "$@"
 	else
 		${WEBAPPDIR}/bin/console -v $ARG "$@"
 	fi
@@ -177,6 +215,9 @@ while getopts ':u:p:qr' OPT ; do
 		q)
 			QUIET=1
 			;;
+		r)
+			PROMPT_PASSWD=1
+			;;
 		:)
 			echo "Error: option '$OPTARG' requires an argument."
 			usage
@@ -231,7 +272,7 @@ uninstall)
 
 install-examples)
 	read_dbpasswords
-	symfony_console domjudge:load-example-data
+	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
 	;;
 
 create-db-users)
@@ -245,7 +286,7 @@ bare-install|install)
 	create_db_users
 	symfony_console doctrine:migrations:migrate -n
 	if [ "$1" = "install" ]; then
-		symfony_console domjudge:load-example-data
+		DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console domjudge:load-example-data
 	fi
 	if [ "$1" = "install" ]; then
 		verbose "SQL structure and default/example data installed."

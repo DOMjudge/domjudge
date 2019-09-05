@@ -533,13 +533,16 @@ For this, you need an installed and configured MySQL server and
 administrator access to it. Run
 <code>
 dj_setup_database genpass
-dj_setup_database [-u <mysql admin user>] [-p <password>] install
+dj_setup_database [-u <mysql admin user>] [-p <password>|-r] install
 </code>
 This first creates the DOMjudge database credentials file
 <tt>etc/dbpasswords.secret</tt> (optionally change the random
 generated password, although it is not needed for normal operation).
 Then it creates the database and user and inserts some
-default/example data into the domjudge database. The command
+default/example data into the domjudge database. The option
+<tt>-r</tt> will prompt for a password for mysql; when no user is
+specified, the mysql client will try to read
+credentials from <tt>$HOME/.my.cnf</tt> as usual. The command
 <tt>uninstall</tt> can be passed to <tt>dj_setup_database</tt> to
 remove the DOMjudge database and users; <em>this deletes all data!</em>
 
