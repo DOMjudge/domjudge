@@ -17,8 +17,36 @@
         <div class="alert alert-danger">No active contest(s)</div>
     {%- else %}
 
+        <a data-ajax-modal data-ajax-modal-after="initSubmitModal" href="{{ path('jury_clarification_new') }}">
+            <button type="submit" name="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-envelope"></i> Send general clarification
+            </button>
+        </a>
+        <br />
+        <br />
+
+        Filter:
+        <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
+            <label class="btn btn-secondary {% if currentFilter is null %}active{% endif %}">
+                <input type="radio" name="filter" autocomplete="off" value="all"
+                       {% if currentFilter is null %}checked{% endif %}> All
+            </label>
+            <label class="btn btn-secondary {% if currentFilter == 'new' %}active{% endif %}">
+                <input type="radio" name="filter" autocomplete="off" value="new"
+                       {% if currentFilter == 'new' %}checked{% endif %}> New
+            </label>
+            <label class="btn btn-secondary {% if currentFilter == 'old' %}active{% endif %}">
+                <input type="radio" name="filter" autocomplete="off" value="old"
+                       {% if currentFilter == 'old' %}checked{% endif %}> Old
+            </label>
+            <label class="btn btn-secondary {% if currentFilter == 'general' %}active{% endif %}">
+                <input type="radio" name="filter" autocomplete="off" value="general"
+                       {% if currentFilter == 'general' %}checked{% endif %}> General
+            </label>
+        </div>
+
         {% if queues | length > 0 %}
-        <h3>Filter on queue</h3>
+            Queue:
             <div class="btn-group btn-group-toggle btn-group-sm mb-3" data-toggle="buttons">
                 <label class="btn btn-secondary {% if currentQueue is null %}active{% endif %}">
                     <input type="radio" name="queue" autocomplete="off" value="all"
@@ -34,38 +62,44 @@
                                {% if currentQueue == queue %}checked{% endif %}> {{ name }}
                     </label>
                 {%- endfor %}
-
             </div>
         {% endif %}
 
-        <p><a href="{{ path('jury_clarification_new') }}">Send Clarification</a></p>
-        <p><a href="#newrequests">View New Clarification Requests</a></p>
-        <p><a href="#oldrequests">View Old Clarification Requests</a></p>
-        <p><a href="#clarifications">View General Clarifications</a></p>
+        {% if currentFilter is null or currentFilter == 'new' %}
+            <h3 id="newrequests">New requests:</h3>
+            {%- if newClarifications | length == 0 %}
+                <p class="nodata">No new clarification requests.</p>
+            {%- else %}
+                {%- include 'jury/partials/clarification_list.html.twig' with {clarifications: newClarifications} %}
+            {%- endif %}
+        {% endif %}
 
-        <h3 id="newrequests">New requests:</h3>
-        {%- if newClarifications | length == 0 %}
-            <p class="nodata">No new clarification requests.</p>
-        {%- else %}
-            {%- include 'jury/partials/clarification_list.html.twig' with {clarifications: newClarifications} %}
-        {%- endif %}
+        {% if currentFilter is null or currentFilter == 'old' %}
+            <h3 id="oldrequests">Old requests:</h3>
+            {%- if oldClarifications | length == 0 %}
+                <p class="nodata">No old clarification requests.</p>
+            {%- else %}
+                {%- include 'jury/partials/clarification_list.html.twig' with {clarifications: oldClarifications} %}
+            {%- endif %}
+        {% endif %}
 
-        <h3 id="oldrequests">Old requests:</h3>
-        {%- if oldClarifications | length == 0 %}
-            <p class="nodata">No old clarification requests.</p>
-        {%- else %}
-            {%- include 'jury/partials/clarification_list.html.twig' with {clarifications: oldClarifications} %}
-        {%- endif %}
-
-        <h3 id="clarifications">General clarifications:</h3>
-        {%- if generalClarifications | length == 0 %}
-            <p class="nodata">No general clarifications.</p>
-        {%- else %}
-            {%- include 'jury/partials/clarification_list.html.twig' with {clarifications: generalClarifications} %}
-        {%- endif %}
+        {% if currentFilter is null or currentFilter == 'general' %}
+            <h3 id="clarifications">General clarifications:</h3>
+            {%- if generalClarifications | length == 0 %}
+                <p class="nodata">No general clarifications.</p>
+            {%- else %}
+                {%- include 'jury/partials/clarification_list.html.twig' with {clarifications: generalClarifications} %}
+            {%- endif %}
+        {% endif %}
     {%- endif %}
 
     <script>
+        function doSwitch() {
+            window.location = '{{ path('jury_clarifications', {'queue': 'REPLACE_QUEUE', 'filter': 'REPLACE_FILTER'}) }}'
+                .replace('REPLACE_QUEUE', $('input[name=queue]:checked').val())
+                .replace('REPLACE_FILTER', $('input[name=filter]:checked').val())
+                .replace('&amp;', '&');
+        }
         $().ready(function () {
             var table = $('.data-table').DataTable({
                 "paging": false,
@@ -99,9 +133,8 @@
                     });
             });
 
-            $('input[name=queue]').on('change', function () {
-                window.location = '{{ path('jury_clarifications', {'queue': 'REPLACE_ME'}) }}'.replace('REPLACE_ME', $(this).val());
-            });
+            $('input[name=queue]').on('change', doSwitch);
+            $('input[name=filter]').on('change', doSwitch);
         });
     </script>
 

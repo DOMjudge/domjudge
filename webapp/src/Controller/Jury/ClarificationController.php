@@ -69,6 +69,11 @@ class ClarificationController extends AbstractController
             $contestIds = [-1];
         }
 
+        $currentFilter = $request->query->get('filter');
+        if ($currentFilter === 'all') {
+            $currentFilter = null;
+        }
+
         $currentQueue = $request->query->get('queue');
         if ($currentQueue === 'all') {
             $currentQueue = null;
@@ -133,6 +138,7 @@ class ClarificationController extends AbstractController
             'queues' => $queues,
             'showExternalId' => $this->eventLogService->externalIdFieldForEntity(Clarification::class),
             'currentQueue' => $currentQueue,
+            'currentFilter' => $currentFilter,
         ]);
     }
 
