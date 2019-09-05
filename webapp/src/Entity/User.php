@@ -487,7 +487,7 @@ class User implements UserInterface, \Serializable
      *
      * @return User
      */
-    public function addRole(Role $role)
+    public function addUserRole(Role $role)
     {
         $this->user_roles[] = $role;
 
@@ -499,7 +499,7 @@ class User implements UserInterface, \Serializable
      *
      * @param Role $role
      */
-    public function removeRole(Role $role)
+    public function removeUserRole(Role $role)
     {
         $this->user_roles->removeElement($role);
     }
