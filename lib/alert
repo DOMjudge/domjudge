@@ -16,7 +16,7 @@ fi
 shift
 DESCRIPTION="$*"
 
-BEEPCMD=$(which beep)
+BEEPCMD=$(which beep 2>/dev/null)
 
 beep()
 {
