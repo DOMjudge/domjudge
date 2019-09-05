@@ -10,3 +10,4 @@
 /dj_make_chroot_docker
 /dj_run_chroot
 /icpctools
+/create-cgroups.service

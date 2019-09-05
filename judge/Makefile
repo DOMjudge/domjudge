@@ -5,7 +5,7 @@ include $(TOPDIR)/Makefile.global
 
 TARGETS = runguard runpipe evict
 
-SUBST_FILES = judgedaemon chroot-startstop.sh
+SUBST_FILES = judgedaemon chroot-startstop.sh domjudge-judgehost.service
 
 judgehost: $(TARGETS) $(SUBST_FILES)
 
@@ -32,6 +32,7 @@ install-judgehost:
 		judgedaemon.main.php
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) judgedaemon
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) runguard runpipe
+	$(INSTALL_DATA) -t $(DESTDIR)$(libdir)/systemd/system/ domjudge-judgehost.service
 
 clean-l:
 	-rm -f $(TARGETS) $(TARGETS:%=%$(OBJEXT))

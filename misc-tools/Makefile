@@ -12,7 +12,7 @@ SUBST_DOMSERVER = save_sources2file restore_sources2db \
 
 SUBST_JUDGEHOST = create_cgroups dj_make_chroot dj_run_chroot dj_make_chroot_docker
 
-SUBST_FILES = $(SUBST_DOMSERVER) $(SUBST_JUDGEHOST)
+SUBST_FILES = $(SUBST_DOMSERVER) $(SUBST_JUDGEHOST) create-cgroups.service
 
 build: $(TARGETS) $(SUBST_FILES)
 
@@ -29,6 +29,7 @@ install-domserver:
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) $(SUBST_JUDGEHOST) \
 		dj_make_ubuntu_java_chroot
+	$(INSTALL_DATA) -t $(DESTDIR)$(libdir)/systemd/system/ create-cgroups.service
 
 maintainer-install:
 	for i in $(SUBST_DOMSERVER) ; do \

@@ -1,0 +1,18 @@
+[Unit]
+Description=DOMjudge JudgeDaemon
+Requires=create-cgroups.service
+After=create-cgroups.service
+After=network.target
+
+[Service]
+Type=simple
+
+ExecStart=@judgehost_bindir@/judgedaemon -n 0
+User=domjudge
+
+Restart=always
+RestartSec=3
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

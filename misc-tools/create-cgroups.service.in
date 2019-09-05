@@ -1,0 +1,7 @@
+[Unit]
+Description=Make sure cgroups exist for DOMjudge judgedaemon
+
+[Service]
+Type=oneshot
+ExecStart=@judgehost_bindir@/create_cgroups
+RemainAfterExit=true
