@@ -819,6 +819,7 @@ class ImportExportService
             ];
         }
 
+        $newTeams = [];
         foreach ($accountData as $accountItem) {
             if (!empty($accountItem['team'])) {
                 $team = $this->em->getRepository(Team::class)->findOneBy([
@@ -836,11 +837,10 @@ class ImportExportService
                     $action = EventLogService::ACTION_UPDATE;
                 }
                 $this->em->flush();
-                if ($contest = $this->dj->getCurrentContest()) {
-                    $this->eventLogService->log('team', $team->getTeamid(), $action, $contest->getCid());
-                    // Reload team as eventlog will have cleared it
-                    $team = $this->em->getRepository(Team::class)->find($team->getTeamid());
-                }
+                $newTeams[] = array(
+                    'team' => $team,
+                    'action' => $action,
+                );
                 $this->dj->auditlog('team', $team->getTeamid(), 'replaced',
                                                  'imported from tsv, autocreated for judge');
                 $accountItem['user']['team'] = $team;
@@ -865,6 +865,14 @@ class ImportExportService
             $this->em->flush();
 
             $this->dj->auditlog('user', $user->getUserid(), 'replaced', 'imported from tsv');
+        }
+
+        if ($contest = $this->dj->getCurrentContest()) {
+            foreach ($newTeams as $newTeam) {
+                $team = $newTeam['team'];
+                $action = $newTeam['action'];
+                $this->eventLogService->log('team', $team->getTeamid(), $action, $contest->getCid());
+            }
         }
 
         return count($accountData);
