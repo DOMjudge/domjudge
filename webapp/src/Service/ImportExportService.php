@@ -836,9 +836,11 @@ class ImportExportService
                     $action = EventLogService::ACTION_UPDATE;
                 }
                 $this->em->flush();
-                $this->eventLogService->log('team', $team->getTeamid(), $action);
-                // Reload team as eventlog will have cleared it
-                $team = $this->em->getRepository(Team::class)->find($team->getTeamid());
+                if ($contest = $this->dj->getCurrentContest()) {
+                    $this->eventLogService->log('team', $team->getTeamid(), $action, $contest->getCid());
+                    // Reload team as eventlog will have cleared it
+                    $team = $this->em->getRepository(Team::class)->find($team->getTeamid());
+                }
                 $this->dj->auditlog('team', $team->getTeamid(), 'replaced',
                                                  'imported from tsv, autocreated for judge');
                 $accountItem['user']['team'] = $team;
