@@ -813,7 +813,7 @@ class ImportExportService
                     'username' => $line[2],
                     'plain_password' => $line[3],
                     'team' => $team,
-                    'roles' => $roles,
+                    'user_roles' => $roles,
                 ],
                 'team' => $juryTeam,
             ];
