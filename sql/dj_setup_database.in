@@ -85,7 +85,7 @@ symfony_console()
 			if [ -n "$PROMPT_PASSWD" ]; then
 				stty -echo
 				printf "Enter password: "
-				read DBA_PASSWD
+				read -r DBA_PASSWD
 				stty echo
 				printf "\n"
 			fi

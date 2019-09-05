@@ -32,6 +32,7 @@ install-judgehost:
 		judgedaemon.main.php
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) judgedaemon
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_bindir) runguard runpipe
+	mkdir -p $(DESTDIR)$(libdir)/systemd/system/
 	$(INSTALL_DATA) -t $(DESTDIR)$(libdir)/systemd/system/ domjudge-judgehost.service
 
 clean-l:

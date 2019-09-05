@@ -142,7 +142,7 @@ class JuryClarificationsTest extends WebTestCase
         $this->logIn($client);
         $crawler = $client->request('GET', '/jury/clarifications');
 
-        $link = $crawler->selectLink('Send Clarification')->link();
+        $link = $crawler->selectLink('Send clarification')->link();
         $message = var_export($link, true);
         $this->assertEquals('http://localhost/jury/clarifications/send', $link->getUri(), $message);
 
