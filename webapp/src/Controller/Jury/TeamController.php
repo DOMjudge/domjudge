@@ -417,7 +417,7 @@ class TeamController extends BaseController
                     ->setParameter(':team', 'team')
                     ->getQuery()
                     ->getOneOrNullResult();
-                $user->addUserRole($role);
+                $user->addRole($role);
                 $user->setTeam($team);
                 // Also set the user's name to the team name
                 $user->setName($team->getName());

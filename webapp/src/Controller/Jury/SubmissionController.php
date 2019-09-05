@@ -563,7 +563,7 @@ class SubmissionController extends BaseController
                             $submission->getContestProblem()->getShortname(), $run->getRunid(),
                             $submission->getTeamid());
 
-        $outputRun = $run->getJudgingRunOutput()->getOutputRun();
+        $outputRun = $run->getOutput()->getOutputRun();
 
         $response = new StreamedResponse();
         $response->setCallback(function () use ($outputRun) {

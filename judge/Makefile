@@ -21,10 +21,8 @@ runguard$(OBJEXT): $(TOPDIR)/etc/runguard-config.h
 evict: evict.c $(LIBHEADERS) $(LIBSOURCES)
 	$(CC) $(CFLAGS) -o $@ $< $(LIBSOURCES)
 
-# FIXME: compile with diet libc to produce a static binary which is
-# not 0.6 MB (!) in size?
-runpipe: runpipe.c $(LIBHEADERS) $(LIBSOURCES)
-	$(CC) $(CFLAGS) -static -o $@ $< $(LIBSOURCES)
+runpipe: runpipe.cc $(LIBHEADERS) $(LIBSOURCES)
+	$(CXX) $(CXXFLAGS) -static -o $@ $< $(LIBSOURCES)
 
 install-judgehost:
 	$(INSTALL_PROG) -t $(DESTDIR)$(judgehost_libjudgedir) \

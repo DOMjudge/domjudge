@@ -439,6 +439,14 @@ class ContestController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // We need to explicitly assign the contest on all problems, because
+            // otherwise we can not save new problems on the contest.
+            /** @var ContestProblem[] $problems */
+            $problems = $contest->getProblems()->toArray();
+            foreach ($problems as $problem) {
+                $problem->setContest($contest);
+            }
+
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
                               $contest->getCid(), false);
             return $this->redirect($this->generateUrl('jury_contest',
