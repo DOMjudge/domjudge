@@ -127,7 +127,7 @@ class SecurityController extends AbstractController
             $password  = $passwordEncoder->encodePassword($user, $plainPass);
             $user->setPassword($password);
             $user->setName($user->getUsername());
-            $user->addUserRole($team_role);
+            $user->addRole($team_role);
 
             $teamName = $registration_form->get('teamName')->getData();
 

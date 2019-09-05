@@ -148,7 +148,7 @@ class BaylorCmsService
                         ->setUsername($username)
                         ->setName($teamData['teamName'])
                         ->setTeam($team)
-                        ->addUserRole($teamRole);
+                        ->addRole($teamRole);
 
                     $this->em->persist($user);
                     $this->em->flush();
