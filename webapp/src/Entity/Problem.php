@@ -112,7 +112,7 @@ class Problem extends BaseApiEntity
      * @var boolean
      * @ORM\Column(type="boolean", name="combined_run_compare",
      *     options={"comment"="Use the exit code of the run script to compute the verdict",
-     *              "unsigned"=true,"default":"0"},
+     *              "default":"0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */

@@ -27,7 +27,7 @@ class Judgehost
      * @var boolean
      * @ORM\Column(type="boolean", name="active",
      *     options={"comment"="Should this host take on judgings?",
-     *              "unsigned"=true,"default"="1"},
+     *              "default"="1"},
      *     nullable=false)
      */
     private $active = true;

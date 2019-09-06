@@ -65,8 +65,9 @@ class Language extends BaseApiEntity
     /**
      * @var bool
      * @ORM\Column(type="boolean", name="filter_compiler_files",
-     *     options={"comment"="Whether to filter the files passed to the compiler by the extension list",
-     *              "default"="1","unsigned"=true}, nullable=false)
+     *     options={"comment"="Whether to filter the files passed to the compiler by the extension list.",
+     *              "default"="1"},
+     *     nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      */
     private $filterCompilerFiles = true;
@@ -74,7 +75,7 @@ class Language extends BaseApiEntity
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_submit",
-     *     options={"comment"="Are submissions accepted in this language?","default"="1","unsigned"="true"},
+     *     options={"comment"="Are submissions accepted in this language?","default"="1"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -83,7 +84,7 @@ class Language extends BaseApiEntity
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_judge",
-     *     options={"comment"="Are submissions in this language judged?","default"="1","unsigned"="true"},
+     *     options={"comment"="Are submissions in this language judged?","default"="1"},
      *     nullable=false)
      * @Serializer\Groups({"Nonstrict"})
      */

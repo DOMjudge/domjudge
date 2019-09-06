@@ -90,7 +90,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="verified",
-     *     options={"comment"="Result verified by jury member?","unsigned"=true,
+     *     options={"comment"="Result verified by jury member?",
      *              "default"="0"},
      *     nullable=false)
      * @Serializer\Exclude()
@@ -121,7 +121,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @var boolean
      * @ORM\Column(type="boolean", name="valid",
      *     options={"comment"="Old judging is marked as invalid when rejudging",
-     *              "unsigned"=true,"default"="1"},
+     *              "default"="1"},
      *     nullable=false)
      */
     private $valid = true;
@@ -145,7 +145,7 @@ class Judging extends BaseApiEntity implements ExternalRelationshipEntityInterfa
      * @var boolean
      * @ORM\Column(type="boolean", name="seen",
      *     options={"comment"="Whether the team has seen this judging",
-     *              "unsigned"=true,"default"="0"},
+     *              "default"="0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */

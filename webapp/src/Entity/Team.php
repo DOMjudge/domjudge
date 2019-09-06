@@ -75,7 +75,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      * @var boolean
      * @ORM\Column(type="boolean", name="enabled",
      *     options={"comment"="Whether the team is visible and operational",
-     *              "unsigned"="true","default"=1},
+     *              "default"=1},
      *     nullable=false)
      * @Serializer\Exclude()
      */

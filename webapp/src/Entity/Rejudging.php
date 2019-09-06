@@ -76,7 +76,7 @@ class Rejudging
      * @var boolean
      * @ORM\Column(type="boolean", name="valid",
      *     options={"comment"="Rejudging is marked as invalid if canceled",
-     *              "unsigned"=true,"default"="1"},
+     *              "default"="1"},
      *     nullable=false)
      */
     private $valid = true;

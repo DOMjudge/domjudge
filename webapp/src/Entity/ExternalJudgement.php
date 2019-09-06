@@ -75,7 +75,7 @@ class ExternalJudgement
      * @var boolean
      * @ORM\Column(type="boolean", name="valid",
      *     options={"comment"="Old external judgement is marked as invalid when receiving a new one",
-     *              "unsigned"=true,"default"="1"},
+     *              "default"="1"},
      *     nullable=false)
      */
     private $valid = true;

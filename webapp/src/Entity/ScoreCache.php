@@ -42,7 +42,7 @@ class ScoreCache
      *
      * @ORM\Column(type="boolean", name="is_correct_restricted",
      *     options={"comment"="Has there been a correct submission? (restricted audience)",
-     *              "unsigned"=true,"default"="0"},
+     *              "default"="0"},
      *     nullable=false)
      */
     private $is_correct_restricted = false;
@@ -82,7 +82,7 @@ class ScoreCache
      *
      * @ORM\Column(type="boolean", name="is_correct_public",
      *     options={"comment"="Has there been a correct submission? (public)",
-     *              "unsigned"=true,"default"="0"},
+     *              "default"="0"},
      *     nullable=false)
      */
     private $is_correct_public = false;
@@ -101,7 +101,7 @@ class ScoreCache
      *
      * @ORM\Column(type="boolean", name="is_first_to_solve",
      *     options={"comment"="Is this the first solution to this problem?",
-     *              "unsigned"=true,"default"="0"},
+     *              "default"="0"},
      *     nullable=false)
      */
     private $is_first_to_solve = false;

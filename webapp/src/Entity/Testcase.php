@@ -89,7 +89,7 @@ class Testcase
      * @var boolean
      * @ORM\Column(type="boolean", name="sample",
      *     options={"comment"="Sample testcases that can be shared with teams",
-     *              "unsigned"=true,"default"="0"},
+     *              "default"="0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */

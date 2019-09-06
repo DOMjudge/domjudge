@@ -60,7 +60,7 @@ class ContestProblem
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_submit",
      *     options={"comment"="Are submissions accepted for this problem?",
-     *              "unsigned"=true,"default"="1"},
+     *              "default"="1"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -70,7 +70,7 @@ class ContestProblem
      * @var boolean
      * @ORM\Column(type="boolean", name="allow_judge",
      *     options={"comment"="Are submissions for this problem judged?",
-     *              "unsigned"=true,"default"="1"},
+     *              "default"="1"},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -90,7 +90,7 @@ class ContestProblem
      * @var boolean|null
      * @ORM\Column(type="boolean", name="lazy_eval_results",
      *     options={"comment"="Whether to do lazy evaluation for this problem; if set this overrides the global configuration setting",
-     *              "unsigned"=true,"default"="NULL"},
+     *              "unsigned"="true", "default"="NULL"},
      *     nullable=true)
      * @Serializer\Exclude()
      */

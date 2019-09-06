@@ -116,7 +116,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
      * @var boolean
      * @ORM\Column(type="boolean", name="valid",
      *     options={"comment"="If false ignore this submission in all scoreboard calculations",
-     *              "unsigned"=true,"default"="1"},
+     *              "default"="1"},
      *     nullable=false)
      * @Serializer\Exclude()
      */

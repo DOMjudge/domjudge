@@ -103,7 +103,7 @@ class Contest extends BaseApiEntity
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="starttime_enabled",
-     *     options={"comment"="If disabled, starttime is not used, e.g. to delay contest start","unsigned"="true","default"=1},
+     *     options={"comment"="If disabled, starttime is not used, e.g. to delay contest start","default"=1},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -242,7 +242,7 @@ class Contest extends BaseApiEntity
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="enabled",
-     *     options={"comment"="Whether this contest can be active","unsigned"=true,"default"=1},
+     *     options={"comment"="Whether this contest can be active","default"=1},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -251,7 +251,7 @@ class Contest extends BaseApiEntity
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="process_balloons",
-     *     options={"comment"="Will balloons be processed for this contest?","unsigned"=true,"default"=1},
+     *     options={"comment"="Will balloons be processed for this contest?","default"=1},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -261,7 +261,7 @@ class Contest extends BaseApiEntity
      * @var boolean
      * @ORM\Column(type="boolean", name="public",
      *     options={"comment"="Is this contest visible for the public?",
-     *              "unsigned"=true,"default"=1},
+     *              "default"=1},
      *     nullable=false)
      * @Serializer\Exclude()
      */
@@ -271,7 +271,7 @@ class Contest extends BaseApiEntity
      * @var boolean
      * @ORM\Column(type="boolean", name="open_to_all_teams",
      *     options={"comment"="Is this contest open to all teams?",
-     *              "unsigned"=true,"default"=1},
+     *              "default"=1},
      *     nullable=false)
      * @Serializer\Exclude()
      */

@@ -112,7 +112,7 @@ class User implements UserInterface, \Serializable
      * @var boolean
      * @ORM\Column(type="boolean", name="enabled",
      *     options={"comment"="Whether the user is able to log in",
-     *              "unsigned"=true,"default"="1"},
+     *              "default"="1"},
      *     nullable=false)
      * @Serializer\Exclude()
      */

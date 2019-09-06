@@ -69,7 +69,7 @@ class TeamCategory extends BaseApiEntity
      * @var boolean
      * @ORM\Column(type="boolean", name="visible",
      *     options={"comment"="Are teams in this category visible?",
-     *              "unsigned"=true,"default"="1"},
+     *              "default"="1"},
      *     nullable=false)
      * @Serializer\Exclude()
      */

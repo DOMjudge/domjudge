@@ -145,7 +145,7 @@ class Clarification extends BaseApiEntity implements ExternalRelationshipEntityI
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="answered",
-     *     options={"comment"="Has been answered by jury?","unsigned"=true,"default":"0"},
+     *     options={"comment"="Has been answered by jury?","default":"0"},
      *     nullable=false)
      * @Serializer\Exclude()
      */

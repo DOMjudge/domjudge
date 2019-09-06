@@ -35,7 +35,7 @@ class Balloon
     /**
      * @var boolean
      * @ORM\Column(type="boolean", name="done",
-     *     options={"comment"="Has been handed out yet?","unsigned"=true,"default"="0"},
+     *     options={"comment"="Has been handed out yet?","default"="0"},
      *     nullable=false)
      */
     private $done = false;
