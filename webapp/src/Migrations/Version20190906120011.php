@@ -14,7 +14,7 @@ final class Version20190906120011 extends AbstractMigration
 {
     public function getDescription() : string
     {
-        return '';
+        return 'Remove unnecessary unsigned=true from booleans.';
     }
 
     public function up(Schema $schema) : void
