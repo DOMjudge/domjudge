@@ -207,6 +207,9 @@
             "webapp/config/routes/nelmio_api_doc.yaml"
         ]
     },
+    "nikic/php-parser": {
+        "version": "v4.2.4"
+    },
     "novus/nvd3": {
         "version": "v1.8.6"
     },
@@ -445,6 +448,15 @@
     },
     "symfony/intl": {
         "version": "v4.3.2"
+    },
+    "symfony/maker-bundle": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
+        }
     },
     "symfony/mime": {
         "version": "v4.3.2"
