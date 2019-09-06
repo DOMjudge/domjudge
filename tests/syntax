@@ -18,16 +18,17 @@ if [ ! -x /usr/bin/shellcheck ]; then
 	exit -1
 fi
 
-find .. \( -path ../lib/vendor -prune \
-	-o -path ../webapp/var -prune \
-	-o -path ../output     -prune \
-	-o -path ../.git       -prune \
+find .. \( -path ../lib/vendor            -prune \
+	-o -path ../webapp/var            -prune \
+	-o -path ../output                -prune \
+	-o -path ../.git                  -prune \
+	-o -path ../webapp/src/Migrations -prune \
         -o -type f \) \
 	-a -type f |  \
 while read -r i ; do
 	if [[ "$i" == *\.php ]] || grep -q "^#\\!.*php" "$i"; then
 		$PHP -l "$i" | sed -e 's|No syntax errors detected in ../|check PHP syntax: |'
-		if [[ "$i" == *\.php ]] && [ "$i" != "../webapp/config/bundles.php" ] && ! head -1 $i|grep -q "strict_types"; then
+		if [[ "$i" == *\.php ]] && [ "$i" != "../webapp/config/bundles.php" ] && ! head -1 "$i"|grep -q "strict_types"; then
 			echo "PHP file missing strict types declaration: $i"
 			exit 1
 		fi
