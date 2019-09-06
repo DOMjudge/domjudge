@@ -539,7 +539,7 @@ class DOMJudgeService
                     ->update(ContestProblem::class, 'p')
                     ->set('p.allowJudge', ':enabled')
                     ->andWhere('p.contest = :cid')
-                    ->andWhere('p.probid = :probid')
+                    ->andWhere('p.problem = :probid')
                     ->setParameter(':enabled', $enabled)
                     ->setParameter(':cid', $contest)
                     ->setParameter(':probid', $disabled['probid'])
