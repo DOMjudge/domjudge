@@ -3,6 +3,7 @@ namespace App\Entity;
 
 use App\Service\EventLogService;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
@@ -118,6 +119,11 @@ class ContestProblem
      * @Serializer\Exclude()
      */
     private $submissions;
+
+    public function __construct()
+    {
+        $this->submissions = new ArrayCollection();
+    }
 
     /**
      * Get cid

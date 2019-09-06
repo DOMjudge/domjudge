@@ -7,6 +7,7 @@ use App\Utils\Utils;
 use App\Validator\Constraints\Identifier;
 use App\Validator\Constraints\TimeString;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -342,6 +343,11 @@ class Contest extends BaseApiEntity
         $this->problems         = new ArrayCollection();
         $this->teams            = new ArrayCollection();
         $this->removedIntervals = new ArrayCollection();
+        $this->clarifications = new ArrayCollection();
+        $this->submissions = new ArrayCollection();
+        $this->internal_errors = new ArrayCollection();
+        $this->scorecache = new ArrayCollection();
+        $this->rankcache = new ArrayCollection();
     }
 
     /**
@@ -1590,5 +1596,10 @@ class Contest extends BaseApiEntity
         }
 
         return '';
+    }
+
+    public function getOpenToAllTeams(): ?bool
+    {
+        return $this->openToAllTeams;
     }
 }

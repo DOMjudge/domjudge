@@ -666,6 +666,7 @@ class Submission extends BaseApiEntity implements ExternalRelationshipEntityInte
         $this->files               = new ArrayCollection();
         $this->resubmissions       = new ArrayCollection();
         $this->external_judgements = new ArrayCollection();
+        $this->balloons = new ArrayCollection();
     }
 
     /**

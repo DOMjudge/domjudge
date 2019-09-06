@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Utils\Utils;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -580,6 +582,10 @@ class Problem extends BaseApiEntity
     public function __construct()
     {
         $this->testcases = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->submissions = new ArrayCollection();
+        $this->clarifications = new ArrayCollection();
+        $this->contest_problems = new ArrayCollection();
+        $this->scorecache = new ArrayCollection();
     }
 
     /**

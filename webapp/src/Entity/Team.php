@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -535,6 +537,12 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     {
         $this->contests = new \Doctrine\Common\Collections\ArrayCollection();
         $this->users = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->submissions = new ArrayCollection();
+        $this->sent_clarifications = new ArrayCollection();
+        $this->received_clarifications = new ArrayCollection();
+        $this->unread_clarifications = new ArrayCollection();
+        $this->scorecache = new ArrayCollection();
+        $this->rankcache = new ArrayCollection();
     }
 
     /**

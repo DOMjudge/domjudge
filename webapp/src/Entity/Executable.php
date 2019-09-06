@@ -2,6 +2,8 @@
 namespace App\Entity;
 
 use App\Validator\Constraints\Identifier;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -79,6 +81,8 @@ class Executable
     public function __construct()
     {
         $this->languages = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->problems_compare = new ArrayCollection();
+        $this->problems_run = new ArrayCollection();
     }
 
     /**
