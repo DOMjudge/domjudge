@@ -25,6 +25,17 @@
 					"type": "zip"
 				}
 			}
+		},
+		{
+			"type": "package",
+			"package": {
+				"name": "eligrey/filesaver",
+				"version": "2.0.2",
+				"dist": {
+					"url": "https://github.com/eligrey/FileSaver.js/archive/v2.0.2.zip",
+					"type": "zip"
+				}
+			}
 		}
 	],
 	"require": {
@@ -47,6 +58,7 @@
 		"doctrine/doctrine-fixtures-bundle": "^3.2",
 		"doctrine/doctrine-migrations-bundle": "^2.0",
 		"doctrine/orm": "^2.6",
+		"eligrey/filesaver": "2.*",
 		"fortawesome/font-awesome": "5.*",
 		"friendsofsymfony/rest-bundle": "^2.5",
 		"ircmaxell/password-compat": "*",

@@ -102,6 +102,9 @@
     "doctrine/reflection": {
         "version": "v1.0.0"
     },
+    "eligrey/filesaver": {
+        "version": "2.0.2"
+    },
     "exsyst/swagger": {
         "version": "v0.4.1"
     },

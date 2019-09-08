@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9943fcb96c3ef3be188d67fd77679798",
+    "content-hash": "25b6362285a19ee13e50048456aef269",
     "packages": [
         {
             "name": "angel-vladov/select2-bootstrap-theme",
@@ -1402,6 +1402,15 @@
                 "reflection"
             ],
             "time": "2018-06-14T14:45:07+00:00"
+        },
+        {
+            "name": "eligrey/filesaver",
+            "version": "2.0.2",
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/eligrey/FileSaver.js/archive/v2.0.2.zip"
+            },
+            "type": "library"
         },
         {
             "name": "exsyst/swagger",

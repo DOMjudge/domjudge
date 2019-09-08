@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{asset('css/nv.d3.min.css')}}" type="text/css"/>
 <script type="text/javascript" src="{{asset('js/d3.min.js')}}"></script>
 <script type="text/javascript" src="{{asset('js/nv.d3.min.js')}}"></script>
+<script type="text/javascript" src="{{asset('js/FileSaver.min.js')}}"></script>
 <style>
 .row.equal {
   display: flex;
@@ -281,5 +282,6 @@ $(function(){
 
 })
 </script>
+{% include 'jury/analysis/download_graphs.html.twig' %}
 
 {% endblock %}
