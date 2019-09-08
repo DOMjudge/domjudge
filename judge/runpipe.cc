@@ -127,10 +127,12 @@ int execute(string cmd, vector<string> args, int stdio_fd[3], int err2out)
 {
 	const char **argv;
 
-	argv = (const char **)calloc(args.size(), sizeof(char *));
+	if ( (argv = (const char **)calloc(args.size(), sizeof(char *)))==NULL ) return -1;
 	for(size_t i=0; i<args.size(); i++) argv[i] = args[i].c_str();
 
-	return execute(cmd.c_str(), argv, args.size(), stdio_fd, err2out);
+	int pid = execute(cmd.c_str(), argv, args.size(), stdio_fd, err2out);
+	free(argv);
+	return pid;
 }
 
 string join(char separator, vector<string> strings)
@@ -225,6 +227,9 @@ void resize_pipe(int fd)
 			max_pipe_size = -2;
 			warning(errno, "could not read from '%s'", PROC_MAX_PIPE_SIZE);
 			return;
+		}
+		if ( fclose(f)!=0 ) {
+			warning(errno, "could not close '%s'", PROC_MAX_PIPE_SIZE);
 		}
 	}
 
