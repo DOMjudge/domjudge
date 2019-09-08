@@ -13,7 +13,7 @@
     <h1>Team {{ team.name }}</h1>
 
     <div class="row">
-        <div class="col-lg-4">
+        <div class="col">
             <table class="table table-sm table-striped">
                 <tr>
                     <th>ID</th>
@@ -80,7 +80,7 @@
             </table>
         </div>
 
-        <div class="col-lg-4">
+        <div class="col">
             <table class="table table-sm table-striped">
                 <tr>
                     <th>Category</th>
@@ -150,7 +150,7 @@
         </div>
     {% set teamImage = 'images/teams/' ~ team.teamId ~ '.jpg' %}
     {% if teamImage | assetExists %}
-        <div class="col-lg-{{ size | default(4) }}">
+        <div class="col">
         <img id="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.name }}"
              title="Picture of team {{ team.name }}">
         </div>
