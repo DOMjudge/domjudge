@@ -4,8 +4,8 @@
 
 {% block extrahead %}
     {{ parent() }}
-    <script type="text/javascript" src="{{ asset('js/ace/ace.js') }}" charset="utf-8"></script>
-    <script type="text/javascript" src="{{ asset('js/ace/ext-modelist.js') }}" charset="utf-8"></script>
+    <script src="{{ asset('js/ace/ace.js') }}"></script>
+    <script src="{{ asset('js/ace/ext-modelist.js') }}"></script>
 {% endblock %}
 
 {% block content %}
