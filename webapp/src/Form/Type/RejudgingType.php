@@ -161,8 +161,10 @@ class RejudgingType extends AbstractType
 
             if (!$selectAllTeams) {
                 $teamsQueryBuilder
-                    ->join('t.contests', 'c')
-                    ->andWhere('c IN (:contests)')
+                    ->leftJoin('t.contests', 'c')
+                    ->join('t.category', 'cat')
+                    ->leftJoin('cat.contests', 'cc')
+                    ->andWhere('c IN (:contests) OR cc IN (:contests)')
                     ->setParameter(':contests', $contests);
             }
 

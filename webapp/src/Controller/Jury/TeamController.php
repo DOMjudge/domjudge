@@ -81,6 +81,7 @@ class TeamController extends BaseController
             ->leftJoin('t.contests', 'c')
             ->leftJoin('t.affiliation', 'a')
             ->join('t.category', 'cat')
+            ->join('cat.contests', 'cc')
             ->orderBy('cat.sortorder', 'ASC')
             ->addOrderBy('t.name', 'ASC')
             ->getQuery()->getResult();
@@ -206,9 +207,16 @@ class TeamController extends BaseController
             $teamdata['ip_address']['default']  = '-';
             $teamdata['ip_address']['cssclass'] = 'text-monospace small';
 
+            $teamContests = [];
+            foreach ($t->getContests() as $c) {
+                $teamContests[$c->getCid()] = true;
+            }
+            foreach ($t->getCategory()->getContests() as $c) {
+                $teamContests[$c->getCid()] = true;
+            }
             // merge in the rest of the data
             $teamdata = array_merge($teamdata, [
-                'num_contests' => ['value' => (int)($t->getContests()->count()) + $num_open_to_all_teams_contests],
+                'num_contests' => ['value' => count($teamContests) + $num_open_to_all_teams_contests],
                 'status' => [
                     'value' => $status,
                     'title' => $statustitle,
