@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Team;
+use App\Entity\TeamCategory;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -83,6 +84,14 @@ class ContestType extends AbstractExternalIdEntityType
             'multiple' => true,
             'choice_label' => function (Team $team) {
                 return sprintf('%s (t%d)', $team->getName(), $team->getTeamid());
+            },
+        ]);
+        $builder->add('teamCategories', EntityType::class, [
+            'required' => false,
+            'class' => TeamCategory::class,
+            'multiple' => true,
+            'choice_label' => function (TeamCategory $category) {
+                return $category->getName();
             },
         ]);
         $builder->add('enabled', ChoiceType::class, [

@@ -8,6 +8,7 @@ use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\RemovedInterval;
 use App\Entity\Submission;
+use App\Entity\Team;
 use App\Form\Type\ContestType;
 use App\Form\Type\FinalizeContestType;
 use App\Form\Type\RemovedIntervalType;
@@ -159,9 +160,8 @@ class ContestController extends BaseController
         }
 
         $contests = $em->createQueryBuilder()
-            ->select('c', 'COUNT(t.teamid) AS num_teams')
+            ->select('c')
             ->from(Contest::class, 'c')
-            ->leftJoin('c.teams', 't')
             ->orderBy('c.starttime', 'DESC')
             ->groupBy('c.cid')
             ->getQuery()->getResult();
@@ -223,9 +223,7 @@ class ContestController extends BaseController
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $contests_table   = [];
-        foreach ($contests as $contestData) {
-            /** @var Contest $contest */
-            $contest        = $contestData[0];
+        foreach ($contests as $contest) {
             $contestdata    = [];
             $contestactions = [];
             // Get whatever fields we can from the contest object itself
@@ -258,7 +256,18 @@ class ContestController extends BaseController
             if ($contest->isOpenToAllTeams()) {
                 $contestdata['num_teams'] = ['value' => '<i>all</i>'];
             } else {
-                $contestdata['num_teams'] = ['value' => $contestData['num_teams']];
+                $teamCount = $em
+                    ->createQueryBuilder()
+                    ->select('COUNT(t.teamid) AS cnt')
+                    ->from(Team::class, 't')
+                    ->leftJoin('t.contests', 'c')
+                    ->join('t.category', 'cat')
+                    ->leftJoin('cat.contests', 'cc')
+                    ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                    ->setParameter(':cid', $contest->getCid())
+                    ->getQuery()
+                    ->getSingleScalarResult();
+                $contestdata['num_teams'] = ['value' => $teamCount];
             }
 
             if (ALLOW_REMOVED_INTERVALS) {

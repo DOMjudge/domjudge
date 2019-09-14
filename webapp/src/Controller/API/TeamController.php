@@ -89,6 +89,7 @@ class TeamController extends AbstractRestController
             ->leftJoin('t.affiliation', 'ta')
             ->leftJoin('t.category', 'tc')
             ->leftJoin('t.contests', 'c')
+            ->leftJoin('tc.contests', 'cc')
             ->select('t, ta');
 
         if ($request->query->has('category')) {
@@ -110,7 +111,7 @@ class TeamController extends AbstractRestController
         $contest = $this->em->getRepository(Contest::class)->find($this->getContestId($request));
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
-                ->andWhere('c.cid = :cid')
+                ->andWhere('c.cid = :cid OR cc.cid = :cid')
                 ->setParameter(':cid', $contest->getCid());
         }
 

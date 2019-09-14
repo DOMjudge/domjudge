@@ -647,8 +647,10 @@ class ScoreboardService
 
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
-                ->join('t.contests', 'c')
-                ->andWhere('c = :contest')
+                ->leftJoin('t.contests', 'c')
+                ->join('t.category', 'cat')
+                ->leftJoin('cat.contests', 'cc')
+                ->andWhere('c = :contest OR cc = :contest')
                 ->setParameter(':contest', $contest);
         }
 
@@ -721,8 +723,10 @@ class ScoreboardService
                 ->setParameter(':categories', $categories);
             if (!$contest->isOpenToAllTeams()) {
                 $queryBuilder
-                    ->join('t.contests', 'c')
-                    ->andWhere('c = :contest')
+                    ->leftJoin('t.contests', 'c')
+                    ->join('t.category', 'cat')
+                    ->leftJoin('cat.contests', 'cc')
+                    ->andWhere('c = :contest OR cc = :contest')
                     ->setParameter(':contest', $contest);
             }
 
@@ -819,8 +823,10 @@ class ScoreboardService
 
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
-                ->join('t.contests', 'c')
-                ->andWhere('c.cid = :cid')
+                ->leftJoin('t.contests', 'c')
+                ->join('t.category', 'cat')
+                ->leftJoin('cat.contests', 'cc')
+                ->andWhere('c.cid = :cid OR cc.cid = :cid')
                 ->setParameter(':cid', $contest->getCid());
         }
 

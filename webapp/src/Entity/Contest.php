@@ -289,6 +289,16 @@ class Contest extends BaseApiEntity
     private $teams;
 
     /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\TeamCategory", inversedBy="contests")
+     * @ORM\JoinTable(name="contestteamcategory",
+     *                joinColumns={@ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")},
+     *                inverseJoinColumns={@ORM\JoinColumn(name="categoryid", referencedColumnName="categoryid", onDelete="CASCADE")}
+     *               )
+     * @Serializer\Exclude()
+     */
+    private $team_categories;
+
+    /**
      * @ORM\OneToMany(targetEntity="Clarification", mappedBy="contest")
      * @Serializer\Exclude()
      */
@@ -348,6 +358,7 @@ class Contest extends BaseApiEntity
         $this->internal_errors = new ArrayCollection();
         $this->scorecache = new ArrayCollection();
         $this->rankcache = new ArrayCollection();
+        $this->team_categories = new ArrayCollection();
     }
 
     /**
@@ -934,6 +945,7 @@ class Contest extends BaseApiEntity
         $this->openToAllTeams = $openToAllTeams;
         if ($this->openToAllTeams) {
             $this->teams->clear();
+            $this->team_categories->clear();
         }
 
         return $this;
@@ -1601,5 +1613,31 @@ class Contest extends BaseApiEntity
     public function getOpenToAllTeams(): ?bool
     {
         return $this->openToAllTeams;
+    }
+
+    /**
+     * @return Collection|TeamCategory[]
+     */
+    public function getTeamCategories(): Collection
+    {
+        return $this->team_categories;
+    }
+
+    public function addTeamCategory(TeamCategory $teamCategory): self
+    {
+        if (!$this->team_categories->contains($teamCategory)) {
+            $this->team_categories[] = $teamCategory;
+        }
+
+        return $this;
+    }
+
+    public function removeTeamCategory(TeamCategory $teamCategory): self
+    {
+        if ($this->team_categories->contains($teamCategory)) {
+            $this->team_categories->removeElement($teamCategory);
+        }
+
+        return $this;
     }
 }

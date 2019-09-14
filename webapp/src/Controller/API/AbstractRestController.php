@@ -165,7 +165,9 @@ abstract class AbstractRestController extends AbstractFOSRestController
         if (!$this->dj->checkrole('api_reader') && !$this->dj->checkrole('judgehost')) {
             if ($this->dj->checkrole('team') && $this->dj->getUser()->getTeamid()) {
                 $qb->leftJoin('c.teams', 'ct')
-                    ->andWhere('ct.teamid = :teamid OR c.openToAllTeams = 1')
+                    ->leftJoin('c.team_categories', 'tc')
+                    ->leftJoin('tc.teams', 'tct')
+                    ->andWhere('ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1')
                     ->setParameter(':teamid', $this->dj->getUser()->getTeamid());
             } else {
                 $qb->andWhere('c.public = 1');

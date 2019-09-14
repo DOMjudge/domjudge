@@ -163,7 +163,9 @@ class DOMJudgeService
         $qb->select('c')->from(Contest::class, 'c', 'c.cid');
         if ($onlyofteam !== null && $onlyofteam > 0) {
             $qb->leftJoin('c.teams', 'ct')
-                ->andWhere('ct.teamid = :teamid OR c.openToAllTeams = 1')
+                ->leftJoin('c.team_categories', 'tc')
+                ->leftJoin('tc.teams', 'tct')
+                ->andWhere('ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1')
                 ->setParameter(':teamid', $onlyofteam);
             // $contests = $DB->q("SELECT * FROM contest
             //                     LEFT JOIN contestteam USING (cid)

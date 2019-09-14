@@ -83,6 +83,11 @@ class TeamCategory extends BaseApiEntity
      */
     private $teams;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="Contest", mappedBy="team_categories")
+     * @Serializer\Exclude()
+     */
+    private $contests;
 
     /**
      * Constructor
@@ -90,6 +95,7 @@ class TeamCategory extends BaseApiEntity
     public function __construct()
     {
         $this->teams = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->contests = new ArrayCollection();
     }
 
     /**
@@ -251,5 +257,33 @@ class TeamCategory extends BaseApiEntity
     public function getTeams()
     {
         return $this->teams;
+    }
+
+    /**
+     * @return Collection|Contest[]
+     */
+    public function getContests(): Collection
+    {
+        return $this->contests;
+    }
+
+    public function addContest(Contest $contest): self
+    {
+        if (!$this->contests->contains($contest)) {
+            $this->contests[] = $contest;
+            $contest->addTeamCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContest(Contest $contest): self
+    {
+        if ($this->contests->contains($contest)) {
+            $this->contests->removeElement($contest);
+            $contest->removeTeamCategory($this);
+        }
+
+        return $this;
     }
 }
