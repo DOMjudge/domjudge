@@ -1,4 +1,4 @@
-{% if scoreboard is defined %}
+{% if scoreboard is defined and scoreboard is not null %}
     <h2 class="mt-2">Score</h2>
 
     {% include 'partials/scoreboard_table.html.twig' with {displayRank: true, jury: true} %}
