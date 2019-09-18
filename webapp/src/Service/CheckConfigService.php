@@ -230,7 +230,7 @@ class CheckConfigService
             $desc .= sprintf("MySQL's max_connections is set to %s. In our experience you need at least 300, but better 1000 connections to prevent connection refusal during the contest.\n", $vars['max_connections']);
         }
 
-        if ($vars['innodb_log_file_size'] < 128*1024*1024) {
+        if ($vars['innodb_log_file_size'] < 10 * $max_inout) {
             $result = 'W';
             $desc .= sprintf("MySQL's innodb_log_file_size is set to %s. You may want to raise this to 10x the maximum test case size (now %s).\n", Utils::printsize((int)$vars['innodb_log_file_size']), Utils::printsize($max_inout));
         }
