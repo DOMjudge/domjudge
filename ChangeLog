@@ -20,6 +20,7 @@ Version 7.1.0 - DEV
  - Use Doctrine for migrations and initial data.
  - Add option (enabled by default) to limit files passed to
    language compilers by langauge extension list.
+ - Add option to add a whole team category to a contest.
 
 Version 7.0.3 - 11 July 2019
 ----------------------------
