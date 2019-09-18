@@ -648,7 +648,6 @@ class ScoreboardService
         if (!$contest->isOpenToAllTeams()) {
             $queryBuilder
                 ->leftJoin('t.contests', 'c')
-                ->join('t.category', 'cat')
                 ->leftJoin('cat.contests', 'cc')
                 ->andWhere('c = :contest OR cc = :contest')
                 ->setParameter(':contest', $contest);
