@@ -601,6 +601,10 @@ class ProblemController extends BaseController
                 foreach (['input', 'output', 'image'] as $type) {
                     /** @var UploadedFile $file */
                     if ($file = $request->files->get('update_' . $type)[$rank]) {
+                        if (!$file->isValid()) {
+                            $this->addFlash('danger', sprintf('File upload error %s %s: %s. No changes made.', $type, $rank, $file->getErrorMessage()));
+                            return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                        }
                         $content = file_get_contents($file->getRealPath());
                         if ($type === 'image') {
                             $imageType = Utils::getImageType($content, $error);
@@ -651,10 +655,13 @@ class ProblemController extends BaseController
 
             $allOk = true;
             foreach (['input', 'output'] as $type) {
-                if (!$request->files->get('add_' . $type)) {
-                    $messages[] = sprintf('<b>Warning: new %s file was not selected, not adding new testcase</b>',
+                if (!$file = $request->files->get('add_' . $type)) {
+                    $messages[] = sprintf('Warning: new %s file was not selected, not adding new testcase',
                                           $type);
                     $allOk      = false;
+                } elseif (!$file->isValid()) {
+                    $this->addFlash('danger', sprintf('File upload error new %s: %s. No changes made.', $type, $file->getErrorMessage()));
+                    return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
                 }
             }
 
@@ -677,6 +684,10 @@ class ProblemController extends BaseController
                 }
 
                 if ($imageFile = $request->files->get('add_image')) {
+                    if (!$imageFile->isValid()) {
+                        $this->addFlash('danger', sprintf('File upload error new image: %s', $imageFile->getErrorMessage()));
+                        return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
+                    }
                     $content   = file_get_contents($imageFile->getRealPath());
                     $imageType = Utils::getImageType($content, $error);
                     if ($imageType === false) {
