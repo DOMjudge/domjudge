@@ -424,7 +424,6 @@ which allows it to contain newlines. The following keys are supported
 (these correspond directly to the problem settings in the jury web
 interface):
 <itemize>
-<item><tt>probid</tt> - the problem short name (e.g. "A")
 <item><tt>name</tt> - the problem displayed name
 <item><tt>allow_submit</tt> - allow submissions to this problem,
 disabling this also makes the problem invisible to teams and public
@@ -437,13 +436,11 @@ disabling this also makes the problem invisible to teams and public
 </itemize>
 
 <p>
-The <tt>probid</tt> key is required when importing a new problem from
-the <tt>jury/problems</tt> overview page, while it is ignored when
-uploading into an existing problem. All other keys are optional. If
-they are present, the respective value will be overwritten; if not
-present, then the value will not be changed or a default chosen when
-creating a new problem. Test data files are added to set of test
-cases already present. Thus, one can easily add test cases to a
+The basename of the ZIP-file will be used as the problem short name(e.g. "A").
+All keys are optional. If they are present, the respective value will be
+overwritten; if not present, then the value will not be changed or a
+default chosen when creating a new problem. Test data files are added to set
+of test cases already present. Thus, one can easily add test cases to a
 configured problem by uploading a zip file that contains only
 testcase files. Any jury solutions present will be automatically
 submitted when <tt>allow_submit</tt> is <tt>1</tt>.

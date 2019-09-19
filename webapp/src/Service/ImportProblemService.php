@@ -130,14 +130,7 @@ class ImportProblemService
             $problemProperties['externalid'] = $externalId;
         }
 
-        // Rename old probid to contestproblem:shortname
-        if (isset($contestProblemProperties['probid'])) {
-            $shortname = $contestProblemProperties['probid'];
-            unset($contestProblemProperties['probid']);
-            $contestProblemProperties['shortname'] = $shortname;
-        } else {
-            $contestProblemProperties['shortname'] = $externalId;
-        }
+        $contestProblemProperties['shortname'] = $externalId;
 
         // Set default of 1 point for a problem if not specified
         if (!isset($contestProblemProperties['points'])) {

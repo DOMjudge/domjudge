@@ -323,7 +323,6 @@ class ProblemController extends BaseController
 
         // Build up INI
         $iniData = [
-            'probid' => $contestProblem ? $contestProblem->getShortname() : null,
             'timelimit' => $problem->getTimelimit(),
             'special_run' => $problem->getSpecialRun(),
             'special_compare' => $problem->getSpecialCompare(),
@@ -436,7 +435,7 @@ class ProblemController extends BaseController
         $zip->close();
 
         if ($contestProblem && $contestProblem->getShortname()) {
-            $zipFilename = sprintf('p%d-%s.zip', $problem->getProbid(), $contestProblem->getShortname());
+            $zipFilename = sprintf('%s.zip', $contestProblem->getShortname());
         } else {
             $zipFilename = sprintf('p%d.zip', $problem->getProbid());
         }
