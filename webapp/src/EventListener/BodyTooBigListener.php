@@ -30,7 +30,7 @@ class BodyTooBigListener implements EventSubscriberInterface
             if ($request->request->count() === 0 && $request->files->count() === 0 &&
                 $request->headers->get('content-length', 0) > 0) {
                 throw new BadRequestHttpException(sprintf(
-                                                      "Body data exceeded php.ini's 'post_max_size' directive (currently set to %d)",
+                                                      "Body data exceeded php.ini's 'post_max_size' directive (currently set to %s)",
                                                       ini_get('post_max_size')
                                                   ));
             }
