@@ -396,6 +396,13 @@ class EventLogService implements ContainerAwareInterface
 
         if ($jsonPassed) {
             $json = $this->dj->jsonDecode($json);
+        } elseif (!in_array($type, ['contests', 'state'])) {
+            // Re-index JSON so we can look up the elements by ID
+            $tmp  = $json;
+            $json = [];
+            foreach ($tmp as $item) {
+                $json[$item['id']] = $item;
+            }
         }
 
         // TODO: can this be wrapped into a single query?
@@ -407,8 +414,10 @@ class EventLogService implements ContainerAwareInterface
                 if (in_array($type, ['contests', 'state']) || $jsonPassed) {
                     // Contest and state endpoint are singular
                     $jsonElement = $json;
+                } elseif (isset($json[$ids[$idx]])) {
+                    $jsonElement = $json[$ids[$idx]];
                 } else {
-                    $jsonElement = $json[$idx];
+                    continue;
                 }
 
                 if ($checkEvents) {
@@ -442,7 +451,7 @@ class EventLogService implements ContainerAwareInterface
         $this->em->flush();
 
         if (count($events) !== $expectedEvents) {
-            throw new Exception(sprintf("EventLogService::log failed to %s %s with ID's %s (%d/%d events done)",
+            $this->logger->warning(sprintf("EventLogService::log failed to %s %s with ID's %s (%d/%d events done)",
                                         $action, $type, $idsCombined, count($events),
                                         $expectedEvents));
         }
