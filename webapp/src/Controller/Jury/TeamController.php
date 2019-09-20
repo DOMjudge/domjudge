@@ -81,7 +81,7 @@ class TeamController extends BaseController
             ->leftJoin('t.contests', 'c')
             ->leftJoin('t.affiliation', 'a')
             ->join('t.category', 'cat')
-            ->join('cat.contests', 'cc')
+            ->leftJoin('cat.contests', 'cc')
             ->orderBy('cat.sortorder', 'ASC')
             ->addOrderBy('t.name', 'ASC')
             ->getQuery()->getResult();
