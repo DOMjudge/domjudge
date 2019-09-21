@@ -67,6 +67,17 @@ mysql()
 	fi
 }
 
+# Quick shell hack to get a key from an INI file.
+# This is not perfect and ignores sections at least!
+get_ini_file_key()
+{
+	local FILE="$1"
+	local KEY="$2"
+
+	grep "^[[:space:]]*${KEY}[[:space:]]*=" "$FILE" 2>/dev/null \
+		| sed -r "s/^[[:space:]]*${KEY}[[:space:]]*=[[:space:]]*//"
+}
+
 # Wrapper around the Symfony console to allow setting the connection and passing options
 symfony_console()
 {
@@ -92,11 +103,9 @@ symfony_console()
 		fi
 
 		# If we do not have a user or password yet, try to read it from ~/.my.cnf
-		if [ -z "$DBA_USER" ] && [ -f ~/.my.cnf ] && grep -q '^user=' ~/.my.cnf; then
-				DBA_USER=$(grep '^user=' ~/.my.cnf  | sed 's/^user=//')
-		fi
-		if [ -z "$DBA_PASSWD" ] && [ -f ~/.my.cnf ] && grep -q '^password=' ~/.my.cnf; then
-			DBA_PASSWD=$(grep '^password=' ~/.my.cnf  | sed 's/^password=//')
+		if [ -f ~/.my.cnf ]; then
+			[ -z "$DBA_USER"   ] && DBA_USER=$(  get_ini_file_key ~/.my.cnf 'user')
+			[ -z "$DBA_PASSWD" ] && DBA_PASSWD=$(get_ini_file_key ~/.my.cnf 'password')
 		fi
 
 		if [ -z "$DBA_USER" ]; then
