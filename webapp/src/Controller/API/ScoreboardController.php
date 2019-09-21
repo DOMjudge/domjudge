@@ -130,7 +130,7 @@ class ScoreboardController extends AbstractRestController
             ->getQuery()
             ->getOneOrNullResult();
 
-        $scorebard = $this->scoreboardService->getScoreboard($contest, !$public, $filter, !$allTeams);
+        $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, $filter, !$allTeams);
 
         // Build up scoreboard results
         $results = [
@@ -142,11 +142,11 @@ class ScoreboardController extends AbstractRestController
         ];
 
         // Return early if there's nothing to display yet.
-        if (!$scorebard) return $results;
+        if (!$scoreboard) return $results;
 
-        $scoreIsInSecods = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
+        $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
 
-        foreach ($scorebard->getScores() as $teamScore) {
+        foreach ($scoreboard->getScores() as $teamScore) {
             $row = [
                 'rank' => $teamScore->getRank(),
                 'team_id' => (string)$teamScore->getTeam()->getApiId($this->eventLogService),
@@ -158,8 +158,8 @@ class ScoreboardController extends AbstractRestController
             ];
 
             /** @var ScoreboardMatrixItem $matrixItem */
-            foreach ($scorebard->getMatrix()[$teamScore->getTeam()->getTeamid()] as $problemId => $matrixItem) {
-                $contestProblem = $scorebard->getProblems()[$problemId];
+            foreach ($scoreboard->getMatrix()[$teamScore->getTeam()->getTeamid()] as $problemId => $matrixItem) {
+                $contestProblem = $scoreboard->getProblems()[$problemId];
                 $problem        = [
                     'label' => $contestProblem->getShortname(),
                     'problem_id' => (string)$contestProblem->getApiId($this->eventLogService),
@@ -169,7 +169,7 @@ class ScoreboardController extends AbstractRestController
                 ];
 
                 if ($matrixItem->isCorrect()) {
-                    $problem['time'] = Utils::scoretime($matrixItem->getTime(), $scoreIsInSecods);
+                    $problem['time'] = Utils::scoretime($matrixItem->getTime(), $scoreIsInSeconds);
                 }
 
                 $row['problems'][] = $problem;
