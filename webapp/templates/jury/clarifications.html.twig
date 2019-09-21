@@ -93,8 +93,9 @@
 
     <script>
         function doSwitch() {
+            // Fallback the queue to all, since it might not be defined.
             window.location = '{{ path('jury_clarifications', {'queue': 'REPLACE_QUEUE', 'filter': 'REPLACE_FILTER'}) }}'
-                .replace('REPLACE_QUEUE', $('input[name=queue]:checked').val())
+                .replace('REPLACE_QUEUE', $('input[name=queue]:checked').val() || "all")
                 .replace('REPLACE_FILTER', $('input[name=filter]:checked').val())
                 .replace('&amp;', '&');
         }
