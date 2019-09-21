@@ -138,7 +138,7 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 fi
 
 # Check the Contest API:
-$CHECK_API -n -C -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
+$CHECK_API -n -C -e -a 'strict=1' http://admin:$ADMINPASS@localhost/domjudge/api
 
 # Validate the eventfeed against the api(currently ignore failures)
 cd ${DIR}/misc-tools
