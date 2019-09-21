@@ -249,7 +249,7 @@ fi
 echo "Running debootstrap to install base system, this may take a while..."
 
 # shellcheck disable=SC2086
-eval $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
+eval PATH=$PATH:/bin:/sbin:/usr/sbin $BOOTSTRAP_COMMAND $INCLUDEOPT $EXCLUDEOPT \
 	--variant=minbase --arch "$ARCH" "$RELEASE" "$CHROOTDIR" "$DEBMIRROR"
 
 rm -f "$CHROOTDIR/etc/resolv.conf"
