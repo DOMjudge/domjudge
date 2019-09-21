@@ -53,6 +53,7 @@ class SubmissionController extends AbstractRestController
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
+     * @IsGranted({"ROLE_JURY", "ROLE_JUDGEHOST", "ROLE_API_READER"})
      * @SWG\Response(
      *     response="200",
      *     description="Returns all the submissions for this contest",
@@ -87,6 +88,7 @@ class SubmissionController extends AbstractRestController
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @Rest\Get("/{id}")
+     * @IsGranted({"ROLE_JURY", "ROLE_JUDGEHOST", "ROLE_API_READER"})
      * @SWG\Response(
      *     response="200",
      *     description="Returns the given submission for this contest",
