@@ -141,51 +141,51 @@ class ScoreboardController extends AbstractRestController
             'rows' => [],
         ];
 
+        // Return early if there's nothing to display yet.
+        if (!$scorebard) return $results;
+
         $scoreIsInSecods = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
 
-        if ($scorebard) {
-            foreach ($scorebard->getScores() as $teamScore) {
-                $row = [
-                    'rank'     => $teamScore->getRank(),
-                    'team_id'  => (string)$teamScore->getTeam()->getApiId($this->eventLogService),
-                    'score'    => [
-                        'num_solved' => $teamScore->getNumberOfPoints(),
-                        'total_time' => $teamScore->getTotalTime(),
-                    ],
-                    'problems' => [],
+        foreach ($scorebard->getScores() as $teamScore) {
+            $row = [
+                'rank' => $teamScore->getRank(),
+                'team_id' => (string)$teamScore->getTeam()->getApiId($this->eventLogService),
+                'score' => [
+                    'num_solved' => $teamScore->getNumberOfPoints(),
+                    'total_time' => $teamScore->getTotalTime(),
+                ],
+                'problems' => [],
+            ];
+
+            /** @var ScoreboardMatrixItem $matrixItem */
+            foreach ($scorebard->getMatrix()[$teamScore->getTeam()->getTeamid()] as $problemId => $matrixItem) {
+                $contestProblem = $scorebard->getProblems()[$problemId];
+                $problem        = [
+                    'label' => $contestProblem->getShortname(),
+                    'problem_id' => (string)$contestProblem->getApiId($this->eventLogService),
+                    'num_judged' => $matrixItem->getNumberOfSubmissions(),
+                    'num_pending' => $matrixItem->getNumberOfPendingSubmissions(),
+                    'solved' => $matrixItem->isCorrect(),
                 ];
 
-                /** @var ScoreboardMatrixItem $matrixItem */
-                foreach ($scorebard->getMatrix()[$teamScore->getTeam()->getTeamid()] as $problemId => $matrixItem) {
-                    $contestProblem = $scorebard->getProblems()[$problemId];
-                    $problem        = [
-                        'label'       => $contestProblem->getShortname(),
-                        'problem_id'  => (string)$contestProblem->getApiId($this->eventLogService),
-                        'num_judged'  => $matrixItem->getNumberOfSubmissions(),
-                        'num_pending' => $matrixItem->getNumberOfPendingSubmissions(),
-                        'solved'      => $matrixItem->isCorrect(),
-                    ];
-
-                    if ($matrixItem->isCorrect()) {
-                        $problem['time'] = Utils::scoretime($matrixItem->getTime(),
-                                                            $scoreIsInSecods);
-                    }
-
-                    $row['problems'][] = $problem;
+                if ($matrixItem->isCorrect()) {
+                    $problem['time'] = Utils::scoretime($matrixItem->getTime(), $scoreIsInSecods);
                 }
 
-                usort($row['problems'], function ($a, $b) {
-                    return $a['label'] <=> $b['label'];
-                });
-
-                if ($request->query->getBoolean('strict')) {
-                    foreach ($row['problems'] as $key => $data) {
-                        unset($row['problems'][$key]['label']);
-                    }
-                }
-
-                $results['rows'][] = $row;
+                $row['problems'][] = $problem;
             }
+
+            usort($row['problems'], function ($a, $b) {
+                return $a['label'] <=> $b['label'];
+            });
+
+            if ($request->query->getBoolean('strict')) {
+                foreach ($row['problems'] as $key => $data) {
+                    unset($row['problems'][$key]['label']);
+                }
+            }
+
+            $results['rows'][] = $row;
         }
 
         return $results;
