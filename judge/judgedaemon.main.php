@@ -768,16 +768,22 @@ function judge(array $row)
     $sources = request($url, 'GET', '');
     $sources = dj_json_decode($sources);
     $files = array();
+    $hasFiltered = false;
     foreach ($sources as $source) {
         $srcfile = "$workdir/compile/$source[filename]";
         $file = $source['filename'];
         if ($row['filter_compiler_files']) {
+            $picked = false;
             foreach ($row['language_extensions'] as $extension) {
                 $extensionLength = strlen($extension);
                 if (substr($file, -$extensionLength) === $extension) {
                     $files[] = "'$file'";
+                    $picked = true;
                     break;
                 }
+            }
+            if (!$picked) {
+                $hasFiltered = true;
             }
         } else {
             $files[] = "'$file'";
@@ -786,6 +792,21 @@ function judge(array $row)
             error("Could not create $srcfile");
         }
     }
+
+    if (empty($files) && $hasFiltered) {
+        $message = 'No files with allowed extensions found to pass to compiler. Allowed extensions: ' . implode(', ', $row['language_extensions']);
+        $args = 'compile_success=0' .
+                '&output_compile=' . urlencode(base64_encode($message));
+
+        $url = sprintf('judgehosts/update-judging/%s/%s', urlencode($myhost), urlencode((string)$row['judgingid']));
+        request($url, 'PUT', $args);
+
+        // revoke readablity for domjudge-run user to this workdir
+        chmod($workdir, 0700);
+        logmsg(LOG_NOTICE, "Judging s$row[submitid]/j$row[judgingid]: compile error");
+        return;
+    }
+
     if (count($files)==0) {
         error("No submission files could be downloaded.");
     }

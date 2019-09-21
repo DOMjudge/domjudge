@@ -451,6 +451,7 @@ class SubmissionService
         $files = array_values($files);
 
         $totalSize = 0;
+        $extensionMatchCount = 0;
         foreach ($files as $file) {
             if (!$file->isReadable()) {
                 $message = sprintf("File '%s' not found (or not readable).", $file->getRealPath());
@@ -461,6 +462,28 @@ class SubmissionService
                 return null;
             }
             $totalSize += $file->getSize();
+
+            if ($language->getFilterCompilerFiles()) {
+                $matchesExtension = false;
+                foreach ($language->getExtensions() as $extension) {
+                    $extensionLength = strlen($extension);
+                    if (substr($file->getClientOriginalName(), -$extensionLength) === $extension) {
+                        $matchesExtension = true;
+                        break;
+                    }
+                }
+                if ($matchesExtension) {
+                    $extensionMatchCount++;
+                }
+            }
+        }
+
+        if ($language->getFilterCompilerFiles() && $extensionMatchCount === 0) {
+            $message = sprintf(
+                "None of the submitted files match any of the allowed extensions for %s (allowed: %s)",
+                $language->getName(), implode(', ', $language->getExtensions())
+            );
+            return null;
         }
 
         if ($totalSize > $sourceSize * 1024) {
