@@ -37,3 +37,11 @@ services:
     App\Doctrine\HashPasswordSubscriber:
         tags:
             - { name: doctrine.event_subscriber, connection: default }
+
+    fos_rest.exception.controller:
+        public: true
+        class: App\FosRestBundle\ExceptionController
+        arguments:
+            - '@fos_rest.view_handler'
+            - '@fos_rest.exception.codes_map'
+            - '%kernel.debug%'
