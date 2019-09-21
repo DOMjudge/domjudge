@@ -54,14 +54,15 @@ Creates a chroot environment with Java JRE support using the
 Debian or Ubuntu GNU/Linux distribution.
 
 Options:
-  -a <arch>   Machine archicture to use.
-  -d <dir>    Directory where to build the chroot environment.
-  -D <distro> Linux distribution to use: 'Debian' or 'Ubuntu'.
-  -i <debs>   List of extra package names to install (comma separated).
-  -r <debs>   List of extra package names to remove (comma separated).
-  -l <debs>   List of local package files to install (comma separated).
-  -y          Force overwriting the chroot dir and downloading debootstrap.
-  -h          Display this help.
+  -a <arch>    Machine archicture to use.
+  -d <dir>     Directory where to build the chroot environment.
+  -D <distro>  Linux distribution to use: 'Debian' or 'Ubuntu'.
+  -R <release> Release for the selected Linux distribution
+  -i <debs>    List of extra package names to install (comma separated).
+  -r <debs>    List of extra package names to remove (comma separated).
+  -l <debs>    List of local package files to install (comma separated).
+  -y           Force overwriting the chroot dir and downloading debootstrap.
+  -h           Display this help.
 
 This script must be run as root, <chrootdir> is the non-existing
 target location of the chroot (unless '-y' is specified). If the host
@@ -84,11 +85,12 @@ error()
 }
 
 # Read command-line parameters:
-while getopts 'a:d:D:i:r:l:yh' OPT ; do
+while getopts 'a:d:D:R:i:r:l:yh' OPT ; do
 	case $OPT in
 		a) ARCH=$OPTARG ;;
 		d) CHROOTDIR=$OPTARG ;;
 		D) DISTRO=$OPTARG ;;
+		R) RELEASE=$OPTARG ;;
 		i) INSTALLDEBS_EXTRA=$OPTARG ;;
 		r) REMOVEDEBS_EXTRA=$OPTARG ;;
 		l) LOCALDEBS=$OPTARG ;;
