@@ -369,6 +369,39 @@ class ContestController extends AbstractRestController
                             unset($data['test_data_count']);
                         }
                     }
+                    // This is an ugly hack, but we don't hav easy access to
+                    // the Entity @Serializer\Groups annotations.
+                    if ($strict) {
+                        if ($event->getEndpointtype() == 'contests') {
+                            unset($data['end_time']);
+                            unset($data['external_id']);
+                            unset($data['shortname']);
+                        }
+                        if ($event->getEndpointtype() == 'languages') {
+                            unset($data['extensions']);
+                            unset($data['filter_compiler_files']);
+                            unset($data['allow_judge']);
+                            unset($data['time_factor']);
+                            unset($data['require_entry_point']);
+                            unset($data['entry_point_description']);
+                        }
+                        if ($event->getEndpointtype() == 'problems') {
+                            unset($data['short_name']);
+                        }
+                        if ($event->getEndpointtype() == 'groups') {
+                            unset($data['sortorder']);
+                            unset($data['color']);
+                        }
+                        if ($event->getEndpointtype() == 'organizations') {
+                            unset($data['shortname']);
+                        }
+                        if ($event->getEndpointtype() == 'teams') {
+                            unset($data['externalid']);
+                            unset($data['affiliation']);
+                            unset($data['nationality']);
+                            unset($data['members']);
+                        }
+                    }
                     $result = array(
                         'id' => (string)$event->getEventid(),
                         'type' => (string)$event->getEndpointtype(),
