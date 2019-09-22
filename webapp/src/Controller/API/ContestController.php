@@ -257,7 +257,7 @@ class ContestController extends AbstractRestController
      *     name="strict",
      *     in="query",
      *     type="boolean",
-     *     description="Whether to not include non-CCS compliant properties in the response",
+     *     description="Whether to only include CCS compliant properties in the response",
      *     default="false"
      * )
      * @SWG\Parameter(

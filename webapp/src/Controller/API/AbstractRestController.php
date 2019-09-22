@@ -132,7 +132,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
         $view->getContext()->setAttribute('domjudge_service', $this->dj);
 
         $groups = ['Default'];
-        if (!$request->query->has('strict')) {
+        if (!$request->query->has('strict') || !$request->query->getBoolean('strict')) {
             $groups[] = 'Nonstrict';
         }
         $view->getContext()->setGroups($groups);
