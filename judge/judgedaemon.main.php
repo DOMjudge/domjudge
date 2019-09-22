@@ -1039,6 +1039,7 @@ function judge(array $row)
             'output_run'   => rest_encode_file($testcasedir . '/program.out', false),
             'output_error' => rest_encode_file($testcasedir . '/program.err', $output_storage_limit),
             'output_system' => rest_encode_file($testcasedir . '/system.out', $output_storage_limit),
+            'metadata' => rest_encode_file($testcasedir . '/program.meta', $output_storage_limit),
             'output_diff'  => rest_encode_file($testcasedir . '/feedback/judgemessage.txt', $output_storage_limit)
         );
         $unsent_judging_runs[] = $new_judging_run;

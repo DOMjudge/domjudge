@@ -650,6 +650,13 @@
                             {% else %}
                                 <pre class="output_text">{{ runsOutput[runIdx].output_system | parseRunDiff }}</pre>
                             {% endif %}
+
+                            <h5>Metadata</h5>
+                            {% if runsOutput[runIdx].metadata is empty %}
+                                <p class="nodata">There was no judging system metadata.</p>
+                            {% else %}
+                                <pre class="output_text">{{ runsOutput[runIdx].metadata }}</pre>
+                            {% endif %}
                         {% endif %}
 
                     {% endif %} {# not runDone #}

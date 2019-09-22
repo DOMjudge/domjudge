@@ -690,6 +690,12 @@ class JudgehostController extends AbstractFOSRestController
      *     type="string",
      *     description="The (base64-encoded) system output of the run"
      * )
+     * @SWG\Parameter(
+     *     name="metadata",
+     *     in="formData",
+     *     type="string",
+     *     description="The (base64-encoded) metadata"
+     * )
      * @param Request $request
      * @param string  $hostname
      * @param int     $judgingId
@@ -730,6 +736,7 @@ class JudgehostController extends AbstractFOSRestController
             $outputDiff   = $request->request->get('output_diff');
             $outputError  = $request->request->get('output_error');
             $outputSystem = $request->request->get('output_system');
+            $metadata     = $request->request->get('metadata');
 
             /** @var Judgehost $judgehost */
             $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
@@ -740,7 +747,7 @@ class JudgehostController extends AbstractFOSRestController
             /** @var Judging $judging */
             $judging = $this->em->getRepository(Judging::class)->find($judgingId);
             $this->addSingleJudgingRun($hostname, $judgingId, (int)$testCaseId, $runResult, $runTime, $judging,
-                                       $outputSystem, $outputError, $outputDiff, $outputRun);
+                                       $outputSystem, $outputError, $outputDiff, $outputRun, $metadata);
             $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
             $judgehost->setPolltime(Utils::now());
             $this->em->flush();
@@ -778,7 +785,8 @@ class JudgehostController extends AbstractFOSRestController
                 'output_run',
                 'output_diff',
                 'output_error',
-                'output_system'
+                'output_system',
+                'metadata'
             ];
 
             foreach ($required as $argument) {
@@ -795,6 +803,7 @@ class JudgehostController extends AbstractFOSRestController
             $outputDiff   = $judgingRun['output_diff'];
             $outputError  = $judgingRun['output_error'];
             $outputSystem = $judgingRun['output_system'];
+            $metadata     = $judgingRun['metadata'];
             /** @var Judging $judging */
             $judging = $this->em->getRepository(Judging::class)->find($judgingId);
             if (!$judging) {
@@ -802,7 +811,7 @@ class JudgehostController extends AbstractFOSRestController
                     sprintf("Unknown judging, don't send us any imaginary data!"));
             }
             $this->addSingleJudgingRun($hostname, $judgingId, (int)$testCaseId, $runResult, $runTime, $judging,
-                                       $outputSystem, $outputError, $outputDiff, $outputRun);
+                                       $outputSystem, $outputError, $outputDiff, $outputRun, $metadata);
         }
         $judgehost = $this->em->getRepository(Judgehost::class)->find($hostname);
         $judgehost->setPolltime(Utils::now());
@@ -968,6 +977,7 @@ class JudgehostController extends AbstractFOSRestController
      * @param string  $outputError
      * @param string  $outputDiff
      * @param string  $outputRun
+     * @param string  $metadata
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
@@ -983,7 +993,8 @@ class JudgehostController extends AbstractFOSRestController
         string $outputSystem,
         string $outputError,
         string $outputDiff,
-        string $outputRun
+        string $outputRun,
+        string $metadata
     ) {
         /** @var Testcase $testCase */
         $testCase = $this->em->getRepository(Testcase::class)->find($testCaseId);
@@ -1005,7 +1016,8 @@ class JudgehostController extends AbstractFOSRestController
             $outputSystem,
             $outputError,
             $outputDiff,
-            $outputRun
+            $outputRun,
+            $metadata
         ) {
             $judgingRun = new JudgingRun();
             $judgingRunOutput = new JudgingRunOutput();
@@ -1020,7 +1032,8 @@ class JudgehostController extends AbstractFOSRestController
                 ->setOutputRun(base64_decode($outputRun))
                 ->setOutputDiff(base64_decode($outputDiff))
                 ->setOutputError(base64_decode($outputError))
-                ->setOutputSystem(base64_decode($outputSystem));
+                ->setOutputSystem(base64_decode($outputSystem))
+                ->setMetadata(base64_decode($metadata));
 
             $this->em->persist($judgingRun);
             $this->em->flush();

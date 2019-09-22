@@ -57,6 +57,14 @@ class JudgingRunOutput
     private $output_system;
 
     /**
+     * @var string
+     * @ORM\Column(type="blobtext", length=4294967295, name="metadata",
+     *     options={"comment"="Judging metadata", "default"="NULL"},
+     *     nullable=true)
+     */
+    private $metadata;
+
+    /**
      * @param JudgingRun $run
      *
      * @return JudgingRunOutput
@@ -172,5 +180,17 @@ class JudgingRunOutput
     public function getOutputSystem()
     {
         return $this->output_system;
+    }
+
+    public function getMetadata()
+    {
+        return $this->metadata;
+    }
+
+    public function setMetadata($metadata): self
+    {
+        $this->metadata = $metadata;
+
+        return $this;
     }
 }
