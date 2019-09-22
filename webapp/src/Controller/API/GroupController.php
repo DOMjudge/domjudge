@@ -25,6 +25,13 @@ class GroupController extends AbstractRestController
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
+     * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(
+     *     name="public",
+     *     in="query",
+     *     type="boolean",
+     *     description="Only show public groups, even for users with more permissions"
+     * )
      * @SWG\Response(
      *     response="200",
      *     description="Returns all the groups for this contest",
@@ -32,13 +39,6 @@ class GroupController extends AbstractRestController
      *         type="array",
      *         @SWG\Items(ref=@Model(type=TeamCategory::class))
      *     )
-     * )
-     * @SWG\Parameter(ref="#/parameters/idlist")
-     * @SWG\Parameter(
-     *     name="public",
-     *     in="query",
-     *     type="boolean",
-     *     description="Only show public groups, even for users with more permissions"
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
