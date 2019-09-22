@@ -382,9 +382,9 @@ EOT;
             logmsg(LOG_DEBUG, "Compiling");
             $olddir = getcwd();
             chdir($execpath);
-            system("./build", $retval);
+            system("./build >> " . LOGFILE . " 2>&1", $retval);
             if ($retval!=0) {
-                return array(null, "Could not run ./build in $execpath");
+                return array(null, "Could not run ./build in $execpath.");
             }
             chdir($olddir);
         }
@@ -821,8 +821,9 @@ function judge(array $row)
         $row['compile_script_md5sum']
     );
     if (isset($error)) {
-        logmsg(LOG_ERR, "fetching executable failed for compile script '" . $row['compile_script'] . "':" . $error);
-        disable('language', 'langid', $row['langid'], $error, $row['judgingid'], (string)$row['cid']);
+        logmsg(LOG_ERR, "fetching executable failed for compile script '" . $row['compile_script'] . "': " . $error);
+        $description = $row['compile_script'] . ': fetch, compile, or deploy of compile script failed.';
+        disable('language', 'langid', $row['langid'], $description, $row['judgingid'], (string)$row['cid']);
         return;
     }
 
@@ -983,8 +984,9 @@ function judge(array $row)
         list($run_runpath, $error) =
             fetch_executable($workdirpath, $row['run'], $row['run_md5sum'], $row['combined_run_compare']);
         if (isset($error)) {
-            logmsg(LOG_ERR, "fetching executable failed for run script '" . $row['run'] . "':" . $error);
-            disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], (string)$row['cid']);
+            logmsg(LOG_ERR, "fetching executable failed for run script '" . $row['run'] . "': " . $error);
+            $description = $row['run'] . ': fetch, compile, or deploy of run script failed.';
+            disable('problem', 'probid', $row['probid'], $description, $row['judgingid'], (string)$row['cid']);
             return;
         }
 
@@ -995,8 +997,9 @@ function judge(array $row)
         } else {
             list($compare_runpath, $error) = fetch_executable($workdirpath, $row['compare'], $row['compare_md5sum']);
             if (isset($error)) {
-                logmsg(LOG_ERR, "fetching executable failed for compare script '" . $row['compare'] . "':" . $error);
-                disable('problem', 'probid', $row['probid'], $error, $row['judgingid'], (string)$row['cid']);
+                logmsg(LOG_ERR, "fetching executable failed for compare script '" . $row['compare'] . "': " . $error);
+                $description = $row['compare'] . ': fetch, compile, or deploy of validation script failed.';
+                disable('problem', 'probid', $row['probid'], $description, $row['judgingid'], (string)$row['cid']);
                 return;
             }
         }
