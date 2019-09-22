@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\Doctrine\DBAL\Types\InternalErrorStatusType;
 use App\Entity\ContestProblem;
 use App\Entity\InternalError;
+use App\Entity\Problem;
 use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -107,10 +108,8 @@ class InternalErrorController extends BaseController
         switch ($disabled['kind']) {
             case 'problem':
                 $affectedLink = $this->generateUrl('jury_problem', ['probId' => $disabled['probid']]);
-                $idData       = ['contest' => $internalError->getCid(), 'problem' => $disabled['probid']];
-                /** @var ContestProblem $problem */
-                $problem      = $this->em->getRepository(ContestProblem::class)->find($idData);
-                $affectedText = sprintf('%s - %s', $problem->getShortname(), $problem->getProblem()->getName());
+                $problem      = $this->em->getRepository(Problem::class)->find($disabled['probid']);
+                $affectedText = $problem->getName();
                 break;
             case 'judgehost':
                 $affectedLink = $this->generateUrl('jury_judgehost', ['hostname' => $disabled['hostname']]);
