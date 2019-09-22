@@ -71,11 +71,13 @@ mysql()
 # This is not perfect and ignores sections at least!
 get_ini_file_key()
 {
-	local FILE="$1"
-	local KEY="$2"
+	(
+	FILE="$1"
+	KEY="$2"
 
 	grep "^[[:space:]]*${KEY}[[:space:]]*=" "$FILE" 2>/dev/null \
 		| sed -r "s/^[[:space:]]*${KEY}[[:space:]]*=[[:space:]]*//"
+	)
 }
 
 # Wrapper around the Symfony console to allow setting the connection and passing options
