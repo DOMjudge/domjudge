@@ -654,12 +654,54 @@ class DOMJudgeService
     }
 
     /**
-     * Legacy function to make print send method available outside
-     * Symfony. Can be removed if the team interface uses Symfony.
+     * Print the given file using the print command.
+     *
+     * Returns array with two elements: first a boolean indicating
+     * overall success, and second the data returned from the print command.
+     *
+     * @param string      $filename The on-disk file to be printed out
+     * @param string      $origname The original filename as submitted by the team
+     * @param string|null $language Langid of the programming language this file is in
+     * @param string      $username Username of the print job submitter
+     * @param string|null $teamname Teamname of the team this user belongs to, if any
+     * @param int|null    $teamid   Teamid of the team this user belongs to, if any
+     * @param string|null $location Room/place of the team, if any.
+     * @return array
+     * @throws \Exception
      */
-    public function sendPrint(...$args): array
-    {
-        return \App\Utils\Printing::send(...$args);
+    public function printFile(
+        string $filename,
+        string $origname,
+        ?string $language,
+        string $username,
+        ?string $teamname,
+        ?int $teamid = null,
+        ?string $location = null
+    ): array {
+        $printCommand = $this->dbconfig_get('print_command', '');
+        if (empty($printCommand)) {
+            return [false, 'Printing not enabled'];
+        }
+
+        $replaces = [
+            '[file]' => escapeshellarg($filename),
+            '[original]' => escapeshellarg($origname),
+            '[language]' => escapeshellarg($language),
+            '[username]' => escapeshellarg($username),
+            '[teamname]' => escapeshellarg($teamname ?? ''),
+            '[teamid]' => escapeshellarg((string)($teamid ?? '')),
+            '[location]' => escapeshellarg($location ?? ''),
+        ];
+
+        $cmd = str_replace(
+            array_keys($replaces),
+            array_values($replaces),
+            $printCommand
+        );
+
+        exec($cmd, $output, $retval);
+
+        return [$retval == 0, implode("\n", $output)];
     }
 
     /**
