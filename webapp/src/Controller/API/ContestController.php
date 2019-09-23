@@ -3,11 +3,14 @@
 namespace App\Controller\API;
 
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
 use App\Entity\Event;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use JMS\Serializer\Metadata\PropertyMetadata;
+use Metadata\MetadataFactoryInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Swagger\Annotations as SWG;
@@ -17,6 +20,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Inflector\Inflector;
 
 /**
  * @Rest\Route("/api/v4/contests", defaults={ "_format" = "json" })
@@ -235,8 +240,10 @@ class ContestController extends AbstractRestController
      * @Rest\Get("/{cid}/event-feed")
      * @SWG\Get(produces={"application/x-ndjson"})
      * @IsGranted({"ROLE_JURY", "ROLE_API_READER"})
-     * @param Request $request
-     * @param string  $cid
+     * @param Request                  $request
+     * @param string                   $cid
+     * @param MetadataFactoryInterface $metadataFactory
+     * @param KernelInterface          $kernel
      * @return Response|StreamedResponse
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @SWG\Parameter(ref="#/parameters/cid")
@@ -283,8 +290,12 @@ class ContestController extends AbstractRestController
      *     )
      * )
      */
-    public function getEventFeedAction(Request $request, string $cid)
-    {
+    public function getEventFeedAction(
+        Request $request,
+        string $cid,
+        MetadataFactoryInterface $metadataFactory,
+        KernelInterface $kernel
+    ) {
         $contest = $this->getContestWithId($request, $cid);
         // Make sure this script doesn't hit the PHP maximum execution timeout.
         set_time_limit(0);
@@ -300,25 +311,62 @@ class ContestController extends AbstractRestController
         } else {
             $since_id = -1;
         }
+
         $response = new StreamedResponse();
         $response->headers->set('X-Accel-Buffering', 'no');
         $response->headers->set('Content-Type', 'application/x-ndjson');
-        $response->setCallback(function () use ($cid, $contest, $request, $since_id) {
+        $response->setCallback(function () use ($cid, $contest, $request, $since_id, $metadataFactory, $kernel) {
             $lastUpdate = 0;
             $lastIdSent = $since_id;
             $typeFilter = false;
             if ($request->query->has('types')) {
                 $typeFilter = explode(',', $request->query->get('types'));
             }
-            $strict = false;
-            if ($request->query->has('strict')) {
-                $strict = $request->query->getBoolean('strict');
-            }
-            $stream = true;
-            if ($request->query->has('stream')) {
-                $stream = $request->query->getBoolean('stream');
-            }
+            $strict     = $request->query->getBoolean('strict', false);
+            $stream     = $request->query->getBoolean('stream', true);
             $canViewAll = $this->isGranted('ROLE_API_READER');
+
+            $skippedProperties = [];
+            // Determine which properties we should not send out for strict clients.
+            // We do this here instead of every loop to speed up sending events at
+            // the cost of sending out the first byte a bit slower.
+            if ($strict) {
+                $toCheck = [];
+                $dir   = realpath(sprintf(
+                                      '%s/src/Entity',
+                                      $kernel->getProjectDir()
+                                  ));
+                $files = glob($dir . '/*.php');
+                foreach ($files as $file) {
+                    $parts      = explode('/', $file);
+                    $shortClass = str_replace('.php', '',
+                                              $parts[count($parts) - 1]);
+                    $class      = sprintf('App\\Entity\\%s', $shortClass);
+                    if (class_exists($class)) {
+                        $plural = strtolower(Inflector::pluralize($shortClass));
+                        $toCheck[$plural] = $class;
+                    }
+                }
+
+                // Change some specifc endpoints that do not map to our own objects.
+                $toCheck['problems'] = ContestProblem::class;
+                $toCheck['groups'] = $toCheck['teamcategories'];
+                $toCheck['organizations'] = $toCheck['teamaffiliations'];
+                unset($toCheck['teamcategories']);
+                unset($toCheck['teamaffiliations']);
+                unset($toCheck['contestproblems']);
+                
+                foreach ($toCheck as $plural => $class) {
+                    $serializerMetadata = $metadataFactory->getMetadataForClass($class);
+                    /** @var PropertyMetadata $propertyMetadata */
+                    foreach ($serializerMetadata->propertyMetadata as $propertyMetadata) {
+                        if (is_array($propertyMetadata->groups) &&
+                            !in_array('Default', $propertyMetadata->groups)) {
+                            $skippedProperties[$plural][] = $propertyMetadata->serializedName;
+                        }
+                    }
+                }
+            }
 
             // Initialize all static events
             $this->eventLogService->initStaticEvents($contest);
@@ -369,37 +417,10 @@ class ContestController extends AbstractRestController
                             unset($data['test_data_count']);
                         }
                     }
-                    // This is an ugly hack, but we don't hav easy access to
-                    // the Entity @Serializer\Groups annotations.
                     if ($strict) {
-                        if ($event->getEndpointtype() == 'contests') {
-                            unset($data['end_time']);
-                            unset($data['external_id']);
-                            unset($data['shortname']);
-                        }
-                        if ($event->getEndpointtype() == 'languages') {
-                            unset($data['extensions']);
-                            unset($data['filter_compiler_files']);
-                            unset($data['allow_judge']);
-                            unset($data['time_factor']);
-                            unset($data['require_entry_point']);
-                            unset($data['entry_point_description']);
-                        }
-                        if ($event->getEndpointtype() == 'problems') {
-                            unset($data['short_name']);
-                        }
-                        if ($event->getEndpointtype() == 'groups') {
-                            unset($data['sortorder']);
-                            unset($data['color']);
-                        }
-                        if ($event->getEndpointtype() == 'organizations') {
-                            unset($data['shortname']);
-                        }
-                        if ($event->getEndpointtype() == 'teams') {
-                            unset($data['externalid']);
-                            unset($data['affiliation']);
-                            unset($data['nationality']);
-                            unset($data['members']);
+                        $toSkip = $skippedProperties[$event->getEndpointtype()] ?? [];
+                        foreach ($toSkip as $property) {
+                            unset($data[$property]);
                         }
                     }
                     $result = array(
