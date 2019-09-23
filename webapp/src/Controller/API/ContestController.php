@@ -355,7 +355,7 @@ class ContestController extends AbstractRestController
                 unset($toCheck['teamcategories']);
                 unset($toCheck['teamaffiliations']);
                 unset($toCheck['contestproblems']);
-                
+
                 foreach ($toCheck as $plural => $class) {
                     $serializerMetadata = $metadataFactory->getMetadataForClass($class);
                     /** @var PropertyMetadata $propertyMetadata */
