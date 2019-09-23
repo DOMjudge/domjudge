@@ -40,11 +40,6 @@
         {% include 'partials/menu_login_logout_button.html.twig' %}
 
         <ul class="navbar-nav">
-            <li class="ajax-loader-container">
-                <div class="spinner-border spinner-border-sm ajax-loader" style="display: none;" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
-            </li>
             {% if current_public_contests | length > 1 %}
                 {% include 'partials/menu_change_contest.html.twig' with {contest: current_public_contest, contests: current_public_contests, change_path: 'public_change_contest', show_no_contest: false} %}
             {% endif %}

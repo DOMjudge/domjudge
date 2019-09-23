@@ -1,5 +1,7 @@
 <div class="navbar-text" style="white-space:nowrap;">
-    <i style="padding-left: 10px;" class="fas fa-clock"></i>
+    <span style="padding-left: 10px;">
+        <i class="fas fa-clock loading-indicator"></i>
+    </span>
     {% set now = 'now'|date('U') %}
     <span id="timeleft">
         {%- if contest is null -%}

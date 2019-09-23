@@ -282,12 +282,12 @@ function toggle(id, show)
 	setCookie("domjudge_teamselection", cookieVal);
 
 
-	$('.ajax-loader').show('fast');
+	$('.loading-indicator').addClass('ajax-loader');
 	$.ajax({
 		url: scoreboardUrl
 	}).done(function(data, status, jqXHR) {
 		processAjaxResponse(jqXHR, data);
-		$('.ajax-loader').hide('fast');
+		$('.loading-indicator').removeClass('ajax-loader');
 	});
 }
 
@@ -451,12 +451,12 @@ function enableRefresh($url, $after, usingAjax) {
     }
     var refresh = function () {
         if (usingAjax) {
-            $('.ajax-loader').show('fast');
+            $('.loading-indicator').addClass('ajax-loader');
             $.ajax({
                 url: $url
             }).done(function(data, status, jqXHR) {
                 processAjaxResponse(jqXHR, data);
-                $('.ajax-loader').hide('fast');
+                $('.loading-indicator').removeClass('ajax-loader');
             });
         } else {
             window.location = $url;
