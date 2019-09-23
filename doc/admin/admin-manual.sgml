@@ -1235,12 +1235,33 @@ and allows teams to print from within their editor.
 If this is not feasible, DOMjudge includes support for printing via
 the DOMjudge web interface: the DOMjudge server then needs to be
 able to deliver the uploaded files to the printer. It can be
-enabled via the <tt>enable_printing</tt> configuration option in
-the administrator interface. By default printouts are formatted with
-<tt>enscript</tt> and and printed with local <tt>lpr</tt>.
-The exact command used to send the files to a printer can be
-changed by overriding the <tt>send</tt> method of the
-<tt>\App\Utils\Printing</tt> class.
+enabled via the <tt>print_command</tt> configuration option in
+the administrator interface. Here you can enter a command that will
+be run to print the files. The command you enter can have the
+following placeholders:
+
+<itemize>
+<item> <tt>[file]</tt>: the location on disk of the file to print.
+<item> <tt>[original]</tt>: the original name of the file.
+<item> <tt>[language]</tt>: the ID of the language of the file.
+Useful for syntax highlighting.
+<item> <tt>[username]</tt>: the username of the user who is printing.
+<item> <tt>[teamname]</tt>: the teamname of the user who is printing.
+<item> <tt>[teamid]</tt>: the team ID of the user who is printing.
+<item> <tt>[location]</tt>: the location of the user's team.
+</itemize>
+
+Note that <tt>[language]</tt>, <tt>[teamname]</tt>, <tt>[teamid]</tt> and
+<tt>[location]</tt> can be empty. Placeholders will be shell-escaped before
+passing them to the command. The standard output of the command will
+be shown in the web interface. If you also want to show standard error,
+add <tt>2>&1</tt> to the command.
+
+For example, to send the first 10 pages of the file to the default printer
+using <tt>enscript</tt> and add the username in the page header,
+you can use this command:
+
+<code>enscript -b [username] -a 0-10 -f Courier9 [file] 2>&1</code>
 
 <sect1>Judging consistency
 <p>

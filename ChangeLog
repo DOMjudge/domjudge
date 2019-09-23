@@ -21,6 +21,7 @@ Version 7.1.0 - DEV
  - Add option (enabled by default) to limit files passed to
    language compilers by langauge extension list.
  - Add option to add a whole team category to a contest.
+ - Allow admin to specify print command using configuration setting.
 
 Version 7.0.3 - 11 July 2019
 ----------------------------

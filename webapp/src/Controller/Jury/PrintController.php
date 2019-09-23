@@ -53,7 +53,7 @@ class PrintController extends BaseController
      */
     public function showAction(Request $request)
     {
-        if (!$this->dj->dbconfig_get('enable_printing', 0)) {
+        if (!$this->dj->dbconfig_get('print_command', '')) {
             throw new AccessDeniedHttpException("Printing disabled in config");
         }
 
@@ -73,7 +73,7 @@ class PrintController extends BaseController
 
             // Since this is the Jury interface, there's not necessarily a
             // team involved; do not set a teamname or location.
-            $ret = Printing::send($realfile, $originalfilename, $langid, $username, "");
+            $ret = $this->dj->printFile($realfile, $originalfilename, $langid, $username);
 
             return $this->render('jury/print_result.html.twig', [
                 'success' => $ret[0],

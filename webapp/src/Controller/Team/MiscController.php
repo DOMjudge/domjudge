@@ -182,7 +182,7 @@ class MiscController extends BaseController
      */
     public function printAction(Request $request)
     {
-        if (!$this->dj->dbconfig_get('enable_printing', 0)) {
+        if (!$this->dj->dbconfig_get('print_command', '')) {
             throw new AccessDeniedHttpException("Printing disabled in config");
         }
 
@@ -201,8 +201,8 @@ class MiscController extends BaseController
             $username = $this->getUser()->getUsername();
 
             $team = $this->dj->getUser()->getTeam();
-            $ret  = Printing::send($realfile, $originalfilename, $langid, $username, $team->getName(),
-                                   $team->getRoom());
+            $ret  = $this->dj->printFile($realfile, $originalfilename, $langid,
+                $username, $team->getName(), $team->getTeamid(), $team->getRoom());
 
             return $this->render('team/print_result.html.twig', [
                 'success' => $ret[0],
