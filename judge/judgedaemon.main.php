@@ -699,11 +699,12 @@ function send_unsent_judging_runs($unsent_judging_runs, $judgingid)
 {
     global $myhost;
 
-    request(
+    return request(
         sprintf('judgehosts/add-judging-run/%s/%s', urlencode($myhost),
                 urlencode((string)$judgingid)),
         'POST',
-        'batch=' . json_encode($unsent_judging_runs)
+        'batch=' . json_encode($unsent_judging_runs),
+        false
     );
 }
 
@@ -1049,7 +1050,10 @@ function judge(array $row)
         if (!$lastcase_correct
             || ($now - $last_sent) >= $update_every_X_seconds
             || $outstanding_data > $row['outputlimit'] * 1024) {
-           send_unsent_judging_runs($unsent_judging_runs, $row['judgingid']);
+           if (send_unsent_judging_runs($unsent_judging_runs, $row['judgingid']) === null) {
+               disable('problem', 'probid', $row['probid'], "uploading unsent judging runs failed", $row['judgingid'], (string)$row['cid']);
+               return;
+           }
            $unsent_judging_runs = array();
            $last_sent = $now;
            $outstanding_data = 0;
@@ -1057,7 +1061,10 @@ function judge(array $row)
         logmsg(LOG_DEBUG, "Testcase $tc[rank] done, result: " . $result);
     } // end: for each testcase
     if (!empty($unsent_judging_runs)) {
-        send_unsent_judging_runs($unsent_judging_runs, $row['judgingid']);
+        if (send_unsent_judging_runs($unsent_judging_runs, $row['judgingid']) === null) {
+            disable('problem', 'probid', $row['probid'], "uploading unsent judging runs failed", $row['judgingid'], (string)$row['cid']);
+            return;
+        }
     }
 
     // revoke readablity for domjudge-run user to this workdir
