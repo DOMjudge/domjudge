@@ -332,15 +332,11 @@ class ContestController extends AbstractRestController
             // the cost of sending out the first byte a bit slower.
             if ($strict) {
                 $toCheck = [];
-                $dir   = realpath(sprintf(
-                                      '%s/src/Entity',
-                                      $kernel->getProjectDir()
-                                  ));
+                $dir   = realpath($kernel->getProjectDir() . '/src/Entity');
                 $files = glob($dir . '/*.php');
                 foreach ($files as $file) {
                     $parts      = explode('/', $file);
-                    $shortClass = str_replace('.php', '',
-                                              $parts[count($parts) - 1]);
+                    $shortClass = str_replace('.php', '', $parts[count($parts) - 1]);
                     $class      = sprintf('App\\Entity\\%s', $shortClass);
                     if (class_exists($class)) {
                         $plural = strtolower(Inflector::pluralize($shortClass));
@@ -355,7 +351,7 @@ class ContestController extends AbstractRestController
                 unset($toCheck['teamcategories']);
                 unset($toCheck['teamaffiliations']);
                 unset($toCheck['contestproblems']);
-                
+
                 foreach ($toCheck as $plural => $class) {
                     $serializerMetadata = $metadataFactory->getMetadataForClass($class);
                     /** @var PropertyMetadata $propertyMetadata */
