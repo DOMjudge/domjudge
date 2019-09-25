@@ -1,7 +1,11 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.0.4 - DEV
--------------------
+Version 7.0.4 - 25 September 2019
+---------------------------------
+ - Fix downloading results.html.
+ - Silence stderr of which.
+ - Remove double menu from statistics pages.
+ - Fix events when editing problems from non-current contest.
 
 Version 7.0.3 - 11 July 2019
 ----------------------------
