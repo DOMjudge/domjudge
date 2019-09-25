@@ -22,6 +22,9 @@ Version 7.1.0 - DEV
    language compilers by langauge extension list.
  - Add option to add a whole team category to a contest.
  - Allow admin to specify print command using configuration setting.
+ - Show metadata for judging runs.
+ - Restrict some API endpoints to jury or API users.
+ - Allow to download statistic graphs as SVG.
 
 Version 7.0.3 - 11 July 2019
 ----------------------------
