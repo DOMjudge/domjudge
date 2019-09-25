@@ -9,7 +9,7 @@ use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
-use Doctrine\Common\Util\Inflector;
+use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;

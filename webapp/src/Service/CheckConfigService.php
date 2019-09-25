@@ -12,7 +12,7 @@ use App\Entity\TeamAffiliation;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\Utils;
-use Doctrine\Common\Util\Inflector;
+use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
