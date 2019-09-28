@@ -1,11 +1,5 @@
 {% set timelimit = submission.problem.timelimit * submission.language.timeFactor %}
 <div>
-    {% if judgings|length > 1 %}
-        <div style="display: inline-block" id="maxruntime">
-            <h3 id="graphs">Max Runtimes</h3>
-            <svg style="width:500px; height:250px;"></svg>
-        </div>
-    {% endif %}
     {% if selectedJudging is not null %}
         <div style="display: inline-block" id="testcaseruntime">
             <h3 id="graphs">Testcase Runtimes</h3>
@@ -15,6 +9,12 @@
     {% if externalJudgement is not null and externalJudgement.result is not null %}
         <div style="display: inline-block" id="externalruntime">
             <h3 id="graphs">External Testcase Runtimes</h3>
+            <svg style="width:500px; height:250px;"></svg>
+        </div>
+    {% endif %}
+    {% if judgings|length > 1 %}
+        <div style="display: inline-block" id="maxruntime">
+            <h3 id="graphs">Max Runtimes</h3>
             <svg style="width:500px; height:250px;"></svg>
         </div>
     {% endif %}
