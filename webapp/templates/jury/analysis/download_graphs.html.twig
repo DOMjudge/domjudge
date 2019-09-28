@@ -49,15 +49,14 @@
     $(function () {
         $('.container-fluid svg').each(function () {
             var $button = $('<button class="btn btn-sm btn-outline-secondary" style="margin-left: 8px;"><i class="fas fa-download"></i> SVG</button>');
-            $(this).parent().append($button);
 
-	    // Pick a good place for the button, on the submission page next to
-	    // the title, otherwise next to the card header.
+            // Pick a good place for the button, on the submission page next to
+            // the title, otherwise next to the card header.
             if ($(this).parent().children(':first-child').is('h3')) {
                 $(this).parent().children(':first-child').append($button);
-	    } else {
+            } else {
                 $(this).parent().parent().children(':first-child').append($button);
-	    }
+            }
 
             $button.on('click', function () {
                 var svg = $(this).parent().find('svg')[0];
