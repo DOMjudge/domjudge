@@ -23,7 +23,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         @ORM\Index(name="special_compare", columns={"special_compare"})
  *     })
  * @ORM\HasLifecycleCallbacks()
- * @UniqueEntity("externalid")
+ * @UniqueEntity("externalid", message="A problem with the same `externalid` already exists - is this a duplicate?")
  */
 class Problem extends BaseApiEntity
 {
