@@ -51,6 +51,14 @@
             var $button = $('<button class="btn btn-sm btn-primary"><i class="fas fa-download"></i> Download as SVG</button>');
             $(this).parent().append($button);
 
+	    // Pick a good place for the button, on the submission page next to
+	    // the title, otherwise next to the card header.
+            if ($(this).parent().children(':first-child').is('h3')) {
+                $(this).parent().children(':first-child').append($button);
+	    } else {
+                $(this).parent().parent().children(':first-child').append($button);
+	    }
+
             $button.on('click', function () {
                 var svg = $(this).parent().find('svg')[0];
                 var svgString = getSVGString(svg);
