@@ -419,15 +419,23 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
                 }
             }
 
-            $description = $testcase->getDescription(true);
-
-            $extraTitle = '';
-            if ($run && $runResult !== null) {
-                $extraTitle = sprintf(', runtime: %ss, result: %s', $run->getRuntime(), $runResult);
+            $titleElements = array("#" . $testcase->getRank());
+            if (!empty($testcase->getOrigInputFilename())) {
+                $titleElements[] = "name: " . $testcase->getOrigInputFilename();
             }
-            $icon    = sprintf('<span class="badge badge-%s badge-testcase">%s</span>', $class, $text);
-            $results .= sprintf('<a title="#%d, desc: %s%s" href="#run-%d" %s>%s</a>', $testcase->getRank(),
-                                $description, $extraTitle, $testcase->getRank(),
+
+            $description = $testcase->getDescription(true);
+            if (!empty($description)) {
+                $titleElements[] = "desc: " . $description;
+            }
+
+            if ($run && $runResult !== null) {
+                $titleElements[] = sprintf('runtime: %ss', $run->getRuntime());
+                $titleElements[] = sprintf('result: %s', $runResult);
+            }
+            $icon     = sprintf('<span class="badge badge-%s badge-testcase">%s</span>', $class, $text);
+            $results .= sprintf('<a title="%s" href="#run-%d" %s>%s</a>',
+                                join(', ', $titleElements), $testcase->getRank(),
                                 $isCorrect ? 'onclick="display_correctruns(true);"' : '', $icon);
         }
 
