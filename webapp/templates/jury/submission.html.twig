@@ -506,8 +506,101 @@
                 {% if externalRuns[runIdx] is defined %}
                     {% set externalRun = externalRuns[runIdx] %}
                 {% endif %}
-                <div class="run {% if run.firstJudgingRun and run.firstJudgingRun.runresult == 'correct' %}run_correct{% endif %}">
-                    <h4 id="run-{{ run.rank }}">Run {{ run.rank }}</h4>
+                <div id="run-{{run.rank}}"
+                     style="margin-bottom: 20px;"
+                     class="card run {% if run.firstJudgingRun and run.firstJudgingRun.runresult == 'correct' %}run_correct{% endif %}">
+                    <div class="card-header">
+                        Run #{{ run.rank }}
+                        {% if run.origInputFilename is not null %}
+                            | <span style="font-family:monospace;">{{ run.origInputFilename }}.in</span>
+                        {% else %}
+                            {% if run.description is not null %}
+                                | {{ run.description }}
+                            {% endif %}
+                        {% endif %}
+                        {% if run.firstJudgingRun is not null %}
+                            | 
+                            <span class="sol {% if run.firstJudgingRun.runresult == 'correct' %}sol_correct{% else %}sol_incorrect{% endif %}">
+                                {{ run.firstJudgingRun.runresult }}
+                            </span>
+                            {% if run.firstJudgingRun.runresult == 'timelimit' %}
+                                {% if runsOutput[runIdx].terminated %}
+                                    <b>(terminated)</b>
+                                {% else %}
+                                    <b>(finished late)</b>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                        {% if externalRun is not null and externalRun.firstExternalRun is not null %}
+                            {% if externalRun.firstExternalRun is not null %}
+                                (external:
+                                <span class="sol {% if externalRun.firstExternalRun.result == 'correct' %}sol_correct{% else %}sol_incorrect{% endif %}">
+                                    {{ externalRun.firstExternalRun.result }}{#-
+                                -#}</span>{#-
+                                -#})
+                            {% endif %}
+                        {% endif %}
+                        <span style="float: right;">
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.probid, 'rank': run.rank, 'type': 'input'}) }}">
+                                <button class="btn btn-sm btn-outline-secondary" >
+                                    <i class="fas fa-download"></i>
+                                    Input
+                                </button>
+                            </a>
+                            <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.probid, 'rank': run.rank, 'type': 'output'}) }}">
+                                <button class="btn btn-sm btn-outline-secondary" >
+                                    <i class="fas fa-download"></i>
+                                    Reference Output
+                                </button>
+                            </a>
+                            {% if run.firstJudgingRun is not null %}
+                                <a href="{{ path('jury_submission_team_output', {'submission': submission.submitid, 'run': run.firstJudgingRun.runid, 'contest': submission.cid}) }}">
+                                    <button class="btn btn-sm btn-outline-secondary" >
+                                        <i class="fas fa-download"></i>
+                                        Team Output
+                                    </button>
+                                </a>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                    {% if run.firstJudgingRun is not null %}
+                    <span style="display:inline; margin-left: 5px;">
+		        <i class="fas fa-stopwatch" title="runtime"></i>
+                        {{ runsOutput[runIdx].cpu_time }}s CPU
+                        {% if runsOutput[runIdx].metadata is not null %}
+                            , {{ runsOutput[runIdx].wall_time }}s wall,
+		            <i class="fas fa-memory" title="RAM"></i>
+                            {{ runsOutput[runIdx].memory }}
+		            <i class="far fa-question-circle" title="exit-code"></i>
+                            exit code:
+                            {{ runsOutput[runIdx].exitcode }}{% if runsOutput[runIdx].signal > 0 %},
+                                signal: {{ runsOutput[runIdx].signal }}
+                            {% endif %}
+                            <button class="btn btn-sm btn-outline-secondary" data-toggle="collapse"
+                                    data-target="#collapseExample-{{ runIdx }}"
+                                    aria-expanded="false">
+                                show complete metadata
+                            </button>
+                            <div class="collapse" id="collapseExample-{{ runIdx }}">
+                                  <div class="card card-body output_text">{{ runsOutput[runIdx].metadata }}</div>
+                            </div>
+                        {% endif %}
+                    </span>
+                    {% endif %}
+                    {% if run.description is not null %}
+                        <p><em>
+                            {{ run.description(true) | descriptionExpand }}
+                        </em></p>
+                    {% endif %}
+                    {% if runsOutput[runIdx].image_thumb %}
+                        <span style="float:right; border: 3px solid #438ec3; margin: 5px; padding: 5px;">
+                            {% set imgUrl = path('jury_problem_testcase_fetch', {'probId': submission.probid, 'rank': run.rank, 'type': 'image'}) %}
+                            <a href="{{ imgUrl }}">
+                                <img src="data:image/{{ run.imageType }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
+                            </a>
+                        </span>
+                    {% endif %}
 
                     {% set runDone = false %}
                     {% if run is not null and run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
@@ -524,90 +617,6 @@
                             {% endif %}
                         </p>
                     {% else %}
-                        <table>
-                            <tr>
-                                <td>
-                                    <table class="table table-sm table-striped table-bordered table-hover">
-                                        {% if run.origInputFilename is not null %}
-                                        <tr>
-                                            <th>Original filename</th>
-                                            <td>{{ run.origInputFilename }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        {% if run.description is not null %}
-                                        <tr>
-                                            <th>Description</th>
-                                            <td>{{ run.description(true) | descriptionExpand }}</td>
-                                        </tr>
-                                        {% endif %}
-                                        <tr>
-                                            <th>Download</th>
-                                            <td>
-                                                <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.probid, 'rank': run.rank, 'type': 'input'}) }}">
-                                                    Input
-                                                </a>
-                                                /
-                                                <a href="{{ path('jury_problem_testcase_fetch', {'probId': submission.probid, 'rank': run.rank, 'type': 'output'}) }}">
-                                                    Reference Output
-                                                </a>
-                                                {% if run.firstJudgingRun is not null %}
-                                                    /
-                                                    <a href="{{ path('jury_submission_team_output', {'submission': submission.submitid, 'run': run.firstJudgingRun.runid, 'contest': submission.cid}) }}">
-                                                        Team Output
-                                                    </a>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Runtime</th>
-                                            <td>
-                                                {% if run.firstJudgingRun is not null %}
-                                                    {{ run.firstJudgingRun.runtime }} sec
-                                                    {% if run.firstJudgingRun.runresult == 'timelimit' %}
-                                                        {% if runsOutput[runIdx].terminated %}
-                                                            <b>(terminated)</b>
-                                                        {% else %}
-                                                            <b>(finished late)</b>
-                                                        {% endif %}
-                                                    {% endif %}
-                                                {% endif %}
-                                                {% if externalRun is not null and externalRun.firstExternalRun is not null %}
-                                                    (external: {{ externalRun.firstExternalRun.runtime }} sec)
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>Result</th>
-                                            <td>
-                                                {% if run.firstJudgingRun is not null %}
-                                                    <span class="sol {% if run.firstJudgingRun.runresult == 'correct' %}sol_correct{% else %}sol_incorrect{% endif %}">
-                                                        {{ run.firstJudgingRun.runresult }}
-                                                    </span>
-                                                {% endif %}
-                                                {% if externalRun is not null and externalRun.firstExternalRun is not null %}
-                                                    {% if externalRun.firstExternalRun is not null %}
-                                                        (external:
-                                                        <span class="sol {% if externalRun.firstExternalRun.result == 'correct' %}sol_correct{% else %}sol_incorrect{% endif %}">
-                                                            {{ externalRun.firstExternalRun.result }}{#-
-                                                        -#}</span>{#-
-                                                        -#})
-                                                    {% endif %}
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                                <td>
-                                    {% if runsOutput[runIdx].image_thumb %}
-                                        {% set imgUrl = path('jury_problem_testcase_fetch', {'probId': submission.probid, 'rank': run.rank, 'type': 'image'}) %}
-                                        <a href="{{ imgUrl }}">
-                                            <img src="data:image/{{ run.imageType }};base64,{{ runsOutput[runIdx].image_thumb | base64 }}"/>
-                                        </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        </table>
-
                         {% if run.firstJudgingRun is not null and run.firstJudgingRun.runresult is not null %}
                             {% if combinedRunCompare %}
                                 <h5>Validator output</h5>
@@ -658,16 +667,10 @@
                             {% else %}
                                 <pre class="output_text">{{ runsOutput[runIdx].output_system | parseRunDiff }}</pre>
                             {% endif %}
-
-                            <h5>Metadata</h5>
-                            {% if runsOutput[runIdx].metadata is empty %}
-                                <p class="nodata">There was no judging system metadata.</p>
-                            {% else %}
-                                <pre class="output_text">{{ runsOutput[runIdx].metadata }}</pre>
-                            {% endif %}
                         {% endif %}
+                    {% endif %}
 
-                    {% endif %} {# not runDone #}
+                    </div>
                 </div>
             {% endfor %}
 

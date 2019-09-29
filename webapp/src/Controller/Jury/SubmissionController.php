@@ -18,6 +18,7 @@ use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
+use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
@@ -183,6 +184,20 @@ class SubmissionController extends BaseController
         }
 
         return $this->render('jury/submissions.html.twig', $data, $response);
+    }
+
+    private function parseMetadata($raw_metadata) {
+        // TODO: reduce duplication with judgedaemon code
+        $contents = explode("\n", $raw_metadata);
+        $res = [];
+        foreach($contents as $line) {
+            if (strpos($line, ":") !== false) {
+                list($key, $value) = explode(":", $line, 2);
+                $res[$key] = trim($value);
+            }
+        }
+
+        return $res;
     }
 
     /**
@@ -425,8 +440,19 @@ class SubmissionController extends BaseController
                 ->getResult();
 
             foreach ($runResults as $runResult) {
+                $firstJudgingRun = $runResult[0]->getFirstJudgingRun();
                 $runs[] = $runResult[0];
                 unset($runResult[0]);
+                if (empty($runResult['metadata'])) {
+                    $runResult['cpu_time'] = $firstJudgingRun === NULL ? 'n/a' : $firstJudgingRun->getRuntime();
+                } else {
+                    $metadata = $this->parseMetadata($runResult['metadata']);
+                    $runResult['cpu_time'] = $metadata['cpu-time'];
+                    $runResult['wall_time'] = $metadata['wall-time'];
+                    $runResult['memory'] = Utils::printsize((int)$metadata['memory-bytes'], 2);
+                    $runResult['exitcode'] = $metadata['exitcode'];
+                    $runResult['signal'] = isset($metadata['signal']) ? $metadata['signal'] : -1;
+                }
                 $runResult['terminated'] = preg_match('/timelimit exceeded.*hard (wall|cpu) time/',
                                                       (string)$runResult['output_system']);
                 $runsOutput[]            = $runResult;
