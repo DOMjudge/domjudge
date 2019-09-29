@@ -49,6 +49,7 @@
     $(function () {
         $('.container-fluid svg').each(function () {
             var $button = $('<button class="btn btn-sm btn-outline-secondary" style="margin-left: 8px;"><i class="fas fa-download"></i> SVG</button>');
+            var $svg = $(this);
 
             // Pick a good place for the button, on the submission page next to
             // the title, otherwise next to the card header.
@@ -59,7 +60,7 @@
             }
 
             $button.on('click', function () {
-                var svg = $(this).parent().find('svg')[0];
+                var svg = $svg[0];
                 var svgString = getSVGString(svg);
                 var svgBlob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
                 saveAs(svgBlob, 'graph.svg');
