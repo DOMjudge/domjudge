@@ -79,7 +79,7 @@ class Testcase
     /**
      * @var string
      * @ORM\Column(type="string", name="orig_input_filename", length=255,
-     *     options={"comment"="Original basename of the input file.","default"="NULL"},
+     *     options={"comment"="Original basename of the input file.","default"=NULL},
      *     nullable=true)
      * @Serializer\Exclude()
      */
