@@ -103,7 +103,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
             // Check CSRF token if it's coming from the login form
             $csrfToken = $request->request->get('_csrf_token');
             if (false === $this->csrfTokenManager->isTokenValid(new CsrfToken('authenticate', $csrfToken))) {
-                throw new InvalidCsrfTokenException('Invalid CSRF token.');
+                throw new InvalidCsrfTokenException('Invalid CSRF token, please try again.');
             }
         }
 
