@@ -402,10 +402,6 @@ class ImportProblemService
             foreach ($dataFiles as $dataFile) {
                 $testIn      = $zip->getFromName(sprintf('data/%s/%s.in', $type, $dataFile));
                 $testOut     = $zip->getFromName(sprintf('data/%s/%s.ans', $type, $dataFile));
-                $description = $dataFile;
-                if (($descriptionFile = $zip->getFromName(sprintf('data/%s/%s.desc', $type, $dataFile))) !== false) {
-                    $description = $descriptionFile;
-                }
                 $imageFile = $imageType = $imageThumb = false;
                 foreach (['png', 'jpg', 'jpeg', 'gif'] as $imgExtension) {
                     $imageFileName = sprintf('data/%s/%s.%s', $type, $dataFile, $imgExtension);
@@ -444,12 +440,12 @@ class ImportProblemService
                         ->andWhere('t.md5sum_input = :inputmd5')
                         ->andWhere('t.md5sum_output = :outputmd5')
                         ->andWhere('t.sample = :sample')
-                        ->andWhere('t.description = :description')
+                        ->andWhere('t.orig_input_filename = :orig_input_filename')
                         ->andWhere('t.problem = :problem')
                         ->setParameter(':inputmd5', $md5in)
                         ->setParameter(':outputmd5', $md5out)
                         ->setParameter(':sample', $type === 'sample')
-                        ->setParameter(':description', $description)
+                        ->setParameter(':orig_input_filename', $dataFile)
                         ->setParameter(':problem', $problem)
                         ->getQuery()
                         ->getOneOrNullResult();
@@ -469,11 +465,13 @@ class ImportProblemService
                     ->setSample($type === 'sample')
                     ->setMd5sumInput($md5in)
                     ->setMd5sumOutput($md5out)
-                    ->setDescription($description)
                     ->setOrigInputFilename($dataFile);
                 $testcaseContent
                     ->setInput($testIn)
                     ->setOutput($testOut);
+                if (($descriptionFile = $zip->getFromName(sprintf('data/%s/%s.desc', $type, $dataFile))) !== false) {
+                    $testcase->setDescription($descriptionFile);
+                }
                 if ($imageFile !== false) {
                     $testcase->setImageType($imageType);
                     $testcaseContent
