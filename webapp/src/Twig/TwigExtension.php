@@ -392,7 +392,13 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     public function displayTestcaseResults(array $testcases, bool $submissionDone, bool $isExternal = false)
     {
         $results = '';
+        $lastTypeSample = true;
         foreach ($testcases as $testcase) {
+            if ($testcase->getSample() != $lastTypeSample) {
+                $results .= ' | ';
+                $lastTypeSample = $testcase->getSample();
+            }
+
             $class     = $submissionDone ? 'secondary' : 'primary';
             $text      = '?';
             $isCorrect = false;
@@ -414,7 +420,6 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             }
 
             $description = $testcase->getDescription(true);
-
 
             $extraTitle = '';
             if ($run && $runResult !== null) {
