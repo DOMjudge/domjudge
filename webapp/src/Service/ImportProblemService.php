@@ -469,7 +469,8 @@ class ImportProblemService
                     ->setSample($type === 'sample')
                     ->setMd5sumInput($md5in)
                     ->setMd5sumOutput($md5out)
-                    ->setDescription($description);
+                    ->setDescription($description)
+                    ->setOrigInputFilename($dataFile);
                 $testcaseContent
                     ->setInput($testIn)
                     ->setOutput($testOut);

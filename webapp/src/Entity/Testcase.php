@@ -78,6 +78,15 @@ class Testcase
 
     /**
      * @var string
+     * @ORM\Column(type="string", name="orig_input_filename", length=255,
+     *     options={"comment"="Original basename of the input file.","default"="NULL"},
+     *     nullable=true)
+     * @Serializer\Exclude()
+     */
+    private $orig_input_filename;
+
+    /**
+     * @var string
      * @ORM\Column(type="string", name="image_type", length=4,
      *     options={"comment"="File type of the image and thumbnail","default"="NULL"},
      *     nullable=true)
@@ -264,6 +273,30 @@ class Testcase
             return $this->description_as_string;
         }
         return $this->description;
+    }
+
+    /**
+     * Set original input filename
+     *
+     * @param string $origInputFilename
+     *
+     * @return Testcase
+     */
+    public function setOrigInputFilename($origInputFilename)
+    {
+        $this->orig_input_filename = $origInputFilename;
+
+        return $this;
+    }
+
+    /**
+     * Get original input filename
+     *
+     * @return string
+     */
+    public function getOrigInputFilename()
+    {
+        return $this->orig_input_filename;
     }
 
     /**

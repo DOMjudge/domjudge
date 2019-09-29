@@ -629,6 +629,9 @@ class ProblemController extends BaseController
                             $md5Method     = sprintf('setMd5sum%s', ucfirst($type));
                             $testcase->getContent()->{$contentMethod}($content);
                             $testcase->{$md5Method}(md5($content));
+                            if ($type == 'input') {
+                                $testcase->setOrigInputFilename(basename($file->getClientOriginalName(), '.in'));
+                            }
                         }
 
                         $this->dj->auditlog('testcase', $probId, 'updated',
@@ -681,6 +684,9 @@ class ProblemController extends BaseController
                     $md5Method     = sprintf('setMd5sum%s', ucfirst($type));
                     $newTestcaseContent->{$contentMethod}($content);
                     $newTestcase->{$md5Method}(md5($content));
+                    if ($type == 'input') {
+                        $newTestcase->setOrigInputFilename(basename($file->getClientOriginalName(), '.in'));
+                    }
                 }
 
                 if ($imageFile = $request->files->get('add_image')) {
