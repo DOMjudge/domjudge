@@ -528,10 +528,18 @@
                             <tr>
                                 <td>
                                     <table class="table table-sm table-striped table-bordered table-hover">
+                                        {% if run.origInputFilename is not null %}
+                                        <tr>
+                                            <th>Original filename</th>
+                                            <td>{{ run.origInputFilename }}</td>
+                                        </tr>
+                                        {% endif %}
+                                        {% if run.description is not null %}
                                         <tr>
                                             <th>Description</th>
                                             <td>{{ run.description(true) | descriptionExpand }}</td>
                                         </tr>
+                                        {% endif %}
                                         <tr>
                                             <th>Download</th>
                                             <td>
