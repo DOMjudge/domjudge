@@ -359,7 +359,7 @@ sudo apt install gcc g++ make zip unzip mariadb-server \
 	acl bsdmainutils ntp phpmyadmin python-pygments \
 	libcgroup-dev linuxdoc-tools linuxdoc-tools-text \
 	groff texlive-latex-recommended texlive-latex-extra \
-	texlive-fonts-recommended texlive-lang-european
+	texlive-fonts-recommended texlive-lang-european composer
 # To enable the command-line submit client, also add:
 sudo apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
 # Replace apache2, php and libapache2-mod-php with nginx, php-fpm and
@@ -372,9 +372,9 @@ The following command can be used on RedHat Enterprise Linux, and
 related distributions like CentOS and Fedora.
 <code>
 sudo yum install gcc gcc-c++ make zip unzip mariadb-server \
-	httpd php-gd php-cli php-intl php-mbstring php-mysql php-xml \
-	python-pygments ntp linuxdoc-tools libcgroup-devel \
-	texlive-collection-latexrecommended texlive-wrapfig
+	httpd php-gd php-cli php-intl php-mbstring php-mysqlnd \
+	php-xml php-zip composer python-pygments ntp linuxdoc-tools \
+	libcgroup-devel texlive-collection-latexrecommended texlive-wrapfig
 # To enable the command-line submit client, also add:
 sudo yum install libcurl-devel jsoncpp-devel file-devel
 </code>
@@ -408,7 +408,7 @@ sudo apt install make sudo debootstrap libcgroup-dev lsof \
 For RedHat:
 <code>
 sudo yum install make sudo libcgroup-devel lsof \
-	php-cli php-mbstring php-xml php-process procps-ng \
+	php-cli php-mbstring php-xml php-process php-zip procps-ng \
 	gcc gcc-c++ glibc-static libstdc++-static \
 	java-1.7.0-openjdk-headless java-1.7.0-openjdk-devel \
 	ghc-compiler fpc
