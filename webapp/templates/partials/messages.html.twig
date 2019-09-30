@@ -1,5 +1,5 @@
 {% for type in ['success', 'danger', 'warning', 'info'] %}
-    {% if app.session.flashBag.has(type) %}
+    {% if app.session and app.session.flashBag.has(type) %}
         {% for message in app.session.flashBag.get(type) %}
             {% include 'partials/alert.html.twig' %}
         {% endfor %}

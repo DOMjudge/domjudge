@@ -16,7 +16,7 @@
     <script>
         initFavouriteTeams();
 
-        var scoreboardUrl = '{{ refresh.url }}';
+        var scoreboardUrl = '{{ refresh.url ?? null }}';
 
         $(function () {
             window.initializeScoreboard = function () {

@@ -105,6 +105,21 @@ class TeamAffiliation extends BaseApiEntity
     }
 
     /**
+     * Set affilid
+     *
+     * @param integer affilid
+     *
+     * @return TeamAffiliation
+     */
+    public function setAffilid($affilid)
+    {
+        $this->affilid = $affilid;
+
+        return $this;
+    }
+
+
+    /**
      * Get affilid
      *
      * @return integer

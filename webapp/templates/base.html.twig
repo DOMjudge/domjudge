@@ -35,7 +35,9 @@
 {% endblock %}
 
 <script>
-    var domjudge_base_url = "{{ app.request.getBaseURL() }}";
+    "{% if app.request %}"
+        var domjudge_base_url = "{{ app.request.getBaseURL() }}";
+    {% endif %}
     $(function () {
         $('body').on('change', '.custom-file-input', function () {
             var files = this.files;
