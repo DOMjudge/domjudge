@@ -35,7 +35,7 @@
 {% endblock %}
 
 <script>
-    "{% if app.request %}"
+    {% if app.request %}
         var domjudge_base_url = "{{ app.request.getBaseURL() }}";
     {% endif %}
     $(function () {
