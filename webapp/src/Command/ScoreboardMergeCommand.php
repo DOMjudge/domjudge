@@ -109,6 +109,11 @@ class ScoreboardMergeCommand extends Command
             ->setDescription('Merges scoreboards from multiple sites from API endpoints or raw json.')
             ->setHelp('TODO')
             ->addArgument(
+                'contest-name',
+                InputArgument::REQUIRED,
+                'Title of the merged contest.'
+            )
+            ->addArgument(
                 'feed-url',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
                 'URL or directory location of the scoreboard to merge.' . PHP_EOL .
@@ -125,7 +130,7 @@ class ScoreboardMergeCommand extends Command
     {
         // Disable SQL logging if we do not run explicitly in debug mode.
         // This would cause a serious memory leak otherwise since this is a
-        // long runnning process.
+        // long running process.
         if (!$this->debug) {
             $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
         }
@@ -153,21 +158,51 @@ class ScoreboardMergeCommand extends Command
 
         $paths = $input->getArgument('feed-url');
 
+        # Convert from flat list to list of (url, groups) pairs
+        $sites = [];
+
+        if(count($paths) % 2 != 0){
+            echo "Provide an even number of arguments: all pairs of url and comma separated group ids.";
+            return 1;
+        }
+
+        for($i = 0; $i < count($paths); $i += 2){
+            $site = [];
+            $site['path'] = $paths[$i];
+            # Some simple validation to make sure we're actually parsing group ids.
+            $groups_string = $paths[$i+1];
+            if(!preg_match('/^\d+(,\d+)*$/', $groups_string)){
+                echo 'Argument does not look like a comma separated list of group ids: ' . $groups_string . PHP_EOL;
+                return 1;
+            }
+            $site['group_ids'] = array_map('intval', explode(',', $groups_string));
+            $sites[] = $site;
+        }
+
         $contest = Null;
 
-        foreach ($paths as $path){
-            $teamIdMap = [];
+        foreach ($sites as $site){
+            $path = $site['path'];
 
-            #dump($path);
             $client = HttpClient::create();
             $teamdata = $client->request('GET', $path.'/teams')->toArray();
-            // Reading local files doesn't work in docker...
-            //$teamsFile = fopen($path . 'teams.json', 'r');
-            //$teamsText = fread($teamsFile, 1024*1024);
-            //$teams = $this->dj->jsonDecode($teamsText);
-            //fclose($teamsFile);
 
+            $teamIdMap = [];
             foreach ($teamdata as $team){
+
+                # Only include the team if its id is listed in the corresponding groups list.
+                $include = false;
+                foreach($team['group_ids'] as $group_id){
+                    if(in_array($group_id, $site['group_ids'])){
+                        $include = true;
+                        break;
+                    }
+                }
+
+                if(!$include){
+                    continue;
+                }
+
                 $teamobj = new Team();
                 $teamobj->setName($team['name']);
                 $teamobj->setEnabled(true);
@@ -190,9 +225,8 @@ class ScoreboardMergeCommand extends Command
 
             if($contest === Null){
                 $state = $scoreboarddata['state'];
-                #dump($state);
                 $contest = new Contest();
-                $contest->setName("Merged scoreboard");
+                $contest->setName($input->getArgument('contest-name'));
                 $contest->setStarttimeString($state['started']);
                 $contest->setEndtimeString($state['ended']);
                 $contest->setFreezetimeString($state['ended']);
@@ -201,16 +235,11 @@ class ScoreboardMergeCommand extends Command
                 $contest->setDeactivatetimeString($state['ended']);
             }
 
-            //$scoreboardFile = fopen($path . 'scoreboard.json', 'r');
-            //$scoreboardText = fread($scoreboardFile, 1024*1024);
-            //$scoreboard = $this->dj->jsonDecode($scoreboardText);
-            //fclose($scoreboardFile);
-
-            #dump($scoreboard);
-
             // Add scoreboard data
             foreach ($scoreboarddata['rows'] as $row){
-                #dump($row);
+                if(!array_key_exists($row['team_id'], $teamIdMap)){
+                    continue;
+                }
                 $team = $teams[$teamIdMap[$row['team_id']]];
                 foreach ($row['problems'] as $problem){
                     $label = $problem['label'];
