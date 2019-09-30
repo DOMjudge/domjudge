@@ -205,15 +205,17 @@ class DOMJudgeService
      */
     public function getCurrentContest($onlyofteam = null, bool $alsofuture = false)
     {
-        $selected_cid = $this->requestStack->getCurrentRequest()->cookies->get('domjudge_cid');
-        if ($selected_cid == -1) {
-            return null;
-        }
-
         $contests = $this->getCurrentContests($onlyofteam, $alsofuture);
-        foreach ($contests as $contest) {
-            if ($contest->getCid() == $selected_cid) {
-                return $contest;
+        if ($this->requestStack->getCurrentRequest()) {
+            $selected_cid = $this->requestStack->getCurrentRequest()->cookies->get('domjudge_cid');
+            if ($selected_cid == -1) {
+                return null;
+            }
+
+            foreach ($contests as $contest) {
+                if ($contest->getCid() == $selected_cid) {
+                    return $contest;
+                }
             }
         }
         if (count($contests) > 0) {
@@ -307,6 +309,9 @@ class DOMJudgeService
      */
     public function getCookie(string $cookieName)
     {
+        if (!$this->requestStack->getCurrentRequest()) {
+            return null;
+        }
         if (!$this->requestStack->getCurrentRequest()->cookies) {
             return null;
         }

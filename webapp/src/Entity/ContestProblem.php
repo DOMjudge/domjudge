@@ -136,6 +136,20 @@ class ContestProblem
     }
 
     /**
+     * Set probid
+     *
+     * @param integer $probId
+     *
+     * @return Problem
+     */
+    public function setProbid($probid)
+    {
+        $this->getProblem()->setProbid($probid);
+
+        return $this;
+    }
+
+    /**
      * Get probid
      *
      * @return integer

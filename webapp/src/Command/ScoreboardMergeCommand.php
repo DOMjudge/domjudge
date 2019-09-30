@@ -18,9 +18,7 @@ use App\Entity\ScoreCache;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Service\DOMJudgeService;
-use App\Service\EventLogService;
 use App\Service\ScoreboardService;
-use App\Service\SubmissionService;
 use App\Utils\Utils;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
@@ -42,18 +40,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-
-class ImportTeamAffiliation extends TeamAffiliation {
-	public function setAffilid($id){
-		$this->affilid = $id;
-	}
-}
-class ImportProblem extends Problem {
-	public function setProbid($id){
-		$this->probid = $id;
-	}
-}
-
+use Twig\Environment;
 
 
 /**
@@ -73,75 +60,43 @@ class ScoreboardMergeCommand extends Command
     protected $dj;
 
     /**
-     * @var EventLogService
-     */
-    protected $eventLogService;
-
-    /**
      * @var ScoreboardService
      */
     protected $scoreboardService;
-
-    /**
-     * @var SubmissionService
-     */
-    protected $submissionService;
-
-    /**
-     * @var TokenStorageInterface
-     */
-    protected $tokenStorage;
-
-    /**
-     * @var bool
-     */
-    protected $debug;
 
     /**
      * @var LoggerInterface
      */
     protected $logger;
 
-
-	// DATA FOR THIS CLASS
-	protected $teams = [];
-	protected $problems = [];
-	protected $scorecache = [];
-	protected $affiliations = [];
+    /**
+     * @var Environment
+     */
+    protected $twig;
 
 
     /**
      * ScoreboardMergeCommand constructor.
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
-     * @param EventLogService        $eventLogService
      * @param ScoreboardService      $scoreboardService
-     * @param SubmissionService      $submissionService
-     * @param TokenStorageInterface  $tokenStorage
      * @param bool                   $debug
-     * @param string                 $domjudgeVersion
      * @param string|null            $name
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
-        EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
-        SubmissionService $submissionService,
-        TokenStorageInterface $tokenStorage,
         bool $debug,
-        string $domjudgeVersion,
+        Environment $twig,
         string $name = null
     ) {
         parent::__construct($name);
         $this->em                = $em;
         $this->dj                = $dj;
-        $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
-        $this->submissionService = $submissionService;
-        $this->tokenStorage      = $tokenStorage;
         $this->debug             = $debug;
-        $this->domjudgeVersion   = $domjudgeVersion;
+        $this->twig = $twig;
     }
 
     /**
@@ -157,8 +112,8 @@ class ScoreboardMergeCommand extends Command
                 'feed-url',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
                 'URL or directory location of the scoreboard to merge.' . PHP_EOL .
-				'If an URL and it requires authentication, use username:password@ in the URL' . PHP_EOL .
-				'URL should have the form https://<domain>/api/v4/contests/<contestid>/'
+                'If an URL and it requires authentication, use username:password@ in the URL' . PHP_EOL .
+                'URL should have the form https://<domain>/api/v4/contests/<contestid>/'
             );
     }
 
@@ -182,98 +137,155 @@ class ScoreboardMergeCommand extends Command
         ];
         $this->logger      = new ConsoleLogger($output, $verbosityLevelMap);
 
-        #$this->logger->info(sprintf('Importing from local file %s', $input->getArgument('feed-url')));
+        // DATA
+        $teams = [];
+        $problems = [];
+        $problemidmap = [];
+        $scorecache = [];
+        $affiliations = [];
+        $nextTeamid = 0;
 
-		$paths = $input->getArgument('feed-url');
+        $firstsolve = [];
 
-		foreach ($paths as $path){
-			$client = HttpClient::create();
-			$teams = $client->request('GET', $path.'/teams')->toArray();
-			// Reading local files doesn't work in docker...
-			//$teamsFile = fopen($path . 'teams.json', 'r');
-			//$teamsText = fread($teamsFile, 1024*1024);
-			//$teams = $this->dj->jsonDecode($teamsText);
-			//fclose($teamsFile);
+        $category = new TeamCategory();
+        $category->setName("Participants");
+        $category->setCategoryid(0);
 
-			dump($teams);
+        $paths = $input->getArgument('feed-url');
 
-			$category = new TeamCategory();
-			$category->setName("Participants");
-			$category->setCategoryid(0);
+        $contest = Null;
 
-			// Add teams.
-			$teamIdMap = [];
-			foreach ($teams as $team){
-				$teamobj = new Team();
-				$teamobj->setName($team['name']);
-				$teamobj->setEnabled(true);
-				if(!array_key_exists($team['affiliation'], $this->affiliations)){
-					$affiliation = new ImportTeamAffiliation();
-					$affiliation->setName($team['affiliation']);
-					$affiliation->setAffilid(count($this->affiliations));
-					$this->affiliations[$team['affiliation']] = $affiliation;
-				}
-				$teamobj->setAffiliation($this->affiliations[$team['affiliation']]);
-				#$teamobj->setCategoryid(0);
-				$teamobj->setCategory($category);
-				$oldid = $team['id'];
-				$newid = count($teamIdMap);
-				$teamobj->setTeamid($newid);
-				$this->teams[] = $teamobj;
-				$teamIdMap[$oldid] = $newid;
+        foreach ($paths as $path){
+            $teamIdMap = [];
 
-			}
+            #dump($path);
+            $client = HttpClient::create();
+            $teamdata = $client->request('GET', $path.'/teams')->toArray();
+            // Reading local files doesn't work in docker...
+            //$teamsFile = fopen($path . 'teams.json', 'r');
+            //$teamsText = fread($teamsFile, 1024*1024);
+            //$teams = $this->dj->jsonDecode($teamsText);
+            //fclose($teamsFile);
 
-			$scoreboard = $client->request('GET', $path.'/scoreboard')->toArray();
-			//$scoreboardFile = fopen($path . 'scoreboard.json', 'r');
-			//$scoreboardText = fread($scoreboardFile, 1024*1024);
-			//$scoreboard = $this->dj->jsonDecode($scoreboardText);
-			//fclose($scoreboardFile);
+            foreach ($teamdata as $team){
+                $teamobj = new Team();
+                $teamobj->setName($team['name']);
+                $teamobj->setEnabled(true);
+                if(!array_key_exists($team['affiliation'], $affiliations)){
+                    $affiliation = new TeamAffiliation();
+                    $affiliation->setName($team['affiliation']);
+                    $affiliation->setAffilid(count($affiliations));
+                    $affiliations[$team['affiliation']] = $affiliation;
+                }
+                $teamobj->setAffiliation($affiliations[$team['affiliation']]);
+                $teamobj->setCategory($category);
+                $oldid = $team['id'];
+                $newid = $nextTeamid++;
+                $teamobj->setTeamid($newid);
+                $teams[] = $teamobj;
+                $teamIdMap[$oldid] = $newid;
+            }
 
-			#dump($scoreboard);
+            $scoreboarddata = $client->request('GET', $path.'/scoreboard')->toArray();
 
-			// Add scoreboard data
-			foreach ($scoreboard['rows'] as $row){
-				$team = $this->teams[$teamIdMap[$row['team_id']]];
-				foreach ($row['problems'] as $problem){
-					$scorecache = new ScoreCache();
-					if(!array_key_exists($problem['label'], $this->problems)){
-						$problemobj = new ImportProblem();
-						$problemobj->setProbid($problem['label']);
-						$problemobj->setName($problem['label']);
-					}
-					$this->problems[$problem['label']] = $problemobj;
-					//$problemobj->setProbid($problem['label']);
-					$scorecache->setProblem($problemobj);
-					$scorecache->setTeam($team);
-					if(array_key_exists('time', $problem)){
-						$scorecache->setSolveTimePublic($problem['time']);
-					}
-					$scorecache->setSubmissionsPublic($problem['num_judged']);
-					$scorecache->setIsCorrectPublic($problem['solved']);
+            if($contest === Null){
+                $state = $scoreboarddata['state'];
+                #dump($state);
+                $contest = new Contest();
+                $contest->setName("Merged scoreboard");
+                $contest->setStarttimeString($state['started']);
+                $contest->setEndtimeString($state['ended']);
+                $contest->setFreezetimeString($state['ended']);
+                $contest->setUnfreezetimeString($state['ended']);
+                $contest->setFinalizetime($state['ended']);
+                $contest->setDeactivatetimeString($state['ended']);
+            }
 
-					$this->scorecache[] = $scorecache;
-				}
-			}
-		}
+            //$scoreboardFile = fopen($path . 'scoreboard.json', 'r');
+            //$scoreboardText = fread($scoreboardFile, 1024*1024);
+            //$scoreboard = $this->dj->jsonDecode($scoreboardText);
+            //fclose($scoreboardFile);
 
-		// 'static' data:
-		$contest = new Contest();
+            #dump($scoreboard);
 
-		$freezeData = new FreezeData($contest);
+            // Add scoreboard data
+            foreach ($scoreboarddata['rows'] as $row){
+                #dump($row);
+                $team = $teams[$teamIdMap[$row['team_id']]];
+                foreach ($row['problems'] as $problem){
+                    $label = $problem['label'];
+                    if(!array_key_exists($problem['label'], $problemidmap)){
+                        $id = count($problems);
+                        $problemobj = new Problem();
+                        $problemobj->setProbid($id);
+                        $problemobj->setName($label);
+                        $contestproblemobj = new ContestProblem();
+                        $contestproblemobj->setProblem($problemobj);
+                        $contestproblemobj->setShortName($label);
+                        $problems[$id] = $contestproblemobj;
+                        $problemidmap[$label] = $id;
+                        $firstsolve[$label] = Null;
+                    } else {
+                        $id = $problemidmap[$label];
+                    }
+                    $scorecacheobj = new ScoreCache();
+                    $scorecacheobj->setProblem($problems[$id]->getProblem());
+                    $scorecacheobj->setTeam($team);
+                    if(array_key_exists('time', $problem)){
+                        $scorecacheobj->setSolveTimePublic($problem['time']*60);
+                        $scorecacheobj->setSolveTimeRestricted($problem['time']*60);
+                        if($firstsolve[$label] === Null or $problem['time']*60<$firstsolve[$label]){
+                            $firstsolve[$label] = $problem['time']*60;
+                        }
+                    }
+                    $scorecacheobj->setSubmissionsPublic($problem['num_judged']);
+                    $scorecacheobj->setSubmissionsRestricted($problem['num_judged']);
+                    $scorecacheobj->setIsCorrectPublic($problem['solved']);
+                    $scorecacheobj->setIsCorrectRestricted($problem['solved']);
+                    $scorecache[] = $scorecacheobj;
+                }
+            }
+        }
 
-		$scoreboard = new Scoreboard(
-			$contest,
-			$this->teams,
-			[$category],
-			$this->problems,
-			$this->scorecache,
-			$freezeData,
-			true,
-			20,
-			false
-		);
+        // Update first to solve fields.
+        foreach ($scorecache as &$scorecacheobj){
+            if($scorecacheobj->getSolveTimeRestricted() == $firstsolve[$scorecacheobj->getProblem()->getName()]){
+                $scorecacheobj->setIsFirstToSolve(true);
+            }
+        }
 
+
+        $freezeData = new FreezeData($contest);
+
+        $scoreboard = new Scoreboard(
+            $contest,
+            $teams,
+            [$category],
+            $problems,
+            $scorecache,
+            $freezeData,
+            /* jury = */ false,
+            $this->dj->dbconfig_get('penalty_time', 20),
+            false
+        );
+
+        $data   = [
+            'current_public_contest'      => $contest,
+            'static'               => true,
+            'hide_menu'            => true,
+            'contest'              => $contest,
+            'scoreboard'           => $scoreboard,
+            'showFlags'            => $this->dj->dbconfig_get('show_flags', true),
+            'showAffiliationLogos' => $this->dj->dbconfig_get('show_affiliation_logos', false),
+            'showAffiliations'     => $this->dj->dbconfig_get('show_affiliations', true),
+            'showPending'          => $this->dj->dbconfig_get('show_pending', false),
+            'showTeamSubmissions'  => $this->dj->dbconfig_get('show_teams_submissions', true),
+            'scoreInSeconds'       => $this->dj->dbconfig_get('score_in_seconds', false),
+            'maxWidth'             => $this->dj->dbconfig_get('team_column_width', 0),
+        ];
+        $output = $this->twig->render('public/scoreboard.html.twig', $data);
+
+        echo $output;
         return 0;
     }
 }

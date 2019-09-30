@@ -601,8 +601,11 @@ class ScoreboardService
      * @param Response|null $response
      * @return Filter
      */
-    public function initializeScoreboardFilter(Request $request, Response $response)
+    public function initializeScoreboardFilter(?Request $request, ?Response $response)
     {
+        if ($request === null) {
+            return new Filter([], [], [], []);
+        }
         $scoreFilter = [];
         if ($this->dj->getCookie('domjudge_scorefilter')) {
             $scoreFilter = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_scorefilter'));
@@ -759,8 +762,8 @@ class ScoreboardService
      * @throws \Exception
      */
     public function getScoreboardTwigData(
-        Request $request,
-        Response $response,
+        ?Request $request,
+        ?Response $response,
         string $refreshUrl,
         bool $jury,
         bool $public,

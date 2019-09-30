@@ -196,6 +196,20 @@ class Problem extends BaseApiEntity
     private $scorecache;
 
     /**
+     * Set probid
+     *
+     * @param integer $probId
+     *
+     * @return Problem
+     */
+    public function setProbid($probid)
+    {
+        $this->probid = $probid;
+
+        return $this;
+    }
+
+    /**
      * Get probid
      *
      * @return integer
