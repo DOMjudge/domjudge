@@ -18,7 +18,6 @@ use App\Entity\ScoreCache;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Service\DOMJudgeService;
-use App\Service\ScoreboardService;
 use App\Utils\Utils;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
@@ -50,24 +49,9 @@ use Twig\Environment;
 class ScoreboardMergeCommand extends Command
 {
     /**
-     * @var EntityManagerInterface
-     */
-    protected $em;
-
-    /**
      * @var DOMJudgeService
      */
     protected $dj;
-
-    /**
-     * @var ScoreboardService
-     */
-    protected $scoreboardService;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
 
     /**
      * @var Environment
@@ -77,24 +61,18 @@ class ScoreboardMergeCommand extends Command
 
     /**
      * ScoreboardMergeCommand constructor.
-     * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
-     * @param ScoreboardService      $scoreboardService
      * @param bool                   $debug
      * @param string|null            $name
      */
     public function __construct(
-        EntityManagerInterface $em,
         DOMJudgeService $dj,
-        ScoreboardService $scoreboardService,
         bool $debug,
         Environment $twig,
         string $name = null
     ) {
         parent::__construct($name);
-        $this->em                = $em;
         $this->dj                = $dj;
-        $this->scoreboardService = $scoreboardService;
         $this->debug             = $debug;
         $this->twig = $twig;
     }
@@ -106,8 +84,13 @@ class ScoreboardMergeCommand extends Command
     {
         $this
             ->setName('scoreboard:merge')
-            ->setDescription('Merges scoreboards from multiple sites from API endpoints or raw json.')
-            ->setHelp('TODO')
+            ->setDescription('Merges scoreboards from multiple sites from API endpoints.')
+            ->setHelp('Usage example: scoreboard:merge "BAPC preliminaries" '.
+            'https://judge.gehack.nl/api/v4/contests/3/ 3 '.
+            'http://ragnargrootkoerkamp.nl/upload/uva 2' . PHP_EOL . PHP_EOL .
+
+            'This fetches teams and scoreboard data from API endpoints and prints a merged HTML scoreboard. It assumes times in minutes.'
+            )
             ->addArgument(
                 'contest-name',
                 InputArgument::REQUIRED,
@@ -116,9 +99,10 @@ class ScoreboardMergeCommand extends Command
             ->addArgument(
                 'feed-url',
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-                'URL or directory location of the scoreboard to merge.' . PHP_EOL .
+                'Alternating URL location of the scoreboard to merge and a comma separated list of group_ids to include.' . PHP_EOL .
                 'If an URL and it requires authentication, use username:password@ in the URL' . PHP_EOL .
-                'URL should have the form https://<domain>/api/v4/contests/<contestid>/'
+                'URL should have the form https://<domain>/api/v4/contests/<contestid>/' . PHP_EOL .
+                'Only the /teams and /scoreboard endpoint are used, so manually putting files in those locations can work as well.'
             );
     }
 
@@ -128,68 +112,51 @@ class ScoreboardMergeCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // Disable SQL logging if we do not run explicitly in debug mode.
-        // This would cause a serious memory leak otherwise since this is a
-        // long running process.
-        if (!$this->debug) {
-            $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
-        }
-
-        // Set up logger
-        $verbosityLevelMap = [
-            LogLevel::NOTICE => OutputInterface::VERBOSITY_NORMAL,
-            LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL,
-        ];
-        $this->logger      = new ConsoleLogger($output, $verbosityLevelMap);
-
-        // DATA
         $teams = [];
+        $nextTeamId = 0;
         $problems = [];
-        $problemidmap = [];
-        $scorecache = [];
+        $problemIdMap = [];
+        $scoreCache = [];
         $affiliations = [];
-        $nextTeamid = 0;
-
-        $firstsolve = [];
+        $firstSolve = [];
+        $contest = Null;
+        $freezeData = new FreezeData($contest);
 
         $category = new TeamCategory();
         $category->setName("Participants");
         $category->setCategoryid(0);
 
-        $paths = $input->getArgument('feed-url');
+        $siteArguments = $input->getArgument('feed-url');
 
         # Convert from flat list to list of (url, groups) pairs
         $sites = [];
 
-        if(count($paths) % 2 != 0){
+        if(count($siteArguments) % 2 != 0){
             echo "Provide an even number of arguments: all pairs of url and comma separated group ids.";
             return 1;
         }
 
-        for($i = 0; $i < count($paths); $i += 2){
+        for($i = 0; $i < count($siteArguments); $i += 2){
             $site = [];
-            $site['path'] = $paths[$i];
+            $site['path'] = $siteArguments[$i];
             # Some simple validation to make sure we're actually parsing group ids.
-            $groups_string = $paths[$i+1];
-            if(!preg_match('/^\d+(,\d+)*$/', $groups_string)){
-                echo 'Argument does not look like a comma separated list of group ids: ' . $groups_string . PHP_EOL;
+            $groupsString = $siteArguments[$i+1];
+            if(!preg_match('/^\d+(,\d+)*$/', $groupsString)){
+                echo 'Argument does not look like a comma separated list of group ids: ' . $groupsString . PHP_EOL;
                 return 1;
             }
-            $site['group_ids'] = array_map('intval', explode(',', $groups_string));
+            $site['group_ids'] = array_map('intval', explode(',', $groupsString));
             $sites[] = $site;
         }
-
-        $contest = Null;
 
         foreach ($sites as $site){
             $path = $site['path'];
 
             $client = HttpClient::create();
-            $teamdata = $client->request('GET', $path.'/teams')->toArray();
+            $teamData = $client->request('GET', $path.'/teams')->toArray();
 
             $teamIdMap = [];
-            foreach ($teamdata as $team){
-
+            foreach ($teamData as $team){
                 # Only include the team if its id is listed in the corresponding groups list.
                 $include = false;
                 foreach($team['group_ids'] as $group_id){
@@ -203,28 +170,28 @@ class ScoreboardMergeCommand extends Command
                     continue;
                 }
 
-                $teamobj = new Team();
-                $teamobj->setName($team['name']);
-                $teamobj->setEnabled(true);
+                $teamObj = new Team();
+                $teamObj->setName($team['name']);
+                $teamObj->setEnabled(true);
                 if(!array_key_exists($team['affiliation'], $affiliations)){
                     $affiliation = new TeamAffiliation();
                     $affiliation->setName($team['affiliation']);
                     $affiliation->setAffilid(count($affiliations));
                     $affiliations[$team['affiliation']] = $affiliation;
                 }
-                $teamobj->setAffiliation($affiliations[$team['affiliation']]);
-                $teamobj->setCategory($category);
+                $teamObj->setAffiliation($affiliations[$team['affiliation']]);
+                $teamObj->setCategory($category);
                 $oldid = $team['id'];
-                $newid = $nextTeamid++;
-                $teamobj->setTeamid($newid);
-                $teams[] = $teamobj;
+                $newid = $nextTeamId++;
+                $teamObj->setTeamid($newid);
+                $teams[] = $teamObj;
                 $teamIdMap[$oldid] = $newid;
             }
 
-            $scoreboarddata = $client->request('GET', $path.'/scoreboard')->toArray();
+            $scoreboardData = $client->request('GET', $path.'/scoreboard')->toArray();
 
             if($contest === Null){
-                $state = $scoreboarddata['state'];
+                $state = $scoreboardData['state'];
                 $contest = new Contest();
                 $contest->setName($input->getArgument('contest-name'));
                 $contest->setStarttimeString($state['started']);
@@ -233,71 +200,73 @@ class ScoreboardMergeCommand extends Command
                 $contest->setUnfreezetimeString($state['ended']);
                 $contest->setFinalizetime($state['ended']);
                 $contest->setDeactivatetimeString($state['ended']);
+                $contest->UpdateTimes();
             }
 
             // Add scoreboard data
-            foreach ($scoreboarddata['rows'] as $row){
+            foreach ($scoreboardData['rows'] as $row){
+                # If this this team is not in the teams array (because it's not in the right group),
+                # ignore this row.
                 if(!array_key_exists($row['team_id'], $teamIdMap)){
                     continue;
                 }
                 $team = $teams[$teamIdMap[$row['team_id']]];
                 foreach ($row['problems'] as $problem){
                     $label = $problem['label'];
-                    if(!array_key_exists($problem['label'], $problemidmap)){
+                    if(!array_key_exists($label, $problemIdMap)){
                         $id = count($problems);
-                        $problemobj = new Problem();
-                        $problemobj->setProbid($id);
-                        $problemobj->setName($label);
-                        $contestproblemobj = new ContestProblem();
-                        $contestproblemobj->setProblem($problemobj);
-                        $contestproblemobj->setShortName($label);
-                        $problems[$id] = $contestproblemobj;
-                        $problemidmap[$label] = $id;
-                        $firstsolve[$label] = Null;
+                        $problemObj = new Problem();
+                        $problemObj->setProbid($id);
+                        $problemObj->setName($label);
+                        $contestProblemObj = new ContestProblem();
+                        $contestProblemObj->setProblem($problemObj);
+                        $contestProblemObj->setShortName($label);
+                        $problems[$id] = $contestProblemObj;
+                        $problemIdMap[$label] = $id;
+                        $firstSolve[$label] = Null;
                     } else {
-                        $id = $problemidmap[$label];
+                        $id = $problemIdMap[$label];
                     }
-                    $scorecacheobj = new ScoreCache();
-                    $scorecacheobj->setProblem($problems[$id]->getProblem());
-                    $scorecacheobj->setTeam($team);
+                    $scoreCacheObj = new scoreCache();
+                    $scoreCacheObj->setProblem($problems[$id]->getProblem());
+                    $scoreCacheObj->setTeam($team);
                     if(array_key_exists('time', $problem)){
-                        $scorecacheobj->setSolveTimePublic($problem['time']*60);
-                        $scorecacheobj->setSolveTimeRestricted($problem['time']*60);
-                        if($firstsolve[$label] === Null or $problem['time']*60<$firstsolve[$label]){
-                            $firstsolve[$label] = $problem['time']*60;
+                        # TODO: Make this work with input in seconds as well.
+                        $scoreCacheObj->setSolveTimePublic($problem['time']*60);
+                        $scoreCacheObj->setSolveTimeRestricted($problem['time']*60);
+                        if($firstSolve[$label] === Null or $problem['time']*60<$firstSolve[$label]){
+                            $firstSolve[$label] = $problem['time']*60;
                         }
                     }
-                    $scorecacheobj->setSubmissionsPublic($problem['num_judged']);
-                    $scorecacheobj->setSubmissionsRestricted($problem['num_judged']);
-                    $scorecacheobj->setIsCorrectPublic($problem['solved']);
-                    $scorecacheobj->setIsCorrectRestricted($problem['solved']);
-                    $scorecache[] = $scorecacheobj;
+                    $scoreCacheObj->setSubmissionsPublic($problem['num_judged']);
+                    $scoreCacheObj->setSubmissionsRestricted($problem['num_judged']);
+                    $scoreCacheObj->setIsCorrectPublic($problem['solved']);
+                    $scoreCacheObj->setIsCorrectRestricted($problem['solved']);
+                    $scoreCache[] = $scoreCacheObj;
                 }
             }
         }
 
-        // Update first to solve fields.
-        foreach ($scorecache as &$scorecacheobj){
-            if($scorecacheobj->getSolveTimeRestricted() == $firstsolve[$scorecacheobj->getProblem()->getName()]){
-                $scorecacheobj->setIsFirstToSolve(true);
+        // Update the first to solve fields.
+        foreach ($scoreCache as &$scoreCacheObj){
+            if($scoreCacheObj->getSolveTimeRestricted() == $firstSolve[$scoreCacheObj->getProblem()->getName()]){
+                $scoreCacheObj->setIsFirstToSolve(true);
             }
         }
-
-
-        $freezeData = new FreezeData($contest);
 
         $scoreboard = new Scoreboard(
             $contest,
             $teams,
             [$category],
             $problems,
-            $scorecache,
+            $scoreCache,
             $freezeData,
             /* jury = */ false,
             $this->dj->dbconfig_get('penalty_time', 20),
-            false
+            /* scoreIsInSeconds = */ false
         );
 
+        # Render the scoreboard to HTML and print it.
         $data   = [
             'current_public_contest'      => $contest,
             'static'               => true,
@@ -312,8 +281,10 @@ class ScoreboardMergeCommand extends Command
             'scoreInSeconds'       => $this->dj->dbconfig_get('score_in_seconds', false),
             'maxWidth'             => $this->dj->dbconfig_get('team_column_width', 0),
         ];
+
         $output = $this->twig->render('public/scoreboard.html.twig', $data);
 
+        # TODO: It would be nice to return a zip containing all relevant css/js/font files.
         echo $output;
         return 0;
     }
