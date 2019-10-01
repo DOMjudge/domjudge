@@ -120,7 +120,7 @@ class ScoreboardMergeCommand extends Command
         $affiliations = [];
         $firstSolve = [];
         $contest = Null;
-        $freezeData = new FreezeData($contest);
+        $freezeData = Null;
 
         $category = new TeamCategory();
         $category->setName("Participants");
@@ -201,6 +201,7 @@ class ScoreboardMergeCommand extends Command
                 $contest->setFinalizetime($state['ended']);
                 $contest->setDeactivatetimeString($state['ended']);
                 $contest->UpdateTimes();
+                $freezeData = new FreezeData($contest);
             }
 
             // Add scoreboard data
