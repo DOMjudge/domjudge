@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -92,15 +91,15 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/register", name="register")
-     * @param Request                      $request
-     * @param AuthorizationChecker         $authorizationChecker
-     * @param UserPasswordEncoderInterface $passwordEncoder
+     * @param Request                       $request
+     * @param AuthorizationCheckerInterface $authorizationChecker
+     * @param UserPasswordEncoderInterface  $passwordEncoder
      * @return RedirectResponse|Response
      * @throws Exception
      */
     public function registerAction(
         Request $request,
-        AuthorizationChecker $authorizationChecker,
+        AuthorizationCheckerInterface $authorizationChecker,
         UserPasswordEncoderInterface $passwordEncoder
     )
     {
@@ -166,7 +165,7 @@ class SecurityController extends AbstractController
             return $this->redirect($this->generateUrl('login'));
         }
 
-        return $this->render(':security:register.html.twig', array(
+        return $this->render('security/register.html.twig', array(
             'registration_form' => $registration_form->createView(),
         ));
     }
