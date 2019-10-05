@@ -674,7 +674,7 @@ class DOMJudgeService
         string $origname,
         ?string $language,
         string $username,
-        ?string $teamname,
+        ?string $teamname = null,
         ?int $teamid = null,
         ?string $location = null
     ): array {
