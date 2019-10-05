@@ -10,6 +10,7 @@ use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
+use App\Service\ScoreboardService;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Scoreboard;
 use Exception;
@@ -53,22 +54,30 @@ class ScoreboardMergeCommand extends Command
     protected $client;
 
     /**
+     * @var ScoreboardService
+     */
+    protected $scoreboardService;
+
+    /**
      * ScoreboardMergeCommand constructor.
      * @param DOMJudgeService     $dj
      * @param Environment         $twig
      * @param HttpClientInterface $client
+     * @param ScoreboardService   $scoreboardService
      * @param string|null         $name
      */
     public function __construct(
         DOMJudgeService $dj,
         Environment $twig,
         HttpClientInterface $client,
+        ScoreboardService $scoreboardService,
         string $name = null
     ) {
         parent::__construct($name);
         $this->dj = $dj;
         $this->twig = $twig;
         $this->client = $client;
+        $this->scoreboardService = $scoreboardService;
     }
 
     /**
@@ -307,27 +316,11 @@ class ScoreboardMergeCommand extends Command
         );
 
         // Render the scoreboard to HTML and print it.
-        $data = [
-            'current_public_contest' => $contest,
-            'static'                 => true,
-            'hide_menu'              => true,
-            'contest'                => $contest,
-            'scoreboard'             => $scoreboard,
-            'showFlags'              =>
-                $this->dj->dbconfig_get('show_flags', true),
-            'showAffiliationLogos'   =>
-                $this->dj->dbconfig_get('show_affiliation_logos', false),
-            'showAffiliations'       =>
-                $this->dj->dbconfig_get('show_affiliations', true),
-            'showPending'            =>
-                $this->dj->dbconfig_get('show_pending', false),
-            'showTeamSubmissions'    =>
-                $this->dj->dbconfig_get('show_teams_submissions', true),
-            'scoreInSeconds'         =>
-                $this->dj->dbconfig_get('score_in_seconds', false),
-            'maxWidth'               =>
-                $this->dj->dbconfig_get('team_column_width', 0),
-        ];
+        $data = $this->scoreboardService->getScoreboardTwigData(
+            null, null, '', false, true, true, $contest, $scoreboard
+        );
+        $data['hide_menu'] = true;
+        $data['current_public_contest'] = $contest;
 
         $output = $this->twig->render('public/scoreboard.html.twig', $data);
 

@@ -759,13 +759,14 @@ class ScoreboardService
      * @throws \Exception
      */
     public function getScoreboardTwigData(
-        Request $request,
-        Response $response,
+        ?Request $request,
+        ?Response $response,
         string $refreshUrl,
         bool $jury,
         bool $public,
         bool $static,
-        Contest $contest = null
+        Contest $contest = null,
+        Scoreboard $scoreboard = null
     ) {
         $data = [
             'refresh' => [
@@ -778,8 +779,14 @@ class ScoreboardService
 
         if ($contest) {
 
-            $scoreFilter = $this->initializeScoreboardFilter($request, $response);
-            $scoreboard  = $this->getScoreboard($contest, $jury, $scoreFilter);
+            if ($request && $response) {
+                $scoreFilter = $this->initializeScoreboardFilter($request, $response);
+            } else {
+                $scoreFilter = null;
+            }
+            if ($scoreboard === null) {
+                $scoreboard = $this->getScoreboard($contest, $jury, $scoreFilter);
+            }
 
             $data['contest']              = $contest;
             $data['scoreFilter']          = $scoreFilter;
@@ -795,7 +802,7 @@ class ScoreboardService
             $data['maxWidth']             = $this->dj->dbconfig_get('team_column_width', 0);
         }
 
-        if ($request->isXmlHttpRequest()) {
+        if ($request && $request->isXmlHttpRequest()) {
             $data['jury']   = $jury;
             $data['public'] = $public;
             $data['ajax']   = true;
