@@ -16,13 +16,15 @@ use Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -46,19 +48,27 @@ class ScoreboardMergeCommand extends Command
     protected $twig;
 
     /**
+     * @var HttpClientInterface
+     */
+    protected $client;
+
+    /**
      * ScoreboardMergeCommand constructor.
-     * @param DOMJudgeService $dj
-     * @param Environment     $twig
-     * @param string|null     $name
+     * @param DOMJudgeService     $dj
+     * @param Environment         $twig
+     * @param HttpClientInterface $client
+     * @param string|null         $name
      */
     public function __construct(
         DOMJudgeService $dj,
         Environment $twig,
+        HttpClientInterface $client,
         string $name = null
     ) {
         parent::__construct($name);
         $this->dj = $dj;
         $this->twig = $twig;
+        $this->client = $client;
     }
 
     /**
@@ -74,6 +84,13 @@ class ScoreboardMergeCommand extends Command
                       'http://ragnargrootkoerkamp.nl/upload/uva 2' . PHP_EOL . PHP_EOL .
                       'This fetches teams and scoreboard data from API endpoints and prints a merged HTML scoreboard. It assumes times in minutes.'
             )
+            ->addOption(
+                'category',
+                'c',
+                InputOption::VALUE_REQUIRED,
+                'Name of the team category to use',
+                'Participant'
+            )
             ->addArgument(
                 'contest-name',
                 InputArgument::REQUIRED,
@@ -84,8 +101,8 @@ class ScoreboardMergeCommand extends Command
                 InputArgument::REQUIRED | InputArgument::IS_ARRAY,
                 'Alternating URL location of the scoreboard to merge and a comma separated list of group_ids to include.' . PHP_EOL .
                 'If an URL and it requires authentication, use username:password@ in the URL' . PHP_EOL .
-                'URL should have the form https://<domain>/api/v4/contests/<contestid>/' . PHP_EOL .
-                'Only the /teams and /scoreboard endpoint are used, so manually putting files in those locations can work as well.'
+                'URL should have the form https://<domain>/api/v4/contests/<contestid>/ for DOMjudge or point to any ICPC Contest API compatible contest' . PHP_EOL .
+                'Only the /teams, /organizations, /problems and /scoreboard endpoint are used, so manually putting files in those locations can work as well.'
             );
     }
 
@@ -103,6 +120,7 @@ class ScoreboardMergeCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $style = new SymfonyStyle($input, $output);
         $teams = [];
         $nextTeamId = 0;
         $problems = [];
@@ -115,7 +133,7 @@ class ScoreboardMergeCommand extends Command
         $freezeData = null;
 
         $category = (new TeamCategory())
-            ->setName("Participants")
+            ->setName($input->getOption('category'))
             ->setCategoryid(0);
 
         $siteArguments = $input->getArgument('feed-url');
@@ -124,7 +142,7 @@ class ScoreboardMergeCommand extends Command
         $sites = [];
 
         if (count($siteArguments) % 2 != 0) {
-            echo "Provide an even number of arguments: all pairs of url and comma separated group ids.";
+            $style->error("Provide an even number of arguments: all pairs of url and comma separated group ids.");
             return 1;
         }
 
@@ -134,7 +152,7 @@ class ScoreboardMergeCommand extends Command
             # Some simple validation to make sure we're actually parsing group ids.
             $groupsString = $siteArguments[$i + 1];
             if (!preg_match('/^\d+(,\d+)*$/', $groupsString)) {
-                echo 'Argument does not look like a comma separated list of group ids: ' . $groupsString . PHP_EOL;
+                $style->error('Argument does not look like a comma separated list of group ids: ' . $groupsString);
                 return 1;
             }
             $site['group_ids'] = array_map(
@@ -145,9 +163,25 @@ class ScoreboardMergeCommand extends Command
 
         foreach ($sites as $site) {
             $path = $site['path'];
+            // Strip of last /
+            if (substr($path, -1) === '/') {
+                $path = substr($path, 0, strlen($path) - 1);
+            }
 
-            $client = HttpClient::create();
-            $teamData = $client->request('GET', $path . '/teams')->toArray();
+            $teamData = $this->client
+                ->request('GET', $path . '/teams')->toArray();
+            $organizationData = $this->client
+                ->request('GET', $path . '/organizations')->toArray();
+            $problemData = $this->client
+                ->request('GET', $path . '/problems')->toArray();
+            $organizationMap = [];
+            foreach ($organizationData as $organization) {
+                $organizationMap[$organization['id']] = $organization;
+            }
+            $problemMap = [];
+            foreach ($problemData as $problem) {
+                $problemMap[$problem['id']] = $problem;
+            }
 
             $teamIdMap = [];
             foreach ($teamData as $team) {
@@ -167,15 +201,21 @@ class ScoreboardMergeCommand extends Command
                 $teamObj = (new Team())
                     ->setName($team['name'])
                     ->setEnabled(true);
-                if (!array_key_exists($team['affiliation'], $affiliations)) {
-                    $affiliation = (new TeamAffiliation())
-                        ->setName($team['affiliation'])
-                        ->setAffilid(count($affiliations));
-                    $affiliations[$team['affiliation']] = $affiliation;
+                if ($team['organization_id'] !== null &&
+                    isset($organizationMap[$team['organization_id']])) {
+                    $organization = $organizationMap[$team['organization_id']];
+                    $organizationName = $organization['formal_name'] ?? $organization['name'];
+
+                    if (!array_key_exists($organizationName, $affiliations)) {
+                        $affiliation = (new TeamAffiliation())
+                            ->setName($organizationName)
+                            ->setAffilid(count($affiliations));
+                        $affiliations[$organizationName] = $affiliation;
+                    }
+                    $teamObj->setAffiliation($affiliations[$organizationName]);
                 }
-                $teamObj
-                    ->setAffiliation($affiliations[$team['affiliation']])
-                    ->setCategory($category);
+
+                $teamObj->setCategory($category);
                 $oldid = $team['id'];
                 $newid = $nextTeamId++;
                 $teamObj->setTeamid($newid);
@@ -183,7 +223,7 @@ class ScoreboardMergeCommand extends Command
                 $teamIdMap[$oldid] = $newid;
             }
 
-            $scoreboardData = $client
+            $scoreboardData = $this->client
                 ->request('GET', $path . '/scoreboard')
                 ->toArray();
 
@@ -209,7 +249,8 @@ class ScoreboardMergeCommand extends Command
                 }
                 $team = $teams[$teamIdMap[$row['team_id']]];
                 foreach ($row['problems'] as $problem) {
-                    $label = $problem['label'];
+                    $problemId = $problem['problem_id'];
+                    $label = $problemMap[$problemId]['label'];
                     if (!array_key_exists($label, $problemIdMap)) {
                         $id = count($problems);
                         $problemObj = (new Problem())
@@ -265,7 +306,7 @@ class ScoreboardMergeCommand extends Command
             false
         );
 
-        # Render the scoreboard to HTML and print it.
+        // Render the scoreboard to HTML and print it.
         $data = [
             'current_public_contest' => $contest,
             'static'                 => true,
