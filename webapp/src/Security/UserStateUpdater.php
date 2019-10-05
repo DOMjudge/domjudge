@@ -7,7 +7,7 @@ use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Security\Core\Event\AuthenticationEvent;
+use Symfony\Component\Security\Core\Event\AuthenticationSuccessEvent;
 
 class UserStateUpdater implements EventSubscriberInterface
 {
@@ -32,10 +32,10 @@ class UserStateUpdater implements EventSubscriberInterface
      */
     public static function getSubscribedEvents()
     {
-        return [AuthenticationEvent::class => 'updateUserState'];
+        return [AuthenticationSuccessEvent::class => 'updateUserState'];
     }
 
-    public function updateUserState(AuthenticationEvent $event)
+    public function updateUserState(AuthenticationSuccessEvent $event)
     {
         if ($event->getAuthenticationToken() && ($user = $event->getAuthenticationToken()->getUser()) && $user instanceof User) {
             $user->setLastLogin(Utils::now());
