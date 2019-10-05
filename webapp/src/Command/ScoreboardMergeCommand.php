@@ -20,6 +20,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -30,6 +33,7 @@ use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
+use ZipArchive;
 
 
 /**
@@ -59,11 +63,23 @@ class ScoreboardMergeCommand extends Command
     protected $scoreboardService;
 
     /**
+     * @var RouterInterface
+     */
+    protected $router;
+
+    /**
+     * @var string
+     */
+    protected $projectDir;
+
+    /**
      * ScoreboardMergeCommand constructor.
      * @param DOMJudgeService     $dj
      * @param Environment         $twig
      * @param HttpClientInterface $client
      * @param ScoreboardService   $scoreboardService
+     * @param RouterInterface     $router
+     * @param string              $projectDir
      * @param string|null         $name
      */
     public function __construct(
@@ -71,6 +87,8 @@ class ScoreboardMergeCommand extends Command
         Environment $twig,
         HttpClientInterface $client,
         ScoreboardService $scoreboardService,
+        RouterInterface $router,
+        string $projectDir,
         string $name = null
     ) {
         parent::__construct($name);
@@ -78,6 +96,8 @@ class ScoreboardMergeCommand extends Command
         $this->twig = $twig;
         $this->client = $client;
         $this->scoreboardService = $scoreboardService;
+        $this->router = $router;
+        $this->projectDir = $projectDir;
     }
 
     /**
@@ -99,6 +119,11 @@ class ScoreboardMergeCommand extends Command
                 InputOption::VALUE_REQUIRED,
                 'Name of the team category to use',
                 'Participant'
+            )
+            ->addArgument(
+                'output-file',
+                InputArgument::REQUIRED,
+                'Where to store the ZIP file with the merged scoreboard'
             )
             ->addArgument(
                 'contest-name',
@@ -323,9 +348,62 @@ class ScoreboardMergeCommand extends Command
         $data['current_public_contest'] = $contest;
 
         $output = $this->twig->render('public/scoreboard.html.twig', $data);
+        // What files to add to the ZIP file
+        $filesToAdd = [
+            'webfonts/*',
+            'images/*'
+        ];
+        // Detect other files to add to the ZIP file by scanning the output.
+        // We need to do this anyway, since we need to rewrite the absolute paths.
+        $rootUrl = $this->router->generate('root');
+        // Parts of the output we should match and what to replace it with.
+        // ROOT_URL will be replaced with the root URL as defined above
+        $toMatch = [
+            '/href="ROOT_URL(.*)(?:\?.*)"/' => 'href="$1"',
+            '/src="ROOT_URL(.*)(?:\?.*)"/'  => 'src="$1"',
+        ];
+        foreach ($toMatch as $pattern => $replace) {
+            $pattern = str_replace(
+                'ROOT_URL', preg_quote($rootUrl, '/'), $pattern
+            );
+            preg_match_all($pattern, $output, $matches);
+            $filesToAdd = array_merge($filesToAdd, $matches[1]);
+            $output = preg_replace($pattern, $replace, $output);
+        }
 
-        // TODO: It would be nice to return a zip containing all relevant css/js/font files.
-        echo $output;
+        $zip = new ZipArchive();
+        $result = $zip->open($input->getArgument('output-file'),
+                             ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        if ($result !== true) {
+            $style->error('Can not open output file to write ZIP to: ' . $result);
+            return 1;
+        }
+        $zip->addFromString('index.html', $output);
+
+        // Now add all files we need
+        $publicDir = realpath(sprintf('%s/public/', $this->projectDir));
+        foreach ($filesToAdd as $fileToAdd) {
+            $finder = new Finder();
+            $lastSlash = strrpos($fileToAdd, '/');
+            if ($lastSlash === false) {
+                $path = '';
+                $file = $fileToAdd;
+            } else {
+                $path = substr($fileToAdd, 0, $lastSlash);
+                $file = substr($fileToAdd, $lastSlash + 1);
+            }
+            $pathRegex = sprintf('/^%s/', preg_quote($path, '/'));
+            /** @var SplFileInfo $fileInfo */
+            foreach ($finder->followLinks()->in($publicDir)->path($pathRegex)->name($file)->files() as $fileInfo) {
+                $zip->addFile($fileInfo->getRealPath(),
+                              $fileInfo->getRelativePathname());
+            }
+        }
+
+        $zip->close();
+
+        $style->success(sprintf('Merged scoreboard data written to %s',
+                                $input->getArgument('output-file')));
         return 0;
     }
 }
