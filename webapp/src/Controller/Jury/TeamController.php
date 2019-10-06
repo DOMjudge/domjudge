@@ -130,6 +130,14 @@ class TeamController extends BaseController
             'stats' => ['title' => 'stats', 'sort' => true,],
         ];
 
+        $userDataPerTeam = $this->em->createQueryBuilder()
+            ->from(Team::class, 't', 't.teamid')
+            ->leftJoin('t.users', 'u')
+            ->select('t.teamid', 'u.last_ip_address', 'u.first_login')
+            ->groupBy('t.teamid')
+            ->getQuery()
+            ->getResult();
+
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $teams_table      = [];
         foreach ($teams as $t) {
@@ -147,7 +155,7 @@ class TeamController extends BaseController
             $num_submitted = 0;
             $status = 'noconn';
             $statustitle = "no connections made";
-            if (!$t->getUsers()->isEmpty() && $t->getUsers()->first()->getFirstLogin()) {
+            if ($userDataPerTeam[$t->getTeamid()]['first_login'] ?? null) {
                 $status = 'crit';
                 $statustitle = "teampage viewed, no submissions";
             }
@@ -201,8 +209,8 @@ class TeamController extends BaseController
             }
 
             // render IP address nicely
-            if (!$t->getUsers()->isEmpty() && $t->getUsers()->first()->getLastIpAddress()) {
-                $teamdata['ip_address']['value'] = Utils::printhost($t->getUsers()->first()->getLastIpAddress());
+            if ($userDataPerTeam[$t->getTeamid()]['last_ip_address'] ?? null) {
+                $teamdata['ip_address']['value'] = Utils::printhost($userDataPerTeam[$t->getTeamid()]['last_ip_address']);
             }
             $teamdata['ip_address']['default']  = '-';
             $teamdata['ip_address']['cssclass'] = 'text-monospace small';
