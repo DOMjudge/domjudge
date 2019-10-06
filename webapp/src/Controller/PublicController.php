@@ -190,7 +190,7 @@ class PublicController extends BaseController
                 ->from(ContestProblem::class, 'cp')
                 ->join('cp.problem', 'p')
                 ->leftJoin('p.testcases', 'tc')
-                ->select('p', 'cp', 'SUM(tc.sample) AS numsamples')
+                ->select('partial p.{probid,name,externalid,problemtext_type}', 'cp', 'SUM(tc.sample) AS numsamples')
                 ->andWhere('cp.contest = :contest')
                 ->andWhere('cp.allowSubmit = 1')
                 ->setParameter(':contest', $contest)
