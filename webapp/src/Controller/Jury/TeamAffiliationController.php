@@ -189,20 +189,18 @@ class TeamAffiliationController extends BaseController
         ];
 
         if ($currentContest = $this->dj->getCurrentContest()) {
-            $data['scoreboard']           = $scoreboardService->getScoreboard($currentContest, true);
-            $data['showFlags']            = $this->dj->dbconfig_get('show_flags', true);
-            $data['showAffiliationLogos'] = $this->dj->dbconfig_get('show_affiliation_logos', false);
-            $data['showAffiliations']     = $this->dj->dbconfig_get('show_affiliations', true);
-            $data['showPending']          = $this->dj->dbconfig_get('show_pending', false);
-            $data['showTeamSubmissions']  = $this->dj->dbconfig_get('show_teams_submissions', true);
-            $data['scoreInSeconds']       = $this->dj->dbconfig_get('score_in_seconds', false);
-            $data['limitToTeams']         = $teamAffiliation->getTeams();
+            $data = array_merge(
+                $data,
+                $scoreboardService->getScoreboardTwigData(
+                    $request, null, '', true, false, false, $currentContest
+                )
+            );
+            $data['limitToTeams'] = $teamAffiliation->getTeams();
         }
 
         // For ajax requests, only return the submission list partial
         if ($request->isXmlHttpRequest()) {
             $data['displayRank'] = true;
-            $data['jury']        = true;
             return $this->render('partials/scoreboard_table.html.twig', $data);
         }
 

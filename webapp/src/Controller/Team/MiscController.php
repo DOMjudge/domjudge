@@ -11,11 +11,15 @@ use App\Service\ScoreboardService;
 use App\Service\SubmissionService;
 use App\Utils\Printing;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
@@ -73,9 +77,10 @@ class MiscController extends BaseController
     /**
      * @Route("", name="team_index")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return Response
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws Exception
      */
     public function homeAction(Request $request)
     {
@@ -95,20 +100,23 @@ class MiscController extends BaseController
             'maxWidth' => $this->dj->dbconfig_get('team_column_width', 0),
         ];
         if ($contest) {
-            $data['scoreboard']           = $this->scoreboardService->getTeamScoreboard($contest, $teamId, true);
-            $data['showFlags']            = $this->dj->dbconfig_get('show_flags', true);
-            $data['showAffiliationLogos'] = $this->dj->dbconfig_get('show_affiliation_logos', false);
-            $data['showAffiliations']     = $this->dj->dbconfig_get('show_affiliations', true);
-            $data['showPending']          = $this->dj->dbconfig_get('show_pending', false);
-            $data['showTeamSubmissions']  = $this->dj->dbconfig_get('show_teams_submissions', true);
-            $data['scoreInSeconds']       = $this->dj->dbconfig_get('score_in_seconds', false);
+            $scoreboard = $this->scoreboardService
+                ->getTeamScoreboard($contest, $teamId, true);
+            $data = array_merge(
+                $data,
+                $this->scoreboardService->getScoreboardTwigData(
+                    $request, null, '', true, false, false,
+                    $contest, $scoreboard
+                )
+            );
+            $data['limitToTeams'] = [$team];
             $data['verificationRequired'] = $this->dj->dbconfig_get('verification_required', false);
-            $data['limitToTeams']         = [$team];
             // We need to clear the entity manager, because loading the team scoreboard seems to break getting submission
             // contestproblems for the contest we get the scoreboard for
             $this->em->clear();
             $data['submissions'] = $this->submissionService->getSubmissionList([$contest->getCid() => $contest],
-                                                                               ['teamid' => $teamId], 0)[0];
+                                                                               ['teamid' => $teamId],
+                                                                               0)[0];
 
             /** @var Clarification[] $clarifications */
             $clarifications = $this->em->createQueryBuilder()
@@ -161,7 +169,7 @@ class MiscController extends BaseController
      * @param Request         $request
      * @param RouterInterface $router
      * @param int             $contestId
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function changeContestAction(Request $request, RouterInterface $router, int $contestId)
     {
@@ -177,8 +185,8 @@ class MiscController extends BaseController
     /**
      * @Route("/print", name="team_print")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @return Response
+     * @throws Exception
      */
     public function printAction(Request $request)
     {

@@ -284,14 +284,16 @@ class TeamController extends BaseController
         }
 
         if ($currentContest) {
-            $data['scoreboard']           = $scoreboardService->getTeamScoreboard($currentContest, $teamId, true);
-            $data['showFlags']            = $this->dj->dbconfig_get('show_flags', true);
-            $data['showAffiliationLogos'] = $this->dj->dbconfig_get('show_affiliation_logos', false);
-            $data['showAffiliations']     = $this->dj->dbconfig_get('show_affiliations', true);
-            $data['showPending']          = $this->dj->dbconfig_get('show_pending', false);
-            $data['showTeamSubmissions']  = $this->dj->dbconfig_get('show_teams_submissions', true);
-            $data['scoreInSeconds']       = $this->dj->dbconfig_get('score_in_seconds', false);
-            $data['limitToTeams']         = [$team];
+            $scoreboard = $scoreboardService
+                ->getTeamScoreboard($currentContest, $teamId, true);
+            $data = array_merge(
+                $data,
+                $scoreboardService->getScoreboardTwigData(
+                    $request, null, '', true, false, false,
+                    $currentContest, $scoreboard
+                )
+            );
+            $data['limitToTeams'] = [$team];
         }
 
         // We need to clear the entity manager, because loading the team scoreboard seems to break getting submission
