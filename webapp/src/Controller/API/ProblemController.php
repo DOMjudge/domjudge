@@ -136,14 +136,14 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      * )
      * @SWG\Response(
      *     response="200",
-     *     description="Returns the IDs of the just imported problems and produced messages",
+     *     description="Returns the IDs of the imported problems and any messages produced",
      *     @SWG\Schema(
      *         type="object",
      *         @SWG\Property(property="problem_ids", type="array",
      *             @SWG\Items(type="integer", description="The IDs of the imported problems")
      *         ),
      *         @SWG\Property(property="messages", type="array",
-     *             @SWG\Items(type="string", description="Messages produced whiel adding problems")
+     *             @SWG\Items(type="string", description="Messages produced while adding problems")
      *         )
      *     )
      * )
