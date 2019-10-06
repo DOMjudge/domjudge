@@ -870,7 +870,10 @@ class ScoreboardService
     }
 
     /**
-     * Get the problems to display on the scoreboard
+     * Get the problems to display on the scoreboard.
+     *
+     * Note that this will return only a partial object for optimization purposes.
+     *
      * @param Contest $contest
      * @return ContestProblem[]
      */
@@ -878,7 +881,7 @@ class ScoreboardService
     {
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
-            ->select('cp, p')
+            ->select('cp, partial p.{probid,externalid,name}')
             ->innerJoin('cp.problem', 'p')
             ->andWhere('cp.allowSubmit = 1')
             ->andWhere('cp.contest = :contest')
