@@ -174,7 +174,7 @@ class ProblemController extends BaseController
         }
 
         $problems = $this->em->createQueryBuilder()
-            ->select('p', 'COUNT(tc.testcaseid) AS testdatacount')
+            ->select('partial p.{probid,name,timelimit,memlimit,outputlimit}', 'COUNT(tc.testcaseid) AS testdatacount')
             ->from(Problem::class, 'p')
             ->leftJoin('p.testcases', 'tc')
             ->orderBy('p.probid', 'ASC')
