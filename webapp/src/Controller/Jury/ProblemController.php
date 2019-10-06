@@ -198,6 +198,19 @@ class ProblemController extends BaseController
                 array_slice($table_fields, 1, null, true);
         }
 
+        $contestCountData = $this->em->createQueryBuilder()
+            ->from(ContestProblem::class, 'cp')
+            ->select('COUNT(cp.shortname) AS count', 'p.probid')
+            ->join('cp.problem', 'p')
+            ->groupBy('cp.problem')
+            ->getQuery()
+            ->getResult();
+
+        $contestCounts = [];
+        foreach ($contestCountData as $problemCount) {
+            $contestCounts[$problemCount['probid']] = $problemCount['count'];
+        }
+
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $problems_table   = [];
         foreach ($problems as $row) {
@@ -268,7 +281,7 @@ class ProblemController extends BaseController
 
             // merge in the rest of the data
             $problemdata = array_merge($problemdata, [
-                'num_contests' => ['value' => (int)($p->getContestProblems()->count())],
+                'num_contests' => ['value' => (int)($contestCounts[$p->getProbid()] ?? 0)],
                 'num_testcases' => ['value' => (int)$row['testdatacount']],
             ]);
 
