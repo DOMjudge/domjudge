@@ -684,8 +684,8 @@ class ImportExportService
                 if (!$teamCategory) {
                     $teamCategory = new TeamCategory();
                     $teamCategory
-                        ->setCategoryid($teamItem['categoryid'])
-                        ->setName($teamItem['categoryid'] . ' - auto-create during import');
+                        ->setCategoryid((int)$teamItem['team']['categoryid'])
+                        ->setName($teamItem['team']['categoryid'] . ' - auto-create during import');
                     $this->em->persist($teamCategory);
                     $this->dj->auditlog('team_category', $teamCategory->getCategoryid(), 'added',
                                                      'imported from tsv');
