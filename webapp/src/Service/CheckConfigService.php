@@ -451,26 +451,27 @@ class CheckConfigService
                 $moreproblemerrors[$probid] .= sprintf("problem-specific memory limit %s is larger than global script filesize limit (%s).\n", $memlimit, $script_filesize_limit);
             }
 
-            $tcs = $problem->getTestcases();
-            if (count($tcs) === 0) {
+            $tcs_size = $this->em->createQueryBuilder()
+                ->select('tc.testcaseid', 'tc.rank', 'length(tcc.output) as output_size' )
+                ->from(Testcase::class, 'tc')
+                ->join('tc.content', 'tcc')
+                ->andWhere('tc.probid = :probid')
+                ->setParameter(':probid', $probid)
+                ->getQuery()
+                ->getResult();
+            if (count($tcs_size) === 0) {
                 $result = 'E';
                 $moreproblemerrors[$probid] .= sprintf("No testcases for p%s\n", $probid);
             } else {
                 $problem_output_limit = 1024 * ($problem->getOutputLimit() ?: $output_limit);
-                $tcsizequery = $this->em->createQueryBuilder()
-                     ->select('tc.testcaseid')
-                     ->from(Testcase::class, 'tc')
-                     ->join('tc.content', 'tcc')
-                     ->where('length(tcc.output) > :maxoutput')
-                     ->andWhere('tc.probid = :probid')
-                     ->setParameter(':probid', $probid)
-                     ->setParameter(':maxoutput', $problem_output_limit)
-                     ->getQuery()
-                     ->getResult();
-                foreach ($tcsizequery as $row) {
-                    $result = 'E';
-                    $moreproblemerrors[$probid] .= sprintf("Testcase number %s for p%s exceeds output limit of %s\n",
-                    $row['testcaseid'], $probid, $problem_output_limit);
+                foreach ($tcs_size as $row) {
+                    if ($row['output_size'] > $problem_output_limit) {
+                        $result = 'E';
+                        $moreproblemerrors[$probid] .= sprintf(
+                            "Testcase %s for p%s exceeds output limit of %s\n",
+                            $row['rank'], $probid, $problem_output_limit
+                        );
+                    }
                 }
             }
         }
