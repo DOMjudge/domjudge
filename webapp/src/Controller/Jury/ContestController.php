@@ -412,7 +412,7 @@ class ContestController extends BaseController
         $problems = $this->em->createQueryBuilder()
             ->from(ContestProblem::class, 'cp')
             ->join('cp.problem', 'p')
-            ->select('cp', 'p')
+            ->select('cp', 'partial p.{probid,externalid,name,timelimit,memlimit}')
             ->andWhere('cp.contest = :contest')
             ->setParameter(':contest', $contest)
             ->orderBy('cp.shortname')
