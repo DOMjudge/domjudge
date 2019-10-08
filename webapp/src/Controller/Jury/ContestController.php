@@ -83,7 +83,8 @@ class ContestController extends BaseController
         $em = $this->em;
 
         if ($doNow = (array)$request->request->get('donow')) {
-            $times         = ['activate', 'start', 'freeze', 'end', 'unfreeze', 'finalize', 'deactivate'];
+            $times         = ['activate', 'start', 'freeze', 'end',
+                              'unfreeze', 'finalize', 'deactivate'];
             $start_actions = ['delay_start', 'resume_start'];
             $actions       = array_merge($times, $start_actions);
 
@@ -98,11 +99,16 @@ class ContestController extends BaseController
 
             $time = key($doNow);
             if (!in_array($time, $actions, true)) {
-                throw new BadRequestHttpException(sprintf("Unknown value '%s' for timetype", $time));
+                throw new BadRequestHttpException(
+                    sprintf("Unknown value '%s' for timetype", $time)
+                );
             }
 
             if ($time === 'finalize') {
-                return $this->redirectToRoute('jury_contest_finalize', ['contestId' => $contest->getCid()]);
+                return $this->redirectToRoute(
+                    'jury_contest_finalize',
+                    ['contestId' => $contest->getCid()]
+                );
             }
 
             $now       = (int)floor(Utils::now());
@@ -114,29 +120,44 @@ class ContestController extends BaseController
             if (in_array($time, $start_actions, true)) {
                 $enabled = $time === 'delay_start' ? 0 : 1;
                 if (Utils::difftime((float)$contest->getStarttime(false), $now) <= $maxSeconds) {
-                    $this->addFlash('error', sprintf("Cannot %s less than %d seconds before contest start.",
-                                                     $time, $maxSeconds));
+                    $this->addFlash(
+                        'error',
+                        sprintf("Cannot %s less than %d seconds before contest start.",
+                                $time, $maxSeconds)
+                    );
                     return $this->redirectToRoute('jury_contests');
                 }
                 $contest->setStarttimeEnabled($enabled);
                 $em->flush();
-                $this->eventLogService->log('contest', $contest->getCid(), EventLogService::ACTION_UPDATE,
-                                            $contest->getCid());
-                $this->addFlash('scoreboard_refresh', 'After changing the contest start time, it may be necessary to recalculate any cached scoreboards.');
+                $this->eventLogService->log(
+                    'contest',
+                    $contest->getCid(),
+                    EventLogService::ACTION_UPDATE,
+                    $contest->getCid()
+                );
+                $this->addFlash('scoreboard_refresh',
+                                'After changing the contest start time, it may be ' .
+                                'necessary to recalculate any cached scoreboards.');
                 return $this->redirectToRoute('jury_contests');
             }
 
             $juryTimeData = $contest->getJuryTimeData();
             if (!$juryTimeData[$time]['show_button']) {
-                throw new BadRequestHttpException(sprintf('Cannot update %s time at this moment', $time));
+                throw new BadRequestHttpException(
+                    sprintf('Cannot update %s time at this moment', $time)
+                );
             }
 
             // starttime is special because other, relative times depend on it.
             if ($time == 'start') {
-                if ($contest->getStarttimeEnabled() && Utils::difftime((float)$contest->getStarttime(false),
-                                                                       $now) <= $maxSeconds) {
-                    $this->addFlash('danger', sprintf("Cannot update starttime less than %d seconds before contest start.",
-                                                              $maxSeconds));
+                if ($contest->getStarttimeEnabled() &&
+                    Utils::difftime((float)$contest->getStarttime(false),
+                                    $now) <= $maxSeconds) {
+                    $this->addFlash(
+                        'danger',
+                        sprintf("Cannot update starttime less than %d seconds before contest start.",
+                                $maxSeconds)
+                    );
                     return $this->redirectToRoute('jury_contests');
                 }
                 $contest
@@ -145,16 +166,26 @@ class ContestController extends BaseController
                     ->setStarttimeEnabled(true);
                 $em->flush();
 
-                $this->eventLogService->log('contest', $contest->getCid(), EventLogService::ACTION_UPDATE,
-                                            $contest->getCid());
-                $this->addFlash('scoreboard_refresh', 'After changing the contest start time, it may be necessary to recalculate any cached scoreboards.');
+                $this->eventLogService->log(
+                    'contest',
+                    $contest->getCid(),
+                    EventLogService::ACTION_UPDATE,
+                    $contest->getCid()
+                );
+                $this->addFlash('scoreboard_refresh',
+                                'After changing the contest start time, it may be ' .
+                                'necessary to recalculate any cached scoreboards.');
                 return $this->redirectToRoute('jury_contests');
             } else {
                 $method = sprintf('set%stimeString', $time);
                 $contest->{$method}($nowstring);
                 $em->flush();
-                $this->eventLogService->log('contest', $contest->getCid(), EventLogService::ACTION_UPDATE,
-                                            $contest->getCid());
+                $this->eventLogService->log(
+                    'contest',
+                    $contest->getCid(),
+                    EventLogService::ACTION_UPDATE,
+                    $contest->getCid()
+                );
                 return $this->redirectToRoute('jury_contests');
             }
         }
@@ -167,12 +198,13 @@ class ContestController extends BaseController
             ->getQuery()->getResult();
 
         $table_fields = [
-            'cid' => ['title' => 'CID', 'sort' => true],
-            'shortname' => ['title' => 'shortname', 'sort' => true],
-            'name' => ['title' => 'name', 'sort' => true],
+            'cid'          => ['title' => 'CID', 'sort' => true],
+            'shortname'    => ['title' => 'shortname', 'sort' => true],
+            'name'         => ['title' => 'name', 'sort' => true],
             'activatetime' => ['title' => 'activate', 'sort' => true],
-            'starttime' => ['title' => 'start', 'sort' => true, 'default_sort' => true, 'default_sort_order' => 'desc'],
-            'endtime' => ['title' => 'end', 'sort' => true],
+            'starttime'    => ['title' => 'start', 'sort' => true,
+                               'default_sort' => true, 'default_sort_order' => 'desc'],
+            'endtime'      => ['title' => 'end', 'sort' => true],
         ];
 
         $currentContests = $this->dj->getCurrentContests();
@@ -209,9 +241,9 @@ class ContestController extends BaseController
 
         $table_fields = array_merge($table_fields, [
             'process_balloons' => ['title' => 'process<br/>balloons?', 'sort' => true],
-            'public' => ['title' => 'public?', 'sort' => true],
-            'num_teams' => ['title' => '# teams', 'sort' => true],
-            'num_problems' => ['title' => '# problems', 'sort' => true],
+            'public'           => ['title' => 'public?', 'sort' => true],
+            'num_teams'        => ['title' => '# teams', 'sort' => true],
+            'num_problems'     => ['title' => '# problems', 'sort' => true],
         ]);
 
         // Insert external ID field when configured to use it
@@ -251,7 +283,9 @@ class ContestController extends BaseController
                 ];
             }
 
-            $contestdata['process_balloons'] = ['value' => $contest->getProcessBalloons() ? 'yes' : 'no'];
+            $contestdata['process_balloons'] = [
+                'value' => $contest->getProcessBalloons() ? 'yes' : 'no'
+            ];
             $contestdata['public'] = ['value' => $contest->getPublic() ? 'yes' : 'no'];
             if ($contest->isOpenToAllTeams()) {
                 $contestdata['num_teams'] = ['value' => '<i>all</i>'];
@@ -271,7 +305,9 @@ class ContestController extends BaseController
             }
 
             if (ALLOW_REMOVED_INTERVALS) {
-                $contestdata['num_removed_intervals'] = ['value' => $removedIntervals[$contest->getCid()]['num_removed_intervals'] ?? 0];
+                $contestdata['num_removed_intervals'] = [
+                    'value' => $removedIntervals[$contest->getCid()]['num_removed_intervals'] ?? 0
+                ];
             }
             $contestdata['num_problems'] = ['value' => $problems[$contest->getCid()] ?? 0];
 
@@ -394,8 +430,8 @@ class ContestController extends BaseController
     }
 
     /**
-     * @Route("/{contestId<\d+>}/remove-interval/{intervalId}", name="jury_contest_remove_interval",
-     *                                                              methods={"POST"})
+     * @Route("/{contestId<\d+>}/remove-interval/{intervalId}",
+     *        name="jury_contest_remove_interval", methods={"POST"})
      * @param int $contestId
      * @param int $intervalId
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -411,7 +447,9 @@ class ContestController extends BaseController
         /** @var RemovedInterval $removedInterval */
         $removedInterval = $this->em->getRepository(RemovedInterval::class)->find($intervalId);
         if (!$contest) {
-            throw new NotFoundHttpException(sprintf('Removed interval with ID %s not found', $intervalId));
+            throw new NotFoundHttpException(
+                sprintf('Removed interval with ID %s not found', $intervalId)
+            );
         }
 
         if ($removedInterval->getContest()->getCid() !== $contest->getCid()) {
@@ -502,15 +540,19 @@ class ContestController extends BaseController
     {
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'contest' => $contestId,
-                                                                                               'problem' => $probId
-                                                                                           ]);
+            'contest' => $contestId,
+            'problem' => $probId
+        ]);
         if (!$contestProblem) {
-            throw new NotFoundHttpException(sprintf('Contest problem with contest ID %s and problem ID %s not found', $contestId, $probId));
+            throw new NotFoundHttpException(
+                sprintf('Contest problem with contest ID %s and problem ID %s not found',
+                        $contestId, $probId)
+            );
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $contestProblem,
-                                   $contestProblem->getShortname(), $this->generateUrl('jury_contest', ['contestId' => $contestId]));
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel,
+                                   $contestProblem, $contestProblem->getShortname(),
+                                   $this->generateUrl('jury_contest', ['contestId' => $contestId]));
     }
 
     /**
@@ -531,8 +573,9 @@ class ContestController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->transactional(function () use ($contest) {
-                // A little 'hack': we need to first persist and save the contest, before we can persist and
-                // save the problem, because we need a contest ID
+                // A little 'hack': we need to first persist and save the
+                // contest, before we can persist and save the problem,
+                // because we need a contest ID
                 /** @var ContestProblem[] $problems */
                 $problems = $contest->getProblems()->toArray();
                 foreach ($contest->getProblems() as $problem) {

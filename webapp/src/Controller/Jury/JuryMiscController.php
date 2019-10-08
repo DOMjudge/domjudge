@@ -194,7 +194,8 @@ class JuryMiscController extends BaseController
      */
     public function refreshCacheAction(Request $request, ScoreboardService $scoreboardService)
     {
-        // Note: we use a XMLHttpRequest here as Symfony does not support streaming Twig outpit
+        // Note: we use a XMLHttpRequest here as Symfony does not support
+        // streaming Twig output.
 
         $contests = $this->dj->getCurrentContests();
         if ($cid = $request->request->get('cid')) {
@@ -202,7 +203,8 @@ class JuryMiscController extends BaseController
                 throw new BadRequestHttpException(sprintf('Contest %s not found', $cid));
             }
             $contests = [$cid => $contests[$cid]];
-        } elseif ($request->cookies->has('domjudge_cid') && ($contest = $this->dj->getCurrentContest())) {
+        } elseif ($request->cookies->has('domjudge_cid') &&
+                  ($contest = $this->dj->getCurrentContest())) {
             $contests = [$contest->getCid() => $contest];
         }
 
@@ -245,7 +247,8 @@ class JuryMiscController extends BaseController
                         ->getQuery()
                         ->getResult();
 
-                    $message = sprintf('<p>Recalculating all values for the scoreboard cache for contest %d (%d teams, %d problems)...</p>',
+                    $message = sprintf('<p>Recalculating all values for the scoreboard ' .
+                                       'cache for contest %d (%d teams, %d problems)...</p>',
                                        $contest->getCid(), count($teams), count($problems));
                     $progressReporter($message);
                     $progressReporter('<pre>');
