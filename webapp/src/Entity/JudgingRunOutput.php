@@ -16,6 +16,10 @@ use Doctrine\ORM\Mapping as ORM;
 class JudgingRunOutput
 {
     /**
+     * We use a ManyToOne instead of a OneToOne here, because otherwise the
+     * reverse of this relation will always be loaded. See the commit message of commit
+     * 9e421f96691ec67ed62767fe465a6d8751edd884 for a more elaborate explanation
+     *
      * @var JudgingRun
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="App\Entity\JudgingRun", inversedBy="output")
