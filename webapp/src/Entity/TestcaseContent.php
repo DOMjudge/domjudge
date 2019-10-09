@@ -17,7 +17,7 @@ class TestcaseContent
     /**
      * @var Testcase
      * @ORM\Id
-     * @ORM\OneToOne(targetEntity="Testcase", inversedBy="content")
+     * @ORM\ManyToOne(targetEntity="Testcase", inversedBy="content")
      * @ORM\JoinColumn(name="testcaseid", referencedColumnName="testcaseid", onDelete="CASCADE")
      */
     private $testcase;

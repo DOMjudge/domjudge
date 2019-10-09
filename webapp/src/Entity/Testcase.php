@@ -117,8 +117,8 @@ class Testcase
     private $external_runs;
 
     /**
-     * @var TestcaseContent
-     * @ORM\OneToOne(targetEntity="TestcaseContent", mappedBy="testcase", cascade={"persist"})
+     * @var TestcaseContent[]|ArrayCollection
+     * @ORM\OneToMany(targetEntity="TestcaseContent", mappedBy="testcase", cascade={"persist"}, orphanRemoval=true)
      * @Serializer\Exclude()
      */
     private $content;
@@ -137,6 +137,7 @@ class Testcase
     {
         $this->judging_runs = new ArrayCollection();
         $this->external_runs = new ArrayCollection();
+        $this->content = new ArrayCollection();
     }
 
     /**
@@ -414,8 +415,9 @@ class Testcase
      */
     public function setContent(?TestcaseContent $content)
     {
-        $this->content = $content;
-        $this->content->setTestcase($this);
+        $this->content->clear();
+        $this->content->add($content);
+        $content->setTestcase($this);
 
         return $this;
     }
@@ -427,7 +429,7 @@ class Testcase
      */
     public function getContent(): ?TestcaseContent
     {
-        return $this->content;
+        return $this->content->first() ?: null;
     }
 
     /**

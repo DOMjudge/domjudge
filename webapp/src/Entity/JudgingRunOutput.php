@@ -18,7 +18,7 @@ class JudgingRunOutput
     /**
      * @var JudgingRun
      * @ORM\Id
-     * @ORM\OneToOne(targetEntity="App\Entity\JudgingRun", inversedBy="output")
+     * @ORM\ManyToOne(targetEntity="App\Entity\JudgingRun", inversedBy="output")
      * @ORM\JoinColumn(name="runid", referencedColumnName="runid", onDelete="CASCADE")
      */
     private $run;
