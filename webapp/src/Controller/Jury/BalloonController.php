@@ -160,7 +160,8 @@ class BalloonController extends AbstractController
             $comments = [];
             if ($AWARD_BALLOONS['contest'][$contest] == $balloonId) {
                 $comments[] = 'first in contest';
-            } elseif (in_array($balloonId, $AWARD_BALLOONS['problem'][$balloonsData['probid']], true)) {
+            } elseif (is_array($AWARD_BALLOONS['problem'][$balloonsData['probid']])
+                   && in_array($balloonId, $AWARD_BALLOONS['problem'][$balloonsData['probid']], true)) {
                 $comments[] = 'first for problem';
             }
 
