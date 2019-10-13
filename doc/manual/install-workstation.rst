@@ -17,7 +17,7 @@ Command line submit client
 DOMjudge comes with a command line submit client which makes it really
 convenient for teams to submit their solutions to DOMjudge.
 
-In order to build the submit clent, you need libcURL, libJSONcpp and
+In order to build the submit client, you need libcURL, libJSONcpp and
 optionally libmagic. To install this on Debian-like distributions::
 
   sudo apt install libcurl4-gnutls-dev libjsoncpp-dev libmagic-dev
@@ -26,9 +26,9 @@ Or on RedHat/CentOS/Fedora::
 
   sudo yum install libcurl-devel jsoncpp-devel file-devel
 
-Run::
+Then run (adapt the URL to your environment)::
 
-  ./configure --enable-static-linking --with-baseurl="https://domjudge.example.org"
+  ./configure --enable-static-linking --with-baseurl="https://yourhost.example.edu/domjudge"
   make submitclient
 
 You can now copy this client from ``submit/submit`` to the workstations.
@@ -37,7 +37,7 @@ In order for the client to authenticate to DOMjudge, credentials can be
 pre-provisioned in the file ``~/.netrc`` in the user's homedir, with example
 content::
 
-  machine domserver.example.com login user0123 password Fba^2bHzz
+  machine yourhost.example.edu login user0123 password Fba^2bHzz
 
 See the netrc(4) manual page for more details. You can run ``./submit --help``
 to inspect its configuration and options.
