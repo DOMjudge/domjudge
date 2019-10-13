@@ -162,7 +162,8 @@ class BalloonController extends Controller
             $comments = [];
             if ($AWARD_BALLOONS['contest'][$contest] == $balloonId) {
                 $comments[] = 'first in contest';
-            } elseif (in_array($balloonId, $AWARD_BALLOONS['problem'][$balloonsData['probid']], true)) {
+            } elseif (isset($AWARD_BALLOONS['problem'][$balloonsData['probid']])
+                   && in_array($balloonId, $AWARD_BALLOONS['problem'][$balloonsData['probid']], true)) {
                 $comments[] = 'first for problem';
             }
 
