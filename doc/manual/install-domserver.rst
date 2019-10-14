@@ -35,7 +35,7 @@ DOMjudge server as mentioned above when using Debian GNU/Linux, or one of its
 derivate distributions like Ubuntu::
 
   sudo apt install zip unzip mariadb-server \
-        apache2 php libapache2-mod-php \
+        apache2 php php-fpm \
         php-gd php-curl php-mysql php-json php-xml php-intl php-mbstring \
         ntp
 
@@ -100,7 +100,8 @@ Web server configuration
 For the web interface, you need to have a web server (e.g. nginx or Apache)
 installed on the domserver and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
-details.
+details. In the examples below, replace ``7.3`` with the PHP version
+you're installing.
 
 To configure the Apache web server for DOMjudge, use the Apache
 configuration snippet from ``etc/apache.conf``. It contains
@@ -111,8 +112,9 @@ settings. Reload the web server for changes to take effect.
 ::
 
   ln -s <DOMSERVER_INSTALL_PATH>/etc/apache.conf /etc/apache2/conf-available/domjudge.conf
-  a2enmod rewrite
-  a2enconf domjudge
+  ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/7.3/fpm/pool.d/domjudge.conf
+  a2enmod proxy_fcgi setenvif rewrite
+  a2enconf php7.3-fpm domjudge
   # Edit the file /etc/apache2/conf-available/domjudge.conf to your needs
   service apache2 reload
 
@@ -123,10 +125,10 @@ from ``apache2-utils`` though. To use this configuration
 file, perform the following steps::
 
   ln -s <DOMSERVER_INSTALL_PATH>/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
-  ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/7.0/fpm/pool.d/domjudge.conf
+  ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/7.3/fpm/pool.d/domjudge.conf
   # Edit the files /etc/nginx/sites-enabled/domjudge and
-  # /etc/php/7.0/fpm/pool.d/domjudge.conf to your needs
-  service php7.0-fpm reload
+  # /etc/php/7.3/fpm/pool.d/domjudge.conf to your needs
+  service php7.3-fpm reload
   service nginx reload
 
 The judgehosts connect to DOMjudge via the DOMjudge API so need
