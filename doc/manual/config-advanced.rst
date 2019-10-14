@@ -9,7 +9,7 @@ team pictures and a page-wide banner on the public interface.
 You can place the images under the path `public/images/` as
 follows:
 
-- *Country flags*: are shipped with DOmjudge under
+- *Country flags*: are shipped with DOMjudge under
   `public/images/countries/XXX.png` with *XXX* being the country code.
   You can replace them if you want different flags.
 - *Affiliation logos*: these will be shown with the teams that are
