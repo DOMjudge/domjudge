@@ -21,15 +21,10 @@ import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
 
-project = 'DOMjudge'
 copyright = '2004-2019 by the DOMjudge developers and contributors'
 author = 'DOMjudge Team'
 
-# The short X.Y version
-version = '@DOMJUDGE_VERSION@'
-# The full version, including alpha/beta/rc tags
-release = '@DOMJUDGE_VERSION@'
-
+exec(open("version.py").read())
 
 # -- General configuration ---------------------------------------------------
 

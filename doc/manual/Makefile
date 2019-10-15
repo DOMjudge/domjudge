@@ -1,19 +1,28 @@
-# Minimal makefile for Sphinx documentation
-#
+ifndef TOPDIR
+TOPDIR=../..
+endif
+include $(TOPDIR)/Makefile.global
 
-# You can set these variables from the command line.
-SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
-SOURCEDIR     = .
-BUILDDIR      = _build
+SUBST_CONFIGS = version.py
 
-# Put it first so that "make" without argument is like "make help".
-help:
-	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+$(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
+	$(substconfigvars)
 
-.PHONY: help Makefile
+config: $(SUBST_CONFIGS)
 
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+ifeq ($(BUILD_DOCS),yes)
+docs distdocs: html
+endif
+
+install-docs: docs
+
+clean-l:
+	rm -rf build
+
+distclean-l:
+	-rm -f $(SUBST_CONFIGS)
+
+html: config
+	sphinx-build -M $@ . build
+
+.PHONY: docs distdocs install-docs html
