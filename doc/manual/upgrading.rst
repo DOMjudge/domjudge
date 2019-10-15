@@ -1,7 +1,7 @@
 Upgrading
 =========
 
-There is support to upgrade an existing DOMjudge installation to 
+There is support to upgrade an existing DOMjudge installation to
 a newer version.
 
 .. warning::
@@ -17,11 +17,10 @@ transferring the configuration settings from the old version.
 After upgrading the files, you can run ``dj_setup_database upgrade``
 to migrate the database.
 
-Since DOMjudge uses Doctrine migrations, it is possible to upgrade
-from one version to another. This is only supported
-from DOMjudge 7.0 onwards. This means that if you run a DOMjudge
-version before 7.0, you first need to complete an upgrade to 7.0
-before upgrading to a newer version.
+Since version 7.0 DOMjudge uses Doctrine migrations to upgrade the
+database schema. This means that if you run a DOMjudge version before
+7.0, you first need to complete an upgrade to 7.0 before upgrading to
+a newer version.
 
 If you have any active contests, it may be advisable to run
 "Refresh scoreboard cache" from the DOMjudge web interface after
