@@ -535,6 +535,18 @@ class EventLogService implements ContainerAwareInterface
 
             // Insert the event
             $this->insertEvent($contest, 'state', '', $dataToInsert);
+
+            if ($field === 'finalized') {
+                // Insert all awards events
+                $url = sprintf('/contests/%s/awards', $contest->getApiId($this));
+                $awards = [];
+                $this->dj->withAllRoles(function () use ($url, &$awards) {
+                    $awards = $this->dj->internalApiRequest($url);
+                });
+                foreach ($awards as $award) {
+                    $this->insertEvent($contest, 'awards', $award['id'], $award);
+                }
+            }
         }
 
         // If we already have an event with end_of_updates, we are done
