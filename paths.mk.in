@@ -138,6 +138,7 @@ define substconfigvars
 @[ -n "$(QUIET)" ] || echo "Substituting configure variables in '$@'."
 @cat $< | sed \
 	-e "s|@configure_input[@]|Generated from '$<' on `date`.|g" \
+	-e 's,@PACKAGE_NAME[@],@PACKAGE_NAME@,g' \
 	-e 's,@DOMJUDGE_VERSION[@],@DOMJUDGE_VERSION@,g' \
 	-e 's,@domserver_bindir[@],@domserver_bindir@,g' \
 	-e 's,@domserver_etcdir[@],@domserver_etcdir@,g' \
