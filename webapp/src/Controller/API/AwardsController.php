@@ -117,10 +117,12 @@ class AwardsController extends AbstractRestController
         $additionalBronzeMedals = $contest->getB() ?? 0;
         $scoreboard = $this->scoreboardService->getScoreboard($contest, !$public, null, true);
         $group_winners = $problem_winners = [];
+        $groups = [];
         foreach ($scoreboard->getTeams() as $team) {
             $teamid = (string)$team->getApiId($this->eventLogService);
             if ($scoreboard->isBestInCategory($team)) {
                 $group_winners[$team->getCategoryId()][] = $teamid;
+                $groups[$team->getCategoryid()] = $team->getCategory()->getName();
             }
             foreach($scoreboard->getProblems() as $problem) {
                 $probid = (string)$problem->getApiId($this->eventLogService);
@@ -133,7 +135,7 @@ class AwardsController extends AbstractRestController
         foreach ($group_winners as $id => $team_ids) {
             $type = 'group-winner-' . $id;
             $result = [ 'id' => $type,
-                'citation' => 'Winner(s) of group ' . $id,
+                'citation' => 'Winner(s) of group ' . $groups[$id],
                 'team_ids' => $team_ids];
             if ($requestedType === $type) {
                 return $result;
