@@ -5,7 +5,7 @@ API
 ```
 DOMjudge comes with a fully featured REST API. It is based on the
 `CCS Contest API specification
-<https://clics.ecs.baylor.edu/index.php?title=Contest_API>`
+<https://clics.ecs.baylor.edu/index.php?title=Contest_API>`_
 to which some DOMjudge-specific API endpoints have been added. Full documentation
 on the available API endpoints can be found at
 `http(s)://yourhost.example.edu/domjudge/api/doc`.

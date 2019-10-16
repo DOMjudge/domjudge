@@ -9,13 +9,17 @@ team pictures and a page-wide banner on the public interface.
 You can place the images under the path `public/images/` as
 follows:
 
-- *Country flags*: are shipped with DOMjudge under
+- *Country flags* are shown when the ``show_flags`` configuration option
+  is enabled. They are shipped with DOMjudge under
   `public/images/countries/XXX.png` with *XXX* being the country code.
   You can replace them if you want different flags.
 - *Affiliation logos*: these will be shown with the teams that are
-  part of the affilation. They can be placed in
+  part of the affilation, if the ``show_affiliation_logos`` configuration
+  option is enabled. They can be placed in
   `public/images/affiliations/1234.png` where *1234* is the numeric ID
-  of the affiliation as shown in the DOMjudge interface.
+  of the affiliation as shown in the DOMjudge interface. There is a
+  separate option ``show_affiliations`` that independently controls where
+  the affiliation *names* are shown on the scoreboard.
 - *Team pictures*: a photo of the team will be shown in the team details
   page if `public/images/teams/456.jpg` exists, where *456* is the
   team's numeric ID as shown in the DOMjudge interface.
@@ -25,7 +29,7 @@ follows:
 .. note::
 
   The IDs for affiliations and teams need to be the *external ID*
-  if the `data_source` setting of DOMjudge is set to external.
+  if the ``data_source`` setting of DOMjudge is set to external.
 
 Authentication methods
 ----------------------
@@ -41,7 +45,6 @@ Two other authentication methods are available:
 
 IP Address
 ``````````
-
 To enable the IP Address authentication method, you will need to edit
 the configuration option ``auth_methods`` to include ``ipaddress``.
 
@@ -54,7 +57,6 @@ account from the Users page.
 
 X-Headers
 `````````
-
 To enable the X-Headers authentication method, you will need to edit
 the configuration option ``auth_methods`` to include ``xheaders``.
 

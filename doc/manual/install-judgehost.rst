@@ -10,8 +10,8 @@ Requirements
 System requirements
 ```````````````````
 
-* The operating system is Linux variant. DOMjudge has mostly
-  been tested with Debian Linux, but should work on other environments.
+* The operating system is a Linux variant. DOMjudge has mostly
+  been tested with Debian and Ubuntu, but should work on other environments.
 * It is necessary that you have root access.
 * A TCP/IP network which connects the DOMserver and the judgehosts.
   The machines only need HTTP(S) access to the DOMserver. 

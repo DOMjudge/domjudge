@@ -39,7 +39,7 @@ Requirements and contest planning
 ---------------------------------
 
 DOMjudge requires the following to be available to run. Please refer to the
-domserver and judgehost chapters for detailed oftware requirements.
+domserver and judgehost chapters for detailed software requirements.
 
 * At least one machine to act as the *DOMjudge server* (or *domserver* for
   brevity). The machine needs to be runing Linux and a webserver
@@ -53,7 +53,7 @@ domserver and judgehost chapters for detailed oftware requirements.
 * *Team workstations*, one for each team. They require only a modern
   web browser to interface with DOMjudge, but of course need a local
   development environment for teams to develop and test solutions. Optionally
-  these have the DOMjudge command line client installed.
+  these have the DOMjudge submit client installed.
 
 * *Jury / admin workstations*. The jury members (persons) that want to
   configure and monitor the contest need just any workstation with a web
@@ -61,10 +61,10 @@ domserver and judgehost chapters for detailed oftware requirements.
   machines.
 
 One (virtual) machine is required to run the DOMserver. The minimum amount of
-judgehosts is also one, but preferably more: depending on configured timeouts,
-judging one solution can tie up a judgehost for several minutes, and if there's
-a problem with one judgehost it can be resolved while judging continues on the
-others.
+judgehosts is also one, but preferably more: depending on configured timelimits,
+and the amount of testcases per problem, judging one solution can tie up a
+judgehost for several minutes, and if there's a problem with one judgehost it
+can be resolved while judging continues on the others.
 
 As a rule of thumb, we recommend one judgehost per 20 teams.
 
@@ -134,6 +134,11 @@ individual files for acknowledgements.
 
 About the name and logo
 -----------------------
+
+.. image:: ../logos/DOMjudgelogo.*
+   :width: 100 px
+   :alt: DOMjudge logo
+   :align: right
 
 The name of this judging system is inspired by a very important and well known
 landmark in the city of Utrecht: the Dom tower.  The logo of the 2004 Dutch

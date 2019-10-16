@@ -17,7 +17,7 @@ people accessing your system. There are several roles possible:
 - Administrative user: can configure and change everything in DOMjudge.
 - Jury user: can view submissions and judgings. Can view clarification
   requests and send clarifications. Can rejudge non-correct judgings
-  (submissions judged *correct* can only be rejudged by an administrator.
+  (submissions judged *correct* can only be rejudged by an administrator).
 - Balloon runner: can only view the balloon queue and mark balloons as
   delivered.
 - Team member: can view its own team interface and submit solutions
@@ -30,8 +30,10 @@ To set up teams, you can start in the *Teams* page and add teams there.
 You then have the option to automatically create a corresponding user
 account that is associated with the team.
 
-It is also possible to use the *Import / Export* page to import ICPC-compatble
-tsv files with teams.
+It is also possible to use the *Import / Export* page to import
+`ICPC-compatible tsv files
+<https://clics.ecs.baylor.edu/index.php?title=Contest_Control_System_Requirements#teams.tsv>`_
+with teams.
 
 A jury or administrative user can also be associated with a team. This
 will enable that user to submit solutions to the system, or resubmit
@@ -101,7 +103,7 @@ see if a submission is close to the timelimit.
 
 Problems can be imported and exported into and from DOMjudge
 using zip-files that contain the problem metadata and testdata files,
-based on the *problemarchive.org* format.
+based on the `problemarchive.org format`_.
 
 Problems can have special *compare* and
 *run* scripts associated to them, to deal with problem
@@ -123,8 +125,7 @@ and maybe use their runtimes to set timelimits for the problems.
 The simplest way to do this is to include the jury solutions in a
 problem zip file and upload this. You can also upload a zip file
 containing just solutions to an existing problem. Note that the zip
-archive has to adhere to the `problemarchive.org format
-<https://www.problemarchive.org/wiki/index.php/Problem_Format>`_.
+archive has to adhere to the `problemarchive.org format`_.
 For this to work, the jury/admin user who uploads the problem has to have
 an associated team to which the solutions will be assigned. The
 solutions will automatically be judged if the contest is active (but
@@ -132,3 +133,4 @@ it need not have started yet). You can verify whether the submissions
 gave the expected answer in the Judging Verifier, available from
 the jury index page.
 
+.. _problemarchive.org format: https://www.problemarchive.org/wiki/index.php/Problem_Format

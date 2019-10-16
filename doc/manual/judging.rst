@@ -159,7 +159,7 @@ not run any part of DOMjudge as root; the parts that require it will gain root
 by themselves through sudo. Either run it as yourself or, probably better,
 create dedicated a user `domjudge` under which to install and run everything.
 
-..attention::
+.. attention::
 
   Do not confuse this with the `domjudge-run` user:
   this is a special user to run submissions as and should also not

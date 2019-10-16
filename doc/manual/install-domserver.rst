@@ -1,9 +1,8 @@
-Installation of the domserver
+Installation of the DOMserver
 =============================
 
-The DOMjudge server is the central entity (or toad stool) that runs the
-DOMjudge web interface and API that teams, jury members and the judgehosts
-connect to.
+The DOMjudge server is the central entity that runs the DOMjudge web interface
+and API that teams, jury members and the judgehosts connect to.
 
 Requirements
 ------------
@@ -12,10 +11,10 @@ System requirements
 ```````````````````
 
 * The operating system is Linux or another Unix variant. DOMjudge has mostly
-  been tested with Debian Linux, but should work on other environments.
+  been tested with Debian and Ubuntu, but should work on other environments.
 * It is probably necessary that you have root access to be able to install
   the necessary components, but it's not required for actually running the
-  domserver.
+  DOMserver.
 * A TCP/IP network which connects the DOMserver and the judgehosts, and
   DOMjudge and the team workstations. All of these machines only need HTTP(S)
   access to the DOMserver. 
@@ -98,7 +97,7 @@ Web server configuration
 ------------------------
 
 For the web interface, you need to have a web server (e.g. nginx or Apache)
-installed on the domserver and made sure that PHP correctly works
+installed on the DOMserver and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
 details. In the examples below, replace ``7.3`` with the PHP version
 you're installing.
@@ -137,7 +136,7 @@ to be able to access at least this part of the web interface.
 Log in to DOMjudge
 ------------------
 
-The domserver should now be operational. You can access the web application
+The DOMserver should now be operational. You can access the web application
 at your configured base URL. There's an ``admin`` user with initial password
 found in ``etc/initial_admin_password.secret``.
 
