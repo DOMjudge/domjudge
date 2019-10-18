@@ -16,9 +16,9 @@ DOMjudge Manual
    judging
    develop
 
+Appendices
+----------
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
+.. toctree::
+   quick-install
+   problem-format

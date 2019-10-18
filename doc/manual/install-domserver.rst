@@ -9,7 +9,6 @@ Requirements
 
 System requirements
 ```````````````````
-
 * The operating system is Linux or another Unix variant. DOMjudge has mostly
   been tested with Debian and Ubuntu, but should work on other environments.
 * It is probably necessary that you have root access to be able to install
@@ -21,7 +20,6 @@ System requirements
 
 Software requirements
 `````````````````````
-
 * A web server with support for PHP >= 7.1.3 and the ``mysqli``, ``curl``, ``gd``,
   ``mbstring, ``intl``, ``zip``, ``xml`` and ``json`` extensions for PHP.
 * MySQL or MariaDB >= 5.3.3 database. This can be on the same machine, but for
@@ -47,7 +45,6 @@ distributions like CentOS and Fedora::
 
 Installation
 ------------
-
 The DOMjudge build/install system consists of a ``configure``
 script and makefiles, but when installing it, some more care has to be
 taken than simply running ``./configure && make && make install``.
@@ -67,7 +64,6 @@ to perform these steps manually.
 
 Database configuration
 ----------------------
-
 DOMjudge uses a MySQL or MariaDB database server for information storage.
 Where this document talks about MySQL, it can be understood to also apply
 to MariaDB.
@@ -95,7 +91,6 @@ stored in ``etc/initial_admin_password.secret``.
 
 Web server configuration
 ------------------------
-
 For the web interface, you need to have a web server (e.g. nginx or Apache)
 installed on the DOMserver and made sure that PHP correctly works
 with it. Refer to the documentation of your web server and PHP for
@@ -135,7 +130,6 @@ to be able to access at least this part of the web interface.
 
 Log in to DOMjudge
 ------------------
-
 The DOMserver should now be operational. You can access the web application
 at your configured base URL. There's an ``admin`` user with initial password
 found in ``etc/initial_admin_password.secret``.

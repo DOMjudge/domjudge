@@ -92,14 +92,13 @@ all further uses of that executable.
 
 Programming languages
 ---------------------
-
 Compilers can be configured by creating or selecting/editing an executable in
 the web interface. When compiling a set of source files, the ``run``
 executable is invoked with the following arguments: destination file name,
 memory limit (in kB), main (first) source file, other source files.
 For more information, see for example the executables ``c`` or
-``java_javac_detect`` in the web interface. Note that compile
-scripts are included for most common languages already.
+``java_javac_detect`` in the web interface. For many common languages
+compile scripts are already included.
 
 Interpreted languages and non-statically linked binaries (for example,
 Python or Java) can in also be used, but require that all
@@ -115,7 +114,6 @@ and ``java_javac_detect`` in the list of executables.
 
 Special run and compare programs
 --------------------------------
-
 To allow for problems that do not fit within the standard scheme of
 fixed input and/or output, DOMjudge has the possibility to change the
 way submissions are run and checked for correctness.
@@ -246,7 +244,7 @@ to bind it to core ``X``.
 
 
 Multi-site contests
---------------------
+-------------------
 This manual assumed you are running a singe-site contest; that is, the teams
 are located closely together, probably in a single physical location. In a
 multi-site or distributed contest, teams from several remote locations use the

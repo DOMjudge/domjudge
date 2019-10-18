@@ -124,7 +124,7 @@ and maybe use their runtimes to set timelimits for the problems.
 
 The simplest way to do this is to include the jury solutions in a
 problem zip file and upload this. You can also upload a zip file
-containing just solutions to an existing problem. Note that the zip
+containing just solutions to an existing problem. The zip
 archive has to adhere to the `problemarchive.org format`_.
 For this to work, the jury/admin user who uploads the problem has to have
 an associated team to which the solutions will be assigned. The

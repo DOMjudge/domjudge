@@ -39,7 +39,6 @@ generates documentation from RST/LaTeX sources.
 
 Maintainer mode installation
 ````````````````````````````
-
 DOMjudge provides a special maintainer mode installation.
 This method does an in-place installation within the source
 tree. This allows one to immediately see effects when modifying
@@ -53,8 +52,8 @@ be run via makefile rules as follows::
   make maintainer-install
 
 Note that these targets have to be executed *separately* and
-they replace the steps described in the section
-Installation system.
+they replace the steps described in the chapters on installing
+the DOMserver or Judghost.
 
 Makefile structure
 ``````````````````
