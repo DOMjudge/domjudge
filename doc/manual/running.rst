@@ -33,9 +33,10 @@ the same information about the problem set. The jury can also send a
 clarification that does not correspond to a specific request. These
 will be termed *general clarification*.
 
+Handling clarification requests
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Under Clarifications, three lists are shown: new clarifications,
-answered clarifications and general clarifications. It lists the team
-login, the problem concerned, the time and an excerpt. Click the excerpt
+answered clarifications and general clarifications. Click the excerpt
 for details about that clarification request.
 
 Every incoming clarification request will initially be marked as
@@ -52,3 +53,23 @@ choose to either send it to the team that requested the clarification,
 or to all teams. In the latter case, make sure you phrase it in such a
 way that the message is self-contained (e.g. by keeping the quoted
 text), since the other teams cannot view the original request.
+
+In the DOMjudge configuration under ``clar_answers`` you can set predefined
+clarification responses that can be selected when processing incoming
+clarifications.
+
+Clarification categories and queues
+```````````````````````````````````
+When sending a clarification request, the team needs to select an
+appropriate *category* (or *subject*). DOMjudge will generate a category
+for every problem in every active contest. You can define additional
+categories in the DOMjudge configuration under ``clar_categories``.
+
+Categories are hence visible to the teams and they need to select one.
+In addition to this there's the concept of *queues*. Queues are purely
+internal to the jury, not visible to the outside world and can be used
+for internal workload assignment. In the DOMjudge configuration you can
+define in ``clar_queues`` the available queues and a
+``clar_default_problem_queue`` where newly created requests will end up in.
+On the clarification overview page, you can quickly assign incoming
+clarifications to a queue by pressing the queue's button in the table row.

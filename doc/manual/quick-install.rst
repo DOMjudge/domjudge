@@ -1,10 +1,10 @@
-Quick installation checklist
-============================
+Appendix: Quick installation checklist
+======================================
 
 .. note::
 
   This is not a replacement for the thorough installation
-  instructions below, but more a cheat-sheet for those who've already
+  instructions, but more a cheat-sheet for those who've already
   installed DOMjudge before and need a few hints. When in doubt, always
   consult the full installation instruction.
 

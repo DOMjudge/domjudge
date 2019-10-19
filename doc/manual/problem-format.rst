@@ -1,5 +1,5 @@
-Problem format specification
-============================
+Appendix: Problem format specification
+======================================
 
 DOMjudge supports the import and export of problems in a zip-bundle
 format.
@@ -37,6 +37,6 @@ chosen when creating a new problem. Test data files are added to set of test
 cases already present. Thus, one can easily add test cases to a configured
 problem by uploading a zip file that contains only testcase files. Any jury
 solutions present will be automatically submitted when ``allow_submit`` is
-``1``.
+``1`` and there's a team associated with the uploading user.
 
 .. _problemarchive.org format: https://www.problemarchive.org/wiki/index.php/Problem_Format

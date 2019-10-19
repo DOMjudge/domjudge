@@ -114,6 +114,53 @@ Then run the following command::
 
 to directly activate this setting.
 
+Lazy judging and results priority
+---------------------------------
+In order to increase capacity, you can set the DOMjudge configuration option
+``lazy_eval_results``. When enabled, judging of a submission will stop when
+a highest priority result has been found for any testcase. You can find these
+priorities under the ``results_prio`` setting. In the default configuration,
+when enabling this, judging will stop with said verdict when a testcase
+results in e.g. *run-error*, *timelimit* or *wrong-answer*. When a testcase
+is *correct* (lower priority), judging will continue to the next test case.
+In other words, to arrive at a verdict of *correct*, all testcases will have
+been evaluated, while any of the 'error' verdicts will immediately return this
+answer for the submission and the other testcases will never be tested, since
+the submission can never become correct anymore if one has failed.
+
+Since many of the submissions are expected to have some kind of error, this
+will significantly save on judging time.
+
+When not using lazy judging, all testcases will always be ran for each
+submission. The ``results_prio`` list will then determine which of the
+individual testcase results will be the overall submission result:
+the highest priority one. In case of a tie, the first occurring testcase
+result with highest priority is returned.
+
+Judgehost restrictions
+----------------------
+It is possible to dedicate certain judgehosts only for certain languages,
+problems or contests; or a combination thereof. To set this up, configure
+the desired restiction pattern under *Judgehost restrictions* from the
+main menu. For example, you select contest 1 and language Java.
+Then, you can edit all judgehosts and apply the newly created restriction
+to any of them. The judgehosts with this restriction will only pick up
+submissions that are in contest 1 *and* are submitted in Java. Submissions
+for other languages, or in other contests, will need to be processed by
+other judgehosts.
+
+When adding restrictions, take care that there must remain judgehosts
+available to judge every active problem, language and contest.
+The *Configuration checker* will perform a check for this.
+
+A special restriction is turning off *Allow rejudge on same judgehost*.
+This defaults to Yes (so a rejudge of a submission can happen on any
+judgehost), but you can add a judgehost restriction with this setting
+to No. This can be used to test timings on judgehosts by configuring
+all judgehosts with this restriction and then rejudging a set of submissions
+as many times as there are judgehosts. This will lead to the situation that
+each judgehosts has judged every submission exactly once.
+
 Solutions to common issues
 --------------------------
 
