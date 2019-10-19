@@ -9,7 +9,7 @@ check syntax:
   stage: test
   image: domjudge/gitlabci:1.0
   script:
-    - ./tests/syntax
+    - ./gitlab/syntax.sh
 
 run unit tests:
   stage: test

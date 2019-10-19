@@ -7,7 +7,7 @@ REC_TARGETS = docs install-docs distdocs
 include $(TOPDIR)/Makefile.global
 
 # Subdirectories to recurse into for REC_TARGETS
-SUBDIRS = team examples
+SUBDIRS = manual team examples
 
 # Cleanup LaTeX logs, etc. after generating documentation for distribution.
 distdocs-l:

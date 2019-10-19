@@ -25,12 +25,16 @@ from Git repository sources, because you want to use the bleeding edge
 code or consider to send a patch to the developers, the
 configure/build system first has to be bootstrapped.
 
-This requires the GNU autoconf/automake toolset to be installed.
+This requires the GNU autoconf/automake toolset to be installed,
+and various tools to build the documentation.
 
 On Debian(-based) systems, the following apt command should
 install the additionally required packages::
 
-  sudo apt install autoconf automake
+  sudo apt install autoconf automake \
+    python3-sphinx python3-sphinx-rtd-theme \
+    texlive-latex-recommended texlive-latex-extra \
+    texlive-fonts-recommended texlive-lang-european
 
 When this software is present, bootstrapping can be done by running
 ``make dist``, which creates the ``configure`` script,
