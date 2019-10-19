@@ -36,7 +36,6 @@ class DOMJudgeService
 {
     protected $em;
     protected $logger;
-    protected $hasAllRoles = false;
     /** @var Configuration[] */
     protected $configCache = [];
 
@@ -257,10 +256,6 @@ class DOMJudgeService
 
     public function checkrole(string $rolename, bool $check_superset = true): bool
     {
-        if ($this->hasAllRoles) {
-            return true;
-        }
-
         $user = $this->getUser();
         if ($user === null) {
             return false;
@@ -433,14 +428,6 @@ class DOMJudgeService
     }
 
     /**
-     * @return bool
-     */
-    public function getHasAllRoles(): bool
-    {
-        return $this->hasAllRoles;
-    }
-
-    /**
      * Run the given callable with all roles.
      *
      * This will result in all calls to checkrole() to return true.
@@ -450,7 +437,11 @@ class DOMJudgeService
     public function withAllRoles(callable $callable)
     {
         $currentToken = $this->tokenStorage->getToken();
-        $token = null;
+        dump($currentToken);
+        // We need a 'user' to create a token. However, even if you
+        // are not logged in, a (anonymous) user is returned. This
+        // check is just here to make sure the code does not crash
+        // in strange circumstances.
         if ($currentToken && $currentToken->getUser()) {
             $this->tokenStorage->setToken(
                 new UsernamePasswordToken(
@@ -461,9 +452,7 @@ class DOMJudgeService
                 )
             );
         }
-        $this->hasAllRoles = true;
         $callable();
-        $this->hasAllRoles = false;
         $this->tokenStorage->setToken($currentToken);
     }
 
