@@ -28,6 +28,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use ZipArchive;
 
@@ -448,9 +449,22 @@ class DOMJudgeService
      */
     public function withAllRoles(callable $callable)
     {
+        $currentToken = $this->tokenStorage->getToken();
+        $token = null;
+        if ($currentToken && $currentToken->getUser()) {
+            $this->tokenStorage->setToken(
+                new UsernamePasswordToken(
+                    $currentToken->getUser(),
+                    null,
+                    'main',
+                    ['ROLE_ADMIN']
+                )
+            );
+        }
         $this->hasAllRoles = true;
         $callable();
         $this->hasAllRoles = false;
+        $this->tokenStorage->setToken($currentToken);
     }
 
     /**
