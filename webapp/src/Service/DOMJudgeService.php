@@ -432,7 +432,6 @@ class DOMJudgeService
     public function withAllRoles(callable $callable)
     {
         $currentToken = $this->tokenStorage->getToken();
-        dump($currentToken);
         // We need a 'user' to create a token. However, even if you
         // are not logged in, a (anonymous) user is returned. This
         // check is just here to make sure the code does not crash
