@@ -699,8 +699,12 @@ class RejudgingController extends BaseController
                         $em->remove($rejudging);
                         $em->flush();
                     }
-                    $this->addFlash('danger', sprintf('Submission is already part of rejudging r%d',
-                                                      $submission['rejudgingid']));
+                    $this->addFlash('danger',
+                        sprintf('Submission is already part of rejudging <a href="%s">r%d</a>',
+                            $this->generateUrl('jury_rejudging',
+                                ['rejudgingId' => $submission['rejudgingid']]),
+                            $submission['rejudgingid']
+                        ));
                     return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_index'));
                 } else {
                     // silently skip that submission
