@@ -692,6 +692,12 @@ class RejudgingController extends BaseController
         foreach ($judgings as $judging) {
             $submission = $judging['submission'];
             if ($submission['rejudgingid'] !== null) {
+                $skipMessage = sprintf('Skipping submission <a href="%s">s%d</a> since it is already part of rejudging <a href="%s">r%d</a>.',
+                    $this->generateUrl('jury_submission', ['submitId' => $submission['submitid']]),
+                    $submission['submitid'],
+                    $this->generateUrl('jury_rejudging', ['rejudgingId' => $submission['rejudgingid']]),
+                    $submission['rejudgingid']);
+                $this->addFlash('danger', $skipMessage);
                 // Already associated rejudging
                 if ($singleJudging) {
                     // Clean up before throwing an error
@@ -699,15 +705,9 @@ class RejudgingController extends BaseController
                         $em->remove($rejudging);
                         $em->flush();
                     }
-                    $this->addFlash('danger',
-                        sprintf('Submission is already part of rejudging <a href="%s">r%d</a>',
-                            $this->generateUrl('jury_rejudging',
-                                ['rejudgingId' => $submission['rejudgingid']]),
-                            $submission['rejudgingid']
-                        ));
                     return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_index'));
                 } else {
-                    // silently skip that submission
+                    // just skip that submission
                     continue;
                 }
             }
