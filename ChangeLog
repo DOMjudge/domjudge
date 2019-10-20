@@ -11,7 +11,7 @@ Version 7.1.1 - 20 October 2019
  - Fix registration action.
  - Fix showing user last login info.
  - Fix balloon page when we do not have award info.
- - Fix logging events that require higher permissions then user
+ - Fix logging events that require higher permissions than the user
    that triggers the action has.
 
 Version 7.1.0 - 25 September 2019
