@@ -5,6 +5,13 @@ Version 7.2.0 - DEV
  - Improve judging run display in jury interface.
  - Added a command to merge scoreboards from multiple ICPC Contest API
    endpoints (#632 thanks Ragnar Groot Koerkamp).
+ - Update documentation for Fedora .(Thanks Marc Furon!)
+ - Fix printing in jury interface.
+ - Fix registration action.
+ - Fix showing user last login info.
+ - Fix balloon page when we do not have award info.
+ - Fix logging events that require higher permissions then user
+   that triggers the action has.
 
 Version 7.1.0 - 25 September 2019
 ---------------------------------
