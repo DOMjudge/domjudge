@@ -4,7 +4,16 @@ Version 7.2.0 - DEV
 -------------------
  - Improve judging run display in jury interface.
  - Added a command to merge scoreboards from multiple ICPC Contest API
-   endpoints (#632 thanks Ragnar Groot Koerkamp).
+   endpoints (#632, thanks Ragnar Groot Koerkamp).
+ - Rewrote documentation into a completely new DOMjudge Manual.
+ - Always display a flash message for skipped submissions in rejudgings
+ - Show affiliation logo's on jury affiliation overview page.
+ - Reduce page load times and memory requirements.
+ - API: add endpoint to get users.
+ - API: improve awards endpoint.
+
+Version 7.1.1 - 20 October 2019
+-------------------------------
  - Update documentation for Fedora (Thanks Marc Furon!).
  - Fix printing in jury interface.
  - Fix registration action.
