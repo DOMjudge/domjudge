@@ -1,9 +1,12 @@
 <?php declare(strict_types=1);
 namespace App\Entity;
 
+use App\Utils\Utils;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -29,6 +32,7 @@ class User implements UserInterface, \Serializable
      * @ORM\Column(type="integer", name="userid", length=4,
      *     options={"comment"="User ID","unsigned"=true}, nullable=false)
      * @Serializer\SerializedName("id")
+     * @Serializer\Type("string")
      */
     private $userid;
 
@@ -81,7 +85,7 @@ class User implements UserInterface, \Serializable
      *     options={"comment"="Last IP address of successful login",
      *              "default"="NULL"},
      *     nullable=true)
-     * @Serializer\SerializedName("lastip")
+     * @Serializer\SerializedName("last_ip")
      */
     private $last_ip_address;
 
@@ -115,7 +119,6 @@ class User implements UserInterface, \Serializable
      *     options={"comment"="Whether the user is able to log in",
      *              "default"="1"},
      *     nullable=false)
-     * @Serializer\Exclude()
      */
     private $enabled = true;
 
@@ -126,6 +129,8 @@ class User implements UserInterface, \Serializable
      *     options={"comment"="Team associated with", "unsigned"=true,
      *              "default"="NULL"},
      *     nullable=true)
+     * @Serializer\SerializedName("team_id")
+     * @Serializer\Type("string")
      */
     private $teamid;
 
@@ -284,6 +289,20 @@ class User implements UserInterface, \Serializable
     }
 
     /**
+     * Get the last login time for this user as a DateTime object
+     *
+     * @return DateTime|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("last_login_time")
+     * @Serializer\Type("DateTime")
+     * @throws Exception
+     */
+    public function getLastLoginObject()
+    {
+        return $this->getLastLogin() ? new DateTime(Utils::absTime($this->getLastLogin())) : null;
+    }
+
+    /**
      * Set firstLogin
      *
      * @param $firstLogin
@@ -304,6 +323,20 @@ class User implements UserInterface, \Serializable
     public function getFirstLogin()
     {
         return $this->first_login;
+    }
+
+    /**
+     * Get the first login time for this user as a DateTime object
+     *
+     * @return DateTime|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("first_login_time")
+     * @Serializer\Type("DateTime")
+     * @throws Exception
+     */
+    public function getFirstLoginObject()
+    {
+        return $this->getFirstLogin() ? new DateTime(Utils::absTime($this->getFirstLogin())) : null;
     }
 
     /**
@@ -473,6 +506,20 @@ class User implements UserInterface, \Serializable
     {
         return $this->team;
     }
+
+    /**
+     * Get the team name of this user
+     * @return string|null
+     * @Serializer\VirtualProperty()
+     * @Serializer\SerializedName("team")
+     * @Serializer\Type("string")
+     * @Serializer\Groups({"Nonstrict"})
+     */
+    public function getTeamName()
+    {
+        return $this->getTeam() ? $this->getTeam()->getName() : null;
+    }
+
     /**
      * Constructor
      */
