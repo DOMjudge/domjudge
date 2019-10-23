@@ -1,0 +1,8 @@
+# @configure_input@
+
+project = '@PACKAGE_NAME@'
+
+# The short X.Y version
+version = '@DOMJUDGE_VERSION@'.rsplit('.',1)[0]
+# The full version, including alpha/beta/rc tags
+release = '@DOMJUDGE_VERSION@'

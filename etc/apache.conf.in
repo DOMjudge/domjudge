@@ -56,7 +56,6 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$ index.php [QSA,L]
 
-RewriteRule .svn/ - [F]
 RewriteRule .git/ - [F]
 RewriteRule .gitignore$ - [F]
 RewriteRule Makefile$ - [F]
@@ -78,21 +77,6 @@ RewriteRule Makefile$ - [F]
     Header set X-Content-Type-Options "nosniff"
     Header set X-XSS-Protection "1; mode=block"
 </IfModule>
-
-# If you want to allow large file uploads for testcases, you must
-# ensure that the following PHP settings are all set to high enough
-# values. The following example will allow to upload testcases of
-# up to 64 MB. Defaults for these vary per PHP version and install.
-# Note that additionally, you may want to increase max_file_uploads
-# in your php.ini file to allow for more testcases per problem and
-# multiple file submissions.
-
-#<IfModule mod_php7.c>
-#php_value max_file_uploads    101
-#php_value upload_max_filesize 128M
-#php_value post_max_size       128M
-#php_value memory_limit        512M
-#</IfModule>
 
 </Directory>
 
