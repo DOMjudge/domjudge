@@ -15,7 +15,7 @@ error()
 }
 
 if [ $# -ne 1 ]; then
-	error "exactly one arguments expected."
+	error "exactly one argument expected."
 fi
 
 DBPASSWORDS=$1
