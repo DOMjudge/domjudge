@@ -24,6 +24,7 @@ The flow of an incoming submission is as follows.
    can be enabled by setting ``verification_required`` on
    the *configuration settings* admin page.
 
+.. _rejudging:
 
 Rejudging
 ---------
@@ -93,6 +94,8 @@ The `soft:hard` timelimit pair is passed to `runguard` as both
 wall clock and CPU limit. This is used by `runguard` when reporting
 whether the soft, actual timelimit has been surpassed. The submitted
 program gets killed when either the hard wall clock or CPU time has passed.
+
+.. _judging-consistency:
 
 Judging consistency
 -------------------

@@ -1,6 +1,8 @@
 Development
 ===========
 
+.. _API:
+
 API
 ```
 DOMjudge comes with a fully featured REST API. It is based on the

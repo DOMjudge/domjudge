@@ -15,14 +15,15 @@ Under *Users* from the homepage you can add user accounts for the
 people accessing your system. There are several roles possible:
 
 - Administrative user: can configure and change everything in DOMjudge.
-- Jury user: can view submissions and judgings. Can view clarification
-  requests and send clarifications. Can rejudge non-correct judgings
-  (submissions judged *correct* can only be rejudged by an administrator).
-- Balloon runner: can only view the balloon queue and mark balloons as
-  delivered.
+- Jury user: can view submissions and judgings. Can view
+  :ref:`clarification requests <clarifications>` and send clarifications.
+  Can :ref:`rejudge <rejudging>` non-correct judgings (submissions judged
+  *correct* can only be rejudged by an administrator).
+- Balloon runner: can only view the :ref:`balloon queue <balloons>` and mark
+  balloons as delivered.
 - Team member: can view its own team interface and submit solutions
   (see below).
-- Several system roles: they are for API access. The most imporant
+- Several system roles: they are for :ref:`API` access. The most imporant
   one is *judgehost* which means the account credentials can be used by a
   judgedaemon.
 
@@ -83,27 +84,24 @@ Setting up problems
 -------------------
 When this is done, you can upload the intended
 problems that teams need to solve under *Problems*. DOMjudge supports
-uploading them as a zip file or configuring each problem manually
-via the interface. You can add a problem to a contest while uploading,
-or associate it by editing the contest from the Contests page later.
+uploading them as :doc:`a zip file <problem-format>` or configuring
+each problem manually via the interface. You can add a problem to a
+contest while uploading, or associate it by editing the contest
+from the Contests page later.
 
-It is possible to change
-whether teams can submit solutions for that problem (using the toggle
-switch 'allow submit'). If disallowed, submissions for that problem
-will be rejected, but more importantly, teams will not see that
-problem on the scoreboard. Disallow judge will make DOMjudge accept
-submissions, but leave them queued; this is useful in case an
-unexpected problem shows up with one of the problems. Timelimit is the
-maximum number of seconds a submission for this problem is allowed to
-run before a 'TIMELIMIT' response is given (to be multiplied possibly
-by a language factor). A 'timelimit overshoot' can be
-configured to let submissions run a bit longer. Although DOMjudge will
-use the actual limit to determine the verdict, this allows judges to
-see if a submission is close to the timelimit.
-
-Problems can be imported and exported into and from DOMjudge
-using zip-files that contain the problem metadata and testdata files,
-based on the `problemarchive.org format`_.
+It is possible to change whether teams can submit solutions for that
+problem (using the toggle switch 'allow submit'). If disallowed,
+submissions for that problem will be rejected, but more importantly,
+teams will not see that problem on the scoreboard. Disallow judge
+will make DOMjudge accept submissions, but leave them queued; this
+is useful in case an unexpected problem shows up with one of the
+problems. Timelimit is the maximum number of seconds a submission
+for this problem is allowed to run before a 'TIMELIMIT' response
+is given (to be multiplied possibly by a language factor). A
+'timelimit overshoot' can be configured to let submissions run a
+bit longer. Although DOMjudge will use the actual limit to
+determine the verdict, this allows judges to see if a submission
+is close to the timelimit.
 
 Problems can have special *compare* and
 *run* scripts associated to them, to deal with problem

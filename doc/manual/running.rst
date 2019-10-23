@@ -1,9 +1,8 @@
 Running the contest
 ===================
 
-
 Team status
-```````````
+-----------
 Under the Teams menu option, you can get a general impression of the
 status of each team: a traffic light will show either of the
 following:
@@ -19,9 +18,10 @@ expected that every team can make at least one correct submission. A
 team with any other colour than green near the end of the session
 might be having difficulties.
 
+.. _clarifications:
 
 Clarification Requests
-``````````````````````
+----------------------
 Communication between teams and jury happens through Clarification
 Requests. Everything related to that is handled under the
 Clarifications menu item.
@@ -34,7 +34,7 @@ clarification that does not correspond to a specific request. These
 will be termed *general clarification*.
 
 Handling clarification requests
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```````````````````````````````
 Under Clarifications, three lists are shown: new clarifications,
 answered clarifications and general clarifications. Click the excerpt
 for details about that clarification request.
@@ -73,3 +73,39 @@ define in ``clar_queues`` the available queues and a
 ``clar_default_problem_queue`` where newly created requests will end up in.
 On the clarification overview page, you can quickly assign incoming
 clarifications to a queue by pressing the queue's button in the table row.
+
+.. _balloons:
+
+Balloon handling
+----------------
+According to ICPC tradition, every solved problem earns the team a
+balloon in colour specific to that problem. This can be facilitated
+with the balloons interface reachable from the main menu.
+
+The interface can be accessed by administrators and any user with
+the *Balloon runner* role. It's possible to assign a user only this
+role; they will be able to access the jury interface but only see
+and handle balloons. You need to enable balloons processing for a
+contest in the configuration under the Contests menu option.
+
+For each first correct submission of a problem by a team, an entry
+is created in the table on the balloons interface. A runner can then
+be dispatched to hand out the inflatable award. The entry can be
+marked as 'done' by clicking the running person at the end of the row.
+
+Each row will also list the total amount of balloons that team has
+earned so the runner can compare the resulting situation at the
+team's workplace with the expected one. Where applicable there's
+also an indication of whether this balloon is the first in the entire
+contest, or the first for that problem to be handed out, should
+you wish to do something special with these cases.
+
+Normally balloon distribution stops when the scoreboard is frozen.
+This will be indicated in the interface and no new entries will
+show for submissions after the freeze. It is possibe that new
+entries appear for some times after the freeze, if the result of
+a submission before the freeze is only known after (this can also
+happen in case of a :ref:`rejudging`).
+The global configuration option ``show_balloons_postfreeze`` will
+ignore a contest freeze for purposes of balloons and new correct
+submissions will trigger a balloon entry in the table.

@@ -59,8 +59,8 @@ your home directory::
 
 Note that root privileges are required to set permissions and user and
 group ownership of password files and a few directories. If you run
-the installation targets as non-root, you will be warned that you have
-to perform these steps manually.
+the installation targets as non-root, you will be shown how to perform
+these steps manually.
 
 Database configuration
 ----------------------
@@ -84,7 +84,7 @@ default/example data into the domjudge database. The option
 specified, the mysql client will try to read
 credentials from ``$HOME/.my.cnf`` as usual. The command
 ``uninstall`` can be passed to ``dj_setup_database`` to
-remove the DOMjudge database and users; _this deletes all data!_
+remove the DOMjudge database and users; *this deletes all data*!
 
 The script also creates the initial "admin" user with password
 stored in ``etc/initial_admin_password.secret``.
@@ -109,14 +109,14 @@ settings. Reload the web server for changes to take effect.
   ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/7.3/fpm/pool.d/domjudge.conf
   a2enmod proxy_fcgi setenvif rewrite
   a2enconf php7.3-fpm domjudge
-  # Edit the file /etc/apache2/conf-available/domjudge.conf to your needs
+  # Edit the file /etc/apache2/conf-available/domjudge.conf and
+  # /etc/php/7.3/fpm/pool.d/domjudge.conf to your needs
+  service php7.3-fpm reload
   service apache2 reload
 
-An nginx webserver configuration snippet is also provided
-in ``etc/nginx-conf``. The file ``etc/domjudge-fpm.conf``
-contains the PHP FPM configuration you can use. You still need ``htpasswd``
-from ``apache2-utils`` though. To use this configuration
-file, perform the following steps::
+An nginx webserver configuration snippet is also provided in
+``etc/nginx-conf``.  You still need ``htpasswd`` from ``apache2-utils``
+though. To use this configuration, perform the following steps::
 
   ln -s <DOMSERVER_INSTALL_PATH>/etc/nginx-conf /etc/nginx/sites-enabled/domjudge
   ln -s <DOMSERVER_INSTALL_PATH>/etc/domjudge-fpm.conf /etc/php/7.3/fpm/pool.d/domjudge.conf
@@ -134,4 +134,5 @@ The DOMserver should now be operational. You can access the web application
 at your configured base URL. There's an ``admin`` user with initial password
 found in ``etc/initial_admin_password.secret``.
 
-You can continue now with installing one or more judgehosts.
+You can continue now with
+:doc:`installing one or more judgehosts <install-judgehost>`.

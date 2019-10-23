@@ -31,17 +31,17 @@ follows:
   The IDs for affiliations and teams need to be the *external ID*
   if the ``data_source`` setting of DOMjudge is set to external.
 
-Authentication methods
-----------------------
+Authentication and registration
+-------------------------------
 Out of the box users are able to authenticate using username and password.
-There is also a configuration option to allow teams to self-register with
-the system.
 
 Two other authentication methods are available:
 
 - IP Address - authenticates users based on the IP address they are accessing
   the system from;
 - X-Headers - authenticates users based on some HTTP header values.
+
+There's an option to let teams register themselves in the system.
 
 IP Address
 ``````````
@@ -75,6 +75,14 @@ Squid configuration for this might look like::
   request_header_add X-DOMjudge-Login "$USERNAME" autologin
   request_header_add X-DOMjudge-Pass "$BASE64_PASSWORD" autologin
 
+Self-registration
+`````````````````
+There is also a configuration option to allow teams to self-register with
+the system: ``registration_category_name``. When left empty, no self-registration
+is allowed; when filled with a category name, newly registered teams will
+be placed in this category. During registration, a team can specify their
+affiliation.
+
 Executables
 -----------
 DOMjudge supports executable archives (uploaded and stored in ZIP
@@ -102,8 +110,8 @@ compile scripts are already included.
 
 Interpreted languages and non-statically linked binaries (for example,
 Python or Java) can in also be used, but require that all
-runtime dependencies are added to the chroot environment. See section
-"creating a chroot environment".
+runtime dependencies are added to the chroot environment. For details,
+see the section :ref:`make-chroot`.
 
 Interpreted languages do not generate an executable and in principle
 do not need a compilation step. However, to be able to use interpreted
@@ -226,10 +234,13 @@ you can use this command::
 
   enscript -b [username] -a 0-10 -f Courier9 [file] 2>&1
 
+.. _multiple-judgedaemons:
+
 Multiple judgedaemons per machine
 ---------------------------------
-You can run multiple judgedaemons on one multi-cpu or multi-core
-machine, dedicating one cpu core to each judgedaemon.
+You can run multiple judgedaemons on one multi-CPU or multi-core
+machine, dedicating one CPU core to each judgedaemon using Linux
+cgroups.
 
 To that end, add extra unprivileged users to the system, i.e. add users
 ``domjudge-run-X`` (where ``X`` runs through
@@ -242,6 +253,9 @@ You can then start each of the judgedaemons with::
 
 to bind it to core ``X``.
 
+Although each judgedaemon process will be bound to one single CPU
+core, shared use of other resources such as disk I/O might
+still have effect on run times.
 
 Multi-site contests
 -------------------

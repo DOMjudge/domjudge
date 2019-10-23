@@ -27,7 +27,8 @@ A global overview of the features that DOMjudge provides:
 * Automatic judging with distributed (scalable) judge hosts
 * Web interface for portability and simplicity
 * Modular system for plugging in languages/compilers and validators
-* Detailed jury information (submissions, judgings, diffs) and options (rejudge, clarifications, resubmit)
+* Detailed jury information (submissions, judgings, diffs)
+  and options (rejudge, clarifications, resubmit)
 * Designed with security in mind
 
 DOMjudge has been used in many live contests
@@ -39,7 +40,8 @@ Requirements and contest planning
 ---------------------------------
 
 DOMjudge requires the following to be available to run. Please refer to the
-domserver and judgehost chapters for detailed software requirements.
+:doc:`DOMserver <install-domserver>` and :doc:`Judgehost <install-judgehost>`
+chapters for detailed software requirements.
 
 * At least one machine to act as the *DOMjudge server* (or *domserver* for
   brevity). The machine needs to be runing Linux and a webserver
@@ -78,15 +80,12 @@ tasks. For example, although running a judgehost on the same machine as the
 domserver is possible, it's not recommended except for testing purposes.
 Judgehosts should also not double as local workstations for jury members.
 Having all judgehosts be of uniform hardware configuration helps in creating a
-fair, reproducible setup; in the ideal case they are run on the same type of
-machines that the teams use.
+fair, :ref:`reproducible setup <judging-consistency>`; in the ideal case
+they are run on the same type of machines that the teams use.
 
-DOMjudge supports running multiple judgedaemons in parallel on a single
-judgehost machine. This might be useful on multi-core machines. Note that
-although each judgedaemon process can be bound to one single CPU core (using
-Linux cgroups), shared use of other resources such as disk I/O might still have
-a minor effect on run times. For more details on using this, see the section
-Installation: optional features.
+DOMjudge supports running :ref:`multiple judgedaemons <multiple-judgedaemons>`
+in parallel on a single judgehost machine. This might be useful on multi-core
+machines.
 
 Copyright and licencing
 -----------------------
@@ -127,7 +126,7 @@ DOMjudge is Copyright (c) 2004 - 2019 by the DOMjudge developers and contributor
 DOMjudge, including its documentation, is free software; you can redistribute
 it and/or modify it under the terms of the GNU General Public License as
 published by the Free Software Foundation; either version 2, or (at your
-option) any later version. See the file COPYING.
+option) any later version. See the file COPYING for details.
 
 This software is partly based on code by other people. Please refer to
 individual files for acknowledgements.

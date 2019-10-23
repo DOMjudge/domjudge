@@ -50,7 +50,7 @@ home directory::
   sudo make install-judgehost
 
 For running solution programs under a non-privileged user, a user and group have
-to be added to the system(s) that act as judgehost. This user does not
+to be added to the system that acts as judgehost. This user does not
 need a home-directory or password, so the following command would
 suffice to add a user and group ``domjudge-run`` with minimal privileges::
 
@@ -66,11 +66,13 @@ certain operations. There's a pregenerated snippet
 in ``etc/sudoers-domjudge`` that contains all required rules. You can
 put this snippet in ``/etc/sudoers.d/``.
 
-If you change the user you run the judgedaemon as, or the installation
+If you change the user you start the judgedaemon as, or the installation
 paths, be sure to update the sudoers rules accordingly.
 
-Chroot creation
----------------
+.. _make-chroot:
+
+Creating a chroot environment
+-----------------------------
 
 The judgedaemon executes submissions inside a chroot environment for
 security reasons. By default it mounts parts of a prebuilt chroot tree
@@ -107,13 +109,14 @@ file.
 Linux Control Groups
 --------------------
 
-DOMjudge uses Linux Control Groups or cgroups for process isolation in
+DOMjudge uses Linux Control Groups or *cgroups* for process isolation in
 the judgedaemon. Linux cgroups give more accurate measurement of
 actually allocated memory than traditional resource limits (which is
 helpful with interpreters like Java that reserve but not actually use
 lots of memory). Also, cgroups are used to restrict network access so
-no separate measures are necessary, and they allow running multiple
-judgedaemons on a multi-core machine by using CPU binding.
+no separate measures are necessary, and they allow running
+:ref:`multiple judgedaemons <multiple-judgedaemons>`
+on a multi-core machine by using CPU binding.
 
 The judgedaemon needs to run a recent Linux kernel (at least 3.2.0). The
 following steps configure cgroups on Debian. Instructions for other
@@ -139,9 +142,9 @@ REST API credentials
 --------------------
 
 The judgehost connects to the domserver via a REST API. You need to
-create an account in DOMjudge for the judgedaemons to use (this may
-be a shared account between all judgedaemons) with a difficult,
-random password and the 'judgehost' role.
+create an account in the DOMjudge web interface for the judgedaemons
+to use (this may be a shared account between all judgedaemons) with
+a difficult, random password and the 'judgehost' role.
 
 On each judgehost, copy from the domserver (or create) a file
 ``etc/restapi.secret`` containing the id, URL,
@@ -149,11 +152,11 @@ username and password whitespace-separated on one line, for example::
 
   default http://example.edu/domjudge/api/  judgehosts  MzfJYWF5agSlUfmiGEy5mgkfqU
 
-Note that the password must be identical to that of
-the ``judgehost`` user in the admin web interface.
-Multiple lines may be specified to allow a judgedaemon to work for multiple
-domservers. The id is used to differentiate between multiple domservers,
-and should be unique within the ``restapi.secret`` file.
+The password here must be identical to that of the ``judgehosts`` user
+in the admin web interface. Multiple lines may be specified to allow a
+judgedaemon to work for multiple domservers. The id in the first column
+is used to differentiate between multiple domservers, and should be
+unique within the ``restapi.secret`` file.
 
 Starting the judgedaemon
 ------------------------

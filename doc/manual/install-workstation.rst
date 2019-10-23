@@ -3,8 +3,8 @@ Installation of the team workstations
 
 To access DOMjudge, a team workstation needs nothing more than a modern
 webbrowser, like a recent version of Chrome, Firefox or Edge. We do not
-support legacy browsers like Internet Explorer. Of course the team would
-also need the appropriate development tools for the languages you'd want
+support legacy browsers like Internet Explorer. Of course the machine
+also needs the appropriate development tools for the languages you want
 to support.
 
 The web browser needs to access the domserver via HTTP(S). It may be
