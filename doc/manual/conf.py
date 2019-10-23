@@ -35,9 +35,13 @@ exec(open("version.py").read())
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+
+# The sphinx_rtd_theme extension does not seem to work with older
+# versions (at least those in buster/bionic). We don't seem to need
+# it yet, so don't add it.
 extensions = [
     'sphinx.ext.ifconfig',
-    'sphinx_rtd_theme',
+#   'sphinx_rtd_theme',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
