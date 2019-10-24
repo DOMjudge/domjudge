@@ -36,7 +36,7 @@ For RedHat::
   sudo yum install make sudo libcgroup-devel lsof \
         php-cli php-mbstring php-xml php-process procps-ng \
         gcc gcc-c++ glibc-static libstdc++-static \
-        java-1.7.0-openjdk-headless java-1.7.0-openjdk-devel \
+        java-1.8.0-openjdk-headless java-1.8.0-openjdk-devel \
         ghc-compiler fpc
 
 Building and installing
