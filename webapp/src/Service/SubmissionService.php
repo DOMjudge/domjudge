@@ -109,7 +109,7 @@ class SubmissionService
 
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
-            ->select('s', 'j')
+            ->select('s', 'j', 'cp')
             ->join('s.team', 't')
             ->join('s.contest_problem', 'cp')
             ->andWhere('s.cid IN (:contests)')
