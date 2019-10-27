@@ -65,16 +65,14 @@ class BalloonController extends AbstractController
 
         $em = $this->em;
 
-        $contests = $this->dj->getCurrentContests();
-        $frozen_contests = [];
-        $freezetimes = [];
-        foreach($contests as $cid => $contest) {
-            if($contest->getState()['frozen']) {
-                $frozen_contests[$cid] = $contest->getShortName();
-            }
-            if ( !$showPostFreeze ) {
-                $freezetimes[$cid] = $contest->getFreezeTime();
-            }
+        $contest = $this->dj->getCurrentContest();
+        if(is_null($contest)) {
+            return $this->render('jury/balloons.html.twig');
+        }
+
+        $contestIsFrozen = isset($contest->getState()['frozen']);
+        if(!$showPostFreeze) {
+            $freezetime = $contest->getFreezeTime();
         }
 
         // Build a list of teams and the problems they solved first
@@ -99,6 +97,8 @@ class BalloonController extends AbstractController
             ->leftJoin('s.team', 't')
             ->leftJoin('t.category', 'c')
             ->leftJoin('t.affiliation', 'a')
+            ->andWhere('co.cid = :cid')
+            ->setParameter(':cid', $contest->getCid())
             ->orderBy('b.done', 'ASC')
             ->addOrderBy('s.submittime', 'DESC');
 
@@ -110,7 +110,7 @@ class BalloonController extends AbstractController
                 continue;
             }
 
-            $TOTAL_BALLOONS[$balloonsData['teamid']][$balloonsData['cid']."-".$balloonsData['probshortname']] = $balloonsData['color'];
+            $TOTAL_BALLOONS[$balloonsData['teamid']][$balloonsData['probshortname']] = $balloonsData['color'];
 
             // Keep a list of balloons that were first to solve this problem;
             // can be multiple, one for each sortorder.
@@ -119,7 +119,7 @@ class BalloonController extends AbstractController
             }
             // Keep overwriting this - in the end it'll
             // contain the id of the first balloon in this contest.
-            $AWARD_BALLOONS['contest'][$balloonsData['cid']] = $balloonsData[0]->getBalloonId();
+            $AWARD_BALLOONS['contest'] = $balloonsData[0]->getBalloonId();
         }
 
         // Loop again to construct table
@@ -135,15 +135,13 @@ class BalloonController extends AbstractController
             $balloonId = $balloon->getBalloonId();
 
             $stime = $balloonsData['submittime'];
-            $contest = $balloonsData['cid'];
 
-            if ( isset($freezetimes[$contest]) && $stime >= $freezetimes[$contest]) {
+            if ( isset($freezetime) && $stime >= $freezetime) {
                 continue;
             }
 
             $balloondata = [];
             $balloondata['balloonid'] = $balloonId;
-            $balloondata['cid'] = $balloonsData['cid'];
             $balloondata['time'] = $stime;
             $balloondata['solved'] = Utils::balloonSym($color) . " " . $balloonsData['probshortname'];
             $balloondata['color'] = $color;
@@ -158,7 +156,7 @@ class BalloonController extends AbstractController
             $balloondata['total'] = $TOTAL_BALLOONS[$balloonsData['teamid']];
 
             $comments = [];
-            if ($AWARD_BALLOONS['contest'][$contest] == $balloonId) {
+            if ($AWARD_BALLOONS['contest'] == $balloonId) {
                 $comments[] = 'first in contest';
             } elseif (isset($AWARD_BALLOONS['problem'][$balloonsData['probid']])
                    && in_array($balloonId, $AWARD_BALLOONS['problem'][$balloonsData['probid']], true)) {
@@ -210,8 +208,7 @@ class BalloonController extends AbstractController
                 'url' => $this->generateUrl('jury_balloons'),
                 'ajax' => true
             ],
-            'showContest' => count($contests) > 1,
-            'frozen_contests' => $frozen_contests,
+            'isfrozen' => $contestIsFrozen,
             'hasFilters' => !empty($filters),
             'filteredAffiliations' => $filteredAffiliations,
             'balloons' => $balloons_table

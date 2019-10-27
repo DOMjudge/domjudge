@@ -11,11 +11,16 @@
 
 {% block content %}
 
-    <h1>Balloons</h1>
+    {% if current_contest is null %}
+        <h1>Balloons</h1>
+        <p class="nodata">No active contest</p>
+    {% else %}
 
-    {% for cid,cname in frozen_contests %}
-        <div class="alert alert-info"><i class="fas fa-snowflake"></i> Scoreboard of c{{ cid }} ({{ cname }}) is now frozen.</div>
-    {% endfor %}
+    <h1>Balloons - {{ current_contest.name }}</h1>
+
+    {% if isfrozen %}
+        <div class="alert alert-info"><i class="fas fa-snowflake"></i> Scoreboard of c{{ current_contest.cid }} ({{ current_contest.shortname }}) is now frozen.</div>
+    {% endif %}
 
     <div class="mb-3">
         <div class="btn-group-toggle" data-toggle="buttons">
@@ -50,6 +55,7 @@
     <div data-ajax-refresh-target data-ajax-refresh-after="process_balloons_filter">
         {%- include 'jury/partials/balloon_list.html.twig' %}
     </div>
+    {% endif %}
 
 {% endblock %}
 
