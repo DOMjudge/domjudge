@@ -3,8 +3,10 @@
 namespace App\Controller\Jury;
 
 use App\Entity\Configuration;
+use App\Entity\Judging;
 use App\Service\CheckConfigService;
 use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
@@ -58,10 +60,32 @@ class ConfigController extends AbstractController
         $this->checkConfigService = $checkConfigService;
     }
 
+    private function logUnverifiedJudgings(EventLogService $eventLogService)
+    {
+        /** @var Judging[] $judgings */
+        $judgings = $this->em->getRepository(Judging::class)->findBy(
+            [ 'verified' => 0, 'valid' => 1]
+        );
+
+        $judgings_per_contest = [];
+        foreach ($judgings as $judging) {
+            $judgings_per_contest[$judging->getCid()][] = $judging->getJudgingid();
+        }
+
+        // Log to event table; normal cases are handled in:
+        // * API/JudgehostController::addJudgingRunAction
+        // * Jury/SubmissionController::verifyAction
+        foreach ($judgings_per_contest as $cid => $judging_ids) {
+            $eventLogService->log('judging', $judging_ids, 'update', $cid);
+        }
+    }
+
     /**
      * @Route("", name="jury_config")
+     * @param EventLogService   $eventLogService
+     * @param Request           $request
      */
-    public function indexAction(Request $request)
+    public function indexAction(EventLogService $eventLogService, Request $request)
     {
         /** @var Configuration[] */
         $options = $this->em->getRepository(Configuration::class)->findAll();
@@ -76,6 +100,13 @@ class ConfigController extends AbstractController
                     $val = false;
                 } else {
                     $val = $request->request->get('config_' . $option->getName());
+                }
+                if ($option->getName() == 'verification_required' &&
+                    $option->getValue() && !$val ) {
+                    // If toggled off, we have to send events for all judgings
+                    // that are complete, but not verified yet. Scoreboard
+                    // cache refresh should take care of the rest. See #645.
+                    $this->logUnverifiedJudgings($eventLogService);
                 }
                 switch ( $option->getType() ) {
                     case 'bool':
