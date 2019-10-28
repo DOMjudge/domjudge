@@ -928,8 +928,24 @@ class SubmissionController extends BaseController
             $this->em->clear();
             /** @var Judging $judging */
             $judging = $this->em->getRepository(Judging::class)->find($judgingId);
-            $scoreboardService->calculateScoreRow($judging->getContest(), $judging->getSubmission()->getTeam(),
-                                                  $judging->getSubmission()->getProblem());
+            // We need to update the score for all teams for this problem, since the first to solve might now have changed
+            $teamsQueryBuilder = $this->em->createQueryBuilder()
+                                     ->from(Team::class, 't')
+                                     ->select('t')
+                                     ->orderBy('t.teamid');
+            if (!$judging->getContest()->isOpenToAllTeams()) {
+                $teamsQueryBuilder
+                    ->leftJoin('t.contests', 'c')
+                    ->join('t.category', 'cat')
+                    ->leftJoin('cat.contests', 'cc')
+                    ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                    ->setParameter(':cid', $judging->getContest()->getCid());
+            }
+            /** @var Team[] $teams */
+            $teams = $teamsQueryBuilder->getQuery()->getResult();
+            foreach ($teams as $team) {
+                $scoreboardService->calculateScoreRow($judging->getContest(), $team, $judging->getSubmission()->getProblem());
+            }
             $balloonService->updateBalloons($judging->getContest(), $judging->getSubmission(), $judging);
         }
 
