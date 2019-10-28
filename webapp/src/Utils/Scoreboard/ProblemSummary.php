@@ -35,35 +35,11 @@ class ProblemSummary
 
     /**
      * @param int $sortorder
-     * @param int $numberOfSubmissions
-     */
-    public function addNumberOfSubmissions(int $sortorder, int $numberOfSubmissions)
-    {
-        if (!isset($this->numberOfSubmissions[$sortorder])) {
-            $this->numberOfSubmissions[$sortorder] = 0;
-        }
-        $this->numberOfSubmissions[$sortorder] += $numberOfSubmissions;
-    }
-
-    /**
-     * @param int $sortorder
      * @return int
      */
     public function getNumberOfPendingSubmissions(int $sortorder): int
     {
         return $this->numberOfPendingSubmissions[$sortorder] ?? 0;
-    }
-
-    /**
-     * @param int $sortorder
-     * @param int $numberOfPendingSubmissions
-     */
-    public function addNumberOfPendingSubmissions(int $sortorder, int $numberOfPendingSubmissions)
-    {
-        if (!isset($this->numberOfPendingSubmissions[$sortorder])) {
-            $this->numberOfPendingSubmissions[$sortorder] = 0;
-        }
-        $this->numberOfPendingSubmissions[$sortorder] += $numberOfPendingSubmissions;
     }
 
     /**
@@ -77,13 +53,27 @@ class ProblemSummary
 
     /**
      * @param int $sortorder
+     * @param int $numberOfSubmissions
+     * @param int $numberOfPendingSubmissions
      * @param int $numberOfCorrectSubmissions
      */
-    public function addNumberOfCorrectSubmissions(int $sortorder, int $numberOfCorrectSubmissions)
-    {
+    public function addSubmissionCounts(
+        int $sortorder,
+        int $numberOfSubmissions,
+        int $numberOfPendingSubmissions,
+        int $numberOfCorrectSubmissions
+    ) {
+        if (!isset($this->numberOfSubmissions[$sortorder])) {
+            $this->numberOfSubmissions[$sortorder] = 0;
+        }
+        if (!isset($this->numberOfPendingSubmissions[$sortorder])) {
+            $this->numberOfPendingSubmissions[$sortorder] = 0;
+        }
         if (!isset($this->numberOfCorrectSubmissions[$sortorder])) {
             $this->numberOfCorrectSubmissions[$sortorder] = 0;
         }
+        $this->numberOfSubmissions[$sortorder]        += $numberOfSubmissions;
+        $this->numberOfPendingSubmissions[$sortorder] += $numberOfPendingSubmissions;
         $this->numberOfCorrectSubmissions[$sortorder] += $numberOfCorrectSubmissions;
     }
 

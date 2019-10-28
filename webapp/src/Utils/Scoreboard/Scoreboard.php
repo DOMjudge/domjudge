@@ -221,9 +221,11 @@ class Scoreboard
         // Calculate matrix and update scores
         $this->matrix = [];
         foreach ($this->scoreCache as $scoreRow) {
+            $teamId = $scoreRow->getTeam()->getTeamid();
+            $probId = $scoreRow->getProblem()->getProbid();
             // Skip this row if the team or problem is not known by us
-            if (!array_key_exists($scoreRow->getTeam()->getTeamid(), $this->teams) ||
-                !array_key_exists($scoreRow->getProblem()->getProbid(), $this->problems)) {
+            if (!array_key_exists($teamId, $this->teams) ||
+                !array_key_exists($probId, $this->problems)) {
                 continue;
             }
 
@@ -233,7 +235,7 @@ class Scoreboard
                 $this->penaltyTime, $this->scoreIsInSeconds
             );
 
-            $this->matrix[$scoreRow->getTeam()->getTeamid()][$scoreRow->getProblem()->getProbid()] = new ScoreboardMatrixItem(
+            $this->matrix[$teamId][$probId] = new ScoreboardMatrixItem(
                 $scoreRow->getIsCorrect($this->restricted),
                 $scoreRow->getIsCorrect($this->restricted) ? $scoreRow->getIsFirstToSolve() : false,
                 $scoreRow->getSubmissions($this->restricted),
@@ -243,11 +245,12 @@ class Scoreboard
             );
 
             if ($scoreRow->getIsCorrect($this->restricted)) {
-                $solveTime      = Utils::scoretime($scoreRow->getSolveTime($this->restricted), $this->scoreIsInSeconds);
+                $solveTime      = Utils::scoretime($scoreRow->getSolveTime($this->restricted),
+                                                   $this->scoreIsInSeconds);
                 $contestProblem = $this->problems[$scoreRow->getProblem()->getProbid()];
-                $this->scores[$scoreRow->getTeam()->getTeamid()]->addNumberOfPoints($contestProblem->getPoints());
-                $this->scores[$scoreRow->getTeam()->getTeamid()]->addSolveTime($solveTime);
-                $this->scores[$scoreRow->getTeam()->getTeamid()]->addTotalTime($solveTime + $penalty);
+                $this->scores[$teamId]->addNumberOfPoints($contestProblem->getPoints());
+                $this->scores[$teamId]->addSolveTime($solveTime);
+                $this->scores[$teamId]->addTotalTime($solveTime + $penalty);
             }
         }
 
@@ -260,16 +263,18 @@ class Scoreboard
         $previousTeamId = null;
         foreach ($this->scores as $teamScore) {
             $teamId = $teamScore->getTeam()->getTeamid();
+            $teamSortOrder = $teamScore->getTeam()->getCategory()->getSortorder();
             // rank, team name, total correct, total time
-            if ($teamScore->getTeam()->getCategory()->getSortorder() != $prevSortOrder) {
-                $prevSortOrder  = $teamScore->getTeam()->getCategory()->getSortorder();
+            if ($teamSortOrder != $prevSortOrder) {
+                $prevSortOrder  = $teamSortOrder;
                 $rank           = 0; // reset team position on switch to different category
                 $previousTeamId = null;
             }
             $rank++;
 
             // Use previous team rank when scores are equal
-            if (isset($previousTeamId) && $this->scoreCompare($this->scores[$previousTeamId], $teamScore) == 0) {
+            if (isset($previousTeamId) &&
+                $this->scoreCompare($this->scores[$previousTeamId], $teamScore) == 0) {
                 $teamScore->setRank($rank);
                 $teamScore->setRank($this->scores[$previousTeamId]->getRank());
             } else {
@@ -281,10 +286,11 @@ class Scoreboard
             // The numberOfPoints summary is useful only if they're all 1-point problems.
             $sortOrder = $teamScore->getTeam()->getCategory()->getSortorder();
             $this->summary->addNumberOfPoints($sortOrder, $teamScore->getNumberOfPoints());
-            if ($teamScore->getTeam()->getAffiliation()) {
-                $this->summary->incrementAffiliationValue($teamScore->getTeam()->getAffiliation()->getAffilid());
-                if ($teamScore->getTeam()->getAffiliation()->getCountry()) {
-                    $this->summary->incrementCountryValue($teamScore->getTeam()->getAffiliation()->getCountry());
+            $teamAffiliation = $teamScore->getTeam()->getAffiliation();
+            if ($teamAffiliation) {
+                $this->summary->incrementAffiliationValue($teamAffiliation->getAffilid());
+                if ($teamAffiliation->getCountry()) {
+                    $this->summary->incrementCountryValue($teamAffiliation->getCountry());
                 }
             }
 
@@ -298,10 +304,13 @@ class Scoreboard
 
                 $problemMatrixItem = $this->matrix[$teamId][$problemId];
                 $problemSummary    = $this->summary->getProblem($problemId);
-                $problemSummary->addNumberOfSubmissions($sortOrder, $problemMatrixItem->getNumberOfSubmissions());
-                $problemSummary->addNumberOfPendingSubmissions($sortOrder,
-                                                               $problemMatrixItem->getNumberOfPendingSubmissions());
-                $problemSummary->addNumberOfCorrectSubmissions($sortOrder, $problemMatrixItem->isCorrect() ? 1 : 0);
+
+                $problemSummary->addSubmissionCounts(
+                    $sortOrder,
+                    $problemMatrixItem->getNumberOfSubmissions(),
+                    $problemMatrixItem->getNumberOfPendingSubmissions(),
+                    $problemMatrixItem->isCorrect() ? 1 : 0
+                );
                 if ($problemMatrixItem->isFirst()) {
                     $problemSummary->updateBestTime($sortOrder, $problemMatrixItem->getTime());
                 }
@@ -324,8 +333,10 @@ class Scoreboard
     protected static function scoreboardCompare(TeamScore $a, TeamScore $b)
     {
         // First order by our predefined sortorder based on category
-        if ($a->getTeam()->getCategory()->getSortorder() != $b->getTeam()->getCategory()->getSortorder()) {
-            return $a->getTeam()->getCategory()->getSortorder() <=> $b->getTeam()->getCategory()->getSortorder();
+        $a_sortorder = $a->getTeam()->getCategory()->getSortorder();
+        $b_sortorder = $b->getTeam()->getCategory()->getSortorder();
+        if ($a_sortorder != $b_sortorder) {
+            return $a_sortorder <=> $b_sortorder;
         }
 
         // Then compare scores
@@ -381,21 +392,17 @@ class Scoreboard
         $btimes = $b->getSolveTimes();
         rsort($atimes);
         rsort($btimes);
+
         if (isset($atimes[0]) && isset($btimes[0])) {
             return $atimes[0] <=> $btimes[0];
-        } else {
-            if (!isset($atimes[0]) && !isset($btimes[0])) {
-                return 0;
-            } else {
-                if (!isset($atimes[0])) {
-                    return -1;
-                } else {
-                    if (!isset($btimes[0])) {
-                        return 1;
-                    }
-                }
-            }
         }
+        if (!isset($atimes[0]) && !isset($btimes[0])) {
+            return 0;
+        }
+        if (!isset($atimes[0])) return -1;
+        if (!isset($btimes[0])) return 1;
+
+        throw new Exception('Unhandled tie breaker case.');
     }
 
     /**

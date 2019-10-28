@@ -227,8 +227,9 @@ class ScoreboardService
                 $teamScores = [];
                 $teams      = [];
                 foreach ($tied as $rankCache) {
-                    $teamScores[$rankCache->getTeam()->getTeamid()] = new TeamScore($rankCache->getTeam());
-                    $teams[]                                        = $rankCache->getTeam();
+                    $tiedteam = $rankCache->getTeam();
+                    $teamScores[$tiedteam->getTeamid()] = new TeamScore($tiedteam);
+                    $teams[] = $tiedteam;
                 }
 
                 // Get submission times for each of the teams.
@@ -256,10 +257,11 @@ class ScoreboardService
 
                 // Now check for each team if it is ranked higher than $teamid.
                 foreach ($tied as $rankCache) {
-                    if ($rankCache->getTeam()->getTeamid() == $team->getTeamid()) {
+                    $tiedteam = $rankCache->getTeam();
+                    if ($tiedteam->getTeamid() == $team->getTeamid()) {
                         continue;
                     }
-                    if (Scoreboard::scoreTiebreaker($teamScores[$rankCache->getTeam()->getTeamid()],
+                    if (Scoreboard::scoreTiebreaker($teamScores[$tiedteam->getTeamid()],
                                                     $teamScores[$team->getTeamid()]) < 0) {
                         $rank++;
                     }
@@ -364,9 +366,8 @@ class ScoreboardService
             }
 
             // Check if this submission has a publicly visible judging result:
-            if ($judging === null ||
-                (!$useExternalJudgements && $verificationRequired && !$judging->getVerified()) ||
-                empty($judging->getResult())) {
+            if ($judging === null || empty($judging->getResult()) ||
+                (!$useExternalJudgements && $verificationRequired && !$judging->getVerified())) {
                 // For the jury: only consider it pending if we don't have a
                 // correct one yet. This is needed because during the freeze
                 // we consider submissions after the correct one for the
