@@ -441,22 +441,27 @@ class ScoreboardService
                     LEFT JOIN team t USING(teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
-                    (ej.result IS NULL OR ej.result = :correctResult) AND
+                    (ej.result IS NULL OR ej.result = :correctResult %s) AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
                     round(s.submittime,4) < :submitTime', $params);
             } else {
-                $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
+                if ($verificationRequired) {
+                    $verificationRequiredExtra = 'OR j.verified = 0';
+                } else {
+                    $verificationRequiredExtra = '';
+                }
+                $firstToSolve = 0 == $this->em->getConnection()->fetchColumn(sprintf('
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j USING (submitid)
                     LEFT JOIN team t USING(teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
-                    ((j.valid = 1 AND ( j.rejudgingid IS NULL AND (j.result IS NULL OR j.result = :correctResult))) OR
+                    ((j.valid = 1 AND ( j.rejudgingid IS NULL AND (j.result IS NULL OR j.result = :correctResult %s))) OR
                       s.judgehost IS NULL) AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
-                    round(s.submittime,4) < :submitTime', $params);
+                    round(s.submittime,4) < :submitTime', $verificationRequiredExtra), $params);
             }
         }
 
