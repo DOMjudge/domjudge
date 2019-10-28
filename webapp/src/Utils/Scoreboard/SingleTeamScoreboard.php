@@ -51,7 +51,7 @@ class SingleTeamScoreboard extends Scoreboard
      * @param FreezeData       $freezeData
      * @param bool             $jury
      * @param int              $penaltyTime
-     * @param bool             $scoreIsInSecods
+     * @param bool             $scoreIsInSeconds
      */
     public function __construct(
         Contest $contest,
@@ -63,14 +63,14 @@ class SingleTeamScoreboard extends Scoreboard
         FreezeData $freezeData,
         bool $jury,
         int $penaltyTime,
-        bool $scoreIsInSecods
+        bool $scoreIsInSeconds
     ) {
         $this->team      = $team;
         $this->teamRank  = $teamRank;
         $this->rankCache = $rankCache;
         $this->jury      = $jury;
         parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, $jury,
-                            $penaltyTime, $scoreIsInSecods);
+                            $penaltyTime, $scoreIsInSeconds);
     }
 
     /**
@@ -95,7 +95,7 @@ class SingleTeamScoreboard extends Scoreboard
 
             $penalty = Utils::calcPenaltyTime(
                 $scoreRow->getIsCorrect($this->restricted), $scoreRow->getSubmissions($this->restricted),
-                $this->penaltyTime, $this->scoreIsInSecods
+                $this->penaltyTime, $this->scoreIsInSeconds
             );
 
             $this->matrix[$scoreRow->getTeam()->getTeamid()][$scoreRow->getProblem()->getProbid()] = new ScoreboardMatrixItem(

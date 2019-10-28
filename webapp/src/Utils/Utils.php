@@ -577,10 +577,10 @@ class Utils
      * @param bool $solved Whether there was at least one correct submission by this team for this problem
      * @param int $numSubmissions The total number of tries for this problem by this team
      * @param int $penaltyTime The penalty time for every wrong submission
-     * @param bool $scoreIsInSecods Whether scoring is in seconds
+     * @param bool $scoreIsInSeconds Whether scoring is in seconds
      * @return int
      */
-    public static function calcPenaltyTime(bool $solved, int $numSubmissions, int $penaltyTime, bool $scoreIsInSecods)
+    public static function calcPenaltyTime(bool $solved, int $numSubmissions, int $penaltyTime, bool $scoreIsInSeconds)
     {
         if (!$solved) {
             return 0;
@@ -589,7 +589,7 @@ class Utils
         $result = ($numSubmissions - 1) * $penaltyTime;
         //  Convert the penalty time to seconds if the configuration
         //  parameter to compute scores to the second is set.
-        if ($scoreIsInSecods) {
+        if ($scoreIsInSeconds) {
             $result *= 60;
         }
 

@@ -62,7 +62,7 @@ class Scoreboard
     /**
      * @var bool
      */
-    protected $scoreIsInSecods;
+    protected $scoreIsInSeconds;
 
     /**
      * @var ScoreboardMatrixItem[][]
@@ -94,7 +94,7 @@ class Scoreboard
      * @param FreezeData       $freezeData
      * @param bool             $jury
      * @param int              $penaltyTime
-     * @param bool             $scoreIsInSecods
+     * @param bool             $scoreIsInSeconds
      */
     public function __construct(
         Contest $contest,
@@ -105,17 +105,17 @@ class Scoreboard
         FreezeData $freezeData,
         bool $jury,
         int $penaltyTime,
-        bool $scoreIsInSecods
+        bool $scoreIsInSeconds
     ) {
-        $this->contest         = $contest;
-        $this->teams           = $teams;
-        $this->categories      = $categories;
-        $this->problems        = $problems;
-        $this->scoreCache      = $scoreCache;
-        $this->freezeData      = $freezeData;
-        $this->restricted      = $jury || $freezeData->showFinal($jury);
-        $this->penaltyTime     = $penaltyTime;
-        $this->scoreIsInSecods = $scoreIsInSecods;
+        $this->contest          = $contest;
+        $this->teams            = $teams;
+        $this->categories       = $categories;
+        $this->problems         = $problems;
+        $this->scoreCache       = $scoreCache;
+        $this->freezeData       = $freezeData;
+        $this->restricted       = $jury || $freezeData->showFinal($jury);
+        $this->penaltyTime      = $penaltyTime;
+        $this->scoreIsInSeconds = $scoreIsInSeconds;
 
         $this->initializeScoreboard();
         $this->calculateScoreboard();
@@ -229,7 +229,7 @@ class Scoreboard
 
             $penalty = Utils::calcPenaltyTime(
                 $scoreRow->getIsCorrect($this->restricted), $scoreRow->getSubmissions($this->restricted),
-                $this->penaltyTime, $this->scoreIsInSecods
+                $this->penaltyTime, $this->scoreIsInSeconds
             );
 
             $this->matrix[$scoreRow->getTeam()->getTeamid()][$scoreRow->getProblem()->getProbid()] = new ScoreboardMatrixItem(
@@ -242,7 +242,7 @@ class Scoreboard
             );
 
             if ($scoreRow->getIsCorrect($this->restricted)) {
-                $solveTime      = Utils::scoretime($scoreRow->getSolveTime($this->restricted), $this->scoreIsInSecods);
+                $solveTime      = Utils::scoretime($scoreRow->getSolveTime($this->restricted), $this->scoreIsInSeconds);
                 $contestProblem = $this->problems[$scoreRow->getProblem()->getProbid()];
                 $this->scores[$scoreRow->getTeam()->getTeamid()]->addNumberOfPoints($contestProblem->getPoints());
                 $this->scores[$scoreRow->getTeam()->getTeamid()]->addSolveTime($solveTime);
