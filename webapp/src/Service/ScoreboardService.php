@@ -94,9 +94,12 @@ class ScoreboardService
         $categories = $this->getCategories($jury && !$visibleOnly);
         $scoreCache = $this->getScorecache($contest);
 
-        return new Scoreboard($contest, $teams, $categories, $problems, $scoreCache, $freezeData, $jury,
-                              (int)$this->dj->dbconfig_get('penalty_time', 20),
-                              (bool)$this->dj->dbconfig_get('score_in_seconds', false));
+        return new Scoreboard(
+            $contest, $teams, $categories, $problems,
+            $scoreCache, $freezeData, $jury,
+            (int)$this->dj->dbconfig_get('penalty_time', 20),
+            (bool)$this->dj->dbconfig_get('score_in_seconds', false)
+        );
     }
 
     /**
@@ -133,10 +136,12 @@ class ScoreboardService
             $teamRank = 0;
         }
 
-        return new SingleTeamScoreboard($contest, $team, $teamRank, $problems, $rankCache, $scoreCache, $freezeData,
-                                        $jury,
-                                        (int)$this->dj->dbconfig_get('penalty_time', 20),
-                                        (bool)$this->dj->dbconfig_get('score_in_seconds', false));
+        return new SingleTeamScoreboard(
+            $contest, $team, $teamRank, $problems,
+            $rankCache, $scoreCache, $freezeData, $jury,
+            (int)$this->dj->dbconfig_get('penalty_time', 20),
+            (bool)$this->dj->dbconfig_get('score_in_seconds', false)
+        );
     }
 
     /**
@@ -170,7 +175,7 @@ class ScoreboardService
         $totalTime  = $rankCache ? $rankCache->getTotaltimeRestricted() : 0;
         $sortOrder  = $team->getCategory()->getSortorder();
 
-        // Number of teams that definitely ranked higher
+        // Number of teams that definitely ranked higher.
         $better = $this->em->createQueryBuilder()
             ->from(RankCache::class, 'r')
             ->join('r.team', 't')
@@ -179,9 +184,9 @@ class ScoreboardService
             ->andWhere('r.contest = :contest')
             ->andWhere('tc.sortorder = :sortorder')
             ->andWhere('t.enabled = 1')
-            ->andWhere(sprintf('r.points_%s > :points OR (r.points_%s = :points AND r.totaltime_%s < :totaltime)',
-                               $variant, $variant,
-                               $variant))
+            ->andWhere(sprintf('r.points_%s > :points OR '.
+                               '(r.points_%s = :points AND r.totaltime_%s < :totaltime)',
+                               $variant, $variant, $variant))
             ->setParameter(':contest', $contest)
             ->setParameter(':sortorder', $sortOrder)
             ->setParameter(':points', $points)
@@ -191,8 +196,9 @@ class ScoreboardService
 
         $rank = $better + 1;
 
-        // Resolve ties based on latest correctness points, only necessary when we actually
-        // solved at least one problem, so this list should usually be short
+        // Resolve ties based on latest correctness points, only necessary
+        // when we actually solved at least one problem, so this list should
+        // usually be short.
         if ($points > 0) {
             /** @var RankCache[] $tied */
             $tied = $this->em->createQueryBuilder()
@@ -203,7 +209,8 @@ class ScoreboardService
                 ->andWhere('r.contest = :contest')
                 ->andWhere('tc.sortorder = :sortorder')
                 ->andWhere('t.enabled = 1')
-                ->andWhere(sprintf('r.points_%s = :points AND r.totaltime_%s = :totaltime', $variant, $variant))
+                ->andWhere(sprintf('r.points_%s = :points AND r.totaltime_%s = :totaltime',
+                                   $variant, $variant))
                 ->setParameter(':contest', $contest)
                 ->setParameter(':sortorder', $sortOrder)
                 ->setParameter(':points', $points)
@@ -279,15 +286,21 @@ class ScoreboardService
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Exception
      */
-    public function calculateScoreRow(Contest $contest, Team $team, Problem $problem, bool $updateRankCache = true)
-    {
-        $this->logger->debug(sprintf("ScoreboardService::calculateScoreRow '%d' '%d' '%d'", $contest->getCid(),
-                                     $team->getTeamid(),
-                                     $problem->getProbid()));
+    public function calculateScoreRow(
+        Contest $contest,
+        Team    $team,
+        Problem $problem,
+        bool    $updateRankCache = true
+    ) {
+        $this->logger->debug(sprintf(
+            "ScoreboardService::calculateScoreRow '%d' '%d' '%d'",
+            $contest->getCid(), $team->getTeamid(), $problem->getProbid()
+        ));
 
         // First acquire an advisory lock to prevent other calls to this
         // method from interfering with our update.
-        $lockString = sprintf('domjudge.%d.%d.%d', $contest->getCid(), $team->getTeamid(), $problem->getProbid());
+        $lockString = sprintf('domjudge.%d.%d.%d',
+                              $contest->getCid(), $team->getTeamid(), $problem->getProbid());
         if ($this->em->getConnection()->fetchColumn('SELECT GET_LOCK(:lock, 3)',
                                                     [':lock' => $lockString]) != 1) {
             throw new \Exception(sprintf("ScoreboardService::calculateScoreRow failed to obtain lock '%s'",
@@ -431,7 +444,8 @@ class ScoreboardService
             // - submission needs to be valid (not invalidated)
             // - a valid judging is present, but
             //   - either it's still ongoing (pending judgement, could be correct)
-            //   - or already judged to be correct (if it's judged but != correct, it's not a first to solve)
+            //   - or already judged to be correct (if it is judged but not correct,
+            //     it is not a first to solve)
             // - or the submission is still queued for judgement (judgehost is NULL).
             if ($useExternalJudgements) {
                 $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('

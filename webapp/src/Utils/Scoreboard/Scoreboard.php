@@ -193,7 +193,8 @@ class Scoreboard
         }
 
         $passed   = Utils::difftime((float)$this->contest->getStarttime(), $now);
-        $duration = Utils::difftime((float)$this->contest->getStarttime(), (float)$this->contest->getEndtime());
+        $duration = Utils::difftime((float)$this->contest->getStarttime(),
+                                    (float)$this->contest->getEndtime());
         return (int)($passed * 100. / $duration);
     }
 
@@ -213,7 +214,7 @@ class Scoreboard
     }
 
     /**
-     * Calculate the scoreboard data, filling the summary, matrix and scores properteis
+     * Calculate the scoreboard data, filling the summary, matrix and scores properties
      */
     protected function calculateScoreboard()
     {
@@ -221,14 +222,14 @@ class Scoreboard
         $this->matrix = [];
         foreach ($this->scoreCache as $scoreRow) {
             // Skip this row if the team or problem is not known by us
-            if (!array_key_exists($scoreRow->getTeam()->getTeamid(),
-                                  $this->teams) || !array_key_exists($scoreRow->getProblem()->getProbid(),
-                                                                     $this->problems)) {
+            if (!array_key_exists($scoreRow->getTeam()->getTeamid(), $this->teams) ||
+                !array_key_exists($scoreRow->getProblem()->getProbid(), $this->problems)) {
                 continue;
             }
 
             $penalty = Utils::calcPenaltyTime(
-                $scoreRow->getIsCorrect($this->restricted), $scoreRow->getSubmissions($this->restricted),
+                $scoreRow->getIsCorrect($this->restricted),
+                $scoreRow->getSubmissions($this->restricted),
                 $this->penaltyTime, $this->scoreIsInSeconds
             );
 
@@ -422,12 +423,13 @@ class Scoreboard
         $usedCategories = [];
         foreach ($this->scores as $score) {
             // skip if we have limitteams and the team is not listed
-            if (!empty($limitToTeamIds) && !in_array($score->getTeam()->getTeamid(), $limitToTeamIds)) {
+            if (!empty($limitToTeamIds) &&
+                !in_array($score->getTeam()->getTeamid(), $limitToTeamIds)) {
                 continue;
             }
 
             if ($score->getTeam()->getCategory()) {
-                $category                                   = $score->getTeam()->getCategory();
+                $category = $score->getTeam()->getCategory();
                 $usedCategories[$category->getCategoryid()] = $category;
             }
         }
@@ -442,7 +444,8 @@ class Scoreboard
     public function hasCategoryColors(): bool
     {
         foreach ($this->scores as $score) {
-            if ($score->getTeam()->getCategory() && $score->getTeam()->getCategory()->getColor()) {
+            if ($score->getTeam()->getCategory() &&
+                $score->getTeam()->getCategory()->getColor()) {
                 return true;
             }
         }
@@ -462,7 +465,8 @@ class Scoreboard
             $this->bestInCategoryData = [];
             foreach ($this->scores as $score) {
                 // skip if we have limitteams and the team is not listed
-                if (!empty($limitToTeamIds) && !in_array($score->getTeam()->getTeamid(), $limitToTeamIds)) {
+                if (!empty($limitToTeamIds) &&
+                    !in_array($score->getTeam()->getTeamid(), $limitToTeamIds)) {
                     continue;
                 }
 
@@ -476,7 +480,8 @@ class Scoreboard
         $categoryId = $team->getCategoryid();
         // Only check the scores when the team has points
         if ($this->scores[$team->getTeamid()]->getNumberOfPoints()) {
-            // If the rank of this team is equal to the best team for this category, this team is best in that category
+            // If the rank of this team is equal to the best team for this
+            // category, this team is best in that category
             return $this->scores[$this->bestInCategoryData[$categoryId]]->getRank() ===
                 $this->scores[$team->getTeamid()]->getRank();
         }
