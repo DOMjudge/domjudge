@@ -7,9 +7,6 @@
     <table class="data-table table table-hover table-striped table-sm balloons-table" style="width:auto">
         <thead class="thead-light">
         <tr>
-            {%- if showContest %}
-                <th scope="col">contest</th>
-            {%- endif %}
             <th scope="col">&nbsp;</th>
             <th scope="col">ID</th>
             <th scope="col">time</th>
@@ -28,9 +25,6 @@
             <tr class="{% if balloon.data.done %}disabled{% endif %}"
                 data-affiliation-id="{{ balloon.data.affiliation }}"
                 data-location-str="{{ balloon.data.location }}">
-                {%- if showContest %}
-                    <td>c{{ balloon.data.cid }}</td>
-                {%- endif %}
                 <td>
                 {%- if balloon.data.done -%}
                     <i class="far fa-check-circle"></i>
