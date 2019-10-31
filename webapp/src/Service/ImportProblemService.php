@@ -390,10 +390,11 @@ class ImportProblemService
             for ($j = 0; $j < $zip->numFiles; $j++) {
                 $filename = $zip->getNameIndex($j);
                 if (Utils::startsWith($filename, sprintf('data/%s/', $type)) && Utils::endsWith($filename, '.in')) {
-                    $basename = basename($filename, ".in");
-                    $fileout  = sprintf('data/%s/%s.ans', $type, $basename);
+                    $fileout  = preg_replace("/\.in$/", ".ans", $filename);
                     if ($zip->locateName($fileout) !== false) {
-                        $dataFiles[] = $basename;
+                        $basename = basename($filename, ".in");
+                        $dirname = dirname($filename);
+                        $dataFiles[] = preg_replace("|^data/$type/|", "", sprintf('%s/%s', $dirname, $basename));
                     }
                 }
             }
