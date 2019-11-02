@@ -51,6 +51,11 @@ INSTALL_DATA    = $(INSTALL) -m 0644
 INSTALL_USER    = $(INSTALL) -m 0644 -o $(DOMJUDGE_USER)
 INSTALL_WEBSITE = $(INSTALL) -m 0644 -o $(DOMJUDGE_USER) -g $(WEBSERVER_GROUP)
 INSTALL_DIR     = $(INSTALL) -d
+# KLUDGE: how to install a tree of files with correct permissions?
+define install_tree
+	cp    -R -t   $(1) $(2) ; \
+	chmod -R a+rX $(1)/`basename $(2)`
+endef
 
 # Library objects required in multiple places:
 LIBSBASE   = $(addprefix $(TOPDIR)/lib/,lib.error lib.misc)

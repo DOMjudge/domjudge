@@ -34,10 +34,8 @@ install-domserver:
 # This must be done first to install with the rest.
 	$(MAKE) copy-bundle-assets
 	$(INSTALL_DIR) $(DESTDIR)$(domserver_webappdir);
-# KLUDGE: how to install a tree of files with correct permissions?
 	for d in bin config public src templates tests ; do \
-		cp -R           -t $(DESTDIR)$(domserver_webappdir) $$d ; \
-		chmod -R a+rX      $(DESTDIR)$(domserver_webappdir)/$$d ; \
+		$(call install_tree,$(DESTDIR)$(domserver_webappdir),$$d) ; \
 	done
 # Change webapp/public/doc symlink
 	rm $(DESTDIR)$(domserver_webappdir)/public/doc

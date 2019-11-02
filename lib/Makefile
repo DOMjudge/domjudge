@@ -23,10 +23,10 @@ endef
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_libdir)    *.php
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_libdir)    alert
-# KLUDGE: how to install a tree of files with correct permissions?
-	cp -R           -t $(DESTDIR)$(domserver_libvendordir) vendor/*
+	for i in vendor/* ; do \
+		$(call install_tree,$(DESTDIR)$(domserver_libvendordir),$$i) ; \
+	done
 	$(call fix_composer_paths,$(DESTDIR)$(domserver_libvendordir))
-	chmod -R a+rX      $(DESTDIR)$(domserver_libvendordir)
 
 install-judgehost:
 	$(INSTALL_DATA) -t $(DESTDIR)$(judgehost_libdir)    *.php *.sh
