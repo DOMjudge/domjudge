@@ -24,7 +24,11 @@ import sphinx_rtd_theme
 copyright = '2004-2019 by the DOMjudge developers and contributors'
 author = 'DOMjudge Team'
 
-exec(open("version.py").read())
+import os
+if os.path.isfile("version.py"):
+    exec(open("version.py").read())
+else:
+    exec(open("version.dist.py").read())
 
 # -- General configuration ---------------------------------------------------
 
