@@ -128,7 +128,7 @@ judgehost_dirs = $(judgehost_bindir) $(judgehost_etcdir) $(judgehost_libdir) \
                  $(judgehost_libjudgedir) $(judgehost_logdir) \
                  $(judgehost_rundir) $(judgehost_judgedir)
 
-docs_dirs      = $(addprefix $(domjudge_docdir)/,admin judge team examples logos)
+docs_dirs      = $(addprefix $(domjudge_docdir)/,manual team examples logos)
 
 # Macro to substitute configure variables.
 # Defined in makefile to allow for expansion of ${prefix} etc. during

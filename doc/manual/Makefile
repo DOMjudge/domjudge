@@ -19,6 +19,7 @@ docs distdocs:
 endif
 
 install-docs: docs
+	$(call install_tree,$(DESTDIR)$(domjudge_docdir)/manual,build/html)
 
 clean-l:
 	rm -rf build
