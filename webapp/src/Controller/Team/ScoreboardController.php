@@ -72,6 +72,7 @@ class ScoreboardController extends BaseController
         $data['myTeamId'] = $user->getTeamid();
 
         if ($request->isXmlHttpRequest()) {
+            $data['current_contest'] = $contest;
             return $this->render('partials/scoreboard.html.twig', $data, $response);
         }
         return $this->render('team/scoreboard.html.twig', $data, $response);
