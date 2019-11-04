@@ -54,6 +54,7 @@ class ScoreboardController extends AbstractController
                                                                       false, $contest);
 
         if ($request->isXmlHttpRequest()) {
+            $data['current_contest'] = $contest;
             return $this->render('partials/scoreboard.html.twig', $data, $response);
         }
         return $this->render('jury/scoreboard.html.twig', $data, $response);

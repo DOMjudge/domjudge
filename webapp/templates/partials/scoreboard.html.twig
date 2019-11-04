@@ -4,7 +4,7 @@
 
 {% if ajax is defined and ajax and not static and public %}
     <div class="d-none">
-        {% include 'partials/scoreboard_progress_bar.html.twig' %}
+        {% include 'partials/scoreboard_progress_bar.html.twig' with {contest: current_contest} %}
     </div>
 {% endif %}
 
@@ -32,7 +32,7 @@
         </div>
 
         {% if static %}
-            {% include 'partials/scoreboard_progress_bar.html.twig' %}
+            {% include 'partials/scoreboard_progress_bar.html.twig' with {contest: current_contest} %}
         {% endif %}
     </div> {# card #}
 
