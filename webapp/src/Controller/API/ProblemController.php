@@ -323,6 +323,10 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         /** @var ContestProblem $problem */
         $problem       = $object[0];
         $testDataCount = (int)$object['testdatacount'];
-        return new ContestProblemWrapper($problem, $testDataCount);
+        if ($this->dj->checkrole('jury')) {
+            return new ContestProblemWrapper($problem, $testDataCount);
+        } else {
+            return $problem;
+        }
     }
 }
