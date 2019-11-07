@@ -148,7 +148,7 @@ class TeamAffiliationController extends BaseController
                 ];
             }
 
-            $organizationFilePath = sprintf('images/affiliations/%s.png', $teamAffiliation->getAffilid());
+            $organizationFilePath = sprintf('images/affiliations/%s.png', $teamAffiliation->getExternalid() ?? $teamAffiliation->getAffilid());
             $affiliationLogo = '';
             if (file_exists($webDir . '/' . $organizationFilePath)) {
                 $affiliationLogo = sprintf('<img src="%s" alt="%s" class="affiliation-logo">',
