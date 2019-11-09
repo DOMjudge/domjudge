@@ -14,11 +14,11 @@
 
 <script>
     var initial = {{ now }};
+    var localInitial = new Date().getTime();
     var activatetime = {{ contest.activatetime|default(-1) }};
     var starttime = {{ contest.starttime|default(-1) }};
     var endtime = {{ contest.endtime|default(-1) }};
-    var offset = 0;
-    var date = new Date(initial * 1000);
+    var clientOffset = localInitial - new Date(initial * 1000).getTime();
     var timeleftelt = document.getElementById("timeleft");
 
     setInterval(function () {
