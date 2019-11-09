@@ -128,8 +128,7 @@ function togglelastruns()
 // start (and end?).
 function updateClock()
 {
-	var curtime = initial+offset;
-	date.setTime(curtime*1000);
+	var curtime = Math.round((new Date().getTime() - clientOffset) / 1000);
 
 	var fmt = "";
 	if ( timeleftelt.innerHTML=='start delayed' || timeleft.innerHTML == 'no contest' ) { // FIXME
@@ -166,7 +165,6 @@ function updateClock()
 	}
 
 	timeleftelt.innerHTML = what + fmt;
-	offset++;
 }
 
 function setCookie(name, value)
