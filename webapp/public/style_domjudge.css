@@ -22,7 +22,7 @@ body {
     max-width: 800px;
 }
 
-.disabled {
+.disabled, .dropdown-disabled {
     color: silver !important;
 }
 
