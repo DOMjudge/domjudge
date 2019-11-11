@@ -71,7 +71,7 @@
                     was frozen with {{ current_contest.minutesRemaining }} minutes remaining
                 {% else %}
                     The scoreboard was frozen with {{ current_contest.minutesRemaining }} minutes remaining - solutions
-                    submitted in the last {{ current_contest.minutesRemaining }} minutes of the contest are still shown as pending.
+                    submitted in the last {{ current_contest.minutesRemaining }} minutes of the contest {% if showPending %}are still shown as pending{% else %}are not shown{% endif %}.
                 {% endif %}
             </div>
         {% endif %}
