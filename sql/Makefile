@@ -48,7 +48,7 @@ dist-l: $(CONFSTUB)
 
 distclean-l:
 	-rm -f dj_setup_database
-	-rm -f files/defaultdata/compare/run files/defaultdata/float/check_float \
+	-rm -f files/defaultdata/compare/run \
 	       files/defaultdata/java_javac_detect/DetectMain.class \
 	       files/defaultdata/kt/DetectMain.class \
 	       files/examples/boolfind_cmp/check_boolfind \
