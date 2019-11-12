@@ -9,9 +9,5 @@ include $(TOPDIR)/Makefile.global
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = manual team examples
 
-# Cleanup LaTeX logs, etc. after generating documentation for distribution.
-distdocs-l:
-	$(MAKE) clean
-
 install-docs-l:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domjudge_docdir)/logos logos/DOMjudgelogo.pdf
