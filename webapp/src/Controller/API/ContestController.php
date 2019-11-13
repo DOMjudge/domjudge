@@ -5,9 +5,11 @@ namespace App\Controller\API;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
+use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
 use App\Utils\Utils;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use JMS\Serializer\Metadata\PropertyMetadata;
@@ -44,7 +46,8 @@ class ContestController extends AbstractRestController
     /**
      * @param ImportExportService    $importExportService
      */
-    public function __construct(ImportExportService $importExportService) {
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj, EventLogService $eventLogService, ImportExportService $importExportService) {
+        parent::__construct($entityManager, $dj, $eventLogService);
         $this->importExportService = $importExportService;
     }
 
