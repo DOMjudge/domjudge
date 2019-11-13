@@ -24,7 +24,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Inflector\Inflector;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -52,7 +51,7 @@ class ContestController extends AbstractRestController
     /**
      * Add one or more contests.
      * @param Request $request
-     * @return array
+     * @return string
      * @Rest\Post("")
      * @IsGranted("ROLE_ADMIN")
      * @SWG\Post(consumes={"multipart/form-data"})
@@ -67,7 +66,7 @@ class ContestController extends AbstractRestController
      *     response="200",
      *     description="Returns a (currently meaningless) status message.",
      * )
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws BadRequestHttpException
      */
     public function addContestAction(Request $request)
     {
