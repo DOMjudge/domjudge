@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Inflector\Inflector;
@@ -64,16 +65,7 @@ class ContestController extends AbstractRestController
      * )
      * @SWG\Response(
      *     response="200",
-     *     description="Returns the IDs of the imported problems and any messages produced",
-     *     @SWG\Schema(
-     *         type="object",
-     *         @SWG\Property(property="problem_ids", type="array",
-     *             @SWG\Items(type="integer", description="The IDs of the imported problems")
-     *         ),
-     *         @SWG\Property(property="messages", type="array",
-     *             @SWG\Items(type="string", description="Messages produced while adding problems")
-     *         )
-     *     )
+     *     description="Returns a (currently meaningless) status message.",
      * )
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
@@ -83,9 +75,10 @@ class ContestController extends AbstractRestController
         $yamlFile = $request->files->get('yaml') ?: [];
         $data = Yaml::parseFile($yamlFile->getRealPath(), Yaml::PARSE_DATETIME);
         if ($this->importExportService->importContestYaml($data, $message)) {
+            // TODO: better return contest id here
             return "New contest successfully added.";
         } else {
-            return "Error while adding contest: $message";
+            throw new BadRequestHttpException("Error while adding contest: $message");
         }
     }
 
