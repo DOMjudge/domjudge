@@ -421,6 +421,11 @@ if (isset($options['h'])) {
     usage();
 }
 
+if ( posix_getuid()==0 || posix_geteuid()==0 ) {
+    echo "This program should not be run as root.\n";
+    exit(1);
+}
+
 $myhost = trim(`hostname | cut -d . -f 1`);
 if (isset($options['daemonid'])) {
     if (preg_match('/^\d+$/', $options['daemonid'])) {
