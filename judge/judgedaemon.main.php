@@ -138,7 +138,9 @@ function request(string $url, string $verb = 'GET', string $data = '', bool $fai
                 "Check credentials in restapi.secret.";
         } else {
             $errstr = "Error while executing curl $verb to url " . $url .
-                ": http status code: " . $status . ", response: " . $response;
+                ": http status code: " . $status .
+                ", request size = " . strlen($data) .
+                ", response: " . $response;
         }
         if ($failonerror) {
             error($errstr);
