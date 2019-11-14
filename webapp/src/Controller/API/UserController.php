@@ -68,7 +68,7 @@ class UserController extends AbstractRestController
             // TODO: better return all groups here
             return "New groups successfully added.";
         } else {
-            throw new BadRequestHttpException("Error while adding contest: $message");
+            throw new BadRequestHttpException("Error while adding groups: $message");
         }
     }
 
@@ -100,7 +100,39 @@ class UserController extends AbstractRestController
             // TODO: better return all teams here?
             return "New teams successfully added.";
         } else {
-            throw new BadRequestHttpException("Error while adding contest: $message");
+            throw new BadRequestHttpException("Error while adding teams: $message");
+        }
+    }
+
+    /**
+     * Add accounts to teams.
+     * @param Request $request
+     * @return string
+     * @Rest\Post("/accounts")
+     * @IsGranted("ROLE_ADMIN")
+     * @SWG\Post(consumes={"multipart/form-data"})
+     * @SWG\Parameter(
+     *     name="tsv",
+     *     in="formData",
+     *     type="file",
+     *     required=true,
+     *     description="The accounts.tsv files to import."
+     * )
+     * @SWG\Response(
+     *     response="200",
+     *     description="Returns a (currently meaningless) status message.",
+     * )
+     * @throws BadRequestHttpException
+     */
+    public function addAccountsAction(Request $request)
+    {
+        /** @var UploadedFile $tsvFile */
+        $tsvFile = $request->files->get('tsv') ?: [];
+        if ($this->importExportService->importTsv('accounts', $tsvFile, $message)) {
+            // TODO: better return all teams here?
+            return "New accounts successfully added.";
+        } else {
+            throw new BadRequestHttpException("Error while adding accounts: $message");
         }
     }
 
