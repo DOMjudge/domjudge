@@ -3,6 +3,10 @@
 namespace App\Controller\API;
 
 use App\Entity\User;
+use App\Service\DOMJudgeService;
+use App\Service\EventLogService;
+use App\Service\ImportExportService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -23,6 +27,51 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class UserController extends AbstractRestController
 {
+    /**
+     * @var ImportExportService
+     */
+    protected $importExportService;
+
+    /**
+     * @param ImportExportService    $importExportService
+     */
+    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj, EventLogService $eventLogService, ImportExportService $importExportService) {
+        parent::__construct($entityManager, $dj, $eventLogService);
+        $this->importExportService = $importExportService;
+    }
+
+    /**
+     * Add one or more contests.
+     * @param Request $request
+     * @return string
+     * @Rest\Post("/groups")
+     * @IsGranted("ROLE_ADMIN")
+     * @SWG\Post(consumes={"multipart/form-data"})
+     * @SWG\Parameter(
+     *     name="tsv",
+     *     in="formData",
+     *     type="file",
+     *     required=true,
+     *     description="The groups.tsv files to import."
+     * )
+     * @SWG\Response(
+     *     response="200",
+     *     description="Returns a (currently meaningless) status message.",
+     * )
+     * @throws BadRequestHttpException
+     */
+    public function addGroupAction(Request $request)
+    {
+        /** @var UploadedFile $tsvFile */
+        $tsvFile = $request->files->get('tsv') ?: [];
+        if ($this->importExportService->importTsv('groups', $tsvFile, $message)) {
+            // TODO: better return all groups here
+            return "New groups successfully added.";
+        } else {
+            throw new BadRequestHttpException("Error while adding contest: $message");
+        }
+    }
+
     /**
      * Get all the users
      * @param Request $request
