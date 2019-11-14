@@ -96,9 +96,10 @@ class ImportProblemService
         // This might take a while
         ini_set('max_execution_time', '300');
 
-        $propertiesFile = 'domjudge-problem.ini';
-        $yamlFile       = 'problem.yaml';
-        $tleFile        = '.timelimit';
+        $propertiesFile  = 'domjudge-problem.ini';
+        $yamlFile        = 'problem.yaml';
+        $tleFile         = '.timelimit';
+        $submission_file = 'submissions.json';
         $problemIsNew   = $problem === null;
 
         $iniKeysProblem        = ['name', 'timelimit', 'special_run', 'special_compare'];
@@ -523,6 +524,11 @@ class ImportProblemService
                 ->getQuery()
                 ->getResult();
 
+            // Read submission details from optional file.
+            $submission_file_string = $zip->getFromName($submission_file);
+            $submission_details = $submission_file_string===FALSE ? array() :
+                $this->dj->jsonDecode($submission_file_string);
+
             $numJurySolutions = 0;
             for ($j = 0; $j < $zip->numFiles; $j++) {
                 $path = $zip->getNameIndex($j);
@@ -573,6 +579,9 @@ class ImportProblemService
                         }
                     }
                 }
+                if (isset($submission_details[$path]['langid'])) {
+                    $languageToUse = $submission_details[$path]['langid'];
+                }
 
                 $tmpDir = $this->dj->getDomjudgeTmpDir();
 
@@ -611,11 +620,25 @@ class ImportProblemService
                     } elseif (!empty($expectedResult)) {
                         $results = [$expectedResult];
                     }
+                    $jury_team_id = $this->dj->getUser()->getTeamid();
+                    if (isset($submission_details[$path]['team'])) {
+                        $json_team = $this->em->getRepository(Team::class)
+                            ->findOneBy(['name' => $submission_details[$path]['team']]);
+                        if (isset($json_team)) {
+                            $json_team_id = $json_team->getTeamid();
+                            if (isset($json_team_id)) {
+                                $jury_team_id = $json_team_id;
+                            }
+                        }
+                    }
+                    $entry_point = '__auto__';
+                    if (isset($submission_details[$path]['entry_point'])) {
+                        $entry_point = $submission_details[$path]['entry_point'];
+                    }
                     if ($totalSize <= $this->dj->dbconfig_get('sourcesize_limit') * 1024) {
                         $contest        = $this->em->getRepository(Contest::class)->find(
                             $contest->getCid());
-                        $team           = $this->em->getRepository(Team::class)->find(
-                            $this->dj->getUser()->getTeamid());
+                        $team           = $this->em->getRepository(Team::class)->find($jury_team_id);
                         $contestProblem = $this->em->getRepository(ContestProblem::class)->find(
                             [
                                 'problem' => $problem,
@@ -623,7 +646,7 @@ class ImportProblemService
                             ]);
                         $submission     = $this->submissionService->submitSolution($team, $contestProblem, $contest,
                                                                                    $languageToUse, $filesToSubmit, null,
-                                                                                   '__auto__', null, null,
+                                                                                   $entry_point, null, null,
                                                                                    $submissionMessage);
                         if (!$submission) {
                             $messages[] = $submissionMessage;
