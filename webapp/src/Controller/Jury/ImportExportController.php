@@ -200,7 +200,7 @@ class ImportExportController extends BaseController
             /** @var UploadedFile $file */
             $file = $importForm->get('file')->getData();
             $data = Yaml::parseFile($file->getRealPath(), Yaml::PARSE_DATETIME);
-            if ($this->importExportService->importContestYaml($data, $message)) {
+            if ($this->importExportService->importContestYaml($data, $message, $cid)) {
                 $this->addFlash('success',
                                 sprintf('The file %s is successfully imported.', $file->getClientOriginalName()));
             } else {

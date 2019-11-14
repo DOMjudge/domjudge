@@ -76,9 +76,8 @@ class ContestController extends AbstractRestController
         /** @var UploadedFile $yamlFile */
         $yamlFile = $request->files->get('yaml') ?: [];
         $data = Yaml::parseFile($yamlFile->getRealPath(), Yaml::PARSE_DATETIME);
-        if ($this->importExportService->importContestYaml($data, $message)) {
-            // TODO: better return contest id here
-            return "New contest successfully added.";
+        if ($this->importExportService->importContestYaml($data, $message, $cid)) {
+            return $cid;
         } else {
             throw new BadRequestHttpException("Error while adding contest: $message");
         }
