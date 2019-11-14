@@ -55,7 +55,7 @@ if [[ $response =~ ^(yes|y| ) ]] || [[ -z $response ]]; then
   else
     echo "Importing contest."
     cat contest.yaml problemset.yaml > combined.yaml
-    cid=$(http -b -f POST "$api_url/contests" yaml@combined.yaml)
+    cid=$(http -b -f POST "$api_url/contests" yaml@combined.yaml | sed -e 's|^"||' -e 's|"$||')
     echo "  -> cid=$cid"
     rm combined.yaml
   fi
