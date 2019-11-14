@@ -14,8 +14,10 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Swagger\Annotations as SWG;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * @Rest\Route("/api/v4/users", defaults={"_format" = "json"})
@@ -123,14 +125,16 @@ class UserController extends AbstractRestController
      *     description="Returns a (currently meaningless) status message.",
      * )
      * @throws BadRequestHttpException
+     * @throws Exception
      */
     public function addAccountsAction(Request $request)
     {
         /** @var UploadedFile $tsvFile */
         $tsvFile = $request->files->get('tsv') ?: [];
-        if ($this->importExportService->importTsv('accounts', $tsvFile, $message)) {
+        $ret = $this->importExportService->importTsv('accounts', $tsvFile, $message);
+        if ($ret >= 0) {
             // TODO: better return all teams here?
-            return "New accounts successfully added.";
+            return "$ret new accounts added successfully.";
         } else {
             throw new BadRequestHttpException("Error while adding accounts: $message");
         }
