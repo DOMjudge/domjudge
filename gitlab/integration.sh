@@ -58,7 +58,7 @@ EOF
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
-bin/judgedaemon -n 0 &
+sudo -u domjudge bin/judgedaemon -n 0 &
 sleep 5
 
 # write out current log to learn why it might be broken
