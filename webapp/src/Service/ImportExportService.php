@@ -149,7 +149,7 @@ class ImportExportService
                            ))
             ->setExternalid($contest->getShortname())
             ->setStarttimeString(date_format($starttime, 'Y-m-d H:i:s e'))
-            ->setActivatetimeString('-1:00')
+            ->setActivatetimeString('-24:00')
             ->setEndtimeString(sprintf('+%s', $data['duration']));
 
         /** @var string|null $freezeDuration */
