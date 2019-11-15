@@ -446,11 +446,11 @@ class Scoreboard
 
     /**
      * Return whether this scoreboard has multiple category colors.
+     * @param array|null $limitToTeamIds
      * @return bool
      */
     public function hasCategoryColors(array $limitToTeamIds = null): bool
     {
-        dump($limitToTeamIds);
         $colors = [];
         foreach ($this->scores as $score) {
             // skip if we have limitteams and the team is not listed
@@ -466,7 +466,6 @@ class Scoreboard
                 $colors['transparent'] = 1;
             }
         }
-        dump($colors);
 
         return count($colors) > 1;
     }
