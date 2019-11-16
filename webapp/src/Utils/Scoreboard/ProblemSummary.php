@@ -7,82 +7,47 @@ class ProblemSummary
     /**
      * @var int[]
      */
-    protected $numberOfSubmissions = [];
+    public $numSubmissions = [];
 
     /**
      * @var int[]
      */
-    protected $numberOfPendingSubmissions = [];
+    public $numSubmissionsPending = [];
 
     /**
      * @var int[]
      */
-    protected $numberOfCorrectSubmissions = [];
+    public $numSubmissionsCorrect = [];
 
     /**
      * @var float[]
      */
-    protected $bestTimes = [];
+    public $bestTimes = [];
 
     /**
      * @param int $sortorder
-     * @return int
-     */
-    public function getNumberOfSubmissions(int $sortorder): int
-    {
-        return $this->numberOfSubmissions[$sortorder] ?? 0;
-    }
-
-    /**
-     * @param int $sortorder
-     * @return int
-     */
-    public function getNumberOfPendingSubmissions(int $sortorder): int
-    {
-        return $this->numberOfPendingSubmissions[$sortorder] ?? 0;
-    }
-
-    /**
-     * @param int $sortorder
-     * @return int
-     */
-    public function getNumberOfCorrectSubmissions(int $sortorder): int
-    {
-        return $this->numberOfCorrectSubmissions[$sortorder] ?? 0;
-    }
-
-    /**
-     * @param int $sortorder
-     * @param int $numberOfSubmissions
-     * @param int $numberOfPendingSubmissions
-     * @param int $numberOfCorrectSubmissions
+     * @param int $numSubmissions
+     * @param int $numSubmissionsPending
+     * @param int $numSubmissionsCorrect
      */
     public function addSubmissionCounts(
         int $sortorder,
-        int $numberOfSubmissions,
-        int $numberOfPendingSubmissions,
-        int $numberOfCorrectSubmissions
+        int $numSubmissions,
+        int $numSubmissionsPending,
+        int $numSubmissionsCorrect
     ) {
-        if (!isset($this->numberOfSubmissions[$sortorder])) {
-            $this->numberOfSubmissions[$sortorder] = 0;
+        if (!isset($this->numSubmissions[$sortorder])) {
+            $this->numSubmissions[$sortorder] = 0;
         }
-        if (!isset($this->numberOfPendingSubmissions[$sortorder])) {
-            $this->numberOfPendingSubmissions[$sortorder] = 0;
+        if (!isset($this->numSubmissionsPending[$sortorder])) {
+            $this->numSubmissionsPending[$sortorder] = 0;
         }
-        if (!isset($this->numberOfCorrectSubmissions[$sortorder])) {
-            $this->numberOfCorrectSubmissions[$sortorder] = 0;
+        if (!isset($this->numSubmissionsCorrect[$sortorder])) {
+            $this->numSubmissionsCorrect[$sortorder] = 0;
         }
-        $this->numberOfSubmissions[$sortorder]        += $numberOfSubmissions;
-        $this->numberOfPendingSubmissions[$sortorder] += $numberOfPendingSubmissions;
-        $this->numberOfCorrectSubmissions[$sortorder] += $numberOfCorrectSubmissions;
-    }
-
-    /**
-     * @return float[]
-     */
-    public function getBestTimes(): array
-    {
-        return $this->bestTimes;
+        $this->numSubmissions[$sortorder]        += $numSubmissions;
+        $this->numSubmissionsPending[$sortorder] += $numSubmissionsPending;
+        $this->numSubmissionsCorrect[$sortorder] += $numSubmissionsCorrect;
     }
 
     /**

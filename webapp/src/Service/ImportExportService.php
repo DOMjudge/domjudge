@@ -364,8 +364,8 @@ class ImportExportService
             /** @var ScoreboardMatrixItem $matrixItem */
             foreach ($scoreboard->getMatrix()[$teamScore->getTeam()->getTeamid()] as $matrixItem) {
                 $time    = Utils::scoretime($matrixItem->getTime(), $scoreIsInSeconds);
-                $drow[]  = $matrixItem->getNumberOfSubmissions();
-                $drow[]  = $matrixItem->isCorrect() ? $time : -1;
+                $drow[]  = $matrixItem->numSubmissions;
+                $drow[]  = $matrixItem->isCorrect ? $time : -1;
                 $maxtime = max($maxtime, $time);
             }
 

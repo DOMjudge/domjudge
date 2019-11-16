@@ -167,13 +167,13 @@ class ScoreboardController extends AbstractRestController
                 $problem        = [
                     'label' => $contestProblem->getShortname(),
                     'problem_id' => (string)$contestProblem->getApiId($this->eventLogService),
-                    'num_judged' => $matrixItem->getNumberOfSubmissions(),
-                    'num_pending' => $matrixItem->getNumberOfPendingSubmissions(),
-                    'solved' => $matrixItem->isCorrect(),
-                    'first_to_solve' => $matrixItem->isCorrect() && $scoreboard->solvedFirst($teamScore->getTeam(), $contestProblem),
+                    'num_judged' => $matrixItem->numSubmissions,
+                    'num_pending' => $matrixItem->numSubmissionsPending,
+                    'solved' => $matrixItem->isCorrect,
+                    'first_to_solve' => $matrixItem->isCorrect && $scoreboard->solvedFirst($teamScore->getTeam(), $contestProblem),
                 ];
 
-                if ($matrixItem->isCorrect()) {
+                if ($matrixItem->isCorrect) {
                     $problem['time'] = Utils::scoretime($matrixItem->getTime(), $scoreIsInSeconds);
                 }
 
