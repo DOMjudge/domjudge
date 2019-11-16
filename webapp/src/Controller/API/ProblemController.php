@@ -158,6 +158,9 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
         $allMessages = [];
         $probIds     = [];
 
+        // Only timeout after 2 minutes, since importing may take a while.
+        set_time_limit(120);
+
         $probId = $request->request->get('problem');
         $problem = null;
         if (!empty($probId)) {
