@@ -439,7 +439,9 @@ class ClarificationController extends AbstractController
         if (empty($sendto)) {
             $sendto = null;
         } elseif ($sendto === 'domjudge-must-select') {
-            throw new InvalidArgumentException('You must select somewhere to send the clarification to.');
+            $message = 'You must select somewhere to send the clarification to.';
+            $this->addFlash('danger', $message);
+            return $this->redirectToRoute('jury_clarification_send');
         } else {
             $clarification->setRecipientId($sendto);
             $team = $this->em->getReference(Team::class, $sendto);
