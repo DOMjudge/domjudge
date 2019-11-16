@@ -24,19 +24,19 @@
                     <a {% if link %}href="{{ link }}"{% endif %}>
                         <i class="fas fa-thumbs-up fa-fw"></i>
                         <span style="font-size:90%;" title="number of accepted submissions">
-                                {{ summary.numberOfCorrectSubmissions(sortOrder) }}
+                                {{ summary.numSubmissionsCorrect[sortOrder] }}
                             </span>
                         <br/>
 
                         <i class="fas fa-thumbs-down fa-fw"></i>
                         <span style="font-size:90%;" title="number of rejected submissions">
-                                {{ summary.numberOfSubmissions(sortOrder) - summary.numberOfCorrectSubmissions(sortOrder) }}
+                                {{ summary.numSubmissions[sortOrder] - summary.numSubmissionsCorrect[sortOrder] }}
                             </span>
                         <br/>
 
                         <i class="fas fa-question-circle fa-fw"></i>
                         <span style="font-size:90%;" title="number of pending submissions">
-                                {{ summary.numberOfPendingSubmissions(sortOrder) }}
+                                {{ summary.numSubmissionsPending[sortOrder] }}
                             </span>
                         <br/>
 

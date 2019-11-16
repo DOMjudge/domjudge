@@ -414,7 +414,7 @@ class ImportExportController extends BaseController
 
                 /** @var ScoreboardMatrixItem $matrixItem */
                 $matrixItem = $matrix[$team->getTeamid()][$problem->getProbid()];
-                if ($matrixItem->isCorrect() && $scoreboard->solvedFirst($team, $problem)) {
+                if ($matrixItem->isCorrect && $scoreboard->solvedFirst($team, $problem)) {
                     $firstToSolve[$problem->getProbid()] = [
                         'problem' => $problem->getShortname(),
                         'problem_name' => $problem->getProblem()->getName(),

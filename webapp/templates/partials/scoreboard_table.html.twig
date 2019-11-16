@@ -233,15 +233,15 @@
                         {% if scoreboard.solvedFirst(score.team, problem) %}
                             {% set scoreCssClass = scoreCssClass ~ ' score_first' %}
                         {% endif %}
-                    {% elseif showPending and matrixItem.numberOfPendingSubmissions > 0 %}
+                    {% elseif showPending and matrixItem.numSubmissionsPending > 0 %}
                         {% set scoreCssClass = 'score_pending' %}
-                    {% elseif matrixItem.numberOfSubmissions > 0 %}
+                    {% elseif matrixItem.numSubmissions > 0 %}
                         {% set scoreCssClass = 'score_incorrect' %}
                     {% endif %}
 
-                    {% set numberOfSubmissions = matrixItem.numberOfSubmissions %}
-                    {% if showPending and matrixItem.numberOfPendingSubmissions > 0 %}
-                        {% set numberOfSubmissions = numberOfSubmissions ~ ' + ' ~ matrixItem.numberOfPendingSubmissions %}
+                    {% set numSubmissions = matrixItem.numSubmissions %}
+                    {% if showPending and matrixItem.numSubmissionsPending > 0 %}
+                        {% set numSubmissions = numSubmissions ~ ' + ' ~ matrixItem.numSubmissionsPending %}
                     {% endif %}
 
                     {# If correct, print time scored. The format will vary depending on the scoreboard resolution setting #}
@@ -250,8 +250,8 @@
                         {% set time = matrixItem.time %}
                         {% if scoreInSeconds %}
                             {% set time = time | scoreTime | printTimeRelative %}
-                            {% if matrixItem.numberOfSubmissions > 1 %}
-                                {% set time = time ~ ' + ' ~ (calculatePenaltyTime(true, matrixItem.numberOfSubmissions) | printTimeRelative) %}
+                            {% if matrixItem.numSubmissions > 1 %}
+                                {% set time = time ~ ' + ' ~ (calculatePenaltyTime(true, matrixItem.numSubmissions) | printTimeRelative) %}
                             {% endif %}
                         {% else %}
                             {% set time = time | scoreTime %}
@@ -265,15 +265,15 @@
                     {% endif %}
 
                     <td class="score_cell">
-                        {% if numberOfSubmissions != '0' %}
+                        {% if numSubmissions != '0' %}
                             <a {% if link %}href="{{ link }}"{% endif %}>
                                 <div class="{{ scoreCssClass }}">
                                     {{ time | raw }}
                                     <span>
-                                        {% if numberOfSubmissions is same as(1) %}
+                                        {% if numSubmissions is same as(1) %}
                                             1 try
                                         {% else %}
-                                            {{ numberOfSubmissions }} tries
+                                            {{ numSubmissions }} tries
                                         {% endif %}
                                     </span>
                                 </div>

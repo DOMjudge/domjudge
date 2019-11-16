@@ -418,7 +418,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
                 $this->assertInstanceOf(ScoreboardMatrixItem::class, $item);
 
                 $expected = (@$fts_probid2teamid[$probid] === $teamid);
-                $this->assertEquals($expected, $item->isFirst(),
+                $this->assertEquals($expected, $item->isFirst,
                                     "Check FTS matches for team $teamname, problem $probname");
             }
         }

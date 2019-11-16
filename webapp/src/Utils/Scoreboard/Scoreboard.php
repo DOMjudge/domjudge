@@ -307,12 +307,12 @@ class Scoreboard
 
                 $problemSummary->addSubmissionCounts(
                     $sortOrder,
-                    $problemMatrixItem->getNumberOfSubmissions(),
-                    $problemMatrixItem->getNumberOfPendingSubmissions(),
-                    $problemMatrixItem->isCorrect() ? 1 : 0
+                    $problemMatrixItem->numSubmissions ?? 0,
+                    $problemMatrixItem->numSubmissionsPending ?? 0,
+                    $problemMatrixItem->isCorrect ? 1 : 0
                 );
-                if ($problemMatrixItem->isFirst()) {
-                    $problemSummary->updateBestTime($sortOrder, $problemMatrixItem->getTime());
+                if ($problemMatrixItem->isFirst) {
+                    $problemSummary->updateBestTime($sortOrder, $problemMatrixItem->time);
                 }
             }
         }
@@ -514,6 +514,6 @@ class Scoreboard
      */
     public function solvedFirst(Team $team, ContestProblem $problem): bool
     {
-        return $this->matrix[$team->getTeamid()][$problem->getProbid()]->isFirst();
+        return $this->matrix[$team->getTeamid()][$problem->getProbid()]->isFirst;
     }
 }
