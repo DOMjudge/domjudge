@@ -682,14 +682,18 @@ class ScoreboardService
             /** @var Team $team */
             foreach ($category->getTeams() as $team) {
                 if ($teamaffil = $team->getAffiliation()) {
-                    $affiliations[$teamaffil->getName()] = $teamaffil->getName();
+                    $affiliations[$teamaffil->getName()] = array(
+                        'id' => $teamaffil->getExternalid(),
+                        'name' => $teamaffil->getName());
                 }
             }
 
             if (empty($affiliations)) {
                 /** @var Team $team */
                 foreach ($category->getTeams() as $team) {
-                    $affiliations[$team->getName()] = $team->getName();
+                    $affiliations[$team->getName()] = array(
+                        'id' => -1,
+                        'name' => $team->getName());
                 }
             }
             if (!empty($affiliations)) {

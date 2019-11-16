@@ -48,7 +48,12 @@
                             <ul class="list-group list-group-flush">
                                 {% for affiliation in affiliations %}
                                     <li class="list-group-item">
-                                        {{ affiliation }}
+                                        {% set affiliationLogo = 'images/affiliations/' ~ affiliation.id ~ '.png' %}
+                                        {% if affiliationLogo | assetExists %}
+                                            <img src="{{ asset(affiliationLogo) }}" alt="{{ affiliation.name }}"
+                                                 title="{{ affiliation.name }}" class="affiliation-logo"/>
+                                        {% endif %}
+                                        {{ affiliation.name }}
                                     </li>
                                 {% endfor %}
                             </ul>
