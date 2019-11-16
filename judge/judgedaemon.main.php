@@ -304,10 +304,10 @@ function fetch_executable(
                 }
                 switch ($execlang) {
                 case 'c':
-                    $buildscript .= "gcc -Wall -O2 -std=gnu99 '$source' -o $execrunpath -lm\n";
+                    $buildscript .= "gcc -Wall -O2 -std=gnu11 '$source' -o $execrunpath -lm\n";
                     break;
                 case 'cpp':
-                    $buildscript .= "g++ -Wall -O2 -std=c++11 '$source' -o $execrunpath\n";
+                    $buildscript .= "g++ -Wall -O2 -std=gnu++17 '$source' -o $execrunpath\n";
                     break;
                 case 'java':
                     $source = basename($source, ".java");
