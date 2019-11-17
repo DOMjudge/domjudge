@@ -501,9 +501,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         if (!empty($extCcsUrl)) {
             $dataSource = $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL);
             if ($dataSource == 2) {
-                return str_replace(':id:', $submission->getExternalid(), $extCcsUrl);
+                return str_replace(['[contest]', '[id]'], [$submission->getContest()->getExternalid(), $submission->getExternalid()], $extCcsUrl);
             } elseif ($dataSource == 1) {
-                return str_replace(':id:', $submission->getSubmitid(), $extCcsUrl);
+                return str_replace(['[contest]', '[id]'], [$submission->getContest()->getExternalid(), $submission->getSubmitid()], $extCcsUrl);
             }
         }
 
