@@ -42,10 +42,12 @@
                        href="{{ path('jury_executable_download_single', {execId: executable.execid, index: idx}) }}">
                         <i class="fas fa-download"></i> Download
                     </a>
-                    <a class="btn btn-secondary btn-sm"
-                       href="{{ path('jury_executable_edit_files', {execId: executable.execid, index: idx}) }}">
-                        <i class="fas fa-pencil-alt"></i> Edit
-                    </a>
+		    {%- if is_granted('ROLE_ADMIN') %}
+                        <a class="btn btn-secondary btn-sm"
+			   href="{{ path('jury_executable_edit_files', {execId: executable.execid, index: idx}) }}">
+                            <i class="fas fa-pencil-alt"></i> Edit
+			</a>
+		    {%- endif %}
                 </div>
 
                 {{ files[idx] | codeEditor(idx, null, false, '', aceFilenames[idx]) }}

@@ -174,12 +174,12 @@ class ExecutableController extends BaseController
                     ]),
                     'ajaxModal' => true,
                 ];
-                $execactions[] = [
-                    'icon' => 'file-download',
-                    'title' => 'download this executable',
-                    'link' => $this->generateUrl('jury_executable_download', ['execId' => $e->getExecid()])
-                ];
             }
+            $execactions[] = [
+                'icon' => 'file-download',
+                'title' => 'download this executable',
+                'link' => $this->generateUrl('jury_executable_download', ['execId' => $e->getExecid()])
+            ];
 
             $execdata['md5sum']['cssclass'] = 'text-monospace small';
             $execdata                       = array_merge($execdata, [
@@ -226,7 +226,6 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/content", name="jury_executable_content")
-     * @IsGranted("ROLE_ADMIN")
      * @param string $execId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -243,7 +242,6 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/download", name="jury_executable_download")
-     * @IsGranted("ROLE_ADMIN")
      * @param string $execId
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -275,7 +273,6 @@ class ExecutableController extends BaseController
 
     /**
      * @Route("/{execId}/download/{index}", name="jury_executable_download_single")
-     * @IsGranted("ROLE_ADMIN")
      * @param string $execId
      * @param int    $index
      * @return \Symfony\Component\HttpFoundation\Response
