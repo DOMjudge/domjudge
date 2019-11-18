@@ -166,6 +166,7 @@ class ScoreboardController extends AbstractRestController
                     'num_judged' => $matrixItem->getNumberOfSubmissions(),
                     'num_pending' => $matrixItem->getNumberOfPendingSubmissions(),
                     'solved' => $matrixItem->isCorrect(),
+                    'first_to_solve' => $matrixItem->isCorrect() && $scoreboard->solvedFirst($teamScore->getTeam(), $contestProblem),
                 ];
 
                 if ($matrixItem->isCorrect()) {

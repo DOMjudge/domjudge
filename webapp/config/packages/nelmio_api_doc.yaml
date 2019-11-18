@@ -98,6 +98,7 @@ nelmio_api_doc:
                                             num_pending: { type: integer }
                                             solved: { type: boolean }
                                             time: { type: integer }
+                                            first_to_solve: { type: boolean }
             NextJudging:
                 type: object
                 properties:
