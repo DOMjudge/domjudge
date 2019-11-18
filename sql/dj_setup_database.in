@@ -313,7 +313,7 @@ upgrade)
 		echo "You may also remove those users from MySQL."
 	fi
 	read_dbpasswords
-	symfony_console doctrine:migrations:migrate -n
+	DBUSER=$domjudge_DBUSER PASSWD=$domjudge_PASSWD symfony_console doctrine:migrations:migrate -n
 	verbose "DOMjudge database upgrade completed."
 	rm -f $TMPOUT
 	;;
