@@ -16,9 +16,7 @@ class TeamCategoryType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add('name');
-        $builder->add('sortorder', IntegerType::class, [
-            
-        ]);
+        $builder->add('sortorder', IntegerType::class);
         $builder->add('color', TextType::class, [
             'required' => false,
             'attr' => [
