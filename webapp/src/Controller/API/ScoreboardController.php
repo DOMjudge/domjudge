@@ -183,6 +183,7 @@ class ScoreboardController extends AbstractRestController
             if ($request->query->getBoolean('strict')) {
                 foreach ($row['problems'] as $key => $data) {
                     unset($row['problems'][$key]['label']);
+                    unset($row['problems'][$key]['first_to_solve']);
                 }
             }
 
