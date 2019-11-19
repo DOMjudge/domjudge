@@ -167,20 +167,8 @@ class DOMJudgeService
                 ->leftJoin('tc.teams', 'tct')
                 ->andWhere('ct.teamid = :teamid OR tct.teamid = :teamid OR c.openToAllTeams = 1')
                 ->setParameter(':teamid', $onlyofteam);
-            // $contests = $DB->q("SELECT * FROM contest
-            //                     LEFT JOIN contestteam USING (cid)
-            //                     WHERE (contestteam.teamid = %i OR contest.openToAllTeams = 1)
-            //                     AND enabled = 1 ${extra}
-            //                     AND ( deactivatetime IS NULL OR
-            //                           deactivatetime > UNIX_TIMESTAMP() )
-            //                     ORDER BY activatetime", $onlyofteam);
         } elseif ($onlyofteam === -1) {
             $qb->andWhere('c.public = 1');
-            // $contests = $DB->q("SELECT * FROM contest
-            //                     WHERE enabled = 1 AND public = 1 ${extra}
-            //                     AND ( deactivatetime IS NULL OR
-            //                           deactivatetime > UNIX_TIMESTAMP() )
-            //                     ORDER BY activatetime");
         }
         $qb->andWhere('c.enabled = 1')
             ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
