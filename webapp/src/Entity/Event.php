@@ -12,7 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  *     options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4", "comment"="Log of all events during a contest"},
  *     indexes={
  *         @ORM\Index(name="eventtime", columns={"cid","eventtime"}),
- *         @ORM\Index(name="cid", columns={"cid"})
+ *         @ORM\Index(name="cid", columns={"cid"}),
+ *         @ORM\Index(name="endpoint", columns={"cid","endpointtype","endpointid"})
  *     })
  * @ORM\Entity
  */
