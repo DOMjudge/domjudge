@@ -183,14 +183,12 @@ class DOMJudgeService
             //                     ORDER BY activatetime");
         }
         $qb->andWhere('c.enabled = 1')
-            ->andWhere($qb->expr()->orX(
-                'c.deactivatetime is null',
-                $qb->expr()->gt('c.deactivatetime', $now)
-            ))
+            ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
+            ->setParameter(':now', $now)
             ->orderBy('c.activatetime');
 
         if (!$alsofuture) {
-            $qb->andWhere($qb->expr()->lte('c.activatetime', $now));
+            $qb->andWhere('c.activatetime <= :now');
         }
 
         $contests = $qb->getQuery()->getResult();

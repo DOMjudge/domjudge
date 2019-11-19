@@ -152,13 +152,9 @@ abstract class AbstractRestController extends AbstractFOSRestController
             ->from(Contest::class, 'c')
             ->select('c')
             ->andWhere('c.enabled = 1')
-            ->andWhere(
-                $qb->expr()->lte('c.activatetime', $now)
-            )
-            ->andWhere($qb->expr()->orX(
-                'c.deactivatetime is null',
-                $qb->expr()->gt('c.deactivatetime', $now)
-            ))
+            ->andWhere('c.activatetime <= :now')
+            ->andWhere('c.deactivatetime IS NULL OR c.deactivatetime > :now')
+            ->setParameter(':now', $now)
             ->orderBy('c.activatetime');
 
         // Filter on contests this user has access to
