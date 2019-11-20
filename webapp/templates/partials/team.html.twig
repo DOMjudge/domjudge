@@ -26,7 +26,7 @@
                         <th>Affiliation</th>
                         <td>
                         {% set affiliationId = team.affiliation.affilid %}
-                        {% if team.affiliation.externalid is not null %}
+                        {% if showExternalId(team.affiliation) %}
                             {% set affiliationId = team.affiliation.externalid %}
                         {% endif %}
                         {% set affiliationLogo = 'images/affiliations/' ~ affiliationId ~ '.png' %}

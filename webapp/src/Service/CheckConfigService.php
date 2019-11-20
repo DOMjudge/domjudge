@@ -618,34 +618,22 @@ class CheckConfigService
                         $desc .= sprintf("Flag for %s does not exist (looking for %s)\n", $countryCode, $flagpath);
                     } elseif (!is_readable($flagpath)) {
                          $result = 'W';
-                          $desc .= sprintf("Flag for %s not readable (looking for %s)\n", $countryCode, $flagpath);
+                         $desc .= sprintf("Flag for %s not readable (looking for %s)\n", $countryCode, $flagpath);
                     }
                 }
             }
             if ($show_logos) {
                 if ($aid = $affiliation->getAffilid()) {
-                    $logopaths = [$webDir . sprintf('images/affiliations/%s.png', $aid)];
-                    if ($externalAffilid = $affiliation->getExternalid()) {
-                        $logopaths[] = $webDir . sprintf('images/affiliations/%s.png', $externalAffilid);
+                    $logopath = $webDir . sprintf('images/affiliations/%s.png', $aid);
+                    if ($this->eventLogService->externalIdFieldForEntity($affiliation)) {
+                        $logopath = $webDir . sprintf('images/affiliations/%s.png', $affiliation->getExternalid());
                     }
-                    $exists   = false;
-                    $readable = false;
-                    foreach ($logopaths as $logopath) {
-                        if (file_exists($logopath)) {
-                            $exists = true;
-                            if (is_readable($logopath)) {
-                                $readable = true;
-                            }
-                        }
-                    }
-                    if (!$exists) {
+                    if (!file_exists($logopath)) {
                         $result = 'W';
-                        $desc   .= sprintf("Logo for %s does not exist (looking for %s)\n",
-                                           $affiliation->getShortname(), implode(', ', $logopaths));
-                    } elseif (!$readable) {
+                        $desc   .= sprintf("Logo for %s does not exist (looking for %s)\n", $affiliation->getShortname(), $logopath);
+                    } elseif (!is_readable($logopath)) {
                         $result = 'W';
-                        $desc   .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(),
-                                           implode(', ', $logopaths));
+                        $desc   .= sprintf("Logo for %s not readable (looking for %s)\n", $affiliation->getShortname(), $logopath);
                     }
                 }
             }

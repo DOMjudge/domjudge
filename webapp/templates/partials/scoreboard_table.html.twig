@@ -162,7 +162,7 @@
                         {% endif %}
                         <a {% if link %}href="{{ link }}"{% endif %}>
                             {% set affiliationId = score.team.affiliation.affilid %}
-                            {% if score.team.affiliation.externalid is not null %}
+                            {% if showExternalId(score.team.affiliation) %}
                                 {% set affiliationId = score.team.affiliation.externalid %}
                             {% endif %}
                             {% set affiliationImage = 'images/affiliations/' ~ affiliationId ~ '.png' %}

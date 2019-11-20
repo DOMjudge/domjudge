@@ -50,18 +50,27 @@ class ScoreboardService
     protected $logger;
 
     /**
+     * @var EventLogService
+     */
+    protected $eventLogService;
+
+    /**
      * ScoreboardService constructor.
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param LoggerInterface        $logger
+     * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        EventLogService $eventLogService
     ) {
-        $this->em     = $em;
-        $this->dj     = $dj;
-        $this->logger = $logger;
+        $this->em              = $em;
+        $this->dj              = $dj;
+        $this->logger          = $logger;
+        $this->eventLogService = $eventLogService;
     }
 
     /**
@@ -683,8 +692,11 @@ class ScoreboardService
             foreach ($category->getTeams() as $team) {
                 if ($teamaffil = $team->getAffiliation()) {
                     $affiliations[$teamaffil->getName()] = array(
-                        'id' => $teamaffil->getExternalid(),
-                        'name' => $teamaffil->getName());
+                        'id'   => $this->eventLogService->externalIdFieldForEntity($teamaffil) ?
+                            $teamaffil->getExternalid() :
+                            $teamaffil->getAffilid(),
+                        'name' => $teamaffil->getName(),
+                    );
                 }
             }
 
