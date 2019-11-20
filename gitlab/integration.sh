@@ -41,6 +41,7 @@ fi
 # download domjudge-scripts for API check
 cd $HOME
 composer -n require justinrainbow/json-schema
+reset
 PATH=${PATH}:${HOME}/vendor/bin
 git clone --depth=1 https://github.com/DOMjudge/domjudge-scripts.git
 CHECK_API=${HOME}/domjudge-scripts/contest-api/check-api.sh
