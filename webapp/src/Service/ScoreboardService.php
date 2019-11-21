@@ -115,21 +115,16 @@ class ScoreboardService
      * Get scoreboard data for a single team based on the cached data in the
      * scorecache table.
      *
-     * @param Contest $contest The contest to get the scoreboard for.
-     * @param int     $teamId  The ID of the team to get the scoreboard for.
-     * @param bool    $jury    If true, the scoreboard will always be current.
-     *                         If false, frozen results will not be returned.
+     * @param Contest $contest         The contest to get the scoreboard for.
+     * @param int     $teamId          The ID of the team to get the scoreboard for.
+     * @param bool    $showFtsInFreeze If false, the scoreboard will hide first
+     *                                 to solve for submissions after contest freeze.
      * @return Scoreboard|null
      * @throws \Exception
      */
-    public function getTeamScoreboard(Contest $contest, int $teamId, bool $jury = false)
+    public function getTeamScoreboard(Contest $contest, int $teamId, bool $showFtsInFreeze = true)
     {
         $freezeData = new FreezeData($contest);
-
-        // Don't leak information before start of contest
-        if (!$jury && !$freezeData->started()) {
-            return null;
-        }
 
         $teams = $this->getTeams($contest, true, new Filter([], [], [], [$teamId]));
         if (empty($teams)) {
@@ -139,15 +134,11 @@ class ScoreboardService
         $problems   = $this->getProblems($contest);
         $rankCache  = $this->getRankcache($contest, $team);
         $scoreCache = $this->getScorecache($contest, $team);
-        if ($jury || !$freezeData->showFrozen()) {
-            $teamRank = $this->calculateTeamRank($contest, $team, $rankCache, $freezeData, $jury);
-        } else {
-            $teamRank = 0;
-        }
+        $teamRank   = $this->calculateTeamRank($contest, $team, $rankCache, $freezeData, true);
 
         return new SingleTeamScoreboard(
             $contest, $team, $teamRank, $problems,
-            $rankCache, $scoreCache, $freezeData, $jury,
+            $rankCache, $scoreCache, $freezeData, $showFtsInFreeze,
             (int)$this->dj->dbconfig_get('penalty_time', 20),
             (bool)$this->dj->dbconfig_get('score_in_seconds', false)
         );

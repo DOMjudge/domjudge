@@ -38,7 +38,7 @@ class SingleTeamScoreboard extends Scoreboard
     /**
      * @var bool
      */
-    protected $jury;
+    protected $showRestrictedFts;
 
     /**
      * SingleTeamScoreboard constructor.
@@ -49,7 +49,7 @@ class SingleTeamScoreboard extends Scoreboard
      * @param RankCache|null   $rankCache
      * @param ScoreCache[]     $scoreCache
      * @param FreezeData       $freezeData
-     * @param bool             $jury
+     * @param bool             $showFtsInFreeze
      * @param int              $penaltyTime
      * @param bool             $scoreIsInSeconds
      */
@@ -61,16 +61,16 @@ class SingleTeamScoreboard extends Scoreboard
         $rankCache,
         array $scoreCache,
         FreezeData $freezeData,
-        bool $jury,
+        bool $showFtsInFreeze,
         int $penaltyTime,
         bool $scoreIsInSeconds
     ) {
-        $this->team      = $team;
-        $this->teamRank  = $teamRank;
-        $this->rankCache = $rankCache;
-        $this->jury      = $jury;
-        parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, $jury,
-                            $penaltyTime, $scoreIsInSeconds);
+        $this->team              = $team;
+        $this->teamRank          = $teamRank;
+        $this->rankCache         = $rankCache;
+        $this->showRestrictedFts = $showFtsInFreeze || $freezeData->showFinal();
+        parent::__construct($contest, [$team->getTeamid() => $team], [], $problems, $scoreCache, $freezeData, true,
+            $penaltyTime, $scoreIsInSeconds);
     }
 
     /**
@@ -100,7 +100,7 @@ class SingleTeamScoreboard extends Scoreboard
 
             $this->matrix[$scoreRow->getTeam()->getTeamid()][$scoreRow->getProblem()->getProbid()] = new ScoreboardMatrixItem(
                 $scoreRow->getIsCorrect($this->restricted),
-                $scoreRow->getIsFirstToSolve(),
+                $scoreRow->getIsCorrect($this->showRestrictedFts) && $scoreRow->getIsFirstToSolve(),
                 $scoreRow->getSubmissions($this->restricted),
                 $scoreRow->getPending($this->restricted),
                 $scoreRow->getSolveTime($this->restricted),
