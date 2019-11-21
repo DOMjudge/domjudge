@@ -101,7 +101,7 @@ class MiscController extends BaseController
         ];
         if ($contest) {
             $scoreboard = $this->scoreboardService
-                ->getTeamScoreboard($contest, $teamId, true);
+                ->getTeamScoreboard($contest, $teamId, false);
             $data = array_merge(
                 $data,
                 $this->scoreboardService->getScoreboardTwigData(
