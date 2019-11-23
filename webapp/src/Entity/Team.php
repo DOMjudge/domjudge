@@ -187,18 +187,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     private $unread_clarifications;
 
     /**
-     * @ORM\OneToMany(targetEntity="ScoreCache", mappedBy="team")
-     * @Serializer\Exclude()
-     */
-    private $scorecache;
-
-    /**
-     * @ORM\OneToMany(targetEntity="RankCache", mappedBy="team")
-     * @Serializer\Exclude()
-     */
-    private $rankcache;
-
-    /**
      * Set teamid
      *
      * @param int $teamid
@@ -541,8 +529,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
         $this->sent_clarifications = new ArrayCollection();
         $this->received_clarifications = new ArrayCollection();
         $this->unread_clarifications = new ArrayCollection();
-        $this->scorecache = new ArrayCollection();
-        $this->rankcache = new ArrayCollection();
     }
 
     /**
@@ -757,74 +743,6 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     public function getUnreadClarifications()
     {
         return $this->unread_clarifications;
-    }
-
-    /**
-     * Add scorecache
-     *
-     * @param \App\Entity\ScoreCache $scorecache
-     *
-     * @return Team
-     */
-    public function addScorecache(\App\Entity\ScoreCache $scorecache)
-    {
-        $this->scorecache[] = $scorecache;
-
-        return $this;
-    }
-
-    /**
-     * Remove scorecache
-     *
-     * @param \App\Entity\ScoreCache $scorecache
-     */
-    public function removeScorecache(\App\Entity\ScoreCache $scorecache)
-    {
-        $this->scorecache->removeElement($scorecache);
-    }
-
-    /**
-     * Get scorecache
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getScorecache()
-    {
-        return $this->scorecache;
-    }
-
-    /**
-     * Add rankcache
-     *
-     * @param \App\Entity\RankCache $rankcache
-     *
-     * @return Team
-     */
-    public function addRankcache(\App\Entity\RankCache $rankcache)
-    {
-        $this->rankcache[] = $rankcache;
-
-        return $this;
-    }
-
-    /**
-     * Remove rankcache
-     *
-     * @param \App\Entity\RankCache $rankcache
-     */
-    public function removeRankcache(\App\Entity\RankCache $rankcache)
-    {
-        $this->rankcache->removeElement($rankcache);
-    }
-
-    /**
-     * Get rankcache
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getRankcache()
-    {
-        return $this->rankcache;
     }
 
     /**
