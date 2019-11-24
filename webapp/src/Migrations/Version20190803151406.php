@@ -14,6 +14,52 @@ final class Version20190803151406 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
+        $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
+
+        // We'll add some foreign key constraints later. First remove broken
+        // references so that adding those constraints won't fail.
+        $this->addSql(<<<SQL
+UPDATE `language` l
+    LEFT JOIN `executable` e ON (l.compile_script = e.execid)
+    SET `compile_script` = NULL
+    WHERE l.compile_script IS NOT NULL AND e.execid IS NULL;
+SQL
+        );
+        $this->addSql(<<<SQL
+UPDATE `problem` p
+    LEFT JOIN `executable` e ON (p.special_run = e.execid)
+    SET `special_run` = NULL
+    WHERE p.special_run IS NOT NULL AND e.execid IS NULL;
+SQL
+        );
+        $this->addSql(<<<SQL
+UPDATE `problem` p
+    LEFT JOIN `executable` e ON (p.special_compare = e.execid)
+    SET `special_compare` = NULL
+    WHERE p.special_compare IS NOT NULL AND e.execid IS NULL;
+SQL
+        );
+        $this->addSql(<<<SQL
+DELETE s FROM `submission` s
+    LEFT JOIN `contestproblem` cp ON (s.cid = cp.cid AND s.probid = cp.probid)
+    WHERE cp.cid IS NULL;
+SQL
+        );
+        $this->addSql(<<<SQL
+DELETE c FROM `clarification` c
+    LEFT JOIN `team` t ON (c.sender = t.teamid)
+    WHERE c.sender IS NOT NULL AND t.teamid IS NULL;
+SQL
+        );
+        $this->addSql(<<<SQL
+DELETE c FROM `clarification` c
+    LEFT JOIN `team` t ON (c.recipient = t.teamid)
+    WHERE c.recipient IS NOT NULL AND t.teamid IS NULL;
+SQL
+        );
+        $this->addSql('TRUNCATE TABLE `scorecache`');
+        $this->addSql('TRUNCATE TABLE `rankcache`');
+
         $this->addSql(<<<SQL
 ALTER TABLE `contest`
     MODIFY COLUMN `cid` int(4) UNSIGNED AUTO_INCREMENT NOT NULL COMMENT 'Contest ID',
