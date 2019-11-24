@@ -2,15 +2,30 @@ DOMjudge Programming Contest Judging System
 
 Version 7.2.0 - DEV
 -------------------
- - Improve judging run display in jury interface.
- - Added a command to merge scoreboards from multiple ICPC Contest API
-   endpoints (#632, thanks Ragnar Groot Koerkamp).
  - Rewrote documentation into a completely new DOMjudge Manual.
+ - Reduce page load times and memory requirements, especially for contests
+   with many problems.
+ - Add DB indices to improve event log updates.
+ - Fix doctrine query that lead to a polluted query cache.
+ - Multiple bug fixes with respect to first to solve.
+ - Fix contest clock update.
+ - Improve submission and judging run display in jury interface.
  - Always display a flash message for skipped submissions in rejudgings
+ - Restrict displayed balloons to currently selected contest.
  - Show affiliation logo's on jury affiliation overview page.
- - Reduce page load times and memory requirements.
- - API: add endpoint to get users.
- - API: improve awards endpoint.
+ - Fix AJAX refreshes with multiple active contests.
+ - Add support for testdata subgroups.
+ - Store original input filename of testcases.
+ - API: Add endpoint to get users.
+ - API: Improve awards endpoint.
+ - API: Add endpoint to upload contest.yaml, groups.tsv, teams2.tsv, and
+   accounts.tsv.
+ - Update compiler options in internal build scripts.
+ - Update default configuration values to modern system limits.
+ - Add simple script to import a whole contest from a CLICS compatible
+   ccsconfig directory.
+ - Add a command to merge scoreboards from multiple ICPC Contest API
+   endpoints (#632, thanks Ragnar Groot Koerkamp).
 
 Version 7.1.1 - 20 October 2019
 -------------------------------
