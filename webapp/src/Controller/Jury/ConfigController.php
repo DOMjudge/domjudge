@@ -147,9 +147,10 @@ class ConfigController extends AbstractController
                         break;
 
                     default:
-                        $msg = sprintf("configation option '%s' has unknown type '%s'",
-                                       $option->getName(), $option->getType());
-                        $this->logger->warn($msg);
+                        $this->logger->warn(
+                            "configation option '%s' has unknown type '%s'",
+                            [ $option->getName(), $option->getType() ]
+                        );
                 }
             }
 

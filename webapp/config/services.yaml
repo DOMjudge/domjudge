@@ -38,6 +38,12 @@ services:
         tags:
             - { name: doctrine.event_subscriber, connection: default }
 
+
+    App\Logger\VarargsLogMessageProcessor:
+        autowire: true
+        tags:
+            - { name: monolog.processor }
+
     fos_rest.exception.controller:
         public: true
         class: App\FosRestBundle\ExceptionController

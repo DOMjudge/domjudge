@@ -1003,8 +1003,8 @@ class JudgehostController extends AbstractFOSRestController
         $resultsPrio  = $this->dj->dbconfig_get('results_prio');
 
         if (array_key_exists($runResult, $resultsRemap)) {
-            $this->logger->info(sprintf('Testcase %d remapping result %s -> %s',
-                                        $testCaseId, $runResult, $resultsRemap[$runResult]));
+            $this->logger->info('Testcase %d remapping result %s -> %s',
+                                [ $testCaseId, $runResult, $resultsRemap[$runResult] ]);
             $runResult = $resultsRemap[$runResult];
         }
 

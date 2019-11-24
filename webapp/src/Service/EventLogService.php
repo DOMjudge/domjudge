@@ -234,9 +234,10 @@ class EventLogService implements ContainerAwareInterface
         $dataidsCombined = json_encode($dataIds);
         $idsCombined     = $ids === null ? null : is_array($ids) ? json_encode($ids) : $ids;
 
-        $this->logger->debug(sprintf("EventLogService::log arguments: '%s' '%s' '%s' '%s' '%s' '%s'",
-                                     $type, $dataidsCombined, $action, $contestId, $json,
-                                     $idsCombined));
+        $this->logger->debug(
+            "EventLogService::log arguments: '%s' '%s' '%s' '%s' '%s' '%s'",
+            [ $type, $dataidsCombined, $action, $contestId, $json, $idsCombined ]
+        );
 
 
         // Gracefully fail since we may call this from the generic
@@ -254,18 +255,21 @@ class EventLogService implements ContainerAwareInterface
         }
 
         if (!isset($endpoint)) {
-            $this->logger->warning(sprintf("EventLogService::log: invalid endpoint '%s' specified",
-                                           $type));
+            $this->logger->warning(
+                "EventLogService::log: invalid endpoint '%s' specified", [ $type ]
+            );
             return;
         }
         if (!in_array($action, [self::ACTION_CREATE, self::ACTION_UPDATE, self::ACTION_DELETE])) {
-            $this->logger->warning(sprintf("EventLogService::log: invalid action '%s' specified",
-                                           $action));
+            $this->logger->warning(
+                "EventLogService::log: invalid action '%s' specified", [ $action ]
+            );
             return;
         }
         if ($endpoint[self::KEY_URL] === null) {
-            $this->logger->warning(sprintf("EventLogService::log: no endpoint for '%s', ignoring",
-                                           $type));
+            $this->logger->warning(
+                "EventLogService::log: no endpoint for '%s', ignoring", [ $type ]
+            );
             return;
         }
 
@@ -290,9 +294,9 @@ class EventLogService implements ContainerAwareInterface
         // State is a special case, as it works without an ID
         if ($type !== 'state' && count(array_filter($ids)) !== count($dataIds)) {
             $this->logger->warning(
-                sprintf("EventLogService::log API ID not specified or inferred from data for type %s and data ID's '%s'",
-                        $type, json_encode($dataIds)
-                )
+                "EventLogService::log API ID not specified or inferred ".
+                "from data for type %s and data ID's '%s'",
+                [ $type, json_encode($dataIds) ]
             );
             return;
         }
@@ -379,8 +383,9 @@ class EventLogService implements ContainerAwareInterface
             });
 
             if ($json === null) {
-                $this->logger->warning(sprintf("EventLogService::log got no JSON data from '%s'",
-                                               $url));
+                $this->logger->warning(
+                    "EventLogService::log got no JSON data from '%s'", [ $url ]
+                );
                 // If we didn't get data from the API, then that is probably
                 // because this particular data is not visible, for example
                 // because it belongs to an invisible jury team. If we don't
@@ -451,13 +456,16 @@ class EventLogService implements ContainerAwareInterface
         $this->em->flush();
 
         if (count($events) !== $expectedEvents) {
-            $this->logger->warning(sprintf("EventLogService::log failed to %s %s with ID's %s (%d/%d events done)",
-                                        $action, $type, $idsCombined, count($events),
-                                        $expectedEvents));
+            $this->logger->warning(
+                "EventLogService::log failed to %s %s with ID's %s (%d/%d events done)",
+                [ $action, $type, $idsCombined, count($events), $expectedEvents ]
+            );
         }
 
-        $this->logger->debug(sprintf("EventLogService::log %sd %s with ID's %s for %d contest(s)",
-                                     $action, $type, $idsCombined, count($contestIds)));
+        $this->logger->debug(
+            "EventLogService::log %sd %s with ID's %s for %d contest(s)",
+            [ $action, $type, $idsCombined, count($contestIds) ]
+        );
     }
 
     /**

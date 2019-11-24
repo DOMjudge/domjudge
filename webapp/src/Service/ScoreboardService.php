@@ -303,10 +303,10 @@ class ScoreboardService
         Problem $problem,
         bool    $updateRankCache = true
     ) {
-        $this->logger->debug(sprintf(
+        $this->logger->debug(
             "ScoreboardService::calculateScoreRow '%d' '%d' '%d'",
-            $contest->getCid(), $team->getTeamid(), $problem->getProbid()
-        ));
+            [ $contest->getCid(), $team->getTeamid(), $problem->getProbid() ]
+        );
 
         // First acquire an advisory lock to prevent other calls to this
         // method from interfering with our update.
@@ -536,8 +536,8 @@ class ScoreboardService
      */
     public function updateRankCache(Contest $contest, Team $team)
     {
-        $this->logger->debug(sprintf("ScoreboardService::updateRankCache '%d' '%d'",
-                                     $contest->getCid(), $team->getTeamid()));
+        $this->logger->debug("ScoreboardService::updateRankCache '%d' '%d'",
+                             [ $contest->getCid(), $team->getTeamid() ]);
 
         // First acquire an advisory lock to prevent other calls to this
         // method from interfering with our update.
