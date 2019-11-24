@@ -19,25 +19,99 @@ final class Version20190906120011 extends AbstractMigration
 
     public function up(Schema $schema) : void
     {
-        // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE judging CHANGE verified verified TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Result verified by jury member?\', CHANGE valid valid TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Old judging is marked as invalid when rejudging\', CHANGE seen seen TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Whether the team has seen this judging\'');
-        $this->addSql('ALTER TABLE submission CHANGE valid valid TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'If false ignore this submission in all scoreboard calculations\'');
-        $this->addSql('ALTER TABLE contest CHANGE enabled enabled TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Whether this contest can be active\', CHANGE starttime_enabled starttime_enabled TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'If disabled, starttime is not used, e.g. to delay contest start\', CHANGE process_balloons process_balloons TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Will balloons be processed for this contest?\', CHANGE public public TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Is this contest visible for the public?\', CHANGE open_to_all_teams open_to_all_teams TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Is this contest open to all teams?\'');
-        $this->addSql('ALTER TABLE team CHANGE enabled enabled TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Whether the team is visible and operational\'');
-        $this->addSql('ALTER TABLE problem CHANGE combined_run_compare combined_run_compare TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Use the exit code of the run script to compute the verdict\'');
-        $this->addSql('ALTER TABLE language CHANGE allow_submit allow_submit TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Are submissions accepted in this language?\', CHANGE allow_judge allow_judge TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Are submissions in this language judged?\', CHANGE filter_compiler_files filter_compiler_files TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Whether to filter the files passed to the compiler by the extension list.\'');
-        $this->addSql('ALTER TABLE clarification CHANGE answered answered TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Has been answered by jury?\'');
-        $this->addSql('ALTER TABLE scorecache CHANGE is_correct_restricted is_correct_restricted TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Has there been a correct submission? (restricted audience)\', CHANGE is_correct_public is_correct_public TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Has there been a correct submission? (public)\', CHANGE is_first_to_solve is_first_to_solve TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Is this the first solution to this problem?\'');
-        $this->addSql('ALTER TABLE team_category CHANGE visible visible TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Are teams in this category visible?\'');
-        $this->addSql('ALTER TABLE judgehost CHANGE active active TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Should this host take on judgings?\'');
-        $this->addSql('ALTER TABLE rejudging CHANGE valid valid TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Rejudging is marked as invalid if canceled\'');
-        $this->addSql('ALTER TABLE testcase CHANGE sample sample TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Sample testcases that can be shared with teams\'');
-        $this->addSql('ALTER TABLE user CHANGE enabled enabled TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Whether the user is able to log in\'');
-        $this->addSql('ALTER TABLE external_judgement CHANGE valid valid TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Old external judgement is marked as invalid when receiving a new one\'');
-        $this->addSql('ALTER TABLE balloon CHANGE done done TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Has been handed out yet?\'');
-        $this->addSql('ALTER TABLE contestproblem CHANGE allow_submit allow_submit TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Are submissions accepted for this problem?\', CHANGE allow_judge allow_judge TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Are submissions for this problem judged?\'');
+        $this->addSql(<<<SQL
+ALTER TABLE `judging`
+    MODIFY `verified` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Result verified by jury member?',
+    MODIFY `valid` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Old judging is marked as invalid when rejudging',
+    MODIFY `seen` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Whether the team has seen this judging'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `submission`
+    MODIFY `valid` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'If false ignore this submission in all scoreboard calculations'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `contest`
+    MODIFY `enabled` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Whether this contest can be active',
+    MODIFY `starttime_enabled` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'If disabled, starttime is not used, e.g. to delay contest start',
+    MODIFY `process_balloons` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Will balloons be processed for this contest?',
+    MODIFY `public` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Is this contest visible for the public?',
+    MODIFY `open_to_all_teams` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Is this contest open to all teams?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `team`
+    MODIFY `enabled` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Whether the team is visible and operational'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `problem`
+    MODIFY `combined_run_compare` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Use the exit code of the run script to compute the verdict'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `language`
+    MODIFY `allow_submit` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Are submissions accepted in this language?',
+    MODIFY `allow_judge` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Are submissions in this language judged?',
+    MODIFY `filter_compiler_files` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Whether to filter the files passed to the compiler by the extension list.'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `clarification`
+    MODIFY `answered` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Has been answered by jury?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `scorecache`
+    MODIFY `is_correct_restricted` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Has there been a correct submission? (restricted audience)',
+    MODIFY `is_correct_public` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Has there been a correct submission? (public)',
+    MODIFY `is_first_to_solve` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Is this the first solution to this problem?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `team_category`
+    MODIFY `visible` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Are teams in this category visible?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `judgehost`
+    MODIFY `active` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Should this host take on judgings?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `rejudging`
+    MODIFY `valid` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Rejudging is marked as invalid if canceled'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `testcase`
+    MODIFY `sample` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Sample testcases that can be shared with teams'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `user`
+    MODIFY `enabled` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Whether the user is able to log in'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `external_judgement`
+    MODIFY `valid` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Old external judgement is marked as invalid when receiving a new one'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `balloon`
+    MODIFY `done` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Has been handed out yet?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `contestproblem`
+    MODIFY `allow_submit` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Are submissions accepted for this problem?',
+    MODIFY `allow_judge` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Are submissions for this problem judged?'
+SQL
+        );
     }
 
     public function down(Schema $schema) : void
@@ -45,21 +119,96 @@ final class Version20190906120011 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE balloon CHANGE done done TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Has been handed out yet?\'');
-        $this->addSql('ALTER TABLE clarification CHANGE answered answered TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Has been answered by jury?\'');
-        $this->addSql('ALTER TABLE contest CHANGE starttime_enabled starttime_enabled TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'If disabled, starttime is not used, e.g. to delay contest start\', CHANGE enabled enabled TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Whether this contest can be active\', CHANGE process_balloons process_balloons TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Will balloons be processed for this contest?\', CHANGE public public TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Is this contest visible for the public?\', CHANGE open_to_all_teams open_to_all_teams TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Is this contest open to all teams?\'');
-        $this->addSql('ALTER TABLE contestproblem CHANGE allow_submit allow_submit TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Are submissions accepted for this problem?\', CHANGE allow_judge allow_judge TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Are submissions for this problem judged?\'');
-        $this->addSql('ALTER TABLE external_judgement CHANGE valid valid TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Old external judgement is marked as invalid when receiving a new one\'');
-        $this->addSql('ALTER TABLE judgehost CHANGE active active TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Should this host take on judgings?\'');
-        $this->addSql('ALTER TABLE judging CHANGE verified verified TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Result verified by jury member?\', CHANGE valid valid TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Old judging is marked as invalid when rejudging\', CHANGE seen seen TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Whether the team has seen this judging\'');
-        $this->addSql('ALTER TABLE language CHANGE filter_compiler_files filter_compiler_files TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Whether to filter the files passed to the compiler by the extension list\', CHANGE allow_submit allow_submit TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Are submissions accepted in this language?\', CHANGE allow_judge allow_judge TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Are submissions in this language judged?\'');
-        $this->addSql('ALTER TABLE problem CHANGE combined_run_compare combined_run_compare TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Use the exit code of the run script to compute the verdict\'');
-        $this->addSql('ALTER TABLE rejudging CHANGE valid valid TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Rejudging is marked as invalid if canceled\'');
-        $this->addSql('ALTER TABLE scorecache CHANGE is_correct_restricted is_correct_restricted TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Has there been a correct submission? (restricted audience)\', CHANGE is_correct_public is_correct_public TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Has there been a correct submission? (public)\', CHANGE is_first_to_solve is_first_to_solve TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Is this the first solution to this problem?\'');
-        $this->addSql('ALTER TABLE submission CHANGE valid valid TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'If false ignore this submission in all scoreboard calculations\'');
-        $this->addSql('ALTER TABLE team CHANGE enabled enabled TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Whether the team is visible and operational\'');
-        $this->addSql('ALTER TABLE team_category CHANGE visible visible TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Are teams in this category visible?\'');
-        $this->addSql('ALTER TABLE testcase CHANGE sample sample TINYINT(1) DEFAULT \'0\' NOT NULL COMMENT \'Sample testcases that can be shared with teams\'');
-        $this->addSql('ALTER TABLE user CHANGE enabled enabled TINYINT(1) DEFAULT \'1\' NOT NULL COMMENT \'Whether the user is able to log in\'');
+        $this->addSql(<<<SQL
+ALTER TABLE `balloon`
+    MODIFY `done` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Has been handed out yet?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `clarification`
+    MODIFY `answered` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Has been answered by jury?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `contest`
+    MODIFY `starttime_enabled` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'If disabled, starttime is not used, e.g. to delay contest start',
+    MODIFY `enabled` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Whether this contest can be active',
+    MODIFY `process_balloons` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Will balloons be processed for this contest?',
+    MODIFY `public` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Is this contest visible for the public?',
+    MODIFY `open_to_all_teams` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Is this contest open to all teams?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `contestproblem`
+    MODIFY `allow_submit` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Are submissions accepted for this problem?',
+    MODIFY `allow_judge` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Are submissions for this problem judged?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `external_judgement`
+    MODIFY `valid` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Old external judgement is marked as invalid when receiving a new one'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `judgehost`
+    MODIFY `active` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Should this host take on judgings?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `judging`
+    MODIFY `verified` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Result verified by jury member?',
+    MODIFY `valid` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Old judging is marked as invalid when rejudging',
+    MODIFY `seen` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Whether the team has seen this judging'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `language`
+    MODIFY `filter_compiler_files` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Whether to filter the files passed to the compiler by the extension list',
+    MODIFY `allow_submit` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Are submissions accepted in this language?',
+    MODIFY `allow_judge` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Are submissions in this language judged?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `problem`
+    MODIFY `combined_run_compare` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Use the exit code of the run script to compute the verdict'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `rejudging`
+    MODIFY `valid` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Rejudging is marked as invalid if canceled'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `scorecache`
+    MODIFY `is_correct_restricted` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Has there been a correct submission? (restricted audience)',
+    MODIFY `is_correct_public` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Has there been a correct submission? (public)',
+    MODIFY `is_first_to_solve` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Is this the first solution to this problem?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `submission`
+    MODIFY `valid` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'If false ignore this submission in all scoreboard calculations'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `team`
+    MODIFY `enabled` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Whether the team is visible and operational'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `team_category`
+    MODIFY `visible` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Are teams in this category visible?'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `testcase`
+    MODIFY `sample` TINYINT(1) DEFAULT '0' NOT NULL COMMENT 'Sample testcases that can be shared with teams'
+SQL
+        );
+        $this->addSql(<<<SQL
+ALTER TABLE `user`
+    MODIFY `enabled` TINYINT(1) DEFAULT '1' NOT NULL COMMENT 'Whether the user is able to log in'
+SQL
+        );
     }
 }
