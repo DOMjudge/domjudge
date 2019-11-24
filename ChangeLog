@@ -53,7 +53,7 @@ Version 7.1.0 - 25 September 2019
  - Split up contest.public into contest.public and contest.open_to_all_teams,
    allow public contests with a limited set of teams and private contests
    with all teams.
- - Upgrade Symfony and dependencies to the latest version.
+ - Upgrade Symfony and dependencies to version 4.3.
  - Use Doctrine for migrations and initial data.
  - Add option (enabled by default) to limit files passed to
    language compilers by langauge extension list.
