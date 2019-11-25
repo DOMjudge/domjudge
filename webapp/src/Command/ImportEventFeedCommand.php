@@ -110,10 +110,11 @@ class ImportEventFeedCommand extends Command
     protected $verdicts = [];
 
     /**
-     * This array will hold all events that are waiting on a dependent event because it has an ID
-     * that does not exist yet. According to the official spec this can not happen, but in practice
-     * it does happen. We handle this by storing these events here and checking whether there are
-     * any after saving any dependent event.
+     * This array will hold all events that are waiting on a dependent event
+     * because it has an ID that does not exist yet. According to the official
+     * spec this can not happen, but in practice it does happen. We handle
+     * this by storing these events here and checking whether there are any
+     * after saving any dependent event.
      *
      * This array is three dimensional:
      * - The first dimension is the type of the dependent event type
@@ -175,18 +176,20 @@ class ImportEventFeedCommand extends Command
     {
         $this
             ->setName('import:eventfeed')
-            ->setDescription('Import contest data from an event feed following the Contest API specification')
+            ->setDescription('Import contest data from an event feed following ' .
+                             'the Contest API specification')
             ->setHelp(
-                'Import contest data from an event feed following the Contest API specification (https://clics.ecs.baylor.edu/index.php?title=Contest_API)' . PHP_EOL . PHP_EOL .
-                'The following assumptions and caveats are of note:' . PHP_EOL .
-                '- The contest that will be imported to should already contain the problems,' . PHP_EOL .
-                '  because the event feed does not contain the testcases' . PHP_EOL .
-                '- Problems will be updated, but not their test_data_count, time_limit or ordinal' . PHP_EOL .
-                '- Judgement types will not be imported, but only verified' . PHP_EOL .
-                '- Languages will not be imported, but only verified' . PHP_EOL .
-                '- Team members will not be imported' . PHP_EOL .
-                '- Awards will not be imported' . PHP_EOL .
-                '- State will not be imported'
+                'Import contest data from an event feed following the Contest API specification:' . PHP_EOL .
+                'https://clics.ecs.baylor.edu/index.php?title=Contest_API' . PHP_EOL . PHP_EOL .
+                'Note the following assumptions and caveats:' . PHP_EOL .
+                '- The contest to import into should already contain the problems,' . PHP_EOL .
+                '  because the event feed does not contain the testcases.' . PHP_EOL .
+                '- Problems will be updated, but not their test_data_count, time_limit or ordinal.' . PHP_EOL .
+                '- Judgement types will not be imported, but only verified.' . PHP_EOL .
+                '- Languages will not be imported, but only verified.' . PHP_EOL .
+                '- Team members will not be imported.' . PHP_EOL .
+                '- Awards will not be imported.' . PHP_EOL .
+                '- State will not be imported.'
             )
             ->addArgument(
                 'contest-id',
@@ -196,27 +199,30 @@ class ImportEventFeedCommand extends Command
             ->addArgument(
                 'feed-url',
                 InputArgument::REQUIRED,
-                'URL or file location of the feed to import.' . PHP_EOL .
-                'If an URL and it requires authentication, use username:password@ in the URL'
+                'URL or file location of the feed to import;' . PHP_EOL .
+                'if a URL requires authentication, use' . PHP_EOL .
+                'username:password@ in front of the hostname'
             )
             ->addOption(
                 'basepath',
                 'b',
                 InputOption::VALUE_REQUIRED,
-                'If `feed-url` is a local file, pass the path that will be used as the base directory for relative URL\'s'
+                'If `feed-url` is a local file, pass the path that will' . PHP_EOL .
+                'be used as the base directory for relative URL\'s'
             )
             ->addOption(
                 'since-event',
                 's',
                 InputOption::VALUE_REQUIRED,
-                'If given, only process events strictly after this event'
+                'Only process events strictly after this event'
             )
             ->addOption(
                 'force',
                 'f',
                 InputOption::VALUE_NONE,
-                sprintf('If given, also import the event feed when the data_source config option is not set to %d',
-                        DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL)
+                sprintf('Also import the event feed when the data_source%s' .
+                        'config option is not set to %d',
+                        PHP_EOL, DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL)
             );
     }
 
