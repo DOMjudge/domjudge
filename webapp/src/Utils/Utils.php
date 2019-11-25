@@ -2,6 +2,7 @@
 namespace App\Utils;
 
 use App\Entity\SubmissionFile;
+use DateTime;
 
 /**
  * Generic utility class.
@@ -445,6 +446,16 @@ class Utils
         $seconds = $seconds - $hours*3600 - $minutes*60;
         return $sign . sprintf("%d:%02d:%02d", $hours, $minutes, $seconds)
             . ($floored ? '' : $millis);
+    }
+
+    // Parse a string as time and return as epoch in float format (with
+    // optional fractional part). The original time string should be in one of
+    // the formats understood by DateTime (e.g. an ISO 8601 date and time with
+    // fractional seconds). Throws an exception if $time cannot be parsed.
+    public static function to_epoch_float(string $time) : float
+    {
+        $dt = new DateTime($time);
+        return (float)sprintf('%d.%06d', $dt->getTimestamp(), $dt->format('u'));
     }
 
     /**

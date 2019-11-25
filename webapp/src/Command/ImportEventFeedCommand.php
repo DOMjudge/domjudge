@@ -1112,8 +1112,7 @@ class ImportEventFeedCommand extends Command
 
         $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
 
-        $time       = new DateTime($event['data']['time']);
-        $submitTime = sprintf('%d.%d', $time->getTimestamp(), $time->format('u'));
+        $submitTime = Utils::to_epoch_float($event['data']['time']);
 
         $clarification
             ->setInReplyTo($inReplyTo)
@@ -1226,8 +1225,7 @@ class ImportEventFeedCommand extends Command
             return;
         }
 
-        $time       = new DateTime($event['data']['time']);
-        $submitTime = (float)sprintf('%d.%06d', $time->getTimestamp(), $time->format('u'));
+        $submitTime = Utils::to_epoch_float($event['data']['time']);
 
         $entryPoint = $event['data']['entry_point'] ?? null;
         if (empty($entryPoint)) {
@@ -1499,14 +1497,10 @@ class ImportEventFeedCommand extends Command
         }
 
 
-        $startTimeObject = new DateTime($event['data']['start_time']);
-        $startTime       = sprintf('%d.%06d', $startTimeObject->getTimestamp(),
-                                   $startTimeObject->format('u'));
-        $endTime         = null;
+        $startTime = Utils::to_epoch_float($event['data']['start_time']);
+        $endTime   = null;
         if (isset($event['data']['end_time'])) {
-            $endTimeObject = new DateTime($event['data']['end_time']);
-            $endTime       = sprintf('%d.%06d', $endTimeObject->getTimestamp(),
-                                     $endTimeObject->format('u'));
+            $endTime = Utils::to_epoch_float($event['data']['end_time']);
         }
 
         $judgementTypeId = $event['data']['judgement_type_id'] ?? null;
@@ -1609,9 +1603,7 @@ class ImportEventFeedCommand extends Command
         }
 
 
-        $timeObject = new DateTime($event['data']['time']);
-        $time       = sprintf('%d.%06d', $timeObject->getTimestamp(), $timeObject->format('u'));
-
+        $time    = Utils::to_epoch_float($event['data']['time']);
         $runTime = $event['data']['run_time'] ?? null;
 
         $judgementTypeId = $event['data']['judgement_type_id'] ?? null;

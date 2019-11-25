@@ -73,6 +73,50 @@ class UtilsTest extends TestCase
         $this->assertEquals('-3:25:45', Utils::relTime(-12345.6789, true));
     }
 
+    public function test_to_epoch_float_leapday()
+    {
+        $tz = date_default_timezone_get();
+        date_default_timezone_set('Europe/Amsterdam');
+        $this->assertEquals(1583017140.000123, Utils::to_epoch_float('2020-02-29T23:59:00.000123+01:00'));
+        date_default_timezone_set($tz);
+    }
+
+    public function test_to_epoch_float_dst_change()
+    {
+        $tz = date_default_timezone_get();
+        date_default_timezone_set('Europe/Amsterdam');
+        $this->assertEquals(1572140520.010203, Utils::to_epoch_float('2019-10-27T02:42:00.010203+01:00'));
+        $this->assertEquals(1572136920.010203, Utils::to_epoch_float('2019-10-27T02:42:00.010203+02:00'));
+        date_default_timezone_set($tz);
+    }
+
+    public function test_absTime_to_epoch_float_random()
+    {
+        $tz_orig = date_default_timezone_get();
+
+        $timezones = [
+            'Asia/Kathmandu',
+            'Europe/Amsterdam',
+            'Europe/London',
+            'America/St_Johns',
+            'Pacific/Auckland',
+            'UTC'
+        ];
+        foreach ($timezones as $tz) {
+            date_default_timezone_set($tz);
+
+            $now = time();
+            $year = 365*24*3600;
+            for ($i=0; $i<10000; $i++) {
+                $t = (float)sprintf('%d.%03d', $now - $year + rand(0,2*$year), rand(0,999));
+                $t2 = Utils::to_epoch_float(Utils::absTime($t));
+                $this->assertEquals($t, $t2, "comparing random times in TZ=$tz", 0.0000001);
+            }
+        }
+
+        date_default_timezone_set($tz_orig);
+    }
+
     public function testPrinttimeNotime()
     {
         $this->assertEquals('', Utils::printTime(null, "%H:%M"));
