@@ -26,13 +26,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -139,6 +139,7 @@ class ImportEventFeedCommand extends Command
      * @param ScoreboardService      $scoreboardService
      * @param SubmissionService      $submissionService
      * @param TokenStorageInterface  $tokenStorage
+     * @param LoggerInterface        $logger
      * @param bool                   $debug
      * @param string                 $domjudgeVersion
      * @param string|null            $name
@@ -150,6 +151,7 @@ class ImportEventFeedCommand extends Command
         ScoreboardService $scoreboardService,
         SubmissionService $submissionService,
         TokenStorageInterface $tokenStorage,
+        LoggerInterface $logger,
         bool $debug,
         string $domjudgeVersion,
         string $name = null
@@ -161,6 +163,7 @@ class ImportEventFeedCommand extends Command
         $this->scoreboardService = $scoreboardService;
         $this->submissionService = $submissionService;
         $this->tokenStorage      = $tokenStorage;
+        $this->logger            = $logger;
         $this->debug             = $debug;
         $this->domjudgeVersion   = $domjudgeVersion;
     }
@@ -229,13 +232,6 @@ class ImportEventFeedCommand extends Command
         if (!$this->debug) {
             $this->em->getConnection()->getConfiguration()->setSQLLogger(null);
         }
-
-        // Set up logger
-        $verbosityLevelMap = [
-            LogLevel::NOTICE => OutputInterface::VERBOSITY_NORMAL,
-            LogLevel::INFO => OutputInterface::VERBOSITY_NORMAL,
-        ];
-        $this->logger      = new ConsoleLogger($output, $verbosityLevelMap);
 
         pcntl_signal(SIGTERM, [$this, 'stopCommand']);
         pcntl_signal(SIGINT, [$this, 'stopCommand']);
