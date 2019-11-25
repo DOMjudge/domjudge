@@ -590,7 +590,8 @@ class ImportEventFeedCommand extends Command
         /** @var Contest $contest */
         $contest = $this->em->getRepository(Contest::class)->find($this->contestId);
 
-        // We need to convert the freeze to a value from the start instead of the end so perform some regex magic
+        // We need to convert the freeze to a value from the start instead of
+        // the end so perform some regex magic.
         $duration     = $event['data']['duration'];
         $freeze       = $event['data']['scoreboard_freeze_duration'];
         $reltimeRegex = '/^(-)?(\d+):(\d{2}):(\d{2})(?:\.(\d{3}))?$/';
@@ -605,11 +606,11 @@ class ImportEventFeedCommand extends Command
             $freezeHourModifier   = $freezeNegative ? -1 : 1;
             $freezeInSeconds    = $freezeHourModifier * $freezeData[2] * 3600
                                   + 60 * $freezeData[3]
-                                  + (double)sprintf('%d.%d', $freezeData[4], $freezeData[5]);
+                                  + (double)sprintf('%d.%03d', $freezeData[4], $freezeData[5]);
             $durationHourModifier = $durationNegative ? -1 : 1;
             $durationInSeconds  = $durationHourModifier * $durationData[2] * 3600
                                   + 60 * $durationData[3]
-                                  + (double)sprintf('%d.%d', $durationData[4], $durationData[5]);
+                                  + (double)sprintf('%d.%03d', $durationData[4], $durationData[5]);
             $freezeStartSeconds = $durationInSeconds - $freezeInSeconds;
             $freezeHour         = floor($freezeStartSeconds / 3600);
             $freezeMinutes      = floor(($freezeStartSeconds % 3600) / 60);
