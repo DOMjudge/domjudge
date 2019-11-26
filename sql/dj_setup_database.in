@@ -10,6 +10,8 @@ ETCDIR="@domserver_etcdir@"
 WEBAPPDIR="@domserver_webappdir@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
+RESTPWFILE="$ETCDIR/restapi.secret"
+ADMINPWFILE="$ETCDIR/initial_admin_password.secret"
 
 verbose()
 {
@@ -24,7 +26,7 @@ Usage: $0 [option]... <command>
 
 Commands:
   status           check database installation status
-  genpass          generate password file
+  genpass          generate DB,API,admin password files
   create-db-users  create (empty) database and users
   install          create database, example contest and users if not existing
   bare-install     create database, setup defaults if not existing
