@@ -28,23 +28,8 @@ domserver: apache.conf nginx-conf nginx-conf-inner $(SECRETS)
 
 judgehost:
 
-dbpasswords.secret:
-	chmod go= $@
-	./gendbpasswords >> $@
-
-restapi.secret:
-	chmod go= $@
-	./genrestapicredentials >> $@
-
-symfony_app.secret:
-	touch $@
-	chmod go= $@
-	./gensymfonysecret >> $@
-
-initial_admin_password.secret:
-	touch $@
-	chmod go= $@
-	./genadminpassword >> $@
+$(SECRETS):
+	./gen_all_secrets
 
 install-domserver:
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \

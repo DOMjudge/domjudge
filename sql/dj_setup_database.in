@@ -10,8 +10,6 @@ ETCDIR="@domserver_etcdir@"
 WEBAPPDIR="@domserver_webappdir@"
 
 PASSWDFILE="$ETCDIR/dbpasswords.secret"
-RESTPWFILE="$ETCDIR/restapi.secret"
-ADMINPWFILE="$ETCDIR/initial_admin_password.secret"
 
 verbose()
 {
@@ -26,7 +24,7 @@ Usage: $0 [option]... <command>
 
 Commands:
   status           check database installation status
-  genpass          generate DB,API,admin password files
+  genpass          generate DB,API,Symfony,admin password files
   create-db-users  create (empty) database and users
   install          create database, example contest and users if not existing
   bare-install     create database, setup defaults if not existing
@@ -263,19 +261,7 @@ status)
 	;;
 
 genpass)
-	if [ -f "$PASSWDFILE" ]; then
-		echo "Error: password file '$PASSWDFILE' already exists."
-		exit 1
-	fi
-	echo "Running '$ETCDIR/gendbpasswords'..."
-	$ETCDIR/gendbpasswords > "$PASSWDFILE"
-	echo "Password file '$PASSWDFILE' created."
-	echo "Running '$ETCDIR/genrestapicredentials'..."
-	$ETCDIR/genrestapicredentials > "$RESTPWFILE"
-	echo "Password file '$RESTPWFILE' created."
-	echo "Running '$ETCDIR/genadminpassword'..."
-	$ETCDIR/genadminpassword > "$ADMINPWFILE"
-	echo "Password file '$ADMINPWFILE' created."
+	$ETCDIR/gen_all_secrets
 	;;
 
 uninstall)
