@@ -113,6 +113,7 @@ class ConfigController extends AbstractController
                     $this->logUnverifiedJudgings($eventLogService);
                     $needs_merge = true;
                 }
+                $old_val = $option->getValue();
                 switch ( $option->getType() ) {
                     case 'bool':
                         $option->setValue((bool)$val);
@@ -151,6 +152,10 @@ class ConfigController extends AbstractController
                             "configation option '%s' has unknown type '%s'",
                             [ $option->getName(), $option->getType() ]
                         );
+                }
+                if ($option->getValue() != $old_val) {
+                    $val_json = $this->dj->jsonEncode($option->getValue());
+                    $this->dj->auditlog('configuration', $option->getName(), 'updated', $val_json);
                 }
             }
 
