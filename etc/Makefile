@@ -29,12 +29,10 @@ domserver: apache.conf nginx-conf nginx-conf-inner $(SECRETS)
 judgehost:
 
 dbpasswords.secret:
-	echo "# Randomly generated on host `hostname`, `date`" > $@
 	chmod go= $@
 	./gendbpasswords >> $@
 
 restapi.secret:
-	echo "# Randomly generated on host `hostname`, `date`" > $@
 	chmod go= $@
 	./genrestapicredentials >> $@
 
