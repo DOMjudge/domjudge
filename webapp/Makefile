@@ -9,17 +9,6 @@ include $(TOPDIR)/Makefile.global
 # Subdirectories to recurse into for REC_TARGETS
 SUBDIRS = config
 
-LOCALENV = .env.local
-
-domserver: $(LOCALENV)
-
-# Don't try to create dbpasswords.secret here if it doesn't exist:
-$(TOPDIR)/etc/dbpasswords.secret:
-
-$(LOCALENV): %: $(TOPDIR)/etc/dbpasswords.secret
-	@[ -n "$(QUIET)" ] || echo "Generating '$@'..."
-	$(TOPDIR)/etc/gensymfonyenv $^ > $@
-
 copy-bundle-assets:
 # We can not use bin/console here, as when using a fakeroot,
 # the include paths are broken. We just copy in the data we need
@@ -28,7 +17,7 @@ copy-bundle-assets:
 	cp -R ../lib/vendor/nelmio/api-doc-bundle/Resources/public/* public/bundles/nelmioapidoc/
 
 clean-l:
-	-rm -rf public/bundles/nelmioapidoc $(LOCALENV) $(LOCALENV).php
+	-rm -rf public/bundles/nelmioapidoc
 
 install-domserver:
 # This must be done first to install with the rest.
@@ -49,7 +38,7 @@ install-domserver:
 			ln -s $$realtarget $$link ; \
 		fi \
 	done
-	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist
+	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_webappdir) phpunit.xml.dist .env
 
 install-docs:
 	$(INSTALL_DATA) -T public/images/countries/README    $(DESTDIR)$(domjudge_docdir)/README.country_flags

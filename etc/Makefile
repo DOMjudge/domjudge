@@ -4,7 +4,7 @@ endif
 include $(TOPDIR)/Makefile.global
 
 # Note:
-# Although dbpasswords.secret and restapi.secret are generated during
+# Although the *.secret files are generated during
 # building/installing, we only remove them with 'distclean', for in
 # maintainer-install mode it's inconvenient to have these regenerated
 # with different passwords from those in the database.
@@ -12,6 +12,8 @@ include $(TOPDIR)/Makefile.global
 # These files should probably not be generated in the source tree
 # anyway, but it is more convenient to be able to share the passwords
 # between domserver and judgehost installs.
+
+SECRETS = dbpasswords.secret restapi.secret symfony_app.secret initial_admin_password.secret
 
 SUBST_CONFIGS = apache.conf nginx-conf nginx-conf-inner domjudge-fpm.conf domserver-static.php \
                 judgehost-static.php runguard-config.h submit-config.h \
@@ -22,7 +24,7 @@ $(SUBST_CONFIGS): %: %.in $(TOPDIR)/paths.mk
 
 config: $(SUBST_CONFIGS)
 
-domserver: apache.conf nginx-conf nginx-conf-inner dbpasswords.secret restapi.secret initial_admin_password.secret
+domserver: apache.conf nginx-conf nginx-conf-inner $(SECRETS)
 
 judgehost:
 
@@ -35,6 +37,11 @@ restapi.secret:
 	echo "# Randomly generated on host `hostname`, `date`" > $@
 	chmod go= $@
 	./genrestapicredentials >> $@
+
+symfony_app.secret:
+	touch $@
+	chmod go= $@
+	./gensymfonysecret >> $@
 
 initial_admin_password.secret:
 	touch $@
@@ -65,7 +72,7 @@ distclean-l:
 	-rm -f $(SUBST_CONFIGS) config.h
 
 clean-passwords:
-	-rm -f dbpasswords.secret restapi.secret initial_admin_password.secret
+	-rm -f $(SECRETS)
 
 maintainer-clean-l:
 	-rm -f config.h.in
