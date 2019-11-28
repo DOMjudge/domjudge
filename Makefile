@@ -202,7 +202,9 @@ maintainer-conf: dist composer-dependencies-dev
 
 # Run Symfony in dev mode (for maintainer-mode):
 webapp/.env.local:
-	echo "APP_ENV=dev" > $@
+	echo "# This file was automatically created by 'make maintainer-install' to run" >> $@
+	echo "# the DOMjudge Symfony application in developer mode. Adjust as needed." >> $@
+	echo "APP_ENV=dev" >> $@
 
 # Install the system in place: don't really copy stuff, but create
 # symlinks where necessary to let it work from the source tree.
