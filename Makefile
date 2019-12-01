@@ -179,7 +179,7 @@ paths.mk:
 
 # Configure for running in source tree, not meant for normal use:
 MAINT_CXFLAGS=-g -O1 -Wall -fstack-protector -D_FORTIFY_SOURCE=2 \
-              -fPIE -Wformat -Wformat-security -ansi -pedantic
+              -fPIE -Wformat -Wformat-security -std=c++11 -pedantic
 MAINT_LDFLAGS=-fPIE -pie -Wl,-z,relro -Wl,-z,now
 maintainer-conf: dist composer-dependencies-dev
 	./configure $(subst 1,-q,$(QUIET)) --prefix=$(CURDIR) \
