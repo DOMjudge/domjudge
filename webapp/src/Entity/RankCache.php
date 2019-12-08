@@ -61,14 +61,14 @@ class RankCache
 
     /**
      * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Contest", inversedBy="rankcache")
+     * @ORM\ManyToOne(targetEntity="Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
     private $contest;
 
     /**
      * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Team", inversedBy="rankcache")
+     * @ORM\ManyToOne(targetEntity="Team")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
      */
     private $team;

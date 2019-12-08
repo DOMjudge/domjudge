@@ -108,21 +108,21 @@ class ScoreCache
 
     /**
      * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Contest", inversedBy="scorecache")
+     * @ORM\ManyToOne(targetEntity="Contest")
      * @ORM\JoinColumn(name="cid", referencedColumnName="cid", onDelete="CASCADE")
      */
     private $contest;
 
     /**
      * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Team", inversedBy="scorecache")
+     * @ORM\ManyToOne(targetEntity="Team")
      * @ORM\JoinColumn(name="teamid", referencedColumnName="teamid", onDelete="CASCADE")
      */
     private $team;
 
     /**
      * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Problem", inversedBy="scorecache")
+     * @ORM\ManyToOne(targetEntity="Problem")
      * @ORM\JoinColumn(name="probid", referencedColumnName="probid", onDelete="CASCADE")
      */
     private $problem;
