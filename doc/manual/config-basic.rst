@@ -123,12 +123,12 @@ and maybe use their runtimes to set timelimits for the problems.
 The simplest way to do this is to include the jury solutions in a
 problem zip file and upload this. You can also upload a zip file
 containing just solutions to an existing problem. The zip
-archive has to adhere to the `problemarchive.org format`_.
-For this to work, the jury/admin user who uploads the problem has to have
-an associated team to which the solutions will be assigned. The
+archive has to adhere to the `ICPC problem format`_.
+For this to work, the jury/admin user who uploads the problem has to
+have an associated team to which the solutions will be assigned. The
 solutions will automatically be judged if the contest is active (but
 it need not have started yet). You can verify whether the submissions
 gave the expected answer in the Judging Verifier, available from
 the jury index page.
 
-.. _problemarchive.org format: https://www.problemarchive.org/wiki/index.php/Problem_Format
+.. _ICPC problem format: https://clics.ecs.baylor.edu/index.php?title=Problem_format
