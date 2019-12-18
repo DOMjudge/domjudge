@@ -9,6 +9,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
+use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Utils\Utils;
@@ -119,6 +120,7 @@ class CheckConfigService
         $teams = [
             'affiliations' => $this->checkAffiliations(),
             'teamdupenames' => $this->checkTeamDuplicateNames(),
+            'selfregistration' => $this->checkSelfRegistration(),
         ];
 
         $results['Teams'] = $teams;
@@ -672,6 +674,35 @@ class CheckConfigService
         $desc = $desc ?: 'Every team name is unique';
 
         return ['caption' => 'Team name uniqueness',
+            'result' => $result,
+            'desc' => $desc];
+    }
+
+    public function checkSelfRegistration()
+    {
+        $result = 'O';
+        $desc = '';
+
+        $selfRegistrationCategories = $this->em->getRepository(TeamCategory::class)->findBy(
+            ['allow_self_registration' => 1],
+            ['sortorder' => 'ASC']
+        );
+        if (count($selfRegistrationCategories) === 0) {
+            $desc .= "Self-registration is disabled.\n";
+        } else {
+            $desc .= "Self-registration is enabled.\n";
+            if (count($selfRegistrationCategories) === 1) {
+                $desc .= sprintf("Team category for self-registered teams: %s.\n",
+                    $selfRegistrationCategories[0]->getName());
+            } else {
+                $desc .= sprintf("Team categories allowed for self-registered teams: %s.\n",
+                    implode(', ', array_map(function($category) {
+                        return $category->getName();
+                    }, $selfRegistrationCategories)));
+            }
+        }
+
+        return ['caption' => 'Self-registration',
             'result' => $result,
             'desc' => $desc];
     }

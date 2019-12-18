@@ -32,6 +32,14 @@ class TeamCategoryType extends AbstractType
                 'No' => false,
             ],
         ]);
+        $builder->add('allow_self_registration', ChoiceType::class, [
+            'label' => 'Allow self-registration',
+            'expanded' => true,
+            'choices' => [
+                'Yes' => true,
+                'No' => false,
+            ],
+        ]);
         $builder->add('save', SubmitType::class);
     }
 

@@ -85,13 +85,12 @@ class SecurityController extends AbstractController
         $response = new Response();
         $response->headers->set('X-Login-Page', $this->generateUrl('login'));
 
-        $registrationCategoryName = $this->config->get('registration_category_name');
-        $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
+        $selfRegistrationCategoriesCount = $em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
 
         return $this->render('security/login.html.twig', array(
             'last_username' => $lastUsername,
             'error' => $error,
-            'allow_registration' => $registrationCategory !== null,
+            'allow_registration' => $selfRegistrationCategoriesCount !== 0,
             'allowed_authmethods' => $authmethods,
             'auth_xheaders_present' => $request->headers->get('X-DOMjudge-Login'),
             'auth_ipaddress_users' => $auth_ipaddress_users,
@@ -117,11 +116,10 @@ class SecurityController extends AbstractController
             return $this->redirect($this->generateUrl('root'));
         }
 
-        $em                       = $this->getDoctrine()->getManager();
-        $registrationCategoryName = $this->config->get('registration_category_name');
-        $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
+        $em                              = $this->getDoctrine()->getManager();
+        $selfRegistrationCategoriesCount = $em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
 
-        if ($registrationCategory === null) {
+        if ($selfRegistrationCategoriesCount === 0) {
             throw new HttpException(400, "Registration not enabled");
         }
 
@@ -139,13 +137,20 @@ class SecurityController extends AbstractController
 
             $teamName = $registration_form->get('teamName')->getData();
 
+            if ($selfRegistrationCategoriesCount === 1) {
+                $teamCategory = $em->getRepository(TeamCategory::class)->findOneBy(['allow_self_registration' => 1]);
+            } else {
+                // $selfRegistrationCategoriesCount > 1, 'teamCategory' field exists
+                $teamCategory = $registration_form->get('teamCategory')->getData();
+            }
+
             // Create a team to go with the user, then set some team attributes
             $team = new Team();
             $user->setTeam($team);
             $team
                 ->addUser($user)
                 ->setName($teamName)
-                ->setCategory($registrationCategory)
+                ->setCategory($teamCategory)
                 ->setComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
 
             if ($this->config->get('show_affiliations')) {

@@ -93,6 +93,7 @@ class TeamCategoryController extends BaseController
             'name' => ['title' => 'name', 'sort' => true],
             'num_teams' => ['title' => '# teams', 'sort' => true],
             'visible' => ['title' => 'visible', 'sort' => true],
+            'allow_self_registration' => ['title' => 'self-registration', 'sort' => true],
         ];
 
         // Insert external ID field when configured to use it
@@ -134,8 +135,9 @@ class TeamCategoryController extends BaseController
                 ];
             }
 
-            $categorydata['num_teams'] = ['value' => $teamCategoryData['num_teams']];
-            $categorydata['visible']   = ['value' => $teamCategory->getVisible() ? 'yes' : 'no'];
+            $categorydata['num_teams']               = ['value' => $teamCategoryData['num_teams']];
+            $categorydata['visible']                 = ['value' => $teamCategory->getVisible() ? 'yes' : 'no'];
+            $categorydata['allow_self_registration'] = ['value' => $teamCategory->getAllowSelfRegistration() ? 'yes' : 'no'];
 
             $team_categories_table[] = [
                 'data' => $categorydata,

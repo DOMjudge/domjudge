@@ -4,11 +4,13 @@ namespace App\Form\Type;
 
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
+use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -96,6 +98,30 @@ class UserRegistrationType extends AbstractType
                 ],
                 'mapped' => false,
             ]);
+
+        $selfRegistrationCategoriesCount = $this->em->getRepository(TeamCategory::class)->count(['allow_self_registration' => 1]);
+        if ($selfRegistrationCategoriesCount > 1) {
+            $builder
+                ->add('teamCategory', EntityType::class, [
+                    'class' => TeamCategory::class,
+                    'label' => false,
+                    'mapped' => false,
+                    'choice_label' => 'name',
+                    'placeholder' => '-- Select category --',
+                    'query_builder' => function (EntityRepository $er) {
+                        return $er
+                            ->createQueryBuilder('c')
+                            ->where('c.allow_self_registration = 1')
+                            ->orderBy('c.sortorder');
+                    },
+                    'attr' => [
+                        'placeholder' => 'Category',
+                    ],
+                    'constraints' => [
+                        new NotBlank(),
+                    ],
+                ]);
+        }
 
         if ($this->config->get('show_affiliations')) {
             $countries = [];
