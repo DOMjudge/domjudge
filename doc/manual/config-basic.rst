@@ -123,7 +123,7 @@ and maybe use their runtimes to set timelimits for the problems.
 The simplest way to do this is to include the jury solutions in a
 problem zip file and upload this. You can also upload a zip file
 containing just solutions to an existing problem. The zip
-archive has to adhere to the `problemarchive.org format`_.
+archive has to adhere to the `problemarchive.org format`_ (DOMjudge always adheres to the `CLICS`_ subset.
 For this to work, the jury/admin user who uploads the problem has to have
 an associated team to which the solutions will be assigned. The
 solutions will automatically be judged if the contest is active (but
@@ -132,3 +132,4 @@ gave the expected answer in the Judging Verifier, available from
 the jury index page.
 
 .. _problemarchive.org format: https://www.problemarchive.org/wiki/index.php/Problem_Format
+.. _CLICS: https://clics.ecs.baylor.edu/index.php?title=Problem_format
