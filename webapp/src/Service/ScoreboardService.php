@@ -17,6 +17,7 @@ use App\Utils\Scoreboard\Filter;
 use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use App\Entity\ExternalJudgement;
@@ -615,6 +616,128 @@ class ScoreboardService
                                                     [':lock' => $lockString]) != 1) {
             throw new \Exception('ScoreboardService::updateRankCache failed to release lock');
         }
+    }
+
+    /**
+     * Recalculate the scoreCache and rankCache of a contest.
+     *
+     * $progressReporter (optional) should be a callable that takes a string.
+     *
+     * @param Contest $contest
+     * @param mixed   $progressReporter
+     * @throws \Exception
+     */
+    public function refreshCache(Contest $contest, $progressReporter = null)
+    {
+        $this->dj->auditlog('contest', $contest->getCid(), 'refresh scoreboard cache');
+
+        if ($progressReporter === null) {
+            $progressReporter = function($data) {};
+        }
+
+        $queryBuilder = $this->em->createQueryBuilder()
+            ->from(Team::class, 't')
+            ->select('t')
+            ->orderBy('t.teamid');
+        if (!$contest->isOpenToAllTeams()) {
+            $queryBuilder
+                ->leftJoin('t.contests', 'c')
+                ->join('t.category', 'cat')
+                ->leftJoin('cat.contests', 'cc')
+                ->andWhere('c.cid = :cid OR cc.cid = :cid')
+                ->setParameter(':cid', $contest->getCid());
+        }
+        /** @var Team[] $teams */
+        $teams = $queryBuilder->getQuery()->getResult();
+        /** @var Problem[] $problems */
+        $problems = $this->em->createQueryBuilder()
+            ->from(Problem::class, 'p')
+            ->join('p.contest_problems', 'cp')
+            ->select('p')
+            ->andWhere('cp.contest = :contest')
+            ->setParameter(':contest', $contest)
+            ->orderBy('cp.shortname')
+            ->getQuery()
+            ->getResult();
+
+        $message = sprintf('<p>Recalculating all values for the scoreboard ' .
+                           'cache for contest %d (%d teams, %d problems)...</p>',
+                           $contest->getCid(), count($teams), count($problems));
+        $progressReporter($message);
+        $progressReporter('<pre>');
+
+        if (count($teams) == 0) {
+            $progressReporter('No teams defined, doing nothing.</pre>');
+            return;
+        }
+        if (count($problems) == 0) {
+            $progressReporter('No problems defined, doing nothing.</pre>');
+            return;
+        }
+
+        // for each team, fetch the status of each problem
+        foreach ($teams as $team) {
+            $progressReporter(sprintf('Team %d:', $team->getTeamid()));
+
+            // for each problem fetch the result
+            foreach ($problems as $problem) {
+                $progressReporter(sprintf(' p%d', $problem->getProbid()));
+                $this->calculateScoreRow($contest, $team, $problem, false);
+            }
+
+            $progressReporter(" rankcache\n");
+            $this->updateRankCache($contest, $team);
+        }
+
+        $progressReporter('</pre>');
+
+        $progressReporter('<p>Deleting irrelevant data...</p>');
+
+        // Drop all teams and problems that do not exist in the contest
+        if (!empty($problems)) {
+            $problemIds = array_map(function (Problem $problem) {
+                return $problem->getProbid();
+            }, $problems);
+        } else {
+            // problemId -1 will never happen, but otherwise the array is
+            // empty and that is not supported.
+            $problemIds = [-1];
+        }
+
+        if (!empty($teams)) {
+            $teamIds = array_map(function (Team $team) {
+                return $team->getTeamid();
+            }, $teams);
+        } else {
+            // teamId -1 will never happen, but otherwise the array is empty
+            // and that is not supported.
+            $teamIds = [-1];
+        }
+
+        $params = [
+            ':cid' => $contest->getCid(),
+            ':problemIds' => $problemIds,
+        ];
+        $types  = [
+            ':problemIds' => Connection::PARAM_INT_ARRAY,
+            ':teamIds' => Connection::PARAM_INT_ARRAY,
+        ];
+        $this->em->getConnection()->executeQuery(
+            'DELETE FROM scorecache WHERE cid = :cid AND probid NOT IN (:problemIds)',
+            $params, $types);
+
+        $params = [
+            ':cid' => $contest->getCid(),
+            ':teamIds' => $teamIds,
+        ];
+        $this->em->getConnection()->executeQuery(
+            'DELETE FROM scorecache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
+            $params, $types);
+        $this->em->getConnection()->executeQuery(
+            'DELETE FROM rankcache WHERE cid = :cid AND teamid NOT IN (:teamIds)',
+            $params, $types);
+
+        $progressReporter('<p>Done.</p>');
     }
 
     /**
