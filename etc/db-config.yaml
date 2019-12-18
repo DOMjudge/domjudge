@@ -231,11 +231,6 @@
             default_value: ""
             public: true
             description: If not empty, enable teams and jury to send source code to this command. See admin manual for allowed arguments.
-        -   name: registration_category_name
-            type: string
-            default_value: ""
-            public: true
-            description: Team category for users that register themselves with the system. Self-registration is disabled if this field is left empty.
         -   name: data_source
             type: int
             default_value: 0

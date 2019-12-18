@@ -77,11 +77,13 @@ Squid configuration for this might look like::
 
 Self-registration
 `````````````````
-There is also a configuration option to allow teams to self-register with
-the system: ``registration_category_name``. When left empty, no self-registration
-is allowed; when filled with a category name, newly registered teams will
-be placed in this category. During registration, a team can specify their
-affiliation.
+Teams can be allowed to self-register with the system. Each team category can
+be set to allow registration or not. When none of the categories are set to
+allow, self-registration is disabled. When one category is set to allow,
+self-registration is enabled and newly registered teams will be placed in this
+category. When multiple categories are set to allow, teams can choose one of
+them during registration. Teams can also specify their affiliation during
+registration.
 
 Executables
 -----------
