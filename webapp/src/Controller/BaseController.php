@@ -258,8 +258,8 @@ abstract class BaseController extends AbstractController
             $DOMJudgeService->auditlog($auditLogType, implode(', ', $primaryKeyData), 'deleted');
 
             if ($entity instanceof Team) {
-                // No need to do this in a transaction, since the chance of a team with same ID being created
-                // at the same time is neglibible.
+                // No need to do this in a transaction, since the chance of a team
+                // with same ID being created at the same time is negligible.
                 $entityManager->getConnection()->executeQuery('DELETE FROM scorecache WHERE teamid = :teamid',
                                                               [':teamid' => $entityId]);
                 $entityManager->getConnection()->executeQuery('DELETE FROM rankcache WHERE teamid = :teamid',
