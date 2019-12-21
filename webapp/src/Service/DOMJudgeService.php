@@ -582,8 +582,10 @@ class DOMJudgeService
 
         $status = $response->getStatusCode();
         if ($status < 200 || $status >= 300) {
-            $this->logger->warning(sprintf("executing internal %s request to url %s: http status code: %d, response: %s",
-                                           $method, $url, $status, $response));
+            $this->logger->warning(
+                "executing internal %s request to url %s: http status code: %d, response: %s",
+                [ $method, $url, $status, $response ]
+            );
             return null;
         }
 

@@ -568,8 +568,10 @@ class SubmissionService
                 $toFile = $this->dj->getDomjudgeSubmitDir() . '/' .
                           $this->getSourceFilename($fdata);
                 if (!@copy($file->getRealPath(), $toFile)) {
-                    $this->logger->warning(sprintf("Could not copy '%s' to '%s'",
-                                                   $file->getRealPath(), $toFile));
+                    $this->logger->warning(
+                        "Could not copy '%s' to '%s'",
+                        [ $file->getRealPath(), $toFile ]
+                    );
                 }
             }
         } else {
@@ -578,8 +580,8 @@ class SubmissionService
 
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(
-                sprintf("The contest is closed, submission stored but not processed. [c%d]",
-                        $contest->getCid())
+                "The contest is closed, submission stored but not processed. [c%d]",
+                [ $contest->getCid() ]
             );
         }
 
