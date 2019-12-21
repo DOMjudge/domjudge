@@ -241,8 +241,9 @@ class SubmissionService
 
         $submissions = $queryBuilder->getQuery()->getResult();
         if (isset($restrictions['rejudgingid'])) {
-            // Doctrine will return an array for each item. At index '0' will be the submission and at
-            // index 'oldresult' will be the old result. Remap this
+            // Doctrine will return an array for each item. At index '0' will
+            // be the submission and at index 'oldresult' will be the old
+            // result. Remap this.
             $submissions = array_map(function ($submissionData) {
                 /** @var Submission $submission */
                 $submission = $submissionData[0];
@@ -358,9 +359,9 @@ class SubmissionService
         }
         if (!$problem instanceof ContestProblem) {
             $problem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                            'contest' => $contest,
-                                                                                            'problem' => $problem
-                                                                                        ]);
+                'contest' => $contest,
+                'problem' => $problem
+            ]);
         }
         if (!$language instanceof Language) {
             $language = $this->em->getRepository(Language::class)->find($language);
@@ -480,7 +481,8 @@ class SubmissionService
 
         if ($language->getFilterCompilerFiles() && $extensionMatchCount === 0) {
             $message = sprintf(
-                "None of the submitted files match any of the allowed extensions for %s (allowed: %s)",
+                "None of the submitted files match any of the allowed " .
+                "extensions for %s (allowed: %s)",
                 $language->getName(), implode(', ', $language->getExtensions())
             );
             return null;
@@ -493,7 +495,8 @@ class SubmissionService
 
         $this->logger->info('input verified');
 
-        // First look up any expected results in file, so as to minimize the SQL transaction time below.
+        // First look up any expected results in file, so as to minimize the
+        // SQL transaction time below.
         if ($this->dj->checkrole('jury')) {
             $results = self::getExpectedResults(file_get_contents($files[0]->getRealPath()),
                 $this->dj->dbconfig_get('results_remap', []));
@@ -532,22 +535,23 @@ class SubmissionService
                                         EventLogService::ACTION_CREATE, $contest->getCid());
         });
 
-        // Reload contest, team and contestproblem for now, as EventLogService::log will clear the Doctrine entity manager
+        // Reload contest, team and contestproblem for now, as
+        // EventLogService::log will clear the Doctrine entity manager.
         /** @var Contest $contest */
         /** @var Team $team */
         /** @var ContestProblem $problem */
         $contest = $this->em->getRepository(Contest::class)->find($contest->getCid());
         $team    = $this->em->getRepository(Team::class)->find($team->getTeamid());
         $problem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                        'problem' => $problem->getProblem(),
-                                                                                        'contest' => $problem->getContest(),
-                                                                                    ]);
+            'problem' => $problem->getProblem(),
+            'contest' => $problem->getContest(),
+        ]);
 
         $this->scoreboardService->calculateScoreRow($contest, $team, $problem->getProblem());
 
         $this->dj->alert('submit', sprintf('submission %d: team %d, language %s, problem %d',
-                                                        $submission->getSubmitid(), $team->getTeamid(),
-                                                        $language->getLangid(), $problem->getProblem()->getProbid()));
+                                           $submission->getSubmitid(), $team->getTeamid(),
+                                           $language->getLangid(), $problem->getProblem()->getProbid()));
 
         if (is_writable($this->dj->getDomjudgeSubmitDir())) {
             // Copy the submission to the submission directory for safe-keeping
@@ -561,9 +565,11 @@ class SubmissionService
                     'rank' => $rank,
                     'filename' => $file->getClientOriginalName()
                 ];
-                $toFile = $this->dj->getDomjudgeSubmitDir() . '/' . $this->getSourceFilename($fdata);
+                $toFile = $this->dj->getDomjudgeSubmitDir() . '/' .
+                          $this->getSourceFilename($fdata);
                 if (!@copy($file->getRealPath(), $toFile)) {
-                    $this->logger->warning(sprintf("Could not copy '%s' to '%s'", $file->getRealPath(), $toFile));
+                    $this->logger->warning(sprintf("Could not copy '%s' to '%s'",
+                                                   $file->getRealPath(), $toFile));
                 }
             }
         } else {
@@ -572,7 +578,9 @@ class SubmissionService
 
         if (Utils::difftime((float)$contest->getEndtime(), $submitTime) <= 0) {
             $this->logger->info(
-                sprintf("The contest is closed, submission stored but not processed. [c%d]", $contest->getCid()));
+                sprintf("The contest is closed, submission stored but not processed. [c%d]",
+                        $contest->getCid())
+            );
         }
 
         return $submission;
