@@ -165,7 +165,7 @@ class RejudgingService
 
             if ($action === self::ACTION_APPLY) {
                 $this->em->transactional(function () use ($submission, $rejudgingId) {
-                    // First invalidate old judging, maybe different from prevjudgingid!
+                    // First invalidate old judging, may be different from prevjudgingid!
                     $this->em->getConnection()->executeQuery(
                         'UPDATE judging SET valid=0 WHERE submitid = :submitid',
                         [':submitid' => $submission['submitid']]
@@ -183,7 +183,7 @@ class RejudgingService
                         [':submitid' => $submission['submitid']]
                     );
 
-                    // Last update cache
+                    // Update cache
                     $contest = $this->em->getRepository(Contest::class)->find($submission['cid']);
                     $team    = $this->em->getRepository(Team::class)->find($submission['teamid']);
                     $problem = $this->em->getRepository(Problem::class)->find($submission['probid']);
@@ -210,7 +210,7 @@ class RejudgingService
                                                     $submission['cid'], null, null, false);
                     }
 
-                    // Update ballons
+                    // Update balloons
                     $contest    = $this->em->getRepository(Contest::class)->find($submission['cid']);
                     $submission = $this->em->getRepository(Submission::class)->find($submission['submitid']);
                     $this->balloonService->updateBalloons($contest, $submission);
