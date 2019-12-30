@@ -241,7 +241,7 @@ class ProblemController extends BaseController
             'contest' => $contest,
         ]);
         if (!$contestProblem) {
-            throw new NotFoundHttpException($notfound_msg));
+            throw new NotFoundHttpException($notfound_msg);
         }
 
         $zipFilename    = $this->dj->getSamplesZip($contestProblem);
