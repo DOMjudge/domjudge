@@ -110,9 +110,9 @@ class ProblemController extends BaseController
         }
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'problem' => $probId,
-                                                                                               'contest' => $contest,
-                                                                                           ]);
+            'problem' => $probId,
+            'contest' => $contest,
+        ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -168,9 +168,9 @@ class ProblemController extends BaseController
         }
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'problem' => $probId,
-                                                                                               'contest' => $contest,
-                                                                                           ]);
+            'problem' => $probId,
+            'contest' => $contest,
+        ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -231,16 +231,17 @@ class ProblemController extends BaseController
     {
         $user    = $this->dj->getUser();
         $contest = $this->dj->getCurrentContest($user->getTeamid());
+        $notfound_msg = sprintf('Problem p%d not found or not available', $probId);
         if (!$contest || !$contest->getFreezeData()->started()) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+            throw new NotFoundHttpException($notfound_msg);
         }
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'problem' => $probId,
-                                                                                               'contest' => $contest,
-                                                                                           ]);
+            'problem' => $probId,
+            'contest' => $contest,
+        ]);
         if (!$contestProblem) {
-            throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
+            throw new NotFoundHttpException($notfound_msg));
         }
 
         $zipFilename    = $this->dj->getSamplesZip($contestProblem);

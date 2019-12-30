@@ -602,7 +602,7 @@ class JudgehostController extends AbstractFOSRestController
                     $judgingId = $judging->getJudgingid();
                     $contestId = $judging->getSubmission()->getCid();
                     $this->dj->auditlog('judging', $judgingId, 'judged',
-                                                     'compiler-error', $hostname, $contestId);
+                                        'compiler-error', $hostname, $contestId);
 
                     if (!$this->dj->dbconfig_get('verification_required', false) &&
                         $judging->getRejudgingid() === null) {
@@ -920,8 +920,7 @@ class JudgehostController extends AbstractFOSRestController
 
         $error = new InternalError();
         $error
-            ->setJudging($judgingId ? $this->em->getReference(Judging::class,
-                                                                         $judgingId) : null)
+            ->setJudging($judgingId ? $this->em->getReference(Judging::class, $judgingId) : null)
             ->setContest($contest)
             ->setDescription($description)
             ->setJudgehostlog($judgehostlog)
@@ -1116,15 +1115,16 @@ class JudgehostController extends AbstractFOSRestController
                 $problem    = $submission->getProblem();
                 $this->scoreboardService->calculateScoreRow($contest, $team, $problem);
 
-                // We call alert here before possible validation. Note that this means that these
-                // alert messages should be treated as confidential information.
-                $this->dj->alert($result === 'correct' ? 'accept' : 'reject',
-                                              sprintf("submission %s, judging %s: %s",
-                                                      $submission->getSubmitid(),
-                                                      $judging->getJudgingid(), $result));
+                // We call alert here before possible validation. Note that
+                // this means that these alert messages should be treated as
+                // confidential information.
+                $msg = sprintf("submission %s, judging %s: %s",
+                               $submission->getSubmitid(), $judging->getJudgingid(), $result);
+                $this->dj->alert($result === 'correct' ? 'accept' : 'reject', $msg);
 
                 // Log to event table if no verification required
-                // (case of verification required is handled in jury/SubmissionController::verifyAction)
+                // (case of verification required is handled in
+                // jury/SubmissionController::verifyAction)
                 if (!$this->dj->dbconfig_get('verification_required', false)) {
                     if ($judging->getRejudgingid() === null) {
                         $this->eventLogService->log('judging', $judging->getJudgingid(),

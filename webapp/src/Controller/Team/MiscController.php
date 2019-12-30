@@ -114,9 +114,11 @@ class MiscController extends BaseController
             // We need to clear the entity manager, because loading the team scoreboard seems to break getting submission
             // contestproblems for the contest we get the scoreboard for
             $this->em->clear();
-            $data['submissions'] = $this->submissionService->getSubmissionList([$contest->getCid() => $contest],
-                                                                               ['teamid' => $teamId],
-                                                                               0)[0];
+            $data['submissions'] = $this->submissionService->getSubmissionList(
+                [$contest->getCid() => $contest],
+                ['teamid' => $teamId],
+                0
+            )[0];
 
             /** @var Clarification[] $clarifications */
             $clarifications = $this->em->createQueryBuilder()

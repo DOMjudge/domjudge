@@ -894,9 +894,9 @@ class ImportEventFeedCommand extends Command
         // Now find the contest problem
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                    'contest' => $this->contestId,
-                                                                                    'problem' => $problem,
-                                                                                ]);
+            'contest' => $this->contestId,
+            'problem' => $problem,
+        ]);
         if ($contestProblem) {
             $action = EventLogService::ACTION_UPDATE;
         } else {
@@ -1206,9 +1206,9 @@ class ImportEventFeedCommand extends Command
         // Find the contest problem
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                    'contest' => $this->contestId,
-                                                                                    'problem' => $problem,
-                                                                                ]);
+            'contest' => $this->contestId,
+            'problem' => $problem,
+        ]);
 
         if (!$contestProblem) {
             $this->logger->error(
@@ -1416,8 +1416,10 @@ class ImportEventFeedCommand extends Command
                         return;
                     }
                     file_put_contents($tmpSubmissionFile, $content);
-                    $filesToSubmit[] = new UploadedFile($tmpSubmissionFile, $filename, null, null,
-                                                        null, true);
+                    $filesToSubmit[] = new UploadedFile(
+                        $tmpSubmissionFile, $filename,
+                        null, null, null, true
+                    );
                 }
 
                 // If the language requires an entry point but we do not have one, use automatic entry point detection
@@ -1428,9 +1430,8 @@ class ImportEventFeedCommand extends Command
                 // Submit the solution
                 $contest    = $this->em->getRepository(Contest::class)->find($this->contestId);
                 $submission = $this->submissionService->submitSolution(
-                    $team, $contestProblem, $contest, $language, $filesToSubmit, null, $entryPoint,
-                    $submissionId,
-                    $submitTime
+                    $team, $contestProblem, $contest, $language, $filesToSubmit,
+                    null, $entryPoint, $submissionId, $submitTime
                 );
 
                 // Clean up the ZIP

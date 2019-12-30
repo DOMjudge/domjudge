@@ -200,8 +200,10 @@ class JudgehostRestrictionController extends BaseController
             $this->em->flush();
             $this->dj->auditlog('judgehost_restriction', $judgehostRestriction->getRestrictionid(),
                                              'updated');
-            return $this->redirect($this->generateUrl('jury_judgehost_restriction',
-                                                      ['restrictionId' => $judgehostRestriction->getRestrictionid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_judgehost_restriction',
+                ['restrictionId' => $judgehostRestriction->getRestrictionid()]
+            ));
         }
 
         return $this->render('jury/judgehost_restriction_edit.html.twig', [
@@ -247,8 +249,10 @@ class JudgehostRestrictionController extends BaseController
             $this->em->flush();
             $this->dj->auditlog('judgehost_restriction', $judgehostRestriction->getRestrictionid(),
                                              'added');
-            return $this->redirect($this->generateUrl('jury_judgehost_restriction',
-                                                      ['restrictionId' => $judgehostRestriction->getRestrictionid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_judgehost_restriction',
+                ['restrictionId' => $judgehostRestriction->getRestrictionid()]
+            ));
         }
 
         return $this->render('jury/judgehost_restriction_add.html.twig', [

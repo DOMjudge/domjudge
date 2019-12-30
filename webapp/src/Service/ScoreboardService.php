@@ -512,7 +512,7 @@ class ScoreboardService
             :submissionsPublic, :pendingPublic, :solvetimePublic, :isCorrectPublic, :isFirstToSolve)', $params);
 
         if ($this->em->getConnection()->fetchColumn('SELECT RELEASE_LOCK(:lock)',
-                                                               [':lock' => $lockString]) != 1) {
+                                                    [':lock' => $lockString]) != 1) {
             throw new \Exception('ScoreboardService::calculateScoreRow failed to release lock');
         }
 
@@ -598,8 +598,10 @@ class ScoreboardService
                                                       $penaltyTime, $scoreIsInSeconds);
 
                     $numPoints[$variant] += $contestProblems[$probId]->getPoints();
-                    $totalTime[$variant] += Utils::scoretime((float)$scoreCache->getSolveTime($isRestricted),
-                                                             $scoreIsInSeconds) + $penalty;
+                    $totalTime[$variant] += Utils::scoretime(
+                        (float)$scoreCache->getSolveTime($isRestricted),
+                        $scoreIsInSeconds
+                    ) + $penalty;
                 }
             }
         }

@@ -144,7 +144,8 @@ class LanguageController extends BaseController
         ]);
     }
 
-    // Note that the add action appears before the view action to make sure /add is not seen as a language
+    // Note that the add action appears before the view action to make sure
+    // /add is not seen as a language.
     /**
      * @Route("/add", name="jury_language_add")
      * @IsGranted("ROLE_ADMIN")
@@ -168,8 +169,10 @@ class LanguageController extends BaseController
             $this->em->persist($language);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $language,
                               $language->getLangid(), true);
-            return $this->redirect($this->generateUrl('jury_language',
-                                                      ['langId' => $language->getLangid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_language',
+                ['langId' => $language->getLangid()]
+            ));
         }
 
         return $this->render('jury/language_add.html.twig', [
@@ -295,8 +298,10 @@ class LanguageController extends BaseController
             }
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $language,
                               $language->getLangid(), false);
-            return $this->redirect($this->generateUrl('jury_language',
-                                                      ['langId' => $language->getLangid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_language',
+                ['langId' => $language->getLangid()]
+            ));
         }
 
         return $this->render('jury/language_edit.html.twig', [
@@ -321,6 +326,9 @@ class LanguageController extends BaseController
             throw new NotFoundHttpException(sprintf('Language with ID %s not found', $langId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $language, $language->getName(), $this->generateUrl('jury_languages'));
+        return $this->deleteEntity(
+            $request, $this->em, $this->dj, $this->kernel,
+            $language, $language->getName(), $this->generateUrl('jury_languages')
+        );
     }
 }

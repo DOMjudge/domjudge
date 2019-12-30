@@ -234,8 +234,10 @@ class UserController extends BaseController
                 $this->tokenStorage->setToken($token);
             }
 
-            return $this->redirect($this->generateUrl('jury_user',
-                                                      ['userId' => $user->getUserid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_user',
+                ['userId' => $user->getUserid()]
+            ));
         }
 
         return $this->render('jury/user_edit.html.twig', [
@@ -287,8 +289,10 @@ class UserController extends BaseController
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $user,
                               $user->getUserid(),
                               true);
-            return $this->redirect($this->generateUrl('jury_user',
-                                                      ['userId' => $user->getUserid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_user',
+                ['userId' => $user->getUserid()]
+            ));
         }
 
         return $this->render('jury/user_add.html.twig', [

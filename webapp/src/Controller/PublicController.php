@@ -106,8 +106,9 @@ class PublicController extends BaseController
             $refreshUrl = sprintf('?%s', http_build_query($refreshParams));
         }
 
-        $data = $this->scoreboardService->getScoreboardTwigData($request, $response, $refreshUrl, false, true, $static,
-                                                                $contest);
+        $data = $this->scoreboardService->getScoreboardTwigData(
+            $request, $response, $refreshUrl, false, true, $static, $contest
+        );
 
         if ($static) {
             $data['hide_menu'] = true;
@@ -223,9 +224,9 @@ class PublicController extends BaseController
         }
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'problem' => $probId,
-                                                                                               'contest' => $contest,
-                                                                                           ]);
+            'problem' => $probId,
+            'contest' => $contest,
+        ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -280,9 +281,9 @@ class PublicController extends BaseController
         }
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'problem' => $probId,
-                                                                                               'contest' => $contest,
-                                                                                           ]);
+            'problem' => $probId,
+            'contest' => $contest,
+        ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }
@@ -347,9 +348,9 @@ class PublicController extends BaseController
         }
         /** @var ContestProblem $contestProblem */
         $contestProblem = $this->em->getRepository(ContestProblem::class)->find([
-                                                                                               'problem' => $probId,
-                                                                                               'contest' => $contest,
-                                                                                           ]);
+            'problem' => $probId,
+            'contest' => $contest,
+        ]);
         if (!$contestProblem) {
             throw new NotFoundHttpException(sprintf('Problem p%d not found or not available', $probId));
         }

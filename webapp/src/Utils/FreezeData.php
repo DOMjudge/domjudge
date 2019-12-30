@@ -47,13 +47,16 @@ class FreezeData
      */
     public function showFinal(bool $jury = false)
     {
-        if (!isset($this->cache[self::KEY_SHOW_FINAL]) || !isset($this->cache[self::KEY_SHOW_FINAL_JURY])) {
+        if (!isset($this->cache[self::KEY_SHOW_FINAL]) ||
+            !isset($this->cache[self::KEY_SHOW_FINAL_JURY])) {
             if (!$this->contest || !$this->contest->getStarttimeEnabled()) {
-                $this->cache[self::KEY_SHOW_FINAL] = $this->cache[self::KEY_SHOW_FINAL_JURY] = false;
+                $this->cache[self::KEY_SHOW_FINAL]      = false;
+                $this->cache[self::KEY_SHOW_FINAL_JURY] = false;
             } else {
-                $now                                    = Utils::now();
-                $this->cache[self::KEY_SHOW_FINAL_JURY] = Utils::difftime((float)$this->contest->getEndtime(),
-                                                                          $now) <= 0;
+                $now = Utils::now();
+                $this->cache[self::KEY_SHOW_FINAL_JURY] =
+                    Utils::difftime((float)$this->contest->getEndtime(), $now) <= 0;
+
                 // Show final scores if contest is over and unfreezetime has been
                 // reached, or if contest is over and no freezetime had been set.
                 $hasFreezeTime                     = $this->contest->getFreezetime() !== null;

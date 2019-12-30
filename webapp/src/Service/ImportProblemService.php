@@ -253,12 +253,14 @@ class ImportProblemService
                 }
 
                 if (isset($yamlData['validation'])
-                    && ($yamlData['validation'] == 'custom' || $yamlData['validation'] == 'custom interactive')) {
+                    && ($yamlData['validation'] == 'custom' ||
+                        $yamlData['validation'] == 'custom interactive')) {
                     // search for validator
                     $validatorFiles = [];
                     for ($j = 0; $j < $zip->numFiles; $j++) {
                         $filename = $zip->getNameIndex($j);
-                        if (Utils::startsWith($filename, 'output_validators/') && !Utils::endsWith($filename, '/')) {
+                        if (Utils::startsWith($filename, 'output_validators/') &&
+                            !Utils::endsWith($filename, '/')) {
                             $validatorFiles[] = $filename;
                         }
                     }
@@ -271,15 +273,16 @@ class ImportProblemService
                         foreach ($validatorFiles as $validatorFile) {
                             if (!Utils::startsWith($validatorFile, $validatorDir)) {
                                 $sameDir    = false;
-                                $messages[] = sprintf('%s does not start with %s.', $validatorFile,
-                                                      $validatorDir);
+                                $messages[] = sprintf('%s does not start with %s.',
+                                                      $validatorFile, $validatorDir);
                                 break;
                             }
                         }
                         if (!$sameDir) {
                             $messages[] = 'Found multiple custom output validators.';
                         } else {
-                            $tmpzipfiledir = exec("mktemp -d --tmpdir=" . $this->dj->getDomjudgeTmpDir(),
+                            $tmpzipfiledir = exec("mktemp -d --tmpdir=" .
+                                                  $this->dj->getDomjudgeTmpDir(),
                                                   $dontcare, $retval);
                             if ($retval != 0) {
                                 throw new ServiceUnavailableHttpException(null, 'failed to create temporary directory');
@@ -296,7 +299,8 @@ class ImportProblemService
                                 }
                             }
 
-                            exec("zip -r -j '$tmpzipfiledir/outputvalidator.zip' '$tmpzipfiledir'", $dontcare, $retval);
+                            exec("zip -r -j '$tmpzipfiledir/outputvalidator.zip' '$tmpzipfiledir'",
+                                 $dontcare, $retval);
                             if ($retval != 0) {
                                 throw new ServiceUnavailableHttpException(null,
                                     'failed to create zip file for output validator.');
@@ -390,7 +394,8 @@ class ImportProblemService
             $dataFiles = [];
             for ($j = 0; $j < $zip->numFiles; $j++) {
                 $filename = $zip->getNameIndex($j);
-                if (Utils::startsWith($filename, sprintf('data/%s/', $type)) && Utils::endsWith($filename, '.in')) {
+                if (Utils::startsWith($filename, sprintf('data/%s/', $type)) &&
+                    Utils::endsWith($filename, '.in')) {
                     $fileout  = preg_replace("/\.in$/", ".ans", $filename);
                     if ($zip->locateName($fileout) !== false) {
                         $basename = basename($filename, ".in");
@@ -413,14 +418,16 @@ class ImportProblemService
                             $messages[] = sprintf("reading '%s': %s", $imageFileName, $errormsg);
                             $imageFile  = false;
                         } elseif ($imageType !== ($imgExtension == 'jpg' ? 'jpeg' : $imgExtension)) {
-                            $messages[] = sprintf("extension of '%s' does not match type '%s'", $imageFileName,
-                                                  $imageType);
+                            $messages[] = sprintf("extension of '%s' does not match type '%s'",
+                                                  $imageFileName, $imageType);
                             $imageFile  = false;
                         } else {
                             $thumbnailSize = $this->dj->dbconfig_get('thumbnail_size', 128);
-                            $imageThumb    = Utils::getImageThumb($imageFile, $thumbnailSize,
-                                                                  $this->dj->getDomjudgeTmpDir(),
-                                                                  $errormsg);
+                            $imageThumb    = Utils::getImageThumb(
+                                $imageFile, $thumbnailSize,
+                                $this->dj->getDomjudgeTmpDir(),
+                                $errormsg
+                            );
                             if ($imageThumb === false) {
                                 $imageThumb = null;
                                 $messages[] = sprintf("reading '%s': %s", $imageFileName, $errormsg);
@@ -604,9 +611,10 @@ class ImportProblemService
                                 sprintf('Could not create temporary file in directory %s', $tmpDir));
                         }
                         if (file_put_contents($tempFileName, $source) === false) {
-                            throw new ServiceUnavailableHttpException(null,
-                                                                      sprintf("Could not write to temporary file '%s'.",
-                                                                              $tempFileName));
+                            throw new ServiceUnavailableHttpException(
+                                null,
+                                sprintf("Could not write to temporary file '%s'.", $tempFileName)
+                            );
                         }
                         $filesToSubmit[] = new UploadedFile($tempFileName, $files[$k], null, null, null, true);
                         $totalSize       += filesize($tempFileName);
@@ -644,10 +652,11 @@ class ImportProblemService
                                 'problem' => $problem,
                                 'contest' => $contest,
                             ]);
-                        $submission     = $this->submissionService->submitSolution($team, $contestProblem, $contest,
-                                                                                   $languageToUse, $filesToSubmit, null,
-                                                                                   $entry_point, null, null,
-                                                                                   $submissionMessage);
+                        $submission     = $this->submissionService->submitSolution(
+                            $team, $contestProblem, $contest, $languageToUse, $filesToSubmit,
+                            null, $entry_point, null, null, $submissionMessage
+                        );
+
                         if (!$submission) {
                             $messages[] = $submissionMessage;
                             return null;

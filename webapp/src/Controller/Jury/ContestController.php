@@ -496,8 +496,10 @@ class ContestController extends BaseController
 
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
                               $contest->getCid(), false);
-            return $this->redirect($this->generateUrl('jury_contest',
-                                                      ['contestId' => $contest->getcid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_contest',
+                ['contestId' => $contest->getcid()]
+            ));
         }
 
         $this->em->refresh($contest);
@@ -592,8 +594,10 @@ class ContestController extends BaseController
                 $this->saveEntity($this->em, $this->eventLogService, $this->dj, $contest,
                                   $contest->getCid(), true);
             });
-            return $this->redirect($this->generateUrl('jury_contest',
-                                                      ['contestId' => $contest->getcid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_contest',
+                ['contestId' => $contest->getcid()]
+            ));
         }
 
         return $this->render('jury/contest_add.html.twig', [

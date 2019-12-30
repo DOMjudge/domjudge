@@ -777,23 +777,23 @@ JS;
     public function showDiff(SubmissionFile $newFile, SubmissionFile $oldFile)
     {
         $newsourcefile = $this->submissionService->getSourceFilename([
-                                                                         'cid' => $newFile->getSubmission()->getCid(),
-                                                                         'submitid' => $newFile->getSubmitid(),
-                                                                         'teamid' => $newFile->getSubmission()->getTeamid(),
-                                                                         'probid' => $newFile->getSubmission()->getProbid(),
-                                                                         'langid' => $newFile->getSubmission()->getLangid(),
-                                                                         'rank' => $newFile->getRank(),
-                                                                         'filename' => $newFile->getFilename()
-                                                                     ]);
+            'cid' => $newFile->getSubmission()->getCid(),
+            'submitid' => $newFile->getSubmitid(),
+            'teamid' => $newFile->getSubmission()->getTeamid(),
+            'probid' => $newFile->getSubmission()->getProbid(),
+            'langid' => $newFile->getSubmission()->getLangid(),
+            'rank' => $newFile->getRank(),
+            'filename' => $newFile->getFilename()
+        ]);
         $oldsourcefile = $this->submissionService->getSourceFilename([
-                                                                         'cid' => $oldFile->getSubmission()->getCid(),
-                                                                         'submitid' => $oldFile->getSubmitid(),
-                                                                         'teamid' => $oldFile->getSubmission()->getTeamid(),
-                                                                         'probid' => $oldFile->getSubmission()->getProbid(),
-                                                                         'langid' => $oldFile->getSubmission()->getLangid(),
-                                                                         'rank' => $oldFile->getRank(),
-                                                                         'filename' => $oldFile->getFilename()
-                                                                     ]);
+            'cid' => $oldFile->getSubmission()->getCid(),
+            'submitid' => $oldFile->getSubmitid(),
+            'teamid' => $oldFile->getSubmission()->getTeamid(),
+            'probid' => $oldFile->getSubmission()->getProbid(),
+            'langid' => $oldFile->getSubmission()->getLangid(),
+            'rank' => $oldFile->getRank(),
+            'filename' => $oldFile->getFilename()
+        ]);
 
         require_once $this->dj->getDomjudgeEtcDir() . '/domserver-static.php';
 

@@ -95,15 +95,18 @@ class SubmissionController extends BaseController
                     $files = [$files];
                 }
                 $entryPoint = $form->get('entry_point')->getData() ?: null;
-                $submission = $this->submissionService->submitSolution($team, $problem->getProbid(), $contest,
-                                                                       $language, $files, null, $entryPoint, null, null,
-                                                                       $message);
+                $submission = $this->submissionService->submitSolution(
+                    $team, $problem->getProbid(), $contest, $language, $files,
+                    null, $entryPoint, null, null, $message
+                );
 
                 if ($submission) {
-                    $this->dj->auditlog('submission', $submission->getSubmitid(), 'added', 'via teampage',
-                                                     null, $contest->getCid());
-                    $this->addFlash('success',
-                                    '<strong>Submission done!</strong> Watch for the verdict in the list below.');
+                    $this->dj->auditlog('submission', $submission->getSubmitid(), 'added',
+                                        'via teampage', null, $contest->getCid());
+                    $this->addFlash(
+                        'success',
+                        '<strong>Submission done!</strong> Watch for the verdict in the list below.'
+                    );
                 } else {
                     $this->addFlash('danger', $message);
                 }
@@ -152,7 +155,8 @@ class SubmissionController extends BaseController
             ->getOneOrNullResult();
 
         // Update seen status when viewing submission
-        if ($judging && $judging->getSubmission()->getSubmittime() < $contest->getEndtime() && (!$verificationRequired || $judging->getVerified())) {
+        if ($judging && $judging->getSubmission()->getSubmittime() < $contest->getEndtime() &&
+            (!$verificationRequired || $judging->getVerified())) {
             $judging->setSeen(true);
             $this->em->flush();
         }

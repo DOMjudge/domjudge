@@ -342,8 +342,10 @@ class ExecutableController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $executable,
                               $executable->getExecid(), false);
-            return $this->redirect($this->generateUrl('jury_executable',
-                                                      ['execId' => $executable->getExecid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_executable',
+                ['execId' => $executable->getExecid()]
+            ));
         }
 
         $data       = [];

@@ -243,8 +243,10 @@ class TeamAffiliationController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation,
                               $teamAffiliation->getAffilid(), false);
-            return $this->redirect($this->generateUrl('jury_team_affiliation',
-                                                      ['affilId' => $teamAffiliation->getAffilid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_team_affiliation',
+                ['affilId' => $teamAffiliation->getAffilid()]
+            ));
         }
 
         return $this->render('jury/team_affiliation_edit.html.twig', [
@@ -292,8 +294,10 @@ class TeamAffiliationController extends BaseController
             $this->em->persist($teamAffiliation);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $teamAffiliation,
                               $teamAffiliation->getAffilid(), true);
-            return $this->redirect($this->generateUrl('jury_team_affiliation',
-                                                      ['affilId' => $teamAffiliation->getAffilid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_team_affiliation',
+                ['affilId' => $teamAffiliation->getAffilid()]
+            ));
         }
 
         return $this->render('jury/team_affiliation_add.html.twig', [

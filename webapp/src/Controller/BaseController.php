@@ -184,8 +184,10 @@ abstract class BaseController extends AbstractController
                         if ($count > 0) {
                             $parts              = explode('\\', $table);
                             $targetEntityType   = $parts[count($parts) - 1];
-                            $targetReadableType = str_replace('_', ' ',
-                                                              Inflector::tableize(Inflector::pluralize($targetEntityType)));
+                            $targetReadableType = str_replace(
+                                '_', ' ',
+                                Inflector::tableize(Inflector::pluralize($targetEntityType))
+                            );
 
                             switch ($constraint['type']) {
                                 case 'CASCADE':
@@ -196,11 +198,15 @@ abstract class BaseController extends AbstractController
                                         foreach ($dependentEntities as $dependentEntity) {
                                             $parts                       = explode('\\', $dependentEntity);
                                             $dependentEntityType         = $parts[count($parts) - 1];
-                                            $dependentEntitiesReadable[] = str_replace('_', ' ',
-                                                                                       Inflector::tableize(Inflector::pluralize($dependentEntityType)));
+                                            $dependentEntitiesReadable[] = str_replace(
+                                                '_', ' ',
+                                                Inflector::tableize(Inflector::pluralize($dependentEntityType))
+                                            );
                                         }
-                                        $message .= sprintf(', and possibly to dependent entities %s',
-                                                            implode(', ', $dependentEntitiesReadable));
+                                        $message .= sprintf(
+                                            ', and possibly to dependent entities %s',
+                                            implode(', ', $dependentEntitiesReadable)
+                                        );
                                     }
                                     $messages[] = $message;
                                     break;
@@ -239,12 +245,16 @@ abstract class BaseController extends AbstractController
                     // judging, not from testcase. Since MySQL does not define the
                     // order of cascading deletes, we need to manually first cascade
                     // via submission -> judging -> judging_run.
-                    $entityManager->getConnection()->executeQuery('DELETE FROM submission WHERE probid = :probid',
-                                                                  [':probid' => $entity->getProbid()]);
+                    $entityManager->getConnection()->executeQuery(
+                        'DELETE FROM submission WHERE probid = :probid',
+                        [':probid' => $entity->getProbid()]
+                    );
                     // Also delete internal errors that are "connected" to this problem.
                     $disabledJson = '{"kind":"problem","probid":' . $entity->getProbid() . '}';
-                    $entityManager->getConnection()->executeQuery('DELETE FROM internal_error WHERE disabled = :disabled',
-                        [':disabled' => $disabledJson]);
+                    $entityManager->getConnection()->executeQuery(
+                        'DELETE FROM internal_error WHERE disabled = :disabled',
+                        [':disabled' => $disabledJson]
+                    );
                     $entityManager->clear();
                     $entity = $entityManager->getRepository(Problem::class)->find($entity->getProbid());
                 }
@@ -260,14 +270,19 @@ abstract class BaseController extends AbstractController
             if ($entity instanceof Team) {
                 // No need to do this in a transaction, since the chance of a team
                 // with same ID being created at the same time is negligible.
-                $entityManager->getConnection()->executeQuery('DELETE FROM scorecache WHERE teamid = :teamid',
-                                                              [':teamid' => $entityId]);
-                $entityManager->getConnection()->executeQuery('DELETE FROM rankcache WHERE teamid = :teamid',
-                                                              [':teamid' => $entityId]);
+                $entityManager->getConnection()->executeQuery(
+                    'DELETE FROM scorecache WHERE teamid = :teamid',
+                    [':teamid' => $entityId]
+                );
+                $entityManager->getConnection()->executeQuery(
+                    'DELETE FROM rankcache WHERE teamid = :teamid',
+                    [':teamid' => $entityId]
+                );
             }
 
-            $this->addFlash('success', sprintf('Successfully deleted %s %s "%s"',
-                                                      $readableType, implode(', ', $primaryKeyData), $description));
+            $msg = sprintf('Successfully deleted %s %s "%s"',
+                           $readableType, implode(', ', $primaryKeyData), $description);
+            $this->addFlash('success', $msg);
             if ($request->isXmlHttpRequest()) {
                 return new JsonResponse(['url' => $redirectUrl]);
             } else {

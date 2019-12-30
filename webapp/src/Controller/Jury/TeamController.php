@@ -332,8 +332,9 @@ class TeamController extends BaseController
             $restrictionText = implode(', ', $restrictionTexts);
         }
         $restrictions['teamid'] = $teamId;
-        list($submissions, $submissionCounts) = $submissionService->getSubmissionList($this->dj->getCurrentContests(),
-                                                                                      $restrictions);
+        list($submissions, $submissionCounts) =
+            $submissionService->getSubmissionList($this->dj->getCurrentContests(), $restrictions);
+
         $data['restrictionText']    = $restrictionText;
         $data['submissions']        = $submissions;
         $data['submissionCounts']   = $submissionCounts;
@@ -372,8 +373,10 @@ class TeamController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team,
                               $team->getTeamid(), false);
-            return $this->redirect($this->generateUrl('jury_team',
-                                                      ['teamId' => $team->getTeamid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_team',
+                ['teamId' => $team->getTeamid()]
+            ));
         }
 
         return $this->render('jury/team_edit.html.twig', [
@@ -444,8 +447,10 @@ class TeamController extends BaseController
             $this->em->persist($team);
             $this->saveEntity($this->em, $this->eventLogService, $this->dj, $team,
                               $team->getTeamid(), true);
-            return $this->redirect($this->generateUrl('jury_team',
-                                                      ['teamId' => $team->getTeamid()]));
+            return $this->redirect($this->generateUrl(
+                'jury_team',
+                ['teamId' => $team->getTeamid()]
+            ));
         }
 
         return $this->render('jury/team_add.html.twig', [

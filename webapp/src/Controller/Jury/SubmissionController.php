@@ -125,8 +125,8 @@ class SubmissionController extends BaseController
         $limit = $viewTypes[$view] == 'newest' ? 50 : 0;
 
         /** @var Submission[] $submissions */
-        list($submissions, $submissionCounts) = $this->submissionService->getSubmissionList($contests, $restrictions,
-                                                                                            $limit);
+        list($submissions, $submissionCounts) =
+            $this->submissionService->getSubmissionList($contests, $restrictions, $limit);
 
         // Load preselected filters
         $filters          = $this->dj->jsonDecode((string)$this->dj->getCookie('domjudge_submissionsfilter') ?: '[]');
@@ -733,8 +733,10 @@ class SubmissionController extends BaseController
     {
         if (!$this->dj->getUser()->getTeam() || !$this->dj->checkrole('team')) {
             $this->addFlash('danger', 'You cannot re-submit code without being a team.');
-            return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl('jury_submission',
-                                                                                              ['submitId' => $submission->getSubmitid()]));
+            return $this->redirectToLocalReferrer($this->router, $request, $this->generateUrl(
+                'jury_submission',
+                ['submitId' => $submission->getSubmitid()]
+            ));
         }
 
         /** @var SubmissionFile[] $files */

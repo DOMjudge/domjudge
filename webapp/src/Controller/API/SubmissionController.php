@@ -224,9 +224,10 @@ class SubmissionController extends AbstractRestController
 
         // Now submit the solution
         $team       = $this->dj->getUser()->getTeam();
-        $submission = $this->submissionService->submitSolution($team, $problem, $problem->getContest(), $language,
-                                                               $files, null, $entryPoint, null, null, $message);
-
+        $submission = $this->submissionService->submitSolution(
+            $team, $problem, $problem->getContest(), $language,
+            $files, null, $entryPoint, null, null, $message
+        );
         if (!$submission) {
             throw new BadRequestHttpException($message);
         }

@@ -50,8 +50,9 @@ class ScoreboardController extends AbstractController
         $response   = new Response();
         $refreshUrl = $this->generateUrl('jury_scoreboard');
         $contest    = $this->dj->getCurrentContest();
-        $data       = $this->scoreboardService->getScoreboardTwigData($request, $response, $refreshUrl, true, false,
-                                                                      false, $contest);
+        $data       = $this->scoreboardService->getScoreboardTwigData(
+            $request, $response, $refreshUrl, true, false, false, $contest
+        );
 
         if ($request->isXmlHttpRequest()) {
             $data['current_contest'] = $contest;

@@ -244,11 +244,12 @@ class ContestController extends AbstractRestController
         $response->setCallback(function () use ($contest, $penalty_time) {
             echo "name:                     " . $contest->getName() . "\n";
             echo "short-name:               " . $contest->getExternalid() . "\n";
-            echo "start-time:               " . Utils::absTime($contest->getStarttime(), true) . "\n";
-            echo "duration:                 " . Utils::relTime($contest->getEndtime() - $contest->getStarttime(),
-                                                               true) . "\n";
-            echo "scoreboard-freeze-length: " . Utils::relTime($contest->getEndtime() - $contest->getFreezetime(),
-                                                               true) . "\n";
+            echo "start-time:               " .
+                Utils::absTime($contest->getStarttime(), true) . "\n";
+            echo "duration:                 " .
+                Utils::relTime($contest->getEndtime() - $contest->getStarttime(), true) . "\n";
+            echo "scoreboard-freeze-length: " .
+                Utils::relTime($contest->getEndtime() - $contest->getFreezetime(), true) . "\n";
             echo "penalty-time:             " . $penalty_time . "\n";
         });
         $response->headers->set('Content-Type', 'application/x-yaml');
@@ -352,9 +353,9 @@ class ContestController extends AbstractRestController
         if ($request->query->has('since_id')) {
             $since_id = $request->query->getInt('since_id');
             $event    = $this->em->getRepository(Event::class)->findOneBy([
-                                                                              'eventid' => $since_id,
-                                                                              'cid' => $contest->getCid(),
-                                                                          ]);
+                'eventid' => $since_id,
+                'cid' => $contest->getCid(),
+            ]);
             if ($event === null) {
                 return new Response('Invalid parameter "since_id" requested.', Response::HTTP_BAD_REQUEST);
             }

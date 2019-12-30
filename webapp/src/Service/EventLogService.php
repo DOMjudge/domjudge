@@ -164,8 +164,9 @@ class EventLogService implements ContainerAwareInterface
                 $entity    = Inflector::classify($singular);
                 $fullClass = sprintf('App\Entity\%s', $entity);
                 if (!class_exists($fullClass)) {
-                    throw new \BadMethodCallException(sprintf('Class \'%s\' does not exist',
-                                                              $fullClass));
+                    throw new \BadMethodCallException(
+                        sprintf('Class \'%s\' does not exist', $fullClass)
+                    );
                 }
                 $this->apiEndpoints[$endpoint][self::KEY_ENTITY] = $fullClass;
             }
