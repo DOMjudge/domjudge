@@ -122,19 +122,12 @@ class RejudgingService
         }
 
         // Get all submissions that we should consider
-        $queryBuilder = $this->em->createQueryBuilder()
+        $submissions = $this->em->createQueryBuilder()
             ->from(Submission::class, 's')
-            ->join('s.judgings', 'j')
-            ->select('s.submitid, s.cid, s.teamid, s.probid, j.judgingid, j.result')
-            ->andWhere('s.rejudging = :rejudging');
-        if ($action === self::ACTION_APPLY) {
-            $queryBuilder->andWhere('j.rejudging = :rejudging');
-        }
-        /** @var array $submissions */
-        $submissions = $queryBuilder
+            ->leftJoin('s.judgings', 'j', 'WITH', 'j.rejudging = :rejudging')
+            ->select('s.submitid, s.cid, s.teamid, s.probid, j.judgingid')
+            ->andWhere('s.rejudging = :rejudging')
             ->setParameter(':rejudging', $rejudging)
-            ->groupBy('s.submitid')
-            ->groupBy('j.judgingid')
             ->getQuery()
             ->getResult();
 
