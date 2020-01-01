@@ -750,18 +750,21 @@ class ProblemController extends BaseController
                     $inFile->getClientOriginalName(),  Utils::printsize($inFile->getSize()),
                     $outFile->getClientOriginalName(), Utils::printsize($outFile->getSize())
                 );
+                $haswarnings = false;
 
-                if ($newTestcaseContent->getOutput() > $outputLimit * 1024) {
+                if (strlen($newTestcaseContent->getOutput()) > $outputLimit * 1024) {
                     $message .= sprintf(
                         '<br><b>Warning: file size exceeds <code>output_limit</code> ' .
                         'of %s kB. This will always result in wrong answers!</b>',
                         $outputLimit
                     );
+                    $haswarnings = true;
                 }
 
                 if (empty($newTestcaseContent->getInput()) ||
                     empty($newTestcaseContent->getOutput())) {
                     $message .= '<br /><b>Warning: empty testcase file(s)!</b>';
+                    $haswarnings = true;
                 }
 
                 $messages[] = $message;
@@ -774,7 +777,7 @@ class ProblemController extends BaseController
                         return sprintf('<li>%s</li>', $message);
                     }, $messages)) . '</ul>';
 
-                $this->addFlash('info', $message);
+                $this->addFlash($haswarnings ? 'warning' : 'info', $message);
             }
             return $this->redirectToRoute('jury_problem_testcases', ['probId' => $probId]);
         }
