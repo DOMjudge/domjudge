@@ -2,8 +2,15 @@ DOMjudge Programming Contest Judging System
 
 Version 7.1.2 - DEV
 -------------------
+ - Fix for dj_setup_database for REST and API password files.
+ - API: only output test data count for jury members.
+ - Fix correct contest for AJAX requests and scoreboard progress bar.
  - Fix output limit check when uploading new testcases
    (thanks Irfan Sofyana Putra).
+ - Take into aacount unverified judgings when determining first to solve
+   if verification is required, and do not show First To Solve when the
+   problem has not been solved w.r.t. the restrictions.
+ - Clarify documentation.
 
 Version 7.1.1 - 20 October 2019
 -------------------------------
