@@ -21,7 +21,7 @@ import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
 
-copyright = '2004-2019 by the DOMjudge developers and contributors'
+copyright = '2004-2020 by the DOMjudge developers and contributors'
 author = 'DOMjudge Team'
 
 import os
