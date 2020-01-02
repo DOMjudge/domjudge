@@ -22,7 +22,6 @@ database schema. This means that if you run a DOMjudge version before
 7.0, you first need to complete an upgrade to 7.0 before upgrading to
 a newer version.
 
-If you have any active contests, it may be advisable to run
-"Refresh scoreboard cache" from the DOMjudge web interface after
-the upgrade.
+If you have any active contests, we recommend to run "Refresh
+scoreboard cache" from the DOMjudge web interface after the upgrade.
 

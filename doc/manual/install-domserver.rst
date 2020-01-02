@@ -16,20 +16,20 @@ System requirements
   DOMserver.
 * A TCP/IP network which connects the DOMserver and the judgehosts, and
   DOMjudge and the team workstations. All of these machines only need HTTP(S)
-  access to the DOMserver. 
+  access to the DOMserver.
 
 Software requirements
 `````````````````````
 * A web server with support for PHP >= 7.1.3 and the ``mysqli``, ``curl``, ``gd``,
-  ``mbstring, ``intl``, ``zip``, ``xml`` and ``json`` extensions for PHP.
+  ``mbstring``, ``intl``, ``zip``, ``xml`` and ``json`` extensions for PHP.
 * MySQL or MariaDB >= 5.3.3 database. This can be on the same machine, but for
   advanced setups can also run on a dedicated machine.
 * An NTP daemon, for keeping the clocks between jury system and team
   workstations in sync.
 
-For your convenience, the following command will install needed software on the
-DOMjudge server as mentioned above when using Debian GNU/Linux, or one of its
-derivate distributions like Ubuntu::
+For your convenience, the following command will install the necessary
+software on the DOMjudge server as mentioned above when using Debian
+GNU/Linux, or one of its derivative distributions like Ubuntu::
 
   sudo apt install zip unzip mariadb-server apache2 \
         php php-fpm php-cli \

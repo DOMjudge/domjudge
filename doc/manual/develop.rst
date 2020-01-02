@@ -85,8 +85,8 @@ all directories in ``SUBDIRS``. Moreover, a local variant of the
 target with ``-l`` appended is called after recursing into the
 subdirectories, so recursion is depth-first.
 
-The targets ``dist, clean, distclean, maintainer-clean`` are
-recursive by default, which means that these call their local
+The targets ``dist``, ``clean``, ``distclean``, ``maintainer-clean``
+are recursive by default, which means that these call their local
 ``-l`` variants in all directories containing a Makefile. This
 allows for true depth-first traversal, which is necessary to correctly
 run the ``*clean`` targets: otherwise e.g. ``paths.mk`` will
