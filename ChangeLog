@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.1.2 - DEV
--------------------
+Version 7.1.2 - 4 January 2020
+------------------------------
  - Fix for dj_setup_database for REST and API password files.
  - API: only output test data count for jury members.
  - Fix correct contest for AJAX requests and scoreboard progress bar.
