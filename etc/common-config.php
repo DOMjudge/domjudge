@@ -15,7 +15,7 @@ define('DEBUG_PHP_NOTICE', 1); // Display PHP notice level warnings
 define('DEBUG_SQL', 4); // Display SQL queries on webpages
 define('DEBUG_JUDGE', 8); // Display judging scripts debug info
 
-define('DEBUG', 0);
+define('DEBUG', 1);
 
 // By default report all PHP errors, except notices.
 error_reporting(E_ALL & ~E_NOTICE);
