@@ -16,9 +16,5 @@ cd /opt/domjudge/domserver
 
 export APP_ENV="test"
 
-# Symlink lib/vendor to vendor since the Symfony PHPUnit bridge
-# expects vendor packages to be there.
-ln -s lib/vendor vendor
-
 # Run phpunit tests.
-webapp/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --coverage-text --colors=never
+lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --coverage-text --colors=never
