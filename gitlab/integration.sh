@@ -61,7 +61,7 @@ EOF
 
 # start judgedaemon
 cd /opt/domjudge/judgehost/
-sudo -u domjudge bin/judgedaemon -n 0 &
+sudo -u domjudge bin/judgedaemon -n 0 | tee /tmp/judgedaemon.log &
 sleep 5
 
 # write out current log to learn why it might be broken
@@ -105,13 +105,20 @@ curl $CURLOPTS -c $COOKIEJAR -F "_csrf_token=$CSRFTOKEN" -F "_username=admin" -F
 curl $CURLOPTS -F "sendto=" -F "problem=2-" -F "bodytext=Testing" -F "submit=Send" \
 	 "http://localhost/domjudge/jury/clarifications/send" -o /dev/null
 
+# Don't spam the log.
+set +x
+
 while /bin/true; do
+	sleep 30s
 	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1" -o /dev/null
 	NUMNOTVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions checked" | sed -r 's/^.* ([0-9]+) submissions checked.*$/\1/')
 	NUMVERIFIED=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "submissions not checked" | sed -r 's/^.* ([0-9]+) submissions not checked.*$/\1/')
-	if [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
-		sleep 30s
-	else
+	# Check whether all submissions have been processed...
+	if [ $NUMSUBS -eq $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
+		break
+	fi
+	# ... or something has crashed.
+	if tail /tmp/judgedaemon.log | grep -q "No submissions in queue"; then
 		break
 	fi
 done
@@ -119,8 +126,9 @@ done
 NUMNOMAGIC=$(curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier" | grep "without magic string" | sed -r 's/^.* ([0-9]+) without magic string.*$/\1/')
 
 # include debug output here
-if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
-	echo "Exactly 2 submissions are expected to be unverified, but $NUMNOTVERIFIED are."
+if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ] || [ $NUMSUBS -gt $((NUMVERIFIED+NUMNOTVERIFIED)) ]; then
+	echo "verified subs: $NUMVERIFIED, unverified subs: $NUMNOTVERIFIED, total subs: $NUMSUBS"
+	echo "(expected 2 submissions to be unverified, but all to be processed)"
 	echo "Of these $NUMNOMAGIC do not have the EXPECTED_RESULTS string (should be 0)."
 	curl $CURLOPTS "http://localhost/domjudge/jury/judging-verifier?verify_multiple=1"
 	for i in /opt/domjudge/judgehost/judgings/*/*/*/compile.out; do
@@ -137,6 +145,12 @@ if [ $NUMNOTVERIFIED -ne 2 ] || [ $NUMNOMAGIC -ne 0 ]; then
 	done
 	cat /proc/cmdline
 	cat /chroot/domjudge/etc/apt/sources.list
+	echo -e "\nJudgedaemon log:"
+	cat /tmp/judgedaemon.log
+	echo -e "\nNginx log:"
+	cat /var/log/nginx/domjudge.log
+	echo -e "\nSymfony log:"
+	cat "$LOGFILE"
 	exit -1;
 fi
 
