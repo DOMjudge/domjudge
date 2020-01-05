@@ -17,4 +17,4 @@ cd /opt/domjudge/domserver
 export APP_ENV="test"
 
 # Run phpunit tests.
-lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --coverage-text --colors=never
+lib/vendor/bin/phpunit -c webapp/phpunit.xml.dist --log-junit ${CI_PROJECT_DIR}/unit-tests.xml --colors=never
