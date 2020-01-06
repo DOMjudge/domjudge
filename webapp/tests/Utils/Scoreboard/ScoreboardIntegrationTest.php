@@ -162,6 +162,7 @@ class ScoreboardTest extends KernelTestCase
     public function testScoreboardJuryFreeze()
     {
         $this->createDefaultSubmissions();
+        // Scoreboard cache is recalculated below for each freeze time.
 
         $expected_scores = [
             [ 'team' => $this->teams[0], 'rank' => 2, 'solved' => 0, 'time' => 0 ],
@@ -231,6 +232,8 @@ class ScoreboardTest extends KernelTestCase
         $this->createSubmission($lang, $this->problems[2], $team, 84*60+42, null);
         $this->createSubmission($lang, $this->problems[2], $team, 85*60+42, 'correct')
             ->setValid(false);
+
+        // No submissions for $this->teams[2]
     }
 
     function createSubmission(
