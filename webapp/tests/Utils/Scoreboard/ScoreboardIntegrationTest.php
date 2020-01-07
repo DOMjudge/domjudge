@@ -14,6 +14,8 @@ use App\Entity\TeamCategory;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use App\Utils\Scoreboard\Scoreboard;
+use App\Utils\Scoreboard\SingleTeamScoreboard;
+use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Scoreboard\TeamScore;
 
 use PHPUnit\Framework\TestCase;
@@ -153,9 +155,16 @@ class ScoreboardTest extends KernelTestCase
             [ 'team' => $this->teams[1], 'rank' => 1, 'solved' => 2, 'time' => 161 ],
         ];
 
+        $expected_fts = [
+            // problems[0] has earlier unjudged solution by teams[0]
+            [ 'problem' => $this->problems[1], 'team' => $this->teams[1] ],
+            // problems[2] solution by teams[1] is invalid
+        ];
+
         foreach ([ false, true ] as $jury) {
             $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
             $this->assertScoresMatch($expected_scores, $scoreboard);
+            $this->assertFTSMatch($expected_fts, $scoreboard);
         }
     }
 
@@ -169,6 +178,12 @@ class ScoreboardTest extends KernelTestCase
             [ 'team' => $this->teams[1], 'rank' => 1, 'solved' => 2, 'time' => 161 ],
         ];
 
+        $expected_fts = [
+            // problems[0] has earlier unjudged solution by teams[0]
+            [ 'problem' => $this->problems[1], 'team' => $this->teams[1] ],
+            // problems[2] solution by teams[1] is invalid
+        ];
+
         // Jury scoreboard should not depend on freeze, so test a couple.
         foreach ([ '+0:30:00', '+1:00:00', '+1:20:00' ] as $freeze) {
             $this->contest->setFreezetimeString($freeze);
@@ -176,6 +191,7 @@ class ScoreboardTest extends KernelTestCase
 
             $scoreboard = $this->ss->getScoreboard($this->contest, true);
             $this->assertScoresMatch($expected_scores, $scoreboard);
+            $this->assertFTSMatch($expected_fts, $scoreboard);
         }
     }
 
@@ -190,8 +206,35 @@ class ScoreboardTest extends KernelTestCase
             [ 'team' => $this->teams[1], 'rank' => 1, 'solved' => 1, 'time' => 69 ],
         ];
 
+        $expected_fts = [
+            // problems[0] has earlier unjudged solution by teams[0]
+            // problems[1] solution by teams[1] is after freeze
+            // problems[2] solution by teams[1] is invalid
+        ];
+
         $scoreboard = $this->ss->getScoreboard($this->contest, false);
         $this->assertScoresMatch($expected_scores, $scoreboard);
+        $this->assertFTSMatch($expected_fts, $scoreboard);
+    }
+
+    public function testTeamScoreboardFreezeFTS()
+    {
+        $this->contest->setFreezetimeString('+1:10:00');
+        $this->createDefaultSubmissions();
+        $this->recalcScoreCaches();
+
+        $expected_fts = [
+            // problems[0] has earlier unjudged solution by teams[0]
+            // problems[1] solution by teams[1] is after freeze
+            // problems[2] solution by teams[1] is invalid
+        ];
+
+        $team = $this->teams[1];
+
+        $scoreboard = $this->ss->getTeamScoreboard($this->contest, $team->getTeamid(), false);
+
+        $this->assertInstanceOf(SingleTeamScoreboard::class, $scoreboard);
+        $this->assertFTSMatch($expected_fts, $scoreboard);
     }
 
     function assertScoresMatch($expected_scores, $scoreboard)
@@ -209,6 +252,34 @@ class ScoreboardTest extends KernelTestCase
             $this->assertEquals($row['solved'], $score->getNumberOfPoints(), "# solved for '$name'");
             $this->assertEquals($row['time'],   $score->getTotalTime(), "Total time for '$name'");
         }
+    }
+
+    function assertFTSMatch($expected_fts, $scoreboard)
+    {
+        $matrix = $scoreboard->getMatrix();
+        $teams = [];
+        $probs = [];
+        foreach ($scoreboard->getTeams()    as $team) $teams[$team->getTeamid()] = $team;
+        foreach ($scoreboard->getProblems() as $prob) $probs[$prob->getProbid()] = $prob;
+
+        $fts_probid2teamid = [];
+        foreach ($expected_fts as $row) {
+            $fts_probid2teamid[$row['problem']->getProbid()] = $row['team']->getTeamid();
+        }
+
+        foreach ($matrix as $teamid => $row) {
+            $teamname = $teams[$teamid]->getName();
+            foreach ($row as $probid => $item) {
+                $probname = $probs[$probid]->getShortname();
+
+                $this->assertInstanceOf(ScoreboardMatrixItem::class, $item);
+
+                $expected = (@$fts_probid2teamid[$probid] === $teamid);
+                $this->assertEquals($expected, $item->isFirst(),
+                                    "Check FTS matches for team $teamname, problem $probname");
+            }
+        }
+
     }
 
     function recalcScoreCaches()
@@ -276,7 +347,9 @@ class ScoreboardTest extends KernelTestCase
             }
             $this->em->persist($judging);
 
-            $submission->addJudging($judging);
+            $submission
+                ->addJudging($judging)
+                ->setJudgehost($this->judgehost);
         }
 
         $this->em->flush();
