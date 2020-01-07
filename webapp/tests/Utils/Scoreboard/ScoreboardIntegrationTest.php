@@ -155,7 +155,7 @@ class ScoreboardTest extends KernelTestCase
 
         foreach ([ false, true ] as $jury) {
             $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
-            $this->assertScoresMatch($expected_scores, $scoreboard->getScores());
+            $this->assertScoresMatch($expected_scores, $scoreboard);
         }
     }
 
@@ -175,7 +175,7 @@ class ScoreboardTest extends KernelTestCase
             $this->recalcScoreCaches();
 
             $scoreboard = $this->ss->getScoreboard($this->contest, true);
-            $this->assertScoresMatch($expected_scores, $scoreboard->getScores());
+            $this->assertScoresMatch($expected_scores, $scoreboard);
         }
     }
 
@@ -191,11 +191,13 @@ class ScoreboardTest extends KernelTestCase
         ];
 
         $scoreboard = $this->ss->getScoreboard($this->contest, false);
-        $this->assertScoresMatch($expected_scores, $scoreboard->getScores());
+        $this->assertScoresMatch($expected_scores, $scoreboard);
     }
 
-    function assertScoresMatch($expected_scores, $scores)
+    function assertScoresMatch($expected_scores, $scoreboard)
     {
+        $scores = $scoreboard->getScores();
+
         foreach ( $expected_scores as $row ) {
             $team = $row['team'];
             $name = $team->getName();
