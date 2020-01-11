@@ -29,6 +29,11 @@ class CheckConfigService
     protected $em;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var DOMJudgeService
      */
     protected $dj;
@@ -56,6 +61,7 @@ class CheckConfigService
     public function __construct(
         bool $debug,
         EntityManagerInterface $em,
+        ConfigurationService $config,
         DOMJudgeService $dj,
         EventLogService $eventLogService,
         RouterInterface $router,
@@ -63,6 +69,7 @@ class CheckConfigService
     ) {
         $this->debug           = $debug;
         $this->em              = $em;
+        $this->config          = $config;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
         $this->router          = $router;
@@ -159,7 +166,7 @@ class CheckConfigService
 
     public function checkPhpSettings()
     {
-        $sourcefiles_limit = $this->config->get('sourcefiles_limit', 100);
+        $sourcefiles_limit = $this->config->get('sourcefiles_limit');
         $max_files = ini_get('max_file_uploads');
 
         /* PHP will silently discard any files above the max_file_uploads limit,
