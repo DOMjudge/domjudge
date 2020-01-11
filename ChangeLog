@@ -1,7 +1,7 @@
 DOMjudge Programming Contest Judging System
 
-Version 7.0.5 - DEV
--------------------
+Version 7.0.5 - 11 January 2020
+-------------------------------
  - Fix output limit check when uploading new testcases
    (thanks Irfan Sofyana Putra).
  - API: only output test data count for jury members.
