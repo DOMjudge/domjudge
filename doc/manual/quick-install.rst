@@ -9,7 +9,7 @@ Appendix: Quick installation checklist
   consult the full installation instruction.
 
 DOMserver
-`````````
+---------
  * Install the MySQL- or MariaDB-server and set a root password for it.
  * Install either nginx or Apache and PHP.
  * Make sure PHP works for the web server and command line scripts.
@@ -47,7 +47,7 @@ DOMserver
  * Run the config checker in the jury web interface.
 
 Judgehosts
-``````````
+----------
  * Extract the source tarball and run
    ``./configure --with-baseurl=<url> && make judgehost``.
  * Run ``sudo make install-judgehost`` to install the system.
@@ -66,7 +66,7 @@ Judgehosts
  * Start the judge daemon: ``bin/judgedaemon``
 
 Checking if it works
-````````````````````
+--------------------
 It should be done by now. As a check that (almost) everything works,
 the set of test sources can be submitted on the DOMserver::
 

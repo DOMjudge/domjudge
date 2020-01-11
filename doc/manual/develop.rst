@@ -4,7 +4,7 @@ Development
 .. _API:
 
 API
-```
+---
 DOMjudge comes with a fully featured REST API. It is based on the
 `CCS Contest API specification
 <https://clics.ecs.baylor.edu/index.php?title=Contest_API>`_
@@ -20,7 +20,7 @@ compatible JSON file, which can be found at
 
 
 Bootstrapping from Git repository sources
-`````````````````````````````````````````
+-----------------------------------------
 The installation steps in this document assume that you are using a
 downloaded tarball from the DOMjudge website. If you want to install
 from Git repository sources, because you want to use the bleeding edge
@@ -44,7 +44,7 @@ downloads and installs the PHP dependencies via composer and
 generates documentation from RST/LaTeX sources.
 
 Maintainer mode installation
-````````````````````````````
+----------------------------
 DOMjudge provides a special maintainer mode installation.
 This method does an in-place installation within the source
 tree. This allows one to immediately see effects when modifying
@@ -75,7 +75,7 @@ exists) are loaded when you run the unit tests. You can thus place any
 test-specific settings in there.
 
 Makefile structure
-``````````````````
+------------------
 The Makefiles in the source tree use a recursion mechanism to run make
 targets within the relevant subdirectories. The recursion is handled
 by the ``REC_TARGETS`` and ``SUBDIRS`` variables and the
