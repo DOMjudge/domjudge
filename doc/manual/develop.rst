@@ -36,7 +36,8 @@ install the additionally required packages::
   sudo apt install autoconf automake \
     python3-sphinx python3-sphinx-rtd-theme \
     texlive-latex-recommended texlive-latex-extra \
-    texlive-fonts-recommended texlive-lang-european
+    texlive-fonts-recommended texlive-lang-european \
+    libcgroup-dev libcurl4-openssl-dev libjsoncpp-dev
 
 When this software is present, bootstrapping can be done by running
 ``make dist``, which creates the ``configure`` script,
