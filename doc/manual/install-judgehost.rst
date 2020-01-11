@@ -4,6 +4,8 @@ Installation of the judgehosts
 A DOMjudge installation requires one or more judgehosts which will perform
 the actual compilation and evaluation of submissions.
 
+.. _judgehost_requirements:
+
 Requirements
 ------------
 

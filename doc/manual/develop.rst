@@ -31,7 +31,11 @@ This requires the GNU autoconf/automake toolset to be installed,
 and various tools to build the documentation.
 
 On Debian(-based) systems, the following apt command should
-install the additionally required packages::
+install the packages that are required (additionally to the ones
+already listed under
+:ref:`domserver <domserver_requirements>`,
+:ref:`judgehost <judgehost_requirements>` and
+:ref:`submit client <submit_client_requirements>` requirements)::
 
   sudo apt install autoconf automake \
     python3-sphinx python3-sphinx-rtd-theme \
