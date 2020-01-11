@@ -60,10 +60,10 @@ system.
 
 
 The team manual requires a working LaTeX installation and some packages
-available in the `texlive-latex-extra` package in any modern Linux
+included in the `texlive-latex-extra` package in any modern Linux
 distribution.
 
-When DOMjudge is configure and site-specific
+When DOMjudge is configured and site-specific
 configuration set, the team manual can be generated with the command
 `genteammanual` found under `docs/team`. The PDF
 document will be placed in the current
