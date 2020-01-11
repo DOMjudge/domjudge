@@ -93,24 +93,13 @@ class ConfigurationService
      */
     public function get(string $name, bool $onlyIfPublic = false)
     {
-        $spec    = $this->getConfigSpecification()[$name] ?? null;
-        $dbValue = $this->getDbValues()[$name] ?? null;
+        $spec = $this->getConfigSpecification()[$name];
 
-        if (isset($spec)) {
-            if ($onlyIfPublic && !$spec['public']) {
-                // If we require public values and the spec is not public,
-                // set the value from the DB to null to not have a value
-                $dbValue = null;
-            }
-        }
-
-        if (isset($dbValue)) {
-            return $dbValue;
-        } elseif (!array_key_exists('default_value', $spec)) {
+        if (!isset($spec) || ($onlyIfPublic && !$spec['public'])) {
             throw new Exception("Configuration variable '$name' not found.");
-        } else {
-            return $spec['default_value'];
         }
+
+        return $this->getDbValues()[$name] ?? $spec['default_value'];
     }
 
     /**
@@ -126,22 +115,20 @@ class ConfigurationService
         $specs  = $this->getConfigSpecification();
         $result = [];
         foreach ($specs as $name => $spec) {
-            if (!$onlyIfPublic || $spec['public']) {
+            if ($spec['public'] || !$onlyIfPublic) {
                 $result[$name] = $spec['default_value'];
             }
         }
 
         foreach ($this->getDbValues() as $name => $value) {
-            if (!isset($result[$name])) {
+            // Don't potentially leak information to public logging:
+            if (!isset($specs[$name]) && !$onlyIfPublic) {
                 $this->logger->warning(
                     'Configuration value %s not defined', [$name]
                 );
-                continue;
             }
-            if (!$onlyIfPublic ||
-                (isset($specs[$name]) && $specs[$name]['public'])) {
-                $result[$name] = $value;
-            }
+            // $result[$name] exists iff it should be visible.
+            if (isset($result[$name])) $result[$name] = $value;
         }
 
         return $result;
