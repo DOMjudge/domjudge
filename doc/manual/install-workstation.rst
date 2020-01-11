@@ -12,6 +12,8 @@ convenient to teams if the URL of DOMjudge is set as the default homepage,
 and if using a self-signed HTTPS certificate, that the browser is made
 to trust this certificate.
 
+.. _submit_client_requirements:
+
 Command line submit client
 --------------------------
 DOMjudge comes with a command line submit client which makes it really

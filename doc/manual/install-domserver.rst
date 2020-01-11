@@ -4,6 +4,8 @@ Installation of the DOMserver
 The DOMjudge server is the central entity that runs the DOMjudge web interface
 and API that teams, jury members and the judgehosts connect to.
 
+.. _domserver_requirements:
+
 Requirements
 ------------
 
