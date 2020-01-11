@@ -4,6 +4,11 @@ Version 7.0.5 - DEV
 -------------------
  - Fix output limit check when uploading new testcases
    (thanks Irfan Sofyana Putra).
+ - API: only output test data count for jury members.
+ - Do not show First To Solve when the problem has not been solved
+   w.r.t. the restrictions.
+ - Fix balloon page when we do not have award info.
+ - Clarify documentation.
 
 Version 7.0.4 - 25 September 2019
 ---------------------------------
