@@ -362,7 +362,7 @@ class EventLogService implements ContainerAwareInterface
         // Generate JSON content if not set, for deletes this is only the ID.
         if ($action === self::ACTION_DELETE) {
             $json = array_values(array_map(function ($id) {
-                return ['id' => $id];
+                return ['id' => (string)$id];
             }, $ids));
         } elseif ($json === null) {
             $url = $endpoint[self::KEY_URL];
@@ -631,7 +631,7 @@ class EventLogService implements ContainerAwareInterface
             if ($endpointType === 'state') {
                 $event->setAction(self::ACTION_UPDATE);
             } else {
-                // Set the action basd on whether there was already an event
+                // Set the action based on whether there was already an event
                 // for the same endpoint and ID
                 $event->setAction(
                     $existingEvent === null ?
