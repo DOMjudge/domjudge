@@ -698,7 +698,7 @@ class ProblemController extends BaseController
                                    $inFile->getClientOriginalName(), Utils::printsize($inFile->getSize()),
                                    $outFile->getClientOriginalName(), Utils::printsize($outFile->getSize()));
 
-                if ($newTestcase->getOutput() > $outputLimit * 1024) {
+                if (strlen($newTestcase->getOutput()) > $outputLimit * 1024) {
                     $message .= sprintf('<br><b>Warning: file size exceeds <code>output_limit</code> of %s kB. This will always result in wrong answers!</b>',
                                         $outputLimit);
                 }
