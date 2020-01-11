@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\Entity\Submission;
 use App\Entity\TeamCategory;
 use App\Form\Type\TeamCategoryType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
@@ -35,6 +36,11 @@ class TeamCategoryController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
@@ -46,19 +52,23 @@ class TeamCategoryController extends BaseController
 
     /**
      * TeamCategoryController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->config          = $config;
         $this->eventLogService = $eventLogService;
         $this->kernel          = $kernel;
     }
@@ -170,7 +180,7 @@ class TeamCategoryController extends BaseController
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
             'showContest' => count($this->dj->getCurrentContests()) > 1,
-            'showExternalResult' => $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) ==
+            'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'refresh' => [
                 'after' => 15,

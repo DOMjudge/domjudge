@@ -136,6 +136,11 @@ class EventLogService implements ContainerAwareInterface
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EntityManagerInterface
      */
     protected $em;
@@ -147,10 +152,12 @@ class EventLogService implements ContainerAwareInterface
 
     public function __construct(
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EntityManagerInterface $em,
         LoggerInterface $logger
     ) {
         $this->dj     = $dj;
+        $this->config = $config;
         $this->em     = $em;
         $this->logger = $logger;
 
@@ -912,8 +919,7 @@ class EventLogService implements ContainerAwareInterface
         if ($endpointData[self::KEY_ALWAYS_USE_EXTERNAL_ID] ?? false) {
             $lookupExternalid = true;
         } else {
-            $dataSource = $this->dj->dbconfig_get('data_source',
-                                                  DOMJudgeService::DATA_SOURCE_LOCAL);
+            $dataSource = $this->config->get('data_source');
 
             if ($dataSource !== DOMJudgeService::DATA_SOURCE_LOCAL) {
                 $endpointType = $endpointData[self::KEY_TYPE];

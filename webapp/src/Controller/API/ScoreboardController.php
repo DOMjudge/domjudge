@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\Entity\Contest;
 use App\Entity\Event;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
@@ -35,18 +36,21 @@ class ScoreboardController extends AbstractRestController
 
     /**
      * ScoreboardController constructor.
+     *
      * @param EntityManagerInterface $entityManager
      * @param DOMJudgeService        $DOMJudgeService
+     * @param ConfigurationService   $config
      * @param EventLogService        $eventLogService
      * @param ScoreboardService      $scoreboardService
      */
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
+        parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
         $this->scoreboardService = $scoreboardService;
     }
 
@@ -144,7 +148,7 @@ class ScoreboardController extends AbstractRestController
         // Return early if there's nothing to display yet.
         if (!$scoreboard) return $results;
 
-        $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
+        $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
 
         foreach ($scoreboard->getScores() as $teamScore) {
             $row = [

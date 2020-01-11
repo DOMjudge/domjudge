@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\Entity\Judging;
 use App\Helpers\JudgingWrapper;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,9 +34,10 @@ class JudgementController extends AbstractRestController implements QueryObjectT
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
+        ConfigurationService $config,
         EventLogService $eventLogService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
+        parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
 
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $this->verdicts = include $verdictsConfig;
@@ -153,7 +155,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
             $queryBuilder
                 ->andWhere('s.submittime < c.endtime')
                 ->andWhere('j.valid = 1');
-            if ($this->dj->dbconfig_get('verification_required', false)) {
+            if ($this->config->get('verification_required')) {
                 $queryBuilder->andWhere('j.verified = 1');
             }
         }

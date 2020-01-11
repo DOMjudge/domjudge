@@ -4,6 +4,7 @@ namespace App\Controller\API;
 
 use App\Entity\JudgingRun;
 use App\Helpers\JudgingRunWrapper;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,9 +31,14 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      */
     protected $verdicts;
 
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $DOMJudgeService, EventLogService $eventLogService)
-    {
-        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $DOMJudgeService,
+        ConfigurationService $config,
+        EventLogService $eventLogService
+    ) {
+        parent::__construct($entityManager, $DOMJudgeService, $config,
+            $eventLogService);
 
         $verdictsConfig = $this->dj->getDomjudgeEtcDir() . '/verdicts.php';
         $this->verdicts = include $verdictsConfig;
@@ -157,7 +163,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
             $queryBuilder
                 ->andWhere('s.submittime < c.endtime')
                 ->andWhere('j.rejudgingid IS NULL OR j.valid = 1');
-            if ($this->dj->dbconfig_get('verification_required', false)) {
+            if ($this->config->get('verification_required')) {
                 $queryBuilder->andWhere('j.verified = 1');
             }
         }

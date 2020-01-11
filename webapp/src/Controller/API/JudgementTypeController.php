@@ -104,7 +104,7 @@ class JudgementTypeController extends AbstractRestController
                 $solved  = true;
             }
             if ($name == 'compiler-error') {
-                $penalty = $this->dj->dbconfig_get('compile_penalty', false);
+                $penalty = $this->config->get('compile_penalty');
             }
             if ($filteredOn !== null && !in_array($label, $filteredOn)) {
                 continue;

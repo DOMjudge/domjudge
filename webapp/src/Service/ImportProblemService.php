@@ -44,6 +44,11 @@ class ImportProblemService
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var SubmissionService
      */
     protected $submissionService;
@@ -62,6 +67,7 @@ class ImportProblemService
         EntityManagerInterface $em,
         LoggerInterface $logger,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         SubmissionService $submissionService,
         ValidatorInterface $validator
@@ -69,6 +75,7 @@ class ImportProblemService
         $this->em                = $em;
         $this->logger            = $logger;
         $this->dj                = $dj;
+        $this->config            = $config;
         $this->eventLogService   = $eventLogService;
         $this->submissionService = $submissionService;
         $this->validator         = $validator;
@@ -422,7 +429,7 @@ class ImportProblemService
                                                   $imageFileName, $imageType);
                             $imageFile  = false;
                         } else {
-                            $thumbnailSize = $this->dj->dbconfig_get('thumbnail_size', 128);
+                            $thumbnailSize = $this->config->get('thumbnail_size');
                             $imageThumb    = Utils::getImageThumb(
                                 $imageFile, $thumbnailSize,
                                 $this->dj->getDomjudgeTmpDir(),
@@ -604,7 +611,7 @@ class ImportProblemService
                         $source = $zip->getFromIndex($indices[$k]);
                         if ($results === null) {
                             $results = SubmissionService::getExpectedResults($source,
-                                $this->dj->dbconfig_get('results_remap', []));
+                                $this->config->get('results_remap'));
                         }
                         if (!($tempFileName = tempnam($tmpDir, 'ref_solution-'))) {
                             throw new ServiceUnavailableHttpException(null,
@@ -643,7 +650,7 @@ class ImportProblemService
                     if (isset($submission_details[$path]['entry_point'])) {
                         $entry_point = $submission_details[$path]['entry_point'];
                     }
-                    if ($totalSize <= $this->dj->dbconfig_get('sourcesize_limit') * 1024) {
+                    if ($totalSize <= $this->config->get('sourcesize_limit') * 1024) {
                         $contest        = $this->em->getRepository(Contest::class)->find(
                             $contest->getCid());
                         $team           = $this->em->getRepository(Team::class)->find($jury_team_id);

@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\Entity\User;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
@@ -35,10 +36,20 @@ class UserController extends AbstractRestController
     protected $importExportService;
 
     /**
+     * @param EntityManagerInterface $entityManager
+     * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
+     * @param EventLogService        $eventLogService
      * @param ImportExportService    $importExportService
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj, EventLogService $eventLogService, ImportExportService $importExportService) {
-        parent::__construct($entityManager, $dj, $eventLogService);
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EventLogService $eventLogService,
+        ImportExportService $importExportService
+    ) {
+        parent::__construct($entityManager, $dj, $config, $eventLogService);
         $this->importExportService = $importExportService;
     }
 

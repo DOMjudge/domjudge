@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\Entity\Clarification;
 use App\Entity\Problem;
 use App\Form\Type\TeamClarificationType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
@@ -36,6 +37,11 @@ class ClarificationController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EntityManagerInterface
      */
     protected $em;
@@ -52,11 +58,13 @@ class ClarificationController extends BaseController
 
     public function __construct(
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EntityManagerInterface $em,
         EventLogService $eventLogService,
         FormFactoryInterface $formFactory
     ) {
         $this->dj              = $dj;
+        $this->config          = $config;
         $this->em              = $em;
         $this->eventLogService = $eventLogService;
         $this->formFactory     = $formFactory;
@@ -72,7 +80,7 @@ class ClarificationController extends BaseController
      */
     public function viewAction(Request $request, int $clarId)
     {
-        $categories = $this->dj->dbconfig_get('clar_categories');
+        $categories = $this->config->get('clar_categories');
         $user       = $this->dj->getUser();
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
@@ -123,7 +131,7 @@ class ClarificationController extends BaseController
                 $category = $problemId;
             } else {
                 $problem = $this->em->getRepository(Problem::class)->find($problemId);
-                $queue   = $this->dj->dbconfig_get('clar_default_problem_queue');
+                $queue   = $this->config->get('clar_default_problem_queue');
                 if ($queue === "") {
                     $queue = null;
                 }
@@ -192,7 +200,7 @@ class ClarificationController extends BaseController
      */
     public function addAction(Request $request)
     {
-        $categories = $this->dj->dbconfig_get('clar_categories');
+        $categories = $this->config->get('clar_categories');
         $user       = $this->dj->getUser();
         $team       = $user->getTeam();
         $contest    = $this->dj->getCurrentContest($team->getTeamid());
@@ -216,7 +224,7 @@ class ClarificationController extends BaseController
                 $category = $problemId;
             } else {
                 $problem = $this->em->getRepository(Problem::class)->find($problemId);
-                $queue   = $this->dj->dbconfig_get('clar_default_problem_queue');
+                $queue   = $this->config->get('clar_default_problem_queue');
                 if ($queue === "") {
                     $queue = null;
                 }

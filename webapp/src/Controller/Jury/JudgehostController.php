@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\Entity\Judgehost;
 use App\Entity\Judging;
 use App\Form\Type\JudgehostsType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,23 +37,32 @@ class JudgehostController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
 
     /**
      * JudgehostController constructor.
+     *
      * @param EntityManagerInterface $em
-     * @param DOMJudgeService $dj
-     * @param KernelInterface $kernel
+     * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
+     * @param KernelInterface        $kernel
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         KernelInterface $kernel
     ) {
-        $this->em = $em;
-        $this->dj = $dj;
+        $this->em     = $em;
+        $this->dj     = $dj;
+        $this->config = $config;
         $this->kernel = $kernel;
     }
 
@@ -106,8 +116,8 @@ class JudgehostController extends BaseController
         $workcontest = $map($workcontest);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        $time_warn = $this->dj->dbconfig_get('judgehost_warning', 30);
-        $time_crit = $this->dj->dbconfig_get('judgehost_critical', 120);
+        $time_warn = $this->config->get('judgehost_warning');
+        $time_crit = $this->config->get('judgehost_critical');
         $judgehosts_table = [];
         foreach ($judgehosts as $judgehost) {
             $judgehostdata    = [];
@@ -251,9 +261,9 @@ class JudgehostController extends BaseController
         }
 
         $reltime = floor(Utils::difftime(Utils::now(), (float)$judgehost->getPolltime()));
-        if ($reltime < $this->dj->dbconfig_get('judgehost_warning', 30)) {
+        if ($reltime < $this->config->get('judgehost_warning')) {
             $status = 'OK';
-        } elseif ($reltime < $this->dj->dbconfig_get('judgehost_critical', 120)) {
+        } elseif ($reltime < $this->config->get('judgehost_critical')) {
             $status = 'Warning';
         } else {
             $status = 'Critical';

@@ -10,6 +10,7 @@ use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Form\Type\RejudgingType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\RejudgingService;
 use App\Service\ScoreboardService;
@@ -47,6 +48,11 @@ class RejudgingController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var RouterInterface
      */
     protected $router;
@@ -59,11 +65,13 @@ class RejudgingController extends BaseController
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         RouterInterface $router,
         SessionInterface $session
     ) {
         $this->em      = $em;
         $this->dj      = $dj;
+        $this->config  = $config;
         $this->router  = $router;
         $this->session = $session;
     }
@@ -97,7 +105,7 @@ class RejudgingController extends BaseController
             'status' => ['title' => 'status', 'sort' => true],
         ];
 
-        $timeFormat       = (string)$this->dj->dbconfig_get('time_format', '%H:%M');
+        $timeFormat       = (string)$this->config->get('time_format');
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $rejudgings_table = [];
         foreach ($rejudgings as $rejudging) {
@@ -349,7 +357,7 @@ class RejudgingController extends BaseController
             'submissionCounts' => $submissionCounts,
             'oldverdict' => $request->query->get('oldverdict', 'all'),
             'newverdict' => $request->query->get('newverdict', 'all'),
-            'showExternalResult' => $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) ==
+            'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'refresh' => [
                 'after' => 15,

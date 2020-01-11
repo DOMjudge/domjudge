@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
+use App\Entity\ExternalJudgement;
 use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\RankCache;
@@ -15,13 +16,12 @@ use App\Entity\TeamCategory;
 use App\Utils\FreezeData;
 use App\Utils\Scoreboard\Filter;
 use App\Utils\Scoreboard\Scoreboard;
+use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\TeamScore;
 use App\Utils\Utils;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use App\Entity\ExternalJudgement;
-use App\Utils\Scoreboard\SingleTeamScoreboard;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,6 +46,11 @@ class ScoreboardService
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var LoggerInterface
      */
     protected $logger;
@@ -57,19 +62,23 @@ class ScoreboardService
 
     /**
      * ScoreboardService constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param LoggerInterface        $logger
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         LoggerInterface $logger,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->config          = $config;
         $this->logger          = $logger;
         $this->eventLogService = $eventLogService;
     }
@@ -107,8 +116,8 @@ class ScoreboardService
         return new Scoreboard(
             $contest, $teams, $categories, $problems,
             $scoreCache, $freezeData, $jury,
-            (int)$this->dj->dbconfig_get('penalty_time', 20),
-            (bool)$this->dj->dbconfig_get('score_in_seconds', false)
+            (int)$this->config->get('penalty_time'),
+            (bool)$this->config->get('score_in_seconds')
         );
     }
 
@@ -140,8 +149,8 @@ class ScoreboardService
         return new SingleTeamScoreboard(
             $contest, $team, $teamRank, $problems,
             $rankCache, $scoreCache, $freezeData, $showFtsInFreeze,
-            (int)$this->dj->dbconfig_get('penalty_time', 20),
-            (bool)$this->dj->dbconfig_get('score_in_seconds', false)
+            (int)$this->config->get('penalty_time'),
+            (bool)$this->config->get('score_in_seconds')
         );
     }
 
@@ -252,7 +261,7 @@ class ScoreboardService
                 foreach ($tiedScores as $tiedScore) {
                     $teamScores[$tiedScore->getTeam()->getTeamid()]->addSolveTime(Utils::scoretime(
                         $tiedScore->getSolveTime($restricted),
-                        (bool)$this->dj->dbconfig_get('score_in_seconds', false)
+                        (bool)$this->config->get('score_in_seconds')
                     ));
                 }
 
@@ -313,7 +322,7 @@ class ScoreboardService
         // Determine whether we will use external judgements instead of judgings
         $localSource           = DOMJudgeService::DATA_SOURCE_LOCAL;
         $shadow                = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
-        $useExternalJudgements = $this->dj->dbconfig_get('data_source', $localSource) == $shadow;
+        $useExternalJudgements = $this->config->get('data_source') == $shadow;
 
         // Note the clause 's.submittime < c.endtime': this is used to
         // filter out TOO-LATE submissions from pending, but it also means
@@ -345,12 +354,12 @@ class ScoreboardService
         }
 
         // Check if we need to count compile error as a penalty.
-        $compilePenalty = $this->dj->dbconfig_get('compile_penalty', true);
+        $compilePenalty = $this->config->get('compile_penalty');
 
         /** @var Submission[] $submissions */
         $submissions = $queryBuilder->getQuery()->getResult();
 
-        $verificationRequired = $this->dj->dbconfig_get('verification_required', false);
+        $verificationRequired = $this->config->get('verification_required');
 
         // Initialize variables.
         $submissionsJury = $pendingJury = $timeJury = 0;
@@ -565,8 +574,8 @@ class ScoreboardService
             $totalTime[$variant] = $team->getPenalty();
         }
 
-        $penaltyTime      = (int) $this->dj->dbconfig_get('penalty_time', 20);
-        $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
+        $penaltyTime      = (int) $this->config->get('penalty_time');
+        $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
 
         // Now fetch the ScoreCache entries.
         /** @var ScoreCache[] $scoreCacheRows */
@@ -852,8 +861,8 @@ class ScoreboardService
             'countries' => [],
             'categories' => [],
         ];
-        $showFlags        = $this->dj->dbconfig_get('show_flags', true);
-        $showAffiliations = $this->dj->dbconfig_get('show_affiliations', true);
+        $showFlags        = $this->config->get('show_flags');
+        $showAffiliations = $this->config->get('show_affiliations');
 
         $queryBuilder = $this->em->createQueryBuilder()
             ->from(TeamCategory::class, 'c')
@@ -951,13 +960,13 @@ class ScoreboardService
             $data['scoreboard']           = $scoreboard;
             $data['filterValues']         = $this->getFilterValues($contest, $jury);
             $data['groupedAffiliations']  = empty($scoreboard) ? $this->getGroupedAffiliations($contest) : null;
-            $data['showFlags']            = $this->dj->dbconfig_get('show_flags', true);
-            $data['showAffiliationLogos'] = $this->dj->dbconfig_get('show_affiliation_logos', false);
-            $data['showAffiliations']     = $this->dj->dbconfig_get('show_affiliations', true);
-            $data['showPending']          = $this->dj->dbconfig_get('show_pending', false);
-            $data['showTeamSubmissions']  = $this->dj->dbconfig_get('show_teams_submissions', true);
-            $data['scoreInSeconds']       = $this->dj->dbconfig_get('score_in_seconds', false);
-            $data['maxWidth']             = $this->dj->dbconfig_get('team_column_width', 0);
+            $data['showFlags']            = $this->config->get('show_flags');
+            $data['showAffiliationLogos'] = $this->config->get('show_affiliation_logos');
+            $data['showAffiliations']     = $this->config->get('show_affiliations');
+            $data['showPending']          = $this->config->get('show_pending');
+            $data['showTeamSubmissions']  = $this->config->get('show_teams_submissions');
+            $data['scoreInSeconds']       = $this->config->get('score_in_seconds');
+            $data['maxWidth']             = $this->config->get('team_column_width');
         }
 
         if ($request && $request->isXmlHttpRequest()) {

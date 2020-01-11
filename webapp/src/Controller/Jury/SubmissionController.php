@@ -14,6 +14,7 @@ use App\Entity\SubmissionFile;
 use App\Entity\Team;
 use App\Entity\Testcase;
 use App\Service\BalloonService;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
@@ -54,6 +55,11 @@ class SubmissionController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var SubmissionService
      */
     protected $submissionService;
@@ -65,19 +71,23 @@ class SubmissionController extends BaseController
 
     /**
      * SubmissionController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param SubmissionService      $submissionService
      * @param RouterInterface        $router
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         SubmissionService $submissionService,
         RouterInterface $router
     ) {
         $this->em                = $em;
         $this->dj                = $dj;
+        $this->config            = $config;
         $this->submissionService = $submissionService;
         $this->router            = $router;
     }
@@ -173,7 +183,7 @@ class SubmissionController extends BaseController
             'filteredProblems' => $filteredProblems,
             'filteredLanguages' => $filteredLanguages,
             'filteredTeams' => $filteredTeams,
-            'showExternalResult' => $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) ==
+            'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
         ];
 
@@ -381,7 +391,7 @@ class SubmissionController extends BaseController
             }
         }
 
-        $outputDisplayLimit    = (int)$this->dj->dbconfig_get('output_display_limit', 2000);
+        $outputDisplayLimit    = (int)$this->config->get('output_display_limit');
         $outputTruncateMessage = sprintf("\n[output display truncated after %d B]\n", $outputDisplayLimit);
 
         $externalRuns = [];
@@ -522,7 +532,7 @@ class SubmissionController extends BaseController
             'runsOutput' => $runsOutput,
             'lastRuns' => $lastRuns,
             'unjudgableReasons' => $unjudgableReasons,
-            'verificationRequired' => (bool)$this->dj->dbconfig_get('verification_required', false),
+            'verificationRequired' => (bool)$this->config->get('verification_required'),
             'claimWarning' => $claimWarning,
             'combinedRunCompare' => $submission->getProblem()->getCombinedRunCompare(),
         ];
@@ -919,14 +929,14 @@ class SubmissionController extends BaseController
             $this->dj->auditlog('judging', $judging->getJudgingid(),
                                              $verified ? 'set verified' : 'set unverified');
 
-            if ((bool)$this->dj->dbconfig_get('verification_required', false)) {
+            if ((bool)$this->config->get('verification_required')) {
                 // Log to event table (case of no verification required is handled
                 // in the REST API API/JudgehostController::addJudgingRunAction
                 $eventLogService->log('judging', $judging->getJudgingid(), 'update', $judging->getCid());
             }
         });
 
-        if ((bool)$this->dj->dbconfig_get('verification_required', false)) {
+        if ((bool)$this->config->get('verification_required')) {
             $this->em->clear();
             /** @var Judging $judging */
             $judging = $this->em->getRepository(Judging::class)->find($judgingId);

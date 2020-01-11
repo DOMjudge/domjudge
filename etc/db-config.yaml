@@ -1,0 +1,285 @@
+# Configuration settings that can be overriden using the `configuration` database table
+-   category: Scoring
+    items:
+        -   name: verification_required
+            type: bool
+            default_value: false
+            public: false
+            description: Is verification of judgings by jury required before publication?
+        -   name: compile_penalty
+            type: bool
+            default_value: false
+            public: true
+            description: Should submissions with compiler-error incur penalty time (and show on the scoreboard)?
+        -   name: penalty_time
+            type: int
+            default_value: 20
+            public: true
+            description: Penalty time in minutes per wrong submission (if finally solved).
+        -   name: results_prio
+            type: array_keyval
+            default_value:
+                memory-limit: 99
+                output-limit: 99
+                run-error: 99
+                timelimit: 99
+                wrong-answer: 99
+                no-output: 99
+                correct: 1
+            public: false
+            description: Priorities of results for determining final result with multiple testcases. Higher priority is used first as final result. With equal priority, the first occurring result determines the final result.
+        -   name: results_remap
+            type: array_keyval
+            default_value: []
+            public: false
+            description: Remap testcase result, e.g. to disable a specific result type such as 'no-output'.
+        -   name: score_in_seconds
+            type: bool
+            default_value: false
+            public: true
+            description: Should the scoreboard resolution be measured in seconds instead of minutes?
+-   category: Judging
+    items:
+        -   name: memory_limit
+            type: int
+            default_value: 2097152
+            public: false
+            description: Maximum memory usage (in kB) by submissions. This includes the shell which starts the compiled solution and also any interpreter like the Java VM, which takes away approx. 300MB! Can be overridden per problem.
+        -   name: output_limit
+            type: int
+            default_value: 8192
+            public: false
+            description: Maximum output (in kB) submissions may generate. Any excessive output is truncated, so this should be greater than the maximum testdata output.
+        -   name: process_limit
+            type: int
+            default_value: 64
+            public: false
+            description: Maximum number of processes that the submission is allowed to start (including shell and possibly interpreters).
+        -   name: sourcesize_limit
+            type: int
+            default_value: 256
+            public: true
+            description: Maximum source code size (in kB) of a submission. This setting should be kept in sync with that in "etc/submit-config.h.in".
+        -   name: sourcefiles_limit
+            type: int
+            default_value: 100
+            public: true
+            description: Maximum number of source files in one submission. Set to one to disable multiple file submissions.
+        -   name: script_timelimit
+            type: int
+            default_value: 30
+            public: false
+            description: Maximum seconds available for compile/compare scripts. This is a safeguard against malicious code and buggy scripts, so a reasonable but large amount should do.
+        -   name: script_memory_limit
+            type: int
+            default_value: 2097152
+            public: false
+            description: Maximum memory usage (in kB) by compile/compare scripts. This is a safeguard against malicious code and buggy script, so a reasonable but large amount should do.
+        -   name: script_filesize_limit
+            type: int
+            default_value: 540672
+            public: false
+            description: Maximum filesize (in kB) compile/compare scripts may write. Submission will fail with compiler-error when trying to write more, so this should be greater than any *intermediate or final* result written by compilers.
+        -   name: timelimit_overshoot
+            type: string
+            default_value: 1s|10%
+            public: false
+            description: Time that submissions are kept running beyond timelimit before being killed. Specify as "Xs" for X seconds, "Y%" as percentage, or a combination of both separated by one of "+|&" for the sum, maximum, or minimum of both.
+        -   name: output_storage_limit
+            type: int
+            default_value: 50000
+            public: false
+            description: Maximum size of error/system output stored in the database (in bytes); use "-1" to disable any limits.
+        -   name: output_display_limit
+            type: int
+            default_value: 2000
+            public: false
+            description: Maximum size of run/diff/error/system output shown in the jury interface (in bytes); use "-1" to disable any limits.
+        -   name: lazy_eval_results
+            type: bool
+            default_value: true
+            public: false
+            description: Lazy evaluation of results? If enabled, stops judging as soon as a highest priority result is found, otherwise always all testcases will be judged.
+        -   name: judgehost_warning
+            type: int
+            default_value: 30
+            public: false
+            description: Time in seconds after a judgehost last checked in before showing its status as "warning".
+        -   name: judgehost_critical
+            type: int
+            default_value: 120
+            public: false
+            description: Time in seconds after a judgehost last checked in before showing its status as "critical".
+        -   name: diskspace_error
+            type: int
+            default_value: 1048576
+            public: false
+            description: Minimum free disk space (in kB) on judgehosts.
+        -   name: update_judging_seconds
+            type: int
+            default_value: 5
+            public: false
+            description: Post updates to a judging every X seconds. Set to 0 to update after each judging_run.
+        -   name: default_compare
+            type: string
+            default_value: compare
+            public: false
+            description: The script used to compare outputs if no special compare script specified.
+        -   name: default_run
+            type: string
+            default_value: run
+            public: false
+            description: The script used to run submissions if no special run script specified.
+-   category: Clarification
+    items:
+        -   name: clar_categories
+            type: array_keyval
+            default_value:
+                general: General issue
+                tech: Technical issue
+            public: true
+            description: List of additional clarification categories
+        -   name: clar_answers
+            type: array_val
+            default_value:
+                - No comment
+                - Read the problem statement carefully
+            public: false
+            description: List of predefined clarification answers
+        -   name: clar_queues
+            type: array_keyval
+            default_value: []
+            public: true
+            description: List of clarification queues
+        -   name: clar_default_problem_queue
+            type: string
+            default_value: ""
+            public: true
+            description: Queue to assign to problem clarifications
+
+-   category: Display
+    items:
+        -   name: show_pending
+            type: bool
+            default_value: true
+            public: true
+            description: Show pending submissions on the scoreboard?
+        -   name: show_flags
+            type: bool
+            default_value: true
+            public: true
+            description: Show country flags in the interfaces?
+        -   name: show_affiliations
+            type: bool
+            default_value: true
+            public: true
+            description: Show affiliation names in the interfaces?
+        -   name: show_affiliation_logos
+            type: bool
+            default_value: false
+            public: true
+            description: Show affiliation logos on the scoreboard?
+        -   name: show_teams_submissions
+            type: bool
+            default_value: true
+            public: true
+            description: Show problem columns with submission information on the public and team scoreboards?
+        -   name: show_compile
+            type: int
+            default_value: 2
+            public: true
+            description: "Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always."
+        -   name: show_sample_output
+            type: bool
+            default_value: false
+            public: true
+            description: Should teams be able to view a diff of their and the reference output to sample testcases?
+        -   name: show_balloons_postfreeze
+            type: bool
+            default_value: false
+            public: true
+            description: Give out balloon notifications after the scoreboard has been frozen?
+        -   name: show_relative_time
+            type: bool
+            default_value: false
+            public: true
+            description: Print times of contest events relative to contest start (instead of absolute).
+        -   name: time_format
+            type: string
+            default_value: "%H:%M"
+            public: false
+            description: The format used to print times. For formatting options see the PHP 'strftime' function.
+        -   name: thumbnail_size
+            type: int
+            default_value: 200
+            public: false
+            description: Maximum width/height of a thumbnail for uploaded testcase images.
+        -   name: show_limits_on_team_page
+            type: bool
+            default_value: true
+            public: true
+            description: Show time and memory limit on the team problems page
+        -   name: team_column_width
+            type: int
+            default_value: 0
+            public: false
+            description: Maximum width of team column on scoreboard. Leave 0 for no maximum.
+-   category: Misc
+    items:
+        -   name: print_command
+            type: string
+            default_value: ""
+            public: true
+            description: If not empty, enable teams and jury to send source code to this command. See admin manual for allowed arguments.
+        -   name: registration_category_name
+            type: string
+            default_value: ""
+            public: true
+            description: Team category for users that register themselves with the system. Self-registration is disabled if this field is left empty.
+        -   name: data_source
+            type: int
+            default_value: 0
+            public: false
+            description: "Source of data. Choices: 0 = all local, 1 = configuration data external, 2 = configuration and live data external"
+        -   name: external_ccs_submission_url
+            type: string
+            default_value: ""
+            public: false
+            description: URL of a submission detail page on the external CCS. Placeholder [id] will be replaced by submission ID and [contest] by the contest ID. Leave empty to not display links to external CCS
+-   category: Authentication
+    items:
+        -   name: auth_methods
+            type: array_val
+            default_value: []
+            public: false
+            description: List of allowed additional authentication methods. Supported values are 'ipaddress', and 'xheaders'
+        -   name: allow_openid_auth
+            type: bool
+            default_value: false
+            public: true
+            description: Allow users to log in using OpenID
+        -   name: openid_autocreate_team
+            type: bool
+            default_value: true
+            public: true
+            description: Create a team for each user that logs in with OpenID
+        -   name: openid_provider
+            type: string
+            default_value: https://accounts.google.com
+            public: true
+            description: OpenID Provider URL
+        -   name: openid_clientid
+            type: string
+            default_value: ""
+            public: false
+            description: OpenID Connect client id
+        -   name: openid_clientsecret
+            type: string
+            default_value: ""
+            public: false
+            description: OpenID Connect client secret
+        -   name: ip_autologin
+            type: bool
+            default_value: false
+            public: false
+            description: Enable to skip the login page when using IP authentication.

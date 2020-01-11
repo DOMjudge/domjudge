@@ -7,6 +7,7 @@ use App\Entity\Language;
 use App\Entity\Problem;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
@@ -41,10 +42,11 @@ class SubmissionController extends AbstractRestController
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         SubmissionService $submissionService
     ) {
-        parent::__construct($entityManager, $dj, $eventLogService);
+        parent::__construct($entityManager, $dj, $config, $eventLogService);
         $this->submissionService = $submissionService;
     }
 

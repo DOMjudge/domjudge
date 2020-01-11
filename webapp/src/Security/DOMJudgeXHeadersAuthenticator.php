@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use App\Service\DOMJudgeService;
+use App\Service\ConfigurationService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,26 +23,27 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
 
     private $security;
     private $encoder;
-    private $dj;
+    private $config;
     private $router;
 
     /**
      * DOMJudgeXHeadersAuthenticator constructor.
+     *
      * @param Security                     $security
      * @param UserPasswordEncoderInterface $encoder
-     * @param DOMJudgeService              $dj
+     * @param ConfigurationService         $config
      * @param RouterInterface              $router
      */
     public function __construct(
         Security $security,
         UserPasswordEncoderInterface $encoder,
-        DOMJudgeService $dj,
+        ConfigurationService $config,
         RouterInterface $router
     ) {
-        $this->security  = $security;
-        $this->encoder   = $encoder;
-        $this->dj        = $dj;
-        $this->router    = $router;
+        $this->security = $security;
+        $this->encoder  = $encoder;
+        $this->config   = $config;
+        $this->router   = $router;
     }
 
     /**
@@ -52,7 +53,7 @@ class DOMJudgeXHeadersAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request)
     {
-        $authmethods = $this->dj->dbconfig_get('auth_methods', []);
+        $authmethods = $this->config->get('auth_methods');
         $auth_allow_xheaders = in_array('xheaders', $authmethods);
         if (!$auth_allow_xheaders) {
             return false;

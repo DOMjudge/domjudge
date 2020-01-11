@@ -16,6 +16,7 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\Testcase;
 use App\Entity\User;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
@@ -26,9 +27,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Monolog\Logger;
 use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,6 +54,11 @@ class ImportEventFeedCommand extends Command
      * @var DOMJudgeService
      */
     protected $dj;
+
+    /**
+     * @var ConfigurationService
+     */
+    protected $config;
 
     /**
      * @var EventLogService
@@ -134,8 +138,10 @@ class ImportEventFeedCommand extends Command
 
     /**
      * ImportEventFeedCommand constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param EventLogService        $eventLogService
      * @param ScoreboardService      $scoreboardService
      * @param SubmissionService      $submissionService
@@ -148,6 +154,7 @@ class ImportEventFeedCommand extends Command
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
         SubmissionService $submissionService,
@@ -160,6 +167,7 @@ class ImportEventFeedCommand extends Command
         parent::__construct($name);
         $this->em                = $em;
         $this->dj                = $dj;
+        $this->config            = $config;
         $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
         $this->submissionService = $submissionService;
@@ -242,7 +250,7 @@ class ImportEventFeedCommand extends Command
         pcntl_signal(SIGTERM, [$this, 'stopCommand']);
         pcntl_signal(SIGINT, [$this, 'stopCommand']);
 
-        $dataSource = (int)$this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL);
+        $dataSource = (int)$this->config->get('data_source');
         $importDataSource = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
         if ($dataSource !== $importDataSource) {
             if ($input->getOption('force')) {
@@ -700,7 +708,7 @@ class ImportEventFeedCommand extends Command
                 $penalty = false;
                 $solved  = true;
             } elseif ($verdict === 'CE') {
-                $penalty = (bool)$this->dj->dbconfig_get('compile_penalty', false);
+                $penalty = (bool)$this->config->get('compile_penalty');
             }
 
             if ($penalty !== $event['data']['penalty']) {

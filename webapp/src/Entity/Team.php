@@ -775,7 +775,7 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      * @Serializer\VirtualProperty()
      * @Serializer\Type("string")
      * @Serializer\Groups({"Nonstrict"})
-     * @Serializer\Expose(if="context.getAttribute('domjudge_service').dbconfig_get('show_flags', true)")
+     * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
      */
     public function getNationality()
     {

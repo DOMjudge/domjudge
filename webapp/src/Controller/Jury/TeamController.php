@@ -8,6 +8,7 @@ use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\TeamType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
@@ -41,6 +42,11 @@ class TeamController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
@@ -52,19 +58,23 @@ class TeamController extends BaseController
 
     /**
      * TeamController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->config          = $config;
         $this->eventLogService = $eventLogService;
         $this->kernel          = $kernel;
     }
@@ -278,10 +288,10 @@ class TeamController extends BaseController
                 'ajax' => true,
             ],
             'team' => $team,
-            'showAffiliations' => (bool)$this->dj->dbconfig_get('show_affiliations', true),
-            'showFlags' => (bool)$this->dj->dbconfig_get('show_flags', true),
+            'showAffiliations' => (bool)$this->config->get('show_affiliations'),
+            'showFlags' => (bool)$this->config->get('show_flags'),
             'showContest' => count($this->dj->getCurrentContests()) > 1,
-            'maxWidth' => $this->dj->dbconfig_get("team_column_width", 0),
+            'maxWidth' => $this->config->get("team_column_width"),
         ];
 
         $currentContest = $this->dj->getCurrentContest();
@@ -338,7 +348,7 @@ class TeamController extends BaseController
         $data['restrictionText']    = $restrictionText;
         $data['submissions']        = $submissions;
         $data['submissionCounts']   = $submissionCounts;
-        $data['showExternalResult'] = $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) ==
+        $data['showExternalResult'] = $this->config->get('data_source') ==
             DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
 
         if ($request->isXmlHttpRequest()) {

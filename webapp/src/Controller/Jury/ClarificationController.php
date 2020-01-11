@@ -2,20 +2,20 @@
 
 namespace App\Controller\Jury;
 
+use App\Entity\Clarification;
 use App\Entity\Contest;
+use App\Entity\ContestProblem;
+use App\Entity\Problem;
 use App\Entity\Team;
 use App\Entity\User;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use App\Entity\Clarification;
-use App\Entity\ContestProblem;
-use App\Entity\Problem;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -37,23 +37,32 @@ class ClarificationController extends AbstractController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
 
     /**
      * ClarificationController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->config          = $config;
         $this->eventLogService = $eventLogService;
     }
 
@@ -129,7 +138,7 @@ class ClarificationController extends AbstractController
             }
         }
 
-        $queues = $this->dj->dbconfig_get('clar_queues');
+        $queues = $this->config->get('clar_queues');
 
         return $this->render('jury/clarifications.html.twig', [
             'newClarifications' => $newClarifications,
@@ -159,8 +168,8 @@ class ClarificationController extends AbstractController
         $clardata['showExternalId'] = $this->eventLogService->externalIdFieldForEntity(Clarification::class);
 
         $categories = $clardata['clarform']['subjects'];
-        $queues     = $this->dj->dbconfig_get('clar_queues');
-        $clar_answers = $this->dj->dbconfig_get('clar_answers', []);
+        $queues     = $this->config->get('clar_queues');
+        $clar_answers = $this->config->get('clar_answers');
 
         if ( $irt = $clarification->getInReplyTo() ) {
             $clarlist = [$irt];
@@ -262,7 +271,7 @@ class ClarificationController extends AbstractController
 
         $subject_options = [];
 
-        $categories = $this->dj->dbconfig_get('clar_categories');
+        $categories = $this->config->get('clar_categories');
         $contests = $this->dj->getCurrentContests();
 
         /** @var ContestProblem[] $contestproblems */
@@ -470,7 +479,7 @@ class ClarificationController extends AbstractController
         if($respid) {
             $queue = $respclar->getQueue();
         } else {
-            $queue = $this->dj->dbconfig_get('clar_default_problem_queue');
+            $queue = $this->config->get('clar_default_problem_queue');
             if ($queue === "") {
                 $queue = null;
             }

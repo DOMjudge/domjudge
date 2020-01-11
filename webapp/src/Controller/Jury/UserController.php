@@ -8,6 +8,7 @@ use App\Entity\Team;
 use App\Entity\User;
 use App\Form\Type\GeneratePasswordsType;
 use App\Form\Type\UserType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
@@ -39,6 +40,11 @@ class UserController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
@@ -55,8 +61,10 @@ class UserController extends BaseController
 
     /**
      * UserController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      * @param TokenStorageInterface  $tokenStorage
@@ -64,12 +72,14 @@ class UserController extends BaseController
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService,
         TokenStorageInterface $tokenStorage
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->config          = $config;
         $this->eventLogService = $eventLogService;
         $this->tokenStorage    = $tokenStorage;
         $this->kernel          = $kernel;
@@ -102,7 +112,7 @@ class UserController extends BaseController
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $users_table      = [];
-        $timeFormat  = (string)$this->dj->dbconfig_get('time_format', '%H:%M');
+        $timeFormat  = (string)$this->config->get('time_format');
         foreach ($users as $u) {
             $userdata    = [];
             $useractions = [];

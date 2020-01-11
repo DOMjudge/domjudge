@@ -50,6 +50,11 @@ class SubmissionService
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -63,12 +68,14 @@ class SubmissionService
         EntityManagerInterface $em,
         LoggerInterface $logger,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService
     ) {
         $this->em                = $em;
         $this->logger            = $logger;
         $this->dj                = $dj;
+        $this->config            = $config;
         $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
     }
@@ -231,7 +238,7 @@ class SubmissionService
             }
         }
 
-        if ($this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) ==
+        if ($this->config->get('data_source') ==
             DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL) {
             // When we are shadow, also load the external results
             $queryBuilder
@@ -390,7 +397,7 @@ class SubmissionService
         if (count($files) == 0) {
             throw new BadRequestHttpException("No files specified.");
         }
-        if (count($files) > $this->dj->dbconfig_get('sourcefiles_limit', 100)) {
+        if (count($files) > $this->config->get('sourcefiles_limit')) {
             $message = "Tried to submit more than the allowed number of source files.";
             return null;
         }
@@ -409,7 +416,7 @@ class SubmissionService
             return null;
         }
 
-        $sourceSize = $this->dj->dbconfig_get('sourcesize_limit');
+        $sourceSize = $this->config->get('sourcesize_limit');
 
         $freezeData = new FreezeData($contest);
         if (!$this->dj->checkrole('jury') && !$freezeData->started()) {
@@ -499,7 +506,7 @@ class SubmissionService
         // SQL transaction time below.
         if ($this->dj->checkrole('jury')) {
             $results = self::getExpectedResults(file_get_contents($files[0]->getRealPath()),
-                $this->dj->dbconfig_get('results_remap', []));
+                $this->config->get('results_remap'));
         }
 
         $submission = new Submission();

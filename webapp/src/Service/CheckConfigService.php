@@ -159,7 +159,7 @@ class CheckConfigService
 
     public function checkPhpSettings()
     {
-        $sourcefiles_limit = $this->dj->dbconfig_get('sourcefiles_limit', 100);
+        $sourcefiles_limit = $this->config->get('sourcefiles_limit', 100);
         $max_files = ini_get('max_file_uploads');
 
         /* PHP will silently discard any files above the max_file_uploads limit,
@@ -279,7 +279,7 @@ class CheckConfigService
 
         $scripts = ['compare', 'run'];
         foreach ($scripts as $type) {
-            $scriptid = $this->dj->dbconfig_get('default_' . $type);
+            $scriptid = $this->config->get('default_' . $type);
             if (!$this->em->getRepository(Executable::class)->find($scriptid)) {
                 $res = 'E';
                 $desc .= sprintf("The default %s script '%s' does not exist.\n", $type, $scriptid);
@@ -295,8 +295,8 @@ class CheckConfigService
 
     public function checkScriptFilesizevsMemoryLimit()
     {
-        if ($this->dj->dbconfig_get('script_filesize_limit') <
-            $this->dj->dbconfig_get('memory_limit')) {
+        if ($this->config->get('script_filesize_limit') <
+            $this->config->get('memory_limit')) {
              $result = 'W';
         } else {
              $result = 'O';
@@ -410,8 +410,8 @@ class CheckConfigService
     public function checkProblemsValidate()
     {
         $problems = $this->em->getRepository(Problem::class)->findAll();
-        $script_filesize_limit = $this->dj->dbconfig_get('script_filesize_limit');
-        $output_limit = $this->dj->dbconfig_get('output_limit');
+        $script_filesize_limit = $this->config->get('script_filesize_limit');
+        $output_limit = $this->config->get('output_limit');
 
         $problemerrors = $scripterrors = [];
         $result = 'O';
@@ -496,7 +496,7 @@ class CheckConfigService
     public function checkLanguagesValidate()
     {
         $languages = $this->em->getRepository(Language::class)->findAll();
-        $script_filesize_limit = $this->dj->dbconfig_get('script_filesize_limit');
+        $script_filesize_limit = $this->config->get('script_filesize_limit');
 
         $languageerrors = $scripterrors = [];
         $result = 'O';
@@ -591,8 +591,8 @@ class CheckConfigService
 
     public function checkAffiliations()
     {
-        $show_logos = $this->dj->dbconfig_get('show_affiliation_logos');
-        $show_flags = $this->dj->dbconfig_get('show_flags');
+        $show_logos = $this->config->get('show_affiliation_logos');
+        $show_flags = $this->config->get('show_flags');
 
         if (!$show_logos && !$show_flags) {
             return ['caption' => 'Team affiliations',

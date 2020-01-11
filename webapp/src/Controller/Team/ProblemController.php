@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\Entity\ContestProblem;
 use App\Entity\Language;
 use App\Entity\Testcase;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
@@ -33,19 +34,30 @@ class ProblemController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EntityManagerInterface
      */
     protected $em;
 
     /**
      * ProblemController constructor.
+     *
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param EntityManagerInterface $em
      */
-    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
-    {
-        $this->dj = $dj;
-        $this->em = $em;
+    public function __construct(
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EntityManagerInterface $em
+    ) {
+        $this->dj     = $dj;
+        $this->config = $config;
+        $this->em     = $em;
     }
 
     /**
@@ -58,8 +70,8 @@ class ProblemController extends BaseController
     {
         $user               = $this->dj->getUser();
         $contest            = $this->dj->getCurrentContest($user->getTeamid());
-        $showLimits         = (bool)$this->dj->dbconfig_get('show_limits_on_team_page');
-        $defaultMemoryLimit = (int)$this->dj->dbconfig_get('memory_limit', 0);
+        $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
+        $defaultMemoryLimit = (int)$this->config->get('memory_limit');
         $timeFactorDiffers  = false;
         if ($showLimits) {
             $timeFactorDiffers = $this->em->createQueryBuilder()

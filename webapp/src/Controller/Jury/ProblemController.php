@@ -13,6 +13,7 @@ use App\Entity\TestcaseContent;
 use App\Form\Type\ProblemType;
 use App\Form\Type\ProblemUploadMultipleType;
 use App\Form\Type\ProblemUploadType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportProblemService;
@@ -52,6 +53,11 @@ class ProblemController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
@@ -73,8 +79,10 @@ class ProblemController extends BaseController
 
     /**
      * ProblemController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      * @param SubmissionService      $submissionService
@@ -83,6 +91,7 @@ class ProblemController extends BaseController
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService,
         SubmissionService $submissionService,
@@ -90,6 +99,7 @@ class ProblemController extends BaseController
     ) {
         $this->em                   = $em;
         $this->dj                   = $dj;
+        $this->config               = $config;
         $this->kernel               = $kernel;
         $this->eventLogService      = $eventLogService;
         $this->submissionService    = $submissionService;
@@ -498,12 +508,12 @@ class ProblemController extends BaseController
             'problem' => $problem,
             'submissions' => $submissions,
             'submissionCounts' => $submissionCounts,
-            'defaultMemoryLimit' => (int)$this->dj->dbconfig_get('memory_limit'),
-            'defaultOutputLimit' => (int)$this->dj->dbconfig_get('output_limit'),
-            'defaultRunExecutable' => (string)$this->dj->dbconfig_get('default_run'),
-            'defaultCompareExecutable' => (string)$this->dj->dbconfig_get('default_compare'),
+            'defaultMemoryLimit' => (int)$this->config->get('memory_limit'),
+            'defaultOutputLimit' => (int)$this->config->get('output_limit'),
+            'defaultRunExecutable' => (string)$this->config->get('default_run'),
+            'defaultCompareExecutable' => (string)$this->config->get('default_compare'),
             'showContest' => count($this->dj->getCurrentContests()) > 1,
-            'showExternalResult' => $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) ==
+            'showExternalResult' => $this->config->get('data_source') ==
                 DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
             'refresh' => [
                 'after' => 15,
@@ -596,8 +606,8 @@ class ProblemController extends BaseController
         if ($request->isMethod('POST')) {
             $messages      = [];
             $maxrank       = 0;
-            $outputLimit   = $this->dj->dbconfig_get('output_limit');
-            $thumbnailSize = $this->dj->dbconfig_get('thumbnail_size', 128);
+            $outputLimit   = $this->config->get('output_limit');
+            $thumbnailSize = $this->config->get('thumbnail_size');
             foreach ($testcases as $rank => $testcase) {
                 $newSample = isset($request->request->get('sample')[$rank]);
                 if ($newSample !== $testcase->getSample()) {
