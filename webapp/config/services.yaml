@@ -15,7 +15,9 @@ services:
             $debug: '%kernel.debug%'
             $domjudgeVersion: '%domjudge.version%'
             $projectDir: '%kernel.project_dir%'
+            $cacheDir: '%kernel.cache_dir%'
             $sqlDir: '%domjudge.sqldir%'
+            $etcDir: '%domjudge.etcdir%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -53,3 +55,9 @@ services:
             - '%kernel.debug%'
 
     Metadata\MetadataFactoryInterface: '@jms_serializer.metadata_factory'
+
+    # We need the configuration serivce to be public to be able to run two of the migrations
+    App\Service\ConfigurationService:
+        public: true
+        arguments:
+            $configCache: '@config_cache_factory'

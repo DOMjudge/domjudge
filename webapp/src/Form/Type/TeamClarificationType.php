@@ -3,6 +3,7 @@
 namespace App\Form\Type;
 
 use App\Entity\ContestProblem;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -16,9 +17,17 @@ class TeamClarificationType extends AbstractType
      */
     protected $dj;
 
-    public function __construct(DOMJudgeService $dj)
-    {
-        $this->dj = $dj;
+    /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    public function __construct(
+        DOMJudgeService $dj,
+        ConfigurationService $config
+    ) {
+        $this->dj     = $dj;
+        $this->config = $config;
     }
 
     /**
@@ -36,7 +45,7 @@ class TeamClarificationType extends AbstractType
 
         $subjects = [];
         /** @var string[] $categories */
-        $categories = $this->dj->dbconfig_get('clar_categories');
+        $categories = $this->config->get('clar_categories');
         $user       = $this->dj->getUser();
         $contest    = $this->dj->getCurrentContest($user->getTeamid());
         foreach ($categories as $categoryId => $categoryName) {

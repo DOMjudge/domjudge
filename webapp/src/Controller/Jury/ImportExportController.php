@@ -12,6 +12,7 @@ use App\Form\Type\ContestExportType;
 use App\Form\Type\ContestImportType;
 use App\Form\Type\TsvImportType;
 use App\Service\BaylorCmsService;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
@@ -62,6 +63,11 @@ class ImportExportController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -71,11 +77,13 @@ class ImportExportController extends BaseController
 
     /**
      * ImportExportController constructor.
+     *
      * @param BaylorCmsService       $baylorCmsService
      * @param ImportExportService    $importExportService
      * @param EntityManagerInterface $em
      * @param ScoreboardService      $scoreboardService
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param EventLogService        $eventLogService
      * @param string                 $domjudgeVersion
      */
@@ -85,6 +93,7 @@ class ImportExportController extends BaseController
         EntityManagerInterface $em,
         ScoreboardService $scoreboardService,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         string $domjudgeVersion
     ) {
@@ -93,6 +102,7 @@ class ImportExportController extends BaseController
         $this->em                  = $em;
         $this->scoreboardService   = $scoreboardService;
         $this->dj                  = $dj;
+        $this->config              = $config;
         $this->eventLogService     = $eventLogService;
         $this->domjudgeVersion     = $domjudgeVersion;
     }
@@ -311,7 +321,7 @@ class ImportExportController extends BaseController
             throw new BadRequestHttpException('No current contest');
         }
 
-        $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
+        $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
         $filter           = new Filter();
         $filter->setCategories($categoryIds);
         $scoreboard = $this->scoreboardService->getScoreboard($contest, true, $filter);
@@ -446,13 +456,13 @@ class ImportExportController extends BaseController
             throw new BadRequestHttpException('No current contest');
         }
 
-        $queues              = (array)$this->dj->dbconfig_get('clar_queues');
+        $queues              = (array)$this->config->get('clar_queues');
         $clarificationQueues = [null => 'Unassigned issues'];
         foreach ($queues as $key => $val) {
             $clarificationQueues[$key] = $val;
         }
 
-        $categories = (array)$this->dj->dbconfig_get('clar_categories');
+        $categories = (array)$this->config->get('clar_categories');
 
         $clarificationCategories = [];
         foreach ($categories as $key => $val) {

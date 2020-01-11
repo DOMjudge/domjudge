@@ -4,6 +4,7 @@ namespace App\Form\Type;
 
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -24,19 +25,28 @@ class SubmitProblemType extends AbstractType
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EntityManagerInterface
      */
     protected $em;
 
-    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
-    {
+    public function __construct(
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EntityManagerInterface $em
+    ) {
         $this->dj = $dj;
         $this->em = $em;
+        $this->config = $config;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $allowMultipleFiles = $this->dj->dbconfig_get('sourcefiles_limit', 100) > 1;
+        $allowMultipleFiles = $this->config->get('sourcefiles_limit') > 1;
         $user               = $this->dj->getUser();
         $contest            = $this->dj->getCurrentContest($user->getTeamid());
 

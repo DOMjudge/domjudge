@@ -64,6 +64,11 @@ class DOMJudgeService
      */
     protected $httpKernel;
 
+    /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
     const DATA_SOURCE_LOCAL = 0;
     const DATA_SOURCE_CONFIGURATION_EXTERNAL = 1;
     const DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL = 2;
@@ -72,6 +77,7 @@ class DOMJudgeService
 
     /**
      * DOMJudgeService constructor.
+     *
      * @param EntityManagerInterface        $em
      * @param LoggerInterface               $logger
      * @param RequestStack                  $requestStack
@@ -79,6 +85,7 @@ class DOMJudgeService
      * @param AuthorizationCheckerInterface $authorizationChecker
      * @param TokenStorageInterface         $tokenStorage
      * @param HttpKernelInterface           $httpKernel
+     * @param ConfigurationService          $config
      */
     public function __construct(
         EntityManagerInterface $em,
@@ -87,7 +94,8 @@ class DOMJudgeService
         ParameterBagInterface $params,
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
-        HttpKernelInterface $httpKernel
+        HttpKernelInterface $httpKernel,
+        ConfigurationService $config
     ) {
         $this->em                   = $em;
         $this->logger               = $logger;
@@ -96,6 +104,7 @@ class DOMJudgeService
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage         = $tokenStorage;
         $this->httpKernel           = $httpKernel;
+        $this->config               = $config;
     }
 
     /**
@@ -384,7 +393,7 @@ class DOMJudgeService
             ->from(Judgehost::class, 'j')
             ->andWhere('j.active = 1')
             ->andWhere('j.polltime < :i')
-            ->setParameter('i', time() - $this->dbconfig_get('judgehost_critical', 120))
+            ->setParameter('i', time() - $this->config->get('judgehost_critical'))
             ->getQuery()->getResult();
 
         $rejudgings = $this->em->createQueryBuilder()
@@ -629,6 +638,15 @@ class DOMJudgeService
     }
 
     /**
+     * Get the directory used for storing cache files
+     * @return string
+     */
+    public function getCacheDir(): string
+    {
+        return $this->params->get('kernel.cache_dir');
+    }
+
+    /**
      * Open the given ZIP file
      * @param string $filename
      * @return ZipArchive
@@ -673,7 +691,7 @@ class DOMJudgeService
         ?int $teamid = null,
         ?string $location = null
     ): array {
-        $printCommand = $this->dbconfig_get('print_command', '');
+        $printCommand = $this->config->get('print_command');
         if (empty($printCommand)) {
             return [false, 'Printing not enabled'];
         }

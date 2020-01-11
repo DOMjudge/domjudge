@@ -2,6 +2,7 @@
 
 namespace App\Controller\Jury;
 
+use App\Service\ConfigurationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use App\Controller\BaseController;
@@ -27,6 +28,11 @@ class ShadowDifferencesController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var SubmissionService
      */
     protected $submissions;
@@ -43,11 +49,13 @@ class ShadowDifferencesController extends BaseController
 
     public function __construct(
         DOMJudgeService $dj,
+        ConfigurationService $config,
         SubmissionService $submissions,
         SessionInterface $session,
         EntityManagerInterface $em
     ) {
         $this->dj          = $dj;
+        $this->config      = $config;
         $this->submissions = $submissions;
         $this->session     = $session;
         $this->em          = $em;
@@ -59,7 +67,7 @@ class ShadowDifferencesController extends BaseController
     public function indexAction(Request $request)
     {
         $shadowMode = DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL;
-        $dataSource = $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL);
+        $dataSource = $this->config->get('data_source');
         if ($dataSource != $shadowMode) {
             $this->addFlash('danger', sprintf(
                 'Shadow differences only supported when data_source is %d',

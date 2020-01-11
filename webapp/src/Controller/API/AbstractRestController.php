@@ -3,6 +3,7 @@
 namespace App\Controller\API;
 
 use App\Entity\Contest;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
@@ -32,20 +33,33 @@ abstract class AbstractRestController extends AbstractFOSRestController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
 
     /**
      * AbstractRestController constructor.
+     *
      * @param EntityManagerInterface $entityManager
-     * @param DOMJudgeService $dj
+     * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
+     * @param EventLogService        $eventLogService
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj, EventLogService $eventLogService)
-    {
-        $this->em   = $entityManager;
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EventLogService $eventLogService
+    ) {
+        $this->em              = $entityManager;
         $this->dj              = $dj;
         $this->eventLogService = $eventLogService;
+        $this->config          = $config;
     }
 
     /**
@@ -130,6 +144,7 @@ abstract class AbstractRestController extends AbstractFOSRestController
 
         // Set the DOMjudge service on the context, so we can use it for permissions
         $view->getContext()->setAttribute('domjudge_service', $this->dj);
+        $view->getContext()->setAttribute('config_service', $this->config);
 
         $groups = ['Default'];
         if (!$request->query->has('strict') || !$request->query->getBoolean('strict')) {

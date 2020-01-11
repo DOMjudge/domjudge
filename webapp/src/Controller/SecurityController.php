@@ -8,6 +8,7 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use App\Entity\User;
 use App\Form\Type\UserRegistrationType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,9 +28,17 @@ class SecurityController extends AbstractController
      */
     private $dj;
 
-    public function __construct(DOMJudgeService $dj)
-    {
+    /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    public function __construct(
+        DOMJudgeService $dj,
+        ConfigurationService $config
+    ) {
         $this->dj = $dj;
+        $this->config = $config;
     }
 
     /**
@@ -47,13 +56,13 @@ class SecurityController extends AbstractController
     )
     {
         $allowIPAuth = false;
-        $authmethods = $this->dj->dbconfig_get('auth_methods', []);
+        $authmethods = $this->config->get('auth_methods');
 
         if (in_array('ipaddress', $authmethods)) {
             $allowIPAuth = true;
         }
 
-        $ipAutologin = $this->dj->dbconfig_get('ip_autologin', false);
+        $ipAutologin = $this->config->get('ip_autologin');
         if ($authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY') && !$ipAutologin) {
             return $this->redirect($this->generateUrl('root'));
         }
@@ -76,7 +85,7 @@ class SecurityController extends AbstractController
         $response = new Response();
         $response->headers->set('X-Login-Page', $this->generateUrl('login'));
 
-        $registrationCategoryName = $this->dj->dbconfig_get('registration_category_name', '');
+        $registrationCategoryName = $this->config->get('registration_category_name');
         $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
 
         return $this->render('security/login.html.twig', array(
@@ -109,7 +118,7 @@ class SecurityController extends AbstractController
         }
 
         $em                       = $this->getDoctrine()->getManager();
-        $registrationCategoryName = $this->dj->dbconfig_get('registration_category_name', '');
+        $registrationCategoryName = $this->config->get('registration_category_name');
         $registrationCategory     = $em->getRepository(TeamCategory::class)->findOneBy(['name' => $registrationCategoryName]);
 
         if ($registrationCategory === null) {
@@ -139,7 +148,7 @@ class SecurityController extends AbstractController
                 ->setCategory($registrationCategory)
                 ->setComments('Registered by ' . $this->dj->getClientIp() . ' on ' . date('r'));
 
-            if ($this->dj->dbconfig_get('show_affiliations', true)) {
+            if ($this->config->get('show_affiliations')) {
                 switch ($registration_form->get('affiliation')->getData()) {
                     case 'new':
                         $affiliation = new TeamAffiliation();

@@ -7,6 +7,7 @@ use App\Entity\Judging;
 use App\Entity\Problem;
 use App\Entity\Testcase;
 use App\Form\Type\SubmitProblemType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\SubmissionService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -45,6 +46,11 @@ class SubmissionController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var FormFactoryInterface
      */
     protected $formFactory;
@@ -53,11 +59,13 @@ class SubmissionController extends BaseController
         EntityManagerInterface $em,
         SubmissionService $submissionService,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         FormFactoryInterface $formFactory
     ) {
         $this->em                = $em;
         $this->submissionService = $submissionService;
         $this->dj                = $dj;
+        $this->config            = $config;
         $this->formFactory       = $formFactory;
     }
 
@@ -132,9 +140,9 @@ class SubmissionController extends BaseController
      */
     public function viewAction(Request $request, int $submitId)
     {
-        $verificationRequired = (bool)$this->dj->dbconfig_get('verification_required', false);;
-        $showCompile      = $this->dj->dbconfig_get('show_compile', 2);
-        $showSampleOutput = $this->dj->dbconfig_get('show_sample_output', 0);
+        $verificationRequired = (bool)$this->config->get('verification_required');;
+        $showCompile      = $this->config->get('show_compile');
+        $showSampleOutput = $this->config->get('show_sample_output');
         $user             = $this->dj->getUser();
         $team             = $user->getTeam();
         $contest          = $this->dj->getCurrentContest($team->getTeamid());

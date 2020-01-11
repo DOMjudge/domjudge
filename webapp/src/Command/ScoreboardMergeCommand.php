@@ -9,6 +9,7 @@ use App\Entity\ScoreCache;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use App\Utils\FreezeData;
@@ -48,6 +49,11 @@ class ScoreboardMergeCommand extends Command
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var Environment
      */
     protected $twig;
@@ -74,16 +80,19 @@ class ScoreboardMergeCommand extends Command
 
     /**
      * ScoreboardMergeCommand constructor.
-     * @param DOMJudgeService     $dj
-     * @param Environment         $twig
-     * @param HttpClientInterface $client
-     * @param ScoreboardService   $scoreboardService
-     * @param RouterInterface     $router
-     * @param string              $projectDir
-     * @param string|null         $name
+     *
+     * @param DOMJudgeService      $dj
+     * @param ConfigurationService $config
+     * @param Environment          $twig
+     * @param HttpClientInterface  $client
+     * @param ScoreboardService    $scoreboardService
+     * @param RouterInterface      $router
+     * @param string               $projectDir
+     * @param string|null          $name
      */
     public function __construct(
         DOMJudgeService $dj,
+        ConfigurationService $config,
         Environment $twig,
         HttpClientInterface $client,
         ScoreboardService $scoreboardService,
@@ -93,6 +102,7 @@ class ScoreboardMergeCommand extends Command
     ) {
         parent::__construct($name);
         $this->dj = $dj;
+        $this->config = $config;
         $this->twig = $twig;
         $this->client = $client;
         $this->scoreboardService = $scoreboardService;
@@ -336,7 +346,7 @@ class ScoreboardMergeCommand extends Command
             $scoreCache,
             $freezeData,
             false,
-            (int)$this->dj->dbconfig_get('penalty_time', 20),
+            (int)$this->config->get('penalty_time'),
             false
         );
 

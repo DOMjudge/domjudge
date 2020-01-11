@@ -9,6 +9,7 @@ use App\Entity\Language;
 use App\Entity\Submission;
 use App\Entity\SubmissionFile;
 use App\Entity\Testcase;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\SubmissionService;
@@ -27,6 +28,11 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
      * @var DOMJudgeService
      */
     protected $dj;
+
+    /**
+     * @var ConfigurationService
+     */
+    protected $config;
 
     /**
      * @var EntityManagerInterface
@@ -60,6 +66,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
 
     public function __construct(
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EntityManagerInterface $em,
         SubmissionService $submissionService,
         EventLogService $eventLogService,
@@ -68,6 +75,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         string $projectDir
     ) {
         $this->dj                   = $dj;
+        $this->config               = $config;
         $this->em                   = $em;
         $this->submissionService    = $submissionService;
         $this->eventLogService      = $eventLogService;
@@ -136,10 +144,10 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'current_contests' => $this->dj->getCurrentContests(),
             'current_public_contest' => $this->dj->getCurrentContest(-1),
             'current_public_contests' => $this->dj->getCurrentContests(-1),
-            'have_printing' => $this->dj->dbconfig_get('print_command', ''),
+            'have_printing' => $this->config->get('print_command'),
             'refresh_flag' => $refresh_flag,
             'icat_url' => defined('ICAT_URL') ? ICAT_URL : null,
-            'external_ccs_submission_url' => $this->dj->dbconfig_get('external_ccs_submission_url', ''),
+            'external_ccs_submission_url' => $this->config->get('external_ccs_submission_url'),
             'current_team_contest' => $team ? $this->dj->getCurrentContest($user->getTeamid()) : null,
             'current_team_contests' => $team ? $this->dj->getCurrentContests($user->getTeamid()) : null,
             'submission_languages' => $this->em->createQueryBuilder()
@@ -151,7 +159,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             'alpha3_countries' => Utils::ALPHA3_COUNTRIES,
             'show_shadow_differences' => $this->tokenStorage->getToken() &&
                                          $this->authorizationChecker->isGranted('ROLE_ADMIN') &&
-                                         $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL) === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
+                                         $this->config->get('data_source') === DOMJudgeService::DATA_SOURCE_CONFIGURATION_AND_LIVE_EXTERNAL,
         ];
     }
 
@@ -179,7 +187,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
         if ($datetime === null) {
             $datetime = Utils::now();
         }
-        if ($contest !== null && $this->dj->dbconfig_get('show_relative_time', false)) {
+        if ($contest !== null && $this->config->get('show_relative_time')) {
             $relativeTime = $contest->getContestTime((float)$datetime);
             $sign         = ($relativeTime < 0 ? -1 : 1);
             $relativeTime *= $sign;
@@ -202,7 +210,7 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
             }
         } else {
             if ($format === null) {
-                $format = $this->dj->dbconfig_get('time_format', '%H:%M');
+                $format = $this->config->get('time_format');
             }
             return Utils::printtime($datetime, $format);
         }
@@ -497,9 +505,9 @@ class TwigExtension extends AbstractExtension implements GlobalsInterface
     {
         require_once $this->dj->getDomjudgeEtcDir() . '/domserver-config.php';
 
-        $extCcsUrl = $this->dj->dbconfig_get('external_ccs_submission_url', '');
+        $extCcsUrl = $this->config->get('external_ccs_submission_url');
         if (!empty($extCcsUrl)) {
-            $dataSource = $this->dj->dbconfig_get('data_source', DOMJudgeService::DATA_SOURCE_LOCAL);
+            $dataSource = $this->config->get('data_source');
             if ($dataSource == 2) {
                 return str_replace(['[contest]', '[id]'], [$submission->getContest()->getExternalid(), $submission->getExternalid()], $extCcsUrl);
             } elseif ($dataSource == 1) {
@@ -885,7 +893,7 @@ JS;
      */
     public function scoreTime($time)
     {
-        return Utils::scoretime($time, (bool)$this->dj->dbconfig_get('score_in_seconds', false));
+        return Utils::scoretime($time, (bool)$this->config->get('score_in_seconds'));
     }
 
     /**
@@ -897,8 +905,8 @@ JS;
      */
     public function calculatePenaltyTime(bool $solved, int $num_submissions)
     {
-        return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->dj->dbconfig_get('penalty_time', 20),
-                                      (bool)$this->dj->dbconfig_get('score_in_seconds', false));
+        return Utils::calcPenaltyTime($solved, $num_submissions, (int)$this->config->get('penalty_time'),
+                                      (bool)$this->config->get('score_in_seconds'));
     }
 
     /**

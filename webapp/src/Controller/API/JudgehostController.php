@@ -13,6 +13,7 @@ use App\Entity\Submission;
 use App\Entity\Testcase;
 use App\Entity\User;
 use App\Service\BalloonService;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
@@ -48,6 +49,11 @@ class JudgehostController extends AbstractFOSRestController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -74,8 +80,10 @@ class JudgehostController extends AbstractFOSRestController
 
     /**
      * JudgehostController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param EventLogService        $eventLogService
      * @param ScoreboardService      $scoreboardService
      * @param SubmissionService      $submissionService
@@ -85,6 +93,7 @@ class JudgehostController extends AbstractFOSRestController
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         ScoreboardService $scoreboardService,
         SubmissionService $submissionService,
@@ -93,6 +102,7 @@ class JudgehostController extends AbstractFOSRestController
     ) {
         $this->em                = $em;
         $this->dj                = $dj;
+        $this->config            = $config;
         $this->eventLogService   = $eventLogService;
         $this->scoreboardService = $scoreboardService;
         $this->submissionService = $submissionService;
@@ -401,16 +411,16 @@ class JudgehostController extends AbstractFOSRestController
 
         // Merge defaults
         if (empty($result['memlimit'])) {
-            $result['memlimit'] = $this->dj->dbconfig_get('memory_limit');
+            $result['memlimit'] = $this->config->get('memory_limit');
         }
         if (empty($result['outputlimit'])) {
-            $result['outputlimit'] = $this->dj->dbconfig_get('output_limit');
+            $result['outputlimit'] = $this->config->get('output_limit');
         }
         if (empty($result['compare'])) {
-            $result['compare'] = $this->dj->dbconfig_get('default_compare');
+            $result['compare'] = $this->config->get('default_compare');
         }
         if (empty($result['run'])) {
-            $result['run'] = $this->dj->dbconfig_get('default_run');
+            $result['run'] = $this->config->get('default_run');
         }
 
         // Add executable MD5's
@@ -604,7 +614,7 @@ class JudgehostController extends AbstractFOSRestController
                     $this->dj->auditlog('judging', $judgingId, 'judged',
                                         'compiler-error', $hostname, $contestId);
 
-                    if (!$this->dj->dbconfig_get('verification_required', false) &&
+                    if (!$this->config->get('verification_required') &&
                         $judging->getRejudgingid() === null) {
                         $this->eventLogService->log('judging', $judgingId,
                                                     EventLogService::ACTION_UPDATE, $contestId);
@@ -998,8 +1008,8 @@ class JudgehostController extends AbstractFOSRestController
         /** @var Testcase $testCase */
         $testCase = $this->em->getRepository(Testcase::class)->find($testCaseId);
 
-        $resultsRemap = $this->dj->dbconfig_get('results_remap');
-        $resultsPrio  = $this->dj->dbconfig_get('results_prio');
+        $resultsRemap = $this->config->get('results_remap');
+        $resultsPrio  = $this->config->get('results_prio');
 
         if (array_key_exists($runResult, $resultsRemap)) {
             $this->logger->info('Testcase %d remapping result %s -> %s',
@@ -1087,7 +1097,7 @@ class JudgehostController extends AbstractFOSRestController
 
         if (($result = $this->submissionService->getFinalResult($allRuns, $resultsPrio)) !== null) {
             // Lookup global lazy evaluation of results setting and possible problem specific override.
-            $lazyEval    = $this->dj->dbconfig_get('lazy_eval_results', true);
+            $lazyEval    = $this->config->get('lazy_eval_results');
             $problemLazy = $judging->getSubmission()->getContestProblem()->getLazyEvalResults();
             if (isset($problemLazy)) {
                 $lazyEval = $problemLazy;
@@ -1125,7 +1135,7 @@ class JudgehostController extends AbstractFOSRestController
                 // Log to event table if no verification required
                 // (case of verification required is handled in
                 // jury/SubmissionController::verifyAction)
-                if (!$this->dj->dbconfig_get('verification_required', false)) {
+                if (!$this->config->get('verification_required')) {
                     if ($judging->getRejudgingid() === null) {
                         $this->eventLogService->log('judging', $judging->getJudgingid(),
                                                     EventLogService::ACTION_UPDATE,

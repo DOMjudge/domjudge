@@ -43,33 +43,13 @@ function dbconfig_init()
             error("JSON config '$key' decode: unknown error");
         }
 
-        switch ($type = $row['type']) {
-        case 'bool':
-        case 'int':
-            if (!is_int($val)) {
-                error("invalid type '$type' for config variable '$key'");
-            }
-            break;
-        case 'string':
-            if (!is_string($val)) {
-                error("invalid type '$type' for config variable '$key'");
-            }
-            break;
-        case 'array_val':
-        case 'array_keyval':
-            if (!is_array($val)) {
-                error("invalid type '$type' for config variable '$key'");
-            }
-            break;
-        default:
-            error("unknown type '$type' for config variable '$key'");
-        }
+        // TODO: here used to be a check for type. We have removed this after
+        // moving database configuration to a YAML file. This whole function
+        // should be removed at some point anyway and we only use it in legacy
+        // calls. Also we dont store the type and public values anymore, but
+        // we don't need them in the legacy code.
 
-        $LIBDBCONFIG[$key] = array('value' => $val,
-                                   'type' => $row['type'],
-                                   'public' => $row['public'],
-                                   'category' => $row['category'],
-                                   'desc' => $row['description']);
+        $LIBDBCONFIG[$key] = array('value' => $val);
     }
 }
 
@@ -79,11 +59,8 @@ function dbconfig_init()
  * values can be used.
  *
  * When $name is null, then all variables will be returned.
- *
- * Set $onlyifpublic to true to only return a value when this is
- * a variable marked 'public'.
  */
-function dbconfig_get(string $name, $default = null, bool $cacheok = true, bool $onlyifpublic = false)
+function dbconfig_get(string $name, $default = null, bool $cacheok = true)
 {
     global $LIBDBCONFIG;
 
@@ -94,14 +71,12 @@ function dbconfig_get(string $name, $default = null, bool $cacheok = true, bool 
     if (is_null($name)) {
         $ret = array();
         foreach ($LIBDBCONFIG as $name => $config) {
-            if ( !$onlyifpublic || $config['public'] ) {
-                $ret[$name] = $config['value'];
-            }
+            $ret[$name] = $config['value'];
         }
         return $ret;
     }
 
-    if (isset($LIBDBCONFIG[$name]) && (!$onlyifpublic || $LIBDBCONFIG[$name]['public'])) {
+    if (isset($LIBDBCONFIG[$name])) {
         return $LIBDBCONFIG[$name]['value'];
     }
 

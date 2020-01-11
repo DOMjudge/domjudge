@@ -45,6 +45,11 @@ class ImportExportService
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -58,12 +63,14 @@ class ImportExportService
         EntityManagerInterface $em,
         ScoreboardService $scoreboardService,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         ValidatorInterface $validator
     ) {
         $this->em                = $em;
         $this->scoreboardService = $scoreboardService;
         $this->dj                = $dj;
+        $this->config            = $config;
         $this->eventLogService   = $eventLogService;
         $this->validator         = $validator;
     }
@@ -90,9 +97,9 @@ class ImportExportService
                 true);
         }
         $data = array_merge($data, [
-            'penalty-time' => $this->dj->dbconfig_get('penalty_time'),
-            'default-clars' => $this->dj->dbconfig_get('clar_answers'),
-            'clar-categories' => array_values($this->dj->dbconfig_get('clar_categories')),
+            'penalty-time' => $this->config->get('penalty_time'),
+            'default-clars' => $this->config->get('clar_answers'),
+            'clar-categories' => array_values($this->config->get('clar_categories')),
             'languages' => [],
             'problems' => [],
         ]);
@@ -316,7 +323,7 @@ class ImportExportService
         if ($contest === null) {
             throw new BadRequestHttpException('No current contest');
         }
-        $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
+        $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
         $scoreboard       = $this->scoreboardService->getScoreboard($contest, true);
 
         $data = [];
@@ -382,7 +389,7 @@ class ImportExportService
             $categoryIds[] = $category->getCategoryid();
         }
 
-        $scoreIsInSeconds = (bool)$this->dj->dbconfig_get('score_in_seconds', false);
+        $scoreIsInSeconds = (bool)$this->config->get('score_in_seconds');
         $filter           = new Filter();
         $filter->setCategories($categoryIds);
         $scoreboard = $this->scoreboardService->getScoreboard($contest, true, $filter);

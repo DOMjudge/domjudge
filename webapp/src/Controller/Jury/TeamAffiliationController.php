@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Entity\TeamAffiliation;
 use App\Form\Type\TeamAffiliationType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ScoreboardService;
@@ -34,6 +35,11 @@ class TeamAffiliationController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
@@ -45,19 +51,23 @@ class TeamAffiliationController extends BaseController
 
     /**
      * TeamCategoryController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->config          = $config;
         $this->kernel          = $kernel;
         $this->eventLogService = $eventLogService;
     }
@@ -76,7 +86,7 @@ class TeamAffiliationController extends BaseController
             ->groupBy('a.affilid')
             ->getQuery()->getResult();
 
-        $showFlags = $this->dj->dbconfig_get('show_flags', true);
+        $showFlags = $this->config->get('show_flags');
 
         $table_fields = [
             'affilid' => ['title' => 'ID', 'sort' => true],
@@ -192,13 +202,13 @@ class TeamAffiliationController extends BaseController
 
         $data = [
             'teamAffiliation' => $teamAffiliation,
-            'showFlags' => $this->dj->dbconfig_get('show_flags', true),
+            'showFlags' => $this->config->get('show_flags'),
             'refresh' => [
                 'after' => 30,
                 'url' => $this->generateUrl('jury_team_affiliation', ['affilId' => $teamAffiliation->getAffilid()]),
                 'ajax' => true,
             ],
-            'maxWidth' => $this->dj->dbconfig_get('team_column_width', 0),
+            'maxWidth' => $this->config->get('team_column_width'),
         ];
 
         if ($currentContest = $this->dj->getCurrentContest()) {

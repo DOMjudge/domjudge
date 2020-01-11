@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Event;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportExportService;
@@ -44,10 +45,20 @@ class ContestController extends AbstractRestController
     protected $importExportService;
 
     /**
+     * @param EntityManagerInterface $entityManager
+     * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
+     * @param EventLogService        $eventLogService
      * @param ImportExportService    $importExportService
      */
-    public function __construct(EntityManagerInterface $entityManager, DOMJudgeService $dj, EventLogService $eventLogService, ImportExportService $importExportService) {
-        parent::__construct($entityManager, $dj, $eventLogService);
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EventLogService $eventLogService,
+        ImportExportService $importExportService
+    ) {
+        parent::__construct($entityManager, $dj, $config, $eventLogService);
         $this->importExportService = $importExportService;
     }
 
@@ -241,7 +252,7 @@ class ContestController extends AbstractRestController
     public function getContestYamlAction(Request $request, string $cid)
     {
         $contest      = $this->getContestWithId($request, $cid);
-        $penalty_time = $this->dj->dbconfig_get('penalty_time', 20);
+        $penalty_time = $this->config->get('penalty_time');
         $response     = new StreamedResponse();
         $response->setCallback(function () use ($contest, $penalty_time) {
             echo "name:                     " . $contest->getName() . "\n";

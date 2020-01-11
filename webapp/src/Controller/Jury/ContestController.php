@@ -12,6 +12,7 @@ use App\Entity\Team;
 use App\Form\Type\ContestType;
 use App\Form\Type\FinalizeContestType;
 use App\Form\Type\RemovedIntervalType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
@@ -43,6 +44,11 @@ class ContestController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
@@ -54,19 +60,23 @@ class ContestController extends BaseController
 
     /**
      * TeamCategoryController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->config          = $config;
         $this->eventLogService = $eventLogService;
         $this->kernel          = $kernel;
     }
@@ -209,7 +219,7 @@ class ContestController extends BaseController
 
         $currentContests = $this->dj->getCurrentContests();
 
-        $timeFormat = (string)$this->dj->dbconfig_get('time_format', '%H:%M');
+        $timeFormat = (string)$this->config->get('time_format');
 
         $etcDir = $this->dj->getDomjudgeEtcDir();
         require_once $etcDir . '/domserver-config.php';

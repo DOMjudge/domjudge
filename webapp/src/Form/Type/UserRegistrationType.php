@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Entity\Team;
 use App\Entity\TeamAffiliation;
 use App\Entity\User;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Utils\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,19 +33,30 @@ class UserRegistrationType extends AbstractType
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EntityManagerInterface
      */
     protected $em;
 
     /**
      * UserRegistrationType constructor.
+     *
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param EntityManagerInterface $em
      */
-    public function __construct(DOMJudgeService $dj, EntityManagerInterface $em)
-    {
-        $this->dj = $dj;
-        $this->em = $em;
+    public function __construct(
+        DOMJudgeService $dj,
+        ConfigurationService $config,
+        EntityManagerInterface $em
+    ) {
+        $this->dj     = $dj;
+        $this->config = $config;
+        $this->em     = $em;
     }
 
     /**
@@ -85,7 +97,7 @@ class UserRegistrationType extends AbstractType
                 'mapped' => false,
             ]);
 
-        if ($this->dj->dbconfig_get('show_affiliations', true)) {
+        if ($this->config->get('show_affiliations')) {
             $countries = [];
             foreach (Utils::ALPHA3_COUNTRIES as $alpha3 => $country) {
                 $countries["$country ($alpha3)"] = $alpha3;
@@ -174,7 +186,7 @@ class UserRegistrationType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $validateAffiliation = function ($data, ExecutionContext $context) {
-            if ($this->dj->dbconfig_get('show_affiliations', true)) {
+            if ($this->config->get('show_affiliations')) {
                 /** @var Form $form */
                 $form = $context->getRoot();
                 switch ($form->get('affiliation')->getData()) {

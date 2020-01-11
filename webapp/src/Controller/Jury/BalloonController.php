@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Entity\Balloon;
 use App\Entity\ScoreCache;
 use App\Entity\TeamAffiliation;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
@@ -35,23 +36,32 @@ class BalloonController extends AbstractController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
 
     /**
      * BalloonController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->config          = $config;
         $this->eventLogService = $eventLogService;
     }
 
@@ -60,8 +70,8 @@ class BalloonController extends AbstractController
      */
     public function indexAction(Request $request, Packages $assetPackage, KernelInterface $kernel)
     {
-        $timeFormat = (string)$this->dj->dbconfig_get('time_format', '%H:%M');
-        $showPostFreeze = (bool)$this->dj->dbconfig_get('show_balloons_postfreeze', false);
+        $timeFormat = (string)$this->config->get('time_format');
+        $showPostFreeze = (bool)$this->config->get('show_balloons_postfreeze');
 
         $em = $this->em;
 

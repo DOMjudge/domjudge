@@ -3,6 +3,7 @@
 namespace App\Serializer;
 
 use App\Entity\Contest;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use JMS\Serializer\EventDispatcher\Events;
 use JMS\Serializer\EventDispatcher\EventSubscriberInterface;
@@ -17,17 +18,18 @@ use JMS\Serializer\Metadata\StaticPropertyMetadata;
 class ContestVisitor implements EventSubscriberInterface
 {
     /**
-     * @var DOMJudgeService
+     * @var ConfigurationService
      */
-    private $dj;
+    protected $config;
 
     /**
      * ContestVisitor constructor.
-     * @param DOMJudgeService $dj
+     *
+     * @param ConfigurationService $config
      */
-    public function __construct(DOMJudgeService $dj)
+    public function __construct(ConfigurationService $config)
     {
-        $this->dj = $dj;
+        $this->config = $config;
     }
 
     /**
@@ -58,6 +60,6 @@ class ContestVisitor implements EventSubscriberInterface
             'penalty_time',
             null
         );
-        $visitor->visitProperty($property, (int)$this->dj->dbconfig_get('penalty_time'));
+        $visitor->visitProperty($property, (int)$this->config->get('penalty_time'));
     }
 }

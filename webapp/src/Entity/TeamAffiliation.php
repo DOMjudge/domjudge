@@ -76,7 +76,7 @@ class TeamAffiliation extends BaseApiEntity
      *     options={"comment"="ISO 3166-1 alpha-3 country code","default"="NULL",
      *              "fixed"=true},
      *     nullable=true)
-     * @Serializer\Expose(if="context.getAttribute('domjudge_service').dbconfig_get('show_flags', true)")
+     * @Serializer\Expose(if="context.getAttribute('config_service').get('show_flags')")
      * @Country()
      */
     private $country;

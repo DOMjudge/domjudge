@@ -5,6 +5,7 @@ namespace App\Controller\Jury;
 use App\Controller\BaseController;
 use App\Entity\Language;
 use App\Form\Type\PrintType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Utils\Printing;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,14 +36,25 @@ class PrintController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * PrintController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      */
-    public function __construct(EntityManagerInterface $em, DOMJudgeService $dj)
-    {
-        $this->em = $em;
-        $this->dj = $dj;
+    public function __construct(
+        EntityManagerInterface $em,
+        DOMJudgeService $dj,
+        ConfigurationService $config
+    ) {
+        $this->em     = $em;
+        $this->dj     = $dj;
+        $this->config = $config;
     }
 
     /**
@@ -53,7 +65,7 @@ class PrintController extends BaseController
      */
     public function showAction(Request $request)
     {
-        if (!$this->dj->dbconfig_get('print_command', '')) {
+        if (!$this->config->get('print_command')) {
             throw new AccessDeniedHttpException("Printing disabled in config");
         }
 

@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -28,16 +29,17 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     private $csrfTokenManager;
     private $security;
     private $em;
-    private $dj;
+    private $config;
     private $router;
     private $requestStack;
 
     /**
      * DOMJudgeIPAuthenticator constructor.
+     *
      * @param CsrfTokenManagerInterface $csrfTokenManager
      * @param Security                  $security
      * @param EntityManagerInterface    $em
-     * @param DOMJudgeService           $dj
+     * @param ConfigurationService      $config
      * @param RouterInterface           $router
      * @param RequestStack              $requestStack
      */
@@ -45,14 +47,14 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
         CsrfTokenManagerInterface $csrfTokenManager,
         Security $security,
         EntityManagerInterface $em,
-        DOMJudgeService $dj,
+        ConfigurationService $config,
         RouterInterface $router,
         RequestStack $requestStack
     ) {
         $this->csrfTokenManager = $csrfTokenManager;
         $this->security         = $security;
         $this->em               = $em;
-        $this->dj               = $dj;
+        $this->config           = $config;
         $this->router           = $router;
         $this->requestStack     = $requestStack;
     }
@@ -63,7 +65,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
     public function supports(Request $request)
     {
         // Make sure ipaddress auth is enabled.
-        $authmethods          = $this->dj->dbconfig_get('auth_methods', []);
+        $authmethods          = $this->config->get('auth_methods');
         $auth_allow_ipaddress = in_array('ipaddress', $authmethods);
         if (!$auth_allow_ipaddress) {
             return false;
@@ -81,7 +83,7 @@ class DOMJudgeIPAuthenticator extends AbstractGuardAuthenticator
             'security.firewall.map.context.api',
         ];
         $fwcontext             = $request->attributes->get('_firewall_context', '');
-        $ipAutologin           = $this->dj->dbconfig_get('ip_autologin', false);
+        $ipAutologin           = $this->config->get('ip_autologin');
         if (in_array($fwcontext, $stateless_fw_contexts) || $ipAutologin) {
             return true;
         }

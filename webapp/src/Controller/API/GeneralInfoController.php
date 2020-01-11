@@ -5,6 +5,7 @@ namespace App\Controller\API;
 use App\Entity\Contest;
 use App\Entity\User;
 use App\Service\CheckConfigService;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -39,6 +40,11 @@ class GeneralInfoController extends AbstractFOSRestController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var EventLogService
      */
     protected $eventLogService;
@@ -55,8 +61,10 @@ class GeneralInfoController extends AbstractFOSRestController
 
     /**
      * GeneralInfoController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param EventLogService        $eventLogService
      * @param CheckConfigService     $checkConfigService
      * @param RouterInterface        $router
@@ -64,6 +72,7 @@ class GeneralInfoController extends AbstractFOSRestController
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         CheckConfigService $checkConfigService,
         RouterInterface $router
@@ -73,6 +82,7 @@ class GeneralInfoController extends AbstractFOSRestController
         $this->eventLogService    = $eventLogService;
         $this->checkConfigService = $checkConfigService;
         $this->router             = $router;
+        $this->config             = $config;
     }
 
     /**
@@ -237,7 +247,7 @@ class GeneralInfoController extends AbstractFOSRestController
         $onlypublic = !($this->dj->checkrole('jury') || $this->dj->checkrole('judgehost'));
         $name       = $request->query->get('name');
 
-        $result = $this->dj->dbconfig_get($name, null, $onlypublic);
+        $result = $this->config->get($name, $onlypublic);
 
         if ($name !== null) {
             return [$name => $result];

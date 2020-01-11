@@ -4,6 +4,7 @@ namespace App\Controller\Team;
 
 use App\Controller\BaseController;
 use App\Entity\Team;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,6 +31,11 @@ class ScoreboardController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var ScoreboardService
      */
     protected $scoreboardService;
@@ -41,16 +47,20 @@ class ScoreboardController extends BaseController
 
     /**
      * ScoreboardController constructor.
+     *
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param ScoreboardService      $scoreboardService
      * @param EntityManagerInterface $em
      */
     public function __construct(
         DOMJudgeService $dj,
+        ConfigurationService $config,
         ScoreboardService $scoreboardService,
         EntityManagerInterface $em
     ) {
         $this->dj                = $dj;
+        $this->config            = $config;
         $this->scoreboardService = $scoreboardService;
         $this->em                = $em;
     }
@@ -89,8 +99,8 @@ class ScoreboardController extends BaseController
     public function teamAction(Request $request, int $teamId)
     {
         $team             = $this->em->getRepository(Team::class)->find($teamId);
-        $showFlags        = (bool)$this->dj->dbconfig_get('show_flags', true);
-        $showAffiliations = (bool)$this->dj->dbconfig_get('show_affiliations', true);
+        $showFlags        = (bool)$this->config->get('show_flags');
+        $showAffiliations = (bool)$this->config->get('show_affiliations');
         $data             = [
             'team' => $team,
             'showFlags' => $showFlags,

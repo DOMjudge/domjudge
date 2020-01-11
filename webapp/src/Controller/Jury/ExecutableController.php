@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\Entity\Executable;
 use App\Form\Type\ExecutableType;
 use App\Form\Type\ExecutableUploadType;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Utils\Utils;
@@ -42,6 +43,11 @@ class ExecutableController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var KernelInterface
      */
     protected $kernel;
@@ -53,19 +59,23 @@ class ExecutableController extends BaseController
 
     /**
      * ExecutableController constructor.
+     *
      * @param EntityManagerInterface $em
      * @param DOMJudgeService        $dj
+     * @param ConfigurationService   $config
      * @param KernelInterface        $kernel
      * @param EventLogService        $eventLogService
      */
     public function __construct(
         EntityManagerInterface $em,
         DOMJudgeService $dj,
+        ConfigurationService $config,
         KernelInterface $kernel,
         EventLogService $eventLogService
     ) {
         $this->em              = $em;
         $this->dj              = $dj;
+        $this->config          = $config;
         $this->kernel          = $kernel;
         $this->eventLogService = $eventLogService;
     }
@@ -219,8 +229,8 @@ class ExecutableController extends BaseController
 
         return $this->render('jury/executable.html.twig', [
             'executable' => $executable,
-            'default_compare' => (string)$this->dj->dbconfig_get('default_compare'),
-            'default_run' => (string)$this->dj->dbconfig_get('default_run'),
+            'default_compare' => (string)$this->config->get('default_compare'),
+            'default_run' => (string)$this->config->get('default_run'),
         ]);
     }
 

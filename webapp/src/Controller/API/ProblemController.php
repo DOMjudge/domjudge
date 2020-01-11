@@ -7,6 +7,7 @@ use App\Entity\ContestProblem;
 use App\Entity\Problem;
 use App\Helpers\ContestProblemWrapper;
 use App\Helpers\OrdinalArray;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\EventLogService;
 use App\Service\ImportProblemService;
@@ -39,10 +40,11 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
     public function __construct(
         EntityManagerInterface $entityManager,
         DOMJudgeService $DOMJudgeService,
+        ConfigurationService $config,
         EventLogService $eventLogService,
         ImportProblemService $importProblemService
     ) {
-        parent::__construct($entityManager, $DOMJudgeService, $eventLogService);
+        parent::__construct($entityManager, $DOMJudgeService, $config, $eventLogService);
         $this->importProblemService = $importProblemService;
     }
 

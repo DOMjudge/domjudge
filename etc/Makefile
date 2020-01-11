@@ -37,7 +37,7 @@ install-domserver:
 	$(INSTALL_PROG) -t $(DESTDIR)$(domserver_etcdir) \
 		gendbpasswords genrestapicredentials genadminpassword
 	$(INSTALL_DATA) -t $(DESTDIR)$(domserver_etcdir) \
-		domserver-config.php common-config.php verdicts.php
+		domserver-config.php common-config.php verdicts.php db-config.yaml
 # Password files are installed from root Makefile.
 
 install-judgehost:

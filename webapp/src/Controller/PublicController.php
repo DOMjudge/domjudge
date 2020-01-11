@@ -6,6 +6,7 @@ use App\Entity\ContestProblem;
 use App\Entity\Language;
 use App\Entity\Team;
 use App\Entity\Testcase;
+use App\Service\ConfigurationService;
 use App\Service\DOMJudgeService;
 use App\Service\ScoreboardService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,6 +34,11 @@ class PublicController extends BaseController
     protected $dj;
 
     /**
+     * @var ConfigurationService
+     */
+    protected $config;
+
+    /**
      * @var ScoreboardService
      */
     protected $scoreboardService;
@@ -44,10 +50,12 @@ class PublicController extends BaseController
 
     public function __construct(
         DOMJudgeService $dj,
+        ConfigurationService $config,
         ScoreboardService $scoreboardService,
         EntityManagerInterface $em
     ) {
         $this->dj                = $dj;
+        $this->config            = $config;
         $this->scoreboardService = $scoreboardService;
         $this->em                = $em;
     }
@@ -149,8 +157,8 @@ class PublicController extends BaseController
     public function teamAction(Request $request, int $teamId)
     {
         $team             = $this->em->getRepository(Team::class)->find($teamId);
-        $showFlags        = (bool)$this->dj->dbconfig_get('show_flags', true);
-        $showAffiliations = (bool)$this->dj->dbconfig_get('show_affiliations', true);
+        $showFlags        = (bool)$this->config->get('show_flags');
+        $showAffiliations = (bool)$this->config->get('show_affiliations');
         $data             = [
             'team' => $team,
             'showFlags' => $showFlags,
@@ -173,8 +181,8 @@ class PublicController extends BaseController
     public function problemsAction()
     {
         $contest            = $this->dj->getCurrentContest(-1);
-        $showLimits         = (bool)$this->dj->dbconfig_get('show_limits_on_team_page');
-        $defaultMemoryLimit = (int)$this->dj->dbconfig_get('memory_limit', 0);
+        $showLimits         = (bool)$this->config->get('show_limits_on_team_page');
+        $defaultMemoryLimit = (int)$this->config->get('memory_limit');
         $timeFactorDiffers  = false;
         if ($showLimits) {
             $timeFactorDiffers = $this->em->createQueryBuilder()
