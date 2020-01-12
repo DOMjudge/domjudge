@@ -2,6 +2,7 @@
 
 namespace Tests\Utils\Scoreboard;
 
+use App\Entity\Configuration;
 use App\Entity\Contest;
 use App\Entity\ContestProblem;
 use App\Entity\Judgehost;
@@ -69,6 +70,14 @@ class ScoreboardTest extends KernelTestCase
         $this->dj = self::$container->get(DOMJudgeService::class);
         $this->ss = self::$container->get(ScoreboardService::class);
         $this->em = self::$container->get('doctrine')->getManager();
+
+        // Reset scoring related config to default.
+        $config = $this->em->getRepository(Configuration::class);
+        $config->findOneBy(['name' => 'verification_required'])->setValue(false);
+        $config->findOneBy(['name' => 'penalty_time'])->setValue(20);
+        $config->findOneBy(['name' => 'compile_penalty'])->setValue(false);
+        $config->findOneBy(['name' => 'score_in_seconds'])->setValue(false);
+        $config->findOneBy(['name' => 'data_source'])->setValue(0);
 
         // Create a contest, problems and teams for which to test the
         // scoreboard. These get deleted again in tearDown().
@@ -297,6 +306,7 @@ class ScoreboardTest extends KernelTestCase
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+57.240, null);
 
         $team = $this->teams[1];
+        $this->createSubmission($lang, $this->problems[0], $team, 61*60+00.000, 'compiler-error');
         $this->createSubmission($lang, $this->problems[0], $team, 69*60+00.000, 'correct');
         $this->createSubmission($lang, $this->problems[0], $team, 72*60+07.824, 'wrong-answer');
         $this->createSubmission($lang, $this->problems[1], $team, 72*60+39.733, 'wrong-answer');
