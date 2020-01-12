@@ -97,6 +97,7 @@ class ContestController extends AbstractRestController
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function listAction(Request $request)
@@ -117,6 +118,7 @@ class ContestController extends AbstractRestController
      *     @Model(type=Contest::class)
      * )
      * @SWG\Parameter(ref="#/parameters/cid")
+     * @SWG\Parameter(ref="#/parameters/strict")
      */
     public function singleAction(Request $request, string $cid)
     {

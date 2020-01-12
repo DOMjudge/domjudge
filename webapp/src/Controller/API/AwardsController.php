@@ -62,6 +62,7 @@ class AwardsController extends AbstractRestController
      *         @SWG\Items(ref="#/definitions/Award")
      *     )
      * )
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @throws \Exception
      */
     public function listAction(Request $request)
@@ -81,6 +82,7 @@ class AwardsController extends AbstractRestController
      *     @SWG\Schema(ref="#/definitions/Award")
      * )
      * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @throws \Exception
      */
     public function singleAction(Request $request, string $id)

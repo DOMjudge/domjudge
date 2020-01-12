@@ -36,6 +36,7 @@ class ClarificationController extends AbstractRestController
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @SWG\Parameter(
      *     name="problem",
      *     in="query",
@@ -63,6 +64,7 @@ class ClarificationController extends AbstractRestController
      *     @Model(type=Clarification::class)
      * )
      * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

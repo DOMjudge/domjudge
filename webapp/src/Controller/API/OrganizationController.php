@@ -34,6 +34,7 @@ class OrganizationController extends AbstractRestController
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @SWG\Parameter(
      *     name="country",
      *     in="query",
@@ -60,6 +61,7 @@ class OrganizationController extends AbstractRestController
      *     @Model(type=TeamAffiliation::class)
      * )
      * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

@@ -60,6 +60,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      */
@@ -227,6 +228,7 @@ class ProblemController extends AbstractRestController implements QueryObjectTra
      *     ref="#/definitions/ContestProblem"
      * )
      * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

@@ -35,6 +35,7 @@ class TeamController extends AbstractRestController
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @SWG\Parameter(
      *     name="category",
      *     in="query",
@@ -73,6 +74,7 @@ class TeamController extends AbstractRestController
      *     @Model(type=Team::class)
      * )
      * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

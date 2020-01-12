@@ -34,6 +34,7 @@ class LanguageController extends AbstractRestController
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function listAction(Request $request)
@@ -54,6 +55,7 @@ class LanguageController extends AbstractRestController
      *     @Model(type=Language::class)
      * )
      * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

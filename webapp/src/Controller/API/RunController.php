@@ -58,6 +58,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @SWG\Parameter(
      *     name="first_id",
      *     in="query",
@@ -108,6 +109,7 @@ class RunController extends AbstractRestController implements QueryObjectTransfo
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

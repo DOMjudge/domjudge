@@ -61,6 +61,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @SWG\Parameter(
      *     name="result",
      *     in="query",
@@ -99,6 +100,7 @@ class JudgementController extends AbstractRestController implements QueryObjectT
      *     )
      * )
      * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {

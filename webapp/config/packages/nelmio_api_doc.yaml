@@ -173,6 +173,12 @@ nelmio_api_doc:
                 items:
                     type: string
                     description: A single ID
+            strict:
+                name: strict
+                in: query
+                type: boolean
+                default: false
+                description: Whether to only include CCS compliant properties in the response
 
     areas:
         path_patterns: [ ^/api/v4 ]

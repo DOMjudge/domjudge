@@ -26,6 +26,7 @@ class GroupController extends AbstractRestController
      * @return \Symfony\Component\HttpFoundation\Response
      * @Rest\Get("")
      * @SWG\Parameter(ref="#/parameters/idlist")
+     * @SWG\Parameter(ref="#/parameters/strict")
      * @SWG\Parameter(
      *     name="public",
      *     in="query",
@@ -60,6 +61,7 @@ class GroupController extends AbstractRestController
      *     @Model(type=TeamCategory::class)
      * )
      * @SWG\Parameter(ref="#/parameters/id")
+     * @SWG\Parameter(ref="#/parameters/strict")
      */
     public function singleAction(Request $request, string $id)
     {
