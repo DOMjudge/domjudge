@@ -334,6 +334,33 @@ class ScoreboardTest extends KernelTestCase
         $this->em->flush();
     }
 
+    public function testFTSwithQueuedRejudging()
+    {
+        $lang = $this->em->getRepository(Language::class)->find('c');
+
+        $team = $this->teams[0];
+        $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'wrong-answer')
+            ->setJudgehost(null)
+            ->setRejudgingid($this->rejudging->getRejudgingid());
+
+        $this->createSubmission($lang, $this->problems[0], $team, 55*60+59.841, 'correct');
+
+        $team = $this->teams[1];
+        $this->createSubmission($lang, $this->problems[0], $team, 54*60+15.054, 'correct');
+
+        $this->em->flush();
+        $this->recalcScoreCaches();
+
+        $expected_fts = [
+            [ 'problem' => $this->problems[0], 'team' => $this->teams[1] ],
+        ];
+
+        foreach ([ false, true ] as $jury) {
+            $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
+            $this->assertFTSMatch($expected_fts, $scoreboard);
+        }
+    }
+
     function assertScoresMatch($expected_scores, $scoreboard)
     {
         $scores = $scoreboard->getScores();
