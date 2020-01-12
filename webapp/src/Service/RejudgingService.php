@@ -46,7 +46,7 @@ class RejudgingService
     /**
      * RejudgingService constructor.
      * @param EntityManagerInterface $em
-     * @param DOMJudgeService        $DOMJudgeService
+     * @param DOMJudgeService        $dj
      * @param ScoreboardService      $scoreboardService
      * @param EventLogService        $eventLogService
      * @param BalloonService         $balloonService
@@ -63,6 +63,111 @@ class RejudgingService
         $this->scoreboardService = $scoreboardService;
         $this->eventLogService   = $eventLogService;
         $this->balloonService    = $balloonService;
+    }
+
+    /**
+     * Create a new rejudging (either a full Rejudging or a direct rejudge)
+     * @param string        $reason           Reason for this rejudging
+     * @param array         $judgings         List of judgings to rejudging
+     * @param bool          $fullRejudge      Whether a Rejudging should be created
+     * @param array        &$skipped          Returns list of judgings not included
+     * @return Rejudging|bool
+     */
+    public function createRejudging(
+        string $reason,
+        array $judgings,
+        bool $fullRejudge,
+        array &$skipped
+    ) {
+        /** @var Rejudging|null $rejudging */
+        $rejudging = null;
+        if ($fullRejudge) {
+            $rejudging = new Rejudging();
+            $rejudging
+                ->setStartUser($this->dj->getUser())
+                ->setStarttime(Utils::now())
+                ->setReason($reason);
+            $this->em->persist($rejudging);
+            $this->em->flush();
+        }
+
+        $singleJudging = count($judgings) == 1;
+        foreach ($judgings as $judging) {
+            $submission = $judging['submission'];
+            if ($submission['rejudgingid'] !== null) {
+                $skipped[] = $judging;
+
+                if ($singleJudging) {
+                    // Clean up already associated rejudging before throwing an error.
+                    if ($rejudging) {
+                        $this->em->remove($rejudging);
+                        $this->em->flush();
+                    }
+                    return false;
+                } else {
+                    // just skip that submission
+                    continue;
+                }
+            }
+
+            $this->em->transactional(function () use (
+                $singleJudging,
+                $fullRejudge,
+                $judging,
+                $submission,
+                $rejudging
+            ) {
+                if (!$fullRejudge) {
+                    $this->em->getConnection()->executeUpdate(
+                        'UPDATE judging SET valid = false WHERE judgingid = :judgingid',
+                        [ ':judgingid' => $judging['judgingid'] ]
+                    );
+                }
+
+                $this->em->getConnection()->executeUpdate(
+                    'UPDATE submission SET judgehost = null WHERE submitid = :submitid AND rejudgingid IS NULL',
+                    [ ':submitid' => $submission['submitid'] ]
+                );
+                if ($rejudging) {
+                    $this->em->getConnection()->executeUpdate(
+                        'UPDATE submission SET rejudgingid = :rejudgingid WHERE submitid = :submitid AND rejudgingid IS NULL',
+                        [
+                            ':rejudgingid' => $rejudging->getRejudgingid(),
+                            ':submitid' => $submission['submitid'],
+                        ]
+                    );
+                }
+
+                if ($singleJudging) {
+                    $teamid = $submission['teamid'];
+                    if ($teamid) {
+                        $this->em->getConnection()->executeUpdate(
+                            'UPDATE team SET judging_last_started = null WHERE teamid = :teamid',
+                            [ ':teamid' => $teamid ]
+                        );
+                    }
+                }
+
+                if (!$fullRejudge) {
+                    // Clear entity manager to get fresh data
+                    $this->em->clear();
+                    $contest = $this->em->getRepository(Contest::class)
+                        ->find($submission['cid']);
+                    $team    = $this->em->getRepository(Team::class)
+                        ->find($submission['teamid']);
+                    $problem = $this->em->getRepository(Problem::class)
+                        ->find($submission['probid']);
+                    $scoreboardService->calculateScoreRow($contest, $team, $problem);
+                }
+            });
+
+            if (!$fullRejudge) {
+                $this->dj->auditlog('judging', $judging['judgingid'], 'mark invalid', '(rejudge)');
+            }
+        }
+
+        if ($rejudging) return $rejudging;
+        return true;
     }
 
     /**
