@@ -462,22 +462,18 @@ class ScoreboardService
                     tc.sortorder = :teamSortOrder AND
                     round(s.submittime,4) < :submitTime', $params);
             } else {
-                if ($verificationRequired) {
-                    $verificationRequiredExtra = 'OR j.verified = 0';
-                } else {
-                    $verificationRequiredExtra = '';
-                }
-                $firstToSolve = 0 == $this->em->getConnection()->fetchColumn(sprintf('
+                $verificationRequiredExtra = $verificationRequired ? 'OR j.verified = 0' : '';
+                $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
                 SELECT count(*) FROM submission s
                     LEFT JOIN judging j USING (submitid)
                     LEFT JOIN team t USING(teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
-                    ((j.valid = 1 AND ( j.rejudgingid IS NULL AND (j.result IS NULL OR j.result = :correctResult %s))) OR
-                      s.judgehost IS NULL) AND
+                    ((j.valid = 1 AND (j.result IS NULL OR j.result = :correctResult '.
+                    $verificationRequiredExtra.')) OR s.judgehost IS NULL) AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
-                    round(s.submittime,4) < :submitTime', $verificationRequiredExtra), $params);
+                    round(s.submittime,4) < :submitTime', $params);
             }
         }
 
