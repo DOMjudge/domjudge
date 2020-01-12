@@ -464,12 +464,12 @@ class ScoreboardService
                 $verificationRequiredExtra = $verificationRequired ? 'OR j.verified = 0' : '';
                 $firstToSolve = 0 == $this->em->getConnection()->fetchColumn('
                 SELECT count(*) FROM submission s
-                    LEFT JOIN judging j USING (submitid)
-                    LEFT JOIN team t USING(teamid)
+                    LEFT JOIN judging j ON (s.submitid=j.submitid AND j.valid=1)
+                    LEFT JOIN team t USING (teamid)
                     LEFT JOIN team_category tc USING (categoryid)
                 WHERE s.valid = 1 AND
-                    ((j.valid = 1 AND (j.result IS NULL OR j.result = :correctResult '.
-                    $verificationRequiredExtra.')) OR s.judgehost IS NULL) AND
+                    (j.judgingid IS NULL OR j.result IS NULL OR j.result = :correctResult '.
+                    $verificationRequiredExtra.') AND
                     s.cid = :cid AND s.probid = :probid AND
                     tc.sortorder = :teamSortOrder AND
                     round(s.submittime,4) < :submitTime', $params);
