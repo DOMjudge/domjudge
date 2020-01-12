@@ -9,6 +9,7 @@ use App\Entity\Judgehost;
 use App\Entity\Judging;
 use App\Entity\Language;
 use App\Entity\Problem;
+use App\Entity\Rejudging;
 use App\Entity\Submission;
 use App\Entity\Team;
 use App\Entity\TeamCategory;
@@ -18,6 +19,7 @@ use App\Utils\Scoreboard\Scoreboard;
 use App\Utils\Scoreboard\SingleTeamScoreboard;
 use App\Utils\Scoreboard\ScoreboardMatrixItem;
 use App\Utils\Scoreboard\TeamScore;
+use App\Utils\Utils;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -52,6 +54,11 @@ class ScoreboardTest extends KernelTestCase
      * @var App\Entity\Judgehost
      */
     private $judgehost;
+
+    /**
+     * @var App\Entity\Rejudging
+     */
+    private $rejudging;
 
     /**
      * @var App\Entity\Problem[]
@@ -101,6 +108,12 @@ class ScoreboardTest extends KernelTestCase
             $this->em->persist($this->judgehost);
         }
 
+        $this->rejudging = new Rejudging();
+        $this->rejudging
+            ->setStarttime(Utils::now())
+            ->setReason(self::CONTEST_NAME);
+        $this->em->persist($this->rejudging);
+
         $category = $this->em->getRepository(TeamCategory::class)
             ->findOneBy(['sortorder' => 0]);
 
@@ -141,6 +154,7 @@ class ScoreboardTest extends KernelTestCase
         if ( !$this->hasFailed() ) {
             $this->em->remove($this->contest);
             $this->em->remove($this->judgehost);
+            $this->em->remove($this->rejudging);
             foreach ($this->teams    as $team)    $this->em->remove($team);
             foreach ($this->problems as $problem) $this->em->remove($problem);
         }
@@ -252,7 +266,7 @@ class ScoreboardTest extends KernelTestCase
 
         $team = $this->teams[0];
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'correct', true)
-            ->getJudgings()[0]->setRejudgingid(1);
+            ->getJudgings()[0]->setRejudgingid($this->rejudging->getRejudgingid());
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+57.240, null);
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+59.841, 'wrong-answer');
         $this->createSubmission($lang, $this->problems[1], $team, 61*60+00.000, 'correct', true);
@@ -285,7 +299,7 @@ class ScoreboardTest extends KernelTestCase
 
         $team = $this->teams[0];
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'correct', true)
-            ->getJudgings()[0]->setRejudgingid(1);
+            ->getJudgings()[0]->setRejudgingid($this->rejudging->getRejudgingid());
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+57.240, null);
         $this->createSubmission($lang, $this->problems[0], $team, 53*60+59.841, 'wrong-answer');
         $this->createSubmission($lang, $this->problems[1], $team, 61*60+00.000, 'correct', true);
