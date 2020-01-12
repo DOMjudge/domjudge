@@ -93,7 +93,7 @@ class ConfigurationService
      */
     public function get(string $name, bool $onlyIfPublic = false)
     {
-        $spec = $this->getConfigSpecification()[$name];
+        $spec = $this->getConfigSpecification()[$name] ?? null;
 
         if (!isset($spec) || ($onlyIfPublic && !$spec['public'])) {
             throw new Exception("Configuration variable '$name' not found.");
@@ -148,6 +148,7 @@ class ConfigurationService
         $cacheFile = $this->cacheDir . '/djDbConfig.php';
         $this->configCache->cache($cacheFile,
             function (ConfigCacheInterface $cache) {
+                // @codeCoverageIgnoreStart
                 $yamlDbConfigFile = $this->etcDir . '/db-config.yaml';
                 $fileLocator      = new FileLocator($this->etcDir);
                 $loader           = new YamlConfigLoader($fileLocator);
@@ -171,6 +172,7 @@ EOF;
 
                 $cache->write($specification,
                     [new FileResource($yamlDbConfigFile)]);
+                // @codeCoverageIgnoreEnd
             });
 
         $specification = require $cacheFile;
