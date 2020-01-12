@@ -246,6 +246,80 @@ class ScoreboardTest extends KernelTestCase
         $this->assertFTSMatch($expected_fts, $scoreboard);
     }
 
+    public function testOneSingleFTS()
+    {
+        $lang = $this->em->getRepository(Language::class)->find('c');
+
+        $team = $this->teams[0];
+        $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'correct', true)
+            ->getJudgings()[0]->setRejudgingid(1);
+        $this->createSubmission($lang, $this->problems[0], $team, 53*60+57.240, null);
+        $this->createSubmission($lang, $this->problems[0], $team, 53*60+59.841, 'wrong-answer');
+        $this->createSubmission($lang, $this->problems[1], $team, 61*60+00.000, 'correct', true);
+
+        $team = $this->teams[1];
+        $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.054, 'correct', true);
+        $this->createSubmission($lang, $this->problems[1], $team, 59*60+59.999, 'correct');
+
+        $this->em->flush();
+
+        $expected_fts = [
+            [ 'problem' => $this->problems[0], 'team' => $this->teams[0] ],
+            [ 'problem' => $this->problems[1], 'team' => $this->teams[1] ],
+        ];
+
+        foreach ([ false, true ] as $jury) {
+            foreach([ null, '+1:00:00', '+1:20:00' ] as $freeze) {
+                $this->contest->setFreezetimeString($freeze);
+                $this->recalcScoreCaches();
+
+                $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
+                $this->assertFTSMatch($expected_fts, $scoreboard);
+            }
+        }
+    }
+
+    public function testFTSwithVerificationRequired()
+    {
+        $lang = $this->em->getRepository(Language::class)->find('c');
+
+        $team = $this->teams[0];
+        $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.053, 'correct', true)
+            ->getJudgings()[0]->setRejudgingid(1);
+        $this->createSubmission($lang, $this->problems[0], $team, 53*60+57.240, null);
+        $this->createSubmission($lang, $this->problems[0], $team, 53*60+59.841, 'wrong-answer');
+        $this->createSubmission($lang, $this->problems[1], $team, 61*60+00.000, 'correct', true);
+
+        $team = $this->teams[1];
+        $this->createSubmission($lang, $this->problems[0], $team, 53*60+15.054, 'wrong-answer', true);
+        $this->createSubmission($lang, $this->problems[1], $team, 59*60+59.999, 'correct');
+
+        // FIXME: use ConfigureService mock once merged.
+        $config = $this->em->getRepository(Configuration::class);
+        $config->findOneBy(['name' => 'verification_required'])->setValue(true);
+
+        $this->em->flush();
+
+        $expected_fts = [
+            [ 'problem' => $this->problems[0], 'team' => $this->teams[0] ],
+            // problems[1] is solved by teams[0], but teams[1] has an earlier
+            // unverified submission.
+        ];
+
+        foreach ([ false, true ] as $jury) {
+            foreach([ null, '+1:00:00', '+1:20:00' ] as $freeze) {
+                $this->contest->setFreezetimeString($freeze);
+                $this->recalcScoreCaches();
+
+                $scoreboard = $this->ss->getScoreboard($this->contest, $jury);
+                $this->assertFTSMatch($expected_fts, $scoreboard);
+            }
+        }
+
+        $config->findOneBy(['name' => 'verification_required'])->setValue(false);
+        $this->em->flush();
+    }
+
     function assertScoresMatch($expected_scores, $scoreboard)
     {
         $scores = $scoreboard->getScores();
