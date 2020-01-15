@@ -2,7 +2,8 @@ DOMjudge Programming Contest Judging System
 
 Version 7.3.0 - DEV
 -------------------
-
+ - Move specification of database configuration out of database and into
+   a YAML file.
 
 Version 7.2.0 - 4 January 2020
 ------------------------------
