@@ -20,14 +20,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  *         @ORM\Index(name="categoryid", columns={"categoryid"})
  *     },
  *     uniqueConstraints={
- *         @ORM\UniqueConstraint(name="externalid", columns={"externalid"}, options={"lengths": {"190"}}),
+ *         @ORM\UniqueConstraint(name="icpcid", columns={"icpcid"}, options={"lengths": {"190"}}),
  *     })
- * @Serializer\VirtualProperty(
- *     "externalid_nonstrict",
- *     exp="object.getExternalId()",
- *     options={@Serializer\SerializedName("externalid"), @Serializer\Type("string"), @Serializer\Groups({"Nonstrict"})}
- * )
- * @UniqueEntity("externalid")
+ * @UniqueEntity("icpcid")
  */
 class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 {
@@ -44,11 +39,11 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
 
     /**
      * @var string
-     * @ORM\Column(type="string", name="externalid", length=255, options={"comment"="Team ID in an external system",
+     * @ORM\Column(type="string", name="icpcid", length=255, options={"comment"="Team ID in the ICPC system",
      *                            "collation"="utf8mb4_bin","default"="NULL"}, nullable=true)
      * @Serializer\SerializedName("icpc_id")
      */
-    protected $externalid;
+    protected $icpcid;
 
     /**
      * @var string
@@ -217,27 +212,27 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     }
 
     /**
-     * Set externalid
+     * Set icpcid
      *
-     * @param string $externalid
+     * @param string $icpcid
      *
      * @return Team
      */
-    public function setExternalid($externalid)
+    public function setIcpcid($icpcid)
     {
-        $this->externalid = $externalid;
+        $this->icpcid = $icpcid;
 
         return $this;
     }
 
     /**
-     * Get externalid
+     * Get icpcid
      *
      * @return string
      */
-    public function getExternalid()
+    public function getIcpcid()
     {
-        return $this->externalid;
+        return $this->icpcid;
     }
 
     /**

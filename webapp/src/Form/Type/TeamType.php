@@ -8,6 +8,7 @@ use App\Entity\TeamAffiliation;
 use App\Entity\TeamCategory;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -21,7 +22,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Regex;
 
-class TeamType extends AbstractExternalIdEntityType
+class TeamType extends AbstractType
 {
     /**
      * @param FormBuilderInterface $builder
@@ -30,9 +31,10 @@ class TeamType extends AbstractExternalIdEntityType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('externalid', TextType::class, [
-            'label' => 'External ID',
+        $builder->add('icpcid', TextType::class, [
+            'label' => 'ICPC ID',
             'required' => false,
+            'help' => 'ID of the team in the ICPC CMS',
             'constraints' => [
                 new Regex(
                     [

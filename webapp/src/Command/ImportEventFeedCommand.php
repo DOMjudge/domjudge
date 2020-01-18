@@ -986,7 +986,7 @@ class ImportEventFeedCommand extends Command
                 $this->em->flush();
                 $this->eventLogService->log('teams', $team->getTeamid(),
                                             EventLogService::ACTION_DELETE,
-                                            $this->contestId, null, $team->getExternalid());
+                                            $this->contestId, null, $team->getTeamid());
                 return;
             } else {
                 $this->logger->error('Cannot delete nonexistent team %s', [ $teamId ]);
@@ -1003,7 +1003,7 @@ class ImportEventFeedCommand extends Command
             $team = new Team();
             $team
                 ->setTeamid($teamId)
-                ->setExternalid($icpcId);
+                ->setIcpcid($icpcId);
             $action = EventLogService::ACTION_CREATE;
         }
 
@@ -1063,7 +1063,7 @@ class ImportEventFeedCommand extends Command
         $this->em->flush();
         $this->eventLogService->log('teams', $team->getTeamid(), $action, $this->contestId);
 
-        $this->processPendingEvents('team', $team->getExternalid());
+        $this->processPendingEvents('team', $team->getTeamid());
     }
 
     /**
@@ -1281,13 +1281,13 @@ class ImportEventFeedCommand extends Command
         // If any of the other fields are different, this is an error
         if ($submission) {
             $matches = true;
-            if ($submission->getTeam()->getExternalid() !== $team->getExternalid()) {
+            if ($submission->getTeam()->getTeamid() !== $team->getTeamid()) {
                 $this->logger->error(
                     'Got new event for submission %s with different team ID (%s instead of %s)',
                     [
                         $submission->getExternalid(),
-                        $team->getExternalid(),
-                        $submission->getTeam()->getExternalid()
+                        $team->getTeamid(),
+                        $submission->getTeam()->getTeamid()
                     ]
                 );
                 $matches = false;

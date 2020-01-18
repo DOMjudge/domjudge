@@ -127,7 +127,8 @@ class BaylorCmsService
                  * FIXME: team members are behind a different API call and not important for now
                  */
 
-                $team = $this->em->getRepository(Team::class)->findOneBy(['externalid' => $teamData['teamId']]);
+                /** @var Team $team */
+                $team = $this->em->getRepository(Team::class)->findOneBy(['icpcid' => $teamData['teamId']]);
                 // Note: teams are not deleted but disabled depending on their status
                 $enabled = $teamData['status'] === 'ACCEPTED';
                 if ($team === null) {
@@ -138,7 +139,7 @@ class BaylorCmsService
                         ->setAffiliation($affiliation)
                         ->setEnabled($enabled)
                         ->setComments('Status: ' . $teamData['status'])
-                        ->setExternalid($teamData['teamId'])
+                        ->setIcpcid($teamData['teamId'])
                         ->setRoom($siteName);
                     $this->em->persist($team);
                     $this->em->flush();
@@ -160,7 +161,7 @@ class BaylorCmsService
                         ->setAffiliation($affiliation)
                         ->setEnabled($enabled)
                         ->setComments('Status: ' . $teamData['status'])
-                        ->setExternalid($teamData['teamId'])
+                        ->setIcpcid($teamData['teamId'])
                         ->setRoom($siteName);
 
                     $user = $this->em->getRepository(User::class)->findOneBy(['username' => $username]);
