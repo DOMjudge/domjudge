@@ -660,7 +660,7 @@ class CheckConfigService
         $desc = '';
         $seen = [];
         foreach ($teams as $team) {
-            $seen[$team->getName()][] = $team->getTeamid();
+            $seen[$team->getEffectiveName()][] = $team->getTeamid();
         }
         foreach ($seen as $teamname => $teams) {
             if (count($teams) > 1) {

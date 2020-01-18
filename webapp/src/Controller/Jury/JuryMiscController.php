@@ -101,16 +101,17 @@ class JuryMiscController extends BaseController
             }, $problems);
         } elseif ($datatype === 'teams') {
             $teams = $qb->from(Team::class, 't')
-                ->select('t.teamid', 't.name')
+                ->select('t.teamid', 't.display_name', 't.name', 'COALESCE(t.display_name, t.name) AS order')
                 ->where($qb->expr()->like('t.name', '?1'))
+                ->orWhere($qb->expr()->like('t.display_name', '?1'))
                 ->orWhere($qb->expr()->eq('t.teamid', '?2'))
-                ->orderBy('t.name', 'ASC')
+                ->orderBy('order', 'ASC')
                 ->getQuery()->setParameter(1, '%' . $q . '%')
                 ->setParameter(2, $q)
                 ->getResult();
 
             $results = array_map(function (array $team) {
-                $displayname = $team['name'] . " (t" . $team['teamid'] . ")";
+                $displayname = ($team['display_name'] ?? $team['name']) . " (t" . $team['teamid'] . ")";
                 return [
                     'id' => $team['teamid'],
                     'text' => $displayname,

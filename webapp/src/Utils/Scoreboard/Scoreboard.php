@@ -346,9 +346,9 @@ class Scoreboard
         }
 
         // Else, order by teamname alphabetically
-        if ($a->getTeam()->getName() != $b->getTeam()->getName()) {
+        if ($a->getTeam()->getEffectiveName() != $b->getTeam()->getEffectiveName()) {
             $collator = new \Collator('en');
-            return $collator->compare($a->getTeam()->getName(), $b->getTeam()->getName());
+            return $collator->compare($a->getTeam()->getEffectiveName(), $b->getTeam()->getEffectiveName());
         }
         // Undecided, should never happen in practice
         return 0;

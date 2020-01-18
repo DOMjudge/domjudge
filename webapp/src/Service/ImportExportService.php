@@ -289,7 +289,7 @@ class ImportExportService
                 $team->getTeamid(),
                 $team->getExternalid(),
                 $team->getCategoryid(),
-                $team->getName(),
+                $team->getEffectiveName(),
                 $team->getAffiliation() ? $team->getAffiliation()->getName() : '',
                 $team->getAffiliation() ? $team->getAffiliation()->getShortname() : '',
                 $team->getAffiliation() ? $team->getAffiliation()->getCountry() : '',
@@ -482,12 +482,12 @@ class ImportExportService
             $teamA = $teams[$a[0]] ?? null;
             $teamB = $teams[$b[0]] ?? null;
             if ($teamA) {
-                $nameA = $teamA->getName();
+                $nameA = $teamA->getEffectiveName();
             } else {
                 $nameA = '';
             }
             if ($teamB) {
-                $nameB = $teamB->getName();
+                $nameB = $teamB->getEffectiveName();
             } else {
                 $nameB = '';
             }

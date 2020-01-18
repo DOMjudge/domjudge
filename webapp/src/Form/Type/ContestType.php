@@ -83,7 +83,7 @@ class ContestType extends AbstractExternalIdEntityType
             'class' => Team::class,
             'multiple' => true,
             'choice_label' => function (Team $team) {
-                return sprintf('%s (t%d)', $team->getName(), $team->getTeamid());
+                return sprintf('%s (t%d)', $team->getEffectiveName(), $team->getTeamid());
             },
         ]);
         $builder->add('teamCategories', EntityType::class, [

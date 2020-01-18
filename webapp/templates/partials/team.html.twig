@@ -9,7 +9,7 @@
             <table class="table table-sm table-striped">
                 <tr>
                     <th>Name</th>
-                    <td>{{ team.name }}</td>
+                    <td>{{ team.effectiveName }}</td>
                 </tr>
                 <tr>
                     <th>Category</th>
@@ -61,8 +61,8 @@
     {% set teamImage = 'images/teams/' ~ team.teamId ~ '.jpg' %}
     {% if teamImage | assetExists %}
         <div class="col-lg-{{ size | default(4) }}">
-        <img id="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.name }}"
-             title="Picture of team {{ team.name }}">
+        <img id="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.effectiveName }}"
+             title="Picture of team {{ team.effectiveName }}">
         </div>
     {% endif %}
     </div>

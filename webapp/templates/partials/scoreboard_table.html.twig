@@ -183,7 +183,7 @@
                 {% set colorClass = color | replace({"#": "_"}) %}
                 {% set backgroundColors = backgroundColors | merge({(color): 1}) %}
             {% endif %}
-            <td class="scoretn cl{{ colorClass }}" title="{{ score.team.name }}">
+            <td class="scoretn cl{{ colorClass }}" title="{{ score.team.effectiveName }}">
                 {% set link = null %}
                 {% set extra = null %}
                 {% if not static %}
@@ -204,7 +204,7 @@
                             {{ score.team.category.name }}
                         </span>
                         {% endif %}
-                        {{ score.team.name }}
+                        {{ score.team.effectiveName }}
                     </span>
                     {% if showAffiliations %}
                         <span class="univ forceWidth">

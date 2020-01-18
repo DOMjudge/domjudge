@@ -830,9 +830,9 @@ class ScoreboardService
             if (empty($affiliations)) {
                 /** @var Team $team */
                 foreach ($category->getTeams() as $team) {
-                    $affiliations[$team->getName()] = array(
+                    $affiliations[$team->getEffectiveName()] = array(
                         'id' => -1,
-                        'name' => $team->getName());
+                        'name' => $team->getEffectiveName());
                 }
             }
             if (!empty($affiliations)) {

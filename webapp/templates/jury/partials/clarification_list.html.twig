@@ -44,11 +44,11 @@
                 {%- if clarification.recipient is null %}
                     {%- set recipient = 'All' %}
                 {%- else %}
-                    {%- set recipient = clarification.recipient.name %}
+                    {%- set recipient = clarification.recipient.effectiveName %}
                 {%- endif %}
             {%- else %}
                 {%- set recipient = 'Jury' %}
-                {%- set sender = clarification.sender.name %}
+                {%- set sender = clarification.sender.effectiveName %}
             {%- endif %}
 
             <td><a href="{{ link }}" title="{{ sender }}">{{ sender | truncate(30) }}</a></td>

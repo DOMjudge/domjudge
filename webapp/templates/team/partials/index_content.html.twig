@@ -1,8 +1,8 @@
 {% if contest is empty %}
-    <h1 id="teamwelcome" class="text-center">Welcome team <span id="teamwelcometeam">{{ team.name }}</span>!</h1>
+    <h1 id="teamwelcome" class="text-center">Welcome team <span id="teamwelcometeam">{{ team.effectiveName }}</span>!</h1>
     <h2 id="contestnotstarted" class="text-center">There's no active contest for you (yet).</h2>
 {% elseif not contest.freezeData.started %}
-    <h1 id="teamwelcome" class="text-center">Welcome team <span id="teamwelcometeam">{{ team.name }}</span>!</h1>
+    <h1 id="teamwelcome" class="text-center">Welcome team <span id="teamwelcometeam">{{ team.effectiveName }}</span>!</h1>
     <h2 id="contestnotstarted" class="text-center">
         Contest {{ contest | printContestStart }}
     </h2>
