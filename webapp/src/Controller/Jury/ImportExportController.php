@@ -10,6 +10,7 @@ use App\Entity\TeamCategory;
 use App\Form\Type\BaylorCmsType;
 use App\Form\Type\ContestExportType;
 use App\Form\Type\ContestImportType;
+use App\Form\Type\JsonImportType;
 use App\Form\Type\TsvImportType;
 use App\Service\BaylorCmsService;
 use App\Service\ConfigurationService;
@@ -131,6 +132,22 @@ class ImportExportController extends BaseController
             return $this->redirectToRoute('jury_import_export');
         }
 
+        $jsonForm = $this->createForm(JsonImportType::class);
+
+        $jsonForm->handleRequest($request);
+
+        if ($jsonForm->isSubmitted() && $jsonForm->isValid()) {
+            $type  = $jsonForm->get('type')->getData();
+            $file  = $jsonForm->get('file')->getData();
+            $count = $this->importExportService->importJson($type, $file, $message);
+            if ($count >= 0) {
+                $this->addFlash('success', sprintf('%d items imported', $count));
+            } else {
+                $this->addFlash('danger', $message);
+            }
+            return $this->redirectToRoute('jury_import_export');
+        }
+
         $baylorForm = $this->createForm(BaylorCmsType::class);
 
         $baylorForm->handleRequest($request);
@@ -169,6 +186,7 @@ class ImportExportController extends BaseController
 
         return $this->render('jury/import_export.html.twig', [
             'tsv_form' => $tsvForm->createView(),
+            'json_form' => $jsonForm->createView(),
             'baylor_form' => $baylorForm->createView(),
             'sort_orders' => $sortOrders,
         ]);
