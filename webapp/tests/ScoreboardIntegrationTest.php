@@ -24,7 +24,7 @@ use App\Utils\Utils;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class ScoreboardTest extends KernelTestCase
+class ScoreboardIntegrationTest extends KernelTestCase
 {
     public const CONTEST_NAME = 'scoretest';
     public const NUM_PROBLEMS = 3;
