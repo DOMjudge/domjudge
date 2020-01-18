@@ -21,7 +21,7 @@ class TeamFixture extends AbstractExampleDataFixture implements DependentFixture
     {
         $team = new Team();
         $team
-            ->setExternalid('exteam')
+            ->setIcpcid('exteam')
             ->setName('Example teamname')
             ->setAffiliation($this->getReference(TeamAffiliationFixture::AFFILIATION_REFERENCE))
             ->setCategory($this->getReference(TeamCategoryFixture::PARTICIPANTS_REFERENCE));

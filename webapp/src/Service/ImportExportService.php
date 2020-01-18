@@ -316,7 +316,7 @@ class ImportExportService
         foreach ($teams as $team) {
             $data[] = [
                 $team->getTeamid(),
-                $team->getExternalid(),
+                $team->getIcpcid(),
                 $team->getCategoryid(),
                 $team->getName(),
                 $team->getAffiliation() ? $team->getAffiliation()->getName() : '',
@@ -370,7 +370,7 @@ class ImportExportService
             $data[] = array_merge(
                 [
                     $teamScore->getTeam()->getAffiliation() ? $teamScore->getTeam()->getAffiliation()->getName() : '',
-                    $teamScore->getTeam()->getExternalid(),
+                    $teamScore->getTeam()->getIcpcid(),
                     $teamScore->getRank(),
                     $teamScore->getNumberOfPoints(),
                     $teamScore->getTotalTime(),
@@ -425,10 +425,10 @@ class ImportExportService
 
         /** @var Team[] $teams */
         $teams = $this->em->createQueryBuilder()
-            ->from(Team::class, 't', 't.externalid')
+            ->from(Team::class, 't', 't.icpcid')
             ->select('t')
-            ->where('t.externalid IS NOT NULL')
-            ->orderBy('t.externalid')
+            ->where('t.icpcid IS NOT NULL')
+            ->orderBy('t.icpcid')
             ->getQuery()
             ->getResult();
 
@@ -487,7 +487,7 @@ class ImportExportService
             }
 
             $data[] = [
-                $teamScore->getTeam()->getExternalid() ?? $teamScore->getTeam()->getTeamid(),
+                $teamScore->getTeam()->getIcpcid() ?? $teamScore->getTeam()->getIcpcid(),
                 $rank,
                 $awardString,
                 $teamScore->getNumberOfPoints(),
@@ -639,10 +639,10 @@ class ImportExportService
 
             // we may do more integrity/format checking of the data here.
 
-            // Set external ID's to null if they are not given
-            $teamExternalId = @$line[1];
-            if (empty($teamExternalId)) {
-                $teamExternalId = null;
+            // Set ICPC  ID's to null if they are not given
+            $teamIcpcId = @$line[1];
+            if (empty($teamIcpcId)) {
+                $teamIcpcId = null;
             }
             $affiliationExternalid = preg_replace('/^INST-(U-)?/', '', @$line[7]);
             if (empty($affiliationExternalid)) {
@@ -652,16 +652,16 @@ class ImportExportService
                 $affiliationExternalid = null;
             }
 
-            // Set team ID to external ID if it has the literal value 'null' and the external ID is numeric
+            // Set team ID to ICPC ID if it has the literal value 'null' and the ICPC ID is numeric
             $teamId = @$line[0];
-            if ($teamId === 'null' && is_numeric($teamExternalId)) {
-                $teamId = (int)$teamExternalId;
+            if ($teamId === 'null' && is_numeric($teamIcpcId)) {
+                $teamId = (int)$teamIcpcId;
             }
 
             $teamData[] = [
                 'team' => [
                     'teamid' => $teamId,
-                    'externalid' => $teamExternalId,
+                    'icpcid' => $teamIcpcId,
                     'categoryid' => @$line[2],
                     'name' => @$line[3],
                 ],

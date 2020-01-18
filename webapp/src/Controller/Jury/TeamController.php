@@ -129,7 +129,7 @@ class TeamController extends BaseController
 
         $table_fields = [
             'teamid' => ['title' => 'ID', 'sort' => true,],
-            'externalid' => ['title' => 'external ID', 'sort' => true,],
+            'icpcid' => ['title' => 'ICPC ID', 'sort' => true,],
             'name' => ['title' => 'teamname', 'sort' => true, 'default_sort' => true],
             'category' => ['title' => 'category', 'sort' => true,],
             'affiliation' => ['title' => 'affiliation', 'sort' => true,],

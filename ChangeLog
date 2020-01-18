@@ -4,6 +4,8 @@ Version 7.3.0 - DEV
 -------------------
  - Move specification of database configuration out of database and into
    a YAML file.
+ - Rename team.externalid to team.icpcid, since it is not an external ID in
+   the sense the other ones are.
 
 Version 7.2.0 - 4 January 2020
 ------------------------------
