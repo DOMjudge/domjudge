@@ -21,6 +21,8 @@ use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Id\AssignedGenerator;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -79,7 +81,7 @@ class ImportExportService
      * Get the YAML data for a given contest
      * @param Contest $contest
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getContestYamlData(Contest $contest)
     {
@@ -332,7 +334,7 @@ class ImportExportService
     /**
      * Get scoreboard data
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getScoreboardData(): array
     {
@@ -387,7 +389,7 @@ class ImportExportService
      * Get results data for the given sortorder
      * @param int $sortOrder
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function getResultsData(int $sortOrder)
     {
@@ -533,7 +535,7 @@ class ImportExportService
      * @param UploadedFile $file
      * @param string|null  $message
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public function importTsv(string $type, UploadedFile $file, string &$message = null): int
     {
@@ -561,7 +563,41 @@ class ImportExportService
             case 'accounts':
                 return $this->importAccountsTsv($content, $message);
             default:
-                $message = sprintf('Invalid TSV type %s', $type);
+                $message = sprintf('Invalid import type %s', $type);
+                return -1;
+        }
+    }
+
+    /**
+     * Import a JSON file
+     * @param string       $type
+     * @param UploadedFile $file
+     * @param string|null  $message
+     * @return int
+     * @throws Exception
+     */
+    public function importJson(string $type, UploadedFile $file, string &$message = null): int
+    {
+        $content = file_get_contents($file->getRealPath());
+        $data = json_decode($content, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $message = 'File contents is not valid JSON: ' . json_last_error_msg();
+            return -1;
+        }
+        if (!is_array($data) || !is_int(key($data))) {
+            $message = 'File contents does not contain JSON array';
+            return -1;
+        }
+
+        switch ($type) {
+            case 'groups':
+                return $this->importGroupsJson($data, $message);
+            case 'organizations':
+                return $this->importOrganizationsJson($data, $message);
+            case 'teams':
+                return $this->importTeamsJson($data, $message);
+            default:
+                $message = sprintf('Invalid import type %s', $type);
                 return -1;
         }
     }
@@ -571,7 +607,7 @@ class ImportExportService
      * @param array       $content
      * @param string|null $message
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importGroupsTsv(array $content, string &$message = null): int
     {
@@ -590,6 +626,46 @@ class ImportExportService
             ];
         }
 
+        return $this->importGroupData($groupData);
+    }
+
+    /**
+     * Import groups JSON
+     * @param array       $data
+     * @param string|null $message
+     * @return int
+     * @throws Exception
+     */
+    protected function importGroupsJson(array $data, string &$message = null): int
+    {
+        $groupData = [];
+        foreach ($data as $idx => $group) {
+            if (!is_numeric($group['id'] ?? null)) {
+                $message = sprintf('Invalid id format for object at index %d', $idx);
+                return -1;
+            }
+            $groupData[] = [
+                'categoryid' => @$group['id'],
+                'name' => @$group['name'],
+                'visible' => !($group['hidden'] ?? false),
+                'sortorder' => @$group['sortorder'],
+            ];
+        }
+
+        return $this->importGroupData($groupData);
+    }
+
+    /**
+     * Import group data from the given array
+     *
+     * @param array $groupData
+     *
+     * @return int
+     *
+     * @throws NonUniqueResultException
+     */
+    protected function importGroupData(array $groupData): int
+    {
         // We want to overwrite the ID so change the ID generator
         $metadata = $this->em->getClassMetaData(TeamCategory::class);
         $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
@@ -606,17 +682,80 @@ class ImportExportService
             } else {
                 $action = EventLogService::ACTION_UPDATE;
             }
-            $teamCategory->setName($groupItem['name']);
+            $teamCategory
+                ->setName($groupItem['name'])
+                ->setVisible($groupItem['visible'] ?? true)
+                ->setSortorder($groupItem['sortorder'] ?? 0);
             $this->em->flush();
             if ($contest = $this->dj->getCurrentContest()) {
                 $this->eventLogService->log('team_category', $teamCategory->getCategoryid(), $action,
                                             $contest->getCid());
             }
             $this->dj->auditlog('team_category', $teamCategory->getCategoryid(), 'replaced',
-                                             'imported from tsv');
+                                             'imported from tsv / json');
         }
 
         return count($groupData);
+    }
+
+    /**
+     * Import organizations JSON
+     * @param array       $data
+     * @param string|null $message
+     * @return int
+     * @throws Exception
+     */
+    protected function importOrganizationsJson(array $data, string &$message = null): int
+    {
+        $organizationData = [];
+        foreach ($data as $idx => $group) {
+            $organizationData[] = [
+                'externalid' => @$group['id'],
+                'shortname' => @$group['name'],
+                'name' => @$group['formal_name'],
+                'country' => @$group['country'],
+            ];
+        }
+
+        return $this->importOrganizationData($organizationData);
+    }
+
+    /**
+     * Import organization data from the given array
+     *
+     * @param array $organizationData
+     *
+     * @return int
+     *
+     * @throws NonUniqueResultException
+     */
+    protected function importOrganizationData(array $organizationData): int
+    {
+        foreach ($organizationData as $organizationItem) {
+            $externalId      = $organizationItem['externalid'];
+            $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $externalId]);
+            if (!$teamAffiliation) {
+                $teamAffiliation = new TeamAffiliation();
+                $teamAffiliation->setExternalid($externalId);
+                $this->em->persist($teamAffiliation);
+                $action = EventLogService::ACTION_CREATE;
+            } else {
+                $action = EventLogService::ACTION_UPDATE;
+            }
+            $teamAffiliation
+                ->setShortname($organizationItem['shortname'])
+                ->setName($organizationItem['name'])
+                ->setCountry($organizationItem['country']);
+            $this->em->flush();
+            if ($contest = $this->dj->getCurrentContest()) {
+                $this->eventLogService->log('team_affilation', $teamAffiliation->getAffilid(), $action,
+                                            $contest->getCid());
+            }
+            $this->dj->auditlog('team_affilation', $teamAffiliation->getCategoryid(), 'replaced',
+                                             'imported from tsv / json');
+        }
+
+        return count($organizationData);
     }
 
     /**
@@ -624,7 +763,7 @@ class ImportExportService
      * @param array       $content
      * @param string|null $message
      * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     protected function importTeamsTsv(array $content, string &$message = null): int
     {
@@ -673,7 +812,48 @@ class ImportExportService
                 ]
             ];
         }
+        return $this->importTeamData($teamData);
+    }
 
+    /**
+     * Import teams JSON
+     * @param array       $data
+     * @param string|null $message
+     * @return int
+     * @throws Exception
+     */
+    protected function importTeamsJson(array $data, string &$message = null): int
+    {
+        $teamData = [];
+        foreach ($data as $idx => $team) {
+            $teamData[] = [
+                'team' => [
+                    'teamid' => $team['id'],
+                    'externalid' => $team['icpc_id'] ?? null,
+                    'categoryid' => $team['group_ids'][0] ?? null,
+                    'name' => @$team['name'],
+                    'display_name' => @$team['display_name'],
+                ],
+                'team_affiliation' => [
+                    'externalid' => $team['organization_id'] ?? null,
+                ]
+            ];
+        }
+
+        return $this->importTeamData($teamData);
+    }
+
+    /**
+     * Import team data from the given array
+     *
+     * @param array $teamData
+     *
+     * @return int
+     *
+     * @throws NonUniqueResultException
+     */
+    protected function importTeamData(array $teamData): int
+    {
         // We want to overwrite the ID so change the ID generator
         $metadata = $this->em->getClassMetaData(TeamCategory::class);
         $metadata->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_NONE);
@@ -712,6 +892,18 @@ class ImportExportService
                     $createdAffiliations[] = $teamAffiliation->getAffilid();
                     $this->dj->auditlog('team_affiliation', $teamAffiliation->getAffilid(),
                                         'added', 'imported from tsv');
+                }
+            } elseif (!empty($teamItem['team_affiliation']['externalid'])) {
+                $teamAffiliation = $this->em->getRepository(TeamAffiliation::class)->findOneBy(['externalid' => $teamItem['team_affiliation']['externalid']]);
+                if (!$teamAffiliation) {
+                    $teamAffiliation = new TeamAffiliation();
+                    $teamAffiliation
+                        ->setExternalid($teamItem['team_affiliation']['externalid'])
+                        ->setName($teamItem['team_affiliation']['externalid'] . ' - auto-create during import');
+                    $this->em->persist($teamAffiliation);
+                    $this->dj->auditlog('team_affiliation',
+                        $teamAffiliation->getAffilid(),
+                        'added', 'imported from tsv / json');
                 }
             }
             $teamItem['team']['affiliation'] = $teamAffiliation;
@@ -780,7 +972,7 @@ class ImportExportService
      * @param array       $content
      * @param string|null $message
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     protected function importAccountsTsv(array $content, string &$message = null): int
     {
