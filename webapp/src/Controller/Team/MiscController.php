@@ -222,7 +222,7 @@ class MiscController extends BaseController
 
             $team = $this->dj->getUser()->getTeam();
             $ret  = $this->dj->printFile($realfile, $originalfilename, $langid,
-                $username, $team->getName(), $team->getTeamid(), $team->getRoom());
+                $username, $team->getEffectiveName(), $team->getTeamid(), $team->getRoom());
 
             return $this->render('team/print_result.html.twig', [
                 'success' => $ret[0],

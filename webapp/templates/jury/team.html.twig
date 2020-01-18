@@ -10,7 +10,7 @@
 
 {% block content %}
 
-    <h1>Team {{ team.name }}</h1>
+    <h1>Team {{ team.effectiveName }}</h1>
 
     <div class="row">
         <div class="col">
@@ -32,6 +32,16 @@
                 <tr>
                     <th>Name</th>
                     <td>{{ team.name }}</td>
+                </tr>
+                <tr>
+                    <th>Display name</th>
+                    <td>
+                        {% if team.displayName %}
+                            {{ team.displayName }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <th>First login</th>
@@ -152,7 +162,7 @@
     {% if teamImage | assetExists %}
         <div class="col">
         <img id="teampicture" src="{{ asset(teamImage) }}" alt="Picture of team {{ team.name }}"
-             title="Picture of team {{ team.name }}">
+             title="Picture of team {{ team.effectiveName }}">
         </div>
     {% endif %}
     </div>

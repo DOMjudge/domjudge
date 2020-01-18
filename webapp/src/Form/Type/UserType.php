@@ -5,6 +5,8 @@ namespace App\Form\Type;
 use App\Entity\Role;
 use App\Entity\Team;
 use App\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -20,8 +22,33 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class UserType extends AbstractType
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $em;
+
+    /**
+     * UserType constructor.
+     *
+     * @param EntityManagerInterface $em
+     */
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        /** @var Team[] $teams */
+        $teams = $this->em->createQueryBuilder()
+            ->from(Team::class, 't', 't.teamid')
+            ->select('t')
+            ->getQuery()
+            ->getResult();
+        uasort($teams, function(Team $a, Team $b) {
+            return $a->getEffectiveName() <=> $b->getEffectiveName();
+        });
+
         $builder->add('username', TextType::class);
         $builder->add('name', TextType::class, [
             'label' => 'Full name',
@@ -44,14 +71,11 @@ class UserType extends AbstractType
                 'No' => false,
             ],
         ]);
-        $builder->add('team', EntityType::class, [
-            'class' => Team::class,
-            'choice_label' => 'name',
+        $builder->add('team', ChoiceType::class, [
+            'choice_label' => 'effective_name',
             'required' => false,
             'placeholder' => '-- no team --',
-            'query_builder' => function (EntityRepository $er) {
-                return $er->createQueryBuilder('t')->orderBy('t.name');
-            },
+            'choices' => $teams,
         ]);
         $builder->add('user_roles', EntityType::class, [
             'label' => 'Roles',

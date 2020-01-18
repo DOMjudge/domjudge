@@ -1,6 +1,6 @@
 {% extends "jury/base.html.twig" %}
 
-{% block title %}Analysis - Team {{ team.name }}{% endblock %}
+{% block title %}Analysis - Team {{ team.effectiveName }}{% endblock %}
 
 {% block extrahead %}
 <link rel="stylesheet" href="{{asset('css/nv.d3.min.css')}}">
@@ -27,7 +27,7 @@
 <div class="container-fluid">
   <div class="row equal mt-3">
     <div class="col-12">
-      <h1>Team {{ team.teamid }}: {{ team.name }}</h1>
+      <h1>Team {{ team.teamid }}: {{ team.effectiveName }}</h1>
     </div>
     <div class="col-lg-3 col-sm-6 mt-3">
       <div class="card">

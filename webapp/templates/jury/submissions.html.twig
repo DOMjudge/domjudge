@@ -74,7 +74,7 @@
                             {%- for team in filteredTeams %}
 
                                 <option value="{{ team.teamid }}" selected>
-                                    {{ team.name }} (t{{ team.teamid }})
+                                    {{ team.effectiveName }} (t{{ team.teamid }})
                                 </option>
                             {%- endfor %}
 

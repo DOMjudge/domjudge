@@ -329,7 +329,7 @@ class ImportExportController extends BaseController
 
         $teamNames = [];
         foreach ($teams as $team) {
-            $teamNames[$team->getExternalid() ?? $team->getTeamid()] = $team->getName();
+            $teamNames[$team->getExternalid() ?? $team->getTeamid()] = $team->getEffectiveName();
         }
 
         $awarded       = [];

@@ -45,6 +45,10 @@ class TeamType extends AbstractExternalIdEntityType
         $builder->add('name', TextType::class, [
             'label' => 'Team name',
         ]);
+        $builder->add('displayName', TextType::class, [
+            'label' => 'Display name',
+            'required' => false,
+        ]);
         $builder->add('category', EntityType::class, [
             'class' => TeamCategory::class,
         ]);

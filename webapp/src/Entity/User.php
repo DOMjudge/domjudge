@@ -517,7 +517,7 @@ class User implements UserInterface, \Serializable
      */
     public function getTeamName()
     {
-        return $this->getTeam() ? $this->getTeam()->getName() : null;
+        return $this->getTeam() ? $this->getTeam()->getEffectiveName() : null;
     }
 
     /**

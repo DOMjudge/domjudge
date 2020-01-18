@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -57,6 +56,13 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
      *                            nullable=false)
      */
     private $name;
+
+    /**
+     * @var string|null
+     * @ORM\Column(type="string", name="display_name", length=255, options={"comment"="Team display name", "collation"="utf8mb4_bin"},
+     *                            nullable=true)
+     */
+    private $display_name;
 
     /**
      * @var int
@@ -256,6 +262,37 @@ class Team extends BaseApiEntity implements ExternalRelationshipEntityInterface
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Set display name
+     * @param string|null $display_name
+     *
+     * @return $this
+     */
+    public function setDisplayName(?string $display_name): self
+    {
+        $this->display_name = $display_name;
+
+        return $this;
+    }
+
+    /**
+     * Get display name
+     * @return string|null
+     */
+    public function getDisplayName(): ?string
+    {
+        return $this->display_name;
+    }
+
+    /**
+     * Get the effective name of this team
+     * @return string
+     */
+    public function getEffectiveName(): string
+    {
+        return $this->getDisplayName() ?? $this->getName();
     }
 
     /**

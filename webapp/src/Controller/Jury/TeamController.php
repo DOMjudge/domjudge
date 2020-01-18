@@ -131,6 +131,7 @@ class TeamController extends BaseController
             'teamid' => ['title' => 'ID', 'sort' => true,],
             'externalid' => ['title' => 'external ID', 'sort' => true,],
             'name' => ['title' => 'teamname', 'sort' => true, 'default_sort' => true],
+            'display_name' => ['title' => 'display name', 'sort' => true, 'default_sort' => true],
             'category' => ['title' => 'category', 'sort' => true,],
             'affiliation' => ['title' => 'affiliation', 'sort' => true,],
             'num_contests' => ['title' => '# contests', 'sort' => true,],
@@ -411,7 +412,7 @@ class TeamController extends BaseController
             throw new NotFoundHttpException(sprintf('Team with ID %s not found', $teamId));
         }
 
-        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $team, $team->getName(),
+        return $this->deleteEntity($request, $this->em, $this->dj, $this->kernel, $team, $team->getEffectiveName(),
                                    $this->generateUrl('jury_teams'));
     }
 
@@ -451,7 +452,7 @@ class TeamController extends BaseController
                 $user->addUserRole($role);
                 $user->setTeam($team);
                 // Also set the user's name to the team name
-                $user->setName($team->getName());
+                $user->setName($team->getEffectiveName());
                 $this->em->persist($user);
             }
             $this->em->persist($team);

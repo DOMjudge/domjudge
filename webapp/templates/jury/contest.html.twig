@@ -99,7 +99,7 @@
                         {% else %}
                             {% for team in contest.teams %}
                                 <a href="{{ path('jury_team', {'teamId': team.teamid}) }}">
-                                    {{ team.name }} (t{{ team.teamid }})
+                                    {{ team.effectiveName }} (t{{ team.teamid }})
                                 </a>
                                 <br>
                             {% endfor %}

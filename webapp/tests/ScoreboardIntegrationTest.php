@@ -386,7 +386,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
 
         foreach ( $expected_scores as $row ) {
             $team = $row['team'];
-            $name = $team->getName();
+            $name = $team->getEffectiveName();
 
             $score = $scores[$team->getTeamid()];
             $this->assertInstanceOf(TeamScore::class, $score);
@@ -411,7 +411,7 @@ class ScoreboardIntegrationTest extends KernelTestCase
         }
 
         foreach ($matrix as $teamid => $row) {
-            $teamname = $teams[$teamid]->getName();
+            $teamname = $teams[$teamid]->getEffectiveName();
             foreach ($row as $probid => $item) {
                 $probname = $probs[$probid]->getShortname();
 

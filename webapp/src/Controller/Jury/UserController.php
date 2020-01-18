@@ -137,7 +137,7 @@ class UserController extends BaseController
                     'link' => $this->generateUrl('jury_team', [
                         'teamId' => $u->getTeamid(),
                     ]),
-                    'title' => $u->getTeam()->getName(),
+                    'title' => $u->getTeam()->getEffectiveName(),
                 ];
             }
 

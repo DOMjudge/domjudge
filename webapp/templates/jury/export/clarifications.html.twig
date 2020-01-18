@@ -35,14 +35,14 @@
                     <td>{{ clarification.submitTime | printtime(null, contest) }}</td>
                     <td>
                         {% if clarification.sender %}
-                            {{ clarification.sender.name }}
+                            {{ clarification.sender.effectiveName }}
                         {% else %}
                             Jury ({{ clarification.juryMember }})
                         {% endif %}
                     </td>
                     <td>
                         {% if clarification.recipient and clarification.sender is empty %}
-                            {{ clarification.recipient.name }}
+                            {{ clarification.recipient.effectiveName }}
                         {% elseif clarification.sender %}
                             Jury
                         {% else %}

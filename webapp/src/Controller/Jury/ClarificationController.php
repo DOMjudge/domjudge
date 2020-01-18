@@ -194,12 +194,12 @@ class ClarificationController extends AbstractController
             }
 
             if ( $fromteam = $clar->getSender() ) {
-                $data['from_teamname'] = $fromteam->getName();
+                $data['from_teamname'] = $fromteam->getEffectiveName();
                 $data['from_teamid'] = $fromteam->getTeamid();
                 $concernsteam = $fromteam->getTeamid();
             }
             if ( $toteam = $clar->getRecipient() ) {
-                $data['to_teamname'] = $toteam->getName();
+                $data['to_teamname'] = $toteam->getEffectiveName();
                 $data['to_teamid'] = $toteam->getTeamid();
             }
 
@@ -257,11 +257,11 @@ class ClarificationController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         if ($team !== null) {
-            $teamlist[$team->getTeamid()] = sprintf("%s (t%s)", $team->getName(), $team->getTeamid());
+            $teamlist[$team->getTeamid()] = sprintf("%s (t%s)", $team->getEffectiveName(), $team->getTeamid());
         } else {
             $teams = $em->getRepository(Team::class)->findAll();
             foreach ($teams as $team) {
-                $teamlist[$team->getTeamid()] = sprintf("%s (t%s)", $team->getName(), $team->getTeamid());
+                $teamlist[$team->getTeamid()] = sprintf("%s (t%s)", $team->getEffectiveName(), $team->getTeamid());
             }
         }
         asort($teamlist, SORT_STRING | SORT_FLAG_CASE);

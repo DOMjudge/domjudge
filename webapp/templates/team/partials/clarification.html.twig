@@ -20,14 +20,14 @@
                 <div class="col-sm">
                     From:
                     {% if clarification.sender is not empty %}
-                        {{ clarification.sender.name }} (t{{ clarification.sender.teamid }})
+                        {{ clarification.sender.effectiveName }} (t{{ clarification.sender.teamid }})
                     {% else %}
                         Jury
                     {% endif %}
                 </div>
                 <div class="col-sm">To:
                     {% if clarification.recipient is not empty %}
-                        {{ clarification.recipient.name }} (t{{ clarification.recipient.teamid }})
+                        {{ clarification.recipient.effectiveName }} (t{{ clarification.recipient.teamid }})
                     {% elseif clarification.sender is not null %}
                         Jury
                     {% else %}
