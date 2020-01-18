@@ -138,25 +138,24 @@
                 general: General issue
                 tech: Technical issue
             public: true
-            description: List of additional clarification categories
+            description: List of additional clarification categories.
         -   name: clar_answers
             type: array_val
             default_value:
                 - No comment
                 - Read the problem statement carefully
             public: false
-            description: List of predefined clarification answers
+            description: List of predefined clarification answers.
         -   name: clar_queues
             type: array_keyval
             default_value: []
             public: true
-            description: List of clarification queues
+            description: List of clarification queues.
         -   name: clar_default_problem_queue
             type: string
             default_value: ""
             public: true
-            description: Queue to assign to problem clarifications
-
+            description: Queue to assign to problem clarifications.
 -   category: Display
     items:
         -   name: show_pending
@@ -188,7 +187,11 @@
             type: int
             default_value: 2
             public: true
-            description: "Show compile output in team webinterface? Choices: 0 = never, 1 = only on compilation error(s), 2 = always."
+            description: Show compile output in team webinterface?
+            options:
+                0: never
+                1: only on compilation error(s)
+                2: always
         -   name: show_sample_output
             type: bool
             default_value: false
@@ -218,7 +221,7 @@
             type: bool
             default_value: true
             public: true
-            description: Show time and memory limit on the team problems page
+            description: Show time and memory limit on the team problems page.
         -   name: team_column_width
             type: int
             default_value: 0
@@ -235,44 +238,51 @@
             type: int
             default_value: 0
             public: false
-            description: "Source of data. Choices: 0 = all local, 1 = configuration data external, 2 = configuration and live data external"
+            description: "Source of data: used to indicate whether internal or external IDs are exposed in the API. 'configuration data external' is typically used when loading configuration data from the ICPC CMS, and 'configuration and live data external when running DOMjudge as \"shadow system\""
+            options:
+                0: all local
+                1: configuration data external
+                2: configuration and live data external
         -   name: external_ccs_submission_url
             type: string
             default_value: ""
             public: false
-            description: URL of a submission detail page on the external CCS. Placeholder [id] will be replaced by submission ID and [contest] by the contest ID. Leave empty to not display links to external CCS
+            description: URL of a submission detail page on the external CCS. Placeholder [id] will be replaced by submission ID and [contest] by the contest ID. Leave empty to not display links to external CCS.
 -   category: Authentication
     items:
         -   name: auth_methods
             type: array_val
             default_value: []
             public: false
-            description: List of allowed additional authentication methods. Supported values are 'ipaddress', and 'xheaders'
+            description: List of allowed additional authentication methods.
+            options:
+                - ipaddress
+                - xheaders
         -   name: allow_openid_auth
             type: bool
             default_value: false
             public: true
-            description: Allow users to log in using OpenID
+            description: Allow users to log in using OpenID.
         -   name: openid_autocreate_team
             type: bool
             default_value: true
             public: true
-            description: Create a team for each user that logs in with OpenID
+            description: Create a team for each user that logs in with OpenID.
         -   name: openid_provider
             type: string
             default_value: https://accounts.google.com
             public: true
-            description: OpenID Provider URL
+            description: OpenID Provider URL.
         -   name: openid_clientid
             type: string
             default_value: ""
             public: false
-            description: OpenID Connect client id
+            description: OpenID Connect client id.
         -   name: openid_clientsecret
             type: string
             default_value: ""
             public: false
-            description: OpenID Connect client secret
+            description: OpenID Connect client secret.
         -   name: ip_autologin
             type: bool
             default_value: false
